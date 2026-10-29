@@ -57,6 +57,7 @@ import {
   type StatusState
 } from "./planDoc.types"
 
+import { ChangeOriginals } from "./ChangeOriginals"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -2401,6 +2402,8 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *   - `was`:  the words it replaced, found in the doc's earlier versions (`earlierVersions`, `ChangeOriginals`;
+   *     epic `epic-engine` I160), when first stamped;  none for new words, or when no version tells
    *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
    *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
    *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
@@ -2418,6 +2421,8 @@ export class PlanDoc extends PlanReader {
       const data: Partial<EpicData<"epic-change">> = {}
       if (!CHANGE_ID.test(change.id)) {
         data.id = `ch${next++}`
+        const was = change.hasAttribute("was") ? undefined : ChangeOriginals.find(change, this.earlierVersions)
+        if (was) data.was = was
         if (this.markHandled(change)) changed++
       }
       if (!change.hasAttribute("at")) data.at = now

@@ -508,6 +508,9 @@ than just being able to move on").
      - The words, not the block:  one mark per change, the question's id alone.
      - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists them;
        `epic lint` fails one not stamped, or naming no item.
+     - The words a mark replaced (`was`, the popup's "Originally") are found by the tool as it stamps, from the page
+       as it was (on disk, else its last commits):  write nothing more (I160).  Run `epic change` in the same turn
+       you wrote the marks:  the content repo's turn-end commit is what it compares with.
      - No approval:  orange for 3 days, then quiet, the `Q16` chip for good.  Owen reopens its question if he
        disagrees;  `inbox apply` reopens it.  Rules:  `plan-doc.md`, "Change marks".
      - In a PHASE's text, the mark marks its item handled in that phase (P31):  grey, out of the lists.

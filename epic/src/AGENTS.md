@@ -148,7 +148,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - the Overview's keyed `summary`, on its title row (epic `epic-engine` I55):
             `<epic-summary>` drew them under its lede before
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
-        its own `<epic-review buttons="change">` in a tooltip on its words
+        its own `<epic-review buttons="change">` in the popup a click on its words opens (I160)
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)

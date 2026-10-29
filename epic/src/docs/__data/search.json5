@@ -284,7 +284,7 @@
     {
       "path": "epic-change.html",
       "title": "<epic-change>",
-      "summary": "The <epic-change> element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&A chip, Accept and Reopen.",
+      "summary": "The <epic-change> element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&A chip; a click on the words opens a popup: which answer, when, the words it replaced, Reopen.",
       "tag": "epic-change",
       "sections": [
         {

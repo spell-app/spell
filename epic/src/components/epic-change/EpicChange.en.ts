@@ -20,9 +20,10 @@ export const epicChangeVocabulary = {
     "Words an answer changed or added, marked where they are (epic `epic-engine` P30):  " +
     '`<epic-change item="q16">todos fold into it</epic-change>`.  They show on an orange ground, our colour for ' +
     '"changed since you looked", with a small folded chip naming the question (`Q16`);  unfolded, the question and ' +
-    "its answer in a line.  While the page is reviewed, Accept and Reopen show on hover or focus.  Accept clears " +
-    "the orange and the chip stays for good (Q13, B);  Reopen opens the question again, and the words stay orange.  " +
-    "Claude writes the element with `item` alone;  the epic tool gives it its id, time and answer.",
+    "its answer in a line.  A click on the words (or Enter) opens a popup:  which answer changed them and when, the " +
+    "words they replaced (`was`), and, while the page is reviewed and the change new, Reopen, which opens the " +
+    "question again.  Claude writes the element with `item` alone;  the epic tool gives it its id, time, answer " +
+    "and the words it replaced.",
   attributes: [
     {
       name: "id",
@@ -56,6 +57,14 @@ export const epicChangeVocabulary = {
         "`<epic-answer title>`, so the chip still says why months later."
     },
     {
+      name: "was",
+      kind: "string",
+      description:
+        'The words it replaced, as plain text (epic `epic-engine` I160):  the popup\'s "Originally".  The epic ' +
+        "tool finds them as it stamps the mark, in the page as it was before (on disk, else its last commits);  " +
+        "none:  new words, or a mark from before I160."
+    },
+    {
       name: "accepted",
       kind: "string",
       format: "time",
@@ -68,17 +77,22 @@ export const epicChangeVocabulary = {
   slots: [{ name: "", description: "The changed or new words:  running text, links and code included." }],
   parts: [
     { name: "base", description: "The whole mark:  the words, the chip, its question and answer." },
-    { name: "words", description: "The changed words, a `<mark>`:  orange while new (3 days)." },
+    {
+      name: "words",
+      description:
+        "The changed words, a `<mark>`:  orange while new (3 days);  a click, Enter or Space opens the popup."
+    },
     { name: "chip", description: "The question's id (`Q16`), a `<button>`:  a click folds its question and answer." },
     {
       name: "qa",
       description: "The question's title and its answer, in a line, after the chip;  hidden while folded."
     },
     {
-      name: "buttons",
+      name: "popup",
       description:
-        "Accept and Reopen (an `<epic-review buttons=change>`), under the chip on hover or focus, while the page is " +
-        "reviewed and the change waits."
+        "The words' popup (a `<ui-popup>`), opened by a click on them:  which answer changed them and when, " +
+        '"Originally" and the words they replaced, and Reopen (an `<epic-review buttons=change>`) while the page ' +
+        "is reviewed and the change is new.  A click elsewhere or Escape closes it."
     }
   ],
   states: [
@@ -87,15 +101,11 @@ export const epicChangeVocabulary = {
   ],
   texts: [
     {
-      key: "newTip",
-      text: "Changed by {item}'s answer{when}:  Reopen to talk it over again",
-      description: "The words' tooltip while the change is new and the page reviewed;  `when`, ` on 10/24/26 15:10`."
+      key: "changedBy",
+      text: "Changed by {item}{when}",
+      description: "The popup's first line;  `when`, ` (10/24/26 15:10)`."
     },
-    {
-      key: "changedTip",
-      text: "Changed by {item}'s answer{when}",
-      description: "The words' tooltip otherwise."
-    },
+    { key: "originally", text: "Originally:", description: "The popup's second line, before the words replaced." },
     { key: "unfoldTip", text: "{item}:  show the question and its answer", description: "The chip's tooltip, folded." },
     { key: "foldTip", text: "{item}:  hide the question and its answer", description: "The chip's tooltip, open." },
     { key: "noAnswer", text: "not answered yet", description: "The answer's place when the change has none." },

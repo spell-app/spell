@@ -293,7 +293,8 @@ export class PlanDocFiles {
    *   - an older doc comes up to today's markup on its first edit, logged
    *   - a migration that would break the doc refuses the edit, as any change does
    * - then the whole-doc pass (`updateStates()`),
-   *   with the page's `recent-since` from the doc's checkout (`recentSince()`)
+   *   with the page's `recent-since` from the doc's checkout (`recentSince()`), and its earlier versions for the words a
+   *   new change mark replaced (`earlierVersions()`)
    * - then it stamps "updated", and writes it (`writeDoc()`)
    * - REFUSES, writing nothing:
    *   - a doc in the old markup (`read()`)
@@ -303,6 +304,7 @@ export class PlanDocFiles {
   edit<T>(file: string, change: (plan: PlanDoc) => T, { split }: { split?: boolean } = {}): Promise<T> {
     return SRV.FileLock.runAsync(file, async () => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
+      plan.earlierVersions = PlanDocFiles.earlierVersions(file)
       const before = new Set(plan.check())
       plan.migrate()
       const result = change(plan)
@@ -496,6 +498,89 @@ export class PlanDocFiles {
   ////////////////
   // ## Git
   ////////////////
+
+  /**
+   * The doc at `file` as it was, newest first, each read and assembled only when asked for:  where a new change mark's
+   * replaced words are looked for (`PlanDoc.updateChanges()`, `ChangeOriginals`;  epic `epic-engine` I160).
+   * - first the files on disk, before this edit writes them:  a command handed new markup (`--changes`) changes only
+   *   the doc in memory
+   * - then its last `EARLIER_COMMITS` commits in the git repo holding it (the shared content repo:  its turn-end commits),
+   *   for marks written by hand into a part file, which the disk already holds
+   * - git only READS there (`log`, `ls-tree`, `cat-file`):  never a commit, never the index
+   * - STATIC;  NEVER throws:  a version that can't be read is left out
+   */
+  static earlierVersions(file: string): Iterable<Document> {
+    const sources: (() => Document | undefined)[] = [() => PlanDocFiles.versionOnDisk(file)]
+    let commits: string[] | undefined
+    const folder = dirname(file)
+    const top = () => SRV.Git.out(["rev-parse", "--show-toplevel"], folder)
+    for (let n = 0; n < EARLIER_COMMITS; n++)
+      sources.push(() => {
+        const root = top()
+        if (!root) return undefined
+        commits ??= SRV.Git.lines(["log", `-${EARLIER_COMMITS}`, "--format=%H", "--", folder], folder)
+        const commit = commits[n]
+        return commit ? PlanDocFiles.versionAt(file, root, commit) : undefined
+      })
+    const read: (Document | undefined | null)[] = []
+    return {
+      *[Symbol.iterator]() {
+        for (const [index, source] of sources.entries()) {
+          if (read[index] === undefined) {
+            try {
+              read[index] = source() ?? null
+            } catch {
+              read[index] = null
+            }
+          }
+          if (read[index]) yield read[index]!
+        }
+      }
+    }
+  }
+
+  /** The doc at `file` as the disk holds it, its parts read in;  `undefined` without one. */
+  private static versionOnDisk(file: string): Document | undefined {
+    if (!existsSync(file)) return undefined
+    const { document } = parseHTML(readFileSync(file, "utf8"))
+    new EpicParts(document as unknown as Document).assemble(PlanParts.reader(file))
+    return document as unknown as Document
+  }
+
+  /**
+   * The doc at `file` as commit `commit` of the repo at `root` held it, its parts read in:  every file of its folder in
+   * ONE `git cat-file --batch`;  `undefined` when the commit has no such doc.
+   */
+  private static versionAt(_file: string, root: string, commit: string): Document | undefined {
+    // by its real path, as git names the repo's root (a temp folder's `/var` is `/private/var`)
+    const file = RealPath.of(_file)
+    const path = (absolute: string) => relative(RealPath.of(root), absolute).split(sep).join("/")
+    const names = SRV.Git.lines(["ls-tree", "-r", "--name-only", commit, "--", path(dirname(file))], root).filter(
+      (name) => name === path(file) || name.startsWith(`${path(join(dirname(file), PARTS_DIR))}/`)
+    )
+    if (!names.includes(path(file))) return undefined
+    const run = SRV.Git.run(["cat-file", "--batch"], root, {
+      input: names.map((name) => `${commit}:${name}`).join("\n") + "\n",
+      trim: false
+    })
+    if (!run.ok) return undefined
+    const texts = new Map<string, string>()
+    const out = Buffer.from(run.out, "utf8")
+    let at = 0
+    for (const name of names) {
+      const end = out.indexOf(0x0a, at)
+      if (end < 0) break
+      const size = Number(/ blob (\d+)$/.exec(out.subarray(at, end).toString("utf8"))?.[1])
+      if (!Number.isFinite(size)) return undefined
+      texts.set(name, out.subarray(end + 1, end + 1 + size).toString("utf8"))
+      at = end + 1 + size + 1
+    }
+    const skeleton = texts.get(path(file))
+    if (skeleton === undefined) return undefined
+    const { document } = parseHTML(skeleton)
+    new EpicParts(document as unknown as Document).assemble((id) => texts.get(path(PlanParts.partFile(file, id))))
+    return document as unknown as Document
+  }
 
   /**
    * `git <args>` in this checkout, trimmed stdout ("" on failure).
@@ -772,3 +857,6 @@ function assembleEpic(document: Document, file: string): PlanDocParts {
   const missing = new EpicParts(document).assemble(PlanParts.reader(file))
   return { split: hosts.length > 0, hosts: ids, missing, inline }
 }
+
+/** How many of an epic folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
+const EARLIER_COMMITS = 3

@@ -183,8 +183,8 @@ export class EpicProgram {
     ).usage("<epic> overview | phases | building")
     this.page(
       epic.command("change"),
-      'stamp the change marks written by hand (<epic-change item="q13">words</epic-change>:  their id, time and ' +
-        "answer), then list the ones waiting for Owen's Accept;  --for:  the item of the marks that name none " +
+      'stamp the change marks written by hand (<epic-change item="q13">words</epic-change>:  their id, time, ' +
+        "answer and the words they replaced), then list them;  --for:  the item of the marks that name none " +
         "(any epic edit stamps them too)",
       "epic change seo --for q13"
     ).usage("<epic> [--for <item id>]")

@@ -1291,7 +1291,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    Questions and Todos;  phases:  the Phases too;  building:
                                                    everything);  no stage reads as building;  logged
   change <name> [--for <item id>]                  stamp the change marks written by hand (<epic-change item>:
-                                                   id, time, answer;  every edit does too), list them, new first;
+                                                   id, time, answer, the words replaced;  every edit does
+                                                   too), list them, new first;
                                                    --for:  the item of the marks that name none
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)

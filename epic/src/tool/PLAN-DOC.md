@@ -772,6 +772,14 @@ text itself, where an `<epic-update>` only said a block changed.
   - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
   - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
     has one, so the chip still says why months later
+  - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  Owen, 2026-10-29:
+    "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
+    - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
+      word with the same block in the doc as it was, and what lay between the words around the mark
+    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic folder's last 3
+      commits in the content repo (a mark written by hand into a part file);  git only reads there
+    - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
+    - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
     `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
 - Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it not `accepted`, in the
@@ -780,7 +788,9 @@ text itself, where an `<epic-update>` only said a block changed.
 - On the page:  the words on an orange ground, a folded chip naming the item (`Q16`;  unfolded, its title and the
   answer).  NO approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question"):
   orange for 3 days after `at`, then quiet (`isNewChange()`;  `<epic-change>`'s `isQuiet`).
-  - while new and reviewed:  Reopen, in a tooltip on the words (`<epic-review buttons="change">`):
+  - a click on the words (or Enter / Space) opens a popup under them (I160;  never a hover):  "Changed by Q16
+    (10/24/26 15:10)", then "Originally:" and `was`, when it has one;  a click elsewhere or Escape closes it
+  - while new and reviewed:  Reopen, in that popup (`<epic-review buttons="change">`):
     `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
