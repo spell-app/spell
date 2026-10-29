@@ -5,6 +5,7 @@ import { fmtConfig, packageLint, patternLintIn } from "spell/toolchain/lint"
 /**
  * Not linted or formatted by oxlint / oxfmt:
  * - the app's builds, in `app/`;  the docs' pictures and old notes (`docs/`)
+ * - the app's hand-laid-out component pages (`app/docs/`)
  * - the `@spell` space's projects (`spaces/@spell/`):  spell source, and what compiling writes beside it
  * - the tested examples' and guides' snapshots (`tests/spell/__examples__/`, `__guides__/`):  what compiling them writes
  * - Python (ruff's):  spaces' web server, its `.venv`
@@ -17,6 +18,7 @@ const NOT_OURS = [
   "app/dist-element",
   "app/dist-page",
   "app/static",
+  "app/docs",
   "docs",
   "spaces/@spell",
   "tests/spell/__examples__",

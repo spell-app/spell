@@ -409,6 +409,9 @@ and a rule changed here reaches every repo's next run.
 
 - The kit's own carry a prefix:  `yarn kit:ts` is `spell-types`, then its tests' `tsc`;
   `kit:lint`, `kit:format`, `kit:test` and `kit:review` the same way.
+- Each `format` covers only its own files:  the kit's names its own folders and configs, and each big folder's
+  reads its own ignore list.
+  A bare `vp fmt` at the kit's root would reach every folder with only the root's list.
 - At the kit's root, the bare names run every repo, the kit first and then lowest first,
   so each type check finds the declarations below it already fresh.
 - What each check runs, how to run one folder or one file, and what CI checks:

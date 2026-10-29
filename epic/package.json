@@ -28,6 +28,7 @@
     "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts tests vscode/src && echo '<< OXLINT PASSED\n'",
     "lint:fix": "vp lint --fix src scripts tests vscode/src",
     "format": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
+    "format:check": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts --check",
     "/////// TESTING": "",
     "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && yarn test:scripts && echo '<< TESTS PASSED\n'",
     "test:watch": "vp test",
