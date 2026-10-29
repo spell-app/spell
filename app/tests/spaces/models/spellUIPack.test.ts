@@ -19,7 +19,7 @@ describe("SPELL_UI_PACK", () => {
 
   test("loading spaces registers it:  a spellx drawing's <button> compiles to ui-button", () => {
     const contents = ['<spell-view "card">', "\t<draw>", "\t\t<button>Go</>", "\t</draw>", "</spell-view>"].join("\n")
-    const [file] = parseSpellProject([{ path: "/card.spellx", contents }]).files
+    const [file] = parseSpellProject([{ path: "/card.spellml", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-button", "Go")')
   })
@@ -35,7 +35,7 @@ describe("SPELL_UI_PACK", () => {
       "\t</draw>",
       "</spell-view>"
     ].join("\n")
-    const [file] = parseSpellProject([{ path: "/card.spellx", contents }]).files
+    const [file] = parseSpellProject([{ path: "/card.spellml", contents }]).files
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-space"')
   })

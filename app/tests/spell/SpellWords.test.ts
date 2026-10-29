@@ -28,7 +28,7 @@ describe("SpellWords", () => {
       autoPlay: "auto play",
       draw: "draw it"
     })
-    // its card, as Card.spellx writes it, and as Solitaire.spellx teaches it to play
+    // its card, as Card.spellml writes it, and as Solitaire.spellml teaches it to play
     expect(words.types.Card).toMatchObject({ name: "name", play: "play a card" })
     // a kind of pile:  the layout it gives every stock pile (its placeholder's drawing and its click handler are no members)
     expect(words.types.StockPile).toEqual({ layout: "layout" })

@@ -2,6 +2,8 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
+// Import directly:  the theme editor's barrel would load the editor
+import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
 import {
@@ -46,8 +48,9 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *     - Its rows are `<ui-item>` children;  its text goes in its `trigger` slot.
  *     - Its last, under a divider:  Theme bench, opening it as the palette's row does (not a theme:  never chosen).
  * - The theme bench is Spell UI's docs page, on the site `bench` names (the Spell editor:  the page server's
- *   address), else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row.  It's opened with the theme chosen in
- *   its address (`ThemePreference.addressWith()`), so it opens as this page shows.
+ *   address), else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row.
+ *   - It's opened with the theme chosen in its address (`ThemePreference.addressWith()`), so it opens as this page
+ *     shows, and only the bench's page for this place on (`pages=epic`, `benchPageId`;  `BenchAddress.withPage()`).
  * - The theme and scheme themselves are `ThemePreference`'s
  *   (one pair per page, remembered per viewer, the scheme shared with every Spell site's header).
  *   - Picking calls `ThemePreference.setTheme()` / `setScheme()` / `flipScheme()`,
@@ -157,7 +160,25 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     if (given === NO_BENCH || isServer) return undefined
     const site = given?.replace(/\/$/, "") ?? WORKTREE_ROOT.exec(location.pathname)?.[0] ?? ""
     const address = site + BENCH_PATH
-    return ThemePreference.addressWith(address, { theme: this.chosenTheme })
+    return BenchAddress.withPage(ThemePreference.addressWith(address, { theme: this.chosenTheme }), this.benchPageId)
+  }
+
+  /**
+   * The bench's page for the place this menu is on, shown alone as the bench opens (Owen:  "start with only the
+   * section you came from visible ... Default to `app`"):  `bench-page`, else from this page's address.
+   * - an epic page (`/epics/`):  `epic`;  Spell UI's docs (`/components/`):  `ui`;  a notebook (`/notebooks/`):
+   *   `notebook`;  anywhere else:  `app`
+   */
+  get benchPageId(): string {
+    const given = this.benchPageAttribute
+    if (given) return given
+    const path = isServer ? "" : location.pathname
+    return BENCH_PLACES.find(([pattern]) => pattern.test(path))?.[1] ?? DEFAULT_BENCH_PAGE
+  }
+
+  /** `bench-page`, as written. */
+  private get benchPageAttribute(): string | undefined {
+    return (this.attributes["bench-page"] ?? undefined) || undefined
   }
 
   /** Open the theme bench in a new window. */
@@ -559,6 +580,16 @@ const BENCH_PATH = "/components/ui/theme-bench.html"
 
 /** A worktree's site on the page server:  `/worktrees/<name>`, where its pages start. */
 const WORKTREE_ROOT = /^\/worktrees\/[^/]+/
+
+/** Where a page is, by its path => the theme bench's page for it;  first match wins. */
+const BENCH_PLACES: readonly (readonly [RegExp, string])[] = [
+  [/\/epics\//, "epic"],
+  [/\/notebooks\//, "notebook"],
+  [/\/components\//, "ui"]
+]
+
+/** The bench's page for anywhere else:  the app. */
+const DEFAULT_BENCH_PAGE = "app"
 
 /** `bench`'s value for no Theme bench row. */
 const NO_BENCH = "none"

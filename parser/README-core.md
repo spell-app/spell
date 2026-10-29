@@ -301,7 +301,7 @@ A reader of only a derived value hears of a change on a microtask, and only the 
 `the first card of the deck` is the first card, and `card 2 of the deck` the second, as a person counts.
 JavaScript and Python count from 0, and so does the runtime.
 The compiler bridges the two;  here's Klondike's deal, from the
-[Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx) example:
+[Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml) example:
 
 ```spell
 for row from 1 to 7

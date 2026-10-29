@@ -202,7 +202,7 @@ export type FormatOptions = GlobalOptions & {
 
 /**
  * `spell spellx convert` flags.
- * - `dryRun`:  write nothing:  print each `.spellx` file instead
+ * - `dryRun`:  write nothing:  print each `.spellml` file instead
  */
 export type SpellxConvertOptions = GlobalOptions & {
   dryRun?: boolean

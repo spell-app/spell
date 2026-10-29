@@ -467,7 +467,7 @@ export class SpellLanguageService {
    *   - a name where it's declared, e.g. `card` in `a card is a thing`, is a `declaration`
    * - JSX tag names are `type`s, attribute names `property`s.
    * - Nothing in a `<css>` block:  editors colour it as CSS themselves.
-   * - A `.spellx` file (epic `elemental-spell` P8):  its tags' words and closers are `keyword`s, their attribute names
+   * - A `.spellml` file (epic `elemental-spell` P8):  its tags' words and closers are `keyword`s, their attribute names
    *   `property`s, a note's or a prose line's text a comment -- see `spellxSpans()`;
    *   a twin's own words, standing at a tag with no text of their own, are never coloured (C24).
    */
@@ -615,7 +615,7 @@ export class SpellLanguageService {
    * - None for a fragment, `<>...</>`:  it has no name.
    */
   /**
-   * A `.spellx` file's own words, which its twin lines never hold (epic `elemental-spell` P8, C24):
+   * A `.spellml` file's own words, which its twin lines never hold (epic `elemental-spell` P8, C24):
    * - a tag's `<word`, and its `>` or `/>`:  `keyword`
    * - its attributes' names:  `property`  (their values, a quoted name and a phrase are the twin's, coloured by the parse)
    * - a closer, `</>` or `</property>`:  `keyword`
@@ -1466,7 +1466,7 @@ export class SpellLanguageService {
 
   /**
    * The spellx `file` reads as:  a `.spell` file written as spellx (`SX.SpellxWriter.textOf()`, J95);
-   * a `.spellx` file's own text.
+   * a `.spellml` file's own text.
    * - NEVER throws:  a file that can't be written says so, as a comment.
    */
   static spellxOf(file: SP.SpellFile): string {
@@ -1478,7 +1478,7 @@ export class SpellLanguageService {
   }
 
   /**
-   * The code spell `file` means:  a `.spellx` file's, written from its tags' twins (`SX.CodeSpellWriter`, Q70);
+   * The code spell `file` means:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`, Q70);
    * a `.spell` file's own text.
    * - A drawing's bare component names as the parse took them (`<card>` => `<solitaire-card>`):
    *   each element's match, by where it starts.
@@ -2091,7 +2091,7 @@ export class SpellLanguageService {
     const text = file.contents ?? ""
     if (!text.trim()) return []
     const formatter = new P.TokenFormatter({
-      // the file's own form's:  a `.spellx` file's tags are tokens of its own tokenizer (epic `elemental-spell` P8)
+      // the file's own form's:  a `.spellml` file's tags are tokens of its own tokenizer (epic `elemental-spell` P8)
       tokenizer: file.scope?.parser?.tokenizer ?? file.language.parser.tokenizer,
       indent: "\t",
       trimFinalBlankLines: !range && !!options.trimFinalNewlines,
@@ -2172,7 +2172,7 @@ export class SpellLanguageService {
   }
 
   /**
-   * The accent fixes of a `.spellx` file's own words from offset `from` to `to`, into `edits` (epic `elemental-spell`
+   * The accent fixes of a `.spellml` file's own words from offset `from` to `to`, into `edits` (epic `elemental-spell`
    * P8, Q49):  a tag's word and its attributes' names, typed without their accents --
    * `<accion "voltearla">` => `<acción "voltearla">`, `descripcion=` => `descripción=`.
    * - Named closers too:  `</accion>` => `</acción>`.

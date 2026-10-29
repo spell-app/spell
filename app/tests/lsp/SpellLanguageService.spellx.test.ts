@@ -9,12 +9,12 @@ import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
-/** spell-parser's spellx pair fixtures:  each `X.spellx` beside the `X.spell` it means. */
+/** spell-parser's spellx pair fixtures:  each `X.spellml` beside the `X.spell` it means. */
 const PAIRS = resolve(import.meta.dirname, "../../../parser/tests/spell/spellx")
 
 /**
  * The language service over a SPELLX file, spell's tag-shaped form (epic `elemental-spell` P8):
- * a temp project holding spell-parser's FlipTile pair fixture, `FlipTile.spellx`.
+ * a temp project holding spell-parser's FlipTile pair fixture, `FlipTile.spellml`.
  * - Its colours, hover and outline come from the match tree, as a `.spell` file's do.
  * - A tag line reads as its code-spell twin, whose own words are SYNTHETIC tokens at the tag's start (C24):
  *   nothing may colour them, or hover on them, as if they were typed there.
@@ -23,10 +23,10 @@ describe("SpellLanguageService, spellx", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellx"), "utf8")
-  writeFileSync(resolve(folder, "FlipTile.spellx"), tileText)
-  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellx", active: true }] }\n`)
-  const tileUri = pathToFileURL(resolve(folder, "FlipTile.spellx")).href
+  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
+  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
+  const tileUri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
   const workspace = new SpellDiskWorkspace()
   const service = new LSP.SpellLanguageService(workspace)
   let tile: SP.SpellFile
@@ -39,6 +39,22 @@ describe("SpellLanguageService, spellx", () => {
   test("it parses as spellx, with no errors", () => {
     expect(tile.form).toBe("spellx")
     expect(service.diagnostics(tile).map((it) => it.message)).toEqual([])
+  })
+
+  // epic `repo-split` P21:  the old ending, `.spellx`, still reads as a `.spellml` file does
+  test("the same file with the old ending parses, colours and outlines the same as its .spellml", async () => {
+    const oldFolder = resolve(dir, "OldTiles")
+    const oldName = `FlipTile${SP.OLD_SPELLML_SUFFIX}`
+    mkdirSync(oldFolder)
+    writeFileSync(resolve(oldFolder, oldName), tileText)
+    writeFileSync(resolve(oldFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/${oldName}", active: true }] }\n`)
+    const oldUri = pathToFileURL(resolve(oldFolder, oldName)).href
+    await workspace.update(oldUri, tileText)
+    const old = workspace.fileFor(oldUri)!
+    expect(old.form).toBe("spellx")
+    expect(service.diagnostics(old)).toEqual([])
+    expect(describeTokens(old)).toEqual(describeTokens(tile))
+    expect(service.documentSymbols(old)).toEqual(service.documentSymbols(tile))
   })
 
   test("its tags' words, attribute names and closers are coloured as written;  a twin's own words never are (C24)", () => {
@@ -127,17 +143,17 @@ describe("SpellLanguageService, spellx", () => {
 })
 
 /**
- * A `.spellx` file its project imports directly, with no `.spell` copy beside it (epic `elemental-spell` C51):
+ * A `.spellml` file its project imports directly, with no `.spell` copy beside it (epic `elemental-spell` C51):
  * everything VS Code asks for works on it, at positions in its own text.
  */
 describe("SpellLanguageService, a spellx file its project imports", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-import-"))
   const folder = resolve(dir, "Tiles")
   mkdirSync(folder)
-  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellx"), "utf8")
-  writeFileSync(resolve(folder, "FlipTile.spellx"), tileText)
-  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellx", active: true }] }\n`)
-  const uri = pathToFileURL(resolve(folder, "FlipTile.spellx")).href
+  const tileText = readFileSync(resolve(PAIRS, "FlipTile.spellml"), "utf8")
+  writeFileSync(resolve(folder, "FlipTile.spellml"), tileText)
+  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`)
+  const uri = pathToFileURL(resolve(folder, "FlipTile.spellml")).href
   const workspace = new SpellDiskWorkspace()
   const service = new LSP.SpellLanguageService(workspace)
   const lines = tileText.split("\n")
@@ -194,21 +210,21 @@ describe("SpellLanguageService, a spellx file its project imports", () => {
 })
 
 /**
- * A SPANISH spellx file (`Ficha.es.spellx`, spell-parser's pair fixture), typed without its accents:
+ * A SPANISH spellx file (`Ficha.es.spellml`, spell-parser's pair fixture), typed without its accents:
  * its tags' and attributes' words are upgraded as you type, as Spanish code spell's keywords are (Q49).
  */
 describe("SpellLanguageService, Spanish spellx", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-spellx-es-"))
   const folder = resolve(dir, "Fichas")
   mkdirSync(folder)
-  const accented = readFileSync(resolve(PAIRS, "Ficha.es.spellx"), "utf8")
+  const accented = readFileSync(resolve(PAIRS, "Ficha.es.spellml"), "utf8")
   const plain = accented
     .replaceAll("<acción", "<accion")
     .replaceAll("</acción>", "</accion>")
     .replace("descripción=", "descripcion=")
-  writeFileSync(resolve(folder, "Ficha.es.spellx"), plain)
-  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/Ficha.es.spellx", active: true }] }\n`)
-  const uri = pathToFileURL(resolve(folder, "Ficha.es.spellx")).href
+  writeFileSync(resolve(folder, "Ficha.es.spellml"), plain)
+  writeFileSync(resolve(folder, SP.PROJECT_FILE), `{ imports: [{ path: "/Ficha.es.spellml", active: true }] }\n`)
+  const uri = pathToFileURL(resolve(folder, "Ficha.es.spellml")).href
   const workspace = new SpellDiskWorkspace()
   const service = new LSP.SpellLanguageService(workspace)
   let ficha: SP.SpellFile

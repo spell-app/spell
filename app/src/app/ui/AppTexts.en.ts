@@ -264,7 +264,7 @@ export const APP_TEXTS = {
   outputTab: "Output",
   typescriptTab: "TypeScript",
   pythonTab: "Python",
-  // a .spellx file's code spell, the text it reads as (epic `elemental-spell` P8)
+  // a .spellml file's code spell, the text it reads as (epic `elemental-spell` P8)
   codeSpellTab: "Code Spell",
   // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
   spellxTab: "Spellx",
@@ -292,7 +292,7 @@ export const APP_TEXTS = {
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
   // the pages it previews while it's worked on (`BenchPages`, in development)
-  "themePage.editor": "App",
+  "themePage.app": "App",
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",

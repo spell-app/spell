@@ -53,7 +53,7 @@ export type BenchPagesProps = {
 }
 
 /** The four pages' ids, in the grid's order, two by two (Owen):  the App (the editor) and the epic page on top. */
-export const BENCH_PAGE_IDS = ["editor", "epic", "ui", "notebook"] as const
+export const BENCH_PAGE_IDS = ["app", "epic", "ui", "notebook"] as const
 
 /** One of them. */
 export type BenchPageId = (typeof BENCH_PAGE_IDS)[number]
@@ -79,7 +79,7 @@ const PLACES: Readonly<
     }
   >
 > = {
-  editor: {
+  app: {
     at: "editor",
     path: "/edit/@spell/examples/Solitaire",
     width: 1440,

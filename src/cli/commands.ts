@@ -16,6 +16,8 @@
  *   (epic `repo-split` P19)
  * - `spell rename imports [--dry-run] [repos...]`:  the import rename of epic `repo-split` P20 (`spell-ui/x` =>
  *   `spell/ui/x` ...), kept for branches open when it landed
+ * - `spell rename spellml [--dry-run] [checkouts...]`:  Spell's markup files, `.spellx` => `.spellml` (epic
+ *   `repo-split` P21):  moved with `git mv`, and every mention but the record's;  kept for branches open when it landed
  * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
  *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
@@ -262,6 +264,20 @@ export default function kitCommands(spell: Command): void {
       CLI.runCommand(async () => {
         const { renameImportsCommand } = await import("spell/cli/commands/renameImports")
         renameImportsCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, repos })
+        return CLI.EXIT.OK
+      })
+    )
+
+  rename
+    .command("spellml")
+    .description("Spell's markup files, .spellx => .spellml:  each file moved with git mv, and each mention (P21)")
+    .argument("[checkouts...]", "the checkouts to rename in;  none:  this kit")
+    .option("--dry-run", "only report what it would change")
+    .option("--json", "print each checkout's report as JSON")
+    .action((checkouts: string[], options: CLI.RenameOptions) =>
+      CLI.runCommand(async () => {
+        const { renameSpellmlCommand } = await import("spell/cli/commands/renameSpellml")
+        renameSpellmlCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, checkouts })
         return CLI.EXIT.OK
       })
     )

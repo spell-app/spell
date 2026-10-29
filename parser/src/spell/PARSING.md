@@ -15,7 +15,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 - [`Parser.parse(input, ruleName, scope)`](../parser/Parser.ts) tokenizes,
   then calls `scope.getRuleOrDie(ruleName).parse()`.
 - [`SpellParser.tokenize()`](SpellParser.ts) calls `Tokenizer.tokenize()`.
-  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spellx` file's,
+  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spellml` file's,
     `SP.SpellxTokenizer`, for a whole file (the `"block"` rule) only;  see "Spellx", below.
   - For the `"block"` rule, it then calls [`breakIntoIndentedBlocks()`](../parser/tokenizer/Tokenizer.ts).
   - The result is ONE root `BlockToken`:  its lines (`LineToken`s), and nested blocks of the same kind.
@@ -1143,7 +1143,7 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
 
 ## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
 
-A `.spellx` file is read by spell's own parser and rules, as sentences and the outline are:
+A `.spellml` file is read by spell's own parser and rules, as sentences and the outline are:
 each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
 
 - Which form a file is:  its suffix (`SpellFile.form`, `"spell"` or `"spellx"`).
@@ -1250,8 +1250,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - The way back, a `.spell` file written as spellx, is `SX.SpellxWriter` (`spell spellx convert`, P12):
   rule by rule over the parse, each declaration as the tag whose twin it is, the rest in `<spell>` chunks.
 - Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
-  a `.es.spellx` file is a Spanish code-spell file's twin, its words the language's.
-- Its tests:  each pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same and has no
+  a `.es.spellml` file is a Spanish code-spell file's twin, its words the language's.
+- Its tests:  each pair in `tests/spell/spellx/`, `X.spellml` beside the `X.spell` it means, compiles the same and has no
   errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
 - A file's CHUNK TREE (`SX.SpellxView`, `spell/parser/spellx`) is built from these same tokens, for the editor, the
   notebook and agents:  no rules, nothing compiled (J30).
@@ -1861,7 +1861,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - The map names each file by its name in the project (`Card.spell`) and carries its text (`sourcesContent`).
   - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
     carries it inline:  `P.SourceMarks.inline()`.
-  - A `.spellx` file's positions are its own (Q69), so its map points at its `.spellx` lines.
+  - A `.spellml` file's positions are its own (Q69), so its map points at its `.spellml` lines.
   - Not the Python target, yet.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:

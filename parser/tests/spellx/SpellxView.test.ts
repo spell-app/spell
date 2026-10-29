@@ -6,7 +6,7 @@ import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 
 /**
- * The spellx view (epic `elemental-spell` P6, J30):  a `.spellx` file's chunk tree, built from the tokens spell's
+ * The spellx view (epic `elemental-spell` P6, J30):  a `.spellml` file's chunk tree, built from the tokens spell's
  * parser reads it as.  o1's examples read to the same outlines P3's hand-written reader gave;  each spellx mistake
  * the tokenizer notes is a diagnostic.
  * - The fixtures are the epic page's examples (its o1), both languages:  `fixtures/`.
@@ -17,7 +17,7 @@ import { SX } from "spell/parser/spellx"
 ////////////////
 
 /** The example files, each read whole. */
-const EXAMPLES = ["TwoSidedView.spellx", "Card.spellx", "Carta.es.spellx", "Solitaire.spellx", "Deck.spellx"]
+const EXAMPLES = ["TwoSidedView.spellml", "Card.spellml", "Carta.es.spellml", "Solitaire.spellml", "Deck.spellml"]
 
 /** Read a fixture by its name, its language from its name. */
 function readExample(name: string) {
@@ -25,7 +25,7 @@ function readExample(name: string) {
 }
 
 /** Read `text` as a spellx file, English unless `path` says otherwise. */
-function read(text: string, path = "Test.spellx") {
+function read(text: string, path = "Test.spellml") {
   return SX.SpellxView.read(text, { path })
 }
 
@@ -69,11 +69,11 @@ describe("SpellxView.read():  the examples", () => {
         const attributes = "attributes" in node ? node.attributes.map((attribute) => attribute.name) : []
         return [depth, node.kind, type, attributes.join(",")].join(" ")
       })
-    expect(shapeOf(readExample("Carta.es.spellx"))).toEqual(shapeOf(readExample("Card.spellx")))
+    expect(shapeOf(readExample("Carta.es.spellml"))).toEqual(shapeOf(readExample("Card.spellml")))
   })
 
   test("a card's members are what o1 says:  names, aliases, the parts, the handler's phrase", () => {
-    const card = readExample("Card.spellx").templates[0]!
+    const card = readExample("Card.spellml").templates[0]!
     expect({ type: card.type, name: card.name, attributes: card.attributes.map((a) => [a.name, a.value]) }).toEqual({
       type: "view",
       name: "playing card",
@@ -104,7 +104,7 @@ describe("SpellxView.read():  the examples", () => {
   })
 
   test("the two sided view's drawing is ONE if-chain of two branches, each placing a part", () => {
-    const view = readExample("TwoSidedView.spellx").templates[0]!
+    const view = readExample("TwoSidedView.spellml").templates[0]!
     const draw = view.children.find((node) => node.kind === "declaration" && node.type === "draw")
     expect(draw).toMatchObject({
       children: [
@@ -313,7 +313,7 @@ describe("SpellxView.read():  what a tag says", () => {
 	</dibujar>
 </encanto-vista>
 `,
-      "Carta.es.spellx"
+      "Carta.es.spellml"
     )
     const draw = file.templates[0]!.children[0] as SX.SpellxDeclaration
     expect(file.diagnostics).toEqual([])
@@ -438,7 +438,7 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
 	<propiedda "palo" />
 </encanto-vista>
 `,
-      "Carta.es.spellx"
+      "Carta.es.spellml"
     )
     expect(file.diagnostics[0]!.message).toBe(
       `"<propiedda>" no es una palabra de spellx:  ¿querías decir "<propiedad>"?`

@@ -13,9 +13,9 @@ import { SX } from "spell/parser/spellx"
 
 /**
  * SPELLX read by spell's own rules, as a third style of spell (epic `elemental-spell` P6, Q69 A):
- * each tag line reads as its code-spell twin (`SP.SpellxTwin`), so a `.spellx` file compiles to EXACTLY what its
+ * each tag line reads as its code-spell twin (`SP.SpellxTwin`), so a `.spellml` file compiles to EXACTLY what its
  * twin `.spell` file does.
- * - The pairs are in `spellx/`:  each `X.spellx` beside the `X.spell` it means.
+ * - The pairs are in `spellx/`:  each `X.spellml` beside the `X.spell` it means.
  *   - `Card`:  o1's playing card, its drawings naming components bare (`<text>`, P7), and no `pass event` (P9).
  *   - `FlipTile`:  an event, an action's details, a drawing's if-chain placing slots.
  *   - `Deck`:  a template with nothing inside, a list template, bodies on a tag's own line.
@@ -31,9 +31,9 @@ describe("spellx:  a third style of spell", () => {
   beforeAll(registerTestComponentPack)
 
   test.each(["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"])(
-    "%s.spellx compiles as its .spell twin does",
+    "%s.spellml compiles as its .spell twin does",
     (name) => {
-      const spellx = compiled(`${name}.spellx`)
+      const spellx = compiled(`${name}.spellml`)
       const spell = compiled(`${name}.spell`)
       expect(spellx.errors).toEqual([])
       expect(spell.errors).toEqual([])
@@ -69,7 +69,7 @@ describe("spellx:  a third style of spell", () => {
     const files: SpellSourceFile[] = [
       { path: "/Game.spell", contents: ["set the card to a new card", "turn the card over"].join("\n") },
       {
-        path: "/Card.spellx",
+        path: "/Card.spellml",
         contents: [
           '<spell-view "card">',
           '\t<property "side" one-of="up, down" />',
@@ -94,13 +94,13 @@ describe("spellx:  a third style of spell", () => {
         "\t</action>",
         "</spell-view>"
       ].join("\n")
-    const files: SpellSourceFile[] = [{ path: "/Card.spellx", contents: text("set its side to down") }]
+    const files: SpellSourceFile[] = [{ path: "/Card.spellml", contents: text("set its side to down") }]
     const project = incrementalSpellProject(files)
     for (const body of ["set its side to up", "print 1", "set its side to down"]) {
       const contents = text(body)
-      project.update("/Card.spellx", contents)
+      project.update("/Card.spellml", contents)
       expect(summarizeIncremental(project), body).toEqual(
-        summarize(parseSpellProject([{ path: "/Card.spellx", contents }]))
+        summarize(parseSpellProject([{ path: "/Card.spellml", contents }]))
       )
     }
   })
@@ -121,7 +121,7 @@ describe("spellx:  a third style of spell", () => {
 
     test("in Spanish, with or without its accent:  <botón> is <es-boton>", () => {
       const spanish = ['<encanto-vista "carta">', "\t<dibujar>", "\t\t<botón>Ir</>", "\t</dibujar>", "</encanto-vista>"]
-      const { code, errors } = compiledText(spanish, { path: "/test.es.spellx" })
+      const { code, errors } = compiledText(spanish, { path: "/test.es.spellml" })
       expect(errors).toEqual([])
       expect(code).toContain('h("es-boton", "Ir")')
     })
@@ -196,7 +196,7 @@ describe("spellx:  a third style of spell", () => {
           "\t</dibujar>",
           "</encanto-vista>"
         ],
-        { path: "/Carta.es.spellx" }
+        { path: "/Carta.es.spellml" }
       )
       expect(errors).toEqual([])
       expect(code).toContain('h("span", { hidden: () => this.arriba ? undefined : "until-found" }, "arriba")')
@@ -324,7 +324,7 @@ describe("spellx:  a third style of spell", () => {
           "\t</dibujar>",
           "</encanto-vista>"
         ],
-        { path: "/prueba.es.spellx" }
+        { path: "/prueba.es.spellml" }
       )
       expect(errors).toEqual([])
       expect(code).toMatch(/h\("[a-z-]+-carta", h\("es-texto", \{ slot: "front" \}, "As"\)\)/)
@@ -384,7 +384,7 @@ describe("spellx:  a third style of spell", () => {
     })
 
     test("in Spanish:  in Spanish, on its own line", () => {
-      const path = "/prueba.es.spellx"
+      const path = "/prueba.es.spellml"
       const unknown = compiledText(
         ['<encanto-vista "carta">', '\t<propiedd "palo" uno-de="a, b" />', "</encanto-vista>"],
         {
@@ -411,7 +411,7 @@ describe("spellx:  a third style of spell", () => {
       expect(pile.errors).toEqual([])
       expect(pile.code).toContain("static canBeDroppedOn = true")
       // Spanish
-      const es = compiledText(['<encanto-vista "carta" arrastrable>', "</encanto-vista>"], { path: "Carta.es.spellx" })
+      const es = compiledText(['<encanto-vista "carta" arrastrable>', "</encanto-vista>"], { path: "Carta.es.spellml" })
       expect(es.errors).toEqual([])
       expect(es.code).toContain("static canBeDragged = true")
     })
@@ -445,7 +445,7 @@ describe("spellx:  a third style of spell", () => {
           "\t</menú>",
           "</encanto-aplicación>"
         ],
-        { path: "/prueba.es.spellx" }
+        { path: "/prueba.es.spellml" }
       )
       expect(es.errors).toEqual([])
       expect(es.code).toContain('static menuBar = "MenúDelJuego"')
@@ -560,7 +560,7 @@ describe("spellx:  a third style of spell", () => {
       expect(code).toContain("/** A click turns it over */\n  onClick(event) {")
       // as its twin's comment is, above a `- while ...:` with a block
       expect(code).toContain("// Held:  it says so\n  whileMouseDown() {")
-      const [card] = SX.SpellxView.read(lines.join("\n"), { path: "/Card.spellx" }).templates
+      const [card] = SX.SpellxView.read(lines.join("\n"), { path: "/Card.spellml" }).templates
       const groups = SX.SpellxFile.groupsOf(card!).map(({ name, members }) => [name, members.length])
       expect(groups).toEqual([
         ["playing", 1],
@@ -575,7 +575,7 @@ describe("spellx:  a third style of spell", () => {
           '\t<al clic descripción="Un clic la voltea">imprimir "volteada"</>',
           "</encanto-vista>"
         ],
-        { path: "/Carta.es.spellx", keepDocs: true }
+        { path: "/Carta.es.spellml", keepDocs: true }
       )
       expect(errors).toEqual([])
       expect(code).toContain("/** Un clic la voltea */")
@@ -623,7 +623,7 @@ function compiled(name: string) {
  *   the two forms say where and how in their own ways
  * - `keepDocs`:  keep its line comments, to see a docstring
  */
-function compiledText(lines: string[], { path = "/test.spellx", keepDocs = false } = {}) {
+function compiledText(lines: string[], { path = "/test.spellml", keepDocs = false } = {}) {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
   const code = file!.compiled
     .replace(/\/\*! SPELL: DECLARES[^]*?\*\//g, "")

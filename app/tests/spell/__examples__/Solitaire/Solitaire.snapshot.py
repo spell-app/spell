@@ -901,8 +901,8 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   position: relative;
   /* its cards size themselves by its width */
   container-type: inline-size;
-  /* the glow when a dragged card would land here:  0.6em around its cards, inside the board's gutters */
-  --spell-drop-glow-inset: calc(var(--ui-grid-row-spacing) / 2 - 0.6em) calc(var(--ui-grid-gutter) / 2 - 0.6em);
+  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */
+  --spell-drop-glow: none;
 }
 /* its height:  a card's, by default -- a percentage of padding is one of its width */
 [layout]::before {
@@ -941,14 +941,14 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 }
 
 /****************
- * Turning over:  a card draws both its sides (Card.spellx), back to back, and turns over in 3D
+ * Turning over:  a card draws both its sides (Card.spellml), back to back, and turns over in 3D
  * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
  *   Its back side is drawn already turned half round, so it faces you when the card does.
  * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
  * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellx), so it turns over before it moves.
+ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellml), so it turns over before it moves.
  ****************/
 
 [layout] > * {
@@ -1005,6 +1005,27 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   --ui-red-text: #c8102e;
   --ui-black-text: #1a1a1a;
   --ui-blue-text: #2f6fd6;
+}
+
+/****************
+ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on
+ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.
+ *   An empty pile's placeholder, where it would lie.
+ * - A tight glow hugging the card:  a thin ring, then a soft halo.
+ *   The rings grow out from the card's own corners, so they round more than it does.
+ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.
+ ****************/
+
+[layout]:state(accepting-drop) > :last-child,
+[layout]:state(accepting-drop)::part(placeholder) {
+  border-radius: 0.035em;
+  box-shadow:
+    0 0 0 0.012em rgb(150 80 255 / 0.85),
+    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);
+}
+/* an empty pile's placeholder shows clearly while it would take the card */
+[layout]:state(accepting-drop)::part(placeholder) {
+  opacity: 1;
 }
 
 /****************

@@ -16,10 +16,10 @@ import { CLI } from "spell/app/cli"
  * - `--fix`:  puts right what it can, writes it back,
  *   then lists what it did, one line each (`... fixed:  ...`), on stdout (with `--json`, on stderr):
  *   - each retired word in the spell, e.g. `drawable thing` => `view` -- see `fixRetiredWords()`
- *   - a `.spellx` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
+ *   - a `.spellml` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
  *   - each editor page
  *   - What it can't put right is still an error.
- * - A `.spellx` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
+ * - A `.spellml` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
  * - SIDE EFFECT:  compiles any project they import which has never been compiled --
  *   see `CliSession.compileImports()`.
  * - Returns the exit code:  `EXIT.ERRORS` if there were any.
@@ -117,7 +117,7 @@ async function fixRetiredWords(
 }
 
 /**
- * With `--fix`:  put each HTML habit in `project`'s `.spellx` files right -- only `file`'s, if given --
+ * With `--fix`:  put each HTML habit in `project`'s `.spellml` files right -- only `file`'s, if given --
  * and write each changed file back (epic `elemental-spell` P8):
  * a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`.
  * - Only a tag the file's packs give that bare name (`SP.ComponentPacks`):  `<solitaire-card>` stays.
@@ -157,7 +157,7 @@ async function fixHtmlHabits(
 }
 
 /**
- * The HTML habits in `project`'s `.spellx` files that `--fix` can't put right -- only `file`'s, if given:
+ * The HTML habits in `project`'s `.spellml` files that `--fix` can't put right -- only `file`'s, if given:
  * an element's `on-click=` (or any `on-...=`), which spellx handles in its template, with `<on click>...</>`.
  * - Each a problem, where it is;  read from the files as last parsed.
  */

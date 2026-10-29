@@ -1,7 +1,7 @@
 /**
  * The tags Spell UI is going to have, but doesn't yet:  each with its Spanish name, the gap it fills and the phase
  * of epic `ui-gaps` that builds it.
- * - Why:  a `.spellx` drawing holds no native HTML, so a tag Spell UI lacks is a tag nobody can draw.
+ * - Why:  a `.spellml` drawing holds no native HTML, so a tag Spell UI lacks is a tag nobody can draw.
  *   A drawing's reader uses this list to say "coming:  tables" for a planned tag, rather than "unknown tag".
  * - A tag LEAVES this list in the change that builds it:  `components.planned.test.ts` fails on a planned tag
  *   that's already in the root catalog.

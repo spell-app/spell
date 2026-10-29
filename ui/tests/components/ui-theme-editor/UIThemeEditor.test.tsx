@@ -9,15 +9,19 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { SavedTheme, type DOMThemeEditorElement, type UIThemeEditor } from "spell/ui/components/ui-theme-editor"
 import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
-/** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄, the pages turned off. */
+/** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄, the pages turned off and their order. */
 const KEPT_KEYS = [
   "spell-ui:theme-draft",
   "spell-ui:theme-editor-folds",
   "spell-ui:theme-editor-swapped",
   "spell-ui:theme-editor-schemes",
   "spell-ui:theme-editor-head",
-  "spell-ui:theme-editor-hidden-pages"
+  "spell-ui:theme-editor-hidden-pages",
+  "spell-ui:theme-editor-page-order"
 ]
+
+/** The test page's own address:  the editor writes its view into it (`BenchAddress`), and each test starts clean. */
+const TEST_ADDRESS = location.href
 
 /** The editor in the fixture, drawn, and its component. */
 async function editor(
@@ -82,6 +86,7 @@ async function withPages() {
 }
 
 function forget() {
+  history.replaceState(history.state, "", TEST_ADDRESS)
   SavedTheme.forget()
   for (const key of KEPT_KEYS) localStorage.removeItem(key)
 }
@@ -400,32 +405,48 @@ describe("<ui-theme-editor> with pages", () => {
     expect(root.querySelectorAll(".tokens ui-section[open='false']")).toHaveLength(0)
   })
 
-  it("the bar:  Light / Dark / Both first, ⇄ beside them only under Both, then the pages;  every control has a tooltip", async () => {
+  it("the bar:  the themes, Light / Dark / Both with ⇄ in it under Both, then the pages and Phone at the far right;  every control has a tooltip", async () => {
     const { host, component } = await withPages()
-    const tools = inner(host, ".bar .tools")
-    expect(tools.firstElementChild?.className).toBe("schemes-group")
-    expect(tools.children[1]?.className).toBe("page-toggles")
+    const tools = [...inner(host, ".bar .tools").children]
+    expect(tools.map((tool) => tool.classList[0])).toEqual([undefined, "schemes-group", "page-toggles", "bar-toggle"])
+    expect(tools[0]!.getAttribute("aria-label")).toBe("Theme")
     expect(inner(host, ".bar ui-theme-menu")).toBeNull()
-    expect(inner(host, ".schemes-group ui-button")).not.toBeNull()
+    const swap = () => host.shadowRoot!.querySelector<HTMLElement>('.schemes-group ui-item[value="swap"]')
+    expect(swap()?.getAttribute("aria-pressed")).toBe("false")
     component.showSchemes("light")
     await ElementFixture.settle()
-    expect(inner(host, ".schemes-group ui-button")).toBeNull()
+    expect(swap()).toBeNull()
     component.showSchemes("both")
     await ElementFixture.settle()
     const untitled = [
-      ...host.shadowRoot!.querySelectorAll(".bar ui-button, .bar ui-item, .side ui-button, .side button")
+      ...host.shadowRoot!.querySelectorAll(".bar ui-button, .bar ui-item, .side ui-button, .side button, .page-head")
     ]
       .filter((control) => !control.getAttribute("title"))
       .map((control) => control.outerHTML.slice(0, 80))
     expect(untitled).toEqual([])
   })
 
-  it("each page toggles on and off, kept;  the last one on stays on;  an odd last page takes the row", async () => {
+  it("⇄ is a toggle segment of the schemes group:  pressed in while swapped, Both stays picked", async () => {
+    const { host, component } = await withPages()
+    const swap = inner(host, '.schemes-group ui-item[value="swap"]')
+    swap.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    await ElementFixture.settle()
+    expect(component.isSwapped).toBe(true)
+    expect(component.schemes).toBe("both")
+    expect(swap.classList.contains("on")).toBe(true)
+    expect(swap.getAttribute("title")).toMatch(/^Dark light/)
+  })
+
+  it("each page toggles on and off, pressed in while on, kept;  the last one on stays on;  an odd last page takes the row", async () => {
     const { host, component } = await withPages()
     const figure = (index: number) => host.shadowRoot!.querySelectorAll<HTMLElement>("figure.page")[index]!
     expect(figure(2).classList.contains("wide")).toBe(true)
-    inner(host, '.page-toggles ui-button[value="other"]').click()
+    const other = inner(host, '.page-toggles ui-item[value="other"]')
+    expect(other.classList.contains("on")).toBe(true)
+    await userEvent.click(other.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
     await ElementFixture.settle()
+    expect(other.classList.contains("on")).toBe(false)
+    expect(other.hasAttribute("selected")).toBe(false)
     expect(figure(1).hidden).toBe(true)
     expect(component.shownPageIds).toEqual(["page", "app"])
     expect(figure(2).classList.contains("wide")).toBe(false)
@@ -436,6 +457,69 @@ describe("<ui-theme-editor> with pages", () => {
     expect(component.isDarkFirst("app")).toBe(false)
     component.togglePage("other")
     expect(component.shownPageIds).toEqual(["other", "app"])
+  })
+
+  it("a page moves by its title row:  Alt+→ / Alt+←, or a drop;  the grid and the toggles follow, kept", async () => {
+    const { host, component } = await withPages()
+    const head = (id: string) =>
+      [...host.shadowRoot!.querySelectorAll<HTMLElement>("figure.page")].find(
+        (figure) =>
+          figure.querySelector(".page-title")?.textContent === component.pageList.find((page) => page.id === id)?.label
+      )!
+    head("page")
+      .querySelector<HTMLElement>(".page-head")!
+      .dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, bubbles: true }))
+    await ElementFixture.settle()
+    expect(component.shownPageIds).toEqual(["other", "page", "app"])
+    expect(head("page").style.order).toBe("1")
+    expect(
+      [...host.shadowRoot!.querySelectorAll(".page-toggles ui-item")].map((item) => item.getAttribute("value"))
+    ).toEqual(["other", "page", "app"])
+    component.movePage("app", "other", "before")
+    expect(component.shownPageIds).toEqual(["app", "other", "page"])
+    expect(JSON.parse(localStorage.getItem("spell-ui:theme-editor-page-order")!)).toEqual(["app", "other", "page"])
+    // a drag over a page's far half, then a drop:  after it
+    const figure = head("page")
+    const box = figure.getBoundingClientRect()
+    const drag = (type: string, x: number) =>
+      new DragEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: box.top + 10,
+        dataTransfer: new DataTransfer()
+      })
+    head("app").querySelector(".page-head")!.dispatchEvent(drag("dragstart", 0))
+    figure.dispatchEvent(drag("dragover", box.right - 5))
+    await ElementFixture.settle()
+    expect(figure.classList.contains("drop-after")).toBe(true)
+    figure.dispatchEvent(drag("drop", box.right - 5))
+    await ElementFixture.settle()
+    expect(component.shownPageIds).toEqual(["other", "page", "app"])
+    expect(figure.classList.contains("drop-after")).toBe(false)
+  })
+
+  it("its view goes in the page's address, and an address brings that view back", async () => {
+    const { host, component } = await withPages()
+    component.showSchemes("dark")
+    component.togglePage("other")
+    component.device = "phone"
+    await ElementFixture.settle()
+    const params = new URL(location.href).searchParams
+    expect(params.get("scheme")).toBe("dark")
+    expect(params.get("pages")).toBe("page,app")
+    expect(params.get("phone")).toBe("1")
+    expect(params.get("theme")).toBe(component.baseTheme)
+    // a fresh page at an address:  it wins over what's remembered
+    host.remove()
+    history.replaceState(history.state, "", `${location.pathname}?theme=glass&scheme=both&swap=1&pages=app,page`)
+    const again = await withPages()
+    expect(again.component.baseTheme).toBe("glass")
+    expect(again.component.schemes).toBe("both")
+    expect(again.component.isSwapped).toBe(true)
+    expect(again.component.shownPageIds).toEqual(["app", "page"])
+    expect(again.component.device).toBe("desk")
+    expect(localStorage.getItem("spell-ui:theme-editor-schemes")).toBe("dark")
   })
 
   it("a page's ↻ reloads its own frames, and no other page's", async () => {

@@ -133,7 +133,7 @@ Where it stops:
 | `run(compiled)` | runs code pushed to it, a `SpellCompiled`:  `{ projectId, compiled }`, and the scope pack, declarations and words if you have them.  Pushed code wins over `project` and `src`, and works before the element joins the page |
 | `restart()` | runs it again afresh:  the toolbar's Restart |
 | `pushed` | the property holding the code pushed to it last;  dropped when `project`, `src`, `scopes`, `name` or `editor` changes |
-| `spell-open` | the event a Type Explorer link sends:  `detail.href` is the source it points at, `spell:/@spell/examples/Solitaire/Solitaire.spellx#L12` |
+| `spell-open` | the event a Type Explorer link sends:  `detail.href` is the source it points at, `spell:/@spell/examples/Solitaire/Solitaire.spellml#L12` |
 
 | `<spell-editor>` | What it does |
 | --- | --- |
@@ -444,13 +444,13 @@ A compile, in the order Debug's Program Output tab logs it:
 3. `executeCompiledApp()` runs it on the runtime, carrying things over when it's the project it ran last.
 4. The console ends "Example executed without errors.", or with the error.
 
-### A `.spellx` file
+### A `.spellml` file
 
-A `.spellx` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
-- A template lives in ONE file, `.spell` or `.spellx`, never both:  its other form is a read-only view.
-  - Debug's Program panel has it as a tab:  Code Spell on a `.spellx` file, Spellx on a `.spell` file.
+A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
+- A template lives in ONE file, `.spell` or `.spellml`, never both:  its other form is a read-only view.
+  - Debug's Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
-  - A project may list a `.spellx` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
+  - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
 ### The Inspector:  look inside the running app
@@ -545,7 +545,7 @@ The code's own toolbar:
 
 | Address | Page |
 | --- | --- |
-| `/edit/<address>` | the editor, on a project or one file:  `/edit/@spell/examples/Solitaire/Solitaire.spellx` |
+| `/edit/<address>` | the editor, on a project or one file:  `/edit/@spell/examples/Solitaire/Solitaire.spellml` |
 | `/run/<address>` | Run:  the app alone, full size, under its header:  `/run/@spell/examples/calculator` |
 | anything else | the chooser:  your projects, the examples and the guides side by side, each with a Create button;  in dev, the frozen test projects too |
 
@@ -602,7 +602,7 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   and the rest, from [the language service](README-lsp.md#what-it-answers-request-by-request),
   called in the page itself.
   - That's why the language service must stay safe to run in a browser.
-- Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spellx`,
+- Each file is a Monaco model at an address like `spell:/@spell/examples/Solitaire/Solitaire.spellml`,
   a view of its file:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.
 - The editors on it are Solid components, `MonacoEditor` and `FileEditor`.

@@ -211,8 +211,8 @@ export class SpellLanguageServer {
         watchers: [
           { globPattern: "**/__project.json5" },
           { globPattern: "**/project.json" },
-          { globPattern: "**/*.spell" },
-          { globPattern: "**/*.spellx" }
+          { globPattern: `**/*${SP.SPELL_SUFFIX}` },
+          ...SP.SPELLML_SUFFIXES.map((suffix) => ({ globPattern: `**/*${suffix}` }))
         ]
       })
       .catch(() => undefined)

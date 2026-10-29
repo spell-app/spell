@@ -49,7 +49,7 @@ const COMPILED_TARGETS = {
   js: { language: "javascript", comment: "//" },
   ts: { language: "typescript", comment: "//" },
   py: { language: "python", comment: "#" },
-  // a `.spellx` file's code spell, "Show as Code Spell" (epic `elemental-spell` P8)
+  // a `.spellml` file's code spell, "Show as Code Spell" (epic `elemental-spell` P8)
   spell: { language: "spell", comment: "//" },
   // a `.spell` file as spellx, "Show as Spellx":  a view, never a second file (J95)
   spellx: { language: "spellx", comment: "//" }

@@ -48,9 +48,9 @@ export function OutputToolbar() {
  * ### `<OutputEditor>`
  * Read-only Monaco showing `editor.file`'s compiled javascript, guarded by an `<ErrorBoundary>`;
  * or, with `target`, the whole project's code for that target, written after each compile (`project.codeFor()`);
- * or, with `target="spell"`, the code spell `editor.file` means:  a `.spellx` file's, written from its tags' twins;
+ * or, with `target="spell"`, the code spell `editor.file` means:  a `.spellml` file's, written from its tags' twins;
  * or, with `target="spellx"`, `editor.file` as spellx:  a `.spell` file's, written by `SX.SpellxWriter`.
- * - Those two are a file's OTHER FORM, a view:  a template lives in ONE file, `.spell` or `.spellx`
+ * - Those two are a file's OTHER FORM, a view:  a template lives in ONE file, `.spell` or `.spellml`
  *   (epic `elemental-spell` J95).
  * - Coloured by Monaco's own highlighting for the language;  it doesn't follow the cursor in `<InputEditor>`.
  * - A target whose writer can't write the project shows why, as a comment, instead of its code.
@@ -112,14 +112,14 @@ export type OtherTarget = keyof typeof TARGET_LOOKS
 const TARGET_LOOKS = {
   "ts/solid": { language: "typescript", comment: "//" },
   py: { language: "python", comment: "#" },
-  // not a target:  the code spell a `.spellx` file means (epic `elemental-spell` P8)
+  // not a target:  the code spell a `.spellml` file means (epic `elemental-spell` P8)
   spell: { language: "spell", comment: "//" },
   // not a target either:  a `.spell` file as spellx (J95)
   spellx: { language: "spellx", comment: "//" }
 } as const
 
 /**
- * The code spell `file` means, as text:  a `.spellx` file's, written from its tags' twins (`SX.CodeSpellWriter`);
+ * The code spell `file` means, as text:  a `.spellml` file's, written from its tags' twins (`SX.CodeSpellWriter`);
  * any other spell file's own text;  nothing for a file that isn't spell.
  * - Its project's packs name its drawings' components;  its own views keep their bare names here
  *   (VS Code's view takes them from the parse).
@@ -138,7 +138,7 @@ function codeSpellOf(file: typeof editor.file): string {
 
 /**
  * `file` as spellx, as text:  a `.spell` file's, written by `SX.SpellxWriter` from its last parse;
- * a `.spellx` file's own text;  nothing for a file that isn't spell.
+ * a `.spellml` file's own text;  nothing for a file that isn't spell.
  * - NEVER throws:  a file that can't be written says why, as a comment.
  */
 function spellxOf(file: typeof editor.file): string {

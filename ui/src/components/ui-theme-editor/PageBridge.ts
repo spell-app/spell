@@ -1,17 +1,12 @@
 import { E } from "spell/ui/core"
-import {
-  PAGE_MESSAGE,
-  type PageMessage,
-  type PageReply,
-  type PageScheme,
-  type PageLook,
-  type TitlesAt
-} from "./UIThemeEditor.types"
+import { PAGE_MESSAGE, type PageMessage, type PageReply, type PageScheme, type PageLook } from "./UIThemeEditor.types"
 
 /****************
  * ### `PageBridge`
  * What the theme editor (`<ui-theme-editor>`) does INSIDE a page it shows in a frame:
- * lay its tuning over the page, scroll its section titles, and read what the page's sheets say about the tokens.
+ * lay its tuning over the page, and read what the page's sheets say about the tokens.
+ * - Until epic `debut` I83 it also scrolled the page's section titles at rest or stuck (the bar's At rest / Stuck,
+ *   which Owen dropped).
  * - Two ways in, the same functions:
  *   - a page beside the editor (same origin):  the editor calls them on the frame's document
  *   - the Spell editor app, on its own port (another origin):  the theme editor sends messages, and the app, in development,
@@ -73,32 +68,6 @@ export class PageBridge {
     root.classList.remove(scheme === "dark" ? "ui-light" : "ui-dark")
     root.classList.add(`ui-${scheme}`)
     root.style.colorScheme = scheme
-  }
-
-  ////////////////
-  // ## The section titles
-  ////////////////
-
-  /**
-   * Scroll `doc` so its section titles (`ui-section[sticky]`, in shadow roots too) show `at` rest, or stuck.
-   * - `rest`:  every box they scroll in back to its top, where the page's tabs and first titles are
-   * - `stuck`:  into a section with a section inside it, so both titles stick, one under the other,
-   *   with the page scrolling under them:  the first open one tall enough to scroll under, else a top-level one
-   * - A page with none, or none open and tall enough (an epic page, its phases folded):  as `rest`.
-   *   Opening one would change how the page was left, which it remembers.
-   */
-  static scrollTitles(doc: Document, at: TitlesAt): void {
-    const sections = PageBridge.deepAll(doc, STICKY_SECTION)
-    if (!sections.length) return
-    const tall = sections.filter((section) => section.getBoundingClientRect().height > TALL_ENOUGH)
-    const target = tall.find((section) => PageBridge.parentSection(section)) ?? tall[0]
-    if (at === "rest" || !target) {
-      for (const scroller of new Set(sections.map((section) => PageBridge.scrollerOf(section)))) scroller.scrollTop = 0
-      return
-    }
-    const scroller = PageBridge.scrollerOf(target)
-    const top = target.getBoundingClientRect().top - PageBridge.topOf(scroller) + scroller.scrollTop
-    scroller.scrollTop = Math.max(0, top + SCROLL_INTO)
   }
 
   ////////////////
@@ -171,7 +140,7 @@ export class PageBridge {
   /**
    * Take the theme editor's messages in this window, from now on;  returns the stop.
    * - Says `hello` to the window it's framed in, so the theme editor sends everything at once.
-   * - Each message's parts, in order:  `theme`, `scheme`, `fullMonty` (each through `handlers`), `css`, `titles`;
+   * - Each message's parts, in order:  `theme`, `scheme`, `fullMonty` (each through `handlers`), `css`;
    *   then the reply to an `ask`.
    * - NEVER throws:  a part that fails says so on the console, and the rest still runs.
    */
@@ -202,10 +171,6 @@ export class PageBridge {
     if (message.scheme !== undefined) await run("scheme", () => handlers.scheme(message.scheme!))
     if (message.fullMonty) await run("full view", () => handlers.fullMonty?.())
     if (message.css !== undefined) await run("tuning", () => PageBridge.applyCss(document, message.css!))
-    if (message.titles !== undefined) {
-      // after the parts above have drawn
-      await run("titles", () => E.after(LAYOUT_SECONDS, () => PageBridge.scrollTitles(document, message.titles!)))
-    }
     if (!message.ask) return undefined
     return { type: PAGE_MESSAGE, reply: message.ask.id, look: PageBridge.look(document, message.ask.tokens) }
   }
@@ -221,37 +186,6 @@ export class PageBridge {
       if (element.shadowRoot) found.push(...PageBridge.deepAll(element.shadowRoot, selector))
     }
     return found
-  }
-
-  /** The sticky section `section` sits in, across shadow roots;  `undefined` for a top-level one. */
-  private static parentSection(section: Element): Element | undefined {
-    for (let node = PageBridge.up(section); node; node = PageBridge.up(node)) {
-      if (node.matches(STICKY_SECTION)) return node
-    }
-    return undefined
-  }
-
-  /** The box `element` scrolls in:  its nearest ancestor that scrolls, across shadow roots;  else the page. */
-  private static scrollerOf(element: Element): Element {
-    const doc = element.ownerDocument
-    for (let node = PageBridge.up(element); node; node = PageBridge.up(node)) {
-      if (node === doc.documentElement || node === doc.body) break
-      const { overflowY } = doc.defaultView!.getComputedStyle(node)
-      if (SCROLLS.test(overflowY) && node.scrollHeight > node.clientHeight + 1) return node
-    }
-    return doc.scrollingElement ?? doc.documentElement
-  }
-
-  /** Where `scroller`'s box starts, px from the window's top:  the page's own scroller starts at 0. */
-  private static topOf(scroller: Element): number {
-    return scroller === scroller.ownerDocument.scrollingElement ? 0 : scroller.getBoundingClientRect().top
-  }
-
-  /** `node`'s parent element, or its shadow root's host. */
-  private static up(node: Element): Element | undefined {
-    if (node.parentElement) return node.parentElement
-    const root = node.getRootNode()
-    return root instanceof node.ownerDocument.defaultView!.ShadowRoot ? root.host : undefined
   }
 
   /** Every sheet of `doc`, its shadow roots' too, each with the roots that hold it. */
@@ -285,21 +219,6 @@ const PINNED = new WeakMap<Window, "light" | "dark">()
 
 /** Id of the `<style>` the theme being made goes in. */
 const STYLE_ID = "ui-theme-editor-sheet"
-
-/** A section whose title sticks. */
-const STICKY_SECTION = "ui-section[sticky]"
-
-/** A section tall enough to scroll under its title, px. */
-const TALL_ENOUGH = 320
-
-/** How far into a section `stuck` scrolls, past its top, px:  enough for both titles to stick. */
-const SCROLL_INTO = 140
-
-/** How long a page gets to draw a theme before its titles are scrolled, in seconds. */
-const LAYOUT_SECONDS = 0.6
-
-/** An `overflow-y` that scrolls. */
-const SCROLLS = /auto|scroll|overlay/
 
 /** A token read:  `var(--x`. */
 const READ = /var\(\s*(--[\w-]+)/g

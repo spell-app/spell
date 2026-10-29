@@ -434,7 +434,7 @@ describe("<ui-theme-menu> Theme bench", () => {
     const bench = part<HTMLAnchorElement>(host, "bench")
     expect(bench.target).toBe("_blank")
     expect(bench.getAttribute("title")).toBe("Open the theme bench in a new window, in this theme")
-    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=spell`)
+    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=spell&pages=app`)
     row(host, "merlot").click()
     await ElementFixture.settle()
     expect(part<HTMLAnchorElement>(host, "bench").href).toContain("?theme=merlot")
@@ -443,10 +443,30 @@ describe("<ui-theme-menu> Theme bench", () => {
   it("`bench` names the site it's on;  `none`:  no row", async () => {
     const host = await render(`<ui-theme-menu bench="http://127.0.0.1:4747/"></ui-theme-menu>`)
     expect(part<HTMLAnchorElement>(host, "bench").href).toBe(
-      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=spell"
+      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=spell&pages=app"
     )
     const none = await render(`<ui-theme-menu bench="none"></ui-theme-menu>`)
     expect(none.shadowRoot!.querySelector("[part~=bench]")).toBeNull()
+  })
+
+  it("it opens with only the bench's page for this place:  `bench-page`, else from the page's address", async () => {
+    const host = await render(`<ui-theme-menu bench-page="epic"></ui-theme-menu>`)
+    expect(new URL(part<HTMLAnchorElement>(host, "bench").href).searchParams.get("pages")).toBe("epic")
+    const before = location.href
+    try {
+      for (const [path, page] of [
+        ["/epics/debut/debut.plan.html", "epic"],
+        ["/components/ui/ui-button.html", "ui"],
+        ["/edit/@spell/notebooks/Avatar", "notebook"],
+        ["/edit/@spell/examples/Solitaire", "app"]
+      ]) {
+        history.replaceState(history.state, "", path)
+        const menu = await render(`<ui-theme-menu></ui-theme-menu>`)
+        expect(new URL(part<HTMLAnchorElement>(menu, "bench").href).searchParams.get("pages")).toBe(page)
+      }
+    } finally {
+      history.replaceState(history.state, "", before)
+    }
   })
 
   it("the dropdown's Theme bench opens it, and chooses no theme", async () => {
@@ -454,7 +474,7 @@ describe("<ui-theme-menu> Theme bench", () => {
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     pick(host, "theme bench")
     expect(open).toHaveBeenCalledWith(
-      `${location.origin}/components/ui/theme-bench.html?theme=spell`,
+      `${location.origin}/components/ui/theme-bench.html?theme=spell&pages=app`,
       "_blank",
       "noopener"
     )

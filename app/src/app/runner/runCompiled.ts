@@ -163,7 +163,7 @@ export type RunCompiledOptions = {
   messages?: Record<string, string>
   /**
    * The program's source map, its `<Project>.spell.js.map` (epic `elemental-spell` P14):  inlined into what runs, so dev
-   * tools and an error's stack name its `.spell` / `.spellx` lines.
+   * tools and an error's stack name its `.spell` / `.spellml` lines.
    * - None:  the program's own `sourceMappingURL` line comes out, since a `blob:` URL can't fetch the map beside it.
    */
   sourceMap?: string

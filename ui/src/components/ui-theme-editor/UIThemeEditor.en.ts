@@ -209,11 +209,6 @@ export const themeEditorVocabulary = {
     { key: "showPageTip", text: "Show {page}", description: "A page's toggle, while it's off." },
     { key: "hidePageTip", text: "Hide {page}", description: "A page's toggle, while it's on." },
     { key: "themeTip", text: "Build on {theme}", description: "Each theme in the bar's theme row:  its tooltip." },
-    { key: "titles", text: "Section titles", description: "Accessible name of the titles' scroll menu." },
-    { key: "rest", text: "At rest", description: "Scroll each page to its top, its titles at rest." },
-    { key: "restTip", text: "Scroll each page to its top, its section titles at rest", description: "Its tooltip." },
-    { key: "stuck", text: "Stuck", description: "Scroll each page so its section titles stick." },
-    { key: "stuckTip", text: "Scroll each page so its section titles stick", description: "Its tooltip." },
     { key: "schemes", text: "Schemes", description: "Accessible name of the schemes' menu." },
     { key: "both", text: "Both", description: "Light and dark side by side:  pages, samples and token values." },
     { key: "bothTip", text: "Light and dark side by side", description: "Its tooltip." },
@@ -234,8 +229,18 @@ export const themeEditorVocabulary = {
     },
     {
       key: "swapTip",
-      text: "Swap light and dark:  each page's pair changes sides",
-      description: "Its tooltip."
+      text: "Light dark · dark light:  the darks side by side.  Press to put the lights side by side",
+      description: "Its tooltip, while not swapped."
+    },
+    {
+      key: "swappedTip",
+      text: "Dark light · light dark:  the lights side by side.  Press to put the darks side by side",
+      description: "Its tooltip, while swapped."
+    },
+    {
+      key: "moveTip",
+      text: "Drag to move this page;  or Alt+← / Alt+→",
+      description: "A page's title row's tooltip:  how to move it in the grid."
     },
     {
       key: "scrollBack",

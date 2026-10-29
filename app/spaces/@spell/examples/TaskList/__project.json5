@@ -3,11 +3,11 @@
   "description": "A to-do list in spellx, Spell in tags:  each task its own element, with Spell UI's controls;  a toolbar of actions filters it, ticking the one it shows, and a click selects tasks (shift and command for more) for a property editor that changes them all at once",
   "imports": [
     {
-      "path": "/Task.spellx",
+      "path": "/Task.spellml",
       "active": true
     },
     {
-      "path": "/TaskList.spellx",
+      "path": "/TaskList.spellml",
       "active": true
     },
     {

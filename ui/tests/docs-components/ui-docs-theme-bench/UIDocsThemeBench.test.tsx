@@ -8,12 +8,12 @@ import { BenchPages } from "spell/ui/docs-components/ui-docs-theme-bench/BenchPa
 import "spell/ui/docs-components/ui-docs-theme-bench"
 
 describe("<ui-docs-theme-bench>", () => {
-  it("shows the theme editor, handed the four pages, Editor and Epic page first", async () => {
+  it("shows the theme editor, handed the four pages, App and Epic page first", async () => {
     const bench = await ElementFixture.render<DOMElement>(`<ui-docs-theme-bench></ui-docs-theme-bench>`)
     await ElementFixture.settle()
     const editor = bench.shadowRoot!.querySelector("ui-theme-editor") as (Element & { pages: PreviewPage[] }) | null
     expect(editor).not.toBeNull()
-    expect(editor!.pages.map((page) => page.id)).toEqual(["editor", "epic", "ui", "notebook"])
+    expect(editor!.pages.map((page) => page.id)).toEqual(["app", "epic", "ui", "notebook"])
     expect(editor!.pages[1]!.label).toBe("Epic page")
   })
 })

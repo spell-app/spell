@@ -241,7 +241,7 @@ function compileFixture(
   const { scope, files } = parseSpellProject(sources, { parentScope })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
-    .filter(({ path, active }) => active !== false && /\.(spell|spellx|css)$/.test(path))
+    .filter(({ path, active }) => active !== false && /\.(spell|spellml|spellx|css)$/.test(path))
     .map(({ path }) => {
       if (path.endsWith(".css")) return compiledCSS(readFileSync(resolve(projectDir, `.${path}`), "utf8"))
       const file = files.find((it) => it.path === path)!
@@ -281,7 +281,7 @@ export function fixtureImports(projectName: string): Record<string, string> {
 function projectImportsIn(folder: string): Record<string, string> {
   const imported: Record<string, string> = {}
   for (const { path, active } of readProjectFile(folder).imports) {
-    if (active === false || /\.(spell|spellx|css)$/.test(path)) continue
+    if (active === false || /\.(spell|spellml|spellx|css)$/.test(path)) continue
     const projectId = SP.SpellProject.projectIdForImport(path)
     const projectName = projectId.split("/").at(-1)!
     if (fixtureProjectId(projectName) !== projectId)
@@ -317,7 +317,7 @@ export function fixtureImportScope(projectName: string): P.Scope {
 /**
  * The import layer the project in `folder` parses under:  `fixtureImportScope()`, for any project's folder,
  * e.g. the Counter notebook's, under the Counter example's declarations.
- * - `paths`:  its files', e.g. `/Counter.spellx`:  their languages, by their names, pick its root scope.
+ * - `paths`:  its files', e.g. `/Counter.spellml`:  their languages, by their names, pick its root scope.
  */
 export function importScopeIn(folder: string, paths: string[]): P.Scope {
   const { imports } = readProjectFile(folder)
@@ -339,30 +339,30 @@ function moduleFor(projectId: string): string {
   return `${SP.SPELL_PROJECT_MODULE}${encodeURI(projectId)}`
 }
 
-/** `{ path, contents }` of each spell file (`.spell` or `.spellx`) in test project `projectName`, in its project file's order. */
+/** `{ path, contents }` of each spell file (`.spell` or `.spellml`) in test project `projectName`, in its project file's order. */
 export function loadFixtureProject(projectName: string): SpellSourceFile[] {
   const projectDir = fixtureFolder(projectName)
   return readProjectFile(projectDir)
-    .imports.filter(({ path, active }) => active !== false && /\.spellx?$/.test(path))
+    .imports.filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
     .map(({ path }) => ({ path, contents: readFileSync(resolve(projectDir, `.${path}`), "utf8") }))
 }
 
 /**
  * The code-spell twins of the showcase examples' spellx files, kept beside the tests:  `tests/spell/__spell__/<Example>/`.
- * - Each is the same program as the example's `.spellx` file:  `spellxExamples.test.ts` checks it.
+ * - Each is the same program as the example's `.spellml` file:  `spellxExamples.test.ts` checks it.
  */
 export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell", "__spell__")
 
 /**
- * `loadFixtureProject()`, each `.spellx` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spellx` =>
+ * `loadFixtureProject()`, each `.spellml` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spellml` =>
  * `/Card.spell`, the same program written as code spell.
  * - For a test of code spell itself (its parse, its journal, its edits) on a whole example written in spellx,
  *   e.g. `loadCodeSpellTwin("Solitaire")`.
  */
 export function loadCodeSpellTwin(projectName: string): SpellSourceFile[] {
   return loadFixtureProject(projectName).map((file) => {
-    if (!file.path.endsWith(".spellx")) return file
-    const path = file.path.slice(0, -1)
+    if (!SP.isSpellmlName(file.path)) return file
+    const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, projectName, `.${path}`), "utf8") }
   })
 }

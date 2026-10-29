@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll } from "vite-plus/test"
 
+import { SP } from "spell/parser/spell"
 import { monaco } from "spell/app/app/ui/monaco/monaco"
 import { SpellMonaco } from "spell/app/app/ui/monaco/SpellMonaco"
 import { SpellTokensProvider } from "spell/app/app/ui/monaco/SpellTokensProvider"
@@ -58,7 +59,7 @@ describe("SpellTokensProvider", () => {
 })
 
 /**
- * A `.spellx` file colours by its own tokenizer:  each tag line as its code-spell twin, its tag's own words around it.
+ * A `.spellml` file colours by its own tokenizer:  each tag line as its code-spell twin, its tag's own words around it.
  * - The lines are Solitaire's `Card` in spellx, the examples test's fixture (`tests/spell/__spellx__/`).
  */
 describe("SpellTokensProvider.forSpellx()", () => {
@@ -78,8 +79,9 @@ describe("SpellTokensProvider.forSpellx()", () => {
     })
   }
 
-  test("a .spellx file is Monaco's spellx language;  a .spell file stays spell", () => {
-    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spellx")).toBe("spellx")
+  test("a .spellml file (or the old .spellx) is Monaco's spellx language;  a .spell file stays spell", () => {
+    expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spellml")).toBe("spellx")
+    expect(SpellMonaco.languageForPath(`/@spell/examples/Solitaire/Card${SP.OLD_SPELLML_SUFFIX}`)).toBe("spellx")
     expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell")).toBe("spell")
   })
 

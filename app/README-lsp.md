@@ -160,7 +160,7 @@ and return the protocol's own shapes (`Hover`, `CompletionItem[]` ...), so any h
 The editor's Monaco calls the service in the page, and converts each answer to Monaco's own shapes
 ([spell-app's README-app.md](README-app.md) has the editor).
 - Its files are the page's, loaded from the page server, at addresses like
-  `spell:/@spell/examples/Solitaire/Solitaire.spellx`.
+  `spell:/@spell/examples/Solitaire/Solitaire.spellml`.
 - There's no queue in the page:  an edit re-parses as it lands, so a hover right after it sees the new parse.
 
 ### In VS Code:  the server, from your checkout
@@ -407,15 +407,15 @@ It reads a SCOPE PACK, `<Project>.scopes.js`:  the scope explorer's tree, writte
   entries: [
     { path: "project:Solitaire" },
     {
-      path: "project:Solitaire/file:Card.spellx",
-      uri: "spell:/@spell/examples/Solitaire/Card.spellx",
+      path: "project:Solitaire/file:Card.spellml",
+      uri: "spell:/@spell/examples/Solitaire/Card.spellml",
       description: "# A playing card\nA card says what its rank, suit and color are:  a deck, a pile or the game only reads them.\nIt's a two sided view:  face up it shows its picture, face down the back every card shares.\nOn the page each card is its own element, `<solitaire-card>`."
     },
     {
-      path: "project:Solitaire/file:Card.spellx/type:Card", line: [6, 84],
+      path: "project:Solitaire/file:Card.spellml/type:Card", line: [6, 84],
       super: "type:TwoSidedView"
     },
-    { path: "project:Solitaire/file:Card.spellx/type:Card/property:rank", line: 8 },
+    { path: "project:Solitaire/file:Card.spellml/type:Card/property:rank", line: 8 },
     // ...
 ```
 

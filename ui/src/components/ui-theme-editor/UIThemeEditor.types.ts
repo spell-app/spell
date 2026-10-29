@@ -118,9 +118,6 @@ export type FrameKey = `${string}:${PageSlot}`
 /** Every message's `type`, both ways:  a page ignores any other (the value is the theme bench's, which began it). */
 export const PAGE_MESSAGE = "spell-theme-bench"
 
-/** Where a framed page scrolls its section titles to:  at rest (the page's top), or stuck under each other. */
-export type TitlesAt = "rest" | "stuck"
-
 /** Light, dark, or the OS's. */
 export type PageScheme = "light" | "dark" | "system"
 
@@ -128,7 +125,6 @@ export type PageScheme = "light" | "dark" | "system"
  * The editor to a framed page:  any of these, each applied as it comes.
  * - `theme`, `scheme`:  wear them, as the page's own menu would, but never remembered:  the page's own choice stays
  * - `css`:  the theme being made, a sheet laid over everything the page has (`""`:  none)
- * - `titles`:  scroll so its section titles are at rest, or stuck
  * - `fullMonty`:  the page's full view:  the Spell editor's Debug, every side bar, the Inspector's cards, a part picked
  * - `ask`:  reply with what the page's sheets read and declare, and the tokens' values now (`PageReply`)
  */
@@ -137,7 +133,6 @@ export type PageMessage = {
   theme?: string
   scheme?: PageScheme
   css?: string
-  titles?: TitlesAt
   fullMonty?: boolean
   ask?: { id: number; tokens: readonly string[] }
 }

@@ -6,7 +6,7 @@ import { SX } from "spell/parser/spellx"
 
 /**
  * A `.spell` file written as spellx (epic `elemental-spell` P12):  `SX.SpellxWriter`.
- * - Every pair's `.spell` (spell's `tests/spell/spellx/`) converts to a `.spellx` that compiles to the same code.
+ * - Every pair's `.spell` (spell's `tests/spell/spellx/`) converts to a `.spellml` that compiles to the same code.
  * - Then what it writes for each kind of line, English and Spanish.
  * - spell-app's `spellxExamples.test.ts` converts every built-in example the same way.
  */
@@ -18,7 +18,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     (name) => {
       const text = readFileSync(new URL(`../spell/spellx/${name}.spell`, import.meta.url), "utf8")
       const spell = compiled(`/${name}.spell`, text)
-      const back = compiled(`/${name}.spellx`, converted(`/${name}.spell`, text))
+      const back = compiled(`/${name}.spellml`, converted(`/${name}.spell`, text))
       expect(spell.errors).toEqual([])
       expect(back.errors).toEqual([])
       expect(back.code).toBe(spell.code)
@@ -38,7 +38,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     const spellx = converted("/Note.spell", lines)
     expect(spellx).toContain("First line\n\n\t\t\tSecond line")
     const spell = compiled("/Note.spell", lines.join("\n"))
-    const back = compiled("/Note.spellx", spellx)
+    const back = compiled("/Note.spellml", spellx)
     expect([back.errors, back.code]).toEqual([[], spell.code])
     expect(spell.code).toContain("First line\\n\\nSecond line")
   })
@@ -111,7 +111,7 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
       ].join("\n")
     )
     const spell = compiled("/Box.spell", lines.join("\n"))
-    const back = compiled("/Box.spellx", spellx)
+    const back = compiled("/Box.spellml", spellx)
     expect(back.errors).toEqual([])
     expect(back.code).toBe(spell.code)
   })

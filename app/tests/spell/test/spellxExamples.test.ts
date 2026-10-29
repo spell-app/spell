@@ -17,9 +17,9 @@ import "spell/app/spaces"
  * Every built-in example, written as spellx by `SX.SpellxWriter` (epic `elemental-spell` P12),
  * compiles to the same javascript, file by file:  the round trip `.spell` => spellx => javascript, in memory.
  * - Each project is parsed whole, then each `.spell` file converted, then the project parsed again with the
- *   `.spellx` files in their places:  each file's code must match, with no errors.
+ *   `.spellml` files in their places:  each file's code must match, with no errors.
  *   - An example written in spellx (Solitaire, Task List) has nothing to convert:  it must compile with no errors.
- * - Read where the examples are, never a frozen copy;  NOTHING is written:  the `.spellx` text lives in the test.
+ * - Read where the examples are, never a frozen copy;  NOTHING is written:  the `.spellml` text lives in the test.
  * - So the editor's "Show as Spellx" view of any example means what its `.spell` file does.
  * - Compared without comments and the `DECLARES` header, which carry line numbers.
  * - A drawing with the web's own elements (`<div>`, `<button>`) is written as code spell, in a `<spell>` chunk
@@ -30,9 +30,9 @@ const EXAMPLES_DIR = resolve(environment.systemFilesRoot, "examples")
 /**
  * Each example's OTHER form, kept as a test fixture beside the tests:  one file per file of the example
  * (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
- * - An example written as code spell:  its spellx in `__spellx__/<Example>/<File>.spellx`.
+ * - An example written as code spell:  its spellx in `__spellx__/<Example>/<File>.spellml`.
  * - An example written in spellx, the showcases (Solitaire, Task List):  its code spell in `__spell__/<Example>/<File>.spell`.
- * - NOT in the examples:  a template lives in ONE file, `.spell` or `.spellx`, never both.
+ * - NOT in the examples:  a template lives in ONE file, `.spell` or `.spellml`, never both.
  */
 const SPELLX_FIXTURES_DIR = resolve(environment.repoDir, "tests", "spell", "__spellx__")
 const SPELL_FIXTURES_DIR = CODE_SPELL_TWINS_DIR
@@ -62,9 +62,9 @@ function convertsTheSame(name: string) {
 
   // a file already in spellx stays as it is
   const converted = before.map(({ path, contents, match, scope }) =>
-    path.endsWith(".spellx")
+    path.endsWith(".spellml")
       ? { path, contents }
-      : { path: `${path}x`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
+      : { path: `${path}ml`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
   )
   const after = parseSpellProject(converted, { parentScope }).files
   for (const [index, file] of after.entries()) {
@@ -73,20 +73,20 @@ function convertsTheSame(name: string) {
   }
 }
 
-/** The spell files (`.spell` and `.spellx`) of the project in `folder`, in its project file's order. */
+/** The spell files (`.spell` and `.spellml`) of the project in `folder`, in its project file's order. */
 function sourcesOf(folder: string): SpellSourceFile[] {
   const { imports } = JSON5.parse(readFileSync(projectFileFor(folder), "utf8")) as {
     imports: Array<{ path: string; active?: boolean }>
   }
   return imports
-    .filter(({ path, active }) => active !== false && /\.spellx?$/.test(path))
+    .filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
     .map(({ path }) => ({ path, contents: readFileSync(resolve(folder, `.${path}`), "utf8") }))
 }
 
 /**
  * The examples' fixtures in their other form (`SPELLX_FIXTURES_DIR`, `SPELL_FIXTURES_DIR`), hand-kept since P13
  * (J54, J55), compile to the same javascript as the example's own files, file by file, with no errors.
- * - `Deck.spell` in an example => `__spellx__/<Example>/Deck.spellx`;  `Card.spellx` => `__spell__/<Example>/Card.spell`.
+ * - `Deck.spell` in an example => `__spellx__/<Example>/Deck.spellml`;  `Card.spellml` => `__spell__/<Example>/Card.spell`.
  * - A drawing with the web's own elements (`<div>`) is a `<spell>` chunk, or an `<html>` block, there (J83).
  */
 const FIXTURE_EXAMPLES = [SPELLX_FIXTURES_DIR, SPELL_FIXTURES_DIR].flatMap((dir) =>
@@ -110,9 +110,9 @@ describe("the examples' spellx fixtures compile to the same javascript as the ex
 })
 
 // J95:  a template lives in ONE file, so its other form is a view the editor writes, never a second file to drift
-test("no example keeps a template in both forms:  no `Card.spellx` beside `Card.spell`", () => {
+test("no example keeps a template in both forms:  no `Card.spellml` beside `Card.spell`", () => {
   const both = readdirSync(EXAMPLES_DIR, { recursive: true, encoding: "utf8" })
-    .filter((path) => path.endsWith(".spellx"))
+    .filter((path) => path.endsWith(".spellml"))
     .filter((path) => existsSync(resolve(EXAMPLES_DIR, path.slice(0, -1))))
   expect(both).toEqual([])
 })
@@ -123,8 +123,8 @@ function fixtureCompilesTheSame(name: string) {
   const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
   const before = parseSpellProject(sources, { parentScope }).files
   const fixtures = sources.map(({ path }) => {
-    const twin = path.endsWith(".spellx") ? path.slice(0, -1) : `${path}x`
-    const dir = path.endsWith(".spellx") ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
+    const twin = SP.isSpellmlName(path) ? path.replace(/\.spellml$/, SP.SPELL_SUFFIX) : `${path}ml`
+    const dir = SP.isSpellmlName(path) ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
     return { path: twin, contents: readFileSync(resolve(dir, name, `.${twin}`), "utf8") }
   })
   const after = parseSpellProject(fixtures, { parentScope }).files

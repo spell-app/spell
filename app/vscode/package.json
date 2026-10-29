@@ -165,10 +165,14 @@
       {
         "id": "spellx",
         "aliases": [
+          "Spellml",
           "Spellx",
           "spellx"
         ],
         "extensions": [
+          ".spellml",
+          ".en.spellml",
+          ".es.spellml",
           ".spellx",
           ".en.spellx",
           ".es.spellx"

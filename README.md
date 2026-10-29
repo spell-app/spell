@@ -585,7 +585,7 @@ When the page server is already running, its line ends "(already running)".
 
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-This game's [Solitaire.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx) is written in spellx, Spell in tags,
+This game's [Solitaire.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml) is written in spellx, Spell in tags,
 and its cards, deck and piles are files of its own beside it.
 A tableau says what it can take:
 `return its color is not the color of the card and its value is the value of the card + 1`.

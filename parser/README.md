@@ -244,7 +244,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx),
+  the tableau's rule in [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -252,7 +252,7 @@ Six ideas carry most of the language, and each reads both ways:
   ([positions count from 1](README-core.md#positions-count-from-1)).
 - **Ids and addresses.**  Every thing has an `id`, built in, and saves as readable JSON;
   `a person is saved in its own file` gives each person a file of their own.
-  Projects and files have addresses too, like `@spell/examples/Solitaire/Solitaire.spellx`
+  Projects and files have addresses too, like `@spell/examples/Solitaire/Solitaire.spellml`
   ([ids, names and addresses](README-spell.md#ids-names-and-addresses)).
 
 Every rule, and what each target writes for it:  [README-spell](README-spell.md).
@@ -480,7 +480,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [parser/rulex/](src/parser/rulex/) | `spell/parser/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
 | [markdown/](src/markdown/) | `spell/parser/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
 | [spell/](src/spell/) | `spell/parser/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
-| [spellx/](src/spellx/) | `spell/parser/spellx` | Spellx, Spell in tags:  the tree a `.spellx` file reads into;  Spell's own parser compiles it | [README-spellx](README-spellx.md) <ul><li>a card in tags, its plain Spell twin, and the tree it reads to</li><li>a closed vocabulary, not HTML's open one;  English and Spanish</li><li>how it reads:  tag tokens, twins, prose, markup, closers</li><li>using it;  the tree's nodes;  the edges</li></ul> |
+| [spellx/](src/spellx/) | `spell/parser/spellx` | Spellx, Spell in tags:  the tree a `.spellml` file reads into;  Spell's own parser compiles it | [README-spellx](README-spellx.md) <ul><li>a card in tags, its plain Spell twin, and the tree it reads to</li><li>a closed vocabulary, not HTML's open one;  English and Spanish</li><li>how it reads:  tag tokens, twins, prose, markup, closers</li><li>using it;  the tree's nodes;  the edges</li></ul> |
 | [spell/languages/](src/spell/languages/) | `spell/parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
 | [core/](src/core/) | `spell/parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>a run keeps an undo history, and what the person chose last time</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell/parser/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
