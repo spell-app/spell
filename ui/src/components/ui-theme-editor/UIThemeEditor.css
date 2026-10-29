@@ -119,7 +119,7 @@
     margin-inline-start: auto;
   }
   /*
-   * The bar's toggles, pressed IN while on:  the pages (`<ui-menu choose="many">`, which draws its own), ⇄ and
+   * The bar's toggles, pressed IN while on:  the pages (`<ui-menu choose="many">`, whose own pressed shadow is the same), ⇄ and
    * Phone, all alike:  a choice's fill (white, in a pill theme), in an inset well (Owen:  "feel like the other pills,
    * but with a \"depressed\" aesthetic", "white bg when depressed.  Change other things to match")
    */
@@ -127,7 +127,6 @@
     --_pressed-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
     --_pressed-shadow:
       inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
-    --ui-menu-segmented-pressed-shadow: var(--_pressed-shadow);
   }
   /* ⇄, a toggle inside the Light / Dark / Both choice:  quieter while off */
   .toggle::part(item) {

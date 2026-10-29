@@ -1055,7 +1055,8 @@
     }
   }
   .ui.segmented.toggles.menu {
-    --_ui-menu-active-shadow: var(
+    --_ui-menu-active-shadow: var(--_ui-menu-segmented-pressed-shadow);
+    --_ui-menu-segmented-pressed-shadow: var(
       --ui-menu-segmented-pressed-shadow,
       inset 0 1px 3px rgb(0 0 0 / 0.28),
       inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)
