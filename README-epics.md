@@ -369,6 +369,7 @@ epic whoami
 ```text
 Ana  (Ana Lima, github: ana)
   kept in ~/.spell-epic/person.json5
+  agent:  claude (Claude's mark, CLAUDECODE)
 ```
 
 </details>
@@ -383,6 +384,11 @@ Your SHORT NAME is who you are on the epics:  what's stamped on your replies, co
 - `epic whoami --rename Ana Lima --dry-run` says what a new name would change:
   `--rename` writes it over your old one everywhere it says who wrote something, on every page.
 - `epic whois Ben` lists what the pages say about Ben:  his replies and comments, by page, and when last.
+- The AGENT under you is the one running `epic`:  what its words are stamped with, so Bob's Codex reads "Codex (Bob)".
+  - Found from the mark each agent leaves on the commands it runs (Claude Code's `CLAUDECODE`, Codex's
+    `CODEX_THREAD_ID`).
+  - Another agent names itself with `SPELL_EPIC_AGENT=gemini`, set in its own settings.
+  - None of them:  `claude`, and `epic whoami` says it guessed.
 
 On a page, your own replies say "You", and everyone else's their name.
 Claude's replies say "Claude", or "Claude (Ben)" when Ben's session wrote them,
