@@ -940,7 +940,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "install",
       usage: "[--kit <folder>] [--dry-run] [--json]",
       description:
-        "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/:  the old " +
+        "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/ (from npm:  the " +
+        "spell-epic package beside spell, its marketplace from GitHub):  the old " +
         "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
         "safe to run again",
       example: "epic plugin install --dry-run",
