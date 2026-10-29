@@ -5,7 +5,9 @@ import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
-import { Inspector, addressKey, type InspectorPanel, type PartRow } from "./Inspector"
+import { Inspector, addressKey, isThing, type InspectorBand, type InspectorPanel, type PartRow } from "./Inspector"
+import { InspectorActions, type ActionParameter, type InspectorAction } from "./InspectorActions"
+import { enabledWhenInSource, type WrittenEvent } from "./InspectorSource"
 import { ThingExplorer } from "./ThingExplorer"
 import { TypeExplorer } from "./TypeExplorer"
 import { on } from "./on"
@@ -303,88 +305,263 @@ const [foldsChanged, setFoldsChanged] = createSignal(0)
 const FOLDED_PREF = "inspector:folded"
 
 /****************
- * ### `<InspectorEvents>`
- * The picked part's events, a card of the Inspector's own (epic `debut` P13, C23).
- * - Each:  its name as a heading, then its code, typed into a box that grows with it (`<EventCode>`);
- *   what the program was written with to start with (`Inspector.writtenHandlersOf()`).
- * - What it handles already (`Inspector.eventsOf()`), then what was added here;  "None yet." when neither.
- * - The header's "+" adds one:  a dropdown of the events a part understands, those it doesn't handle yet.
- *   - For now, the DOM's everyday ones (`DEFAULT_EVENTS`):  click, mouse down ...
- *   - Writing an event's code into the program is later (T18):  it's kept with the project for now.
- * - Nothing picked:  a tip.
+ * ### `<EventsBand>`
+ * The picked part's events, a folding band at the end of the properties card, titled Events (epic `debut` P28):
+ * what it does when people touch it.
+ * - A drawn thing's, in its program's own words (`Inspector.writtenEventsOf()`):
+ *   - first its abilities' conditions, a hand each:  `it can give up a card if`, its condition under it
+ *     (an ability with no condition, `it can be dragged`, its words alone)
+ *   - then its events, a bolt each:  `on click` as written (`when clicked` if written so), its code under it
+ * - A Spell UI element's:  what it handles (`Inspector.eventsOf()`), `on click`, with the code it was written with.
+ * - Each code box grows as it's typed into (`<EventCode>`);  what's typed is kept with the project (T18).
+ * - Then the events added here, with the band's "+":  a dropdown of the DOM's everyday events not there yet
+ *   (`DEFAULT_EVENTS`).
+ * - Folds as the card's other bands do, remembered (`Inspector.setGroupFolded("events")`).
+ * - Drawn while the part has an event, or one could be added:  never a "None yet." line.
  ****************/
-export function InspectorEvents(): JSX.Element {
-  const events = createMemo(() => {
-    const element = Inspector.inspected?.element
-    return element ? Inspector.eventsOf(element) : []
+export function EventsBand(props: {
+  /** The part picked, in the app. */
+  element: Element
+}): JSX.Element {
+  const rows = createMemo((): EventRow[] => {
+    const element = props.element
+    if (!Inspector.isDrawnThing(element)) {
+      const handlers = Inspector.writtenHandlersOf(element)
+      return Inspector.eventsOf(element).map((event) => eventRow(event, handlers[event] ?? ""))
+    }
+    const written = Inspector.writtenEventsOf(element).map((row) => ({ ...row, key: row.words }))
+    const added = Inspector.addedEventsOf(element)
+      .filter((event) => !written.some((row) => sameWords(row.words, onWords(event))))
+      .map((event) => eventRow(event, ""))
+    return [...written, ...added]
   })
-  const addable = () => DEFAULT_EVENTS.filter((event) => !events().includes(event))
+  const addable = () =>
+    DEFAULT_EVENTS.filter((event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event))))
   return (
-    <InspectorCard
-      panel="events"
-      class="InspectorEvents"
-      icon="bolt"
-      title={appTexts.text("inspectorEvents")}
-      actions={
-        <Show when={Inspector.inspected?.element && addable().length}>
+    <Show when={rows().length || addable().length}>
+      <ui-property-group
+        class="InspectorEvents"
+        label={appTexts.text("inspectorEvents")}
+        collapsible=""
+        open={Inspector.isGroupFolded("events") ? "false" : undefined}
+        ref={foldRemembered("events")}
+      >
+        <Show when={addable().length}>
           <ui-dropdown
+            slot="output"
             class="InspectorAddEvent"
             aria-label={appTexts.text("inspectorAddEvent")}
-            data-tooltip={appTexts.text("inspectorAddEvent")}
-            data-position="bottom right"
-            data-inverted=""
+            title={appTexts.text("inspectorAddEvent")}
+            onClick={(event: MouseEvent) => event.stopPropagation()}
             ref={on<{ value: string }>("ui-changed", (event) => {
-              const element = Inspector.inspected?.element
-              if (element && event.detail.value) Inspector.addEvent(element, event.detail.value)
+              if (event.detail.value) Inspector.addEvent(props.element, event.detail.value)
             })}
           >
             <ui-icon slot="trigger" name="plus" />
             <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
           </ui-dropdown>
         </Show>
-      }
-    >
-      <Show
-        when={Inspector.inspected?.element}
-        keyed
-        fallback={<p class="InspectorNone">{appTexts.text("inspectorEventsTip")}</p>}
-      >
-        {(element) => (
-          <Show when={events().length} fallback={<p class="InspectorNone">{appTexts.text("inspectorNoEvents")}</p>}>
-            <For each={events()}>
-              {(event) => (
-                <EventCode element={element} event={event} written={Inspector.writtenHandlersOf(element)[event]} />
-              )}
-            </For>
-          </Show>
-        )}
+        <For each={rows()}>{(row) => <EventCode element={props.element} row={row} />}</For>
+      </ui-property-group>
+    </Show>
+  )
+}
+
+/** One row of the Events band:  an event or an ability, as written, its code, and its key for what's typed. */
+type EventRow = WrittenEvent & {
+  /** What its typed code is kept under, beside the part's key:  the DOM event (`click`), else its words. */
+  key: string
+}
+
+/** The row for DOM event `event` (`click`):  `on click`, with `code`. */
+function eventRow(event: string, code: string): EventRow {
+  return { kind: "event", key: event, words: onWords(event), code }
+}
+
+/** DOM event `event`'s words:  `on click`, `on mouse down`. */
+function onWords(event: string): string {
+  return appTexts.text("inspectorEventHeading", { event: eventText(event) })
+}
+
+/** Are `a` and `b` the same words, whatever their spacing and case? */
+function sameWords(a: string, b: string): boolean {
+  return a.replace(/\s+/g, " ").toLowerCase() === b.replace(/\s+/g, " ").toLowerCase()
+}
+
+/** A band's fold, remembered:  its `ui-closing` and `ui-opening` tell the Inspector. */
+function foldRemembered(band: InspectorBand): (group: HTMLElement) => void {
+  return (group) => {
+    on("ui-closing", () => Inspector.setGroupFolded(band, true))(group)
+    on("ui-opening", () => Inspector.setGroupFolded(band, false))(group)
+  }
+}
+
+/**
+ * One of a part's events or abilities:  its icon and words, then its code, in a box that grows as it's typed into.
+ * - An event's icon a bolt;  an ability's a hand.
+ * - An ability with no condition (`it can be dragged`):  its words alone, no box.
+ * - The box:  a `<ui-textarea grow>` (epic `ui-gaps` P14), one line to start;  its monospace look through its
+ *   `control` part (`Inspector.css`).
+ * - Its code:  what was typed here, else what the program was written with, else empty.
+ */
+function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
+  const key = () => `${Inspector.keyOf(props.element) ?? ""}|${props.row.key}`
+  const isEvent = () => props.row.kind === "event"
+  return (
+    <section class={["InspectorEvent", props.row.kind]}>
+      <h3>
+        <ui-icon name={isEvent() ? EVENT_ICON : ABILITY_ICON} />
+        {props.row.words}
+      </h3>
+      <Show when={isEvent() || props.row.code}>
+        <ui-textarea
+          class="InspectorCode"
+          grow=""
+          fluid=""
+          spellcheck="false"
+          aria-label={props.row.words}
+          placeholder={appTexts.text(isEvent() ? "inspectorEventCode" : "inspectorConditionCode", {
+            event: props.row.words
+          })}
+          value={eventCode()[key()] ?? props.row.code}
+          ref={on<{ value: string }>("ui-typed", (event) => setEventCode(key(), event.detail.value))}
+        />
       </Show>
-    </InspectorCard>
+    </section>
+  )
+}
+
+/** An event's icon, in the Events band:  a bolt. */
+const EVENT_ICON = "bolt"
+/** An ability's icon, in the Events band:  a hand. */
+const ABILITY_ICON = "hand paper outline"
+
+/****************
+ * ### `<ActionsBand>`
+ * What can be done to the picked thing, a folding band at the very end of the properties card, titled Actions
+ * (epic `debut` P29):  each action of its type, a button reading its own words (`turn over`, `play it`),
+ * done to the thing in the running app.
+ * - Its actions:  its type's own, then those it inherits, in their file's order (`InspectorActions.of()`).
+ * - One that takes something has a field after its button:  a select of the game's piles for `put it on a pile`
+ *   (`<ActionParameterField>`);  with more than one, they go under its button.
+ * - Dimmed while it isn't enabled, following the thing live;  its tooltip says why, its `enabled when` in its own
+ *   words.
+ * - While it waits (`put it on a pile` pauses), its button shows it's busy.
+ * - An error goes to the program's console, as its own would.
+ * - Not drawn for something that isn't one of the program's things, nor with nothing to do.
+ ****************/
+export function ActionsBand(props: {
+  /** The thing picked (or the trail leads to). */
+  thing: object
+}): JSX.Element {
+  const actions = createMemo(() => {
+    const core = runtimeCore()
+    return core && isThing(props.thing) ? InspectorActions.of(props.thing, core, editor.programWords) : []
+  })
+  return (
+    <Show when={actions().length}>
+      <ui-property-group
+        class="InspectorActions"
+        label={appTexts.text("inspectorActions")}
+        collapsible=""
+        open={Inspector.isGroupFolded("actions") ? "false" : undefined}
+        ref={foldRemembered("actions")}
+      >
+        <For each={actions()}>{(action) => <ActionRow thing={props.thing} action={action} />}</For>
+      </ui-property-group>
+    </Show>
   )
 }
 
 /**
- * One of a part's events:  its name, then its code, in a box that grows as it's typed into.
- * - The box:  a `<ui-textarea grow>` (epic `ui-gaps` P14), one line to start;  its monospace look through its
- *   `control` part (`Inspector.css`).
- * - Its code:  what was typed here, else what the program was written with (`written`), else empty.
+ * One action:  its button, then a field for each thing it takes.
+ * - Its button is off while it isn't enabled, while a field is empty, and while it runs.
  */
-function EventCode(props: { element: Element; event: string; written?: string }): JSX.Element {
-  const key = () => `${Inspector.keyOf(props.element) ?? ""}|${props.event}`
+function ActionRow(props: { thing: object; action: InspectorAction }): JSX.Element {
+  const [args, setArgs] = createSignal<unknown[]>(props.action.parameters.map(() => undefined))
+  const [isRunning, setRunning] = createSignal(false)
+  const isEnabled = () => runtimeCore()?.isActionEnabled(props.thing, props.action.name) ?? false
+  const isReady = () => args().every((arg) => arg !== undefined && arg !== "")
+  const why = () => {
+    if (!isEnabled()) {
+      const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+      const condition = enabledWhenInSource(props.action.words, sources)
+      return condition
+        ? appTexts.text("inspectorActionOnlyWhen", { condition })
+        : appTexts.text("inspectorActionNotNow")
+    }
+    return isReady() ? undefined : appTexts.text("inspectorActionNeeds")
+  }
+  const setArg = (index: number, value: unknown) => setArgs((all) => all.map((arg, at) => (at === index ? value : arg)))
+  const press = () => {
+    const core = runtimeCore()
+    if (!core) return
+    const waiting = InspectorActions.run(core, props.thing, props.action, args())
+    if (!waiting) return
+    setRunning(true)
+    void waiting.finally(() => setRunning(false))
+  }
   return (
-    <section class="InspectorEvent">
-      <h3>{appTexts.text("inspectorEventHeading", { event: eventText(props.event) })}</h3>
-      <ui-textarea
-        class="InspectorCode"
-        grow=""
-        fluid=""
-        spellcheck="false"
-        aria-label={appTexts.text("inspectorEventHeading", { event: eventText(props.event) })}
-        placeholder={appTexts.text("inspectorEventCode", { event: eventText(props.event) })}
-        value={eventCode()[key()] ?? props.written ?? ""}
-        ref={on<{ value: string }>("ui-typed", (event) => setEventCode(key(), event.detail.value))}
-      />
-    </section>
+    <div class={["InspectorAction", { many: props.action.parameters.length > 1, off: !isEnabled() }]} title={why()}>
+      <ui-button
+        size="small"
+        appearance="basic"
+        icon="play"
+        class="InspectorActionButton"
+        disabled={!isEnabled() || !isReady() || isRunning() ? "" : undefined}
+        loading={isRunning() ? "" : undefined}
+        onClick={press}
+      >
+        {props.action.words}
+      </ui-button>
+      <For each={props.action.parameters}>
+        {(parameter, index) => (
+          <ActionParameterField parameter={parameter} onChange={(value) => setArg(index(), value)} />
+        )}
+      </For>
+    </div>
+  )
+}
+
+/**
+ * A field for something an action takes, by its type:
+ * - one of the program's types (`a pile`):  a select of the running program's things of that type, sub-types'
+ *   too, by their titles (`Foundation · clubs`)
+ * - anything else:  an input, read as spell would read a value (`InspectorActions.valueFrom()`)
+ */
+function ActionParameterField(props: { parameter: ActionParameter; onChange: (value: unknown) => void }): JSX.Element {
+  const things = () => {
+    const core = runtimeCore()
+    return core && props.parameter.type ? InspectorActions.thingsOfType(core, props.parameter.type) : []
+  }
+  const placeholder = () => props.parameter.words || appTexts.text("inspectorActionValue")
+  return (
+    <Show
+      when={props.parameter.type}
+      fallback={
+        <ui-input
+          class="InspectorActionField"
+          size="small"
+          aria-label={placeholder()}
+          placeholder={placeholder()}
+          ref={on<{ value: string }>("ui-typed", (event) =>
+            props.onChange(InspectorActions.valueFrom(event.detail.value))
+          )}
+        />
+      }
+    >
+      <ui-select
+        class="InspectorActionField"
+        size="small"
+        aria-label={placeholder()}
+        placeholder={placeholder()}
+        ref={on<{ value: string }>("ui-changed", (event) => props.onChange(things()[Number(event.detail.value)]))}
+      >
+        <For each={things()}>
+          {(thing, index) => <ui-item value={String(index())}>{Inspector.thingLabel(thing)}</ui-item>}
+        </For>
+      </ui-select>
+    </Show>
   )
 }
 

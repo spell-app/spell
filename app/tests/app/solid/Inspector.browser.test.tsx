@@ -176,25 +176,81 @@ describe("the parts tree and events", () => {
   })
 })
 
+describe("the Events band (epic `debut` P28)", () => {
+  test("a Spell UI element's events end its properties card:  `on click`, with the code it was written with", async () => {
+    // a place of its own among the parts:  the events added to the other tests' buttons are remembered by theirs
+    const area = await inArea(`<ui-segment></ui-segment><ui-button>Go</ui-button>`)
+    cleanups.push(Inspector.watch(area))
+    const button = area.querySelector("ui-button")!
+    Object.assign(button, { _$$click: () => {}, _$$clickData: 1 })
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.pick(button)
+    flush()
+    await ElementFixture.settle(host)
+    const band = host.querySelector(".InspectorMain ui-property-editor > ui-property-group.InspectorEvents")!
+    expect(band.getAttribute("label")).toBe("Events")
+    expect([...band.querySelectorAll(".InspectorEvent h3")].map((h3) => h3.textContent)).toEqual(["on click"])
+    expect(band.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
+  })
+
+  test("a drawn thing's events by its own words;  an ability with no condition, a hand and its words alone", async () => {
+    /** A stand-in for a drawn spell type:  an event, and an ability with no condition (fallback:  its methods). */
+    class Card {
+      onClick() {}
+      whenCardDroppedOn() {}
+    }
+    const area = await inArea(`<test-card></test-card>`)
+    cleanups.push(Inspector.watch(area))
+    const element = area.querySelector("test-card")!
+    Object.assign(element, { component: { currentThing: new Card() } })
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.pick(element)
+    flush()
+    await ElementFixture.settle(host)
+    const rows = () => [...host.querySelectorAll(".InspectorEvents .InspectorEvent h3")].map((h3) => h3.textContent)
+    expect(rows()).toEqual(["on click", "when card dropped on"])
+
+    // "+" adds one, after them
+    Inspector.addEvent(element, "mouseenter")
+    flush()
+    await ElementFixture.settle(host)
+    expect(rows()).toEqual(["on click", "when card dropped on", "on mouse enter"])
+    expect(host.querySelectorAll(".InspectorEvents .InspectorEvent .InspectorCode")).toHaveLength(3)
+  })
+
+  test("nothing picked:  no band", async () => {
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    flush()
+    expect(host.querySelector(".InspectorEvents")).toBeNull()
+  })
+})
+
 describe("the cards", () => {
   test("a card hides and folds;  the column opens again with the cards it last showed", async () => {
     const host = await mount(() => <InspectorColumn />)
     Inspector.toggle()
     flush()
     const titles = () => [...host.querySelectorAll(".InspectorCard")].map((card) => card.classList.contains("folded"))
-    expect(titles()).toEqual([false, false, false])
-    Inspector.setShown("events", false)
+    // two cards:  the Events card is gone, its events a band of the properties card (epic `debut` P28)
+    expect(titles()).toEqual([false, false])
+    expect(host.querySelector('.InspectorCard[data-panel="events"]')).toBeNull()
     Inspector.toggleFolded("views")
     flush()
     expect(titles()).toEqual([false, true])
+    Inspector.setShown("views", false)
+    flush()
+    expect(titles()).toEqual([false])
     // closed, then opened again, a click each
     Inspector.toggle()
     flush()
     Inspector.toggle()
     flush()
-    expect(titles()).toEqual([false, true])
+    expect(titles()).toEqual([false])
     // as it was, for the other tests
-    Inspector.setShown("events", true)
+    Inspector.setShown("views", true)
     Inspector.toggleFolded("views")
     flush()
   })

@@ -11,8 +11,9 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { SpellElement } from "spell/app/app/runner/SpellElement"
-import { InspectorCard, InspectorEvents, InspectorViews, appParts } from "./InspectorParts"
-import { handlersInSource } from "./InspectorSource"
+import { InspectorActions } from "./InspectorActions"
+import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
+import { eventsInSource, handlersInSource, type WrittenEvent } from "./InspectorSource"
 import { on } from "./on"
 import { SplitPanel } from "./SplitPanel"
 
@@ -108,12 +109,12 @@ export class Inspector {
   }
 
   /** Is the properties card's section for `group` folded (reactive)?  Advanced starts folded. */
-  static isGroupFolded(group: E.AttributeGroup): boolean {
+  static isGroupFolded(group: InspectorBand): boolean {
     return foldedGroups().includes(group)
   }
 
   /** Fold the properties card's section for `group`, or unfold it;  remember which. */
-  static setGroupFolded(group: E.AttributeGroup, isFolded: boolean): void {
+  static setGroupFolded(group: InspectorBand, isFolded: boolean): void {
     const next = [...foldedGroups().filter((each) => each !== group), ...(isFolded ? [group] : [])]
     setFoldedGroups(next)
     editorPrefs.set(FOLDED_GROUPS_PREF, next)
@@ -393,6 +394,36 @@ export class Inspector {
   }
 
   /**
+   * The events added here to `element` (`addEvent()`), remembered with the project (reactive).
+   * - A drawn thing's other events are as its program was written (`writtenEventsOf()`).
+   */
+  static addedEventsOf(element: Element): string[] {
+    eventsAdded()
+    const address = Inspector.addressOf(element)
+    return address ? (Inspector.addedEvents[addressKey(address)] ?? []) : []
+  }
+
+  /**
+   * A drawn thing's abilities and events, in its program's own words, each with its code (epic `debut` P28):
+   * `it can give up a card if` (`the card is face up`), `on click` (`play it`).
+   * - Read from the program's spell, where its type and those it inherits are written (`eventsInSource()`).
+   * - None found there (a language the reader doesn't know yet):  its event methods, by their names.
+   * - Not a drawn thing:  none.
+   */
+  static writtenEventsOf(element: Element): WrittenEvent[] {
+    const thing = SpellElement.thingOf(element)
+    if (!thing) return []
+    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const written = eventsInSource(InspectorActions.typeWordsOf(thing), sources)
+    return written.length ? written : InspectorActions.eventsOf(thing)
+  }
+
+  /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
+  static isDrawnThing(element: Element): boolean {
+    return !!SpellElement.thingOf(element)
+  }
+
+  /**
    * The code `element` was written with for each event, from the program's spell (`handlersInSource()`):
    * `{ click: "add someone" }`.
    * - A drawn thing's handlers are on what its drawing holds:  the thing's, merged.
@@ -407,7 +438,7 @@ export class Inspector {
   }
 
   /**
-   * Add `event` to `element`'s events, remembered with the project.
+   * Add `event` to `element`'s events, remembered with the project;  once:  added again, nothing changes.
    * - Writing a handler into the code is later (T18), as with property edits.
    * - Nothing happens for an element outside the app.
    */
@@ -416,6 +447,7 @@ export class Inspector {
     if (!address) return
     const added = Inspector.addedEvents
     const key = addressKey(address)
+    if (added[key]?.includes(event)) return
     editorPrefs.set(Inspector.eventsPref, { ...added, [key]: [...(added[key] ?? []), event] })
     setEventsAdded((count) => count + 1)
   }
@@ -582,23 +614,38 @@ const CONTROL_TAGS = new Set([
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
 const [isOpen, setOpen] = createSignal(editorPrefs.get(OPEN_PREF) as boolean)
 
-/** The Inspector's cards, top to bottom:  what's picked, its events, the app's views. */
-export const INSPECTOR_PANELS = ["properties", "events", "views"] as const
+/**
+ * The Inspector's cards, top to bottom:  what's picked, with its events and actions, then the app's views.
+ * - The Events card is gone (epic `debut` P28):  its events are a band of the properties card.
+ */
+export const INSPECTOR_PANELS = ["properties", "views"] as const
 /** One of the Inspector's cards. */
 export type InspectorPanel = (typeof INSPECTOR_PANELS)[number]
 
-/** The cards showing, in order (remembered:  `PANELS_PREF`). */
+/**
+ * The cards showing, in order (remembered:  `PANELS_PREF`).
+ * - A card remembered that's gone (Events) is dropped, so an old pref hides nothing.
+ */
 const [shownPanels, setShownPanels] = createSignal<readonly InspectorPanel[]>(
-  (editorPrefs.get(PANELS_PREF) as InspectorPanel[] | undefined) ?? INSPECTOR_PANELS
+  knownPanels(editorPrefs.get(PANELS_PREF)) ?? INSPECTOR_PANELS
 )
 /** The cards folded to their headers (remembered:  `FOLDED_PANELS_PREF`). */
 const [foldedPanels, setFoldedPanels] = createSignal<readonly InspectorPanel[]>(
-  (editorPrefs.get(FOLDED_PANELS_PREF) as InspectorPanel[] | undefined) ?? []
+  knownPanels(editorPrefs.get(FOLDED_PANELS_PREF)) ?? []
 )
 
+/** The cards a pref names that are still cards:  `undefined` if it names none. */
+function knownPanels(remembered: unknown): InspectorPanel[] | undefined {
+  if (!Array.isArray(remembered)) return undefined
+  return remembered.filter((panel): panel is InspectorPanel => (INSPECTOR_PANELS as readonly string[]).includes(panel))
+}
+
+/** One of the properties card's folding bands:  a group of a Spell UI element's fields, or its Events or Actions. */
+export type InspectorBand = E.AttributeGroup | "events" | "actions"
+
 /** The properties card's folded sections (remembered:  `FOLDED_GROUPS_PREF`). */
-const [foldedGroups, setFoldedGroups] = createSignal<readonly E.AttributeGroup[]>(
-  (editorPrefs.get(FOLDED_GROUPS_PREF) as E.AttributeGroup[] | undefined) ?? ["advanced"]
+const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(
+  (editorPrefs.get(FOLDED_GROUPS_PREF) as InspectorBand[] | undefined) ?? ["advanced"]
 )
 
 /** Show `panels`, and remember them. */
@@ -846,8 +893,7 @@ const FLUID_CONTROLS = "ui-property > :is(ui-input, ui-select, ui-dropdown, ui-t
  * ### `<InspectorColumn>`
  * The Inspector, a tall column at the page's far right, while it's open (`Inspector.isOpen`):
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
- *   - what's picked (`<PropertiesCard>`)
- *   - its events (`<InspectorEvents>`)
+ *   - what's picked (`<PropertiesCard>`), its events and actions as bands at its end
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the App pane's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
  * - Each card folds to its header (`<InspectorCard>`):  a folded card keeps its header's height, the others share
@@ -891,9 +937,6 @@ export function InspectorColumn(): JSX.Element {
         >
           <Show when={Inspector.isShown("properties")}>
             <PropertiesCard />
-          </Show>
-          <Show when={Inspector.isShown("events")}>
-            <InspectorEvents />
           </Show>
           <Show when={Inspector.isShown("views")}>
             <InspectorViews rows={rows()} />
@@ -992,29 +1035,26 @@ const SMALLEST_SHEET = 160
 const TALLEST_SHEET = 0.9
 
 /**
- * The column's sizes for the cards `shown`:  a folded card its header's height, Events as tall as its events,
- * the others their usual shares of the rest (Owen:  Events "fit to content").
- * - `id`:  the sizes remembered for this set of cards, as dragged (`<SplitPanel id>`):  a drag fixes Events' height.
+ * The column's sizes for the cards `shown`:  a folded card its header's height,
+ * the others their usual shares of the rest.
+ * - `id`:  the sizes remembered for this set of cards, as dragged (`<SplitPanel id>`).
  */
 function cardsLayout(shown: readonly InspectorPanel[]): { id: string; rows: string } {
-  const open = shown.filter((panel) => !Inspector.isFolded(panel) && CARD_SHARES[panel] !== FIT)
-  const total = open.reduce((sum, panel) => sum + (CARD_SHARES[panel] as number), 0)
+  const open = shown.filter((panel) => !Inspector.isFolded(panel))
+  const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
   return {
     id: `spellEditor-inspectorCards-${shown.map((panel) => (Inspector.isFolded(panel) ? `${panel}-folded` : panel)).join(",")}`,
     rows: shown
-      .map((panel) => {
-        const share = CARD_SHARES[panel]
-        if (Inspector.isFolded(panel)) return `${FOLDED_CARD_HEIGHT}px`
-        return share === FIT ? FIT : `${Math.round((share / total) * 100)}%`
-      })
+      .map((panel) =>
+        Inspector.isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
+      )
       .join(",")
   }
 }
 
-/** A card as tall as its content (`<SplitPanel>`'s `auto`). */
-const FIT = "auto"
 /**
- * Fold each card dragged too small to show anything (Owen:  "events panel should auto-collapse when it gets small"),
+ * Fold each card dragged too small to show anything (Owen, of the old Events card:  "should auto-collapse when it
+ * gets small"),
  * and forget the drag (`id`'s sizes), so unfolding it brings back its usual size.
  */
 function foldSmallCards(panes: HTMLElement[], id: string): void {
@@ -1027,8 +1067,8 @@ function foldSmallCards(panes: HTMLElement[], id: string): void {
   }
 }
 
-/** Each card's usual share of the column, among those open;  `FIT`:  as tall as its content. */
-const CARD_SHARES: Record<InspectorPanel, number | typeof FIT> = { properties: 60, events: FIT, views: 40 }
+/** Each card's usual share of the column, among those open. */
+const CARD_SHARES: Record<InspectorPanel, number> = { properties: 60, views: 40 }
 /** A folded card's height:  its header's (`.AppPaneHeader`). */
 const FOLDED_CARD_HEIGHT = 40
 /** The least a card's body may show, px:  dragged smaller, it folds. */
@@ -1041,6 +1081,8 @@ const SMALLEST_CARD_BODY = 32
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Picking again is the App pane's crosshairs (`<InspectorPick>`), beside the Inspector's button.
  * - Nothing picked:  the card is titled "Inspector", and says how to pick.
+ * - Then its Events band (`<EventsBand>`), and a thing's Actions band (`<ActionsBand>`):
+ *   what it does when people touch it, then what can be done to it (epic `debut` P28, P29;  Q45 A).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
  *   Following one, the title is the TRAIL from what was picked (`Solitaire › DiscardPile · discards`),
  *   each step a pill that goes back to it (`Inspector.inspected`).
@@ -1116,6 +1158,10 @@ function PropertiesCard(): JSX.Element {
             </Show>
             <Show when={!part.layout}>
               <ThingFields value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
+            </Show>
+            <Show when={part.element}>{(element) => <EventsBand element={element()} />}</Show>
+            <Show when={!part.layout}>
+              <ActionsBand thing={part.value} />
             </Show>
           </ui-property-editor>
         )}
@@ -1340,7 +1386,6 @@ export function InspectorPick(): JSX.Element {
 /** Each card's name, in the menu of cards. */
 const PANEL_TEXTS: Record<InspectorPanel, AppTextKey> = {
   properties: "inspectorProperties",
-  events: "inspectorEvents",
   views: "inspectorParts"
 }
 
