@@ -39,7 +39,7 @@
 }
 
 /*
- * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, one
+ * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`, one
  * `<ui-item>` link per top-level section (`toolbarMenu()`, `spell-doc-toolbar.js`;  epic `airplane` P8, a menu since epic
  * `epic-engine` P3).  Its look through the menu's tokens, the boxes it draws through `::part()`:
  * - a box of its own (the menu's host is `display: contents`):  measured, slotted and banded as one
