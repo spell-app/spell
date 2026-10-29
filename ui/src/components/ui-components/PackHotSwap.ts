@@ -1,3 +1,4 @@
+import { after } from "spell/util/timing"
 import { HotDefinitions } from "spell/element/HotDefinitions"
 // Import directly:  the site barrel would bring the site header into every page that swaps
 import { PagePatch } from "spell/server/site/PagePatch"
@@ -71,7 +72,7 @@ export class PackHotSwap {
   /** Swap each pack in;  once all swapped, wait `SETTLE_MS` for the re-rendered elements to draw what they load. */
   private static async swapIn(sources: string[]): Promise<PackSwapResult[]> {
     const results = await Promise.all(sources.map((source) => ComponentPacks.reload(source, PackHotSwap.swap)))
-    if (!results.includes("reload")) await new Promise((settled) => setTimeout(settled, SETTLE_MS))
+    if (!results.includes("reload")) await after(SETTLE_MS / 1000)
     return results
   }
 
