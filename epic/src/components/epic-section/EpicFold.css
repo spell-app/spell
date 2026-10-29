@@ -241,6 +241,8 @@
   }
   .gear > ui-button {
     --ui-button-circular-min-width: 24px;
+    /* the bare icon, no circle round it (Owen, 2026-10-29:  "Gear icon doesn't need circle outline, just icon") */
+    --ui-button-basic-border-width: 0px;
   }
   .gear > ui-button::part(button) {
     display: inline-grid;

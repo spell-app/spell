@@ -1328,8 +1328,8 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-        - no page-wide git toggle since P53:  the Log lists every commit (P52), and each phase and item its own (a
-          git icon)
+        - no page-wide git toggle since P53:  the Log lists every commit (P52), an item its own (a git icon), a phase
+          its own in its gear ("Show this phase's commits", I183)
       - the toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds

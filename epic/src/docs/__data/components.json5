@@ -4584,7 +4584,7 @@
         {
           "name": "commits",
           "kind": "boolean",
-          "description": "Its body lists commits:  its git icon shows."
+          "description": "Its body lists commits:  its gear offers to show them."
         },
         {
           "name": "to-accept",
@@ -4696,10 +4696,6 @@
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
         {
-          "name": "git",
-          "description": "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own commits;  pressed while they show."
-        },
-        {
           "name": "status",
           "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
@@ -4755,7 +4751,7 @@
         },
         {
           "name": "commits",
-          "description": "Its own commits show:  its git icon pressed."
+          "description": "Its own commits show:  ticked in its gear."
         },
         {
           "name": "movable",
@@ -4810,12 +4806,7 @@
         {
           "key": "showCommits",
           "text": "Show this phase's commits",
-          "description": "The git icon's tooltip (P53, J163)."
-        },
-        {
-          "key": "hideCommits",
-          "text": "Hide this phase's commits",
-          "description": "The git icon's tooltip, its commits shown."
+          "description": "Its gear menu:  its own commits, ticked while they show, while it has any (I183)."
         },
         {
           "key": "showPhaseFiles",

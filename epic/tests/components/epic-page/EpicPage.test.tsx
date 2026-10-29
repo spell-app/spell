@@ -187,8 +187,9 @@ describe("<epic-page>", () => {
     expect(host.shadowRoot!.querySelector('[part~="hung"]')).toBeNull()
   })
 
-  // P53, J163:  no page-wide toggle (the Log lists every commit);  a phase shows its own, as an item does
-  test("no page-wide git toggle;  a phase with commits has its own git icon, showing ITS commits while pressed", async () => {
+  // P53, J163:  no page-wide toggle (the Log lists every commit);  I183 (Owen, 2026-10-29:  "Shouldn't have 'show git'
+  // icon anymore"):  a phase's own commits from its gear, no git icon on its row
+  test("no git toggle or icon;  a phase with commits offers them in its gear, showing ITS commits while ticked", async () => {
     const host = await render(
       page(`repo="https://example.com/r"`, []).replace(
         "</epic-section>",
@@ -198,19 +199,28 @@ describe("<epic-page>", () => {
     )
     expect(host.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
     const [p1, p2] = ["#p1", "#p2"].map((id) => host.querySelector(id)!)
-    expect(p2.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
+    expect([p1, p2].map((phase) => phase.shadowRoot!.querySelector("button.git"))).toEqual([null, null])
+    const entries = (phase: Element) =>
+      Array.from(phase.shadowRoot!.querySelectorAll(".gear ui-item"), (item) => item.textContent!.trim())
+    expect(entries(p2)).not.toContain("Show this phase's commits")
+    expect(entries(p1)).toContain("Show this phase's commits")
     const commit = host.querySelector("epic-commit")!
-    const git = p1.shadowRoot!.querySelector<HTMLButtonElement>('[part~="git"]')!
-    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Show this phase's commits", "false"])
     expect(getComputedStyle(commit).display).toBe("none")
-    git.click()
-    await ElementFixture.tick()
-    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Hide this phase's commits", "true"])
+    const pick = async () => {
+      const gear = p1.shadowRoot!.querySelector<E.DOMElement>(".gear")!
+      gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+      await ElementFixture.tick()
+      const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+      rows.find((row) => row.textContent!.includes("commits"))!.click()
+      await ElementFixture.tick()
+      await ElementFixture.tick()
+    }
+    await pick()
     // it opens, so they show
     await vi.waitFor(() => expect(getComputedStyle(commit).display).toBe("block"))
     expect(p1.matches(":state(commits)")).toBe(true)
-    git.click()
-    await ElementFixture.tick()
+    expect(p1.shadowRoot!.querySelector('.gear ui-item[value="commits"]')!.getAttribute("icon")).toBe("check")
+    await pick()
     expect(getComputedStyle(commit).display).toBe("none")
   })
 
