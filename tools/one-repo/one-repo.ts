@@ -330,13 +330,21 @@ function sorted(record: Record<string, string>): Record<string, string> {
 // ## 3. The imports
 ////////////////
 
-/** `spell rename imports` over the kit's checkout, committed. */
-function imports(): void {
+/**
+ * `spell rename imports` over the kit's checkout, committed.
+ * - `only`:  just these files (paths from the kit's root), as `spell rename branches` passes what its merges brought
+ *   in;  default every tracked file, as P20's own step did
+ * - With `only`, main's files that name the old layout on purpose (`AGENTS.md`, old-layout test fixtures) stay as
+ *   they are (epic `repo-split` T61:  the whole-kit pass renamed 12 of them on debut's branch)
+ */
+function imports(only?: ReadonlySet<string>): void {
   mustBeClean()
-  renameImportsCommand(KIT, { dryRun, repos: [KIT] })
+  if (only) new ImportRenamer(KIT).renameRepo(KIT, dryRun, only)
+  else renameImportsCommand(KIT, { dryRun, repos: [KIT] })
   if (dryRun) return
   git(KIT, ["add", "--update"])
-  if (staged())
+  if (staged() && only) commit(`repo-split P20:  carry on -- spell rename imports over what the merges brought in`)
+  else if (staged())
     commit(
       "repo-split P20:  One Repo -- spell rename imports over the merged repo:  spell-ui/x => spell/ui/x (and parser, epic, app), each <repo>-source => spell-source, paths naming the old folders => the new (../spell-ui/ => ../ui/), GitHub links into the old repos' files => the merged repo's"
     )
@@ -349,7 +357,7 @@ function imports(): void {
 /**
  * Each old child repo still checked out inside the kit, its current branch rewritten as `history` rewrote its `main`,
  * its imports renamed, then merged into the kit's current branch, into its folder;  then `spell rename imports` over
- * the kit, for what the merge brought in.
+ * what the merges brought in, and only that (`imports()`).
  * - Throws, before changing anything, when a child repo has uncommitted changes, or the kit doesn't hold the merged
  *   folders yet (merge `main` first).
  * - Checks each rewritten branch shares the merged history:  its `main` commits came out with the SAME SHAs.
@@ -371,6 +379,8 @@ function carryOn(): void {
   }
   const renamer = new ImportRenamer(KIT)
   const scratch = mkdtempSync(join(tmpdir(), "spell-carry-on-"))
+  /** every file the carried branches' own commits changed, from the kit's root:  the last pass's list */
+  const carriedFiles = new Set<string>()
   let carried = 0
   try {
     for (const { repo, folder } of present) {
@@ -399,6 +409,7 @@ function carryOn(): void {
       // only the files its own commits changed:  main's files, old-layout fixtures included, stay as they are
       const ownFiles = new Set(git(KIT, ["diff", "--name-only", "-z", base, head]).split("\0").filter(Boolean))
       const report = renamer.renameRepo(clone, false, ownFiles)
+      for (const file of ownFiles) carriedFiles.add(file)
       let tip = head
       if (report.names) {
         git(clone, ["add", "--update"])
@@ -421,7 +432,7 @@ function carryOn(): void {
   } finally {
     rmSync(scratch, { recursive: true, force: true })
   }
-  if (!dryRun && carried) imports()
+  if (!dryRun && carried) imports(carriedFiles)
 }
 
 /**
