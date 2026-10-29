@@ -10,6 +10,7 @@ import JSON5 from "json5"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { PeopleColors } from "./PeopleColors.ts"
 import { VoiceColor } from "./VoiceColor.ts"
 
 /****************
@@ -649,12 +650,26 @@ export class EpicConfig {
 
   /**
    * a colour for each person and each agent on the epic pages (`colors`, epic `epic-friend` P10, Q16):
-   * `{ people: { ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } }`;  anyone left out keeps the shared voice
+   * `{ people: { ana: "green" }, agents: { codex: "#0f8b8d" } }`;  anyone left out keeps the shared voice
+   * - the config's own, then the colour each person picked as `epic init` set them up, kept in the content folder's
+   *   `people/` (`PeopleColors`, epic `epic-friend` P13):  a name the config gives a colour keeps the config's
    * - the page server tells every page (`SPELL_SERVER.colors`, `personRoutes`), which draws a reply, a thread message
    *   in it (`ThreadFacts.voiceOf()`)
    */
   get colors(): EpicColors {
-    return this.settings.colors
+    const own = this.settings.colors
+    const named = Object.keys(own.people).map((name) => name.trim().toLowerCase())
+    const picked = Object.entries(this.peopleColors()).filter(([name]) => !named.includes(name.toLowerCase()))
+    return { people: { ...own.people, ...Object.fromEntries(picked) }, agents: own.agents }
+  }
+
+  /** The colours people picked, in the content folder's `people/` (`PeopleColors`);  none when it won't read. */
+  private peopleColors(): Record<string, string> {
+    try {
+      return PeopleColors.read(this.contentFolder)
+    } catch {
+      return {}
+    }
   }
 
   /** the window names:  the default window, and the folder names a window shows */

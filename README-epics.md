@@ -2,29 +2,32 @@
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-epic init --name Ben
+npx spell@next epic init --name Ben
 ```
 
 <details>
 <summary>What it printed</summary>
 
 ```text
+plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  kept as it is
-~/www/my-app.epics:  cloned from git@github.com:ana/my-app-epics.git
+joined git@github.com:ana/my-app-epics.git:  the plans cloned into ~/www/my-app.epics
 ~/www/my-app/epics:  linked
 ~/www/my-app/sagas:  linked
 ~/www/my-app/guides:  linked
 ~/www/my-app/pages:  linked
 ~/www/my-app/.gitignore:  lists the links already
 you:  Ben, kept in ~/.spell-epic/person.json5
-next:  epic server start, to see the epics
+your colour:  red, kept in ~/www/my-app.epics/people/ben.json5, and pushed:  the team sees it
+open:  http://127.0.0.1:4848/
 more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
 ```
 
 </details>
 
-_Ben joins Ana's repo:  two commands, and every plan the team has written is on his machine.
-Real output, with a stand-in for GitHub (local repos at GitHub's addresses), the home folder shortened to `~`._
+_Ben joins Ana's repo:  one command, and every plan the team has written is on his machine, and in his browser.
+Real output from this kit's `epic`, on a fresh machine (a scratch home folder), with a stand-in for GitHub (local
+repos at GitHub's addresses), the home folder shortened to `~`._
 
 One config file and a block in `.gitignore` are all `epic init` leaves in your repo.
 The plans live next door, in `my-app.epics`, a git repo of their own, which every agent's turn pulls and pushes.
@@ -87,7 +90,7 @@ flowchart LR
   class config,github data
 ```
 
-_Once per machine, all from one clone of Spell:  the plugin, the command, the server and the extension.
+_Once per machine, `epic init` does the plugin, the command and the server;  the extension is by hand.
 Once per repo:  one small file in it, two folders beside it, and the team's copy of the plans on GitHub._
 
 The plans are NOT in your repo.
@@ -100,7 +103,7 @@ Your teammates have the same page too, a turn behind at most.
 The work IS in your repo:  one worktree per epic, on a branch named after it,
 beside the main checkout rather than inside it.
 
-## Setting it up:  four steps and an extension
+## Setting it up:  one command, and an extension
 
 You need Claude Code, VS Code, git, Node 24.11 or later, and GitHub's command, `gh`.
 These steps are for the FIRST person on a team;  everyone after them:  "A teammate joins", below.
@@ -121,58 +124,13 @@ gh auth login
 - Without it, `epic init` still sets everything else up, and says how to get it.
   Run `epic init` again once you're logged in:  it makes the shared repo then.
 
-### 2. Spell, the plugin, and `epic` on your PATH
+### 2. `epic init`, in your repo
 
-The plugin comes from a clone of Spell, for now:
-[Setup from zero](README.md#setup-from-zero), on Spell's front page, clones and installs it at `~/www/spell`,
-with the plugin in its `epic/` folder.
-- 🌱 Without a clone:  the plugin's package is on npm, `npm install spell-epic@next`
-  (`@next` until Spell's first release, planned for December 1, 2026), and its `epic` command answers.
-  Its `epic plugin install` doesn't run from there yet:  it looks for the clone's `epic/bin/`.
-
-Then, once per machine, from that clone:
-
-```sh
-node epic/bin/epic plugin install
-```
-
-[README/agents.md](README/agents.md#the-epic-plugin) says what each of its steps does.
-- It installs the plugin for the whole machine as `epic@spell`, straight from the clone's `epic/` folder.
-- It links its skills in, for a bare `/epic`.
-- It puts `epic` on your terminal's `PATH`.
-- Run again, it changes nothing;  `--dry-run` says what it would change.
-- Updating is a `git pull` in the clone.
-
-Then check that `epic` answers:
-
-```sh
-epic --version
-```
-
-<details>
-<summary>Output</summary>
-
-```text
-epic ... (...) .../epic
-```
-
-</details>
-
-- `--version` names the code that answers:  its commit, its branch and the folder it's in.
-- `~/.local/bin`, where the link goes, may not be on your `PATH`:  put the link wherever yours looks.
-- Installed for the machine, its hooks run in every repo, not just yours:
-  in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
-
-🌱 The plugin is being published, so a clone won't be needed:
-`/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`, in Claude Code.
-
-### 3. `epic init`, in your repo
-
-In your repo's main checkout, a git repo with at least one commit:
+From any folder of your repo, a git repo with at least one commit:
 
 ```sh
 cd ~/www/my-app
-epic init
+npx spell@next epic init
 git add .epic/config.json5 .gitignore && git commit -m "epic init" && git push
 ```
 
@@ -180,6 +138,7 @@ git add .epic/config.json5 .gitignore && git commit -m "epic init" && git push
 <summary>What it printed</summary>
 
 ```text
+plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  written
   contentRemote:  "git@github.com:ana/my-app-epics.git"
   ...
@@ -197,18 +156,30 @@ shared repo:  made ana/my-app-epics on GitHub, private, and pushed
 ~/www/my-app/pages:  linked
 ~/www/my-app/.gitignore:  written
 you:  Ana, kept in ~/.spell-epic/person.json5
+your colour:  green, kept in ~/www/my-app.epics/people/ana.json5, and pushed:  the team sees it
+open:  http://127.0.0.1:4848/
 next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them, and push it:  then a teammate's epic init clones the plans
 more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
 ```
 
 </details>
 
-_Ana's first `epic init`, against the same stand-in for GitHub as the top of this page.
+_Ana's first `epic init`, against the same stand-in for GitHub as the top of this page, answered with
+`--name Ana --color green`.
 Trimmed:  it prints every setting, 27 in all;  the `...` lines stand for the rest._
 
-In a terminal, it asks two things first:
+- `npx spell@next epic init` fetches Spell's package and runs its `spell epic`, which runs the epic tool:
+  the one installed beside it, else `spell-epic` fetched at the same version.
+  Once `epic` is on your `PATH` (its plugin step puts it there), `epic init` is the same thing.
+- 🌱 `spell epic` is new:  until the next `spell@next` is published, run it from a clone of Spell
+  ([Setup from zero](README.md#setup-from-zero)):  `node ~/www/spell/bin/spell.mjs epic init`.
+
+In a terminal, it asks four things first:
 - **What do you want to be called?**  Your short name on the pages, suggesting your GitHub login.
   `--name Ana` answers it.
+- **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
+  It lists Spell UI's colour names nobody on the team has yet, and suggests the first.
+  `--color green` answers it;  any CSS colour works too.
 - **What should the shared repo be called?**  Suggesting `<repo>-epics`, here `my-app-epics`.
   `--content-repo <name>` answers it.
 - **Private or public?**  Suggesting private:  `p`, `private` or `public`, in any case.
@@ -217,32 +188,41 @@ In a terminal, it asks two things first:
   `epic init` says so in a line of its own.
 
 Then, in order, it:
-1. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
+1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
+   - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
+     ([README/agents.md](README/agents.md#the-epic-plugin) says what each step does).
+   - Installed for the machine, its hooks run in every repo, not just yours:
+     in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
+   - `--no-plugin` skips it;  `epic plugin install` does it by itself.
+2. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ("The config file", below).
    A file already there is kept as it is.
-2. Makes the content folder, `../<repo>.epics`, a git repo of its own.
+3. Makes the content folder, `../<repo>.epics`, a git repo of its own.
    It holds the four folders, a README, and a `.gitignore` for what's never committed.
-3. Makes the shared repo on GitHub:  private unless you said public, under your account,
+4. Makes the shared repo on GitHub:  private unless you said public, under your account,
    or under the organization your code repo is on.
    It pushes the content repo there, and writes its address in the config, `contentRemote`.
-4. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
-5. Lists the links in a block of your `.gitignore`.
+5. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
+6. Lists the links in a block of your `.gitignore`.
    The block starts `# shared:start` and ends `# shared:end`.
-6. Keeps your name, in `~/.spell-epic/person.json5`.
+7. Keeps your name, in `~/.spell-epic/person.json5`.
+8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
+   your teammates see it, and nobody commits anything in the code repo for it.
+9. Starts the epic server, serving your repo, and prints its address:  open it ("One epic server", below).
+   `--no-server` skips it.
 
 - Commit both files on the base branch, and push:  every new worktree branches from it,
   and a teammate's `epic init` reads the shared repo's address from it.
 - Each step is skipped when it's done, so it's safe to run again:  a second run ends `set up already`.
 - `--remote <address>` uses a shared repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
-- `--public` makes the shared repo public, without asking.
 
 Try it first in a throwaway repo:  `--dry-run` says what it would do, and writes nothing.
 
 ```sh
 cd "$(mktemp -d)" && git init -q -b main my-app && cd my-app
 git commit -q --allow-empty -m first
-epic init --dry-run --no-remote
+epic init --dry-run --no-remote --no-plugin
 ```
 
 <details>
@@ -259,6 +239,8 @@ shared repo:  none (--no-remote):  the plans stay on this machine
 .../my-app/pages:  would link (missing)
 .../my-app/.gitignore:  would be written
 you:  ...
+...
+epic server:  would start, and serve this repo
 dry run:  nothing changed
 ```
 
@@ -281,44 +263,26 @@ Gemfile.lock            bundle install
 
 </details>
 
-### 4. The epic server
+Then check that `epic` answers:
 
 ```sh
-epic server start
+epic --version
 ```
 
 <details>
-<summary>What it printed</summary>
+<summary>Output</summary>
 
 ```text
-epic server:  now serves my-app (~/www/my-app);  epic repo list
-{
-  "pid": 78507,
-  "port": 48123,
-  ...
-  "repos": [
-    {
-      "name": "my-app",
-      ...
-      "isDefault": true
-    }
-  ],
-  "epicServer": true,
-  ...
-  "base": "http://127.0.0.1:48123",
-  "launched": true
-}
+epic ... (...) .../epic
 ```
 
 </details>
 
-_Ben's first start, trimmed, on a test port (`SPELL_EPIC_PORT=48123`);  yours is 4848._
+- `--version` names the code that answers:  its commit, its branch and the folder it's in.
+- `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  put the link wherever yours looks.
 
-- The first time, it registers your repo with the machine's one epic server;  the first repo is served at `/` too.
-- It starts the server in the background if it isn't running, and prints where it is, as JSON.
-- `epic server url <file>` prints the address of any page:
-  `epic server url ../my-app.epics/epics/seo/seo.plan.html`.
-- More below, "One epic server for the machine".
+🌱 The plugin is being published, so npm won't be needed either:
+`/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`, in Claude Code.
 
 ### And the extension
 
@@ -347,21 +311,22 @@ What they share is the content repo:  every turn pulls the others' changes in, a
 
 ### A teammate joins
 
-The same steps, but `epic init` finds the shared repo's address in the config the first person committed,
+The same one command:  `epic init` finds the shared repo's address in the config the first person committed,
 and CLONES it, beside the code repo:
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-epic init
-epic server start
+npx spell@next epic init
 ```
 
 - What it printed:  the top of this page.
+- It asks your name and your colour, as it asked the first person, from any folder of the code repo:
+  it finds the repo's main checkout from wherever it runs.
 - The shared repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
   with write access, since every turn pushes.
 - Joining needs no `gh`:  plain git clones the shared repo.
   With `gh` logged in, though, your short name defaults to your GitHub login.
-- Step 2 and the extension are once per machine, so a teammate does those too.
+- The plugin step and the extension are once per machine, so a teammate does those too.
 
 ### Who you are
 
@@ -496,10 +461,10 @@ each answer stamped with whose agent wrote it, "Codex (Bob)".
 Both run the same skills:  ONE copy of each, which Codex calls as `$epic review` where Claude Code says `/epic review`.
 An agent with no skills at all gets the workflow from `epic guide`.
 
-**Setting Codex up**, once per machine, from the clone of Spell:
+**Setting Codex up**, once per machine, after `epic init` (which puts `epic` on your `PATH`):
 
 ```sh
-node epic/bin/epic plugin install --codex
+epic plugin install --codex
 ```
 
 <details>
@@ -764,10 +729,9 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 What you'd trip on today, roughly in the order you'd meet it.
 
-1. **It installs from a clone of Spell.**
-   `spell-epic` is on npm (`npm install spell-epic@next`, with `spell` as its dependency), and its `epic` command runs
-   from there, but `epic plugin install` needs the clone's `epic/` folder.
-   So you clone Spell to plan work in a repo that has nothing to do with it.
+1. **The extension is built from a clone of Spell.**
+   `npx spell@next epic init` sets up everything else from npm, but the VS Code extension is built and installed by
+   hand, in a clone's `epic/vscode/`.
 2. **Sharing needs GitHub.**
    `epic init` makes the shared repo only through GitHub's `gh`;
    anywhere else, make it by hand and pass `--remote <address>`.
@@ -806,11 +770,12 @@ What you'd trip on today, roughly in the order you'd meet it.
      - `spell rename imports` renames in the peers `repos.json5` names, so never in your project
      - `spell publish` publishes only the kit's folders that have a `"spellPublish"`
 
-**Real today:**  a repo that isn't Spell, set up in four steps, its plans shared by a team through GitHub,
+**Real today:**  a repo that isn't Spell, set up with one command, its plans shared by a team through GitHub,
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
-- `epic plugin install` from the npm package, without a clone of Spell (the package is out under `next`, above)
+- `npx spell@next epic init` itself, until the next `spell@next` is published:  a clone runs it today
+- the VS Code extension without a clone
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the shared repo by hand
 - two repos reviewed from one server

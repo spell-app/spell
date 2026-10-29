@@ -187,6 +187,15 @@ describe("install()", () => {
     expect(readlinkSync(cache)).toBe(engine)
   })
 
+  test("isInstalled() (epic-friend P13):  not on a fresh machine;  installed once it's run", () => {
+    expect(installer().isInstalled()).toBe(false)
+    installer().install()
+    expect(installer().isInstalled()).toBe(true)
+    // its folder gone:  not installed
+    rmSync(join(home, "plugins", "cache"), { recursive: true, force: true })
+    expect(installer().isInstalled()).toBe(false)
+  })
+
   test("a kit with no plugin, a list that won't parse:  refused, saying why", () => {
     expect(() => new PluginInstall({ home, kit: top, bin }).install()).toThrow(/has no plugin in epic\/.*--kit/)
     writeFileSync(join(home, "settings.json"), "{ not json")

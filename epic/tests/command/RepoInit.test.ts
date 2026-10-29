@@ -17,8 +17,11 @@ import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 import { Git } from "spell/server/Git"
 import { EpicCheckout } from "spell/epic/command/EpicCheckout"
 import { RepoInit } from "spell/epic/command/RepoInit"
+import { DataFile } from "spell/server/DataFile"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import { PeopleColors } from "spell/epic/config/PeopleColors"
+import { VoiceColor } from "spell/epic/config/VoiceColor"
 
 /** A throwaway repo `try` on branch `trunk`:  a README, nothing set up for epics yet. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "repo-init-")))
@@ -143,7 +146,7 @@ describe("epic init:  the person's name", () => {
   test("--name:  kept over what was kept", async () => {
     const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
     try {
-      expect(await new RepoInit({ main: MAIN }).run(["--name", "Ana", "--json"])).toBe(0)
+      expect(await offline(MAIN).run(["--name", "Ana", "--json"])).toBe(0)
     } finally {
       out.mockRestore()
     }
@@ -193,6 +196,125 @@ describe("RepoInit's statics", () => {
 
   test("the .gitignore block:  nothing to ignore and no block yet adds none (a repo that links nothing in)", () => {
     expect(RepoInit.withIgnoreBlock("dist/\n", [], "../x.epics")).toBe("dist/\n")
+  })
+})
+
+describe("epic init:  one command (epic-friend P13)", () => {
+  test("the plugin:  installed when Claude Code doesn't have it, first;  run again, there already", async () => {
+    const app = codeRepo("plugin")
+    const plugin = stubPlugin()
+    const init = new RepoInit({ main: app, plugin: plugin.make, hub: stubHub().make })
+    const report = await init.init({ plugin: true })
+    expect(report.plugin).toEqual({ action: "installed", changes: 3 })
+    expect(RepoInit.lines(report)[0]).toBe(
+      "plugin:  epic installed for Claude Code (3 changes):  /reload-plugins in a running session"
+    )
+    const again = await init.init({ plugin: true })
+    expect(again.plugin).toEqual({ action: "already" })
+    expect(plugin.calls).toEqual(["install"])
+  })
+
+  test("the plugin:  a dry run installs nothing;  a failure is one line, and init carries on;  off by default", async () => {
+    const app = codeRepo("plugin-fails")
+    const dry = await new RepoInit({ main: app, plugin: stubPlugin().make }).init({ plugin: true, dryRun: true })
+    expect(dry.plugin).toEqual({ action: "would install" })
+    const failing = new RepoInit({ main: app, plugin: stubPlugin({ fails: "no plugin in epic/" }).make })
+    const report = await failing.init({ plugin: true })
+    expect(report.plugin).toEqual({ action: "failed", error: "no plugin in epic/" })
+    expect(RepoInit.lines(report).slice(0, 2)).toEqual([
+      "plugin:  couldn't install epic for Claude Code:  no plugin in epic/",
+      "  epic plugin install --dry-run says what it would do"
+    ])
+    expect(existsSync(join(app, EpicConfig.FILE))).toBe(true)
+    expect((await new RepoInit({ main: app }).init()).plugin).toBeUndefined()
+  })
+
+  test("the server:  registered and started last, its address the last line before what to commit", async () => {
+    const app = codeRepo("served")
+    const hub = stubHub()
+    const report = await new RepoInit({ main: app, hub: hub.make }).init({ server: true })
+    expect(report.server).toEqual({ action: "started", address: "http://localhost:4848/r/try/" })
+    expect(hub.calls).toEqual([`register ${app}`, `address ${app}`])
+    expect(RepoInit.lines(report)).toContain("open:  http://localhost:4848/r/try/")
+    // a dry run starts nothing
+    const dry = await new RepoInit({ main: app, hub: stubHub().make }).init({ server: true, dryRun: true })
+    expect(dry.server).toEqual({ action: "would start" })
+  })
+
+  test("the server:  a failure is two lines, and init still reports the rest;  a join without it says to start it", async () => {
+    const app = codeRepo("unserved")
+    const hub = stubHub({ fails: "port 4848 is taken" })
+    const report = await new RepoInit({ main: app, hub: hub.make }).init({ server: true })
+    expect(report.server).toEqual({ action: "failed", error: "port 4848 is taken" })
+    expect(RepoInit.lines(report)).toContain("epic server:  couldn't start:  port 4848 is taken")
+    expect(report.links.map((link) => link.action)).toEqual(Array(4).fill("linked"))
+  })
+
+  test("your colour:  none asked for, the free ones named;  --color keeps it with the plans, in people/", async () => {
+    const app = codeRepo("colours")
+    const content = join(TEMP, "colours", "colours.epics")
+    const none = await new RepoInit({ main: app }).init({ name: "Bo" })
+    expect(none.color).toEqual({ action: "none", free: [...VoiceColor.NAMES] })
+    expect(RepoInit.lines(none)).toContain(
+      `your colour:  the shared one;  pick your own:  epic init --color <name> (${VoiceColor.NAMES.join(", ")})`
+    )
+    const kept = await new RepoInit({ main: app }).init({ name: "Bo", color: "green" })
+    const file = join(content, "people", "bo.json5")
+    expect(kept.color).toEqual({ action: "kept", color: "green", file, free: [...VoiceColor.NAMES] })
+    expect(DataFile.read(file)).toEqual({ name: "Bo", color: "green" })
+    expect(new EpicConfig(app).colors.people).toEqual({ Bo: "green" })
+    // theirs already:  kept as it is
+    const again = await new RepoInit({ main: app }).init({ name: "Bo", color: "teal" })
+    expect(again.color).toEqual({ action: "already", color: "green", free: [] })
+  })
+
+  test("your colour:  one someone has is refused, naming the free ones;  asked with no terminal, the first free", async () => {
+    const app = codeRepo("taken")
+    const content = join(TEMP, "taken", "taken.epics")
+    await new RepoInit({ main: app }).init({ name: "Bo", color: "red" })
+    const taken = await new RepoInit({ main: app }).init({ name: "Cy", color: "Red" })
+    expect(taken.color?.action).toBe("taken")
+    expect(taken.color?.free).not.toContain("red")
+    expect(RepoInit.lines(taken).find((line) => line.startsWith("your colour:"))).toBe(
+      `your colour:  Red is someone's already;  free:  ${VoiceColor.NAMES.filter((name) => name !== "red").join(", ")} ` +
+        "(--color <name>)"
+    )
+    // no terminal to ask in:  the suggestion, the first free name
+    const asked = await new RepoInit({ main: app }).init({ name: "Cy", ask: true })
+    expect(asked.color).toMatchObject({ action: "kept", color: "orange" })
+    expect(PeopleColors.read(content)).toEqual({ Bo: "red", Cy: "orange" })
+  })
+
+  test("your colour:  every name taken:  the shared colour, said so", async () => {
+    const app = codeRepo("full")
+    const content = join(TEMP, "full", "full.epics")
+    await new RepoInit({ main: app }).init({ name: "Bo" })
+    for (const [at, color] of VoiceColor.NAMES.entries()) PeopleColors.write(content, `p${at}`, color)
+    const report = await new RepoInit({ main: app }).init({ name: "Cy", ask: true })
+    expect(report.color).toEqual({ action: "all taken", free: [] })
+    expect(RepoInit.lines(report)).toContain(
+      "your colour:  every colour name is taken:  your words keep the shared colour"
+    )
+  })
+
+  test("--color, --no-plugin and --no-server on the command line;  a colour that isn't one is refused", async () => {
+    const app = codeRepo("flags")
+    const plugin = stubPlugin()
+    const hub = stubHub()
+    const init = new RepoInit({ main: app, plugin: plugin.make, hub: hub.make })
+    const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+    try {
+      await init.run(["--name", "Bo", "--color", "teal", "--no-plugin", "--no-server", "--no-remote"])
+      expect(plugin.calls).toEqual([])
+      expect(hub.calls).toEqual([])
+      expect(PeopleColors.read(join(TEMP, "flags", "flags.epics"))).toEqual({ Bo: "teal" })
+      await init.run(["--no-remote"])
+      expect(plugin.calls).toEqual(["install"])
+      expect(hub.calls).toHaveLength(2)
+    } finally {
+      out.mockRestore()
+    }
+    await expect(init.run(["--color", "red;}"])).rejects.toThrow(/--color red;} isn't a colour/)
   })
 })
 
@@ -260,7 +382,9 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     expect(git(content, "log", "--format=%s").trim()).toBe("Shared content:  empty")
     expect(realpathSync(join(friend, "epics"))).toBe(join(content, "epics"))
     const lines = RepoInit.lines(report)
-    expect(lines).toContain(`${content}:  cloned from ${join(TEMP, "first", "gh-repos", "ana", "first-epics.git")}`)
+    expect(lines).toContain(
+      `joined ${join(TEMP, "first", "gh-repos", "ana", "first-epics.git")}:  the plans cloned into ${content}`
+    )
     expect(lines).toContain("next:  epic server start, to see the epics")
   })
 
@@ -278,7 +402,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     git(TEMP, "init", "-q", "--bare", bare)
     const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
     try {
-      expect(await new RepoInit({ main: app }).run(["--remote", bare, "--json"])).toBe(0)
+      expect(await offline(app).run(["--remote", bare, "--json"])).toBe(0)
     } finally {
       out.mockRestore()
     }
@@ -315,7 +439,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
     let printed = ""
     try {
-      expect(await withGh(gh, () => new RepoInit({ main: app }).run(["--public"]))).toBe(0)
+      expect(await withGh(gh, () => offline(app).run(["--public"]))).toBe(0)
       printed = out.mock.calls.map(([text]) => String(text)).join("")
     } finally {
       out.mockRestore()
@@ -343,7 +467,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
   })
 
   test("--content-repo, --remote and --no-remote:  one at a time;  a repo name GitHub takes", async () => {
-    const init = new RepoInit({ main: MAIN })
+    const init = offline(MAIN)
     await expect(init.run(["--remote", "x", "--no-remote"])).rejects.toThrow(/give one of/)
     await expect(init.run(["--content-repo", "no way"])).rejects.toThrow(/isn't a GitHub repo name/)
   })
@@ -361,6 +485,56 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
 })
 
 /** A code repo `<TEMP>/<name>/<name>` with one commit, nothing set up for epics. */
+/**
+ * A stand-in for the epic plugin's installer, installed or not:  what `RepoInit` asks of `PluginInstall`.
+ * - `fails`:  its install throws, with those words
+ */
+function stubPlugin({ installed = false, fails }: { installed?: boolean; fails?: string } = {}) {
+  const calls: string[] = []
+  return {
+    calls,
+    make: () => ({
+      isInstalled: () => installed,
+      install: () => {
+        calls.push("install")
+        if (fails) throw new Error(fails)
+        installed = true
+        return { plugin: "epic@spell", version: "1.0.0", from: "/kit/epic", dryRun: false, changes: ["a", "b", "c"] }
+      }
+    })
+  }
+}
+
+/**
+ * A stand-in for the machine's epic server:  what `RepoInit` asks of `Hub`, every call kept.
+ * - `fails`:  its start throws, with those words
+ */
+function stubHub({ fails }: { fails?: string } = {}) {
+  const calls: string[] = []
+  return {
+    calls,
+    make: () => ({
+      registerHere: (checkout?: string) => {
+        calls.push(`register ${checkout}`)
+        return undefined
+      },
+      addressOf: async (checkout: string) => {
+        calls.push(`address ${checkout}`)
+        if (fails) throw new Error(fails)
+        return "http://localhost:4848/r/try/"
+      }
+    })
+  }
+}
+
+/**
+ * `RepoInit` for the repo at `main`, its plugin installed and its server a stand-in:  a test's `run()` never touches
+ * the machine's Claude Code or starts a server (`run()` installs the plugin and starts the server unless told not to).
+ */
+function offline(main: string): RepoInit {
+  return new RepoInit({ main, plugin: stubPlugin({ installed: true }).make, hub: stubHub().make })
+}
+
 function codeRepo(name: string): string {
   const app = join(TEMP, name, name)
   mkdirSync(app, { recursive: true })

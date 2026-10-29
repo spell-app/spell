@@ -23,13 +23,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [repos.ts](repos.ts) -- `spellRepos()`, `commandLists()`, `hook()` / `needHook()`
   - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
     `ask()`, a question asked only in a real terminal
-  - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`
+  - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  readme  map  coherence  publish  pony        (help is the program's own)
+  server  bundle  commands  wwod  readme  map  coherence  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:

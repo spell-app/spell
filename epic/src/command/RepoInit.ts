@@ -7,17 +7,24 @@ import { CLI } from "spell/cli"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { GitHub, type RepoVisibility } from "spell/epic/config/GitHub"
+import { PeopleColors } from "spell/epic/config/PeopleColors"
+import { VoiceColor } from "spell/epic/config/VoiceColor"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
+import { Hub } from "./Hub"
+import { PluginInstall } from "./PluginInstall"
 import { Shared } from "./Shared"
 
 /****************
  * ### `RepoInit`
- * `epic init [--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--public] [--dry-run]
- * [--json]`:
- * set a repo up for epics (epic `epic-eject` P9), in its main checkout or any worktree of it.
+ * `epic init [--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public]
+ * [--no-plugin] [--no-server] [--dry-run] [--json]`:
+ * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
+ * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
  *
  * In order, each step skipped when it's done already, so it's safe to run again:
+ * 0. the epic plugin, installed for Claude Code when it isn't yet (`pluginStep()`, `PluginInstall`):  the machine's,
+ *    once;  `--no-plugin` skips it
  * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`EpicConfig.defaultsFor()`):
  *    - the content folder `../<repo>.epics`
  *    - the base branch from git
@@ -48,24 +55,41 @@ import { Shared } from "./Shared"
  *      suggesting their GitHub login, else git's `user.name` (`CLI.ask()`, `EpicHome.refreshGithub()`);
  *      with no terminal (a skill, a Claude session), that suggestion
  *    - a name kept already stays, unless `--name` gives another
+ * 6. the colour their words are drawn in (`colorStep()`, epic `epic-friend` P13):  "Which colour should your words be?",
+ *    from Spell UI's colour names nobody has yet, the first suggested;  `--color` answers it
+ *    - kept in the SHARED plans repo, `people/<name>.json5` (`PeopleColors`), so it reaches everyone with the plans and
+ *      nobody commits anything;  a colour the config's `colors` gives them wins
+ *    - asked only when they have none yet;  no terminal, the suggestion;  every name taken, the shared colour
+ * 7. the epic server, serving this repo, started (`serverStep()`, `Hub`):  its address the last line;  `--no-server`
+ *    skips it
  *
  * - `--dry-run`:  says what it would do, and writes nothing (it asks `gh` whether it could make the shared repo)
  * - `--json`:  the report as JSON
+ * - a failed plugin install or server start is one line, and init carries on
  * - it commits nothing in the repo:  it says which files to commit (the config and `.gitignore`),
  *   since every new worktree branches from the base branch and needs the `.gitignore` to leave the links alone
  ****************/
 export class RepoInit {
   /** the repo's main checkout:  where the config goes, and the folders are relative to */
   readonly main: string
+  /** what installs the epic plugin (`pluginStep()`):  made when the step runs */
+  readonly plugin: () => Pick<PluginInstall, "isInstalled" | "install">
+  /** the machine's epic server (`serverStep()`) */
+  readonly hub: () => Pick<Hub, "registerHere" | "addressOf">
 
-  /** - `main`:  default the main checkout of the repo the current folder is in */
-  constructor({ main }: { main?: string } = {}) {
+  /**
+   * - `main`:  default the main checkout of the repo the current folder is in
+   * - `plugin`, `hub`:  default the machine's own (`PluginInstall`, `Hub`);  a test hands in stand-ins
+   */
+  constructor({ main, plugin = () => new PluginInstall(), hub = () => new Hub() }: RepoInitProps = {}) {
     this.main = main ?? RepoInit.mainHere()
+    this.plugin = plugin
+    this.hub = hub
   }
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
-    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public"])
+    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public", "noPlugin", "noServer"])
     const dryRun = flags.dryRun === true
     const remote = stringFlag(flags.remote)
     const contentRepo = stringFlag(flags.contentRepo)
@@ -80,7 +104,23 @@ export class RepoInit {
     const ask = !dryRun && !flags.json
     const name = stringFlag(flags.name) ?? (ask ? await RepoInit.askName() : undefined)
     const visibility: RepoVisibility | undefined = flags.public === true ? "public" : undefined
-    const report = await this.init({ dryRun, name, remote, contentRepo, visibility, noRemote, ask })
+    const color = stringFlag(flags.color)
+    if (color !== undefined && !VoiceColor.isColor(color))
+      throw new EpicCommandError(
+        `epic init:  --color ${color} isn't a colour:  one of ${VoiceColor.NAMES.join(", ")}, or a CSS colour`
+      )
+    const report = await this.init({
+      dryRun,
+      name,
+      remote,
+      contentRepo,
+      visibility,
+      noRemote,
+      ask,
+      color,
+      plugin: flags.noPlugin !== true,
+      server: flags.noServer !== true
+    })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of RepoInit.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -99,9 +139,14 @@ export class RepoInit {
     contentRepo,
     visibility,
     noRemote = false,
-    ask = false
+    ask = false,
+    color,
+    plugin = false,
+    server = false
   }: InitOptions = {}): Promise<InitReport> {
     const { main } = this
+    // the plugin first:  the machine's, whatever happens to the repo
+    const pluginReport = plugin ? this.pluginStep({ dryRun }) : undefined
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
     const settings = hadConfig ? new EpicConfig(main).settings : EpicConfig.defaultsFor(main)
@@ -119,7 +164,8 @@ export class RepoInit {
       links: [],
       remote: { action: "skipped" },
       gitignore: { file: join(main, ".gitignore"), action: "ok" },
-      person: RepoInit.personStep({ dryRun, name })
+      person: RepoInit.personStep({ dryRun, name }),
+      ...(pluginReport && { plugin: pluginReport })
     }
     const config = { main, dir: content, worktrees: [], links: folders }
     const shared = new Shared({ checkout: main, config })
@@ -181,7 +227,69 @@ export class RepoInit {
     const after = RepoInit.withIgnoreBlock(before, ignored, relative(main, content))
     report.gitignore.action = after === before ? "ok" : before ? "updated" : "written"
     if (!dryRun && after !== before) writeFileSync(ignoreFile, after)
+    // their colour, kept with the plans
+    if (report.content.action !== "missing" && report.content.action !== "would clone")
+      report.color = await RepoInit.colorStep({
+        dryRun,
+        content,
+        person: report.person.name,
+        settings: report.config.settings,
+        color,
+        ask
+      })
+    // a colour kept with shared plans goes to the team now, not at the next turn's end
+    if (report.color?.action === "kept" && report.config.settings.contentRemote)
+      report.color.shared = await RepoInit.shareNow(main)
+    // the server last:  its address is what to open next
+    if (server && report.content.action !== "missing") report.server = await this.serverStep({ dryRun })
     return report
+  }
+
+  /**
+   * The content repo of checkout `main` committed and synced at once (`Shared.sync()`, every turn's end):  whether
+   * it pushed.
+   * - NEVER throws:  a sync that fails waits for the next turn's, as any does
+   * - SIDE EFFECT:  commits in the content repo, a pull and a push
+   */
+  static async shareNow(main: string): Promise<boolean> {
+    try {
+      const { sync } = await new Shared({ checkout: main }).sync({ checkout: main })
+      return sync?.pushed === true
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * The epic plugin, installed for Claude Code when it isn't yet (the class's step 0);  what it did, or would.
+   * - NEVER throws:  a failure is `failed`, with its words, and init carries on
+   * - SIDE EFFECT (not `dryRun`, not installed):  Claude Code's settings and lists, the links (`PluginInstall`)
+   */
+  pluginStep({ dryRun }: { dryRun: boolean }): PluginReport {
+    try {
+      const installer = this.plugin()
+      if (installer.isInstalled()) return { action: "already" }
+      if (dryRun) return { action: "would install" }
+      return { action: "installed", changes: installer.install().changes.length }
+    } catch (error) {
+      return { action: "failed", error: (error as Error).message }
+    }
+  }
+
+  /**
+   * The epic server, serving this repo (the class's step 7):  registered if need be, started, and its address.
+   * - NEVER throws:  a failure is `failed`, with its words, and init carries on
+   * - SIDE EFFECT (not `dryRun`):  the repo list, a server started in the background
+   */
+  async serverStep({ dryRun }: { dryRun: boolean }): Promise<ServerReport> {
+    if (dryRun) return { action: "would start" }
+    try {
+      const hub = this.hub()
+      hub.registerHere(this.main)
+      return { action: "started", address: await hub.addressOf(this.main) }
+    } catch (error) {
+      return { action: "failed", error: (error as Error).message }
+    }
   }
 
   /**
@@ -351,6 +459,50 @@ export class RepoInit {
   }
 
   /**
+   * Their colour (the class's step 6):  kept, there already, or why not.
+   * - `person`:  their short name;  none, no colour
+   * - theirs already:  the config's `colors`, else their file in `people/` (`EpicConfig.colors`' order)
+   * - the free names:  Spell UI's (`VoiceColor.NAMES`) less every one the config and `people/` give anyone
+   * - `color`:  `--color`;  a name someone has is `taken`;  else asked when `ask` (`askColor()`), else none
+   * - SIDE EFFECT (not `dryRun`):  writes `people/<name>.json5` in the content folder
+   */
+  static async colorStep({ dryRun, content, person, settings, color, ask }: ColorStepOptions): Promise<ColorReport> {
+    if (!person) return { action: "none", free: [] }
+    const picked = PeopleColors.read(content)
+    const all = { ...picked, ...settings.colors.people }
+    const own = Object.entries(all).find(([name]) => name.trim().toLowerCase() === person.trim().toLowerCase())?.[1]
+    if (own) return { action: "already", color: own, free: [] }
+    const taken = new Set(
+      [...Object.values(all), ...Object.values(settings.colors.agents)].map((value) => value.trim().toLowerCase())
+    )
+    const free = VoiceColor.NAMES.filter((name) => !taken.has(name))
+    if (color && taken.has(color.trim().toLowerCase())) return { action: "taken", color, free }
+    if (!color && !free.length) return { action: "all taken", free }
+    const wanted = color ?? (ask ? await RepoInit.askColor(free) : undefined)
+    if (!wanted) return { action: "none", free }
+    const file = PeopleColors.fileFor(content, person)
+    if (dryRun) return { action: "would keep", color: wanted, file, free }
+    PeopleColors.write(content, person, wanted)
+    return { action: "kept", color: wanted, file, free }
+  }
+
+  /**
+   * Their colour, asked in a terminal:  "Which colour should your words be?", listing `free`, the first suggested.
+   * - takes one of `free`, any case;  anything else asks again, twice at most, then the suggestion
+   * - no terminal:  the suggestion, asking nothing (`CLI.ask()`)
+   */
+  static async askColor(free: readonly string[]): Promise<string> {
+    const suggestion = free[0]!
+    if (process.stdin.isTTY && process.stdout.isTTY) CLI.err(`  free:  ${free.join(", ")}`)
+    for (let tries = 0; tries < 3; tries++) {
+      const answer = (await CLI.ask(COLOR_QUESTION, { suggestion })).trim().toLowerCase()
+      if (free.includes(answer)) return answer
+      CLI.err(`  one of ${free.join(", ")}, please`)
+    }
+    return suggestion
+  }
+
+  /**
    * `.epic/config.json5`'s text for `settings`:  every key, each with a comment saying what it is.
    * - in JSON5's JSON-compatible part (what `EpicConfig.parse()` and `DataFile` read)
    */
@@ -456,8 +608,11 @@ export class RepoInit {
       ...remoteLinesFor(report),
       ...report.links.map(({ path, action }) => `${join(report.main, path)}:  ${action}`),
       `${report.gitignore.file}:  ${report.gitignore.action === "ok" ? "lists the links already" : `${would}${report.gitignore.action}`}`,
-      personLineFor(report.person)
+      personLineFor(report.person),
+      ...colorLinesFor(report.color),
+      ...serverLinesFor(report.server)
     ]
+    if (report.plugin) lines.unshift(...pluginLinesFor(report.plugin))
     if (report.dryRun) return [...lines, "dry run:  nothing changed"]
     const remote = report.remote
     const configChanged = config.action === "written" || REMOTE_WRITTEN.has(remote.action)
@@ -470,7 +625,7 @@ export class RepoInit {
           `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}` +
             (remote.address && configChanged ? ", and push it:  then a teammate's epic init clones the plans" : "")
         ]
-      : remote.action === "cloned"
+      : remote.action === "cloned" && report.server?.action !== "started"
         ? ["next:  epic server start, to see the epics"]
         : content.action === "exists" && !REMOTE_WRITTEN.has(remote.action)
           ? ["set up already"]
@@ -489,7 +644,7 @@ function contentLineFor({ content, remote, dryRun }: InitReport): string {
     case "added":
       return `${folder}:  ${dryRun ? "would add" : "added"} ${content.made.join(", ")}`
     case "cloned":
-      return `${folder}:  cloned from ${remote.address}`
+      return `joined ${remote.address}:  the plans cloned into ${folder}`
     case "would clone":
       return `${folder}:  would clone it from ${remote.address}`
     case "missing":
@@ -568,6 +723,57 @@ function personLineFor(person: InitReport["person"]): string {
   return `you:  ${person.name}, ${person.action === "kept" ? "kept" : "would be kept"} in ${file}`
 }
 
+/** What `epic init` says about the epic plugin (its first lines). */
+function pluginLinesFor(plugin: PluginReport): string[] {
+  switch (plugin.action) {
+    case "already":
+      return ["plugin:  epic is installed for Claude Code already"]
+    case "would install":
+      return ["plugin:  would install epic for Claude Code (epic plugin install)"]
+    case "installed":
+      return [
+        `plugin:  epic installed for Claude Code (${plugin.changes} changes):  /reload-plugins in a running session`
+      ]
+    default:
+      /* case "failed" */ return [
+        `plugin:  couldn't install epic for Claude Code:  ${plugin.error}`,
+        "  epic plugin install --dry-run says what it would do"
+      ]
+  }
+}
+
+/** What `epic init` says about the person's colour;  nothing when there's none to say. */
+function colorLinesFor(color: ColorReport | undefined): string[] {
+  if (!color) return []
+  switch (color.action) {
+    case "kept":
+    case "would keep": {
+      const kept = `your colour:  ${color.color}, ${color.action === "kept" ? "kept" : "would be kept"} in ${color.file}`
+      if (color.shared === undefined) return [kept]
+      return [color.shared ? `${kept}, and pushed:  the team sees it` : `${kept};  the team sees it after your next turn`]
+    }
+    case "already":
+      return [`your colour:  ${color.color}`]
+    case "taken":
+      return [`your colour:  ${color.color} is someone's already;  free:  ${color.free.join(", ")} (--color <name>)`]
+    case "all taken":
+      return ["your colour:  every colour name is taken:  your words keep the shared colour"]
+    default:
+      /* case "none" */ return color.free.length
+        ? [`your colour:  the shared one;  pick your own:  epic init --color <name> (${color.free.join(", ")})`]
+        : []
+  }
+}
+
+/** What `epic init` says about the epic server:  its address last, the one thing to open. */
+function serverLinesFor(server: ServerReport | undefined): string[] {
+  if (!server) return []
+  if (server.action === "would start") return ["epic server:  would start, and serve this repo"]
+  if (server.action === "failed")
+    return [`epic server:  couldn't start:  ${server.error}`, "  epic server start says more"]
+  return [`open:  ${server.address}`]
+}
+
 /** What `epic init` did, or would do:  `RepoInit.init()`. */
 export type InitReport = {
   main: string
@@ -588,6 +794,73 @@ export type InitReport = {
   gitignore: { file: string; action: "ok" | "updated" | "written" }
   /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
   person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
+  /** the epic plugin (`pluginStep()`);  none with `--no-plugin` */
+  plugin?: PluginReport
+  /** their colour (`colorStep()`);  none when the content folder isn't there */
+  color?: ColorReport
+  /** the epic server (`serverStep()`);  none with `--no-server` */
+  server?: ServerReport
+}
+
+/** What `epic init` did about the epic plugin:  `installed` (and how many `changes`), `already`, ... */
+export type PluginReport = {
+  action: "installed" | "already" | "would install" | "failed"
+  /** what `PluginInstall.install()` changed */
+  changes?: number
+  /** why it failed */
+  error?: string
+}
+
+/**
+ * What `epic init` did about the person's colour (`RepoInit.colorStep()`):
+ * - `kept` (`would keep`) in `file`;  `already` theirs;  `taken` by someone else;  `all taken`;  `none` asked for
+ * - `free`:  the colour names nobody has
+ */
+export type ColorReport = {
+  action: "kept" | "would keep" | "already" | "taken" | "all taken" | "none"
+  /** the colour */
+  color?: string
+  /** where it's kept:  `people/<name>.json5` in the content folder */
+  file?: string
+  /** kept with shared plans:  whether it was pushed at once (`RepoInit.shareNow()`) */
+  shared?: boolean
+  /** Spell UI's colour names nobody has yet */
+  free: string[]
+}
+
+/** What `epic init` did about the epic server:  `started` (its repo's `address`), `would start`, `failed`. */
+export type ServerReport = {
+  action: "started" | "would start" | "failed"
+  /** this repo's home page on the server */
+  address?: string
+  /** why it failed */
+  error?: string
+}
+
+/** What `RepoInit` takes. */
+export type RepoInitProps = {
+  /** the repo's main checkout;  default the one the current folder is in */
+  main?: string
+  /** what installs the epic plugin;  default the machine's `PluginInstall` */
+  plugin?: () => Pick<PluginInstall, "isInstalled" | "install">
+  /** the machine's epic server;  default its `Hub` */
+  hub?: () => Pick<Hub, "registerHere" | "addressOf">
+}
+
+/** What `RepoInit.colorStep()` takes. */
+export type ColorStepOptions = {
+  /** only say what it would do */
+  dryRun: boolean
+  /** the content folder:  `people/` is in it */
+  content: string
+  /** their short name;  none, no colour */
+  person: string | undefined
+  /** the settings in force:  the config's `colors` */
+  settings: EpicSettings
+  /** the colour asked for (`--color`) */
+  color?: string
+  /** whether to ask in a terminal */
+  ask: boolean
 }
 
 /**
@@ -647,10 +920,16 @@ export type InitOptions = {
   /** no remote, no shared repo (`--no-remote`):  the plans stay on this machine;  default `false` */
   noRemote?: boolean
   /**
-   * whether to ask the shared repo's name, and private or public, in a terminal (`CLI.ask()`);
-   * default `false`:  the suggestions
+   * whether to ask the shared repo's name, and private or public, and their colour, in a terminal (`CLI.ask()`);
+   * default `false`:  the suggestions, and no colour
    */
   ask?: boolean
+  /** their colour (`--color`):  a Spell UI colour name, or a CSS colour;  none:  asked when `ask` */
+  color?: string
+  /** install the epic plugin when Claude Code doesn't have it (`--no-plugin` turns it off);  default `false` */
+  plugin?: boolean
+  /** start the epic server, serving the repo, last (`--no-server` turns it off);  default `false` */
+  server?: boolean
 }
 
 /** What `RepoInit.remoteStep()` takes:  `init()`'s options, the content repo and the settings in force. */
@@ -664,6 +943,9 @@ export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo" | "vi
 
 /** What `epic init` asks, in a terminal, when no name is kept. */
 const NAME_QUESTION = "What do you want to be called?"
+
+/** What `epic init` asks, in a terminal, when they have no colour yet. */
+const COLOR_QUESTION = "Which colour should your words be?"
 
 /** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub. */
 const REPO_QUESTION = "What should the shared epics repo be called?"

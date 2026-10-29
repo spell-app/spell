@@ -627,11 +627,13 @@ export class EpicProgram {
 
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
-        "set this repo up for epics:  its .epic/config.json5, the content repo beside it (made, or cloned from the " +
-          "team's), shared on GitHub, the links and their .gitignore lines;  safe to run again"
+        "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
+          ".epic/config.json5, the content repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
-        "[--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--public] [--dry-run] [--json]"
+        "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
+          "[--no-plugin] [--no-server] [--dry-run] [--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1066,7 +1068,9 @@ Examples:
 
 /** After `epic init --help`. */
 const INIT_HELP = `
-In the repo's main checkout (or any worktree of it), each step skipped when it's done:
+From any folder of the repo (a worktree's too), each step skipped when it's done:
+  the plugin           epic, installed for Claude Code when it isn't yet (epic plugin install):  the machine's,
+                       once;  --no-plugin skips it
   .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
                        the base branch from git, the install command its lock file names (none without one),
                        window names from the repo's;  a file already there is kept
@@ -1078,6 +1082,10 @@ In the repo's main checkout (or any worktree of it), each step skipped when it's
                        it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
+  your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
+  your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
+                       with the plans, in the content repo's people/
+  the epic server      started, serving this repo:  its address the last line;  --no-server skips it
 Then commit .epic/config.json5 and .gitignore on the base branch, and push it:  a teammate's epic init then
 clones the plans.
 
@@ -1091,8 +1099,9 @@ without it, epic init asks in a terminal, suggesting your GitHub login (else git
 anywhere else.
 
 Examples:
+  npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
-  epic init --name Ana
+  epic init --name Ana --color green
   epic init --content-repo my-app-epics
   epic init --remote git@github.com:my-team/my-app-epics.git
   epic init`

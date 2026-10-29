@@ -6,6 +6,7 @@ import { afterAll, beforeEach, describe, expect, test, vi } from "vite-plus/test
 import { NameSweep } from "spell/epic/command/NameSweep"
 import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import { PeopleColors } from "spell/epic/config/PeopleColors"
 
 /**
  * `epic whoami` and `epic whois`, on a scratch epic home (`$SPELL_EPIC_HOME`), a scratch git config
@@ -253,6 +254,19 @@ describe("NameSweep", () => {
     const result = new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima", { dryRun: true })
     expect([result.dryRun, result.count, result.files.length]).toEqual([true, 10, 4])
     for (const [path, text] of Object.entries(SWEPT_FILES)) expect(swept(path)).toBe(text)
+  })
+})
+
+describe("NameSweep:  a person's colour (epic-friend P13)", () => {
+  test("their people/ file moves to the new name, the name in it too, in the sweep's moves", () => {
+    sweptFolder()
+    PeopleColors.write(SWEPT, "Ana", "green")
+    const dry = new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima", { dryRun: true })
+    expect(dry.moved).toContainEqual(["people/ana.json5", "people/ana-lima.json5"])
+    expect(PeopleColors.read(SWEPT)).toEqual({ Ana: "green" })
+    const result = new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima")
+    expect(result.moved).toContainEqual(["people/ana.json5", "people/ana-lima.json5"])
+    expect(PeopleColors.read(SWEPT)).toEqual({ "Ana Lima": "green" })
   })
 })
 

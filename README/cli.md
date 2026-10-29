@@ -225,6 +225,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
+| `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -1206,7 +1207,9 @@ If you find yourself writing a second copy of any of these, stop and reuse.
   - `Ctrl-C` reaches the child, which stops cleanly, and we exit with its code
   - killed by a signal:  `128 +` its number, as a shell reports it
 - a repo's tool script:  `runTool()`, from the nearest checkout that has it, under `tsx` when its `ToolSpec` says so
-- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic`, else the one on the `PATH`
+- `spell-epic`'s `epic`:  `runEpic()`, the nearest checkout's `epic/bin/epic`, else the installed `spell-epic`'s
+  (`publishedEpicBin()`), else the one on the `PATH`
+  - `spell epic`:  `runSpellEpic()`, the same first two, else `npx -y spell-epic@<spell's version>`, never the `PATH`'s
 
 </details>
 
@@ -1222,7 +1225,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [program.ts](../src/cli/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
 | [repos.ts](../src/cli/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
 | [run.ts](../src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
-| [tools.ts](../src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()` |
+| [tools.ts](../src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()`, `runSpellEpic()`, `publishedEpicBin()` |
 | [findCheckout.ts](../src/cli/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
 | [cli.types.ts](../src/cli/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
 | [commands/serverCommand.ts](../src/cli/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |

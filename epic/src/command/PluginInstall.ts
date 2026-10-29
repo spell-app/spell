@@ -211,6 +211,20 @@ export class PluginInstall {
   }
 
   /**
+   * Whether Claude Code has the plugin already:  its installed plugins list (`plugins/installed_plugins.json`) names
+   * `epic@spell`, and the folder it runs it from is there (epic `epic-friend` P13:  `epic init` installs it when not).
+   * - only installed or not:  `install()` itself brings an older install up to date
+   * - throws `EpicCommandError` when the kit has no plugin
+   */
+  isInstalled(): boolean {
+    const { plugin, marketplace } = this.names()
+    const file = join(this.home, "plugins", "installed_plugins.json")
+    const installed = existsSync(file) ? (readJson(file) as InstalledPlugins) : undefined
+    const [entry] = installed?.plugins?.[`${plugin}@${marketplace}`] ?? []
+    return !!entry?.installPath && existsSync(entry.installPath)
+  }
+
+  /**
    * Set the plugin up for Codex (`--codex`, the class's Codex steps);  what it changed, or would with `dryRun`.
    * - SIDE EFFECT (not `dryRun`):  writes Codex's hooks file and custom agents, the skill links, and the `epic` link
    * - throws `EpicCommandError` when the kit has no Codex hooks file, or Codex's won't parse

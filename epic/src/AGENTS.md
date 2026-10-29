@@ -394,6 +394,11 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       (SSH or HTTPS, as gh's `git_protocol` says);  never throws but where it says so;  `$SPELL_EPIC_GH` names a
       stand-in;  plain `node` loads it
       - only `epic whoami` and `epic init` run it:  never a page served or a hook
+    - `PeopleColors` (epic `epic-friend` P13):  the colour each person picked, one file each in the content folder's
+      `people/` (`people/ana-lima.json5`, `{ name, color }`), synced with the plans;  `EpicConfig.colors` reads them in,
+      the config's own winning;  `epic init` writes one, `epic whoami --rename` moves it (`NameSweep`);  `slugOf()` is
+      the ONE rule for a person's file name, the comments files' too (`SharedComments.slugOf()`);  plain `node` loads
+      it
     - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
       titles, the end first (`titles()`), its end (`tail()`), the question waiting (`pendingQuestion()`);  plain
       `node` loads it (the handoff hook)
@@ -447,6 +452,13 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           address in the config (`contentRemote`);  a later person's clones it where the content folder is missing
           (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
           says how to get it and does the rest
+        - the ONE command to start (epic `epic-friend` P13), `npx spell@next epic init` (the kit's `spell epic`,
+          `runSpellEpic()`):  first the epic plugin when Claude Code doesn't have it (`pluginStep()`,
+          `PluginInstall.isInstalled()`;  `--no-plugin`), after the name the person's colour (`colorStep()`:  asked
+          from the free colour names, `--color`, kept in the content folder's `people/` by `PeopleColors` and pushed
+          at once, `shareNow()`), last the epic server, serving the repo, its address the last line (`serverStep()`,
+          `Hub.addressOf()`;  `--no-server`);  each a failure of one line, init carrying on;  `init()` takes them as
+          `plugin`, `server` (off unless asked:  only `run()` asks) and `color`, a test hands in stand-ins
       - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
         what the content folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, renameSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
 
 import { ThreadFacts } from "spell/epic/comments"
+import { PeopleColors } from "spell/epic/config/PeopleColors"
 import { DataFile } from "spell/epic/data/DataFile"
 
 import { CommentList, type Comment, type CommentClaim, type CommentReply } from "./CommentList"
@@ -86,17 +87,11 @@ export class SharedComments {
   }
 
   /**
-   * A person's name as their file names it:  lower case, each run of anything but letters and digits one `-`
-   * ("Ana Lima" => `ana-lima`, "José" => `josé`);  "someone" for a name with nothing left.
-   * - two ways of writing one name (`Ana`, `ana`) are one file, as `epic whois` counts them one person
+   * A person's name as their file names it:  `PeopleColors.slugOf()`, the ONE rule for a person's files
+   * ("Ana Lima" => `ana-lima`)
    */
   static slugOf(person: string): string {
-    const slug = person
-      .normalize("NFC")
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}]+/gu, "-")
-      .replace(/^-+|-+$/g, "")
-    return slug || SOMEONE
+    return PeopleColors.slugOf(person)
   }
 
   /** Inbox file `inbox` without its kind:  `epics/seo/seo.inbox.json5` => `epics/seo/seo`. */
@@ -328,9 +323,6 @@ const SLUGGED = /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*\.json5$/u
 
 /** A comments file's own part of its name, at the end of a path:  `.comments.ana-lima.json5`. */
 const COMMENTS_FILE = /\.comments\.[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*\.json5$/u
-
-/** The file of a person with no name, as `EpicHome.SOMEONE` says them. */
-const SOMEONE = "someone"
 
 /**
  * `comment`'s thread put in order once every file's part is in:  replies by time (the same one twice, once), closed

@@ -1371,10 +1371,13 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   voice: { "--for <kind>": "the voice that kind of page is written in", "--json": "print it as JSON" },
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",
+    "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",
     "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>-epics)",
     "--remote <address>": "use this shared repo, made already",
     "--no-remote": "make no shared repo:  the plans stay on this machine",
     "--public": "make the shared repo public, without asking (else asked, or private)",
+    "--no-plugin": "don't install the epic plugin for Claude Code",
+    "--no-server": "don't start the epic server",
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"
   },

@@ -3,6 +3,7 @@ import { join, relative } from "node:path"
 
 import { Git } from "spell/server/Git"
 import { SRV } from "spell/server"
+import { PeopleColors } from "spell/epic/config/PeopleColors"
 import { AuthorWords } from "spell/epic/tool/AuthorWords"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 import { SharedComments } from "spell/epic/tool/SharedComments"
@@ -29,7 +30,8 @@ import { PersonCommands } from "./PersonCommands"
  * - Each file written only when it changed, every other byte kept, under the lock its writers take
  *   (`RootLinks.lockOf()`:  a part locks its page);  `dryRun` writes nothing and counts the same.
  * - Then each of their COMMENTS FILES moves to the new name (`SharedComments.rename()`, epic `epic-friend` P9):
- *   `seo.comments.ana.json5` => `seo.comments.ana-lima.json5`;  and when the content folder is a repo of its own,
+ *   `seo.comments.ana.json5` => `seo.comments.ana-lima.json5`;  and their colour's, `people/ana.json5` =>
+ *   `people/ana-lima.json5`, the name in it too (`PeopleColors.rename()`, epic `epic-friend` P13);  and when the content folder is a repo of its own,
  *   all of it is ONE commit there (`commit()`), so a teammate's sync sees a move, not a new person.
  * - Its position:  the command layer's;  knows the content folder's files, never a page's elements.
  ****************/
@@ -54,9 +56,11 @@ export class NameSweep {
       const count = dryRun ? this.sweepFile(file, from, to, "count") : this.sweepUnderLock(file, from, to)
       if (count) files.push({ path: relative(this.content, file), count })
     }
-    const moved = SharedComments.rename(all, from, to, { dryRun }).map(
-      ([old, now]) => [relative(this.content, old), relative(this.content, now)] as [string, string]
-    )
+    const colorFile = PeopleColors.rename(this.content, from, to, { dryRun })
+    const moved = [
+      ...SharedComments.rename(all, from, to, { dryRun }),
+      ...(colorFile && colorFile[0] !== colorFile[1] ? [colorFile] : [])
+    ].map(([old, now]) => [relative(this.content, old), relative(this.content, now)] as [string, string])
     return { from, to, dryRun, count: files.reduce((sum, file) => sum + file.count, 0), files, moved }
   }
 

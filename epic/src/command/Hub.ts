@@ -86,6 +86,20 @@ export class Hub {
   }
 
   /**
+   * The address of checkout `checkout`'s repo on the epic server, started first if need be:  its home page,
+   * `<base>/` for the default repo, else `<base>/r/<repo>/` (epic `epic-friend` P13:  `epic init`'s last line).
+   * - throws `EpicCommandError` for a repo the server doesn't serve (`registerHere()` first), or a server that won't
+   *   start
+   */
+  async addressOf(checkout: string, port = DEFAULT_EPIC_PORT): Promise<string> {
+    const main = EpicConfig.mainOf(checkout)
+    const repo = new RepoList({ home: this.home }).repos().find((each) => RealPath.same(each.checkout, main))
+    if (!repo) throw new EpicCommandError(`${main} isn't served by the epic server:  epic repo add ${main}`)
+    const { base } = await this.ensure(port)
+    return `${base}${repo.isDefault ? "/" : repo.prefix}`
+  }
+
+  /**
    * `file`'s URL on the epic server, started first if need be.
    * - throws `EpicCommandError` for a file in no registered repo's content
    */

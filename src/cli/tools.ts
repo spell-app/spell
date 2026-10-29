@@ -1,7 +1,8 @@
 import { spawn } from "node:child_process"
 import { existsSync } from "node:fs"
+import { createRequire } from "node:module"
 import { constants } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 
 // By its file, not the server's barrel:  every `spell` command loads this, and needs no linkedom
 import { RealPath } from "spell/server/RealPath"
@@ -100,15 +101,63 @@ const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
 export const ENGINE = "epic"
 
 /**
- * The `epic` command to run:  the engine's `bin/epic` (`epic/bin/epic`) in the nearest checkout that has one (`findCheckout()`, else
- * the kit `spell` runs from);  else plain `epic`, on the `PATH`.
+ * The `epic` command to run, the first there is:
+ * 1. the engine's `bin/epic` (`epic/bin/epic`) in the nearest checkout that has one (`findCheckout()`, else the kit
+ *    `spell` runs from)
+ * 2. the published `spell-epic`'s, installed beside the published `spell` (`publishedEpicBin()`)
+ * 3. plain `epic`, on the `PATH`
  * - `from`:  where to look from, default the current folder
  */
 export function epicBin(from = process.cwd()): string {
   const bin = join(ENGINE, "bin", "epic")
   const found = join(CLI.findCheckout(bin, from), bin)
-  return existsSync(found) ? found : "epic"
+  if (existsSync(found)) return found
+  return publishedEpicBin() ?? "epic"
 }
+
+/**
+ * The published `spell-epic`'s `bin/epic`, as Node finds the package from the kit `kit`
+ * (`npm install spell spell-epic`);  `undefined` when none is installed.
+ * - the published `spell` has no `epic/bin`:  its epic code is built into `dist/`, the command is `spell-epic`'s
+ */
+export function publishedEpicBin(kit = CLI.KIT_ROOT): string | undefined {
+  try {
+    const found = join(
+      dirname(createRequire(join(kit, "package.json")).resolve(`${EPIC_PACKAGE}/package.json`)),
+      "bin",
+      "epic"
+    )
+    return existsSync(found) ? found : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * `spell epic <args>` (epic `epic-friend` P13):  the epic tool, wherever it is, so `npx spell@next epic init` is the
+ * one command a new repo needs.
+ * - an `epic/bin/epic` or an installed `spell-epic` (`epicBin()`'s first two):  run under this `node`
+ * - else `npx -y spell-epic@<spell's version>`:  fetched at the version of the `spell` running, never another
+ * - NEVER the `epic` on the `PATH`:  it may be another checkout's, at another version
+ * - resolves to its exit code
+ */
+export function runSpellEpic(args: string[], from = process.cwd()): Promise<number> {
+  const bin = epicBin(from)
+  if (bin !== "epic") return runEpic(args, bin)
+  return runChild("npx", ["-y", `${EPIC_PACKAGE}@${spellVersion()}`, ...args])
+}
+
+/** The version of the `spell` running:  its `package.json`'s;  `latest` when it can't be read. */
+export function spellVersion(kit = CLI.KIT_ROOT): string {
+  try {
+    return (createRequire(import.meta.url)(join(kit, "package.json")) as { version?: string }).version ?? "latest"
+  } catch {
+    return "latest"
+  }
+}
+
+/** The epic tool's npm package:  `spell-epic`, its bin `epic`. */
+const EPIC_PACKAGE = "spell-epic"
 
 /**
  * Run `epic <args>`, with this terminal attached;  resolves to its exit code.
