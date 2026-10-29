@@ -352,9 +352,10 @@ Another project needs the plugin and `epic`, the VS Code extension,
 and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, and a content folder beside it
 for the pages.
 
-It has run end to end once outside Spell, in a throwaway repo, and its rough edges are listed, not hidden.
-The first is the biggest:  it installs from a clone of Spell, since it runs on Spell UI and the kit
-from their one install.
+It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
+One command sets a project up:  `npx spell@next epic init` installs the plugin, asks your name and colour, and starts
+the epic server.
+Until a `spell@next` with `spell epic` is published, run it from a clone of Spell (`node <clone>/bin/spell.mjs epic init`).
 The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## Working on it
