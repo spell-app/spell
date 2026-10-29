@@ -98,7 +98,10 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
    * `:state(doing)`:  the session's line shows (the header keeps Send centred beside the spinner).
    */
   protected cssStates() {
-    return { running: this.agents.length > 0, doing: this.draws !== "agents" && !!this.doing }
+    return {
+      running: this.draws !== "spinner" && this.draws !== "doing" && this.agents.length > 0,
+      doing: this.draws !== "agents" && !!this.doing
+    }
   }
 
   render(): JSX.Element {
@@ -124,7 +127,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
             </>
           )}
         </Show>
-        <Show when={this.draws !== "doing" && this.agents.length}>
+        <Show when={this.draws !== "doing" && this.draws !== "spinner" && this.agents.length}>
           {/* `1 🤖` at every width (Owen, 2026-10-25:  "`1 <robot icon>` is sufficient");  the words its name and tooltip */}
           <button
             type="button"

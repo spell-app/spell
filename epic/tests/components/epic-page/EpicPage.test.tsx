@@ -1027,6 +1027,20 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(markedBadge(phases)).toBeNull()
   })
 
+  // Owen, 2026-10-29, on a red circle beside a plan he had accepted:  "dot next to P13 -- shouldn't be red?"
+  test("a phase Owen marked (its plan accepted, not applied yet):  its circle blue, as the blue badge counts it", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = await render(page("", ["done", "todo", "todo"]))
+    const p2 = host.querySelector("#p2")!
+    p2.setAttribute("plan", "waiting")
+    const state = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!.dataset.state
+    await vi.waitFor(() => expect(state()).toBe("attention"))
+    routes.inbox.marks.p2 = { action: "approve", at: new Date().toISOString() }
+    await client.refresh()
+    await vi.waitFor(() => expect(state()).toBe("progress"))
+  })
+
   test("outside a review (no inbox):  no badge, every count as before", async () => {
     await adoptClient(new FakeRoutes(), { served: false })
     const host = await render(filterPage(["attention", "open"], ["open"]))
@@ -1177,6 +1191,8 @@ describe("<epic-page> Agents running", () => {
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
     expect(host.shadowRoot!.querySelector('epic-agents[draws="agents"]')!.closest('[part~="step-pill"]')).not.toBeNull()
+    // ONCE:  the spinner beside Send draws no second button (Owen, 2026-10-29:  "agent pill appears twice?")
+    expect(agentsRoot(host, "spinner").querySelector(".agents-button")).toBeNull()
     expect(agentRows(host)).toEqual([
       ["demo-aaa", "active", "blue", "2h 5m", "Port the parser", []],
       [

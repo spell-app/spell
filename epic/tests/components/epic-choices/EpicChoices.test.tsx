@@ -501,6 +501,24 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     ])
   })
 
+  test("the switch flips a set already picked (I178):  pick any holds, the pick kept", async () => {
+    const routes = new FakeRoutes()
+    routes.inbox.marks.q1 = { action: "pick", pick: "B", choices: 0, at: new Date().toISOString() }
+    await reviewing(routes)
+    const { host, options } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    const toggle = () => inShadow<HTMLButtonElement>(host, "[part~='switch']")!
+    toggle().click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "B", multiple: true, choices: 0 })
+    expect([toggle().getAttribute("aria-checked"), toggle().textContent]).toEqual(["true", "Pick any"])
+    pillOf(options[0])!.click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "B A", multiple: true, choices: 0 })
+  })
+
   test("Add choice:  its form, then a card of Owen's, picked, dashed until sent;  ✕ drops it", async () => {
     const { routes } = await reviewing()
     const { host } = await choices(

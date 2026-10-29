@@ -286,6 +286,10 @@
   }
   .step-pill ui-label::part(label) {
     border-color: var(--epic-pill-color);
+  }
+  /* an outlined label takes the pill's fill;  a SOLID one (done, green) keeps its own, its white words on it (Owen,
+     2026-10-29:  "Done is white, no contrast":  the pill's fill had put them on the page's background) */
+  .step-pill ui-label[appearance~="basic"]::part(label) {
     background: var(--_epic-pill-fill);
   }
   /* both halves one height and one fill, so they read as one pill (Owen, 2026-10-25:  "looks like crap") */
