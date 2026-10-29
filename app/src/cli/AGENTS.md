@@ -11,7 +11,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
-  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, and `spell projects`
+  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`, and
+    `spell content check [--bless]`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)
@@ -40,7 +41,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `languageCommands`:  the parser folder's `LanguageCommands` (its `spell/parser/cli` types),
     each on a new `CliSession`.
   - `appCommands`:  `create`, `serve`, `projects`, the same way.
-  - `spell app vscode` loads no spell:  [vscodeCommand.ts](commands/vscodeCommand.ts), imported directly.
+  - `spell app vscode` and `spell content check` load no spell:
+    [vscodeCommand.ts](commands/vscodeCommand.ts) and [contentCheckCommand.ts](commands/contentCheckCommand.ts),
+    imported directly.
 - Spell itself is NOT here.
   - It's the folders beside this one (lsp, spaces) and the folders below (the parser folder's spell, parser and
     core;  the kit's util).

@@ -4,6 +4,7 @@ import { describeTypecheckError, typecheck, type TypecheckResult } from "spell/p
 import { SP } from "spell/parser/spell"
 import { solidSample } from "spell/parser/spell/test"
 import {
+  bareNameOf,
   compiledFixture,
   fixtureImports,
   fixtureProjectId,
@@ -16,7 +17,7 @@ import {
  * `@spell/core`'s own types -- see `typecheck()` -- what it reports, against
  * `<Project>.snapshot.tsc.txt`, with its other snapshots (`snapshotPath()`).
  * - So every place the typed output falls short shows, as a line of that file:  a change is a diff to read.
- *   Blessed with the fixtures:  `yarn spell:test:fixtures:bless`.
+ *   Blessed with the other content snapshots:  `spell content check --bless`.
  * - Each fixture's error count is printed on every run, e.g. `Solitaire:  35 tsc errors`:  on stderr, as Vitest
  *   hides a passing test's `console` output.
  * - Errors in `core`'s own files fail the test:  only the fixtures' may be listed.
@@ -79,7 +80,7 @@ describe("fixture projects as TypeScript, checked by tsc", () => {
       const errors = result.errors[fileOf(name)]!
       process.stderr.write(`${name}:  ${errors.length} tsc error${errors.length === 1 ? "" : "s"}\n`)
       const text = errors.map((error) => `${describeTypecheckError(error)}\n`).join("")
-      await expect(text).toMatchFileSnapshot(snapshotPath(name, `${name}.snapshot.tsc.txt`))
+      await expect(text).toMatchFileSnapshot(snapshotPath(name, `${bareNameOf(name)}.snapshot.tsc.txt`))
     })
   }
 })

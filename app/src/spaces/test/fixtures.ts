@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readdirSync, readFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { basename, resolve } from "path"
 
@@ -16,15 +16,27 @@ import "spell/app/spaces/models/spellUIPack"
  * - Node only, for tests:  imported as `spell/app/spaces/test`, never from spaces' barrel.
  * - spell-parser's `spell/parser/spell/test` parses and compiles the projects a test writes inline (`parseSpellProject()`);
  *   these are the ones on disk, spell-app's own.
- * - Three kinds, each by its name, e.g. `fizzbuzz`, `Solitaire`, `a-first-spell`:
- *   - the FROZEN test projects, `@spell/test` (`FIXTURES_DIR`):  tests' own, never edited to follow anything
- *   - a few built-in EXAMPLES, `@spell/examples` (`EXAMPLE_FIXTURES`):  read where they are, so they're tested as
- *     they are;  their snapshots are tests' own, in `EXAMPLE_SNAPSHOTS_DIR`
- *   - every built-in GUIDE, `@spell/guides` (`GUIDE_FIXTURES`):  the same, their snapshots in `GUIDE_SNAPSHOTS_DIR`
+ * - Three kinds:
+ *   - the FIXTURES, `@spell/test` (`FIXTURES_DIR`):  the frozen test projects, tests' own,
+ *     never edited to follow anything;  each by its bare name, e.g. `fizzbuzz`
+ *   - every built-in EXAMPLE, `@spell/examples` (`EXAMPLE_PROJECTS`):  tested in place, as they are;
+ *     their snapshots are tests' own, in `EXAMPLE_SNAPSHOTS_DIR`
+ *   - every built-in Spell guide, `@spell/guides` (`GUIDE_PROJECTS`):  the same, their snapshots in `GUIDE_SNAPSHOTS_DIR`
+ * - A test project's NAME (`TestProjectName`) says its group:
+ *   `fizzbuzz` is the fixture, `@spell/examples/fizzbuzz` the example of the same name.
+ *   - Its folder, its snapshots' folder and its project id follow from that group, never from a lookup.
+ * - The content check runs every test of them:  `spell content check`;  `--bless` rewrites their snapshots.
  */
 
 /**
- * Frozen projects tests run against, the `@spell/test` group.
+ * A test project, by its name:
+ * - a fixture's, bare:  `fizzbuzz` (or its project id, `@spell/test/fizzbuzz`)
+ * - an example's or a Spell guide's, with its group:  `@spell/examples/Solitaire`, `@spell/guides/a-first-spell`
+ */
+export type TestProjectName = string
+
+/**
+ * Frozen projects tests run against, the `@spell/test` group:  the FIXTURES.
  * - Their folder:  `spaces/@spell/test/<project>/` at spell-app's root, e.g. `fizzbuzz`:
  *   spaces' `environment.testFilesRoot`, beside the other built-in groups (epic `spanish` P18).
  *   - spell-parser's until then (epic `repo-split` C11):  every `@spell` group is spell-app's now.
@@ -32,62 +44,57 @@ import "spell/app/spaces/models/spellUIPack"
  * - Their snapshots are beside them:  `fizzbuzz.snapshot.js` ...
  * - NEVER update a fixture to follow an example:  it's frozen so tests don't move.
  *   - Change a test's input in the test, or add another fixture:
- *     copy a project in, then `yarn spell:test:fixtures:bless`.  See `compiledFixture()`.
+ *     copy a project in, then `spell content check --bless`.  See `compiledFixture()`.
  */
 export const FIXTURES_DIR = environment.testFilesRoot
 
 /** The fixtures' group, `@spell/test` (spaces' `PROJECT_GROUPS`). */
 export const FIXTURES_GROUP = "@spell/test"
 
-/**
- * The built-in examples tested as they are, by their names in `@spell/examples` (epic `spanish` P21).
- * - Solitaire, and Solitario, its Spanish twin:  each a whole game, its own cards, deck and piles in it.
- * - Task List, and Lista de tareas, its Spanish twin:  a to-do list, its tasks selected and edited together.
- * - Calculator:  an app in the sentence style, its keypad Spell UI's buttons (epic `debut` P7).
- * - Tic-Tac-Toe, Bill Splitter, Flash Cards and Habit Tracker:  a game, a form, a quiz and a checklist (epic `debut` P8).
- * - Counter:  a button that counts its clicks, a view and an app;  the Counter notebook imports its counter
- *   (epic `elemental-spell`).
- * - NOT frozen:  read from `spaces/@spell/examples/<name>/`, where people (and agents) edit them.
- *   - A change to one changes its snapshots:  `yarn spell:test:fixtures:bless`, then read the diff.
- * - Their snapshots are tests', never beside the example:  `EXAMPLE_SNAPSHOTS_DIR`.
- */
-export const EXAMPLE_FIXTURES = new Set([
-  "Solitaire",
-  "Solitario",
-  "TaskList",
-  "ListaDeTareas",
-  "calculator",
-  "tic-tac-toe",
-  "bill-splitter",
-  "flash-cards",
-  "habit-tracker",
-  "Counter"
-])
-
-/** The examples' group, `@spell/examples`:  where `EXAMPLE_FIXTURES` are read from. */
+/** The examples' group, `@spell/examples`:  where `EXAMPLE_PROJECTS` are read from. */
 export const EXAMPLES_GROUP = "@spell/examples"
 
+/** The Spell guides' group, `@spell/guides`:  where `GUIDE_PROJECTS` are read from. */
+export const GUIDES_GROUP = "@spell/guides"
+
+/** Every group a test project is in:  the fixtures', the examples', the Spell guides'. */
+const TEST_GROUPS = [FIXTURES_GROUP, EXAMPLES_GROUP, GUIDES_GROUP]
+
 /**
- * Folder of the snapshots of `EXAMPLE_FIXTURES`:  `tests/spell/__examples__/<name>/`, at spell-app's root.
+ * Every built-in example, by its name with its group:  `@spell/examples/Solitaire` (epic `spanish` P21).
+ * - Each folder of `@spell/examples` with a project file:  Solitaire and Solitario, Task List and Lista de tareas,
+ *   Calculator, FizzBuzz, Counter ...
+ * - NOT frozen, and not listed by hand:  read from `spaces/@spell/examples/<name>/`, where people (and agents) edit
+ *   them, so a new example is tested as soon as its folder is there.
+ *   - A change to one changes its snapshots:  `spell content check --bless`, then read the diff.
+ * - Their snapshots are tests', never beside the example:  `EXAMPLE_SNAPSHOTS_DIR`.
+ */
+export const EXAMPLE_PROJECTS = new Set(projectsIn(EXAMPLES_GROUP))
+
+/**
+ * Folder of the snapshots of `EXAMPLE_PROJECTS`:  `tests/spell/__examples__/<name>/`, at spell-app's root.
  * - So an example's folder holds only what a person wrote, and what compiling it writes beside it.
  */
 export const EXAMPLE_SNAPSHOTS_DIR = resolve(environment.repoDir, "tests", "spell", "__examples__")
 
-/** The guides' group, `@spell/guides`:  where `GUIDE_FIXTURES` are read from. */
-export const GUIDES_GROUP = "@spell/guides"
-
 /**
- * Every built-in guide, by its name in `@spell/guides`:  each folder there with a project file (epic `debut` P10).
- * - A guide is a spell file that reads as prose, with a working program inside it:
+ * Every built-in Spell guide, by its name with its group:  `@spell/guides/a-first-spell` (epic `debut` P10).
+ * - A Spell guide is a spell file that reads as prose, with a working program inside it:
  *   so each one is compiled, run and type-checked as the examples are.
- * - NOT frozen, and not listed by hand:  a new guide is tested as soon as it's there.
- *   - Its snapshots are written by `yarn spell:test:fixtures:bless`;  read the diff.
+ * - NOT frozen, and not listed by hand:  a new one is tested as soon as it's there.
+ *   - Its snapshots are written by `spell content check --bless`;  read the diff.
  * - Their snapshots are tests', never beside the guide:  `GUIDE_SNAPSHOTS_DIR`.
  */
-export const GUIDE_FIXTURES = new Set(projectFoldersIn(resolve(environment.systemFilesRoot, "guides")))
+export const GUIDE_PROJECTS = new Set(projectsIn(GUIDES_GROUP))
 
-/** Folder of the snapshots of `GUIDE_FIXTURES`:  `tests/spell/__guides__/<name>/`, at spell-app's root. */
+/** Folder of the snapshots of `GUIDE_PROJECTS`:  `tests/spell/__guides__/<name>/`, at spell-app's root. */
 export const GUIDE_SNAPSHOTS_DIR = resolve(environment.repoDir, "tests", "spell", "__guides__")
+
+/** Where each group's snapshots are, but the fixtures':  theirs are beside them. */
+const SNAPSHOT_DIRS: Record<string, string> = {
+  [EXAMPLES_GROUP]: EXAMPLE_SNAPSHOTS_DIR,
+  [GUIDES_GROUP]: GUIDE_SNAPSHOTS_DIR
+}
 
 /** Path of `parts` under `FIXTURES_DIR`, e.g. `fixturePath("fizzbuzz", "FizzBuzz.spell")`. */
 export function fixturePath(...parts: string[]): string {
@@ -96,14 +103,13 @@ export function fixturePath(...parts: string[]): string {
 
 /**
  * Path of snapshot `file` of test project `projectName`:
- * - a frozen fixture's beside it, `spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js`
+ * - a fixture's beside it, `spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js`
  * - an example's in `EXAMPLE_SNAPSHOTS_DIR`, `tests/spell/__examples__/Solitaire/Solitaire.snapshot.js`
- * - a guide's in `GUIDE_SNAPSHOTS_DIR`, `tests/spell/__guides__/a-first-spell/a-first-spell.snapshot.js`
+ * - a Spell guide's in `GUIDE_SNAPSHOTS_DIR`, `tests/spell/__guides__/a-first-spell/a-first-spell.snapshot.js`
  */
-export function snapshotPath(projectName: string, file: string): string {
-  if (EXAMPLE_FIXTURES.has(projectName)) return resolve(EXAMPLE_SNAPSHOTS_DIR, projectName, file)
-  if (GUIDE_FIXTURES.has(projectName)) return resolve(GUIDE_SNAPSHOTS_DIR, projectName, file)
-  return fixturePath(projectName, file)
+export function snapshotPath(projectName: TestProjectName, file: string): string {
+  const snapshots = SNAPSHOT_DIRS[groupOf(projectName)]
+  return snapshots ? resolve(snapshots, bareNameOf(projectName), file) : fixtureFolder(projectName, file)
 }
 
 /**
@@ -111,15 +117,31 @@ export function snapshotPath(projectName: string, file: string): string {
  * to load it as a `SpellProject`.
  * - Loads from disk in node, after `installDiskFetch()`.
  */
-export function fixtureProjectId(projectName: string): string {
-  return `${groupOf(projectName)}/${projectName}`
+export function fixtureProjectId(projectName: TestProjectName): string {
+  return `${groupOf(projectName)}/${bareNameOf(projectName)}`
 }
 
-/** The group test project `projectName` is in:  `@spell/examples`, `@spell/guides`, else `@spell/test`. */
-function groupOf(projectName: string): string {
-  if (EXAMPLE_FIXTURES.has(projectName)) return EXAMPLES_GROUP
-  if (GUIDE_FIXTURES.has(projectName)) return GUIDES_GROUP
-  return FIXTURES_GROUP
+/**
+ * Test project `projectName`'s own name, without its group:  `Solitaire` for `@spell/examples/Solitaire`.
+ * - What its files are named after:  `Solitaire.snapshot.js`, `Solitaire.en.js`.
+ */
+export function bareNameOf(projectName: TestProjectName): string {
+  return projectName.split("/").at(-1)!
+}
+
+/** The group test project `projectName` is in:  the one its name starts with, else the fixtures', `@spell/test`. */
+function groupOf(projectName: TestProjectName): string {
+  return TEST_GROUPS.find((group) => projectName.startsWith(`${group}/`)) ?? FIXTURES_GROUP
+}
+
+/** Each project of `group`, by its test project name:  `@spell/examples/Solitaire` -- see `projectFoldersIn()`. */
+function projectsIn(group: string): TestProjectName[] {
+  return projectFoldersIn(groupFolderOf(group)).map((name) => `${group}/${name}`)
+}
+
+/** Folder of test group `group`:  `FIXTURES_DIR`, or `spaces/@spell/<group>/`. */
+function groupFolderOf(group: string): string {
+  return group === FIXTURES_GROUP ? FIXTURES_DIR : resolve(environment.systemFilesRoot, group.slice("@spell/".length))
 }
 
 /**
@@ -128,14 +150,14 @@ function groupOf(projectName: string): string {
  * - The core contract runs them under Python.
  * - Each phase adds the ones it makes write:  things and lists, pauses, drawing.
  */
-export const PYTHON_FIXTURES = new Set([
+export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "counter",
   "counter-app",
   "fizzbuzz",
   "lists-from-zero",
   "people",
-  "Solitaire",
-  "TaskList",
+  `${EXAMPLES_GROUP}/Solitaire`,
+  `${EXAMPLES_GROUP}/TaskList`,
   "thing-references"
 ])
 
@@ -147,11 +169,11 @@ export const PYTHON_FIXTURES = new Set([
 export const LIBRARY_FIXTURES = new Set(["people"])
 
 /**
- * Name of each test project:  each folder of `FIXTURES_DIR` with a project file, alphabetically,
- * then `EXAMPLE_FIXTURES`, then `GUIDE_FIXTURES`.
+ * Name of each test project:  each fixture (each folder of `FIXTURES_DIR` with a project file), alphabetically,
+ * then `EXAMPLE_PROJECTS`, then `GUIDE_PROJECTS`.
  */
-export function fixtureProjectNames(): string[] {
-  return [...projectFoldersIn(FIXTURES_DIR), ...EXAMPLE_FIXTURES, ...GUIDE_FIXTURES]
+export function fixtureProjectNames(): TestProjectName[] {
+  return [...projectFoldersIn(FIXTURES_DIR), ...EXAMPLE_PROJECTS, ...GUIDE_PROJECTS]
 }
 
 /** Name of each folder of `dir` with a project file, alphabetically. */
@@ -169,7 +191,10 @@ function projectFoldersIn(dir: string): string[] {
  * - `target`:  compiled for that target, e.g. `ts/solid` (see `SP.TARGETS`);
  *   or a writer itself, e.g. a test's own.
  */
-export function compiledFixture(projectName: string, target: string | P.ProgramWriter = SP.RUNNING_TARGET): string {
+export function compiledFixture(
+  projectName: TestProjectName,
+  target: string | P.ProgramWriter = SP.RUNNING_TARGET
+): string {
   return compileFixture(projectName, target).code
 }
 
@@ -178,7 +203,7 @@ export function compiledFixture(projectName: string, target: string | P.ProgramW
  * `code`, the marks taken out again, must be `compiledFixture()`'s.
  */
 export function compiledFixtureWithMap(
-  projectName: string,
+  projectName: TestProjectName,
   target: string | P.ProgramWriter = SP.RUNNING_TARGET
 ): { code: string; map: P.SourceMapV3 } {
   const { code, map } = compileFixture(projectName, target, { sourceMap: true })
@@ -186,12 +211,12 @@ export function compiledFixtureWithMap(
 }
 
 /** Does fixture `projectName` draw:  hold a drawing (JSX) anywhere?  Then a Python target writes its page too. */
-export function fixtureDraws(projectName: string): boolean {
+export function fixtureDraws(projectName: TestProjectName): boolean {
   return compileFixture(projectName).draws
 }
 
 /** Fixture `projectName`'s declarations, as its `<Project>.declarations.json5` would hold them -- see `compileFixture()`. */
-export function fixtureDeclarations(projectName: string): string {
+export function fixtureDeclarations(projectName: TestProjectName): string {
   return JSON.stringify(compileFixture(projectName).declarations, null, 2) + "\n"
 }
 
@@ -200,7 +225,7 @@ export function fixtureDeclarations(projectName: string): string {
  * `["es"]` for `Solitario`, whose files are `Carta.es.spell` ... -- see `SP.SpellDeclarations.languagesOf()`.
  * - It has a words file in each:  `fixtureWords()`.
  */
-export function fixtureLanguages(projectName: string): string[] {
+export function fixtureLanguages(projectName: TestProjectName): string[] {
   return SP.SpellDeclarations.languagesOf(compileFixture(projectName).declarations)
 }
 
@@ -209,9 +234,9 @@ export function fixtureLanguages(projectName: string): string[] {
  * from its declarations, by javascript's names -- see `SP.SpellWords`.
  * - `lang`:  the one it speaks, by default (`fixtureLanguages()`).
  */
-export function fixtureWords(projectName: string, lang = fixtureLanguages(projectName)[0]!): string {
+export function fixtureWords(projectName: TestProjectName, lang = fixtureLanguages(projectName)[0]!): string {
   const words = SP.SpellWords.of(compileFixture(projectName).declarations, P.JSWriter.instance, lang)
-  return SP.SpellWords.script(words, projectName)
+  return SP.SpellWords.script(words, bareNameOf(projectName))
 }
 
 /**
@@ -228,7 +253,7 @@ export function fixtureWords(projectName: string, lang = fixtureLanguages(projec
  * - `draws`:  does it hold a drawing -- see `SP.SpellProject.draws()`.
  */
 function compileFixture(
-  projectName: string,
+  projectName: TestProjectName,
   target: string | P.ProgramWriter = SP.RUNNING_TARGET,
   { sourceMap = false }: { sourceMap?: boolean } = {}
 ): { code: string; declarations: SP.SpellDeclarationsData; draws: boolean; map?: P.SourceMapV3 } {
@@ -262,29 +287,30 @@ function compileFixture(
 /**
  * The projects test project `projectName` imports, by the module its compiled code imports each from.
  * - e.g. `{ "@spell/project/@spell/test/counter": "counter" }`
- * - Each by its name, as the fixture helpers take it.
+ * - Each by its test project name, as the fixture helpers take it:  see `projectImportsIn()`.
  * - none:  `{}`
  * - throws if it imports a project that isn't a test project:  see `projectImportsIn()`
  */
-export function fixtureImports(projectName: string): Record<string, string> {
+export function fixtureImports(projectName: TestProjectName): Record<string, TestProjectName> {
   return projectImportsIn(fixtureFolder(projectName))
 }
 
 /**
  * The projects the project in `folder` imports, by the module its compiled code imports each from:
  * `fixtureImports()`, for any project's folder, e.g. the Counter notebook's (`@spell/notebooks/Counter`).
- * - Each by its name, as the fixture helpers take it:  a frozen fixture, or a tested example (`EXAMPLE_FIXTURES`),
- *   e.g. the notebook's `@spell/examples/Counter` => `Counter`.
- * - throws if it imports any other project:
- *   tests read ONLY `FIXTURES_DIR`, `EXAMPLE_FIXTURES` and `GUIDE_FIXTURES`.
+ * - Each by its test project name, as the fixture helpers take it:
+ *   a fixture's bare (`@spell/test/counter` => `counter`), an example's or a Spell guide's with its group
+ *   (the notebook's `@spell/examples/Counter`).
+ * - throws if it imports any other project:  tests read ONLY the test groups (`TEST_GROUPS`).
  */
-function projectImportsIn(folder: string): Record<string, string> {
-  const imported: Record<string, string> = {}
+function projectImportsIn(folder: string): Record<string, TestProjectName> {
+  const imported: Record<string, TestProjectName> = {}
   for (const { path, active } of readProjectFile(folder).imports) {
     if (active === false || /\.(spell|spellml|spellx|css)$/.test(path)) continue
     const projectId = SP.SpellProject.projectIdForImport(path)
-    const projectName = projectId.split("/").at(-1)!
-    if (fixtureProjectId(projectName) !== projectId)
+    const group = projectId.split("/").slice(0, -1).join("/")
+    const projectName = group === FIXTURES_GROUP ? bareNameOf(projectId) : projectId
+    if (!TEST_GROUPS.includes(group) || !hasProjectFile(fixtureFolder(projectName)))
       throw new TypeError(`projectImportsIn():  ${folder} imports ${path}, which isn't a test project`)
     imported[moduleFor(projectId)] = projectName
   }
@@ -292,14 +318,20 @@ function projectImportsIn(folder: string): Record<string, string> {
 }
 
 /**
- * Path of `parts` in test project `projectName`'s folder:  a frozen fixture's (`FIXTURES_DIR`), an example's
- * (`EXAMPLE_FIXTURES`) or a guide's (`GUIDE_FIXTURES`), e.g. `fixtureFolder("Solitaire", "Card.spell")`.
+ * Path of `parts` in test project `projectName`'s folder:  a fixture's (`FIXTURES_DIR`), an example's or a Spell
+ * guide's (`spaces/@spell/<group>/`), e.g. `fixtureFolder("@spell/examples/Solitaire", "Card.spellml")`.
  * - NEVER write there:  copy it first (`copyFixtureProject()`).
+ * - throws if a bare name is no fixture:  an example or a Spell guide is named with its group
  */
-export function fixtureFolder(projectName: string, ...parts: string[]): string {
-  if (EXAMPLE_FIXTURES.has(projectName)) return resolve(environment.systemFilesRoot, "examples", projectName, ...parts)
-  if (GUIDE_FIXTURES.has(projectName)) return resolve(environment.systemFilesRoot, "guides", projectName, ...parts)
-  return fixturePath(projectName, ...parts)
+export function fixtureFolder(projectName: TestProjectName, ...parts: string[]): string {
+  const group = groupOf(projectName)
+  const folder = resolve(groupFolderOf(group), bareNameOf(projectName))
+  if (!projectName.startsWith(`${group}/`) && !existsSync(folder))
+    throw new TypeError(
+      `fixtureFolder():  no fixture \`${projectName}\` in ${FIXTURES_GROUP};  ` +
+        `name an example or a Spell guide with its group, e.g. \`${EXAMPLES_GROUP}/${projectName}\``
+    )
+  return resolve(folder, ...parts)
 }
 
 /**
@@ -309,7 +341,7 @@ export function fixtureFolder(projectName: string, ...parts: string[]): string {
  * - A test parsing a fixture's files itself parses them under it:
  *   `parseSpellProject(loadFixtureProject("counter-app"), { parentScope: fixtureImportScope("counter-app") })`.
  */
-export function fixtureImportScope(projectName: string): P.Scope {
+export function fixtureImportScope(projectName: TestProjectName): P.Scope {
   const paths = loadFixtureProject(projectName).map(({ path }) => path)
   return importScopeIn(fixtureFolder(projectName), paths)
 }
@@ -340,7 +372,7 @@ function moduleFor(projectId: string): string {
 }
 
 /** `{ path, contents }` of each spell file (`.spell` or `.spellml`) in test project `projectName`, in its project file's order. */
-export function loadFixtureProject(projectName: string): SpellSourceFile[] {
+export function loadFixtureProject(projectName: TestProjectName): SpellSourceFile[] {
   const projectDir = fixtureFolder(projectName)
   return readProjectFile(projectDir)
     .imports.filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
@@ -357,13 +389,13 @@ export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell
  * `loadFixtureProject()`, each `.spellml` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spellml` =>
  * `/Card.spell`, the same program written as code spell.
  * - For a test of code spell itself (its parse, its journal, its edits) on a whole example written in spellx,
- *   e.g. `loadCodeSpellTwin("Solitaire")`.
+ *   e.g. `loadCodeSpellTwin("@spell/examples/Solitaire")`.
  */
-export function loadCodeSpellTwin(projectName: string): SpellSourceFile[] {
+export function loadCodeSpellTwin(projectName: TestProjectName): SpellSourceFile[] {
   return loadFixtureProject(projectName).map((file) => {
     if (!SP.isSpellmlName(file.path)) return file
     const path = file.path.replace(/(ml|x)$/, "")
-    return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, projectName, `.${path}`), "utf8") }
+    return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, bareNameOf(projectName), `.${path}`), "utf8") }
   })
 }
 
@@ -372,7 +404,7 @@ export function loadCodeSpellTwin(projectName: string): SpellSourceFile[] {
  * - Not its snapshots:  a copy a test may edit, or an editor open, as a person's project.
  * - SIDE EFFECT:  makes `dir`.
  */
-export function copyFixtureProject(projectName: string, dir: string): void {
+export function copyFixtureProject(projectName: TestProjectName, dir: string): void {
   mkdirSync(dir, { recursive: true })
   const folder = fixtureFolder(projectName)
   for (const { path } of readProjectFile(folder).imports) {

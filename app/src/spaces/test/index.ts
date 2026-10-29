@@ -1,5 +1,6 @@
 //
-//  ## The test helpers of spell-app's tests:  the frozen test projects (`@spell/test`), and the examples tested as they are.
+//  ## The test helpers of spell-app's tests:  the fixtures (the frozen test projects, `@spell/test`),
+//  and the examples and Spell guides, tested in place.
 //  Imported by `*.test.ts` files only -- nothing in `src/` proper should depend on this.
 //  - Inline projects, the samples and the rest:  spell-parser's `spell/parser/spell/test`.
 //
@@ -14,6 +15,8 @@ export {
   fixtureFolder,
   snapshotPath,
   fixtureProjectId,
+  bareNameOf,
+  type TestProjectName,
   FIXTURES_GROUP,
   fixtureProjectNames,
   compiledFixture,
@@ -26,10 +29,10 @@ export {
   fixtureImportScope,
   importScopeIn,
   FIXTURES_DIR,
-  EXAMPLE_FIXTURES,
+  EXAMPLE_PROJECTS,
   EXAMPLES_GROUP,
   EXAMPLE_SNAPSHOTS_DIR,
-  GUIDE_FIXTURES,
+  GUIDE_PROJECTS,
   GUIDES_GROUP,
   GUIDE_SNAPSHOTS_DIR,
   PYTHON_FIXTURES,

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
-import { compiledFixture, fixtureLanguages, fixtureProjectNames } from "spell/app/spaces/test"
+import { bareNameOf, compiledFixture, fixtureLanguages, fixtureProjectNames } from "spell/app/spaces/test"
 import { CLI } from "spell/app/cli"
 
 /**
@@ -12,7 +12,7 @@ import { CLI } from "spell/app/cli"
  *   (Solitario) deals and draws too (epic `spanish` P21:  it was `cartas`, the cards alone, before).
  * - Every `esperar que ...` of every test must pass;  a failing one is listed, as it printed.
  */
-describe("fixtures in other languages pass their own tests", () => {
+describe("test projects in other languages pass their own tests", () => {
   for (const name of fixtureProjectNames().filter((name) => fixtureLanguages(name).some((lang) => lang !== "en"))) {
     test(
       name,
@@ -26,7 +26,7 @@ describe("fixtures in other languages pass their own tests", () => {
 
 /** Each check of test project `name`'s spell tests that failed, as it printed:  a line starting `❌`. */
 async function failedChecks(name: string): Promise<string[]> {
-  const { exitCode, output, stdout } = await CLI.runCode("run", name, compiledFixture(name), {
+  const { exitCode, output, stdout } = await CLI.runCode("run", bareNameOf(name), compiledFixture(name), {
     extension: ".mjs",
     capture: true,
     dom: true,

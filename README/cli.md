@@ -948,7 +948,8 @@ How the static render works:
 
 ## spell-app
 
-The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension.
+The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension,
+check the built-in examples.
 `spell app serve` is the one you'll type daily:  it brings up two servers,
 and `Ctrl-C` takes down only what it started.
 The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md).
@@ -961,6 +962,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app preview build` | builds the editor as plain files any web host serves, with the examples and guides compiled in:  a visitor's edits stay in their browser, until "Reset Example" |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
+| `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
 
 ```sh
 spell projects

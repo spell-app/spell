@@ -77,12 +77,22 @@ working in `app/`, the kit's app folder (its yarn workspace is still named `spel
       so a test project may import another `@spell` project:  `counter-app` imports `counter`, a frozen counter library.
     - The tests that compile them whole are here too, in [tests/spell/](tests/spell/), the `spell` project:
       their snapshots, `tsc` and pyright on them, whole-project parsing.
-      - The built-in examples are tested as they are, never a frozen copy (`EXAMPLE_FIXTURES`):
-        their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes.
-      - So is every guide (`@spell/guides`, epic `debut` P10):  its snapshots in `tests/spell/__guides__/<Project>/`.
+      - The FIXTURES are the frozen ones alone;  every built-in example (`EXAMPLE_PROJECTS`) is tested in place,
+        never a frozen copy:  their snapshots are in `tests/spell/__examples__/<Project>/`,
+        re-blessed when an example changes.
+        - Named with its group, `@spell/examples/fizzbuzz`, so the example FizzBuzz and the fixture `fizzbuzz`
+          are two test projects.
+      - So is every Spell guide (`@spell/guides`, epic `debut` P10):  its snapshots in `tests/spell/__guides__/<Project>/`.
       - The same paths they had in spell-parser:  `tests/spell/test/fixtures.test.ts`, `tests/spell/parserTests/...`.
       - Their helpers:  [app/spaces/test](src/spaces/test/index.ts) (`loadFixtureProject()`, `compiledFixture()` ...).
-      - `yarn spell:test:fixtures` runs the snapshot tests;  `yarn spell:test:fixtures:bless` rewrites the snapshots.
+      - `spell content check` runs every content check in one Vitest run (epic `content` P2):
+        the snapshot tests, the Spanish projects' own tests, the command-line contract,
+        the spellx round trip and its twins, the notebooks, README-examples' table.
+        - `spell content check --bless` rewrites every snapshot among them;  read the diff.
+        - The list of tests is the folder's `spell:test:fixtures` (and `:bless`) yarn scripts, which it runs.
+        - The snapshots are generated files:  `linguist-generated merge=binary` in [.gitattributes](.gitattributes),
+          and "content snapshots" in the kit's [generators list](../.epic/generators.json5), so
+          `epic worktree merge-main` re-blesses them.
     - The parser folder's own tests write their projects inline, and never read these.
 - This file holds what's about the app folder:  its sub-folders, the folders it reaches, its commands and toolchain.
   - The house style every folder shares is WWOD (`agents/wwod/`, above).
@@ -274,7 +284,7 @@ The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees
 As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 
 - The app's own commands are in its [commands.ts](src/cli/commands.ts):
-  `spell app create | serve | vscode`, `spell projects`.
+  `spell app create | serve | vscode`, `spell projects`, `spell content check [--bless]`.
 - The language commands' work (`spell compile`, `run`, `lint` ...) is here too, behind a hook
   ([cli's AGENTS.md](src/cli/AGENTS.md)).
 

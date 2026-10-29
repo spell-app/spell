@@ -163,6 +163,52 @@ One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 202
 - **Not the same word:**  spell's own `meta`, in a spell program, is Command-or-Control (epic `elemental-spell` Q31):
   it's the language's word, not Spell UI's attribute.
 
+## Spell's own projects
+
+The `@spell` space's built-in projects, and the tests that read them (epic `content` P2, its T3).
+
+### fixture
+
+- **Say:**  fixture, ONLY for a frozen test project:  the `@spell/test` group, tests' own, never edited to follow
+  anything (`FIXTURES_DIR`, `FIXTURES_GROUP`).
+  - The examples and Spell guides are "test projects tested in place" (`EXAMPLE_PROJECTS`, `GUIDE_PROJECTS`):
+    read where people edit them, their snapshots beside the tests.
+  - "Test project" is any of the three;  a test names one by its group and name (`TestProjectName`):
+    `fizzbuzz` is the fixture, `@spell/examples/fizzbuzz` the example.
+- **Not:**  fixture for an example, a Spell guide, or the hand-kept spellx twins (those are "twins").
+  - The helpers that read any test project keep their old names for now (`compiledFixture()`,
+    `loadFixtureProject()`, `PYTHON_FIXTURES`):  a rename of their own.
+- **Decided:**  epic `content` P2 (T3).
+
+### the @spell space
+
+- **Say:**  the `@spell` space, for Spell's own built-in projects (`spaces/@spell/` in the app folder):
+  its groups `@spell/examples`, `@spell/notebooks`, `@spell/guides`, `@spell/library`, `@spell/test`.
+- **Not:**  the `@spell` package, `@spell/` packages.
+  - "Package" is the npm package (`spell`, `spell-ui`, `spell-epic`).
+- **Decided:**  epic `content` P2 (T3).
+
+### guide / Spell guide
+
+- **Say:**
+  - guide:  a docs page, the epic's lasting page (the kit's `AGENTS.md`, "Words")
+  - Spell guide:  a `@spell/guides` project, a spell file that reads as prose with a working program inside
+    ("A first spell", "How Solitaire works")
+- **Not:**  a bare "guide" for a `@spell/guides` project, where a docs page could be meant.
+- **Decided:**  epic `content` P2 (T3).
+
+### content / epic repo
+
+- **Say:**
+  - content:  the `@spell` space's examples, notebooks and Spell guides:  what `spell content check | update`
+    and the epic `content` work on
+  - epic repo:  `spell.epics`, the repo of epic pages, guides and logs every checkout shares
+- **Not:**  "the shared content", "the content repo" for `spell.epics`.
+  - Its setting, `contentFolder`, and `epic shared ...` keep their names until they're renamed:
+    epic `epic-engine`'s r47.
+- **Decided:**  Owen, 2026-10-29, epic `content` Q7 (B:  keep `spell content`;  "the shared content repo is the
+  epic repo from now on").
+
 ## Open
 
 Words a sweep found more than one of, still to decide.
