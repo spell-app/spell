@@ -185,7 +185,11 @@ export function lastWorked(values: readonly (string | null | undefined)[]): Date
   return latest
 }
 
-/** Every log line's time in epic-page markup `html` (`<epic-event at="...">`), in the order written. */
+/**
+ * Every log line's time in epic-page markup `html`, in the order written:  its review lines' (`<epic-event at>`) and
+ * its Log's commits' (`<epic-commit at>`, epic `epic-engine` P52);  "last worked on" takes the newest, so an old
+ * commit added later never moves it back.
+ */
 export function eventTimesIn(html: string): string[] {
   return Array.from(html.matchAll(EVENT_TIME), (match) => match[1]!)
 }
@@ -208,4 +212,4 @@ export function favoritesIn(list: unknown): Set<string> {
 }
 
 /** A log line's time:  `<epic-event at="2026-10-09T00:26-04:00">`, `$1`. */
-const EVENT_TIME = /<epic-event\b[^>]*?\sat="([^"]+)"/g
+const EVENT_TIME = /<epic-(?:event|commit)\b[^>]*?\sat="([^"]+)"/g

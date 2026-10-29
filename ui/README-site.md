@@ -75,10 +75,10 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 - The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
   its bundle (`"pageServer"`, in [package.json](package.json):
   [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
-  - So it needs only the kit and `spell-ui`:  `yarn clone spell-ui`
+  - So it needs only a checkout of the kit, Spell UI's folder with it
     ([setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)).
   - `start all` and `spell server start` both find the kit from any folder of it.
-- `start all` brings up the editor too, where spell-app is cloned.
+- `start all` brings up the editor too, from the app's folder.
   For the page server alone, `spell server start`.
 - An open page reloads when the page, its layout, its data or the bundle changes.
 - `spell server stop all` stops them both.
@@ -476,7 +476,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [ReportTables.ts](src/tools/ReportTables.ts) | rewrites the generated tables of the status report, in the content folder's Spell UI notes |
 | [peers.ts](src/tools/peers.ts) | the peer specifiers `dist/` imports |
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
-| [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale.  Another component set's data too (`set`, `forSet()`):  the brand's, Epic UI's, App UI's |
+| [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale.  Another component set's data too (`set`, `forSet()`):  Epic UI's, App UI's and any other set's |
 | [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
 | [ElementManifests.ts](src/tools/ElementManifests.ts) | what editors read about the elements, written by `yarn site:data`:  in `docs/__data/`, `custom-elements.json` (Custom Elements Manifest 2.1), `html-custom-data.json` (VS Code's HTML data) and `css-custom-data.json` (VS Code's CSS data:  custom properties, `::part()` and `:state()` names), which spell-app's VS Code extension copies when it's built, for every window;  and the JSX types, `src/jsx.ts` (`spell/ui/jsx`) |
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |

@@ -1187,6 +1187,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
     "--plan <html>": "a phase's build plan, waiting for Owen's Accept",
+    "--choices <html>": "a phase's own option sets, <epic-choices> (its Choices field)",
     "--accepted": "with --plan:  written accepted, Owen's comments on his Accept folded in (no second Accept)",
     "--files <html>": "a phase's files",
     "--verify <html>": "how a phase is checked",
@@ -1227,11 +1228,21 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
-    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't"
+    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't",
+    "--options <list>":
+      'a judgement or question:  its option set, split by " | ", "*" the recommended:  "*Do it | Don\'t"',
+    "--multiple": "a standing set (#choices):  pick any, not pick one",
+    "--note <html>": "a standing set (#choices):  its lead, before it"
   },
   calm: { "--loud": "urgent (red) again" },
   decide: { "--details <html>": "the answer's details, and why", "--option <letter>": "the option chosen" },
   choose: { "--set <n>": "on the Nth card set (default the latest)" },
+  option: {
+    "--set <n>": "on the Nth card set (default the latest)",
+    "--image <png>": "add:  a picture for the option, copied beside the page (tests/)",
+    "--title <title>": "edit:  the option's new title",
+    "--note <html>": "edit:  the option's new text (HTML, or plain text)"
+  },
   close: {},
   reopen: {},
   cancel: {},
@@ -1242,7 +1253,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
-    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't"
+    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't",
+    "--prepared <n>": "a manual test:  written out for Owen by Start testing, nth in his order"
   },
   summarize: { "--file <condensed.html>": "what the item shows now, as HTML" },
   restore: {
@@ -1273,7 +1285,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
 
   // an epic page:  log and upkeep
-  log: {},
+  log: { "--last <n>": "with no text:  how many of the newest review lines to print (default 20)" },
   prompt: { "--file <file>": "the prompt, from a file" },
   bedtime: {},
   backfill: { "--all": "every epic", "--apply": "mark them:  a dry run without it" },

@@ -16,8 +16,9 @@ const root = mkdtempSync(join(tmpdir(), "srv-live-"))
 let server: PageServer
 let browser: Browser
 
-/** A page long enough to scroll, with a section to address. */
+/** A page long enough to scroll, with a section to address, and a field to type in. */
 const PAGE = `<!doctype html><html><head><title>T</title></head><body><main>
+  <input id="field" aria-label="Field">
   ${"<p>filler text</p>".repeat(150)}<section id="more"><p>More</p></section>${"<p>filler text</p>".repeat(150)}
 </main></body></html>\n`
 
@@ -61,7 +62,7 @@ async function opened(hash = "", y = 0): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 800, height: 600 } })
   await page.addInitScript(logArrival)
   await page.goto(`http://127.0.0.1:${server.info.port}/docs/page.html${hash}`)
-  await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reload?: unknown } }).SPELL_SERVER?.reload)
+  await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reloadNow?: unknown } }).SPELL_SERVER?.reloadNow)
   await page.evaluate((top) => scrollTo(0, top), y)
   return page
 }
@@ -76,11 +77,46 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
     const page = await opened("#more", 1234)
     await Promise.all([
       page.waitForEvent("load"),
-      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reloadNow(): void } }).SPELL_SERVER.reloadNow())
     ])
     await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
     expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
     expect(await page.evaluate(() => [Math.round(scrollY), location.hash])).toEqual([1234, "#more"])
+    await page.close()
+  })
+
+  it("`reload()` in view reloads quietly (I172):  held and cross-faded, its scroll kept, no pill", async () => {
+    const page = await opened("", 1234)
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    ])
+    await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
+    expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
+    expect(await page.evaluate(() => Math.round(scrollY))).toBe(1234)
+    expect(await page.locator("body > button").count()).toBe(0)
+    await page.close()
+  })
+
+  it("`reload()` waits while the reader types in a field, and reloads once it loses the focus (I172)", async () => {
+    const page = await opened()
+    const origin = await page.evaluate(() => performance.timeOrigin)
+    await page.getByLabel("Field").fill("half a thought")
+    await page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    await page.waitForTimeout(800)
+    expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin)
+    await Promise.all([page.waitForEvent("load"), page.evaluate(() => (document.activeElement as HTMLElement).blur())])
+    expect(await page.evaluate(() => performance.timeOrigin)).not.toBe(origin)
+    await page.close()
+  })
+
+  it("a field focused but not typed in doesn't hold a reload", async () => {
+    const page = await opened()
+    await page.getByLabel("Field").focus()
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    ])
     await page.close()
   })
 

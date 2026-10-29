@@ -6,7 +6,7 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 
 import { PageStages } from "spell/epic/phases"
-import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell/epic/review"
+import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
@@ -17,12 +17,14 @@ import {
   STATE_PICK,
   type StatePickDetail
 } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
-import { TEST_START } from "spell/epic/components/epic-test-run/EpicTestRun.types"
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
 import { PhaseDrag } from "./PhaseDrag"
-import { StateFilter } from "./StateFilter"
+import { phaseFields } from "./PhaseFields"
+import { PhaseState } from "./PhaseState"
+import { StateFilter, type ChipPick } from "./StateFilter"
+import { TestQueue } from "./TestQueue"
 import {
   CLOSED_STATUSES,
   COUNT_ATTRIBUTES,
@@ -35,21 +37,22 @@ import {
   ITEM_KINDS,
   NEW_HERE,
   NUMBERED_BLOCKS,
+  PHASE_FIELDS,
   PHASE_FILTER_STATES,
-  PHASE_TOGGLES,
-  PHASE_TOGGLES_KEY,
   REPORT,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
-  TOGGLE,
-  PhaseState,
+  ALL_QUERY,
+  TEST_ALL,
+  TEST_QUERY,
   type ChipState,
   type ChipStateName,
   type ContentsEntry,
   type EpicSectionVocabulary,
   type FilterState,
   type ItemStateName,
-  type PhaseToggle,
+  type PhaseFieldName,
+  type PhaseStateName,
   type SectionCount,
   type SectionLook,
   type StateFilterEntry
@@ -79,11 +82,15 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
   /**
    * How many of its items Owen marked in this pass (epic `epic-engine` P43), and the Phases section's phases with
    * Claude (I147):  the page's toolbar adds them up.
+   * - the phases drawn blue (`progress`, I170) too:  its own filter counts them in its blue badge, and the toolbar's
+   *   chips are the items' alone (`stateFilter()`)
    * - read TRACKED:  the toolbar follows each mark (and reads `stateFilter` again with it)
    */
   get markedCount(): number {
     const section = this.section
-    return section?.marked().size ?? 0
+    if (!section) return 0
+    const working = section.kind === "phases" ? (section.stateCounts().get("progress") ?? 0) : 0
+    return section.marked().size + working
   }
 
   /**
@@ -127,6 +134,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - a click (Owen, 2026-10-10;  `StateFilter.nextShown()`):
  *     everything showing, only that state;  else a hidden state shows too and a shown one hides;
  *     the only one showing, everything again
+ *   - an ⌥-click (epic `epic-engine` I166):  only that state, whatever showed
  *   - a filtered list says `3 hidden · show all` under it
  *   - each item it hides is marked `data-epic-filtered` (page state, never in the file:  the live patch keeps it),
  *     which the page sheet hides (`EpicSection.runs.css`;  a `::slotted(#id)` rule per item before epic `epic-engine`
@@ -135,7 +143,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - the page's toolbar filters every section at once, through its DOM element (`DOMEpicSectionElement`)
  * - The Phases section's STATE FILTER (epic `epic-engine` I157;  Owen, 2026-10-29:  "badges for
  *   'undone|updated|complete' -- e.g. 49 phases in this plan are a lot to scroll past"):  the same chips, rule, note,
- *   marks and memory, after its Files / Verify toggles, by a phase's state (`PhaseState.of()`)
+ *   marks and memory, before its gear, by a phase's state (`PhaseState.of()`)
  *   - its phases with Claude in the blue badge, as an item section's marked items
  *   - NOT in the page's toolbar chips, which are the items' (`stateFilter()`)
  * - An item section's lines are drawn as rounded cards, one per RUN of lines between unfolded items' details
@@ -143,10 +151,13 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - by position, with sibling selectors, in a page sheet it registers (`EpicSection.runs.css`, P45;  Owen,
  *     2026-10-25:  "generic CSS, using sibling selectors ... rather than with explicit ids"):  the phases and the
  *     Overview's parts too
- * - The Phases section's title holds the Files / Verify toggles:
- *   - each shows or hides that field in every phase,
- *     through `--epic-files-display` / `--epic-verify-display`, which the fields read
- *   - remembered per page
+ * - The Phases section's title ends in a GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), its menu
+ *   "Show each phase's files" and "Show each phase's checks", ticked while on (the Files / Verify toggles before;
+ *   Owen, 2026-10-29:  "something I'd rarely choose")
+ *   - each shows or hides that field in every phase (`PhaseFields.setEveryPhase()`, forgetting each phase's own
+ *     choice of it), through `--epic-files-display` / `--epic-verify-display`, which the fields read
+ *   - a phase's own gear chooses for it alone (`<epic-phase>`)
+ *   - remembered per page, under the toggles' old key
  * - No Plan changes box above the phases any more (Owen, 2026-10-11):  each phase draws its own (`<epic-phase>`).
  *   An older doc's copies (`<epic-updated slot="changes">`, T14) have no slot to show in;  the tool removes them.
  * - An item section with no items says "None yet".
@@ -163,8 +174,16 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   the Todos and Questions sections end with
  *   - the new items of their kind Owen asked for and Claude hasn't made yet (Edit, Remove:  `newItemList()`)
  *   - then a New todo / New question button, which opens the form there (`<epic-new-item>`)
- * - The Manual tests section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
- *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-opening`)
+ * - The Manual tests section's tests are answered WHERE THEY ARE (epic `epic-engine` P51, Q53;  the separate test run
+ *   went):  Approve passes one, a note (and a screenshot pasted in it) says what Owen saw, the note box's x says it
+ *   no longer applies;  left alone, it waits.  Its button, on its title while reviewed and a test is open
+ *   (`testButton()`):
+ *   - "Start testing · 9":  Claude prepares the tests first, a request for now (`ReviewClient.prepareTests()`):  it
+ *     checks what it can itself, writes out the rest step by step with a screenshot, and stamps each `prepared`
+ *   - "Preparing tests", turning, while it does (a click calls it off);  once done, the first test opens (`TestQueue`)
+ *   - every open test prepared:  "Next test · 3 left", which opens the next one he hasn't answered
+ *   - the address's `?test=1` presses it as the page loads (`epic test <epic>`);  with `all`, its last line links the
+ *     next epic with open tests once every test here is answered
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
  *   follows the review inbox while connected (an Overview sub-section, Todos, Questions).
  ****************/
@@ -184,9 +203,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## State
   ////////////////
 
-  /** The Phases section's toggles:  which fields show. */
-  @E.state accessor shown: Record<string, boolean> = EpicSection.savedToggles()
-
   /**
    * The states the reader chose to show, as last left on this page;  `undefined`:  every state.
    * - by the DOM element's own `id`, read plainly:  a starting value, never followed
@@ -196,16 +212,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Its view of the review inbox:
    * - an Overview sub-section's:  keyed by its id (is the page reviewed?  has it a marked note?)
+   * - the Manual tests section's:  keyed by its id, `tests`, for Start testing's request (epic `epic-engine` P51)
    * - the Todos and Questions sections':  for their new items (no id:  never marked themselves)
    * - other kinds never read it
    */
-  readonly reviewState = new ReviewState(() => (this.kind === "overview-part" ? this.id : undefined))
+  readonly reviewState = new ReviewState(() =>
+    this.kind === "overview-part" || this.kind === "tests" ? this.id : undefined
+  )
 
   /** The Todos or Questions section's `<epic-new-item>`, as drawn:  Edit on a waiting item opens its form on it. */
   private newItem: (HTMLElement & { open: boolean; editing?: string }) | undefined
-
-  /** The toggles' icons, in `PHASE_TOGGLES`' order. */
-  readonly toggleGlyphs = PHASE_TOGGLES.map((toggle) => new E.IconGlyph({ owner: this, name: () => toggle.icon }))
 
   ////////////////
   // ## Derived state
@@ -257,14 +273,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   readonly count = createMemo((): SectionCount | undefined => this.countOf(this.counted))
 
   /**
-   * Each item's state, in page order;  the Phases section's phases' (`PhaseState.of()`:  undone, updated, complete;
-   * epic `epic-engine` I157), which its chips filter as an item section's do.
+   * Each item's state, in page order;  the Phases section's phases' (`PhaseState.of()`:  red, orange, blue, dotted
+   * blue, green, grey, the first that holds;  epic `epic-engine` I157, I170), which its chips filter as an item
+   * section's do.
    */
   readonly itemStates = createMemo((): { item: Element; state: ChipStateName }[] => {
     if (this.kind === "phases")
       return this.counted
         .filter((child) => child.localName === "epic-phase")
-        .map((phase) => ({ item: phase, state: PhaseState.of(PhaseState.fieldsOf(phase)) }))
+        .map((phase) => ({ item: phase, state: this.phaseStateOf(phase) }))
     return this.holdsItems()
       ? this.counted
           .filter((child) => child.localName === "epic-item")
@@ -278,9 +295,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    *   as he marks
    * - never hidden by the filter:  a marked item stays in sight mid-pass
    * - outside a review (no inbox):  none
-   * - the Phases section's:  its phases WITH CLAUDE (epic `epic-engine` I147), not done, and marked in this pass or
-   *   being worked on (the inbox's `working`:  its plan being written, or it being built);  the same blue badge,
-   *   left out of the phase chips and never hidden by them (I157)
+   * - the Phases section's:  its phases Owen marked in this pass, not done (epic `epic-engine` I147, I157);  the same
+   *   blue badge, left out of the phase chips and never hidden by them
+   *   - a phase under way or being worked on is `progress` (I170), which the filter counts in that badge too, as an
+   *     item's:  unless it's red or orange first (Owen's order)
    */
   readonly marked = createMemo((): ReadonlySet<Element> => {
     const marked = this.itemStates().filter((it) => it.item.id && this.isWithClaude(it))
@@ -339,7 +357,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.isConnected && PageStages.hides(this.domElement)
   }
 
-  /** Its title has tools:  the Phases toggles, or a state filter with chips (or the marked badge alone). */
+  /** Its title has tools:  the Phases gear, or a state filter with chips (or the marked badge alone). */
   @E.cssState("tools")
   get hasTools(): boolean {
     return this.kind === "phases" || this.hasFilter()
@@ -447,8 +465,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         kind === "phases"
           ? () => (
               <>
-                {this.toggles()}
                 {this.filter()}
+                {this.gear()}
               </>
             )
           : kind === "overview-part"
@@ -456,8 +474,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             : this.holdsItems()
               ? () => (
                   <>
-                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.count()?.open}>
-                      {(open) => this.startTesting(open())}
+                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
+                      {(testing) => this.testButton(testing)}
                     </Show>
                     {this.filter()}
                     <Show when={this.reviewState.reviewing() && this.newKind()}>
@@ -483,6 +501,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             {this.reviewControl("note", "note-box")}
           </Show>
           <Show when={this.reviewState.reviewing() && this.newKind()}>{(newKind) => this.newItems(newKind())}</Show>
+          <Show when={kind === "tests" && this.runsAll && this.reviewState.reviewing() && this.testing()?.left === 0}>
+            {this.nextEpicLine()}
+          </Show>
         </>
       )
     })
@@ -553,29 +574,199 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     )
   }
 
+  ////////////////
+  // ## Testing (epic `epic-engine` P51)
+  ////////////////
+
   /**
-   * The Manual tests section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
-   * - A click asks the page for its test run (`epic-test-opening`, out of the shadow root).
+   * The Manual tests section's button (`testButton()`), as things stand;  `undefined` with no open test:
+   * - `open`:  open tests;  `left`:  those Owen hasn't answered (no mark of his yet)
+   * - `prepared`:  every open test written out by Start testing (`<epic-item prepared>`)
+   * - `preparing`:  Start testing's request is on its way or under way;  `queued`:  nobody has taken it yet
    */
-  private startTesting(open: number): JSX.Element {
+  readonly testing = createMemo((): TestingState | undefined => {
+    if (this.kind !== "tests" || isServer) return undefined
+    const open = this.count()?.open
+    if (!open) return undefined
+    const running = this.reviewState.running()
+    return {
+      open,
+      left: TestQueue.leftIds(this.domElement, this.reviewState.isMarked).length,
+      prepared: TestQueue.isPrepared(this.domElement),
+      preparing: !!running,
+      queued: !!running?.queued
+    }
+  })
+
+  /** Start testing's request is under way:  what `onPrepared()` follows. */
+  get isPreparing(): boolean {
+    return !!this.testing()?.preparing
+  }
+
+  /** Start testing was pressed on this visit, and its request hasn't finished:  the first test opens when it does. */
+  private pressedStart = false
+
+  /** The test it opened last:  Next test goes on from it (the address may have followed the scroll since). */
+  private lastOpened: string | undefined
+
+  /** The address asked for a run across every epic (`?test=1&all=1`, `epic test --all`):  read as it connects. */
+  readonly runsAll = !isServer && EpicSection.testQuery() === TEST_ALL
+
+  /** The next epic with open tests, for a run across every epic;  `null` once asked and none is left. */
+  @E.state accessor nextEpic: TestsEntry | null | undefined = undefined
+
+  /**
+   * The Manual tests section's button (Owen, 2026-10-29, Q53:  "The 'Start testing' button in header of Manual Testing
+   * could just do the grunt work for fleshing out what exactly I need to do for the test, screenshots, etc."):
+   * - "Start testing · 9" (blue):  Claude prepares them (`startTesting()`)
+   * - "Preparing tests" (its icon turning) while that runs;  a click calls it off
+   * - every open test prepared:  "Next test · 3 left" ("Go through the tests" with none left), opening the next
+   */
+  private testButton(state: () => TestingState): JSX.Element {
+    const words = () => {
+      const testing = state()
+      return testing.preparing
+        ? this.translationForKey("preparingTests")
+        : testing.prepared
+          ? this.translationForKey(testing.left ? "nextTest" : "firstTest", { count: testing.left || testing.open })
+          : this.translationForKey("startTesting", { count: testing.open })
+    }
+    const tip = () => {
+      const testing = state()
+      return testing.preparing
+        ? testing.queued
+          ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
+          : this.translationForKey("preparingTip")
+        : this.translationForKey(testing.prepared ? "nextTestTip" : "startTestingTip")
+    }
     return (
       <ui-button
         class={START_TESTING}
         part={this.partForName("start-testing")}
         color="blue"
-        appearance="basic"
+        appearance={state().prepared && !state().preparing ? undefined : "basic"}
         size="mini"
-        icon="flask"
-        title={this.translationForKey("startTestingTip", { count: open })}
+        icon={state().preparing ? "circle notch" : state().prepared ? "arrow right" : "flask"}
+        data-busy={state().preparing ? "" : undefined}
+        title={tip()}
         onClick={(event: MouseEvent) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
-          this.send(TEST_START, {})
+          this.startTesting()
         }}
       >
-        {this.translationForKey("startTesting", { count: open })}
+        {words()}
       </ui-button>
     )
+  }
+
+  /**
+   * Press the button:
+   * - while preparing:  call it off ("nevermind")
+   * - every open test prepared, nothing new since:  straight to the next test (`openNext()`)
+   * - else Start testing's request for now;  the first test opens when it's done (`onPrepared()`)
+   */
+  @E.untracked
+  startTesting() {
+    const client = this.reviewState.client
+    const testing = this.testing()
+    if (!client || !testing) return
+    if (testing.preparing) {
+      this.pressedStart = false
+      void client.cancel(this.id ?? "")
+      return
+    }
+    if (testing.prepared) return this.openNext()
+    this.pressedStart = true
+    void client.prepareTests()
+  }
+
+  /** Open the next test Owen hasn't answered, after the one it opened last (`TestQueue.nextId()`). */
+  @E.untracked
+  private openNext() {
+    const current = this.lastOpened ?? decodeURIComponent(location.hash.slice(1))
+    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked, current)
+    if (!id) return
+    this.lastOpened = id
+    TestQueue.open(id)
+  }
+
+  /**
+   * Start testing's request finished:  the first test opens (Owen, Q53:  then the page "opens the first test");
+   * while he's typing, a notice says the tests are ready instead, and Next test opens it.
+   * - only for a press on this visit:  a request another window asked for, or one called off, opens nothing
+   */
+  @E.onChange("isPreparing")
+  protected onPrepared(preparing: boolean) {
+    if (preparing || !this.pressedStart || isServer) return
+    this.pressedStart = false
+    if (!TestQueue.openIds(this.domElement).length) return
+    if (TestQueue.isTyping()) return this.reviewState.client?.notify(this.translationForKey("testsReady"))
+    this.lastOpened = undefined
+    this.openNext()
+  }
+
+  /** It can press its button by itself:  the page reviewed, a test open.  What `pressFromAddress()` follows. */
+  get canStartTesting(): boolean {
+    return this.reviewState.reviewing() && !!this.testing()
+  }
+
+  /**
+   * The address's `?test=1` (`epic test <epic>`, an old test run's link) presses the button once, as soon as it can;
+   * the query then leaves the address, so a reload doesn't ask again (`all` stays, for the next epic's link).
+   */
+  @E.onChange("canStartTesting")
+  protected pressFromAddress(can: boolean) {
+    if (!can || isServer || this.kind !== "tests" || !new URLSearchParams(location.search).has(TEST_QUERY)) return
+    const url = new URL(location.href)
+    url.searchParams.delete(TEST_QUERY)
+    if (this.runsAll) url.searchParams.set(ALL_QUERY, "1")
+    history.replaceState(history.state, "", url.href)
+    this.startTesting()
+  }
+
+  /** Every test here answered, in a run across every epic:  what `findNextEpic()` follows. */
+  get isAllAnswered(): boolean {
+    return this.runsAll && this.testing()?.left === 0
+  }
+
+  /** Every test answered, in a run across every epic:  ask the page server which epic has open tests next. */
+  @E.onChange("isAllAnswered")
+  protected findNextEpic(answered: boolean) {
+    const client = this.reviewState.client
+    if (!answered || !client || this.nextEpic !== undefined) return
+    const here = location.pathname
+    void client.openTests().then((entries) => {
+      this.nextEpic = entries.find((entry) => !here.endsWith(entry.page.replace(/^\//, ""))) ?? null
+    })
+  }
+
+  /** The section's last line in a run across every epic:  the next epic with open tests, or that none is left. */
+  private nextEpicLine(): JSX.Element {
+    return (
+      <Show when={this.nextEpic !== undefined}>
+        <p class={NEXT_EPIC} part={this.partForName("next-epic")}>
+          <Show when={this.nextEpic} fallback={this.translationForKey("noEpicLeft")}>
+            {(next) => (
+              <a href={`${next().page}?${TEST_QUERY}=1&${ALL_QUERY}=1`}>
+                {this.translationForKey("nextEpic", { epic: next().epic, count: next().open })}
+              </a>
+            )}
+          </Show>
+        </p>
+      </Show>
+    )
+  }
+
+  /**
+   * The address's `?test=`:  `1` (any value), `all` (`?test=all`, or `?test=1&all=1` as `epic test --all` writes it,
+   * or `all=1` left after it pressed the button), or `undefined` for none.
+   */
+  private static testQuery(): string | undefined {
+    const query = new URLSearchParams(location.search)
+    const value = query.get(TEST_QUERY)
+    if (query.has(ALL_QUERY) || value === TEST_ALL) return TEST_ALL
+    return value === null ? undefined : "1"
   }
 
   /** Open this section, then its new item form, on screen, its title field ready. */
@@ -605,6 +796,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             counts={[...this.stateCounts()].map(([state, count]) => `${state}:${count}`).join(" ")}
             shown={this.chosen ? [...this.showing()].join(" ") : undefined}
             marked={this.marked().size || undefined}
+            phases={this.kind === "phases" ? "" : undefined}
           />
         </span>
       </Show>
@@ -620,36 +812,29 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## The Phases section
   ////////////////
 
-  /** The Phases title's toggles:  bare icons, the accent while pressed. */
-  private toggles(): JSX.Element {
-    return (
-      <For each={PHASE_TOGGLES}>
-        {(toggle, index) => {
-          const on = () => !!this.shown[toggle.field]
-          const label = () => this.translationForKey(on() ? toggle.hide : toggle.show)
-          return (
-            <button
-              type="button"
-              class={TOGGLE}
-              aria-pressed={on() ? "true" : "false"}
-              aria-label={label()}
-              title={label()}
-              onClick={() => this.flip(toggle)}
-            >
-              {this.toggleGlyphs[index()]!.svg}
-            </button>
-          )
-        }}
-      </For>
-    )
+  /**
+   * The Phases title's gear (`EpicFold.renderGear()`, I166), last in its row:
+   * "Show each phase's files" and "... checks", ticked while every phase shows them.
+   */
+  private gear(): JSX.Element {
+    return this.renderGear({
+      title: () => this.translationForKey("gearTip"),
+      entries: () =>
+        PHASE_FIELDS.map((it) => ({
+          value: it.field,
+          text: this.translationForKey(it.every),
+          isOn: !!phaseFields.everyPhase()[it.field]
+        })),
+      pick: (field) => this.flip(field as PhaseFieldName)
+    })
   }
 
-  /** The Phases section's fields to show:  each toggle's custom property, `block` while it's on. */
+  /** The Phases section's fields to show:  each field's custom property, `block` while every phase shows it. */
   protected foldStyle(): Record<string, string> | undefined {
     if (this.kind !== "phases") return undefined
-    const shown = this.shown
+    const shown = phaseFields.everyPhase()
     const style: Record<string, string> = {}
-    for (const toggle of PHASE_TOGGLES) if (shown[toggle.field]) style[toggle.property] = "block"
+    for (const it of PHASE_FIELDS) if (shown[it.field]) style[it.property] = "block"
     return style
   }
 
@@ -780,27 +965,24 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Behaviour
   ////////////////
 
-  /** A toggle, clicked:  show or hide its field in every phase, and remember it. */
+  /** An entry of its gear menu, picked:  show or hide `field` in every phase, and remember it. */
   @E.untracked
-  private flip(toggle: PhaseToggle) {
-    const shown = { ...this.shown }
-    shown[toggle.field] = !shown[toggle.field]
-    this.shown = shown
-    EpicSection.save(PHASE_TOGGLES_KEY, shown)
+  private flip(field: PhaseFieldName) {
+    phaseFields.setEveryPhase(field, !phaseFields.everyPhase()[field])
   }
 
   /** One of its state chips, clicked (`<epic-state-filter>`'s `epic-state-changed`). */
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state)
+    this.pickState(event.detail.state, event.detail.how)
   }
 
-  /** A state chip, clicked:  what shows next, by `StateFilter.nextShown()`'s rule. */
+  /** A state chip, clicked:  what shows next, by `StateFilter.nextShown()`'s rule;  ⌥-clicked, only its state. */
   @E.untracked
-  private pickState(state: string) {
+  private pickState(state: string, how: ChipPick = "click") {
     const present = this.present().map((it) => it.state as string)
-    const next = StateFilter.nextShown(present, [...this.showing()], state)
+    const next = StateFilter.nextShown(present, [...this.showing()], state, how)
     this.showStates(next.length === present.length ? undefined : next)
   }
 
@@ -859,13 +1041,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * Is `it` with Claude (`marked()`)?  An item marked in this pass;  a phase not done, marked or being worked on.
+   * Is `it` with Claude (`marked()`)?  An item, or a phase not done, marked in this pass.
    */
   private isWithClaude(it: { item: Element; state: ChipStateName }): boolean {
     if (it.item.localName !== "epic-phase") return this.reviewState.isMarked(it.item.id)
-    return (
-      it.state !== "complete" && (this.reviewState.isMarked(it.item.id) || this.reviewState.liveOf(it.item.id).workedOn)
-    )
+    return it.state !== "recent" && it.state !== "old" && this.reviewState.isMarked(it.item.id)
   }
 
   /** A kind that holds items (Questions ... Manual tests). */
@@ -898,7 +1078,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    *   - one being worked on is blue, not red
    *   - one Owen marked in this pass is with Claude (the blue badge), in neither
    * - `replied`:  of those, the ones waiting on his pick (orange)
-   * - `running`:  the phases at work now:  under way (`status="active"`), or being worked on (I147)
+   * - `running`:  the phases drawn blue (`PhaseState.of()`, I170):  under way or being worked on (I147), and needing
+   *   nothing of Owen first, nor changed since he looked;  a phase drawn red counts in `attention`
    */
   private countOf(children: readonly Element[]): SectionCount | undefined {
     if (!children.length) return undefined
@@ -907,20 +1088,20 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     ).length
     // an item Owen marked in this pass is with Claude (the blue badge), as its section's chips leave it out (P43)
     const states = children.map((child) =>
-      child.localName !== "epic-item"
-        ? (child.getAttribute("state") ?? "")
-        : child.id && this.reviewState.isMarked(child.id)
+      child.localName === "epic-phase"
+        ? child.id && child.getAttribute("status") !== "done" && this.reviewState.isMarked(child.id)
           ? "marked"
-          : this.drawnStateOf(child)
+          : this.phaseStateOf(child)
+        : child.localName !== "epic-item"
+          ? (child.getAttribute("state") ?? "")
+          : child.id && this.reviewState.isMarked(child.id)
+            ? "marked"
+            : this.drawnStateOf(child)
     )
     const attention = states.filter((state) => NEEDS_OWEN.has(state)).length
     const replied = states.filter((state) => state === "replied").length
-    const running = children.filter(
-      (child) =>
-        child.localName === "epic-phase" &&
-        (child.getAttribute("status") === "active" ||
-          (child.getAttribute("status") !== "done" && !!child.id && this.reviewState.liveOf(child.id).workedOn))
-    ).length
+    // a phase drawn blue (I170):  under way or worked on, and neither red nor orange first
+    const running = children.filter((child, at) => child.localName === "epic-phase" && states[at] === "progress").length
     return { open, total: children.length, attention, replied, running }
   }
 
@@ -944,9 +1125,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return DrawnState.of(DrawnState.fieldsOf(item), this.reviewState.liveOf(item.id))
   }
 
-  /** The Phases toggles as last left on this page;  none without storage. */
-  private static savedToggles(): Record<string, boolean> {
-    return EpicSection.saved(PHASE_TOGGLES_KEY) as Record<string, boolean>
+  /**
+   * A phase's state as DRAWN (`PhaseState.of()`, epic `epic-engine` I170):  its attributes, and the review inbox now
+   * (Claude at work on it, its updates marked Seen);  the rule its own status circle draws by too.
+   */
+  private phaseStateOf(phase: Element): PhaseStateName {
+    return PhaseState.of(PhaseState.fieldsOf(phase), {
+      workedOn: !!phase.id && this.reviewState.liveOf(phase.id).workedOn,
+      isSeen: (id) => this.reviewState.markOf(id)?.action === "seen"
+    })
   }
 
   /** The state filters as last left on this page, by section id;  none without storage. */
@@ -986,6 +1173,12 @@ const FILTERED = "data-epic-filtered"
 
 /** Class of the Manual tests section's Start testing. */
 const START_TESTING = "start-testing"
+
+/** Class of the Manual tests section's last line in a run across every epic. */
+const NEXT_EPIC = "next-epic"
+
+/** The Manual tests section's button, as things stand (`EpicSection.testing()`). */
+type TestingState = { open: number; left: number; prepared: boolean; preparing: boolean; queued: boolean }
 
 /** Classes of the waiting new items (`newItemList()`):  the list, a card. */
 const NEW_LIST = "new-list"

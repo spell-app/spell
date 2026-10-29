@@ -17,7 +17,7 @@
       }
     </script>
     <script type="module">
-      import "spell/ui/ui-root.js"
+      import "spell-ui/ui-root.js"
     </script>
   </head>
   <body>
@@ -67,10 +67,10 @@ and a page needs nothing else of Spell's to use it.
   and form controls that are real form controls, joining a `<form>` and validating and resetting like native ones.
   The cost is a current browser ([below](#what-it-costs-and-what-it-assumes)).
 
-**Real today:**  all of that, from a checkout of the kit, the folder every Spell repo is cloned into.
-**Not yet:  `npm install spell-ui`.**
-The page above maps `ui/` onto the kit's own build of the library, and Solid onto one vendored copy:
-[the thirty seconds below](#thirty-seconds-two-ways) make both, and show the map 🌱 npm will need instead.
+**On npm:**  `npm install spell-ui@next`, or no install at all, from a CDN.
+`@next` is the tag until Spell's first release (planned for December 1, 2026);  from then on, plain `spell-ui`.
+The page above maps `spell-ui/` onto a copy of the library's build, and Solid onto one vendored copy:
+[the thirty seconds below](#thirty-seconds-three-ways) show where each comes from, and the map for a CDN instead.
 
 <details>
 <summary>What the button drew inside its shadow root</summary>
@@ -198,30 +198,53 @@ Each component also has public tokens of its own, `--ui-<tag>-*`, listed on its 
 The layers in order, dark mode and five recipes (sitewide defaults, one component's, a whole theme,
 the app stylesheet, making a theme) are on [README-themes.md](README-themes.md#five-recipes).
 
-## Thirty seconds, two ways
+## Thirty seconds, three ways
 
-Both start from the kit, with Spell UI cloned inside it.
-Setting the kit up from zero (Node 24, yarn, the clone) is [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero);
-then bring Spell UI in:
+**In a plain HTML page, from a CDN:**  nothing to install or build.
+Give the page at the top this import map instead, and open it from any static server:
 
-```sh
-cd ~/www/spell             # the kit
-yarn clone spell-ui        # clones spell-ui and what it needs, then the one install
+```json
+{
+  "imports": {
+    "spell-ui/": "https://cdn.jsdelivr.net/npm/spell-ui@next/dist/",
+    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.17",
+    "solid-js/": "https://esm.sh/solid-js@2.0.0-rc.17/",
+    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.17?external=solid-js"
+  }
+}
 ```
 
-Spell UI needs only the kit;  `spell-epic` and `spell-app` need Spell UI.
-`yarn install` runs in the kit, never in `ui/`, because the kit holds the one install for every repo.
-Run `yarn clone spell-ui` again and it says the repo is there, then installs anyway (`--no-install` skips that):
+- Checked in headless Chromium against the published `0.8.6`:  the segment, its header and the Save button drew,
+  with no failed request.
+- `solid-js/` is there for Solid's own `solid-js/internal`, which the vendored copy below folds in.
 
-```text
-every repo asked for is cloned:  spell-ui
-== yarn install:  one install over every repo
-```
-
-**In a plain HTML page:**  build the library once, and copy it beside your page.
+**In a program with a bundler:**
 
 ```sh
-cd ~/www/spell/spell-ui
+npm install spell-ui@next solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
+```
+
+```js
+// main.js
+import "spell-ui/ui-root"
+```
+
+Then the same `<ui-root>` markup, in your page or in your components' templates.
+
+- Solid 2 is a peer:  your app and Spell UI share one copy.
+- Spell UI is also inside `spell`, the whole kit's package, under the kit's names:
+  `npm install spell@next`, then `import "spell/ui/ui-root"`.
+  A page loads one or the other, never both:  each has its own copy of the element code.
+- Inside the kit, Vite reads Spell UI's source under that same name, as it does for the Spell app's own
+  `<spell-viewer>` element and for Spell UI's docs site.
+
+**In a plain HTML page, from your own server:**  build the library once in a checkout of the kit,
+and copy it beside your page.
+Setting the kit up from zero (Node 24, yarn, the clone, the one install) is
+[the kit's front page](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero).
+
+```sh
+cd ~/www/spell/ui
 yarn build                         # the library, into dist/
 yarn vendor                        # ONE copy of Solid, for import-map pages, into vendor/
 mkdir ~/hello && cp -R dist vendor ~/hello/
@@ -267,38 +290,6 @@ python3 -m http.server 8000        # then open http://localhost:8000/hello.html
 - Recorded by Playwright, each answered with a 200;  a rebuild changes the hashed names.
 
 </details>
-
-🌱 **From a CDN, once Spell UI is on npm,** there's nothing to build:  the map points at an npm CDN instead.
-
-```json
-{
-  "imports": {
-    "spell-ui/": "https://cdn.jsdelivr.net/npm/spell-ui/dist/",
-    "solid-js": "https://esm.sh/solid-js@2.0.0-rc.17",
-    "@solidjs/web": "https://esm.sh/@solidjs/web@2.0.0-rc.17?external=solid-js"
-  }
-}
-```
-
-Spell UI isn't published, so that map answers nothing yet.
-
-**In a program with a bundler,** 🌱 once Spell UI is on npm:
-
-```sh
-npm install spell-ui solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
-```
-
-```js
-// main.js
-import "spell/ui/ui-root"
-```
-
-Then the same `<ui-root>` markup, in your page or in your components' templates.
-
-Today that works inside the kit, under the name every Spell repo uses, `spell/ui/components/ui-root`:
-Vite reads Spell UI's source, as it does for the Spell app's own `<spell-viewer>` element and for Spell UI's docs site.
-A program outside the kit can't do that yet:
-inside it, Spell UI's entries are its TypeScript source, which only the kit's one install resolves.
 
 ## `<ui-root>`, the top of every page
 
@@ -407,17 +398,17 @@ Three families aren't finished:  Property Editor, Section and Theme Editor, mark
 ## Other ways to load
 
 The root is one of five ways in.
-Each is a real entry of the package, by the name every Spell repo uses today, and 🌱 the shorter one it'll have on npm.
+Each is a real entry, by its name in the `spell-ui` package and by the kit's name, in `spell` and inside the kit.
 
-| How | Inside the kit, today | 🌱 On npm | What it does |
+| How | `spell-ui` | The kit's name | What it does |
 | --- | --- | --- | --- |
-| everything | `import "spell/ui"` | the same | defines every family at once |
-| one family | `import "spell/ui/components/ui-button"` | `spell/ui/ui-button` | each family is its own entry, so a page carries only what it imports |
-| on demand | `import "spell/ui/components/ui-root"` | `spell/ui/ui-root` | the root loads the rest:  this page's way, and the docs site's |
-| no JavaScript at all | `import "spell/ui/styles/ui.css"`, through your bundler | not among its published entries yet | tokens, utilities, typography and plain-HTML styling as one stylesheet;  `class="ui-typography"` on `<body>` for Fomantic's page typography |
-| the static render | `spell ssr <pages>` | -- | `ui-*` pages turned into plain HTML in node, for search engines and readers without JavaScript ([README-runtime.md](README-runtime.md#the-static-render)) |
+| everything | `import "spell-ui"` | `import "spell/ui"` | defines every family at once |
+| one family | `import "spell-ui/ui-button"` | `spell/ui/ui-button` (`spell/ui/components/ui-button` in full) | each family is its own entry, so a page carries only what it imports |
+| on demand | `import "spell-ui/ui-root"` | `spell/ui/ui-root` | the root loads the rest:  this page's way, and the docs site's |
+| no JavaScript at all | not among its published entries yet | `import "spell/ui/styles/ui.css"`, through your bundler, inside the kit | tokens, utilities, typography and plain-HTML styling as one stylesheet;  `class="ui-typography"` on `<body>` for Fomantic's page typography |
+| the static render | -- | `spell ssr <pages>` | `ui-*` pages turned into plain HTML in node, for search engines and readers without JavaScript ([README-runtime.md](README-runtime.md#the-static-render)) |
 
-- On the kit's build, an import map's `ui/` reaches the same entries as files:
+- An import map's `spell-ui/` reaches the same entries as files:
   `spell-ui/index.js`, `spell-ui/ui-button.js`, `spell-ui/ui-root.js`.
 - `ui.css` is a build entry:  your bundler inlines its `@import`s and resolves its custom media queries,
   which no browser reads by itself.
@@ -597,11 +588,8 @@ so they need a checkout with the content folder and the page server running:
 
 ## 🌱 Coming
 
-The one that would change this page most:  `npm install spell-ui`, with Solid 2 as a peer,
-so any project can use Spell UI without the kit,
-and an import map can point at a CDN ([above](#thirty-seconds-two-ways)).
-Where it stands:  the package is already shaped for it, its published entries pointing at the built `dist/`,
-whose declarations `yarn smoke` checks an app could resolve;  it isn't published.
+The one that would change this page most:  the first release, planned for December 1, 2026,
+when `npm install spell-ui` drops its `@next` ([above](#thirty-seconds-three-ways)).
 
 The rest is on the page that owns each one:
 - a tool that moves a Semantic UI page over:  [README-migrating.md](README-migrating.md#-coming--the-migration-tool)
@@ -617,7 +605,7 @@ The rest is on the page that owns each one:
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 76 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 npm</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 76 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 the first release</li></ul> |
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  eighteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
 | [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and Spell's four themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>the theme menu, `<ui-theme-menu>`</li><li>🌱 themes per component</li></ul> |

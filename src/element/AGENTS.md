@@ -5,7 +5,7 @@ when working with code in the kit's `src/element/` (`spell/element`), and its to
 (`src/element-tools/`, `src/test-helpers/`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the kit's layout, and the house style every repo shares.
+the kit's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 **This is Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL FIRST,**
@@ -15,16 +15,16 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
 
 - What makes a custom element on Solid:  the component and DOM element bases, the reactive members' decorators,
   shadow events, hot reloading.
-- Its own repo, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
+- Once a repo of its own, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
   merged into the kit with that history in P9.
-- Another repo imports it by its npm name, `spell/element` (`spell/element/SkeletonText` ...),
-  through the wildcard entry of the kit's `exports`.
+- Every big folder (Spell UI's elements, the epics', the app's) and every project outside imports it by one name,
+  `spell/element` (`spell/element/SkeletonText` ...), through the wildcard entry of the kit's `exports`.
 - The kit's own files import it by the same name (epic `repo-split` P14).
   - Its pack-module key is that name too, `spell/element`:
     every page's component packs share it by that name at run time (`SpellUI.packModules`).
     - It was `$/spell-element` until epic `repo-split` P14 (Q45).
 - It may use:  util's generic files (`spell/util/class` ...) and the toolchain, both the kit's.
-  - Every arrow points DOWN:  nothing in the kit or below it may import a child repo.
+  - Every arrow points DOWN:  nothing in the kit's `src/` may import a big folder (`parser/`, `ui/` ...).
 - Its tests:  in the kit's [tests/element/](../../tests/element/) (below, "Overview").
 
 ## Overview

@@ -10,7 +10,6 @@
         "epic-summary",
         "epic-prompt",
         "epic-section",
-        "epic-test-run",
         "epic-state-filter",
         "epic-hidden-note",
         "epic-cards",
@@ -74,7 +73,7 @@
       "tags": ["epic-threads", "epic-thread", "epic-comment-pane", "epic-page-note-head"]
     }
   ],
-  "drawnOnly": ["epic-review", "epic-new-item", "epic-agents", "epic-thread-message"],
+  "drawnOnly": ["epic-review", "epic-new-item", "epic-option-form", "epic-agents", "epic-thread-message"],
   "nav": {
     "start": [{ "id": "index", "file": "index.html", "label": "The Epic Elements", "icon": "layer group" }],
     "foundation": [

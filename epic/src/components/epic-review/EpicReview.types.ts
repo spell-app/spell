@@ -40,6 +40,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   (`PLAN_BUTTONS`);  its note box a part's
  * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Reopen (`CHANGE_BUTTONS`);
  *   no note box
+ * - `update`:  a new update block's (`<epic-update id="up3">`, epic `epic-engine` I168):  Seen (`UPDATE_BUTTONS`);
+ *   no note box
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
  *   I140):  a part's buttons, then the green check of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
  */
@@ -51,6 +53,7 @@ export const REVIEW_KINDS = [
   "closed",
   "proposal",
   "change",
+  "update",
   "plan",
   "accepted"
 ] as const
@@ -87,7 +90,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -103,6 +106,7 @@ export type ReviewButtonSpec = {
     | "looksGood"
     | "defer"
     | "reopenChange"
+    | "seenUpdate"
     | "acceptPlan"
     | "deferPhase"
   /** what it does, for a screen reader */
@@ -116,6 +120,7 @@ export type ReviewButtonSpec = {
     | "looksGoodTip"
     | "deferTip"
     | "reopenChangeTip"
+    | "seenUpdateTip"
     | "acceptPlanTip"
 }
 
@@ -188,6 +193,16 @@ export const CHANGE_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "reopen", color: "blue", icon: "history", label: "reopenChange", tip: "reopenChangeTip" }
 ]
 
+/**
+ * A new update block's button (`<epic-update id="up3">`, epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear
+ * these 'update' marks?"), at its title row's right while it's new and the page is reviewed:
+ * - Seen (`seen`, grey:  no longer news):  the block folds to one grey line at once;  `inbox apply` writes `seen` into
+ *   the page, so it's seen for everyone
+ */
+export const UPDATE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "seen", color: "grey", icon: "check", label: "seenUpdate", tip: "seenUpdateTip" }
+]
+
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
@@ -197,6 +212,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   closed: [],
   proposal: PROPOSAL_BUTTONS,
   change: CHANGE_BUTTONS,
+  update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
   accepted: PART_BUTTONS
 }
@@ -320,6 +336,7 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   closed: [],
   proposal: NOTE_BUTTONS,
   change: [],
+  update: [],
   plan: NOTE_BUTTONS,
   accepted: NOTE_BUTTONS
 }
@@ -344,6 +361,9 @@ export const DO_IT_NOTE = "do it"
  */
 export const DO_IT_ID = /^[jt]\d+$/i
 
+/** A manual test's id (`m3`):  its note box's x says "no longer applies" (epic `epic-engine` P51). */
+export const TEST_ITEM_ID = /^m\d+$/i
+
 ////////////////
 // ## Shadow markup
 ////////////////
@@ -357,6 +377,10 @@ export const NOTE_BOX = "note-box"
 export const NOTE_TEXT = "note-text"
 export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
+export const NOTE_FIELD = "note-field"
+export const NOTE_PICK = "note-pick"
+export const NOTE_PICTURE = "note-picture"
+export const SAID_PICTURE = "said-picture"
 export const NOTE_ACTIONS = "note-actions"
 export const SAID = "said"
 export const SAID_WHAT = "said-what"
@@ -468,6 +492,7 @@ export const REVIEW_NAME_TEXTS = [
   },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
+  { key: "seenUpdate", text: "Seen", description: "A new update block's button (the check):  its name." },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
 
@@ -523,6 +548,11 @@ export const REVIEW_TEXTS = [
     description: "A phase's review button while the phases are agreed:  what Defer does."
   },
   {
+    key: "seenUpdateTip",
+    text: "Seen:  fold it to one grey line, for everyone, once Claude applies it",
+    description: "A new update block's button:  what Seen does."
+  },
+  {
     key: "reopenChangeTip",
     text: "Talk the question over again:  it opens for you to answer",
     description: "A change mark's button:  what Reopen does."
@@ -564,6 +594,21 @@ export const REVIEW_TEXTS = [
     text: "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why",
     description: "Note box:  the x."
   },
+  {
+    key: "boxSkipTestTip",
+    text: "No longer applies:  cancel this test;  a note here says why",
+    description: "A manual test's note box:  the x (epic `epic-engine` P51, as a test run's Skip)."
+  },
+  {
+    key: "pictureAdd",
+    text: "Add a picture:  paste one (⌘V) or drop it in the box, or choose a file",
+    description: "The note box's picture button (epic `epic-engine` P51):  its tooltip."
+  },
+  { key: "pictureSaving", text: "saving…", description: "A pasted picture on its way to the page server." },
+  { key: "pictureRemove", text: "Take the picture out", description: "The ✕ on a note's picture." },
+  { key: "pictureZoom", text: "Your picture:  click to see it full size", description: "A note's picture." },
+  { key: "notImage", text: "That isn't a picture", description: "Something else dropped or pasted in the note." },
+  { key: "tooBig", text: "That picture is over 8 MB", description: "A picture too big for the page server." },
   { key: "saved", text: "Saved {time}", description: "The note box's floppy:  its draft is saved." },
   { key: "notSaved", text: "Not saved:  {why} (kept in this browser)", description: "The floppy, red:  not saved." },
   { key: "you", text: "You", description: "Who wrote a marked note." },

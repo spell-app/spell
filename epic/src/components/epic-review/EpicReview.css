@@ -220,12 +220,97 @@
     box-shadow: 0 1px 0 color-mix(in oklab, var(--ui-violet, #6550ca) 12%, transparent);
     font-size: 15px;
   }
-  /* the note, its Saved mark (a floppy, its tooltip the time) in the lower right corner */
+  /* the note, then its picture (epic `epic-engine` P51) */
   .note-text {
-    position: relative;
     display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
     min-width: 0;
+  }
+  /* the field, its Saved mark (a floppy, its tooltip the time) in the lower right corner, the picture button above it */
+  .note-field {
+    position: relative;
+    display: flex;
+    min-width: 0;
+  }
+  .note-pick {
+    position: absolute;
+    inset-block-start: 4px;
+    inset-inline-end: 3px;
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--_epic-act-muted);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .note-pick:is(:hover, :focus-visible) {
+    color: var(--_epic-act-ink);
+  }
+  .note-pick:focus-visible {
+    outline: 2px solid var(--_epic-act-focus);
+    outline-offset: 0;
+  }
+  .note-pick ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  /* a picture pasted or dropped in the note:  its thumbnail, a click opening it full size, then its x */
+  .note-picture {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    color: var(--_epic-act-muted);
+    font-size: 12px;
+  }
+  .note-picture > img,
+  .said-picture {
+    display: block;
+    max-width: min(240px, 100%);
+    max-height: 96px;
+    border: 1px solid var(--_epic-act-rule);
+    border-radius: 4px;
+    background: var(--_epic-act-paper);
+    object-fit: contain;
+    cursor: zoom-in;
+  }
+  .note-picture[data-saving] > img {
+    opacity: 0.6;
+  }
+  .note-picture > button {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--_epic-act-paper);
+    box-shadow: inset 0 0 0 1px var(--_epic-act-rule);
+    color: var(--_epic-act-muted);
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .note-picture > button:is(:hover, :focus-visible) {
+    color: var(--_epic-act-ink);
+  }
+  .note-picture ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  /* a marked note's picture:  small, beside its words */
+  .said-picture {
+    flex: none;
+    align-self: center;
+    max-height: 40px;
   }
   /*
    * grows with its text (Owen, 2026-10-06:  every "tell me more" box), from two lines to half the window:  a

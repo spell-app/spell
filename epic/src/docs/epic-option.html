@@ -357,7 +357,7 @@
                     <tr>
                       <td><code>tick</code></td>
                       <td>
-                        In an <code>&lt;epic-ask&gt;</code>: its tick box (round for pick one), labelled by its title.
+                        In an <code>&lt;epic-ask&gt;</code>: its Choose pill, a radio (pick one) or a checkbox to a screen reader, labelled by its title.
                       </td>
                     </tr>
                     <tr>
@@ -426,7 +426,7 @@
                     </tr>
                     <tr>
                       <td><code>answering</code></td>
-                      <td>An option of an <code>&lt;epic-ask&gt;</code>: a tick box, a comment box.</td>
+                      <td>An option of an <code>&lt;epic-ask&gt;</code>: a Choose pill, a comment box folded under a Comment link.</td>
                     </tr>
                     <tr>
                       <td><code>ticked</code></td>
@@ -502,13 +502,21 @@
                   <li>The card is framed to match.</li>
                   <li>On the chosen option the pill is solid green: the pick applied.</li>
                   <li>
+                    Edited in place (epic <code>epic-engine</code> P50), while the page is reviewed and its set open: a
+                    pencil and an ✕ on its band, shown on hover. The pencil opens a form in the card; saved, the card
+                    shows the new title and text, dashed, "Edited · not sent", with Undo. The ✕ fades it, "Removed ·
+                    not sent". Applied, its earlier text folds under Was (its <code>was</code> slot); a removed one
+                    moves to its set's Removed list. Its pictures are thumbnails; a click shows one full size.
+                  </li>
+                  <li>
                     In an
                     <a href="epic-ask.html" target="src-packages-epic-components-elements-epic-ask-html"
                       ><code>&lt;epic-ask&gt;</code></a
                     >
-                    (a page Owen answers on, epic <code>epic-workflow</code> P12): a card a row, its header a tick box
-                    labelled by its title (round for pick one), the badge, then the (?) of "Provide more details" and
-                    its state icon at the end; a comment box under it; ticked, framed green; <code>done</code>, hidden
+                    (a page Owen answers on, epic <code>epic-workflow</code> P12): a card a row, in the epic page's look
+                    (epic <code>epic-engine</code> P50): its title folds it, the badge, the (?) of "Provide more
+                    details" and its state icon, then its Choose pill; its comment box folded under a Comment link;
+                    picked, framed green; <code>done</code>, hidden
                     under its question's Open.
                   </li>
                 </ul>

@@ -1,12 +1,12 @@
 /**
  * Shared types for spell-app's `spell` commands (`cli/commands.ts`) and the language commands' work (`cli/hooks.ts`).
- * - Runtime-light:  types, plus `normalizedName()`.
+ * - Runtime-light:  types, plus `normalizedName()` and `checkProjectName()`.
  * - The kit's (`spell/cli`) and the language's (`spell/parser/cli`) are re-exported here, so every file of this
  *   folder says `CLI.CliError`, `CLI.CompileOptions` ...:  ONE `CliError` class for every repo's commands.
  */
 import type { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
-import type { GlobalOptions } from "spell/cli"
+import { CliError, type GlobalOptions } from "spell/cli"
 
 export { CliError, EXIT, type GlobalOptions } from "spell/cli"
 export type {
@@ -48,6 +48,17 @@ export type ResolvedProject = Exclude<CliProject, { kind: "root" }>
 ////////////////
 // ## Options
 ////////////////
+
+/**
+ * Throw if spell can't use `name` for a project:  a letter, then letters, digits, `-` or `_`.
+ * - Here, where nothing loads spell:  `spell app create` asks before `loadApp()` loads all of spell
+ *   (seconds on CI), and `newCommand()` asks too, for its other callers.
+ */
+export function checkProjectName(name: string): void {
+  if (!/^[A-Za-z][\w-]*$/.test(name)) {
+    throw new CliError(`'${name}' won't do as a project name:  a letter, then letters, digits, - or _`)
+  }
+}
 
 /**
  * `name` for comparing as people would:  lower case, with spaces, `-`, `_` and a word's capital all one space.

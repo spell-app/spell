@@ -1,6 +1,9 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
+// By file:  the review barrel is the page's;  this is a plain function
+import { inTestOrder } from "spell/epic/review/review.types"
+
 import type { PlanDoc } from "./PlanDoc"
 import { PlanDocFiles } from "./PlanDocFiles"
 import { PlanItem } from "./PlanItem"
@@ -87,7 +90,8 @@ export class EpicTests {
   ////////////////
 
   /**
-   * Epic page `plan`'s open tests, in the run's order:  page order, the deferred ones (Not now, before) last.
+   * Epic page `plan`'s open tests, in Owen's order (`inTestOrder()`, the page's too):  the prepared ones by their
+   * place (epic `epic-engine` P51), then page order, the deferred ones (Not now, before) last.
    * - each with what the run shows:  its Step (with its action links), Should, Example, If not;
    *   an older test, only prose:  `prose`, which the run shows as its Step
    * - `failed`:  the issue an earlier run filed it as (`<epic-item failed>`)
@@ -95,7 +99,7 @@ export class EpicTests {
   static openIn(plan: PlanDoc): OpenTest[] {
     const open = plan.itemsOf("test").filter((item) => item.getAttribute("status") === "open")
     const tests = open.map((item) => EpicTests.testOf(plan, item))
-    return [...tests.filter((test) => !test.deferred), ...tests.filter((test) => test.deferred)]
+    return inTestOrder(tests)
   }
 
   /** Test `item` of `plan`, as `openIn()` lists it. */
@@ -114,6 +118,7 @@ export class EpicTests {
       title: PlanItem.titleOf(item),
       ...optional({
         deferred: item.getAttribute("deferred"),
+        prepared: item.getAttribute("prepared"),
         failed: item.getAttribute("failed")?.toUpperCase(),
         step: text(step),
         actions: actions.length ? actions : undefined,
@@ -272,6 +277,8 @@ export type OpenTest = {
   title: string
   /** put off in an earlier run (Not now), that day:  the run puts it last */
   deferred?: string
+  /** Start testing wrote it out for Owen (epic `epic-engine` P51):  its place in his order, `"1"` first */
+  prepared?: string
   /** the issue an earlier run filed its failure as:  `I42` */
   failed?: string
   /** what to do, as text */

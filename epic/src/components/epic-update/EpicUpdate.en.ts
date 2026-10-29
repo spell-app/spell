@@ -25,6 +25,15 @@ export const epicUpdateVocabulary = {
     "item changed while a phase is active.",
   attributes: [
     {
+      name: "id",
+      property: "epicId",
+      kind: "string",
+      format: "anchor",
+      description:
+        "A block's `up3`, given by the epic tool on its next write (epic `epic-engine` I168):  the key its Seen mark goes " +
+        "under, and a link's target (`#up3`).  None:  just written, no Seen yet;  a bare label never has one."
+    },
+    {
       name: "at",
       kind: "string",
       format: "time",
@@ -42,6 +51,15 @@ export const epicUpdateVocabulary = {
       description:
         "The phase active when it was written, by its number (`3`, `11.1`).  `phase 3 done` removes P3's bare labels and the updates " +
         "outside a phase;  a phase's own plan changes stay."
+    },
+    {
+      name: "seen",
+      kind: "string",
+      format: "time",
+      description:
+        "When Owen marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from " +
+        "its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until " +
+        "`PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
     }
   ],
   events: [],
@@ -53,17 +71,33 @@ export const epicUpdateVocabulary = {
     { name: "title", description: "A block's `Update: <summary>`." },
     { name: "time", description: "A block's date (`at`), at the right of its title row." },
     ACTIONS_PART_SPEC,
+    {
+      name: "seen",
+      description:
+        'A new block\'s ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons="update">`.'
+    },
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
     { name: "label", description: "The bare orange `UPDATE` label." }
   ],
   states: [
     { name: "block", description: "Drawn as a block:  it has a summary, a date or what changed." },
-    { name: "open", description: "A block, unfolded:  it starts so (page state, never written)." }
+    {
+      name: "open",
+      description: "A block, unfolded:  it starts so while new, folded once seen or quiet (page state, never written)."
+    },
+    {
+      name: "quiet",
+      description:
+        "A block seen (`seen`, or its Seen mark in the inbox) or older than 3 days (`PlanDates.isQuiet()`):  " +
+        "grey, folded to its title row."
+    }
   ],
   texts: [
     { key: "foldTip", text: "Close this update", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Open this update", description: "Tooltip of its fold button while folded." },
 
+    { key: "buttonsLabel", text: "this update", description: "Seen's group, spoken." },
+    { key: "seenAt", text: "Seen {when}", description: "The date's tooltip, after the full date:  when it was seen." },
     { key: "title", text: "Update", description: "A block's title, in bold, before `: <summary>`." },
     { key: "during", text: "Written during P{phase}", description: "The date's tooltip, after the full date." },
     { key: "label", text: "UPDATE", description: "The bare label." },

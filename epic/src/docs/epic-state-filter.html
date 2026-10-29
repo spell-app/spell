@@ -45,6 +45,9 @@
           </p>
           <ul>
             <li>It filters nothing itself: a click tells its owner what was picked, and what should show next.</li>
+            <li>
+              ⌥-click (Alt-click) a chip to show ONLY its state, whatever showed (epic <code>epic-engine</code> I166).
+            </li>
             <li>ONE element for every filter by state: an item section's title, an epic page's toolbar, the Epics page's lists.</li>
           </ul>
           <p class="meta">
@@ -77,6 +80,22 @@
                 <ui-code language="html"
                   ><script type="text/plain">
                     <epic-state-filter counts="open:2 recent:3" shown="open" marked="3"></epic-state-filter>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>
+              The Phases section's (<code>phases</code>, epic <code>epic-engine</code> I170): a phase's states, in Owen's
+              order. Red needs him, orange changed since he looked, the one under way in the blue badge, a dotted blue
+              outline scheduled, green done lately, grey done before.
+            </p>
+<epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The phases example · 1 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-state-filter phases counts="attention:1 updated:2 progress:1 scheduled:4 recent:2 old:40" shown="attention updated scheduled progress"></epic-state-filter>
                   </script></ui-code
                 >
               </ui-content>
@@ -118,6 +137,7 @@
                 </thead>
                 <tbody>
                   <tr><td><code>counts</code></td><td>How many items are in each state: <code>attention:2 open:5</code>. A chip per state with any, in the filter's order: progress, attention, replied, open, recent, old.</td></tr>
+                  <tr><td><code>phases</code></td><td>The Phases section's chips (epic <code>epic-engine</code> I170): <code>counts</code> names a phase's states, in Owen's order: attention (red), updated (orange), progress (blue, in the badge), scheduled (a dotted blue outline), recent (green), old (grey), each with its own words.</td></tr>
                   <tr><td><code>shown</code></td><td>The states showing. No attribute: every state; <code>""</code>: none.</td></tr>
                   <tr><td><code>marked</code></td><td>How many items Owen marked in this pass, not applied yet (epic <code>epic-engine</code> P43): the blue badge, left of the chips, drawn whatever <code>shown</code> says. Left out of <code>counts</code>. None or 0: no badge.</td></tr>
                 </tbody>
@@ -132,7 +152,7 @@
                 </thead>
                 <tbody>
                   <tr><td><code>base</code></td><td>The group of chips.</td></tr>
-                  <tr><td><code>chip</code></td><td>Each chip, a <code>&lt;button&gt;</code>: <code>data-state</code>, <code>data-color</code>, <code>aria-pressed</code>.</td></tr>
+                  <tr><td><code>chip</code></td><td>Each chip, a <code>&lt;button&gt;</code>: <code>data-state</code>, <code>data-color</code>, <code>data-fill</code> (<code>dotted</code>: a phase scheduled), <code>aria-pressed</code>.</td></tr>
                   <tr><td><code>marked</code></td><td>The blue badge of the items marked in this pass: not a button, a click does nothing.</td></tr>
                 </tbody>
               </table>
@@ -146,7 +166,7 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-state-changed</code></td><td><code>{ state, shown }</code></td><td>A chip was clicked: its state, and what should show next by the one rule (<code>StateFilter.nextShown()</code>).</td></tr>
+                  <tr><td><code>epic-state-changed</code></td><td><code>{ state, shown, how }</code></td><td>A chip was clicked: its state, and what should show next by the one rule (<code>StateFilter.nextShown()</code>); <code>how</code> is <code>click</code>, or <code>only</code> for an ⌥-click, which shows its state alone.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -157,8 +177,9 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>Each state in its colour: blue Claude is on it, red needs Owen, orange his turn to pick, yellow open, green done lately, grey older.</li>
+              <li>A phase scheduled, still to do: a DOTTED blue outline, its count in blue, never filled; faded while hidden (epic <code>epic-engine</code> I170).</li>
               <li>The colours come from the page: an epic page's <code>--epic-state-*</code>, a docs page's <code>--spell-state-*</code>.</li>
-              <li>Each chip's tooltip says how many, which state, and what a click does.</li>
+              <li>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only these.</li>
               <li>The marked badge: solid blue, the Send plane's, with white numbers, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</li>
             </ul>
           </ui-section>

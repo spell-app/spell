@@ -462,7 +462,7 @@ yarn test:vscode
 <details>
 <summary>More in the docs site</summary>
 
-In the content folder, so only where `spell.epics` sits beside the repos, served by `spell server start`:
+In the content folder, so only where a checkout has `spell.epics`, served by `spell server start`:
 
 - "Windows and Review":  `/guides/windows-and-review.html`
 

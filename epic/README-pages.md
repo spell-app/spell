@@ -56,8 +56,10 @@ where the build stands and where you're needed are one glance up.
    The step pill names the phase under way (`P13`), else the next one to do, DONE, FUTURE or STANDING;
    it turns red when every phase is done but items still need you, and grey when the epic is paused,
    untouched for 3 days.
-   - Beside it:  Send (the paper plane), while the page is being reviewed,
-     and the git toggle, which shows or hides every commit the page lists.
+   - Beside it:  the gear, which picks Auto Send and the page's theme.
+   - In the header's middle:  Send (the paper plane), while the page is being reviewed.
+     A press sends at once;  left alone, a ring round it drains, and it sends by itself (2 minutes by default).
+     Beside it, a spinner while Claude is at work.
    - The epic's name, at the left, copies `/epic resume <name>` when you click it;
      the chip after it says how long what's open takes to read.
 2. **The toolbar says where you're needed.**

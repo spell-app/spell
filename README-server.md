@@ -1,7 +1,7 @@
 # `spell/server`:  the page server
 
 ```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 spell server status
 ```
 

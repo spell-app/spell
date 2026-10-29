@@ -2,7 +2,7 @@
  * Link source references in `.html` docs:  one named target per destination, new tab.
  * - see `src/AGENTS.md`, "Links"
  *
- * Usage (from spell-epic's root):
+ * Usage (from the epic folder, `epic/`):
  *   yarn tsx tools/doc-links.js <folder>/<doc>.html ...           -- add links (idempotent)
  *   yarn tsx tools/doc-links.js --check <folder>/<doc>.html ...   -- verify, exit 1 on problems
  *   ... --root <checkout> ...                                     -- links resolve in that checkout, not this one
@@ -32,12 +32,21 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { SRV } from "spell/server"
+import { kitOf } from "spell/server/page/settings"
 import { RepoList } from "spell/epic/server/RepoList"
 import { EpicTargets } from "spell/epic/tool/EpicTargets"
 import { ServedFolders } from "spell/epic/tool/ServedFolders"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
+
+/**
+ * The checkout the links are from:  the kit, when `ROOT` is one of its folders (epic `repo-split` P20, I46);
+ * else `ROOT`.
+ * - Run as `yarn tsx src/tools/doc-links.js` in `epic/`, `ROOT` is the epic folder:  without this, `/epic/src/x.ts`
+ *   was looked for under `epic/epic/`, and every bare file name was found in the content folder instead.
+ */
+const CHECKOUT = kitOf(ROOT) ?? ROOT
 
 /**
  * The folders served at another address under checkout `root` (`ServedFolders`):  the component sets'
@@ -49,13 +58,13 @@ function servedUnder(root) {
 }
 
 /**
- * ONE linker, under the checkout the page server serves (`RepoList.linkRootOf()`:  the kit, for a child repo's
- * checkout;  or the command line's `--root`):  its bare-name index is built once per process.
+ * ONE linker, under the checkout the page server serves (`RepoList.linkRootOf()`:  the kit, for a folder of it or
+ * an older child repo's checkout;  or the command line's `--root`):  its bare-name index is built once per process.
  * - every link is a ROOT PATH from there (epic `epic-engine` P46):  a content page's, and this repo's own pages'
  *   (Epic UI's, the templates), `/epic/src/...` alike
  * - before P46, this repo's own pages linked from this checkout, and only the content folder's from the kit (I22)
  */
-let linker = linkerUnder(new RepoList().linkRootOf(ROOT))
+let linker = linkerUnder(new RepoList().linkRootOf(CHECKOUT))
 
 /** A linker under checkout `root`, told its served folders:  a new one each call, so callers keep theirs. */
 export function linkerUnder(root) {
@@ -79,7 +88,7 @@ export function linkerFor(docDir) {
  * What short addresses and `<epic-link>`s find in this checkout, or the `--root` one (epic `epic-workflow` P15):
  * the sagas, pages, ids.
  */
-let targets = new EpicTargets(ROOT)
+let targets = new EpicTargets(CHECKOUT)
 
 ////////////////
 // ## Linking
@@ -157,14 +166,14 @@ if (import.meta.main) {
   const at = args.indexOf("--root")
   const root = at >= 0 ? args[at + 1] : undefined
   if (root) {
-    linker = new SRV.Linker(resolvePath(root), { served: servedUnder(ROOT) })
+    linker = new SRV.Linker(resolvePath(root), { served: servedUnder(CHECKOUT) })
     targets = new EpicTargets(resolvePath(root))
   }
   const files = args.filter((arg, i) => !arg.startsWith("--") && !(at >= 0 && i === at + 1))
   if (!files.length) {
     console.error(
       [
-        "usage (from spell-epic's root):",
+        "usage (from the epic folder, epic/):",
         "  yarn tsx tools/doc-links.js ../../guides/<folder>/<doc>.html ...      -- add links (idempotent)",
         "  yarn tsx tools/doc-links.js --check ../../guides/<folder>/<doc>.html -- verify, exit 1 on problems",
         "  ... --root <checkout>                                                 -- resolve links in another checkout"

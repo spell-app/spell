@@ -250,7 +250,7 @@ const EDGE_PX = 48
 const SCROLL_STEP = 12
 
 /** What keeps its own click in a title row. */
-const CONTROLS = new Set(["a", "ui-button", "epic-review", "input", "textarea", "select"])
+const CONTROLS = new Set(["a", "ui-button", "ui-dropdown", "epic-review", "input", "textarea", "select"])
 
 /** Swallow the click that follows a drag's release:  it would fold the phase. */
 function swallowClick() {

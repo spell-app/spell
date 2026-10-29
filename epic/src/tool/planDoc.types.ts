@@ -16,6 +16,9 @@
 // every vocabulary
 import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
 
+import type { ChoicesSummary } from "./OptionSets"
+import type { AddedOption, EditedOption } from "./ReviewInbox"
+
 ////////////////
 // ## Errors
 ////////////////
@@ -89,7 +92,10 @@ export type PhaseWindow = {
 }
 
 /** A phase's fields as HTML, by flag:  `PlanDoc.setPhaseFields()`;  `""` removes one. */
-export type PhaseFieldValues = Partial<Record<PhaseField, string>>
+export type PhaseFieldValues = Partial<Record<PhaseField, string>> & {
+  /** its own option sets, `<epic-choices>` HTML (`--choices`, epic `epic-engine` P50);  never filled with TBD */
+  choices?: string
+}
 
 /** `PlanDoc.addPhase()`'s options:  the fields, the estimate, and where it goes. */
 export type AddPhaseOptions = Prettify<
@@ -532,6 +538,14 @@ export type PlanMark = {
    * none (a mark from before):  the item's own
    */
   choices?: number
+  /** the pick-one / pick-any flip (epic `epic-engine` P50):  `true` sets `multiple`, `false` removes it */
+  multiple?: boolean
+  /** options Owen added from the page (epic `epic-engine` P50) */
+  added?: AddedOption[]
+  /** options Owen edited in place (epic `epic-engine` P50) */
+  edited?: EditedOption[]
+  /** letters of options Owen removed (epic `epic-engine` P50) */
+  removed?: string[]
   /** a revisit's:  `soon` or `now` */
   when?: string
   /** Owen's note */
@@ -586,6 +600,14 @@ export type KeptNote = {
   note: string
   /** the mark's action:  `revisit`, `todo` ... */
   action: string
+  /** the pick-one / pick-any flip (epic `epic-engine` P50):  `true` sets `multiple`, `false` removes it */
+  multiple?: boolean
+  /** options Owen added from the page (epic `epic-engine` P50) */
+  added?: AddedOption[]
+  /** options Owen edited in place (epic `epic-engine` P50) */
+  edited?: EditedOption[]
+  /** letters of options Owen removed (epic `epic-engine` P50) */
+  removed?: string[]
   /** a revisit's:  `soon` or `now` */
   when?: string
   /** when he marked it (ISO), else now */
@@ -612,12 +634,33 @@ export type CommitLogEntry = {
   sha: string
   /** its subject line */
   subject: string
-  /** the GitHub page of the repo it's in (`PlanDocFiles.sharedDocLog()`):  a child repo's commit links there */
+  /**
+   * the GitHub page of the repo it's in (`PlanDocFiles.sharedDocLog()`):  a child repo's or a peer's commit links
+   * there
+   */
   repo?: string | null
+  /** when it went in:  git's commit time, ISO with its offset (`%cI`, `2026-10-29T11:46:12-04:00`);  the Log's `at` */
+  time?: string
 }
 
-/** A commit `PlanDoc.backfillCommits()` listed:  its sha, and where. */
-export type BackfilledCommit = Prettify<CommitTarget & { sha: string }>
+/**
+ * An epic page's history, for `PlanDoc.backfillCommits()` (`PlanDocFiles.epicHistory()`):
+ * its commits, newest first, its repo's GitHub page and its epic's name.
+ */
+export type CommitHistory = {
+  /** its commits, newest first, none another epic's page lists */
+  log: CommitLogEntry[]
+  /** the page's repo's GitHub page, or `null` */
+  base: string | null
+  /** the epic's name, from its file */
+  epic: string
+}
+
+/**
+ * A commit `PlanDoc.backfillCommits()` listed:  its sha, and where.
+ * - under a phase (`phase`) or an item (`item`);  or, `log`, as an entry in the Log (epic `epic-engine` P52)
+ */
+export type BackfilledCommit = Prettify<CommitTarget & { sha: string; log?: true }>
 
 /** `PlanDoc.addCommit()`'s options. */
 export type CommitOptions = {
@@ -634,6 +677,11 @@ export type CommitOptions = {
 export type BackfillOptions = CommitOptions & {
   /** the epic's name:  a commit naming ANOTHER epic first (`other-epic P7:`) is left out */
   epic?: string
+  /**
+   * the Log's entries only, nothing listed under phases and items (the migration `log-commits`, epic `epic-engine`
+   * P52):  an old page's lists hold its commits by their shas before the repos were merged into one
+   */
+  logOnly?: boolean
 }
 
 /** What a commit subject says it did (`PlanCommits.parseCommitSubject()`). */
@@ -676,6 +724,8 @@ export type PlanSummary = {
   saga: string | null
   /** each kind's open items, in `OPEN_KINDS`' order */
   open: Record<OpenKind, ItemSummary[]>
+  /** the option sets (epic `epic-engine` P50):  the Choices section's standing sets, each phase's open ones */
+  choices: ChoicesSummary
 }
 
 ////////////////

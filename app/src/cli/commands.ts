@@ -15,6 +15,7 @@
 import type { Command } from "commander"
 
 import { CLI } from "spell/cli"
+import { checkProjectName } from "spell/app/cli/cli.types"
 import { loadApp } from "./hooks"
 
 export default function appCommands(spell: Command): void {
@@ -28,7 +29,10 @@ export default function appCommands(spell: Command): void {
     .argument("<name>", "the project's name, e.g. Snake")
     .option("--in <folder>", "make it in this folder -- default owen@spell's, your space in spell.spaces")
     .action((name: string, _options, command: Command) =>
-      CLI.runCommand(async () => (await loadApp()).appCommands.create([name], command.optsWithGlobals()))
+      CLI.runCommand(async () => {
+        checkProjectName(name)
+        return (await loadApp()).appCommands.create([name], command.optsWithGlobals())
+      })
     )
 
   app

@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-event>`
- * One line of the plan's log.
+ * One review line of the plan's log:  written, not drawn on an epic page (epic `epic-engine` P52, Q56 C).
  ****************/
 export const epicEventVocabulary = {
   tag: "epic-event",
@@ -17,7 +17,9 @@ export const epicEventVocabulary = {
   noun: "event",
   ui: false,
   description:
-    'One line of the log (`<epic-section kind="log">`):  its time and icon are drawn;  its text is its children.',
+    'One review line of the log (`<epic-section kind="log">`):  "Q53 answered", "P49 active" ...;  its time and icon ' +
+    "are drawn, its text is its children.  The Log hides them (epic `epic-engine` P52):  it shows the epic's " +
+    "commits (`<epic-commit>`);  Actual Time reads them, and `epic log <epic>` prints them.",
   attributes: [
     {
       name: "at",

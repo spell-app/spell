@@ -16,7 +16,15 @@ import "spell/epic/components/epic-choices"
 const PAGE = "/epics/sample/sample.plan.html"
 
 /** A mark as the fake routes keep it. */
-type FakeMark = { action: string; pick?: string; choices?: number; note?: string; when?: string; at: string }
+type FakeMark = {
+  action: string
+  pick?: string
+  choices?: number
+  note?: string
+  when?: string
+  removed?: string[]
+  at: string
+}
 
 /**
  * The page server's review routes, as `fetch`:  `GET inbox`, `POST mark` and `POST send`, every reply the whole
@@ -106,7 +114,7 @@ describe("<epic-choices>", () => {
   test("an open question:  cards side by side, each headed `A · title`, a violet thumbs-up after the recommended one, no word;  passes axe", async () => {
     const { host, options } = await choices(`<epic-choices>${OPTIONS}</epic-choices>`)
     expect(host.matches(":state(answered)")).toBe(false)
-    expect(getComputedStyle(part(host, "base")!).display).toBe("grid")
+    expect(getComputedStyle(part(host, "cards")!).display).toBe("grid")
     expect(options.map((option) => part(option, "title")!.textContent!.trim())).toEqual([
       "A · A named palette",
       "B · Any CSS colour"
@@ -426,5 +434,182 @@ describe("<epic-option>'s Choose pill, anywhere (I8)", () => {
       [null, ["Chosen", "true"]]
     ])
     expect(pillOf(reply![1])!.classList.contains("applied")).toBe(true)
+  })
+})
+
+////////////////
+// ## P50:  any set, pick any, Add choice, edited in place
+////////////////
+
+/** `host`'s shadow element matching `selector`. */
+function inShadow<T extends Element = HTMLElement>(host: Element, selector: string): T | null {
+  return host.shadowRoot!.querySelector<T>(selector)
+}
+
+/** The mark the routes keep under `id`, without its time. */
+function markOf(routes: FakeRoutes, id: string) {
+  const { at: _at, ...mark } = routes.inbox.marks[id] ?? ({ at: "" } as FakeMark)
+  return mark
+}
+
+describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
+  test("pick any (`multiple`):  several pills on at once, ONE mark naming them all;  the item stays open", async () => {
+    const { routes } = await reviewing()
+    const { host, options } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices multiple>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    expect(inShadow(host, "[part~='switch']")!.getAttribute("aria-checked")).toBe("true")
+    pillOf(options[0])!.click()
+    await settle()
+    pillOf(options[1])!.click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "A B", choices: 0 })
+    expect(pills(options)).toEqual([
+      ["Chosen · not sent", "true"],
+      ["Chosen · not sent", "true"]
+    ])
+  })
+
+  test("the switch flips pick one to pick any, and back:  the newest pick stays;  the flip rides in the mark", async () => {
+    const { routes } = await reviewing()
+    const { host, options } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    const toggle = () => inShadow<HTMLButtonElement>(host, "[part~='switch']")!
+    expect([toggle().getAttribute("role"), toggle().getAttribute("aria-checked"), toggle().textContent]).toEqual([
+      "switch",
+      "false",
+      "Pick one"
+    ])
+    toggle().click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", multiple: true, choices: 0 })
+    pillOf(options[1])!.click()
+    await settle()
+    pillOf(options[0])!.click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "B A", multiple: true, choices: 0 })
+    toggle().click()
+    await settle()
+    // back to what the set says:  no flip, the newest pick alone
+    expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "A", choices: 0 })
+    expect(pills(options)).toEqual([
+      ["Chosen · not sent", "true"],
+      ["Choose", "false"]
+    ])
+  })
+
+  test("Add choice:  its form, then a card of Owen's, picked, dashed until sent;  ✕ drops it", async () => {
+    const { routes } = await reviewing()
+    const { host } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    inShadow<HTMLButtonElement>(host, "[part~='add']")!.click()
+    await settle()
+    const form = inShadow(host, "epic-option-form")!
+    await ElementFixture.settle()
+    const title = form.shadowRoot!.querySelector<HTMLInputElement>("[part~='title']")!
+    title.value = "Both"
+    form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({
+      action: "pick",
+      pick: "+1",
+      added: [{ key: "+1", title: "Both" }],
+      choices: 0
+    })
+    const card = inShadow(host, "[part~='added']")!
+    expect(card.textContent).toContain("New · Both")
+    expect(card.textContent).toContain("Yours · not sent")
+    expect(getComputedStyle(card).borderTopStyle).toBe("dashed")
+    expect(inShadow(host, "epic-option-form")).toBe(null)
+    // its ✕
+    card.querySelectorAll("ui-button")[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    await settle()
+    expect(routes.inbox.marks.q1).toBe(undefined)
+  })
+
+  test("`fixed`:  no Add choice;  `closed`:  drawn answered, no pills, no switch, no pencils", async () => {
+    await reviewing()
+    const fixed = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices fixed>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    expect(inShadow(fixed.host, "[part~='add']")).toBe(null)
+    expect(inShadow(fixed.host, "[part~='switch']")).not.toBe(null)
+    const closed = await choices(
+      `<epic-item id="q2" title="Which?" status="open"><epic-choices closed>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    expect(closed.host.matches(":state(answered)")).toBe(true)
+    expect(pills(closed.options)).toEqual([null, null])
+    expect(inShadow(closed.host, "[part~='switch']")).toBe(null)
+    expect(closed.options.map((option) => inShadow(option, ".tools"))).toEqual([null, null])
+  })
+
+  test("edited in place:  the pencil's form, then the new title dashed with Undo;  ✕ fades it, Undo brings it back", async () => {
+    const { routes } = await reviewing()
+    const { options } = await choices(
+      `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
+    )
+    await settle()
+    const tools = (option: Element) => inShadow(option, ".tools")!.querySelectorAll("ui-button")
+    tools(options[0])[0]!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    await settle()
+    const form = inShadow(options[0], "epic-option-form")!
+    await ElementFixture.settle()
+    const title = form.shadowRoot!.querySelector<HTMLInputElement>("[part~='title']")!
+    expect(title.value).toBe("A named palette")
+    title.value = "A palette of six"
+    form.shadowRoot!.querySelector<HTMLButtonElement>("button[type=submit]")!.click()
+    await settle()
+    expect(markOf(routes, "q1")).toEqual({
+      action: "pick",
+      edited: [{ letter: "A", title: "A palette of six", note: "short" }],
+      choices: 0
+    })
+    expect(part(options[0], "title")!.textContent).toBe("A · A palette of six")
+    expect(part(options[0], "change")!.textContent).toContain("Edited · not sent")
+    tools(options[1])[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    await settle()
+    expect(options[1].matches(":state(removing)")).toBe(true)
+    expect(markOf(routes, "q1").removed).toEqual(["B"])
+    part(options[1], "change")!.querySelector("button")!.click()
+    await settle()
+    expect(options[1].matches(":state(removing)")).toBe(false)
+    expect(markOf(routes, "q1")).toEqual({
+      action: "pick",
+      edited: [{ letter: "A", title: "A palette of six", note: "short" }],
+      choices: 0
+    })
+  })
+
+  test("a phase's set is keyed by the phase;  a standing set by its own id, its title its heading", async () => {
+    const { routes } = await reviewing()
+    const phase = await choices(
+      `<epic-phase id="p-one"><epic-field name="choices"><epic-choices>${OPTIONS}</epic-choices></epic-field></epic-phase>`
+    )
+    await settle()
+    pillOf(phase.options[0])!.click()
+    await settle()
+    expect(markOf(routes, "p-one")).toEqual({ action: "pick", pick: "A", choices: 0 })
+    const standing = await choices(
+      `<epic-choices id="s-upgrades" title="Upgrades on offer" standing multiple>${OPTIONS}` +
+        `<epic-option letter="C" title="Old one" slot="picked" picked-on="2026-10-28"></epic-option>` +
+        `<epic-option letter="D" title="Gone" slot="removed" removed="2026-10-28"></epic-option></epic-choices>`
+    )
+    await settle()
+    expect(standing.host.matches(":state(answered)")).toBe(false)
+    expect(part(standing.host, "title")!.textContent).toBe("Upgrades on offer")
+    expect(part(standing.host, "picked")!.textContent).toContain("Picked (1)")
+    expect(part(standing.host, "removed")!.textContent).toContain("Removed (1)")
+    // retired options:  no pill
+    expect(pills(standing.options)).toEqual([["Choose", "false"], ["Choose", "false"], null, null])
+    pillOf(standing.options[1])!.click()
+    await settle()
+    expect(markOf(routes, "s-upgrades")).toEqual({ action: "pick", pick: "B", choices: 0 })
   })
 })

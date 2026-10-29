@@ -168,6 +168,15 @@ export const epicItemVocabulary = {
         "stays open;  gone once a run passes it."
     },
     {
+      name: "prepared",
+      kind: "string",
+      format: "place",
+      description:
+        "A manual test Start testing wrote out for Owen (epic `epic-engine` P51):  its place in his order, `1` first.  " +
+        "The Manual tests section opens the prepared tests in that order, and once every open test has it, its " +
+        "button is Next test."
+    },
+    {
       name: "source",
       kind: "string",
       description:
@@ -188,6 +197,14 @@ export const epicItemVocabulary = {
       description:
         "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+    },
+    {
+      name: "to-see",
+      kind: "string",
+      description:
+        "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the " +
+        "epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts " +
+        "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
     },
     {
       name: "open",

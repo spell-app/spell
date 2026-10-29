@@ -95,14 +95,23 @@ async function record(argv: string[], root: string): Promise<number> {
   return 0
 }
 
-/** The page's commits:  `<where> <sha7> <repo or ->`, in page order. */
+/** The page's commits under its phases and items:  `<where> <sha7> <repo or ->`, in page order. */
 function listed(): string[] {
   const plan = new PlanDocFiles({ root: KIT }).read(PAGE)
-  return Array.from(plan.document.querySelectorAll("epic-commit")).map((commit) => {
+  return Array.from(plan.document.querySelectorAll(":not(epic-section) > epic-commit")).map((commit) => {
     const host = commit.parentElement!
     const where = host.localName === "epic-phase" ? `P${plan.phases.find((p) => p.id === host.id)?.number}` : host.id
     return `${where} ${commit.getAttribute("sha")!.slice(0, 7)} ${commit.getAttribute("repo") ?? "-"}`
   })
+}
+
+/** The Log's entries (epic `epic-engine` P52):  `<sha7> <refs or -> <repo or ->`, as the file has them. */
+function logged(): string[] {
+  const plan = new PlanDocFiles({ root: KIT }).read(PAGE)
+  return Array.from(plan.document.querySelectorAll('epic-section[kind="log"] > epic-commit')).map(
+    (commit) =>
+      `${commit.getAttribute("sha")!.slice(0, 7)} ${commit.getAttribute("refs") ?? "-"} ${commit.getAttribute("repo") ?? "-"}`
+  )
 }
 
 // git, the docs index and two page writes a test:  slow under a full run
@@ -123,7 +132,14 @@ describe("commits on the epic page by themselves (I135)", { timeout: 30_000 }, (
     sha.plain = commit(WORKTREE, "unrelated work")
     printed = []
     expect(await commands(WORKTREE).run(["phase", "x", "1", "done", "--no-open"])).toBe(0)
-    expect(printed).toContain("2 commits listed on the page")
+    expect(printed).toContain("2 commits listed on the page, 2 added to the Log")
+    const one = new PlanDocFiles({ root: KIT }).read(PAGE).phases[0]!.id
+    expect(logged().sort()).toEqual(
+      [
+        `${sha.kitOne!.slice(0, 7)} ${one} -`,
+        `${sha.uiOne!.slice(0, 7)} ${one} https://github.com/spell-app/spell-ui`
+      ].sort()
+    )
     // the same second's commits, from two repos, in either order
     expect(listed().sort()).toEqual(
       [`P1 ${sha.kitOne!.slice(0, 7)} -`, `P1 ${sha.uiOne!.slice(0, 7)} https://github.com/spell-app/spell-ui`].sort()
@@ -153,12 +169,17 @@ describe("commits on the epic page by themselves (I135)", { timeout: 30_000 }, (
         `${sha.item} ${sha.kitItem!.slice(0, 7)} -`
       ].sort()
     )
-    expect(printed.at(-1)).toBe("3 commits added (6 merged)")
+    expect(printed.at(-1)).toBe("3 commits added, 2 to the Log (6 merged)")
+    const two = new PlanDocFiles({ root: KIT }).read(PAGE).phases[1]!.id
+    expect(logged().slice(2).sort()).toEqual(
+      [`${sha.uiTwo!.slice(0, 7)} ${two} ${sha.item} ${ui}`, `${sha.kitItem!.slice(0, 7)} ${sha.item} -`].sort()
+    )
     expect(readFileSync(PAGE, "utf8")).toMatch(/repo="https:\/\/github\.com\/spell-app\/spell"/)
     printed = []
     await Requests.recordMerged("x", merged, { cwd: KIT, record })
-    expect(printed.at(-1)).toBe("0 commits added (6 merged)")
+    expect(printed.at(-1)).toBe("0 commits added, 0 to the Log (6 merged)")
     expect(listed()).toHaveLength(5)
+    expect(logged()).toHaveLength(4)
   })
 
   test("best effort:  a failing record says so in one line, never throws;  nothing merged or no page, nothing run", async () => {

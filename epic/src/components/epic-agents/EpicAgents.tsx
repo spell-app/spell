@@ -21,8 +21,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAgents`
- * The component behind `<epic-agents>`:  WHAT CLAUDE IS DOING, at the right of the epic page's toolbar (epic
- * `epic-engine` P35), drawn by `<epic-page>` in its shadow root.
+ * The component behind `<epic-agents>`:  WHAT CLAUDE IS DOING (epic `epic-engine` P35), drawn by `<epic-page>` in its
+ * shadow root:  a bare spinner beside the header's Send (`draws="spinner"`, P53), and the agents in the header's pill.
  * - the session's LINE:  what it's doing now, a word or two ("Responding", "Building P35"), a quiet spinner before it,
  *   in a grey pill like the header's step label (Owen, 2026-10-25:  "should look like "running P6" pill");
  *   nothing when idle, or nobody listens (`epic inbox status`, the inbox's `doing`:  `ReviewClient.doing`)
@@ -93,15 +93,19 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   // ## Drawing
   ////////////////
 
-  /** `:state(running)`:  agents are running, its button shows (the header's pill joins it:  `EpicPage.css`). */
+  /**
+   * `:state(running)`:  agents are running, its button shows (the header's pill joins it:  `EpicPage.css`);
+   * `:state(doing)`:  the session's line shows (the header keeps Send centred beside the spinner).
+   */
   protected cssStates() {
-    return { running: this.agents.length > 0 }
+    return { running: this.agents.length > 0, doing: this.draws !== "agents" && !!this.doing }
   }
 
   render(): JSX.Element {
     return (
       <span class={TOOLS} part={this.partForName("base")}>
-        <Show when={this.draws !== "agents" && this.doing}>
+        <Show when={this.draws === "spinner" && this.doing}>{(doing) => this.bareSpinner(doing)}</Show>
+        <Show when={this.draws !== "agents" && this.draws !== "spinner" && this.doing}>
           {(doing) => (
             <>
               <span
@@ -116,27 +120,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
                   <span class={WORDS}>{doing().text}</span>
                 </ui-label>
               </span>
-              <Show when={doing().items?.length}>
-                <ui-popup
-                  open-on="hover"
-                  position="bottom right"
-                  class={DOING_TIP}
-                  part={this.partForName("doing-tip")}
-                >
-                  <b class={TIP_HEAD}>{this.translationForKey("doingTip", { doing: doing().text })}</b>
-                  <ul class={TIP_ITEMS}>
-                    <For each={doing().items ?? []} keyed={false}>
-                      {(item) => (
-                        <li>
-                          <a href={`#${item().id}`}>
-                            <span class={TIP_CHIP}>{item().id.toUpperCase()}</span> {item().title}
-                          </a>
-                        </li>
-                      )}
-                    </For>
-                  </ul>
-                </ui-popup>
-              </Show>
+              <Show when={doing().items?.length}>{this.doingTip(doing)}</Show>
             </>
           )}
         </Show>
@@ -179,6 +163,51 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   private agentsWords(): string {
     const count = this.agents.length
     return this.translationForKey(count === 1 ? "agentRunning" : "agentsRunning", { count })
+  }
+
+  /**
+   * The session's line as a BARE spinner, beside the header's Send (`draws="spinner"`;  T53, Owen, 2026-10-29:
+   * "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
+   * already round, doesn't need to be in a circular border"):  no pill, its words the tooltip;  what it's
+   * answering in the styled tooltip, as the line's.
+   */
+  private bareSpinner(doing: () => InboxDoing): JSX.Element {
+    const answering = () => !!doing().items?.length
+    return (
+      <>
+        <span
+          class={[DOING, BARE]}
+          part={this.partForName("doing")}
+          role="img"
+          tabindex={answering() ? "0" : undefined}
+          aria-label={this.doingLabel(doing())}
+          title={answering() ? undefined : doing().text}
+        >
+          <span class={SPINNER} aria-hidden="true" />
+        </span>
+        <Show when={answering()}>{this.doingTip(doing)}</Show>
+      </>
+    )
+  }
+
+  /** The line's styled tooltip:  what it's doing, then each item it's answering, linked. */
+  private doingTip(doing: () => InboxDoing): JSX.Element {
+    return (
+      <ui-popup open-on="hover" position="bottom right" class={DOING_TIP} part={this.partForName("doing-tip")}>
+        <b class={TIP_HEAD}>{this.translationForKey("doingTip", { doing: doing().text })}</b>
+        <ul class={TIP_ITEMS}>
+          <For each={doing().items ?? []} keyed={false}>
+            {(item) => (
+              <li>
+                <a href={`#${item().id}`}>
+                  <span class={TIP_CHIP}>{item().id.toUpperCase()}</span> {item().title}
+                </a>
+              </li>
+            )}
+          </For>
+        </ul>
+      </ui-popup>
+    )
   }
 
   /** The line, spoken:  what it's doing, and what it's answering (the tooltip's ids). */
@@ -366,6 +395,7 @@ const TOOLS = "tools"
 const DOING = "doing"
 const DOING_PILL = "doing-pill"
 const SPINNER = "spinner"
+const BARE = "bare"
 const DOING_TIP = "doing-tip"
 const TIP_HEAD = "tip-head"
 const TIP_ITEMS = "tip-items"

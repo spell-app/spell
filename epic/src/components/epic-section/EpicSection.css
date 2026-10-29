@@ -54,46 +54,33 @@
   :host([kind="phases"]) ui-section {
     --ui-section-content-padding: 6px var(--epic-inset, 16px) 0;
   }
-  /* the log:  one-liners, a size down */
+  /*
+   * the Log:  the epic's change log (epic `epic-engine` P52), a size down
+   * - its commits, NEWEST FIRST (J146):  the file keeps them oldest first, so the body's column runs bottom up
+   * - each commit always shown, not only under the page's git toggle
+   * - the review lines (`<epic-event>`:  answered, reviewed, active ...) are written, never drawn (Q56 C):
+   *   Actual Time reads them, and `epic log <name>` prints them
+   */
   :host([kind="log"]) .body {
+    display: flex;
+    flex-direction: column-reverse;
     font-size: 14px;
+  }
+  :host([kind="log"]) ::slotted(epic-commit) {
+    --epic-commits-display: block;
+  }
+  :host([kind="log"]) ::slotted(epic-event) {
+    display: none;
+  }
+  /* its part's failure line stays on top */
+  :host([kind="log"]) .body > [part~="note"] {
+    order: 1;
   }
 
   /* an Overview sub-section's number, quieter than its title */
   .number {
     color: var(--epic-muted, var(--ui-text-muted));
     font-variant-numeric: tabular-nums;
-  }
-
-  /* ## The Phases title's toggles:  bare icons, square, muted;  the accent while pressed */
-  .toggle {
-    display: inline-grid;
-    place-items: center;
-    box-sizing: border-box;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: none;
-    color: var(--epic-muted, var(--ui-text-muted));
-    cursor: pointer;
-  }
-  .toggle svg {
-    display: block;
-    width: auto;
-    height: 14px;
-    fill: currentColor;
-  }
-  .toggle:hover {
-    background: var(--epic-accent-soft, var(--ui-primary-background));
-  }
-  .toggle[aria-pressed="true"] {
-    color: var(--epic-accent, var(--ui-link));
-  }
-  .toggle:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
-    outline-offset: 1px;
   }
 
   /* ## An item section with no items */
@@ -105,7 +92,7 @@
   }
 
   /*
-   * ## The title's end:  the count badge, then its tools (toggles, the state filter) ending in collapse-all;
+   * ## The title's end:  the count badge, then its tools (the state filter;  the Phases section's ending in its gear);
    * the chevron at the row's START, before the icon (Owen, 2026-10-25:  "put it on the left")
    */
   ui-section::part(badge) {
@@ -233,6 +220,26 @@
     flex: none;
     color: var(--ui-link, LinkText);
     font-size: 12px;
+  }
+
+  /* the Manual tests section's button while Claude prepares the tests (epic `epic-engine` P51):  its icon turns */
+  .start-testing[data-busy]::part(icon) {
+    animation: epic-section-turn 1.2s linear infinite;
+  }
+  @keyframes epic-section-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .start-testing[data-busy]::part(icon) {
+      animation: none;
+    }
+  }
+  /* a run across every epic:  the next epic with open tests, once every test here is answered */
+  .next-epic {
+    margin: 8px 0 2px;
+    font-size: 14px;
   }
 
   /* a phase being dragged (`PhaseDrag`, epic `epic-engine` P34):  no text selected on the way, the grabbing cursor */

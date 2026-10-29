@@ -19,19 +19,21 @@ export const epicAgentsVocabulary = {
   noun: "agents panel",
   ui: false,
   description:
-    "What Claude is doing, at the right of an epic page's toolbar (epic `epic-engine` P35), drawn by `<epic-page>` in " +
-    "its shadow root, never written in a doc:  the listening session's line (`Responding`, `Building P35`, set by " +
-    "`epic inbox status`), a grey pill with a spinner, its tooltip listing what it's answering;  and while agents " +
+    "What Claude is doing (epic `epic-engine` P35), drawn by `<epic-page>` in its shadow root, never written in a " +
+    "doc:  the listening session's line (`Responding`, `Building P35`, set by `epic inbox status`), a grey pill with " +
+    "a spinner, or a bare spinner beside the header's Send (P53), its tooltip listing what it's answering;  and while agents " +
     "run, `2` and a robot, a button (`2 agents running` its name and tooltip) whose popover holds a row per agent (name, status, age, task, the redirects so far), each with a note box " +
     "that redirects it, sent by a blue plane.  Only while the page is served with a token.",
   attributes: [
     {
       name: "draws",
       kind: "enum",
-      values: ["doing", "agents"],
+      values: ["doing", "spinner", "agents"],
       description:
-        "Which half it draws:  `doing` (the session's line, in the toolbar) or `agents` (the agents' button, in the " +
-        "header's pill:  Owen, 2026-10-25);  none:  both."
+        "Which part it draws:  `doing` (the session's line, a grey pill with a spinner and its words), `spinner` (the " +
+        "same line as a bare spinner, its words the tooltip:  beside an epic page header's Send, epic `epic-engine` " +
+        "P53) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
+        "agents both."
     }
   ],
   events: [],
@@ -50,7 +52,10 @@ export const epicAgentsVocabulary = {
     },
     { name: "agents", description: "The agents' popover (`<ui-popup>`):  a row per agent." }
   ],
-  states: [{ name: "running", description: "Agents are running:  its button shows." }],
+  states: [
+    { name: "running", description: "Agents are running:  its button shows." },
+    { name: "doing", description: "The session's line shows (`doing` or `spinner`):  the session is at work." }
+  ],
   texts: [
     { key: "doingTip", text: "{doing}:", description: "The line's tooltip, its head:  what Claude is doing." },
     {

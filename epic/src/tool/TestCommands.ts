@@ -9,17 +9,19 @@ import { EpicTests, type EpicTestCount, type OpenTest, type TestFieldValues } fr
 import type { PlanDoc } from "./PlanDoc"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 import { TEST_SHOTS } from "./TestShots"
+import { PlanMarkup } from "./PlanMarkup"
 
 /****************
  * ### `TestCommands`
- * `epic test`, and the test flags of `epic add <epic>#M` / `epic details <epic>#M3` (epic `epic-engine` P4):
- * Owen's TEST RUN, from the command line.
- * - `test <name>`:  the epic page in the Review tab in test mode (`?test=1`), one test at a time;
- *   `--at <id>`, landing on that test (`seo#M3`)
- * - `test <name> --list [--json]`:  its open tests, in the run's order (`EpicTests.openIn()`)
+ * `epic test`, and the test flags of `epic add <epic>#M` / `epic details <epic>#M3` (epic `epic-engine` P4, P51):
+ * Owen's testing, from the command line.
+ * - `test <name>`:  the epic page in the Review tab, its Manual tests section's Start testing pressed (`?test=1`,
+ *   P51:  Claude prepares the tests, then the first opens);  `--at <id>`, landing on that test (`seo#M3`)
+ * - `test <name> --list [--json]`:  its open tests, in Owen's order (`EpicTests.openIn()`)
  * - `test --all [--list] [--json]`:  every epic with open tests, in Owen's saga order (`EpicTests.waiting()`),
- *   and the first one's page opened in test mode, `?test=1&all=1`:  its summary card leads to the next
- * - `--step`, `--should`, `--example`, `--if-not`:  a test's fields (`fieldsOf()`, `EpicTests.fieldsHTML()`)
+ *   and the first one's page opened so, `?test=1&all=1`:  its Manual tests section links the next once all are answered
+ * - `--step`, `--should`, `--example`, `--if-not`:  a test's fields (`fieldsOf()`, `EpicTests.fieldsHTML()`);
+ *   `--prepared <n>`, Start testing's stamp (`preparedOf()`)
  * - Prints and opens through its owner (`PlanDocCommands`):  NOT a command line of its own.
  ****************/
 export class TestCommands {
@@ -35,9 +37,10 @@ export class TestCommands {
   ////////////////
 
   /**
-   * `test <name> [--at <id>] [--list [--json]]`:  epic `name`'s test run, its page at `file`.
+   * `test <name> [--at <id>] [--list [--json]]`:  epic `name`'s testing, its page at `file`.
    * - `--list` (or `--json`):  print its open tests, open nothing
-   * - else:  the page in the Review tab in test mode, at test `--at` when given;  none open:  says so, opens nothing
+   * - else:  the page in the Review tab, Start testing pressed, at test `--at` when given;  none open:  says so,
+   *   opens nothing
    * - throws a `PlanDocError` for an `--at` that isn't one of its open tests
    */
   run(name: string, file: string, { at, list, json }: Flags): void {
@@ -53,7 +56,7 @@ export class TestCommands {
 
   /**
    * `test --all [--list] [--json]`:  every epic with open tests, in Owen's saga order;
-   * then the first one's page in test mode, `?test=1&all=1`, unless `--list` (or `--json`).
+   * then the first one's page, Start testing pressed, `?test=1&all=1`, unless `--list` (or `--json`).
    */
   all({ list, json }: Flags): void {
     const waiting = new EpicTests(this.owner.files.content).waiting()
@@ -65,7 +68,9 @@ export class TestCommands {
     this.owner.print(lines.join("\n"))
     if (list) return
     const first = waiting[0]!
-    this.owner.print(`first:  ${first.epic}, in the Review tab;  its last card leads to the next`)
+    this.owner.print(
+      `first:  ${first.epic}, in the Review tab;  its Manual tests section links the next once all are answered`
+    )
     this.owner.openInVSCode(this.owner.files.findDoc(first.epic), "review", { query: ALL_QUERY })
   }
 
@@ -73,9 +78,10 @@ export class TestCommands {
   private printTests(name: string, tests: OpenTest[], json: boolean): void {
     if (json) return this.owner.print(JSON.stringify(tests, null, 2))
     if (!tests.length) return this.owner.print(`${name}:  no open tests`)
-    const lines = [`${name}:  ${plural(tests.length, "open test")}, in the run's order:`]
+    const lines = [`${name}:  ${plural(tests.length, "open test")}, in your order:`]
     for (const test of tests) {
       const notes = [
+        test.prepared && `prepared ${test.prepared}`,
         test.deferred && `not now ${test.deferred}`,
         test.failed && `failed:  ${test.failed}`,
         !test.step && "prose only"
@@ -122,6 +128,20 @@ export class TestCommands {
   }
 
   /**
+   * `--prepared <n>` (epic `epic-engine` P51):  test `id`'s place in Owen's order, as Start testing wrote it out;
+   * `undefined` when not given.
+   * - throws a `PlanDocError` on an item that isn't a test, or a place that isn't a whole number from 1
+   */
+  preparedOf(id: string, { prepared }: Flags): number | undefined {
+    if (prepared === undefined) return undefined
+    if (!/^m\d+$/i.test(id)) throw new PlanDocError(`--prepared is a manual test's (M), not ${id.toUpperCase()}'s`)
+    const place = Number(prepared === true ? NaN : prepared)
+    if (!Number.isInteger(place) || place < 1)
+      throw new PlanDocError(`--prepared <n>:  the test's place in Owen's order, 1 first, not ${String(prepared)}`)
+    return place
+  }
+
+  /**
    * Copy a test's example screenshot (`fieldsOf()`'s `example`) beside epic page `file`, over one there.
    * - SIDE EFFECT:  writes `tests/<id>.png` in the page's folder
    */
@@ -144,10 +164,47 @@ export class TestCommands {
     if (flags.limit && kind === "todo") kind = "limit"
     else if (flags.limit && kind !== "limit") throw new PlanDocError(`--limit is a todo's (T), not a ${kind}'s`)
     const { html, example } = this.fieldsOf(plan.nextId(kind), flags)
-    const details = `${html}${stringFlag(flags.details) ?? ""}`
+    const details = `${html}${stringFlag(flags.details) ?? ""}${itemOptions(kind, flags)}`
     const id = plan.addItem(kind, title, { ...flags, details })
     return { id, example }
   }
+}
+
+/**
+ * `--options "*Do it | Don't"` on a judgement call or a question (epic `epic-engine` P50, request r44;  Owen, on a
+ * call that needed his yes / no:  "In future, this could be a question block!"):  an option set after its details,
+ * so he picks on the page;  `""` without the flag.
+ * - each option split by ` | `, lettered A, B ... in order;  a leading `*` marks the recommended one;  a leading
+ *   `A:` is its letter, given (`"A:Do it | B:Don't"`), else the first letter nobody has
+ * - its pros and cons, or a picture:  `epic option edit` / `epic option add` afterwards
+ * - throws on another kind, or with fewer than two options
+ */
+function itemOptions(kind: string, flags: Flags): string {
+  const given = stringFlag(flags.options)
+  if (given === undefined) return ""
+  if (kind !== "judgement" && kind !== "question")
+    throw new PlanDocError(`--options is a judgement call's (J) or a question's (Q), not a ${kind}'s`)
+  const entries = given
+    .split(/\s+\|\s+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  if (entries.length < 2) throw new PlanDocError(`--options:  two or more, split by " | ":  "*Do it | Don't"`)
+  const parsed = entries.map((entry) => {
+    const recommended = entry.startsWith("*")
+    const text = recommended ? entry.slice(1).trim() : entry
+    const lettered = /^([A-Z]):\s*(.+)$/.exec(text)
+    return { recommended, text: lettered?.[2] ?? text, given: lettered?.[1] }
+  })
+  // an option without a letter takes the first one nobody has
+  const used = new Set(parsed.map((each) => each.given).filter(Boolean))
+  const options = parsed.map(({ recommended, text, given }) => {
+    let letter = given
+    for (let code = 65; !letter; code++) if (!used.has(String.fromCharCode(code))) letter = String.fromCharCode(code)
+    used.add(letter)
+    const title = PlanMarkup.attribute(text)
+    return `<epic-option letter="${letter}" title="${title}"${recommended ? " recommended" : ""}></epic-option>`
+  })
+  return `<epic-choices>${options.join("")}</epic-choices>`
 }
 
 /** A test's fields as `TestCommands.fieldsOf()` makes them:  the HTML, and an example screenshot to copy. */
@@ -158,7 +215,7 @@ export type TestFields = {
   example?: { from: string; to: string }
 }
 
-/** The page's query for a test run (`<epic-page>` reads it):  one epic's. */
+/** The page's query that presses Start testing (the Manual tests section reads it, epic `epic-engine` P51). */
 const RUN_QUERY = "test=1"
 
 /** ... and for `test --all`'s:  its summary card leads on to the next epic with open tests. */

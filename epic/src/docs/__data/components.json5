@@ -353,7 +353,7 @@
         },
         {
           "name": "how",
-          "description": "`Pick one` or `Pick several`."
+          "description": "`Pick one` / `Pick any`:  a switch Owen flips (`role=\"switch\"`, epic `epic-engine` P50)."
         },
         {
           "name": "tools",
@@ -382,12 +382,22 @@
         {
           "key": "pickOne",
           "text": "Pick one",
-          "description": "Its line, without `multiple`."
+          "description": "Its line's switch, off:  without `multiple` (or flipped)."
         },
         {
           "key": "pickSeveral",
-          "text": "Pick several",
-          "description": "Its line, with `multiple`."
+          "text": "Pick any",
+          "description": "Its line's switch, on:  `multiple` (or flipped)."
+        },
+        {
+          "key": "toSeveralTip",
+          "text": "Let me pick several",
+          "description": "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
+        },
+        {
+          "key": "toOneTip",
+          "text": "Back to one pick:  the newest pick stays, the others turn off",
+          "description": "The switch's tooltip while it's pick any."
         },
         {
           "key": "selectAll",
@@ -1147,7 +1157,33 @@
         {
           "name": "chosen",
           "kind": "string",
-          "description": "The chosen option's `letter`, once answered;  absent while the question is open."
+          "description": "The chosen option's `letter`, once answered;  absent while the question is open.  A `multiple` set's may name several, a space between (`chosen=\"A C\"`)."
+        },
+        {
+          "name": "multiple",
+          "kind": "boolean",
+          "description": "Pick any:  Owen may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is reviewed its heading's switch flips it;  the flip goes with his Send."
+        },
+        {
+          "name": "fixed",
+          "kind": "boolean",
+          "description": "Owen may NOT add options:  no Add choice.  None:  every open set takes his (Owen's comment C4)."
+        },
+        {
+          "name": "closed",
+          "kind": "boolean",
+          "description": "The set is DONE (Owen's comment C11):  no more picks, and no options added, edited or removed;  drawn answered.  `epic option close`."
+        },
+        {
+          "name": "standing",
+          "kind": "boolean",
+          "description": "A standing set, in the page's Choices section:  never folds away as answered.  Each round's picks are stamped on their options (`picked-on`) and folded under Picked;  the rest stay open, and Claude adds more."
+        },
+        {
+          "name": "title",
+          "kind": "string",
+          "property": "epicTitle",
+          "description": "A standing set's title, drawn as its heading (`Upgrades on offer`).  Its `id` keys its marks."
         },
         {
           "name": "chosen-on",
@@ -1164,6 +1200,14 @@
         {
           "name": "",
           "description": "The options."
+        },
+        {
+          "name": "picked",
+          "description": "A standing set's options Owen picked (`picked-on`):  folded under Picked."
+        },
+        {
+          "name": "removed",
+          "description": "Its removed options (`removed`), never erased:  folded under Removed (n)."
         }
       ],
       "events": [],
@@ -1187,6 +1231,38 @@
         {
           "name": "note",
           "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
+        },
+        {
+          "name": "cards",
+          "description": "Open:  the cards' grid, Owen's added ones and Add choice's form too (P50)."
+        },
+        {
+          "name": "heading",
+          "description": "Open, while reviewed or pick any, or a standing set:  the line above the cards, its title and its switch."
+        },
+        {
+          "name": "title",
+          "description": "A standing set's title, in its heading."
+        },
+        {
+          "name": "switch",
+          "description": "While reviewed:  `Pick one` / `Pick any`, a `<button role=\"switch\">`;  flipped from the set's own, dashed until sent."
+        },
+        {
+          "name": "add",
+          "description": "While reviewed, unless `fixed`:  the Add choice button under the cards."
+        },
+        {
+          "name": "added",
+          "description": "An option Owen added, not applied yet:  a card in the options' look, dashed until sent."
+        },
+        {
+          "name": "picked",
+          "description": "A standing set's folded Picked list, at its end."
+        },
+        {
+          "name": "removed",
+          "description": "The folded Removed list, at its end."
         }
       ],
       "states": [
@@ -1201,6 +1277,10 @@
         {
           "name": "answering",
           "description": "An `<epic-ask>`'s options (a page Owen answers on):  one card a row, each with a tick box."
+        },
+        {
+          "name": "reviewed",
+          "description": "The page is reviewed and the set takes changes (not `closed`, nor an Original's):  pills, the switch, Add choice, pencils."
         }
       ],
       "texts": [
@@ -1238,6 +1318,131 @@
           "key": "chosenNoteOnly",
           "text": "Chosen:  {note}",
           "description": "Atop the unfolded panels:  a pick with a note, no day."
+        },
+        {
+          "key": "closedMark",
+          "text": "Closed",
+          "description": "After a closed set's heading, with nothing chosen."
+        },
+        {
+          "key": "pickOne",
+          "text": "Pick one",
+          "description": "The heading's switch, off:  one option at most."
+        },
+        {
+          "key": "pickAny",
+          "text": "Pick any",
+          "description": "The heading's switch, on (or its words):  several options."
+        },
+        {
+          "key": "switchToAnyTip",
+          "text": "Let me pick several:  sent with your next Send",
+          "description": "The switch's tooltip while it's pick one."
+        },
+        {
+          "key": "switchToOneTip",
+          "text": "Back to one pick:  the newest pick stays, the others turn off;  sent with your next Send",
+          "description": "The switch's tooltip while it's pick any."
+        },
+        {
+          "key": "addChoice",
+          "text": "Add choice",
+          "description": "The button under the cards."
+        },
+        {
+          "key": "addTip",
+          "text": "Add an option of your own:  sent with your next Send, picked",
+          "description": "Add choice's tooltip."
+        },
+        {
+          "key": "newChoice",
+          "text": "New choice",
+          "description": "Add choice's form:  its heading."
+        },
+        {
+          "key": "add",
+          "text": "Add",
+          "description": "Add choice's form:  its Save button."
+        },
+        {
+          "key": "editNew",
+          "text": "Change your choice",
+          "description": "An added option's form:  its heading."
+        },
+        {
+          "key": "newLetter",
+          "text": "New",
+          "description": "An added option's letter, until it's applied and given one."
+        },
+        {
+          "key": "choose",
+          "text": "Choose",
+          "description": "An added option's pill."
+        },
+        {
+          "key": "chosenNotSent",
+          "text": "Chosen · not sent",
+          "description": "An added option's pill, picked, not sent."
+        },
+        {
+          "key": "chosenSent",
+          "text": "Chosen · sent",
+          "description": "An added option's pill, picked, sent."
+        },
+        {
+          "key": "tipNewChoose",
+          "text": "Pick your option",
+          "description": "An added option's pill's tooltip."
+        },
+        {
+          "key": "tipNewPicked",
+          "text": "Your option is picked:  click to un-pick",
+          "description": "... once picked."
+        },
+        {
+          "key": "addedNotSent",
+          "text": "Yours · not sent",
+          "description": "Under an added option:  it goes with the next Send."
+        },
+        {
+          "key": "addedSent",
+          "text": "Yours · sent",
+          "description": "Under an added option, once sent."
+        },
+        {
+          "key": "editTip",
+          "text": "Edit {letter}",
+          "description": "A card's pencil:  its tooltip and name."
+        },
+        {
+          "key": "removeTip",
+          "text": "Remove {letter}",
+          "description": "A card's ✕:  its tooltip and name."
+        },
+        {
+          "key": "zoomTip",
+          "text": "Show it full size",
+          "description": "An option's picture:  its tooltip."
+        },
+        {
+          "key": "pickedList",
+          "text": "Picked ({count})",
+          "description": "A standing set's folded list of picked options."
+        },
+        {
+          "key": "removedList",
+          "text": "Removed ({count})",
+          "description": "The folded list of removed options."
+        },
+        {
+          "key": "foldListTip",
+          "text": "Fold the list",
+          "description": "A folded list's button, while open."
+        },
+        {
+          "key": "unfoldListTip",
+          "text": "Show the list",
+          "description": "A folded list's button, while folded."
         }
       ]
     },
@@ -1585,7 +1790,7 @@
         "change",
         "git"
       ],
-      "description": "One commit that built a phase or fixed an item:  its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  its sentence is its children.",
+      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sentence for each phase and item it names.  Its sentence is its children.",
       "noun": "commit",
       "attributes": [
         {
@@ -1596,7 +1801,17 @@
         {
           "name": "repo",
           "kind": "string",
-          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-parser`)."
+          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-parser`), a peer's (spell-brand)."
+        },
+        {
+          "name": "at",
+          "kind": "string",
+          "description": "When it went in:  git's commit time, to the minute, with its offset (`2026-10-29T11:46-04:00`);  shown as `2026-10-29 11:46`.  The Log's entries carry it (epic `epic-engine` P52)."
+        },
+        {
+          "name": "refs",
+          "kind": "string",
+          "description": "The phases (by their lasting id, `p-commit-log`) and items (`q56`) its subject names, space-separated:  a chip for each, a phase showing its number today (`P52`), each a link landing there;  one the page no longer has is plain text.  The Log's entries carry it."
         }
       ],
       "slots": [
@@ -1610,6 +1825,18 @@
         {
           "name": "base",
           "description": "The commit:  its heading (the first commit only), then its line."
+        },
+        {
+          "name": "line",
+          "description": "Its line:  the time (with `at`), the sha, its sentence, the chips (with `refs`)."
+        },
+        {
+          "name": "time",
+          "description": "With `at`:  its time, to the minute, before the sha."
+        },
+        {
+          "name": "ref",
+          "description": "With `refs`:  a chip per phase or item it names, after its sentence."
         },
         {
           "name": "heading",
@@ -1631,6 +1858,16 @@
           "key": "open",
           "text": "Open {sha} on GitHub",
           "description": "The sha link's tooltip."
+        },
+        {
+          "key": "refTip",
+          "text": "Go to {ref}:  {title}",
+          "description": "A chip's tooltip:  where it lands, and its title."
+        },
+        {
+          "key": "refGone",
+          "text": "{ref} isn't on this page any more",
+          "description": "A chip whose phase or item is gone."
         }
       ]
     },
@@ -1651,7 +1888,7 @@
         "history",
         "changelog entry"
       ],
-      "description": "One line of the log (`<epic-section kind=\"log\">`):  its time and icon are drawn;  its text is its children.",
+      "description": "One review line of the log (`<epic-section kind=\"log\">`):  \"Q53 answered\", \"P49 active\" ...;  its time and icon are drawn, its text is its children.  The Log hides them (epic `epic-engine` P52):  it shows the epic's commits (`<epic-commit>`);  Actual Time reads them, and `epic log <epic>` prints them.",
       "noun": "event",
       "attributes": [
         {
@@ -1709,7 +1946,7 @@
         "where",
         "step"
       ],
-      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size, over the page (the page's `<ui-zoom>`).",
+      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size, over the page (the page's `<ui-zoom>`).  A NAMED field folds too (epic `epic-engine` I167):  a chevron before its icon, a click on it, the icon or the label folds or opens it;  folded, its label row stays with one line of its text (a list's count);  open to start with, the reader's folds remembered per page;  ⌥-click and the page's expand-all and collapse-all reach it, and a link or comment landing inside opens it.",
       "noun": "field",
       "attributes": [
         {
@@ -1720,13 +1957,14 @@
             "changes",
             "requests",
             "goal",
+            "choices",
             "plan",
             "done",
             "files",
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
@@ -1766,11 +2004,15 @@
         },
         {
           "name": "toggle",
-          "description": "A request's fold button, before its label."
+          "description": "The fold button:  a request's, before its label;  a named field's, before its icon."
         },
         {
           "name": "body",
-          "description": "A request's prose, under its label:  folded, `hidden=\"until-found\"`."
+          "description": "A request's or a named field's prose:  folded, `hidden=\"until-found\"`."
+        },
+        {
+          "name": "taste",
+          "description": "A folded named field's line after its label:  its text, cut off at the line's end, or a list's count."
         }
       ],
       "states": [
@@ -1780,7 +2022,7 @@
         },
         {
           "name": "open",
-          "description": "A request, unfolded."
+          "description": "A request, or a named field, unfolded."
         }
       ],
       "texts": [
@@ -1799,6 +2041,11 @@
         {
           "key": "goal",
           "text": "Goal:"
+        },
+        {
+          "key": "choices",
+          "text": "Choices:",
+          "description": "A phase's own option sets (P50)."
         },
         {
           "key": "plan",
@@ -1840,6 +2087,36 @@
           "key": "unfoldTip",
           "text": "Open this request",
           "description": "A request's fold button, while folded."
+        },
+        {
+          "key": "foldFieldTip",
+          "text": "Fold this field",
+          "description": "A named field's fold button, while open."
+        },
+        {
+          "key": "unfoldFieldTip",
+          "text": "Open this field",
+          "description": "A named field's fold button, while folded."
+        },
+        {
+          "key": "tasteItem",
+          "text": "1 item",
+          "description": "A folded field that's a list of one."
+        },
+        {
+          "key": "tasteItems",
+          "text": "{count} items",
+          "description": "A folded field that's a list:  how many."
+        },
+        {
+          "key": "tasteRequest",
+          "text": "1 request",
+          "description": "A folded Requests field holding one."
+        },
+        {
+          "key": "tasteRequests",
+          "text": "{count} requests",
+          "description": "A folded Requests field:  how many it holds."
         }
       ]
     },
@@ -2050,6 +2327,11 @@
           "description": "A test that FAILED in Owen's test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."
         },
         {
+          "name": "prepared",
+          "kind": "string",
+          "description": "A manual test Start testing wrote out for Owen (epic `epic-engine` P51):  its place in his order, `1` first.  The Manual tests section opens the prepared tests in that order, and once every open test has it, its button is Next test."
+        },
+        {
           "name": "source",
           "kind": "string",
           "description": "Its details' part file (`parts/q7.html`), loaded into its children the first time it opens (its children without a `slot` are a placeholder the part replaces)."
@@ -2068,6 +2350,11 @@
           "name": "to-accept",
           "kind": "string",
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+        },
+        {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
         },
         {
           "name": "open",
@@ -2461,6 +2748,11 @@
           "key": "reopenChange",
           "text": "Reopen",
           "description": "A change mark's button (the history):  its name."
+        },
+        {
+          "key": "seenUpdate",
+          "text": "Seen",
+          "description": "A new update block's button (the check):  its name."
         },
         {
           "key": "boxSkip",
@@ -2981,6 +3273,26 @@
           "description": "The one Claude recommends."
         },
         {
+          "name": "by",
+          "kind": "string",
+          "description": "Who added it, when not Claude:  `owen`, an option he added from the page (Add choice, P50)."
+        },
+        {
+          "name": "edited",
+          "kind": "string",
+          "description": "The day it was last edited in place (P50):  its earlier title and text are kept in its `was` slot, folded."
+        },
+        {
+          "name": "removed",
+          "kind": "string",
+          "description": "The day it was removed (P50), never erased:  it sits in its set's `removed` slot, folded under `Removed (1)`;  no pill, no pencil."
+        },
+        {
+          "name": "picked-on",
+          "kind": "string",
+          "description": "A STANDING set's option Owen picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, folded under `Picked`."
+        },
+        {
           "name": "selected",
           "kind": "boolean",
           "description": "In an `<epic-ask>`:  ticked to start with, until Owen picks (the review's item picker ticks what isn't reviewed yet).  The tick itself is page state, its question's."
@@ -3025,6 +3337,10 @@
         {
           "name": "title",
           "description": "A title with markup, in place of `title`."
+        },
+        {
+          "name": "was",
+          "description": "Its earlier titles and text, one `<div data-title>` per edit, oldest first (P50)."
         }
       ],
       "events": [
@@ -3078,7 +3394,11 @@
         },
         {
           "name": "tick",
-          "description": "In an `<epic-ask>`:  its tick box (round for pick one), labelled by its title."
+          "description": "In an `<epic-ask>`:  its Choose pill, the epic page's (P50, Q55), a `<button role=\"radio\">` (pick one) or `role=\"checkbox\"`, labelled by its title."
+        },
+        {
+          "name": "comment-link",
+          "description": "In an `<epic-ask>`:  the Comment link its comment box folds under."
         },
         {
           "name": "badge",
@@ -3095,6 +3415,14 @@
         {
           "name": "comment",
           "description": "In an `<epic-ask>`:  the comment box under it, an `<epic-text-box>` for `<key>-<letter>`."
+        },
+        {
+          "name": "was",
+          "description": "With earlier text (its `was` slot, P50):  the folded `Was` line at its body's end."
+        },
+        {
+          "name": "change",
+          "description": "An edit or removal not applied yet (P50):  `Edited · not sent` and Undo, under the card."
         }
       ],
       "states": [
@@ -3125,6 +3453,14 @@
         {
           "name": "filtered",
           "description": "In an `<epic-ask filter>`:  `done`, and hidden while it shows Open."
+        },
+        {
+          "name": "retired",
+          "description": "Removed (`removed`), or a standing set's picked one (`picked-on`):  a small panel in a folded list."
+        },
+        {
+          "name": "removing",
+          "description": "Removed in its set's mark, not applied yet:  faded, with Undo."
         }
       ],
       "texts": [
@@ -3169,6 +3505,16 @@
           "description": "The pill's tooltip."
         },
         {
+          "key": "tipTicked",
+          "text": "{letter} is picked:  click to un-pick",
+          "description": "In an `<epic-ask>`:  a picked option's pill's tooltip."
+        },
+        {
+          "key": "commentLink",
+          "text": "Comment",
+          "description": "In an `<epic-ask>`:  the link its comment box folds under (P50, Q55)."
+        },
+        {
           "key": "tipChosen",
           "text": "{letter} is picked:  click to un-pick",
           "description": "The picked pill's tooltip."
@@ -3202,6 +3548,61 @@
           "key": "commentLabel",
           "text": "Comment on {letter} · {title}",
           "description": "In an `<epic-ask>`:  its comment box's name, for a screen reader."
+        },
+        {
+          "key": "editHeading",
+          "text": "Edit {letter}",
+          "description": "The pencil's form:  its heading."
+        },
+        {
+          "key": "pickedOn",
+          "text": "Picked {date}",
+          "description": "A standing set's picked option:  when."
+        },
+        {
+          "key": "was",
+          "text": "Was",
+          "description": "The folded line of its earlier text."
+        },
+        {
+          "key": "foldWasTip",
+          "text": "Fold its earlier text",
+          "description": "The `Was` line's button, while open."
+        },
+        {
+          "key": "unfoldWasTip",
+          "text": "Show its earlier text",
+          "description": "The `Was` line's button, while folded."
+        },
+        {
+          "key": "editedNotSent",
+          "text": "Edited · not sent",
+          "description": "Under a card edited, not sent yet."
+        },
+        {
+          "key": "editedSent",
+          "text": "Edited · sent",
+          "description": "Under a card edited, sent, not applied yet."
+        },
+        {
+          "key": "removedNotSent",
+          "text": "Removed · not sent",
+          "description": "Under a card removed, not sent yet."
+        },
+        {
+          "key": "removedSent",
+          "text": "Removed · sent",
+          "description": "Under a card removed, sent, not applied yet."
+        },
+        {
+          "key": "undo",
+          "text": "Undo",
+          "description": "After a change's line:  takes it back out of the mark."
+        },
+        {
+          "key": "undoTip",
+          "text": "Take this change back",
+          "description": "Undo's tooltip."
         }
       ]
     },
@@ -3576,7 +3977,7 @@
         },
         {
           "name": "header",
-          "description": "The sticky page header:  the h1, then at its right Send (while reviewed), the bedtime label, the step label (the state in it) and the git toggle."
+          "description": "The sticky page header:  the h1, Send in the middle (while reviewed), then at its right the bedtime label, the step label (the state in it) and the gear."
         },
         {
           "name": "heading",
@@ -3600,15 +4001,39 @@
         },
         {
           "name": "send",
-          "description": "In the header while the page is reviewed, Send (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), dotted once each has his mark;  its tooltip names them."
+          "description": "In the header's middle while the page is reviewed, Send (`<epic-send-buttons countdown>`, epic `epic-engine` P20, P53):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  a press sends at once, and Auto Send (the gear) sends by itself after the page is left alone, a ring round the plane counting down.  While the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), dotted once each has his mark;  its tooltip names them."
         },
         {
-          "name": "git",
-          "description": "The git toggle:  shows or hides every commit (only when the doc has some)."
+          "name": "centre",
+          "description": "The header's middle (epic `epic-engine` P53):  Send, then what the session is doing, a bare spinner.  Centred on the header while the title fits beside it;  narrower, right after the title, never over it."
+        },
+        {
+          "name": "spinner",
+          "description": "What the session is doing, beside Send (`<epic-agents draws=spinner>`, T53):  a turning spinner, its words (`Building P53`) its tooltip;  nothing while it's idle."
         },
         {
           "name": "status",
-          "description": "The header's right side:  the changes to accept, Send (while reviewed), the bedtime label, the step label, the git toggle."
+          "description": "The header's right side:  the bedtime label, the step label, the gear."
+        },
+        {
+          "name": "gear",
+          "description": "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, Auto Send and Theme."
+        },
+        {
+          "name": "gear-menu",
+          "description": "The gear's menu (a `<ui-popup>`):  its two rows, and beside them the sub-menu open."
+        },
+        {
+          "name": "gear-row",
+          "description": "A row of the gear's menu:  `Auto Send · 2 minutes`, `Theme · Paper`."
+        },
+        {
+          "name": "auto-send",
+          "description": "Auto Send's sub-menu:  Immediately, 2 minutes, 5 minutes, then Off;  the chosen one ticked."
+        },
+        {
+          "name": "theme-menu",
+          "description": "The Theme sub-menu:  Spell UI's `<ui-theme-menu show=\"menu\" bench=\"none\">`, Light / Dark / Auto and the themes."
         },
         {
           "name": "step-pill",
@@ -3645,28 +4070,12 @@
         {
           "name": "see-also",
           "description": "Above the blocks:  the pages the epic made for itself (its `details/` folder), each a link;  none, no box."
-        },
-        {
-          "name": "agents",
-          "description": "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
-        },
-        {
-          "name": "test-run",
-          "description": "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, `epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
         }
       ],
       "states": [
         {
           "name": "future",
           "description": "A future epic."
-        },
-        {
-          "name": "commits",
-          "description": "Every commit shows (the git toggle is on)."
-        },
-        {
-          "name": "testing",
-          "description": "Test mode (epic `epic-engine` P4):  a test run shows over its blocks, until Esc or Done testing.  Page state, never in a doc."
         }
       ],
       "texts": [
@@ -3677,8 +4086,8 @@
         },
         {
           "key": "copyHeading",
-          "text": "Copy {command}",
-          "description": "The h1's name:  its tooltip."
+          "text": "{name}:  click to copy {command}",
+          "description": "The h1's name:  its tooltip, its full name first (narrow, the name is cut short)."
         },
         {
           "key": "copiedText",
@@ -3821,14 +4230,39 @@
           "description": "The bedtime label's tooltip."
         },
         {
-          "key": "showCommits",
-          "text": "Show the commits",
-          "description": "The git toggle, off."
+          "key": "gearTip",
+          "text": "Settings",
+          "description": "The header's gear:  its tooltip, and its menu's name."
         },
         {
-          "key": "hideCommits",
-          "text": "Hide the commits",
-          "description": "The git toggle, on."
+          "key": "autoSend",
+          "text": "Auto Send",
+          "description": "The gear's first row, and its sub-menu's name."
+        },
+        {
+          "key": "theme",
+          "text": "Theme",
+          "description": "The gear's second row, and its sub-menu's name."
+        },
+        {
+          "key": "autoSendNow",
+          "text": "Immediately",
+          "description": "Auto Send:  each change sent as it's finished (a note when its box loses the focus)."
+        },
+        {
+          "key": "autoSend2",
+          "text": "2 minutes",
+          "description": "Auto Send:  after 2 minutes left alone (the default)."
+        },
+        {
+          "key": "autoSend5",
+          "text": "5 minutes",
+          "description": "Auto Send:  after 5 minutes left alone."
+        },
+        {
+          "key": "autoSendOff",
+          "text": "Off",
+          "description": "Auto Send off:  only a press sends."
         },
         {
           "key": "futureHeader",
@@ -4191,12 +4625,22 @@
         {
           "name": "commits",
           "kind": "boolean",
-          "description": "Its body lists commits (the page's git buttons)."
+          "description": "Its body lists commits:  its git icon shows."
         },
         {
           "name": "to-accept",
           "kind": "string",
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+        },
+        {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+        },
+        {
+          "name": "choices-open",
+          "kind": "number",
+          "description": "How many option sets in its body are still open (neither `chosen` nor `closed`;  epic `epic-engine` P50), written by the epic tool on every edit:  its title row says so while its body, a part, isn't loaded.  None:  no attribute."
         },
         {
           "name": "plan",
@@ -4208,9 +4652,14 @@
           "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
         },
         {
+          "name": "done-at",
+          "kind": "string",
+          "description": "When it was done (ISO), written by the epic tool as it's set done, and for an older done phase from the log's `P3 done` line (epic `epic-engine` I170):  done in the last 3 days, green;  before, or none, grey."
+        },
+        {
           "name": "changes",
           "kind": "number",
-          "description": "How many plan changes (`<epic-update>` blocks) it holds, written by the epic tool on every edit:  its title row says so while it isn't done, folded too (its body, a part, loads only when it opens)."
+          "description": "An OLDER page's count of its plan changes (`<epic-update>` blocks), from before epic `epic-engine` I168:  its pen says so until the epic tool's next write puts `to-see` in its place."
         },
         {
           "name": "open",
@@ -4288,20 +4737,36 @@
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
         {
+          "name": "git",
+          "description": "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own commits;  pressed while they show."
+        },
+        {
           "name": "status",
           "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
         {
+          "name": "choices-open",
+          "description": "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+        },
+        {
           "name": "changed",
-          "description": "In its title, while it isn't done:  its plan changed, an orange pen and how many times (`changes`)."
+          "description": "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet or marked Seen since)."
+        },
+        {
+          "name": "seen-all",
+          "description": "After the pen, while the page is reviewed:  a round ✓ `<ui-button>` marking every new update Seen at once."
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed, then its gear."
         },
         {
           "name": "estimate",
           "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip."
+        },
+        {
+          "name": "gear",
+          "description": "Its gear, last on its title row (epic `epic-engine` I166):  a `<ui-dropdown>` menu of what this phase shows, \"Show this phase's files\" and \"Show this phase's checks\", ticked while on;  its choice wins over the Phases section's gear for this phase.  Only with an `id`."
         },
         {
           "name": "review-buttons",
@@ -4328,6 +4793,10 @@
         {
           "name": "error",
           "description": "Its `source` part couldn't be loaded."
+        },
+        {
+          "name": "commits",
+          "description": "Its own commits show:  its git icon pressed."
         },
         {
           "name": "movable",
@@ -4375,14 +4844,54 @@
           "description": "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
         },
         {
+          "key": "gearTip",
+          "text": "Settings for this phase",
+          "description": "Its gear's tooltip and name (I166)."
+        },
+        {
+          "key": "showCommits",
+          "text": "Show this phase's commits",
+          "description": "The git icon's tooltip (P53, J163)."
+        },
+        {
+          "key": "hideCommits",
+          "text": "Hide this phase's commits",
+          "description": "The git icon's tooltip, its commits shown."
+        },
+        {
+          "key": "showPhaseFiles",
+          "text": "Show this phase's files",
+          "description": "Its gear menu:  its Files field, ticked while it shows (its own choice, else every phase's)."
+        },
+        {
+          "key": "showPhaseVerify",
+          "text": "Show this phase's checks",
+          "description": "Its gear menu:  its Verify field, ticked while it shows (its own choice, else every phase's)."
+        },
+        {
           "key": "tookTip",
           "text": "~{estimate}",
           "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
         },
         {
+          "key": "choiceOpen",
+          "text": "1 choice open",
+          "description": "After its title (P50):  a set in its body waits for Owen's pick."
+        },
+        {
+          "key": "choicesOpenCount",
+          "text": "{count} choices open",
+          "description": "After its title (P50):  sets in its body wait for Owen's picks."
+        },
+        {
           "key": "changedTip",
-          "text": "Its plan changed:  {count} × Update, at the end of its description",
-          "description": "The title's pen while it isn't done:  its tooltip and name;  `count` how many changes."
+          "text": "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for everyone;  unseen, each goes quiet by itself 3 days after it was written",
+          "description": "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
+        },
+        {
+          "key": "seenAllTip",
+          "text": "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+          "description": "The pen's ✓:  what it does."
         }
       ]
     },
@@ -5038,6 +5547,7 @@
           "values": [
             "overview-part",
             "epics",
+            "choices",
             "phases",
             "questions",
             "judgements",
@@ -5047,7 +5557,7 @@
             "log",
             "report"
           ],
-          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-event>`s;  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
         },
         {
           "name": "title",
@@ -5069,6 +5579,11 @@
           "name": "to-accept",
           "kind": "string",
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+        },
+        {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
         },
         {
           "name": "open",
@@ -5136,11 +5651,6 @@
           "name": "epic-count-changed",
           "detail": "{}",
           "description": "Its live count changed with no change to its markup (epic `epic-engine` I147):  an item or phase being worked on, an urgency not applied yet.  The docs runtime draws the toolbar's badges again."
-        },
-        {
-          "name": "epic-test-opening",
-          "detail": "{}",
-          "description": "The Manual tests section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
         }
       ],
       "parts": [
@@ -5162,11 +5672,15 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+        },
+        {
+          "name": "gear",
+          "description": "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles before):  a `<ui-dropdown>` menu, \"Show each phase's files\" and \"Show each phase's checks\", ticked while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
         },
         {
           "name": "hidden-note",
@@ -5202,7 +5716,11 @@
         },
         {
           "name": "start-testing",
-          "description": "The Manual tests section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
+          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Next test · 3 left\", which opens the next test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+        },
+        {
+          "name": "next-epic",
+          "description": "The Manual tests section's link to the next epic with open tests, at its end once every test is answered:  only in a run across every epic (`epic test --all`, `?test=1&all=1`)."
         }
       ],
       "states": [
@@ -5220,7 +5738,7 @@
         },
         {
           "name": "tools",
-          "description": "Its title has tools:  the Phases toggles, or a state filter (items in it)."
+          "description": "Its title has tools:  the Phases gear, or a state filter (items in it)."
         }
       ],
       "texts": [
@@ -5237,6 +5755,11 @@
         {
           "key": "epicsTitle",
           "text": "Epics"
+        },
+        {
+          "key": "choicesTitle",
+          "text": "Choices",
+          "description": "The standing option sets' section (P50)."
         },
         {
           "key": "phasesTitle",
@@ -5272,24 +5795,19 @@
           "description": "An item section with no items."
         },
         {
-          "key": "showFiles",
-          "text": "Show each phase's Files",
-          "description": "The Phases title's Files toggle, off."
+          "key": "gearTip",
+          "text": "Settings for every phase",
+          "description": "The Phases gear's tooltip and name (I166)."
         },
         {
-          "key": "hideFiles",
-          "text": "Hide each phase's Files",
-          "description": "The Files toggle, on."
+          "key": "showFiles",
+          "text": "Show each phase's files",
+          "description": "The Phases gear menu:  every phase's Files field, ticked while shown."
         },
         {
           "key": "showVerify",
-          "text": "Show each phase's Verify",
-          "description": "The Phases title's Verify toggle, off."
-        },
-        {
-          "key": "hideVerify",
-          "text": "Hide each phase's Verify",
-          "description": "The Verify toggle, on."
+          "text": "Show each phase's checks",
+          "description": "The Phases gear menu:  every phase's Verify field, ticked while shown."
         },
         {
           "key": "addNew",
@@ -5303,8 +5821,53 @@
         },
         {
           "key": "startTestingTip",
-          "text": "Go through the {count} open tests one at a time, answering each on the page",
-          "description": "Start testing's tooltip."
+          "text": "Claude checks the tests it can check itself, writes out exactly what to do for the rest, with a screenshot, then the first test opens:  Approve one that passed, write what you saw in its note, the x if it no longer applies",
+          "description": "Start testing's tooltip (epic `epic-engine` P51)."
+        },
+        {
+          "key": "preparingTests",
+          "text": "Preparing tests",
+          "description": "The Manual tests section's button while Claude prepares the tests (P51)."
+        },
+        {
+          "key": "preparingTip",
+          "text": "Claude is checking what it can and writing out the rest;  the first test opens when it's done · click to call it off",
+          "description": "Preparing tests' tooltip."
+        },
+        {
+          "key": "waitingTip",
+          "text": "Asked:  {why} · click to call it off",
+          "description": "Preparing tests' tooltip while nobody has taken it yet."
+        },
+        {
+          "key": "nextTest",
+          "text": "Next test · {count} left",
+          "description": "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+        },
+        {
+          "key": "firstTest",
+          "text": "Go through the tests · {count}",
+          "description": "The same, every open test answered already:  it opens the first again."
+        },
+        {
+          "key": "nextTestTip",
+          "text": "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+          "description": "Next test's tooltip."
+        },
+        {
+          "key": "testsReady",
+          "text": "Tests ready:  Next test opens the first",
+          "description": "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+        },
+        {
+          "key": "nextEpic",
+          "text": "Next epic with open tests:  {epic} · {count}",
+          "description": "The Manual tests section's last line in a run across every epic, once every test is answered."
+        },
+        {
+          "key": "noEpicLeft",
+          "text": "Every epic's tests are answered:  Send hands them to Claude",
+          "description": "The same, with no other epic left to test."
         },
         {
           "key": "newTodo",
@@ -5445,9 +6008,9 @@
         "countdown",
         "auto send",
         "paper plane",
-        "wand"
+        "ring"
       ],
-      "description": "Send, the paper plane, ALONE since 2026-10-25 (Owen:  \"remove the wand EVERYWHERE\").  With `wand`, its countdown too (epic `epic-engine` P20):  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -5478,7 +6041,7 @@
         {
           "name": "accept",
           "kind": "string",
-          "description": "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  The wand stays.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
+          "description": "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  The countdown's ring goes round its check, and its end only sends marks, never accepts.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
         },
         {
           "name": "accepted",
@@ -5495,9 +6058,9 @@
           "description": "The pill WAITS ON YOU (Owen, 2026-10-25):  `waiting`, the pill's own border 2px #666, darker than its hairline, solid;  `taken`, dotted once you've pressed what it waits for;  none:  no ring.  An epic page's header sets it while Claude's build plans wait for your Accept, on their phases;  the pill stays Send, never green.  The same ring as a waiting plan's own buttons on its phase."
         },
         {
-          "name": "wand",
+          "name": "countdown",
           "kind": "boolean",
-          "description": "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere since Owen, 2026-10-25 (\"remove the wand EVERYWHERE ...  We may bring the wand back later\"), so only a press sends.  `manual` before, the other way round, for a page a command waits on (`<epic-run>`)."
+          "description": "Counts down to Send by itself, on the page's Auto Send (`SendCountdown`, chosen in an epic page header's gear):  the ring round the plane.  Off by default:  only an epic page's header sets it, as only it has the gear (J142);  a details page or a guide sends when you press."
         }
       ],
       "slots": [],
@@ -5505,13 +6068,13 @@
         {
           "name": "epic-send-saving",
           "detail": "{ auto }",
-          "description": "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The owner sends;  a countdown's send asks every revisit now, as Review Now did (decision Q7)."
+          "description": "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The owner sends, waking the epic when nobody listens (Q59, B);  a countdown's send asks every revisit now, as Review Now did (decision Q7)."
         }
       ],
       "parts": [
         {
           "name": "base",
-          "description": "The group:  one pill, the plane's end and the wand's."
+          "description": "The group:  one pill round the plane."
         },
         {
           "name": "send",
@@ -5522,26 +6085,22 @@
           "description": "The badge on the plane:  how many things a press sends;  none on the stage button."
         },
         {
-          "name": "countdown",
-          "description": "The wand, a `<button aria-pressed>`, only with `wand`:  countdown mode on (blue) or off (grey)."
-        },
-        {
           "name": "ring",
-          "description": "The countdown's ring round the wand, light grey turning blue as the 2 minutes run;  only while it runs."
+          "description": "The countdown's ring round the plane (the stage button's check), its ends round, draining clockwise;  only while it counts."
         }
       ],
       "states": [
         {
           "name": "countdown",
-          "description": "Countdown mode is on."
+          "description": "Auto Send is on, and this Send counts down (`countdown`)."
         },
         {
           "name": "counting",
-          "description": "The countdown is running:  something waits, and the ring turns blue."
+          "description": "The countdown is running:  something waits, and the ring drains."
         },
         {
           "name": "waiting",
-          "description": "Countdown mode is off and something isn't sent:  the plane is filled blue."
+          "description": "Auto Send is off and something isn't sent:  the plane is filled blue."
         },
         {
           "name": "stage",
@@ -5560,29 +6119,14 @@
           "description": "The plane's tooltip and name, when the owner gives none (`send-tip`)."
         },
         {
-          "key": "countdownOn",
-          "text": "Countdown on:  {when}.  Click to send only when you press the plane",
-          "description": "The wand's tooltip, mode on;  `{when}` says when it sends."
+          "key": "counting",
+          "text": "sends by itself in {time};  click to send now",
+          "description": "After the plane's words while the ring counts;  `{time}` like `1:42`."
         },
         {
-          "key": "countdownOff",
-          "text": "Countdown off:  press the plane to send.  Click to send by itself 2 minutes after you stop",
-          "description": "The wand's tooltip, mode off."
-        },
-        {
-          "key": "whenCounting",
-          "text": "sends by itself in {time} unless you keep typing, clicking or scrolling",
-          "description": "When a running countdown sends;  `{time}` like `1:42`."
-        },
-        {
-          "key": "whenIdle",
-          "text": "what you leave unsent goes by itself 2 minutes after you stop",
-          "description": "When it sends, with nothing waiting yet."
-        },
-        {
-          "key": "countdownName",
-          "text": "Countdown",
-          "description": "The wand's name, for a screen reader (its state is `aria-pressed`)."
+          "key": "held",
+          "text": "sends by itself once you leave the note box;  click to send now",
+          "description": "After the plane's words while a note box with words has the focus:  the ring stays full."
         }
       ]
     },
@@ -5671,18 +6215,23 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip;  an ⌥-click (Alt-click) shows only its state, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
       "noun": "state-filter",
       "attributes": [
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, scheduled, recent, old."
         },
         {
           "name": "marked",
           "kind": "number",
           "description": "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
+        },
+        {
+          "name": "phases",
+          "kind": "boolean",
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order (`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
           "name": "shown",
@@ -5694,8 +6243,8 @@
       "events": [
         {
           "name": "epic-state-changed",
-          "detail": "{ state, shown }",
-          "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`).  The owner filters, and sets `shown`."
+          "detail": "{ state, shown, how }",
+          "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`);  `how`, `click`, or `only` for an ⌥-click, which shows its state alone.  The owner filters, and sets `shown`."
         }
       ],
       "parts": [
@@ -5705,7 +6254,7 @@
         },
         {
           "name": "chip",
-          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`."
+          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed`."
         },
         {
           "name": "marked",
@@ -5721,8 +6270,13 @@
         },
         {
           "key": "chipWords",
-          "text": "{count} {words}:  {does}",
-          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+          "text": "{count} {words}:  {does}\n{only}",
+          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), then what an ⌥-click does (`chipAltOnly`)."
+        },
+        {
+          "key": "chipAltOnly",
+          "text": "⌥-click:  show only these",
+          "description": "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
         },
         {
           "key": "markedWords",
@@ -5785,19 +6339,39 @@
           "description": "A state chip's words:  `old` (grey)."
         },
         {
-          "key": "phaseUndone",
-          "text": "still to do",
-          "description": "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+          "key": "markedPhaseWords",
+          "text": "{count} with Claude:  under way, being worked on, or marked in this pass",
+          "description": "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked in this pass (epic `epic-engine` I170)."
+        },
+        {
+          "key": "phaseAttention",
+          "text": "need you:  a plan to accept, or a choice open",
+          "description": "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
         },
         {
           "key": "phaseUpdated",
-          "text": "with news for you (a plan to accept, or changed)",
-          "description": "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its plan changed, the orange pen)."
+          "text": "changed since you looked",
+          "description": "A Phases chip's words:  `updated` (orange:  new plan changes, not seen and not 3 days old yet)."
         },
         {
-          "key": "phaseComplete",
-          "text": "done",
-          "description": "A Phases chip's words:  `complete` (green)."
+          "key": "phaseProgress",
+          "text": "under way, or being worked on",
+          "description": "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+        },
+        {
+          "key": "phaseScheduled",
+          "text": "scheduled, not running yet",
+          "description": "A Phases chip's words:  `scheduled` (dotted blue:  still to do, nothing waiting on Owen)."
+        },
+        {
+          "key": "phaseRecent",
+          "text": "done in the last 3 days",
+          "description": "A Phases chip's words:  `recent` (green)."
+        },
+        {
+          "key": "phaseOld",
+          "text": "done a while ago",
+          "description": "A Phases chip's words:  `old` (grey:  done over 3 days ago)."
         }
       ]
     },
@@ -6034,379 +6608,6 @@
       "texts": []
     },
     {
-      "tag": "epic-test-run",
-      "name": "epic-test-run",
-      "folder": "epic-test-run",
-      "mainTag": "epic-test-run",
-      "main": true,
-      "page": true,
-      "href": "epic-test-run.html",
-      "topics": [
-        "page"
-      ],
-      "aka": [
-        "test run",
-        "testing",
-        "walkthrough",
-        "start testing",
-        "to test",
-        "hand checks"
-      ],
-      "description": "A test run (epic `epic-engine` P4):  the open tests of the `<epic-page>` around it, ONE big card at a time -- the test's title and id, its Step (with buttons for the pages it says to open), Should, an Example screenshot (click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, each a review mark (`{ action: \"test\", result }`) in the page's inbox.  \"4 of 9\" and a thin bar say how far along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  Drawn by `<epic-page>` over its blocks in test mode (the Manual tests section's Start testing, or `?test=1` on the page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
-      "noun": "test run",
-      "attributes": [
-        {
-          "name": "all",
-          "kind": "boolean",
-          "description": "The run is one epic of a run across every epic (`epic test --all`, the address's `?test=1&all=1`):  the summary card leads on to the next epic with open tests, \"Next:  <epic> (n tests)\"."
-        }
-      ],
-      "slots": [],
-      "events": [
-        {
-          "name": "epic-test-closed",
-          "detail": "{}",
-          "description": "Owen left the run:  Esc, or \"Done testing\".  `<epic-page>` shows its blocks again;  the run has sent its unsent answers (I52)."
-        }
-      ],
-      "parts": [
-        {
-          "name": "base",
-          "description": "The run:  its head, the progress bar, then the card."
-        },
-        {
-          "name": "head",
-          "description": "Its head:  \"Testing\", \"4 of 9\", and Done testing;  with the bar under it, a full-width band, sticky under the page's header."
-        },
-        {
-          "name": "progress",
-          "description": "The thin bar under the head:  where the run is, as \"4 of 9\" says;  how many are answered, its tooltip (`<ui-progress>`)."
-        },
-        {
-          "name": "card",
-          "description": "The current test's card, or the summary's."
-        },
-        {
-          "name": "answers",
-          "description": "The four answers, ONE button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)."
-        },
-        {
-          "name": "comment",
-          "description": "Under the answers on every card:  the comment box (`<epic-text-box>`), saved as typed, going with whichever answer is picked."
-        },
-        {
-          "name": "failure",
-          "description": "Under the comment on every card:  the screenshot's area (paste, drop or choose one), going with whichever answer is picked;  its part name from when only Failed had it."
-        },
-        {
-          "name": "moves",
-          "description": "Back and Next:  a full-width band of their own, pinned to the window's bottom."
-        },
-        {
-          "name": "summary",
-          "description": "The summary card:  the counts, the tests commented on, Send results, the next epic."
-        }
-      ],
-      "states": [
-        {
-          "name": "summary",
-          "description": "The summary card shows:  past the last test."
-        }
-      ],
-      "texts": [
-        {
-          "key": "run",
-          "text": "Test run",
-          "description": "The run's region, spoken."
-        },
-        {
-          "key": "testing",
-          "text": "Testing",
-          "description": "The head's title."
-        },
-        {
-          "key": "of",
-          "text": "{at} of {total}",
-          "description": "Where the run is:  \"4 of 9\"."
-        },
-        {
-          "key": "answered",
-          "text": "{count} of {total} answered",
-          "description": "The progress bar's name and tooltip."
-        },
-        {
-          "key": "done",
-          "text": "Done testing",
-          "description": "The head's button:  leave the run (Esc)."
-        },
-        {
-          "key": "doneTip",
-          "text": "Leave the run (Esc):  your answers go to Claude",
-          "description": "Done testing's tooltip:  leaving sends the run's unsent answers (I52)."
-        },
-        {
-          "key": "leftSent",
-          "text": "{count} results sent to Claude",
-          "description": "The notice line, the run left (Done testing, Esc, Next epic):  its unsent answers sent."
-        },
-        {
-          "key": "leftSentOne",
-          "text": "1 result sent to Claude",
-          "description": "As `leftSent`, for one answer."
-        },
-        {
-          "key": "leftFailed",
-          "text": "Couldn't send your answers ({count}):  {error}.  They're kept:  Send in the header sends them",
-          "description": "The notice line, the run left but its send failed:  the answers wait, Send blue."
-        },
-        {
-          "key": "leftNotServed",
-          "text": "Not sent:  the page isn't served by the page server.  Your answers ({count}) are kept",
-          "description": "The notice line, the run left while not reviewed (`file://`, no token)."
-        },
-        {
-          "key": "noReason",
-          "text": "the page server didn't answer",
-          "description": "Why the send failed, when the client couldn't say."
-        },
-        {
-          "key": "step",
-          "text": "Step",
-          "description": "The card's Step:  what to do."
-        },
-        {
-          "key": "should",
-          "text": "Should",
-          "description": "The card's Should:  what should happen."
-        },
-        {
-          "key": "example",
-          "text": "Example",
-          "description": "The card's Example:  a screenshot Claude took, or a line."
-        },
-        {
-          "key": "ifNot",
-          "text": "If not",
-          "description": "The card's If not:  what to tell Claude."
-        },
-        {
-          "key": "loading",
-          "text": "Loading the test's details ...",
-          "description": "The Step while the test's part file loads."
-        },
-        {
-          "key": "noDetails",
-          "text": "This test has no details:  its title is the step.",
-          "description": "The Step of a test with neither fields nor prose."
-        },
-        {
-          "key": "zoom",
-          "text": "Zoom {alt}",
-          "description": "An example screenshot, its button's name and tooltip."
-        },
-        {
-          "key": "openAction",
-          "text": "Opens {href}",
-          "description": "A Step's action button, its tooltip."
-        },
-        {
-          "key": "failedBefore",
-          "text": "failed before",
-          "description": "On the card of a test a run failed before."
-        },
-        {
-          "key": "deferredOn",
-          "text": "not now {date}",
-          "description": "On the card of a test put off before."
-        },
-        {
-          "key": "answers",
-          "text": "Your answer",
-          "description": "The answers' group, spoken."
-        },
-        {
-          "key": "passed",
-          "text": "Passed",
-          "description": "Answer:  it did what it should."
-        },
-        {
-          "key": "failed",
-          "text": "Failed",
-          "description": "Answer:  it didn't;  a note and a screenshot follow."
-        },
-        {
-          "key": "skip",
-          "text": "Skip",
-          "description": "Answer:  it no longer applies;  Claude closes it."
-        },
-        {
-          "key": "notnow",
-          "text": "Not now",
-          "description": "Answer:  can't do it yet;  it stays open, last next run."
-        },
-        {
-          "key": "passedTip",
-          "text": "It did what it should (P)",
-          "description": "Passed's tooltip."
-        },
-        {
-          "key": "failedTip",
-          "text": "It didn't:  say what went wrong (F)",
-          "description": "Failed's tooltip."
-        },
-        {
-          "key": "skipTip",
-          "text": "It no longer applies:  Claude closes it (S)",
-          "description": "Skip's tooltip."
-        },
-        {
-          "key": "notnowTip",
-          "text": "Can't do it yet:  it stays open, last next run (N)",
-          "description": "Not now's tooltip."
-        },
-        {
-          "key": "unsent",
-          "text": "not sent yet",
-          "description": "A chosen answer's state, before Send."
-        },
-        {
-          "key": "sent",
-          "text": "sent",
-          "description": "A chosen answer's state, once sent."
-        },
-        {
-          "key": "notServed",
-          "text": "Not served by the page server:  answers can't be saved here.",
-          "description": "Over the answers, while the page isn't reviewed (`file://`, no token)."
-        },
-        {
-          "key": "note",
-          "text": "Comment (optional)",
-          "description": "Every card's comment box, under the answers:  goes with whichever answer is picked."
-        },
-        {
-          "key": "noteLabel",
-          "text": "Your comment on {id}",
-          "description": "The comment box, spoken."
-        },
-        {
-          "key": "commentedTitle",
-          "text": "Your comments",
-          "description": "The summary's list of the tests commented on, each with its answer."
-        },
-        {
-          "key": "unanswered",
-          "text": "not answered",
-          "description": "A commented test's answer, in the summary:  none yet."
-        },
-        {
-          "key": "paste",
-          "text": "Paste a screenshot (⌘V) or drop one here",
-          "description": "The failure's screenshot area, empty."
-        },
-        {
-          "key": "choose",
-          "text": "Choose a file",
-          "description": "The empty screenshot area's button:  a file picker.  In VS Code's side bar a file dragged in never reaches the page, so this is the way there besides pasting."
-        },
-        {
-          "key": "saving",
-          "text": "Saving the screenshot ...",
-          "description": "The screenshot area while it uploads."
-        },
-        {
-          "key": "tooBig",
-          "text": "That screenshot is over 8 MB:  crop it first.",
-          "description": "A notice:  too big."
-        },
-        {
-          "key": "notImage",
-          "text": "Only an image goes here.",
-          "description": "A notice:  something else was dropped."
-        },
-        {
-          "key": "removeShot",
-          "text": "Remove the screenshot",
-          "description": "The screenshot's ×."
-        },
-        {
-          "key": "back",
-          "text": "‹ Back",
-          "description": "Back to the test before (←)."
-        },
-        {
-          "key": "next",
-          "text": "Next ›",
-          "description": "On to the next test, or the summary (→)."
-        },
-        {
-          "key": "backTip",
-          "text": "The test before (←)",
-          "description": "Back's tooltip."
-        },
-        {
-          "key": "nextTip",
-          "text": "The next test (→)",
-          "description": "Next's tooltip."
-        },
-        {
-          "key": "summaryTitle",
-          "text": "{total} tests gone through",
-          "description": "The summary card's title."
-        },
-        {
-          "key": "countPassed",
-          "text": "{count} passed",
-          "description": "A summary count."
-        },
-        {
-          "key": "countFailed",
-          "text": "{count} failed",
-          "description": "A summary count."
-        },
-        {
-          "key": "countSkip",
-          "text": "{count} skipped",
-          "description": "A summary count."
-        },
-        {
-          "key": "countNotnow",
-          "text": "{count} not now",
-          "description": "A summary count."
-        },
-        {
-          "key": "countOpen",
-          "text": "{count} not answered",
-          "description": "A summary count."
-        },
-        {
-          "key": "summaryWhat",
-          "text": "Send results hands your answers to Claude (Done testing does too):  passed tests close, each failure becomes an issue with your note and screenshot, skipped ones are canceled, not now stays open for the next run.",
-          "description": "The summary card's line on what Send does."
-        },
-        {
-          "key": "send",
-          "text": "Send results",
-          "description": "The summary card's Send."
-        },
-        {
-          "key": "sentAll",
-          "text": "Results sent",
-          "description": "The summary card's Send, once every answer has gone."
-        },
-        {
-          "key": "nextEpic",
-          "text": "Next:  {epic} ({count} tests)",
-          "description": "The summary card's link to the next epic with open tests (`epic test --all`)."
-        },
-        {
-          "key": "noTests",
-          "text": "No open tests:  nothing to run.",
-          "description": "The card of a run with no tests."
-        }
-      ]
-    },
-    {
       "tag": "epic-text-box",
       "name": "epic-text-box",
       "folder": "epic-text-box",
@@ -6439,7 +6640,7 @@
             "note"
           ],
           "default": "comment",
-          "description": "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` (a choice page's, drawn by `<epic-choices-bar>`), `note` (none of a page's answer:  read by the element drawing it, a test run's failure note, `<epic-test-run>`)."
+          "description": "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` (a choice page's, drawn by `<epic-choices-bar>`), `note` (none of a page's answer:  read by the element drawing it:  `<epic-option-form>`'s, `<epic-new-item>`'s)."
         },
         {
           "name": "for",
@@ -6813,6 +7014,12 @@
       "noun": "update",
       "attributes": [
         {
+          "name": "id",
+          "kind": "string",
+          "property": "epicId",
+          "description": "A block's `up3`, given by the epic tool on its next write (epic `epic-engine` I168):  the key its Seen mark goes under, and a link's target (`#up3`).  None:  just written, no Seen yet;  a bare label never has one."
+        },
+        {
           "name": "at",
           "kind": "string",
           "description": "When it changed:  `2026-10-11 14:30`, drawn `10/11/26 14:30` at the title's right."
@@ -6826,6 +7033,11 @@
           "name": "phase",
           "kind": "string",
           "description": "The phase active when it was written, by its number (`3`, `11.1`).  `phase 3 done` removes P3's bare labels and the updates outside a phase;  a phase's own plan changes stay."
+        },
+        {
+          "name": "seen",
+          "kind": "string",
+          "description": "When Owen marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until `PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
         }
       ],
       "slots": [
@@ -6865,6 +7077,10 @@
           "description": "In its title row, after the title and before its own buttons:  the `actions` slot."
         },
         {
+          "name": "seen",
+          "description": "A new block's ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons=\"update\">`."
+        },
+        {
           "name": "body",
           "description": "What changed, under the title row;  hidden (`until-found`) while folded."
         },
@@ -6880,7 +7096,11 @@
         },
         {
           "name": "open",
-          "description": "A block, unfolded:  it starts so (page state, never written)."
+          "description": "A block, unfolded:  it starts so while new, folded once seen or quiet (page state, never written)."
+        },
+        {
+          "name": "quiet",
+          "description": "A block seen (`seen`, or its Seen mark in the inbox) or older than 3 days (`PlanDates.isQuiet()`):  grey, folded to its title row."
         }
       ],
       "texts": [
@@ -6893,6 +7113,16 @@
           "key": "unfoldTip",
           "text": "Open this update",
           "description": "Tooltip of its fold button while folded."
+        },
+        {
+          "key": "buttonsLabel",
+          "text": "this update",
+          "description": "Seen's group, spoken."
+        },
+        {
+          "key": "seenAt",
+          "text": "Seen {when}",
+          "description": "The date's tooltip, after the full date:  when it was seen."
         },
         {
           "key": "title",
@@ -7113,7 +7343,7 @@
       "folder": "epic-ask",
       "mainTag": "epic-ask",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options with tick boxes, Other, its state as a chip.",
+      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7245,7 +7475,7 @@
       "folder": "epic-event",
       "mainTag": "epic-event",
       "title": "<epic-event>",
-      "summary": "The <epic-event> element: one line of an epic page's log, its icon and time drawn.",
+      "summary": "The <epic-event> element: one review line of an epic page's log, written but not shown there (the Log shows commits).",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7521,7 +7751,7 @@
       "folder": "epic-send-buttons",
       "mainTag": "epic-send-buttons",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
+      "summary": "The <epic-send-buttons> element: Send, the paper plane; with countdown, Auto Send's ring round it.",
       "status": "done",
       "docs": false,
       "tags": [
@@ -7574,18 +7804,6 @@
       "docs": false,
       "tags": [
         "epic-summary"
-      ],
-      "tokens": []
-    },
-    "epic-test-run": {
-      "folder": "epic-test-run",
-      "mainTag": "epic-test-run",
-      "title": "<epic-test-run>",
-      "summary": "The <epic-test-run> element: an epic page's open tests, one at a time, each answered on the page.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "epic-test-run"
       ],
       "tokens": []
     },

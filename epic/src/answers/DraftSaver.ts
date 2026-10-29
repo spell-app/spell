@@ -10,7 +10,7 @@ import { ANSWER_RETRY_MS, type DraftState } from "./answers.types"
  * A DRAFT THAT SAVES ITSELF as Owen types (epic `coherence` C10):  the one way every page he types into keeps what's
  * typed and not sent, so nothing lives only in the open page.
  * - Its users:  the answer pages' forms (`AnswerForm`, `ChoicesForm`, `RunForm`), the review note (`<epic-review>`),
- *   a test's comment (`<epic-test-run>`), the docs pages' comments (`spell-doc-comments.js`), the syntax page.
+ *   the docs pages' comments (`spell-doc-comments.js`), the syntax page.
  * - Each hands it what differs:  the save call (`save`), the wait after the last change (`wait`), and the key of the
  *   browser's own copy (`key`, optional).
  * - What it does for all of them:

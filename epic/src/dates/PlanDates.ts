@@ -66,4 +66,29 @@ export class PlanDates {
       date.getMinutes() === parts[4]
     return exists ? { date, hasTime } : undefined
   }
+
+  ////////////////
+  // ## New, then quiet
+  ////////////////
+
+  /**
+   * How long a dated mark stays NEW, in days:  a change mark (`<epic-change>`) orange, an update (`<epic-update>`)
+   * orange, open and counted on its phase's pen.  Then it goes QUIET by itself (`isQuiet()`).
+   */
+  static readonly QUIET_DAYS = 3
+
+  /**
+   * Is a mark stamped `at` QUIET at `now`:  more than `QUIET_DAYS` old?
+   * - ONE rule for every mark that goes quiet with age:  `<epic-change>`, `<epic-update>`, a phase's pen, and the
+   *   epic tool's own reads (`PlanDoc.isNewChange()`)
+   * - no `at`, or one that won't parse:  never quiet
+   * - `now` handed in:  no clock here
+   */
+  static isQuiet(at: string | null | undefined, now: Date): boolean {
+    const read = at ? PlanDates.read(at) : undefined
+    return !!read && now.getTime() - read.date.getTime() > PlanDates.QUIET_DAYS * DAY_MS
+  }
 }
+
+/** A day, in ms. */
+const DAY_MS = 24 * 60 * 60 * 1000

@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 when working with code in the kit's `src/server/` (`spell/server`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the kit's layout, and the house style every repo shares.
+the kit's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -85,12 +85,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - first offered to the page (`spell-server:scripts-reloading`, cancelable, `ScriptsChange`):  a page that runs every
           changed script's new code itself takes it, and doesn't reload (epic `epic-engine` I116:  a rebuilt
           component pack swapped in place by Spell UI's `PackHotSwap`)
+          - the swap is ONE short cross-fade (`PagePatch.crossFade()`), held until the re-rendered elements have drawn
+          - new observed attributes, and a new version of a family's DOM class, swap in too (`HotDefinitions`, I171)
+          - a swap that fails after all asks `SPELL_SERVER.reload()`:  a quiet reload like any other (below)
       - anything else:  `spell-server:changed`, and the page decides
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
-      - NEVER in front of the reader (epic `epic-engine` I116):  a page in view shows an "Updated:  reload" pill, and
-        reloads the moment it's out of sight (`visibilitychange`), or on a click;  one out of sight reloads at once.
+      - QUIET (epic `epic-engine` I172;  Owen, 2026-10-29, of the pill before it:  "why do we have this?"):
+        a page in view reloads by itself, held behind its old frame and cross-faded in (below), its scroll and folds
+        kept;  in VS Code's views too
+        - except while the reader TYPES in a field (`typing()`:  the focus in an input, a textarea or rich text,
+          its text changed since it got the focus):  it waits until the field loses the focus, or the page goes out of
+          sight;  a field merely clicked into doesn't hold it
+        - a comment draft is kept in the browser as it's typed (the docs runtime), so a reload loses none of it
+        - a page's own `SPELL_SERVER.reload()` too;  `SPELL_SERVER.reloadNow()` is the one that doesn't wait
+        - it replaced I116's "Updated:  reload" pill, which held a page in view on its old code until it went out of
+          sight
       - A file rewritten with the same contents (a rebuilt bundle, a `touch`) isn't reported at all (`LiveReload`).
       - Drawn with no flash (epic `epic-engine` I164;  Owen, 2026-10-29:  "use a page transition to redraw without visual
         flash"):  the reload is a replace navigation to the page itself, which Chromium runs a cross-document view
@@ -145,7 +156,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
     its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
     - its files' shapes:  [runs.types.ts](runs/runs.types.ts), the contract with spell-epic's page and routes
-    - it names no element and no child repo;  `show()` runs `epic` as a program, when there is one
+    - it names no element and no big folder;  `show()` runs `epic` as a program, when there is one
     - steering (P25):  the command runs on while Owen answers
       - `answersAsTheyCome()`:  each answer as he gives it, on the same watcher and heartbeat as `wait()`
       - `take()`
@@ -163,10 +174,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the toolchain's format settings
   - So anything node-side may import it:
     ui's tools and site, spaces' node server, cli, app, epics, goals, the VS Code extension.
-- It's GENERIC (epic `repo-split` P4):  its code names nothing of spell-app's or spell-epic's folders.
+- It's GENERIC (epic `repo-split` P4):  its code names nothing inside `app/` or `epic/`.
   - What the page server serves beyond the checkout comes from its settings (below):
     the component sets, the engine routes, the page scripts, the route modules, the site header's tabs.
-  - Each repo's part of what it serves is that repo's own settings (below), never code here.
+  - Each folder's part of what it serves is that folder's own settings (below), never code here.
   - It went to spell-server when the repos split (P8), and into the kit with it (P9).
     spell-app's `page-server` (the bundles' build, the highlight.js swap, the `/ui/` bridge) joined it in P16.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
@@ -179,22 +190,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - I62's `--root spell-app`, added by the kit's `spell server` from outside spell-app, is gone
     - page edits:  `PageEditor`, `/api/pages`
     - its info:  `/api/server`
-    - THE PAGE SERVER'S SETTINGS (epic `repo-split` P16):  every repo's own PART, merged.
-      - Each repo declares its part in its own `package.json`, `"pageServer"`, as it declares its `"spell": { "commands" }`:
-        - spell-ui:  its component set and its site bundle
-        - spell-brand:  its set, engine routes, watched folders, bundle
-        - spell-epic:  its route modules, engine routes, watched folders, Epic UI, `localCopies`
-        - spell-app:  the app's route module, App UI, `pageScripts`
+    - THE PAGE SERVER'S SETTINGS (epic `repo-split` P16):  every folder's own PART, merged.
+      - Each big folder declares its part in its folder manifest, `"pageServer"`,
+        as it declares its `"spell": { "commands" }`:
+        - `ui/`:  its component set and its site bundle
+        - `epic/`:  its route modules, engine routes, watched folders, Epic UI, `localCopies`
+        - `app/`:  the app's route module, App UI, `pageScripts`
+      - A project beside the kit declares its part the same way, in its own `package.json`:
+        spell-brand, its set, engine routes, watched folders, bundle.
       - The content repo's part:  `page-server.json5` at the content folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  none today.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
-        the kit's, the content repo's, then each child repo `repos.json5` lists that's INSTALLED
-        (cloned in the kit, else in its `node_modules`), lowest first.
-        - names no child repo:  the list is the kit's data, so the server runs with any set of repos installed
-        - every path in a part is from ITS repo's folder;
-          merged, from `root` (`ui/docs` from the kit, `../ui/docs` read for spell-app's folder)
-        - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later repo winning
+        the kit's, the content repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
+        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
+        then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
+        - names no folder:  the lists are the kit's data
+        - every path in a part is from ITS folder;
+          merged, from `root` (`docs` in ui's part is `ui/docs` from the kit)
+        - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later part winning
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
@@ -385,14 +399,14 @@ The steps between a page's content and its file on disk, for every tool that wri
     so every Spell UI change deleted and re-added most of their files, in every diff and merge.
   - A new bundle:
     - a `BUNDLES` entry
-    - its output folder in its repo's part of the settings (above)
-    - and in the `.gitignore` of the repo that builds it (`/site/_assets/`, in spell-ui's)
+    - its output folder in its folder's part of the settings (above)
+    - and in the `.gitignore` of the folder that builds it (`/site/_assets/`, in `ui/`'s)
 - JSON5 written with its comments kept moved to util, `spell/util/node/json5` (epic `repo-split` P1):
   its users (ui's tools, app, brand, spaces, spell-epic) need util, not the assembler.
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
-  - NEVER make it import spell-epic's code:  spell-epic imports this.
+  - NEVER make it import the epic folder's code:  `epic/` imports this.
   - `DataFile` (`SRV.DataFile`, or `spell/server/DataFile` alone):  the tooling's JSON5 data files,
     here since epic `epic-eject` I5, so the CLI reads the commands page's data without the engine.
   - `contentFolderOf()` (`SRV.contentFolderOf()`, or `spell/server/contentFolder` alone, epic `epic-eject` P12):
@@ -417,7 +431,8 @@ The steps between a page's content and its file on disk, for every tool that wri
       - `templates/`
       - in the shared content folder (`contentFolderOf()`), laid under the checkout:
         its folders the checkout has none of are found there (`Linker`'s `content`)
-    - the epic engine's code, docs tools included:  spell-epic's `src/`, through the checkout's `spell-epic` link
+    - the epic engine's code, docs tools included:  the kit's `epic/src/` (epic `repo-split` P20),
+      else an older checkout's `spell-epic/src/`
 - The docs tools are JavaScript:  [doc-links.js](../../epic/src/tools/doc-links.js) imports the kit's server.
   - So it runs under `tsx`:  `docLinksRun()`, in the docs tools' [pages.js](../../epic/src/tools/pages.js).
 

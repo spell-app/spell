@@ -7,7 +7,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
 
-import { PlanDocError } from "spell/epic/tool/planDoc.types"
+import { PlanDocError, type PlanMark } from "spell/epic/tool/planDoc.types"
 
 import { EpicTests } from "spell/epic/tool/EpicTests"
 import { ItemPicker } from "spell/epic/tool/ItemPicker"
@@ -193,6 +193,32 @@ describe("PlanDoc phases", () => {
     expect(el(plan, "p1").querySelector('[name="done"]')!.textContent).toBe("built it again")
   })
 
+  // epic `epic-engine` I170:  green for 3 days after it's done, then grey
+  test("done stamps `done-at`;  any other status removes it;  an older done phase takes its log's `P1 done`", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.setPhase(1, "done")
+    expect(el(plan, "p1").getAttribute("done-at")).toBe(PlanTime.isoMinutes(NOW))
+    plan.setPhase(1, "active")
+    expect(el(plan, "p1").hasAttribute("done-at")).toBe(false)
+    plan.setPhase(1, "done")
+    plan.setPhase(2, "done")
+    // a phase done before I170:  no `done-at`, its log line the record
+    el(plan, "p2").removeAttribute("done-at")
+    const said = Array.from(plan.document.querySelectorAll("#log > epic-event")).findLast(
+      (event) => event.textContent === "P2 done"
+    )!
+    said.setAttribute("at", "2026-09-20T08:00+00:00")
+    expect(plan.updateStates()).toBeGreaterThan(0)
+    expect(el(plan, "p2").getAttribute("done-at")).toBe("2026-09-20T08:00+00:00")
+    // no log line:  none, and nothing to change
+    el(plan, "p2").removeAttribute("done-at")
+    said.remove()
+    expect(plan.updateDoneAt()).toBe(0)
+    expect(el(plan, "p2").hasAttribute("done-at")).toBe(false)
+  })
+
   test("estimates:  the phase's attribute, totalled in the Overview, what's left;  none without one", () => {
     const plan = freshPlan()
     const total = () => plan.overview.getAttribute("estimate")
@@ -256,7 +282,7 @@ describe("PlanDoc phases", () => {
     plan.addPhaseUpdate(4, "<p>four changed</p>")
     const item = plan.addItem("todo", "after four", { details: '<p>see <a href="#p-four">P4 · Four</a></p>' })
     Markup.set<"epic-item">(el(plan, item), { phase: "4" })
-    plan.updateChangeCounts()
+    plan.updateUpdates()
     expect(plan.addPhase("Inserted", { before: 3, estimate: "1h" })).toBe(3)
     expect(plan.phases.map((phase) => `${phase.n} ${phase.name} ${phase.status}`)).toEqual([
       "1 One done",
@@ -271,7 +297,13 @@ describe("PlanDoc phases", () => {
     const line = el(plan, "p5").querySelector(":scope > epic-update")!
     expect([line.textContent, line.getAttribute("phase")]).toEqual(["four changed", "2"])
     plan.updateStates()
-    expect(plan.phaseElements.map((phase) => phase.getAttribute("changes"))).toEqual([null, null, null, null, "1"])
+    expect(plan.phaseElements.map((phase) => phase.getAttribute("to-see"))).toEqual([
+      null,
+      null,
+      null,
+      null,
+      "up1@2026-10-01T09:05"
+    ])
     const link = el(plan, item).querySelector('a[href^="#p"]')!
     expect([link.getAttribute("href"), link.textContent]).toEqual(["#p-four", "P5 · Four"])
     expect(el(plan, item).getAttribute("phase")).toBe("5")
@@ -467,7 +499,8 @@ describe("PlanDoc phases", () => {
     expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
   })
 
-  test("plan changes:  counted in each phase's `changes`;  a phase done keeps them and its count", () => {
+  // epic `epic-engine` I168 (Owen, 2026-10-29:  "How do I clear these 'update' marks?")
+  test("update blocks:  each given its id (`up1`);  each host's `to-see` lists the new ones, with their `at`", () => {
     const plan = freshPlan()
     plan.addPhase("One", { symptom: "s", changes: "c" })
     plan.addPhase("Two", { symptom: "s", changes: "c" })
@@ -476,17 +509,58 @@ describe("PlanDoc phases", () => {
     plan.addPhaseUpdate(1, '<p>Kept <a id="anchor" href="#q1">small</a></p>')
     plan.addPhaseUpdate(3, "split in two")
     plan.addPhaseUpdate(3, "and again")
+    // an older page's count goes:  `to-see` says what the pen counts now
+    Markup.set<"epic-phase">(el(plan, "p2"), { changes: 4 })
     plan.updateStates()
-    const counts = () => plan.phaseElements.map((phase) => phase.getAttribute("changes"))
-    expect(counts()).toEqual(["1", null, "2"])
+    const toSee = () => plan.phaseElements.map((phase) => phase.getAttribute("to-see"))
+    expect(Array.from(plan.document.querySelectorAll("epic-update"), (update) => update.id)).toEqual([
+      "up1",
+      "up2",
+      "up3"
+    ])
+    expect(toSee()).toEqual(["up1@2026-10-01T09:05", null, "up2@2026-10-01T09:05 up3@2026-10-01T09:05"])
+    expect(plan.phaseElements.map((phase) => phase.getAttribute("changes"))).toEqual([null, null, null])
     expect(plan.document.querySelectorAll("#anchor")).toHaveLength(1)
     expect(problems(plan)).toEqual([])
-    // the same again:  nothing to change;  a phase done keeps its updates and its count (the element hides its mark)
-    expect(plan.updateChangeCounts()).toBe(false)
+    // the same again:  nothing to change;  a phase done keeps its updates (the element hides its pen)
+    expect(plan.updateUpdates()).toBe(0)
     plan.setPhase(1, "done")
     plan.updateStates()
-    expect(counts()).toEqual(["1", null, "2"])
-    expect(PlanDoc.parse(plan.toString(), NOW).updateChangeCounts()).toBe(false)
+    expect(toSee()[0]).toBe("up1@2026-10-01T09:05")
+    expect(PlanDoc.parse(plan.toString(), NOW).updateUpdates()).toBe(0)
+    // a block seen, or more than 3 days old as of the write (`PlanDates.isQuiet()`):  out of the list
+    Markup.set<"epic-update">(el(plan, "up2"), { seen: "2026-10-01 10:00" })
+    plan.updateStates()
+    expect(toSee()[2]).toBe("up3@2026-10-01T09:05")
+    const later = PlanDoc.parse(plan.toString(), new Date(2026, 9, 4, 9, 6))
+    later.updateStates()
+    expect(later.phaseElements.map((phase) => phase.getAttribute("to-see"))).toEqual([null, null, null])
+    // a new block takes the next free id, after the highest
+    el(plan, "up1").remove()
+    plan.addPhaseUpdate(2, "new")
+    plan.updateStates()
+    expect(el(plan, "p2").querySelector("epic-update")!.id).toBe("up4")
+  })
+
+  test("Seen on an update (`up3`):  `inbox apply` stamps `seen`, logged;  out of its phase's `to-see`", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: "c" })
+    plan.addPhaseUpdate(1, "split in two", { summary: "Split in two" })
+    plan.addPhaseUpdate(1, "and again")
+    plan.updateStates()
+    expect(plan.applyMark({ id: "UP1", action: "seen", at: "2026-10-01T09:06:00Z" } as PlanMark)).toEqual({
+      applied: true,
+      did: "seen:  Split in two"
+    })
+    expect(el(plan, "up1").getAttribute("seen")).toBe("2026-10-01 09:05")
+    expect(Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!.textContent).toBe(
+      "UP1 seen:  Split in two"
+    )
+    expect(plan.applyMark({ id: "up1", action: "seen" } as PlanMark)).toEqual({ applied: true, did: "seen already" })
+    plan.updateStates()
+    expect(el(plan, "p1").getAttribute("to-see")).toBe("up2@2026-10-01T09:05")
+    expect(plan.applyMark({ id: "up9", action: "seen" } as PlanMark)).toMatchObject({ applied: false, gone: true })
+    expect(problems(plan)).toEqual([])
   })
 
   test("phase N done:  drops its bare labels and its prose updates;  a phase's own plan changes stay", () => {
@@ -1343,7 +1417,7 @@ describe("PlanDoc commits", () => {
       { sha: "d".repeat(40), subject: "P9:  no such phase" },
       { sha: "e".repeat(40), subject: "Merge branch 'main'" }
     ]
-    const added = plan.backfillCommits(log, { base: BASE })
+    const added = plan.backfillCommits(log, { base: BASE }).filter((entry) => !entry.log)
     expect(added.map((entry) => [entry.sha[0], entry.phase ?? entry.item])).toEqual([
       ["a", 1],
       ["b", 1],
@@ -1366,10 +1440,66 @@ describe("PlanDoc commits", () => {
       { sha: "a".repeat(40), subject: "P1 follow-up:  more" }
     ]
     const added = plan.backfillCommits(log, { epic: "demo" })
-    expect(added.map((entry) => [entry.sha[0], entry.phase])).toEqual([
+    expect(added.filter((entry) => !entry.log).map((entry) => [entry.sha[0], entry.phase])).toEqual([
       ["a", 1],
       ["b", 3]
     ])
+    // the Log:  the old P3's names the epic, so it's an entry, with no chips;  another epic's isn't
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "c"])
+  })
+
+  test("the Log (epic-engine P52):  an entry per commit, its time, refs by phase id and item;  placed by time;  once", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.addItem("issue", "bug")
+    plan.log("P1 active")
+    const event = plan.findSection("log")!.lastElementChild!
+    event.setAttribute("at", "2026-10-20T12:30-04:00")
+    const PEER = "https://github.com/spell-app/spell-brand"
+    const log = [
+      { sha: "d".repeat(40), subject: "demo:  tidy, no phase", time: "2026-10-20T14:00:09-04:00" },
+      { sha: "c".repeat(40), subject: "other-epic P1:  One -- another epic's", time: "2026-10-20T13:30:00-04:00" },
+      {
+        sha: "b".repeat(40),
+        subject: "demo P2, I1:  Two -- in the brand",
+        repo: PEER,
+        time: "2026-10-20T13:00:00-04:00"
+      },
+      {
+        sha: "a".repeat(40),
+        subject: "demo P1:  One -- P1 active, the first",
+        repo: BASE,
+        time: "2026-10-20T12:00:00-04:00"
+      }
+    ]
+    const added = plan.backfillCommits(log, { base: BASE, epic: "demo" })
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "d"])
+    const section = plan.findSection("log")!
+    const lines = () =>
+      Array.from(section.children, (line) =>
+        line.localName === "epic-event"
+          ? `event ${line.getAttribute("at")}`
+          : [
+              line.getAttribute("sha")![0],
+              line.getAttribute("at"),
+              line.getAttribute("refs"),
+              line.getAttribute("repo"),
+              line.textContent
+            ].join(" | ")
+      )
+    const [one, two] = plan.phases
+    expect(lines().slice(-4)).toEqual([
+      `a | 2026-10-20T12:00-04:00 | ${one!.id} |  | P1 active, the first`,
+      "event 2026-10-20T12:30-04:00",
+      `b | 2026-10-20T13:00-04:00 | ${two!.id} i1 | ${PEER} | in the brand`,
+      "d | 2026-10-20T14:00-04:00 |  |  | tidy, no phase"
+    ])
+    expect(plan.backfillCommits(log, { base: BASE, epic: "demo" })).toEqual([])
+    expect(problems(plan)).toEqual([])
+    // `epic log` and Actual Time read the review lines alone:  a commit's sentence is never one (`activeWindow()`)
+    expect(plan.reviewLines().map((line) => line.text)).not.toContain("P1 active, the first")
+    expect(plan.reviewLines().at(-1)).toEqual({ at: "2026-10-20 12:30", text: "P1 active" })
   })
 
   test("a child repo's commit links to its own repo;  the page's links the rest", () => {
@@ -1583,9 +1713,10 @@ describe("PlanDoc review inbox", () => {
     expect(todo.textContent).toContain("Owen:  after the flight")
     const phase = el(plan, "p1")
     expect(phase.querySelector(':scope > epic-status[slot="status"][state="noted"] a[href="#t2"]')).not.toBeNull()
+    // a phase's pick is its own option sets' (epic `epic-engine` P50):  none here
     expect(plan.applyMark({ id: "p1", action: "pick", pick: "A" })).toEqual({
       applied: false,
-      left: "P1 (phase):  can't pick A"
+      left: "P1 has no option cards"
     })
     expect(plan.applyMark({ id: "p1", action: "revisit", when: "soon", note: "too big?" })).toMatchObject({
       applied: false,
@@ -2498,6 +2629,55 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     plan.applyMark({ id: "m2", action: "test", result: "failed", note: "Half of it.", at })
     expect(replyOf("m2")).toEqual(["test failed", "Half of it."])
     expect(el(plan, "i1").textContent).toContain("Owen:  Half of it.")
+    expect(problems(plan)).toEqual([])
+  })
+
+  // epic `epic-engine` P51 (Q53):  answered inline, with the page's own marks
+  test("inline:  Approve closes it;  the note box's x cancels it, his note and picture kept;  a revisit is left", () => {
+    const plan = withTests()
+    const at = new Date(2026, 9, 1, 9, 30).toISOString()
+    expect(plan.applyMark({ id: "m1", action: "approve" }).did).toBe("approved:  closed (passed)")
+    expect(
+      plan.applyMark({ id: "m3", action: "skip", note: "Moot.", shot: "tests/m3-20261029-1432.png", at }).did
+    ).toBe('canceled:  no longer applies (Owen\'s run):  "Moot."')
+    const reply = el(plan, "m3").querySelector('epic-reply[from="Owen"]')!
+    expect([
+      el(plan, "m3").getAttribute("status"),
+      reply.getAttribute("re"),
+      reply.querySelector("img")?.getAttribute("src")
+    ]).toEqual(["canceled", "test skipped", "tests/m3-20261029-1432.png"])
+    const left = plan.applyMark({
+      id: "m2",
+      action: "revisit",
+      when: "soon",
+      note: "It half worked",
+      shot: "tests/m2-20261029-1432.png",
+      at
+    })
+    expect(left.applied).toBe(false)
+    expect(el(plan, "m2").getAttribute("status")).toBe("open")
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("another item's x keeps the note's picture in his reply", () => {
+    const plan = withTests()
+    plan.addItem("judgement", "a call")
+    plan.applyMark({ id: "j1", action: "skip", shot: "tests/j1-20261029-1432.png" })
+    expect(el(plan, "j1").querySelector('epic-reply[from="Owen"] img')?.getAttribute("src")).toBe(
+      "tests/j1-20261029-1432.png"
+    )
+    expect(el(plan, "j1").getAttribute("status")).toBe("open")
+  })
+
+  test("prepared (Start testing):  stamped with its place;  Owen's order puts the prepared first, by place", () => {
+    const plan = withTests()
+    plan.prepareTest("m3", 1)
+    plan.prepareTest("m1", 2)
+    expect(el(plan, "m3").getAttribute("prepared")).toBe("1")
+    expect(EpicTests.openIn(plan).map((test) => test.id)).toEqual(["M3", "M1", "M2"])
+    expect(plan.document.querySelector("#log > epic-event:last-of-type")?.textContent).toContain(
+      "M1 prepared for Owen's testing, number 2"
+    )
     expect(problems(plan)).toEqual([])
   })
 

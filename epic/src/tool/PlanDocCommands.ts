@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, relative, resolve } from "node:path"
+import { dirname, join, relative, resolve } from "node:path"
 
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
@@ -13,7 +13,7 @@ import {
   PlanDocError,
   REVIEW_SECTIONS,
   TITLE_PREFIX,
-  type CommitLogEntry,
+  type CommitHistory,
   type Phase,
   type PhaseTimer,
   type PlanSummary
@@ -27,6 +27,7 @@ import { EpicTargets } from "./EpicTargets"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { MigrateCommands, type SessionFinder } from "./MigrateCommands"
+import { OptionCommands } from "./OptionCommands"
 import { PlanDoc } from "./PlanDoc"
 import { PlanCommits } from "./PlanCommits"
 import { EPIC_STATUSES, PlanDocFiles, type EpicListing } from "./PlanDocFiles"
@@ -48,7 +49,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `option`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -95,6 +96,9 @@ export class PlanDocCommands {
   /** the `test` command, and `add` / `details`' test fields, on this object's files and output */
   readonly tests: TestCommands
 
+  /** the `option` command, `choose`, and `add`'s standing sets (epic `epic-engine` P50), on this object's files */
+  readonly options: OptionCommands
+
   /**
    * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
    * `epic-engine` P41):  STATIC for the object's life
@@ -118,6 +122,7 @@ export class PlanDocCommands {
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
     this.tests = new TestCommands(this)
+    this.options = new OptionCommands(this)
   }
 
   ////////////////
@@ -195,7 +200,11 @@ export class PlanDocCommands {
           plan.setPhase(plan.phasePlace(phase), status, { done: flags.done as string | undefined, minutes })
           return history ? plan.backfillCommits(history.log, history) : []
         })
-        if (added.length) this.print(`${added.length} commit${added.length === 1 ? "" : "s"} listed on the page`)
+        // and each into the Log (epic `epic-engine` P52)
+        const logged = added.filter((entry) => entry.log).length
+        const listed = added.length - logged
+        if (added.length)
+          this.print(`${listed} commit${listed === 1 ? "" : "s"} listed on the page, ${logged} added to the Log`)
         // done:  nobody works on it any more (I147)
         if (status === "done") this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
         this.files.reindex()
@@ -220,7 +229,7 @@ export class PlanDocCommands {
           const n = plan.phasePlace(need(rest[0], "a phase"))
           const set = plan.setPhaseFields(n, flags, { accepted: flags.accepted === true })
           if (!set.length)
-            throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify`)
+            throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify / --choices`)
           plan.log(`${plan.phaseLabel(n)} ${set.join(", ")} set`)
           return PlanDocCommands.planningAfter(plan.phase(n), flags)
         })
@@ -282,6 +291,8 @@ export class PlanDocCommands {
         })
       case "add": {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
+        // a standing option set, in the Choices section (epic `epic-engine` P50)
+        if (kind === "choices") return this.options.addStanding(file, title, flags)
         const { id, example } = await this.edit(file, (plan) => this.tests.addItem(plan, kind, title, flags))
         this.tests.saveExample(file, example)
         return this.print(id.toUpperCase())
@@ -300,13 +311,11 @@ export class PlanDocCommands {
         })
         return this.print(id.toUpperCase())
       }
-      case "choose": {
-        const id = need(rest[0], "an item id")
-        const letter = need(rest[1], "the option's letter")
-        const set = flags.set === undefined ? undefined : Number(flags.set)
-        const did = await this.edit(file, (plan) => plan.choose(id, letter, { outcome: rest[2], set }))
-        return this.print(`${id.toUpperCase()} ${did}`)
-      }
+      case "choose":
+        // several letters, a phase or a standing set too (epic `epic-engine` P50)
+        return this.options.choose(file, rest, flags)
+      case "option":
+        return this.options.run(file, rest, flags)
       case "commit":
         return this.commit(file, rest, flags)
       case "commits":
@@ -348,7 +357,9 @@ export class PlanDocCommands {
       case "items":
         return this.printItems(this.read(file), file, flags)
       case "log":
-        return this.edit(file, (plan) => plan.log(need(rest[0], "the text")))
+        // no text:  print the review lines, which the page no longer shows (epic `epic-engine` P52, Q56 C)
+        if (rest[0] === undefined) return this.printLog(file, flags)
+        return this.edit(file, (plan) => plan.log(rest[0]!))
       case "bedtime":
         return this.edit(file, (plan) => bedtime(plan, rest))
       case "prompt": {
@@ -628,13 +639,14 @@ export class PlanDocCommands {
    * `commits <name> --backfill [--merged <sha,...>]`:
    * the doc's phase and item commits into its phases' and items' commit lists (`PlanDoc.backfillCommits()`).
    * - prints what it added
-   * - the doc's history:  `unlistedHistory()`
+   * - the doc's history:  `PlanDocFiles.epicHistory()`
+   * - every commit read also gets its entry in the Log (epic `epic-engine` P52), printed as `Log`
    * - `--merged`:  only those commits, short shas or full (`epic merge`'s, just fast-forwarded onto `main`;  epic
    *   `epic-engine` I135)
    */
   private async backfillCommits(file: string, merged?: string | boolean): Promise<void> {
     const only = typeof merged === "string" ? merged.split(",").filter(Boolean) : undefined
-    const history = this.unlistedHistory(file)
+    const history = this.files.epicHistory(file)
     const log = only
       ? history.log.filter(({ sha }) => only.some((given) => sha.startsWith(given) || given.startsWith(sha)))
       : history.log
@@ -644,10 +656,12 @@ export class PlanDocCommands {
         .map((entry) => ({ ...entry, where: entry.phase !== undefined ? plan.phaseLabel(entry.phase) : undefined }))
     )
     for (const entry of added) {
-      const where = entry.where ?? entry.item!.toUpperCase()
+      const where = entry.where ?? (entry.log ? LOG_LABEL : entry.item!.toUpperCase())
       this.print(`  ${where.padEnd(4)} ${entry.sha.slice(0, 7)}`)
     }
-    const count = `${added.length} commit${added.length === 1 ? "" : "s"} added`
+    const logged = added.filter((entry) => entry.log).length
+    const listed = added.length - logged
+    const count = `${listed} commit${listed === 1 ? "" : "s"} added, ${logged} to the Log`
     this.print(only ? `${count} (${only.length} merged)` : `${count} (${history.log.length} in the doc's history)`)
   }
 
@@ -690,12 +704,12 @@ export class PlanDocCommands {
   }
 
   /**
-   * `unlistedHistory()`, best effort (`phase ... done`):  NEVER throws;  a history that won't read is `undefined`,
-   * and says why.
+   * `PlanDocFiles.epicHistory()`, best effort (`phase ... done`):  NEVER throws;  a history that won't read is
+   * `undefined`, and says why.
    */
-  private historyOrNone(file: string): ReturnType<PlanDocCommands["unlistedHistory"]> | undefined {
+  private historyOrNone(file: string): CommitHistory | undefined {
     try {
-      return this.unlistedHistory(file)
+      return this.files.epicHistory(file)
     } catch (error) {
       this.warn(`epic:  no commits listed:  ${error instanceof Error ? error.message : String(error)}`)
       return undefined
@@ -703,28 +717,24 @@ export class PlanDocCommands {
   }
 
   /**
-   * The doc's history for `backfillCommits()`:  its commits (`PlanDocFiles.docLog()`, git's, or a shared doc's
-   * `sharedDocLog()` over every repo of a kit), its repo's GitHub page and its epic's name.
-   * - never a commit ANOTHER epic's page lists:  a bare `P7:  Doc Review` reads the same for every epic with one
-   */
-  private unlistedHistory(file: string): { log: CommitLogEntry[]; base: string | null; epic: string } {
-    const epic = basename(file).replace(/(\.plan)?\.html$/, "")
-    const others = [...new EpicDocs({ files: this.files, name: epic }).otherEpicsCommits()]
-    const log = this.files.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
-    return { log, base: this.files.commitBase(file), epic }
-  }
-
-  /**
    * `details <name> <id> --file <html> [--append | --more]`:
    * an agent's details or reply into one item, under the doc's lock.
    * - a test's fields instead of, or before, the file's HTML (epic `epic-engine` P4):
    *   `--step`, `--should`, `--example`, `--if-not` (`TestCommands.fieldsOf()`)
+   * - `--prepared <n>` on a test (epic `epic-engine` P51):  Start testing wrote it out for Owen, its place `n` in his
+   *   order (`<epic-item prepared="2">`);  alone, it only stamps it
    * - refused while Owen called the request off on the page ("nevermind", epic `windows-and-review` P2):
    *   nothing lands
    */
   private async details(name: string, file: string, rest: string[], flags: Flags): Promise<void> {
     const id = need(rest[0], "an item id")
     const fields = this.tests.fieldsOf(id, flags)
+    const prepared = this.tests.preparedOf(id, flags)
+    if (prepared && !fields.html && stringFlag(flags.file) === undefined) {
+      refuseCanceled(name, file, id)
+      await this.edit(file, (plan) => plan.prepareTest(id, prepared))
+      return
+    }
     const given = stringFlag(flags.file) !== undefined || !fields.html
     const html =
       fields.html + (given ? readFileSync(need(flags.file as string | undefined, "--file <html file>"), "utf8") : "")
@@ -733,6 +743,7 @@ export class PlanDocCommands {
     await this.edit(file, (plan) => {
       if (flags.more) plan.addMore(id, html)
       else plan.setDetails(id, html, { append: Boolean(flags.append) })
+      if (prepared) plan.prepareTest(id, prepared)
       plan.log(
         `${id.toUpperCase()} ${flags.more ? "more details added" : flags.append ? "reply added" : "details rewritten"}`
       )
@@ -1076,6 +1087,18 @@ export class PlanDocCommands {
   }
 
   /** `summary`:  bullets for a reply (or JSON for a script). */
+  /**
+   * `log <name> [--last <n>]`:  the newest `n` review lines of the log (default `LOG_LAST`), newest last,
+   * `2026-10-29 08:59  Q56 answered:  ...`.
+   * - the page draws only the Log's commits (epic `epic-engine` P52, Q56 C):  this is where to read when something was
+   *   answered, reviewed or set active
+   */
+  private printLog(file: string, { last }: Flags): void {
+    const count = last === undefined ? LOG_LAST : Number(stringFlag(last))
+    if (!Number.isInteger(count) || count < 1) throw new PlanDocError(`log:  --last takes a count, e.g. --last 20`)
+    for (const { at, text } of this.read(file).reviewLines().slice(-count)) this.print(`${at}  ${text}`)
+  }
+
   private printSummary(summary: PlanSummary, json: boolean): void {
     if (json) return this.print(JSON.stringify(summary, null, 2))
     const lines = [`${summary.title}`]
@@ -1087,6 +1110,13 @@ export class PlanDocCommands {
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
     if (summary.next) lines.push(`next:  P${summary.next.number} · ${summary.next.name}`)
+    // the option sets (epic `epic-engine` P50):  "choices:  2 sets open, 5 options;  P50 1 open"
+    const { choices } = summary
+    const standing = choices.sets
+      ? `${choices.open} set${choices.open === 1 ? "" : "s"} open, ${choices.options} option${choices.options === 1 ? "" : "s"}`
+      : ""
+    const phases = choices.phases.map(({ phase, open }) => `${phase} ${open} open`)
+    if (standing || phases.length) lines.push(`choices:  ${[standing, ...phases].filter(Boolean).join(";  ")}`)
     for (const kind of OPEN_KINDS) {
       const open = summary.open[kind]
       if (!open.length) continue
@@ -1335,11 +1365,21 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   decide <name> <Q id> "answer" [--details html] [--option A]
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
-  choose <name> <id> <letter> ["outcome"] [--set N]
+  choose <name> <id> <letter>... ["outcome"] [--set N]
                                                    an option Owen settled IN CONVERSATION, on any item, as the
                                                    page's pick records it:  chosen on the item's latest card
                                                    set (--set N:  the Nth);  a question answered, a judgement
-                                                   call closed, any item reviewed;  the outcome in its Choices
+                                                   call closed, any item reviewed;  the outcome in its Choices;
+                                                   several letters in a pick-any set;  a phase's set, or a
+                                                   standing set (s-upgrades), as its target
+  option <name> add <id> "title" ["note"] [--set N] [--image <png>]
+  option <name> edit <id> <letter> [--title "..."] [--note "..."] [--set N]
+  option <name> remove | close <id> [<letter>] [--set N]
+                                                   an option set's options:  added (the next letter), edited
+                                                   in place (the old text kept, folded), removed (kept, folded),
+                                                   or the set closed (done);  on an item, a phase or a standing set
+  add <name> choices "title" [--multiple] [--note "..."]
+                                                   a standing option set (s-<slug>), in the Choices section
   close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
@@ -1349,7 +1389,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    (subjects "P3:  Name -- summary", "Fix I3:  ...");
                                                    --merged:  only those (epic merge's);  phase ... done and
                                                    epic merge list them by themselves
-  log <name> "text"                                timestamped line in the log
+  log <name> ["text"] [--last <n>]                timestamped review line in the log;  no text:  print the newest
   saga page <id> [--force]                         a saga's page, sagas/<id>/<id>.saga.html, from the template:
                                                    its title and purpose from sagas/sagas.json5;  --force remakes
                                                    it;  every verb above edits it as SAGA:/<id> (epic-workflow P15)
@@ -1453,6 +1493,12 @@ Every command reads <epic-*> markup only, and refuses a doc in the old markup (o
 --here is no longer needed:  accepted and ignored.`
 
 /** `summary`'s mark for a phase's status. */
+/** Where `commits --backfill` says a commit's Log entry went. */
+const LOG_LABEL = "Log"
+
+/** How many review lines `log <name>` prints with no `--last`. */
+const LOG_LAST = 20
+
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]" }
 
 /**

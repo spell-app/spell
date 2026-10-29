@@ -126,8 +126,7 @@ export const epicPageVocabulary = {
     { name: "", description: "The Overview, then the sections." },
     {
       name: "durable",
-      description:
-        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
+      description: 'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
     },
     {
       name: "toolbar",
@@ -147,8 +146,8 @@ export const epicPageVocabulary = {
     {
       name: "header",
       description:
-        "The sticky page header:  the h1, then at its right Send (while reviewed), the bedtime label, " +
-        "the step label (the state in it) and the git toggle."
+        "The sticky page header:  the h1, Send in the middle (while reviewed), then at its right the bedtime label, " +
+        "the step label (the state in it) and the gear."
     },
     {
       name: "heading",
@@ -182,19 +181,49 @@ export const epicPageVocabulary = {
     {
       name: "send",
       description:
-        "In the header while the page is reviewed, Send (`<epic-send-buttons>`, epic `epic-engine` " +
-        "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
-        "some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While " +
+        "In the header's middle while the page is reviewed, Send (`<epic-send-buttons countdown>`, epic `epic-engine` " +
+        "P20, P53):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
+        "some unsent, outlined blue once sent);  a press sends at once, and Auto Send (the gear) sends by itself after " +
+        "the page is left alone, a ring round the plane counting down.  While " +
         "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, " +
         "with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
         "dotted once each has his mark;  its tooltip names them."
     },
-    { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
+    {
+      name: "centre",
+      description:
+        "The header's middle (epic `epic-engine` P53):  Send, then what the session is doing, a bare spinner.  Centred " +
+        "on the header while the title fits beside it;  narrower, right after the title, never over it."
+    },
+    {
+      name: "spinner",
+      description:
+        "What the session is doing, beside Send (`<epic-agents draws=spinner>`, T53):  a turning spinner, its words " +
+        "(`Building P53`) its tooltip;  nothing while it's idle."
+    },
     {
       name: "status",
+      description: "The header's right side:  the bedtime label, the step label, the gear."
+    },
+    {
+      name: "gear",
       description:
-        "The header's right side:  the changes to accept, Send (while reviewed), the bedtime label, " +
-        "the step label, the git toggle."
+        "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, " +
+        "Auto Send and Theme."
+    },
+    {
+      name: "gear-menu",
+      description: "The gear's menu (a `<ui-popup>`):  its two rows, and beside them the sub-menu open."
+    },
+    { name: "gear-row", description: "A row of the gear's menu:  `Auto Send · 2 minutes`, `Theme · Paper`." },
+    {
+      name: "auto-send",
+      description: "Auto Send's sub-menu:  Immediately, 2 minutes, 5 minutes, then Off;  the chosen one ticked."
+    },
+    {
+      name: "theme-menu",
+      description:
+        'The Theme sub-menu:  Spell UI\'s `<ui-theme-menu show="menu" bench="none">`, Light / Dark / Auto and the themes.'
     },
     {
       name: "step-pill",
@@ -233,30 +262,9 @@ export const epicPageVocabulary = {
       name: "see-also",
       description:
         "Above the blocks:  the pages the epic made for itself (its `details/` folder), each a link;  none, no box."
-    },
-    {
-      name: "agents",
-      description:
-        "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
-    },
-    {
-      name: "test-run",
-      description:
-        "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests " +
-        "section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, " +
-        "`epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
     }
   ],
-  states: [
-    { name: "future", description: "A future epic." },
-    { name: "commits", description: "Every commit shows (the git toggle is on)." },
-    {
-      name: "testing",
-      description:
-        "Test mode (epic `epic-engine` P4):  a test run shows over its blocks, until Esc or Done testing.  Page state, " +
-        "never in a doc."
-    }
-  ],
+  states: [{ name: "future", description: "A future epic." }],
   texts: [
     {
       key: "hungTip",
@@ -264,7 +272,11 @@ export const epicPageVocabulary = {
       description: "Plan hung?:  its tooltip."
     },
 
-    { key: "copyHeading", text: "Copy {command}", description: "The h1's name:  its tooltip." },
+    {
+      key: "copyHeading",
+      text: "{name}:  click to copy {command}",
+      description: "The h1's name:  its tooltip, its full name first (narrow, the name is cut short)."
+    },
     {
       key: "copiedText",
       text: "Copied {text}",
@@ -314,8 +326,17 @@ export const epicPageVocabulary = {
       text: "A /bedtime run is on ({phases}):  what it changes shows green until you review it.",
       description: "The bedtime label's tooltip."
     },
-    { key: "showCommits", text: "Show the commits", description: "The git toggle, off." },
-    { key: "hideCommits", text: "Hide the commits", description: "The git toggle, on." },
+    { key: "gearTip", text: "Settings", description: "The header's gear:  its tooltip, and its menu's name." },
+    { key: "autoSend", text: "Auto Send", description: "The gear's first row, and its sub-menu's name." },
+    { key: "theme", text: "Theme", description: "The gear's second row, and its sub-menu's name." },
+    {
+      key: "autoSendNow",
+      text: "Immediately",
+      description: "Auto Send:  each change sent as it's finished (a note when its box loses the focus)."
+    },
+    { key: "autoSend2", text: "2 minutes", description: "Auto Send:  after 2 minutes left alone (the default)." },
+    { key: "autoSend5", text: "5 minutes", description: "Auto Send:  after 5 minutes left alone." },
+    { key: "autoSendOff", text: "Off", description: "Auto Send off:  only a press sends." },
     { key: "futureHeader", text: "Future epic:  not planned yet", description: "A future epic's notice." },
     {
       key: "futureBody",
@@ -465,6 +486,14 @@ export const epicPageVocabulary = {
       when: { attribute: "kind", values: ["saga"] },
       max: 1,
       description: "A saga page's Epics, after its Overview:  the cards of the epics serving it."
+    },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["choices"] },
+      max: 1,
+      description:
+        "Choices:  standing option sets, open round after round (epic `epic-engine` P50), between the Overview and " +
+        "the Phases;  only on a page that has one."
     },
     { tag: "epic-section", where: { attribute: "kind", values: ["phases"] }, max: 1, description: "2. Phases." },
     {

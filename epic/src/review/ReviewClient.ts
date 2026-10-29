@@ -8,9 +8,10 @@ import {
   NOBODY_LISTENING,
   SUMMARY_ID,
   TESTS_API,
-  TEST_RESULTS,
+  TESTS_ID,
   commentsOf,
   emptyInbox,
+  hasSetChange,
   inboxOf,
   inlineCommentsNote,
   isAnchoredIn,
@@ -32,8 +33,6 @@ import {
   type ReviewClientOptions,
   type Running,
   type StartAnswer,
-  type TestAnswer,
-  type TestResult,
   type TestsEntry,
   sentence,
   storageNow,
@@ -264,10 +263,11 @@ export class ReviewClient extends PageStore {
   runningOf(id: string): Running | null {
     if (this.calling.has(id)) return null
     const work = this.inbox.working[id]
-    if (work) return { action: work.action === "revisit" ? "revisit" : "details", queued: false }
+    if (work) return { action: work.action, queued: false }
     const entry = this.inbox.now.find((each) => each.id === id)
     if (!this.asking.has(id) && !entry) return null
-    const action = entry?.action ?? (this.inbox.marks[id]?.action === "revisit" ? "revisit" : "details")
+    const asked = this.inbox.marks[id]?.action
+    const action = entry?.action ?? (asked === "revisit" || asked === "prepare" ? asked : "details")
     return { action, queued: !this.asking.has(id) && !this.inbox.listening }
   }
 
@@ -433,6 +433,22 @@ export class ReviewClient extends PageStore {
   }
 
   /**
+   * ONE option set's whole change, its mark's set fields (`SetChange`, epic `epic-engine` P50):  picks, the
+   * pick-one / pick-any flip, options added, edited and removed;  `{}` drops them.
+   * - `id`:  what holds the set, an item, a phase or a standing set (`s-upgrades`)
+   * - a revisit keeps its note and comments, its pick fields replaced ("pick B, but ...");  one asked NOW turns
+   *   `soon`, as `choose()` does
+   * - anything else becomes a plain pick mark, or none
+   */
+  changeSet(id: string, change: PickFields): Promise<boolean> {
+    const mark = this.inbox.marks[id]
+    const fields = pickOf(change)
+    const changed = hasSetChange(fields)
+    if (mark?.action !== "revisit") return this.save(id, changed ? { action: "pick", ...fields } : null)
+    return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...commentsOf(mark), ...fields })
+  }
+
+  /**
    * Item `id`'s id chip clicked:  urgent becomes not urgent, and back (`docCalm`:  what the doc says, `calm`).
    * - shown at once, then saved
    * - back to what the doc says:  the inbox forgets it
@@ -446,28 +462,44 @@ export class ReviewClient extends PageStore {
   }
 
   ////////////////
-  // ## Test runs (epic `epic-engine` P4)
+  // ## Pictures and testing (epic `epic-engine` P4, P51)
   ////////////////
 
-  /** Test `id`'s answer in a run (its `test` mark), if any. */
-  testAnswerOf(id: string): TestAnswer | undefined {
-    const mark = this.inbox.marks[id]
-    if (mark?.action !== TEST_ACTION || !isTestResult(mark.result)) return undefined
-    return { result: mark.result, ...(mark.note && { note: mark.note }), ...(mark.shot && { shot: mark.shot }) }
-  }
-
   /**
-   * Answer test `id` (`{ action: "test", result, note?, shot? }`):  shown at once, then saved, as every mark;
-   * true when saved.
+   * Start testing (epic `epic-engine` P51):  the Manual tests section's request for now (`prepare`, under
+   * `TESTS_ID`), which the session hands to an agent that checks what it can and writes out the rest;  true when asked.
+   * - nobody listening:  the page server wakes the epic, as for Add Details (`askNow()`)
    */
-  answerTest(id: string, answer: TestAnswer): Promise<boolean> {
-    return this.save(id, { action: TEST_ACTION, ...answer })
+  prepareTests(): Promise<boolean> {
+    return this.askNow(TESTS_ID, "prepare")
   }
 
   /**
-   * Save `png` (a data URL) as test `id`'s screenshot (`POST shot`);  its path from the epic's folder, as the route
-   * answers it (`tests/v3-20261019-1432.png`), or `undefined` when it failed (a notice says why).
-   * - its answer is the path, not the inbox:  the caller puts it in the test's mark (`answerTest()`)
+   * Put picture `shot` (a path `saveShot()` answered;  `undefined` takes it away) in item `id`'s note mark
+   * (epic `epic-engine` P51:  a screenshot pasted or dropped in any note box);  true when saved.
+   * - a note mark already (a revisit, Make Todo, the x, a todo's plane or drop):  the same mark, with the picture
+   * - else what's typed makes the mark (`typedMark()`), a revisit with the picture, so Send hands it over;
+   *   nothing typed:  a revisit holding only the picture
+   * - taken away from a revisit with no words, pick or comments left:  the mark goes
+   */
+  attachShot(id: string, shot: string | undefined): Promise<boolean> {
+    const mark = this.inbox.marks[id]
+    const typed = this.typedOf(id)
+    const made = mark && NOTE_MARKS.has(mark.action) && !isImmediate(mark) ? stripped(mark) : this.typedMark(id, typed)
+    const base: MarkInput =
+      made && made !== "draft" ? made : { action: "revisit", when: "soon", note: typed.trim(), ...pickOf(mark) }
+    const { shot: _old, ...rest } = base
+    const empty = rest.action === "revisit" && !rest.note && !rest.pick && !rest.comments?.length
+    if (!shot && empty) return this.save(id, null)
+    this.boxes.add(id)
+    return this.save(id, { ...rest, ...(shot && { shot }) })
+  }
+
+  /**
+   * Save `png` (a data URL) as item `id`'s picture (`POST shot`):  a note box's, an option's;  its path from the
+   * epic's folder, as the route answers it (`tests/j3-20261029-1432.png`), or `undefined` when it failed (a notice
+   * says why).
+   * - its answer is the path, not the inbox:  the caller puts it in the mark (`attachShot()`, an option set's change)
    * - NEVER throws
    */
   async saveShot(id: string, png: string): Promise<string | undefined> {
@@ -536,9 +568,11 @@ export class ReviewClient extends PageStore {
     this.forgetTyped(id)
     this.boxes.delete(id)
     if (how === "now") return this.askNow(id, "revisit", note)
-    if (how !== "soon") return this.save(id, { action: how, note })
     const mark = this.inbox.marks[id]
-    return this.save(id, { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark) })
+    // the box's picture goes with the button pressed (epic `epic-engine` P51)
+    const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
+    if (how !== "soon") return this.save(id, { action: how, note, ...shot })
+    return this.save(id, { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark), ...shot })
   }
 
   /**
@@ -574,14 +608,17 @@ export class ReviewClient extends PageStore {
     const mark = this.inbox.marks[id]
     const note = text.trim()
     if (mark && isImmediate(mark)) return "draft"
+    // a picture in the box stays with whatever its words make (epic `epic-engine` P51)
+    const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
     if (!note) {
       if (mark?.action !== "revisit") return "draft"
+      if (shot.shot) return { action: "revisit", when: "soon", note: "", ...pickOf(mark), ...commentsOf(mark), ...shot }
       const pick = pickOf(mark)
       return pick.pick ? { action: "pick", ...pick } : null
     }
-    if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note }
+    if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note, ...shot }
     // his comments in its text stay its content (I140)
-    return { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark) }
+    return { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark), ...shot }
   }
 
   /** Save `text` as `id`'s draft in the inbox;  true when saved (the backup then goes). */
@@ -913,9 +950,6 @@ export class ReviewClient extends PageStore {
   }
 }
 
-/** A test answer's action (epic `epic-engine` P4). */
-const TEST_ACTION = "test"
-
 /**
  * The note marks typing in the note box keeps as they are, changing only their words (`typedMark()`):
  * Make Todo, the x (`skip`), a todo's plane (`next`) and its x (`drop`).
@@ -923,9 +957,14 @@ const TEST_ACTION = "test"
  */
 const TYPED_KEEPS: ReadonlySet<string> = new Set(["todo", "skip", "next", "drop"])
 
-/** Is `result` one of a test's four answers? */
-function isTestResult(result: unknown): result is TestResult {
-  return (TEST_RESULTS as readonly unknown[]).includes(result)
+/**
+ * The note box's marks (epic `epic-engine` P51):  what a picture pasted in the box joins, rather than making a revisit.
+ */
+const NOTE_MARKS: ReadonlySet<string> = new Set(["revisit", "todo", "skip", "next", "drop"])
+
+/** `mark` as a mark to save again:  its own fields, without the stamp. */
+function stripped({ at: _at, ...mark }: InboxMark): MarkInput {
+  return mark
 }
 
 /** The summary's tag:  how the page finds it, having no id. */

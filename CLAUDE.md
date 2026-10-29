@@ -1,12 +1,12 @@
-Claude Code loads the cross-model `AGENTS.md` (the kit, and the rules across repos) and WWOD here;  working in one of
-the kit's folders, its `CLAUDE.md` / `AGENTS.md` comes next (`server/AGENTS.md` ...);  in a child repo, that repo's
-own (`ui/AGENTS.md` ...), then its folder's (`spell/parser/core/AGENTS.md` ...).
+Claude Code loads the cross-model `AGENTS.md` (the kit, and the rules across its folders) and WWOD here;  working in
+one of `src/`'s folders, its `AGENTS.md` comes next (`src/server/AGENTS.md` ...);  in a big folder, its own
+(`ui/AGENTS.md` ...), then its sub-folder's (`parser/src/core/AGENTS.md` ...).
 
 @AGENTS.md
 
 @agents/wwod/WWOD.md
 
-The Claude-only rules, for every repo:
+The Claude-only rules, for every folder:
 
 In your own words, without jargon, narrate each step in the order it actually happens, and bold inline anything in the current PR that has drifted from my most recently stated intent.
 

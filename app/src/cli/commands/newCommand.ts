@@ -18,9 +18,7 @@ import { CLI } from "spell/app/cli"
  */
 export async function newCommand(session: CLI.CliSession, args: string[], options: CLI.NewOptions): Promise<number> {
   const [name = ""] = args
-  if (!/^[A-Za-z][\w-]*$/.test(name)) {
-    throw new CLI.CliError(`'${name}' won't do as a project name:  a letter, then letters, digits, - or _`)
-  }
+  CLI.checkProjectName(name)
   const parent = options.in ? resolve(options.in) : environment.userFilesRoot
   if (!existsSync(parent)) throw new CLI.CliError(`No such folder:  ${options.in ?? parent}`)
   const folder = resolve(parent, name)

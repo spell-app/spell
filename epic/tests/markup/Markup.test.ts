@@ -97,10 +97,17 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-change": { id: "ch3", item: "q16", at: "2026-10-24 15:10", answer: "One list", accepted: "2026-10-24 19:02" },
   "epic-review": { of: "q7", shows: "note", buttons: "todo", label: "Q7", tip: "reviewed 10/7/26", underLine: true },
   "epic-new-item": { open: true, adds: "question", near: "p3", editing: "new1" },
+  "epic-option-form": {
+    heading: "New choice",
+    optionTitle: "Both",
+    note: "a mixin",
+    shot: "tests/q1-20261029-1432.png",
+    for: "q1",
+    submit: "Add"
+  },
   "epic-agents": {},
   "epic-ask": { name: "q1", multiple: true, selectAll: true, filter: true, moreDetails: true },
   "epic-text-box": { type: "comment", for: "q1-B", placeholder: "Comment on B", label: "Comment on B · Blue" },
-  "epic-test-run": { all: true },
   "epic-send": {},
   "epic-send-buttons": { state: "unsent", sendTip: "Send 2 marks to Claude", count: 2, busy: true },
   "epic-choice-rows": { stacked: true, noFile: true },
@@ -414,7 +421,7 @@ describe("Markup.validate()", () => {
       'not allowed here:  <epic-item id="q1">',
       "too many:  <epic-answer>",
       "out of order:  <epic-choices>",
-      "too few:  <epic-choices>",
+      // an empty option set is fine since epic `epic-engine` P50:  a new standing set has no options yet
       "too few:  <epic-page>"
     ])
   })

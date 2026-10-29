@@ -142,6 +142,34 @@ describe("<epic-thread>", () => {
     })
   })
 
+  test("thinking is the page's BLUE (Claude at work on it), not his voice's violet;  `Claude:` in the ink", async () => {
+    for (const scheme of ["light", "dark"]) {
+      const host = await thread(comment({ working: "2026-10-17T14:00:00.000Z" }), "open")
+      const page = host.parentElement!
+      page.style.colorScheme = scheme
+      // the colours as the page's tokens give them, read the same way:  the blue a phase's spinner and Underway take
+      const probe = (color: string) => {
+        const span = document.createElement("span")
+        span.style.color = color
+        page.append(span)
+        const read = getComputedStyle(span).color
+        span.remove()
+        return read
+      }
+      const stub = host.shadowRoot!.querySelector("epic-thread-message[by='thinking']")!
+      const words = stub.shadowRoot!.querySelector(".words")!
+      const who = stub.shadowRoot!.querySelector(".who")!
+      const blue = probe("var(--ui-blue-text, var(--ui-blue, #1a67e0))")
+      expect({
+        scheme,
+        words: getComputedStyle(words).color,
+        violet: getComputedStyle(words).color === probe("var(--ui-violet, #6435c9)"),
+        whoIsBlue: getComputedStyle(who).color === blue,
+        ring: getComputedStyle(stub).boxShadow.includes("0px 0px 0px 1px")
+      }).toEqual({ scheme, words: blue, violet: false, whoIsBlue: false, ring: true })
+    }
+  })
+
   test("taken into an epic:  the line links the phase by its stable id", async () => {
     const host = await thread(
       comment({

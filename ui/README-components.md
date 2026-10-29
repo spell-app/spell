@@ -464,7 +464,7 @@ The docs site must be served first, since the command doesn't start the page ser
 ([README-site.md](README-site.md), "Viewing it").
 
 ```sh
-cd ~/www/spell/spell-ui
+cd ~/www/spell/ui
 yarn readme:components --shoot http://localhost:4747/components/ui/
 ```
 

@@ -1,11 +1,11 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/markdown/` of the `spell-parser` package (`spell/parser/markdown`).
+when working with code in this folder, `src/markdown/` of the kit's parser folder (`spell/parser/markdown`).
 
-**READ the repo root's `AGENTS.md` and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-- the root's:  the repo's layout
-- WWOD:  the house style every package shares
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+- the folder's:  its layout
+- WWOD:  the house style every folder shares
 - Only what's local is below.
   A section named like a WWOD rule extends it.
 
@@ -26,7 +26,7 @@ when working with code in this folder, `src/markdown/` of the `spell-parser` pac
     so rulex's spacing (`{spaces}`, touching parts) sees it
 - Rules are written in rulex as much as possible ([the Rulex guide](../../../spell.epics/guides/rulex/rulex.html)).
   - What rulex can't say is hand-written:  block nesting, emphasis pairing, "any token but a backtick".
-- The tests live in the repo's `tests/markdown/`, at the same paths as the code.
+- The tests live in the parser folder's `tests/markdown/`, at the same paths as the code.
 - `spec/`:  the GFM spec examples, and their test.
   - `gfm-spec.json`:  the examples, from cmark-gfm's `spec.txt`, by `yarn markdown:spec:update <spec.txt>`
   - [spec.test.ts](../../tests/markdown/spec/spec.test.ts) renders each with the PLAIN-HTML tags,
@@ -38,7 +38,7 @@ when working with code in this folder, `src/markdown/` of the `spell-parser` pac
 
 As WWOD §12, plus:
 
-- The repo's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
+- The parser folder's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
   (`spell/toolchain/decorators`).
 
 ## Types / Exports

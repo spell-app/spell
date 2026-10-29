@@ -24,6 +24,7 @@ import { epicListVocabulary } from "spell/epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell/epic/components/epic-list/EpicSort.en"
 import { epicNetEffectVocabulary } from "spell/epic/components/epic-net-effect/EpicNetEffect.en"
 import { epicNewItemVocabulary } from "spell/epic/components/epic-new-item/EpicNewItem.en"
+import { epicOptionFormVocabulary } from "spell/epic/components/epic-option-form/EpicOptionForm.en"
 import { epicNoteVocabulary } from "spell/epic/components/epic-note/EpicNote.en"
 import { epicOriginalVocabulary } from "spell/epic/components/epic-original/EpicOriginal.en"
 import { epicVersionVocabulary } from "spell/epic/components/epic-original/EpicVersion.en"
@@ -45,7 +46,6 @@ import { epicRunRowVocabulary } from "spell/epic/components/epic-run-row/EpicRun
 import { epicStateFilterVocabulary } from "spell/epic/components/epic-state-filter/EpicStateFilter.en"
 import { epicStatusVocabulary } from "spell/epic/components/epic-status/EpicStatus.en"
 import { epicSummaryVocabulary } from "spell/epic/components/epic-summary/EpicSummary.en"
-import { epicTestRunVocabulary } from "spell/epic/components/epic-test-run/EpicTestRun.en"
 import { epicTextBoxVocabulary } from "spell/epic/components/epic-text-box/EpicTextBox.en"
 import { epicThreadVocabulary } from "spell/epic/components/epic-thread/EpicThread.en"
 import { epicThreadMessageVocabulary } from "spell/epic/components/epic-thread/EpicThreadMessage.en"
@@ -123,10 +123,10 @@ export class Definitions {
     "epic-state-filter": epicStateFilterVocabulary,
     "epic-hidden-note": epicHiddenNoteVocabulary,
     // a test run (epic `epic-engine` P4):  drawn by `<epic-page>` over its blocks, written in a doc only as an example
-    "epic-test-run": epicTestRunVocabulary,
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,
     "epic-new-item": epicNewItemVocabulary,
+    "epic-option-form": epicOptionFormVocabulary,
     "epic-agents": epicAgentsVocabulary,
     "epic-thread-message": epicThreadMessageVocabulary,
     // what the docs runtime's comments draw on every page that takes comments (epic `epic-engine` P3)

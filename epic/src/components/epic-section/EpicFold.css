@@ -214,11 +214,50 @@
     line-height: 1.6;
   }
 
-  /* the title's end:  its tools (a section's toggles or filter, a phase's review buttons), then collapse-all */
+  /* the title's end:  its tools (a section's filter, a phase's review buttons), then its gear */
   .tools {
     display: inline-flex;
     align-items: center;
     gap: 2px;
+  }
+
+  /*
+   * its GEAR (`EpicFold.renderGear()`, I166):  a round, quiet button, last on the row, a little apart from what's
+   * before it;  24px, as the review pills' buttons are (`EpicReview.css`), centred on the row as they are
+   * - no caret, and no line box of the dropdown's own around it:  the dropdown is as big as its button
+   */
+  .gear {
+    flex: none;
+    margin-inline-start: 4px;
+  }
+  .gear::part(icon) {
+    display: none;
+  }
+  .gear::part(text) {
+    display: flex;
+    line-height: 1;
+  }
+  .gear > ui-button {
+    --ui-button-circular-min-width: 24px;
+  }
+  .gear > ui-button::part(button) {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    color: var(--epic-muted, var(--ui-text-muted));
+    font-size: 12px;
+    line-height: 1;
+  }
+  .gear > ui-button::part(icon) {
+    margin: 0;
+  }
+  .gear:hover > ui-button::part(button) {
+    color: var(--epic-ink, var(--ui-text-color));
   }
 
   /* the title's icon:  a slotted glyph, centred on the title's row */

@@ -50,6 +50,7 @@ export const epicSectionVocabulary = {
       values: [
         "overview-part",
         "epics",
+        "choices",
         "phases",
         "questions",
         "judgements",
@@ -62,7 +63,8 @@ export const epicSectionVocabulary = {
       required: true,
       description:
         "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its " +
-        "`<epic-event>`s;  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+        "`<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and " +
+        "`report` prose;  `epics` (a saga page's) its `<epic-cards>`."
     },
     {
       name: "title",
@@ -92,6 +94,14 @@ export const epicSectionVocabulary = {
         "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
+    {
+      name: "to-see",
+      kind: "string",
+      description:
+        "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the " +
+        "epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts " +
+        "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+    },
     FOLD_OPEN_ATTRIBUTE
   ],
   events: [
@@ -109,12 +119,6 @@ export const epicSectionVocabulary = {
       description:
         "Its live count changed with no change to its markup (epic `epic-engine` I147):  an item or phase being worked " +
         "on, an urgency not applied yet.  The docs runtime draws the toolbar's badges again."
-    },
-    {
-      name: "epic-test-opening",
-      detail: "{}",
-      description:
-        "The Manual tests section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
     }
   ],
   slots: [
@@ -139,15 +143,24 @@ export const epicSectionVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / " +
-        "Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
+        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter " +
+        "and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+    },
+    {
+      name: "gear",
+      description:
+        "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles " +
+        'before):  a `<ui-dropdown>` menu, "Show each phase\'s files" and "Show each phase\'s checks", ticked ' +
+        "while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
     },
     {
       name: "filter",
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
-        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, " +
-        "updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first " +
+        "that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange " +
+        "changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last " +
+        "3 days, grey done before."
     },
     {
       name: "hidden-note",
@@ -173,17 +186,26 @@ export const epicSectionVocabulary = {
     {
       name: "start-testing",
       description:
-        "The Manual tests section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
-        "open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
+        "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
+        'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
+        'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
+        "test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+    },
+    {
+      name: "next-epic",
+      description:
+        "The Manual tests section's link to the next epic with open tests, at its end once every test is answered:  " +
+        "only in a run across every epic (`epic test --all`, `?test=1&all=1`)."
     }
   ],
   states: [
     ...FOLD_STATES,
-    { name: "tools", description: "Its title has tools:  the Phases toggles, or a state filter (items in it)." }
+    { name: "tools", description: "Its title has tools:  the Phases gear, or a state filter (items in it)." }
   ],
   texts: [
     ...FOLD_TEXTS,
     { key: "epicsTitle", text: "Epics" },
+    { key: "choicesTitle", text: "Choices", description: "The standing option sets' section (P50)." },
     { key: "phasesTitle", text: "Phases" },
     { key: "questionsTitle", text: "Questions" },
     { key: "judgementsTitle", text: "Judgement calls" },
@@ -192,10 +214,17 @@ export const epicSectionVocabulary = {
     { key: "testsTitle", text: "Manual tests" },
     { key: "logTitle", text: "Log" },
     { key: "noneYet", text: "None yet", description: "An item section with no items." },
-    { key: "showFiles", text: "Show each phase's Files", description: "The Phases title's Files toggle, off." },
-    { key: "hideFiles", text: "Hide each phase's Files", description: "The Files toggle, on." },
-    { key: "showVerify", text: "Show each phase's Verify", description: "The Phases title's Verify toggle, off." },
-    { key: "hideVerify", text: "Hide each phase's Verify", description: "The Verify toggle, on." },
+    { key: "gearTip", text: "Settings for every phase", description: "The Phases gear's tooltip and name (I166)." },
+    {
+      key: "showFiles",
+      text: "Show each phase's files",
+      description: "The Phases gear menu:  every phase's Files field, ticked while shown."
+    },
+    {
+      key: "showVerify",
+      text: "Show each phase's checks",
+      description: "The Phases gear menu:  every phase's Verify field, ticked while shown."
+    },
     {
       key: "addNew",
       text: "New {kind}",
@@ -208,8 +237,57 @@ export const epicSectionVocabulary = {
     },
     {
       key: "startTestingTip",
-      text: "Go through the {count} open tests one at a time, answering each on the page",
-      description: "Start testing's tooltip."
+      text:
+        "Claude checks the tests it can check itself, writes out exactly what to do for the rest, with a screenshot, " +
+        "then the first test opens:  Approve one that passed, write what you saw in its note, the x if it no longer applies",
+      description: "Start testing's tooltip (epic `epic-engine` P51)."
+    },
+    {
+      key: "preparingTests",
+      text: "Preparing tests",
+      description: "The Manual tests section's button while Claude prepares the tests (P51)."
+    },
+    {
+      key: "preparingTip",
+      text: "Claude is checking what it can and writing out the rest;  the first test opens when it's done · click to call it off",
+      description: "Preparing tests' tooltip."
+    },
+    {
+      key: "waitingTip",
+      text: "Asked:  {why} · click to call it off",
+      description: "Preparing tests' tooltip while nobody has taken it yet."
+    },
+    {
+      key: "nextTest",
+      text: "Next test · {count} left",
+      description:
+        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+    },
+    {
+      key: "firstTest",
+      text: "Go through the tests · {count}",
+      description: "The same, every open test answered already:  it opens the first again."
+    },
+    {
+      key: "nextTestTip",
+      text: "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+      description: "Next test's tooltip."
+    },
+    {
+      key: "testsReady",
+      text: "Tests ready:  Next test opens the first",
+      description:
+        "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+    },
+    {
+      key: "nextEpic",
+      text: "Next epic with open tests:  {epic} · {count}",
+      description: "The Manual tests section's last line in a run across every epic, once every test is answered."
+    },
+    {
+      key: "noEpicLeft",
+      text: "Every epic's tests are answered:  Send hands them to Claude",
+      description: "The same, with no other epic left to test."
     },
     ...NEW_KIND_TEXTS,
     ...NEW_LIST_TEXTS
@@ -236,13 +314,37 @@ export const epicSectionVocabulary = {
       when: { attribute: "kind", values: ["overview-part"] },
       description: "An Overview sub-section's status cards from Claude, oldest first (`plan-doc status`)."
     },
+    {
+      tag: "epic-choices",
+      when: { attribute: "kind", values: ["choices"] },
+      description:
+        'The Choices section\'s standing sets (epic `epic-engine` P50):  `<epic-choices id="s-<slug>" title standing>`.'
+    },
+    {
+      tag: "flow",
+      when: { attribute: "kind", values: ["choices"] },
+      description: "The Choices section's notes:  a set's lead, before it (`epic add <epic>#choices --note`)."
+    },
     { tag: "epic-phase", when: { attribute: "kind", values: ["phases"] }, description: "The phases, in order." },
     {
       tag: "epic-item",
       when: { attribute: "kind", values: ["questions", "judgements", "todos", "issues", "tests"] },
       description: "The items, their id's letter the section's (`q` in Questions)."
     },
-    { tag: "epic-event", when: { attribute: "kind", values: ["log"] }, description: "The log, oldest first." },
+    {
+      tag: "epic-event",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The log's review lines (answered, reviewed, active ...), oldest first:  written, never drawn (epic " +
+        "`epic-engine` P52, Q56 C);  Actual Time and `epic log` read them."
+    },
+    {
+      tag: "epic-commit",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The Log's entries, one per commit of the epic (`<epic-commit at refs>`), in the file by time, oldest first:  " +
+        "drawn newest first."
+    },
     {
       tag: "epic-cards",
       when: { attribute: "kind", values: ["epics"] },

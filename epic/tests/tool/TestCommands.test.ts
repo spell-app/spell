@@ -132,6 +132,25 @@ test("details <epic> <T id> --step --should:  the test rewritten in the fields, 
   expect(warned.at(-1)).toMatch(/^epic:  missing --file <html file>/)
 })
 
+// epic `epic-engine` P51:  Start testing's stamp
+test("details <epic> <M id> --prepared <n>:  stamped alone, or with its new fields;  refused off a test, or not a place", async () => {
+  await commands().run(["add", "x", "test", "One", "--details", "<p>Click it.</p>"])
+  await commands().run(["add", "x", "test", "Two", "--details", "<p>Type it.</p>"])
+  expect(await commands().run(["details", "x", "M2", "--prepared", "1"])).toBe(0)
+  expect(
+    await commands().run(["details", "x", "M1", "--step", "Open VS Code", "--should", "It shows", "--prepared", "2"])
+  ).toBe(0)
+  const plan = FILES.read(file)
+  expect([plan.findItem("m2")!.getAttribute("prepared"), plan.findItem("m1")!.getAttribute("prepared")]).toEqual([
+    "1",
+    "2"
+  ])
+  expect(plan.findItem("m1")!.querySelector("epic-field")?.textContent).toBe("Open VS Code")
+  await commands().run(["add", "x", "todo", "A todo"])
+  expect(await commands().run(["details", "x", "T1", "--prepared", "1"])).toBe(1)
+  expect(await commands().run(["details", "x", "M1", "--prepared", "0"])).toBe(1)
+})
+
 // Owen, 2026-10-22:  "text is not markdown formatted" -- a Step written as plain text, its steps inline
 describe("a test's fields given as plain text (EpicTests.proseHTML)", () => {
   test("steps numbered from 1, inline or a line each:  a numbered list;  backticks:  code", () => {
@@ -169,7 +188,7 @@ describe("test <epic>", () => {
     await FILES.writeDoc(file, plan, false)
     await commands().run(["test", "x", "--list"])
     expect(printed.join("\n").split("\n")).toEqual([
-      "x:  3 open tests, in the run's order:",
+      "x:  3 open tests, in your order:",
       "  M3  second  · prose only",
       "  M4  third  · prose only",
       `  M1  first  · not now ${plan.findItem("m1")!.getAttribute("deferred")} · prose only`

@@ -265,7 +265,9 @@ attributes, properties and events on the outside, a component behind it drawing 
 - [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md) is about sixty families of these, on [the element framework](README-element.md) every set of them shares.
   A page imports ONE, `<ui-root>`, and it loads each of the others the first time the page uses it.
 - Your program's things are elements too:  that card is a `view`, so it draws as its own `<solitaire-card>`.
-- The catch:  Spell UI isn't on npm yet (below, "Coming").
+- Any project can use it:  `npm install spell-ui@next`, or an import map onto a CDN
+  ([Spell UI's thirty seconds](https://github.com/spell-app/spell/blob/main/ui/README.md#thirty-seconds-three-ways)).
+  - `@next` is the tag until the first release, planned for December 1, 2026 (below, "Coming").
 
 ### The parts are source, all the way down
 
@@ -277,7 +279,9 @@ Nothing is published for the others to use:  each folder imports the others by n
   the dev server, the tests, node and the type check all read source.
 - The one exception is the type check of the app's terminal screens, which reads type declarations (`.d.ts` files):
   `yarn ts` builds them from the source first.
-- The cost:  today, everything runs from a clone of this repo.
+- The cost:  working on Spell means a clone of this repo.
+  Using its parts doesn't:  `npm install spell@next` has every folder, built (the language's imports among them,
+  `spell/parser/...`), and `spell-ui@next` has Spell UI alone.
 
 ## Where it's going
 
@@ -746,8 +750,9 @@ The whole order, the logs agents keep, and the plugin:  [README-agents.md](READM
 ## 🌱 Coming
 
 Two things that would make this page shorter, and neither is here yet:
-- npm packages:  `npm install spell-ui` in any project, and a `spell` that installs without a checkout.
-  Today everything runs from this checkout.
+- The first release, planned for December 1, 2026.
+  Until then the npm packages are under the tag `next`:  `npm install spell@next`, `spell-ui@next`, `spell-epic@next`;
+  plain `npm install spell` gives a placeholder.
 - A public website for Spell, its docs and its components.
   Today the docs site runs locally, from the page server.
 

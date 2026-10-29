@@ -8,10 +8,18 @@ import { PageStages, PhaseIds } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
-import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
-import { DOC_REVIEW, type ContentsEntry } from "spell/epic/components/epic-section/EpicSection.types"
+import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
+import { PhaseState, type PhaseFields } from "spell/epic/components/epic-section/PhaseState"
+import {
+  PHASE_FIELDS,
+  PHASE_FILTER_STATES,
+  type ContentsEntry,
+  type PhaseFieldName,
+  type PhaseStateName
+} from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
@@ -25,14 +33,20 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon in its colour (grey to do, blue under way, green done);  while Claude is at work on it (the
- *     review inbox's `working`, I147), a blue turning spinner, its tooltip "Claude is writing this phase's plan" or
- *     "Claude is working on it"
+ *   - the status icon, its shape by its status (an outline to do, half filled under way, a check done), its COLOUR
+ *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
+ *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a DOTTED blue
+ *     circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
+ *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
+ *     "Claude is writing this phase's plan" or "Claude is working on it"
  *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
- *   - while it isn't done and its plan changed (`changes`, written by the tool):  an orange pen and how many times,
- *     so a folded phase says so too (its body, a part, isn't loaded until it opens)
+ *   - while it isn't done and has NEW updates (`to-see`, written by the tool, less the ones quiet or marked Seen since;
+ *     epic `epic-engine` I168):  an orange pen and how many, so a folded phase says so too (its body, a part, isn't
+ *     loaded until it opens);  none left, no pen
+ *     - while the page is reviewed, a ✓ after it:  Seen on every one at once
+ *     - an older page's `changes` (every plan change) until the tool's next write
  *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
  *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
  * - Its children, in order (the vocabulary's):
@@ -43,7 +57,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - Done, `<epic-commit>`s, Files, Verify, To review
  *   - An older doc's `<epic-updated>` lines (its `changes` slot, P6) show at the end of its body, unboxed,
  *     until the epic tool's next write migrates them (`updates-as-epic-update`)
- *   - Files and Verify show only while the Phases title's toggles say so;  commits while the page's git toggle does
+ *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while its git icon
+ *     does
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
  *   (epic `airplane` P2;  `<epic-review buttons="part">`):
@@ -56,6 +71,14 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
  *   - still to do, its plan accepted (`plan="accepted"`, I140):  Make Todo, Revisit and a green check, a state saying
  *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
+ * - Its GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), last on its title row, with an `id`:
+ *   "Show this phase's files" and "Show this phase's checks", ticked while it shows them
+ *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom
+ *     properties set on its own box (`foldStyle()`), over the ones they'd inherit from the section
+ *   - a list of entries:  more settings for one phase come as more entries
+ * - Its GIT icon (epic `epic-engine` P53, J163), before its gear, while it lists commits (`commits`, or
+ *   `<epic-commit>` children):  shows or hides its own commits, as an item's does;  pressed while they show
+ *   - the page-wide git toggle went (the Log lists every commit, P52), so this is how a phase's own show
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -80,12 +103,64 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** Its view of the review inbox, keyed by its id (`p-epic-migrate`):  is the page reviewed?  Has it a marked note? */
   readonly reviewState = new ReviewState(() => this.id)
 
+  /** Its own commits show (its git icon pressed):  `--epic-commits-display` on its box (`foldStyle()`). */
+  @E.cssState("commits")
+  @E.state
+  accessor showCommits = false
+
+  /** The git icon's glyph. */
+  readonly gitGlyph = new E.IconGlyph({ owner: this, name: () => "git" })
+
+  /** Does it list commits:  `commits` (its part's, before it loads), or `<epic-commit>` children?  Read live. */
+  get hasCommits(): boolean {
+    void this.layout
+    return !!this.commits || !!this.domElement.querySelector(`:scope > ${COMMIT_TAG}`)
+  }
+
   /** The pen of its title's mark:  its plan changed. */
   readonly changedGlyph = new E.IconGlyph({ owner: this, name: () => "pen to square" })
 
-  /** How many plan changes its title says it has:  `changes`, while it isn't done;  0 for none. */
+  /** What `PhaseState` reads of it:  its attributes as its props (tracked), its title as text. */
+  get stateFields(): PhaseFields {
+    return {
+      status: this.shownStatus,
+      plan: this.plan,
+      toSee: this.toSee,
+      changes: this.changes,
+      choicesOpen: this.choicesOpen,
+      doneAt: this.doneAt,
+      title: EpicPhase.titleText(this.domElement)
+    }
+  }
+
+  /**
+   * Its update blocks still NEW, by id (epic `epic-engine` I168;  `PhaseState.newUpdates()`):  `to-see`'s, less the
+   * ones gone quiet since it was written (`PlanDates.isQuiet()`) or marked Seen in the review inbox, while it isn't done.
+   * - an older page, with `changes` and no `to-see` yet:  that many, unnamed, until the epic tool's next write
+   */
+  get newUpdates(): string[] {
+    return PhaseState.newUpdates(this.stateFields, this.live, new Date())
+  }
+
+  /** How many plan changes its title's pen counts:  its new updates (`newUpdates`);  0 for none. */
   get changedCount(): number {
-    return this.shownStatus === "done" ? 0 : (this.changes ?? 0)
+    return this.newUpdates.length
+  }
+
+  /**
+   * Where it stands, as its Phases chip counts it (`PhaseState.of()`, epic `epic-engine` I170):  its status circle's
+   * colour and fill, the same as the chip's.
+   */
+  get drawnState(): PhaseStateName {
+    return PhaseState.of(this.stateFields, this.live)
+  }
+
+  /** What the review inbox says of it now, for `PhaseState`:  Claude at work on it;  an update marked Seen. */
+  private get live() {
+    return {
+      workedOn: this.reviewState.workedOn(),
+      isSeen: (id: string) => this.reviewState.markOf(id)?.action === "seen"
+    }
   }
 
   /** What it took (`took`), shown once it's done;  `undefined` before, or never measured. */
@@ -132,9 +207,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   get isPlanWaiting(): boolean {
     // the doc pass never asks (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
-    return (
-      this.plan === "waiting" && this.shownStatus !== "done" && !DOC_REVIEW.test(EpicPhase.titleText(this.domElement))
-    )
+    return PhaseState.isPlanWaiting(this.stateFields)
   }
 
   /**
@@ -192,7 +265,9 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     const written = this.domElement.getAttribute("status") ?? ""
     const status: PhaseStatus = written in STATUS_ICONS ? (written as PhaseStatus) : "todo"
     const label = `${PhaseIds.labelOf(this.domElement)} · ${EpicPhase.titleText(this.domElement)}`
-    return { label, icon: STATUS_ICONS[status], color: STATUS_COLORS[status] }
+    const state = PhaseState.of(PhaseState.fieldsOf(this.domElement), this.live)
+    const color = PHASE_FILTER_STATES.find((it) => it.state === state)!.color
+    return { label, icon: STATUS_ICONS[status], color }
   }
 
   /** Follow the review inbox while connected (kept alive:  a removed phase stops). */
@@ -221,6 +296,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             <span
               class={[ICON, this.shownStatus]}
               part={this.partForName("status")}
+              data-state={this.drawnState}
               role="img"
               aria-label={this.translationForKey(STATUS_TEXTS[this.shownStatus])}
             >
@@ -232,6 +308,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           <span
             class={[ICON, WORKING]}
             part={this.partForName("status")}
+            data-state={this.drawnState}
             role="img"
             aria-label={this.workingText}
             title={this.workingText}
@@ -257,6 +334,8 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             )}
           </Show>
           {this.reviewButtons()}
+          <Show when={this.hasCommits}>{this.gitButton()}</Show>
+          <Show when={this.id}>{(id) => this.gear(id())}</Show>
         </>
       ),
       before: () => this.saidNote(),
@@ -273,30 +352,126 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   ////////////////
+  // ## Its gear (I166)
+  ////////////////
+
+  /** Its gear:  "Show this phase's files" and "... checks", ticked while it shows them. */
+  private gear(id: string): JSX.Element {
+    return this.renderGear({
+      title: () => this.translationForKey("gearTip"),
+      entries: () =>
+        PHASE_FIELDS.map((it) => ({
+          value: it.field,
+          text: this.translationForKey(it.one),
+          isOn: phaseFields.shows(id, it.field)
+        })),
+      pick: (field) => phaseFields.setOwn(id, field as PhaseFieldName, !phaseFields.shows(id, field as PhaseFieldName))
+    })
+  }
+
+  /** The git icon:  shows or hides its own commits;  pressed while they show. */
+  private gitButton(): JSX.Element {
+    const words = () => this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")
+    return (
+      <button
+        type="button"
+        class={GIT}
+        part={this.partForName("git")}
+        aria-pressed={this.showCommits ? "true" : "false"}
+        aria-label={words()}
+        title={words()}
+        onClick={(event) => this.flipCommits(event)}
+      >
+        {this.gitGlyph.svg}
+      </button>
+    )
+  }
+
+  /** The git icon, clicked:  its commits shown (it opens, loading its part) or hidden again;  the row doesn't fold. */
+  @E.untracked
+  private flipCommits(event: MouseEvent) {
+    event.stopPropagation()
+    const on = !this.showCommits
+    this.showCommits = on
+    if (on) this.expand()
+  }
+
+  /**
+   * Its own choice of fields (`PhaseFields.ownOf()`):  each field's custom property, `block` or `none`, on its own box;
+   * a field it hasn't chosen inherits the Phases section's.  Its commits, while its git icon is pressed.
+   */
+  protected foldStyle(): Record<string, string> | undefined {
+    const style: Record<string, string> = this.showCommits ? { [COMMITS_PROPERTY]: "block" } : {}
+    const id = this.id
+    if (!id) return style
+    const own = phaseFields.ownOf(id)
+    for (const it of PHASE_FIELDS)
+      if (own[it.field] !== undefined) style[it.property] = own[it.field] ? "block" : "none"
+    return style
+  }
+
+  ////////////////
   // ## Plan changed
   ////////////////
 
   /**
-   * Its title's mark while it isn't done and its plan changed:  the pen and how many times, in orange;
-   * its name and tooltip say so (`changedTip`).
+   * Its title's marks:  `1 choice open` in red while a set in its body waits for Owen's pick (`choices-open`, the
+   * tool's, as its body is a part:  epic `epic-engine` P50);
+   * then, while it isn't done and has new updates:  the pen and how many, in orange;
+   * its name and tooltip say so, and what Seen does (`changedTip`).
+   * - while the page is reviewed, a ✓ after it (epic `epic-engine` I168):  Seen on every one of them at once
    */
   private changedMark(): JSX.Element {
     return (
-      <Show when={this.changedCount}>
-        {(count) => (
-          <span
-            class={CHANGED}
-            part={this.partForName("changed")}
-            role="img"
-            aria-label={this.translationForKey("changedTip", { count: count() })}
-            title={this.translationForKey("changedTip", { count: count() })}
-          >
-            {this.changedGlyph.svg}
-            {count()}
+      <>
+        <Show when={Number(this.choicesOpen) > 0 && this.shownStatus !== "done"}>
+          <span class={CHOICES_OPEN} part={this.partForName("choices-open")}>
+            {this.translationForKey(Number(this.choicesOpen) === 1 ? "choiceOpen" : "choicesOpenCount", {
+              count: Number(this.choicesOpen)
+            })}
           </span>
-        )}
-      </Show>
+        </Show>
+        <Show when={this.changedCount}>
+          {(count) => (
+            <span
+              class={CHANGED}
+              part={this.partForName("changed")}
+              role="img"
+              aria-label={this.translationForKey("changedTip", { count: count() })}
+              title={this.translationForKey("changedTip", { count: count() })}
+            >
+              {this.changedGlyph.svg}
+              {count()}
+            </span>
+          )}
+        </Show>
+        <Show when={this.showsSeenAll}>
+          <ui-button
+            class={SEEN_ALL}
+            part={this.partForName("seen-all")}
+            appearance="circular basic"
+            size="mini"
+            icon="check"
+            title={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
+            aria-label={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
+            onClick={(event: MouseEvent) => this.seeAll(event)}
+          />
+        </Show>
+      </>
     )
+  }
+
+  /** The pen's ✓ shows:  the page reviewed, new updates to mark (not an older page's `changes`). */
+  get showsSeenAll(): boolean {
+    return this.reviewState.reviewing() && this.newUpdates.length > 0
+  }
+
+  /** The pen's ✓:  every new update marked Seen;  the click goes no further (the title row would fold). */
+  @E.untracked
+  private seeAll(event: MouseEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.reviewState.markSeen(this.newUpdates)
   }
 
   ////////////////
@@ -342,12 +517,15 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary> {}
 
+/** Class of its title's `1 choice open` (P50). */
+const CHOICES_OPEN = "choices-open"
 /** Class of its status icon's box while Claude is at work on it, and of the spinner in it (I147). */
 const WORKING = "working"
 const SPINNER = "spinner"
 
-/** Class of the shadow markup:  the title's mark, its plan changed. */
+/** Classes of the shadow markup:  the title's mark, its plan changed;  the ✓ after it, Seen on them all. */
 const CHANGED = "changed"
+const SEEN_ALL = "seen-all"
 
 /** A phase's status => its icon (Spell UI's names, from the docs bundle's set). */
 const STATUS_ICONS = {
@@ -366,15 +544,8 @@ const STATUS_TEXTS = {
   done: "statusDone"
 } as const satisfies Record<PhaseStatus, string>
 
-/**
- * A phase's status => its icon's colour (Spell UI's `color`), as `EpicPhase.css`'s:
- * its `contentsEntry`'s, which only the contents list drew (gone 2026-10-08).
- */
-const STATUS_COLORS = {
-  todo: "grey",
-  active: "blue",
-  done: "green"
-} as const satisfies Record<PhaseStatus, string>
+/** Class of its git icon (J163). */
+const GIT = "git"
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"

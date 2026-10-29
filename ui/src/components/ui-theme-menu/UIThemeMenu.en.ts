@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  * - a palette button opening a small overlay with Light | Dark | Auto and Spell's themes
  * - or a theme dropdown, for a page's masthead
  * - or a sun / moon button alone
+ * - or that overlay's panel alone, drawn in place in a sub-menu of another menu
  ****************/
 export const themeMenuVocabulary = {
   tag: "ui-theme-menu",
@@ -28,11 +29,12 @@ export const themeMenuVocabulary = {
     {
       name: "show",
       kind: "enum",
-      values: ["both", "theme", "scheme"],
+      values: ["both", "theme", "scheme", "menu"],
       default: "both",
       description:
         "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), " +
-        "`scheme` (a light / dark button alone) or `theme` (a theme dropdown)."
+        "`scheme` (a light / dark button alone), `theme` (a theme dropdown) or `menu` (the overlay's panel alone, drawn " +
+        "in place:  the body of a sub-menu in another menu, which calls `focusChosen()` as it opens it)."
     },
     {
       name: "size",
@@ -104,7 +106,8 @@ export const themeMenuVocabulary = {
   states: [
     { name: "dark", description: "The page shows the dark scheme (chosen, or the OS's while following it)." },
     { name: "following", description: "The scheme follows the OS (nothing chosen, or Auto)." },
-    { name: "open", description: "The overlay is open." }
+    { name: "open", description: "The overlay is open." },
+    { name: "menu", description: 'It draws its panel in place, inside a host\'s menu (`show="menu"`).' }
   ],
   texts: [
     { key: "themeLabel", text: "{title} theme", description: "The dropdown's text:  the chosen theme." },

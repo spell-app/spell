@@ -177,14 +177,13 @@ describe("reloadGate():  one hot reload, not while typing", () => {
   beforeEach(() => void vi.useFakeTimers())
   afterEach(() => void vi.useRealTimers())
 
-  /** a gate whose reader types while `state.typing`;  `reloads` counts reloads, `waits` the pill's states */
+  /** a gate whose reader types while `state.typing`;  `reloads` counts reloads */
   function gate() {
-    const state = { typing: false, reloads: 0, waits: [] as boolean[] }
+    const state = { typing: false, reloads: 0 }
     const it = SRV.reloadGate({
       wait: 500,
       typing: () => state.typing,
-      reload: () => void state.reloads++,
-      waiting: (on) => void state.waits.push(on)
+      reload: () => void state.reloads++
     })
     return { state, it }
   }
@@ -202,12 +201,12 @@ describe("reloadGate():  one hot reload, not while typing", () => {
     expect(state.reloads).toBe(1)
   })
 
-  test("typing in a field:  waits (the pill shows), then reloads once focus leaves it", () => {
+  test("typing in a field:  waits, then reloads once focus leaves it", () => {
     const { state, it } = gate()
     state.typing = true
     it.request()
     vi.advanceTimersByTime(500)
-    expect(state).toMatchObject({ reloads: 0, waits: [true] })
+    expect(state.reloads).toBe(0)
     // focus moves on to another field:  still typing, still waiting
     it.settle()
     vi.advanceTimersByTime(500)
@@ -215,7 +214,7 @@ describe("reloadGate():  one hot reload, not while typing", () => {
     state.typing = false
     it.settle()
     vi.advanceTimersByTime(500)
-    expect(state).toMatchObject({ reloads: 1, waits: [true, true, false] })
+    expect(state.reloads).toBe(1)
   })
 
   test("focus leaving a field with no reload waiting:  nothing", () => {

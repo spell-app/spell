@@ -8,6 +8,9 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ReviewClient, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-button"
 import "spell/epic/components/epic-section"
 import "spell/epic/components/epic-phase"
 import "spell/epic/components/epic-update"
@@ -16,6 +19,31 @@ import "spell/epic/components/epic-mark"
 import "spell/ui/components/ui-modal"
 // what a request's thumbnail opens in:  `<ui-root>` loads it on a page
 import "spell/ui/components/ui-zoom"
+
+/** `host`'s gear (I166), drawn. */
+async function gearOf(host: Element): Promise<E.DOMElement> {
+  const gear = host.shadowRoot!.querySelector<E.DOMElement>('[part~="gear"]')!
+  await gear.ready
+  return gear
+}
+
+/** Each entry of `gear`'s menu, `<text>:  on` (ticked) or `off`. */
+function gearEntries(gear: Element): string[] {
+  return Array.from(
+    gear.querySelectorAll("ui-item"),
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+  )
+}
+
+/** Open `gear`'s menu and pick the entry saying `text`, as a person does. */
+async function pickGear(gear: E.DOMElement, text: string) {
+  gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+  await ElementFixture.tick()
+  const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+  rows.find((row) => row.textContent!.includes(text))!.click()
+  await ElementFixture.tick()
+  await ElementFixture.tick()
+}
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -179,6 +207,40 @@ describe("<epic-phase> while Claude works on it", () => {
   })
 })
 
+// epic `epic-engine` I170 (Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted blue,
+// green, grey")
+describe("<epic-phase> while Claude works on it, its plan changed", () => {
+  test("orange beats blue:  the spinner orange, its chip `updated`, not in the blue counts;  worked on alone, blue", async () => {
+    await adoptWorking(["p-changed", "p-quiet"])
+    try {
+      const now = new Date()
+      const at = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T00:00`
+      const section = await render(
+        `<epic-section id="phases" kind="phases">` +
+          `<epic-phase id="p-changed" title="Changed" status="active" plan="accepted" to-see="up1@${at}"></epic-phase>` +
+          `<epic-phase id="p-quiet" title="Quiet" status="todo" plan="accepted"></epic-phase></epic-section>`
+      )
+      const status = (id: string) =>
+        section.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+      await vi.waitFor(() => expect(status("p-changed").querySelector(".spinner")).not.toBeNull())
+      expect([status("p-changed").dataset.state, status("p-quiet").dataset.state]).toEqual(["updated", "progress"])
+      expect(getComputedStyle(status("p-changed")).color).not.toBe(getComputedStyle(status("p-quiet")).color)
+      const filter = section.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
+      const chip = filter.shadowRoot!.querySelector<HTMLElement>('button[data-state="updated"]')!
+      expect([chip.textContent, getComputedStyle(status("p-changed")).color]).toEqual([
+        "1",
+        getComputedStyle(chip).borderTopColor
+      ])
+      // the blue badge and the toolbar's blue count:  the quiet one alone
+      expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("1")
+      const entry = (section as Element & { contentsEntry?: { count?: { running?: number } } }).contentsEntry
+      expect(entry?.count?.running).toBe(1)
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
+  })
+})
+
 describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround)", () => {
   /** A phase of `status`, its plan changed twice:  `changes="2"`, and (`lines`) the two updates loaded. */
   function changed(status: string, { lines = true } = {}) {
@@ -214,6 +276,45 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
     expect(host.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
   })
 
+  // epic `epic-engine` I168 (Owen, 2026-10-29:  "How do I clear these 'update' marks?")
+  test("the pen counts its NEW updates (`to-see`):  less the ones quiet since, or marked Seen;  none, no pen", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(2026, 9, 12, 9, 0))
+    const routes = new SeenRoutes()
+    try {
+      // up1 is 4 days old by now:  quiet, though the tool listed it when it wrote the page
+      const toSee = "up1@2026-10-08T08:00 up2@2026-10-11T10:00 up3@2026-10-11T11:00"
+      let host = await render(`<epic-phase id="p2" title="Two" status="active" to-see="${toSee}"></epic-phase>`)
+      const pen = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="changed"]')
+      expect(pen()!.textContent).toBe("2")
+      expect(pen()!.title).toContain("✓ Seen")
+      expect(pen()!.title).toContain("3 days")
+      // not reviewed:  no ✓
+      expect(host.shadowRoot!.querySelector('[part~="seen-all"]')).toBeNull()
+      // reviewed (the client adopted before it draws, as on a page):  the ✓ marks every new one Seen;  the pen goes
+      await adoptSeenClient(routes)
+      host = await render(`<epic-phase id="p2b" title="Two" status="active" to-see="${toSee}"></epic-phase>`)
+      const all = await vi.waitFor(() => {
+        const button = host.shadowRoot!.querySelector<HTMLElement>('[part~="seen-all"]')
+        expect(button).not.toBeNull()
+        return button!
+      })
+      expect(all.title).toContain("all 2 new updates")
+      all.click()
+      await vi.waitFor(() => expect(Object.keys(routes.inbox.marks).sort()).toEqual(["up2", "up3"]))
+      await vi.waitFor(() => expect(pen()).toBeNull())
+      expect(Object.values(routes.inbox.marks).map((mark) => mark.action)).toEqual(["seen", "seen"])
+      // an older page:  `changes`, no `to-see` yet, counts as before;  a page the tool wrote with nothing new:  no pen
+      const older = await render(`<epic-phase id="p3" title="Three" status="active" changes="2"></epic-phase>`)
+      expect(older.shadowRoot!.querySelector('[part~="changed"]')!.textContent).toBe("2")
+      const none = await render(`<epic-phase id="p4" title="Four" status="active"></epic-phase>`)
+      expect(none.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
+    } finally {
+      ReviewClient.adopt(undefined)
+      vi.useRealTimers()
+    }
+  })
+
   test('an older doc\'s lines (`slot="changes"`) still show, unboxed, at the end of its body', async () => {
     const host = await render(
       `<epic-phase id="p2" title="Two" status="todo" open><epic-field name="goal">Fixed.</epic-field>` +
@@ -229,7 +330,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
 })
 
 describe("<epic-field>", () => {
-  test("its icon and label before its prose;  Files and Verify hidden until the Phases toggles show them", async () => {
+  test("its icon and label before its prose;  Files and Verify hidden until a gear shows them", async () => {
     const section = await render<E.DOMElement>(
       `<epic-section id="phases" kind="phases" open><epic-phase id="p1" title="One" status="todo" open>` +
         `<epic-field name="goal"><p>Win.</p></epic-field><epic-field name="files">a.ts</epic-field>` +
@@ -240,12 +341,54 @@ describe("<epic-field>", () => {
     expect(goal.shadowRoot!.querySelector('[part~="label"]')!.textContent).toBe("Goal:")
     expect(goal.shadowRoot!.querySelector('[part~="icon"]')).not.toBeNull()
     expect(getComputedStyle(files).display).toBe("none")
-    section.shadowRoot!.querySelector<HTMLButtonElement>("button.toggle")!.click()
-    await ElementFixture.tick()
+    const gear = await gearOf(section)
+    await pickGear(gear, "Show each phase's files")
     expect(getComputedStyle(files).display).toBe("block")
-    section.shadowRoot!.querySelector<HTMLButtonElement>("button.toggle")!.click()
-    await ElementFixture.tick()
+    await pickGear(gear, "Show each phase's files")
     await expectAccessible(goal)
+  })
+
+  // epic `epic-engine` I166:  "In each phase header, that's the same for this phase"
+  test("each phase's GEAR, last on its row:  its own files and checks, over the Phases section's for it", async () => {
+    const section = await render<E.DOMElement>(
+      `<epic-section id="phases" kind="phases" open>` +
+        `<epic-phase id="p1" title="One" status="todo" estimate="1h" open><epic-field name="files">a.ts</epic-field>` +
+        `<epic-field name="verify">yarn test</epic-field></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="todo" open><epic-field name="files">b.ts</epic-field></epic-phase>` +
+        `</epic-section>`
+    )
+    const [one, two] = Array.from(section.querySelectorAll("epic-phase"))
+    const shown = () =>
+      Array.from(section.querySelectorAll("epic-field"), (field) => getComputedStyle(field).display !== "none")
+    const oneGear = await gearOf(one!)
+    expect(oneGear.title).toBe("Settings for this phase")
+    expect(oneGear.closest('[part~="tools"]')!.lastElementChild).toBe(oneGear)
+    expect(gearEntries(oneGear)).toEqual(["Show this phase's files:  off", "Show this phase's checks:  off"])
+    // this phase alone
+    await pickGear(oneGear, "Show this phase's checks")
+    expect(shown()).toEqual([false, true, false])
+    expect(gearEntries(oneGear)).toEqual(["Show this phase's files:  off", "Show this phase's checks:  on"])
+    expect(one!.matches(":state(open)")).toBe(true)
+    // every phase's files, but this one's, which it hides
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([true, true, true])
+    expect(gearEntries(await gearOf(two!))).toEqual(["Show this phase's files:  on", "Show this phase's checks:  off"])
+    await pickGear(oneGear, "Show this phase's files")
+    expect(shown()).toEqual([false, true, true])
+    expect(JSON.parse(localStorage.getItem(`epic-phase-own-fields:${location.pathname}`)!)).toEqual({
+      p1: { verify: true, files: false }
+    })
+    // every phase's again:  each phase's own choice of it forgotten
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([false, true, false])
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([true, true, true])
+    // back as it was
+    await pickGear(await gearOf(section), "Show each phase's files")
+    await pickGear(oneGear, "Show this phase's checks")
+    expect(shown()).toEqual([false, false, false])
+    expect(localStorage.getItem(`epic-phase-own-fields:${location.pathname}`)).toBe("{}")
+    await expectAccessible(section)
   })
 
   test("a labelled block in prose (`label`, P14):  `Where:` before its prose, no icon", async () => {
@@ -531,3 +674,42 @@ describe("<epic-phase> its title row's cursors", () => {
     expect(cursors(host)).toEqual({ space: "pointer", row: "pointer", chevron: "pointer", time: "pointer" })
   })
 })
+
+/** The review routes' `mark`, as `fetch`, over an inbox kept here (epic `epic-engine` I168):  each reply the whole inbox. */
+class SeenRoutes {
+  inbox = {
+    marks: {} as Record<string, { action: string; at: string }>,
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: {},
+    listening: null,
+    unsentComments: [],
+    waitingComments: [],
+    woken: null,
+    doing: null
+  }
+
+  readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
+    if (input.replace(/\?.*/, "").endsWith("/mark")) {
+      const body = JSON.parse(init!.body as string) as { id: string; mark: { action: string } | null }
+      if (body.mark) this.inbox.marks[body.id] = { ...body.mark, at: new Date().toISOString() }
+      else delete this.inbox.marks[body.id]
+    }
+    return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
+  })
+}
+
+/** A started, served client on `routes`, adopted as the page's:  the page is reviewed. */
+async function adoptSeenClient(routes: SeenRoutes): Promise<void> {
+  const client = new ReviewClient({
+    page: "/epics/demo/demo.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: routes.fetch as unknown as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+}

@@ -1,9 +1,10 @@
-import { Show, type Accessor } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { For, Show, type Accessor } from "solid-js"
+import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell/ui/core"
+import { E, UI } from "spell/ui/core"
 
-import { NOBODY_LISTENING, ReviewClient, picks } from "spell/epic/review"
+import { PlanDates } from "spell/epic/dates"
+import { NOBODY_LISTENING, ReviewClient, picks, type EditedOption } from "spell/epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
 import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
 import { Fold, type FoldTips } from "spell/epic/components/epic-item/Fold"
@@ -11,13 +12,18 @@ import type { EpicItem } from "spell/epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
 import "spell/epic/components/epic-text-box"
 import { CLOSED_STATUSES } from "spell/epic/components/epic-section/EpicSection.types"
+import type { OptionFormSaved } from "spell/epic/components/epic-option-form"
+// Spell UI's page zoom:  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>` (as `<epic-field>`'s)
+import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { epicOptionVocabulary } from "./EpicOption.en"
 import { EpicChoices } from "./EpicChoices"
 import { ITEM_TAG, ORIGINAL_TAG, TOGGLE, type CardSet } from "./EpicChoices.types"
+import { SetChange } from "./SetChange"
 
 import choicesCSS from "./EpicChoices.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import picturesCSS from "./EpicOption.pictures.css?inline"
 
 /****************
  * ### `EpicOption`
@@ -50,6 +56,17 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - on a CLOSED one's (an answered question, an accepted call), but the chosen one,
  *     only while it's revisited (its note box open, a draft, a revisit or a pick):  "pick B instead, because ..."
  *   - never in an Original Discussion (`<epic-original>`):  history, not a choice
+ * - EDITED IN PLACE (epic `epic-engine` P50;  Owen's comment C1), while the page is reviewed and its set is open:
+ *   - a pencil and an ✕ on its band, before the pill, shown on hover and focus
+ *   - the pencil turns the card into `<epic-option-form>`;  Save keeps the change in its set's mark (`SetChange`),
+ *     the card showing the new title and text, dashed, `Edited · not sent`, with Undo
+ *   - ✕:  the card faded, `Removed · not sent`, with Undo
+ *   - applied (`epic inbox apply`):  its earlier text in its `was` slot, a folded `Was` line at its end;  a removed
+ *     one moves to its set's `removed` slot (`removed`), a standing set's picked one to `picked` (`picked-on`):
+ *     drawn as small panels there, no pill, no pencil
+ * - Its pictures (an `<img>` in its text):  thumbnails, a page sheet's (`EpicOption.pictures.css`:  light DOM, out
+ *   of reach of the shadow sheet);  a click shows one full size in the page's `<ui-zoom>` (`ImageZoom`)
+ * - In a pick-any set (`multiple`), several pills are on at once;  a pick there doesn't fold the item.
  * - SIDE EFFECT:  the first one connected makes the page's `ReviewClient` (`forPage()`), which reads the inbox
  *
  * - ANSWERING, an option of an `<epic-ask>` (a page Owen answers on, epic `epic-workflow` P12):
@@ -75,9 +92,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   /** The page's review inbox (`ReviewClient.forPage()`), once connected;  never on the server. */
   private review: ReviewClient | undefined
 
-  /** The id of the item it belongs to:  the mark its pick goes in.  Read once connected. */
-  private itemId: string | undefined
-
   /** It sits in an Original Discussion:  history, never a pill.  Read once connected. */
   private inOriginal = false
 
@@ -96,11 +110,50 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   /** Its item's `status`:  a closed one's options take pills only while revisited. */
   @E.state accessor itemStatus = EpicChoices.itemStatusFor(this.domElement)
 
-  /** It's the chosen option. */
+  /** It's a chosen option (a pick-any set's `chosen` may name several). */
   @E.cssState("chosen")
   get isChosen(): boolean {
-    return !!this.letter && this.chosenLetter === this.letter
+    return !!this.letter && (this.chosenLetter ?? "").split(/\s+/).includes(this.letter)
   }
+
+  /** Out of the cards:  removed (`removed`), or a standing set's picked one (`picked-on`);  a small panel. */
+  @E.cssState("retired")
+  get isRetired(): boolean {
+    return !!this.removed || !!this.pickedOn
+  }
+
+  ////////////////
+  // ## Edited in place (P50)
+  ////////////////
+
+  /** The drawn `<epic-choices>` it's an option of:  the set its pill, pencil and ✕ change. */
+  get choices(): EpicChoices | undefined {
+    void this.inboxVersion
+    return EpicChoices.componentFor(this.domElement)
+  }
+
+  /** It takes the pencil and the ✕:  its set reviewed and open, it isn't retired, nor an `<epic-ask>`'s. */
+  get canEdit(): boolean {
+    const choices = this.choices
+    return !!choices?.isReviewed && !this.questionIsAnswered && !this.isRetired && !this.ask && !!this.letter
+  }
+
+  /** Its edit in its set's mark, not applied yet;  `undefined` for none. */
+  get pendingEdit(): EditedOption | undefined {
+    return this.choices?.fields.edited?.find((each) => each.letter === this.letter)
+  }
+
+  /** Removed in its set's mark, not applied yet:  faded, with Undo. */
+  @E.cssState("removing")
+  get isRemoving(): boolean {
+    return !!this.letter && !!this.choices?.fields.removed?.includes(this.letter)
+  }
+
+  /** The pencil's form is open on it. */
+  @E.state accessor isEditing = false
+
+  /** Its earlier text (its `was` slot), folded to start with. */
+  readonly wasFold = new Fold(() => false)
 
   ////////////////
   // ## Answering:  an option of an `<epic-ask>`
@@ -172,14 +225,14 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
    * Open or folded, until the reader says otherwise:
    * a card (open question) open;  an answered panel open while it's the chosen one.
    */
-  readonly fold = new Fold(() => !this.questionIsAnswered || this.isChosen)
+  readonly fold = new Fold(() => (!this.questionIsAnswered && !this.isRetired) || this.isChosen)
 
   /** Light-DOM slot occupancy:  has it pros and cons? */
   readonly slots = new E.SlotContent(this.domElement)
 
-  /** Does its header fold it?  An answered panel always;  a card with pros and cons. */
+  /** Does its header fold it?  An answered or retired panel always;  a card with pros and cons. */
   get canFold(): boolean {
-    return this.questionIsAnswered || this.slots.hasContent("")
+    return this.questionIsAnswered || this.isRetired || this.slots.hasContent("")
   }
 
   /** Unfolded (a card or panel that folds). */
@@ -205,14 +258,18 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   get pill(): PillState | undefined {
     void this.inboxVersion
     const client = this.review
-    const id = this.itemId
     const letter = this.letter
     const set = this.cardSet()
-    if (!client?.reviewing || !id || !letter || !set) return undefined
+    const id = set?.holder
+    if (!client?.reviewing || !id || !letter || !set || this.isRetired || this.isRemoving) return undefined
+    if (this.choices?.closed) return undefined
     const listening = client.listening
-    // applied:  its set's `chosen`, solid (the fill rule's done)
-    if (this.isChosen) return { picked: true, sent: true, applied: true, listening }
     const mark = client.markOf(id)
+    // applied:  its set's `chosen`, solid (the fill rule's done);  a pick-any set's mark may take it off again
+    const multiple = !!this.choices?.isMultiple
+    const markPicks = this.choices?.fields.pick !== undefined
+    if (this.isChosen && (!multiple || !markPicks || picks(mark, letter, set.index, set.own)))
+      return { picked: true, sent: true, applied: true, listening }
     // Claude took the pick off the inbox, and the doc's `chosen` isn't on the page yet:  still Chosen, sent
     const taken = !mark && !this.chosenLetter && picks(client.takenPickOf(id), letter, set.index, set.own)
     const closed = (CLOSED_STATUSES as readonly string[]).includes(this.itemStatus ?? "")
@@ -238,11 +295,17 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     return !!this.pill?.picked && !this.pill.applied
   }
 
-  /** Words before the noun:  card or panel, `chosen`, `picked` in review, and `sent` once that pick has gone. */
+  /**
+   * Words before the noun:  card or panel, `chosen`, `picked` in review, and `sent` once that pick has gone;
+   * `edited` / `removing` with a change not applied yet (dashed until sent, as a pick).
+   */
   protected get extraClass(): string | undefined {
-    const sent = this.isPicked && this.pill?.sent
+    const changed = !!this.pendingEdit || this.isRemoving
+    const sent = (this.isPicked && this.pill?.sent) || (changed && this.choices?.isSent)
     const classes = [
-      this.questionIsAnswered ? PANEL : CARD,
+      this.questionIsAnswered || this.isRetired ? PANEL : CARD,
+      this.pendingEdit && EDITED,
+      this.isRemoving && REMOVING,
       this.isChosen && CHOSEN_CLASS,
       this.isPicked && PICKED,
       sent && SENT,
@@ -273,32 +336,133 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
+        <Show when={this.isEditing && this.canEdit} fallback={this.card()}>
+          <epic-option-form
+            heading={this.translationForKey("editHeading", { letter: this.letter ?? "" })}
+            option-title={this.pendingEdit?.title ?? this.title ?? this.textOf("title")}
+            note={this.pendingEdit?.note ?? this.textOf("")}
+            for={this.cardSet()?.holder ?? ""}
+            on-epic-option-saved={(event: CustomEvent<OptionFormSaved>) => this.onEdited(event.detail)}
+            on-epic-option-canceled={() => (this.isEditing = false)}
+          />
+        </Show>
+      </div>
+    )
+  }
+
+  /**
+   * The card (or panel) as it stands:  its header, then its pros and cons -- an edit not applied yet shows its new
+   * text instead -- its earlier text folded (`Was`), and a line for a change not applied yet, with Undo.
+   */
+  private card(): JSX.Element {
+    return (
+      <>
         <Show when={this.ask} fallback={this.reviewHeader()}>
           {(ask) => this.answeringHeader(ask)}
         </Show>
         <div
           ref={this.fold.watch}
           id={BODY_ID}
-          class={[BODY, { [EMPTY]: !this.slots.hasContent("") }]}
+          class={[BODY, { [EMPTY]: !this.slots.hasContent("") && !this.pendingEdit?.note && !this.hasWas }]}
           part={this.partForName("body")}
           hidden={this.canFold ? this.fold.hidden() : undefined}
         >
-          <slot />
+          <Show when={this.pendingEdit?.note} fallback={<slot />}>
+            {(note) => (
+              <For
+                each={note()
+                  .split(/\n{2,}/)
+                  .filter(Boolean)}
+              >
+                {(paragraph) => <p class={NEW_TEXT}>{paragraph}</p>}
+              </For>
+            )}
+          </Show>
+          <Show when={this.pickedOn}>
+            <p class={DRAFT_LINE}>{this.translationForKey("pickedOn", { date: PlanDates.format(this.pickedOn) })}</p>
+          </Show>
+          <Show when={this.hasWas}>{this.was()}</Show>
         </div>
+        <Show when={this.pendingEdit || this.isRemoving}>{this.changeLine()}</Show>
         <Show when={this.ask}>
           {(ask) => (
-            <epic-text-box
-              class={COMMENT}
-              part={this.partForName("comment")}
-              type="comment"
-              for={`${ask().key}-${this.letter ?? ""}`}
-              placeholder={this.translationForKey("commentOn", { letter: this.letter ?? "" })}
-              label={this.translationForKey("commentLabel", { letter: this.letter ?? "", title: this.title ?? "" })}
-            />
+            <div class={[COMMENT, { [OPEN]: this.commentOpen }]}>
+              <button
+                type="button"
+                class={COMMENT_LINK}
+                part={this.partForName("comment-link")}
+                aria-expanded={this.commentOpen ? "true" : "false"}
+                onClick={(event: MouseEvent) => this.openComment(event)}
+              >
+                <ui-icon name="comment" />
+                {this.translationForKey("commentLink")}
+              </button>
+              <epic-text-box
+                part={this.partForName("comment")}
+                type="comment"
+                for={`${ask().key}-${this.letter ?? ""}`}
+                placeholder={this.translationForKey("commentOn", { letter: this.letter ?? "" })}
+                label={this.translationForKey("commentLabel", { letter: this.letter ?? "", title: this.title ?? "" })}
+              />
+            </div>
           )}
         </Show>
+      </>
+    )
+  }
+
+  /** Has it earlier text, kept in its `was` slot? */
+  get hasWas(): boolean {
+    return this.slots.hasContent(WAS_SLOT)
+  }
+
+  /** Its earlier text, at its body's end:  a folded `Was` line, its `was` slot under it. */
+  private was(): JSX.Element {
+    return (
+      <div class={WAS} part={this.partForName("was")}>
+        {this.wasFold.button({
+          className: TOGGLE,
+          part: this.partForName("toggle"),
+          controls: WAS_ID,
+          tips: { fold: this.translationForKey("foldWasTip"), unfold: this.translationForKey("unfoldWasTip") },
+          label: <span class={WAS_TITLE}>{this.translationForKey("was")}</span>,
+          clicks: true
+        })}
+        <div ref={this.wasFold.watch} id={WAS_ID} class={WAS_BODY} hidden={this.wasFold.hidden()}>
+          <slot name={WAS_SLOT} />
+        </div>
       </div>
     )
+  }
+
+  /** A change not applied yet:  `Edited · not sent` / `Removed · sent` ..., and Undo. */
+  private changeLine(): JSX.Element {
+    const key = () =>
+      `${this.isRemoving ? "removed" : "edited"}${this.choices?.isSent ? "Sent" : "NotSent"}` as
+        | "removedSent"
+        | "removedNotSent"
+        | "editedSent"
+        | "editedNotSent"
+    return (
+      <p class={DRAFT_LINE} part={this.partForName("change")}>
+        {this.translationForKey(key())}
+        <Show when={this.choices?.isReviewed}>
+          <button type="button" class={UNDO} title={this.translationForKey("undoTip")} onClick={() => this.onUndo()}>
+            {this.translationForKey("undo")}
+          </button>
+        </Show>
+      </p>
+    )
+  }
+
+  /** The text of its `slot` (`""`:  its pros and cons), as the form starts with it:  paragraphs, a blank line between. */
+  @E.untracked
+  private textOf(slot: string): string {
+    const children = Array.from(this.domElement.children).filter((child) => (child.getAttribute("slot") ?? "") === slot)
+    return children
+      .map((child) => (child.textContent ?? "").replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+      .join("\n\n")
   }
 
   /**
@@ -308,31 +472,23 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   private answeringHeader(ask: Accessor<EpicAsk>): JSX.Element {
     return (
       <div class={HEADER} part={this.partForName("header")}>
-        <Show when={this.canFold}>
+        <Show
+          when={this.canFold}
+          fallback={
+            <span class={TOGGLE} part={this.partForName("toggle")}>
+              {this.reviewTitle()}
+            </span>
+          }
+        >
           {this.fold.button({
-            className: FOLD,
+            className: TOGGLE,
             part: this.partForName("toggle"),
             controls: BODY_ID,
             tips: this.foldTips,
+            label: this.reviewTitle(),
             clicks: true
           })}
         </Show>
-        <label class={PICK}>
-          <input
-            type={ask().multiple ? "checkbox" : "radio"}
-            class={TICK}
-            part={this.partForName("tick")}
-            checked={this.isTicked}
-            tabindex={this.tickTabIndex}
-            onChange={this.onTick}
-          />
-          <span class={TITLE} part={this.partForName("title")}>
-            {this.letter}
-            {LETTER_SEPARATOR}
-            <slot name={this.slotForName("title")}>{this.title}</slot>
-            {this.recommendedMark()}
-          </span>
-        </label>
         <Show when={this.badge}>
           <ui-label
             class={BADGE}
@@ -370,6 +526,21 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
               {this.stateGlyph.svg}
             </span>
           </Show>
+        </span>
+        <span class={ACTIONS}>
+          <button
+            type="button"
+            class={[CHOOSE, { [TICKED]: this.isTicked }]}
+            part={this.partForName("tick")}
+            role={ask().isMultiple ? "checkbox" : "radio"}
+            aria-checked={this.isTicked ? "true" : "false"}
+            aria-label={`${this.translationForKey(this.isTicked ? "chosen" : "choose")}:  ${this.letter ?? ""}${LETTER_SEPARATOR}${this.title ?? ""}`}
+            tabindex={this.tickTabIndex}
+            title={this.translationForKey(this.isTicked ? "tipTicked" : "tipChoose", { letter: this.letter ?? "" })}
+            onClick={this.onTick}
+          >
+            {this.translationForKey(this.isTicked ? "chosen" : "choose")}
+          </button>
         </span>
       </div>
     )
@@ -433,6 +604,15 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             clicks: true
           })}
         </Show>
+        <Show when={this.canEdit && !this.isRemoving}>
+          <span class={ACTIONS}>
+            {this.choices?.toolButtons(
+              () => (this.isEditing = true),
+              () => this.onRemove(),
+              this.letter
+            )}
+          </span>
+        </Show>
         <Show when={this.pill}>{(pill) => this.pillButton(pill)}</Show>
       </div>
     )
@@ -450,7 +630,9 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
         <span class={TITLE} part={this.partForName("title")}>
           {this.letter}
           {LETTER_SEPARATOR}
-          <slot name={this.slotForName("title")}>{this.title}</slot>
+          <Show when={this.pendingEdit} fallback={<slot name={this.slotForName("title")}>{this.title}</slot>}>
+            {(edit) => <span class={NEW_TEXT}>{edit().title}</span>}
+          </Show>
           {this.recommendedMark()}
         </span>
       </>
@@ -504,12 +686,27 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
 
   /** Answering:  its tick box changed:  its question hears it (`ui-selected` / `ui-deselected`);  unticked, its (?) goes off too. */
   private readonly onTick = (event: Event) => {
-    const selected = (event.currentTarget as HTMLInputElement).checked
+    event.stopPropagation()
+    const selected = !this.isTicked
     this.send(selected ? "ui-selected" : "ui-deselected", {
       letter: this.letter ?? "",
       selected,
       more: selected && this.wantsMore
     })
+  }
+
+  /**
+   * Answering:  its comment box folds under a Comment link (epic `epic-engine` P50, Q55), until Owen opens it;  a box
+   * with text in it (a draft put back) shows by itself (the sheet:  `:state(filled)`).
+   */
+  @E.state accessor commentOpen = false
+
+  /** The Comment link:  its box opens, and takes the focus. */
+  @E.untracked
+  private openComment(event: MouseEvent) {
+    this.commentOpen = true
+    const box = (event.currentTarget as Element).parentElement?.querySelector("epic-text-box") as HTMLElement | null
+    E.afterSolidUpdate(() => box?.focus())
   }
 
   /** Answering:  its (?) pressed:  on, it's ticked too;  off, its tick stays as it is. */
@@ -528,14 +725,64 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   private readonly onChoose = (event: MouseEvent) => {
     // a panel's header folds on a click;  the item's line would too
     event.stopPropagation()
-    const id = this.itemId
     const letter = this.letter
-    const set = this.cardSet()
+    const choices = this.choices
     const pill = this.pill
-    if (!this.review || !id || !letter || !set || pill?.applied) return
-    // a failed write is the client's own notice, and re-reads the inbox:  nothing to do here
-    void this.review.choose(id, pill?.picked ? null : letter, set.index).catch((error: unknown) => console.error(error))
-    if (!pill?.picked) this.itemComponent()?.foldAfterAction()
+    const multiple = !!choices?.isMultiple
+    if (!choices || !letter || !this.cardSet() || (pill?.applied && !multiple)) return
+    // the set's one mark, its other changes kept (`SetChange`);  a failed write is the client's own notice
+    choices.change((fields, state) => SetChange.toggle(fields, state, letter))
+    // pick any:  Owen may pick more, so the item stays open
+    if (!pill?.picked && !multiple) this.itemComponent()?.foldAfterAction()
+  }
+
+  /** The pencil's form saved:  its new title and note in its set's mark;  the form closes. */
+  @E.untracked
+  private onEdited(saved: OptionFormSaved) {
+    const letter = this.letter
+    this.isEditing = false
+    if (letter) this.choices?.change((fields, state) => SetChange.edit(fields, state, letter, saved.title, saved.note))
+  }
+
+  /** Its ✕:  removed in its set's mark, faded, with Undo. */
+  @E.untracked
+  private onRemove() {
+    const letter = this.letter
+    if (letter) this.choices?.change((fields, state) => SetChange.remove(fields, state, letter))
+  }
+
+  /** Undo on a change not applied yet:  its removal, else its edit, out of the mark. */
+  @E.untracked
+  private onUndo() {
+    const letter = this.letter
+    if (!letter) return
+    const removing = this.isRemoving
+    this.choices?.change((fields, state) =>
+      removing ? SetChange.undoRemove(fields, state, letter) : SetChange.undoEdit(fields, state, letter)
+    )
+  }
+
+  /**
+   * A click on one of its pictures (an `<img>` in its text):  shown full size (`ImageZoom`), never its link.
+   * - the docs runtime takes every other image's click on the page;  this one is for a page without it (Epic UI's)
+   */
+  @E.on("click")
+  protected onPictureClick(event: MouseEvent) {
+    if ((event.target as Element | null)?.closest?.("img")) ImageZoom.onClick(event)
+  }
+
+  /** Its pictures are thumbnails:  the page sheet that draws them, registered once per page. */
+  @E.whileConnected
+  protected registerPictures() {
+    if (isServer) return undefined
+    // the runtime may still be loading as the first option connects
+    void UI.load()
+      .then((runtime) => {
+        if (!runtime.styles.has(PICTURES_PAGE_SHEET))
+          runtime.styles.register(PICTURES_PAGE_SHEET, picturesCSS, { page: true })
+      })
+      .catch((error: unknown) => console.error(error))
+    return undefined
   }
 
   /** The `<epic-item>` it belongs to, drawn;  else `undefined`. */
@@ -553,7 +800,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   protected followReview(): () => void {
     const client = ReviewClient.forPage()
     this.review = client
-    this.itemId = this.domElement.closest(ITEM_TAG)?.id || undefined
     this.inOriginal = !!this.domElement.closest(ORIGINAL_TAG)
     this.inboxVersion = client.version
     return client.subscribe(() => (this.inboxVersion = client.version))
@@ -613,10 +859,7 @@ const APPLIED = "applied"
 const ANSWERING = "answering"
 const TICKED = "ticked"
 
-/** Classes of an answering option's header:  its fold button, the label around tick and title, the tick box. */
-const FOLD = "fold"
-const PICK = "pick"
-const TICK = "tick"
+/** An answering option's pill, ticked:  its look, the card's frame. */
 
 /** Classes of an answering option's badge, the box at its header's end, the (?), its state icon, its comment box. */
 const BADGE = "badge"
@@ -624,6 +867,8 @@ const MARKS = "marks"
 const MORE = "more"
 const STATE_MARK = "state-mark"
 const COMMENT = "comment"
+const COMMENT_LINK = "comment-link"
+const OPEN = "open"
 
 /** The (?) of "Provide more details". */
 const MORE_ICON = "circle question"
@@ -636,3 +881,20 @@ const BODY_ID = "body"
 
 /** Between an option's letter and its title:  `A · A named palette`. */
 const LETTER_SEPARATOR = " · "
+
+/** Class words of a change not applied yet (P50):  edited, removed;  its line, its Undo, the new text. */
+const EDITED = "edited"
+const REMOVING = "removing"
+const DRAFT_LINE = "draft-line"
+const UNDO = "undo"
+const NEW_TEXT = "new-text"
+
+/** Its earlier text:  the slot, its box, title and body, and the body's `id`. */
+const WAS_SLOT = "was"
+const WAS = "was"
+const WAS_TITLE = "list-title"
+const WAS_BODY = "list-body"
+const WAS_ID = "was-body"
+
+/** The page sheet that draws its pictures as thumbnails. */
+const PICTURES_PAGE_SHEET = "epic-option-pictures"

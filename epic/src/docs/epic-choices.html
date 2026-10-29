@@ -139,6 +139,47 @@
                 title="Both, by kind:  classes with behaviour subclass;  plain config / spec records spread"
               ></epic-answer>
             </epic-item>
+            <p>
+              Pick any (<code>multiple</code>, epic <code>epic-engine</code> P50): several options picked at once. On an
+              epic page being reviewed, its heading is a switch, Pick one / Pick any, and Add choice sits under the
+              cards; each card has a pencil and an ✕. Option B has an earlier text, folded under Was; option C was
+              removed, folded under Removed.
+            </p>
+            <epic-item id="q40" title="Which pages get the new toolbar?" status="decided" state="recent" open>
+              <epic-question><p>Every page kind could take it.</p></epic-question>
+              <epic-choices multiple chosen="A B">
+                <epic-option letter="A" title="Guides"><p>The most read.</p></epic-option>
+                <epic-option letter="B" title="Details pages" edited="2026-10-29"
+                  ><p>Owen answers on them.</p
+                  ><div slot="was" data-title="Details and review pages"><p>Both kinds Owen answers on.</p></div
+                ></epic-option>
+                <epic-option letter="C" title="Epic UI's pages" slot="removed" removed="2026-10-29"
+                  ><p>They have the site's own.</p></epic-option
+                >
+              </epic-choices>
+            </epic-item>
+            <p>
+              A standing set (<code>standing</code>), in a page's Choices section: it never folds away as answered.
+              Its title is its heading; each round's picks fold under Picked, and Claude adds more. An option's picture
+              is a thumbnail: a click shows it full size.
+            </p>
+            <epic-choices id="s-upgrades" title="Upgrades on offer" standing multiple>
+              <epic-option letter="A" title="A dark theme for code blocks"
+                ><p>Matches the editor.</p
+                ><img
+                  src="/epic/docs/images/epic-item.png"
+                  alt="An epic page item, for the picture"
+              /></epic-option>
+              <epic-option letter="B" title="Wider tables"><p>Full width on a click.</p></epic-option>
+              <epic-option letter="C" title="Sticky table heads" slot="picked" picked-on="2026-10-28"
+                ><p>Picked last round.</p></epic-option
+              >
+            </epic-choices>
+            <p>A closed set (<code>closed</code>): done. No picks, adds or edits; drawn answered.</p>
+            <epic-choices closed chosen="A">
+              <epic-option letter="A" title="Keep the old names"><p>Nothing to migrate.</p></epic-option>
+              <epic-option letter="B" title="Rename everything"><p>One big migration.</p></epic-option>
+            </epic-choices>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -200,6 +241,18 @@
                   ><code>&lt;epic-version&gt;</code></a
                 >: as it was, in an Original Discussion
               </li>
+              <li>
+                <a href="epic-field.html" target="src-packages-epics-docs-epic-field-html"
+                  ><code>&lt;epic-field name="choices"&gt;</code></a
+                >: a phase's own sets, so its forks stay in its story (P50); its picks are keyed by the phase, and its
+                title says "1 choice open" until picked
+              </li>
+              <li>
+                <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                  ><code>&lt;epic-section kind="choices"&gt;</code></a
+                >: the page's standing sets (<code>standing</code>, each with its own <code>id</code> and
+                <code>title</code>), between the Overview and the Phases (P50)
+              </li>
             </ul>
             <p>Its children:</p>
             <ui-table celled padding="compact" appearance="striped" unstackable>
@@ -242,7 +295,42 @@
                   <tr>
                     <td><code>chosen</code></td>
                     <td>text</td>
-                    <td>The chosen option's <code>letter</code>, once answered; absent while the question is open.</td>
+                    <td>
+                      The chosen option's <code>letter</code>, once answered; absent while the question is open. A
+                      <code>multiple</code> set's may name several: <code>chosen="A C"</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>multiple</code></td>
+                    <td>boolean</td>
+                    <td>Pick any: several options may be picked. Its heading's switch flips it while reviewed.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>fixed</code></td>
+                    <td>boolean</td>
+                    <td>No Add choice: Owen may not add options. Without it, every open set takes his.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>closed</code></td>
+                    <td>boolean</td>
+                    <td>Done: no picks, and no options added, edited or removed; drawn answered.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>standing</code></td>
+                    <td>boolean</td>
+                    <td>
+                      A standing set, in the Choices section: never folds away; each round's picks fold under Picked.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>title</code></td>
+                    <td>text</td>
+                    <td>A standing set's heading. Its <code>id</code> keys its marks.</td>
                     <td></td>
                   </tr>
                   <tr>
@@ -283,6 +371,14 @@
                     <tr>
                       <td><i>default</i></td>
                       <td>The options.</td>
+                    </tr>
+                    <tr>
+                      <td><code>picked</code></td>
+                      <td>A standing set's picked options (<code>picked-on</code>): folded under Picked.</td>
+                    </tr>
+                    <tr>
+                      <td><code>removed</code></td>
+                      <td>Its removed options (<code>removed</code>), never erased: folded under Removed.</td>
                     </tr>
                   </tbody>
                 </table></ui-table

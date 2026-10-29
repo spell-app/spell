@@ -1,0 +1,124 @@
+/*
+ * `<epic-option-form>` (`EpicOptionForm.tsx`, epic `epic-engine` P50):  the form for one option, a new one or one
+ * edited in place.
+ * - Owen's own words:  his ivory, as `<epic-new-item>`'s form (`EpicNewItem.css`, whose private tokens it shares by
+ *   value)
+ * - Public tokens (`--epic-option-form-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-option-form;
+
+@layer ui.components.epic-option-form {
+  :host {
+    --_epic-form-muted: var(--epic-muted, var(--ui-text-muted, GrayText));
+    --_epic-form-ink: var(--ui-text-color, CanvasText);
+    --_epic-form-paper: var(--ui-background, Canvas);
+    --_epic-form-rule: var(--epic-rule, var(--ui-border-color, GrayText));
+    --_epic-form-green: var(--ui-green, #00853a);
+    --_epic-form-green-on: var(--ui-green-on, #fff);
+    --_epic-form-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
+    --_epic-form-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    --_epic-form-focus: var(--ui-focus-color, Highlight);
+    display: block;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* the form:  its heading, the title, the note (it grows), the picture, then Save and Cancel */
+  .option-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid color-mix(in oklab, var(--_epic-form-ivory-ink) 30%, transparent);
+    border-radius: 10px;
+    background: var(--_epic-form-ivory);
+    font-size: 14px;
+  }
+  .heading {
+    color: var(--_epic-form-ivory-ink);
+    font-weight: 600;
+    font-size: 0.9em;
+  }
+  .title-input {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 4px 6px;
+    border: 1px solid var(--_epic-form-rule);
+    border-radius: 6px;
+    background: var(--_epic-form-paper);
+    color: var(--_epic-form-ink);
+    font: inherit;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .title-input:focus-visible {
+    outline: 2px solid var(--_epic-form-focus);
+    outline-offset: 0;
+  }
+
+  /* the picture's area:  a dashed drop zone;  its thumbnail once there is one */
+  .picture {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    padding: 4px 8px;
+    border: 1px dashed var(--_epic-form-rule);
+    border-radius: 6px;
+    color: var(--_epic-form-muted);
+    font-size: 0.9em;
+  }
+  .thumb {
+    display: block;
+    max-width: min(160px, 100%);
+    max-height: 96px;
+    border: 1px solid var(--_epic-form-rule);
+    border-radius: 4px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .actions button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--_epic-form-paper);
+    box-shadow: inset 0 0 0 1px var(--_epic-form-rule);
+    color: var(--_epic-form-ink);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .actions button[type="submit"] {
+    background: var(--_epic-form-green);
+    box-shadow: none;
+    color: var(--_epic-form-green-on);
+  }
+  .actions button:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .actions button:focus-visible {
+    outline: 2px solid var(--_epic-form-focus);
+    outline-offset: 1px;
+  }
+  .actions ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+}

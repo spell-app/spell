@@ -380,4 +380,4 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - [README-spell](README-spell.md):  plain Spell, what every body inside a tag is written in
 - [README-spanish](README-spanish.md):  how a file's name says its language, and the Spanish words
 - [README-parser](README-parser.md):  the parser that reads every spellx file, through its own tokenizer
-- [spell-parser's front page](README.md):  the language, its pipeline, and every page of the repo
+- [spell-parser's front page](README.md):  the language, its pipeline, and every page of the folder

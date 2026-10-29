@@ -1,20 +1,25 @@
-import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import type { E } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { Markup } from "spell/epic/markup"
-import { AgentsClient, ReviewClient, clockOf, type Inbox } from "spell/epic/review"
+import { AgentsClient, ReviewClient, SendCountdown, clockOf, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
 import "spell/ui/components/ui-label"
 import "spell/ui/components/ui-message"
 import "spell/ui/components/ui-code"
 import "spell/ui/components/ui-breadcrumbs"
 import "spell/ui/components/ui-toast"
+// the gear's menu and its Theme sub-menu (P53)
+import "spell/ui/components/ui-popup"
+import "spell/ui/components/ui-theme-menu"
 import "spell/epic/components/epic-page"
 import "spell/epic/components/epic-overview"
 import "spell/epic/components/epic-section"
@@ -25,6 +30,15 @@ import "spell/epic/components/epic-answer"
 import "spell/epic/components/epic-aside"
 // the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
 import "spell/ui/components/ui-input"
+
+// every test:  the page's own countdown, Auto Send OFF, so the plane's tooltips are its own words and nothing sends by
+// itself;  "the header (P53)" chooses what it tests
+beforeEach(() => {
+  const countdown = new SendCountdown({ storage: null })
+  countdown.choose("off")
+  SendCountdown.adopt(countdown)
+})
+afterEach(() => SendCountdown.adopt(undefined))
 
 /** A page with phases in `statuses`, and `attributes` on the page. */
 function page(attributes: string, statuses: string[], extra = ""): string {
@@ -126,7 +140,9 @@ describe("<epic-page>", () => {
     )
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
-    expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe("Copy /epic review SAGA:/epics")
+    expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe(
+      "epics:  click to copy /epic review SAGA:/epics"
+    )
     const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
       crumb.getAttribute("link")
@@ -170,25 +186,31 @@ describe("<epic-page>", () => {
     expect(host.shadowRoot!.querySelector('[part~="hung"]')).toBeNull()
   })
 
-  test("the git toggle shows only with commits, and shows every commit below while pressed", async () => {
-    const without = await render(page("", ["done"]))
-    expect(without.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
-    without.remove()
+  // P53, J163:  no page-wide toggle (the Log lists every commit);  a phase shows its own, as an item does
+  test("no page-wide git toggle;  a phase with commits has its own git icon, showing ITS commits while pressed", async () => {
     const host = await render(
       page(`repo="https://example.com/r"`, []).replace(
         "</epic-section>",
-        `<epic-phase id="p1" title="One" status="done" open><epic-commit sha="0123456789abcdef">Did it</epic-commit></epic-phase></epic-section>`
+        `<epic-phase id="p1" title="One" status="done" commits><epic-commit sha="0123456789abcdef">Did it</epic-commit></epic-phase>` +
+          `<epic-phase id="p2" title="Two" status="todo"></epic-phase></epic-section>`
       )
     )
+    expect(host.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
+    const [p1, p2] = ["#p1", "#p2"].map((id) => host.querySelector(id)!)
+    expect(p2.shadowRoot!.querySelector('[part~="git"]')).toBeNull()
     const commit = host.querySelector("epic-commit")!
-    const git = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="git"]')!
+    const git = p1.shadowRoot!.querySelector<HTMLButtonElement>('[part~="git"]')!
+    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Show this phase's commits", "false"])
     expect(getComputedStyle(commit).display).toBe("none")
     git.click()
     await ElementFixture.tick()
-    expect(git.getAttribute("aria-pressed")).toBe("true")
-    expect(getComputedStyle(commit).display).toBe("block")
+    expect([git.title, git.getAttribute("aria-pressed")]).toEqual(["Hide this phase's commits", "true"])
+    // it opens, so they show
+    await vi.waitFor(() => expect(getComputedStyle(commit).display).toBe("block"))
+    expect(p1.matches(":state(commits)")).toBe(true)
     git.click()
     await ElementFixture.tick()
+    expect(getComputedStyle(commit).display).toBe("none")
   })
 
   test("its blocks are numbered by place, and top-level titles stick below its header and toolbar bar", async () => {
@@ -200,8 +222,9 @@ describe("<epic-page>", () => {
     expect(Number(phases.getAttribute("offset"))).toBe(Math.round(Math.round(header) + bar))
   })
 
-  // Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git icon, but bigger)"
-  test("the h1's row and the toolbar's bar stick;  the step label (the state in it), then git", async () => {
+  // Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git icon, but bigger)";  the git
+  // icon became the gear in P53
+  test("the h1's row and the toolbar's bar stick;  the step label (the state in it), then the gear", async () => {
     const now = new Date()
     const today = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
       .map((n) => String(n).padStart(2, "0"))
@@ -218,7 +241,7 @@ describe("<epic-page>", () => {
     expect(["header", "bar"].map(position)).toEqual(["sticky", "sticky"])
     expect(
       Array.from(shadow.querySelector('[part~="status"]')!.children, (child) => child.getAttribute("part"))
-    ).toEqual(["step-pill", "git"])
+    ).toEqual(["step-pill", "gear", "gear-menu"])
     // the step label (the state in it) inside the one pill, after the changes to accept (I108)
     expect(shadow.querySelector('[part~="step-pill"] > [part~="state"]')).not.toBeNull()
   })
@@ -530,7 +553,7 @@ describe("<epic-page> Send and its countdown", () => {
 
   // Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header, to the
   // left of P11"
-  test("in the header, left of the step label:  never dashed, a click sends, then outlined;  nobody listening:  the pill under the review line and the tooltips say so", async () => {
+  test("in the header's middle (P53):  never dashed, a click sends, then outlined;  nobody listening:  the pill under the review line and the tooltips say so", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "revisit", when: "soon", note: "hm", at } }
@@ -538,11 +561,14 @@ describe("<epic-page> Send and its countdown", () => {
     const host = await render(page("", ["todo"]))
     await vi.waitFor(() => expect(headerButtons(host).send?.[1]).toBeTruthy())
     expect(host.shadowRoot!.querySelector('[part~="send-bar"]')).toBeNull()
-    expect(
-      Array.from(host.shadowRoot!.querySelector('header [part~="status"]')!.children, (child) =>
+    const parts = (name: string) =>
+      Array.from(host.shadowRoot!.querySelector(`header [part~="${name}"]`)!.children, (child) =>
         child.getAttribute("part")
       )
-    ).toEqual(["send", "step-pill"])
+    expect([parts("centre"), parts("status")]).toEqual([
+      ["send", "spinner"],
+      ["step-pill", "gear", "gear-menu"]
+    ])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
     // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
@@ -569,8 +595,7 @@ describe("<epic-page> Send and its countdown", () => {
     await ElementFixture.tick()
     expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"])
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
-    // a countdown running out (the wand's, should it come back) sends as Review Now did (decision Q7):  every revisit
-    // asked now
+    // a countdown running out sends as Review Now did (decision Q7):  every revisit asked now
     sendGroup(host).dispatchEvent(
       new CustomEvent("epic-send-saving", { detail: { auto: true }, bubbles: true, composed: true })
     )
@@ -947,7 +972,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
-    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  marked in this pass, or being worked on"])
+    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
     // its plan accepted:  Claude is working on it, no longer writing the plan
@@ -1035,9 +1060,9 @@ async function adoptAgents(routes: FakeAgents, { served = true } = {}) {
 
 /**
  * The shadow root of `host`'s `<epic-agents>` drawing `draws`:  the agents' button in the header's pill, or the
- * session's line in the toolbar (Owen, 2026-10-25).
+ * session's spinner beside Send (P53).
  */
-function agentsRoot(host: Element, draws: "agents" | "doing" = "agents"): ShadowRoot {
+function agentsRoot(host: Element, draws: "agents" | "spinner" = "agents"): ShadowRoot {
   return host.shadowRoot!.querySelector(`epic-agents[draws="${draws}"]`)!.shadowRoot!
 }
 
@@ -1133,6 +1158,9 @@ describe("<epic-page> Agents running", () => {
     const routes = new FakeAgents()
     const client = await adoptAgents(routes)
     const host = await renderWithAgents()
+    // open, as a person would:  the popover is a real `<ui-popup>` here (the gear's needs it), hidden until clicked
+    agentsRoot(host).querySelector<HTMLButtonElement>(".agents-button")!.click()
+    await vi.waitFor(() => expect(agentsRoot(host).querySelector(".agents-pop")!.matches(":popover-open")).toBe(true))
     const { box, note } = noteBox(host, "demo-aaa")
     note.focus()
     type(note, "Half typed")
@@ -1218,9 +1246,23 @@ describe("<epic-page> what Claude is doing", () => {
     ReviewClient.adopt(undefined)
   })
 
-  test("the session's line in the toolbar, its styled tooltip listing what it answers, linked;  none while idle", async () => {
+  // T53:  "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
+  // already round, doesn't need to be in a circular border"
+  test("the session's spinner beside Send, bare, its words the tooltip;  the styled tooltip lists what it answers;  none while idle", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
+    routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
+    const client = await adoptClient(routes)
+    const host = await render(page("", ["active"]))
+    const line = () => agentsRoot(host, "spinner").querySelector<HTMLElement>("[part~='doing']")
+    await vi.waitFor(() => expect(line()).not.toBeNull())
+    // no pill, no words:  the spinner alone, its words the tooltip
+    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([null, "", "Building P53"])
+    expect(line()!.querySelector(".spinner")).not.toBeNull()
+    expect(getComputedStyle(line()!).borderTopStyle).toBe("none")
+    // beside Send, in the header's middle;  none left in the toolbar
+    expect(host.shadowRoot!.querySelector('[part~="centre"] epic-agents[draws="spinner"]')).not.toBeNull()
+    expect(host.shadowRoot!.querySelector('[part~="toolbar"] epic-agents')).toBeNull()
     routes.inbox.doing = {
       text: "Responding",
       items: [
@@ -1229,19 +1271,10 @@ describe("<epic-page> what Claude is doing", () => {
       ],
       at: new Date().toISOString()
     }
-    const client = await adoptClient(routes)
-    const host = await render(page("", ["active"]))
-    const line = () => agentsRoot(host, "doing").querySelector<HTMLElement>("[part~='doing']")
-    await vi.waitFor(() => expect(line()?.textContent).toBe("Responding"))
+    await client.refresh()
+    await ElementFixture.tick()
     expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, C3")
-    // a grey pill like the step label, its spinner where the label's icon goes (Owen, 2026-10-25)
-    const pill = line()!.querySelector("ui-label")!
-    expect([
-      pill.getAttribute("color"),
-      pill.getAttribute("appearance") === "basic",
-      pill.querySelector(".spinner")!.slot
-    ]).toEqual(["grey", true, "icon"])
-    const tip = agentsRoot(host, "doing").querySelector("ui-popup.doing-tip")!
+    const tip = agentsRoot(host, "spinner").querySelector("ui-popup.doing-tip")!
     expect(tip.getAttribute("open-on")).toBe("hover")
     expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
       ["#q1", "Q1 Which?"],
@@ -1251,6 +1284,174 @@ describe("<epic-page> what Claude is doing", () => {
     await client.refresh()
     await ElementFixture.tick()
     expect(line()).toBeNull()
+  })
+})
+
+////////////////
+// ## The header (epic `epic-engine` P53):  Send centred with its ring, the gear
+////////////////
+
+describe("<epic-page> the header (P53)", () => {
+  afterEach(() => {
+    ReviewClient.adopt(undefined)
+  })
+
+  /** A reviewed page, a mark unsent, Auto Send `choice`, `width` px wide. */
+  async function reviewedPage(choice: "now" | "2m" | "5m" | "off", width = 1000) {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.listening = { session: "s1", since: at, seen: at }
+    routes.inbox.marks = { q1: { action: "approve", at } }
+    await adoptClient(routes)
+    const countdown = new SendCountdown({ storage: null })
+    countdown.choose(choice)
+    SendCountdown.adopt(countdown)
+    const host = await render(page("", ["active"]))
+    host.style.display = "block"
+    host.style.width = `${width}px`
+    await vi.waitFor(() => expect(headerButtons(host).send?.[0]).toBe("unsent"))
+    await ElementFixture.tick()
+    return { host, routes, countdown }
+  }
+
+  /** `element`'s box, its middle and edges. */
+  function box(element: Element) {
+    const rect = element.getBoundingClientRect()
+    return { left: rect.left, right: rect.right, middle: rect.left + rect.width / 2 }
+  }
+
+  // Owen's comment C7:  "Center this button in the epic doc page header";  J161:  narrow, it follows the title
+  test("Send at the header's exact middle;  narrow, right after the title, never over it", async () => {
+    const { host } = await reviewedPage("off")
+    const header = host.shadowRoot!.querySelector('[part~="header"]')!
+    const planeBox = () => box(plane(host))
+    expect(Math.abs(planeBox().middle - box(header).middle)).toBeLessThanOrEqual(1)
+    host.style.width = "340px"
+    await ElementFixture.tick()
+    const heading = host.shadowRoot!.querySelector('[part~="heading"]')!
+    expect(box(heading).right).toBeLessThanOrEqual(planeBox().left)
+    expect(planeBox().right).toBeLessThanOrEqual(box(host.shadowRoot!.querySelector('[part~="status"]')!).left)
+    // the name cut short, its whole name in its tooltip
+    expect(host.shadowRoot!.querySelector("h1 button")!.getAttribute("title")).toBe(
+      "demo:  click to copy /epic resume demo"
+    )
+  })
+
+  test("with a mark unsent and 2 minutes:  the ring round the plane;  a press sends at once (not `now`)", async () => {
+    const { host, routes } = await reviewedPage("2m")
+    expect(sendGroup(host).hasAttribute("countdown")).toBe(true)
+    await vi.waitFor(() => expect(sendGroup(host).shadowRoot!.querySelector('[part~="ring"]')).not.toBeNull())
+    expect(plane(host).title).toMatch(/^Send 1 mark to Claude · sends by itself in [12]:\d\d;  click to send now$/)
+    plane(host).click()
+    await vi.waitFor(() => expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html" }]))
+  })
+
+  // Q59, B:  the countdown's end does what a press does, the wake included (the page server wakes on any send)
+  test("the countdown's end sends, as Review Now did (`now`)", async () => {
+    const { host, routes, countdown } = await reviewedPage("2m")
+    await vi.waitFor(() => expect(countdown.isRunning).toBe(true))
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(Date.now() + 121_000)
+    countdown.check()
+    vi.useRealTimers()
+    await vi.waitFor(() =>
+      expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html", now: true }])
+    )
+    expect(host.isConnected).toBe(true)
+  })
+
+  /** The gear's menu:  the button, the popup, its rows' words. */
+  function gear(host: Element) {
+    const shadow = host.shadowRoot!
+    const rows = () => Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]'))
+    return {
+      button: shadow.querySelector<HTMLButtonElement>('[part~="gear"]')!,
+      menu: shadow.querySelector<HTMLElement>('[part~="gear-menu"]')!,
+      rows,
+      words: () => rows().map((row) => row.textContent!.replace(/\s+/g, " ").trim()),
+      autoSend: shadow.querySelector<HTMLElement>('[part~="auto-send"]')!,
+      theme: shadow.querySelector<HTMLElement>('[part~="theme-menu"]')!
+    }
+  }
+
+  // Owen's comments C6, C8, C9;  J160, J162
+  test("the gear:  Auto Send · 2 minutes and Theme · <theme>;  a pick in Auto Send's sub-menu is the countdown's;  axe", async () => {
+    const { host, countdown } = await reviewedPage("2m")
+    const it = gear(host)
+    expect(it.button.title).toBe("Settings")
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    await vi.waitFor(() => expect(it.words()[1]).toMatch(/^Theme · \w+$/))
+    expect(it.words()[0]).toBe("Auto Send · 2 minutes")
+    expect(it.autoSend.hidden).toBe(true)
+    it.rows()[0]!.click()
+    await ElementFixture.tick()
+    expect(it.autoSend.hidden).toBe(false)
+    const choices = Array.from(it.autoSend.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]'))
+    expect(choices.map((choice) => [choice.textContent, choice.getAttribute("aria-checked")])).toEqual([
+      ["Immediately", "false"],
+      ["2 minutes", "true"],
+      ["5 minutes", "false"],
+      ["Off", "false"]
+    ])
+    // Off under a divider
+    expect(choices[3]!.previousElementSibling!.getAttribute("role")).toBe("separator")
+    await expectAccessible(host)
+    choices[2]!.click()
+    await ElementFixture.tick()
+    expect([countdown.choice, it.words()[0], it.autoSend.hidden]).toEqual(["5m", "Auto Send · 5 minutes", true])
+    // Off:  no ring, the plane filled, waiting for a press
+    it.rows()[0]!.click()
+    await ElementFixture.tick()
+    choices[3]!.click()
+    await ElementFixture.tick()
+    expect(sendGroup(host).shadowRoot!.querySelector('[part~="ring"]')).toBeNull()
+    expect(sendGroup(host).matches(":state(waiting)")).toBe(true)
+  })
+
+  test("the gear's keys:  the right arrow opens a sub-menu, the left arrow or Escape close it, the menu staying open", async () => {
+    const { host } = await reviewedPage("2m")
+    const it = gear(host)
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    const key = (target: Element, name: string) =>
+      target.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true, composed: true, cancelable: true }))
+    key(it.rows()[0]!, "ArrowDown")
+    expect(host.shadowRoot!.activeElement).toBe(it.rows()[1])
+    key(it.rows()[1]!, "ArrowUp")
+    key(it.rows()[0]!, "ArrowRight")
+    await ElementFixture.tick()
+    expect(it.autoSend.hidden).toBe(false)
+    await vi.waitFor(() => expect(host.shadowRoot!.activeElement?.textContent).toBe("2 minutes"))
+    key(host.shadowRoot!.activeElement!, "ArrowLeft")
+    await ElementFixture.tick()
+    expect([it.autoSend.hidden, host.shadowRoot!.activeElement]).toEqual([true, it.rows()[0]])
+    key(it.rows()[0]!, "ArrowRight")
+    await ElementFixture.tick()
+    key(it.autoSend.querySelector("button")!, "Escape")
+    await ElementFixture.tick()
+    expect([it.autoSend.hidden, it.menu.matches(":popover-open")]).toEqual([true, true])
+  })
+
+  test("the gear's Theme:  Spell UI's theme menu in its menu mode, no bench;  a pick there is the row's", async () => {
+    const { host } = await reviewedPage("2m")
+    const it = gear(host)
+    const menu = it.theme.querySelector("ui-theme-menu")!
+    expect([menu.getAttribute("show"), menu.getAttribute("bench")]).toEqual(["menu", "none"])
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    it.rows()[1]!.click()
+    await ElementFixture.tick()
+    expect(it.theme.hidden).toBe(false)
+    const options = await vi.waitFor(() => {
+      const found = Array.from(menu.shadowRoot!.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]'))
+      expect(found.length).toBeGreaterThan(1)
+      return found
+    })
+    expect(menu.shadowRoot!.querySelector('[part~="bench"]')).toBeNull()
+    const other = options.find((option) => option.getAttribute("aria-checked") !== "true")!
+    other.click()
+    await vi.waitFor(() => expect(it.words()[1]).toBe(`Theme · ${other.querySelector(".name")!.textContent}`))
   })
 })
 

@@ -622,30 +622,41 @@ describe("ReviewClient.startReview()", () => {
   })
 })
 
-// epic `epic-engine` P4:  a test run's answers, screenshots, and the epics left to test
-describe("ReviewClient's test runs", () => {
-  test("answerTest():  a `test` mark, read back by testAnswerOf();  another mark is no answer", async () => {
+// epic `epic-engine` P4, P51:  pictures in a note, Start testing, and the epics left to test
+describe("ReviewClient's pictures and testing", () => {
+  test("attachShot():  a picture alone is a revisit;  words typed after keep it;  taken out, the mark goes", async () => {
     const { client, server } = await started()
-    expect(
-      await client.answerTest("m1", { result: "failed", note: "cut short", shot: "tests/m1-20261019-1432.png" })
-    ).toBe(true)
+    const shot = "tests/j2-20261029-1432.png"
+    expect(await client.attachShot("j2", shot)).toBe(true)
     expect(server.posts.at(-1)).toEqual([
       "mark",
-      {
-        page: PAGE,
-        id: "m1",
-        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/m1-20261019-1432.png" }
-      }
+      { page: PAGE, id: "j2", mark: { action: "revisit", when: "soon", note: "", shot } }
     ])
-    expect(client.testAnswerOf("m1")).toEqual({
-      result: "failed",
-      note: "cut short",
-      shot: "tests/m1-20261019-1432.png"
-    })
-    await client.answerTest("m1", { result: "passed" })
-    expect(client.testAnswerOf("m1")).toEqual({ result: "passed" })
-    await client.save("q1", { action: "approve" })
-    expect(client.testAnswerOf("q1")).toBeUndefined()
+    expect(client.isBoxOpen("j2")).toBe(true)
+    await client.saveTyped("j2", "the side bar drew it twice")
+    expect(client.markOf("j2")).toMatchObject({ action: "revisit", note: "the side bar drew it twice", shot })
+    await client.saveTyped("j2", "")
+    expect(client.markOf("j2")).toMatchObject({ action: "revisit", note: "", shot })
+    await client.attachShot("j2", undefined)
+    expect(client.markOf("j2")).toBeUndefined()
+  })
+
+  test("attachShot():  a note mark keeps its action;  the x carries the picture", async () => {
+    const { client } = await started()
+    const shot = "tests/q1-20261029-1432.png"
+    await client.save("q1", { action: "skip", note: "gone" })
+    await client.attachShot("q1", shot)
+    expect(client.markOf("q1")).toMatchObject({ action: "skip", note: "gone", shot })
+    await client.useNote("q1", "soon", "look at this")
+    expect(client.markOf("q1")).toMatchObject({ action: "revisit", note: "look at this", shot })
+  })
+
+  test("prepareTests():  a request for now under `tests`, running until it's done", async () => {
+    const server = new FakeServer()
+    const { client } = await started(server, { hasItem: (id) => ITEMS.has(id) || id === "tests" })
+    expect(await client.prepareTests()).toBe(true)
+    expect(server.posts.at(-1)).toEqual(["now", { page: PAGE, id: "tests", action: "prepare" }])
+    expect(client.runningOf("tests")).toMatchObject({ action: "prepare" })
   })
 
   test("saveShot():  the route's path;  a refusal is a notice, and nothing", async () => {
