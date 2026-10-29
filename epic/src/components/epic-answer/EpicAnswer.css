@@ -48,7 +48,10 @@
    *   the head ends the frame
    */
   :host(:state(in-thread)) {
-    --_epic-thread-rule: var(--epic-thread-rule, var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b))));
+    --_epic-thread-rule: var(
+      --epic-thread-rule,
+      var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)))
+    );
     margin-top: 0;
   }
   :host(:state(thread-start)) {
@@ -279,22 +282,40 @@
   /*
    * ## Voices:  the page's theme tokens (`--epic-voice-*`, `<epic-page>`'s `:host`:  tweak them there), today's
    * values as the fallbacks
-   * - Claude's:  white, its name and mark Claude's terracotta
+   * - an agent's (Claude's):  white, its name and mark Claude's terracotta
+   * - the speaker's OWN colour first, when the repo gives them one (epic `epic-friend` P10):  `--_epic-voice`, set on
+   *   the card by `EpicReply.voice` (`var(--epic-voice-agent-codex, <its colour>)`);  unset, it falls through to
+   *   the shared voice, so a card looks as before
    */
   .reply {
-    --_epic-who-mark: var(--epic-voice-agent, light-dark(#c96442, #d97757));
-    --_epic-card-accent: var(--epic-voice-agent-text, light-dark(#a8502f, #e59a7c));
+    --_epic-who-mark: var(--_epic-voice, var(--epic-voice-agent, light-dark(#c96442, #d97757)));
+    --_epic-card-accent: var(--_epic-voice, var(--epic-voice-agent-text, light-dark(#a8502f, #e59a7c)));
   }
-  /* a person's voice:  violet, faint, as the comment box (I111);  every person's alike (epic `epic-friend` P2) */
+  /*
+   * a person's voice:  violet, faint, as the comment box (I111);  every person's alike (epic `epic-friend` P2), unless
+   * the repo gives them their own (P10):  its fill and rule mixed from it, as the shared ones are from violet
+   * - `--_epic-voice-fill` / `-rule` are unset when `--_epic-voice` is (a `var()` of nothing):  the shared ones then
+   */
   .reply.person {
-    --_epic-who-mark: var(--epic-voice-person, var(--ui-violet, #6550ca));
+    --_epic-who-mark: var(--_epic-voice, var(--epic-voice-person, var(--ui-violet, #6550ca)));
     /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
+    --_epic-voice-fill: color-mix(in oklab, var(--_epic-voice) 5%, light-dark(#fff, var(--ui-background, Canvas)));
+    --_epic-voice-rule: color-mix(in oklab, var(--_epic-voice) 26%, transparent);
     --_epic-card-fill: var(
-      --epic-voice-person-fill,
-      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, var(--ui-background, Canvas)))
+      --_epic-voice-fill,
+      var(
+        --epic-voice-person-fill,
+        color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, var(--ui-background, Canvas)))
+      )
     );
-    --_epic-card-rule: var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
-    --_epic-card-accent: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
+    --_epic-card-rule: var(
+      --_epic-voice-rule,
+      var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent))
+    );
+    --_epic-card-accent: var(
+      --_epic-voice,
+      var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)))
+    );
   }
   .more {
     --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));

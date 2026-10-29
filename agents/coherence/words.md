@@ -60,7 +60,7 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 ### person
 
-- **Say:**  person, in code, for whoever is at the keyboard and writes on a page:  a turn of `person` | `claude`,
+- **Say:**  person, in code, for whoever is at the keyboard and writes on a page:  a turn of `person` | `agent`,
   `EpicHome.person()`, `NEEDS_PERSON`;  "the person", in the skills, where a step is about whoever reviews.
 - **Not:**  Owen (or any one person's name), user, reviewer.
   - "Owen" stays in quotes, dated rules and history:  `(Owen, 2026-10-25:  "...")`.
@@ -86,6 +86,17 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  `role` (the browser's accessibility attribute), `author`.
 - An agent's words say so by `agent` (`agent="claude"`), never by the name:  a person may be called "Claude".
 - **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q9 (A, the marker generalized to `agent`).
+
+### agent
+
+- **Say:**  agent, in code and on pages, for whatever AI writes on a page for a person (Claude, Codex ...):  a turn of
+  `agent`, `agent="codex"`, `EpicHome.agent()`, `latestAgentAt()`, `markAgents()`;  the agent's own name only where
+  that one agent is meant ("Codex (Bob)" on a reply, Claude Code's `CLAUDECODE`).
+- **Not:**  Claude, for the idea:  a person may run Codex, or both (Owen, 2026-10-29:  "bob uses codex and I use
+  claude?").
+  - Old words read, for one release:  a turn of `claude` (`ThreadFacts.asTurn()`);  `CLAUDE_NAME` stays only for the
+    old rule that reads replies written before the marker.
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q13 (A) and P10.
 
 ### Booleans on an element
 

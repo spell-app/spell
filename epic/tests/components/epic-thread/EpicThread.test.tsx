@@ -26,7 +26,7 @@ function comment(fields: Partial<ThreadComment> = {}): ThreadComment {
     text: "Why asyncio?\n\nAnd `await`?",
     at: "2026-10-17T13:12:00.000Z",
     status: "new",
-    turn: "claude",
+    turn: "agent",
     ...fields
   }
 }
@@ -119,7 +119,7 @@ describe("<epic-thread>", () => {
     }).toEqual({ buttons: "thread", acts: ["good", "reply", "skip"], pen: false })
     expect(messages(host)).toEqual([
       { by: "person", older: true, latest: false, words: "Why asyncio?And await?" },
-      { by: "claude", older: false, latest: true, words: "Because await." }
+      { by: "agent", older: false, latest: true, words: "Because await." }
     ])
     const ivory = getComputedStyle(host).backgroundColor
     host.removeAttribute("unseen")
@@ -264,12 +264,88 @@ describe("<epic-thread>", () => {
     ])
     expect(named).toEqual([
       ["person", "You:"],
-      ["claude", "Claude:"],
+      ["agent", "Claude:"],
       ["person", "Ben:"],
-      ["claude", "Claude (Ben):"],
+      ["agent", "Claude (Ben):"],
       ["person", "Claude:"]
     ])
     expect(old).toEqual([["person", "You:"]])
+  })
+
+  test("any agent by its name (epic `epic-friend` P10):  Bob's Codex `Codex (Bob):`, Ana's own `Codex:`, thinking too", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "agent",
+      replies: [
+        { by: "Bob", agent: "codex", at: "2026-11-02T10:00:00.000Z", html: "<p>Bob's.</p>" },
+        { by: "Ana", agent: "codex", at: "2026-11-02T10:01:00.000Z", html: "<p>Mine.</p>" },
+        { by: "Ana", at: "2026-11-02T10:02:00.000Z", text: "And?" }
+      ],
+      working: "2026-11-02T10:03:00.000Z",
+      claim: { by: "Bob", agent: "gemini", at: "2026-11-02T10:03:00.000Z" }
+    })
+    const whoOf = (host: Element) =>
+      [...host.shadowRoot!.querySelectorAll("epic-thread-message")]
+        .slice(1)
+        .map((each) => [each.getAttribute("by"), each.shadowRoot!.querySelector(".who")?.textContent])
+    expect(await asViewer("Ana", async () => whoOf(await thread(said, "open")))).toEqual([
+      ["agent", "Codex (Bob):"],
+      ["agent", "Codex:"],
+      ["person", "You:"],
+      ["thinking", "Gemini (Bob):"]
+    ])
+  })
+
+  test("colours (epic `epic-friend` P10, Q16):  an agent's box in the agent's voice;  a speaker's own colour from the settings", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "person",
+      replies: [
+        { by: "Ana", agent: "claude", at: "2026-11-02T10:00:00.000Z", html: "<p>Claude's.</p>" },
+        { by: "Bob", agent: "codex", at: "2026-11-02T10:01:00.000Z", html: "<p>Codex's.</p>" }
+      ]
+    })
+    const looks = async (server: Record<string, unknown>) => {
+      const holder = globalThis as { SPELL_SERVER?: unknown }
+      const before = holder.SPELL_SERVER
+      holder.SPELL_SERVER = server
+      try {
+        const host = await thread(said, "open")
+        return [...host.shadowRoot!.querySelectorAll("epic-thread-message")].map((each) => ({
+          voice: (each as HTMLElement).style.getPropertyValue("--_epic-voice") || undefined,
+          ring: getComputedStyle(each).boxShadow,
+          who: getComputedStyle(each.shadowRoot!.querySelector(".who")!).color
+        }))
+      } finally {
+        holder.SPELL_SERVER = before
+      }
+    }
+    const plain = await looks({ person: "Ana" })
+    // no colours set:  no token's fallback, so every agent's box is the shared agent voice (terracotta, not violet)
+    expect(plain.map((each) => each.voice)).toEqual([
+      "var(--epic-voice-person-ana)",
+      "var(--epic-voice-agent-claude)",
+      "var(--epic-voice-agent-codex)"
+    ])
+    expect(plain[1]!.ring).toBe(plain[2]!.ring)
+    // terracotta, #c96442, 16% (`EpicThreadMessage.css`)
+    expect(plain[1]!.ring).toContain("color(srgb 0.788235 0.392157 0.258824 / 0.16)")
+    const colored = await looks({
+      person: "Ana",
+      colors: { people: { ana: "rgb(0, 128, 0)" }, agents: { codex: "rgb(0, 0, 255)" } }
+    })
+    expect(colored.map((each) => each.voice)).toEqual([
+      "var(--epic-voice-person-ana, rgb(0, 128, 0))",
+      "var(--epic-voice-agent-claude)",
+      "var(--epic-voice-agent-codex, rgb(0, 0, 255))"
+    ])
+    expect([colored[0]!.who, colored[1]!.ring === plain[1]!.ring, colored[2]!.ring]).toEqual([
+      "rgb(0, 128, 0)",
+      true,
+      expect.stringContaining("color(srgb 0 0 1 / 0.16)")
+    ])
   })
 })
 

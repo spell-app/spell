@@ -107,7 +107,9 @@ describe("epic whoami", () => {
     try {
       expect(await printed(() => commands.whoami([]))).toEqual([
         "Ana Lima",
-        "  git's user.name;  epic whoami <name> keeps another"
+        "  git's user.name;  epic whoami <name> keeps another",
+        // the tests name their agent (`tests/setup/epicHome.ts`)
+        "  agent:  claude (SPELL_EPIC_AGENT)"
       ])
     } finally {
       process.chdir(cwd)
@@ -140,13 +142,32 @@ describe("epic whoami", () => {
     expect(EpicHome.person()).toMatchObject({ name: "Ana Silva", source: "kept" })
     expect(await printed(() => commands.whoami([]))).toEqual([
       "Ana Silva  (Ana Lima)",
-      `  kept in ${EpicHome.personFile()}`
+      `  kept in ${EpicHome.personFile()}`,
+      "  agent:  claude (SPELL_EPIC_AGENT)"
+    ])
+  })
+
+  test("the agent under the person (epic `epic-friend` P10):  by its mark, named, or a guess that says so", () => {
+    expect([
+      PersonCommands.agentLine(EpicHome.agent({ CODEX_THREAD_ID: "t1" })),
+      PersonCommands.agentLine(EpicHome.agent({ SPELL_EPIC_AGENT: "gemini" })),
+      PersonCommands.agentLine(EpicHome.agent({}))
+    ]).toEqual([
+      "  agent:  codex (Codex's mark, CODEX_THREAD_ID)",
+      "  agent:  gemini (SPELL_EPIC_AGENT)",
+      "  agent:  claude (a guess:  no agent's mark found;  SPELL_EPIC_AGENT=<name> names it)"
     ])
   })
 
   test("--json:  the person, where it's kept, and what it was", async () => {
     const json = JSON.parse((await printed(() => commands.whoami(["Bob", "--json"]))).join("\n"))
-    expect(json).toMatchObject({ name: "Bob", source: "kept", file: EpicHome.personFile(), stillNamed: 0 })
+    expect(json).toMatchObject({
+      name: "Bob",
+      source: "kept",
+      file: EpicHome.personFile(),
+      stillNamed: 0,
+      agent: { name: "claude", source: "set" }
+    })
   })
 })
 

@@ -92,11 +92,82 @@ describe("ThreadFacts:  who wrote it (epic `epic-friend` P2)", () => {
     expect([
       ThreadFacts.turnOf(thread),
       ThreadFacts.lastPersonReply(thread),
-      ThreadFacts.latestClaudeAt(thread),
+      ThreadFacts.latestAgentAt(thread),
       ThreadFacts.pendingReplyOf(thread),
       ThreadFacts.isWaiting(thread),
       ThreadFacts.lastWordsAt(thread)
-    ]).toEqual(["claude", person, answer.at, person, true, LATER])
+    ]).toEqual(["agent", person, answer.at, person, true, LATER])
+  })
+})
+
+describe("ThreadFacts:  any agent's words (epic `epic-friend` P10)", () => {
+  test("agentLabel():  Claude, Codex, any other capitalised;  none:  Claude", () => {
+    expect(["claude", "codex", "CODEX", "gemini", "", undefined].map(ThreadFacts.agentLabel)).toEqual([
+      "Claude",
+      "Codex",
+      "Codex",
+      "Gemini",
+      "Claude",
+      "Claude"
+    ])
+  })
+
+  test("Bob's Codex:  its agent, Bob its person;  a reply `from` the agent's own name names nobody", () => {
+    expect([
+      ThreadFacts.speakerOf({ by: "Bob", agent: "codex", at: LATER }, "Ana"),
+      ThreadFacts.speakerOf(reply({ from: "Codex", agent: "codex", at: "2026-11-05 10:00" }), "Ana"),
+      ThreadFacts.speakerOf({ by: "Codex", at: LATER }, "Ana")
+    ]).toEqual([
+      { person: "Bob", agent: "codex", mine: false },
+      { person: undefined, agent: "codex", mine: false },
+      { person: "Codex", agent: undefined, mine: false }
+    ])
+  })
+
+  test("a Codex answer is the person's turn;  a comment waiting reads `agent`, and the old `claude` the same", () => {
+    const codex = { by: "Bob", agent: "codex", at: LATER, html: "<p>Done.</p>" }
+    expect([
+      ThreadFacts.turnOf(comment({ status: "answered", replies: [codex] })),
+      ThreadFacts.turnOf(comment()),
+      ThreadFacts.isWaiting(comment()),
+      ThreadFacts.latestAgentAt(comment({ replies: [codex] }))
+    ]).toEqual(["person", "agent", true, LATER])
+    expect(["agent", "claude", "owen", "person", "done", "nobody", undefined].map(ThreadFacts.asTurn)).toEqual([
+      "agent",
+      "agent",
+      "person",
+      "person",
+      "done",
+      undefined,
+      undefined
+    ])
+    expect(ThreadFacts.isAgentsTurn(comment({ turn: "claude" as never }))).toBe(true)
+  })
+
+  test("voiceOf():  the speaker's own token, the repo's colour its fallback;  an agent's words, the agent's", () => {
+    const colors = { people: { Ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } }
+    expect([
+      ThreadFacts.voiceOf({ person: "ana", agent: undefined }, colors),
+      ThreadFacts.voiceOf({ person: "Bob", agent: "codex" }, colors),
+      ThreadFacts.voiceOf({ person: "Ana Lima", agent: undefined }, colors),
+      ThreadFacts.voiceOf({ person: "Ana", agent: "claude" }, colors),
+      ThreadFacts.voiceOf({ person: undefined, agent: undefined }, colors)
+    ]).toEqual([
+      "var(--epic-voice-person-ana, #2f9e6e)",
+      "var(--epic-voice-agent-codex, #0f8b8d)",
+      "var(--epic-voice-person-ana-lima)",
+      "var(--epic-voice-agent-claude)",
+      undefined
+    ])
+  })
+
+  test("colors():  the page server's, anything not a colour left out;  none:  empty", () => {
+    const said = { people: { ana: " teal ", bob: "red; } body { x", ben: 3 }, agents: { codex: "oklch(60% 0.1 180)" } }
+    expect(ThreadFacts.colors({ SPELL_SERVER: { colors: said } })).toEqual({
+      people: { ana: "teal" },
+      agents: { codex: "oklch(60% 0.1 180)" }
+    })
+    expect(ThreadFacts.colors({})).toEqual({ people: {}, agents: {} })
   })
 })
 
@@ -108,14 +179,13 @@ describe("ThreadFacts", () => {
       ThreadFacts.turnOf(comment({ status: "answered", replies: [CLAUDE, OWEN] })),
       ThreadFacts.turnOf(comment({ status: "answered" })),
       ThreadFacts.turnOf(comment({ done: { how: "good", at: "2026-10-19T00:00:00.000Z" } }))
-    ]).toEqual(["claude", "person", "claude", "person", "done"])
-    // a page server from before epic `epic-friend` P2 says `owen` for the person's turn
+    ]).toEqual(["agent", "person", "agent", "person", "done"])
+    // a page server from before epic `epic-friend` P2 says `owen` for the person's turn;  before P10, `claude` an agent's
     const old = comment({ turn: "owen" as never })
-    expect(ThreadFacts.withTurns([comment({ turn: "person" }), old, comment()]).map((each) => each.turn)).toEqual([
-      "person",
-      "person",
-      "claude"
-    ])
+    const older = comment({ turn: "claude" as never })
+    expect(
+      ThreadFacts.withTurns([comment({ turn: "person" }), old, older, comment()]).map((each) => each.turn)
+    ).toEqual(["person", "person", "agent", "agent"])
   })
 
   test("Owen's words Claude hasn't had:  his first while new, his pending reply until taken or thought about", () => {
@@ -128,7 +198,7 @@ describe("ThreadFacts", () => {
       ),
       ThreadFacts.pendingOf(comment({ status: "answered", replies: [CLAUDE] }))
     ]).toEqual(["edit", null, "reply", null, null])
-    expect(ThreadFacts.latestClaudeAt(comment({ replies: [CLAUDE, OWEN] }))).toBe(CLAUDE.at)
+    expect(ThreadFacts.latestAgentAt(comment({ replies: [CLAUDE, OWEN] }))).toBe(CLAUDE.at)
   })
 
   test("ids:  `C3`, `c3` or the old `cm3`, as typed;  shown `C3`", () => {

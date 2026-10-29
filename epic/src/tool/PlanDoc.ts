@@ -1660,8 +1660,8 @@ export class PlanDoc extends PlanReader {
     const blocks = this.statusBlocks(reading)
     if (!blocks.length) throw new PlanDocError(`${id.toUpperCase()}:  a status card needs a reading`)
     const at = PlanTime.clockTime(this.now)
-    // whose session wrote it (epic `epic-friend` P2):  "Claude (Ana)" to anyone but Ana
-    const card = this.make("epic-status", { state, at, from: this.person }, blocks)
+    // whose session wrote it (epic `epic-friend` P2), and which agent (P10):  "Codex (Ana)" to anyone but Ana
+    const card = this.make("epic-status", { state, at, from: this.person, agent: this.agent }, blocks)
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item") this.stamp(host)
@@ -2155,7 +2155,7 @@ export class PlanDoc extends PlanReader {
    */
   private incoming(html: string | undefined, { question = false }: { question?: boolean } = {}): Node[] {
     if (!html?.trim()) return []
-    const nodes = IncomingHtml.nodes(this.document, html, { person: this.person })
+    const nodes = IncomingHtml.nodes(this.document, html, { person: this.person, agent: this.agent })
     return question ? IncomingHtml.asQuestion(this.document, nodes) : nodes
   }
 

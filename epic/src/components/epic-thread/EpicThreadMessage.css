@@ -6,10 +6,13 @@
  *   The times keep their size.
  * - Owen's:  plain on the ivory, no box, but the same padding and (clear) border as Claude's ("my text doesn't get
  *   bordered (but keep spacing the same)").
- * - Claude's:  a light violet box, its outline only a faint ring drawn as a shadow, its border clear, so nothing
- *   moves ("lighten border around your replies, make it just border-as-shadow").
- * - The Done line:  green, a faint green ring, the same way.  The thinking stub:  Claude's box, his words violet and
- *   italic.
+ * - an agent's:  a light box in the agent's colour (the page's `--epic-voice-agent`, terracotta;  epic `epic-friend`
+ *   P10, Q16:  violet before, which now means a person), its outline only a faint ring drawn as a shadow, its border
+ *   clear, so nothing moves ("lighten border around your replies, make it just border-as-shadow").
+ * - The Done line:  green, a faint green ring, the same way.  The thinking stub:  the agent's box, its words in the
+ *   agent's colour and italic.
+ * - a speaker with a colour of their own (the repo's settings, epic `epic-friend` P10):  `--_epic-voice`, set on the
+ *   host by `<epic-thread>`;  an agent's box takes it, and so does who, in bold.  Unset:  the shared voice.
  * - Claude's latest reply on an orange thread (`latest`):  a stronger orange, a faint orange ring.
  * - Public tokens are never declared here:  it reads the page's (`--spell-*`, `--ui-*`), with fallbacks.
  */
@@ -18,7 +21,7 @@
 
 @layer ui.components.epic-thread-message {
   :host {
-    --_epic-message-violet: var(--ui-violet, #6435c9);
+    --_epic-message-agent: var(--_epic-voice, var(--epic-voice-agent, light-dark(#c96442, #d97757)));
     --_epic-message-green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_epic-message-orange: var(--ui-orange, #f2711c);
     --_epic-message-ink: var(--spell-ink, var(--ui-text-color, CanvasText));
@@ -38,12 +41,12 @@
   :host([older]) .words {
     color: color-mix(in srgb, var(--_epic-message-ink) 72%, var(--_epic-message-ivory));
   }
-  :host(:is([by="claude"], [by="thinking"])) {
-    background: color-mix(in srgb, var(--_epic-message-violet) 9%, var(--_epic-message-paper));
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-violet) 16%, transparent);
+  :host(:is([by="agent"], [by="thinking"])) {
+    background: color-mix(in srgb, var(--_epic-message-agent) 9%, var(--_epic-message-paper));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-agent) 16%, transparent);
   }
   :host([by="thinking"]) .words {
-    color: var(--_epic-message-violet);
+    color: var(--_epic-message-agent);
     font-style: italic;
   }
   :host([by="thinking"]) .who {
@@ -87,6 +90,8 @@
    */
   .who {
     float: left;
+    /* a speaker's own colour (`--_epic-voice`);  none:  the words' own */
+    color: var(--_epic-voice, currentColor);
     font-weight: 700;
   }
   .who::after {

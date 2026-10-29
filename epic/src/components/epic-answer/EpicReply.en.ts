@@ -32,8 +32,8 @@ export const epicReplyVocabulary = {
       name: "agent",
       kind: "string",
       description:
-        "The agent that wrote it (`claude`), else none:  the person in `from` did.  Drawn `Claude (Ana)`, or `Claude` " +
-        "for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` " +
+        "The agent that wrote it (`claude`, `codex` ...), else none:  the person in `from` did.  Drawn by its name, " +
+        "`Codex (Ana)`, or `Codex` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` " +
         "(`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
     },
     {
@@ -56,7 +56,7 @@ export const epicReplyVocabulary = {
     {
       name: "who",
       description:
-        "The heading's left:  who (`You`, a name, `Claude`, `Claude (Ana)`) and `re: <re>`, after a round mark of " +
+        "The heading's left:  who (`You`, a name, `Claude`, `Codex (Ana)`) and `re: <re>`, after a round mark of " +
         "its initial;  wraps within itself."
     },
     {
@@ -70,7 +70,10 @@ export const epicReplyVocabulary = {
     { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
     { name: "in-thread", description: "In its item's thread:  inside the thread's one frame (`AnswerThread`)." },
     { name: "thread-start", description: "First in the thread:  the frame's top edge and corners." },
-    { name: "thread-end", description: "Last in the thread, or its folded head:  the frame's bottom edge and corners." },
+    {
+      name: "thread-end",
+      description: "Last in the thread, or its folded head:  the frame's bottom edge and corners."
+    },
     { name: "thread-hidden", description: "After the thread's head, which is folded:  hidden with it." },
     {
       name: "new",
@@ -85,14 +88,16 @@ export const epicReplyVocabulary = {
     { key: "re", text: "re: {re}", description: "What the reply is about, in its heading." },
     { key: "you", text: "You", description: "Who wrote it, in its heading:  the reader (`from` is their name)." },
     {
-      key: "claude",
-      text: "Claude",
-      description: "Who wrote it, in its heading:  Claude, the reader's own session's, or a reply from before `agent`."
+      key: "agent",
+      text: "{agent}",
+      description:
+        "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`), the reader's own session's, or a " +
+        "reply from before `agent`."
     },
     {
-      key: "claudeOf",
-      text: "Claude ({person})",
-      description: "Who wrote it, in its heading:  another person's session's Claude (`agent`, `from`)."
+      key: "agentOf",
+      text: "{agent} ({person})",
+      description: "Who wrote it, in its heading:  another person's session's agent (`agent`, `from`):  `Codex (Bob)`."
     },
     { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." },
     {

@@ -162,10 +162,11 @@ export class ReviewInbox {
 
   /**
    * The comments, to read or change (in place).
-   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written)
+   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written),
+   *   and an answer the agent running `epic` (`EpicHome.agentName()`, epic `epic-friend` P10)
    */
   get commentList(): CommentList {
-    return new CommentList(this.comments, { person: () => EpicHome.personName() })
+    return new CommentList(this.comments, { person: () => EpicHome.personName(), agent: () => EpicHome.agentName() })
   }
 
   ////////////////

@@ -10,8 +10,8 @@ import { GitHub } from "./GitHub.ts"
 
 /****************
  * ### `EpicHome`
- * The epic tools' own folder on this machine, and who is at its keyboard:  the ONE place that knows where it is
- * (epic `epic-friend` P1).
+ * The epic tools' own folder on this machine, who is at its keyboard, and which agent runs `epic`:  the ONE place that
+ * knows them (epic `epic-friend` P1;  the agent since P10).
  *
  * ```ts
  * EpicHome.folder()            // => "/Users/ana/.spell-epic"
@@ -19,6 +19,7 @@ import { GitHub } from "./GitHub.ts"
  * EpicHome.person()            // => { name: "analima", source: "github", fullName: "Ana Lima", github: "analima" }
  * EpicHome.keepPerson("Ana")   // => { name: "Ana", source: "kept", ... }, from now on
  * EpicHome.refreshGithub()     // => "analima", looked up with `gh` and kept
+ * EpicHome.agent()             // => { name: "codex", source: "mark", mark: "CODEX_THREAD_ID" }
  * ```
  *
  * - Where:  `$SPELL_EPIC_HOME`, else `~/.spell-epic` (`folder()`)
@@ -106,6 +107,40 @@ export class EpicHome {
   /** The name on what's written when nobody said who they are and git doesn't know:  "someone". */
   static readonly SOMEONE = "someone"
 
+  ////////////////
+  // ## The agent
+  ////////////////
+
+  /**
+   * Which AGENT is running `epic` (epic `epic-friend` P10, Q13):  its id (`claude`, `codex` ...) and how it was found.
+   * - in order:
+   *   - `SPELL_EPIC_AGENT`, set in an agent's own settings:  overrides the rest, and names an agent epic doesn't know
+   *     (`gemini`);  lower-cased, spaces dropped
+   *   - the mark each agent leaves on the commands it runs (`AGENT_MARKS`):  Claude Code's `CLAUDECODE`, Codex's
+   *     `CODEX_THREAD_ID`
+   *   - none:  `claude`, as before P10, `source: "guessed"` (`epic whoami` says so)
+   * - `env`:  where to look;  default this process's (a test passes its own)
+   * - NEVER throws
+   */
+  static agent(env: Record<string, string | undefined> = process.env): EpicAgent {
+    const named = (env[EpicHome.AGENT_ENV] ?? "").trim().toLowerCase().replace(/\s+/g, "-")
+    if (named) return { name: named, source: "set" }
+    const mark = AGENT_MARKS.find(([variable]) => env[variable])
+    if (mark) return { name: mark[1], source: "mark", mark: mark[0] }
+    return { name: EpicHome.GUESSED_AGENT, source: "guessed" }
+  }
+
+  /** The agent's id alone (`agent()`):  what's stamped `agent="codex"` on what it writes.  NEVER throws. */
+  static agentName(env: Record<string, string | undefined> = process.env): string {
+    return EpicHome.agent(env).name
+  }
+
+  /** The setting that names the agent, over its mark:  `SPELL_EPIC_AGENT=codex`. */
+  static readonly AGENT_ENV = "SPELL_EPIC_AGENT"
+
+  /** The agent taken for granted when nothing says:  Claude, as every page had it before epic `epic-friend` P10. */
+  static readonly GUESSED_AGENT = "claude"
+
   /**
    * Keep `name` as this machine's person, in `person.json5`, from now on;  the person as now known.
    * - surrounding spaces dropped
@@ -156,6 +191,29 @@ export type EpicPerson = {
  * (`user.name`), or `none`.
  */
 export type PersonSource = "kept" | "github" | "git" | "none"
+
+/** Which agent is running `epic`, and how that was found:  `EpicHome.agent()`. */
+export type EpicAgent = {
+  /** its id, lower case:  `claude`, `codex`, or what `SPELL_EPIC_AGENT` says */
+  name: string
+  /** `set` (`SPELL_EPIC_AGENT`), `mark` (the agent's own mark on its commands) or `guessed` (none:  `claude`) */
+  source: "set" | "mark" | "guessed"
+  /** the mark it was found by (`CODEX_THREAD_ID`), for `source: "mark"` */
+  mark?: string
+}
+
+/**
+ * The mark each agent leaves on the commands it runs, an environment variable, and the agent it means;  the first
+ * found wins (`EpicHome.agent()`).
+ * - Claude Code:  `CLAUDECODE=1`, on every command it runs
+ * - Codex:  `CODEX_THREAD_ID`, its thread's id, which it puts on every shell command (openai/codex,
+ *   `codex-rs/core/src/exec_env.rs`:  "`CODEX_THREAD_ID` is injected when a thread id is provided, even when
+ *   `include_only` is set")
+ */
+const AGENT_MARKS: readonly (readonly [variable: string, agent: string])[] = [
+  ["CLAUDECODE", "claude"],
+  ["CODEX_THREAD_ID", "codex"]
+]
 
 /** `person.json5`'s shape. */
 type PersonFile = {

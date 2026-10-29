@@ -366,7 +366,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "person" && !!ThreadFacts.latestClaudeAt(comment)
+    return comment.turn === "person" && !!ThreadFacts.latestAgentAt(comment)
   }
 
   /**
@@ -378,7 +378,7 @@ class PageComments {
     if (!comment || !this.unseen(comment)) return
     const read = readJSON(this.readKey)
     // read already:  nothing to change (the thread stays orange until Owen answers, so the watcher fires again)
-    const latest = ThreadFacts.latestClaudeAt(comment)
+    const latest = ThreadFacts.latestAgentAt(comment)
     if ((read[id] ?? "") >= latest) return
     read[id] = latest
     writeJSON(this.readKey, read)
@@ -589,7 +589,7 @@ class PageComments {
       const at = block ?? head
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
-      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "claude" })
+      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "agent" })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])

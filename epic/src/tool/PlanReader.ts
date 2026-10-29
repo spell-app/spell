@@ -72,11 +72,16 @@ export abstract class PlanReader {
    */
   earlierVersions: Iterable<Document> = []
 
-  constructor(document: Document, now = new Date(), { recentSince, person = SOMEONE }: PlanDocOptions = {}) {
+  constructor(
+    document: Document,
+    now = new Date(),
+    { recentSince, person = SOMEONE, agent = GUESSED_AGENT }: PlanDocOptions = {}
+  ) {
     this.document = document
     this.now = now
     this.recentSince = recentSince
     this.whoWrites = typeof person === "function" ? person : () => person
+    this.whichAgent = typeof agent === "function" ? agent : () => agent
   }
 
   /**
@@ -89,6 +94,17 @@ export abstract class PlanReader {
 
   /** The constructor's `person`, as a function. */
   private readonly whoWrites: () => string
+
+  /**
+   * Which agent runs the edits:  the id stamped `agent` on its status cards and hand-written replies
+   * (`PlanDocOptions.agent`;  asked when it's read).
+   */
+  get agent(): string {
+    return this.whichAgent()
+  }
+
+  /** The constructor's `agent`, as a function. */
+  private readonly whichAgent: () => string
 
   /** `now`'s date, `YYYY-MM-DD`. */
   get today(): string {
@@ -338,3 +354,6 @@ export abstract class PlanReader {
 
 /** Who wrote it, when nobody said (`PlanDocOptions.person`):  as `EpicHome.personName()` has it. */
 const SOMEONE = "someone"
+
+/** Which agent wrote it, when nobody said (`PlanDocOptions.agent`):  as `EpicHome.agent()` guesses. */
+const GUESSED_AGENT = "claude"

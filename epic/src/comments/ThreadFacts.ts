@@ -4,7 +4,7 @@ import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell
 /****************
  * ### `ThreadFacts`
  * What a comment's THREAD shows, worked out from the comment as the comments route answers it (epic `airplane` P11,
- * its threads since 2026-10-10):  who wrote each word, whose turn it is, a person's words Claude hasn't had yet, its
+ * its threads since 2026-10-10):  who wrote each word, whose turn it is, a person's words their agent hasn't had yet, its
  * id as people see it, the few words its header and the comment pane say it's on, its times, and where a taken
  * comment went.
  * - ONE copy for everything that draws a thread, or asks who wrote a reply (epic `epic-engine` P3, `epic-friend` P2):
@@ -28,7 +28,7 @@ export class ThreadFacts {
   ////////////////
 
   /**
-   * Which agent wrote `reply` (`"claude"`), else `undefined`:  a person did.
+   * Which agent wrote `reply` (`"claude"`, `"codex"` ...), else `undefined`:  a person did.
    * - `reply`:  a page's `<epic-reply>` (anything with `getAttribute()`), or a comment's reply (`{ by, agent, at }`)
    * - its `agent`, when it says;  else the OLD RULE, for what was written before the marker (`AGENTS_MARKED`):
    *   by "Claude", any case, and dated before then (or not dated) is Claude's;  so no old page changes meaning,
@@ -66,15 +66,17 @@ export class ThreadFacts {
   /**
    * Who `reply` is from, as a page shows it to `viewer` (the page's own person, `viewer()`):
    * - `person`:  the person who wrote it, or whose session did;  `undefined` for an agent's reply naming no person
-   *   (Claude's old ones, `from="Claude"`, marked or not):  drawn "Claude"
+   *   (Claude's old ones, `from="Claude"`, marked or not;  one `from` its own agent's name):  drawn "Claude"
    * - `agent`:  the agent that wrote it (`agentOf()`)
-   * - `mine`:  `person` is `viewer`, the same words, any case:  "You", or plain "Claude" for your own session's
+   * - `mine`:  `person` is `viewer`, the same words, any case:  "You", or plain "Codex" for your own session's
    */
   static speakerOf(reply: AnyReply, viewer: string | undefined = ThreadFacts.viewer()): Speaker {
     const agent = ThreadFacts.agentOf(reply)
     const author = ThreadFacts.authorOf(reply)
-    // Claude's own name names nobody:  an old reply, or one the migration marked (`from="Claude" agent="claude"`)
-    const namesNobody = !author || (agent !== undefined && sameName(author, CLAUDE_NAME))
+    // an agent's own name names nobody:  an old reply, or one the migration marked (`from="Claude" agent="claude"`)
+    const namesNobody =
+      !author ||
+      (agent !== undefined && (sameName(author, CLAUDE_NAME) || sameName(author, ThreadFacts.agentLabel(agent))))
     const person = namesNobody ? undefined : author
     return { person, agent, mine: !!person && !!viewer && sameName(person, viewer) }
   }
@@ -86,6 +88,56 @@ export class ThreadFacts {
   static viewer(holder: { SPELL_SERVER?: { person?: unknown } } = globalThis as never): string | undefined {
     const person = holder?.SPELL_SERVER?.person
     return typeof person === "string" && person.trim() ? person.trim() : undefined
+  }
+
+  /**
+   * An agent's name as people read it, from its id (epic `epic-friend` P10):  `claude` -> "Claude", `codex` -> "Codex";
+   * one epic doesn't know, capitalised (`gemini` -> "Gemini");  none:  "Claude", the agent of every page before P10.
+   * - a product's name:  the same in every language, so it's here, not in a vocabulary's texts
+   */
+  static agentLabel(agent: string | undefined): string {
+    const id = (agent ?? "").trim()
+    if (!id) return CLAUDE_NAME
+    return AGENT_LABELS[id.toLowerCase()] ?? id.charAt(0).toUpperCase() + id.slice(1)
+  }
+
+  ////////////////
+  // ## Colours
+  ////////////////
+
+  /**
+   * The colour of `speaker`'s voice, as CSS, for a reply, a thread message or a status card to draw in (epic
+   * `epic-friend` P10, Q16);  `undefined` for one with neither a person nor an agent.
+   * - its OWN theme token, the repo's colour for it (`colors()`) the token's fallback:
+   *   `var(--epic-voice-agent-codex, #0f8b8d)`, `var(--epic-voice-person-ana)`
+   * - an agent's words take the AGENT's colour, whoever's session wrote them:  the agent wrote the words
+   * - no colour of its own:  the token alone, which is unset, so the reader falls back to the shared one
+   *   (`--epic-voice-agent`, `--epic-voice-person`):  every page looks as before until the settings say otherwise
+   */
+  static voiceOf(
+    { person, agent }: Pick<Speaker, "person" | "agent">,
+    colors: VoiceColors = ThreadFacts.colors()
+  ): string | undefined {
+    const [kind, who, own] = agent
+      ? (["agent", agent, colorFor(colors.agents, agent)] as const)
+      : (["person", person, colorFor(colors.people, person)] as const)
+    const slug = slugOf(who)
+    if (!slug) return undefined
+    return `var(--epic-voice-${kind}-${slug}${own ? `, ${own}` : ""})`
+  }
+
+  /**
+   * The repo's colours for each person and each agent, as the page server told the page:  `window.SPELL_SERVER.colors`
+   * (the repo's epic settings, `colors`;  epic `epic-friend` P10);  none, or not a colour:  left out.
+   */
+  static colors(holder: { SPELL_SERVER?: { colors?: unknown } } = globalThis as never): VoiceColors {
+    const said = holder?.SPELL_SERVER?.colors as { people?: unknown; agents?: unknown } | undefined
+    return { people: colorsIn(said?.people), agents: colorsIn(said?.agents) }
+  }
+
+  /** Is `value` a colour the settings may give:  CSS colour words only, nothing that ends a declaration? */
+  static isColor(value: unknown): value is string {
+    return typeof value === "string" && COLOR.test(value.trim())
   }
 
   /** Are `a` and `b` the same person's name:  the same words, any case, spaces trimmed? */
@@ -106,28 +158,45 @@ export class ThreadFacts {
   ////////////////
 
   /**
-   * Whose turn it is on `comment`'s thread:  `done`, `person` or `claude` (sent by the comments route as each
+   * Whose turn it is on `comment`'s thread:  `done`, `person` or `agent` (sent by the comments route as each
    * comment's `turn`).
    * - `done`:  the person closed it
-   * - `person`:  Claude spoke last.  Also an epic page's comment answered in the doc, with no words on the thread.
-   * - `claude`:  a person spoke last (the comment, or a reply).  Claude may have TAKEN it, but hasn't answered yet.
+   * - `person`:  an agent spoke last.  Also an epic page's comment answered in the doc, with no words on the thread.
+   * - `agent`:  a person spoke last (the comment, or a reply).  An agent may have TAKEN it, but hasn't answered yet.
+   *   `claude` before epic `epic-friend` P10 (`asTurn()` reads it so)
    */
   static turnOf(comment: Comment): Turn {
     if (comment.done) return "done"
     const last = comment.replies?.at(-1)
-    if (last) return ThreadFacts.isAgents(last) ? "person" : "claude"
-    return comment.status === "answered" ? "person" : "claude"
+    if (last) return ThreadFacts.isAgents(last) ? "person" : "agent"
+    return comment.status === "answered" ? "person" : "agent"
   }
 
   /**
-   * `comments` as the server answered (none:  `[]`), each with its `turn`:  the server's, else `turnOf()`.
-   * - a server from before epic `epic-friend` P2 says `owen` for the person's turn:  read as `person`
+   * A turn as a server or a page said it, in today's words (`turnOf()`);  `undefined` for none, or one it doesn't know.
+   * - the old words, kept for one release (epic `epic-friend` P10):  `owen` (before P2) is `person`, `claude`
+   *   (before P10) is `agent`
+   */
+  static asTurn(said: unknown): Turn | undefined {
+    if (said === OLD_PERSON_TURN) return "person"
+    if (said === OLD_AGENT_TURN) return "agent"
+    return TURNS.includes(said as Turn) ? (said as Turn) : undefined
+  }
+
+  /** Is it an agent's turn on `comment`:  its `turn` as the server sent it (old words too:  `asTurn()`), else `turnOf()`? */
+  static isAgentsTurn(comment: Comment & { turn?: unknown }): boolean {
+    return (ThreadFacts.asTurn(comment.turn) ?? ThreadFacts.turnOf(comment)) === "agent"
+  }
+
+  /**
+   * `comments` as the server answered (none:  `[]`), each with its `turn`:  the server's, in today's words (`asTurn()`),
+   * else `turnOf()`.
    */
   static withTurns(comments: readonly ThreadComment[] = []): ThreadComment[] {
-    return comments.map((comment) => {
-      const turn = (comment.turn as string) === OLD_PERSON_TURN ? "person" : comment.turn
-      return turn ? { ...comment, turn } : { ...comment, turn: ThreadFacts.turnOf(comment) }
-    })
+    return comments.map((comment) => ({
+      ...comment,
+      turn: ThreadFacts.asTurn(comment.turn) ?? ThreadFacts.turnOf(comment)
+    }))
   }
 
   /** The last reply a PERSON wrote on `comment`'s thread (not an agent:  `isAgents()`);  `undefined` for none. */
@@ -135,17 +204,17 @@ export class ThreadFacts {
     return comment.replies?.findLast((each) => !ThreadFacts.isAgents(each))
   }
 
-  /** When Claude last replied on `comment`'s thread (an ISO time), else `""`. */
-  static latestClaudeAt(comment: Pick<Comment, "replies">): string {
+  /** When an agent last replied on `comment`'s thread (an ISO time), else `""`. */
+  static latestAgentAt(comment: Pick<Comment, "replies">): string {
     return comment.replies?.findLast((each) => ThreadFacts.isAgents(each) && each.at)?.at ?? ""
   }
 
   /**
-   * Is `comment` new work for Claude:  his turn, and not taken (nor being worked on) since a person last spoke?
+   * Is `comment` new work for an agent:  its turn, and not taken (nor being worked on) since a person last spoke?
    * (`CommentList.waiting`)
    */
   static isWaiting(comment: Comment): boolean {
-    if (ThreadFacts.turnOf(comment) !== "claude") return false
+    if (ThreadFacts.turnOf(comment) !== "agent") return false
     const spoke = ThreadFacts.lastPersonReply(comment)?.at ?? comment.at
     const held = heldSince(comment)
     return !held || held < spoke
@@ -155,7 +224,7 @@ export class ThreadFacts {
    * When a person last changed their words on `comment`'s thread, ISO:
    * the latest of the comment, their replies, and their edits.
    * - what a Send compares with its `sent` (`ReviewInbox.unsentComments`, `GuideInbox`):
-   *   words newer than the last send haven't gone to Claude yet
+   *   words newer than the last send haven't gone to their agent yet
    */
   static lastWordsAt(comment: Comment): string {
     const times = [comment.at, comment.edited]
@@ -166,8 +235,8 @@ export class ThreadFacts {
   }
 
   /**
-   * A person's words on `comment` that Claude hasn't had yet, which they may still change:
-   * - `edit`:  their first words, while the comment is `new` and Claude isn't thinking about it
+   * A person's words on `comment` that their agent hasn't had yet, which they may still change:
+   * - `edit`:  their first words, while the comment is `new` and no agent is thinking about it
    * - `reply`:  their pending reply (`pendingReplyOf()`)
    * - else `null`
    * - `person`:  whose words (epic `epic-friend` P9):  only their own comment, and their own reply;  none:  anyone's
@@ -300,6 +369,17 @@ export type ThreadPlace = Pick<CommentPlace, "kind" | "label" | "excerpt" | "quo
  */
 export type ThreadComment = Comment & { id: string; turn?: Turn }
 
+/**
+ * A colour for each person and each agent (`ThreadFacts.voiceOf()`):  the repo's epic settings' `colors`, as
+ * `EpicConfig.colors` reads them and the page server tells every page (`SPELL_SERVER.colors`).
+ */
+export type VoiceColors = {
+  /** by a person's short name, as `epic whoami` prints it (`ana`), any case */
+  people: Record<string, string>
+  /** by an agent's id (`codex`) */
+  agents: Record<string, string>
+}
+
 /** A reply, as `agentOf()` and the rest take it:  a page's `<epic-reply>`, or a comment's reply. */
 export type AnyReply = ReplyElement | Pick<CommentReply, "by" | "at" | "agent">
 
@@ -310,20 +390,35 @@ export type ReplyElement = { getAttribute(name: string): string | null }
 export type Speaker = {
   /** the person who wrote it, or whose session did;  `undefined` for an old reply of Claude's, which names nobody */
   person: string | undefined
-  /** the agent that wrote it (`"claude"`);  `undefined`:  the person did */
+  /** the agent that wrote it (`"claude"`, `"codex"` ...);  `undefined`:  the person did */
   agent: string | undefined
   /** the person is whoever is reading */
   mine: boolean
 }
 
-/** The one agent today:  Claude's marker, `agent="claude"`. */
+/** Claude's marker, `agent="claude"`:  what an old reply by "Claude", with none, was written by (`agentOf()`). */
 const CLAUDE_AGENT = "claude"
 
-/** The name Claude's replies went by before the marker. */
+/**
+ * The name Claude's replies went by before the marker;  still the rule for a page from before it (`isOldClaudes()`),
+ * and the label of a reply naming no agent (`agentLabel()`).
+ */
 const CLAUDE_NAME = "Claude"
+
+/** The agents epic knows, by id, as people read their names (`agentLabel()`);  any other:  its id capitalised. */
+const AGENT_LABELS: Readonly<Record<string, string>> = { claude: "Claude", codex: "Codex" }
+
+/** Whose turn it can be (`Turn`). */
+const TURNS: readonly Turn[] = ["person", "agent", "done"]
 
 /** What a page server from before epic `epic-friend` P2 calls the person's turn. */
 const OLD_PERSON_TURN = "owen"
+
+/** What a page server from before epic `epic-friend` P10 calls an agent's turn:  read for one release (`asTurn()`). */
+const OLD_AGENT_TURN = "claude"
+
+/** A colour, as the settings may give one:  `#2f9e6e`, `teal`, `oklch(60% 0.1 180)`;  no `;`, braces or quotes. */
+const COLOR = /^[#\w][\w\s#%.,()/+-]{0,60}$/
 
 /** A typed comment id:  `C3`, `c3`, the old `cm3`, a `#` before it (`M3` is a manual test's:  epic `epic-engine` P44). */
 const TYPED_ID = /^#?cm?(\d+)$/i
@@ -349,18 +444,43 @@ function sameName(written: string, name: string): boolean {
   return !!written.trim() && written.trim().localeCompare(name.trim(), undefined, { sensitivity: "accent" }) === 0
 }
 
+/** `colors`' colour for `name`, any case;  `undefined` for none. */
+function colorFor(colors: Record<string, string>, name: string | undefined): string | undefined {
+  if (!name) return undefined
+  const key = Object.keys(colors).find((each) => sameName(each, name))
+  return key === undefined ? undefined : colors[key]
+}
+
+/** `said`'s names and colours, the colours trimmed;  any that isn't a colour (`ThreadFacts.isColor()`) left out. */
+function colorsIn(said: unknown): Record<string, string> {
+  if (!said || typeof said !== "object" || Array.isArray(said)) return {}
+  return Object.fromEntries(
+    Object.entries(said)
+      .filter(([, color]) => ThreadFacts.isColor(color))
+      .map(([name, color]) => [name, (color as string).trim()])
+  )
+}
+
+/** A name as a token's last word:  lower case, a dash for each run of anything else (`Ana Lima` -> `ana-lima`). */
+function slugOf(name: string | undefined): string {
+  return (name ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+}
+
 /** Did `person` write what `by` names (no `person`, or no `by`:  yes, anyone's)? */
 function isTheirs(by: string | undefined, person: string | undefined): boolean {
   return !person || !by || sameName(by, person)
 }
 
-/** When Claude last took `comment`, ISO;  `taken` with no record of it:  when written;  never taken:  `undefined`. */
+/** When an agent last took `comment`, ISO;  `taken` with no record of it:  when written;  never taken:  `undefined`. */
 function takenAt(comment: Comment): string | undefined {
   return comment.taken?.at ?? (comment.status === "taken" ? comment.at : undefined)
 }
 
 /**
- * Since when Claude has held `comment`, ISO:  the later of when he took it (`takenAt()`) and when he started thinking
+ * Since when an agent has held `comment`, ISO:  the later of when it took it (`takenAt()`) and when it started thinking
  * about it (`working`);  `undefined` for neither.
  */
 function heldSince(comment: Comment): string | undefined {

@@ -128,7 +128,7 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
       at,
       status: answered[index] ? "answered" : "new",
       ...(answered[index] && { replies: [{ by: "Ana", agent: "claude", at, html: "<p>Answered.</p>" }] }),
-      turn: answered[index] ? "person" : "claude"
+      turn: answered[index] ? "person" : "agent"
     }))
     await route.fulfill({ json: { takesComments: true, comments } })
   })

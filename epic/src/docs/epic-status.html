@@ -263,6 +263,16 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>agent</code></td>
+                    <td>text</td>
+                    <td>
+                      Which agent wrote it (epic <code>epic-friend</code> P10): its id, <code>codex</code>, drawn by its
+                      name, <code>Codex (Ana) • Done</code>, or <code>Codex • Done</code> to Ana. None (a card written
+                      before): <code>Claude</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>done-at</code></td>
                     <td>a time, <code>2026-10-06 23:55</code></td>
                     <td>
@@ -335,7 +345,8 @@
                       <td><code>who</code></td>
                       <td>
                         The heading's left: <code>Claude • Underway</code> / <code>Claude • Done</code>;
-                        <code>Claude (Ana) • Done</code> for a card another person's session wrote (<code>from</code>).
+                        <code>Claude (Ana) • Done</code> for a card another person's session wrote (<code>from</code>);
+                        <code>Codex • Underway</code> for another agent's (<code>agent</code>).
                       </td>
                     </tr>
                     <tr>

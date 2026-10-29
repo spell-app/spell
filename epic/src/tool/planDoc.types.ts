@@ -691,6 +691,13 @@ export type PlanDocOptions = {
    * - the command line passes this machine's person (`EpicHome.personName()`), so the doc stays pure
    */
   person?: string | (() => string)
+  /**
+   * which agent runs the edits (epic `epic-friend` P10):  stamped `agent="codex"` on its status cards and on the
+   * replies it writes by hand (`IncomingHtml.markAgents()`);  a function is asked only when something's written.
+   * Default:  `claude`
+   * - the command line passes the one running `epic` (`EpicHome.agentName()`)
+   */
+  agent?: string | (() => string)
 }
 
 /**

@@ -138,6 +138,24 @@ describe("<epic-reply>", () => {
       ["Claude", "C", true]
     ])
   })
+
+  test("any agent by its name (epic `epic-friend` P10):  Bob's Codex `Codex (Bob)`, Ana's own `Codex`, one `from` Codex itself `Codex`", async () => {
+    const replies = [
+      `<epic-reply from="Bob" agent="codex" at="2026-11-02 10:00"><p>a</p></epic-reply>`,
+      `<epic-reply from="Ana" agent="codex" at="2026-11-02 10:01"><p>b</p></epic-reply>`,
+      `<epic-reply from="Codex" agent="codex" at="2026-11-02 10:02"><p>c</p></epic-reply>`
+    ]
+    const drawn = await asViewer("Ana", async () => {
+      const hosts = []
+      for (const html of replies) hosts.push(await ElementFixture.render(html))
+      return hosts.map((host) => [part(host, "who")!.textContent, part(host, "who")!.dataset.initial])
+    })
+    expect(drawn).toEqual([
+      ["Codex (Bob)", "C"],
+      ["Codex", "C"],
+      ["Codex", "C"]
+    ])
+  })
 })
 
 describe("<epic-reply>'s voices (epic `epic-friend` T11)", () => {
@@ -162,6 +180,47 @@ describe("<epic-reply>'s voices (epic `epic-friend` T11)", () => {
       "rgb(10, 20, 30)",
       "rgb(1, 2, 3)"
     ])
+  })
+
+  test("a colour per person and per agent from the repo's settings (`SPELL_SERVER.colors`, epic `epic-friend` P10):  Ana's mark and card in hers, Codex's mark in its;  anyone else as before", async () => {
+    const replies =
+      `<epic-reply from="Ana"><p>Why?</p></epic-reply>` +
+      `<epic-reply from="Bob" agent="codex"><p>Done</p></epic-reply>` +
+      `<epic-reply from="Ben"><p>Hm</p></epic-reply>` +
+      `<epic-reply from="Ana" agent="claude"><p>So</p></epic-reply>`
+    // the shared person voice, as a reply with no colour of its own draws it
+    const shared = markOf(
+      (await ElementFixture.render(`<div><epic-reply from="Ben"><p>Hm</p></epic-reply></div>`)).children[0]!
+    )
+    const holder = globalThis as { SPELL_SERVER?: unknown }
+    const before = holder.SPELL_SERVER
+    holder.SPELL_SERVER = { colors: { people: { ana: "rgb(0, 128, 0)" }, agents: { codex: "rgb(0, 0, 255)" } } }
+    try {
+      const page = await ElementFixture.render(`<div>${replies}</div>`)
+      const [ana, codex, ben, claude] = Array.from(page.children)
+      expect([
+        markOf(ana),
+        getComputedStyle(part(ana, "base")!).backgroundColor,
+        markOf(codex),
+        markOf(ben),
+        markOf(claude)
+      ]).toEqual([
+        "rgb(0, 128, 0)",
+        expect.stringMatching(/^(oklab|color|rgb)/),
+        "rgb(0, 0, 255)",
+        shared,
+        "rgb(201, 100, 66)"
+      ])
+      // Ana's card fill mixed from her green, not the shared violet's
+      expect(getComputedStyle(part(ana, "base")!).backgroundColor).not.toBe(
+        getComputedStyle(part(ben, "base")!).backgroundColor
+      )
+      // a theme may still set the token over the settings' colour
+      ;(page as HTMLElement).style.setProperty("--epic-voice-agent-codex", "rgb(9, 9, 9)")
+      expect(markOf(codex)).toBe("rgb(9, 9, 9)")
+    } finally {
+      holder.SPELL_SERVER = before
+    }
   })
 })
 

@@ -107,10 +107,26 @@ describe("CommentList", () => {
     expect(() => comments.restore("c9", { ...before, anchor: "two words" })).toThrow(/isn't an anchor/)
   })
 
+  test("any AGENT (epic `epic-friend` P10):  Bob's Codex's answer and claim stamped `agent: \"codex\"`, read when it answers", () => {
+    let agent = "claude"
+    const comments = new CommentList({}, { person: "Bob", agent: () => agent })
+    const id = comments.add(ON_FIELD, "Why?", NOW)
+    agent = "codex"
+    comments.setWorking(id, true, NOW)
+    comments.answer(id, "<p>So.</p>", NOW)
+    expect(comments.comment(id)).toMatchObject({
+      claim: { by: "Bob", agent: "codex" },
+      replies: [{ by: "Bob", agent: "codex", html: "<p>So.</p>" }]
+    })
+    expect(ThreadFacts.turnOf(comments.comment(id))).toBe("person")
+    // nobody said:  Claude's, as before
+    expect(new CommentList({}).agent).toBe("claude")
+  })
+
   test("a THREAD:  Claude answers, Owen replies (saved as typed, one pending reply), Claude answers again", () => {
     const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why here?", NOW)
-    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["claude", 1])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["agent", 1])
     comments.answer(id, "<p>Because.</p>", NOW)
     expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual(["person", []])
     // typed in two goes:  the second save replaces the first
@@ -122,10 +138,7 @@ describe("CommentList", () => {
       { by: PERSON, at: later.toISOString(), text: "Not good enough:  say more.", edited: later.toISOString() }
     ])
     // a reply is new work, as a new comment is
-    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.map((each) => each.id)]).toEqual([
-      "claude",
-      [id]
-    ])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.map((each) => each.id)]).toEqual(["agent", [id]])
     comments.answer(id, "<p>More.</p>", later, "8c7e1d3")
     expect(comments.comment(id).replies?.at(-1)).toMatchObject({
       by: PERSON,
@@ -165,7 +178,7 @@ describe("CommentList", () => {
     comments.resolve(id, "skip", NOW)
     expect(comments.comment(id).done?.how).toBe("skip")
     comments.reply(id, "One more thing", NOW)
-    expect([comments.comment(id).done, ThreadFacts.turnOf(comments.comment(id))]).toEqual([undefined, "claude"])
+    expect([comments.comment(id).done, ThreadFacts.turnOf(comments.comment(id))]).toEqual([undefined, "agent"])
     expect(() => comments.resolve(id, "maybe")).toThrow(expect.objectContaining({ status: 400 }))
   })
 
@@ -173,7 +186,7 @@ describe("CommentList", () => {
     const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Fix it", NOW)
     comments.take(id, { epic: "guide-changes", phase: 4 }, NOW)
-    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual(["claude", []])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual(["agent", []])
     const later = new Date("2026-10-10T15:00:00.000Z")
     comments.reply(id, "And the table too", later)
     expect(comments.waiting.map((each) => each.id)).toEqual([id])
@@ -232,7 +245,7 @@ describe("CommentList", () => {
     // set again:  the first time stays
     comments.setWorking(id, true, later(4))
     expect(comments.comment(id).working).toBe(later(3).toISOString())
-    expect([comments.waiting, ThreadFacts.turnOf(comments.comment(id))]).toEqual([[], "claude"])
+    expect([comments.waiting, ThreadFacts.turnOf(comments.comment(id))]).toEqual([[], "agent"])
     // his reply is read:  more words go after it, as a new reply, and wait again
     comments.reply(id, "And the other one", later(5))
     expect(comments.comment(id).replies!.map((each) => each.text ?? each.html)).toEqual([
@@ -368,7 +381,7 @@ describe("CommentList:  who wrote it (epic `epic-friend` P2)", () => {
         { by: "Ana", text: "And then?" }
       ]
     })
-    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["claude", 1])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["agent", 1])
   })
 
   test("a person NAMED Claude replying is a person:  Claude's turn, the reply theirs to change", () => {
@@ -377,7 +390,7 @@ describe("CommentList:  who wrote it (epic `epic-friend` P2)", () => {
     comments.answer(id, "<p>Hi.</p>", MARKED)
     comments.reply(id, "I'm a person", MARKED)
     expect([ThreadFacts.turnOf(comments.comment(id)), ThreadFacts.pendingOf(comments.comment(id))]).toEqual([
-      "claude",
+      "agent",
       "reply"
     ])
   })

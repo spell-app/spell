@@ -1973,6 +1973,30 @@ describe("PlanDoc review inbox", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // epic `epic-friend` P10:  any agent's words say which agent wrote them
+  test("AGENTS:  Bob's Codex's status card and hand-written replies (`from` Claude or Codex) stamped `agent=\"codex\"`", () => {
+    const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW, {
+      person: "Bob",
+      agent: "codex"
+    })
+    plan.addItem("limit", "slow")
+    plan.addStatus("t1", "On it.")
+    plan.setDetails(
+      "t1",
+      '<epic-reply from="Claude" at="2026-10-01 09:20"><p>a</p></epic-reply>' +
+        '<epic-reply from="Codex" at="2026-10-01 09:21"><p>b</p></epic-reply>' +
+        '<epic-reply from="Ana" at="2026-10-01 09:22"><p>c</p></epic-reply>',
+      { append: true }
+    )
+    expect(Markup.read(el(plan, "t1").querySelector("epic-status")!)).toMatchObject({ from: "Bob", agent: "codex" })
+    expect(Array.from(el(plan, "t1").querySelectorAll("epic-reply"), (reply) => Markup.read(reply))).toEqual([
+      { from: "Bob", agent: "codex", at: "2026-10-01 09:20" },
+      { from: "Bob", agent: "codex", at: "2026-10-01 09:21" },
+      { from: "Ana", at: "2026-10-01 09:22" }
+    ])
+    expect(problems(plan)).toEqual([])
+  })
+
   test("keepNote:  Owen's note as his reply, before Claude's answer to it;  once", () => {
     const plan = inboxPlan()
     plan.setDetails("t1", '<epic-reply from="Claude" at="2026-10-01 09:20"><p>a</p></epic-reply>', { append: true })
@@ -2030,20 +2054,24 @@ describe("PlanDoc status cards (P13)", () => {
     '<epic-option letter="B" title="Unfold it" recommended><p>b</p></epic-option></epic-choices>'
 
   /**
-   * `element`'s status cards, as data plus their reading and summary text;  whose session wrote each (`from`) left
-   * out:  its own test says
+   * `element`'s status cards, as data plus their reading and summary text;  whose session wrote each (`from`) and
+   * which agent (`agent`) left out:  their own tests say
    */
   function cards(element: Element) {
     return Array.from(element.querySelectorAll(":scope > epic-status"), (card) => ({
-      ...withoutFrom(Markup.read<"epic-status">(card)),
+      ...withoutWho(Markup.read<"epic-status">(card)),
       slot: card.getAttribute("slot"),
       reading: Array.from(card.querySelectorAll(":scope > :not([slot])"), (block) => block.outerHTML).join(""),
       summary: Array.from(card.querySelectorAll(':scope > [slot="summary"]'), (block) => block.outerHTML).join("")
     }))
   }
 
-  /** `data` without its `from`. */
-  function withoutFrom<T extends { from?: string }>({ from: _from, ...data }: T): Omit<T, "from"> {
+  /** `data` without its `from` and `agent`. */
+  function withoutWho<T extends { from?: string; agent?: string }>({
+    from: _from,
+    agent: _agent,
+    ...data
+  }: T): Omit<T, "from" | "agent"> {
     return data
   }
 

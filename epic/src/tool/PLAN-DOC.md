@@ -970,9 +970,9 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);
       a person's reply and one written since (a person who calls themselves Claude) are left
     - the inboxes' comment replies the same way, on every read (`CommentList.markAgents()`)
-    - a reply Claude hands in (`details --file`, `add --details`) is marked on the way in instead, its `from` the
-      session's person (`IncomingHtml.markClaudes()`):  `<epic-reply from="Ana" agent="claude">`, drawn "Claude (Ana)"
-      to anyone but Ana
+    - a reply an agent hands in (`details --file`, `add --details`) is marked on the way in instead, its `from` the
+      session's person, its `agent` the one running the command (`IncomingHtml.markAgents()`, any agent since epic
+      `epic-friend` P10):  `<epic-reply from="Ana" agent="codex">`, drawn "Codex (Ana)" to anyone but Ana
     - idempotent:  a marked reply is left
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history

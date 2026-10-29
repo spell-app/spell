@@ -71,6 +71,7 @@ describe("EpicConfig", () => {
       checkoutPatches: "",
       promptAck: true,
       renamedRepos: "{}",
+      colors: '{"people":{},"agents":{}}',
       peers: "",
       kit: "",
       "oldLayout.carryOn": "",
@@ -344,6 +345,20 @@ describe("EpicConfig", () => {
       /"windows\.default" must be a string/
     )
     expect(() => EpicConfig.settingsFrom("[]", "x.json5")).toThrow(/must hold an object/)
+  })
+
+  test("colors (epic `epic-friend` P10):  a colour per person and per agent;  none by default;  refuses anything not a colour", () => {
+    const colors = { people: { ana: "#2f9e6e" }, agents: { codex: "oklch(60% 0.1 180)" } }
+    expect(EpicConfig.settingsFrom(JSON.stringify({ colors })).colors).toEqual(colors)
+    expect(EpicConfig.settingsFrom('{ colors: { agents: { codex: "teal" } } }').colors).toEqual({
+      people: {},
+      agents: { codex: "teal" }
+    })
+    expect(EpicConfig.settingsFrom("").colors).toEqual({ people: {}, agents: {} })
+    expect(() => EpicConfig.settingsFrom('{ colors: { people: { ana: "red; } body { x" } } }', "x.json5")).toThrow(
+      /x\.json5's "colors" must be/
+    )
+    expect(() => EpicConfig.settingsFrom('{ colors: ["teal"] }', "x.json5")).toThrow(TypeError)
   })
 
   test("renamedRepos (epic-engine I150):  old repo addresses to new;  none by default;  refuses anything else", () => {

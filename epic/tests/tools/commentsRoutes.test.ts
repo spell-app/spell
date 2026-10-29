@@ -332,7 +332,7 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
   const page = "/epics/big/notes.html"
   const inbox = join(root, "epics/big/notes.inbox.json5")
   const { id, comments } = (await post({ page, action: "add", ...ON_TABLE, text: "Why?" })).answer
-  expect(comments.find((each: { id: string }) => each.id === id).turn).toBe("claude")
+  expect(comments.find((each: { id: string }) => each.id === id).turn).toBe("agent")
   GuideInbox.update(inbox, (list) => list.answer(id, "<p>Because.</p>"))
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${encodeURIComponent(page)}`)).text)
   expect(read.comments.find((each: { id: string }) => each.id === id).turn).toBe("person")
@@ -340,7 +340,7 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
   await post({ page, action: "reply", id, text: "Say" })
   const replied = await post({ page, action: "reply", id, text: "Say more" })
   expect(replied.answer.comments.find((each: { id: string }) => each.id === id)).toMatchObject({
-    turn: "claude",
+    turn: "agent",
     replies: [
       { by: "Owen", agent: "claude" },
       { by: "Owen", text: "Say more" }
@@ -376,7 +376,7 @@ test("WORKING:  `epic comments working` -- the GET carries it (the thread's thin
   const error = vi.spyOn(console, "error").mockImplementation(() => undefined)
   try {
     expect(await run(["working", file, id, "on"], {})).toBe(0)
-    expect(await shown()).toMatchObject({ turn: "claude", working: expect.any(String) })
+    expect(await shown()).toMatchObject({ turn: "agent", working: expect.any(String) })
     expect(await run(["working", file, id, "off"], {})).toBe(0)
     expect((await shown()).working).toBeUndefined()
     expect(await run(["working", file, id, "on"], {})).toBe(0)

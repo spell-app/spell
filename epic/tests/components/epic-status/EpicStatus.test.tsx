@@ -160,4 +160,14 @@ describe("<epic-status>", () => {
     })
     expect(drawn).toEqual(["Claude • Done", "Claude • Done", "Claude (Ben) • Done"])
   })
+  test("any agent by its name (epic `epic-friend` P10):  `Codex • Underway` for Ana's own Codex, `Codex (Bob) • Underway` for Bob's", async () => {
+    const card = (from: string) =>
+      `<epic-status state="underway" at="2026-11-02 10:00" agent="codex" from="${from}"><p>On it.</p></epic-status>`
+    const drawn = await asViewer("Ana", async () => {
+      const hosts = []
+      for (const from of ["Ana", "Bob"]) hosts.push(await ElementFixture.render(card(from)))
+      return hosts.map((host) => part(host, "who")!.textContent)
+    })
+    expect(drawn).toEqual(["Codex • Underway", "Codex (Bob) • Underway"])
+  })
 })

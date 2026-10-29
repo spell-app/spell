@@ -141,11 +141,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - WHO WROTE IT, the ONE check (epic `epic-friend` P2, Q9):  `isAgents()` / `agentOf()`, `lastPersonReply()`,
       `speakerOf()` (You, a name, Claude, Claude (Ana)), for a page's `<epic-reply>` and a comment's reply alike
       - an agent's words carry a marker:  `<epic-reply from="Ana" agent="claude">`, `{ by: "Ana", agent: "claude" }`
+      - ANY agent (epic `epic-friend` P10):  the marker is the agent's id, `agent="codex"`, drawn by its name
+        (`agentLabel()`:  Claude, Codex, else capitalised):  `Codex (Bob)`, `Codex • Underway`
+        - which agent:  `EpicHome.agent()`, read from the environment:  `SPELL_EPIC_AGENT`, else the mark the agent
+          leaves on its commands (Claude Code's `CLAUDECODE`, Codex's `CODEX_THREAD_ID`), else `claude`, a guess
+          `epic whoami` owns up to;  every writer stamps it (`CommentList`'s `agent`, `PlanDocOptions.agent`)
+        - a colour per person and per agent:  `voiceOf()`, from the repo's settings (`colors`, below "Colours")
         (`from` / `by`:  who wrote it, or whose session did);  no marker:  the person did
       - a reply by "Claude" with no marker, dated before `AGENTS_MARKED`:  Claude's (the old rule);  the migration
         `agents-marked` and `CommentList.markAgents()` write the marker on them
-      - Claude's hand-written `<epic-reply from="Claude">` is marked on the way in (`IncomingHtml.markClaudes()`),
-        `from` the session's person
+      - an agent's hand-written `<epic-reply from="Claude">` (or `from="Codex"`) is marked on the way in
+        (`IncomingHtml.markAgents()`), `agent` the one running the command, `from` the session's person
     - pure, node-safe at import, NOT in the `spell-epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
   - `review/` -- `ReviewClient`, one per page:  the review inbox's reads and writes (`/api/epics/review/*`).
     - Also token refresh, polling, and note-draft backups (the old page runtime's localStorage keys).
@@ -1454,10 +1460,15 @@ In `tools/`:
     - blue:  do it now / Claude is working on it (every Send)
     - green:  decided or done
     - orange:  ONLY changed-since-you-looked, and warnings
-    - violet:  a person's voice (you, everyone alike);  terracotta:  an agent's (Claude's).
+    - violet:  a person's voice (you, everyone alike);  terracotta:  an agent's (Claude's, Codex's).
       Theme tokens, `--epic-voice-*`, tweaked in `<epic-page>`'s theme block (`EpicPage.css`, "Voices";  epic
       `epic-friend` T11);  the docs pages' copies `spell-doc.css`'s `--spell-voice-*`
-      - comment threads still draw Claude's messages violet, from before
+      - comment threads, page notes' replies and "answered" chip, and a waiting comment's quote read them too (epic
+        `epic-friend` P10, Q16):  an agent's in terracotta, violet before
+      - a colour per person and per agent (P10;  Owen:  "color per person and/or agent working on the project, set in
+        epic project settings"):  `colors` in `.epic/config.json5` (`EpicConfig.colors`), told every page as
+        `SPELL_SERVER.colors` (`personRoutes`);  a reply or a thread message sets its speaker's own token,
+        `var(--epic-voice-agent-codex, <colour>)` (`ThreadFacts.voiceOf()`), falling back to the shared one
     - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
@@ -2038,8 +2049,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - what it shows is worked out by `ThreadFacts` (`spell/epic/comments`), the comments' code's too
     - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
     - WHOSE TURN (`ThreadFacts.turnOf()`, sent by the GET as each comment's `turn`):
-      - `person`:  Claude spoke last (`owen` before epic `epic-friend` P2;  `withTurns()` reads it so).  Also an epic page's comment answered in the doc, with no words on the thread.
-      - `claude`:  Owen spoke last, his comment or his reply.  Claude may have taken it, not answered yet.
+      - `person`:  an agent spoke last (`owen` before epic `epic-friend` P2;  `withTurns()` reads it so).  Also an epic page's comment answered in the doc, with no words on the thread.
+      - `agent`:  a person spoke last, their comment or their reply.  An agent may have taken it, not answered yet.
+        `claude` before epic `epic-friend` P10:  `ThreadFacts.asTurn()` reads it so, for a page or server from before
       - `done`:  Owen closed it.
     - Where (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):
       - right after the smallest paragraph, list item, cell ... holding its quote (`holderOf()`)
@@ -2106,8 +2118,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
         - The "thinking…" stub and the Done line count as the last.
         - The times keep their size.
       - Owen's:  plain on the ivory, no box, but the same padding as a boxed one ("my text doesn't get bordered").
-      - Claude's:  a light violet box (`--ui-violet` mixed light), no side bar.
-        - Its outline only a faint violet ring drawn as a shadow, its border clear, so nothing moves.
+      - an agent's:  a light box in the agent's voice (`--epic-voice-agent`, terracotta;  violet before epic
+        `epic-friend` P10), no side bar;  a speaker with a colour of their own, theirs (`--_epic-voice`).
+        - Its outline only a faint ring in that colour, drawn as a shadow, its border clear, so nothing moves.
           Owen, 2026-10-10:  "lighten border around your replies, make it just border-as-shadow".
         - Also "Taken into <epic> · <phase>", and "Answered in the epic page" for an answer with no words here.
           - linked by the phase's stable id, so an insert never moves it (epic `epic-engine` I16, `takenInto()`);

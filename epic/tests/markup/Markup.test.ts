@@ -153,7 +153,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     failed: true
   },
   "epic-thread-message": {
-    by: "claude",
+    by: "agent",
     at: "2026-10-18T08:05:00.000Z",
     stamp: "10/18 08:05",
     older: true,

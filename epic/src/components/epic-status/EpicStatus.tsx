@@ -40,6 +40,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - `Claude • Noted` (a calm outline, no fill):  Claude only RECORDED what Owen chose
  *     (a pick, a todo made or queued), so it never reads as work done (Owen, 2026-10-10)
  *   - `Claude (Ana) • Done`:  a card another person's session wrote (`from`;  epic `epic-friend` P2), to anyone but Ana
+ *   - `Codex • Underway`:  another agent's card, by its name (`agent`;  epic `epic-friend` P10)
  * - the date at the right of the top line (`.header.dated`, as `EpicReply`'s):  `done-at` once finished, else `at`;
  *   once finished, the date's tooltip says when it was taken
  * - Its body:  the reading (its children), kept as it was when it turns done;
@@ -182,14 +183,16 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
   }
 
   /**
-   * Whose Claude wrote it, for its band (epic `epic-friend` P2, Q7):  `Claude (Ana)` when `from` names someone other
-   * than whoever is reading (`ThreadFacts.viewer()`);  plain `Claude` for your own session's, or a card from before.
+   * Whose agent wrote it, for its band (epic `epic-friend` P2, Q7;  any agent since P10):  `Codex (Ana)` when `from`
+   * names someone other than whoever is reading (`ThreadFacts.viewer()`);  plain `Codex` for your own session's.
+   * - the agent by its name (`ThreadFacts.agentLabel()`):  `agent`;  none (a card from before P10):  Claude
    */
   get who(): string {
     const person = this.from?.trim()
+    const agent = ThreadFacts.agentLabel(this.agent)
     return person && !ThreadFacts.sameName(person, ThreadFacts.viewer())
-      ? this.translationForKey("claudeOf", { person })
-      : this.translationForKey("claude")
+      ? this.translationForKey("agentOf", { agent, person })
+      : this.translationForKey("agent", { agent })
   }
 
   /** Its band's right:  `when`, as drawn (`10/8/26 14:34`). */

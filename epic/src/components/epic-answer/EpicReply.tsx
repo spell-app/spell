@@ -47,6 +47,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     every person's in the one person's look (`.person`)
  *   - an agent's (`agent="claude"`, or an old `from="Claude"`):  `Claude (Ana)` for another person's session,
  *     plain `Claude` for the reader's own or an old one;  Claude's look
+ *   - any agent by its name (epic `epic-friend` P10):  `agent="codex"` is `Codex (Bob)`, `Codex`
+ *   - its colour:  the speaker's own, when the repo's settings give one (`voice`), else the shared voice
  *   - the round mark before the name:  its initial
  * - In an item (epic `epic-engine` P27, Owen's layout A):
  *   - one of the THREAD's section, with the item's other replies and its status lines (`AnswerThread`):
@@ -159,13 +161,17 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
   }
 
   /**
-   * Who wrote it, in words:  `You`, a person's name, `Claude`, or `Claude (Ana)` for another person's session;
-   * `""` for a reply that names nobody.
+   * Who wrote it, in words:  `You`, a person's name, the agent's (`Claude`, `Codex`), or `Codex (Ana)` for another
+   * person's session;  `""` for a reply that names nobody.
    */
   get author(): string {
     const { person, agent, mine } = this.speaker
-    if (agent)
-      return person && !mine ? this.translationForKey("claudeOf", { person }) : this.translationForKey("claude")
+    if (agent) {
+      const name = ThreadFacts.agentLabel(agent)
+      return person && !mine
+        ? this.translationForKey("agentOf", { agent: name, person })
+        : this.translationForKey("agent", { agent: name })
+    }
     if (!person) return ""
     return mine ? this.translationForKey("you") : person
   }
@@ -173,7 +179,15 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
   /** The round mark's letter:  the agent's (`C`), else the person's first. */
   get initial(): string {
     const { person, agent } = this.speaker
-    return (agent ? this.translationForKey("claude") : (person ?? "")).trim().charAt(0).toUpperCase()
+    return (agent ? ThreadFacts.agentLabel(agent) : (person ?? "")).trim().charAt(0).toUpperCase()
+  }
+
+  /**
+   * The colour of who wrote it, when the repo gives them their own (`ThreadFacts.voiceOf()`, epic `epic-friend` P10):
+   * the card's `--_epic-voice`;  an agent's words, the agent's.  None set:  the shared voice (`EpicAnswer.css`).
+   */
+  get voice(): string | undefined {
+    return ThreadFacts.voiceOf(this.speaker)
   }
 
   /** Its heading's left:  who, about what. */
@@ -193,7 +207,7 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
 
   render(): JSX.Element {
     return (
-      <div class={this.rootClass} part={this.partForName("base")}>
+      <div class={this.rootClass} part={this.partForName("base")} style={{ "--_epic-voice": this.voice }}>
         <div
           ref={this.fold.heading}
           class={[HEADER, DATED, { [FOLDS]: this.hasBody }]}

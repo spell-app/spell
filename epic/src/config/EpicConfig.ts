@@ -90,6 +90,7 @@ export class EpicConfig {
     checkoutPatches: [],
     promptAck: true,
     renamedRepos: {},
+    colors: { people: {}, agents: {} },
     top: "",
     oldLayout: { carryOn: "", commitMaps: "", oldClones: "" }
   }
@@ -645,6 +646,16 @@ export class EpicConfig {
     return this.settings.renamedRepos
   }
 
+  /**
+   * a colour for each person and each agent on the epic pages (`colors`, epic `epic-friend` P10, Q16):
+   * `{ people: { ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } }`;  anyone left out keeps the shared voice
+   * - the page server tells every page (`SPELL_SERVER.colors`, `personRoutes`), which draws a reply, a thread message
+   *   in it (`ThreadFacts.voiceOf()`)
+   */
+  get colors(): EpicColors {
+    return this.settings.colors
+  }
+
   /** the window names:  the default window, and the folder names a window shows */
   get windows(): EpicWindows {
     return this.kitFor("windows")?.windows ?? this.settings.windows
@@ -921,6 +932,7 @@ export class EpicConfig {
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
       renamedRepos: JSON.stringify(this.renamedRepos),
+      colors: JSON.stringify(this.colors),
       peers: this.peers.map((peer) => `${peer.name}=${peer.main}`).join(","),
       kit: this.kit?.main ?? "",
       "oldLayout.carryOn": this.oldLayout.carryOn,
@@ -1090,6 +1102,7 @@ export class EpicConfig {
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
+      colors: colorsOf(given, defaults.colors, file),
       top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
       oldLayout: oldLayoutOf(given, defaults.oldLayout, file),
       app: {
@@ -1241,6 +1254,10 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - GitHub redirects an old name, but an epic page records the address its repo had when it started:
  *     `EpicRepo` reads both as one repo, offline, so the page needs no rewrite
  *   - read from every repo of a multi-repo top, and from the checkout an address is looked for in (`EpicRepo.renamesOf()`)
+ * - `colors`:  a colour for each person and each agent on the epic pages (epic `epic-friend` P10, Q16;  Owen:  "color
+ *   per person and/or agent working on the project, set in epic project settings"), `EpicColors`;  `{ people: {},
+ *   agents: {} }` (the default):  everyone in the shared person or agent colour
+ *   - `epic init` doesn't write it;  `epic config colors` prints it
  * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
  *   epic-engine's P49, Q51 A);  `""` (the default):  none
  *   - each key this file leaves out that a peer shares (the content folder, windows ...) is the kit's (`kit`);
@@ -1270,6 +1287,7 @@ export type EpicSettings = {
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
   renamedRepos: Record<string, string>
+  colors: EpicColors
   top: string
   oldLayout: EpicOldLayout
 }
@@ -1319,6 +1337,12 @@ export type CheckoutPatch = { id: string; date: string; why: string; copy?: stri
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
+
+/**
+ * `EpicSettings.colors`:  a colour for each person, by the short name `epic whoami` prints, and each agent, by its id
+ * (`codex`);  a CSS colour each.  The page's shape of it:  `ThreadFacts`' `VoiceColors`.
+ */
+export type EpicColors = { people: Record<string, string>; agents: Record<string, string> }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, its layout and settings. */
 export type EpicWindows = {
@@ -1510,6 +1534,37 @@ function urlsTo(
     )
   return value as Record<string, string>
 }
+
+/**
+ * `given.colors`:  `{ people: { <name>: <colour> }, agents: { <id>: <colour> } }`, each half optional;  left out,
+ * `fallback`.
+ * - a colour:  CSS colour words only (`#2f9e6e`, `teal`, `oklch(60% 0.1 180)`), nothing that ends a declaration:
+ *   it goes into a page's style.  The page checks again as it reads them (`ThreadFacts.isColor()`).
+ * - throws `TypeError` naming the file for anything else
+ */
+function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: string): EpicColors {
+  const value = given.colors
+  if (value === undefined) return fallback
+  const isNames = (half: unknown) =>
+    half === undefined ||
+    (typeof half === "object" &&
+      half !== null &&
+      !Array.isArray(half) &&
+      Object.entries(half).every(
+        ([name, color]) => name.trim() && typeof color === "string" && COLOR.test(color.trim())
+      ))
+  const { people, agents } = (value ?? {}) as Record<string, unknown>
+  const ok = typeof value === "object" && value !== null && !Array.isArray(value) && isNames(people) && isNames(agents)
+  if (!ok)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "colors" must be { "people": { "ana": "#2f9e6e" }, "agents": { "codex": "#0f8b8d" } }, ` +
+        `each a CSS colour, not ${JSON.stringify(value)}`
+    )
+  return { people: { ...(people as Record<string, string>) }, agents: { ...(agents as Record<string, string>) } }
+}
+
+/** A colour the settings may give (`colorsOf()`):  CSS colour words only;  the same rule as `ThreadFacts.isColor()`. */
+const COLOR = /^[#\w][\w\s#%.,()/+-]{0,60}$/
 
 /**
  * `given.oldLayout`:  `{ carryOn, commitMaps, oldClones }`, each text;  a key left out, `fallback`'s.

@@ -24,8 +24,11 @@ const RESOLUTIONS: readonly string[] = ["good", "skip"]
 /** Who wrote a person's words, when nobody said (`CommentList`'s `person`):  as `EpicHome.personName()` has it. */
 const SOMEONE = "someone"
 
-/** The agent Claude's answers are marked as (`answer()`):  `agent: "claude"` (`ThreadFacts.agentOf()`). */
-const CLAUDE_AGENT = "claude"
+/**
+ * The agent an answer is marked as when nobody said which (`CommentList`'s `agent`):  `claude`, as
+ * `EpicHome.agent()` guesses.
+ */
+const GUESSED_AGENT = "claude"
 
 /** A commit, as Claude names one under an answer (`answer()`):  7-40 hex digits. */
 const COMMIT = /^[0-9a-f]{7,40}$/
@@ -93,8 +96,9 @@ CommentsError.prototype.name = "CommentsError"
  *   - WORKING (`setWorking()`):  Claude is thinking about it now;  the page shows a "Claude: thinking…" stub at the
  *     thread's end until his answer lands (`answer()` turns it off).  What Owen said before it counts as read:  not
  *     waiting any more, and his last reply no longer his to change (a new one goes after it)
- * - WHO WROTE IT (epic `epic-friend` P2):  every entry names its person, `by`;  Claude's answers are marked
- *   `agent: "claude"` too, `by` naming whose session wrote them (`ThreadFacts.agentOf()`)
+ * - WHO WROTE IT (epic `epic-friend` P2):  every entry names its person, `by`;  an agent's answers are marked
+ *   with the agent too, `agent: "codex"` (the list's `agent`, P10), `by` naming whose session wrote them
+ *   (`ThreadFacts.agentOf()`)
  *   - the person:  the list's `person`, the page server's or the command's (`EpicHome.personName()`), never the page's
  * - WHOSE IT IS (epic `epic-friend` P9):  a comment is its writer's, `by` (`isOwn()`);  everyone sees every thread
  *   - only its writer changes or clears it (`edit()`, `remove()`, `clear()`, `restore()`:  a 409 for anyone else);
@@ -109,16 +113,30 @@ CommentsError.prototype.name = "CommentsError"
 export class CommentList {
   /**
    * - `comments`:  the inbox's record, by id;  edited IN PLACE, any key spelt the other way respelt first (`migrate()`)
-   * - `person`:  who is writing through it, stamped as `by` on what they write and on Claude's answers;
+   * - `person`:  who is writing through it, stamped as `by` on what they write and on their agent's answers;
    *   a function is asked only when something is written.  Default:  "someone"
+   * - `agent`:  which agent answers through it (epic `epic-friend` P10), stamped as `agent` on its answers and claims
+   *   (`EpicHome.agentName()`);  a function is asked only when it answers.  Default:  `claude`
    */
   constructor(
     readonly comments: Record<string, Comment>,
-    { person = SOMEONE }: { person?: string | (() => string) } = {}
+    {
+      person = SOMEONE,
+      agent = GUESSED_AGENT
+    }: { person?: string | (() => string); agent?: string | (() => string) } = {}
   ) {
     CommentList.migrate(comments)
     this.whoWrites = typeof person === "function" ? person : () => person
+    this.whichAgent = typeof agent === "function" ? agent : () => agent
   }
+
+  /** Which agent answers through it:  the id stamped as `agent` (`agent`, asked when it answers). */
+  get agent(): string {
+    return this.whichAgent()
+  }
+
+  /** The constructor's `agent`, as a function. */
+  private readonly whichAgent: () => string
 
   /** Who is writing through it:  the name stamped as `by` (`person`, asked when something's written). */
   get person(): string {
@@ -229,7 +247,7 @@ export class CommentList {
     for (const comment of Object.values(comments ?? {}))
       for (const reply of Array.isArray(comment?.replies) ? comment.replies : [])
         if (reply && typeof reply === "object" && ThreadFacts.isOldClaudes(reply)) {
-          reply.agent = CLAUDE_AGENT
+          reply.agent = ThreadFacts.agentOf(reply)!
           changed = true
         }
     return changed
@@ -486,7 +504,7 @@ export class CommentList {
 
   /** This list's person's agent taking a comment at `at` (`claim`):  "taken by Ana's Claude". */
   private claimOf(at: Date): CommentClaim {
-    return { by: this.person, agent: CLAUDE_AGENT, at: at.toISOString() }
+    return { by: this.person, agent: this.agent, at: at.toISOString() }
   }
 
   /** Comment `id` (`comment`), when it's this list's person's (`isOwn()`);  throws a 409 naming its writer. */
@@ -504,15 +522,16 @@ export class CommentList {
    *   thread, so it's Owen's turn, unless Claude spoke last already.
    * - `commit`:  the commit the answer was built in (the thread's Done line shows it);  throws a 400 when it isn't one
    * - Claude's done thinking about it:  its `working` goes
-   * - marked his (`agent: "claude"`), `by` the list's `person`:  whose session answered
+   * - marked the list's agent's (`agent: "codex"`;  epic `epic-friend` P10), `by` the list's `person`:  whose session
+   *   answered
    */
   answer(id: string, html = "", now = new Date(), commit?: string): void {
     const comment = this.comment(id)
     const markup = String(html ?? "").trim()
     if (commit !== undefined && !COMMIT.test(commit)) throw new CommentsError(`"${commit}" isn't a commit`)
-    const reply: CommentReply = { by: this.person, agent: CLAUDE_AGENT, at: now.toISOString(), html: markup }
+    const reply: CommentReply = { by: this.person, agent: this.agent, at: now.toISOString(), html: markup }
     if (commit) reply.commit = commit
-    if (markup || commit || ThreadFacts.turnOf(comment) === "claude")
+    if (markup || commit || ThreadFacts.turnOf(comment) === "agent")
       comment.replies = [...(comment.replies ?? []), reply]
     if (comment.status === "new") comment.status = "answered"
     delete comment.working
@@ -582,13 +601,13 @@ export type Comment = Required<Omit<CommentPlace, "quote" | "offset">> &
 
 /**
  * An agent taking a comment (`Comment.claim`, epic `epic-friend` P9):  whose session (`by`, a person's name), which
- * agent (`"claude"`), and when.
+ * agent (`"claude"`, `"codex"` ...), and when.
  */
 export type CommentClaim = { by: string; agent: string; at: string }
 
 /**
  * One entry of a comment's thread (who wrote it:  `ThreadFacts.agentOf()`):
- * - Claude's (`agent: "claude"`;  before the marker, `by: "Claude"`):  `html`, as is (`""`:  answered elsewhere, an
+ * - an agent's (`agent: "codex"`;  Claude's before the marker, `by: "Claude"`):  `html`, as is (`""`:  answered elsewhere, an
  *   epic page's in the doc), and `commit`, the commit it was built in;  `by` whose session wrote it
  * - a person's (no `agent`, `by` their name):  `text`, as typed (plain, as a comment's), and `edited`, when they last
  *   changed it
@@ -596,7 +615,7 @@ export type CommentClaim = { by: string; agent: string; at: string }
 export type CommentReply = {
   /** who wrote it, or whose session did:  a person's name (`"Ana"`);  Claude's before the marker:  `"Claude"` */
   by: string
-  /** the agent that wrote it (`"claude"`);  none:  the person did */
+  /** the agent that wrote it (`"claude"`, `"codex"` ...);  none:  the person did */
   agent?: string
   at: string
   html?: string
@@ -608,8 +627,11 @@ export type CommentReply = {
 /** How Owen closed a thread:  "that's good", or "skip it". */
 export type Resolution = "good" | "skip"
 
-/** Whose turn it is on a thread (`ThreadFacts.turnOf()`):  a person's, Claude's, or nobody's once done. */
-export type Turn = "person" | "claude" | "done"
+/**
+ * Whose turn it is on a thread (`ThreadFacts.turnOf()`):  a person's, an agent's, or nobody's once done.
+ * - `agent` was `claude` before epic `epic-friend` P10 (`ThreadFacts.asTurn()` reads it so)
+ */
+export type Turn = "person" | "agent" | "done"
 
 /** A comment with its id (`c3`). */
 export type IdentifiedComment = Comment & { id: string }

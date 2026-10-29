@@ -58,6 +58,13 @@ export const epicStatusVocabulary = {
       description:
         "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone " +
         "but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
+    },
+    {
+      name: "agent",
+      kind: "string",
+      description:
+        "Which agent wrote it (epic `epic-friend` P10):  its id, `codex`, drawn by its name:  `Codex (Ana)`, or " +
+        "`Codex` to Ana.  None (a card written before):  `Claude`."
     }
   ],
   events: [],
@@ -81,7 +88,7 @@ export const epicStatusVocabulary = {
       name: "who",
       description:
         "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for " +
-        "a card Ana's session wrote, to anyone but Ana (`from`)."
+        "a card Ana's session wrote, to anyone but Ana (`from`);  `Codex • Underway` for Codex's (`agent`)."
     },
     { name: "date", description: "The heading's right:  `done-at`, else `at`, as `10/8/26 14:34`;  never wraps." },
     { name: "body", description: "The reading." },
@@ -97,7 +104,10 @@ export const epicStatusVocabulary = {
     { name: "line", description: "In an item:  drawn as a line, not a card." },
     { name: "merged", description: "A line's earlier card, drawn in by the run's last one:  hidden." },
     { name: "drive-by", description: "Taken before your first reply on the item:  its line above the Choices." },
-    { name: "in-thread", description: "Its line in the item's thread, after the replies:  inside the thread's one frame." },
+    {
+      name: "in-thread",
+      description: "Its line in the item's thread, after the replies:  inside the thread's one frame."
+    },
     { name: "thread-end", description: "Last in the thread:  the frame's bottom edge and corners." },
     { name: "thread-hidden", description: "The thread's head is folded:  hidden with the rest of the thread." }
   ],
@@ -109,14 +119,16 @@ export const epicStatusVocabulary = {
     { key: "done", text: "{who} • Done", description: "The heading once work was done." },
     { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what you chose." },
     {
-      key: "claude",
-      text: "Claude",
-      description: "Who wrote it, in its heading:  your own session's Claude, or a card from before `from`."
+      key: "agent",
+      text: "{agent}",
+      description:
+        "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`):  your own session's, or a card " +
+        "from before `from`."
     },
     {
-      key: "claudeOf",
-      text: "Claude ({person})",
-      description: "Who wrote it, in its heading:  another person's session's Claude (`from`)."
+      key: "agentOf",
+      text: "{agent} ({person})",
+      description: "Who wrote it, in its heading:  another person's session's agent (`from`, `agent`):  `Codex (Ana)`."
     },
     { key: "stepUnderway", text: "Underway", description: "A line's step while Claude is on it." },
     { key: "stepDone", text: "Done", description: "A line's step once work was done." },

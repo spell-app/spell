@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  b0e35e9da9cab0b0
+// sources:  654765b0fe10cf12
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -48,12 +48,12 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","wand"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","shown"]},
-  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from"]},
+  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from","agent"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-test-run": {"folder":"epic-test-run","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":6}]},"attributes":["all"]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
-  "epic-thread-message": {"folder":"epic-thread","attributes":["by","person","mine","at","stamp","older","latest"]},
+  "epic-thread-message": {"folder":"epic-thread","attributes":["by","person","agent","mine","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},
   "epic-update": {"folder":"epic-update","attributes":["at","summary","phase"]},
   "epic-updated": {"folder":"epic-phase","attributes":["at","phase","of"]},

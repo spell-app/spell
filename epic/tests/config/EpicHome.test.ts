@@ -123,3 +123,31 @@ describe("EpicHome:  the GitHub login (Owen, 2026-10-29)", () => {
     expect(existsSync(EpicHome.personFile())).toBe(false)
   })
 })
+
+describe("EpicHome.agent():  which agent runs `epic` (epic `epic-friend` P10, Q13)", () => {
+  test("each agent's mark:  Claude Code's `CLAUDECODE`, Codex's `CODEX_THREAD_ID`", () => {
+    expect([
+      EpicHome.agent({ CLAUDECODE: "1" }),
+      EpicHome.agent({ CODEX_THREAD_ID: "0199a2b3-thread" }),
+      EpicHome.agentName({ CODEX_THREAD_ID: "0199a2b3-thread" })
+    ]).toEqual([
+      { name: "claude", source: "mark", mark: "CLAUDECODE" },
+      { name: "codex", source: "mark", mark: "CODEX_THREAD_ID" },
+      "codex"
+    ])
+  })
+
+  test("`SPELL_EPIC_AGENT` overrides any mark, and names an agent epic doesn't know;  lower-cased", () => {
+    expect([
+      EpicHome.agent({ SPELL_EPIC_AGENT: " Gemini ", CLAUDECODE: "1" }),
+      EpicHome.agentName({ SPELL_EPIC_AGENT: "codex", CLAUDECODE: "1" })
+    ]).toEqual([{ name: "gemini", source: "set" }, "codex"])
+  })
+
+  test("none:  `claude`, as before P10, and it says it guessed;  an empty mark counts as none", () => {
+    expect([EpicHome.agent({}), EpicHome.agent({ CLAUDECODE: "", SPELL_EPIC_AGENT: " " })]).toEqual([
+      { name: "claude", source: "guessed" },
+      { name: "claude", source: "guessed" }
+    ])
+  })
+})

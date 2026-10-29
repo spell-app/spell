@@ -924,10 +924,11 @@ pre code {
   --epic-state-recent-on: var(--spell-state-recent-on);
 }
 /*
- * ## Voices on a docs page:  a reply card or a note box outside an epic page takes the page's (`--spell-voice-*`)
+ * ## Voices on a docs page:  a reply card, a note box, a comment thread or a page note's head outside an epic page
+ *   takes the page's (`--spell-voice-*`)
  * - never one inside an `<epic-page>`:  it inherits the page's own, which a page's `epic-page { ... }` may override
  */
-.spell-doc-main :is(epic-reply, epic-review):not(epic-page *) {
+.spell-doc-main :is(epic-reply, epic-review, epic-thread, epic-page-note-head):not(epic-page *) {
   --epic-voice-agent: var(--spell-voice-agent);
   --epic-voice-agent-text: var(--spell-voice-agent-text);
   --epic-voice-person: var(--spell-voice-person);
@@ -948,9 +949,10 @@ pre code {
  * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
  * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
  * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
- * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, violet (Claude's voice)
+ * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, in an agent's voice
+ *   (`--spell-voice-agent`, terracotta;  epic `epic-friend` P10, Q16:  violet before, which now means a person)
  * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
- * - its status, by the colour scheme:  new yellow (open), answered violet, done grey
+ * - its status, by the colour scheme:  new yellow (open), answered in the agent's voice, done grey
  * - read only since P11:  guide comments (below) replaced the bubbles that wrote them
  */
 /* one column no wider than the group:  a folded note's one-line preview ends in "...", never past the column */
@@ -970,7 +972,7 @@ pre code {
   font-size: 0.95rem;
 }
 .spell-doc-main spell-note[status="answered"] {
-  border-left-color: var(--ui-violet, #6435c9);
+  border-left-color: var(--spell-voice-agent);
 }
 .spell-doc-main spell-note[status="done"] {
   border-left-color: var(--spell-rule);
@@ -987,15 +989,15 @@ pre code {
   display: block;
   margin: 6px 0 4px 8px;
   padding: 2px 10px;
-  border-left: 3px solid var(--ui-violet, #6435c9);
-  background: color-mix(in srgb, var(--ui-violet, #6435c9) 7%, var(--spell-bg));
+  border-left: 3px solid var(--spell-voice-agent);
+  background: color-mix(in srgb, var(--spell-voice-agent) 7%, var(--spell-bg));
   border-radius: 0 6px 6px 0;
 }
 .spell-doc-main spell-note-reply::before {
   content: "Claude · " attr(at);
   display: block;
   margin-top: 4px;
-  color: var(--ui-violet, #6435c9);
+  color: var(--spell-voice-agent-text);
   font: var(--spell-eyebrow-font);
   letter-spacing: var(--spell-eyebrow-tracking);
 }

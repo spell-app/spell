@@ -4544,7 +4544,7 @@
         {
           "name": "agent",
           "kind": "string",
-          "description": "The agent that wrote it (`claude`), else none:  the person in `from` did.  Drawn `Claude (Ana)`, or `Claude` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` (`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
+          "description": "The agent that wrote it (`claude`, `codex` ...), else none:  the person in `from` did.  Drawn by its name, `Codex (Ana)`, or `Codex` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` (`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
         },
         {
           "name": "at",
@@ -4579,7 +4579,7 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  who (`You`, a name, `Claude`, `Claude (Ana)`) and `re: <re>`, after a round mark of its initial;  wraps within itself."
+          "description": "The heading's left:  who (`You`, a name, `Claude`, `Codex (Ana)`) and `re: <re>`, after a round mark of its initial;  wraps within itself."
         },
         {
           "name": "new",
@@ -4642,14 +4642,14 @@
           "description": "Who wrote it, in its heading:  the reader (`from` is their name)."
         },
         {
-          "key": "claude",
-          "text": "Claude",
-          "description": "Who wrote it, in its heading:  Claude, the reader's own session's, or a reply from before `agent`."
+          "key": "agent",
+          "text": "{agent}",
+          "description": "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`), the reader's own session's, or a reply from before `agent`."
         },
         {
-          "key": "claudeOf",
-          "text": "Claude ({person})",
-          "description": "Who wrote it, in its heading:  another person's session's Claude (`agent`, `from`)."
+          "key": "agentOf",
+          "text": "{agent} ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's agent (`agent`, `from`):  `Codex (Bob)`."
         },
         {
           "key": "new",
@@ -5910,6 +5910,11 @@
           "name": "from",
           "kind": "string",
           "description": "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
+        },
+        {
+          "name": "agent",
+          "kind": "string",
+          "description": "Which agent wrote it (epic `epic-friend` P10):  its id, `codex`, drawn by its name:  `Codex (Ana)`, or `Codex` to Ana.  None (a card written before):  `Claude`."
         }
       ],
       "slots": [
@@ -5938,7 +5943,7 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for a card Ana's session wrote, to anyone but Ana (`from`)."
+          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for a card Ana's session wrote, to anyone but Ana (`from`);  `Codex • Underway` for Codex's (`agent`)."
         },
         {
           "name": "date",
@@ -6030,14 +6035,14 @@
           "description": "The heading once Claude recorded what you chose."
         },
         {
-          "key": "claude",
-          "text": "Claude",
-          "description": "Who wrote it, in its heading:  your own session's Claude, or a card from before `from`."
+          "key": "agent",
+          "text": "{agent}",
+          "description": "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`):  your own session's, or a card from before `from`."
         },
         {
-          "key": "claudeOf",
-          "text": "Claude ({person})",
-          "description": "Who wrote it, in its heading:  another person's session's Claude (`from`)."
+          "key": "agentOf",
+          "text": "{agent} ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's agent (`from`, `agent`):  `Codex (Ana)`."
         },
         {
           "key": "stepUnderway",

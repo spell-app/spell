@@ -48,4 +48,31 @@ describe("personRoutes", () => {
       await server.stop()
     }
   })
+
+  test("tells every page the repo's colours for people and agents (`colors`, epic `epic-friend` P10);  none set:  no field", async () => {
+    const root = join(TEMP, "colored")
+    mkdirSync(join(root, "docs"), { recursive: true })
+    mkdirSync(join(root, ".epic"), { recursive: true })
+    writeFileSync(join(root, "docs", "page.html"), "<!doctype html><head></head><p>page</p>\n")
+    const server = new PageServer({ root })
+    await personRoutes.setup(server.routeContext())
+    await server.start({ port: 0, routes: false, pidFile: false })
+    /** the page's `window.SPELL_SERVER.colors`, as served */
+    const colors = async () => {
+      const answer = await ask(server.info.port, "GET", "/docs/page.html")
+      return (JSON.parse(/window\.SPELL_SERVER = (.*?)<\/script>/.exec(answer.text)![1]!) as { colors?: unknown })
+        .colors
+    }
+    try {
+      writeFileSync(join(root, ".epic", "config.json5"), `{ contentFolder: "../colored.epics" }\n`)
+      expect(await colors()).toBeUndefined()
+      writeFileSync(
+        join(root, ".epic", "config.json5"),
+        `{ contentFolder: "../colored.epics", colors: { people: { ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } } }\n`
+      )
+      expect(await colors()).toEqual({ people: { ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } })
+    } finally {
+      await server.stop()
+    }
+  })
 })

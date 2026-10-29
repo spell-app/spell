@@ -3,7 +3,8 @@ import { join, relative, sep } from "node:path"
 
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
-import { EpicHome, type EpicPerson } from "spell/epic/config/EpicHome"
+import { EpicHome, type EpicAgent, type EpicPerson } from "spell/epic/config/EpicHome"
+import { ThreadFacts } from "spell/epic/comments"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
@@ -56,9 +57,12 @@ export class PersonCommands {
     const before = EpicHome.person()
     const person = name ? EpicHome.keepPerson(name) : before
     const stillNamed = name && before.name && before.name !== person.name ? this.activityOf(before.name).count : 0
-    if (flags.json) CLI.out(JSON.stringify({ ...person, file: EpicHome.personFile(), before, stillNamed }, null, 2))
+    const agent = EpicHome.agent()
+    if (flags.json)
+      CLI.out(JSON.stringify({ ...person, file: EpicHome.personFile(), before, stillNamed, agent }, null, 2))
     else
-      for (const line of PersonCommands.whoamiLines(person, { kept: Boolean(name), before, stillNamed })) CLI.out(line)
+      for (const line of PersonCommands.whoamiLines(person, { kept: Boolean(name), before, stillNamed, agent }))
+        CLI.out(line)
     return EXIT.OK
   }
 
@@ -200,10 +204,13 @@ export class PersonCommands {
     return parts.join("/").replace(/(\.(inbox|answer|draft|rows))?\.(html|json5)$/, "")
   }
 
-  /** `epic whoami`'s lines. */
+  /**
+   * `epic whoami`'s lines:  the person, then (not when keeping a name) the agent running `epic` under them
+   * (`agentLine()`, epic `epic-friend` P10).
+   */
   static whoamiLines(
     person: EpicPerson,
-    { kept, before, stillNamed }: { kept: boolean; before: EpicPerson; stillNamed: number }
+    { kept, before, stillNamed, agent }: { kept: boolean; before: EpicPerson; stillNamed: number; agent?: EpicAgent }
   ): string[] {
     const file = EpicHome.personFile()
     if (kept) {
@@ -218,17 +225,36 @@ export class PersonCommands {
       }
       return lines
     }
+    const agentLines = agent ? [PersonCommands.agentLine(agent)] : []
     if (!person.name)
       return [
         "nobody yet:  no name kept, no GitHub login, and git has no user.name.",
-        "  epic whoami <name> keeps the one you go by"
+        "  epic whoami <name> keeps the one you go by",
+        ...agentLines
       ]
     return [
       PersonCommands.whoLine(person),
       person.source === "kept"
         ? `  kept in ${file}`
-        : `  ${SOURCE_WORDS[person.source]};  epic whoami <name> keeps another`
+        : `  ${SOURCE_WORDS[person.source]};  epic whoami <name> keeps another`,
+      ...agentLines
     ]
+  }
+
+  /**
+   * The agent running `epic`, in one line (`EpicHome.agent()`):  what it stamps on what it writes, and how it was found;
+   * a guess says so, and how to name it.
+   * - `  agent:  codex (Codex's mark, CODEX_THREAD_ID)`
+   * - `  agent:  claude (a guess:  no agent's mark found;  SPELL_EPIC_AGENT=<name> names it)`
+   */
+  static agentLine({ name, source, mark }: EpicAgent): string {
+    const how =
+      source === "set"
+        ? `${EpicHome.AGENT_ENV}`
+        : source === "mark"
+          ? `${ThreadFacts.agentLabel(name)}'s mark, ${mark}`
+          : `a guess:  no agent's mark found;  ${EpicHome.AGENT_ENV}=<name> names it`
+    return `  agent:  ${name} (${how})`
   }
 
   /**

@@ -270,8 +270,12 @@ export class PlanDocFiles {
       throw new PlanDocError(`no epic page ${relative(this.content, file)}:  \`epic create\` first`)
     const html = readFileSync(file, "utf8")
     if (!isEpicMarkup(html)) throw this.oldMarkup(file)
-    // who is at the keyboard:  the name on what they write, read when something's written
-    const plan = PlanDoc.parse(html, undefined, { person: () => EpicHome.personName(), ...options })
+    // who is at the keyboard, and which agent runs `epic`:  the names on what they write, read when something's written
+    const plan = PlanDoc.parse(html, undefined, {
+      person: () => EpicHome.personName(),
+      agent: () => EpicHome.agentName(),
+      ...options
+    })
     plan.parts = assembleEpic(plan.document, file)
     for (const id of plan.parts.missing)
       process.stderr.write(
