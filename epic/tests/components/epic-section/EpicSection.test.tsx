@@ -706,7 +706,8 @@ describe("<epic-section kind=phases> state chips", () => {
     const colorOf = (state: string) => getComputedStyle(chip(host, state)).borderTopColor
     expect(getComputedStyle(circle("p6")).color).toBe(colorOf("attention"))
     expect(getComputedStyle(circle("p9")).color).toBe(colorOf("updated"))
-    expect(getComputedStyle(circle("p12")).color).toBe(colorOf("scheduled"))
+    // the scheduled chip is filled, its dots lighter:  the circle wears its fill
+    expect(getComputedStyle(circle("p12")).color).toBe(getComputedStyle(chip(host, "scheduled")).backgroundColor)
     expect(getComputedStyle(circle("p1")).color).toBe(colorOf("recent"))
     expect(getComputedStyle(circle("p2")).color).toBe(colorOf("old"))
     // scheduled:  a dotted circle, as its chip's outline

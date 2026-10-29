@@ -4,6 +4,7 @@ import { E } from "spell/element"
 
 import {
   NOTICE_MS,
+  PageNotices,
   ReviewClient,
   isImmediate,
   isSent,
@@ -35,7 +36,7 @@ import { PAGE_TAG, REVIEWING, type ReviewFill } from "./EpicReview.types"
  *   the client is plain code, and a kept-alive element that's gone must stop listening
  * - the page's side, once per page (`watchPage()`):
  *   - `<epic-page reviewing>` while reviewed
- *   - the notice line at the bottom of the window (`ReviewNotice`),
+ *   - the notice at the bottom of the window, in the page's one stack (`PageNotices`),
  *     for what can't be said on an item (a failed save, nobody listening)
  * - MUST be created under the element's owner (a field initializer):  it creates a signal
  * - Server render:  no client, never reviewing
@@ -240,7 +241,7 @@ export class ReviewState {
   /**
    * The page's side of `client`, once:  `<epic-page reviewing>` while it's reviewed, and the notice line.
    * - SIDE EFFECT:  sets the attribute on every `<epic-page>`;
-   *   adds the notice line to `document.body` on the first notice
+   *   the notices go to the page's one stack (`PageNotices`)
    */
   private static watchPage(client: ReviewClient) {
     if (ReviewState.watched.has(client)) return
@@ -250,53 +251,6 @@ export class ReviewState {
     }
     mark()
     client.subscribe(mark)
-    const notice = new ReviewNotice()
-    client.onNotice((message) => notice.show(message))
+    client.onNotice((message) => PageNotices.show(message, { ms: NOTICE_MS }))
   }
 }
-
-/****************
- * ### `ReviewNotice`
- * The line at the bottom of the window saying what can't be said on an item:
- * a failed save, nobody listening, a request called off.
- * - one per page
- * - drawn in a shadow root of its own, so it needs no page stylesheet
- * - `role="status"`:  read out as it changes
- * - SIDE EFFECT:  adds its host to `document.body` on the first `show()`
- ****************/
-class ReviewNotice {
-  /** The timer hiding it. */
-  private timer?: E.CancelablePromise<unknown>
-
-  /** Say `message` for a few seconds (`NOTICE_MS`). */
-  show(message: string) {
-    const { line } = this
-    line.shadowRoot!.querySelector("p")!.textContent = message
-    line.hidden = false
-    this.timer?.cancel()
-    this.timer = E.after(NOTICE_MS / 1000, () => (line.hidden = true))
-  }
-
-  /**
-   * The host:  fixed at the bottom of the window, ink on paper reversed.
-   * - SIDE EFFECT:  built and added to `document.body` on first read (the first `show()`).
-   */
-  @E.lazy private get line(): HTMLElement {
-    const line = document.createElement("div")
-    line.setAttribute("role", "status")
-    line.hidden = true
-    line.attachShadow({ mode: "open" }).innerHTML = `<style>${NOTICE_CSS}</style><p></p>`
-    document.body.append(line)
-    return line
-  }
-}
-
-/** The notice line's look:  the page's ink and paper, swapped. */
-const NOTICE_CSS = `
-:host { position: fixed; z-index: 1000; inset-inline: 12px; inset-block-end: 12px; display: block; }
-:host([hidden]) { display: none; }
-p {
-  box-sizing: border-box; max-width: 520px; margin: 0 auto; padding: 8px 12px; border-radius: 8px;
-  background: var(--ui-text-color, CanvasText); color: var(--ui-background, Canvas);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); font: 14px/1.4 var(--ui-font-family, system-ui, sans-serif);
-}`
