@@ -490,7 +490,8 @@ _The epic workflow, for an agent with none of the skills:  `epic guide` prints i
 
 Bob uses Codex, Ana uses Claude Code, and they work the same epic:  the same pages, the same comments,
 each answer stamped with whose agent wrote it, "Codex (Bob)".
-Claude Code gets the workflow from the plugin's skills;  any other agent gets it from `epic guide`.
+Both run the same skills:  ONE copy of each, which Codex calls as `$epic review` where Claude Code says `/epic review`.
+An agent with no skills at all gets the workflow from `epic guide`.
 
 **Setting Codex up**, once per machine, from the clone of Spell:
 
@@ -502,10 +503,13 @@ node epic/bin/epic plugin install --codex
 <summary>What it printed</summary>
 
 ```text
-epic for Codex 0.8.0, from ~/www/spell/epic:  changed 2
+epic for Codex 0.8.0, from ~/www/spell/epic:  changed 5
   ~/.codex/hooks.json:  the epic hooks (SessionStart, Stop), run from ~/www/spell/epic/hooks
+  Codex skills:  20 linked to ~/www/spell/epic/skills:  airplane, bedtime, bg, coherence, comment, designer, ...
+  ~/.codex/agents/epic-designer.toml:  Codex's designer agent, from ~/www/spell/epic/designer/designer-agent.md
+  ~/.codex/agents/epic-coherence.toml:  Codex's coherence agent, from ~/www/spell/epic/coherence/coherence-agent.md
   PATH:  ~/.local/bin/epic links to ~/www/spell/epic/bin/epic
-then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them
+then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them, and lists the skills ($epic review ...)
 ```
 
 </details>
@@ -513,10 +517,33 @@ then:  in Codex, /hooks, and trust them (once, and again whenever they change); 
 - It writes three hooks into Codex's own hooks file, `~/.codex/hooks.json` (`$CODEX_HOME` moves it):
   - as each turn ends, `epic turn end`:  the plans committed and synced, as Claude's turns do
   - as a session starts, two notices:  its worktree is behind `main`, or the last sync stopped on a conflict
-- Your own hooks in that file stay;  run again, it changes nothing.
+- It links each of the plugin's skills into `~/.agents/skills/`, where the Codex CLI finds your own skills in every repo:
+  the same files Claude Code reads, so an edit to one shows in both at once.
+- It writes the plugin's two reviewers, the designer and coherence, as Codex custom agents in `~/.codex/agents/`:
+  generated from Claude Code's agent files, so edit those and run it again.
+- Your own hooks, skills and agents stay;  run again, it changes nothing.
+- The Codex desktop app can add the plugin itself instead:  `epic/.codex-plugin/plugin.json` names the same skills and
+  hooks.  With both, the hooks still run once:  a hook the plugin starts stands down while `~/.codex/hooks.json` runs it.
 - **Codex runs a hook only once you trust it**:  `/hooks` in Codex, once, and again whenever the hooks change.
 - Codex knows which agent it is by itself (it marks every command with `CODEX_THREAD_ID`).
   Another agent names itself with `SPELL_EPIC_AGENT=gemini`, set in its own settings.
+
+**The skills in Codex.**
+Type `$` and the skill's name, as `/` in Claude Code:
+- `$epic review seo` takes your marks, comments and Sends from the page, as `/epic review` does;
+  `$epic seo` plans or resumes one, `$wtf` says where things stand, `$details` asks a question on a page
+- Codex also picks a skill by itself when the task matches it, as Claude Code does
+- where a step needs something only Claude Code has, the skill says what Codex does instead, in a line beginning
+  "In Codex:":
+  - the question modal:  a numbered question in the chat (a details page works the same for both)
+  - background agents:  Codex sub-agents, which it waits for, so the chat isn't free meanwhile
+  - a worktree:  `epic worktree create seo`, then the agent works from the folder it prints
+  - windows and messages to other sessions:  printed, for you to run or paste
+- five skills stay Claude Code's:  `bg`, `bedtime`, `comment`, `session` and `title`
+  - Codex never picks them by itself (each has an `agents/openai.yaml` saying so)
+  - called by name, `$bg`, each says in its first line what to do in Codex instead
+- `epic skills check` keeps the one copy honest:  it fails a skill naming a Claude-only tool with no "In Codex:" line
+  beside it, and the epic folder's tests run it
 
 **What the agent runs**, in the workflow `epic guide` prints:
 - `epic turn end`, as its turn's last step, when no hook runs it:  safe to run twice, quiet with nothing to do.
@@ -528,13 +555,13 @@ then:  in Codex, /hooks, and trust them (once, and again whenever they change); 
     and a click copies the command.
 
 **Still Claude Code's only, for now:**
-- the skills:  Codex follows `epic guide` instead (the skills under Codex are next)
-- the question modal, details pages opened in the side bar, background agents:
+- the five skills above, and what the others do with Claude Code's own tools:
   `epic guide claude-only-tools` lists the plain way to do each
 - waking a session from the page, session titles, window moves, and the worktree hooks
 - the time a phase took counts only Claude's sessions
 
-Untried so far with a real Codex:  the steps above are tested against stand-ins for Codex's files and hooks.
+Untried so far with a real Codex:  the steps above are tested against stand-ins for Codex's files, hooks, skills and
+agents.
 
 ## The content folder:  your plans, in a repo of their own
 

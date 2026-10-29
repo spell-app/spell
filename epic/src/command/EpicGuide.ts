@@ -5,7 +5,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
 /****************
  * ### `EpicGuide`
- * `epic guide [<topic>] [--list] [--path]`:  the epic workflow in plain steps, for ANY agent (epic `epic-friend` P11):
+ * `epic guide [<topic>] [--list] [--path] [--root]`:  the epic workflow in plain steps, for ANY agent (epic `epic-friend` P11):
  * find the epic, plan, build each phase, take what the person sends, end each turn, finish.
  *
  * - ONE copy of the words:  the epic skill's own [guide.md](../../skills/epic/guide.md), beside its `SKILL.md`, which
@@ -14,6 +14,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - No topic:  the lead, the `workflow` topic, and the list of the rest.
  * - `claude-only-tools`:  what each Claude Code tool the skills lean on is for, and the plain way any agent does it
  *   instead (Q15:  the next phase's skills point at it).
+ * - `--root`:  the plugin's folder, for a skill's `${CLAUDE_PLUGIN_ROOT}` read by an agent that doesn't fill it in (Codex)
  * - Throws `EpicCommandError` for a topic the guide hasn't got, listing those it has.
  ****************/
 export class EpicGuide {
@@ -26,11 +27,20 @@ export class EpicGuide {
 
   /** Run `epic guide <args>`;  resolves to the exit code. */
   async run(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["list", "path"])
+    const { positional, flags } = parseVerbArgs(args, ["list", "path", "root"])
     if (flags.path) return this.print(this.file)
+    if (flags.root) return this.print(this.root)
     if (flags.list)
       return this.print(this.topics.map(({ id, title }) => `${id.padEnd(TOPIC_WIDTH)} ${title}`).join("\n"))
     return this.print(this.text(positional[0]))
+  }
+
+  /**
+   * The epic plugin's own folder (the kit's `epic/`):  what a skill's `${CLAUDE_PLUGIN_ROOT}` names, which Claude Code
+   * fills in and Codex doesn't (`epic guide --root`, epic `epic-friend` P12).
+   */
+  get root(): string {
+    return dirname(dirname(dirname(this.file)))
   }
 
   /** The guide's topics, in order:  each `## <id> -- <title>` section, its text with its heading. */

@@ -13,6 +13,7 @@ import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
 import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
+import { SkillsCheck } from "spell/epic/command/SkillsCheck"
 import { RepoInit } from "spell/epic/command/RepoInit"
 import { Repos } from "spell/epic/command/Repos"
 import { Requests } from "spell/epic/command/Requests"
@@ -48,9 +49,10 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `loc`:  lines of code per repo and folder, and the LOC guide rewritten (`LinesOfCode`, epic `epic-engine` I122)
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49);
- *     `--codex`:  its hooks for Codex (epic `epic-friend` P11)
+ *     `--codex`:  for Codex, its hooks, skills and custom agents (epic `epic-friend` P11, P12)
  *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
  *     `epic-friend` P11)
+ *   - `skills check`:  the plugin's skills hold for Claude Code and Codex alike (`SkillsCheck`, epic `epic-friend` P12)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
  *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
@@ -500,12 +502,18 @@ export class EpicProgram {
         "the epic workflow in plain steps, for any agent (Codex, Claude Code ...):  find, plan, build, review, end " +
           "each turn, finish;  a topic alone, claude-only-tools among them"
       )
-      .usage("[<topic>] [--list] [--path]")
+      .usage("[<topic>] [--list] [--path] [--root]")
       .addHelpText("after", example("epic guide build"))
     this.group(
       epic.command("turn"),
       "an agent's turn:  end, the shared plans committed and synced, what the end-of-turn hooks run",
       (args) => new TurnEnd().run(args)
+    )
+    this.group(
+      epic.command("skills"),
+      "the epic plugin's skills:  check, that each holds for Claude Code and Codex alike (an In Codex: line beside " +
+        "each Claude-only step)",
+      (args) => new SkillsCheck().run(args)
     )
   }
 
@@ -630,7 +638,7 @@ export class EpicProgram {
     this.group(
       epic.command("plugin"),
       "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic);  " +
-        "install --codex:  its hooks for Codex",
+        "install --codex:  its hooks, skills and custom agents for Codex",
       (args) => new PluginInstall().run(args)
     )
   }

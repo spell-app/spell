@@ -16,6 +16,7 @@ import { dirname, join, resolve } from "node:path"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome"
+import { CodexHome, EPIC_HOOK, PLUGIN_HOOK_FLAG } from "spell/epic/config/CodexHome"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { SessionMoves } from "./SessionMoves"
@@ -61,8 +62,15 @@ import { SessionMoves } from "./SessionMoves"
  *      hand in its desktop app, and say nothing of the CLI;  `~/.codex/hooks.json` reaches every Codex
  *    - its other hooks kept;  ours from an older install (another kit folder) replaced, never doubled
  *    - Codex runs a hook only once the person trusts it, in its `/hooks` screen, and again after it changes
- * 2. `epic` on the terminal's `PATH`, as step 6 above
- * - Codex's folder:  `$CODEX_HOME`, else `~/.codex`;  a test hands it in.
+ *    - ONE route (J37):  the plugin's own hooks file passes `--codex-plugin`, and a script started so does nothing
+ *      while this file runs it (`CodexHome.skipPluginHook()`), so a plugin added in Codex's desktop app too never
+ *      runs them twice
+ * 2. a link in `~/.agents/skills/` to each of the plugin's skills (epic `epic-friend` P12):  the SAME files, which
+ *    Codex lists in every repo, called as `$epic review`
+ * 3. the plugin's agents (the designer, coherence) as Codex's custom agents, `<codex>/agents/epic-<name>.toml`,
+ *    generated from Claude Code's agent files
+ * 4. `epic` on the terminal's `PATH`, as step 6 above
+ * - Codex's folder:  `$CODEX_HOME`, else `~/.codex` (`CodexHome`);  the skills' `~/.agents`;  a test hands both in.
  ****************/
 export class PluginInstall {
   /** Claude Code's own folder (`~/.claude`) */
@@ -73,21 +81,25 @@ export class PluginInstall {
   readonly bin: string
   /** the time written into Claude Code's lists */
   readonly now: () => Date
-  /** Codex's own folder (`~/.codex`):  `--codex` writes its hooks file there */
+  /** Codex's own folder (`~/.codex`):  `--codex` writes its hooks file and custom agents there */
   readonly codexHome: string
+  /** the open skills format's own folder (`~/.agents`):  `--codex` links the skills into its `skills/` */
+  readonly agentsHome: string
 
   constructor({
     home = ClaudeHome.home(),
     kit = PluginInstall.mainKit(),
     bin = join(homedir(), ".local", "bin"),
     now = () => new Date(),
-    codexHome = process.env.CODEX_HOME || join(homedir(), ".codex")
+    codexHome = CodexHome.home(),
+    agentsHome = join(homedir(), ".agents")
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
     this.bin = bin
     this.now = now
     this.codexHome = codexHome
+    this.agentsHome = agentsHome
   }
 
   /** The kit's MAIN checkout:  the repo this file is in, through a worktree too. */
@@ -102,7 +114,13 @@ export class PluginInstall {
     if (verb !== "install") throw new EpicCommandError(`unknown verb '${verb ?? ""}':  epic plugin install`)
     const kit = stringFlag(flags.kit)
     const installer = kit
-      ? new PluginInstall({ home: this.home, kit: resolve(kit), bin: this.bin, codexHome: this.codexHome })
+      ? new PluginInstall({
+          home: this.home,
+          kit: resolve(kit),
+          bin: this.bin,
+          codexHome: this.codexHome,
+          agentsHome: this.agentsHome
+        })
       : this
     const dryRun = flags.dryRun === true
     const report = flags.codex ? installer.installCodex({ dryRun }) : installer.install({ dryRun })
@@ -136,14 +154,14 @@ export class PluginInstall {
     this.knownMarketplaces(marketplace, { dryRun, change })
     this.installedPlugins(`${plugin}@${marketplace}`, version, { dryRun, change })
     this.cache(plugin, marketplace, version, { dryRun, change })
-    this.skills({ dryRun, change })
+    this.linkSkills(join(this.home, "skills"), "skills", { dryRun, change })
     this.binLink({ dryRun, change })
     return report
   }
 
   /**
    * Set the plugin up for Codex (`--codex`, the class's Codex steps);  what it changed, or would with `dryRun`.
-   * - SIDE EFFECT (not `dryRun`):  writes Codex's hooks file, and the `epic` link
+   * - SIDE EFFECT (not `dryRun`):  writes Codex's hooks file and custom agents, the skill links, and the `epic` link
    * - throws `EpicCommandError` when the kit has no Codex hooks file, or Codex's won't parse
    */
   installCodex({ dryRun = false }: { dryRun?: boolean } = {}): PluginInstallReport {
@@ -157,6 +175,8 @@ export class PluginInstall {
     }
     const change = (text: string) => report.changes.push(text)
     this.codexHooks({ dryRun, change })
+    this.codexSkills({ dryRun, change })
+    this.codexAgents({ dryRun, change })
     this.binLink({ dryRun, change })
     return report
   }
@@ -168,7 +188,8 @@ export class PluginInstall {
     const verb = report.dryRun ? "would change" : "changed"
     const then =
       report.agent === "codex"
-        ? "then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them"
+        ? "then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them, " +
+          "and lists the skills ($epic review ...)"
         : "then:  /reload-plugins in each running session (or start a new one)"
     return [
       `${head}:  ${verb} ${report.changes.length}`,
@@ -308,13 +329,16 @@ export class PluginInstall {
   /**
    * The plugin's Codex hooks, as the file in its `hooks/` holds them, each command's `${PLUGIN_ROOT}` made `engine`:
    * a user hooks file has no plugin root to name.
+   * - and without `--codex-plugin`:  that flag tells a script the PLUGIN started it, and it then does nothing while
+   *   this file runs it (`CodexHome.skipPluginHook()`):  one route for the hooks, never both (J37)
    */
   static codexHooksFor(engine: string): CodexHooksFile {
     const text = readFileSync(join(engine, "hooks", CODEX_HOOKS), "utf8")
     const hooks = JSON.parse(text) as CodexHooksFile
     for (const groups of Object.values(hooks.hooks))
       for (const group of groups)
-        for (const hook of group.hooks) hook.command = hook.command.replaceAll(PLUGIN_ROOT, engine)
+        for (const hook of group.hooks)
+          hook.command = hook.command.replaceAll(PLUGIN_ROOT, engine).replaceAll(` ${PLUGIN_HOOK_FLAG}`, "")
     return hooks
   }
 
@@ -327,10 +351,71 @@ export class PluginInstall {
     const merged = JSON.parse(JSON.stringify(theirs)) as CodexHooksFile
     const events = (merged.hooks ??= {})
     for (const [event, groups] of Object.entries(events))
-      events[event] = groups.filter((group) => !group.hooks?.some((hook) => OUR_HOOK.test(hook.command ?? "")))
+      events[event] = groups.filter((group) => !group.hooks?.some((hook) => EPIC_HOOK.test(hook.command ?? "")))
     for (const [event, groups] of Object.entries(ours.hooks)) events[event] = [...(events[event] ?? []), ...groups]
     for (const [event, groups] of Object.entries(events)) if (!groups.length) delete events[event]
     return merged
+  }
+
+  /**
+   * Codex's step 2:  a link in `~/.agents/skills/` to each of the plugin's skills, which the Codex CLI lists in every
+   * repo (`$epic review`;  it follows links).
+   * - the SAME files Claude Code reads (epic `epic-friend` J29):  each Claude-only step says its Codex way beside it,
+   *   and the five Claude-only skills carry `agents/openai.yaml`, so Codex never picks one by itself
+   * - the person's skills folder, not the plugin's:  Codex's docs install a local plugin only through its desktop app
+   */
+  private codexSkills(step: Step): void {
+    this.linkSkills(CodexHome.skillsFolder(this.agentsHome), "Codex skills", step)
+  }
+
+  /**
+   * Codex's step 3:  the plugin's agents (the designer, coherence) as Codex's custom agents, a TOML file each in
+   * `<codex>/agents/`, written from Claude Code's agent files (`.claude-plugin/plugin.json`'s `agents`).
+   * - GENERATED:  each file says so, and names its source;  written again when that changes
+   */
+  private codexAgents(step: Step): void {
+    const manifest = readJson(join(this.engine, ".claude-plugin", "plugin.json")) as { agents?: string[] }
+    for (const path of manifest.agents ?? []) {
+      const source = join(this.engine, path)
+      if (!existsSync(source)) continue
+      const agent = PluginInstall.codexAgent(readFileSync(source, "utf8"), { engine: this.engine, source: path })
+      const file = join(CodexHome.agentsFolder(this.codexHome), `epic-${agent.name}.toml`)
+      if (existsSync(file) && readFileSync(file, "utf8") === agent.toml) continue
+      step.change(`${file}:  Codex's ${agent.name} agent, from ${source}`)
+      if (step.dryRun) continue
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, agent.toml)
+    }
+  }
+
+  /**
+   * A Claude Code agent file (front matter `name`, `description`, then its instructions) as a Codex custom agent:
+   * its name, and its TOML with the three keys Codex requires, `name`, `description` and `developer_instructions`.
+   * - every `${CLAUDE_PLUGIN_ROOT}` made `engine`:  Codex has none to fill in
+   * - Claude Code's `tools` list left out:  a Codex agent keeps its parent's sandbox;  the instructions say
+   *   "Change no file"
+   * - SEE:  https://learn.chatgpt.com/docs/agent-configuration/subagents.md
+   * - throws `EpicCommandError` for a file with no front matter, or no name
+   */
+  static codexAgent(markdown: string, { engine, source }: { engine: string; source: string }): CodexAgent {
+    const [, head = "", body = ""] = FRONT_MATTER.exec(markdown) ?? []
+    const field = (key: string) =>
+      head
+        .split("\n")
+        .find((line) => line.startsWith(`${key}:`))
+        ?.slice(key.length + 1)
+    const name = field("name")?.trim()
+    if (!name) throw new EpicCommandError(`epic plugin install --codex:  ${source} has no name`, EXIT.ERRORS)
+    const instructions = body.trim().replaceAll(CLAUDE_PLUGIN_ROOT, engine)
+    const toml = [
+      `# GENERATED by epic plugin install --codex, from the epic plugin's ${source}:  edit that, then run it again`,
+      `name = ${JSON.stringify(name)}`,
+      `description = ${JSON.stringify(field("description")?.trim() ?? "")}`,
+      // a TOML basic string:  JSON's escapes are TOML's
+      `developer_instructions = ${JSON.stringify(instructions)}`,
+      ""
+    ].join("\n")
+    return { name, toml }
   }
 
   ////////////////
@@ -354,9 +439,11 @@ export class PluginInstall {
     }
   }
 
-  /** Step 5:  a link in `<claude>/skills/` to each of the plugin's skills. */
-  private skills(step: Step): void {
-    const folder = join(this.home, "skills")
+  /**
+   * Step 5:  a link in `folder` to each of the plugin's skills:  Claude Code's `<claude>/skills/`, or (`--codex`)
+   * `~/.agents/skills/`;  each change said under `label`.
+   */
+  private linkSkills(folder: string, label: string, step: Step): void {
     const own = join(this.engine, "skills")
     const names = readdirSync(own, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
@@ -366,12 +453,12 @@ export class PluginInstall {
       const at = join(folder, name)
       const stat = lstatSync(at, { throwIfNoEntry: false })
       if (stat && !stat.isSymbolicLink()) {
-        step.change(`skills:  ${at} is a folder of your own;  left as it is`)
+        step.change(`${label}:  ${at} is a folder of your own;  left as it is`)
         continue
       }
       if (this.link(at, join(own, name), step)) moved.push(name)
     }
-    if (moved.length) step.change(`skills:  ${moved.length} linked to ${own}:  ${moved.join(", ")}`)
+    if (moved.length) step.change(`${label}:  ${moved.length} linked to ${own}:  ${moved.join(", ")}`)
     // a link to an older folder of the plugin's skill the plugin no longer has:  it leads nowhere
     if (!existsSync(folder)) return
     for (const entry of readdirSync(folder, { withFileTypes: true })) {
@@ -380,7 +467,7 @@ export class PluginInstall {
       const target = readlinkSync(at)
       if (!OLD_SKILL.test(target)) continue
       if (!step.dryRun) rmSync(at)
-      step.change(`skills:  ${at} removed (it led to ${target}, gone)`)
+      step.change(`${label}:  ${at} removed (it led to ${target}, gone)`)
     }
   }
 
@@ -419,6 +506,8 @@ export type PluginInstallProps = {
   now?: () => Date
   /** Codex's folder;  default `$CODEX_HOME`, else `~/.codex` */
   codexHome?: string
+  /** the open skills format's folder, whose `skills/` Codex lists;  default `~/.agents` */
+  agentsHome?: string
 }
 
 /** What `install()` did, or would do. */
@@ -435,6 +524,14 @@ export type PluginInstallReport = {
   changes: string[]
   /** the agent it was set up for, when not Claude Code:  `codex` (`--codex`) */
   agent?: "codex"
+}
+
+/** One of the plugin's agents as a Codex custom agent:  its name, and the TOML file's text. */
+export type CodexAgent = {
+  /** its `name`, Codex's handle for it:  `designer` */
+  name: string
+  /** the whole file, `<codex>/agents/epic-<name>.toml` */
+  toml: string
 }
 
 /**
@@ -483,8 +580,11 @@ const CODEX_HOOKS = "codex-hooks.json"
 /** What the plugin's Codex hooks name its folder by, in a plugin;  the kit's `epic/` in a user hooks file. */
 const PLUGIN_ROOT = "${PLUGIN_ROOT}"
 
-/** A command that runs one of the plugin's hook scripts:  `node "/.../epic/hooks/shared-commit.mjs"`. */
-const OUR_HOOK = /(?:^|[/"'])(?:spell-)?epic\/hooks\/[\w-]+\.mjs\b/
+/** What Claude Code's agent files and skills name the plugin's folder by. */
+const CLAUDE_PLUGIN_ROOT = "${CLAUDE_PLUGIN_ROOT}"
+
+/** A Markdown file's front matter and the rest:  `---\nname: designer\n---\nYou are ...`. */
+const FRONT_MATTER = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
 
 /** Whether `key` is the old plugin, or any plugin of its marketplace:  `spell-epic@spell-epic`. */
 function isOldPlugin(key: string): boolean {

@@ -6,6 +6,9 @@ argument-hint: "[topic]"
 
 # /details
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+
 A DETAILS PAGE:  a small page that explains one decision.
 - It shows in the "Review" view:  VS Code's right side bar, beside "Epic Docs", where the person answers things.
 - The person picks on the page, and clicks Send.
@@ -40,6 +43,8 @@ Dense, terse pages make them ask "what do you mean?" (Owen, 2026-10-03), so:
 - A concrete example per option:  what the page, the command or the output would look like.
 
 ## 1. Page or modal?
+In Codex:  "the modal" below is the chat:  a question that fits it is asked there, its options numbered;
+the page is the same for both agents.
 
 - Fits the modal (every question 4 options or fewer, 4 questions or fewer) AND needs no picture:
   the modal, as always.  No page.
@@ -152,10 +157,13 @@ Dense, terse pages make them ask "what do you mean?" (Owen, 2026-10-03), so:
 ## 3. Show it, and wait
 
 - Answer page:  `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
+  - In Codex:  run `epic ask show <slug> --wait` in the foreground:
+    it returns when the person sends, so end the turn only if you can't wait.
   - Then END THE TURN with the page's link pair (`epic pages link <page>`, below):
     "answer in the side bar:  <link>".
   - Don't also ask in chat or the modal.
 - Picture page:  `epic ask show <slug>` (foreground), then AskUserQuestion.
+  - In Codex:  the question in the chat, its options numbered, after the picture page.
 - Outside VS Code (a CLI session in a terminal):  `show` opens Chrome instead;  same flow.
 
 ## Links to pages
@@ -199,10 +207,12 @@ Any page you name to the person (a details page, an epic page, any docs page):
     - read each against the page as it is now, and act on it as a comment
 - A PARTIAL answer (anything "not decided yet"):  act on what's there, then wait again at once.
   - `epic ask wait <slug>`, Bash `run_in_background: true`:  every Send wakes you.
+    - In Codex:  `epic ask wait <slug>` in the foreground, the same way.
   - Stop once every question is decided, or the person says they're done.
 - Exit 2:  no answer in 8 hours.
   One line saying so;  ask again only if it still matters.
 - The person answered in chat instead:  stop the waiter (`TaskStop`), or it wakes you later with a stale answer.
+  - In Codex:  a foreground wait ends by itself, or with Ctrl-C;  nothing is left running.
 - They sent again while no waiter ran:  `epic ask answer <slug>` prints the latest.
 
 ## 5. When it fails
@@ -211,6 +221,7 @@ Any page you name to the person (a details page, an epic page, any docs page):
   - That's [detailsRoutes.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/detailsRoutes.ts).
     Route modules load when a page server starts.
   - Say so in one line;  ask in chat or the modal meanwhile.
+    - In Codex:  ask in the chat meanwhile.
   - The person restarts it when no other session needs it:
     `epic server stop`, then `epic server ensure`, in the checkout whose server it is.
 - "The page server restarted since this page loaded":  the person reloads the page, then sends again.

@@ -1,10 +1,13 @@
 ---
 name: designer
-description: Review a page's LOOK the way Owen would -- screenshot it headlessly (desktop, a narrow window and phone, light and dark, scrolled under its stuck bars, hover and open states), hold every shot up against the designer's rules (Owen's own design asks, quoted, then the craft rules from interfaces.dev and jakub.kr), and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase it fixes the obvious ones itself and asks about bigger changes with before / after pictures.  Use for `/designer <page | URL> [focus]`, at the end of any epic phase that changed a page or an element, or when the person says "how does this look?", "review the design of ...", "what would a designer say about ...", "check the UI of ...".
+description: Review a page's LOOK the way Owen would -- screenshot it headlessly (desktop, narrow, phone, light and dark, hover and open states), hold each shot up against the designer's rules, and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase, fix the obvious ones and ask about bigger ones with before / after pictures.  Use for `/designer <page | URL> [focus]`, or "how does this look?", "review the design of ...", "check the UI of ...".
 argument-hint: "<page | URL> [focus]"
 ---
 
 # /designer
+
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
 
 A design review of one page (epic `epic-engine` P24, request r19), against the designer's rules in
 [designer/](${CLAUDE_PLUGIN_ROOT}/designer/), three files, each one read:
@@ -60,6 +63,8 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
 5. What happens to them:
    - **The person asked** (`/designer ...`):  the numbered list, short;  then a modal, "Fix these?", the obvious ones
      recommended.
+     - In Codex:  the list, then ask in the chat which to fix, the obvious ones first;
+       the person answers with the numbers.
    - **The end of a UI phase** (Q12;  Owen, 2026-10-23:  "yes, and fix obvious things, ask about bigger changes with
      pictures"), before `epic phase ... done`, for a phase that changed a page or an element:
      - OBVIOUS:  ONE place, a SETTLED rule (any T rule not in designer.md's "Where his asks pull two ways", or a C rule

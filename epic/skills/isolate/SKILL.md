@@ -6,6 +6,10 @@ argument-hint: <name> | done
 
 # /isolate
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+Codex has no window moves:  it works in the worktree's folder, and prints the window commands for the person.
+
 Work in worktree `<name>`, so this session's edits never collide with another session's.
 - Its folder:  `epic worktree path <name>` prints it.
   - `.claude/worktrees/<name>`, or beside the repo (`../<repo>.worktrees/<name>`)
@@ -40,6 +44,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - The hook:  [prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs);  read its header.
    - "Isolate as <name>" in plain words never reaches the hook, so do its checks here:
    - in plan mode:  it's read-only apart from the plan file.
+     - In Codex:  no plan mode:  skip this check.
      - So `EnterWorktree` can't run, and ExitPlanMode would ask to APPROVE a half-made plan.
      - Ask the user to leave plan mode (shift+tab);  the plan file survives.
    - in another worktree:  the session's folder is in worktree `<other>`, or its window is a worktree's.
@@ -54,9 +59,12 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
        The `WorktreeCreate` hook refuses that worktree here anyway, saying where it belongs.
      - AskUserQuestion "Open `<name>` in its own window?", then `epic window launch <name> --prompt "/isolate <name>"`
        (it finds the epic's repo from here).
+       - In Codex:  say where it belongs,
+         and print `epic window launch <name> --prompt "/isolate <name>"` for the person to run.
      - The prompt hook's note says the same for a typed `/isolate <name>`.
    - rename:  `epic session title "🚧 <name>"`.
      It lands on the next prompt, or when the session opens in its new window.
+     - In Codex:  no session title:  skip the rename (here and in step 1).
    - a saved prompt, `~/.spell/prompts/<name>.md`:  it's the task to carry on with once isolated.
      - The hook saved it while blocking an earlier `/isolate <name> ...`.
      - Delete it once done.
@@ -67,6 +75,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
        `epics`, `guides`, `pages`, `templates`, `goals` and `agents` are links in every checkout
        into the content folder (`epic config contentFolder`).
      - List the edits (`git status --short`) and AskUserQuestion, options:
+       - In Codex:  ask in the chat, the three options numbered.
        - "Carry them over"
        - "Commit on `main` first" (stage, then ask)
        - "Leave them"
@@ -81,13 +90,17 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
 1. `<name>` is `$ARGUMENTS`, or the `<name>` in "isolate as <name>".
    - Lower-kebab-cased:  `Docs Index` -> `docs-index`.
    - No name:  propose one from the work so far in AskUserQuestion;  the user can type another.
+     - In Codex:  propose it in the chat;  the person types another if they like.
    - Then rename (step 0's `epic session title`), since the hook only renames a name it was given.
 2. Collisions, from the repo root:
    - a worktree at `epic worktree path <name>` (`git worktree list`)
    - a branch `<name>` or `worktree-<name>`
    - Any hit:  AskUserQuestion, options "Reuse `<name>`" and "Different name" (typed in "Other").
+     - In Codex:  ask in the chat:  reuse it, or which other name.
 
 2b. Where:  `epic window should-stay` prints `recommend stay|window`, and why.
+    - In Codex:  no window move:  skip 2b, steps 4-6 and "Stay";
+      after step 3, work from the worktree, and print `epic window open <name>` for the person, if they want its window.
    - From `/epic`, add `--epic`.
    - AskUserQuestion "Where should `<name>` run?", its reasons in the question,
      the recommended option first, with "(Recommended)":
@@ -103,6 +116,8 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - With others, they share its doc preview and Source Control.
      - [window.mjs](https://github.com/spell-app/spell/blob/main/epic/src/window.mjs), "Staying put"
 3. `EnterWorktree` with `name: "<name>"`.
+   - In Codex:  `epic worktree create <name>`:  the same worktree hook, which prints its folder;
+     then `cd` there and work from it (each command run there, or with `git -C`).
    - Reusing one:  the same, by `name`:  the worktree hook finds it.  NEVER `path` (epic `epic-engine` P16):  Claude
      Code asks the person before entering a path outside `.claude/worktrees/`, every time.
    - Already in it (`pwd` is in that folder:  a new tab of the worktree's window):  NOT again.
@@ -222,6 +237,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
   1. `merge-main`, if `main` moved
   2. `epic merge <name>`, from the worktree:  it moves the MAIN checkout's `main`
      - no `ExitWorktree` and back:  entering asks the person every time (epic `epic-engine` P12)
+       - In Codex:  the same:  stay in the worktree's folder.
 - `/isolate done` in a standing epic's session:  say it stands, and ask first ("Stop standing, and finish?").
 
 ## Finish:  `/isolate done`
@@ -236,6 +252,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
        An agent's `<owner>-agent-<id>` (below):  or nothing outside branch `<owner>`.
    - None:  stop.
    - Else AskUserQuestion, multi-select, one option per candidate:  "`<name>` (`<branch>`)".
+     - In Codex:  ask in the chat, the candidates numbered.
      - It takes 2-4 options, so one candidate is "Remove `<name>`" / "Keep it".
      - More than 4 go in several questions.
    - For each picked:
@@ -252,6 +269,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      A repo the epic never touched (0 ahead, nothing uncommitted) is left out of every step below.
    - Commit only as the root's rules allow (stage, then ask).
 2. Unmerged commits (`main..HEAD` not empty):  AskUserQuestion, listing the commits in the question.
+   - In Codex:  ask in the chat, yes or no, listing the commits.
    - "Merge `<name>` into `main`?", options "Merge now" and "Leave unmerged"
    - On "Merge now", get the BRANCH ready to fast-forward `main`.
      All from the worktree:  branches are shared, so `main` is visible here.
@@ -290,7 +308,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - These can't conflict any more:  the logs (`agents/*.md`), the changelog, the docs' home page and epic pages.
      - They're shared content, untracked by the repo.
      - One in conflict means a worktree not migrated yet (step 2).
-   - AskUserQuestion, listing the conflicting files, options:
+   - AskUserQuestion, listing the conflicting files (In Codex:  in the chat, the options numbered), options:
      - "Fix conflicts, then merge":
        - `epic worktree merge-main`:  it stops mid-merge, listing them
        - resolve each file, keeping BOTH sides' intent, and `git add` it
@@ -302,6 +320,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - Can't fix them:  keeping both sides needs a decision only the user can make, or the checks fail.
      - `git merge --abort`, say so, and list each file and why.
      - Then AskUserQuestion "Continue exiting?", options "Exit, unmerged" and "Stay isolated".
+     - In Codex:  in the chat too, its options numbered.
 4. Pull request:  an offer, ASKED first, since pushing publishes the branch on GitHub.
    - Only when GitHub's `main` is up to date with local `main` (Q16 of `review-review`, answer C).
    - All from the worktree.
@@ -318,6 +337,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      one open already, so the offer is to push the branch, which updates it.
    - AskUserQuestion "Open a pull request for `<name>` on GitHub?",
      saying how many commits it shows and that pushing publishes them.
+     - In Codex:  ask in the chat, yes or no.
      - Options:  "Push and open a PR", and "No PR".
      - When one is open, the first is "Push `<name>` (updates PR #<n>)".
    - On yes:
@@ -349,6 +369,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      `epic window stay --end` puts the window's title and title bar back.
      It says "nothing to put back" when there's nothing.
 6. `ExitWorktree` with `action: "keep"`:  the worktree and branch stay, and the session is back in the main checkout.
+   - In Codex:  `cd` back to the main checkout (`git worktree list`'s first line):  nothing else to leave.
    - Never `remove` unasked.
    - On a hook-made worktree, `remove` refuses without `discard_changes` anyway.
 7. Merging, only after "Merge now" got the branch ready.
@@ -399,6 +420,7 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
 - Closing out, any of:
   - merged, or the worktree gone
   - a worktree LEFT (`ExitWorktree`, keep or remove)
+    - In Codex:  leaving is the `cd` of step 6.
   - `/isolate done`
   - a `/bedtime` night reviewed ...
   - Leaving counts with or without this skill:  a bare `ExitWorktree` too.
@@ -412,6 +434,7 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
     and need no context from this session.
 - Otherwise leave the line out, and say what keeps the tab open.
 - With the line, ALSO ask (AskUserQuestion) whether to finish, when either is still on disk:
+  - In Codex:  ask in the chat, yes or no.
   - this session's worktree (left with `keep`)
   - worktrees it made and left:  its step 0 cleans those up
   - Options:  "Run `/epic done`" (Recommended) and "Leave it", in an EPIC's session (its worktree is an epic's;

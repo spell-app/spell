@@ -396,6 +396,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     },
     {
+      name: "create",
+      usage: "<name>",
+      description:
+        "make worktree <name> on branch <name>, from the local base branch, as Claude Code's EnterWorktree does " +
+        "through the worktree hook, and print its folder:  for Codex or any agent with no worktree hook;  reused when " +
+        "there already",
+      example: "epic worktree create seo",
+      flags: {}
+    },
+    {
       name: "path",
       usage: "<name>",
       description:
@@ -963,6 +973,18 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     }
   ],
+  skills: [
+    {
+      name: "check",
+      usage: "[--json]",
+      description:
+        "check the epic plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool " +
+        "(the question modal, background agents, the worktree tools ...) has an In Codex: line beside it, each " +
+        "Claude-only skill its agents/openai.yaml, and the descriptions fit Codex's list;  exits 1 on a problem",
+      example: "epic skills check",
+      flags: { "--json": "print the report as JSON" }
+    }
+  ],
   plugin: [
     {
       name: "install",
@@ -970,10 +992,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description:
         "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/:  the old " +
         "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
-        "--codex:  for Codex instead, its hooks in ~/.codex/hooks.json and epic on your PATH;  safe to run again",
+        "--codex:  for Codex instead, its hooks in ~/.codex/hooks.json, its skills linked in ~/.agents/skills, " +
+        "the designer and coherence as Codex agents (~/.codex/agents) and epic on your PATH;  safe to run again",
       example: "epic plugin install --codex --dry-run",
       flags: {
-        "--codex": "set it up for Codex:  the end-of-turn and session-start hooks, in Codex's hooks file",
+        "--codex": "set it up for Codex:  the end-of-turn and session-start hooks, the skills and the custom agents",
         "--kit <folder>": "the kit's checkout to install from (default this code's main checkout, ~/www/spell)",
         "--dry-run": "only say what it would change",
         "--json": "print the report as JSON"
@@ -1102,7 +1125,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `turn` (`TurnEnd`), `plugin` (`PluginInstall`)
+ *   `hub` (`Hub`), `repo` (`Repos`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
+ *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
 export type GroupName =
@@ -1121,6 +1145,7 @@ export type GroupName =
   | "hub"
   | "repo"
   | "turn"
+  | "skills"
   | "plugin"
   | "pages"
 
@@ -1344,5 +1369,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print it as JSON"
   },
   whois: { "--json": "print it as JSON" },
-  guide: { "--list": "the topics, a line each", "--path": "the guide's file, for an agent to read" }
+  guide: {
+    "--list": "the topics, a line each",
+    "--path": "the guide's file, for an agent to read",
+    "--root": "the epic plugin's folder:  what a skill's ${CLAUDE_PLUGIN_ROOT} names"
+  }
 }

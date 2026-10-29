@@ -6,6 +6,9 @@ argument-hint: "<epic...>"
 
 # /docs-check
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+
 Owen's words (epic `airplane`, P10, 2026-10-10):
 "Make a doc task which:  first makes sure that any docs a plan wrote OTHER THAN THE PLAN DOC are consistent with
 what we chose,  then goes through all of those docs as a group, and makes sure things are internally consistent."
@@ -47,10 +50,12 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
 ```
 
 - Nothing after it:  AskUserQuestion, "Which epics' docs should /docs-check go through?", multi-select:
+  - In Codex:  ask in the chat, the epics numbered, Other as a typed name.
   - the epics merged since the last flight, or done in the last week, newest first
     - from `epic list --json`:  those with `status` `done`
     - at most 4 options, "Other" for names
   - Run by a background agent (no person to ask):  the epic this session works on, and say so in the report.
+    - In Codex:  a sub-agent, likewise.
 - Several epics:  pass 1 per epic, then pass 2 over ALL their docs together (a doc two epics touched is read once).
 
 ## What's binding
@@ -138,6 +143,8 @@ From `decisions --json`, later beats earlier:
 
 - Pass 1 only:  one background agent per doc, or per group of neighbouring docs, up to 4 in all.
   Pass 2 waits for every one, and is the session's.
+  - In Codex:  ask for Codex sub-agents, one per doc or group, up to 4;
+    Codex waits for them all, then pass 2 runs here.  No `epic agents add` / `done`:  those list Claude Code's agents.
 - Each one NAMED and LISTED, as the root `CLAUDE.md`'s "Delegated work" says
   ([the bg skill](../bg/SKILL.md), "Names"):
   - `epic agents add docs-check-<n> "<its docs>"`:  prints its full name

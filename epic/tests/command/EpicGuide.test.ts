@@ -2,7 +2,8 @@
  * Tests of `epic guide` (`EpicGuide`, epic `epic-friend` P11):  the epic workflow for any agent, printed from the epic
  * skill's own `guide.md`.
  */
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 
 import { describe, expect, test, vi } from "vite-plus/test"
 
@@ -49,9 +50,13 @@ describe("EpicGuide", () => {
     expect(await printed(["TURN"])).toContain("epic turn end")
   })
 
-  test("--list, --path;  an unknown topic is refused, naming the topics", async () => {
+  test("--list, --path, --root;  an unknown topic is refused, naming the topics", async () => {
     expect((await printed(["--list"])).trim().split("\n")).toHaveLength(TOPICS.length)
     expect(await printed(["--path"])).toMatch(/skills\/epic\/guide\.md\n$/)
+    // the plugin's folder, for a skill's ${CLAUDE_PLUGIN_ROOT} (epic `epic-friend` P12):  it holds the skills
+    const root = (await printed(["--root"])).trim()
+    expect(existsSync(join(root, "skills", "epic", "guide.md"))).toBe(true)
+    expect(existsSync(join(root, ".codex-plugin", "plugin.json"))).toBe(true)
     await expect(guide.run(["bogus"])).rejects.toThrow(/no such topic.*workflow, find/)
   })
 

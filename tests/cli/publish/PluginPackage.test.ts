@@ -40,6 +40,32 @@ describe("namedFiles() / parts()", () => {
   })
 })
 
+describe("the Codex manifest (epic `epic-friend` P12)", () => {
+  test("ships, its skills and hooks paths there;  staged at the package's version, as Claude Code's is", async () => {
+    expect(new PluginPackage(epicRepo(), join(ROOT, "stage"), "0.0.0", {}, {}).parts()).toContain(".codex-plugin")
+    expect(PluginPackage.codexManifestProblems(EPIC)).toEqual([])
+    const stage = join(ROOT, "stage-codex")
+    await new PluginPackage(epicRepo(), stage, "9.9.9", {}, {}).stage()
+    for (const folder of [".claude-plugin", ".codex-plugin"])
+      expect(JSON.parse(readFileSync(join(stage, folder, "plugin.json"), "utf8"))).toMatchObject({
+        name: "epic",
+        version: "9.9.9"
+      })
+    expect(PluginPackage.codexManifestProblems(stage)).toEqual([])
+  })
+
+  test("a missing manifest, or one whose skills folder isn't there, is a problem", () => {
+    const root = join(ROOT, "no-codex")
+    expect(PluginPackage.codexManifestProblems(root)).toEqual([".codex-plugin/plugin.json missing"])
+    mkdirSync(join(root, ".codex-plugin"), { recursive: true })
+    writeFileSync(join(root, ".codex-plugin", "plugin.json"), '{ "name": "epic", "skills": "./skills/" }')
+    expect(PluginPackage.codexManifestProblems(root)).toEqual([
+      "its skills (./skills/) isn't there",
+      "its hooks (undefined) isn't there"
+    ])
+  })
+})
+
 describe("sourceToNpm()", () => {
   test("the root marketplace's epic entry:  ./epic turned to the npm package;  again, nothing", () => {
     mkdirSync(join(ROOT, "kit", ".claude-plugin"), { recursive: true })

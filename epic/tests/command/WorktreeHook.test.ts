@@ -24,6 +24,7 @@ import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SessionFolders } from "spell/epic/config/SessionFolders"
+import { Worktrees } from "spell/epic/command/Worktrees"
 
 /** The hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/worktree.mjs")
@@ -78,6 +79,13 @@ describe("worktree hook", () => {
     const reused = hook("create", { name: "old", cwd: MAIN })
     expect(reused.stdout).toBe(OLD)
     expect(reused.stderr).toMatch(/reusing/)
+  })
+
+  test("epic worktree create (Codex's way, epic `epic-friend` P12):  the same hook, its folder;  again, reused", () => {
+    config({})
+    expect(Worktrees.create("codex-made", MAIN)).toBe(join(BESIDE, "codex-made"))
+    expect(git(join(BESIDE, "codex-made"), "branch", "--show-current")).toBe("codex-made")
+    expect(Worktrees.create("codex-made", MAIN)).toBe(join(BESIDE, "codex-made"))
   })
 
   test("an agent's worktree, from a session in a worktree beside the repo, is named for it", () => {

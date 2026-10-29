@@ -132,7 +132,7 @@ describe("the end-of-turn hook (shared-commit.mjs)", () => {
     const commands = (file: { hooks: Record<string, { hooks: { command: string }[] }[]> }) =>
       file.hooks.Stop!.flatMap((group) => group.hooks.map((each) => each.command))
     expect(commands(claude)).toContain('node "${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs"')
-    expect(commands(codex)).toEqual(['node "${PLUGIN_ROOT}/hooks/shared-commit.mjs"'])
+    expect(commands(codex)).toEqual(['node "${PLUGIN_ROOT}/hooks/shared-commit.mjs" --codex-plugin'])
     expect(readFileSync(join(ENGINE, "hooks", "shared-commit.mjs"), "utf8")).toMatch(/TurnEnd\.inBackground\(input\)/)
   })
 

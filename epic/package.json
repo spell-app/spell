@@ -116,6 +116,7 @@
       "hooks",
       "monitors",
       ".claude-plugin",
+      ".codex-plugin",
       "src/AGENTS.md",
       "src/tool/PLAN-DOC.md"
     ],

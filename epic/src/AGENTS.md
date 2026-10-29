@@ -484,10 +484,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
+        - and (P12) every skill linked into `~/.agents/skills/`, the SAME files, which the Codex CLI lists in every
+          repo;  the designer and coherence agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
+          generated from Claude Code's agent files (`codexAgent()`)
+        - one route for the hooks:  the plugin's own Codex hooks file passes `--codex-plugin`, and a script started so
+          does nothing while the user file runs it (`CodexHome.skipPluginHook()`)
+      - `CodexHome` (`spell/epic/config/CodexHome`):  Codex's folders, the ONE reader of where they are, as
+        `ClaudeHome` is Claude Code's:  `$CODEX_HOME` else `~/.codex`, `~/.agents/skills`, whether its hooks file runs
+        ours;  plain `node` loads it (the hooks)
     - ANY AGENT (epic `epic-friend` P11):
       - `EpicGuide`:  `epic guide [<topic>]`, the workflow in plain steps, printed from the epic skill's own
         [guide.md](../skills/epic/guide.md) (ONE copy:  the skill links it);  `claude-only-tools`, the plain way to do
         each step that leans on a tool only Claude Code has
+      - `SkillsCheck` (P12):  `epic skills check`, the plugin's skills true for Claude Code and Codex alike:  each step
+        naming a Claude-only tool has an `In Codex:` line within 10 lines, each Claude-only skill its
+        `agents/openai.yaml`, the descriptions within Codex's 8,000-character list;  its test runs it over the real ones
+      - `Worktrees.create()` (P12):  `epic worktree create <name>`, the worktree hook run by hand, for an agent with no
+        `EnterWorktree`
       - `TurnEnd`:  `epic turn end`, the end of every agent's turn:  `Shared.sync()`, quiet with nothing to do;  the
         end-of-turn hook ([shared-commit.mjs](../hooks/shared-commit.mjs)), Claude Code's and Codex's, starts it
         detached (`TurnEnd.inBackground()`), so there's one path;  plain `node` loads it by path

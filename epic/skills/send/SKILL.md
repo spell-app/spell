@@ -1,10 +1,13 @@
 ---
 name: send
-description: Send a request to another epic instead of doing it here -- the person's words verbatim, the screenshots they pasted, what this session was looking at -- and wake that epic's session, or open its window.  Use for `/send [<epic>] <text>`, and BY ITSELF whenever the person asks this session to change how they WORK (dev tooling:  the epic page, comments, the Review tab, details pages, skills, hooks, windows, worktrees, `epic` and the repo's own dev commands) rather than this session's own work -- the root `CLAUDE.md`'s "Tooling requests".  E.g. "fix this in the plan doc", "comment mechanism doesn't look right", a screenshot of the Review tab.
+description: Send a request to another epic instead of doing it here -- the person's words verbatim, their screenshots, what this session was looking at -- and wake that epic's session.  Use for `/send [<epic>] <text>`, and BY ITSELF whenever the person asks to change how they WORK (the epic page, comments, the Review tab, details pages, skills, hooks, windows, worktrees, `epic`) rather than this session's own work:  "fix this in the plan doc", "comment mechanism doesn't look right".
 argument-hint: "[<epic>] <text>"
 ---
 
 # /send
+
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
 
 The person says what they want where they are;  it goes to the epic that owns it,
 and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-10-11).
@@ -23,6 +26,7 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
     "Fix P4's file list in the plan doc" in `🚧 python` is python's job;
     "the plan doc's comment box covers the text" is tooling.
   - Unsure which:  AskUserQuestion, "Send to `<home>`, or do it here?", saying what you took it to mean.
+    - In Codex:  ask in the chat.
 - NOT in the tooling home's own session (titled `🚧 <home>`):  tooling work is its own.
 
 ## Steps
@@ -53,6 +57,7 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
    - `tell:  <name>` (its session is running):  `SendMessage` to `<name>`:
      "New request `<rN>` for epic `<epic>`, from `<this session's title>`:  <their first line>.
      Run `/epic request <epic> <rN>`'s steps (`epics/<epic>/requests/<rN>/request.md`)."
+     - In Codex:  Codex can't message another session:  print that line for the person to type into it.
    - `this session is <epic>'s own`:  do it here, as [the epic skill](../epic/SKILL.md), "12. Request".
    - `no session of <epic> is running`:  run the `epic window launch ...` line it printed.
      It opens the epic's window with `/epic request <epic> <rN>` typed in:  the person presses Enter there.

@@ -470,6 +470,7 @@ Lost track?  `epic status`.
 | `epic status [--json]` | takes stock:  worktrees, branches, sessions, parked work and plans, sorted into in process, hung or parked, and dead |
 | `epic worktree list [--json]` | lists every running session with the worktree, branch and folder it works in, then the idle worktrees |
 | `epic worktree status <name>` | prints, as JSON, where a worktree, branch, epic page or session of that name stands |
+| `epic worktree create <name>` | makes worktree `<name>` on branch `<name>`, as Claude Code's `EnterWorktree` does through the worktree hook, and prints its folder:  for Codex, or any agent with no worktree hook;  reused when it's there |
 | `epic worktree path <name>` | prints a worktree's folder, or where a new one would go;  a session enters it by name, never by this path, or Claude Code would ask |
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
@@ -535,12 +536,13 @@ You'll rarely type these:  the turn-end hook runs `epic turn end`, which is `epi
 
 ### Any agent:  the workflow, and each turn's end
 
-Codex, or any agent without the skills, works an epic from these two.
+Codex, or any agent without the skills, works an epic from these;  `skills check` keeps the skills true for Codex too.
 
 | Verb | What it does |
 | --- | --- |
-| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has |
+| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
 | `epic turn end` | ends an agent's turn:  the content folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
+| `epic skills check` | checks the plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool (the question modal, background agents, the worktree tools ...) has an "In Codex:" line beside it, each Claude-only skill its `agents/openai.yaml`, and the descriptions fit Codex's list;  exits 1 on a problem;  `--json` |
 
 ### Windows and the page server
 
@@ -611,7 +613,7 @@ Every key of the config file, and what `epic init` writes:  [README-epics.md](ht
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
-| `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
+| `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer and coherence as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
 | `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 
 ### Pages you answer on, agents, airplane mode

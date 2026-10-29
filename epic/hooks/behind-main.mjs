@@ -18,6 +18,7 @@
  *   it the fixes its repo lists in `"checkoutPatches"` that it lacks (`CheckoutPatches`);  its lines go to
  *   `epic-patches.log` in the checkout's git folder, and nothing is said:  a patch is meant to go unnoticed.
  * - Always exits 0, within a few seconds:  never blocks a session.
+ * - Run by the Codex PLUGIN (`--codex-plugin`) while Codex's own hooks file runs it too:  nothing (`CodexHome`, J37).
  */
 import { spawn } from "node:child_process"
 import { openSync, readFileSync } from "node:fs"
@@ -26,6 +27,9 @@ import { join } from "node:path"
 import { Git } from "spell/server/Git"
 
 try {
+  // the plugin started it (--codex-plugin) while Codex's user hooks file runs it too:  one route, never both
+  const { CodexHome } = await import("spell/epic/config/CodexHome.ts")
+  if (CodexHome.skipPluginHook()) process.exit(0)
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const dir = input.tool_input?.path ?? input.cwd
   // loaded in here, so a config that won't read never fails the hook

@@ -17,10 +17,14 @@
  *   - the next turn's commit picks up anything left
  * - Prints nothing:  Codex takes a `Stop` hook's output as JSON, and plain text as a mistake.
  * - Always exits 0.
+ * - Run by the Codex PLUGIN (`--codex-plugin`) while Codex's own hooks file runs it too:  nothing (`CodexHome`, J37).
  */
 import { readFileSync } from "node:fs"
 
 try {
+  // the plugin started it (--codex-plugin) while Codex's user hooks file runs it too:  one route, never both
+  const { CodexHome } = await import("spell/epic/config/CodexHome.ts")
+  if (CodexHome.skipPluginHook()) process.exit(0)
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a config that won't read never fails the hook
   const { TurnEnd } = await import("spell/epic/command/TurnEnd.ts")

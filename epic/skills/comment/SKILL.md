@@ -6,6 +6,10 @@ argument-hint: "<file> [<file> ...]"
 
 # /comment
 
+In Codex:  Claude Code only (its plan mode's comment tab);
+in Codex, show the file and take the person's notes in the chat,
+or open it as a guide with comments (`epic pages link <page> --show`).
+
 Review any file through PLAN MODE's comment tab.
 - The plan Claude asks to approve opens in an editor tab,
   where the person comments inline before approving or sending feedback.

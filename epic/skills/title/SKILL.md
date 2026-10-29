@@ -6,6 +6,9 @@ argument-hint: "[<title>]"
 
 # /title
 
+In Codex:  Claude Code only (session titles are its VS Code panel's);
+a Codex session needs none:  `epic guide claude-only-tools`.
+
 The command:  `epic session title [<title>]` ([Sessions.ts](https://github.com/spell-app/spell/blob/main/epic/src/command/Sessions.ts)).
 Other skills that rename a session run the same command:  `/isolate`, `/park`, `/unpark` and `/session`.
 

@@ -1,10 +1,15 @@
 ---
 name: epic
-description: Run a planning session against a live epic page, `epics/<name>/<name>.plan.html`, in its own worktree. Use for `/epic <name> [what to plan]` (name alone:  the plan comes in the next prompt), or when the person says "make this a plan doc" / "turn this into a plan doc" about the work in the current session.  `/epic review [<name>]`:  open an epic page in the side bar's Review tab, where the person marks items on the page, and listen:  act on their marks (approvals, picks, todos to make), write details and replies in the background, talk revisits over ("review the seo epic", "go through unified-server's todos").  `/epic resume [<name>]`:  pick an epic back up in a new session, in the right worktree and window, where its epic page says it stopped ("resume the seo epic", "carry on with windows-and-review").  `/epic future <name> [idea]`:  write an idea down as a FUTURE epic, not planned yet:  a stub epic page and a review page of its high-level open questions, answered in the Review tab;  no worktree ("save this as a future epic", "an epic for later").  `/epic phase [ids] [name]`:  add a phase to this session's epic, from its items (`/epic phase J1 J5, t3`) or from scratch;  `/epic start <P1 | ids>`:  work a phase, or a block of its items, now.  `/epic request <epic> [<rN>]`:  take up a request the person sent from another session (`/send`), into a phase.  `/epic done`:  the same as `/isolate done`.
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic done` is `/isolate done`.
 argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | color <look>
 ---
 
 # /epic
+
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`;  the plain workflow:  `epic guide`).
+`${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+Skill calls are `$epic ...` in Codex:  `/epic review` is `$epic review`, `/details` is `$details`.
 
 An EPIC is a planning session and the work it plans;  its live record is the EPIC PAGE.
 - It was `/plan-doc` until 2026-10-02.
@@ -95,6 +100,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (Owen,
       2026-10-24):  the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
+      - In Codex:  the same words:  `$epic done` is `$isolate done`.
     Follow [the isolate skill](../isolate/SKILL.md)'s "Finish", and skip everything else here.
     - The same steps "6. Doc Review" ends with.
 - `<name>` is the first word of `$ARGUMENTS`, or a quoted phrase (`"Docs Index"`).
@@ -108,6 +114,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - "Make this a plan doc" (invoked mid-session):
     propose a name from the work so far in AskUserQuestion, recommended first.
     The user can type another in "Other".
+    - In Codex:  propose it in the chat;  the person types another if they like.
 - Checks and rename, BEFORE anything else:
   as [the isolate skill](../isolate/SKILL.md)'s "Start", step 0.
   - ANOTHER REPO's epic (`epic list --json` gives it a `repo`;  epic `epic-engine` I47):
@@ -115,10 +122,13 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     - No rename, no `EnterWorktree`, no worktree `<name>` here:  the `WorktreeCreate` hook refuses one.
     - AskUserQuestion "Open `<name>` in its own window?", then `epic window launch <name> --prompt "<the command>"`;
       it finds the epic's repo from here.
+      - In Codex:  say where it belongs,
+        and print `epic window launch <name> --prompt "<the command>"` for the person to run.
     - The prompt hook's note says so for a typed command;  its text is saved, as below.
   - A typed `/epic <name> ...` got them from the repo's `UserPromptSubmit` hook
     ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
   - It renamed the session `<name>`, or blocked the prompt (plan mode) and saved its text.
+    - In Codex:  no prompt hook or session title:  do the checks here, and skip the rename.
   - EXCEPT in another worktree (isolate's step 0 test;  the hook's note says so too):
     NOT a failure, and NOT this session's epic.
     Go to "From another worktree", and skip everything else.
@@ -135,11 +145,13 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `epics/<name>/`, `guides/<name>/`, `guides/<name>.html`
   - the worktree and branch checks of the isolate skill's "Start", step 2
   - any hit:  AskUserQuestion, options:
+    - In Codex:  ask in the chat, the options numbered.
     - "Reuse `<name>`":  continue that doc / worktree
     - "Different name":  the user types it in "Other"
     - Never overwrite an existing epic page.
   - A FUTURE epic's doc ("9. Future";  `epic list --json` says `status` `future`):
     no modal, it's waiting to be planned.
+    - In Codex:  no question at all, likewise.
     - Say so in one line, then go on.
     - In "2. Session", step 3, `epic create <name>` PROMOTES it where it is:  no `--prompt-file`.
       Its prompt, decided questions and review page are kept;  the meta lines name the branch and worktree.
@@ -156,6 +168,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 
 When the session already has work under way ("make this a plan doc"), carry it over -- don't start again:
 - Plan mode, and edits already made on `main`:  the isolate skill's "Start", step 0.
+  - In Codex:  no plan mode:  only the edits on `main` carry over.
 - Step 3:  start from the plan drafted so far (a harness plan file, the conversation),
   reshaped into the Overview and its questions:  still the Overview stage, agreed on the page ("3. Plan").
   - Explore only to fill gaps.
@@ -166,6 +179,7 @@ When the session already has work under way ("make this a plan doc"), carry it o
 `/epic <name> ...`, typed in a session working in ANOTHER worktree (`<other>`),
 means "open a window for epic `<name>`" (Owen, 2026-10-07).
 - This session stays `<other>`'s:  no rename, no `EnterWorktree`, no plan here.
+  - In Codex:  say so, and print `epic window launch <name>` for the person to run.
 
 1. The text after `<name>`:  the hook saved it in `~/.spell/prompts/<name>.md`.
    - A natural-language trigger:  save it yourself, as "1. Name" says.
@@ -202,6 +216,7 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
 **Launched:**  the new session's `/epic <name>`, its worktree made, this window its own:
 - The worktree:  `epic worktree path <name>` (`.claude/worktrees/<name>`, or beside the repo).
 - "1. Name" as usual, but the worktree and branch `<name>` are THIS epic's:  no "Reuse" modal for them.
+  - In Codex:  no launched sessions:  Codex starts in the main checkout, and step 1 makes or finds the worktree.
   - An epic page or guide already there still asks.
 - "2. Session" as "Staying in this window", with no question and no `window stay`:
   the window is already `⎇ <name>`, tinted.
@@ -212,6 +227,8 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
       - With a `path` outside `.claude/worktrees/` it asks the person every time, whatever the permission rules say;  a
         symlink doesn't help (it resolves links).
       - Owen:  "this EnterWorktree thing is intolerable -- it's halting processes and wasting my time."
+        - In Codex:  none of this:
+          `cd "$(epic worktree path <name>)"`, or `epic worktree create <name>` when it isn't there.
     - The session-start guard records a session that starts in the worktree, so a reopen from another window still
       comes back to it (epic `epic-eject` I3).
   - Then steps 2, 3 and 5, then "3. Plan".
@@ -223,7 +240,9 @@ All in the FIRST turn, in this order, then the turn ends.
   and the stub doc keeps the kickoff prompt safe whatever happens to this session.
 
 0. Where:  isolate's "Start", step 2b, with `should-stay --epic`:  a new window, or stay in this one.
+   - In Codex:  skip it:  no window move;  print `epic window open <name>` for the person, if they want its window.
 1. Isolate, with this `<name>`:  `EnterWorktree`.
+   - In Codex:  `epic worktree create <name>`, then `cd` into the folder it prints, and work from there.
    - Read [the isolate skill](../isolate/SKILL.md), and follow "Start", step 3 (and step 0 mid-session).
    - A skill can't invoke another, so follow its steps here.
 2. The install command in the worktree, a few seconds:  `epic config installCommand` (`yarn install`).
@@ -239,6 +258,7 @@ All in the FIRST turn, in this order, then the turn ends.
 
    - Its SAGA (epic `epic-workflow` P15):  `epic saga list --json` gives the sagas, in the person's order.
      - Ask in a modal which saga the epic serves:
+       - In Codex:  ask in the chat, the sagas numbered, the likeliest first.
        - the likeliest first, "(Recommended)"
        - each option the saga's title and its purpose
        - "No saga" too:  then no `--saga`
@@ -277,6 +297,7 @@ Staying in this window (step 0):  skip steps 4 and 6.
 ## 3. Plan:  the Overview, on the page
 
 NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
+- In Codex:  nothing to avoid:  Codex has no plan mode.
 - The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
   only the Overview, Questions and Todo until the person presses Accept Overview.
 - Three stages, each ended by the person's button in the page header (`epic stage <name>` prints and sets it):
@@ -321,6 +342,8 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 
 The phases go to a background agent, `<name>-plan-doc`, as if the person had typed `/bg "plan-doc" ...`
 ([the bg skill](../bg/SKILL.md);  Owen, 2026-10-07).
+- In Codex:  no background agents:  do it yourself now, or ask for a Codex sub-agent and wait for it.
+  The same for every "background agent" below:  a sub-agent Codex waits for, or the work done here, one item at a time.
 - Its prompt has these steps, the Overview's sub-sections to read, and the decided questions.
 - The session stays free meanwhile, listening, and relays its report.
 - So does every later epic-page edit bigger than one command:
@@ -579,6 +602,7 @@ than just being able to move on").
        2. `epic merge <name>`, from the worktree:  it works on the MAIN checkout, checks it's on `main` and clean,
           then fast-forwards.
           - Never `ExitWorktree` and back for it:  entering asks the person every time (epic `epic-engine` P12, r11).
+            - In Codex:  nothing to leave:  stay in the worktree's folder.
           - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
           - STRAY files in a main checkout (epic `epic-engine` I77;  Owen:  "ask if I want to ditch them before merging
@@ -586,6 +610,7 @@ than just being able to move on").
             - a test's snapshot, a repo's generated output:  it moves them aside by itself, and says so
             - one to three others (a `settings.json5` ...):  it refuses, listing them.  Ask the person in a modal, "Ditch
               these in main?", each file named;  on a yes, `epic merge <name> --ditch`
+              - In Codex:  ask in the chat, yes or no, the files named.
             - moved aside, never deleted:  into `~/.spell-epic/ditched/<time>/`, which it prints
             - more than three is somebody's work:  `add <name>#I`, as above
        3. The changelog, if the repo keeps one:
@@ -598,6 +623,7 @@ than just being able to move on").
    the next phase whose plan is accepted:  no question, no stop (Owen, 2026-10-25, I117:  "rather than just being able to
    move on").
    - Stop, and ask (AskUserQuestion), only when:
+     - In Codex:  ask in the chat.
      - the next phase has no accepted plan ("4b. Build plans"), or its check needs a new one (step 1)
      - something urgent:  a failing check you can't fix, a hard-to-undo call, an open issue that blocks the next phase
      - it was the last phase, or the person said to stop after this one
@@ -727,6 +753,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
   - a `wait` already running in the session takes the work first:  the monitor then says nothing
 - Mechanical marks:  at once.
 - Add Details and "revisit now":  by background agents.
+  - In Codex:  a Codex sub-agent each, waited for;  or answered here, one at a time.
 - "Revisit soon":  answered one at a time.
 - EVERY answer goes INTO its item, on the page;  the chat only links them (Q3 of `windows-and-review`).
 - No modal walk through items any more (epic `review-review`, 2026-10-04;  its epic page, 1.1-1.2:
@@ -738,6 +765,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
     the hook refuses it, with a one-line reason (epic `airplane` P12, Q10 B).
     Untitled and main sessions are allowed.
   - No worktree, no plan mode.
+    - In Codex:  Codex has neither.
 - Started from the PAGE too (epic `airplane` P12):  the person clicks the "No Claude session is reviewing" pill
   (or the review line).
   - The page server finds the ONE running session titled for the epic (`🚧 <name>`, or the name as a word).
@@ -767,6 +795,7 @@ epic items <name> --json                   where reviews stand;  sections, items
 epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
+                                           In Codex:  run it in the foreground;  it returns with the work
 epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
 epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
@@ -786,6 +815,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 - As reply text, every epic in two groups (in progress / done), most not-reviewed first.
   - E.g. `- commands (worktree commands)  5 / 9`.
 - Then ONE modal, header `Epic Review`, "Which epic do you want to review?":
+  - In Codex:  the question in the chat, the epics numbered.
   - the epics with anything not reviewed
   - label:  `<name> (in progress)` / `<name> (done)`
   - description:  `5 of 9 items not reviewed`
@@ -810,6 +840,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
    - `epic pages link <ABS doc> --hash <that id> --review --show`:  the doc opens in the Review tab, at it.
 4. `epic inbox watch <name>`.
    - Then `epic inbox wait <name>`, with Bash `run_in_background: true`.
+     - In Codex:  run it in the foreground, and take the work it returns;  end the turn only when it times out.
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    a todo's plane queues it for the next phase, its x drops it;
@@ -854,6 +885,7 @@ want you to just do it").
 
 1b. CANCELED:  The person said "nevermind" on a running request for now (epic `windows-and-review` P2).
    - Stop that item's background agent (`TaskStop`).
+     - In Codex:  Codex waits for its sub-agents, so nothing is left running:  just don't write that item's answer.
    - Then `epic update <name>#<id> noted "Called off on the page:  nothing written."`.
    - And `epic inbox done <name>#<id>`.
    - An agent that finishes anyway is refused (`epic details` errors:  "the person called this request off"):
@@ -865,6 +897,8 @@ want you to just do it").
      - The person sees it at once, blue, under their note (P13 of `epic-components`).
    - THEN a BACKGROUND `Agent` (`run_in_background: true`).
      Each prompt carries:
+     - In Codex:  ask for a Codex sub-agent per item, each with this prompt, and wait for them;
+       or answer each here, one at a time.
    - Which doc, which item (id, title), and the rules:
      - `plan-doc.md` "Rules":  cold reader, bullets, examples, Net effect
      - and "Prose":  the blocks are ELEMENTS
@@ -926,6 +960,7 @@ want you to just do it").
      (Q3 of `windows-and-review`:  a long review stays readable.)
    - They answer on the page (Revisit again), or say so in chat.
      A quick yes / no:  a modal.
+     - In Codex:  in the chat.
    - A call made name by name (they want each name's context before a rule's renames go in):
      a CHOICE page (the Choice Pages guide, the content folder's `guides/syntax-choices.html`).
      - `epic choices create <slug> --epic <name> --rows <rows.json5>`.
@@ -993,6 +1028,7 @@ want you to just do it").
    - the doc's link pair last
 
 - A background agent's own completion notice wakes the session too.
+  - In Codex:  no notices:  the sub-agents' results come back before the turn goes on.
   - Nothing to do but check `inbox` shows the item done.
   - Don't re-arm a second `wait` while one runs:  `inbox` would print both.
     Check the background tasks.
@@ -1001,6 +1037,7 @@ want you to just do it").
 
 When the person says they're done ("stop reviewing", "that's it"), or the session must stop:
 - stop the waiter (`TaskStop`), then `epic inbox ignore <name>`
+  - In Codex:  the foreground wait has ended already:  just `epic inbox ignore <name>`.
   - a session whose title or worktree names the epic keeps listening anyway, through its inbox poller (P18, I144):  the next
     Send still reaches it, as a `📬` line
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
@@ -1047,6 +1084,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Then that's the epic, and nothing is asked:
      no "Which epic?" modal (step 1), no new-window-or-stay modal (step 3).
      - Step 3 is `EnterWorktree` with `name: "<name>"` (if not in it yet), then `epic window stay <name>`.
+       - In Codex:  `cd "$(epic worktree path <name>)"` if not there yet;  no window step.
    - One line says so:  "this window is `⎇ <name>`:  resuming it".
 1. Which epic:
    - `<name>` given:  that one.
@@ -1057,6 +1095,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      - One:  use it, naming it in the reply.
      - Several:  AskUserQuestion "Which epic?", label `<name>`,
        description its next phase and checkout (`epic summary`).
+       - In Codex:  ask in the chat, the epics numbered.
    - Rename this session `<name>`, first.
      - A typed `/epic resume <name>` already was, by the prompt hook
        ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
@@ -1068,14 +1107,17 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - a `repo` too:  ANOTHER repo's epic (epic `epic-engine` I47).
      Never `EnterWorktree` here, by name or path:  "1. Name"'s check, `epic window launch <name> --prompt
      "/epic resume <name>"`.
+     - In Codex:  print that command for the person to run.
    - `main`:  no worktree;  work in the main checkout, this window.
    - a worktree (`.claude/worktrees/<name>`, or beside the repo):  as [the unpark skill](../unpark/SKILL.md), step 3.
      - That's `should-stay --epic`, a new window or stay, and `EnterWorktree` with `name: "<name>"` (never `path`:
        "Launched").
+       - In Codex:  `cd "$(epic worktree path <name>)"`;  no window question.
      - A `PARKED-<name>.md` there:  it was parked.
        `/unpark`'s steps instead, and stop here.
    - The worktree is gone but branch `<name>` isn't:
      `EnterWorktree` with `name: "<name>"` re-makes it on that branch (the `WorktreeCreate` hook).
+     - In Codex:  `epic worktree create <name>` re-makes it the same way.
    - Neither:  say so, and ask before starting the epic over.
 4. Catch up, in the checkout:
    - What's done, what's half done:
@@ -1094,6 +1136,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Then:
      - a phase `active` with work under way:
        AskUserQuestion "Carry on with P<N> · <Name> (Recommended)" / "Stop here"
+       - In Codex:  ask in the chat, the options numbered;  the same for every "step 6's modal" below.
      - else, as "5. Each phase", step 6:  "Start P<N> · <Name> (Recommended)", the top open issue, "Stop here"
      - no phases yet (it hung while planning):  "3. Plan", from the prompt quoted in its Overview
      - a new window:  do all of this THIS turn, then end it (the move happens when it ends).
@@ -1109,6 +1152,7 @@ Write an idea down as a FUTURE epic (epic `epic-future`, 2026-10-07).
 - Runs from ANY window, `main` or a worktree:  the prompt hook lets it through.
   - It titles the session `📅 <name>`;  not one titled for another epic, which keeps its title (epic-workflow I5).
   - No worktree, no plan mode, no move.
+    - In Codex:  the same in Codex.
 1. Name, collisions, kickoff prompt:  as "1. Name".
    - The rest of the text is the idea, kept verbatim in `~/.spell/prompts/<name>.md` until the doc holds it.
    - An existing epic of that name:  say so and stop.
@@ -1216,6 +1260,7 @@ The person adds a phase to the epic under way, from items it already has, or fro
 - When its report comes back:
   - the new phase's link pair (`epic pages link <doc> --hash p<n> --review`)
   - and the next step, as "5. Each phase", step 6's modal ("Start P<n> · <Name>" among them)
+    - In Codex:  in the chat.
 
 ## 11. Start:  `/epic start <P1 | ids>`
 
@@ -1232,6 +1277,7 @@ The person starts work in THIS epic, in one block:  a phase, or a handful of its
 - A phase (`P<n>`):  "5. Each phase" for it.
   - Not the next one in order:  say so in one line, then go anyway.
   - Done already:  say so and ask (modal) "Reopen P<n>?" before touching it.
+    - In Codex:  ask in the chat.
 - Items (`J3 J4 T6`, spaces or commas, any case):  one block of work in this epic.
   - Read each whole:  together they're the task, the person's text the steer.
   - Mark each in progress:  `epic queue <name>#<id> "started with <the other ids>"`.
@@ -1256,6 +1302,7 @@ A REQUEST is something the person asked for in another session, sent here instea
   - a message from the sender:  "New request r3 for epic `<epic>` ...":  the same steps
   - a NEW session in the epic's window, `/epic request <epic> r3` typed in, when the epic's session wasn't running
     - first `EnterWorktree` with `name: "<epic>"`, as "Launched" does, only when `pwd` isn't in it already
+      - In Codex:  `cd "$(epic worktree path <epic>)"`.
   - the sender IS this epic's session:  it follows these steps itself
 - The prompt hook titled the session `🚧 <epic>`, so later requests reach it.
   - It refuses `/epic request` in a session titled for another epic.
@@ -1292,6 +1339,7 @@ A REQUEST is something the person asked for in another session, sent here instea
      - its id (`p-retry-logic`) is in `epic summary <name> --json`
    - then, when no phase is under way and bedtime mode is off:  "5. Each phase", step 6's modal,
      "Start P<N> · <Name>" first
+     - In Codex:  in the chat.
    - a phase under way:  no modal;  the new work waits its turn.
 - A request that needs no phase (already done, a duplicate):  `epic file <epic> r3 "<why>"`, and say so.
 
@@ -1329,6 +1377,7 @@ Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by 
      - each epic with a RUNNING session is skipped, and printed under `TELL:` with its line
   2. Send each `TELL:` line, as is, to the session it names:  the command can't send them itself.
      - With `SendMessage` (`to 🚧 seo:  ...`), one message each.
+       - In Codex:  Codex can't message another session:  print each `TELL:` line for the person to type into it.
      - Never a request (`epic send`):  it's a chore, not a phase.
   3. Report one line:  "migrated N epics;  told seo, docs".
 - A session RECEIVING a migrate message ("New epic page migration step ... run `epic migrate <epic>`"):

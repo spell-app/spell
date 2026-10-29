@@ -6,6 +6,9 @@ argument-hint: "[<words> | <id> | name [<title>]]"
 
 # /session
 
+In Codex:  Claude Code only (its saved sessions and panel);
+Codex resumes its own with `codex resume`:  `epic guide claude-only-tools`.
+
 The command:  `epic session <verb>`, run from the session's folder.
 - It lists THAT repo's sessions:  main checkout, worktrees and package folders together.
 - `spell help dev` lists the verbs.

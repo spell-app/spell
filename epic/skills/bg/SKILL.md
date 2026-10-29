@@ -6,6 +6,9 @@ argument-hint: '["name"] [n] <task> | ? | stop <name>'
 
 # /bg
 
+In Codex:  Claude Code only (its background agents free the panel);
+in Codex, ask for a sub-agent and wait for it, or do the task here:  `epic guide claude-only-tools`.
+
 Hand a task to a helper agent that works in the background (epic `skillz`), so the panel is free again at once.
 - The person keeps talking to this session, or sends more `/bg` tasks, while it works.
 - When it's done, its notice wakes this session, which reports.

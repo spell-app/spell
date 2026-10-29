@@ -6,6 +6,9 @@ argument-hint: '[land | status]'
 
 # /airplane
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+
 Airplane mode:  the person works on the pages ALONE, with no internet and no Claude (epic `airplane`).
 - They read epic pages and guides in VS Code's right side bar, mark items, write notes, add todos and questions.
 - Every page saves to this laptop's page server.
@@ -43,6 +46,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
 2. Running sessions:  `epic worktree list`.
    - A session mid-work will stall offline:
      list them for the person, one line each, and ask (modal, multi-select) which to `/park` first.
+     - In Codex:  ask in the chat, the sessions as a numbered list, and take the numbers the person gives.
    - Nothing running:  skip.
 3. The docs first?  Ask, ALWAYS (Owen, 2026-10-10, epic `airplane` J20:
    "When I airplane, ask if I want to do docs-check first").
@@ -51,6 +55,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
      - Only those merged into `main`:  this session is in the main checkout,
        and an unmerged epic's docs are checked from its own worktree.
    - AskUserQuestion, yes / no:  "Run /docs-check on the epics changed since the last flight first?"
+     - In Codex:  ask in the chat, yes or no, with step 2's question when both ask.
      - its description names those epics;  none:  says so, and Other takes names
      - asked in the same modal as step 2's, when both ask
    - Yes (or names):  run `/docs-check <those epics>`, as its skill says, before step 4.
@@ -105,6 +110,7 @@ The person is back online.  Gather everything, work through it in the background
 
 2b. Bring every session back online:  `epic park list`, each entry still `parked`.
    - Its session running:  `SendMessage` to it:  "Run `/unpark <name>` (asked by `/airplane land`)."
+     - In Codex:  Codex can't message another session:  print that line for the person to type into it.
      - running:  `epic worktree status <name>` says `running: true`
      - This session itself:  unpark it here, as [the unpark skill](../unpark/SKILL.md) says, once the rest is done.
    - Not running:  list it in the reply, with `/session <name>` to reopen it, then `/unpark <name>` there.
@@ -138,6 +144,8 @@ The person is back online.  Gather everything, work through it in the background
    - Say which pages, and that `/epic review feedback` works them;  nothing else to do for them now.
 5. The rest goes to background agents, up to 5 at once.
    They're named and listed (the root `CLAUDE.md`, "Delegated work").
+   - In Codex:  ask for Codex sub-agents, one per item, up to 5;
+     Codex waits for them all, so this step ends when they do.
    - Each request for now, revisit and phase note:  as `/epic review` answers one ("7.3", step 2).
      - The status card first, then the answer INTO the item.
      - Then `status ... noted "<what was answered>"`, and `inbox done | clear`:  an answer is a step.
@@ -160,10 +168,13 @@ The person is back online.  Gather everything, work through it in the background
 5b. New epics, made with the Epics page's New epic (`newEpics`):
    ask which to start, with CHECKBOXES (Owen, 2026-10-09).
    - AskUserQuestion, `multiSelect`, "Start which new epics?"
+     - In Codex:  the new epics as a numbered list in the chat;  the person answers with the numbers.
    - One option per epic:  its title for the label;  `<name>` and the prompt's first line for the description.
    - 4 per question, up to 4 questions.
      More than 16:  a details page with a `multiple` question instead.
    - Each picked:  `epic window launch <name>`.
+     - In Codex:  print `epic window launch <name>` for the person to run:
+       Codex can't open a window and start a session in it.
      - Its own worktree and window, with a NEW session there, `/epic <name>` typed in.
      - That session plans the future epic where it is:  prompt kept.
      - One line per window.

@@ -11,10 +11,14 @@
  * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`),
  *   whose content repo exists:  else nothing.
  * - Always exits 0, at once:  it reads one small file, no git.
+ * - Run by the Codex PLUGIN (`--codex-plugin`) while Codex's own hooks file runs it too:  nothing (`CodexHome`, J37).
  */
 import { readFileSync } from "node:fs"
 
 try {
+  // the plugin started it (--codex-plugin) while Codex's user hooks file runs it too:  one route, never both
+  const { CodexHome } = await import("spell/epic/config/CodexHome.ts")
+  if (CodexHome.skipPluginHook()) process.exit(0)
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a config that won't read never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")

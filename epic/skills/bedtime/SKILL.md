@@ -6,6 +6,9 @@ disable-model-invocation: true
 
 # /bedtime
 
+In Codex:  Claude Code only (it leans on background agents and the question modal throughout);
+in Codex, build the phases one by one with `epic guide build`.
+
 The person is going to sleep.
 Ask everything NOW, then get it all done:  run the chosen phases to the end without them.
 

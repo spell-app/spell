@@ -6,6 +6,9 @@ argument-hint: "[<name>] [?]"
 
 # /wtf
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
+
 The person has lost the thread:  hand it back in one screen.
 - Read-only:  change nothing, start nothing, commit nothing.
 - The one exception:  relaying their answers, step 4.
@@ -53,6 +56,7 @@ The person has lost the thread:  hand it back in one screen.
     `/epic review <name>` goes through them.
 - In flight:
   - `ListAgents`:  agents this session started;  for `<name>`, whether its session is running
+    - In Codex:  no `ListAgents`:  the sub-agents this session is waiting on, if any.
   - background shells, scheduled wakeups
 
 ## 3. Reply
@@ -77,6 +81,7 @@ Plain words, no jargon;  coined names defined in a few words.
 6. **Waiting on you** -- numbered (the person refers to them by number):
    - open questions (linked)
    - a modal the session is sitting on
+     - In Codex:  a question this session asked in the chat and the person hasn't answered.
    - issues needing a call
    - staged work awaiting "commit?"
 7. Last line:  where we are, as `/epic` says it:
@@ -90,6 +95,7 @@ Not ASK mode:  stop here.
 - Nothing waiting on the person:  add "Nothing to answer.", and stop.
 - Else, after the reply, AskUserQuestion with the questions from "Waiting on you"
   (4 per call, more calls if needed):
+  - In Codex:  ask them in the chat, numbered, each question's options lettered.
   - the epic page's open questions, with their options (labels as the doc's, recommended first)
   - the session's waiting modal, as it was asked
   - "commit?", for staged work
@@ -97,5 +103,6 @@ Not ASK mode:  stop here.
   - this session:  act on them as if asked directly (`epic decide <name>#Q<n> "..."` for plan questions).
   - `<name>`:  that session owns the work, so relay, don't act.
     - `SendMessage` to it (its name from `ListAgents`), with each question and the person's answer.
+      - In Codex:  Codex can't message another session:  always the block to paste, below.
     - Not running, or not in `ListAgents`:
       give the person the answers as one block to paste there, with `claude --resume <id>`.

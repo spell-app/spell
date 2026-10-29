@@ -11,6 +11,8 @@ The epic workflow in plain steps, for any agent:  Codex, Claude Code, or another
   Never `git add`, commit or restore its files:  `epic turn end` commits and syncs them.
 - Claude Code has a skill for each step (`/epic`, `/epic review` ...):  this guide is the same workflow without it.
   The skill links here, and where a step needs a tool only Claude Code has, the last topic says what to do instead.
+- Codex runs the same skills (epic `epic-friend` P12), once `epic plugin install --codex` has linked them:
+  `$epic review`, `$wtf`, `$details` ...  Each step that needs a Claude Code tool has an "In Codex:" line beside it.
 
 ## workflow -- The loop, start to finish
 
@@ -109,17 +111,23 @@ epic turn end
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 
 The epic skills lean on Claude Code's own tools.
-Without them, every step still works:
+Without them, every step still works:  each skill's "In Codex:" lines say it in short, this table in full.
 
 | Claude Code's | What it's for | Any agent instead |
 | --- | --- | --- |
 | the question modal (`AskUserQuestion`) | a quick pick or yes / no | ask in the chat, the options numbered |
 | a details page (`/details`) | a question that needs a picture | `epic ask create <slug>`, then `epic ask wait <slug>` |
-| background agents (`Agent`) | several items answered at once | answer them one at a time, in this session |
+| a skill, `/epic review` | the workflow's steps, one skill each | Codex:  the same skill, `$epic review`;  another agent:  this guide |
+| background agents (`Agent`, `/bg`) | several items answered at once, the chat free meanwhile | Codex:  ask for sub-agents, one per item, and wait for them (Codex waits, so the chat isn't free);  else one at a time, in this session |
+| the designer and coherence agents | a review by the plugin's own reviewer | Codex:  its custom agents `designer` and `coherence`, which `epic plugin install --codex` writes into `~/.codex/agents/`;  else follow that skill's steps yourself |
+| messages to another session (`SendMessage`, `ListAgents`) | telling a running session to do something | print the line for the person to type into that session |
+| a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
+| plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
+| `${CLAUDE_PLUGIN_ROOT}` in a skill | the epic plugin's own folder, which Claude Code fills in | `epic guide --root` prints it:  read `${CLAUDE_PLUGIN_ROOT}` as that folder |
 | the inbox poller (its `Stop` hook) | wakes the session when the person sends | `epic inbox wait <epic>`, run yourself |
 | the end-of-turn hook | commits and syncs the plans | `epic turn end` (Codex's hook runs it too) |
-| `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `cd "$(epic worktree path <epic>)"` |
-| the window moves (`epic window handoff`) | the session in the epic's VS Code window | open the worktree yourself |
+| `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
+| the window moves (`epic window handoff`, `launch`) | the session in the epic's VS Code window | print `epic window open <name>` for the person to run, and carry on where you are |
 | session titles (`epic session title`) | the epic's name on the session | none needed |
 | the Review tab (`epic open <epic> --review`) | the page beside the chat | `epic pages link <page> --show`:  open its browser link |
 | the time on a phase (`epic phase ... took`) | read from Claude Code's transcripts | not counted for other agents yet |

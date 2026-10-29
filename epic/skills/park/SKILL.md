@@ -6,6 +6,9 @@ argument-hint: "[<name>]"
 
 # /park
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
+
 Get this session's work out of the way, e.g. while another session restructures packages,
 and make it cheap to pick back up.
 - The work ends up as a WIP commit on branch `<name>`, in worktree `<name>`, plus a note.
@@ -36,12 +39,15 @@ What `$ARGUMENTS` means:
 
 0. In plan mode:  ask the person to leave it (shift+tab) first,
    as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
+   - In Codex:  no plan mode:  skip this step.
 1. `<name>`:
    - in a worktree:  that worktree's name
      - the session's folder is a worktree's:  in `.claude/worktrees/`, or beside the repo
    - else `$ARGUMENTS`, lower-kebab-cased
    - none:  propose one from the work so far, in AskUserQuestion
+     - In Codex:  propose it in the chat;  the person types another if they like.
    - Then rename the session `<name>` at once, before step 2:  `epic session title "🚧 <name>"`.
+     - In Codex:  no session title:  skip the rename.
      - Not done by the prompt hook:  `/park <name>` may name ANOTHER session.
 2. In the MAIN checkout:  move the work into worktree `<name>`,
    following [the isolate skill](../isolate/SKILL.md), "Start", with these changes:
@@ -50,6 +56,7 @@ What `$ARGUMENTS` means:
      - `git status --short`.
      - Any file this session didn't touch:
        AskUserQuestion, multiSelect, "Which of these are this session's?" (preselect none).
+       - In Codex:  ask in the chat, the files numbered.
      - Then stash them, tagged, and apply the stash in the worktree after step 3 (then drop that entry):
 
        ```sh
@@ -117,6 +124,7 @@ What `$ARGUMENTS` means:
 1. `epic worktree status <other>`:  its `sessions`.
 2. One running (`running: true`):  `SendMessage` to it:
    "Run `/park` now (asked by session `<this session's title or id>`).  Reply when parked, with the worktree name."
+   - In Codex:  Codex can't message another session:  print that line for the person to type into it.
    - Several running:  AskUserQuestion, which.
 3. None running:  say so in one line, and offer `/session <other>` to reopen it, then `/park` there.
    - NEVER park another session's files from here:  only that session knows which edits are its own.
@@ -149,6 +157,7 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
 4. Can't resolve a conflict (keeping both sides needs the person's call), or checks fail on this branch's code:
    - `git merge --abort` if still merging
    - then AskUserQuestion, listing each file and why
+     - In Codex:  list them in the chat, and ask what to do with each.
    - Stop there.
 5. Otherwise:
    - set line 1 to `<!-- park: resumed -->`

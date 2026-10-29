@@ -24,8 +24,8 @@ and nine hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
-- **Both are Claude Code's, so they work in Claude Code only, for now.**
-  🌱 Other agents are coming ([spell-epic's README](README.md#-coming)).
+- Codex runs fifteen of the skills from the same files, as `$epic review`, and three of the hooks
+  ([In Codex](#in-codex) below);  any other agent follows `epic guide`.
 
 <details>
 <summary>Run the gate yourself</summary>
@@ -258,6 +258,8 @@ Each of those is a row here, by when it happens.
   - Its own file because Codex reads Claude Code's `hooks.json` by default, which names events Codex hasn't got.
   - `epic plugin install --codex` copies them into `~/.codex/hooks.json`;  Codex runs them once you trust them, in
     its `/hooks` screen.
+  - The Codex plugin manifest names the same file, each script passed `--codex-plugin`:  a script started so stands down
+    while `~/.codex/hooks.json` runs it, so a machine with both runs each hook once.
 - Each runs `node "${CLAUDE_PLUGIN_ROOT}/hooks/<script>"`:  the plugin's own folder, wherever it's installed.
 - Why the worktree guard exists:  Claude Code brings a reopened session back into its worktree
   only when it ENTERED it, with its own worktree tool.
@@ -316,6 +318,24 @@ Both names then run the same skill, from the plugin's one folder.
 - A repo that kept its own copy of a skill (`.claude/skills/epic/`) should delete it:
   Claude Code runs your own skills folder's over a project's of the same name, so the copy only goes stale.
 - Outside Spell, the same install, and what else a repo needs:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
+
+## <a id="in-codex"></a>In Codex:  the same skills, one copy
+
+`epic plugin install --codex` links every skill into `~/.agents/skills/`, where the Codex CLI finds them in every repo.
+Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo` where Claude Code says `/epic review seo`.
+- Each step that needs a tool only Claude Code has keeps a line beside it, "In Codex:", saying what Codex does instead:
+  a numbered question in the chat for the question modal, a sub-agent it waits for for a background one,
+  `epic worktree create <name>` for a worktree move, the command printed for the person for a window.
+  - The long form, every tool and its plain way:  `epic guide claude-only-tools`.
+  - `${CLAUDE_PLUGIN_ROOT}` in a skill is the plugin's folder, which Codex doesn't fill in:  `epic guide --root` prints it.
+- Five stay Claude Code's:  `bg`, `bedtime`, `comment`, `session` and `title`.
+  - Each has `agents/openai.yaml` (`policy.allow_implicit_invocation: false`), so Codex never picks it by itself.
+  - Called by name, its first line says what to do in Codex instead.
+- The designer and coherence reviewers are Codex custom agents too, `~/.codex/agents/epic-designer.toml` and
+  `epic-coherence.toml`, generated from their Claude Code agent files at install.
+- `epic skills check` keeps the one copy honest, and the epic folder's tests run it:
+  - a step naming a Claude-only tool with no "In Codex:" line within 10 lines of it fails
+  - so does a Claude-only skill without its `agents/openai.yaml`, or descriptions past Codex's 8,000-character list
 
 ## See also
 

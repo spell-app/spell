@@ -1,13 +1,17 @@
 ---
 name: worktrees
-description: Take stock of every running Claude session (which worktree, branch and folder each is in) and everything open in this repo -- worktrees, branches, `/park`ed and `/bedtime` work, epic pages with phases left -- sorted into what's in process, what's hung or parked, and what's dead but still hanging on;  then let the person pick which groups to deal with, do the picked actions (remove, merge, end, open, unpark ...) and take stock again.  Use for `/worktrees`, `/worktrees sessions` (the table alone), or when the person asks "what's open?", "what worktree is X in", "which sessions are running where", "what did I leave running?", "clean up the worktrees", or can't find a session.  Epics alone:  `/epics`.
+description: Take stock of every running session (its worktree, branch and folder) and everything open in this repo -- worktrees, branches, parked work, epics with phases left -- sorted into in process, hung or parked, and dead;  then let the person pick what to deal with (remove, merge, end, open, unpark ...) and take stock again.  Use for `/worktrees`, `/worktrees sessions` (the table alone), or "what's open?", "which sessions are running where", "clean up the worktrees".  Epics alone:  `/epics`.
 argument-hint: "[sessions]"
 ---
 
 # /worktrees
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
+
 The person has lots going at once:  show it all in one screen, sort it, and clean up what they pick.
 - Nothing changes before they pick it in a modal.
+  - In Codex:  "a modal" is a question in the chat, its options numbered;  the person answers with the numbers.
 - It was `/whassup` plus the old global `/worktrees`, merged 2026-10-03.
 
 - The tools, from the repo root or any worktree.  Read-only.
@@ -19,6 +23,8 @@ The person has lots going at once:  show it all in one screen, sort it, and clea
   - Each:
     - title
     - agent name:  what `ListAgents` and `SendMessage` call it
+      - In Codex:  the sessions listed are Claude Code's;
+        Codex can't message them:  for a step that would, print the line for the person to type into that session.
     - id:  `/session` and `claude --resume` take its first 8
     - status
     - where it runs:  VS Code / terminal / Desktop
@@ -83,6 +89,7 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
   - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](https://github.com/spell-app/spell/blob/main/epic/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
+    - In Codex:  run it in the foreground:  it returns when the person sends.
   - The person's Send wakes the session with the answers as text.
     See [the details skill](../details/SKILL.md);  write it as "Writing for the person" there says.
 - Woken:  each answer is that item's pick, then step 4.
@@ -93,6 +100,7 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
 Else (4 items or fewer), the modals:
 
 AskUserQuestion, multiSelect, question "What's next?", header "Next":
+- In Codex:  ask in the chat:  the groups numbered, "Forget it" last.
 - one option per group with items in it:  "In process (<n>)", "Hung or parked (<n>)", "Dead (<n>)".
   Each described in a few words from its items (e.g. "remove 2 merged worktrees, end 1 idle session").
 - "Forget it":  stop, nothing more.
@@ -101,6 +109,7 @@ AskUserQuestion, multiSelect, question "What's next?", header "Next":
 ## 3. Pick the actions
 
 For each picked group, AskUserQuestion, multiSelect, ONE question per item (4 per call;  more items:  more calls):
+- In Codex:  ask in the chat, every item numbered with its actions lettered (`2b`);  the person answers with the picks.
 - question:  "<n>. <kind> <name>:  <why, short>";  header:  the name, cut to 12 characters
 - options:  its `actions` (label as given;  description:  the commands, or what Claude will do), then "Leave it".
   - More than 3 actions:  the first 3 (the script lists them most useful first), then "Leave it".
@@ -125,6 +134,7 @@ In the order the person will want to see them:  quick looks (`wtf`, `open`, `ans
     - A merged one removed:  `epic session done <name>`.
       Its sessions then read `✅ <name>`, once each is next opened (epic `windows-and-review` P6).
   - `discard`:  ALWAYS a second AskUserQuestion first, "Throw away `<name>`?", listing what goes:
+    - In Codex:  ask in the chat, yes or no, listing what goes.
     - `git log --oneline main..<branch>`
     - `git -C <worktree> status --short`
     - Options "Throw it away" / "Keep it".
@@ -133,6 +143,7 @@ In the order the person will want to see them:  quick looks (`wtf`, `open`, `ans
     - `git merge-tree --write-tree --name-only main <branch>` exits 1 (conflicts):
       don't.  Say which files, and offer `/unpark <name>` or its session to fix them.
     - Picking it in the modal counts as the ask to commit the merge.
+      - In Codex:  a pick in the chat counts the same.
     - Then offer its `remove` next round.
   - `kill`:  `kill <pid>` (SIGTERM).
     - NEVER this session's own pid.
@@ -142,9 +153,11 @@ In the order the person will want to see them:  quick looks (`wtf`, `open`, `ans
   - `answer`:  the `wtf` skill with `<name>?`, which shows the waiting question and relays the person's answer.
   - `unpark` / `wakeup`:  they must run IN that work's session.
     - Running:  `SendMessage` to it ("Run `/unpark`" / "Run `/wakeup`", asked by this session).
+      - In Codex:  print the line for the person to type into that session.
     - Not running:  tell the person to open a new session and run it there.
       Running them here would move THIS session.
   - `nudge`:  `SendMessage` to the session that's waiting:  "`<target>` is done:  run `/unpark <name>`".
+    - In Codex:  the same:  print it for the person.
   - `apply` / `drop` (a stash):
     - `drop` shows `git stash show -p <sha>` first.
     - Then it finds the entry's current `stash@{n}` by its sha (`git stash list --format='%H %gd'`), and drops that.

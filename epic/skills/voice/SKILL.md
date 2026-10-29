@@ -6,6 +6,9 @@ argument-hint: "[<page>...] [--voice <name>]"
 
 # /voice
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
+
 Rewrite guides in a voice (epic `readme` P14):  how they READ, never what they SAY.
 - The voice:  `epic voice --for guide` (the repo's choice;  spell-epic ships `readme`), or `--voice <name>`.
 - On top of it, everywhere, the repo's CODE voice, its house style's writing rules (`epic voice code`):
@@ -33,6 +36,9 @@ Rewrite guides in a voice (epic `readme` P14):  how they READ, never what they S
 3. Split the guides not done into at most 5 groups of about equal WORDS (a long guide alone in its group),
    neighbours together (one folder's guides in one group).
 4. One background agent per group, NAMED and LISTED ([the bg skill](../bg/SKILL.md), "Names"):
+   - In Codex:  ask for Codex sub-agents, one per group, with that brief;
+     Codex waits for them all, then step 5 runs for each.  No `epic agents add` / `done`:
+     those list Claude Code's agents.
    - `epic agents add voice-<n> "<its guides, short>"`:  prints its full name
    - an `Agent` call, type `general-purpose`, `run_in_background: true`, its `description` starting with that name
    - its prompt:  "The agent's brief", below, word for word, with its guides (their REAL paths in the content folder:

@@ -36,6 +36,15 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
   - They reach the plugin's own files through `${CLAUDE_PLUGIN_ROOT}`.
+  - ONE copy for Claude Code AND Codex (epic `epic-friend` P12, J29):  the Codex manifest
+    ([.codex-plugin/plugin.json](.codex-plugin/plugin.json)) names this same folder, and `epic plugin install --codex`
+    links each skill into `~/.agents/skills/`.
+    - A step that names a Claude-only tool (the question modal, `Agent`, `EnterWorktree`, `SendMessage`, plan mode,
+      a background Bash ...) keeps a one-line `In Codex:` way within 10 lines of it;  the long form is the epic
+      skill's [guide.md](skills/epic/guide.md), `claude-only-tools`.
+    - A Claude-only skill (`bg`, `bedtime`, `comment`, `session`, `title`) says `In Codex:  Claude Code only` first,
+      and has `agents/openai.yaml` turning off `policy.allow_implicit_invocation`.
+    - `epic skills check` (`SkillsCheck`) fails either rule, and a description past Codex's list;  its test runs it.
 - Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
   (epic `readme` P12).
   - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
@@ -60,6 +69,8 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   - Wait for the person's next Send with `epic inbox wait <epic>`.
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it;  Codex's, [codex-hooks.json](hooks/codex-hooks.json),
   three of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
+  - Codex's file passes each script `--codex-plugin`:  started so, a script stands down while Codex's own
+    `~/.codex/hooks.json` runs it (`CodexHome.skipPluginHook()`), so they never run twice (J37).
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):

@@ -6,6 +6,9 @@ argument-hint: "<name> | ?"
 
 # /wait-for
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
+
 Another session is changing things this one depends on (e.g. moving packages).
 - Park here, watch it, and resume when it's done, with no one supervising.
 - Parking and resuming are [the park skill](../park/SKILL.md)'s:  read it.
@@ -25,6 +28,7 @@ Another session is changing things this one depends on (e.g. moving packages).
 - `?`, or no argument:  `epic park candidates`.
   - none:  say so, and stop
   - else AskUserQuestion "Wait for which?", one option per candidate
+    - In Codex:  ask in the chat, the candidates numbered.
     - labelled with its `name`, described by its `label`
     - 4 per question;  more in extra questions, or the person types a name in "Other"
 - Else `<name>` is `$ARGUMENTS`.
@@ -46,6 +50,8 @@ Another session is changing things this one depends on (e.g. moving packages).
 
 1. `epic worktree status <name>` already `finished`:  say why in one line, then step 4.
 2. Else start the wait in the background:  `epic park wait <name>`.
+   - In Codex:  run `epic park wait <name>` in the foreground:  the turn waits with it (up to ~2h), then step 4;
+     Ctrl-C stops it.
    - It checks every 60s, and gives up after ~2h.
    - The `Bash` call's settings:  `run_in_background: true`, `timeout: 7200000`
 3. One line:
@@ -57,6 +63,7 @@ Another session is changing things this one depends on (e.g. moving packages).
    - 3, or anything else:  say what it printed, and stop, still parked.
    - The person writes while it waits:  answer them;  the wait goes on.
      "Stop waiting":  stop it (`TaskStop`), and leave the note at `parked`.
+     - In Codex:  the wait runs in the foreground:  Ctrl-C stops it.
 - NOTE:  the wait lives only as long as this session.
   Closed or restarted (VS Code reload, window move):  `/wait-for <name>` again, or `/unpark`.
 

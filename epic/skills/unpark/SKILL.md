@@ -6,6 +6,9 @@ argument-hint: "[<name>]"
 
 # /unpark
 
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
+
 The other half of `/park`.
 - The steps that do the work are [the park skill](../park/SKILL.md)'s "Resume".
 - This skill finds what to resume, and makes sure it happens in the right place.
@@ -20,6 +23,7 @@ The other half of `/park`.
   - none:  say "nothing parked", and stop
   - one:  use it, naming it in the reply
   - several:  AskUserQuestion "Which parked work?", one option per entry
+    - In Codex:  ask in the chat, the entries numbered.
     - label:  `<name>`
     - description:  its `stopped` line and `state`
     - 4 per question;  more in extra questions
@@ -29,6 +33,7 @@ The other half of `/park`.
     ([prompt-gate.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/prompt-gate.mjs)).
   - Else (no argument, or plain words):  `epic session title --force "🚧 <name>"`.
     It lands on the next prompt, or when the session opens in its new window.
+    - In Codex:  no session title:  skip the rename.
 
 ## 2. Parked by a session that's still open
 
@@ -36,6 +41,8 @@ Another session still has it open, by `epic worktree status <name>`:
 - a session in its `sessions` with `running: true`, other than this one
 
 Then AskUserQuestion:
+- In Codex:  Codex can't message another session:
+  say it's open there, and print `/unpark <name>` for the person to type into it;  or unpark here.
 
 - "Tell it to unpark (Recommended)":  `SendMessage` to it:  "Run `/unpark <name>` (asked by `<this session>`)."
   - Then one line, and stop.
@@ -44,6 +51,9 @@ Then AskUserQuestion:
   Say in one line that the other session should be closed, so the two don't both edit.
 
 ## 3. The right window
+In Codex:  skip the window question:
+work from the worktree's folder (`cd "$(epic worktree path <name>)"`),
+and print `epic window open <name>` for the person, if they want its window.
 
 - This window:  `epic window which`, its `workspace` line.
 - `<name>`'s window file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`.
@@ -61,6 +71,7 @@ Then AskUserQuestion:
        - The session moves there when this turn ends.
   - "Stay in this window":  step 1, then `epic window stay <name>` (the window titled `⎇ <name>`, tinted).
 - Same:  `EnterWorktree` with `name: "<name>"` if not in it yet, and go on.
+  - In Codex:  `cd "$(epic worktree path <name>)"` if not there yet.
 
 ## 4. Resume
 
