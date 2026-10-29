@@ -196,7 +196,7 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     // the code pane:  a plain <div> with an EditContext, as Monaco's `native-edit-context` is
     const codePane = document.createElement("div")
     codePane.tabIndex = 0
-    ;(codePane as HTMLElement & { editContext: unknown }).editContext = new (
+    ;(codePane as unknown as { editContext: unknown }).editContext = new (
       globalThis as unknown as { EditContext: new () => unknown }
     ).EditContext()
     document.body.append(codePane)
