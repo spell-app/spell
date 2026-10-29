@@ -13,6 +13,7 @@ import { ActionMenus } from "./ActionMenus"
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
  * How a view's states look.
+ * - A clickable thing (`:state(clickable)`):  the pointer cursor, unless its drawing says otherwise.
  * - A draggable thing:  the browser's grab cursor, grabbing while it's dragged,
  *   over its drawing's own `cursor` (e.g. a clickable card's pointer).
  *   And a finger drags it, rather than scrolling the page.
@@ -28,6 +29,7 @@ import { ActionMenus } from "./ActionMenus"
  *   `--spell-selected-outline` and `--spell-selected-outline-offset` change it.
  */
 const STATES_CSS = `
+  :host(:state(clickable)) { cursor: pointer; }
   :host(:state(draggable)) { touch-action: none; }
   :host(:state(draggable)), :host(:state(draggable)) * { cursor: grab !important; }
   :host(:state(dragging)), :host(:state(dragging)) * { cursor: grabbing !important; }
@@ -316,6 +318,21 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const list = this.ownerList
     if (!thing || !list || !SpellElement.flag(thing, "canBeDragged")) return false
     return !!this.entry?.core.canGiveUp(list, thing)
+  }
+
+  /**
+   * Does a click do something to our thing?  Its type handles a click (`- on click:`, `<on click>`), a double click,
+   * or says it `can be selected`;  it shows the pointer cursor (`STATES_CSS`), and the grab cursor once draggable.
+   * - A click its thing hands up (`pass event`) to its list isn't counted:  the list's element shows it instead.
+   */
+  @E.cssState("clickable")
+  get isClickable(): boolean {
+    const thing = this.currentThing as Record<string, unknown> | undefined
+    if (!thing) return false
+    return (
+      CLICK_HANDLERS.some((handler) => typeof thing[handler] === "function") ||
+      SpellElement.flag(thing, "canBeSelected")
+    )
   }
 
   /** Is it being dragged now?  Its cursor is grabbing meanwhile. */
@@ -1502,6 +1519,9 @@ const THING_EVENTS: Record<string, string> = {
   mouseenter: "mouse-enter",
   mouseleave: "mouse-leave"
 }
+
+/** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
+const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()

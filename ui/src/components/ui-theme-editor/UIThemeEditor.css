@@ -229,6 +229,9 @@
     min-width: 0;
     border-radius: calc(var(--ui-radius-l, 12px) - 6px);
     cursor: grab;
+    /* a press on its text starts the drag, never a text selection (the I-beam cursor) */
+    user-select: none;
+    -webkit-user-select: none;
   }
   .page-head:focus-visible {
     outline: 2px solid var(--ui-focus-color, var(--ui-primary));
