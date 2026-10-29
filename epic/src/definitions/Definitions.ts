@@ -37,6 +37,7 @@ import { epicUpdatedVocabulary } from "spell/epic/components/epic-phase/EpicUpda
 import { epicPromptVocabulary } from "spell/epic/components/epic-prompt/EpicPrompt.en"
 import { epicQuestionVocabulary } from "spell/epic/components/epic-question/EpicQuestion.en"
 import { epicReviewVocabulary } from "spell/epic/components/epic-review/EpicReview.en"
+import { epicStageButtonVocabulary } from "spell/epic/components/epic-review/EpicStageButton.en"
 import { epicSectionVocabulary } from "spell/epic/components/epic-section/EpicSection.en"
 import { epicSendVocabulary } from "spell/epic/components/epic-send/EpicSend.en"
 import { epicSendButtonsVocabulary } from "spell/epic/components/epic-send-buttons/EpicSendButtons.en"
@@ -125,6 +126,7 @@ export class Definitions {
     // a test run (epic `epic-engine` P4):  drawn by `<epic-page>` over its blocks, written in a doc only as an example
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,
+    "epic-stage-button": epicStageButtonVocabulary,
     "epic-new-item": epicNewItemVocabulary,
     "epic-option-form": epicOptionFormVocabulary,
     "epic-agents": epicAgentsVocabulary,

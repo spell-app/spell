@@ -68,7 +68,7 @@ import { SharedComments } from "./SharedComments"
  *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/m3-20261019-1432.png`,
  *         from the epic page's folder (written by the review routes' `POST shot`)
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
- *     - the page header's STAGE BUTTON (epic `epic-engine` P29), Accept Overview or Accept Phases:
+ *     - the STAGE BUTTON, `<epic-stage-button>` (epic `epic-engine` P29), Accept Overview or Accept Phases:
  *       `{ action: "accept", stage: "overview" }` under the key `stage` (`STAGE_ID`), while the page is in that stage
  *       - sent at once with whatever else is unsent;  `epic inbox apply` moves the page on a stage
  *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
@@ -1035,7 +1035,7 @@ export class ReviewInbox {
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
    * - a note box's mark (`revisit`, `todo`, `next`, `drop`, `skip`):  `shot` too, when given, the picture Owen pasted
    *   or dropped in the box (epic `epic-engine` P51):  `tests/j3-20261029-1432.png` (`NOTE_SHOT`)
-   * - `accept` (the page header's stage button, epic `epic-engine` P29):  `stage`, the stage it ends, one of
+   * - `accept` (`<epic-stage-button>`, epic `epic-engine` P29):  `stage`, the stage it ends, one of
    *   `ACCEPT_STAGES`;  none:  a change mark's Accept (P30), `{ action: "accept" }`
    * - `reopen` (a change mark's Reopen, P30):  the action alone
    * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
@@ -1431,7 +1431,7 @@ export const INBOX_VERSION = 1
  * - `pick`:  an option card, by letter (`pick: "B"`), on any item (I8):  `choices` says which card set
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
  * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
- * - `accept`:  the page header's stage button (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
+ * - `accept`:  `<epic-stage-button>` (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id

@@ -35,6 +35,7 @@ describe("Migrations", () => {
       "picks-in-choices",
       "updates-said-by-marks",
       "log-commits",
+      "owens-answers-seen",
       "agents-marked"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")

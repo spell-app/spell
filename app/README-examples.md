@@ -55,7 +55,7 @@ They're two groups in Spell's own space:
 Every example but Counter has a guide that takes it apart:  [guides](#guides--programs-that-read-as-prose), below.
 Counter has a notebook instead, `@spell/notebooks/Counter`, which imports its counter and tries it out.
 Every Spell UI component page is a notebook project too, `@spell/notebooks/Button` and the rest:
-a notebook per tab, linked by the page's tab bar, written from the page by `spell app notebook convert`.
+a notebook per tab, linked by the page's tab bar, converted from the page once, and edited by hand since.
 
 ### Opening one
 

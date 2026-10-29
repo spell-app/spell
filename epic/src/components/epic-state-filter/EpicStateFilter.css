@@ -85,7 +85,9 @@
   }
   /*
    * a phase scheduled, not running (epic `epic-engine` I170;  Owen, 2026-10-29:  "scheduled not running - blue dotted
-   * outline"):  its DOTTED outline in blue, its count in blue, never filled;  hidden, faded
+   * outline"):  its DOTTED outline in blue;  shown, FILLED blue as every chip that's on, its dots a lighter blue on
+   *   the fill (Owen, 2026-10-29:  "blue dotted ring but not filled in is confusing.  Looks like it is turned off");
+   *   hidden, its outline alone, faded
    * - 2px, the dots' size:  1.5px dots blur into a line
    */
   .chip[data-fill="dotted"] {
@@ -94,10 +96,13 @@
     border-style: dotted;
   }
   .chip[data-fill="dotted"][aria-pressed="true"] {
-    background: transparent;
-    color: var(--_chip);
+    border-color: color-mix(in oklab, var(--_chip) 45%, white);
+    background: var(--_chip);
+    color: white;
   }
   .chip[data-fill="dotted"][aria-pressed="false"] {
+    background: transparent;
+    color: var(--_chip);
     opacity: 0.45;
   }
   .chip:hover {

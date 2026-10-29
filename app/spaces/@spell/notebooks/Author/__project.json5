@@ -1,6 +1,6 @@
 {
   "title": "Author",
-  "description": "Spell UI's Author page as notebooks:  its Examples, Usage and API tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
+  "description": "Spell UI's Author page as notebooks:  its Examples, Usage and API tabs, each a notebook of its own, linked by the page's tab bar",
   "imports": [
     {
       "path": "/Examples.spellml",

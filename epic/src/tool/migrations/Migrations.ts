@@ -5,6 +5,7 @@ import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { LogCommits } from "./LogCommits"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { OwensAnswersSeen } from "./OwensAnswersSeen"
 import { PicksInChoices } from "./PicksInChoices"
 import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
@@ -50,6 +51,7 @@ export class Migrations {
     new PicksInChoices(),
     new UpdatesSaidByMarks(),
     new LogCommits(),
+    new OwensAnswersSeen(),
     new AgentsMarked()
   ]
 

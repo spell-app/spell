@@ -629,6 +629,11 @@
     fill: currentColor;
     vertical-align: -0.125em;
   }
+  /* a row with no icon, in a menu whose other rows have one:  its words start where theirs do (a menu of ticks, a
+     check only on the rows that are on;  Owen, 2026-10-29) */
+  .ui.dropdown .menu:has(> .item > .icon) > .item:not(:has(> :is(.icon, .icons, .flag, .image, img))) {
+    padding-inline-start: calc(var(--_ui-dropdown-item-padding-inline) + 1.18em + var(--_ui-dropdown-item-element-spacing));
+  }
   .ui.dropdown > .text :is(img, .image:not(.icon)),
   .ui.dropdown > .text ::slotted(:is(img, .image:not(.icon))),
   .ui.dropdown .menu > :is(.item, .header) > :is(img, .image:not(.icon)) {

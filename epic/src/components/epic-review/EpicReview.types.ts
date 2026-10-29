@@ -650,6 +650,7 @@ declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
       "epic-review": EpicJSXAttributes
+      "epic-stage-button": EpicJSXAttributes
     }
   }
 }

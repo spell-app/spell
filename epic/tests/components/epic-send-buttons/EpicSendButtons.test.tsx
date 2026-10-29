@@ -179,52 +179,6 @@ describe("<epic-send-buttons>", () => {
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])
     })
-
-    // J143
-    test("a stage:  the ring goes round the Accept button's check;  its end asks to send (`auto` true), never Accept", async () => {
-      adoptCountdown()
-      const group = await ElementFixture.render(
-        `<epic-send-buttons state="unsent" accept="Accept Overview" countdown></epic-send-buttons>`
-      )
-      await ElementFixture.settle()
-      const heard = asks(group)
-      const ring = part(group, "ring")!
-      const check = part(group, "send")!.querySelector("ui-icon")!
-      expect(ring.parentElement!.contains(check)).toBe(true)
-      expect(ring.getBoundingClientRect().height).toBeLessThan(part(group, "send")!.getBoundingClientRect().height)
-      vi.advanceTimersByTime(COUNTDOWN_MS)
-      expect(heard).toEqual([true])
-    })
-  })
-})
-
-// epic `epic-engine` P29:  the stage button in the plane's place
-describe("<epic-send-buttons accept>", () => {
-  test("a check and its words in the plane's place, green, no badge;  a press asks as the plane's;  accepted:  outlined green", async () => {
-    adoptCountdown().choose("off")
-    const group = await ElementFixture.render(
-      `<epic-send-buttons state="unsent" count="2" accept="Accept Overview" send-tip="The Overview is agreed"></epic-send-buttons>`
-    )
-    await ElementFixture.settle()
-    const send = part(group, "send")!
-    expect(send.textContent!.trim()).toBe("Accept Overview")
-    expect(send.querySelector("ui-icon")!.getAttribute("name")).toBe("circle check")
-    expect(part(group, "count")).toBeNull()
-    expect(part(group, "base")!.dataset.state).toBe("idle")
-    // never the plane's filled blue, the countdown off or not
-    expect(getComputedStyle(send).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    const heard = asks(group)
-    send.click()
-    expect(heard).toEqual([false])
-    const rule = () => getComputedStyle(part(group, "base")!).borderTopColor
-    const grey = rule()
-    group.setAttribute("accepted", "")
-    await ElementFixture.tick()
-    expect(part(group, "base")!.dataset.state).toBe("accepted")
-    // the words' green
-    expect(rule()).not.toBe(grey)
-    expect(rule()).toBe(getComputedStyle(send).color)
-    await expectAccessible(group)
   })
 })
 

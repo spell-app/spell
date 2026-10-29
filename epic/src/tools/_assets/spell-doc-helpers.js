@@ -10,7 +10,7 @@
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { ServerLink } from "spell/epic/review"
+import { PageNotices, ServerLink } from "spell/epic/review"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -190,31 +190,16 @@ export function growField(field) {
 }
 
 /**
- * A toast through `UI.toast()`;  the console when toasts aren't there.
- * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`ToastAction`s:  `{ text, icon, click }`)
- * - a toast with buttons looks like one without (epic `epic-engine` P20):
- *   each button on the toast's own line, at its end, on its colour (`TOAST_ACTIONS`), never a second band under it
- *   - Owen, 2026-10-22:  "make the 'comment deleted' toast not ugly, matching the styles of the other toasts"
+ * A notice at the bottom of the window, in the page's ONE stack with an epic page's ("Sent 2 marks to Claude"):
+ * `PageNotices` (Owen, 2026-10-29:  "Make the latter look like the former, but green, and put it in the same toast
+ * stack";  Spell UI's `UI.toast()`, at the top, before).
+ * - `type`:  `success` green, `error` red, `warning` orange;  none:  the plain one
+ * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`{ text, icon, click }`), at its end
+ * - NEVER throws
  */
 export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
-  const buttons = actions?.map((action) => ({ class: TOAST_ACTION_CLASS, ...action }))
-  try {
-    window.SpellUI.UI.toast({
-      message,
-      type,
-      displayTime,
-      ...(buttons && { actions: buttons, classActions: TOAST_ACTIONS })
-    })
-  } catch {
-    console.info(message)
-  }
+  PageNotices.show(message, { tone: type ?? "plain", ms: displayTime, actions })
 }
-
-/** A toast's buttons:  a column at its end, no bar of their own (Spell UI's `classActions`). */
-const TOAST_ACTIONS = "basic vertical"
-
-/** Each toast button's look:  an outline on the toast's own colour, as short as the toast's line. */
-const TOAST_ACTION_CLASS = "basic inverted compact"
 
 ////////////////
 // ## Data pages

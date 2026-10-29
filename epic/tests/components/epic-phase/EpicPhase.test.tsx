@@ -31,7 +31,7 @@ async function gearOf(host: Element): Promise<E.DOMElement> {
 function gearEntries(gear: Element): string[] {
   return Array.from(
     gear.querySelectorAll("ui-item"),
-    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "check" ? "on" : "off"}`
   )
 }
 

@@ -38,6 +38,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
   - small inconsistency fixes in touched files
   - fix obviously incorrect comments
   - A drive-by fix SHIPS even when the refactor that surfaced it is parked.
+  - EXCEPT a fix to the built-in projects (app's `spaces/@spell/`) another epic didn't cause:
+    SEE:  the kit's `CLAUDE.md`, "Content requests".
 - **Grep the whole repo BEFORE renaming or moving anything**, and record what you found:
   - "nothing outside `Run.ts` reads `run.index`" is what makes a rename a contained change
     rather than a hopeful one.

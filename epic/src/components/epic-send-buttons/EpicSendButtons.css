@@ -3,8 +3,6 @@
  * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
  *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never
  *   dashed (Owen, 2026-10-22:  "Lose the dotted outline around both").
- * - The STAGE BUTTON (`accept`, epic `epic-engine` P29):  in the plane's place, a check and its words, green;  the
- *   pill outlined green once pressed (`accepted`).
  * - WAITING ON YOU (`asks`, Owen, 2026-10-25):  the pill's own border 2px #666, solid, dotted once pressed (`taken`);
  *   the same ring as a waiting plan's buttons on its phase (`EpicReview.css`, `data-asks`).
  * - Auto Send off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
@@ -17,7 +15,6 @@
  *     by the element, eased over the second)
  *   - the pill's own outline goes while it counts:  ring and button never read as one border
  *   - started again (a key, a click, a scroll):  it unwinds back to empty in 0.3s, never jumps there
- *   - the stage button's ring:  round its check, inside the pill
  * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
  *   - `--epic-send-buttons-size`:  the pill's height (the plane's round end).  Default 28px (an epic page's
  *     `--epic-control-size`).
@@ -31,7 +28,6 @@
   :host {
     --_size: var(--epic-send-buttons-size, 28px);
     --_tint: var(--ui-blue, #2185d0);
-    --_green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
     --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
     --_light: color-mix(in oklab, var(--_tint) 55%, white);
@@ -55,8 +51,8 @@
   }
   /* INACTIVE, nothing new to send (idle, or all of it sent):  the plane alone, its rim `transparent` (Owen, 2026-10-25:
      "no boder around plane in this mode", then "I wanted no border when this is inactive, use `transparent`");  the
-     border kept, so nothing beside it moves.  Not the stage button's, nor while the pill waits on Owen */
-  :host(:not(:state(stage))) .group:is([data-state="idle"], [data-state="sent"]):not([data-asks]) {
+     border kept, so nothing beside it moves.  Not while the pill waits on Owen */
+  .group:is([data-state="idle"], [data-state="sent"]):not([data-asks]) {
     border-color: transparent;
   }
   /* waiting on Owen:  the pill's OWN border 2px #666 (Owen, 2026-10-25:  "try 2px border, #666"), dotted once pressed;
@@ -108,7 +104,7 @@
     background: color-mix(in oklab, var(--_tint) 75%, white);
   }
   /* inside the ring while it counts:  the disc 1px in from it, so it fills the ring's middle and no more */
-  :host(:state(counting)) .send:not(.accept) {
+  :host(:state(counting)) .send {
     padding: calc((var(--_size) - 2px - var(--_disc)) / 2);
     background-clip: content-box;
     font-size: 10px;
@@ -120,25 +116,6 @@
   }
   :host(:state(waiting)) .send:hover {
     background: color-mix(in oklab, var(--_tint) 85%, black);
-  }
-  /* the STAGE BUTTON in the plane's place (`accept`):  a check and its words, green (decided);  outlined green once
-     pressed (`accepted`), waiting for the session to move the page on */
-  .send.accept {
-    display: inline-flex;
-    gap: 5px;
-    width: auto;
-    padding: 0 10px 0 8px;
-    border-radius: 999px;
-    color: var(--_green);
-    font: 600 12px/1 var(--ui-font-family, system-ui, sans-serif);
-    white-space: nowrap;
-  }
-  .send.accept:hover {
-    background: color-mix(in oklab, var(--_green) 12%, transparent);
-    color: var(--_green);
-  }
-  .group[data-state="accepted"] {
-    border: 1.5px solid var(--_green);
   }
   .send[aria-busy="true"] {
     cursor: progress;
@@ -179,8 +156,8 @@
     --_disc: calc(var(--_size) - 12px);
   }
   /* while it counts, the pill's own outline goes, a waiting-on-you one too:  the ring is the only border (Owen,
-     2026-10-29:  "dotted line came back");  the stage button keeps its own, the ring inside it */
-  :host(:state(counting)) .group:not(:has(.accept)) {
+     2026-10-29:  "dotted line came back") */
+  :host(:state(counting)) .group {
     border-color: transparent;
   }
   .ring {
@@ -197,17 +174,10 @@
     overflow: visible;
     pointer-events: none;
   }
-  /* the stage button's:  round its check, inside the pill */
-  .accept .ring {
-    --_ring: calc(var(--_size) - 6px);
-  }
   .ring circle {
     fill: none;
     /* 5px at the plane's size (the 28-unit box drawn 28px wide);  its outer edge the box's */
     stroke-width: 5;
-  }
-  .accept .ring circle {
-    stroke-width: 4;
   }
   /* a light grey track:  the whole wait */
   .ring .track {
@@ -218,13 +188,6 @@
     stroke: var(--_tint);
     stroke-linecap: round;
     transition: stroke-dasharray 1s linear;
-  }
-  .accept .ring .done,
-  .accept .ring .track {
-    stroke: var(--_green);
-  }
-  .accept .ring .track {
-    opacity: 0.25;
   }
   /* started again:  it UNWINDS to empty (Owen, 2026-10-29:  "lost 'unwind' on ring when scrolled, it jumped back to
      0"), then hides, so a round end's dot never shows at nothing */

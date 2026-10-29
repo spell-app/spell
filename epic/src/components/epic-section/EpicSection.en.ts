@@ -143,8 +143,8 @@ export const epicSectionVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter " +
-        "and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter, " +
+        "its Accept Phases while the phases are agreed, and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
     },
     {
       name: "gear",
@@ -152,6 +152,13 @@ export const epicSectionVocabulary = {
         "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles " +
         'before):  a `<ui-dropdown>` menu, "Show each phase\'s files" and "Show each phase\'s checks", ticked ' +
         "while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
+    },
+    {
+      name: "stage-button",
+      description:
+        'Its "Accept Phases" (an `<epic-stage-button>`, epic `epic-engine` I180), the Phases section only, before its gear:  ' +
+        'only while the page is reviewed and agrees its phases (`<epic-page stage="phases">`).  A press accepts the ' +
+        "phases and every build plan waiting, and sends;  outlined green until the session moves the page on."
     },
     {
       name: "filter",

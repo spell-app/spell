@@ -112,7 +112,9 @@ The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning
   hidden section is still in the file: it's only a view
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand
-- meanwhile the header's paper plane is the STAGE BUTTON, "Accept Overview", then "Accept Phases" (Q14): a press
+- meanwhile the STAGE BUTTON ends it, on the title row of the work it accepts (Q14;  epic `epic-engine` I180):
+  "Accept Overview" on the Overview's, then "Accept Phases" on the Phases section's, before its gear (the header's Send
+  stays the paper plane;  the button took its place before I180).  A press
   sends what's unsent with an accept mark; `epic inbox apply` moves the page on a stage, and the session then
   writes the phases, or starts building. Its tooltip counts the open questions: a reminder, never a lock
 - while `phases`, an open phase's pills are Looks good and Defer (later: after the other phases, still to do)
@@ -631,7 +633,8 @@ by itself, as a press would. A press still sends at once.
 - That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into a
   request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did:  the listening session
   answers them all at once, by background agents, into the items.
-- On a stage button (Accept Overview, Accept Phases) it only sends the marks, never accepts.
+- It only ever sends the marks, never accepts a stage:  Accept Overview and Accept Phases are their sections' own
+  buttons (`<epic-stage-button>`, epic `epic-engine` I180).
 - Only an epic page's header counts down:  a details page's or a guide's Send waits for a press.
 - The wand that turned the countdown on and off (P20) is gone for good.
 

@@ -1801,6 +1801,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
       in the page not `seen`
     - unseen, a block goes quiet by itself 3 days after its `at`, the change marks' rule (`PlanDates.isQuiet()`):
       [PLAN-DOC.md](tool/PLAN-DOC.md), "Updates"
+    - a block carrying out Owen's OWN answer (every item it names answered by him, or his comment;  or `updated --for`
+      such items) is written seen by the tool, never in `to-see`:  no Seen to press (epic `epic-engine` I179;  Owen,
+      2026-10-29:  "I shouldn't have to do that if you are doing what I said");  a change Claude made on its own stays new
   - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`):
     - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
       moved after the others)

@@ -516,7 +516,7 @@ export class InboxCommands {
    *   - new
    *   - `test`, a test run's answers (epic `epic-engine` P4):  passed, failed, skip, not now;
    *     each failure's new issue listed after, for the session to tell Owen with its link
-   *   - `accept`, the page header's stage button (epic `epic-engine` P29):  the page on to its next stage;  the
+   *   - `accept`, `<epic-stage-button>` (epic `epic-engine` P29):  the page on to its next stage;  the
    *     session then writes the phases (after the Overview) or starts building (after the phases)
    *   - `defer`, a phase's Defer while the phases are agreed:  moved after the others, still to do
    *   - a change mark's (`ch3`, epic `epic-engine` P30):  `accept` makes it `accepted` (no orange, the chip stays),
