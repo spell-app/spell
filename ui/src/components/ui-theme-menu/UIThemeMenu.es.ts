@@ -13,7 +13,7 @@ export const themeMenuEs = {
   name: "menu-temas",
   aka: ["selector de tema", "cambiar tema", "modo oscuro", "esquema de color", "apariencia", "aspecto"],
   attributes: { show: "mostrar" },
-  values: { show: { both: "ambos", theme: "tema", scheme: "esquema" } },
+  values: { show: { both: "ambos", theme: "tema", scheme: "esquema", menu: "menu" } },
   parts: {
     controls: "controles",
     scheme: "esquema",

@@ -1020,6 +1020,18 @@ export class PlanDoc extends PlanReader {
     return calm ? "not urgent" : "urgent"
   }
 
+  /**
+   * Stamp test `id` PREPARED (epic `epic-engine` P51):  Start testing wrote it out for Owen, `place` its place in his
+   * order (1 first);  the page opens the prepared tests in that order, and Next test skips straight to them.
+   * - logged;  the item's `changed` stamped
+   */
+  prepareTest(id: string, place: number): void {
+    const item = this.item(id)
+    Markup.set(item, { prepared: String(place) })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} prepared for Owen's testing, number ${place}`)
+  }
+
   /** Put item `id` off (`deferred`, today):  still outstanding, shown as such next review;  returns its title. */
   defer(id: string): string {
     const item = this.item(id)
@@ -1140,6 +1152,9 @@ export class PlanDoc extends PlanReader {
    *   it records Owen's choice;  nothing is built yet
    * - `drop`, a todo's x:  canceled (struck through, grey), "dropped by Owen in review" in the log;  reviewed
    * - `skip`, every other note box's x (Owen, 2026-10-09):  nothing to do
+   *   - on a TEST it's "no longer applies" (epic `epic-engine` P51, Q53):  canceled, as a test run's Skip did
+   *     (`applyTest()`)
+   * - a note box's picture (`shot`, P51) goes with its note into Owen's reply
    *   - reviewed, no status card, its state as it was (an open question stays open)
    *   - on a todo it's `drop`
    * - `next`, `drop`, `skip` with a note:  the note kept first, as Owen's reply (`keepNote()`)
@@ -1234,20 +1249,22 @@ export class PlanDoc extends PlanReader {
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
         const where = phase ? `P${phase.number} · ${phase.name}` : "the next phase"
-        if (note) this.keepNote(item.id, { note, action: "next phase", at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "next phase", at, shot })
         this.queue(item.id, where)
         const card = phase ? `Queued for ${where}` : `Queued for the next phase:  there's no phase to do yet`
         this.noteStatus(item.id, PlanMarkup.text(card))
         return { applied: true, did: `queued for ${where}${phase ? "" : " (no phase to do yet)"}` }
       }
       case "drop": {
-        if (note) this.keepNote(item.id, { note, action: "drop", at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "drop", at, shot })
         this.setItem(item.id, "canceled")
         this.review(item.id)
         return { applied: true, did: "canceled:  dropped by Owen in review" }
       }
       case "skip": {
-        if (note) this.keepNote(item.id, { note, action: "skip", at })
+        // a TEST's x (epic `epic-engine` P51):  it no longer applies, as a test run's Skip did
+        if (kind === "test") return this.applyTest(item, kind, { result: "skip", note, shot, at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "skip", at, shot })
         this.review(item.id)
         return { applied: true, did: `skipped:  nothing to do, reviewed${note ? " (his note kept)" : ""}` }
       }
@@ -1940,8 +1957,10 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Fill in commits from the doc's git history:  `log` is `{ sha, subject, repo }`s, newest first (`git log`);
-   * returns what it added, `{ sha, phase }` / `{ sha, item }`, oldest first.
+   * Fill in commits from the doc's git history:  `log` is `{ sha, subject, repo, time }`s, newest first (`git log`);
+   * returns what it added, `{ sha, phase }` / `{ sha, item }` / `{ sha, log }`, oldest first.
+   * - each commit also gets its ENTRY IN THE LOG (`logCommit()`, epic `epic-engine` P52):  the Log is the epic's change
+   *   log, one `<epic-commit at refs>` per commit
    * - subjects `PlanCommits.parseCommitSubject()` reads:
    *   phase commits (`P3:  Name -- summary`) and item fixes (`Fix I3:  ...`)
    * - only phases and items the doc has;  a commit already listed there is skipped, so it can run again
@@ -1953,22 +1972,66 @@ export class PlanDoc extends PlanReader {
    *     (`outline-spell P27:  Doc Review`, once P27 became Pile Drawing)
    *   - a title naming no phase (`P1 follow-up:  more`) goes by its number
    */
-  backfillCommits(log: Iterable<CommitLogEntry>, { base = null, epic }: BackfillOptions = {}): BackfilledCommit[] {
+  backfillCommits(
+    log: Iterable<CommitLogEntry>,
+    { base = null, epic, logOnly = false }: BackfillOptions = {}
+  ): BackfilledCommit[] {
     const added: BackfilledCommit[] = []
-    for (const { sha, subject, repo } of Array.from(log).reverse()) {
+    for (const entry of Array.from(log).reverse()) {
+      const { sha, subject, repo } = entry
       const parsed = PlanCommits.parseCommitSubject(subject)
-      if (!parsed || (epic && parsed.epic && parsed.epic !== epic)) continue
-      const targets: CommitTarget[] = [
-        ...this.phasesNamedBy(parsed).map((n) => ({ phase: n })),
-        ...parsed.items.filter((id) => this.hasItem(id)).map((id) => ({ item: id }))
-      ]
-      for (const target of targets) {
+      if (parsed && epic && parsed.epic && parsed.epic !== epic) continue
+      const phases = parsed ? this.phasesNamedBy(parsed) : []
+      const items = parsed ? parsed.items.filter((id) => this.hasItem(id)) : []
+      const targets: CommitTarget[] = [...phases.map((n) => ({ phase: n })), ...items.map((id) => ({ item: id }))]
+      for (const target of logOnly ? [] : targets) {
         if (this.hasCommit(target, sha)) continue
-        this.addCommit(target, sha, parsed.sentence, { base, repo })
+        this.addCommit(target, sha, parsed!.sentence, { base, repo })
         added.push({ sha, ...target })
       }
+      // the Log:  a commit for a phase or an item here, or one naming this epic first (`epic-engine:  ...` too)
+      const refs = [...phases.map((n) => this.phase(n).id), ...items.map((id) => id.toLowerCase())]
+      const named = Boolean(epic) && (parsed ? parsed.epic === epic : PlanCommits.namesEpic(subject, epic!))
+      if (!refs.length && !named) continue
+      const sentence = parsed?.sentence ?? PlanCommits.afterEpic(subject, epic!)
+      if (this.logCommit(entry, { sentence, refs }, { base })) added.push({ sha, log: true })
     }
     return added
+  }
+
+  /**
+   * Add commit `entry` to the Log (epic `epic-engine` P52, J148):  an `<epic-commit sha at refs repo>` holding
+   * `sentence`, placed among the log's lines by its time, so the file stays oldest first.  Added?
+   * - `refs`:  the phases (by their lasting id, `p-commit-log`) and items (`q56`) it names;  the page draws a chip
+   *   for each
+   * - `at`:  the commit's own time, to the minute, with its offset (`2026-10-29T11:46-04:00`);  none without one
+   * - already there (same sha):  left, so it can run again
+   * - its link:  through its own `repo` when that isn't the page's (a peer's commit;  the kit's, on a page whose `repo`
+   *   is an old child repo's), else the page's;  the page's own `repo` is never changed here (`base`:  the repo a
+   *   commit with none is in)
+   */
+  logCommit(
+    entry: CommitLogEntry,
+    { sentence, refs }: { sentence: string; refs: readonly string[] },
+    { base = null }: CommitOptions = {}
+  ): boolean {
+    const section = this.section("log")
+    if (PlanCommits.findCommit(section, entry.sha)) return false
+    const repo = entry.repo ?? base
+    const own = repo && repo !== this.page.getAttribute("repo") ? repo : undefined
+    const at = entry.time ? PlanCommits.minutesOf(entry.time) : undefined
+    const commit = this.make(
+      "epic-commit",
+      { sha: entry.sha, at, refs: refs.length ? refs.join(" ") : undefined, repo: own },
+      PlanMarkup.text(sentence)
+    )
+    const when = at ? Date.parse(at) : Number.NaN
+    const later = Number.isNaN(when)
+      ? undefined
+      : Array.from(section.children).find((line) => Date.parse(line.getAttribute("at") ?? "") > when)
+    if (later) later.before(commit)
+    else section.append(commit)
+    return true
   }
 
   /**
@@ -1990,9 +2053,23 @@ export class PlanDoc extends PlanReader {
   // ## Log
   ////////////////
 
-  /** Add a line to the log:  an `<epic-event at>`, local time with its offset (`2026-10-06T08:12-04:00`). */
+  /**
+   * Add a REVIEW LINE to the log:  an `<epic-event at>`, local time with its offset (`2026-10-06T08:12-04:00`).
+   * - written, never drawn (epic `epic-engine` P52, Q56 C):  the page shows the Log's commits only;  Actual Time
+   *   (`activeWindow()`), `done-at` and "last worked on" read these;  `epic log <name>` prints them (`reviewLines()`)
+   */
   log(line: string): void {
     this.section("log").append(this.make("epic-event", { at: PlanTime.isoMinutes(this.now) }, PlanMarkup.text(line)))
+  }
+
+  /** The log's review lines (`<epic-event>`), oldest first:  each `at` as shown (`2026-10-29 08:59`) and its text. */
+  reviewLines(): { at: string; text: string }[] {
+    return Array.from(this.findSection("log")?.querySelectorAll(":scope > epic-event") ?? [], (event) => ({
+      at: (event.getAttribute("at") ?? "")
+        .replace("T", " ")
+        .replace(/(\d\d:\d\d)(?::\d\d)?(?:[+-]\d\d:\d\d|Z)?$/, "$1"),
+      text: (event.textContent ?? "").replace(/\s+/g, " ").trim()
+    }))
   }
 
   ////////////////

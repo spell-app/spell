@@ -45,18 +45,19 @@ afterEach(() => SendCountdown.adopt(undefined))
 ////////////////
 
 describe("<epic-send-buttons>", () => {
-  test("idle:  a grey group, the plane and, with `wand`, the wand (pressed:  countdown on by default);  axe", async () => {
+  test("idle:  a grey group, the plane alone, no ring;  axe", async () => {
     adoptCountdown()
-    const group = await ElementFixture.render(`<epic-send-buttons send-tip="Nothing to send" wand></epic-send-buttons>`)
+    const group = await ElementFixture.render(
+      `<epic-send-buttons send-tip="Nothing to send" countdown></epic-send-buttons>`
+    )
     await ElementFixture.settle()
     expect(part(group, "base")!.dataset.state).toBe("idle")
     expect([part(group, "send")!.title, part(group, "send")!.getAttribute("aria-label")]).toEqual([
       "Nothing to send",
       "Nothing to send"
     ])
-    expect(part(group, "countdown")!.getAttribute("aria-pressed")).toBe("true")
+    expect(group.matches(":state(countdown)")).toBe(true)
     expect(part(group, "ring")).toBeNull()
-    expect(part(group, "countdown")!.title).toMatch(/^Countdown on:  what you leave unsent goes by itself/)
     await expectAccessible(group)
   })
 
@@ -73,31 +74,44 @@ describe("<epic-send-buttons>", () => {
     expect(heard).toEqual([false])
   })
 
-  // Owen, 2026-10-25:  "remove the wand EVERYWHERE"
-  test("by default (no `wand`):  Send alone, unsent waits filled for a press, the page's countdown never starts", async () => {
+  // J142:  details pages and guides keep a Send you press
+  test("without `countdown`:  Send alone, unsent waits filled for a press, the page's countdown never starts", async () => {
     const countdown = adoptCountdown()
     const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
     await ElementFixture.settle()
-    expect(part(group, "countdown")).toBeNull()
+    expect(part(group, "ring")).toBeNull()
     expect(group.matches(":state(waiting)")).toBe(true)
     expect(countdown.isRunning).toBe(false)
   })
 
-  describe("the countdown", () => {
-    beforeEach(() => vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] }))
+  describe("the countdown (P53)", () => {
+    beforeEach(() =>
+      vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "setTimeout", "clearTimeout", "Date"] })
+    )
     afterEach(() => vi.useRealTimers())
 
-    test("unsent:  the ring turns blue over 2 minutes, then it asks to send (`auto` true);  sent, it's gone", async () => {
+    test("unsent:  a ring round the PLANE drains over 2 minutes, then it asks to send (`auto` true);  sent, it's gone", async () => {
       adoptCountdown()
-      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
+      const group = await ElementFixture.render(
+        `<epic-send-buttons state="unsent" send-tip="Send 1 mark" countdown></epic-send-buttons>`
+      )
       await ElementFixture.settle()
       const heard = asks(group)
-      expect(part(group, "ring")).not.toBeNull()
+      const ring = part(group, "ring")!
+      expect(ring).not.toBeNull()
+      // round the plane, inside its button:  a press anywhere on it still sends
+      expect(part(group, "send")!.contains(ring)).toBe(true)
+      expect(group.matches(":state(counting)")).toBe(true)
+      // the pill's own outline goes while it counts:  ring and button never one border
+      expect(getComputedStyle(part(group, "base")!).borderTopColor).toBe("rgba(0, 0, 0, 0)")
+      // set apart from the plane:  wider than its round end
+      expect(ring.getBoundingClientRect().width).toBeGreaterThan(part(group, "send")!.getBoundingClientRect().width + 6)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       await ElementFixture.settle()
-      const elapsed = part(group, "ring")!.querySelector<SVGCircleElement>(".elapsed")!
-      expect(parseFloat(elapsed.style.strokeDasharray)).toBeCloseTo(50, 0)
-      expect(part(group, "countdown")!.title).toMatch(/sends by itself in 1:00 unless you keep typing/)
+      const left = ring.querySelector<SVGCircleElement>(".done")!
+      expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
+      expect(getComputedStyle(left).strokeLinecap).toBe("round")
+      expect(part(group, "send")!.title).toBe("Send 1 mark · sends by itself in 1:00;  click to send now")
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])
       group.setAttribute("state", "sent")
@@ -105,39 +119,80 @@ describe("<epic-send-buttons>", () => {
       expect(part(group, "ring")).toBeNull()
     })
 
-    test("a key on the page starts it again;  the wand turns it off:  the plane is filled, and nothing is sent", async () => {
+    test("a press while it counts sends at once (`auto` false), and the countdown never fires after", async () => {
+      adoptCountdown()
+      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
+      await ElementFixture.settle()
+      const heard = asks(group)
+      vi.advanceTimersByTime(10_000)
+      part(group, "send")!.click()
+      group.setAttribute("state", "sent")
+      await ElementFixture.settle()
+      vi.advanceTimersByTime(COUNTDOWN_MS * 2)
+      expect(heard).toEqual([false])
+    })
+
+    test("a key on the page starts it again;  Auto Send Off:  the plane is filled, and nothing is sent", async () => {
       const countdown = adoptCountdown()
       const unwatch = countdown.watch(window)
-      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
+      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(group)
       vi.advanceTimersByTime(COUNTDOWN_MS - 1000)
       document.body.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "a" }))
       vi.advanceTimersByTime(COUNTDOWN_MS - 1000)
       expect(heard).toEqual([])
-      part(group, "countdown")!.click()
+      countdown.choose("off")
       await ElementFixture.settle()
-      expect(part(group, "countdown")!.getAttribute("aria-pressed")).toBe("false")
       expect(part(group, "ring")).toBeNull()
-      expect((group as HTMLElement & { matches(s: string): boolean }).matches(":state(waiting)")).toBe(true)
+      expect(group.matches(":state(waiting)")).toBe(true)
       expect(getComputedStyle(part(group, "send")!).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
       vi.advanceTimersByTime(COUNTDOWN_MS * 2)
       expect(heard).toEqual([])
       unwatch()
     })
 
-    test("drawn again (a guide's Send, at each redraw):  the countdown goes on where it was", async () => {
+    test("Immediately:  no ring, it asks to send right away", async () => {
+      const countdown = adoptCountdown()
+      countdown.choose("now")
+      const group = await ElementFixture.render(`<epic-send-buttons countdown></epic-send-buttons>`)
+      await ElementFixture.settle()
+      const heard = asks(group)
+      group.setAttribute("state", "unsent")
+      await ElementFixture.settle()
+      expect(part(group, "ring")).toBeNull()
+      vi.advanceTimersByTime(0)
+      expect(heard).toEqual([true])
+    })
+
+    test("drawn again:  the countdown goes on where it was", async () => {
       adoptCountdown()
-      const first = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
+      const first = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
       await ElementFixture.settle()
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       first.remove()
-      const second = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
+      const second = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(second)
-      const elapsed = part(second, "ring")!.querySelector<SVGCircleElement>(".elapsed")!
-      expect(parseFloat(elapsed.style.strokeDasharray)).toBeCloseTo(50, 0)
+      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".done")!
+      expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
+      expect(heard).toEqual([true])
+    })
+
+    // J143
+    test("a stage:  the ring goes round the Accept button's check;  its end asks to send (`auto` true), never Accept", async () => {
+      adoptCountdown()
+      const group = await ElementFixture.render(
+        `<epic-send-buttons state="unsent" accept="Accept Overview" countdown></epic-send-buttons>`
+      )
+      await ElementFixture.settle()
+      const heard = asks(group)
+      const ring = part(group, "ring")!
+      const check = part(group, "send")!.querySelector("ui-icon")!
+      expect(ring.parentElement!.contains(check)).toBe(true)
+      expect(ring.getBoundingClientRect().height).toBeLessThan(part(group, "send")!.getBoundingClientRect().height)
+      vi.advanceTimersByTime(COUNTDOWN_MS)
       expect(heard).toEqual([true])
     })
   })
@@ -146,7 +201,7 @@ describe("<epic-send-buttons>", () => {
 // epic `epic-engine` P29:  the stage button in the plane's place
 describe("<epic-send-buttons accept>", () => {
   test("a check and its words in the plane's place, green, no badge;  a press asks as the plane's;  accepted:  outlined green", async () => {
-    adoptCountdown()
+    adoptCountdown().choose("off")
     const group = await ElementFixture.render(
       `<epic-send-buttons state="unsent" count="2" accept="Accept Overview" send-tip="The Overview is agreed"></epic-send-buttons>`
     )

@@ -1,44 +1,52 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { StoragePlace } from "spell/util/persist/StoragePlace"
+import { every, soon } from "spell/util/timing"
 import {
   ACTIVITY_EVENTS,
-  COUNTDOWN_KEY,
-  COUNTDOWN_MS,
+  AUTO_SEND_CHOICES,
+  AUTO_SEND_KEY,
+  AUTO_SEND_MS,
   COUNTDOWN_TICK_MS,
-  OLD_COUNTDOWN_KEY,
+  DEFAULT_AUTO_SEND,
   storageNow,
+  type AutoSend,
   type StorageFinder
 } from "./review.types"
 import { PageStore } from "./PageStore"
 
 /****************
  * ### `SendCountdown`
- * A page's COUNTDOWN to Send (epic `epic-engine` P20):  with countdown mode on and something waiting to be sent,
- * it sends by itself once Owen has left the page alone for 2 minutes (`COUNTDOWN_MS`).
- * - Owen, 2026-10-22:  "when it is on, you wait for 2 minutes of inactivity from me (I haven't typed / clicked /
- *   scrolled) and when that is reached you submit the answers.  When it's off, I have to press the plane."
- * - ONE per page (`forPage()`, a `PageStore`), shared by the page's Send (`<epic-send-buttons>`):
- *   a Send drawn again (a guide's, at every redraw of its comments) finds the countdown where it was
- * - the MODE:  on by default, remembered per viewer for every page (`COUNTDOWN_KEY`;  decision Q6)
- * - it RUNS only while the mode is on and something waits (`pending`, which the Send sets)
- *   - every key, click, wheel, scroll or input on the page starts it again (`activity()`, from `watch()`)
- *   - it ticks every second (`COUNTDOWN_TICK_MS`), so the Send's ring drains, and fires on the tick that reaches 0
- * - at 0:  `onFire()`'s listeners, once;  the Send sends, as Review Now did (decision Q7)
+ * A page's COUNTDOWN to Send:  with Auto Send on and something waiting to be sent,
+ * it sends by itself once Owen has left the page alone for the time he chose (epic `epic-engine` P20, P53).
+ * - Owen, 2026-10-29:  "Send works on a 2-minute no interaction timer ... Pressing it sends immediately.  Turning it
+ *   off could be from a gear menu in the epic page header"
+ * - ONE per page (`forPage()`, a `PageStore`), shared by the page's Send (`<epic-send-buttons countdown>`) and the
+ *   page header's gear:  a Send drawn again finds the countdown where it was
+ * - the CHOICE (`choice`, `AUTO_SEND_CHOICES`):  Immediately, 2 minutes (the default), 5 minutes or Off,
+ *   remembered per viewer for every page (`AUTO_SEND_KEY`;  decision Q6)
+ * - it RUNS while Auto Send is on and something waits (`pending`, which the Send sets)
+ *   - every key, click, wheel, scroll or input on the page starts it again (`activity()`, from `watch()`);
+ *     a pointer just moving doesn't (J141)
+ *   - a note box with the focus and words in it HOLDS it full (`isHeld`, J144):  leaving the box starts the wait
+ *   - it ticks every second (`COUNTDOWN_TICK_MS`), so the Send's ring drains, and fires on the tick past the end
+ *   - the time is read off the clock, never counted in ticks:  a hidden page, whose timers the browser slows, sends on
+ *     its next tick or as it shows again, never minutes late (J141)
+ *   - Immediately:  it fires on the next turn of the page's work, or as soon as the note box lets go
+ * - at the end:  `onFire()`'s listeners, once;  the Send asks its owner to send, as a press would, waking the epic
+ *   when nobody listens (Q59, B)
  *   - it stops, and starts again only once the Send says something waits again (`setPending()`):
- *     a send that failed tries again 2 minutes later, never in a loop
+ *     a send that failed tries again after another wait, never in a loop
  * - Node-safe at import:  nothing touches `window` until `forPage()` or `watch()`;
- *   its clock, timers and storage come in through `SendCountdownOptions`, so tests run it on fake timers
- * - Position in the import graph:  its peers `review.types` and `PageStore` only.
- *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  the element follows it through `subscribe()`.
+ *   its clock, timers, storage and note-box check come in through `SendCountdownOptions`, so tests run it on fake
+ *   timers
+ * - Position in the import graph:  `spell/util`'s timing and persist files, its peers `review.types` and
+ *   `PageStore`.  NEVER imports Solid, Spell UI or the `spell-epic` barrel:  the elements follow it through
+ *   `subscribe()`.
  ****************/
 export class SendCountdown extends PageStore {
-  /** How long a quiet page waits before it sends, ms. */
-  readonly delay: number
-
   constructor(private readonly options: SendCountdownOptions = {}) {
     super()
-    this.delay = options.delay ?? COUNTDOWN_MS
   }
 
   ////////////////
@@ -47,52 +55,76 @@ export class SendCountdown extends PageStore {
 
   /**
    * The page's countdown, made on the first call (browser only), on the page's own clock and storage;
-   * its `version` bumped on every change:  the mode, a start, a tick, a stop.
+   * its `version` bumped on every change:  the choice, a start, a tick, a stop.
    * - SIDE EFFECT:  the first call watches the page for Owen at work (`watch()`)
    * - a test hands it its own, on fake timers (`adopt()`)
    */
   static forPage(): SendCountdown {
     return SendCountdown.onePerPage(() => {
-      // a browser that blocks it throws here:  `StoragePlace` keeps the mode in memory then
-      const countdown = new SendCountdown({ storage: () => window.localStorage })
+      // a browser that blocks it throws here:  `StoragePlace` keeps the choice in memory then
+      const countdown = new SendCountdown({
+        storage: () => window.localStorage,
+        isHeld: () => SendCountdown.isTypingIn(window.document)
+      })
       countdown.watch(window)
       return countdown
     })
   }
 
-  ////////////////
-  // ## The mode
-  ////////////////
-
-  /** Countdown mode:  on unless this browser was told off (`COUNTDOWN_KEY`).  NEVER throws. */
-  get isOn(): boolean {
-    // TODO:  drop the move once every browser has opened an epic page since epic `prefs-and-undo` P4
-    this.modes.moveText(OLD_COUNTDOWN_KEY, ...PrefStore.splitKey(COUNTDOWN_KEY))
-    return PrefStore.getAt(COUNTDOWN_KEY, this.modes) !== "off"
+  /**
+   * Does `document`'s focus sit in a text box with words in it (a note box, a comment, a field)?
+   * Through shadow roots, to the box itself.  NEVER throws.
+   * - STATIC:  it reads the page, not a countdown
+   */
+  static isTypingIn(document: Document): boolean {
+    let active: Element | null = document.activeElement
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+    if (!active) return false
+    const box = active as HTMLInputElement
+    if (active.localName === "textarea" || (active.localName === "input" && TEXT_INPUTS.test(box.type)))
+      return box.value.trim() !== ""
+    return !!(active as HTMLElement).isContentEditable && !!active.textContent?.trim()
   }
 
-  /** Where the mode is kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
-  private modes = new StoragePlace({ storage: () => storageNow(this.options.storage), description: "this browser" })
+  ////////////////
+  // ## The choice
+  ////////////////
+
+  /** Auto Send as chosen:  as set on this page, else as remembered in this browser, else 2 minutes.  NEVER throws. */
+  get choice(): AutoSend {
+    if (this.choiceHere) return this.choiceHere
+    const kept = PrefStore.getAt(AUTO_SEND_KEY, this.choices)
+    return AUTO_SEND_CHOICES.includes(kept as AutoSend) ? (kept as AutoSend) : DEFAULT_AUTO_SEND
+  }
+
+  /** Where the choice is kept:  `options.storage`, through `PrefStore`;  none:  this page's memory. */
+  private choices = new StoragePlace({ storage: () => storageNow(this.options.storage), description: "this browser" })
+
+  /** The choice as last made on this page:  it holds when storage refuses to keep it. */
+  private choiceHere: AutoSend | undefined
 
   /**
-   * Turn countdown mode on or off, and remember it for every page in this browser.
-   * - on, with something waiting:  it starts;  off:  it stops
-   * - a storage that refuses (blocked site data):  the mode holds for this page only (`modeHere`)
+   * Choose Auto Send's `choice`, and remember it for every page in this browser.
+   * - on, with something waiting:  a fresh wait of the new length;  off:  it stops
+   * - a storage that refuses (blocked site data):  the choice holds for this page only
    */
-  toggle(on = !this.isOn) {
-    PrefStore.setAt(COUNTDOWN_KEY, on ? "on" : "off", this.modes)
-    this.modeHere = on
-    if (on && this.isPending) this.start()
+  choose(choice: AutoSend) {
+    PrefStore.setAt(AUTO_SEND_KEY, choice, this.choices)
+    this.choiceHere = choice
+    if (this.isOn && this.isPending) this.start()
     else this.stop()
     this.changed()
   }
 
-  /** The mode as last set on this page, when storage didn't keep it. */
-  private modeHere: boolean | undefined
+  /** Auto Send is on:  any choice but Off. */
+  get isOn(): boolean {
+    return this.choice !== "off"
+  }
 
-  /** The mode in force:  as set on this page, else as remembered. */
-  get isOnHere(): boolean {
-    return this.modeHere ?? this.isOn
+  /** How long a quiet page waits before it sends, ms:  `0` for Immediately (and Off, which never runs). */
+  get delay(): number {
+    const choice = this.choice
+    return choice === "off" ? 0 : AUTO_SEND_MS[choice]
   }
 
   ////////////////
@@ -102,7 +134,7 @@ export class SendCountdown extends PageStore {
   /** Something waits to be sent:  the Send says so (`setPending()`). */
   isPending = false
 
-  /** When the countdown last started, by `now()`;  `undefined` while it isn't running. */
+  /** When the wait last started, by `now()`;  `undefined` while it isn't running. */
   startedAt: number | undefined
 
   /** Is it counting down? */
@@ -110,9 +142,14 @@ export class SendCountdown extends PageStore {
     return this.startedAt !== undefined
   }
 
-  /** How much of the wait is left, `1` (just started) to `0`;  `0` while it isn't running. */
+  /** Is it counting down with a RING to draw:  running, and not Immediately. */
+  get hasRing(): boolean {
+    return this.isRunning && this.delay > 0
+  }
+
+  /** How much of the wait is left, `1` (just started, or held) to `0`;  `0` while it isn't running, or Immediately. */
   get fractionLeft(): number {
-    if (this.startedAt === undefined) return 0
+    if (this.startedAt === undefined || this.delay <= 0) return 0
     return Math.max(0, 1 - (this.now() - this.startedAt) / this.delay)
   }
 
@@ -121,14 +158,23 @@ export class SendCountdown extends PageStore {
     return Math.round(this.fractionLeft * this.delay)
   }
 
+  /** A note box holds it:  the focus in a text box with words (`options.isHeld`;  none:  never). */
+  get isHeld(): boolean {
+    try {
+      return this.options.isHeld?.() ?? false
+    } catch {
+      return false
+    }
+  }
+
   /**
    * Whether something waits to be sent, from the page's Send.
-   * - waiting, the mode on, not running yet:  it starts
+   * - waiting, Auto Send on, not running yet:  it starts
    * - nothing waiting:  it stops
    */
   setPending(pending: boolean) {
     this.isPending = pending
-    if (pending && this.isOnHere && !this.isRunning) this.start()
+    if (pending && this.isOn && !this.isRunning) this.start()
     else if (!pending && this.isRunning) this.stop()
   }
 
@@ -139,11 +185,23 @@ export class SendCountdown extends PageStore {
     this.changed()
   }
 
-  /** Start counting from the top, ticking until it fires or stops. */
+  /**
+   * Check the clock now, as a tick does:  the page shown again (a hidden page's timers are slowed), or a note box let
+   * go (Immediately sends then).
+   */
+  check() {
+    if (this.isRunning) this.tick()
+  }
+
+  /** Start counting from the top, ticking until it fires or stops;  Immediately, a check right after this turn. */
   private start() {
     this.startedAt = this.now()
-    this.timer ??= this.every(() => this.tick(), COUNTDOWN_TICK_MS)
+    this.timer ??= every(COUNTDOWN_TICK_MS / 1000, () => this.tick())
     this.changed()
+    if (this.delay <= 0) {
+      this.unsoon?.()
+      this.unsoon = soon(() => this.check())
+    }
   }
 
   /** Stop counting;  nothing fires. */
@@ -151,11 +209,18 @@ export class SendCountdown extends PageStore {
     this.startedAt = undefined
     this.timer?.()
     this.timer = undefined
+    this.unsoon?.()
+    this.unsoon = undefined
     this.changed()
   }
 
-  /** A second gone:  the ring drains;  at 0, it stops and fires. */
+  /** A second gone:  held, the wait starts again;  else the ring drains;  past the end, it stops and fires. */
   private tick() {
+    if (!this.isRunning) return
+    if (this.isHeld) {
+      this.startedAt = this.now()
+      return this.changed()
+    }
     if (this.fractionLeft > 0) return this.changed()
     this.stop()
     for (const listener of [...this.fireListeners]) listener()
@@ -163,6 +228,9 @@ export class SendCountdown extends PageStore {
 
   /** The running ticker's undo. */
   private timer: (() => void) | undefined
+
+  /** Immediately's pending check's undo. */
+  private unsoon: (() => void) | undefined
 
   ////////////////
   // ## Firing
@@ -183,6 +251,7 @@ export class SendCountdown extends PageStore {
 
   /**
    * Hear Owen at work in `window` (`ACTIVITY_EVENTS`), and in each same-origin frame as it loads;  returns the undo.
+   * - the page shown again, and the focus leaving a box:  a check of the clock (`check()`), never activity
    * - capture listeners on the window:  they hear events inside shadow roots too (a key in a note box)
    *   - a scroll never bubbles:  the capture hears every scrolling box's
    * - a frame from another origin can't be heard:  only what's typed or clicked around it
@@ -214,6 +283,16 @@ export class SendCountdown extends PageStore {
     for (const frame of window.document.querySelectorAll("iframe")) frameOf(frame)
     window.document.addEventListener("load", onLoad, true)
     undos.push(() => window.document.removeEventListener("load", onLoad, true))
+    // the page shown again, or a box let go (after the focus has moved):  read the clock now (J141, J144)
+    const onCheck = () => {
+      soon(() => this.check())
+    }
+    window.document.addEventListener("visibilitychange", onCheck)
+    window.addEventListener("focusout", onCheck, true)
+    undos.push(() => {
+      window.document.removeEventListener("visibilitychange", onCheck)
+      window.removeEventListener("focusout", onCheck, true)
+    })
     return () => {
       for (const undo of undos) undo()
     }
@@ -227,23 +306,20 @@ export class SendCountdown extends PageStore {
   private now(): number {
     return (this.options.now ?? Date.now)()
   }
-
-  /** Call `fn` every `ms`;  returns the undo. */
-  private every(fn: () => void, ms: number): () => void {
-    const id = setInterval(fn, ms)
-    return () => clearInterval(id)
-  }
 }
 
 /** What a `SendCountdown` runs on;  the page's own by default. */
 export type SendCountdownOptions = {
   /**
-   * where the mode is remembered (`localStorage`, or what finds it);  `null` / none:  nowhere, so it's on
+   * where the choice is remembered (`localStorage`, or what finds it);  `null` / none:  nowhere, so 2 minutes
    * - a finder that throws (blocked site data):  this page's memory (`StoragePlace`)
    */
   storage?: StorageFinder
   /** the clock, ms.  Default:  `Date.now` (which fake timers move) */
   now?: () => number
-  /** how long a quiet page waits, ms.  Default:  `COUNTDOWN_MS`, 2 minutes */
-  delay?: number
+  /** is a note box being typed in (the focus in a text box with words)?  Default:  never */
+  isHeld?: () => boolean
 }
+
+/** The `<input type>`s that take typed words:  a box with words in it holds the countdown. */
+const TEXT_INPUTS = /^(text|search|url|email|tel|)$/

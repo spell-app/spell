@@ -1254,7 +1254,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
-    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't"
+    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't",
+    "--prepared <n>": "a manual test:  written out for Owen by Start testing, nth in his order"
   },
   summarize: { "--file <condensed.html>": "what the item shows now, as HTML" },
   restore: {
@@ -1285,7 +1286,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
 
   // an epic page:  log and upkeep
-  log: {},
+  log: { "--last <n>": "with no text:  how many of the newest review lines to print (default 20)" },
   prompt: { "--file <file>": "the prompt, from a file" },
   bedtime: {},
   backfill: { "--all": "every epic", "--apply": "mark them:  a dry run without it" },

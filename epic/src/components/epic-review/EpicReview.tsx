@@ -2,9 +2,11 @@ import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
+// Spell UI's page zoom:  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>` (as `<epic-field>`'s)
+import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { DraftSaver } from "spell/epic/answers"
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, clockOf, isImmediate, type InboxMark } from "spell/epic/review"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, Pictures, clockOf, isImmediate, type InboxMark } from "spell/epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -17,7 +19,10 @@ import {
   NOTE_ACTIONS,
   NOTE_BOX,
   NOTE_BUTTONS_OF,
+  NOTE_FIELD,
   NOTE_INPUT,
+  NOTE_PICK,
+  NOTE_PICTURE,
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
@@ -27,8 +32,10 @@ import {
   SAID,
   SAID_EDIT,
   SAID_NOTE,
+  SAID_PICTURE,
   SAID_WHAT,
   SHOW_NOTE,
+  TEST_ITEM_ID,
   THREAD_ANSWER,
   THREAD_BUTTONS_OF,
   type EpicReviewVocabulary,
@@ -65,6 +72,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - a judgement call's or todo's EMPTY box gets "do it", selected, Revisit turning on with it (Owen, 2026-10-19,
  *     2026-10-22)
  * - Typing in the note box turns Revisit on, and never closes it (`ReviewClient.saveTyped()`;  epic `epic-engine` P20).
+ * - A PICTURE in the note box (epic `epic-engine` P51;  Owen, 2026-10-29:  tests answered inline, "screenshots"):
+ *   pasted (⌘V) or dropped on the box, or chosen with its picture button;  saved beside the page (`POST shot`) and
+ *   put in the note's mark (`ReviewClient.attachShot()`), a thumbnail under the words that opens full size;  the
+ *   marked note shows it too
+ * - A manual test's x says "no longer applies":  `inbox apply` cancels the test (P51, as a test run's Skip did).
  * - A button that chose an action (a review button, a note box button) sends `epic-chosen`:
  *   `<epic-item>` folds, so Owen moves on to the next (Owen, 2026-10-10).
  * - SIDE EFFECT:  the note box listens for `pagehide` while connected, to save a draft as the page goes.
@@ -418,29 +430,36 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         part={this.partForName("base")}
         data-mark={mark()}
         data-sent={mark() && this.review.isSent() ? "" : undefined}
+        onPaste={(event: ClipboardEvent) => this.onPicturePasted(event)}
+        onDragOver={(event: DragEvent) => event.preventDefault()}
+        onDrop={(event: DragEvent) => this.onPictureDropped(event)}
       >
         <span class={NOTE_TEXT}>
-          <ui-textarea
-            ref={(element: HTMLElement) => this.onNoteDrawn(element as NoteField)}
-            class={NOTE_INPUT}
-            grow=""
-            rows="2"
-            placeholder={this.translationForKey("notePlaceholder")}
-            aria-label={this.translationForKey("noteLabel", { id: this.name })}
-            onInput={() => this.onInput()}
-            onFocus={() => this.selectDoIt()}
-            onBlur={() => this.flush()}
-            onKeyDown={(event: KeyboardEvent) => this.onNoteKey(event)}
-          />
-          {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
-          <span
-            class={NOTE_SAVED}
-            hidden={!this.saved}
-            data-failed={this.saved && !this.saved.ok ? "" : undefined}
-            title={this.savedTip}
-          >
-            <ui-icon name="floppy disk outline" />
+          <span class={NOTE_FIELD}>
+            <ui-textarea
+              ref={(element: HTMLElement) => this.onNoteDrawn(element as NoteField)}
+              class={NOTE_INPUT}
+              grow=""
+              rows="2"
+              placeholder={this.translationForKey("notePlaceholder")}
+              aria-label={this.translationForKey("noteLabel", { id: this.name })}
+              onInput={() => this.onInput()}
+              onFocus={() => this.selectDoIt()}
+              onBlur={() => this.flush()}
+              onKeyDown={(event: KeyboardEvent) => this.onNoteKey(event)}
+            />
+            {/* a span around the icon:  `ui-icon`'s host is `display: contents`, which can't be placed */}
+            <span
+              class={NOTE_SAVED}
+              hidden={!this.saved}
+              data-failed={this.saved && !this.saved.ok ? "" : undefined}
+              title={this.savedTip}
+            >
+              <ui-icon name="floppy disk outline" />
+            </span>
+            {this.pictureButton()}
           </span>
+          <Show when={this.picture()}>{(src) => this.pictureRow(src)}</Show>
         </span>
         <span class={NOTE_ACTIONS}>
           <For each={NOTE_BUTTONS_OF[this.buttons ?? "item"]}>{(spec) => this.noteButton(spec)}</For>
@@ -449,15 +468,16 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     )
   }
 
-  /** One note box button. */
+  /** One note box button;  a manual test's x says it no longer applies (P51). */
   private noteButton(spec: NoteButtonSpec): JSX.Element {
+    const tip = spec.how === "skip" && TEST_ITEM_ID.test(this.of ?? "") ? "boxSkipTestTip" : spec.tip
     return (
       <button
         type="button"
         data-how={spec.how}
         data-color={spec.color}
-        title={this.translationForKey(spec.tip)}
-        aria-label={this.translationForKey(spec.tip)}
+        title={this.translationForKey(tip)}
+        aria-label={this.translationForKey(tip)}
         onClick={() => this.use(spec.how)}
       >
         <ui-icon name={spec.icon} />
@@ -591,6 +611,137 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   }
 
   ////////////////
+  // ## A picture in the note (epic `epic-engine` P51)
+  ////////////////
+
+  /** A picture pasted or dropped, shown while it saves:  its data URL. */
+  @E.state accessor pastedPicture: string | undefined = undefined
+
+  /**
+   * The note box's picture:  one on its way, else its mark's (`shot`);  none while the marked note above the box shows
+   * it (`said()`), nor a test answer's (an older run's).
+   */
+  readonly picture = (): string | undefined => {
+    const mark = this.review.mark()
+    if (this.pastedPicture) return this.pastedPicture
+    return mark?.action === "test" || this.review.noted() ? undefined : mark?.shot
+  }
+
+  /**
+   * The picture button, in the field's top corner:  a file chooser (VS Code's side bar never lets a file dragged in
+   * reach the page), its tooltip saying a paste or a drop works too.
+   */
+  private pictureButton(): JSX.Element {
+    return (
+      <>
+        <button
+          type="button"
+          class={NOTE_PICK}
+          title={this.translationForKey("pictureAdd")}
+          aria-label={this.translationForKey("pictureAdd")}
+          onClick={(event: MouseEvent) =>
+            (event.currentTarget as HTMLElement).parentElement?.querySelector<HTMLInputElement>("input")?.click()
+          }
+        >
+          <ui-icon name="file image" />
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(event: Event) => this.onPictureChosen(event.currentTarget as HTMLInputElement)}
+        />
+      </>
+    )
+  }
+
+  /** The picture under the words:  its thumbnail (a click opens it full size), "saving…" while it saves, its ✕. */
+  private pictureRow(src: () => string): JSX.Element {
+    const saving = () => this.pastedPicture === src()
+    return (
+      <span class={NOTE_PICTURE} data-saving={saving() ? "" : undefined}>
+        <img
+          src={src()}
+          alt={this.translationForKey("pictureZoom")}
+          title={this.translationForKey("pictureZoom")}
+          onClick={(event: MouseEvent) => EpicReview.zoom(event)}
+        />
+        <Show when={saving()}>
+          <span>{this.translationForKey("pictureSaving")}</span>
+        </Show>
+        <Show when={!saving()}>
+          <button
+            type="button"
+            title={this.translationForKey("pictureRemove")}
+            aria-label={this.translationForKey("pictureRemove")}
+            onClick={() => void this.review.client?.attachShot(this.review.id(), undefined)}
+          >
+            <ui-icon name="xmark" />
+          </button>
+        </Show>
+      </span>
+    )
+  }
+
+  /** A paste in the note box:  a picture in it is the note's (text pastes as usual). */
+  @E.untracked
+  private onPicturePasted(event: ClipboardEvent) {
+    const file = Pictures.fileOf(event)
+    if (!file) return
+    event.preventDefault()
+    void this.takePicture(file)
+  }
+
+  /** A file dropped on the note box. */
+  @E.untracked
+  private onPictureDropped(event: DragEvent) {
+    const file = Pictures.fileOf(event)
+    if (!file) return
+    event.preventDefault()
+    void this.takePicture(file)
+  }
+
+  /** A file chosen with the picture button. */
+  @E.untracked
+  private onPictureChosen(input: HTMLInputElement) {
+    const file = input.files?.[0]
+    input.value = ""
+    if (file) void this.takePicture(file)
+  }
+
+  /**
+   * Take `file` as the note's picture:  shown at once, saved beside the page (`ReviewClient.saveShot()`), then put in
+   * the note's mark (`attachShot()`), with what's typed:  Revisit turns on with it, as with words.
+   * - not a picture, or over 8 MB:  a notice says so
+   * - NEVER throws:  a failed save is the client's own notice, and the picture goes
+   */
+  @E.untracked
+  private async takePicture(file: File) {
+    const client = this.review.client
+    if (!client) return
+    const problem = Pictures.problemOf(file)
+    if (problem) return client.notify(this.translationForKey(problem))
+    const png = await Pictures.pngOf(file).catch(() => undefined)
+    if (!png) return client.notify(this.translationForKey("notImage"))
+    const id = this.review.id()
+    this.pastedPicture = png
+    // what's typed goes into the mark the picture joins
+    if (this.noteInput) client.type(id, this.noteInput.value)
+    const shot = await client.saveShot(id, png)
+    if (shot) await client.attachShot(id, shot)
+    if (this.pastedPicture === png) this.pastedPicture = undefined
+  }
+
+  /** A click on a note's picture:  full size, in the page's `<ui-zoom>`. */
+  private static zoom(event: MouseEvent) {
+    const image = event.currentTarget as HTMLImageElement | null
+    if (!image || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    event.stopPropagation()
+    ImageZoom.show(image)
+  }
+
+  ////////////////
   // ## A marked note
   ////////////////
 
@@ -609,6 +760,17 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           <div class={SAID} part={this.partForName("base")} aria-label={this.translationForKey("you")}>
             <ui-icon name="comment" />
             <p class={SAID_NOTE}>{mark().note}</p>
+            <Show when={mark().shot}>
+              {(shot) => (
+                <img
+                  class={SAID_PICTURE}
+                  src={shot()}
+                  alt={this.translationForKey("pictureZoom")}
+                  title={this.translationForKey("pictureZoom")}
+                  onClick={(event: MouseEvent) => EpicReview.zoom(event)}
+                />
+              )}
+            </Show>
             <span class={SAID_WHAT}>{this.what(mark())}</span>
             <button
               type="button"

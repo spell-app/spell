@@ -51,6 +51,9 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - the crumbs (`Docs › Epics › <title>`), the h1, the meta lines
   - the step label:  active phase, DONE, next, FUTURE
   - the bedtime label
+  - while reviewed, Send in the header's exact middle, with what the session is doing (a bare spinner) beside it
+  - the gear, last in the header:  Auto Send (Immediately, 2 minutes, 5 minutes, Off) and Theme (epic `epic-engine`
+    P53, where the git toggle was:  the Log lists every commit)
   - the "Plan hung?" notice (while there's no phase), and a future epic's notice
 - The page runs edge to edge by itself.
   It links `spell-doc.css` alone (no `plan-doc.css`:  P14).
@@ -70,7 +73,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - `bedtime="P3-P6"`:  a `/bedtime` run is on (`bedtime <name> start | done`).
   - `repo`:  the GitHub page every `<epic-commit sha>` links through.
     Written by `commit`, and by `commits --backfill`.
-- Its `<epic-commit>`s land by themselves (epic `epic-engine` I135):
+- Its `<epic-commit>`s land by themselves (epic `epic-engine` I135), under their phases and items AND in the Log
+  (epic `epic-engine` P52, "Log"):
   - `phase <name> <N> done`:  every commit in the history not listed yet, as `commits --backfill`
   - `epic merge <name>`:  the commits it just fast-forwarded onto `main`, every repo's (`commits --backfill --merged`)
   - neither lists one twice, nor fails its command when it can't:  it says so in one line
@@ -382,14 +386,23 @@ As `plan-doc.md`, "Ids":
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
+    - A note's PICTURE (epic `epic-engine` P51):  any note box takes one, pasted (⌘V), dropped, or chosen with its
+      picture button.
+      - saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and shown under the words
+      - it rides in the mark as `shot` (revisit, todo, next, drop and skip take one);  a picture alone is a revisit
+      - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's,
+        next's or drop's picture in Owen's kept reply
   - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
     calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
     - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
     - `add <name>#T` writes work;  `--limit` (or `#limit`, the old `#caveat`) a limit
-  - `failed`:  a test that failed in Owen's test run, the issue it was filed as (`i42`;  epic `epic-engine` P4).
-    - written by `inbox apply`, the test left open;  gone once a run passes it
+  - `failed`:  a test that failed, the issue it was filed as (`i42`;  epic `epic-engine` P4).
+    - written by `inbox apply` for an old `test` mark (below), the test left open;  gone once it passes
+  - `prepared`:  a manual test Start testing wrote out for Owen, its place in his order (`prepared="2"`, 1 first;
+    format `place`;  epic `epic-engine` P51).
+    - written by `epic details <name>#M3 --prepared <n>`
 - A MANUAL TEST (`m3`, epic `epic-engine` P4;  `t3` before P44, `v3` before P32):
-  its text is FIELDS, in this order, so Owen's test run can step him through it, one at a time, on the page:
+  its text is FIELDS, in this order, so Owen can do it straight off the page, in the Manual tests section:
 
   ```html
   <epic-item id="m3" title="The sitemap lists every guide" status="open">
@@ -403,19 +416,42 @@ As `plan-doc.md`, "Ids":
   - Step and Should, always;  Example and If not when there's one.
   - `epic add <name>#M "title" --step ... --should ... [--example <png> | "text"] [--if-not ...]` writes them
     (`EpicTests.fieldsHTML()`);  `details <name>#M3 --step ...` rewrites a test in them.
-  - A Step's `a.epic-test-action` links are pages to open:  the run shows each as a button.
+  - A Step's `a.epic-test-action` links are pages to open:  the page shows each as a button.
   - Screenshots live beside the page in `tests/`, their paths from the page's folder:
-    Claude's examples `tests/m3.png`, Owen's failures `tests/m3-20261019-1432.png`.
+    Claude's examples `tests/m3.png`, the pictures in Owen's notes `tests/m3-20261019-1432.png` (`POST shot`).
     - An older one keeps its file name (`tests/t3-...`, `v3-...`):  the page names it by path.
-  - An older test has only prose, still valid:  the run shows the prose as its Step.
+  - An older test has only prose, still valid:  the page shows the prose as its Step.
     No migration step:  the fields are new content a test MAY have, nothing an old page must change.
-  - Owen's answers in the run are review marks, `{ action: "test", result, note?, shot? }`, applied by
-    `inbox apply` (`PlanDoc.applyMark()`):
+  - Owen answers a test WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
+    no Passed / Failed / Skip / Not now, no P / F / S / N keys):
+    - Approve:  passed;  `inbox apply` closes it.
+    - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):  what he saw, often with
+      a picture.  Left for the session, which closes the test when his note says it passed, else files an issue,
+      "M3 failed:  <title>", holding his note and picture, linked both ways, the test left open.
+    - The note box's x (`skip`):  `inbox apply` CANCELS it, "no longer applies";  a note says why.
+    - Left alone:  still open.
+  - A test Claude checked itself and saw pass, Claude MAY close (Q58):  with a Done card saying how it was checked,
+    the picture attached.  The one exception to "a manual test is Owen's to close".
+  - START TESTING, the Manual tests section's button (on its title, while reviewed and a test is open):
+    - "Start testing · 9":  a request for now, `{ action: "prepare" }` keyed on the section's id, `tests`;
+      only `tests` takes `prepare`, and it takes nothing else.
+      - the session checks what it can, writes the rest out (the explicit Step, an Example), orders them so tests in
+        the same window come together, stamps each `prepared`, then `inbox done <name>#tests`
+      - nobody listening:  the page server wakes the epic, as for Add Details
+    - "Preparing tests" while it's worked;  a click calls it off.
+    - Done:  the page opens the first open test (unless Owen is typing in a field:  "Tests ready").
+    - Every open test prepared:  "Next test · 3 left" (open tests with no mark of his yet), the next unanswered one
+      after the last it opened, round to the start;  none left, "Go through the tests · N".
+      It never asks Claude again.
+  - Owen's ORDER, on the page and in `epic test --list`:  prepared tests first by place, then page order,
+    deferred last (`inTestOrder()`).
+  - An OLD mark from the test run before P51, `{ action: "test", result, note?, shot? }`, still applies
+    (`PlanDoc.applyTest()`), so nothing sent before is lost:
     - `passed`:  `done`, reviewed, `failed` gone
     - `failed`:  a new issue, "M3 failed:  <title>", linking the test, with his note and an `<img>` of his
       screenshot;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking it
     - `skip`:  `canceled` ("no longer applies"), reviewed
-    - `notnow`:  `deferred`, today:  the run puts deferred tests last
+    - `notnow`:  `deferred`:  last in his order
 - A WORK todo's review buttons (no `limit`;  Owen, 2026-10-09):  the plane, Revisit, the x,
   in one group.  No Approve or Make Todo.
   - The plane (`next`, green):  "Do it in the next phase".
@@ -628,7 +664,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - An open ISSUE or TODO (not a `limit`) closes in the same write, as `close` does (`PlanDoc.finishWork()`):
       `done`, green, `taken-in` its phase, the log's `I3 closed:  <title>`.
     - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is Owen's to
-      close (Approve, his test run);  a `limit` has nothing to do.
+      close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
   - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:
@@ -735,7 +771,9 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 
 The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
 - No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
-  same day:  Send alone.
+  same day.
+  - The header's Send counts down by itself instead (Auto Send, epic `epic-engine` P53):  a ring round the plane,
+    2 minutes by default, chosen in the header's gear;  a press still sends at once.
   - The inbox still takes a `details` request (an old mark, an older page):  only the button went.
 - The note box's:  Revisit Later, then the x (skip this).
 
@@ -1060,6 +1098,13 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - idempotent:  a dropped block is gone
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
+  - `log-commits` (2026-10-29, on command;  epic `epic-engine` P52, J151):  the Log gets an entry per commit of the
+    epic's history (`LogCommits`), as the backfill writes them;  the Log ONLY (`logOnly`):  an older page's phase and
+    item lists hold their commits by the shas from before epic `repo-split` P20 merged the repos, so they'd list each
+    twice
+    - the history handed in by the runner (`MigrationContext.history`, `PlanDocFiles.epicHistory()`):  git, so never
+      on an edit
+    - idempotent:  a commit already in the Log is skipped
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,
@@ -1067,9 +1112,32 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
 
 ## Log
 
-`<epic-event at="2026-10-06T08:12-04:00">P2 active</epic-event>`
-- `at`:  local time with offset, to the minute.
-- `icon` only when it isn't `pen to square`.
+The epic's CHANGE LOG (epic `epic-engine` P52;  Owen, 2026-10-29:  "a log of what changes went in when, not when I
+answered a question"):  one entry per commit, drawn newest first.
+
+```html
+<epic-commit sha="e75a0e081..." at="2026-10-29T11:46-04:00" refs="p-tests-inline q53">the sentence</epic-commit>
+<epic-event at="2026-10-06T08:12-04:00">P2 active</epic-event>
+```
+
+- A COMMIT entry, `<epic-commit>`, the element a phase's Commits list uses (Owen's comment C5):
+  - `sha`, the full sha;  `repo` when it isn't the page's (a peer's, spell-brand;  the kit's, on an older page whose
+    `repo` is an old child repo's)
+  - `at`:  git's commit time, to the minute, with its offset
+  - `refs`:  the phases (by their lasting id) and items its subject names, space-separated;  the page draws a chip
+    per ref, a phase's showing its number today (`P52`), one the page no longer has as plain text
+  - its text:  the subject's sentence (after ` -- `, else after the colon)
+  - written by the backfill (`PlanDoc.backfillCommits()`, `logCommit()`;  Q57 A), never read from git as the page is
+    served:  `phase <name> <N> done`, `epic merge`, `commits <name> --backfill`
+  - which commits:  the history's (`PlanDocFiles.epicHistory()`:  the kit, its child repos and its peers;  merge commits
+    left out;  none another epic's page lists) naming a phase or item here, or naming the epic first with none
+    (`epic-engine:  ...`:  no chips)
+  - placed among the lines by its time, so the file stays oldest first;  one already there (same sha) is skipped
+- A REVIEW LINE, `<epic-event>`:  "Q53 answered", "P49 active" ... (`PlanDoc.log()`, `epic log <name> "text"`)
+  - `at`:  local time with offset, to the minute;  `icon` only when it isn't `pen to square`
+  - written, NEVER drawn (Q56 C):  Actual Time (`activeWindow()`), `done-at` and "last worked on" read them;
+    `epic log <name> [--last <n>]` prints the newest (20), newest last
+- "Last worked on" (`eventTimesIn()`) takes the newest time of either kind.
 
 ## Parts
 

@@ -11941,6 +11941,13 @@
       }
     },
     {
+      "name": ":state(menu)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-theme-menu>`:  It draws its panel in place, inside a host's menu (`show=\"menu\"`)."
+      }
+    },
+    {
       "name": ":state(mixed)",
       "description": {
         "kind": "markdown",

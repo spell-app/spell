@@ -13,31 +13,34 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 
 /****************
  * ### `<epic-send-buttons>`
- * Send, and its COUNTDOWN when asked for (`wand`;  epic `epic-engine` P20):  the paper plane, then the wand.
- * - Send ALONE by default since Owen, 2026-10-25:  the wand is gone everywhere ("remove the wand EVERYWHERE ...  We may
- *   bring the wand back later"), so only a press sends;  `wand` brings it back, countdown and all
- * - Owen, 2026-10-22:  "Make the magic wand near the plane a toggle -- when it is on, you wait for 2 minutes of
- *   inactivity from me ... and when that is reached you submit the answers.  When it's off, I have to press the plane."
+ * Send:  the paper plane, and its COUNTDOWN when asked for (`countdown`;  epic `epic-engine` P20, P53).
+ * - Owen, 2026-10-29:  "Send works on a 2-minute no interaction timer.  This is integrated into the single send button
+ *   ... with the countdown ring.  Pressing it sends immediately."
  * - the PLANE asks its owner to send (`epic-send-saving`, `auto` false)
  *   - from `state`:  grey with nothing to send, blue with something not sent
  *   - the group's outline:  none with nothing to send, the grey plane alone (Owen, 2026-10-25:  "no boder around
  *     plane in this mode");  grey with something not sent, blue once sent;  never dashed (Owen, 2026-10-22)
- *   - countdown off with something not sent:  FILLED blue, so it plainly waits for a press (`:state(waiting)`)
- * - the WAND (`wand` only) turns countdown mode on and off, for every page in this browser (the page's `SendCountdown`)
- *   - on:  filled light blue, its icon white;  off:  grey
- *   - while it counts (mode on, something not sent):  a very light grey ring round it turns blue, clockwise, over
- *     the 2 minutes, starting again at every key, click or scroll on the page;  its tooltip says how long is left
- *   - at the end the owner is asked to send (`auto` true):  an epic page sends as Review Now did (decision Q7)
+ *   - Auto Send off (or no `countdown`) with something not sent:  FILLED blue, so it plainly waits for a press
+ *     (`:state(waiting)`)
+ * - the RING (`countdown`, the page's Auto Send on, something not sent):  round the plane, set apart from it, with
+ *   rounded ends, filling in blue clockwise over a light grey track as the wait runs
+ *   (Owen's comment C10:  "Prettier ring, with pill edges, not just border.  Should look distinct from the button
+ *   itself";  2026-10-29:  "Start out light grey and fill in blue")
+ *   - every key, click or scroll on the page fills it again;  a note box being typed in holds it full
+ *   - the plane's tooltip says how long is left, and that a click sends now
+ *   - at the end the owner is asked to send (`auto` true), as a press would, waking the epic when nobody listens
+ *   - Auto Send Immediately:  no ring;  each change goes as it's finished
+ *   - the choice is the page header's gear's (`SendCountdown.choose()`), never this element's
  * - a STAGE BUTTON in the plane's place (`accept`, epic `epic-engine` P29):  a check and its words ("Accept
  *   Overview"), green;  a press asks its owner as the plane's does, and the owner accepts the stage
  *   - outlined green once pressed (`accepted`), waiting for the session to move the page on
+ *   - the ring goes round its check;  the countdown's end only ever sends marks, never accepts (J143)
  * - WAITING ON OWEN (`asks`;  Owen, 2026-10-25:  "try the thicker border if you are waiting on me"):  the pill
  *   its own border 2px #666, darker than its hairline, solid, dotted once he's pressed what it waits for (`taken`)
  *   - an epic page's header, while Claude's build plans wait for his Accept on their phases
- * - the countdown is the PAGE's, not this element's:  a Send drawn again (a guide's, at every redraw of its comments)
- *   finds it where it was, its ring too
- * - its owners:  `<epic-page>` (the header), `<epic-send>` (a details page) and the docs runtime's comments
- *   (`drawSend()`, a docs page);  each sends its own way, and only sets `state`
+ * - the countdown is the PAGE's (`SendCountdown`), not this element's:  a Send drawn again finds it where it was
+ * - its owners:  `<epic-page>` (the header, with `countdown`), `<epic-send>` (a details page) and the docs runtime's
+ *   comments (`drawSend()`, a docs page;  both without:  J142);  each sends its own way, and only sets `state`
  * - NEVER sends anything itself:  it only asks
  ****************/
 export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabulary> {
@@ -52,27 +55,27 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   ////////////////
 
   /** The page's countdown;  none in a server render. */
-  readonly countdown = isServer ? undefined : SendCountdown.forPage()
+  readonly pageCountdown = isServer ? undefined : SendCountdown.forPage()
 
   /** The countdown's `version`, as last heard:  the getters below read it, so the group redraws on each change. */
   @E.state accessor version = 0
 
-  /** Countdown mode is on. */
+  /** Auto Send is on, and this Send counts down (`countdown`). */
   @E.cssState("countdown")
   get isCountdownOn(): boolean {
     void this.version
     if (this.isManual) return false
-    return this.countdown?.isOnHere ?? true
+    return this.pageCountdown?.isOn ?? true
   }
 
-  /** The countdown is running:  the ring drains. */
+  /** The ring shows:  the countdown is running with a wait (not Immediately). */
   @E.cssState("counting")
   get isCounting(): boolean {
     void this.version
-    return !this.isManual && !!this.countdown?.isRunning
+    return !this.isManual && !!this.pageCountdown?.hasRing
   }
 
-  /** Countdown off, something not sent:  the plane is filled, waiting for a press;  never the stage button. */
+  /** Auto Send off, something not sent:  the plane is filled, waiting for a press;  never the stage button. */
   @E.cssState("waiting")
   get isWaiting(): boolean {
     return !this.accept && !this.isCountdownOn && this.isUnsent
@@ -84,9 +87,9 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return !!this.accept
   }
 
-  /** No wand (the default since 2026-10-25):  only a press sends, and the page's countdown never runs. */
+  /** No `countdown`:  only a press sends, and the page's countdown never hears of this Send (J142). */
   get isManual(): boolean {
-    return !this.wand
+    return !this.countdown
   }
 
   /** Something not sent yet. */
@@ -94,10 +97,10 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return this.state === "unsent"
   }
 
-  /** How much of the countdown has run, `0` to `1`:  the ring's blue length. */
-  get fractionElapsed(): number {
+  /** How much of the wait is left, `0` to `1`:  the ring's length. */
+  get fractionLeft(): number {
     void this.version
-    return 1 - (this.countdown?.fractionLeft ?? 1)
+    return this.pageCountdown?.fractionLeft ?? 0
   }
 
   /**
@@ -106,8 +109,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
    */
   @E.whileConnected
   protected followCountdown() {
-    const countdown = this.countdown
-    // no wand:  only a press sends;  the page's countdown never hears of this Send
+    const countdown = this.pageCountdown
     if (!countdown || this.isManual) return undefined
     const unsubscribe = countdown.subscribe(() => (this.version = countdown.version))
     const unfire = countdown.onFire(() => this.askToSend(true))
@@ -122,7 +124,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   /** `state` changed:  the countdown starts while something waits, and stops once nothing does. */
   @E.onChange("state")
   protected onStateChange() {
-    if (!this.isManual) this.countdown?.setPending(this.isUnsent)
+    if (!this.isManual) this.pageCountdown?.setPending(this.isUnsent)
   }
 
   ////////////////
@@ -145,14 +147,17 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           part={this.partForName("send")}
           data-state={this.groupState}
           aria-busy={this.busy ? "true" : undefined}
-          aria-label={this.sendTip || this.accept || this.translationForKey("send")}
-          title={this.sendTip || this.accept || this.translationForKey("send")}
+          aria-label={this.sendTitle}
+          title={this.sendTitle}
           onClick={() => this.askToSend(false)}
         >
-          <ui-icon
-            name={this.busy ? "circle notch" : this.accept ? "circle check" : "paper plane"}
-            loading={this.busy ? "" : undefined}
-          />
+          <span class={GLYPH}>
+            <ui-icon
+              name={this.busy ? "circle notch" : this.accept ? "circle check" : "paper plane"}
+              loading={this.busy ? "" : undefined}
+            />
+            <Show when={this.isCounting}>{this.ring()}</Show>
+          </span>
           <Show when={this.accept}>
             <span class={ACCEPT_WORDS}>{this.accept}</span>
           </Show>
@@ -162,33 +167,28 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             </span>
           </Show>
         </button>
-        <Show when={!this.isManual}>
-          <button
-            type="button"
-            class={COUNTDOWN}
-            part={this.partForName("countdown")}
-            aria-pressed={this.isCountdownOn ? "true" : "false"}
-            aria-label={this.translationForKey("countdownName")}
-            title={this.countdownTip}
-            onClick={() => this.countdown?.toggle()}
-          >
-            <Show when={this.isCounting}>
-              <svg class={RING} part={this.partForName("ring")} viewBox="0 0 36 36" aria-hidden="true">
-                <circle class={TRACK} cx="18" cy="18" r="15.5" pathLength="100" />
-                <circle
-                  class={ELAPSED}
-                  cx="18"
-                  cy="18"
-                  r="15.5"
-                  pathLength="100"
-                  style={{ "stroke-dasharray": `${this.fractionElapsed * 100} 100` }}
-                />
-              </svg>
-            </Show>
-            <ui-icon name="wand magic sparkles" />
-          </button>
-        </Show>
       </span>
+    )
+  }
+
+  /**
+   * The countdown's ring round the plane (or the stage button's check):  a light grey track, and over it how
+   * much of the wait has gone, its ends round, filling in clockwise from the top.
+   */
+  private ring(): JSX.Element {
+    const done = () => (1 - this.fractionLeft) * 100
+    return (
+      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 40 40" aria-hidden="true">
+        <circle class={TRACK} cx="20" cy="20" r="17.5" pathLength="100" />
+        <circle
+          class={[DONE, { [EMPTY]: done() < 0.5 }]}
+          cx="20"
+          cy="20"
+          r="17.5"
+          pathLength="100"
+          style={{ "stroke-dasharray": `${done()} 100` }}
+        />
+      </svg>
     )
   }
 
@@ -201,13 +201,18 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return this.state ?? "idle"
   }
 
-  /** The wand's tooltip:  the mode, when it sends, what a click does. */
-  get countdownTip(): string {
-    if (!this.isCountdownOn) return this.translationForKey("countdownOff")
-    const when = this.isCounting
-      ? this.translationForKey("whenCounting", { time: minutesAndSeconds(this.countdown?.msLeft ?? 0) })
-      : this.translationForKey("whenIdle")
-    return this.translationForKey("countdownOn", { when })
+  /**
+   * The plane's tooltip and name:  what a press sends (`send-tip`, the stage button's words), then, while the ring
+   * counts, how long is left and that a click sends now.
+   */
+  get sendTitle(): string {
+    const words = this.sendTip || this.accept || this.translationForKey("send")
+    if (!this.isCounting) return words
+    const countdown = this.pageCountdown!
+    const when = countdown.isHeld
+      ? this.translationForKey("held")
+      : this.translationForKey("counting", { time: minutesAndSeconds(countdown.msLeft) })
+    return `${words} · ${when}`
   }
 
   /** Ask the owner to send (`auto`:  the countdown ran out);  nothing while a send is on its way. */
@@ -227,10 +232,11 @@ const SEND = "send"
 const ACCEPT = "accept"
 const ACCEPT_WORDS = "accept-words"
 const COUNT = "count"
-const COUNTDOWN = "countdown"
+const GLYPH = "glyph"
 const RING = "ring"
 const TRACK = "track"
-const ELAPSED = "elapsed"
+const DONE = "done"
+const EMPTY = "empty"
 
 /** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
 function minutesAndSeconds(ms: number): string {

@@ -592,7 +592,7 @@
                   <tr>
                     <td><code>commits</code></td>
                     <td>boolean: there or not</td>
-                    <td>Its body lists commits (the page's git buttons).</td>
+                    <td>Its body lists commits: its git icon shows.</td>
                     <td></td>
                   </tr>
                   <tr>
@@ -706,7 +706,16 @@
                         open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept,
                         Revisit and Defer; still to do with its plan accepted, Make Todo, Revisit and a green check, a
                         state saying it's ready to build. Revisit on a phase with your comments in its text marks it at
-                        once: those comments are its note. Its gear comes last.
+                        once: those comments are its note. Its git icon (while it lists commits), then its gear, come
+                        last.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>git</code></td>
+                      <td>
+                        Its git icon, before its gear, while it lists commits (<code>commits</code>, or
+                        <code>&lt;epic-commit&gt;</code> children;  epic <code>epic-engine</code> P53, J163): shows or
+                        hides its own commits, as an item's does;  pressed while they show.
                       </td>
                     </tr>
                     <tr>
@@ -773,6 +782,10 @@
                         Claude is at work on it, and it isn't done: the review inbox's <code>working</code>, under its id
                         (writing its plan, or building it). Its status icon is a blue turning spinner.
                       </td>
+                    </tr>
+                    <tr>
+                      <td><code>:state(commits)</code></td>
+                      <td>Its own commits show: its git icon pressed.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -857,7 +870,8 @@
               <li>
                 <b>Files and Verify</b> stay hidden until a gear shows them: the Phases section's, for every phase, or
                 the phase's own, last in its title row, which wins for it (epic <code>epic-engine</code> I166). Commits
-                stay hidden until the page's git toggle shows them.
+                stay hidden until its git icon, before its gear, shows them (epic <code>epic-engine</code> P53, J163);
+                the Log lists them all.
               </li>
               <li>
                 <b>Folding:</b> a click on the title folds it; on an epic page it starts folded. With

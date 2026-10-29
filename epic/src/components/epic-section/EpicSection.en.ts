@@ -63,7 +63,8 @@ export const epicSectionVocabulary = {
       required: true,
       description:
         "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its " +
-        "`<epic-event>`s;  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+        "`<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and " +
+        "`report` prose;  `epics` (a saga page's) its `<epic-cards>`."
     },
     {
       name: "title",
@@ -118,12 +119,6 @@ export const epicSectionVocabulary = {
       description:
         "Its live count changed with no change to its markup (epic `epic-engine` I147):  an item or phase being worked " +
         "on, an urgency not applied yet.  The docs runtime draws the toolbar's badges again."
-    },
-    {
-      name: "epic-test-opening",
-      detail: "{}",
-      description:
-        "The Manual tests section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
     }
   ],
   slots: [
@@ -191,8 +186,16 @@ export const epicSectionVocabulary = {
     {
       name: "start-testing",
       description:
-        "The Manual tests section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
-        "open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
+        "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
+        'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
+        'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
+        "test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+    },
+    {
+      name: "next-epic",
+      description:
+        "The Manual tests section's link to the next epic with open tests, at its end once every test is answered:  " +
+        "only in a run across every epic (`epic test --all`, `?test=1&all=1`)."
     }
   ],
   states: [
@@ -234,8 +237,57 @@ export const epicSectionVocabulary = {
     },
     {
       key: "startTestingTip",
-      text: "Go through the {count} open tests one at a time, answering each on the page",
-      description: "Start testing's tooltip."
+      text:
+        "Claude checks the tests it can check itself, writes out exactly what to do for the rest, with a screenshot, " +
+        "then the first test opens:  Approve one that passed, write what you saw in its note, the x if it no longer applies",
+      description: "Start testing's tooltip (epic `epic-engine` P51)."
+    },
+    {
+      key: "preparingTests",
+      text: "Preparing tests",
+      description: "The Manual tests section's button while Claude prepares the tests (P51)."
+    },
+    {
+      key: "preparingTip",
+      text: "Claude is checking what it can and writing out the rest;  the first test opens when it's done · click to call it off",
+      description: "Preparing tests' tooltip."
+    },
+    {
+      key: "waitingTip",
+      text: "Asked:  {why} · click to call it off",
+      description: "Preparing tests' tooltip while nobody has taken it yet."
+    },
+    {
+      key: "nextTest",
+      text: "Next test · {count} left",
+      description:
+        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+    },
+    {
+      key: "firstTest",
+      text: "Go through the tests · {count}",
+      description: "The same, every open test answered already:  it opens the first again."
+    },
+    {
+      key: "nextTestTip",
+      text: "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+      description: "Next test's tooltip."
+    },
+    {
+      key: "testsReady",
+      text: "Tests ready:  Next test opens the first",
+      description:
+        "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+    },
+    {
+      key: "nextEpic",
+      text: "Next epic with open tests:  {epic} · {count}",
+      description: "The Manual tests section's last line in a run across every epic, once every test is answered."
+    },
+    {
+      key: "noEpicLeft",
+      text: "Every epic's tests are answered:  Send hands them to Claude",
+      description: "The same, with no other epic left to test."
     },
     ...NEW_KIND_TEXTS,
     ...NEW_LIST_TEXTS
@@ -279,7 +331,20 @@ export const epicSectionVocabulary = {
       when: { attribute: "kind", values: ["questions", "judgements", "todos", "issues", "tests"] },
       description: "The items, their id's letter the section's (`q` in Questions)."
     },
-    { tag: "epic-event", when: { attribute: "kind", values: ["log"] }, description: "The log, oldest first." },
+    {
+      tag: "epic-event",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The log's review lines (answered, reviewed, active ...), oldest first:  written, never drawn (epic " +
+        "`epic-engine` P52, Q56 C);  Actual Time and `epic log` read them."
+    },
+    {
+      tag: "epic-commit",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The Log's entries, one per commit of the epic (`<epic-commit at refs>`), in the file by time, oldest first:  " +
+        "drawn newest first."
+    },
     {
       tag: "epic-cards",
       when: { attribute: "kind", values: ["epics"] },

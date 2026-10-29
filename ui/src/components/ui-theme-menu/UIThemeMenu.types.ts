@@ -23,7 +23,7 @@ export type ThemeMenuTextKey = ThemeMenuVocabulary["texts"][number]["key"]
 export type ThemeMenuText = (key: ThemeMenuTextKey, params?: Record<string, string | number>) => string
 
 /** `show`:  which controls render. */
-export type ThemeMenuShow = "both" | "theme" | "scheme"
+export type ThemeMenuShow = "both" | "theme" | "scheme" | "menu"
 
 /** `ui-changed`'s detail. */
 export type ThemeMenuChange = {

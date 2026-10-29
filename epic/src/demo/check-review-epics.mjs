@@ -42,8 +42,10 @@
  *     - the skip:  reviewed, still open, its note kept as Owen's reply
  *     - the pick approves its call (closed, the reply's set `chosen`, a Noted card `Chose C · ...:  recorded ...`),
  *       its pill SOLID
- *   - a countdown's send (epic `epic-engine` P20, as Review Now did;  no wand draws one since 2026-10-25, the
- *     page still takes it):  the revisit waiting asked now
+ *   - Auto Send's ring round the header's plane (epic `epic-engine` P53):  none with nothing marked, there while
+ *     marks wait (2 minutes, the default, in a fresh browser), gone once sent
+ *   - a countdown's send (epic `epic-engine` P20, P53, as Review Now did;  dispatched here, not waited for):
+ *     the revisit waiting asked now
  *   - a COMMENT only (Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up"):
  *     written into the copy's inbox as the bullhorn would (the comments route takes only the shared folders' pages);
  *     Send turns blue, a click sends it (the inbox's `sent` moves, `unsentComments` empties),
@@ -184,7 +186,9 @@ async function run() {
       const root = document.getElementById(id).shadowRoot
       // the review controls' shadow roots, and their note's `<ui-textarea>`'s, where its native textarea is
       const inner = (parent) =>
-        Array.from(parent.querySelectorAll("epic-review, epic-new-item, ui-textarea"), (it) => it.shadowRoot).filter(Boolean)
+        Array.from(parent.querySelectorAll("epic-review, epic-new-item, ui-textarea"), (it) => it.shadowRoot).filter(
+          Boolean
+        )
       const roots = () => {
         const controls = inner(root)
         return [root, ...controls, ...controls.flatMap(inner)]
@@ -209,11 +213,11 @@ async function run() {
   BrowserPage.watch(page, { onProblem: logInto(logs) })
   await open(page)
 
-  // Send:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);  no wand since Owen,
-  // 2026-10-25 ("remove the wand EVERYWHERE")
+  // Send:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);  no ring with nothing to
+  // send (Auto Send, epic `epic-engine` P53)
   expect("the header's buttons, nothing marked", await headerState(page), {
     send: "idle",
-    countdown: null,
+    ring: false,
     nobody: false,
     inHeader: true
   })
@@ -234,7 +238,10 @@ async function run() {
           rootOf(id).querySelectorAll(".review-group ui-button[data-action]"),
           (button) => button.dataset.action
         ),
-        apart: Array.from(rootOf(id).querySelectorAll(".review-controls > ui-button"), (button) => button.dataset.action)
+        apart: Array.from(
+          rootOf(id).querySelectorAll(".review-controls > ui-button"),
+          (button) => button.dataset.action
+        )
       }),
       id
     )
@@ -414,10 +421,11 @@ async function run() {
     ["choose", "choose", "dashed"]
   ])
 
-  // the header's Send:  unsent marks, its tooltip saying nobody listens;  a click sends;  the marks outlined
+  // the header's Send:  unsent marks, its tooltip saying nobody listens, Auto Send's ring counting;  a click sends;
+  // the marks outlined
   expect("the header's buttons, marks unsent", await headerState(page), {
     send: "unsent",
-    countdown: null,
+    ring: true,
     nobody: true,
     inHeader: true
   })
@@ -426,7 +434,7 @@ async function run() {
   await page.waitForTimeout(200)
   expect("the header's buttons, marks sent", await headerState(page), {
     send: "sent",
-    countdown: null,
+    ring: false,
     nobody: true,
     inHeader: true
   })
@@ -522,9 +530,8 @@ async function run() {
   await page.locator(`#${question}`).scrollIntoViewIfNeeded()
   await page.screenshot({ path: join(out, "review-done.png") })
 
-  // a countdown's send, as the wand's would be (epic `epic-engine` P20;  the wand's gone since 2026-10-25, the page still
-  // takes one):
-  // the revisit waiting (sent, to talk over) asked now, as Review Now did (decision Q7)
+  // a countdown's send, as Auto Send's ring running out would ask (epic `epic-engine` P20, P53), dispatched rather
+  // than waited for:  the revisit waiting (sent, to talk over) asked now, as Review Now did (decision Q7)
   await page.evaluate(() =>
     document
       .querySelector("epic-page")
@@ -851,17 +858,20 @@ function attribute(page, id, name) {
 }
 
 /**
- * The page header's Send (`<epic-send-buttons>`, epic `epic-engine` P20), as drawn:  Send's state,
- * the wand's mode (`aria-pressed`;  `null`:  no wand, since 2026-10-25), whether the plane says nobody listens, and whether it sits in the sticky header.
+ * The page header's Send (`<epic-send-buttons countdown>`, epic `epic-engine` P20, P53), as drawn:
+ * - `send`:  Send's state
+ * - `ring`:  Auto Send's ring round the plane shows (`[part~="ring"]`), counting down
+ * - `nobody`:  the plane's tooltip says nobody listens
+ * - `inHeader`:  it sits in the sticky header
  */
 function headerState(page) {
   return page.evaluate((nobody) => {
     const group = document.querySelector("epic-page").shadowRoot.querySelector("epic-send-buttons")
     const plane = group?.shadowRoot?.querySelector('[part~="send"]')
-    const wand = group?.shadowRoot?.querySelector('[part~="countdown"]')
+    const ring = group?.shadowRoot?.querySelector('[part~="ring"]')
     return {
       send: group?.getAttribute("state") ?? null,
-      countdown: wand?.getAttribute("aria-pressed") ?? null,
+      ring: !!ring,
       nobody: new RegExp(nobody).test(plane?.title ?? ""),
       inHeader: !!group?.closest("header")
     }
@@ -919,4 +929,3 @@ function expect(what, actual, wanted) {
   if (JSON.stringify(actual) !== JSON.stringify(wanted))
     problems.push(`${what}:  ${JSON.stringify(actual)}, wanted ${JSON.stringify(wanted)}`)
 }
-

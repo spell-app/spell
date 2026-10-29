@@ -4,6 +4,7 @@
  */
 import type { SRV } from "spell/server"
 import type { DataFileMove } from "spell/epic/data/DataFile"
+import type { CommitHistory } from "spell/epic/tool/planDoc.types"
 
 /**
  * Every KIND of page a migration step can be for (epic `epic-workflow`, J44), by the names P14 proposes.
@@ -78,6 +79,11 @@ export type MigrationContext = {
    * `epic-engine` P46):  the page's linker's `rootLinks()`, mending, from its folder;  when the runner has one
    */
   rootLinks?: (html: string) => SRV.RootLinkChange[]
+  /**
+   * The page's git history (`PlanDocFiles.epicHistory()`), read when a step asks (`log-commits`, epic `epic-engine`
+   * P52):  every repo's commits naming the epic;  `undefined`:  none to be had (no git, no checkout)
+   */
+  history?: () => CommitHistory | undefined
   /** One line for each thing a step fixed or found, for the page's report:  `links-agree:  ...`. */
   notes?: string[]
   /** Comments to move to another anchor, which the runner writes into the inbox after the page (`AnchorMove`). */

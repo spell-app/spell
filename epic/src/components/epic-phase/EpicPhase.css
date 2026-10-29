@@ -73,6 +73,36 @@
     border-end-end-radius: var(--epic-phase-bottom-radius, 0px);
   }
 
+  /* its git icon (epic `epic-engine` P53, J163):  an item's, a bare icon;  the accent while its commits show */
+  .git {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: var(--epic-muted, var(--ui-text-muted, GrayText));
+    cursor: pointer;
+  }
+  .git:hover {
+    color: var(--ui-text-color, CanvasText);
+  }
+  .git[aria-pressed="true"] {
+    color: var(--epic-accent, var(--ui-link, LinkText));
+  }
+  .git:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 0;
+  }
+  .git svg {
+    display: block;
+    width: auto;
+    height: 14px;
+    fill: currentColor;
+  }
   /* its time pill (the estimate;  done and timed, what it took), just BEFORE the review controls, so they end at one
      right edge row to row (Owen, 2026-10-25):  the small pill a fold's badge is (`EpicFold.css`) */
   .estimate {

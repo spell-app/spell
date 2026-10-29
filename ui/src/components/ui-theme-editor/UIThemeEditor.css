@@ -113,9 +113,8 @@
     --ui-menu-margin: 0;
   }
   /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
-  .tools > *,
-  /* the pages' toggles, then Phone:  at the far right (Owen:  "Put visible panes then \"mobile\" button to the far
-     right") */
+  /* the pages' toggles, then Phone right beside them:  at the far right (Owen:  "Put visible panes then \"mobile\"
+     button to the far right", "Align right next to mobile button") */
   .page-toggles {
     margin-inline-start: auto;
   }
@@ -169,13 +168,19 @@
     --ui-icon-width: auto;
     margin: 0;
   }
-  /* Phone:  plain;  pressed, the segmented menus' chosen fill, in a pill */
+  /* Phone:  plain;  pressed, the page toggles' inset well, in a pill -- never a choice's white thumb (Owen:  "white
+     bg when depressed") */
   .bar-toggle {
     --ui-button-radius: 9999px;
     --ui-button-background: transparent;
   }
   .bar-toggle[aria-pressed="true"] {
-    --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+    --ui-button-background: color-mix(in oklab, var(--ui-text-color) 9%, transparent);
+  }
+  .bar-toggle[aria-pressed="true"]::part(button) {
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 0.28),
+      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
   }
 
   /* ## The pages */

@@ -14,6 +14,8 @@ import "spell/ui/components/ui-button"
 import "spell/epic/components/epic-section"
 import "spell/epic/components/epic-phase"
 import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-commit"
+import "spell/epic/components/epic-event"
 import "spell/epic/components/epic-aside"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
@@ -299,6 +301,26 @@ describe("<epic-section kind=log> stays folded", () => {
     expect((log.component as unknown as { expand(): boolean }).expand()).toBe(true)
     await ElementFixture.tick()
     expect(isOpen("log")).toBe(true)
+  })
+})
+
+// epic `epic-engine` P52:  the Log is the epic's change log
+describe("<epic-section kind=log> the change log", () => {
+  test("its commits newest first, always shown;  its review lines (<epic-event>) not drawn", async () => {
+    const host = await render(
+      `<epic-section id="log" kind="log">` +
+        `<epic-commit sha="aaaaaaa" at="2026-10-20T12:00-04:00">first</epic-commit>` +
+        `<epic-event at="2026-10-20T12:30-04:00">P1 active</epic-event>` +
+        `<epic-commit sha="bbbbbbb" at="2026-10-20T13:00-04:00">second</epic-commit>` +
+        `</epic-section>`
+    )
+    ;(host.component as unknown as { expand(): boolean }).expand()
+    await ElementFixture.tick()
+    const [first, second] = Array.from(host.querySelectorAll("epic-commit"))
+    expect([getComputedStyle(first!).display, getComputedStyle(second!).display]).toEqual(["block", "block"])
+    expect(getComputedStyle(host.querySelector("epic-event")!).display).toBe("none")
+    // newest on top
+    expect(second!.getBoundingClientRect().top).toBeLessThan(first!.getBoundingClientRect().top)
   })
 })
 

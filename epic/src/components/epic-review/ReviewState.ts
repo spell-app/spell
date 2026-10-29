@@ -147,11 +147,11 @@ export class ReviewState {
 
   /**
    * Its mark, while it shows as a marked note (`<epic-review shows="said">`):
-   * a mark with a note, no draft, the box closed;  else `undefined`.
+   * a mark with a note or a picture (epic `epic-engine` P51), no draft, the box closed;  else `undefined`.
    */
   readonly noted = (): InboxMark | undefined => {
     const mark = this.mark()
-    return mark?.note && !this.draft() && !this.boxOpen() ? mark : undefined
+    return (mark?.note || (mark?.shot && mark.action !== "test")) && !this.draft() && !this.boxOpen() ? mark : undefined
   }
 
   /** What's typed in its note box. */

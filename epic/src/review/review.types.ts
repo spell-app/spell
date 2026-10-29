@@ -70,7 +70,7 @@ export const NOTICE_MS = 6000
 export const FOCUS_HOLD_MS = 3000
 
 /**
- * How long Owen leaves the page alone before countdown mode sends what's waiting
+ * How long Owen leaves the page alone before Auto Send sends what's waiting, by default
  * (`SendCountdown`;  epic `epic-engine` P20:  "2 minutes of inactivity from me").
  */
 export const COUNTDOWN_MS = 120_000
@@ -79,13 +79,32 @@ export const COUNTDOWN_MS = 120_000
 export const COUNTDOWN_TICK_MS = 1000
 
 /**
- * `localStorage` key of countdown mode, for every page this browser shows:  `"off"` while it's off.
- * - Anything else, or nothing:  on (decision Q6:  on by default, remembered per viewer).
+ * AUTO SEND's choices, the page header's gear (epic `epic-engine` P53, J160), in the order its sub-menu lists them:
+ * - `now`:  Immediately, each change sent as it's finished (a note when its box loses the focus);  no ring
+ * - `2m`, `5m`:  the ring drains over that long after Owen last touched the page
+ * - `off`:  only a press sends
  */
-export const COUNTDOWN_KEY = "spell-epics:send-countdown"
+export const AUTO_SEND_CHOICES = ["now", "2m", "5m", "off"] as const
 
-/** Its key before epic `prefs-and-undo` P4, with no store:  moved to `COUNTDOWN_KEY` once. */
-export const OLD_COUNTDOWN_KEY = "epic-send-countdown"
+/** One of `AUTO_SEND_CHOICES`. */
+export type AutoSend = (typeof AUTO_SEND_CHOICES)[number]
+
+/** Auto Send with nothing chosen in this browser:  2 minutes (Owen, 2026-10-29). */
+export const DEFAULT_AUTO_SEND: AutoSend = "2m"
+
+/** How long each choice that counts waits, ms. */
+export const AUTO_SEND_MS: Readonly<Record<Exclude<AutoSend, "off">, number>> = {
+  now: 0,
+  "2m": COUNTDOWN_MS,
+  "5m": 300_000
+}
+
+/**
+ * `localStorage` key of the Auto Send choice, for every page this browser shows (decision Q6:  per viewer).
+ * - NEW in P53 (J147):  P20's countdown keys (`spell-epics:send-countdown`, `epic-send-countdown`) are ignored, so a
+ *   browser that turned the wand off while testing it starts at 2 minutes like everyone else
+ */
+export const AUTO_SEND_KEY = "spell-epics:auto-send"
 
 /** What counts as Owen at work on the page, so the countdown starts again:  typing, clicking, scrolling. */
 export const ACTIVITY_EVENTS = ["keydown", "pointerdown", "wheel", "input", "scroll"] as const
@@ -192,7 +211,13 @@ export type TestResult = (typeof TEST_RESULTS)[number]
  */
 export const TESTS_API = "/api/epics/tests"
 
-/** The biggest screenshot a failed test takes, as the shot route caps it (`POST shot`). */
+/**
+ * The Manual tests section's key in the inbox (epic `epic-engine` P51):  its Start testing, a request for now
+ * (`prepare`).  As `ReviewInbox`'s `TESTS_ID` (a copy:  that module is node-only).
+ */
+export const TESTS_ID = "tests"
+
+/** The biggest picture a note box or an option takes, as the shot route caps it (`POST shot`). */
 export const SHOT_MAX_BYTES = 8 * 1024 * 1024
 
 /** The running-agents routes (`src/tools/agentRoutes.ts`):  every reply is the epic's list, `{ agents }`. */
@@ -423,7 +448,23 @@ export function isSent(mark: { action: string; when?: string; at: string }, sent
 
 /** Is `mark` an immediate request (Add Details, revisit now), handed over when made?  As `ReviewInbox`'s. */
 export function isImmediate(mark: { action: string; when?: string }): boolean {
-  return mark.action === "details" || (mark.action === "revisit" && mark.when === "now")
+  return mark.action === "details" || mark.action === "prepare" || (mark.action === "revisit" && mark.when === "now")
+}
+
+/**
+ * Open tests in the order Owen goes through them (epic `epic-engine` P51), the ONE rule the page's Manual tests
+ * section and `epic test --list` share:
+ * - the PREPARED ones first (`prepared`, Start testing's place for each:  same window together), by that place
+ * - then the rest in page order, the deferred ones (an older run's Not now) last
+ * - `tests` in page order;  a new list, `tests` untouched
+ */
+export function inTestOrder<T extends { prepared?: string | null; deferred?: string | null }>(
+  tests: readonly T[]
+): T[] {
+  const place = (test: T) => Number(test.prepared) || Infinity
+  const prepared = tests.filter((test) => place(test) < Infinity).sort((a, b) => place(a) - place(b))
+  const rest = tests.filter((test) => place(test) === Infinity)
+  return [...prepared, ...rest.filter((test) => !test.deferred), ...rest.filter((test) => test.deferred)]
 }
 
 /**

@@ -13,8 +13,15 @@ import { RepoList } from "spell/epic/server/RepoList"
 import { SRV } from "spell/server"
 
 import { planDocIn } from "spell/epic/tools/pages.js"
-import { PlanDocError, type CommitLogEntry, type PlanDocOptions, type PlanDocParts } from "./planDoc.types"
+import {
+  PlanDocError,
+  type CommitHistory,
+  type CommitLogEntry,
+  type PlanDocOptions,
+  type PlanDocParts
+} from "./planDoc.types"
 
+import { EpicDocs } from "./EpicDocs"
 import { EpicParts } from "./EpicParts"
 import { Migrations, type AnchorMove, type InboxView, type Migration, type MigrationContext } from "./migrations"
 import { PlanCommits } from "./PlanCommits"
@@ -350,6 +357,7 @@ export class PlanDocFiles {
         root: this.content,
         inbox: inboxView(ReviewInbox.read(inboxFile)),
         rootLinks: (html) => this.linker.rootLinks(html, dirname(file), { mend: true }).changes,
+        history: () => this.historyOrNone(file),
         notes: [],
         moves: []
       }
@@ -655,14 +663,18 @@ export class PlanDocFiles {
 
   /**
    * The repos a doc's commits can be in, the doc's checkout first:  it, then each of its child repos that's there
-   * (`EpicConfig.repos`:  a multi-repo top's, `spell-parser` ...;  none for a single repo).
+   * (`EpicConfig.repos`:  a multi-repo top's, `spell-parser` ...;  none for a single repo), then each of the kit's
+   * PEERS that's on disk (`EpicConfig.peers`:  spell-brand, beside the kit;  epic `epic-engine` P52, J150).
    * - every repo's work counts toward an epic (epic `epic-engine` r17):  outline-spell's phases are mostly
-   *   spell-parser's, spell-ui's and spell-app's commits
+   *   spell-parser's, spell-ui's and spell-app's commits;  a spell-brand commit naming the epic is its too
+   * - a peer by its MAIN checkout:  its own worktrees' commits count once merged there
    */
   repoFolders(file: string): string[] {
     const checkout = this.checkoutOf(file)
-    const children = EpicConfig.of(checkout).repos.map((name) => join(checkout, name))
-    return [checkout, ...children.filter((folder) => existsSync(join(folder, ".git")))]
+    const config = EpicConfig.of(checkout)
+    const children = config.repos.map((name) => join(checkout, name))
+    const peers = config.peers.map((peer) => peer.main)
+    return [checkout, ...[...children, ...peers].filter((folder) => existsSync(join(folder, ".git")))]
   }
 
   /**
@@ -671,6 +683,7 @@ export class PlanDocFiles {
    *   - a rename to `<name>.plan.html` not committed yet has no history of its own, so follow the old name
    *   - once committed, `--follow` goes through the rename
    * - a SHARED doc (`epics` a link into the shared content repo):  spell-app has no history of it
+   * - each with its commit time (`time`);  merge commits left out (epic `epic-engine` P52, J145)
    */
   docLog(file: string): CommitLogEntry[] {
     const checkout = this.checkoutOf(file)
@@ -678,7 +691,9 @@ export class PlanDocFiles {
     const names = [path, path.replace(/\.plan\.html$/, ".html")]
     const tracked = names.find((name) => SRV.Git.run(["cat-file", "-e", `HEAD:${name}`], checkout).ok)
     return tracked
-      ? PlanDocFiles.parseLog(PlanDocFiles.gitIn(checkout, "log", "--follow", "--format=%H%x09%s", "--", tracked))
+      ? PlanDocFiles.parseTimedLog(
+          PlanDocFiles.gitIn(checkout, "log", "--follow", "--no-merges", `--format=${TIMED_FORMAT}`, "--", tracked)
+        )
       : PlanDocFiles.sharedDocLog(file, this.repoFolders(file))
   }
 
@@ -691,7 +706,10 @@ export class PlanDocFiles {
    * - `P3:  <P3's name> -- ...`, no epic named:  the phase name must be its title, since other epics have a P3 too
    *   (`P7:  Fussbudget -- ... every epic's Doc Review ...` isn't a P7 called Doc Review)
    * - a commit naming another epic first, or a bare `Fix I3:` (any epic's), is left out (write `<epic> I3:`)
-   * - each commit carries its repo's GitHub page (`repo`), and the repos' commits are merged by time
+   * - each commit carries its repo's GitHub page (`repo`) and its commit time (`time`), and the repos' commits are
+   *   merged by time
+   * - merge commits left out (`--no-merges`, epic `epic-engine` P52, J145):  `Merge main into seo` is no change of
+   *   its own
    * - STATIC:  any checkout's, for any doc in `<epic-*>` markup
    */
   static sharedDocLog(file: string, checkouts: string | string[]): CommitLogEntry[] {
@@ -699,24 +717,23 @@ export class PlanDocFiles {
     const name = basename(file).replace(/(\.plan)?\.html$/, "")
     const since = /<epic-page\b[^>]*\bstarted="(\d{4}-\d\d-\d\d)"/.exec(html)?.[1]
     const phases = PlanDoc.parse(html).phases
-    const timed: (CommitLogEntry & { time: number })[] = []
+    const timed: (CommitLogEntry & { seconds: number })[] = []
     for (const checkout of [checkouts].flat()) {
       const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"))
       // a bare date means that day at the CURRENT time to git:  midnight, so the start day's commits count
       const raw = PlanDocFiles.gitIn(
         checkout,
         "log",
-        "--format=%ct%x09%H%x09%s",
+        "--no-merges",
+        `--format=%ct%x09${TIMED_FORMAT}`,
         ...(since ? [`--since=${since} 00:00`] : [])
       )
-      for (const { sha: time, subject: rest } of PlanDocFiles.parseLog(raw)) {
-        const [sha, ...subject] = rest.split("\t")
-        timed.push({ sha: sha!, subject: subject.join("\t"), repo, time: Number(time) })
-      }
+      for (const { sha: seconds, subject: rest } of PlanDocFiles.parseLog(raw))
+        for (const entry of PlanDocFiles.parseTimedLog(rest)) timed.push({ ...entry, repo, seconds: Number(seconds) })
     }
     const seen = new Set<string>()
     return timed
-      .sort((a, b) => b.time - a.time)
+      .sort((a, b) => b.seconds - a.seconds)
       .filter(({ sha }) => !seen.has(sha) && Boolean(seen.add(sha)))
       .filter(({ subject }) => {
         const parsed = PlanCommits.parseCommitSubject(subject)
@@ -730,7 +747,41 @@ export class PlanDocFiles {
           })
         )
       })
-      .map(({ sha, subject, repo }) => ({ sha, subject, repo }))
+      .map(({ sha, subject, repo, time }) => ({ sha, subject, repo, time }))
+  }
+
+  /**
+   * `git log` output in `TIMED_FORMAT` (`%H%x09%cI%x09%s`) as `{ sha, time, subject }`s, newest first.
+   * STATIC:  pure.
+   */
+  static parseTimedLog(raw: string): CommitLogEntry[] {
+    return PlanDocFiles.parseLog(raw).map(({ sha, subject: rest }) => {
+      const [time, ...subject] = rest.split("\t")
+      return { sha, time: time!, subject: subject.join("\t") }
+    })
+  }
+
+  /** `epicHistory()`, best effort (a migration's):  a history that won't read is `undefined`.  NEVER throws. */
+  historyOrNone(file: string): CommitHistory | undefined {
+    try {
+      return this.epicHistory(file)
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
+   * The doc's history for `PlanDoc.backfillCommits()`:  its commits (`docLog()`, git's, or a shared doc's
+   * `sharedDocLog()` over every repo of a kit and its peers), its repo's GitHub page and its epic's name.
+   * - never a commit ANOTHER epic's page lists:  a bare `P7:  Doc Review` reads the same for every epic with one
+   * - read by `commits --backfill`, `phase ... done`, `epic merge` and the migration `log-commits`
+   *   (epic `epic-engine` P52)
+   */
+  epicHistory(file: string): CommitHistory {
+    const epic = basename(file).replace(/(\.plan)?\.html$/, "")
+    const others = [...new EpicDocs({ files: this, name: epic }).otherEpicsCommits()]
+    const log = this.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
+    return { log, base: this.commitBase(file), epic }
   }
 
   /** `git log --format=%H%x09%s` output as `{ sha, subject }`s, newest first.  STATIC:  pure. */
@@ -860,3 +911,6 @@ function assembleEpic(document: Document, file: string): PlanDocParts {
 
 /** How many of an epic folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
 const EARLIER_COMMITS = 3
+
+/** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */
+const TIMED_FORMAT = "%H%x09%cI%x09%s"

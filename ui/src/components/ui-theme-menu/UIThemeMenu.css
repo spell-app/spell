@@ -18,6 +18,8 @@
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
  *     Then its tooltip
  *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own
+ *   - `menu`:  the overlay's `.panel` alone, drawn in place in a host's menu (`:state(menu)`):
+ *     no box of its own (the host's menu gives it), the rows in the host's text size
  * - Colours are foundation tokens (`--ui-surface`, `--ui-primary` ...), so every theme restyles it,
  *   the Spell theme into the brand.
  * - The overlay's box is `<ui-popup>`'s `::part(popup)`, restyled with plain properties
@@ -385,6 +387,22 @@
         box-shadow var(--ui-duration-normal, 200ms) ease-out,
         color var(--ui-duration-fast, 100ms) ease-out;
     }
+  }
+}
+
+/*
+ * `show="menu"`:  the panel in place, the body of a host menu's sub-menu
+ * - as wide as the host gives it, in its text size;  no padding, border or shadow:  the host's box has them
+ * - the rows' corners as in the overlay
+ */
+@layer ui.components.theme-menu.variations {
+  :host(:state(menu)) {
+    display: block;
+  }
+  :host(:state(menu)) .ui.themes {
+    display: block;
+    font-size: inherit;
+    line-height: 1.3;
   }
 }
 

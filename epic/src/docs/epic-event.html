@@ -7,7 +7,7 @@
     <title>epic-event</title>
     <meta
       name="description"
-      content="The &lt;epic-event&gt; element: one line of an epic page's log, its icon and time drawn."
+      content="The &lt;epic-event&gt; element: one review line of an epic page's log, written but not shown there (the Log shows commits)."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -41,7 +41,8 @@
           <ui-header level="1" class="site-title">
             &lt;epic-event&gt;
             <ui-header
-              >The &lt;epic-event&gt; element: one line of an epic page's log, its icon and time drawn.</ui-header
+              >The &lt;epic-event&gt; element: one review line of an epic page's log, written but not shown there (the
+              Log shows commits).</ui-header
             >
           </ui-header>
         </ui-container>
@@ -120,9 +121,16 @@
                 <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
                   ><code>&lt;epic-section&gt;</code></a
                 >
-                with <code>kind="log"</code>: the log, oldest first
+                with <code>kind="log"</code>: the review lines, oldest first, among the Log's commits
               </li>
             </ul>
+            <p>
+              Not drawn on an epic page since epic <code>epic-engine</code> P52: the Log is the epic's change log, its
+              <a href="epic-commit.html" target="src-packages-epics-docs-epic-commit-html"
+                ><code>&lt;epic-commit&gt;</code></a
+              >s. These lines are still written, for Actual Time and "last worked on";
+              <code>epic log &lt;epic&gt;</code> prints them.
+            </p>
             <p><b>Its children:</b></p>
             <ul>
               <li>prose: what happened, one line</li>
@@ -245,7 +253,9 @@
                 <code>inbox apply</code> ...
               </li>
               <li>
-                <code>epic create</code>: the template's first line, <code>epic page created</code> (<code>plan doc created</code>
+                <code>epic create</code>: the template's first line, <code>epic page created</code> (<code
+                  >plan doc created</code
+                >
                 on pages made before 2026-10-14).
               </li>
               <li>The time is now, local, with its offset (<code>PlanTime.isoMinutes()</code>).</li>

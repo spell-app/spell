@@ -6,7 +6,7 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 
 import { PageStages } from "spell/epic/phases"
-import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell/epic/review"
+import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
@@ -17,7 +17,6 @@ import {
   STATE_PICK,
   type StatePickDetail
 } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
-import { TEST_START } from "spell/epic/components/epic-test-run/EpicTestRun.types"
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
@@ -25,6 +24,7 @@ import { PhaseDrag } from "./PhaseDrag"
 import { phaseFields } from "./PhaseFields"
 import { PhaseState } from "./PhaseState"
 import { StateFilter, type ChipPick } from "./StateFilter"
+import { TestQueue } from "./TestQueue"
 import {
   CLOSED_STATUSES,
   COUNT_ATTRIBUTES,
@@ -42,6 +42,9 @@ import {
   REPORT,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
+  ALL_QUERY,
+  TEST_ALL,
+  TEST_QUERY,
   type ChipState,
   type ChipStateName,
   type ContentsEntry,
@@ -171,8 +174,16 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   the Todos and Questions sections end with
  *   - the new items of their kind Owen asked for and Claude hasn't made yet (Edit, Remove:  `newItemList()`)
  *   - then a New todo / New question button, which opens the form there (`<epic-new-item>`)
- * - The Manual tests section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
- *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-opening`)
+ * - The Manual tests section's tests are answered WHERE THEY ARE (epic `epic-engine` P51, Q53;  the separate test run
+ *   went):  Approve passes one, a note (and a screenshot pasted in it) says what Owen saw, the note box's x says it
+ *   no longer applies;  left alone, it waits.  Its button, on its title while reviewed and a test is open
+ *   (`testButton()`):
+ *   - "Start testing · 9":  Claude prepares the tests first, a request for now (`ReviewClient.prepareTests()`):  it
+ *     checks what it can itself, writes out the rest step by step with a screenshot, and stamps each `prepared`
+ *   - "Preparing tests", turning, while it does (a click calls it off);  once done, the first test opens (`TestQueue`)
+ *   - every open test prepared:  "Next test · 3 left", which opens the next one he hasn't answered
+ *   - the address's `?test=1` presses it as the page loads (`epic test <epic>`);  with `all`, its last line links the
+ *     next epic with open tests once every test here is answered
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
  *   follows the review inbox while connected (an Overview sub-section, Todos, Questions).
  ****************/
@@ -201,10 +212,13 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Its view of the review inbox:
    * - an Overview sub-section's:  keyed by its id (is the page reviewed?  has it a marked note?)
+   * - the Manual tests section's:  keyed by its id, `tests`, for Start testing's request (epic `epic-engine` P51)
    * - the Todos and Questions sections':  for their new items (no id:  never marked themselves)
    * - other kinds never read it
    */
-  readonly reviewState = new ReviewState(() => (this.kind === "overview-part" ? this.id : undefined))
+  readonly reviewState = new ReviewState(() =>
+    this.kind === "overview-part" || this.kind === "tests" ? this.id : undefined
+  )
 
   /** The Todos or Questions section's `<epic-new-item>`, as drawn:  Edit on a waiting item opens its form on it. */
   private newItem: (HTMLElement & { open: boolean; editing?: string }) | undefined
@@ -460,8 +474,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             : this.holdsItems()
               ? () => (
                   <>
-                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.count()?.open}>
-                      {(open) => this.startTesting(open())}
+                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
+                      {(testing) => this.testButton(testing)}
                     </Show>
                     {this.filter()}
                     <Show when={this.reviewState.reviewing() && this.newKind()}>
@@ -487,6 +501,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             {this.reviewControl("note", "note-box")}
           </Show>
           <Show when={this.reviewState.reviewing() && this.newKind()}>{(newKind) => this.newItems(newKind())}</Show>
+          <Show when={kind === "tests" && this.runsAll && this.reviewState.reviewing() && this.testing()?.left === 0}>
+            {this.nextEpicLine()}
+          </Show>
         </>
       )
     })
@@ -557,29 +574,199 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     )
   }
 
+  ////////////////
+  // ## Testing (epic `epic-engine` P51)
+  ////////////////
+
   /**
-   * The Manual tests section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
-   * - A click asks the page for its test run (`epic-test-opening`, out of the shadow root).
+   * The Manual tests section's button (`testButton()`), as things stand;  `undefined` with no open test:
+   * - `open`:  open tests;  `left`:  those Owen hasn't answered (no mark of his yet)
+   * - `prepared`:  every open test written out by Start testing (`<epic-item prepared>`)
+   * - `preparing`:  Start testing's request is on its way or under way;  `queued`:  nobody has taken it yet
    */
-  private startTesting(open: number): JSX.Element {
+  readonly testing = createMemo((): TestingState | undefined => {
+    if (this.kind !== "tests" || isServer) return undefined
+    const open = this.count()?.open
+    if (!open) return undefined
+    const running = this.reviewState.running()
+    return {
+      open,
+      left: TestQueue.leftIds(this.domElement, this.reviewState.isMarked).length,
+      prepared: TestQueue.isPrepared(this.domElement),
+      preparing: !!running,
+      queued: !!running?.queued
+    }
+  })
+
+  /** Start testing's request is under way:  what `onPrepared()` follows. */
+  get isPreparing(): boolean {
+    return !!this.testing()?.preparing
+  }
+
+  /** Start testing was pressed on this visit, and its request hasn't finished:  the first test opens when it does. */
+  private pressedStart = false
+
+  /** The test it opened last:  Next test goes on from it (the address may have followed the scroll since). */
+  private lastOpened: string | undefined
+
+  /** The address asked for a run across every epic (`?test=1&all=1`, `epic test --all`):  read as it connects. */
+  readonly runsAll = !isServer && EpicSection.testQuery() === TEST_ALL
+
+  /** The next epic with open tests, for a run across every epic;  `null` once asked and none is left. */
+  @E.state accessor nextEpic: TestsEntry | null | undefined = undefined
+
+  /**
+   * The Manual tests section's button (Owen, 2026-10-29, Q53:  "The 'Start testing' button in header of Manual Testing
+   * could just do the grunt work for fleshing out what exactly I need to do for the test, screenshots, etc."):
+   * - "Start testing · 9" (blue):  Claude prepares them (`startTesting()`)
+   * - "Preparing tests" (its icon turning) while that runs;  a click calls it off
+   * - every open test prepared:  "Next test · 3 left" ("Go through the tests" with none left), opening the next
+   */
+  private testButton(state: () => TestingState): JSX.Element {
+    const words = () => {
+      const testing = state()
+      return testing.preparing
+        ? this.translationForKey("preparingTests")
+        : testing.prepared
+          ? this.translationForKey(testing.left ? "nextTest" : "firstTest", { count: testing.left || testing.open })
+          : this.translationForKey("startTesting", { count: testing.open })
+    }
+    const tip = () => {
+      const testing = state()
+      return testing.preparing
+        ? testing.queued
+          ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
+          : this.translationForKey("preparingTip")
+        : this.translationForKey(testing.prepared ? "nextTestTip" : "startTestingTip")
+    }
     return (
       <ui-button
         class={START_TESTING}
         part={this.partForName("start-testing")}
         color="blue"
-        appearance="basic"
+        appearance={state().prepared && !state().preparing ? undefined : "basic"}
         size="mini"
-        icon="flask"
-        title={this.translationForKey("startTestingTip", { count: open })}
+        icon={state().preparing ? "circle notch" : state().prepared ? "arrow right" : "flask"}
+        data-busy={state().preparing ? "" : undefined}
+        title={tip()}
         onClick={(event: MouseEvent) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
-          this.send(TEST_START, {})
+          this.startTesting()
         }}
       >
-        {this.translationForKey("startTesting", { count: open })}
+        {words()}
       </ui-button>
     )
+  }
+
+  /**
+   * Press the button:
+   * - while preparing:  call it off ("nevermind")
+   * - every open test prepared, nothing new since:  straight to the next test (`openNext()`)
+   * - else Start testing's request for now;  the first test opens when it's done (`onPrepared()`)
+   */
+  @E.untracked
+  startTesting() {
+    const client = this.reviewState.client
+    const testing = this.testing()
+    if (!client || !testing) return
+    if (testing.preparing) {
+      this.pressedStart = false
+      void client.cancel(this.id ?? "")
+      return
+    }
+    if (testing.prepared) return this.openNext()
+    this.pressedStart = true
+    void client.prepareTests()
+  }
+
+  /** Open the next test Owen hasn't answered, after the one it opened last (`TestQueue.nextId()`). */
+  @E.untracked
+  private openNext() {
+    const current = this.lastOpened ?? decodeURIComponent(location.hash.slice(1))
+    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked, current)
+    if (!id) return
+    this.lastOpened = id
+    TestQueue.open(id)
+  }
+
+  /**
+   * Start testing's request finished:  the first test opens (Owen, Q53:  then the page "opens the first test");
+   * while he's typing, a notice says the tests are ready instead, and Next test opens it.
+   * - only for a press on this visit:  a request another window asked for, or one called off, opens nothing
+   */
+  @E.onChange("isPreparing")
+  protected onPrepared(preparing: boolean) {
+    if (preparing || !this.pressedStart || isServer) return
+    this.pressedStart = false
+    if (!TestQueue.openIds(this.domElement).length) return
+    if (TestQueue.isTyping()) return this.reviewState.client?.notify(this.translationForKey("testsReady"))
+    this.lastOpened = undefined
+    this.openNext()
+  }
+
+  /** It can press its button by itself:  the page reviewed, a test open.  What `pressFromAddress()` follows. */
+  get canStartTesting(): boolean {
+    return this.reviewState.reviewing() && !!this.testing()
+  }
+
+  /**
+   * The address's `?test=1` (`epic test <epic>`, an old test run's link) presses the button once, as soon as it can;
+   * the query then leaves the address, so a reload doesn't ask again (`all` stays, for the next epic's link).
+   */
+  @E.onChange("canStartTesting")
+  protected pressFromAddress(can: boolean) {
+    if (!can || isServer || this.kind !== "tests" || !new URLSearchParams(location.search).has(TEST_QUERY)) return
+    const url = new URL(location.href)
+    url.searchParams.delete(TEST_QUERY)
+    if (this.runsAll) url.searchParams.set(ALL_QUERY, "1")
+    history.replaceState(history.state, "", url.href)
+    this.startTesting()
+  }
+
+  /** Every test here answered, in a run across every epic:  what `findNextEpic()` follows. */
+  get isAllAnswered(): boolean {
+    return this.runsAll && this.testing()?.left === 0
+  }
+
+  /** Every test answered, in a run across every epic:  ask the page server which epic has open tests next. */
+  @E.onChange("isAllAnswered")
+  protected findNextEpic(answered: boolean) {
+    const client = this.reviewState.client
+    if (!answered || !client || this.nextEpic !== undefined) return
+    const here = location.pathname
+    void client.openTests().then((entries) => {
+      this.nextEpic = entries.find((entry) => !here.endsWith(entry.page.replace(/^\//, ""))) ?? null
+    })
+  }
+
+  /** The section's last line in a run across every epic:  the next epic with open tests, or that none is left. */
+  private nextEpicLine(): JSX.Element {
+    return (
+      <Show when={this.nextEpic !== undefined}>
+        <p class={NEXT_EPIC} part={this.partForName("next-epic")}>
+          <Show when={this.nextEpic} fallback={this.translationForKey("noEpicLeft")}>
+            {(next) => (
+              <a href={`${next().page}?${TEST_QUERY}=1&${ALL_QUERY}=1`}>
+                {this.translationForKey("nextEpic", { epic: next().epic, count: next().open })}
+              </a>
+            )}
+          </Show>
+        </p>
+      </Show>
+    )
+  }
+
+  /**
+   * The address's `?test=`:  `1` (any value), `all` (`?test=all`, or `?test=1&all=1` as `epic test --all` writes it,
+   * or `all=1` left after it pressed the button), or `undefined` for none.
+   */
+  private static testQuery(): string | undefined {
+    const query = new URLSearchParams(location.search)
+    const value = query.get(TEST_QUERY)
+    if (query.has(ALL_QUERY) || value === TEST_ALL) return TEST_ALL
+    return value === null ? undefined : "1"
   }
 
   /** Open this section, then its new item form, on screen, its title field ready. */
@@ -986,6 +1173,12 @@ const FILTERED = "data-epic-filtered"
 
 /** Class of the Manual tests section's Start testing. */
 const START_TESTING = "start-testing"
+
+/** Class of the Manual tests section's last line in a run across every epic. */
+const NEXT_EPIC = "next-epic"
+
+/** The Manual tests section's button, as things stand (`EpicSection.testing()`). */
+type TestingState = { open: number; left: number; prepared: boolean; preparing: boolean; queued: boolean }
 
 /** Classes of the waiting new items (`newItemList()`):  the list, a card. */
 const NEW_LIST = "new-list"
