@@ -168,6 +168,20 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
     - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`C3`), the few words it's on, its times,
       where a taken comment went (`takenInto()`)
+    - WHO WROTE IT, the ONE check (epic `epic-friend` P2, Q9):  `isAgents()` / `agentOf()`, `lastPersonReply()`,
+      `speakerOf()` (You, a name, Claude, Claude (Ana)), for a page's `<epic-reply>` and a comment's reply alike
+      - an agent's words carry a marker:  `<epic-reply from="Ana" agent="claude">`, `{ by: "Ana", agent: "claude" }`
+      - ANY agent (epic `epic-friend` P10):  the marker is the agent's id, `agent="codex"`, drawn by its name
+        (`agentLabel()`:  Claude, Codex, else capitalised):  `Codex (Bob)`, `Codex • Underway`
+        - which agent:  `EpicHome.agent()`, read from the environment:  `SPELL_EPIC_AGENT`, else the mark the agent
+          leaves on its commands (Claude Code's `CLAUDECODE`, Codex's `CODEX_THREAD_ID`), else `claude`, a guess
+          `epic whoami` owns up to;  every writer stamps it (`CommentList`'s `agent`, `PlanDocOptions.agent`)
+        - a colour per person and per agent:  `voiceOf()`, from the repo's settings (`colors`, below "Colours")
+        (`from` / `by`:  who wrote it, or whose session did);  no marker:  the person did
+      - a reply by "Claude" with no marker, dated before `AGENTS_MARKED`:  Claude's (the old rule);  the migration
+        `agents-marked` and `CommentList.markAgents()` write the marker on them
+      - an agent's hand-written `<epic-reply from="Claude">` (or `from="Codex"`) is marked on the way in
+        (`IncomingHtml.markAgents()`), `agent` the one running the command, `from` the session's person
     - pure, node-safe at import, NOT in the `spell/epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
   - `review/` -- `ReviewClient`, one per page:  the review inbox's reads and writes (`/api/epics/review/*`).
     - Also token refresh, polling, and note-draft backups (the old page runtime's localStorage keys).
@@ -245,7 +259,7 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - The elements:
       - `<epic-ask>`, `<epic-text-box>`, `<epic-send>`, `<epic-choice-rows>` / `<epic-choice-row>`, `<epic-choices-bar>`
       - and `<epic-option>`'s answering mode, an option of an `<epic-ask>` (a tick box, a comment box)
-      - Their pages:  Epic UI's "Pages Owen answers on".
+      - Their pages:  Epic UI's "Pages you answer on".
     - `<epic-text-box>` is written in pages (the notes, a section's comment)
       AND drawn by others in their shadow roots (Other, an option's comment, the feedback).
       - Each family drawing it imports its barrel first.
@@ -283,10 +297,18 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
     where a repo keeps its epic things, from ONE file, `.epic/config.json5`.
     - the keys:
-      - the content folder, the base branch, the worktrees' folder, the install command, the window names,
+      - the content folder and its remote (`contentRemote`, the shared repo's address;  epic `epic-friend` P4),
+        the base branch, the worktrees' folder, the install command, the window names,
         whether session folders are linked;  and the repo's app (`app`, epic `epic-engine` I49), which the epic
         server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
-      - each one's default is spell-app's layout before the file existed;  `app`'s:  none
+      - a key the file leaves out reads as `epic init` would write it for THIS repo, never Spell's
+        (epic `epic-friend` P6):  `defaultsFor()`, from its name, lock file and branches
+        - `DEFAULTS` keeps only the keys no repo changes;  `app`'s default:  none
+      - `colors` (epic `epic-friend` P10):  a colour per person and per agent on the pages (see "Colours")
+    - `ofSetUp()`, `isSetUp`:  the ONE "is this repo set up for epics?" check (epic `epic-friend` P6)
+      - every hook and `WorktreeGuard` ask it, and do nothing in a repo `epic init` never set up
+      - there, the worktree hook makes the plain worktree Claude Code would make by itself:
+        `.claude/worktrees/<name>`, on branch `worktree-<name>`
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
       - a BROKEN worktree too, one git no longer knows (its `.git` names `<main>/.git/worktrees/<id>`, gone):
         the main checkout from that path (epic `epic-engine` P26, r20:  solid-17's settings came out inside solid-17)
@@ -352,6 +374,41 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         one session's (`transcriptOf()`), the titles' queue (`titlesFolder()`)
       - `Sessions`, `SessionFolders`, `RunningEpics`, the window script, `ReviewBackfill`, the prompt gate and the
         hooks all ask it;  plain `node` loads it
+    - `EpicHome` (epic `epic-friend` P1):  the epic tools' own folder, the ONE reader of where it is:
+      `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
+      - and who is at the keyboard:  `person()`, their SHORT NAME, kept in its `person.json5`, else their GitHub
+        login, else git's `user.name`;  `fullName` git's;  `keepPerson(name)` (`epic whoami <name>`, `epic init`).
+        The short name is the identity:  no id beside it.
+        - the GitHub login:  `refreshGithub()` (`gh api user`, a few seconds, never throws) keeps it in
+          `person.json5` as `github`;  only `epic whoami` and `epic init` run it, so a page served never runs `gh`
+          (Owen, 2026-10-29);  `$SPELL_EPIC_GH` names another `gh` (the tests' stand-ins)
+      - `personName()`:  the name put on what they write, "someone" when nobody said (epic `epic-friend` P2):
+        the page server stamps a comment's and a reply's `by` with it (never the page's word), the tool passes it to
+        `PlanDoc` (`PlanDocOptions.person`) for kept notes, picks, test runs, log lines and Claude's status cards
+        and replies;  the phrases in text are `AuthorWords`'s, the one list `epic whoami --rename` (`NameSweep`) reads
+
+      - the repo list, the ask listeners, the worktree guard, ditched files, the server prune and the window registry
+        all ask it;  plain `node` loads it
+    - `GitHub` (epic `epic-friend` P4):  GitHub's command, `gh`, the ONE runner of it:  `status()` (installed,
+      logged in), `login()` (`EpicHome.refreshGithub()`'s), `isOrganization()`, `createRepo()`, `addressOf()`
+      (SSH or HTTPS, as gh's `git_protocol` says);  never throws but where it says so;  `$SPELL_EPIC_GH` names a
+      stand-in;  plain `node` loads it
+      - only `epic whoami` and `epic init` run it:  never a page served or a hook
+    - `Editor` (epic `epic-friend` P16):  which editor the tools drive, VS Code (`code`) or Cursor (`cursor`), the ONE
+      reader of it:  `$SPELL_EPIC_EDITOR` (this machine's), else the window's own marks in the environment
+      (`ofWindow()`:  Cursor's `CURSOR_TRACE_ID`, its macOS bundle id, its folders in VS Code's `VSCODE_*` paths), else
+      the repo's `editor` (`EpicConfig.editor`), else `code`
+      - its command (`run()`, through `Processes`), its name for what people read, its URL scheme (`url()`:
+        `vscode://`, `cursor://`);  Cursor takes VS Code's flags, so nothing else differs
+      - who:  the window script's opens, `PluginInstall`'s extension step, `Sessions`' `open`, the docs tools'
+        doc-preview fallback (`--open-url`, every system), `Window.inVSCode`
+      - the tests' setup pins it to `code` (`SPELL_EPIC_EDITOR`), so no output depends on the editor running them
+      - plain `node` loads it (`spell/epic/config/Editor.ts`)
+    - `PeopleColors` (epic `epic-friend` P13):  the colour each person picked, one file each in the content folder's
+      `people/` (`people/ana-lima.json5`, `{ name, color }`), synced with the plans;  `EpicConfig.colors` reads them in,
+      the config's own winning;  `epic init` writes one, `epic whoami --rename` moves it (`NameSweep`);  `slugOf()` is
+      the ONE rule for a person's file name, the comments files' too (`SharedComments.slugOf()`);  plain `node` loads
+      it
     - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
       titles, the end first (`titles()`), its end (`tail()`), the question waiting (`pendingQuestion()`);  plain
       `node` loads it (the handoff hook)
@@ -384,7 +441,40 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - a snapshot or generated output by itself, a few others with `--ditch`
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
+        - and `SharedSync` (epic `epic-friend` P5, Q5 and Q6):  every turn's `shared commit` (and `shared sync` by
+          hand) pulls, rebasing, and pushes, ONLY when `.epic/config.json5` names `contentRemote` (Spell's does since
+          J18:  `spell-app/spell-app.epics`)
+          - before the rebase, ids this machine made that the remote has too (`t22`, `ch12`, `r3`) get the next free
+            number here, links, parts, inbox and request folders following (`Renumber`, `epic migrate`'s too), a log
+            line saying so;  this machine's unpushed commits are then made again, one per group
+          - what stops the rebase:  `ContentMerge` settles two adds at one place and a later date;  anything else
+            undoes it, kept in `SyncState` (the content repo's `.git/spell-shared-sync.json5`), which the
+            `SessionStart` hook [sync-notice.mjs](../hooks/sync-notice.mjs) says to the person and Claude
+          - after it:  the logs both sides wrote (`merge=union`) re-sorted by time, a phase's field added twice joined
+          - offline or refused:  the commits wait, the next sync pushes
+        - the content repo's own `.gitignore` and `.gitattributes`:  a marked block each (`# epic:start`), kept current
+          on every init, commit and sync (`keepRepoFiles()`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
+        - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
+          `epic-friend` P1)
+        - and the SHARED repo, the content repo's remote (epic `epic-friend` P4, Q1):  the first person's makes it
+          on GitHub (`GitHub`), private, named as asked (`<repo>-epics`;  `--content-repo`), pushes, and writes its
+          address in the config (`contentRemote`);  a later person's clones it where the content folder is missing
+          (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
+          says how to get it and does the rest
+        - the ONE command to start (epic `epic-friend` P13), `npx spell@next epic init` (the kit's `spell epic`,
+          `runSpellEpic()`):  first the epic plugin when Claude Code doesn't have it (`pluginStep()`,
+          `PluginInstall.isInstalled()`;  `--no-plugin`), after the name the person's colour (`colorStep()`:  asked
+          from the free colour names, `--color`, kept in the content folder's `people/` by `PeopleColors` and pushed
+          at once, `shareNow()`), last the epic server, serving the repo, its address the last line (`serverStep()`,
+          `Hub.addressOf()`;  `--no-server`);  each a failure of one line, init carrying on;  `init()` takes them as
+          `plugin`, `server` (off unless asked:  only `run()` asks) and `color`, a test hands in stand-ins
+        - its words (Owen, 2026-10-29):  "Initializing Epic for repo <main>" first and "Epics initialized!" last, in
+          colour (`chalk`);  the settings it wrote stay in the file, not printed;  and it COMMITS the two files it wrote
+          (`commitStep()`:  the config and `.gitignore`, only those, on the base branch, asking first in a terminal,
+          yes suggested;  on another branch it says so and commits nothing;  `--no-commit`)
+      - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
+        what the content folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)
         - the repo it runs in, plus, in a multi-repo top, every child repo cloned in it (`EpicConfig.top`)
         - the files git tracks, by the settings file `guides/loc/loc.json5` in the content folder (`DataFile`, written
@@ -460,6 +550,35 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `PluginInstall`:  `epic plugin install`, the plugin installed in Claude Code as `epic@spell`, in place from the
       kit's `epic/` (epic `epic-engine` P49, Q45):  Claude Code's three lists, the cache link, the skill links,
       `~/.local/bin/epic`, the old `spell-epic@spell-epic` taken out;  writes the files itself, safe to run again
+      - off macOS (epic `epic-friend` P15):  links through the kit's `Links` (a folder a junction on Windows), and on
+        Windows `epic.cmd` instead of the `epic` link (Windows runs no file without an extension);  and step 7, the VS
+        Code extension from `vscode/spell-epic.vsix` (`code --install-extension`, skipped when VS Code has that
+        version), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
+      - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
+        written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
+        hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
+        - and (P12) every skill linked into `~/.agents/skills/`, the SAME files, which the Codex CLI lists in every
+          repo;  the designer and coherence agents as Codex custom agents, `~/.codex/agents/epic-<name>.toml`,
+          generated from Claude Code's agent files (`codexAgent()`)
+        - one route for the hooks:  the plugin's own Codex hooks file passes `--codex-plugin`, and a script started so
+          does nothing while the user file runs it (`CodexHome.skipPluginHook()`)
+      - `CodexHome` (`spell/epic/config/CodexHome`):  Codex's folders, the ONE reader of where they are, as
+        `ClaudeHome` is Claude Code's:  `$CODEX_HOME` else `~/.codex`, `~/.agents/skills` (`$SPELL_EPIC_AGENTS_HOME`
+        moves `~/.agents`), whether its hooks file runs ours;  plain `node` loads it (the hooks)
+        - the tests' setup (`tests/setup/epicHome.ts`) points both at scratch folders:  no test writes the machine's
+          (I10)
+    - ANY AGENT (epic `epic-friend` P11):
+      - `EpicGuide`:  `epic guide [<topic>]`, the workflow in plain steps, printed from the epic skill's own
+        [guide.md](../skills/epic/guide.md) (ONE copy:  the skill links it);  `claude-only-tools`, the plain way to do
+        each step that leans on a tool only Claude Code has
+      - `SkillsCheck` (P12):  `epic skills check`, the plugin's skills true for Claude Code and Codex alike:  each step
+        naming a Claude-only tool has an `In Codex:` line within 10 lines, each Claude-only skill its
+        `agents/openai.yaml`, the descriptions within Codex's 8,000-character list;  its test runs it over the real ones
+      - `Worktrees.create()` (P12):  `epic worktree create <name>`, the worktree hook run by hand, for an agent with no
+        `EnterWorktree`
+      - `TurnEnd`:  `epic turn end`, the end of every agent's turn:  `Shared.sync()`, quiet with nothing to do;  the
+        end-of-turn hook ([shared-commit.mjs](../hooks/shared-commit.mjs)), Claude Code's and Codex's, starts it
+        detached (`TurnEnd.inBackground()`), so there's one path;  plain `node` loads it by path
       - run from the published `spell` (no marketplace file, no `epic/bin`):  the plugin is the `spell-epic` package
         beside it (`pluginFolder()`), the marketplace `spell` from GitHub
     - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
@@ -1004,7 +1123,7 @@ In `tools/`:
   - No page script for details and choice pages since epic `epic-workflow` P12.
     - They're written in the epics pack's elements, which draw and send them (see "Details pages").
     - `details.css`, `details.js` and `syntax-choices.js` are gone.
-    - `spell-doc.css` has their pages' few own lines ("Pages Owen answers on").
+    - `spell-doc.css` has their pages' few own lines ("Pages you answer on").
   - `syntax-choices.css`:  the spell syntax guide's boxes and bar (`spell-syntax.js`).
     - A choice page drew with it before P12.
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the content folder's `goals/`.
@@ -1482,8 +1601,20 @@ In `tools/`:
     - blue:  do it now / Claude is working on it (every Send)
     - green:  decided or done
     - orange:  ONLY changed-since-you-looked, and warnings
-    - violet:  Claude's voice
-    - ivory:  Owen's
+    - violet:  a person's voice (you, everyone alike);  terracotta:  an agent's (Claude's, Codex's).
+      Theme tokens, `--epic-voice-*`, tweaked in `<epic-page>`'s theme block (`EpicPage.css`, "Voices";  epic
+      `epic-friend` T11);  the docs pages' copies `spell-doc.css`'s `--spell-voice-*`
+      - comment threads, page notes' replies and "answered" chip, and a waiting comment's quote read them too (epic
+        `epic-friend` P10, Q16):  an agent's in terracotta, violet before
+      - a colour per person and per agent (P10;  Owen:  "color per person and/or agent working on the project, set in
+        epic project settings"):  `colors` in `.epic/config.json5` (`EpicConfig.colors`), told every page as
+        `SPELL_SERVER.colors` (`personRoutes`);  a reply or a thread message sets its speaker's own token,
+        `var(--epic-voice-agent-codex, <colour>)` (`ThreadFacts.voiceOf()`), falling back to the shared one
+      - a colour is a Spell UI colour name, drawn from the theme (`var(--ui-green)`), or any CSS colour (P14, Owen's C7:
+        "would be cool if color names worked here from our 'standard' color set"):  `VoiceColor`
+        (`spell/epic/config/VoiceColor`), the ONE check and drawing, which `EpicConfig` and `ThreadFacts` share;  it
+        imports nothing, so plain `node` and the pages' bundle both load it
+    - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
   - The table, with examples:  [the plan-doc guide](../templates/epics/plan-doc.md), "Colours".
@@ -1617,6 +1748,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
     It's `<name>.inbox.json5`, beside the doc in `epics/<name>/`.
   - Absent until the first mark;  deleted once empty.
   - Git-ignored:  per-machine pending state, never the record.
+  - EXCEPT its comments (epic `epic-friend` P9):  shared, ONE FILE PER PERSON beside it,
+    `<name>.comments.<person>.json5`, committed and synced with the plans ([`SharedComments`](tool/SharedComments.ts))
+    - each machine writes only its own person's file:  their comments, and what they said on others' threads (`on`)
+    - the inbox's `comments` is everyone's, put together as it's read;  a write splits them back by who said what
+    - an inbox file from before P9 still holding comments:  read as this machine's, moved by its next write
+    - everyone sees every thread;  each person's AGENT answers that person's (`CommentList.ownWaiting`):  a Send
+      hands over only its person's, and the thread says whose agent took it (`claim`:  "Claude (Ana): thinking…")
+    - only a comment's writer edits, deletes or clears it (409);  anyone replies, closes or reopens it
+    - two people's new `c4` at once:  the sync renumbers this machine's before it rebases (`Renumber.comments()`)
+    - `epic whoami --rename` moves the person's files to the new name, one commit in the content repo
   - Its shape and methods:  [`ReviewInbox`](tool/ReviewInbox.ts).
 
     ```text
@@ -1720,7 +1861,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - it rides in the note's mark as `shot` (`attachShot()`):  revisit, todo, next, drop and skip take one, checked as
       `NOTE_SHOT` in `ReviewInbox.toMark()`;  a picture alone makes a revisit with an empty note
     - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's, next's
-      or drop's picture in Owen's kept reply (`keepNote()`)
+      or drop's picture in the person's kept reply (`keepNote()`)
   - TESTS, answered on the page (epic `epic-engine` P51, Q53;  Owen, 2026-10-29:  "I don't think we need P/F/S/N if
     testing feedback/etc are integrated in the epic doc"):  no test run, no test mode, no `<epic-test-run>`
     - Approve on a test:  `apply` closes it, passed
@@ -1736,13 +1877,13 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - nobody listening:  the page server wakes the epic, as for Add Details
     - "Preparing tests" while queued or worked;  a click calls it off (nevermind)
     - `epic inbox done <name>#tests` ends it:  the page opens the first open test (`#m3` in the address, then a
-      `hashchange`:  the docs runtime unfolds and opens it), unless Owen is typing in a field
+      `hashchange`:  the docs runtime unfolds and opens it), unless the person is typing in a field
       ("Tests ready:  Next test opens the first")
     - every open test `prepared`:  "Next test · 3 left" (open tests with no mark of his yet), the next one after the
       one it opened last, round to the start;  none left:  "Go through the tests · N";  it never asks Claude again
-    - `prepared="2"` on a test (format `place`):  its place in Owen's order, written by
+    - `prepared="2"` on a test (format `place`):  its place in the person's order, written by
       `epic details <name>#M3 --prepared <n>`
-    - Owen's ORDER, on the page and in `epic test --list` (`inTestOrder()`, review.types.ts):  prepared tests by
+    - the person's ORDER, on the page and in `epic test --list` (`inTestOrder()`, review.types.ts):  prepared tests by
       place, then page order, deferred last
     - `?test=1` in the address presses it once as the page loads, then leaves the address (`all=1` stays);
       `epic test <name>[#M3]` opens that, `epic test --all` the first epic with `?test=1&all=1`
@@ -1765,6 +1906,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
   - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
     `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
+    - or an agent's own `epic inbox wait` (epic `epic-friend` P11):  `wait` listens itself while nobody else does,
+      so a Codex session that waits shows as listening, and stops the moment it ends
+  - `listening.person`, `listening.agent`:  whose agent listens (`EpicHome`), stamped by `setListening()`;
+    `forPage()` adds `lastListener`, the record once nobody listens, so the page says "Your Codex is listening",
+    or, gone, "Your Codex isn't listening:  ask it to run `epic inbox wait <epic>`" (Send never wakes it, Q14)
     - a newer poller of the same session (the next turn's `Stop` hook) takes the place over (I144)
   - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
     next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
@@ -1872,7 +2018,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     pointed at it;  so its See Also lists one link per question
   - the code:  [rounds.js](tools/rounds.js)
 - Written in the epics pack's `<epic-*>` elements (epic `epic-workflow` P12), so a question reads as an epic page's.
-  - Each element has its page in Epic UI (`/components/epics/`, "Pages Owen answers on").
+  - Each element has its page in Epic UI (`/components/epics/`, "Pages you answer on").
   - a question:  a `<ui-section id>` holding an `<epic-ask>`
     - the `<epic-ask>` holds an `<epic-question>`, and an `<epic-choices>` of `<epic-option>`s
     - the section's id is its answer's key
@@ -2105,9 +2251,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
       the comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
     - what it shows is worked out by `ThreadFacts` (`spell/epic/comments`), the comments' code's too
     - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
-    - WHOSE TURN (`CommentList.turnOf()`, sent by the GET as each comment's `turn`):
-      - `owen`:  Claude spoke last.  Also an epic page's comment answered in the doc, with no words on the thread.
-      - `claude`:  Owen spoke last, his comment or his reply.  Claude may have taken it, not answered yet.
+    - WHOSE TURN (`ThreadFacts.turnOf()`, sent by the GET as each comment's `turn`):
+      - `person`:  an agent spoke last (`owen` before epic `epic-friend` P2;  `withTurns()` reads it so).  Also an epic page's comment answered in the doc, with no words on the thread.
+      - `agent`:  a person spoke last, their comment or their reply.  An agent may have taken it, not answered yet.
+        `claude` before epic `epic-friend` P10:  `ThreadFacts.asTurn()` reads it so, for a page or server from before
       - `done`:  Owen closed it.
     - Where (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):
       - right after the smallest paragraph, list item, cell ... holding its quote (`holderOf()`)
@@ -2175,8 +2322,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
         - The "thinking…" stub and the Done line count as the last.
         - The times keep their size.
       - Owen's:  plain on the ivory, no box, but the same padding as a boxed one ("my text doesn't get bordered").
-      - Claude's:  a light violet box (`--ui-violet` mixed light), no side bar.
-        - Its outline only a faint violet ring drawn as a shadow, its border clear, so nothing moves.
+      - an agent's:  a light box in the agent's voice (`--epic-voice-agent`, terracotta;  violet before epic
+        `epic-friend` P10), no side bar;  a speaker with a colour of their own, theirs (`--_epic-voice`).
+        - Its outline only a faint ring in that colour, drawn as a shadow, its border clear, so nothing moves.
           Owen, 2026-10-10:  "lighten border around your replies, make it just border-as-shadow".
         - Also "Taken into <epic> · <phase>", and "Answered in the epic page" for an answer with no words here.
           - linked by the phase's stable id, so an insert never moves it (epic `epic-engine` I16, `takenInto()`);

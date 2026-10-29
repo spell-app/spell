@@ -1,4 +1,5 @@
 import { PlanTime } from "spell/epic/tool/PlanTime"
+import { Renumber } from "spell/epic/tool/Renumber"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -10,7 +11,8 @@ import type { Migration, MigrationContext } from "./migrations.types"
  * - Tests become Manual tests:  `t3` => `m3`
  * - comments become C:  the review inbox's `m3` (and the older `cm3`) => `c3`, by `CommentList.migrate()` as the
  *   runner rewrites the inbox;  items and comments are kept apart, so no number ever meets another's
- * - every number kept, ALL AT ONCE (`renumber()`):  a `t3` made from a `c3` is never then made an `m3`
+ * - every number kept, ALL AT ONCE (`Renumber.page()`, the content repo's sync's renumbering too):
+ *   a `t3` made from a `c3` is never then made an `m3`
  * - every reference on the page follows:  ids, `#t3` links (and words that only say `T3`), `#caveats` links, a change
  *   mark's `item`, an `<epic-mark item>`, a part's `source` (its file written fresh under the new name), `part-ids`,
  *   a note box's `for`, an `<epic-link item>` naming this page
@@ -37,7 +39,7 @@ export class ItemRenames implements Migration {
     const caveats = document.querySelector(`epic-page > epic-section[kind="${OLD_KIND}"]`)
     const renames = ItemRenames.renames(document)
     if (!caveats && !Object.keys(renames).length) return false
-    ItemRenames.renumber(document, { ...renames, [OLD_KIND]: NEW_KIND }, context.epic)
+    Renumber.page(document, { ...renames, [OLD_KIND]: NEW_KIND }, context.epic)
     if (caveats) {
       caveats.setAttribute("kind", NEW_KIND)
       caveats.id = NEW_KIND
@@ -57,60 +59,6 @@ export class ItemRenames implements Migration {
     for (const item of ItemRenames.itemsIn(document, OLD_KIND, OLD_TODO)) renames[item.id] = `t${item.id.slice(1)}`
     for (const item of ItemRenames.itemsIn(document, "tests", OLD_TEST)) renames[item.id] = `m${item.id.slice(1)}`
     return renames
-  }
-
-  /**
-   * Rename every reference in `document` by `renames`, ALL AT ONCE (`c3` => `t3` while `t3` => `m3`):  each value is
-   * read once and written once, so nothing is renamed twice;  changed?
-   * - an item's `id`;  `href` to `#t3` (or a section, `#caveats`) on this page (`epic`'s, or no page);  a link's words
-   *   that only say `T3`
-   * - an `item` (a change mark, an `<epic-mark>`, an `<epic-link>` with no `epic` or this one), a note box's `for`
-   * - a part's `source` (`parts/t3.html`), a host's `part-ids`
-   */
-  static renumber(document: Document, renames: Record<string, string>, epic?: string): boolean {
-    if (!Object.keys(renames).length) return false
-    let changed = false
-    const swap = (id: string) => renames[id.toLowerCase()]
-    const set = (element: Element, name: string, value: string) => {
-      if (element.getAttribute(name) === value) return
-      element.setAttribute(name, value)
-      changed = true
-    }
-    for (const element of Array.from(document.querySelectorAll("*"))) {
-      if (element.localName === "epic-item" && swap(element.id)) set(element, "id", swap(element.id)!)
-      for (const name of ["item", "for"]) {
-        const value = element.getAttribute(name)
-        const other = element.getAttribute("epic")
-        if (value && swap(value) && (!other || other === epic)) {
-          const to = swap(value)!
-          set(element, name, value === value.toUpperCase() ? to.toUpperCase() : to)
-        }
-      }
-      const source = element.getAttribute("source")
-      const part = source && /^(.*parts\/)([a-z]\d+)(\.html)$/.exec(source)
-      if (part && swap(part[2]!)) set(element, "source", `${part[1]}${swap(part[2]!)}${part[3]}`)
-      const partIds = element.getAttribute("part-ids")
-      if (partIds)
-        set(
-          element,
-          "part-ids",
-          partIds
-            .split(/\s+/)
-            .map((id) => swap(id) ?? id)
-            .join(" ")
-        )
-      const href = element.getAttribute("href")
-      const link = href && /^([^#]*)#([a-z][\w-]*)$/.exec(href)
-      if (link && swap(link[2]!) && (link[1] === "" || (epic && link[1]!.endsWith(`${epic}.plan.html`)))) {
-        set(element, "href", `${link[1]}#${swap(link[2]!)}`)
-        const words = element.textContent?.trim() ?? ""
-        if (words.toLowerCase() === link[2] && ITEM_ID.test(words) && element.children.length === 0) {
-          element.textContent = swap(link[2]!)!.toUpperCase()
-          changed = true
-        }
-      }
-    }
-    return changed
   }
 
   /** How many of each `renames` moved, for the page's report:  `5 caveats -> todos, 3 tests -> manual tests`. */
@@ -150,9 +98,6 @@ const OLD_TODO = /^c\d+$/
 
 /** A test's id before the step:  `t3`. */
 const OLD_TEST = /^t\d+$/
-
-/** An item's id, as a link's words may say it:  `T3`. */
-const ITEM_ID = /^[a-z]\d+$/i
 
 /** The page's one log line:  every number kept, so it says the letters, not each id. */
 const LOG_LINE =

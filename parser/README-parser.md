@@ -777,7 +777,7 @@ math.addRule(Plus, {
   run the tests with `BLESS_RULE_TESTS=1` (Spell's script for it is `yarn spell:test:rules:bless`), then read the diff.
 - `parser.speedTest()` runs every rule test once to warm up, then 20 more times, and reports the average.
   `spell speedtest --against HEAD` does it in fresh processes, against a commit
-  ([the language commands](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser)).
+  ([the language commands](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser)).
 
 ### Adding a rule
 

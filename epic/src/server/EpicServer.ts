@@ -17,6 +17,7 @@ import {
 import type { SiteTab } from "spell/server/site/site.types"
 import { resolvedFile } from "spell/toolchain/sourceNames"
 
+import { EpicHome } from "spell/epic/config/EpicHome"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
 import { packageDir } from "spell/epic/tools/packageDir"
@@ -150,7 +151,7 @@ export class EpicServer {
   private bundles?: BundleBuilder
 
   /**
-   * - `home`:  default `RepoList.homeFolder()`
+   * - `home`:  default the epic home (`EpicHome.folder()`)
    * - `engine`:  default this code's checkout
    * - `repos`:  default the home folder's list
    * - `token`:  the guard's (default random)
@@ -158,7 +159,7 @@ export class EpicServer {
    *   copy, so its comments' inboxes never land in the real folder
    */
   constructor({
-    home = RepoList.homeFolder(),
+    home = EpicHome.folder(),
     engine = ENGINE_ROOT,
     repos,
     token,
@@ -276,7 +277,7 @@ export class EpicServer {
    * - runs `bin/epic hub serve` (spell-epic's `tsx` loader is in it), output to `<home>/server.log`
    * - what `epic hub ensure`, `epic hub url` and the openers call
    */
-  static async ensure(home = RepoList.homeFolder(), port = DEFAULT_EPIC_PORT) {
+  static async ensure(home = EpicHome.folder(), port = DEFAULT_EPIC_PORT) {
     const folder = resolve(home)
     mkdirSync(folder, { recursive: true })
     const pidFile = new SRV.PidFile(folder, PID_FILE)

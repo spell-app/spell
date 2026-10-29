@@ -41,7 +41,7 @@ export const epicStateFilterVocabulary = {
       name: "marked",
       kind: "number",
       description:
-        "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
+        "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
         "badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a " +
         "click does nothing.  None, or 0:  no badge."
     },
@@ -49,8 +49,8 @@ export const epicStateFilterVocabulary = {
       name: "phases",
       kind: "boolean",
       description:
-        "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order " +
-        "(`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue " +
+        "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown " +
+        "(`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue " +
         "badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
         "words."
     },

@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-ask>`
- * A question Owen answers ON the page:  a details page's, in a section of its own.
+ * A question you answer ON the page:  a details page's, in a section of its own.
  ****************/
 export const epicAskVocabulary = {
   tag: "epic-ask",
@@ -18,7 +18,7 @@ export const epicAskVocabulary = {
   noun: "ask",
   ui: false,
   description:
-    "A question Owen answers ON the page (a details page's;  epic `epic-workflow` P12):  its text an " +
+    "A question you answer ON the page (a details page's;  epic `epic-workflow` P12):  its text an " +
     "`<epic-question>`, its options an `<epic-choices>` of `<epic-option>`s, each with a tick box, then an Other " +
     "box.  Its line shows a chip in the epic page's state colours (red:  nothing yet;  green:  picked;  blue:  " +
     "Claude has more to do).  Its answer goes under its section's id.",
@@ -60,11 +60,11 @@ export const epicAskVocabulary = {
     { name: "line", description: "Its line:  the chip, how to answer, its tools." },
     {
       name: "chip",
-      description: "Its id chip (`Q1`), in the epic page's state colours:  red needs Owen, green picked, blue Claude's."
+      description: "Its id chip (`Q1`), in the epic page's state colours:  red needs you, green picked, blue Claude's."
     },
     {
       name: "how",
-      description: '`Pick one` / `Pick any`:  a switch Owen flips (`role="switch"`, epic `epic-engine` P50).'
+      description: '`Pick one` / `Pick any`:  a switch you flip (`role="switch"`, epic `epic-engine` P50).'
     },
     { name: "tools", description: "Its buttons:  Select all, Open | All." },
     { name: "other", description: 'The Other box, an `<epic-text-box type="other">`, after the options.' }

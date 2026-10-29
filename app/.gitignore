@@ -37,6 +37,8 @@ PARKED-*.md
 # the component sets' waiting comments (`<page>.inbox.json5` beside a page, and its lock;  the comment route, epic
 # epic-workflow P10 / P11):  per machine, never the record, as the shared pages' are
 /app/docs/**/*.inbox.json*
+# and their comments files (`<page>.comments.<person>.json5`, epic epic-friend P9):  shared only in the content repo
+/app/docs/**/*.comments.*.json5
 
 # `/details` scratch pages and review inboxes (`pages/details/`, `epics/*/*.inbox.json5`):  ignored by the shared
 # content repo's own `.gitignore` (`../spell.epics`);  here the whole folders are ignored (below)

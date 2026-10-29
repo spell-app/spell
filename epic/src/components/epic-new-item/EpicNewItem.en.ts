@@ -20,7 +20,7 @@ export const epicNewItemVocabulary = {
   noun: "new item",
   ui: false,
   description:
-    "A new todo or question Owen asks for while he reads (epic `airplane` P2), drawn by `<epic-page>` (the form " +
+    "A new todo or question you ask for while you read (epic `airplane` P2), drawn by `<epic-page>` (the form " +
     "its toolbar button opens) and a Todos or Questions `<epic-section>` (at its end), never written in a doc:  a button, and while " +
     "`open`, the form.  What's asked for is a mark in the review inbox, made into an item by `epic inbox apply`.",
   attributes: [

@@ -7,7 +7,8 @@
  *   this hook is its thin caller.
  * - stdin `{ cwd, transcript_path, source, session_id, ... }`;
  *   stdout `WorktreeGuard.check()`'s answer, JSON, or nothing.
- * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`):
+ *   the plugin's hooks run in every repo.
  * - Plain `node`:  `WorktreeGuard.ts` loads with its types stripped.
  * - Always exits 0, within a few seconds:  never blocks a session.
  * - Its tests:  `tests/src/command/WorktreeGuard.test.ts`, which runs this file as the hook too.

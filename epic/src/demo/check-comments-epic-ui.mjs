@@ -666,8 +666,8 @@ async function checkGuide() {
             text: "A stubbed comment",
             at,
             status: "answered",
-            replies: [{ by: "Claude", at, html: "<p>Answered.</p>" }],
-            turn: "owen"
+            replies: [{ by: "Ana", agent: "claude", at, html: "<p>Answered.</p>" }],
+            turn: "person"
           }
         ]
       }

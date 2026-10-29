@@ -129,7 +129,7 @@ export type PromptAckProps = {
 /** The hook's stdin, the fields read here. */
 export type AckInput = { prompt?: string; cwd?: string; session_id?: string }
 
-/** The hook's answer:  a line for Owen, or none. */
+/** The hook's answer:  a line for the person, or none. */
 export type AckAnswer = { systemMessage: string } | null
 
 /** A session's state in Claude Code's registry, and how long it's been so. */

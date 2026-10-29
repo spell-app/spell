@@ -9,12 +9,12 @@ import {
   statSync,
   writeFileSync
 } from "node:fs"
-import { homedir } from "node:os"
 import { basename, dirname, join } from "node:path"
 
 // By package path, `.ts` and all:  the window script and the `UserPromptSubmit` hook load this file with plain `node`
 // (types stripped)
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 
 /****************
  * ### `SessionMoves`
@@ -49,7 +49,7 @@ export class SessionMoves {
 
   /** spell-epic's registry folder, read on every call (for tests):  `$SPELL_EPIC_WINDOWS_DIR`, else the default. */
   static registry(): string {
-    return process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows")
+    return process.env.SPELL_EPIC_WINDOWS_DIR || EpicHome.subfolder("windows")
   }
 
   /** `<registry>/handoffs`:  pending moves (`<session id>.json`), the one being carried out, and their logs. */
@@ -243,7 +243,7 @@ export type MissedMove = {
   name: string
   /** why the hook can't run, when that's known (`pluginProblem()`) */
   problem: string | null
-  /** what's said, for Owen and Claude both */
+  /** what's said, for the person and Claude both */
   message: string
 }
 

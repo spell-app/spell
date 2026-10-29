@@ -9,6 +9,7 @@ import { PlanDocError } from "./planDoc.types"
 import { ContentRelink, Migrations, PAGE_KINDS, RootLinks, type PageKind } from "./migrations"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 import { PlanDocFiles, type MigrateResult } from "./PlanDocFiles"
+import { Renumber } from "./Renumber"
 
 /****************
  * ### `MigrateCommands`
@@ -156,7 +157,7 @@ export class MigrateCommands {
       for (const note of result.notes) this.owner.print(`  ${note}`)
     }
     if (Object.keys(renumbered).length) {
-      const relinked = ContentRelink.run(this.files.content, renumbered, { dryRun })
+      const relinked = Renumber.others(this.files.content, renumbered, { dryRun })
       this.owner.print(
         `links on other pages:  ${relinked.links} in ${relinked.files} file${relinked.files === 1 ? "" : "s"} ${dryRun ? "would follow" : "followed"} the renumbering`
       )

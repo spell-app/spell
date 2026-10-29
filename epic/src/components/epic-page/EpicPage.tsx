@@ -5,6 +5,7 @@ import { E, UI, UIT } from "spell/ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
 import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 
+import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import {
@@ -15,7 +16,8 @@ import {
   ServerLink,
   isAirplane,
   isImmediate,
-  type AutoSend
+  type AutoSend,
+  type InboxListener
 } from "spell/epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -434,9 +436,27 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       waiting: all.filter((mark) => !isImmediate(mark)).length,
       asked: client.inbox.now.length,
       listening: client.listening,
+      listener: this.listenerWords(client.inbox.listening, "listening"),
+      idle: client.listening ? "" : this.listenerWords(client.inbox.lastListener, "idle"),
       woken: client.inbox.woken?.message ?? ""
     }
   })
+
+  /**
+   * Whose agent `listener` is, in words (epic `epic-friend` P11):  "Your Codex is listening" (`listening`), or
+   * "Your Codex isn't listening:  ask it to run" (`idle`);  someone else's, "Bob's Codex ...".
+   * - `""` for nobody, or Claude:  the page's own words stand for Claude, as before (its pill, Send's wake)
+   */
+  private listenerWords(listener: InboxListener | null, state: "listening" | "idle"): string {
+    const agent = listener?.agent
+    if (!agent || agent === CLAUDE_AGENT) return ""
+    const person = listener.person?.trim()
+    const viewer = ThreadFacts.viewer()
+    const mine = !person || !viewer || person.toLowerCase() === viewer.toLowerCase()
+    const params = { agent: ThreadFacts.agentLabel(agent), person: person ?? "" }
+    if (state === "listening") return this.translationForKey(mine ? "listeningMine" : "listeningOf", params)
+    return this.translationForKey(mine ? "idleMine" : "idleOf", params)
+  }
 
   /**
    * Does the pill show?  Reviewed, nobody can take the work, and something waits:
@@ -450,6 +470,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const marks = this.marks()
     if (!marks) return false
     if (isAirplane()) return !!(marks.unsent || marks.comments || marks.waiting || marks.asked || marks.woken)
+    // an agent that listens by itself, gone:  how to wake it, whenever anything waits (Send never wakes it, Q14)
+    if (marks.idle) return !!(marks.unsent || marks.comments || marks.waiting || marks.asked)
     if (marks.listening) return false
     return marks.waiting - marks.unsent > 0 || !!(marks.asked || marks.woken)
   })
@@ -996,6 +1018,20 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   private pill(): JSX.Element {
     const woken = () => (isAirplane() ? "" : (this.marks()?.woken ?? ""))
+    const idle = () => (isAirplane() ? "" : (this.marks()?.idle ?? ""))
+    // an agent that isn't Claude, not listening:  its own words, and a click copies the command it runs
+    if (idle())
+      return (
+        <button
+          type="button"
+          class={[PILL, { flash: this.isCopied }]}
+          part={this.partForName("pill")}
+          title={this.translationForKey("copyWait")}
+          onClick={() => void this.copyWait()}
+        >
+          {idle()} <code>{this.waitCommand()}</code>
+        </button>
+      )
     return (
       <button
         type="button"
@@ -1056,12 +1092,39 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         {this.icon(this.icons.copy)}
         <span>
           {this.translationForKey(isAirplane() ? "reviewLineAirplane" : "reviewLine")} <code>{this.command()}</code>
+          <Show when={this.marks()?.listener}>
+            {(words) => (
+              <span class={LISTENER} title={this.translationForKey("listeningTitle")}>
+                {words()}
+              </span>
+            )}
+          </Show>
         </span>
         <span class="done" aria-live="polite">
           {this.isCopied ? this.translationForKey("copied") : ""}
         </span>
       </button>
     )
+  }
+
+  /** What an agent other than Claude runs to hear the next Send (epic `epic-friend` P11):  `epic inbox wait <name>`. */
+  private waitCommand(): string {
+    return `epic inbox wait ${this.isSaga ? this.sagaAddress() : (this.epic ?? "")}`
+  }
+
+  /** The pill naming an agent that isn't listening, clicked:  copy its command, and flash;  nothing is woken (Q14). */
+  @E.untracked
+  private async copyWait() {
+    if (await this.copyAndSay(this.waitCommand())) this.flash()
+  }
+
+  /** The review line and the pill flash, as copied (`isCopied`, `FLASH_MS`). */
+  private flash(): void {
+    // off first, so a second click flashes again
+    this.isCopied = false
+    this.flashTimer?.cancel()
+    E.beforeNextPaint(() => (this.isCopied = true))
+    this.flashTimer = E.after((FLASH_MS + 600) / 1000, () => (this.isCopied = false))
   }
 
   /** `/epic resume <name>`:  what a click on the heading's name copies;  a saga page's, its review command. */
@@ -1453,12 +1516,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     const isStarting = Boolean(client && !client.listening && !isAirplane())
     if (isStarting) void client!.startReview()
-    if (!(await (isStarting ? E.copyText(this.command()) : this.copyAndSay(this.command())))) return
-    // off first, so a second click flashes again
-    this.isCopied = false
-    this.flashTimer?.cancel()
-    E.beforeNextPaint(() => (this.isCopied = true))
-    this.flashTimer = E.after((FLASH_MS + 600) / 1000, () => (this.isCopied = false))
+    if (await (isStarting ? E.copyText(this.command()) : this.copyAndSay(this.command()))) this.flash()
   }
 
   /** The heading's name, clicked:  copy `/epic resume <name>`. */
@@ -1616,6 +1674,12 @@ const STAGE_TEXTS = {
 
 /** The pill holding the changes to accept and the step label, joined (`EpicPage.css`). */
 const STEP_PILL = "step-pill"
+
+/** The review line's listening words, while an agent other than Claude listens (epic `epic-friend` P11). */
+const LISTENER = "listener"
+
+/** Claude's agent id:  its listening needs no words of its own (`EpicHome.GUESSED_AGENT`). */
+const CLAUDE_AGENT = "claude"
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"

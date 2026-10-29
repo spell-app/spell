@@ -3,6 +3,8 @@ import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
+import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
@@ -13,6 +15,7 @@ import { OptionSets } from "./OptionSets"
 import type { PlanDoc } from "./PlanDoc"
 import type { PlanReader } from "./PlanReader"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
+import { AuthorWords } from "./AuthorWords"
 import { PlanItem } from "./PlanItem"
 import {
   ACTIONS,
@@ -63,8 +66,11 @@ export class InboxCommands {
       case undefined:
         return this.print(name, this.owner.read(file), file, Boolean(flags.json))
       case "watch": {
-        const session = stringFlag(flags.session) ?? process.env.CLAUDE_CODE_SESSION_ID
-        if (!session) throw new PlanDocError("watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
+        const session = stringFlag(flags.session) ?? EpicHome.sessionId()
+        if (!session)
+          throw new PlanDocError(
+            "watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID or $CODEX_THREAD_ID)"
+          )
         ReviewInbox.update(path, (box) => box.setListening(session))
         return this.owner.print(`listening:  session ${session}`)
       }
@@ -280,16 +286,21 @@ export class InboxCommands {
    * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code 2
    * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
    * - the poll reads without the lock (atomic writes:  never half a file);  only taking locks
+   * - LISTENS while it waits, when nobody else does (epic `epic-friend` P11):  any agent's way to hear a Send, so the
+   *   page says "Your Codex is listening" (`setListening()` with this process's pid:  gone the moment it ends);
+   *   a session already listening (`watch`, Claude's poller) keeps the place
    * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every `LISTEN_HEARTBEAT_MS`
    *   (`touchListening()`, one locked write), so a session killed mid-wait goes stale on the page (`liveListener()`)
    * - the epic's GUIDES too (epic `epic-workflow` P13, J27):  a Send on any page the epic owns (`SeeAlso.ownerOf()`)
    *   wakes it, its comments taken from the page's inbox (`GuideSends`), printed under the page they're on
    */
-  private async waitForWork(name: string, file: string, { timeout = "3300", json }: Flags): Promise<number | void> {
+  private async waitForWork(name: string, file: string, flags: Flags): Promise<number | void> {
+    const { timeout = "3300", json } = flags
     const path = ReviewInbox.pathFor(file)
     const seconds = timeoutOf(timeout)
     const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
+    listen()
     let beat = 0
     for (;;) {
       let work = null as TakenWork | null
@@ -305,6 +316,20 @@ export class InboxCommands {
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
     else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
     return 2
+
+    /**
+     * Listen on the inbox, as this process, when nobody does:  the session's id, else the agent's and the pid.
+     * - best effort:  an inbox that can't be written now is waited on all the same
+     */
+    function listen(): void {
+      try {
+        if (peek(path).liveListener()) return
+        const session = stringFlag(flags.session) ?? EpicHome.sessionId() ?? `${EpicHome.agentName()}-${process.pid}`
+        ReviewInbox.update(path, (box) => box.liveListener() || box.setListening(session, undefined, process.pid))
+      } catch (error) {
+        if (!(error instanceof InboxError)) console.error("inbox wait:  can't say it's listening:", error)
+      }
+    }
 
     /** The inbox, or an empty one while it can't be read (hand-edited mid-poll):  the next poll tries again. */
     function peek(path: string): ReviewInbox {
@@ -359,7 +384,7 @@ export class InboxCommands {
     const lines: string[] = []
     if (canceled.length) {
       lines.push(
-        `canceled (${canceled.length}):  Owen said "nevermind":  stop each one's background agent (TaskStop), then ` +
+        `canceled (${canceled.length}):  the person said "nevermind":  stop each one's background agent (TaskStop), then ` +
           `\`epic inbox done ${name}#<id>\``
       )
       for (const each of canceled) lines.push(`  - ${line(each)}  (${each.action})`)
@@ -534,7 +559,7 @@ export class InboxCommands {
     )
     if (filed.length)
       lines.push(
-        `failed tests (${filed.length}):  tell Owen one line each, the issue's link ` +
+        `failed tests (${filed.length}):  tell the person one line each, the issue's link ` +
           `(\`epic pages link ${file} --hash <issue> --review\`):`
       )
     for (const { test, issue } of filed) lines.push(`  ${test.toUpperCase()} -> ${issue.toUpperCase()}`)
@@ -617,7 +642,7 @@ export class InboxCommands {
     const extras = [
       none.length ? `no mark:  ${upper(none)}` : "",
       kept.length ? `changed since, kept for the next send:  ${upper(kept)}` : "",
-      notes.length ? `Owen's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
+      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
     ].filter(Boolean)
     this.owner.print(`${label}:  ${upper(keys)}${extras.length ? `  (${extras.join(";  ")})` : ""}`)
   }
@@ -765,7 +790,7 @@ const NO_WORK: TakenWork = { now: [], sent: null, canceled: [] }
 /** A sent mark's heading in `wait`'s print, where its action alone doesn't say it. */
 const SENT_HEADINGS: Partial<Record<string, string>> = {
   revisit: "revisit, to talk over",
-  test: "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers",
+  test: "test, the person's test run:  passed closes, failed files an issue, skip cancels, not now defers",
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do"
@@ -796,7 +821,7 @@ function urgencyOn(plan: PlanDoc, entry: ListedUrgency): UrgencyApplied {
   if (!plan.findItem(entry.id)) return { entry, did: "no such item:  urgency dropped", changed: false }
   const did = plan.setCalm(entry.id, entry.calm)
   if (!did) return { entry, did: `${calmWords(entry.calm)} already`, changed: false }
-  plan.log(`${entry.id.toUpperCase()} ${did} (Owen, from its id chip)`)
+  plan.log(`${entry.id.toUpperCase()} ${did} ${AuthorWords.fromChip(plan.person)}`)
   return { entry, did: `marked ${did}`, changed: true }
 }
 
@@ -831,17 +856,21 @@ function workOf(mark: { action: string } | undefined): "revisit" | "details" | "
 
 /**
  * Comment `comment`'s lines, as `inbox` and `wait` print it, each starting `indent`:
- * its id, where it is, the quote, Owen's words and when;  then his latest reply on the thread, the work now.
+ * its id, where it is, the quote, the person's words and when;  then their latest reply on the thread, the work now.
  * - `unsent`:  says so, waiting for Send
  */
 function commentLines(comment: IdentifiedComment, indent: string, unsent = false): string[] {
   const quote = comment.quote ? `  quoting "${comment.quote.slice(0, 60)}"` : ""
+  // whose it is, and whose agent took it (epic `epic-friend` P9):  everyone's are listed, each person's agent answers theirs
+  const by = comment.by ? `  · ${comment.by}'s` : ""
+  const { claim } = comment
+  const taken = claim && comment.working ? `  · taken by ${claim.by}'s ${ThreadFacts.agentLabel(claim.agent)}` : ""
   const lines = [
     `${indent}- ${CommentList.label(comment.id)}  on ${comment.anchor} (${comment.kind})${quote}  ` +
-      `"${comment.text.slice(0, 120)}"  (${comment.at})${unsent ? "  · unsent" : ""}`
+      `"${comment.text.slice(0, 120)}"  (${comment.at})${by}${taken}${unsent ? "  · unsent" : ""}`
   ]
-  const reply = comment.replies?.findLast((each) => each.by === "Owen")
-  if (reply) lines.push(`${indent}  Owen replied:  "${reply.text!.slice(0, 160)}"  (${reply.at})`)
+  const reply = ThreadFacts.lastPersonReply(comment)
+  if (reply?.text) lines.push(`${indent}  ${reply.by} replied:  "${reply.text.slice(0, 160)}"  (${reply.at})`)
   return lines
 }
 
@@ -855,7 +884,7 @@ function upper(ids: string[]): string {
   return ids.map(shown).join(", ")
 }
 
-/** An item's id as Owen reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
+/** An item's id as the person reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
 function shown(id: string): string {
   return CommentList.isCommentId(id) ? CommentList.label(id) : id.toUpperCase()
 }

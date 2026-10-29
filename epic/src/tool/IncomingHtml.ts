@@ -1,3 +1,4 @@
+import { ThreadFacts } from "spell/epic/comments"
 import { Markup } from "spell/epic/markup"
 
 import { unstackTables } from "spell/epic/tools/to-components.js"
@@ -30,7 +31,7 @@ import { ProseRewrite } from "./ProseRewrite"
  ****************/
 export class IncomingHtml {
   /** `html`, parsed into `document`'s nodes (out of it), old shapes made elements;  blank text at the ends dropped. */
-  static nodes(document: Document, html: string): Node[] {
+  static nodes(document: Document, html: string, { person, agent }: { person?: string; agent?: string } = {}): Node[] {
     const box = document.createElement("div")
     box.innerHTML = html
     const rewrite = ProseRewrite.plain(document)
@@ -38,10 +39,32 @@ export class IncomingHtml {
       if (child.matches(ProseBlocks.reply)) child.replaceWith(rewrite.reply(child))
     }
     rewrite.rewrite(box, { history: false })
+    IncomingHtml.markAgents(box, { person, agent })
     unstackTables(box)
     PathTooltips.rewrite(box)
     PlanMarkup.trimWhitespace(box)
     return Array.from(box.childNodes)
+  }
+
+  /**
+   * The calling agent's own replies in `box` (a command's HTML) marked its, IN PLACE (epic `epic-friend` P2, Q9;
+   * any agent since P10):  `<epic-reply from="Claude">` with no `agent` becomes
+   * `<epic-reply from="Ana" agent="codex">`, `agent` the one running the command, `person` (whose session wrote it)
+   * its `from`;  no `person`:  `from` stays.
+   * - an agent writes its replies by hand, `from="Claude"` as the skills have it, or its own name (`from="Codex"`):
+   *   marked on the way in, a reply written after the marker never needs the old rule (`ThreadFacts.agentOf()`)
+   * - `agent`:  default `claude`, as before P10
+   * - any other `from` (a person's reply, quoted), one with `agent` already, and one in an Original Discussion:  left
+   */
+  static markAgents(box: Element, { person, agent = GUESSED_AGENT }: { person?: string; agent?: string } = {}): void {
+    const names = [CLAUDE_NAME, ThreadFacts.agentLabel(agent)]
+    for (const reply of Array.from(box.querySelectorAll(REPLY_TAG))) {
+      if (reply.hasAttribute("agent") || reply.closest(ORIGINAL_TAG)) continue
+      const from = reply.getAttribute("from") ?? ""
+      if (!names.some((name) => ThreadFacts.sameName(from, name))) continue
+      reply.setAttribute("agent", agent)
+      if (person) reply.setAttribute("from", person)
+    }
   }
 
   /**
@@ -80,3 +103,13 @@ function endsLead(element: Element): boolean {
     LABEL_LINE.test(PlanMarkup.squeeze(element.textContent ?? ""))
   )
 }
+
+/** A reply's tag, and the Original Discussion's, which keeps history as it was (`markAgents()`). */
+const REPLY_TAG = "epic-reply"
+const ORIGINAL_TAG = "epic-original"
+
+/** The name an agent's hand-written replies go by in the skills (`markAgents()`), whichever agent writes them. */
+const CLAUDE_NAME = "Claude"
+
+/** The agent a hand-written reply is marked as when the command says none (`markAgents()`). */
+const GUESSED_AGENT = "claude"

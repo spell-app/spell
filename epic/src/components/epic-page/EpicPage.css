@@ -105,6 +105,29 @@
     --epic-state-old-on: var(--ui-grey-text);
 
     /*
+     * ## Voices:  who said it, on a reply card and the note box (epic `epic-friend` T11;  Owen, 2026-10-29:
+     * "you vs claude colors -- put in theme so we can tweak them").  TWEAK THEM HERE, or on the page:
+     * `epic-page { --epic-voice-agent: teal }`.
+     * - an agent's (Claude's):  its round mark terracotta, its name a deeper terracotta;  its card stays white
+     * - a person's (you, and everyone else, alike):  violet, its card a faint violet fill and rule
+     *   - `-fill` and `-rule` are made from `--epic-voice-person`, so setting it alone re-tints the card;
+     *     `-text` is its own (Spell UI's violet text), so set it too
+     * - the same values as `spell-doc.css`'s `--spell-voice-*`, for the docs pages:  change both
+     * - read by `<epic-reply>` (`EpicAnswer.css`) and `<epic-review>`'s note box (`EpicReview.css`)
+     */
+    --epic-voice-agent: light-dark(#c96442, #d97757);
+    --epic-voice-agent-text: light-dark(#a8502f, #e59a7c);
+    --epic-voice-person: var(--ui-violet, #6550ca);
+    --epic-voice-person-text: var(--ui-violet-text, var(--epic-voice-person));
+    /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
+    --epic-voice-person-fill: color-mix(
+      in oklab,
+      var(--epic-voice-person) 5%,
+      light-dark(#fff, var(--ui-background, Canvas))
+    );
+    --epic-voice-person-rule: color-mix(in oklab, var(--epic-voice-person) 26%, transparent);
+
+    /*
      * ## The chip:  an item's id, a To review link, a commit's sha -- one height, its text centred.
      * In em:  each resolves where it's used, so a chip follows the text it sits in
      */
@@ -573,6 +596,22 @@
   .review-line:focus-visible {
     outline: 2px solid var(--ui-focus-color, var(--epic-accent));
     outline-offset: 1px;
+  }
+  /* an agent other than Claude listening (epic `epic-friend` P11):  after the command, a green dot before it */
+  .review-line .listener {
+    margin-inline-start: 12px;
+    color: var(--epic-ink);
+    white-space: nowrap;
+  }
+  .review-line .listener::before {
+    content: "";
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--ui-green, #21ba45);
+    vertical-align: 0.1em;
   }
   .review-line .done {
     color: var(--epic-ink);

@@ -1,5 +1,4 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { homedir } from "node:os"
 import { join, resolve, sep } from "node:path"
 
 // By the server's package entry (its `exports`, epic `repo-split` P6):  the hooks load this file with plain `node`
@@ -10,7 +9,7 @@ import { orphanServers, serverProcesses } from "spell/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
 import { RealPath } from "spell/server/RealPath"
 
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 
 /****************
  * ### `CheckoutServers`
@@ -91,11 +90,10 @@ export class CheckoutServers {
    * - `ran`:  whether it ran;  `stopped`:  what it stopped
    * - `home`, `now`:  tests'
    */
-  static atSessionStart({
-    home = CheckoutServers.homeFolder(),
-    now = Date.now(),
-    ...prune
-  }: SessionStartOptions = {}): { ran: boolean; stopped: OrphanServer[] } {
+  static atSessionStart({ home = EpicHome.folder(), now = Date.now(), ...prune }: SessionStartOptions = {}): {
+    ran: boolean
+    stopped: OrphanServer[]
+  } {
     const stamp = join(home, CheckoutServers.STAMP)
     const last = Date.parse(readText(stamp).trim())
     if (now - last < CheckoutServers.INTERVAL_MS) return { ran: false, stopped: [] }
@@ -112,14 +110,6 @@ export class CheckoutServers {
     if (!servers.length) return ""
     const each = servers.map(({ kind, pid, port }) => `${kind} pid ${pid}${port ? ` port ${port}` : ""}`)
     return `stopped ${servers.length} server${servers.length === 1 ? "" : "s"} (${each.join(", ")})`
-  }
-
-  /**
-   * spell-epic's home folder:  `$SPELL_EPIC_HOME`, else `~/.spell-epic` (`RepoList.homeFolder()`'s rule).
-   * - read on every call, for tests
-   */
-  static homeFolder(): string {
-    return process.env[HOME_ENV] || join(homedir(), HOME_FOLDER)
   }
 
   /** The session-start prune's stamp, in the epic home:  when it last ran. */

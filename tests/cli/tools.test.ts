@@ -7,9 +7,7 @@ import { CLI } from "spell/cli"
 
 describe("toolArgs()", () => {
   test("plain node:  just the script, in the tool's checkout", () => {
-    expect(CLI.toolArgs({ tool: "epic/src/tools/design.js" }, "/kit")).toEqual([
-      "/kit/epic/src/tools/design.js"
-    ])
+    expect(CLI.toolArgs({ tool: "epic/src/tools/design.js" }, "/kit")).toEqual(["/kit/epic/src/tools/design.js"])
   })
   test("tsx:  the kit's loader first, then the run-time alias hook", () => {
     expect(CLI.toolArgs({ tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" }, "/kit")).toEqual([
@@ -33,6 +31,28 @@ describe("epicBin()", () => {
   })
   test("none there:  the kit spell runs from's, else plain epic, from the PATH", () => {
     expect(CLI.epicBin(temp)).toMatch(/(^epic|\/epic\/bin\/epic)$/)
+  })
+})
+
+describe("publishedEpicBin() (epic-friend P13)", () => {
+  // the published spell, spell-epic installed beside it:  npm install spell spell-epic
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "published-epic-")))
+  afterAll(() => rmSync(temp, { recursive: true, force: true }))
+  const kit = join(temp, "node_modules", "spell")
+  const epic = join(temp, "node_modules", "spell-epic")
+  mkdirSync(kit, { recursive: true })
+  mkdirSync(join(epic, "bin"), { recursive: true })
+  writeFileSync(join(kit, "package.json"), '{ "name": "spell", "version": "0.8.6" }')
+  writeFileSync(join(epic, "package.json"), '{ "name": "spell-epic", "version": "0.8.6" }')
+
+  test("spell-epic beside the kit:  its bin/epic", () => {
+    writeFileSync(join(epic, "bin", "epic"), "")
+    expect(CLI.publishedEpicBin(kit)).toBe(join(epic, "bin", "epic"))
+  })
+  test("none:  undefined;  spell's own version, for npx to fetch spell-epic at", () => {
+    rmSync(epic, { recursive: true, force: true })
+    expect(CLI.publishedEpicBin(kit)).toBeUndefined()
+    expect(CLI.spellVersion(kit)).toBe("0.8.6")
   })
 })
 

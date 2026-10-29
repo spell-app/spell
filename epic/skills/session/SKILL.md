@@ -1,10 +1,13 @@
 ---
 name: session
-description: Find and reopen a saved Claude Code session in the VS Code Claude panel, or title THIS session -- things the panel has no `/resume` or `/rename` for.  Use for `/session` (asks which session), `/session <words or id>` (find and open), `/session name [title]` (title this one, as `/title` does), or when Owen says "resume / reopen / go back to the <x> session".
+description: Find and reopen a saved Claude Code session in the VS Code Claude panel, or title THIS session -- things the panel has no `/resume` or `/rename` for.  Use for `/session` (asks which session), `/session <words or id>` (find and open), `/session name [title]` (title this one, as `/title` does), or when the person says "resume / reopen / go back to the <x> session".
 argument-hint: "[<words> | <id> | name [<title>]]"
 ---
 
 # /session
+
+In Codex:  Claude Code only (its saved sessions and panel);
+Codex resumes its own with `codex resume`:  `epic guide claude-only-tools`.
 
 The command:  `epic session <verb>`, run from the session's folder.
 - It lists THAT repo's sessions:  main checkout, worktrees and package folders together.

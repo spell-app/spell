@@ -364,7 +364,7 @@ export function formatOrder(sections, rows, order) {
       lines.push(`  Order of ${section.title}:  as proposed`)
       continue
     }
-    lines.push(`  Order of ${section.title} (Owen moved rows):`)
+    lines.push(`  Order of ${section.title} (rows moved):`)
     now.forEach((row, i) => {
       const was = proposed.indexOf(row)
       lines.push(`    ${i + 1}. ${row.id}  ${row.recommended}${was === i ? "" : `  (was ${was + 1})`}`)

@@ -1,9 +1,8 @@
 import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs"
-import { homedir } from "node:os"
 import { dirname, join, matchesGlob } from "node:path"
 
 import { Git } from "spell/server/Git"
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { EpicCommandError, type Generator } from "./command.types"
 import { LinesOfCode } from "./LinesOfCode"
@@ -41,7 +40,7 @@ const STATUS_FIELDS: Record<string, number> = { "1": 8, u: 10, "?": 1 }
  * - Each file is `generated` (`LEFT_BY_TOOLS`, one of the repo's generated outputs, or `linguist-generated`) or
  *   someone's:
  *   - generated ones are ditched without asking
- *   - up to `ASK_LIMIT` of someone's are ditched only once Owen says so (`epic merge <epic> --ditch`);
+ *   - up to `ASK_LIMIT` of someone's are ditched only once the person says so (`epic merge <epic> --ditch`);
  *     more is real work in that checkout, another session's maybe, and is never offered
  * - DITCHED is moved aside, never deleted:  copied into the epic home's `ditched/<time>/<repo>/`, then the checkout's
  *   copy put back as committed (a new file removed)
@@ -89,7 +88,7 @@ export class StrayFiles {
     return this.files.filter((file) => file.generated)
   }
 
-  /** the files someone may have made or changed:  ditched only once Owen says so */
+  /** the files someone may have made or changed:  ditched only once the person says so */
   get handMade(): StrayFile[] {
     return this.files.filter((file) => !file.generated)
   }
@@ -113,7 +112,7 @@ export class StrayFiles {
       throw new EpicCommandError(
         `merge:  ${label} has ${handMade.length} stray file${handMade.length === 1 ? "" : "s"}:  nothing merged\n` +
           `${list}\n` +
-          `Ask Owen whether to ditch ${handMade.length === 1 ? "it" : "them"}, then \`epic merge ${epic} --ditch\`:  ` +
+          `Ask the person whether to ditch ${handMade.length === 1 ? "it" : "them"}, then \`epic merge ${epic} --ditch\`:  ` +
           `moved aside into ${StrayFiles.ditchedFolder()}/, not deleted`
       )
   }
@@ -149,11 +148,11 @@ export class StrayFiles {
   static readonly ASK_LIMIT = 3
 
   /**
-   * Where ditched files go:  `ditched/` in spell-epic's home folder (`$SPELL_EPIC_HOME`, else `~/.spell-epic`).
+   * Where ditched files go:  `ditched/` in the epic home (`EpicHome`).
    * - read on every call, for tests
    */
   static ditchedFolder(): string {
-    return join(process.env[HOME_ENV] || join(homedir(), HOME_FOLDER), StrayFiles.FOLDER)
+    return EpicHome.subfolder(StrayFiles.FOLDER)
   }
 
   /**

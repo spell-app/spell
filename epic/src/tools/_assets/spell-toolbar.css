@@ -39,7 +39,7 @@
 }
 
 /*
- * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`, one
+ * THE TOOLBAR, every page's navigation:  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`, one
  * `<ui-item>` link per top-level section (`toolbarMenu()`, `spell-doc-toolbar.js`;  epic `airplane` P8, a menu since epic
  * `epic-engine` P3).  Its look through the menu's tokens, the boxes it draws through `::part()`:
  * - a box of its own (the menu's host is `display: contents`):  measured, slotted and banded as one
@@ -216,7 +216,7 @@
 
 /*
  * The BULLHORN at the toolbar's right (the comments' runtime adds it:  `PageComments.drawWaiting()`;  epic
- * `epic-workflow` P23):  an item of the menu like the section buttons, the threads waiting on Owen, their count an
+ * `epic-workflow` P23):  an item of the menu like the section buttons, the threads waiting on the person, their count an
  * orange badge as an epic page's "replied" one;  each click lands on the next.  Hidden while none waits.  Last in the
  * row, held at its right while the section buttons scroll under it:  an epic page's, just left of `<epic-page>`'s own
  * tools;  a guide's, at the band's right

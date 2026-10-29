@@ -1,11 +1,10 @@
 import { createHash } from "node:crypto"
 import { mkdirSync } from "node:fs"
-import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `AskListeners`
@@ -29,7 +28,7 @@ export class AskListeners {
   /** The heartbeat file of details page `page` (its file):  `<home>/asks/<hash of its real path>.json5`. */
   static fileFor(page: string): string {
     const key = createHash("sha1").update(RealPath.of(page)).digest("hex").slice(0, 16)
-    return join(homeFolder(), ASKS_FOLDER, `${key}${DataFile.SUFFIX}`)
+    return join(EpicHome.subfolder(ASKS_FOLDER), `${key}${DataFile.SUFFIX}`)
   }
 
   /**
@@ -124,11 +123,6 @@ const ASKS_FOLDER = "asks"
 
 /** The signals `hold()` ends on, by number:  the exit code is 128 + it, as the shell's. */
 const SIGNAL_NUMBERS: Partial<Record<NodeJS.Signals, number>> = { SIGHUP: 1, SIGINT: 2, SIGTERM: 15 }
-
-/** spell-epic's home folder:  `$SPELL_EPIC_HOME`, else `~/.spell-epic` (`RepoList.homeFolder()`'s rule). */
-function homeFolder(): string {
-  return process.env[HOME_ENV] || join(homedir(), HOME_FOLDER)
-}
 
 /** The heartbeat in `file`, or `undefined` (none, or one that won't read). */
 function readListener(file: string): AskListener | undefined {

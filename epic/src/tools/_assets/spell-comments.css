@@ -192,9 +192,17 @@ ui-button[title]::part(icon) {
 ::highlight(spell-comment-quote) {
   background-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
 }
-/* ... purple while it waits for Claude:  Owen's words not taken in yet (`QUOTE_WAITING_HIGHLIGHT`) */
+/*
+ * ... in an agent's voice while it waits for one:  the person's words not taken in yet (`QUOTE_WAITING_HIGHLIGHT`;
+ * epic `epic-friend` P10, Q16:  violet before, which now means a person).  The page's token:  an epic page's
+ * (`--epic-voice-agent`, which its text inherits), else the docs pages' (`--spell-voice-agent`), else terracotta
+ */
 ::highlight(spell-comment-quote-waiting) {
-  background-color: color-mix(in srgb, var(--ui-violet, #6435c9) 24%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--epic-voice-agent, var(--spell-voice-agent, light-dark(#c96442, #d97757))) 24%,
+    transparent
+  );
 }
 /*
  * the bullhorn floating beside selected text (in `body`, outside `main`):  a `<ui-button appearance="circular basic" size="mini">`

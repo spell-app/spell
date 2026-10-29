@@ -65,6 +65,8 @@ import { drawThenBoot, el, sectionNumber, titleInside, withCode } from "./spell-
 
 /** Where comments go (`commentsRoutes.ts`). */
 const COMMENTS_API = "/api/docs/comments"
+/** A comment's `turn` while it waits for an agent:  `agent`, or `claude` from a server before epic `epic-friend` P10. */
+const AGENTS_TURNS = ["agent", "claude"]
 /** How long after the last change the draft is saved, in ms. */
 const SAVE_DELAY = 5000
 /** The browser's copy of the page's draft:  this, then the page's path. */
@@ -644,14 +646,17 @@ async function askForDetails(rule, wand, text) {
   }
 }
 
-/** Mark the wands whose comment is waiting for Claude:  this page's comments, as the server has them. */
+/**
+ * Mark the wands whose comment is waiting for an agent:  this page's comments, as the server has them.
+ * - an agent's turn is `agent`;  `claude` from a page server started before epic `epic-friend` P10
+ */
 async function markWands() {
   try {
     const answer = await fetchJSON(COMMENTS_API)
     const asked = new Set()
     for (const comment of answer?.comments ?? []) {
       const className = new RegExp(`^${WAND_WORDS}:  \`([^\`]+)\``).exec(comment.text ?? "")?.[1]
-      if (className && comment.turn === "claude") asked.add(className)
+      if (className && AGENTS_TURNS.includes(comment.turn)) asked.add(className)
     }
     for (const className of wands.keys()) showAsked(className, asked.has(className))
   } catch {

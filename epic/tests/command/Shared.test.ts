@@ -31,9 +31,14 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 
 mkdirSync(MAIN)
 git(MAIN, "init", "-q", "-b", "main")
-// the shared repo beside it, by the repo's config (its default, written out)
+// the shared repo beside it, by the repo's config:  spell-app's old layout, written out (a key left out would be the
+// repo's own:  epic `epic-friend` P6)
 put("package.json", "{}")
-put(".epic/config.json5", '// where the shared repo is\n{ "contentFolder": "../spell-app-dev" }\n')
+put(
+  ".epic/config.json5",
+  '// where the shared repo is\n{ "contentFolder": "../spell-app-dev", "worktreesFolder": ".claude/worktrees",\n' +
+    '  "sharedFolders": ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"] }\n'
+)
 put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/sagas\n/goals\n/agents\n/.claude/worktrees\n")
 git(MAIN, "add", "-A")
 commit(MAIN, "first")
@@ -313,7 +318,11 @@ describe("linkContentBeside()", () => {
   })
 
   test("worktrees nested in the checkout (.claude/worktrees):  nothing linked", () => {
-    put(".epic/config.json5", '{ "contentFolder": "../spell-app.epics" }\n', repo)
+    put(
+      ".epic/config.json5",
+      '{ "contentFolder": "../spell-app.epics", "worktreesFolder": ".claude/worktrees" }\n',
+      repo
+    )
     mkdirSync(join(repo, ".claude", "worktrees"), { recursive: true })
     expect(shared.linkContentBeside()).toBeUndefined()
   })

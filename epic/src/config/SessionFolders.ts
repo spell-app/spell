@@ -5,11 +5,12 @@ import {
   readdirSync,
   realpathSync,
   rmdirSync,
-  symlinkSync,
   unlinkSync,
   writeFileSync
 } from "node:fs"
 import { join } from "node:path"
+
+import { Links } from "spell/server/Links"
 
 import { ClaudeHome } from "./ClaudeHome.ts"
 import { Transcript } from "./Transcript.ts"
@@ -73,7 +74,7 @@ export class SessionFolders {
       if (readdirSync(folder).length) return { action: "kept", folder, target, why: "a folder with sessions in it" }
       rmdirSync(folder)
     } else if (stat) return { action: "kept", folder, target, why: "a file, not a folder" }
-    symlinkSync(target, folder)
+    Links.folder(folder, target)
     return { action: "linked", folder, target }
   }
 

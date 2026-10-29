@@ -373,6 +373,9 @@ describe("ReviewInbox.reviewNow() (windows-and-review P4)", () => {
   })
 })
 
+/** Who every test's listener is:  the test home's person, and the agent the tests name (`tests/setup/epicHome.ts`). */
+const WHO = { person: "Owen", agent: "claude" }
+
 describe("ReviewInbox, Claude's side", () => {
   test("working and listening, set and cleared", () => {
     const inbox = new ReviewInbox()
@@ -380,7 +383,7 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.working).toEqual({ i2: { action: "details", since: M1 } })
     inbox.setWorking("i2", null)
     expect(inbox.working).toEqual({})
-    expect(inbox.setListening("abc", M1)).toEqual({ session: "abc", since: M1, seen: M1 })
+    expect(inbox.setListening("abc", M1)).toEqual({ session: "abc", since: M1, seen: M1, ...WHO })
     expect(inbox.setListening(null)).toBeNull()
   })
 
@@ -389,7 +392,7 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.touchListening(M2)).toBeNull()
     expect(inbox.listening).toBeNull()
     inbox.setListening("abc", M1)
-    expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2 })
+    expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2, ...WHO })
   })
 
   test("liveListener:  stale once seen is older than LISTEN_STALE_MS;  an old file's since counts", () => {
@@ -412,7 +415,8 @@ describe("ReviewInbox, Claude's side", () => {
       session: "abc",
       since: M1,
       seen: M1,
-      pid: process.pid
+      pid: process.pid,
+      ...WHO
     })
     const seen = Date.parse(M1)
     expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
@@ -425,9 +429,37 @@ describe("ReviewInbox, Claude's side", () => {
     inbox.setMark("j1", { action: "approve" }, M1)
     inbox.setListening("abc", M1)
     const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
-    expect(late).toEqual({ ...inbox.toRecord(), listening: null, unsentComments: [], waitingComments: [] })
+    expect(late).toEqual({
+      ...inbox.toRecord(),
+      listening: null,
+      lastListener: inbox.listening,
+      unsentComments: [],
+      waitingComments: []
+    })
     expect(inbox.listening!.session).toBe("abc")
-    expect(inbox.forPage(Date.parse(M1)).listening!.session).toBe("abc")
+    expect(inbox.forPage(Date.parse(M1))).toMatchObject({ listening: { session: "abc" }, lastListener: null })
+  })
+
+  // epic `epic-friend` P11:  the page says whose agent listens ("Your Codex is listening"), and, gone, how to wake it
+  test("setListening():  stamps WHO listens, the machine's person and the agent running epic;  forPage() keeps the last", () => {
+    const before = process.env.SPELL_EPIC_AGENT
+    process.env.SPELL_EPIC_AGENT = "codex"
+    try {
+      const inbox = new ReviewInbox()
+      expect(inbox.setListening("thread-1", M1, 999_999)).toEqual({
+        session: "thread-1",
+        since: M1,
+        seen: M1,
+        pid: 999_999,
+        person: "Owen",
+        agent: "codex"
+      })
+      // its process gone:  nobody listens, and the page is told who did last
+      expect(inbox.forPage()).toMatchObject({ listening: null, lastListener: { agent: "codex", person: "Owen" } })
+      expect(new ReviewInbox().forPage().lastListener).toBeNull()
+    } finally {
+      process.env.SPELL_EPIC_AGENT = before
+    }
   })
 
   test("finishMarks:  immediate marks go;  one Owen changed meanwhile stays", () => {

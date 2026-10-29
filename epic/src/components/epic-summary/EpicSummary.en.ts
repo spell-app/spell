@@ -26,12 +26,12 @@ export const epicSummaryVocabulary = {
     { name: "", description: "The summary:  text, or a `<p>`." },
     {
       name: "status",
-      description: "Claude's status cards on Owen's marks (`<epic-status slot=\"status\">`, P13):  under the lede."
+      description: 'Claude\'s status cards on your marks (`<epic-status slot="status">`, P13):  under the lede.'
     },
     {
       name: "notes",
       description:
-        'Owen\'s notes on the summary from the page, kept once Claude took them (`<epic-reply slot="notes">`):  ' +
+        'Your notes on the summary from the page, kept once Claude took them (`<epic-reply slot="notes">`):  ' +
         "under the lede."
     }
   ],
@@ -43,12 +43,12 @@ export const epicSummaryVocabulary = {
     {
       tag: "epic-reply",
       slot: "notes",
-      description: "Owen's notes on the summary, kept once Claude took them (`inbox done | clear`), oldest first."
+      description: "Your notes on the summary, kept once Claude took them (`inbox done | clear`), oldest first."
     },
     {
       tag: "epic-status",
       slot: "status",
-      description: "Claude's status cards on Owen's marks, oldest first (`plan-doc status`;  a todo filed:  born done)."
+      description: "Claude's status cards on your marks, oldest first (`plan-doc status`;  a todo filed:  born done)."
     }
   ]
 } as const satisfies EpicVocabulary

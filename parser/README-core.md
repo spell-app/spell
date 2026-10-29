@@ -91,7 +91,7 @@ spell lint try/deal
 - Without `--seed`, each run draws differently.
 - A seed is a whole number from 1 to 2147483646 (`spell help run`).
 - No checkout yet:  [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then `spell` on your PATH
-  ([README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up)).
+  ([README-cli](https://github.com/spell-app/spell/blob/main/README/cli.md#setting-it-up)).
 
 </details>
 
@@ -287,7 +287,7 @@ If you write Solid 2, you'd bet on `red` twice.
 Solid 2 stages a write:  a read right after it sees the OLD value, until the next flush.
 Spell can't work that way, because it's imperative:  `set x to 1` then `print x` must print 1.
 
-So a thing's properties aren't Solid's signals but cells, from [the kit's util](https://github.com/spell-app/spell/blob/main/README-util.md):
+So a thing's properties aren't Solid's signals but cells, from [the kit's util](https://github.com/spell-app/spell/blob/main/README/util.md):
 small reactive values, read and written synchronously.
 - Drawing still follows:  Solid redraws only what read a changed cell, on its own schedule, so ten writes redraw once.
 - A write of the value already there (`===`) tells nobody.
@@ -468,7 +468,7 @@ So a deal that waits between cards is one step, the turns it calls included, and
 
 The catch:  nothing undoes while an undoable action still runs, so ⌘Z mid-deal waits for the deal to finish.
 The generic part, one step for everything an action does, is the kit's `UndoStack`
-([README-util](https://github.com/spell-app/spell/blob/main/README-util.md#undostack--one-step-for-everything-an-action-does)).
+([README-util](https://github.com/spell-app/spell/blob/main/README/util.md#undostack--one-step-for-everything-an-action-does)).
 
 ### Props that outlive a run
 
@@ -494,7 +494,7 @@ Whoever runs the program calls `core.remember()` with the project's id, before t
 The editor and `<spell-viewer>` do;  `spell run` and the tests don't, and there a remembered prop is a plain one.
 
 - Kept in the person's preferences, a `PrefStore` named for the project's id
-  ([README-util](https://github.com/spell-app/spell/blob/main/README-util.md#prefstore--preferences-people-and-plain-scripts-can-read)):
+  ([README-util](https://github.com/spell-app/spell/blob/main/README/util.md#prefstore--preferences-people-and-plain-scripts-can-read)):
   the browser's storage, unless the runner names another place.
 - Read whole as the run starts, so a place that must be waited on, the page server's, answers at once after that.
 - An app's prop is kept by its name;  any other thing's under the id the program chose, `main.theme`.
@@ -602,5 +602,5 @@ These guides need a checkout with the content folder beside it, and the page ser
   Python half
 - [README-spell](README-spell.md):  the sentences behind each call, from types and lists to saving by id
 - [core's AGENTS.md](src/core/AGENTS.md):  the rules for changing the core, in full
-- [the kit's README-util](https://github.com/spell-app/spell/blob/main/README-util.md):  the cells under every thing's properties
+- [the kit's README-util](https://github.com/spell-app/spell/blob/main/README/util.md):  the cells under every thing's properties
 - [spell-app's README-app](https://github.com/spell-app/spell/blob/main/app/README-app.md):  the runner that gives each app its own copy

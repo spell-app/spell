@@ -17,12 +17,14 @@ import {
   symlinkSync,
   writeFileSync
 } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { homedir, tmpdir } from "node:os"
+import { dirname, join } from "node:path"
 
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { PluginInstall } from "spell/epic/command/PluginInstall"
+import { CodexHome } from "spell/epic/config/CodexHome"
+import { Editor } from "spell/epic/config/Editor"
 
 const top = realpathSync(mkdtempSync(join(tmpdir(), "plugin-install-")))
 const home = join(top, "claude")
@@ -186,10 +188,68 @@ describe("install()", () => {
     expect(readlinkSync(cache)).toBe(engine)
   })
 
+  test("isInstalled() (epic-friend P13):  not on a fresh machine;  installed once it's run", () => {
+    expect(installer().isInstalled()).toBe(false)
+    installer().install()
+    expect(installer().isInstalled()).toBe(true)
+    // its folder gone:  not installed
+    rmSync(join(home, "plugins", "cache"), { recursive: true, force: true })
+    expect(installer().isInstalled()).toBe(false)
+  })
+
   test("a kit with no plugin, a list that won't parse:  refused, saying why", () => {
     expect(() => new PluginInstall({ home, kit: top, bin }).install()).toThrow(/has no plugin in epic\/.*--kit/)
     writeFileSync(join(home, "settings.json"), "{ not json")
     expect(() => installer().install()).toThrow(/settings\.json can't be read/)
+  })
+})
+
+describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
+  test("Windows:  epic.cmd runs bin/epic with node, no file link;  run again, nothing", () => {
+    const windows = () => new PluginInstall({ home, kit, bin, now: () => NOW, platform: "win32", code: () => "" })
+    const report = windows().install()
+    expect(readFileSync(join(bin, "epic.cmd"), "utf8")).toBe(
+      `@echo off\r\nnode "${join(engine, "bin", "epic")}" %*\r\n`
+    )
+    expect(existsSync(join(bin, "epic"))).toBe(false)
+    expect(report.changes.some((line) => line.startsWith(`PATH:  ${join(bin, "epic.cmd")} runs`))).toBe(true)
+    expect(windows().install().changes).toEqual([])
+  })
+
+  test("the extension:  installed from vscode/spell-epic.vsix unless VS Code has that version;  no code:  said", () => {
+    const vscode = join(engine, "vscode")
+    mkdirSync(vscode, { recursive: true })
+    writeFileSync(
+      join(vscode, "package.json"),
+      '{ "publisher": "spell-app", "name": "spell-epic", "version": "0.2.0" }'
+    )
+    writeFileSync(join(vscode, "spell-epic.vsix"), "")
+    try {
+      const calls: string[][] = []
+      let listed = "spell-app.spell-epic@0.1.0\n"
+      const code = (args: string[]) => (calls.push(args), args[0] === "--list-extensions" ? listed : "")
+      const withCode = (run: (args: string[]) => string | undefined = code, editor = new Editor("code")) =>
+        new PluginInstall({ home, kit, bin, now: () => NOW, editor, code: run })
+      expect(withCode().install().changes.at(-1)).toBe(
+        "VS Code:  extension spell-app.spell-epic 0.2.0 installed;  then:  Developer:  Reload Window"
+      )
+      expect(calls.at(-1)).toEqual(["--install-extension", join(vscode, "spell-epic.vsix"), "--force"])
+      listed = "spell-app.spell-epic@0.2.0\n"
+      expect(withCode().install().changes).toEqual([])
+      expect(withCode(() => undefined).install().changes).toEqual([
+        `VS Code:  no code command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in VS Code:  Install from VSIX...`
+      ])
+      // into Cursor when it's the editor (P16):  the same flags, its own name and command in what's said
+      listed = "spell-app.spell-epic@0.1.0\n"
+      expect(withCode(code, new Editor("cursor")).install().changes.at(-1)).toBe(
+        "Cursor:  extension spell-app.spell-epic 0.2.0 installed;  then:  Developer:  Reload Window"
+      )
+      expect(withCode(() => undefined, new Editor("cursor")).install().changes).toEqual([
+        `Cursor:  no cursor command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in Cursor:  Install from VSIX...`
+      ])
+    } finally {
+      rmSync(vscode, { recursive: true, force: true })
+    }
   })
 })
 
@@ -266,5 +326,180 @@ describe("from the published packages (npm install spell spell-epic)", () => {
 describe("run()", () => {
   test("a verb but install:  a usage error", async () => {
     await expect(installer().run(["remove"])).rejects.toThrow(/epic plugin install/)
+  })
+})
+
+////////////////
+// ## Codex (epic `epic-friend` P11)
+////////////////
+
+/** The real plugin's folder:  its Codex hooks file and manifest, copied into the made-up kit. */
+const REAL = join(import.meta.dirname, "..", "..")
+
+/** Codex's scratch folder:  NEVER the machine's own `~/.codex`. */
+const codexHome = join(top, "codex")
+/** The skills' scratch folder:  NEVER the machine's own `~/.agents`. */
+const agentsHome = join(top, "agents-home")
+
+/** Codex's hooks file, parsed. */
+function codexHooks(): any {
+  return JSON.parse(readFileSync(join(codexHome, "hooks.json"), "utf8"))
+}
+
+/** Every command in a Codex hooks file, by event. */
+function commandsOf(file: any): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(file.hooks as Record<string, { hooks: { command: string }[] }[]>).map(([event, groups]) => [
+      event,
+      groups.flatMap((group) => group.hooks.map((hook) => hook.command))
+    ])
+  )
+}
+
+describe("the plugin's Codex hooks", () => {
+  test("valid:  Codex's event names only, each command a hook script the plugin has, run from its root", () => {
+    const file = JSON.parse(readFileSync(join(REAL, "hooks", "codex-hooks.json"), "utf8"))
+    expect(Object.keys(file.hooks).sort()).toEqual(["SessionStart", "Stop"])
+    for (const command of Object.values(commandsOf(file)).flat()) {
+      const [, script] = /^node "\$\{PLUGIN_ROOT\}\/(hooks\/[\w-]+\.mjs)" --codex-plugin$/.exec(command) ?? []
+      expect(script, command).toBeDefined()
+      expect(existsSync(join(REAL, script!)), script).toBe(true)
+    }
+    expect(commandsOf(file).Stop).toEqual(['node "${PLUGIN_ROOT}/hooks/shared-commit.mjs" --codex-plugin'])
+    // each script it runs does nothing when the plugin starts it while Codex's user hooks file runs it too (J37)
+    for (const command of Object.values(commandsOf(file)).flat()) {
+      const script = /hooks\/[\w-]+\.mjs/.exec(command)![0]
+      expect(readFileSync(join(REAL, script), "utf8"), script).toContain("CodexHome.skipPluginHook()")
+    }
+  })
+
+  test("the Codex manifest names that file;  Claude Code's own hooks file stays Claude's", () => {
+    const manifest = JSON.parse(readFileSync(join(REAL, ".codex-plugin", "plugin.json"), "utf8"))
+    expect(manifest).toMatchObject({ name: "epic", skills: "./skills/", hooks: "./hooks/codex-hooks.json" })
+    const claudes = JSON.parse(readFileSync(join(REAL, "hooks", "hooks.json"), "utf8"))
+    expect(Object.keys(claudes.hooks)).toContain("WorktreeCreate")
+  })
+})
+
+describe("installCodex()", () => {
+  beforeEach(() => {
+    rmSync(codexHome, { recursive: true, force: true })
+    rmSync(agentsHome, { recursive: true, force: true })
+    writeFileSync(join(engine, "hooks", "codex-hooks.json"), readFileSync(join(REAL, "hooks", "codex-hooks.json")))
+    // the designer agent, as the real plugin names it
+    mkdirSync(join(engine, "designer"), { recursive: true })
+    writeFileSync(
+      join(engine, "designer", "designer-agent.md"),
+      readFileSync(join(REAL, "designer", "designer-agent.md"))
+    )
+    writeFileSync(
+      join(engine, ".claude-plugin", "plugin.json"),
+      '{ "name": "epic", "version": "0.8.0", "agents": ["./designer/designer-agent.md"] }'
+    )
+  })
+
+  /** An installer for Codex, on the scratch folders. */
+  function codexInstaller(): PluginInstall {
+    return new PluginInstall({ home, kit, bin, now: () => NOW, codexHome, agentsHome })
+  }
+
+  test("a fresh machine:  Codex's hooks file, the skills, the agents, each once;  run again, nothing", () => {
+    const report = codexInstaller().installCodex()
+    const designer = join(codexHome, "agents", "epic-designer.toml")
+    expect(report.changes).toEqual([
+      `${join(codexHome, "hooks.json")}:  the epic hooks (SessionStart, Stop), run from ${join(engine, "hooks")}`,
+      `Codex skills:  2 linked to ${join(engine, "skills")}:  epic, isolate`,
+      `${designer}:  Codex's designer agent, from ${join(engine, "designer", "designer-agent.md")}`,
+      `PATH:  ${join(bin, "epic")} links to ${join(engine, "bin", "epic")}`
+    ])
+    // the skills:  links to the SAME folders Claude Code reads
+    for (const name of ["epic", "isolate"])
+      expect(realpathSync(join(agentsHome, "skills", name))).toBe(realpathSync(join(engine, "skills", name)))
+    // the agent:  Codex's three required keys, the plugin's folder filled in, said to be generated
+    const toml = readFileSync(designer, "utf8")
+    expect(toml).toMatch(
+      /^# GENERATED by epic plugin install --codex, from the epic plugin's .\/designer\/designer-agent\.md/
+    )
+    expect(toml).toMatch(/^name = "designer"$/m)
+    expect(toml).toMatch(/^description = "A design reviewer for web pages and UI\./m)
+    expect(toml).toMatch(/^developer_instructions = "You are the designer/m)
+    expect(toml).toContain(`${engine}/skills/designer/SKILL.md`)
+    expect(toml).not.toContain("CLAUDE_PLUGIN_ROOT")
+    expect(commandsOf(codexHooks())).toEqual({
+      SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`],
+      Stop: [`node "${engine}/hooks/shared-commit.mjs"`]
+    })
+    expect(PluginInstall.lines(report).at(-1)).toMatch(/in Codex, \/hooks, and trust them/)
+    expect(codexInstaller().installCodex().changes).toEqual([])
+  })
+
+  test("the person's own Codex hooks kept;  an older install's (another kit folder) replaced, never doubled", () => {
+    mkdirSync(codexHome, { recursive: true })
+    const mine = { type: "command", command: "say done" }
+    writeFileSync(
+      join(codexHome, "hooks.json"),
+      JSON.stringify({
+        description: "mine",
+        hooks: {
+          Stop: [
+            { hooks: [mine] },
+            { hooks: [{ type: "command", command: 'node "/old/spell/epic/hooks/shared-commit.mjs"' }] }
+          ],
+          PreToolUse: [{ matcher: "Bash", hooks: [mine] }]
+        }
+      })
+    )
+    codexInstaller().installCodex()
+    const file = codexHooks()
+    expect(file.description).toBe("mine")
+    expect(commandsOf(file)).toEqual({
+      Stop: ["say done", `node "${engine}/hooks/shared-commit.mjs"`],
+      PreToolUse: ["say done"],
+      SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`]
+    })
+  })
+
+  test("--dry-run writes nothing;  run() takes --codex;  a kit with no Codex hooks is refused", async () => {
+    expect(codexInstaller().installCodex({ dryRun: true }).changes).toHaveLength(4)
+    expect(existsSync(join(codexHome, "hooks.json"))).toBe(false)
+    expect(existsSync(join(agentsHome, "skills"))).toBe(false)
+    expect(existsSync(join(codexHome, "agents"))).toBe(false)
+    expect(await codexInstaller().run(["install", "--codex", "--json"])).toBe(0)
+    expect(existsSync(join(codexHome, "hooks.json"))).toBe(true)
+    // Claude Code's lists untouched by --codex
+    expect(existsSync(join(home, "settings.json"))).toBe(false)
+    rmSync(join(engine, "hooks", "codex-hooks.json"))
+    expect(() => codexInstaller().installCodex()).toThrow(/has no Codex hooks/)
+  })
+})
+
+describe("Codex's folders in tests (I10)", () => {
+  test("the setup points them at scratch ones:  no test writes the machine's ~/.codex or ~/.agents/skills", () => {
+    const scratch = realpathSync(tmpdir())
+    for (const folder of [CodexHome.home(), CodexHome.agentsHome(), CodexHome.skillsFolder()]) {
+      expect(realpathSync(dirname(dirname(folder))).startsWith(scratch), folder).toBe(true)
+      expect(folder.startsWith(join(homedir(), ".")), folder).toBe(false)
+    }
+    const installer = new PluginInstall()
+    expect(installer.agentsHome).toBe(CodexHome.agentsHome())
+    expect(installer.codexHome).toBe(CodexHome.home())
+  })
+})
+
+describe("CodexHome.skipPluginHook():  one route for the hooks (J37)", () => {
+  test("only a script the plugin started (--codex-plugin), and only while Codex's user hooks file runs ours", () => {
+    const home = join(top, "codex-route")
+    const argv = ["node", "shared-commit.mjs", "--codex-plugin"]
+    expect(CodexHome.skipPluginHook(argv, home)).toBe(false)
+    mkdirSync(home, { recursive: true })
+    writeFileSync(join(home, "hooks.json"), JSON.stringify({ hooks: { Stop: [{ hooks: [{ command: "say hi" }] }] } }))
+    expect(CodexHome.skipPluginHook(argv, home)).toBe(false)
+    writeFileSync(join(home, "hooks.json"), JSON.stringify(PluginInstall.codexHooksFor(REAL)))
+    expect(CodexHome.hasEpicHooks(home)).toBe(true)
+    expect(CodexHome.skipPluginHook(argv, home)).toBe(true)
+    // the user file's own run, and Claude Code's:  no flag, so never skipped
+    expect(CodexHome.skipPluginHook(["node", "shared-commit.mjs"], home)).toBe(false)
+    writeFileSync(join(home, "hooks.json"), "{ not json")
+    expect(CodexHome.skipPluginHook(argv, home)).toBe(false)
   })
 })

@@ -19,10 +19,10 @@ export const epicChoiceRowsVocabulary = {
   ui: false,
   description:
     "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | " +
-    "Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box Owen types over.  " +
+    "Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box you type over.  " +
     "It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, " +
-    "Owen puts the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and Owen types " +
-    "only what he'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
+    "you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type " +
+    "only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
   attributes: [
     {
       name: "stacked",
@@ -39,9 +39,9 @@ export const epicChoiceRowsVocabulary = {
       name: "blank",
       kind: "boolean",
       description:
-        "Boxes Owen types into, not recommendations (`blank: true`;  epic `epic-engine` P13, r12):  one first column, " +
+        "Boxes you type into, not recommendations (`blank: true`;  epic `epic-engine` P13, r12):  one first column, " +
         "today's text with an EMPTY box under it, then Purpose.  Blank means no change;  a click on today's text " +
-        "copies it into the box.  The count says how many rows and how many he changed."
+        "copies it into the box.  The count says how many rows and how many you changed."
     },
     {
       name: "noun",
@@ -52,7 +52,7 @@ export const epicChoiceRowsVocabulary = {
       name: "reorder",
       kind: "boolean",
       description:
-        "Owen puts the rows in order (a section's `reorder: true`):  a first column, Order, with each row's place " +
+        "You put the rows in order (a section's `reorder: true`):  a first column, Order, with each row's place " +
         'and its move up / move down buttons.  The order goes with the draft and "Do it".'
     }
   ],
@@ -76,7 +76,7 @@ export const epicChoiceRowsVocabulary = {
     {
       key: "countBlank",
       text: "{rows} {noun} · {changed} changed",
-      description: "Its section's badge with `blank`:  how many rows, and how many Owen changed."
+      description: "Its section's badge with `blank`:  how many rows, and how many you changed."
     },
     {
       key: "count",
@@ -91,12 +91,12 @@ export const epicChoiceRowsVocabulary = {
     {
       key: "countMoved",
       text: "{count} · moved",
-      description: "Its section's badge with `reorder`, once Owen moved a row from the order Claude proposed."
+      description: "Its section's badge with `reorder`, once you moved a row from the order Claude proposed."
     },
     {
       key: "countChanged",
       text: "{count} · {changed} changed",
-      description: "Its section's badge, once Owen changed some."
+      description: "Its section's badge, once you changed some."
     }
   ],
   children: [{ tag: "epic-choice-row", description: "Its rows." }]

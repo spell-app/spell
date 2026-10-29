@@ -208,8 +208,15 @@ export type HeaderMarks = {
   waiting: number
   /** requests for now queued, not taken yet */
   asked: number
-  /** a Claude session is listening */
+  /** a session is listening (Claude's, Codex's ...) */
   listening: boolean
+  /** who listens, in words, when it's an agent other than Claude:  "Your Codex is listening";  `""` otherwise */
+  listener: string
+  /**
+   * nobody listens, and the last to listen was an agent other than Claude (epic `epic-friend` P11, Q14):  how to wake
+   * it, in words before its command, "Your Codex isn't listening:  ask it to run";  `""` otherwise
+   */
+  idle: string
   /** what the page server's wake did, while nobody listens (epic `epic-workflow` P16);  `""` for none */
   woken: string
 }

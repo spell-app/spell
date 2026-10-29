@@ -10,6 +10,9 @@ import JSON5 from "json5"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { PeopleColors } from "./PeopleColors.ts"
+import { Editor, EDITOR_IDS } from "./Editor.ts"
+import { VoiceColor } from "./VoiceColor.ts"
 
 /****************
  * ### `EpicConfig`
@@ -17,13 +20,19 @@ import { RealPath } from "spell/server/RealPath"
  *
  * ```ts
  * const config = EpicConfig.of(process.cwd())   // the main checkout's file, from any worktree
- * config.contentFolder                           // => "/Users/owen/www/spell-app/spell-app-dev"
- * config.worktreeFolder("seo")                   // => "<main>/.claude/worktrees/seo":  where it is, or would go
+ * config.contentFolder                           // => "/Users/ana/www/my-app.epics"
+ * config.worktreeFolder("seo")                   // => "/Users/ana/www/my-app.worktrees/seo":  where it is, or would go
  * config.baseBranch                              // => "main"
+ * EpicConfig.ofSetUp(process.cwd())              // => the same, or `undefined` in a repo `epic init` never set up
  * ```
  *
  * - The keys, their defaults and what reads each:  `EpicSettings`.
- *   - With no file, or a key left out:  the default, which is how spell-app worked before the file existed.
+ *   - A key left out reads as `epic init` would write it for THIS repo (`defaultsFor()`, epic `epic-friend` P6):
+ *     `../<repo>.epics`, its own base branch from git, the install its lock file names ...
+ *     - never another repo's values:  until P6 they were an older Spell checkout's (`../spell-app-dev` ...)
+ *     - the keys with no per-repo value take `DEFAULTS`
+ *   - A repo with no file at all reads the same way;  but it isn't SET UP (`isSetUp`, `ofSetUp()`):
+ *     the plugin's hooks, which run in every repo, leave it alone.
  *   - A key it doesn't know is skipped, so an older checkout reads a newer file.
  * - ONE file per repo:  the MAIN checkout's (`SRV.checkoutOf()`), so every worktree reads the same values.
  *   A branch's change to it counts once it's merged and the main checkout has it.
@@ -61,34 +70,31 @@ export class EpicConfig {
   /** where a repo's config is, from its main checkout */
   static readonly FILE = ".epic/config.json5"
 
-  /** every value with no file, or for a key the file leaves out:  how spell-app worked before the file existed */
-  static readonly DEFAULTS: EpicSettings = {
-    contentFolder: "../spell-app-dev",
-    baseBranch: "main",
-    worktreesFolder: ".claude/worktrees",
-    installCommand: "yarn install",
-    installOnCreate: false,
+  /**
+   * the value of each key with nothing to do with WHICH repo it is, for a file that leaves it out
+   * - the per-repo keys (`contentFolder`, `baseBranch`, the window names ...) come from the repo itself:
+   *   `defaultsFor()`
+   */
+  static readonly DEFAULTS: EpicDefaults = {
+    contentRemote: "",
     installTimeout: 600,
     extraInstalls: [],
-    windows: {
-      default: "spell",
-      repoName: "spell",
-      contentName: "spell.epics",
-      worktreeOnly: false,
-      settings: {}
-    },
-    linkSessionFolders: false,
-    sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
+    windows: { worktreeOnly: true, settings: {} },
+    linkSessionFolders: true,
+    // what the epic tooling reads and writes:  epic pages (their parts, inboxes, `home.json5`), the sagas, the guides
+    // epics write, the docs home and the scratch details pages;  not `templates`, which are spell-epic's
+    sharedFolders: ["epics", "sagas", "guides", "pages"],
     engineFolder: "",
     repoTemplates: "",
-    windowsFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
     repos: "",
     voices: {},
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true,
+    editor: "",
     renamedRepos: {},
+    colors: { people: {}, agents: {} },
     top: "",
     oldLayout: { carryOn: "", commitMaps: "", oldClones: "" }
   }
@@ -110,6 +116,13 @@ export class EpicConfig {
 
   /** the worktrees' window files' folder, in the windows folder:  `<windowsFolder>/ongoing/<name>.code-workspace` */
   static readonly WORKTREE_WINDOWS = "ongoing"
+
+  /**
+   * where Claude Code puts its OWN worktrees, from the main checkout:  `.claude/worktrees/<name>`
+   * - the worktree hook's place in a repo `epic init` never set up, as Claude Code's would be
+   * - and every repo's old place, before `worktreesFolder` moved them beside it (`worktreesFolders`)
+   */
+  static readonly CLAUDE_WORKTREES = ".claude/worktrees"
 
   /** the main checkout, its REAL path (links followed):  what the folders are relative to */
   readonly main: string
@@ -151,7 +164,7 @@ export class EpicConfig {
     this.main = RealPath.of(main)
     this.file = join(this.main, EpicConfig.FILE)
     const text = readOrEmpty(this.file)
-    this.settings = EpicConfig.settingsFrom(text, this.file)
+    this.settings = EpicConfig.settingsFrom(text, this.file, this.main)
     this.named = new Set(text.trim() ? Object.keys(EpicConfig.parse(text, this.file) as object) : [])
   }
 
@@ -162,6 +175,26 @@ export class EpicConfig {
    */
   static of(path = process.cwd()): EpicConfig {
     return new EpicConfig(checkoutOf(path)?.main ?? resolve(path))
+  }
+
+  /**
+   * The config of the repo `path` is in (`of()`), when that repo is SET UP for epics (`isSetUp`);  else `undefined`.
+   * - the ONE "does this repo use epics?" check:  the plugin's hooks run in EVERY repo, and do nothing in one that
+   *   doesn't (epic `epic-friend` P6)
+   * - throws as `of()` does, on a file that won't read:  a hook catches it
+   */
+  static ofSetUp(path = process.cwd()): EpicConfig | undefined {
+    const config = EpicConfig.of(path)
+    return config.isSetUp ? config : undefined
+  }
+
+  /**
+   * Whether the repo is set up for epics:
+   * - its main checkout has `.epic/config.json5` (`epic init` writes it)
+   * - or it's a child repo of a multi-repo top (`top`), whose file names it
+   */
+  get isSetUp(): boolean {
+    return existsSync(this.file) || this.top !== undefined
   }
 
   /**
@@ -185,7 +218,7 @@ export class EpicConfig {
   static contentOf(root: string): string {
     try {
       const config = EpicConfig.of(root)
-      if (existsSync(config.file)) {
+      if (config.isSetUp) {
         const content = config.contentFolder
         if (existsSync(content)) return content
         // named, but not there:  said, never silent (epic `epic-engine` I59);  a repo with no content repo yet names none
@@ -204,6 +237,15 @@ export class EpicConfig {
   ////////////////
   // ## The values
   ////////////////
+
+  /**
+   * the shared content repo's address (`contentRemote`, epic `epic-friend` P4):  where everyone pulls the plans from
+   * and pushes them to, as git takes it (`git@github.com:o/x-epics.git`);  `""` when it has none
+   * - `epic init` writes it as it makes the shared repo, and clones it where the content folder is missing
+   */
+  get contentRemote(): string {
+    return this.settings.contentRemote
+  }
 
   /** the shared content repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
   get contentFolder(): string {
@@ -240,12 +282,13 @@ export class EpicConfig {
    * - `worktreesFolder`
    * - then the OLD places:
    *   - a child repo's own `worktreesFolder` (its worktrees from before its top's)
-   *   - the default, `.claude/worktrees`, when the file moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
+   *   - Claude Code's own place, `.claude/worktrees` (`CLAUDE_WORKTREES`), where every repo's went before the file
+   *     moved them (epic `epic-eject` P8:  `../spell-app.worktrees`), and where they go in a repo not set up
    * - the old places stay on the list for good:
    *   harmless once empty, and a worktree there keeps working until its `/isolate done`
    */
   get worktreesFolders(): string[] {
-    const old = resolve(this.main, EpicConfig.DEFAULTS.worktreesFolder)
+    const old = resolve(this.main, EpicConfig.CLAUDE_WORKTREES)
     return [...new Set([this.worktreesFolder, this.ownWorktreesFolder, old])]
   }
 
@@ -600,11 +643,43 @@ export class EpicConfig {
   }
 
   /**
+   * The editor the tools drive, VS Code or Cursor (`Editor`, epic `epic-friend` P16):  this machine's
+   * (`$SPELL_EPIC_EDITOR`), else the window's, else the repo's `editor`, else VS Code
+   */
+  get editor(): Editor {
+    return Editor.of({ setting: this.settings.editor })
+  }
+
+  /**
    * the repo's OLD GitHub addresses, each to the one it was renamed to (`renamedRepos`, epic `epic-engine` I150):
    * what `EpicRepo` reads so an epic page recording the old name is still this repo's
    */
   get renamedRepos(): Record<string, string> {
     return this.settings.renamedRepos
+  }
+
+  /**
+   * a colour for each person and each agent on the epic pages (`colors`, epic `epic-friend` P10, Q16):
+   * `{ people: { ana: "green" }, agents: { codex: "#0f8b8d" } }`;  anyone left out keeps the shared voice
+   * - the config's own, then the colour each person picked as `epic init` set them up, kept in the content folder's
+   *   `people/` (`PeopleColors`, epic `epic-friend` P13):  a name the config gives a colour keeps the config's
+   * - the page server tells every page (`SPELL_SERVER.colors`, `personRoutes`), which draws a reply, a thread message
+   *   in it (`ThreadFacts.voiceOf()`)
+   */
+  get colors(): EpicColors {
+    const own = this.settings.colors
+    const named = Object.keys(own.people).map((name) => name.trim().toLowerCase())
+    const picked = Object.entries(this.peopleColors()).filter(([name]) => !named.includes(name.toLowerCase()))
+    return { people: { ...own.people, ...Object.fromEntries(picked) }, agents: own.agents }
+  }
+
+  /** The colours people picked, in the content folder's `people/` (`PeopleColors`);  none when it won't read. */
+  private peopleColors(): Record<string, string> {
+    try {
+      return PeopleColors.read(this.contentFolder)
+    } catch {
+      return {}
+    }
   }
 
   /** the window names:  the default window, and the folder names a window shows */
@@ -847,12 +922,13 @@ export class EpicConfig {
 
   /**
    * Every value as `epic config` prints it, by dotted key:  folders absolute, the rest as written.
-   * - `{ contentFolder: "/.../spell-app-dev", ..., "windows.default": "spell-app", ... }`
+   * - `{ contentFolder: "/.../my-app.epics", ..., "windows.default": "my-app", ... }`
    * - `sharedFolders` as one comma-separated line, `epics,guides,...`, so a skill reads it as one value
    */
   values(): Record<string, string | boolean | number> {
     return {
       contentFolder: this.contentFolder,
+      contentRemote: this.contentRemote,
       baseBranch: this.baseBranch,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
@@ -881,7 +957,9 @@ export class EpicConfig {
       ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
+      editor: this.editor.id,
       renamedRepos: JSON.stringify(this.renamedRepos),
+      colors: JSON.stringify(this.colors),
       peers: this.peers.map((peer) => `${peer.name}=${peer.main}`).join(","),
       kit: this.kit?.main ?? "",
       "oldLayout.carryOn": this.oldLayout.carryOn,
@@ -937,16 +1015,82 @@ export class EpicConfig {
   ////////////////
 
   /**
-   * The settings in config text `text` (from `file`, for messages), over `DEFAULTS`.
-   * - `""`:  the defaults
+   * The settings for the repo whose main checkout is `main`, as `epic init` writes them (epic `epic-eject` P9),
+   * and what each key a file leaves out reads as (epic `epic-friend` P6):
+   * - `contentFolder`:  `../<repo>.epics`;  `worktreesFolder`:  `../<repo>.worktrees`, both beside the repo
+   * - `baseBranch`:  the remote's default branch, else `main` or `master`, else the main checkout's (`baseBranchOf()`)
+   * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
+   * - `installOnCreate`:  on when there is an install command, so a worktree's window never opens without its packages
+   * - `windows`:  named for the repo (`default`, `repoName`) and its content folder (`contentName`)
+   * - `windowsFolder`:  the content folder's `windows/` (epic `epic-eject` P13)
+   * - every other key:  `DEFAULTS`, the same for any repo
+   * - `written`:  what a file names already, so the values that follow another key follow it:
+   *   `contentName` and `windowsFolder` its `contentFolder`, `installOnCreate` its `installCommand`;
+   *   and `baseBranch` is worked out only when it's left out
+   * - static:  needs no instance, nor a file
+   */
+  static defaultsFor(main: string, written: Record<string, unknown> = {}): EpicSettings {
+    const repo = basename(main)
+    const text = (value: unknown) => (typeof value === "string" ? value : undefined)
+    const contentFolder = text(written.contentFolder) ?? `../${repo}.epics`
+    const installCommand = text(written.installCommand) ?? EpicConfig.installCommandOf(main)
+    const defaults = EpicConfig.DEFAULTS
+    return {
+      ...defaults,
+      contentFolder,
+      baseBranch: written.baseBranch === undefined ? EpicConfig.baseBranchOf(main) : "main",
+      worktreesFolder: `../${repo}.worktrees`,
+      installCommand,
+      installOnCreate: Boolean(installCommand),
+      windows: { ...defaults.windows, default: repo, repoName: repo, contentName: basename(contentFolder) },
+      windowsFolder: join(contentFolder, "windows")
+    }
+  }
+
+  /**
+   * The branch worktrees start from in the repo at `main`, the first of:
+   * - the remote's default branch (`origin/HEAD`'s)
+   * - a branch `main`, else `master`
+   * - the branch the main checkout is on
+   * - `main`
+   * - read from git's own files (`.git/refs/...`, `packed-refs`, `HEAD`), no `git` run:  every config left without a
+   *   `baseBranch` asks, the page server's included;  `git` only for git's newer `reftable` store, which has no such
+   *   files
+   */
+  static baseBranchOf(main: string): string {
+    const dotGit = join(main, ".git")
+    if (existsSync(join(dotGit, "reftable")))
+      return (
+        Git.out(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], main)?.slice("origin/".length) ||
+        "main"
+      )
+    const branchIn = (file: string) => /^ref:\s*refs\/(?:remotes\/origin|heads)\/(.+)$/m.exec(readOrEmpty(file))?.[1]
+    const remote = branchIn(join(dotGit, "refs", "remotes", "origin", "HEAD"))
+    if (remote) return remote
+    const packed = readOrEmpty(join(dotGit, "packed-refs"))
+    const has = (branch: string) =>
+      existsSync(join(dotGit, "refs", "heads", branch)) || packed.includes(` refs/heads/${branch}\n`)
+    return ["main", "master"].find(has) ?? branchIn(join(dotGit, "HEAD")) ?? "main"
+  }
+
+  /** The install command the lock file at `main`'s root names (`INSTALLERS`, first match);  `""` with none. */
+  static installCommandOf(main: string): string {
+    return EpicConfig.INSTALLERS.find(([file]) => existsSync(join(main, file)))?.[1] ?? ""
+  }
+
+  /**
+   * The settings in config text `text` (from `file`, for messages):  each key left out from the repo itself
+   * (`defaultsFor()`).
+   * - `main`:  the repo's main checkout;  default the one `file` is in, `<main>/.epic/config.json5`
+   * - `""`:  the repo's defaults
    * - throws `SyntaxError` on text that won't read, `TypeError` on a value of the wrong kind
    */
-  static settingsFrom(text: string, file = EpicConfig.FILE): EpicSettings {
+  static settingsFrom(text: string, file = EpicConfig.FILE, main = dirname(dirname(resolve(file)))): EpicSettings {
     const written = text.trim() ? EpicConfig.parse(text, file) : {}
     if (typeof written !== "object" || written === null || Array.isArray(written))
       throw new TypeError(`EpicConfig:  ${file} must hold an object, {...}`)
     const given = written as Record<string, unknown>
-    const defaults = EpicConfig.DEFAULTS
+    const defaults = EpicConfig.defaultsFor(main, given)
     const windows = given.windows === undefined ? {} : given.windows
     if (typeof windows !== "object" || windows === null || Array.isArray(windows))
       throw new TypeError(`EpicConfig:  ${file}'s "windows" must be an object, { "default": ..., ... }`)
@@ -960,6 +1104,7 @@ export class EpicConfig {
     const app = appGiven as Record<string, unknown>
     return {
       contentFolder: valueOf(given, "contentFolder", defaults.contentFolder, file),
+      contentRemote: valueOf(given, "contentRemote", defaults.contentRemote, file, "", { empty: true }),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
@@ -983,7 +1128,9 @@ export class EpicConfig {
       pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
+      editor: editorOf(given, defaults.editor, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
+      colors: colorsOf(given, defaults.colors, file),
       top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
       oldLayout: oldLayoutOf(given, defaults.oldLayout, file),
       app: {
@@ -1006,6 +1153,21 @@ export class EpicConfig {
       throw new SyntaxError(`EpicConfig:  ${file} won't read:  ${(error as Error).message}`, { cause: error })
     }
   }
+
+  /**
+   * lock files and the install command each names, first match wins (`installCommandOf()`)
+   * - static:  the same for every repo
+   */
+  private static readonly INSTALLERS: [file: string, command: string][] = [
+    ["yarn.lock", "yarn install"],
+    ["pnpm-lock.yaml", "pnpm install"],
+    ["bun.lock", "bun install"],
+    ["bun.lockb", "bun install"],
+    ["package-lock.json", "npm install"],
+    ["package.json", "npm install"],
+    ["uv.lock", "uv sync"],
+    ["Gemfile.lock", "bundle install"]
+  ]
 }
 
 /**
@@ -1040,19 +1202,26 @@ export type EpicPeer = { name: string; main: string }
 export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: string }
 
 /**
- * What `.epic/config.json5` holds:  where a repo keeps its epic things.  Every key is optional in the file.
- * - `contentFolder`:  the shared content repo, relative to the main checkout (`../spell-app-dev`):
+ * What `.epic/config.json5` holds:  where a repo keeps its epic things.
+ * - Every key is optional in the file:  one left out reads as `epic init` would write it for the repo
+ *   (`EpicConfig.defaultsFor()`);  the defaults below are a repo `my-app`'s.
+ * - `contentFolder`:  the shared content repo, relative to the main checkout (`../my-app.epics`):
  *   the epics, guides, sagas and logs every checkout links in (`epic shared`, the turn-end commit hook)
- * - `baseBranch`:  the branch worktrees start from and merge into (`main`):
+ * - `contentRemote`:  the shared content repo's address, as git takes it (`git@github.com:o/my-app-epics.git`;
+ *   epic `epic-friend` P4);  `""` (the default):  none, the plans stay on this machine
+ *   - the FIRST person's `epic init` makes the repo on GitHub and writes it;  a later person's clones it, where the
+ *     content folder is missing
+ * - `baseBranch`:  the branch worktrees start from and merge into (the remote's default branch, from git):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
- * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`.claude/worktrees`), one folder each:
+ * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`../my-app.worktrees`), one folder each:
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
- *   - it may be outside the repo (`../spell-app.worktrees`, epic `epic-eject` P8);
- *     then the old place, `.claude/worktrees`, is still read for the worktrees left there (`worktreesFolders`)
- * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`, the hook;
- *   `""` for none (a repo with no packages to install)
+ *   - outside the repo since epic `epic-eject` P8:  the old place, `.claude/worktrees`, is still read for the
+ *     worktrees left there (`worktreesFolders`)
+ * - `installCommand`:  what makes a new worktree ready to run (what the repo's lock file names, `yarn install`):
+ *   `/isolate`, `/epic`, the hook;  `""` for none (a repo with no packages to install)
  * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
- *   (off:  the skills run it, after entering).  On, nothing opens the worktree without its packages (I2)
+ *   (off:  the skills run it, after entering).  On (the default when there's an install command), nothing opens the
+ *   worktree without its packages (I2)
  * - `installTimeout`:  the seconds the hook's install may take (600)
  * - `extraInstalls`:  folders of a new worktree that are yarn projects of their own, NOT workspaces of the one install
  *   (`["epic/vscode", "app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
@@ -1062,10 +1231,10 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *     the worktree works, only what needs that folder's packages doesn't
  * - `windows`:  the VS Code windows (the window script)
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
- *     (`spell-app`:  `<windowsFolder>/spell-app.code-workspace`)
- *   - `repoName`:  the repo root's folder name in every window (`spell-app`)
- *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
- *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
+ *     (`my-app`:  `<windowsFolder>/my-app.code-workspace`)
+ *   - `repoName`:  the repo root's folder name in every window (`my-app`)
+ *   - `contentName`:  the content repo's folder name in every window (`my-app.epics`, the content folder's name)
+ *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (on);
  *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
  *   - `settings`:  VS Code settings every window file gets, the repo's own, e.g. which TypeScript the editor runs
  *     (`{}`, none:  the default)
@@ -1073,19 +1242,19 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *       VS Code ignores them in a folder's `.vscode/settings.json`, and reads them from the window file only
  *     - `epic window init` writes them into the window files that exist;  a new one gets them as it's made
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
- *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
+ *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (on;
  *   `SessionFolders`, epic `epic-eject` Q4)
- * - `sharedFolders`:  the content folder's folders each checkout links in at its root (spell-app's seven, `ui` dropped
- *   in epic `epic-eject` P12;  `epic init` writes `epics`, `sagas`, `guides`, `pages` for a new repo):
+ * - `sharedFolders`:  the content folder's folders each checkout links in at its root (`epics`, `sagas`, `guides`,
+ *   `pages`;  the kit's:  none):
  *   `epic shared link`, the turn-end commit hook
  *   - for people and other tools only:  the engine reads pages from the content folder itself (`contentOf()`)
- * - `engineFolder`:  the spell-epic checkout, relative to the main checkout (`../spell-epic`), which `epic shared link`
- *   links in at each checkout's root as `spell-epic`:  spell-app runs the engine through it (its alias table, its page
- *   server's route modules, epic `epic-eject` I5);  `""`:  no link (a repo that only runs `epic`)
+ * - `engineFolder`:  the spell-epic checkout, relative to the main checkout, which `epic shared link` links in at each
+ *   checkout's root as `spell-epic`, for a repo whose code imports the engine (spell-app's once did, epic `epic-eject`
+ *   I5);  `""` (the default):  no link, a repo that only runs `epic`
  * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
  *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
  * - `windowsFolder`:  the VS Code window files' folder, relative to the main checkout (`epic window`, epic `epic-eject`
- *   P13);  `""` (the default):  the content folder's `windows/`, `<contentFolder>/windows`
+ *   P13);  the content folder's `windows/` (`../my-app.epics/windows`);  `""` means it too
  *   - each machine's own, never tracked:  the content repo git-ignores `windows/`
  *   - before P13:  `workspaces/` in the main checkout, tracked by spell-app and marked `skip-worktree`
  * - `app`:  the repo's app, which the top bar's App tab opens through the epic server (epic `epic-engine` I49;
@@ -1107,12 +1276,18 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
+ *   `code` (VS Code) or `cursor` (`Editor`, epic `epic-friend` P16);  `""` (the default):  VS Code
  * - `renamedRepos`:  the repo's OLD GitHub addresses, each to the address it was renamed to
  *   (`{ "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" }`, epic `epic-engine` I150);
  *   `{}` (the default):  none
  *   - GitHub redirects an old name, but an epic page records the address its repo had when it started:
  *     `EpicRepo` reads both as one repo, offline, so the page needs no rewrite
  *   - read from every repo of a multi-repo top, and from the checkout an address is looked for in (`EpicRepo.renamesOf()`)
+ * - `colors`:  a colour for each person and each agent on the epic pages (epic `epic-friend` P10, Q16;  Owen:  "color
+ *   per person and/or agent working on the project, set in epic project settings"), `EpicColors`;  `{ people: {},
+ *   agents: {} }` (the default):  everyone in the shared person or agent colour
+ *   - `epic init` doesn't write it;  `epic config colors` prints it
  * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
  *   epic-engine's P49, Q51 A);  `""` (the default):  none
  *   - each key this file leaves out that a peer shares (the content folder, windows ...) is the kit's (`kit`);
@@ -1122,6 +1297,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  */
 export type EpicSettings = {
   contentFolder: string
+  contentRemote: string
   baseBranch: string
   worktreesFolder: string
   installCommand: string
@@ -1140,10 +1316,29 @@ export type EpicSettings = {
   pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
+  editor: string
   renamedRepos: Record<string, string>
+  colors: EpicColors
   top: string
   oldLayout: EpicOldLayout
 }
+
+/** The keys whose value comes from the repo itself, when a file leaves them out (`EpicConfig.defaultsFor()`). */
+type RepoKey =
+  | "contentFolder"
+  | "baseBranch"
+  | "worktreesFolder"
+  | "installCommand"
+  | "installOnCreate"
+  | "windowsFolder"
+
+/**
+ * `EpicConfig.DEFAULTS`:  every key of `EpicSettings` with no per-repo value, the same in any repo
+ * - the window names are the repo's;  only a window's layout and settings are here
+ */
+export type EpicDefaults = Prettify<
+  Omit<EpicSettings, RepoKey | "windows"> & { windows: Omit<EpicWindows, "default" | "repoName" | "contentName"> }
+>
 
 /**
  * One of `EpicSettings.checkoutPatches`:  a fix to a checkout's setup that reaches every checkout, the worktrees behind
@@ -1173,6 +1368,12 @@ export type CheckoutPatch = { id: string; date: string; why: string; copy?: stri
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
+
+/**
+ * `EpicSettings.colors`:  a colour for each person, by the short name `epic whoami` prints, and each agent, by its id
+ * (`codex`);  a CSS colour each.  The page's shape of it:  `ThreadFacts`' `VoiceColors`.
+ */
+export type EpicColors = { people: Record<string, string>; agents: Record<string, string> }
 
 /** `EpicSettings.windows`:  the default window, the folder names every window shows, its layout and settings. */
 export type EpicWindows = {
@@ -1363,6 +1564,48 @@ function urlsTo(
       `EpicConfig:  ${file}'s "${key}" must be an object of old repo addresses to new ones, { "https://github.com/o/old": "https://github.com/o/new" }, not ${JSON.stringify(value)}`
     )
   return value as Record<string, string>
+}
+
+/**
+ * `given.colors`:  `{ people: { <name>: <colour> }, agents: { <id>: <colour> } }`, each half optional;  left out,
+ * `fallback`.
+ * - a colour:  a Spell UI colour name (`green`, `teal` ...:  `VoiceColor.NAMES`, drawn from the theme), or CSS colour
+ *   words (`#2f9e6e`, `oklch(60% 0.1 180)`), nothing that ends a declaration:  it goes into a page's style.
+ *   ONE check, `VoiceColor.isColor()`, here and as the page reads them.
+ * - throws `TypeError` naming the file for anything else
+ */
+function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: string): EpicColors {
+  const value = given.colors
+  if (value === undefined) return fallback
+  const isNames = (half: unknown) =>
+    half === undefined ||
+    (typeof half === "object" &&
+      half !== null &&
+      !Array.isArray(half) &&
+      Object.entries(half).every(([name, color]) => name.trim() && VoiceColor.isColor(color)))
+  const { people, agents } = (value ?? {}) as Record<string, unknown>
+  const ok = typeof value === "object" && value !== null && !Array.isArray(value) && isNames(people) && isNames(agents)
+  if (!ok)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "colors" must be { "people": { "ana": "green" }, "agents": { "codex": "#0f8b8d" } }, ` +
+        `each a Spell UI colour name (${VoiceColor.NAMES.join(", ")}) or a CSS colour, not ${JSON.stringify(value)}`
+    )
+  return { people: { ...(people as Record<string, string>) }, agents: { ...(agents as Record<string, string>) } }
+}
+
+/**
+ * `given.editor`:  `code` or `cursor`, any case, or `""`;  left out, `fallback`.
+ * - throws `TypeError` naming the file for anything else
+ */
+function editorOf(given: Record<string, unknown>, fallback: string, file: string): string {
+  const value = given.editor
+  if (value === undefined || value === "") return fallback
+  const id = Editor.named(value)
+  if (!id)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "editor" must be one of ${EDITOR_IDS.join(", ")}, not ${JSON.stringify(value)}`
+    )
+  return id
 }
 
 /**

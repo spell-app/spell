@@ -59,7 +59,7 @@ and `spell lint` fails on it by file, line and column.
 
 You need `spell` on your PATH:
 [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero),
-then [the command line](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up).
+then [the command line](https://github.com/spell-app/spell/blob/main/README/cli.md#setting-it-up).
 In any folder outside the checkout, save the card as `try/solitaire/Card.spell`, then:
 
 ```sh

@@ -374,7 +374,7 @@ export function wireJumpKey(go, canGo, { search, host, first = false } = {}) {
 
 /**
  * The jump dialog:  an id typed, Go lands there;  Cancel or Escape just closes it.
- * - a comment's id (`C3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
+ * - a comment's id (`C3`) lands on its thread, opened;  the threads waiting on the person are listed under the box
  *   (`jumpWaitingList()`)
  * - `search`, `host`:  as `wireJumpKey()` takes them
  */
@@ -465,7 +465,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
 }
 
 /**
- * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
+ * The jump dialog's list of the threads waiting on the person (Claude spoke last;  `PageComments.waitingOnPerson`), in page
  * order:  a line each, "C3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
  * no comments.
  * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu direction="vertical" appearance="secondary link">`, its title a header item, each line

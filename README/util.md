@@ -88,17 +88,17 @@ and the pref store by its own file, so nothing else above them lands in its bund
 
 Its biggest reader by far is the language:  242 of spell-parser's files import the barrel,
 207 of them in its `spell` folder, against 14 in spell-app's editor, language server, spaces and command line.
-Spell UI and [the kit's element framework](README-element.md) never touch the barrel at all:
+Spell UI and [the kit's element framework](element.md) never touch the barrel at all:
 they take the generic files, and re-export them as their own.
-The code is in [src/util/](src/util/), its tests in [tests/util/](tests/util/),
-and the rules for working on it in [util's AGENTS.md](src/util/AGENTS.md).
+The code is in [src/util/](../src/util/), its tests in [tests/util/](../tests/util/),
+and the rules for working on it in [util's AGENTS.md](../src/util/AGENTS.md).
 
 Every file also has a name of its own, the package's plus its path under `src/` (`spell/util/reactive/cells`).
 Use the barrel, except for these:
 
 | Import | Why not the barrel | Who imports it so |
 | --- | --- | --- |
-| `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell/blob/main/ui/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
+| `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell/blob/main/ui/src/util/index.ts), [the element framework's](../src/element/index.ts), the kit's test helpers |
 | `spell/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
 | `spell/util/persist` | the preferences and undo, without lodash:  the barrel would bundle it into every page | the kit's site header (`spell/server/site`) |
 | `spell/util/persist/PrefStore` | the pref store alone:  in Spell UI's core bundle the whole folder cost every page 1.9 kB | Spell UI's theme, nav, saved-theme and site-fold preferences |
@@ -166,7 +166,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
   - `@once` takes no arguments, and must be called on its object (`X.load()`), never detached
 
 These are standard (TC39) decorators, not TypeScript's old experimental kind;
-[the toolchain's](README-toolchain.md) pre-pass lowers them before Solid's compiler sees the code.
+[the toolchain's](toolchain.md) pre-pass lowers them before Solid's compiler sees the code.
 
 <details>
 <summary>Every generic decorator, one line each</summary>
@@ -186,7 +186,7 @@ These are standard (TC39) decorators, not TypeScript's old experimental kind;
   - A key it does state replaces the parent's value whole:
     to add to one, spread the parent's (`styleSheets: { ...Parent.prototype.elementSetup.styleSheets, panel }`).
 - The reactive decorators (`@prop`, `@state`, `@derived`) are the engine's:  next section.
-- The element framework's own (`@E.state`, `@E.controlled` ...):  [README-element.md](README-element.md).
+- The element framework's own (`@E.state`, `@E.controlled` ...):  [README/element.md](element.md).
 
 </details>
 
@@ -566,7 +566,7 @@ so a comment inside an item stays with its position when an item before it comes
 - What it writes is the JSON-compatible part of JSON5:  double quotes, quoted keys, no trailing commas.
 - `readJSON5File()` reads one, and throws a `SyntaxError` that names the file.
 - Who writes through it:  Spell UI's tools, spell-app's editor tools and spaces, spell-epic's site,
-  and the kit's own page server (its [data files](README-server.md)) and command line (it reads `repos.json5`).
+  and the kit's own page server (its [data files](server.md)) and command line (it reads `repos.json5`).
 - The cost:  the layout is json5-writer's, not yours.
   Adding a key on the run above also left a blank line in the middle of the object.
 - Node only, because json5-writer runs on jscodeshift:  imported by its own path, never through a barrel.
@@ -604,7 +604,7 @@ And when you're in there:
 - A decorator starts its line (`@proto static x = 1` is fine):  the toolchain's pre-pass finds it there,
   and misses the file otherwise.
 - Reactive work is Solid work:  read the Solid 2 rules in full first (below, "More in the docs site").
-- The tests, in [tests/util/](tests/util/) at the same paths as the code:
+- The tests, in [tests/util/](../tests/util/) at the same paths as the code:
   - the generic files' in a real Chromium, Vitest's project `util`
   - the engine's, `spell/`'s and `node/`'s in node, project `util:node`
   - every test of the kit:  `yarn kit:test`;  util's alone, at the kit's root:
@@ -615,18 +615,18 @@ And when you're in there:
 
 | File | What |
 | --- | --- |
-| [index.ts](src/util/index.ts) | the barrel:  the generic files, then the reactive engine and `persist/`, then Spell's own |
-| [decorators.ts](src/util/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
-| [class.ts](src/util/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
-| [string.ts](src/util/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()` (Fomantic's column words:  `4` is `"four"`), `levenshtein()`, `suggest()` |
-| [timing.ts](src/util/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  waiting:  `waitUntil()`, `within()` |
-| [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
-| [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
-| [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [persist/](src/util/persist/) | what an app keeps for people:  `PrefStore`, and where it keeps them, `PrefPlace` (the quick `StoragePlace`, over the browser's storage or a `MemoryStorage`;  the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`);  `UndoStack`;  `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`);  `persist.types.ts` (the server's protocol too) |
-| [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
-| [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
-| [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
+| [index.ts](../src/util/index.ts) | the barrel:  the generic files, then the reactive engine and `persist/`, then Spell's own |
+| [decorators.ts](../src/util/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
+| [class.ts](../src/util/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
+| [string.ts](../src/util/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()` (Fomantic's column words:  `4` is `"four"`), `levenshtein()`, `suggest()` |
+| [timing.ts](../src/util/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  waiting:  `waitUntil()`, `within()` |
+| [dom.ts](../src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
+| [util.types.ts](../src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
+| [reactive/](../src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
+| [persist/](../src/util/persist/) | what an app keeps for people:  `PrefStore`, and where it keeps them, `PrefPlace` (the quick `StoragePlace`, over the browser's storage or a `MemoryStorage`;  the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`);  `UndoStack`;  `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`);  `persist.types.ts` (the server's protocol too) |
+| [`spell/`](../src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
+| [node/json5.ts](../src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
+| [vitest.config.ts](../vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
 
 </details>
 
@@ -650,10 +650,10 @@ server running (`spell server start`, then the URL it prints):
 
 ## See also
 
-- [README-element.md](README-element.md):  the element framework, which re-exports the generic helpers
+- [README/element.md](element.md):  the element framework, which re-exports the generic helpers
   and has a `@state` and `@derived` of its own
 - [spell-parser's README-core.md](https://github.com/spell-app/spell/blob/main/parser/README-core.md):  the runtime compiled Spell runs on,
   where the same write-then-read happens in English
-- [README-toolchain.md](README-toolchain.md):  the decorator pre-pass every decorator on this page goes through
-- [README-server.md](README-server.md):  the page server, whose data files are written through the JSON5 helper
-- [README.md](README.md):  the repo, and the five parts it holds
+- [README/toolchain.md](toolchain.md):  the decorator pre-pass every decorator on this page goes through
+- [README/server.md](server.md):  the page server, whose data files are written through the JSON5 helper
+- [README.md](../README.md):  the repo, and the five parts it holds

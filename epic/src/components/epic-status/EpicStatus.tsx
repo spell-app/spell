@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
+import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
 // the card's shape and its dated band are the answer family's:  one card, its fills per element
 import {
@@ -38,6 +39,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - `Claude • Done` (green):  work was done (an answer written, code changed, a phase built)
  *   - `Claude • Noted` (a calm outline, no fill):  Claude only RECORDED what Owen chose
  *     (a pick, a todo made or queued), so it never reads as work done (Owen, 2026-10-10)
+ *   - `Claude (Ana) • Done`:  a card another person's session wrote (`from`;  epic `epic-friend` P2), to anyone but Ana
+ *   - `Codex • Underway`:  another agent's card, by its name (`agent`;  epic `epic-friend` P10)
  * - the date at the right of the top line (`.header.dated`, as `EpicReply`'s):  `done-at` once finished, else `at`;
  *   once finished, the date's tooltip says when it was taken
  * - Its body:  the reading (its children), kept as it was when it turns done;
@@ -179,6 +182,19 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
     return (this.isFinished && this.doneAt) || this.at
   }
 
+  /**
+   * Whose agent wrote it, for its band (epic `epic-friend` P2, Q7;  any agent since P10):  `Codex (Ana)` when `from`
+   * names someone other than whoever is reading (`ThreadFacts.viewer()`);  plain `Codex` for your own session's.
+   * - the agent by its name (`ThreadFacts.agentLabel()`):  `agent`;  none (a card from before P10):  Claude
+   */
+  get who(): string {
+    const person = this.from?.trim()
+    const agent = ThreadFacts.agentLabel(this.agent)
+    return person && !ThreadFacts.sameName(person, ThreadFacts.viewer())
+      ? this.translationForKey("agentOf", { agent, person })
+      : this.translationForKey("agent", { agent })
+  }
+
   /** Its band's right:  `when`, as drawn (`10/8/26 14:34`). */
   get date(): string {
     return PlanDates.format(this.when)
@@ -266,7 +282,7 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
             })}
           </Show>
           <span id={WHO_ID} class={WHO} part={this.partForName("who")}>
-            {this.translationForKey(this.isDone ? "done" : this.isNoted ? "noted" : "underway")}
+            {this.translationForKey(this.isDone ? "done" : this.isNoted ? "noted" : "underway", { who: this.who })}
           </span>
           <Show when={this.date}>
             <time class={DATE} part={this.partForName("date")} datetime={this.when} title={this.dateTip}>

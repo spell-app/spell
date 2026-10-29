@@ -1,10 +1,13 @@
 ---
 name: title
-description: Show or change THIS session's title -- the name in the VS Code Claude panel's tab and session list -- which Claude can't set with `/rename` itself.  Use for `/title` (shows it, then offers names), `/title <title>`, or when Owen says "name this session", "call this session <x>", "rename this session".
+description: Show or change THIS session's title -- the name in the VS Code Claude panel's tab and session list -- which Claude can't set with `/rename` itself.  Use for `/title` (shows it, then offers names), `/title <title>`, or when the person says "name this session", "call this session <x>", "rename this session".
 argument-hint: "[<title>]"
 ---
 
 # /title
+
+In Codex:  Claude Code only (session titles are its VS Code panel's);
+a Codex session needs none:  `epic guide claude-only-tools`.
 
 The command:  `epic session title [<title>]` ([Sessions.ts](https://github.com/spell-app/spell/blob/main/epic/src/command/Sessions.ts)).
 Other skills that rename a session run the same command:  `/isolate`, `/park`, `/unpark` and `/session`.
@@ -31,7 +34,7 @@ Other skills that rename a session run the same command:  `/isolate`, `/park`, `
 
 - Claude can't run `/rename`, so:
   - the command writes `~/.claude/session-titles/<session id>`
-  - the `UserPromptSubmit` hook returns it as `sessionTitle` on Owen's NEXT message
+  - the `UserPromptSubmit` hook returns it as `sessionTitle` on the person's NEXT message
     - the hook:  `~/.claude/hooks/session-title.mjs`
   - then deletes the file
   - Say so.

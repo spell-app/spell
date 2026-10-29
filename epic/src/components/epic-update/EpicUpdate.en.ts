@@ -57,7 +57,7 @@ export const epicUpdateVocabulary = {
       kind: "string",
       format: "time",
       description:
-        "When Owen marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from " +
+        "When you marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from " +
         "its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until " +
         "`PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
     }

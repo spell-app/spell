@@ -2,7 +2,8 @@
  * `<epic-page-note-head>` (`EpicPageNoteHead.tsx`):  an old page note's head line, as the note card drew it
  * (`spell-doc.css`, "Page notes", until epic `epic-engine` P3).
  * - one line:  the icon, who and when, the first line while folded (muted, cut short), the status chip
- * - the status, by the colour scheme:  new yellow (open), answered violet, done grey
+ * - the status, by the colour scheme:  new yellow (open), answered in an agent's voice (`--epic-voice-agent`,
+ *   terracotta;  epic `epic-friend` P10, Q16:  violet before, which now means a person), done grey
  */
 
 @layer ui.components.epic-page-note-head;
@@ -63,8 +64,8 @@
     font-size: 12px;
   }
   .status[data-status="answered"] {
-    background: var(--ui-violet, #6435c9);
-    color: var(--ui-violet-on, #fff);
+    background: var(--epic-voice-agent, light-dark(#c96442, #d97757));
+    color: light-dark(#fff, #1b1c1d);
   }
   .status[data-status="done"] {
     background: var(--spell-state-old, var(--ui-grey-background, light-dark(#eeeeee, #34343b)));

@@ -21,11 +21,11 @@ export const ITEM_STATES = ["attention", "replied", "progress", "open", "recent"
 export type ItemState = (typeof ITEM_STATES)[number]
 
 /**
- * The states that wait on Owen:
- * `attention` (red), and `replied` (orange:  Claude answered with options, his turn to pick).
+ * The states that wait on the person:
+ * `attention` (red), and `replied` (orange:  Claude answered with options, their turn to pick).
  * - what a section's count and its "only what needs you" filter take (`<epic-section>`)
  */
-export const NEEDS_OWEN: ReadonlySet<string> = new Set(["attention", "replied"] satisfies ItemState[])
+export const NEEDS_PERSON: ReadonlySet<string> = new Set(["attention", "replied"] satisfies ItemState[])
 
 /**
  * The items Owen may call urgent or not (`calm`, its id chip):
