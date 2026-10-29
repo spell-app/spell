@@ -651,10 +651,14 @@ export type GearEntry = {
   isOn: boolean
 }
 
-/** Class of a gear's dropdown;  an entry's icon while on, and while off. */
+/**
+ * Class of a gear's dropdown;  an entry's icon while on, and while off:  a check, else an empty box of the same width,
+ * so the words stay put (Owen, 2026-10-29:  "Should be blank when off, checkmark when on";  tick boxes before, which
+ * read as missing icons)
+ */
 const GEAR = "gear"
-const GEAR_TICKED = "square check"
-const GEAR_UNTICKED = "square outline"
+const GEAR_TICKED = "check"
+const GEAR_UNTICKED = ""
 
 /** The rounds of `expandAll()` at most:  each opens one level deeper, once the level above has loaded its parts. */
 const EXPAND_ROUNDS = 6

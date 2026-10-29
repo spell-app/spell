@@ -45,7 +45,7 @@ async function gearOf(host: Element): Promise<E.DOMElement> {
 function gearEntries(gear: Element): string[] {
   return Array.from(
     gear.querySelectorAll("ui-item"),
-    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "check" ? "on" : "off"}`
   )
 }
 
@@ -218,6 +218,17 @@ describe("<epic-section>", () => {
     await pickGear(gear, "Show each phase's files")
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("block")
     expect(gearEntries(gear)).toEqual(["Show each phase's files:  on", "Show each phase's checks:  off"])
+    // a check when on, blank when off, the words lined up (Owen, 2026-10-29:  "Should be blank when off, checkmark
+    // when on")
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
+    const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+    await vi.waitFor(() => expect(rows[0]!.querySelector(".icon svg")).not.toBeNull())
+    expect(rows[1]!.querySelector(".icon")).toBeNull()
+    const lefts = rows.map((row) => Math.round(row.querySelector(".text")!.getBoundingClientRect().left))
+    expect(lefts[0]).toBe(lefts[1])
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
     // the toggles' old key:  a choice made with them holds
     expect(JSON.parse(localStorage.getItem(`epic-phase-fields:${location.pathname}`)!)).toEqual({ files: true })
     // picked again (the dropdown keeps no value):  off
