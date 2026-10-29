@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "fs"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { compiledSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
@@ -13,7 +14,7 @@ import { compiledSpellProject, registerTestComponentPack } from "spell/parser/sp
 describe("source maps", () => {
   beforeAll(registerTestComponentPack)
 
-  const pairs = readdirSync(new URL("./spellx/", import.meta.url)).filter((name) => /\.spellx?$/.test(name))
+  const pairs = readdirSync(new URL("./spellx/", import.meta.url)).filter((name) => SP.isSpellSourceName(name))
 
   test.each(pairs)("%s:  the same code with a map as without one", (name) => {
     const files = [fixture(name)]

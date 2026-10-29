@@ -795,13 +795,9 @@ describe("<epic-page> toolbar", () => {
     const item = host.querySelector<E.DOMElement>("#q1")!
     // an item has no collapse-all of its own (Owen, 2026-10-25:  "lose it entirely")
     expect(item.shadowRoot!.querySelector('[part~="collapse-all"]')).toBe(null)
-    // the section's:  its items fold, it stays open
-    // the section's ONE toggle:  first it opens everything inside, then the same button folds it
-    const sectionButton = questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
-    expect(sectionButton.title).toBe("Open everything in 3. Questions")
-    sectionButton.click()
-    await vi.waitFor(() => expect(sectionButton.title).toBe("Fold everything in 3. Questions"))
-    sectionButton.click()
+    // the section's:  no button of its own (I161);  its collapse-all folds its items, it stays open
+    expect(questions.shadowRoot!.querySelector('[part~="toggle-all"]')).toBe(null)
+    ;(questions.component as unknown as { collapseAll(): number }).collapseAll()
     await ElementFixture.tick()
     expect([
       aside.component!.fold.isOpen(),

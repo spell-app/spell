@@ -204,6 +204,21 @@ describe("project-utils", () => {
     expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellml"])
   })
 
+  // epic `repo-split` P21, Owen 2026-10-27:  ".spellml", and "support both for now"
+  test("an old .spellx file still lists, as a .spellml file does", async () => {
+    const projectId = project("OldTags")
+    const folder = resolve(workspace, "OldTags")
+    writeFileSync(resolve(folder, `Card${SP.OLD_SPELLML_SUFFIX}`), '<spell-thing "card">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Deck.spellml"), '<spell-thing "deck">\n</spell-thing>\n')
+
+    const index = await projectUtils.getIndex(projectId)
+    expect(index.imports.map((it) => it.path)).toEqual([
+      "/OldTags.spell",
+      `/Card${SP.OLD_SPELLML_SUFFIX}`,
+      "/Deck.spellml"
+    ])
+  })
+
   // the bug of 2026-10-22:  a project copied to a folder of another name read its old words file as spell
   test("a words file is never one of a project's files, whatever its name:  an old name's is left out", async () => {
     const projectId = project("calc2")

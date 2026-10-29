@@ -8,6 +8,7 @@ import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -44,7 +45,8 @@ export class Migrations {
     new ItemRenames(),
     new RootLinks(),
     new DoneCardsClose(),
-    new PicksInChoices()
+    new PicksInChoices(),
+    new UpdatesSaidByMarks()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

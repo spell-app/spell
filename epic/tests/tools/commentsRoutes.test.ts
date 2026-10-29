@@ -68,6 +68,8 @@ const PAGES: Record<string, string> = {
   "guides/py.html": PAGE,
   "epics/py/py.plan.html": `<epic-page epic="py" updated="2026-10-13"><a slot="durable" href="../../guides/py.html">Py</a></epic-page>`,
   // an epic page whose prose names a details page's markup (epic `epic-workflow`'s own item titles)
+  // an epic page with parts that take a mark (epic `epic-engine` I158):  a phase, items, an Overview part
+  "epics/marks/marks.plan.html": `<epic-page epic="marks"><epic-overview id="overview"><epic-section kind="overview-part" id="o1"></epic-section></epic-overview><epic-phase id="p-build"><epic-field label="Plan"></epic-field></epic-phase><epic-item id="t1"></epic-item><epic-item id="q2"></epic-item><epic-item id="t3"></epic-item></epic-page>`,
   "epics/asks/asks.plan.html": PAGE.replace(
     "<p>Body.</p>",
     '<epic-item id="j1" title="holding an <epic-ask>"></epic-item>'
@@ -466,6 +468,63 @@ test("an epic page's comments go in the epic's REVIEW INBOX, beside its marks;  
   })
   const read = await ask(port, "GET", "/api/docs/comments?page=%2Fepics%2Fbig%2Fbig.plan.html")
   expect(JSON.parse(read.text)).toMatchObject({ takesComments: true, comments: [{ id: "c1", status: "new" }] })
+})
+
+// epic `epic-engine` I158 (Owen, 2026-10-29:  "When I add a comment to a phase, it should show as `revisit` automatically")
+test("a NEW comment in a phase's, an item's or an Overview part's text presses its Revisit;  deleted, it lets go", async () => {
+  const page = "/epics/marks/marks.plan.html"
+  const marks = () => inboxOf("epics/marks/marks.html").marks
+  const on = (anchor: string, text: string) => post({ page, action: "add", ...ON_TABLE, anchor, kind: "field", text })
+  const c1 = (await on("p-build#field-1", "this step?")).answer.id
+  expect(marks()["p-build"]).toMatchObject({
+    action: "revisit",
+    when: "soon",
+    note: "see my comments in its text:  C1",
+    comments: [c1]
+  })
+  // a second one in the same text joins it
+  const c2 = (await on("p-build", "and this")).answer.id
+  expect(marks()["p-build"]).toMatchObject({ note: "see my comments in its text:  C1, C2", comments: [c1, c2] })
+  // the Overview part's too;  the page header and the Overview as a whole take no mark
+  await on("o1#prose-1", "why?")
+  await on("page", "the whole page")
+  await on("overview#prose-1", "the Overview")
+  expect(Object.keys(marks()).sort()).toEqual(["o1", "p-build"])
+  // deleted:  out of the note;  the last one:  the mark goes
+  await post({ page, action: "delete", id: c1 })
+  expect(marks()["p-build"]).toMatchObject({ note: "see my comments in its text:  C2", comments: [c2] })
+  await post({ page, action: "delete", id: c2 })
+  expect(marks()["p-build"]).toBeUndefined()
+})
+
+test("a comment joins a revisit Owen wrote;  a pick stays a pick;  Approve stays Approve, carrying it (I163)", async () => {
+  const page = "/epics/marks/marks.plan.html"
+  const file = join(root, "epics/marks/marks.inbox.json5")
+  ReviewInbox.update(file, (inbox) => {
+    inbox.setMark("t1", { action: "revisit", note: "too big" })
+    inbox.setMark("q2", { action: "pick", pick: "B", choices: 1 })
+    inbox.setMark("t3", { action: "approve" })
+  })
+  const on = async (anchor: string) =>
+    (await post({ page, action: "add", ...ON_TABLE, anchor, kind: "list", text: "hm" })).answer.id as string
+  const [onT1, onQ2, onT3] = [await on("t1#list-1"), await on("q2"), await on("t3#list-1")]
+  const { marks } = inboxOf("epics/marks/marks.html")
+  const label = (id: string) => id.toUpperCase()
+  expect(marks.t1).toMatchObject({
+    action: "revisit",
+    note: `too big\n\nsee my comments in its text:  ${label(onT1)}`,
+    comments: [onT1]
+  })
+  expect(marks.q2).toMatchObject({ action: "revisit", pick: "B", choices: 1, comments: [onQ2] })
+  expect(marks.t3).toMatchObject({ action: "approve", comments: [onT3] })
+  // deleted:  Owen's words stay;  the pick goes back to the plain pick
+  await post({ page, action: "delete", id: onT1 })
+  await post({ page, action: "delete", id: onQ2 })
+  await post({ page, action: "delete", id: onT3 })
+  const after = inboxOf("epics/marks/marks.html").marks
+  expect(after.t3).toEqual({ action: "approve", at: after.t3.at })
+  expect(after.t1).toEqual({ action: "revisit", when: "soon", note: "too big", at: after.t1.at })
+  expect(after.q2).toEqual({ action: "pick", pick: "B", choices: 1, at: after.q2.at })
 })
 
 // epic `epic-workflow` P25:  `epic-workflow`'s own page took no comments, its item titles naming `<epic-ask>`

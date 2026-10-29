@@ -447,6 +447,26 @@ describe("PlanDoc phases", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  test("marksSay (I159):  an answer's change is its marks alone;  --for, the ids named this pass, a file, no item", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: '<p><epic-change item="q1">the new words</epic-change></p>' })
+    plan.addPhase("Two", { symptom: "s", changes: "c" })
+    plan.updateStates()
+    expect(el(plan, "p1").querySelector("epic-change")!.getAttribute("at")).toBe("2026-10-01 09:05")
+    // `--for`:  every item given has a mark in the phase
+    expect(plan.marksSay(1, "<p>anything</p>", ["q1"])).toEqual(["Q1"])
+    expect(plan.marksSay(1, "<p>anything</p>", ["q1", "j2"])).toEqual([])
+    expect(plan.marksSay(2, "<p>anything</p>", ["q1"])).toEqual([])
+    // none given:  the ids the text names, marked this pass, no file named
+    expect(plan.marksSay(1, "<p>Owen answered Q1:  the new words.</p>")).toEqual(["Q1"])
+    expect(plan.marksSay(1, "<p>Q1 moved <code>src/tool/X.ts</code></p>")).toEqual([])
+    expect(plan.marksSay(1, "<p>Q1 and a new question, Q2</p>")).toEqual([])
+    expect(plan.marksSay(1, "<p>Split in two</p>")).toEqual([])
+    const later = PlanDoc.parse(plan.toString(), new Date(2026, 9, 1, 10, 0))
+    expect(later.marksSay(1, "<p>Owen answered Q1</p>")).toEqual([])
+    expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
+  })
+
   test("plan changes:  counted in each phase's `changes`;  a phase done keeps them and its count", () => {
     const plan = freshPlan()
     plan.addPhase("One", { symptom: "s", changes: "c" })

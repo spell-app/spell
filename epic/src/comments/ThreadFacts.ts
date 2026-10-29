@@ -87,13 +87,22 @@ export class ThreadFacts {
   ////////////////
 
   /**
-   * A few words of what a comment is on, for a thread's header and the comment pane's:  the start of the selected
-   * text, else of its block's text, in quotes;  "This page" for the page.
+   * A few words for a thread's header and the comment pane's:  the start of Owen's own words once he's written
+   * some (Owen, 2026-10-29, epic `epic-engine` I162:  "show beginning of my text instead" of what was selected:  the
+   * page already highlights that);  else what it's on, the start of the selected text, else of its block's, in
+   * quotes;  "This page" for the page.
    */
-  static headline(place: ThreadPlace): string {
+  static headline(place: ThreadPlace & { text?: string }): string {
+    const own = (place.text ?? "").replace(/\s+/g, " ").trim()
+    if (own) return ThreadFacts.quoted(own)
     if (place.kind === "page") return "This page"
     const words = (place.quote || place.excerpt || place.label || "").replace(/\s+/g, " ").trim()
     if (!words) return `This ${ThreadFacts.kindName(place.kind)}`
+    return ThreadFacts.quoted(words)
+  }
+
+  /** `words` in quotes, cut at `HEADLINE_CHARS` with "…". */
+  private static quoted(words: string): string {
     return `“${words.length > HEADLINE_CHARS ? `${words.slice(0, HEADLINE_CHARS).trimEnd()}…` : words}”`
   }
 

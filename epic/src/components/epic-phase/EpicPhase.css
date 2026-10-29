@@ -24,13 +24,14 @@
     --epic-inset: var(--epic-card-inset, 16px);
   }
   /*
-   * its status icon in a cell as wide as an item's id chip, so its title starts where an item's does:  chevron, icon
-   * and title in the same columns as the Questions' (Owen, 2026-10-25)
+   * its status icon as wide as its circle, the title the row's gap after it:  circle to "P53" as far as chevron to
+   * circle (epic `epic-engine` I161;  Owen, 2026-10-29:  "Why so much space between o and P53?";  24.5px, now 12px)
+   * - before:  a cell as wide as an item's id chip (`--epic-phase-icon-cell`, 30px), so a phase's title started where
+   *   an item's does (Owen, 2026-10-25)
+   * - 2px past its circle:  the chevron's own box has that much room after its stroke
    */
   ui-section::part(icon) {
-    box-sizing: border-box;
-    width: var(--epic-phase-icon-cell, 30px);
-    justify-content: flex-start;
+    margin-inline-end: 2px;
   }
   :host([status="done"]) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));
@@ -174,11 +175,19 @@
 
   /*
    * ## Dragged to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`)
-   * - a to-do phase on a reviewed page:  its title row the grab cursor
+   * - a to-do phase on a reviewed page:  its title row's EMPTY space the grab cursor;  its chevron, icon, title, time
+   *   pill and buttons keep the pointer (I161, `EpicFold.css`);  while dragging, the grabbing cursor everywhere
    * - while dragged:  faded;  the phase it would land beside:  an accent line on that side, over its edge (no room taken)
    */
-  :host(:state(movable)) ui-section::part(toggle) {
+  :host(:state(movable)) ui-section::part(title) {
     cursor: grab;
+  }
+  /* while a phase is dragged, `PhaseDrag` marks every phase (`data-dragging`) */
+  :host([data-dragging]) ui-section::part(title),
+  :host([data-dragging]) ui-section::part(toggle),
+  :host([data-dragging]) ui-section::part(badge),
+  :host([data-dragging]) ui-section::part(actions) {
+    cursor: grabbing;
   }
   :host([data-dragged]) {
     opacity: 0.45;

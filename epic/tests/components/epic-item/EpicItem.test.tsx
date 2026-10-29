@@ -5,6 +5,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-aside"
 
 ////////////////
 // ## Helpers
@@ -174,7 +175,7 @@ describe("<epic-item>", () => {
       toggle()!.getAttribute("aria-label"),
       toggle()!.title,
       toggle()!.getAttribute("aria-controls")
-    ]).toEqual([true, "Unfold T1", "Unfold T1", "details"])
+    ]).toEqual([true, "Unfold T1", "Unfold T1\n⌥-click:  open everything inside", "details"])
     line.click()
     await ElementFixture.tick()
     expect([host.open, host.matches(":state(open)"), details.hasAttribute("hidden")]).toEqual([true, true, false])
@@ -182,6 +183,26 @@ describe("<epic-item>", () => {
     toggle()!.click()
     await ElementFixture.tick()
     expect(host.open).toBe(false)
+  })
+
+  test("⌥-click on its chevron (or line):  it and every item and card inside open;  again, all fold (I161)", async () => {
+    const { host, toggle } = await item(
+      `<epic-item id="t2" title="Outer" status="open"><p>Why</p>` +
+        `<epic-item id="t3" title="Inner" status="open"><p>Deeper</p></epic-item>` +
+        `<epic-aside title="Aside"><p>Side</p></epic-aside></epic-item>`
+    )
+    const inner = host.querySelector<HTMLElement & { open: boolean }>("#t3")!
+    const aside = host.querySelector<HTMLElement>("epic-aside")!
+    await ElementFixture.settle(host)
+    const asideOpen = () => aside.matches(":state(open)")
+    expect([host.open, inner.open, asideOpen()]).toEqual([false, false, false])
+    toggle()!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, altKey: true }))
+    await ElementFixture.tick()
+    expect([host.open, inner.open, asideOpen()]).toEqual([true, true, true])
+    expect(toggle()!.title).toBe("Fold T2\n⌥-click:  fold everything inside")
+    toggle()!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, altKey: true }))
+    await ElementFixture.tick()
+    expect([host.open, inner.open, asideOpen()]).toEqual([false, false, false])
   })
 
   test("its details fold by height, not at once (Owen, 2026-10-10:  the auto-fold after an action jumped shut)", async () => {

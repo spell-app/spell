@@ -140,7 +140,11 @@ export class SpellMonaco {
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
     monaco.languages.register({ id: LANGUAGE, extensions: [".spell"], mimetypes: ["text/spell", "text/x-spell"] })
-    monaco.languages.register({ id: SPELLX_LANGUAGE, extensions: [".spellml"], mimetypes: ["text/x-spellx"] })
+    monaco.languages.register({
+      id: SPELLX_LANGUAGE,
+      extensions: [...SP.SPELLML_SUFFIXES],
+      mimetypes: ["text/x-spellx"]
+    })
     const colourEach = () => {
       monaco.languages.setTokensProvider(LANGUAGE, new SpellTokensProvider())
       monaco.languages.setTokensProvider(SPELLX_LANGUAGE, SpellTokensProvider.forSpellx())
@@ -172,7 +176,7 @@ export class SpellMonaco {
   /** Monaco language id for a file named `path`, by its extension. */
   static languageForPath(path: string | undefined): string {
     const extension = path?.match(/\.[^./]+$/)?.[0]
-    if (extension === ".spellml") return SpellMonaco.SPELLX_LANGUAGE
+    if (SP.isSpellmlName(extension)) return SpellMonaco.SPELLX_LANGUAGE
     if (SP.isSpellSourceName(extension)) return SpellMonaco.LANGUAGE
     if (extension === ".js" || extension === ".jsx") return "javascript"
     if (extension === ".css") return "css"

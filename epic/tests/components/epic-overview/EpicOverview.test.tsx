@@ -127,9 +127,9 @@ describe("<epic-overview> actions slot", () => {
   })
 })
 
-// Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-describe("<epic-overview> toggle-all", () => {
-  test("folded:  the toggle after the page's own buttons, the chevron at the row's start;  a click opens it, its parts and items", async () => {
+// epic `epic-engine` I161 (Owen, 2026-10-29:  "holding down option is 'expand all'"):  no toggle-all in the row
+describe("<epic-overview> ⌥-click", () => {
+  test("folded:  the page's own buttons after the chevron;  ⌥-click on the chevron opens it, its parts and items", async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-overview id="overview"><button slot="actions" aria-label="Copy">C</button>` +
         `<epic-summary>Summary</epic-summary>` +
@@ -138,21 +138,17 @@ describe("<epic-overview> toggle-all", () => {
     )
     await inner(host).ready
     await ElementFixture.settle(host)
-    const expand = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="toggle-all"]')!
-    expect(expand.title).toBe("Open everything in 1. Overview")
+    expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).toBeNull()
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
-    const [b, e, c] = [button, expand, chevron].map((each) => each.getBoundingClientRect())
-    expect([b.right <= e.left + 0.5, c.right <= b.left + 0.5]).toEqual([true, true])
-    expand.click()
+    expect(chevron.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().left + 0.5)
+    const toggle = inner(host).shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle"]')!
+    expect(toggle.title).toBe("Open this section\n⌥-click:  open everything inside")
+    toggle.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
     const part = host.querySelector("epic-section")!
     const item = host.querySelector("epic-item")!
     await vi.waitFor(() => expect(item.matches(":state(open)")).toBe(true))
     expect([host.matches(":state(open)"), part.matches(":state(open)")]).toEqual([true, true])
-    // open:  the same button, now folding everything (Owen, 2026-10-25:  one button that toggles)
-    await ElementFixture.tick()
-    expect([expand.title, expand.getAttribute("aria-pressed")]).toEqual(["Fold everything in 1. Overview", "true"])
-    expect(host.shadowRoot!.querySelectorAll('[part~="toggle-all"]').length).toBe(1)
     await expectAccessible(host)
   })
 })

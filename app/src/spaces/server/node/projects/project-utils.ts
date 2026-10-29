@@ -273,14 +273,11 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
  * `undefined` for English, or a mix.  Its other files (`styles.css`) say nothing.
  */
 function languageOf(files: string[]): string | undefined {
-  const spellFiles = files.filter((file) => SPELL_FILE.test(file))
+  const spellFiles = files.filter((file) => SP.isSpellSourceName(file))
   const languages = new Set(spellFiles.map((file) => SP.Language.langOfFile(file) ?? "en"))
   const [language] = languages
   return languages.size === 1 && language !== "en" ? language : undefined
 }
-
-/** A spell file's name:  `.spell` or `.spellml`. */
-const SPELL_FILE = /\.spellx?$/
 
 /**
  * `GET /api/projects/list/<group>` -- list projects in a group, e.g. `/api/projects/list/@spell/examples`.
@@ -317,7 +314,7 @@ const GENERATED_SUFFIXES = [
  *   `__init__.js` or `__helpers__.spell` still list.
  * - Lists property editor pages (`SP.EDITOR_PAGE_SUFFIX`, `Card.editor.html`):  the editor opens them as text.
  */
-const manifestExtensions = [SP.SPELL_SUFFIX, SP.SPELLX_SUFFIX, ".css", ".js", ".jsx", SP.EDITOR_PAGE_SUFFIX]
+const manifestExtensions = [SP.SPELL_SUFFIX, ...SP.SPELLML_SUFFIXES, ".css", ".js", ".jsx", SP.EDITOR_PAGE_SUFFIX]
 export function isManifestFile(name: string, projectName = "") {
   if (SPACES.isSpaceName(name)) return false
   if (GENERATED_SUFFIXES.some((suffix) => name.endsWith(suffix))) return false

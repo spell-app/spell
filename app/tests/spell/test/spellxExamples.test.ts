@@ -64,7 +64,7 @@ function convertsTheSame(name: string) {
   const converted = before.map(({ path, contents, match, scope }) =>
     path.endsWith(".spellml")
       ? { path, contents }
-      : { path: `${path}x`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
+      : { path: `${path}ml`, contents: SX.SpellxWriter.write({ text: contents, match: match!, scope }) }
   )
   const after = parseSpellProject(converted, { parentScope }).files
   for (const [index, file] of after.entries()) {
@@ -79,7 +79,7 @@ function sourcesOf(folder: string): SpellSourceFile[] {
     imports: Array<{ path: string; active?: boolean }>
   }
   return imports
-    .filter(({ path, active }) => active !== false && /\.spellx?$/.test(path))
+    .filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
     .map(({ path }) => ({ path, contents: readFileSync(resolve(folder, `.${path}`), "utf8") }))
 }
 
@@ -123,8 +123,8 @@ function fixtureCompilesTheSame(name: string) {
   const parentScope = SP.Language.rootScopeFor([...new Set(sources.map(({ path }) => SP.Language.forFile(path)))])
   const before = parseSpellProject(sources, { parentScope }).files
   const fixtures = sources.map(({ path }) => {
-    const twin = path.endsWith(".spellml") ? path.slice(0, -1) : `${path}x`
-    const dir = path.endsWith(".spellml") ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
+    const twin = SP.isSpellmlName(path) ? path.replace(/\.spellml$/, SP.SPELL_SUFFIX) : `${path}ml`
+    const dir = SP.isSpellmlName(path) ? SPELL_FIXTURES_DIR : SPELLX_FIXTURES_DIR
     return { path: twin, contents: readFileSync(resolve(dir, name, `.${twin}`), "utf8") }
   })
   const after = parseSpellProject(fixtures, { parentScope }).files

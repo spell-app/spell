@@ -2,7 +2,14 @@ import { execFileSync } from "node:child_process"
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { DIST, DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage, type PublishCheck } from "spell/cli/publish"
+import {
+  DIST,
+  DOC_FILES,
+  PublishedPackage,
+  type BuildReport,
+  type PackedPackage,
+  type PublishCheck
+} from "spell/cli/publish"
 
 /****************
  * ### UIBundle

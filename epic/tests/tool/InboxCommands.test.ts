@@ -993,3 +993,52 @@ test("phase P1 planning [off];  phase-body sets it by itself while the plan isn'
   expect(working()).toEqual([])
   expect(printed.slice(0, 2)).toEqual(["P1 planning:  on", "P1 planning:  off"])
 })
+
+// epic `epic-engine` I163 (Owen, 2026-10-29):  "When I approve a phase to which I have just added comments, you should
+// just incorporate the feedback and auto-approve rather than asking me again"
+test("an Accept plan carrying his comments:  wait says to fold them in, apply accepts the plan and leaves them", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Retry Logic", { goal: "<ul><li>retries</li></ul>" })
+  plan.setPhaseFields(1, { plan: "<ol><li>Write the loop</li></ol>" })
+  const phase = plan.phaseElements[0]!.id
+  writeFileSync(file, plan.toString())
+  let ids: string[] = []
+  ReviewInbox.update(inboxFile, (inbox) => {
+    const place = { anchor: `${phase}#field-1`, kind: "field", label: "P1", excerpt: "plan" }
+    ids = [
+      inbox.commentList.add(place, "shorter steps", new Date(M1)),
+      inbox.commentList.add(place, "test it", new Date(M1))
+    ]
+    inbox.setMark(phase, { action: "approve", note: "see my comments in its text:  C1, C2", comments: ids }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
+  const said = printed.join("\n")
+  expect(said).toMatch(/accepted, with comments to fold in: {2}C1, C2\n {10}- C1 [^\n]*"shorter steps"/)
+  expect(said).toMatch(/--plan "\.\.\." --accepted/)
+  // carried by the approve:  not listed again as comments of their own
+  expect(said).not.toMatch(/comments, to answer on their threads/)
+  printed = []
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(printed.join("\n")).toContain("plan accepted:  build it, with comments to fold in:  C1, C2")
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).phaseElements[0]!.getAttribute("plan")).toBe("accepted")
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.marks[phase]).toBeUndefined()
+  expect(inbox.commentList.waiting.map((comment) => comment.id)).toEqual(ids)
+})
+
+test("phase-body --plan ... --accepted writes the plan ACCEPTED:  no waiting, no planning spinner;  without, it waits", async () => {
+  withPhases()
+  const owner = commands()
+  const working = () => Object.keys(ReviewInbox.read(inboxFile).working)
+  expect(await owner.run(["phase-body", "x", "P2", "--goal", "<ul><li>fresh</li></ul>"])).toBe(0)
+  expect(working()).toEqual(["p-docs"])
+  expect(await owner.run(["phase-body", "x", "P2", "--plan", "<ol><li>Folded in.</li></ol>", "--accepted"])).toBe(0)
+  expect(working()).toEqual([])
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phase(2).getAttribute("plan")).toBe("accepted")
+  expect(after.phase(2).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(true)
+  expect(after.toString()).toMatch(/P2 plan written: +accepted, Owen's comments folded in/)
+  expect(await owner.run(["phase-body", "x", "P1", "--plan", "<ol><li>Waits.</li></ol>"])).toBe(0)
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).phase(1).getAttribute("plan")).toBe("waiting")
+})

@@ -13,6 +13,7 @@ export { AREAS, RootLinks, type RootLinksCensus, type RootLinksRun } from "./Roo
 export { TakenInPhase } from "./TakenInPhase"
 export { ToReviewMarks } from "./ToReviewMarks"
 export { TookAsMinutes } from "./TookAsMinutes"
+export { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 export { WholePhaseNumbers } from "./WholePhaseNumbers"
 export { PAGE_KINDS } from "./migrations.types"
 export type { AnchorMove, InboxView, Migration, MigrationContext, PageKind } from "./migrations.types"

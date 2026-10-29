@@ -65,6 +65,13 @@ export abstract class PlanReader {
   /** how the doc was stored (split or not), set by the command line's `read()`;  never read here */
   parts?: PlanDocParts
 
+  /**
+   * Earlier versions of the doc, newest first, read only as they're needed:  where a new change mark's replaced words
+   * are found (`PlanDoc.updateChanges()`, `ChangeOriginals`;  epic `epic-engine` I160)
+   * - set by the command line's `edit()`:  the doc on disk before the edit, then its last commits;  none by default
+   */
+  earlierVersions: Iterable<Document> = []
+
   constructor(document: Document, now = new Date(), { recentSince }: PlanDocOptions = {}) {
     this.document = document
     this.now = now

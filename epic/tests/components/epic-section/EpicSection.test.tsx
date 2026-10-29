@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 
 import { E, UI } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
+
+import { expandAllUnder } from "spell/epic/components/epic-item/Fold"
 
 import "spell/ui/components/ui-section"
 import "spell/epic/components/epic-section"
@@ -24,6 +27,11 @@ function inner(host: Element): E.DOMElement {
 /** The fold button of `host`'s inner section. */
 function toggle(host: Element): HTMLButtonElement {
   return inner(host).shadowRoot!.querySelector('[part~="toggle"]') as HTMLButtonElement
+}
+
+/** An ⌥-click (Alt-click) on `element`:  everything inside too (I161). */
+function altClick(element: Element) {
+  element.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
 }
 
 /** The title text of `host`, as drawn:  its inner section's header, through every slot. */
@@ -237,6 +245,25 @@ function shownIds(host: Element): string[] {
     .map((item) => item.id)
 }
 
+// Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log ... doesn't auto expand with 'expand all'"
+describe("<epic-section kind=log> stays folded", () => {
+  test("the page's expand-all opens every section but the Log, and nothing inside it;  its own expand() still opens it", async () => {
+    const host = await render(
+      `<div><epic-section id="decisions" kind="questions"><p>An item</p></epic-section>` +
+        `<epic-section id="log" kind="log"><epic-section id="inside" kind="overview-part"></epic-section></epic-section></div>`
+    )
+    const wrap = host.parentElement!
+    const log = wrap.querySelector<FoldHost>("#log")!
+    const isOpen = (id: string) => wrap.querySelector(`#${id}`)!.matches(":state(open)")
+    expect(expandAllUnder(wrap)).toBe(1)
+    await ElementFixture.tick()
+    expect([isOpen("decisions"), isOpen("log"), isOpen("inside")]).toEqual([true, false, false])
+    expect((log.component as unknown as { expand(): boolean }).expand()).toBe(true)
+    await ElementFixture.tick()
+    expect(isOpen("log")).toBe(true)
+  })
+})
+
 describe("<epic-section> counts and state filter", () => {
   afterEach(() => {
     localStorage.removeItem(`spell-item-state:${location.pathname}`)
@@ -280,7 +307,8 @@ describe("<epic-section> counts and state filter", () => {
     expect((part as FoldHost & { contentsEntry?: unknown }).contentsEntry).toEqual({ label: "1.1 Why" })
   })
 
-  test("phases count too (open:  not done);  the log and an empty section have no badge", async () => {
+  // the Phases section's `1/2` went with its chips (epic `epic-engine` I157):  they say the numbers
+  test("phases count too (open:  not done), for the rail;  no section has a badge", async () => {
     const host = await render(
       `<div><epic-section id="phases" kind="phases">` +
         `<epic-phase id="p1" title="One" status="done"></epic-phase>` +
@@ -289,8 +317,10 @@ describe("<epic-section> counts and state filter", () => {
         `<epic-section id="log" kind="log"></epic-section></div>`
     )
     const sections = host.parentElement!.querySelectorAll("epic-section")
-    expect(Array.from(sections, (section) => inner(section).getAttribute("badge"))).toEqual(["1/2", null, null])
-    expect(host.shadowRoot!.querySelector('[part~="filter"]')).toBeNull()
+    expect(Array.from(sections, (section) => inner(section).getAttribute("badge"))).toEqual([null, null, null])
+    const entry = (host as FoldHost & { contentsEntry?: { count?: unknown } }).contentsEntry
+    expect(entry?.count).toMatchObject({ open: 1, total: 2, running: 1 })
+    expect(chips(host)).toEqual({ undone: true, complete: true })
   })
 
   test("a chip per state its items are in, with how many, all solid;  no filter icon;  passes axe", async () => {
@@ -360,67 +390,78 @@ describe("<epic-section> counts and state filter", () => {
     expect(chip(host, "replied").getAttribute("data-color")).toBe("orange")
   })
 
-  test("toggle-all, beside the chevron:  opens everything, then its phases fold, it stays open", async () => {
-    const host = await render(
-      `<epic-section id="phases" kind="phases" open>` +
-        `<epic-phase id="p1" title="One" status="active" open><p>Do it.</p></epic-phase></epic-section>`
-    )
-    await ElementFixture.settle(host)
-    const button = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="tools"] [part~="toggle-all"]')!
-    // last in the title's tools:  beside the chevron
-    expect(button.parentElement!.lastElementChild).toBe(button)
-    // first:  everything opens;  then the same button folds what's inside
-    button.click()
-    await ElementFixture.tick()
-    expect(button.getAttribute("aria-pressed")).toBe("true")
-    button.click()
-    await ElementFixture.tick()
-    const phase = host.querySelector("epic-phase")!
-    expect([host.matches(":state(open)"), phase.matches(":state(open)")]).toEqual([true, false])
-    // folded by hand:  the toggle starts over, opening everything
-    ;(host as FoldHost & { open: boolean }).open = false
-    await ElementFixture.tick()
-    expect(button.getAttribute("aria-pressed")).toBe("false")
-  })
-
-  // Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-  test("toggle-all, folded or open:  one click opens it and everything inside, parts loading", async () => {
+  // epic `epic-engine` I161 (Owen, 2026-10-29:  "holding down option is 'expand all'"):  no toggle-all button in the row
+  test("⌥-click on its chevron, folded:  it and everything inside open, parts loading;  open, all fold again", async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases">` +
         `<epic-phase id="p1" title="One" status="active" source="${FIXTURES}/phase-part.html"></epic-phase>` +
         `<epic-phase id="p2" title="Two" status="todo"><p>Later.</p></epic-phase></epic-section>`
     )
-    await ElementFixture.settle(host)
-    const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
-    // ONE button, last in the title's tools, beside the chevron
-    const expand = tools.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
-    expect([tools.lastElementChild === expand, tools.querySelectorAll('[part~="toggle-all"]').length]).toEqual([
-      true,
-      1
-    ])
-    expect([expand.title, expand.getAttribute("aria-label")]).toEqual([
-      "Open everything in 1. Phases",
-      "Open everything in 1. Phases"
-    ])
+    expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).toBeNull()
+    // the chevron's tooltip says what ⌥ does;  its name stays the label
+    expect(toggle(host).title).toBe("Open this section\n⌥-click:  open everything inside")
     const opened: string[] = []
     host.addEventListener("ui-opening", (event) => opened.push((event.target as Element).id))
-    expand.click()
+    altClick(toggle(host))
     // the phase's part loads, then the item in it opens, then its aside
     await vi.waitFor(() => expect(host.querySelector("epic-aside")?.matches(":state(open)")).toBe(true))
     const phases = Array.from(host.querySelectorAll("epic-phase"))
-    expect([host, ...phases, host.querySelector("epic-item")!].map((each) => each.matches(":state(open)"))).toEqual([
-      true,
-      true,
-      true,
-      true
-    ])
+    const everything = () =>
+      [host, ...phases, host.querySelector("epic-item")!].map((each) => each.matches(":state(open)"))
+    expect(everything()).toEqual([true, true, true, true])
     // each a click's open:  the page remembers the blocks' and items' folds by these
     expect(opened).toEqual(["phases", "p1", "p2", "q7"])
-    // open:  the same button now folds everything inside
     await ElementFixture.tick()
-    const e = expand.getBoundingClientRect()
-    expect([expand.title, e.width, e.height]).toEqual(["Fold everything in 1. Phases", 24, 24])
+    expect(toggle(host).title).toBe("Close this section\n⌥-click:  fold everything inside")
+    // open:  ⌥-click folds everything inside, then itself
+    altClick(toggle(host))
+    await ElementFixture.tick()
+    expect([...everything(), host.querySelector("epic-aside")!.matches(":state(open)")]).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false
+    ])
     await expectAccessible(host)
+  })
+
+  test("⌥+Enter on its focused chevron:  the same as ⌥-click", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p1" title="One" status="active"><p>Do it.</p></epic-phase></epic-section>`
+    )
+    const button = toggle(host)
+    button.focus()
+    await userEvent.keyboard("{Alt>}{Enter}{/Alt}")
+    await ElementFixture.tick()
+    expect([host, host.querySelector("epic-phase")!].map((each) => each.matches(":state(open)"))).toEqual([true, true])
+    await userEvent.keyboard("{Alt>} {/Alt}")
+    await ElementFixture.tick()
+    expect([host, host.querySelector("epic-phase")!].map((each) => each.matches(":state(open)"))).toEqual([
+      false,
+      false
+    ])
+  })
+
+  test("its title row's empty space folds it too, and shows the pointer (I161);  a plain click opens only it", async () => {
+    const host = await render(
+      `<epic-section id="phases" kind="phases">` +
+        `<epic-phase id="p1" title="One" status="active"><p>Do it.</p></epic-phase></epic-section>`
+    )
+    const heading = inner(host).shadowRoot!.querySelector<HTMLElement>('[part~="heading"]')!
+    // the fold button is as wide as what it draws:  the rest of the row is the heading's empty space
+    expect(toggle(host).getBoundingClientRect().right).toBeLessThan(heading.getBoundingClientRect().right - 40)
+    expect([getComputedStyle(heading).cursor, getComputedStyle(toggle(host)).cursor]).toEqual(["pointer", "pointer"])
+    heading.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    await ElementFixture.tick()
+    expect([host.matches(":state(open)"), host.querySelector("epic-phase")!.matches(":state(open)")]).toEqual([
+      true,
+      false
+    ])
+    altClick(heading)
+    await ElementFixture.tick()
+    expect(host.matches(":state(open)")).toBe(false)
   })
 
   test("no Plan changes box above the phases (Owen, 2026-10-11):  an older doc's copies show nowhere", async () => {
@@ -438,7 +479,7 @@ describe("<epic-section> counts and state filter", () => {
 // epic `epic-workflow` P25:  the page's own buttons in the title row, where the docs runtime puts the bullhorn too
 describe("<epic-section> actions slot", () => {
   // P25:  the page's own buttons at the title's end, before its tools and its fold
-  test('`slot="actions"`:  at the title\'s end, BEFORE its tools and the toggle-all;  the chevron at its start;  a click never folds it', async () => {
+  test('`slot="actions"`:  at the title\'s end, BEFORE its tools;  the chevron at its start;  a click never folds it', async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases"><button slot="actions" aria-label="Copy">C</button></epic-section>`
     )
@@ -455,9 +496,6 @@ describe("<epic-section> actions slot", () => {
     toggle(host).click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)
-    // open:  before the toggle-all too
-    const all = host.shadowRoot!.querySelector('[part~="toggle-all"]')!
-    expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(all.getBoundingClientRect().left + 0.5)
     // the slotted button isn't a child:  an item section holding only it still says None yet
     const empty = await render(
       `<epic-section id="todos" kind="todos" open><button slot="actions">C</button></epic-section>`
@@ -496,6 +534,106 @@ function roundedEnds(host: Element): Record<string, string> {
 }
 
 // Owen, 2026-10-24:  "With lists like this, tops and bottoms should always be rounded"
+// epic `epic-engine` I157 (Owen, 2026-10-29):  "In phases header, would be cool to have badges for
+// 'undone|updated|complete' -- e.g. 49 phases in this plan are a lot to scroll past"
+describe("<epic-section kind=phases> state chips", () => {
+  afterEach(() => {
+    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+  })
+
+  /** Phases `p1`, `p2` ... by `specs`:  each its attributes (`status="done"`, `plan="waiting"` ...). */
+  function phases(specs: string[], open: number[] = []): string {
+    const each = specs.map(
+      (spec, at) =>
+        `<epic-phase id="p${at + 1}" title="Phase ${at + 1}" ${spec}${open.includes(at + 1) ? " open" : ""}><p>Body ${at + 1}.</p></epic-phase>`
+    )
+    return `<epic-section id="phases" kind="phases" open>${each.join("")}</epic-section>`
+  }
+
+  /** The ids of `host`'s phases that show. */
+  function shownPhases(host: Element): string[] {
+    return Array.from(host.querySelectorAll("epic-phase"))
+      .filter((phase) => getComputedStyle(phase).display !== "none")
+      .map((phase) => phase.id)
+  }
+
+  test("a chip per state:  done complete;  a plan waiting or changes updated (news wins over undone);  else undone", async () => {
+    const host = await render(
+      phases([
+        `status="done"`,
+        // done:  its old changes are no news (the pen shows only while it isn't done)
+        `status="done" changes="2"`,
+        `status="active"`,
+        `status="todo" plan="waiting"`,
+        `status="todo" plan="accepted" changes="1"`,
+        `status="todo" plan="accepted"`
+      ])
+    )
+    expect(chips(host)).toEqual({ undone: true, updated: true, complete: true })
+    expect(chipButtons(host).map((button) => button.textContent)).toEqual(["2", "2", "2"])
+    expect(chip(host, "updated").getAttribute("data-color")).toBe("orange")
+    // the doc pass never asks for an Accept, as its own buttons don't
+    const docs = await render(
+      `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="Doc Review" status="todo" plan="waiting"></epic-phase></epic-section>`
+    )
+    expect(chips(docs)).toEqual({ undone: true })
+    await expectAccessible(host)
+  })
+
+  test("Owen's rule filters the phases:  only undone hides the rest, says so, marks them, and is remembered", async () => {
+    const host = await render(phases([`status="done"`, `status="done"`, `status="todo"`, `status="todo" changes="1"`]))
+    chip(host, "undone").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ undone: true, updated: false, complete: false })
+    expect(shownPhases(host)).toEqual(["p3"])
+    expect(hiddenNote(host).textContent).toBe("3 hidden · show all")
+    expect(Array.from(host.querySelectorAll("[data-epic-filtered]"), (phase) => phase.id)).toEqual(["p1", "p2", "p4"])
+    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({ phases: ["undone"] })
+    // a phase finished:  it leaves the filter's view as it changes state
+    host.querySelector("#p3")!.setAttribute("status", "done")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual([])
+    hiddenNote(host).click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual(["p1", "p2", "p3", "p4"])
+    expect(host.querySelectorAll("[data-epic-filtered]").length).toBe(0)
+  })
+
+  test("not the page toolbar's:  its `stateFilter` is none, so the toolbar's chips stay the items'", async () => {
+    const host = await render(phases([`status="done"`, `status="todo"`]))
+    expect((host as FoldHost & { stateFilter?: unknown }).stateFilter).toBeUndefined()
+    expect((host as FoldHost & { chipCounts?: string }).chipCounts).toBe("complete:1 undone:1")
+  })
+
+  // EpicSection.runs.css used to step over 2 hidden phases at most
+  test("runs stay right with 40 done phases hidden in a row:  the next one showing after an open one is rounded on top", async () => {
+    const specs = [
+      `status="todo"`,
+      ...Array.from({ length: 40 }, () => `status="done"`),
+      `status="todo"`,
+      `status="todo"`
+    ]
+    const host = await render(phases(specs, [1]))
+    chip(host, "undone").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual(["p1", "p42", "p43"])
+    const ends: Record<string, string> = {}
+    for (const id of ["p1", "p42", "p43"]) {
+      const phase = host.querySelector(`#${id}`)!
+      const section = phase.shadowRoot!.querySelector("ui-section")!
+      const title = getComputedStyle(section.shadowRoot!.querySelector("[part~='title']")!)
+      const top = parseFloat(title.borderTopLeftRadius) > 0
+      const bottom = parseFloat(title.borderBottomLeftRadius) > 0
+      ends[id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
+    }
+    expect(ends).toEqual({ p1: "top bottom", p42: "top", p43: "bottom" })
+  })
+})
+
 describe("<epic-section> runs of item lines, rounded at their ends", () => {
   afterEach(() => {
     localStorage.removeItem(`spell-item-state:${location.pathname}`)

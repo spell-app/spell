@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
+import { UI } from "spell/ui/runtime"
 import { ReviewClient, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-popup"
 import "spell/epic/components/epic-change"
 
 ////////////////
@@ -87,14 +90,30 @@ function part(host: Element, name: string): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>(`[part~="${name}"]`)!
 }
 
+/** `host`'s popup on its words (`<ui-popup>`), and whether it's shown. */
+function popup(host: Element): HTMLElement {
+  return part(host, "popup")
+}
+function isOpen(host: Element): boolean {
+  return popup(host).matches(":popover-open")
+}
+
+/** The popup's text, its spaces collapsed. */
+function popupText(host: Element): string {
+  return popup(host).textContent!.replace(/\s+/g, " ").trim()
+}
+
 /** `host`'s Accept or Reopen button, in its `<epic-review>`'s shadow root;  `null` when not drawn. */
 function button(host: Element, action: "accept" | "reopen"): HTMLElement | null {
   const review = host.shadowRoot!.querySelector("epic-review")
   return review?.shadowRoot?.querySelector<HTMLElement>(`ui-button[data-action="${action}"]`) ?? null
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   routes = new FakeRoutes()
+  await UI.load()
+  // Escape through a keyboard binding rather than `CloseWatcher`, so the test can press it
+  UI.overlays.useCloseWatcher = false
 })
 
 afterEach(() => {
@@ -111,7 +130,8 @@ describe("<epic-change>", () => {
     const words = part(host, "words")
     expect([words.localName, words.querySelector("slot") !== null]).toEqual(["mark", true])
     expect(getComputedStyle(words).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(words.title).toMatch(/^Changed by Q16's answer on \d+\/\d+\/\d+ \d+:\d+$/)
+    // no tooltip:  the popup says it, on a click (I160)
+    expect([words.hasAttribute("title"), isOpen(host)]).toEqual([false, false])
     const chip = part(host, "chip")
     expect([chip.textContent, chip.getAttribute("aria-expanded"), part(host, "qa").hidden]).toEqual([
       "Q16",
@@ -143,7 +163,7 @@ describe("<epic-change>", () => {
       expect(host.matches(":state(quiet)")).toBe(true)
       expect(getComputedStyle(part(host, "words")).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
       expect(part(host, "chip").textContent).toBe("Q16")
-      expect(part(host, "words").title).toMatch(/^Changed by Q16's answer on /)
+      expect(popupText(host)).toMatch(/^Changed by Q16 \(\d+\/\d+\/\d+ \d+:\d+\)$/)
       expect(button(host, "reopen")).toBeNull()
     }
   })
@@ -161,5 +181,60 @@ describe("<epic-change>", () => {
     expect(part(host, "words").hasAttribute("title")).toBe(false)
     reopen.click()
     await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("reopen"))
+  })
+
+  test("I160:  a click on the words opens its popup, a click elsewhere closes it;  no hover", async () => {
+    const host = await render(`<p>Caveats:  ${NEW}.</p>`).then((p) => p.querySelector("epic-change")!)
+    const words = part(host, "words")
+    await userEvent.hover(words)
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    expect(isOpen(host)).toBe(false)
+    await userEvent.click(words)
+    await ElementFixture.settle()
+    expect([isOpen(host), words.getAttribute("aria-expanded")]).toEqual([true, "true"])
+    expect(popupText(host)).toMatch(/^Changed by Q16 \(\d+\/\d+\/\d+ \d+:\d+\)$/)
+    await userEvent.click(document.body, { position: { x: 2, y: 2 } })
+    await ElementFixture.settle()
+    expect(isOpen(host)).toBe(false)
+  })
+
+  test("I160:  the keyboard:  Tab to the words, Enter opens it, Escape closes it", async () => {
+    const host = await render(`<p>${NEW}</p>`).then((p) => p.querySelector("epic-change")!)
+    const words = part(host, "words")
+    expect([words.tabIndex, words.getAttribute("role")]).toEqual([0, "button"])
+    words.focus()
+    await userEvent.keyboard("{Enter}")
+    await ElementFixture.settle()
+    expect(isOpen(host)).toBe(true)
+    await userEvent.keyboard("{Escape}")
+    await ElementFixture.settle()
+    expect(isOpen(host)).toBe(false)
+    await userEvent.keyboard(" ")
+    await ElementFixture.settle()
+    expect(isOpen(host)).toBe(true)
+  })
+
+  test("I160:  `was` shows as Originally, under the line;  Reopen kept while reviewed", async () => {
+    await adoptClient()
+    const host = await render(NEW.replace(` answer=`, ` was="todos stay a list of their own" answer=`))
+    await userEvent.click(part(host, "words"))
+    await ElementFixture.settle()
+    const original = popup(host).querySelector(".original")!
+    expect(original.textContent!.replace(/\s+/g, " ").trim()).toBe("Originally: todos stay a list of their own")
+    expect(original.querySelector("i")!.textContent).toBe("Originally:")
+    expect(button(host, "reopen")).not.toBeNull()
+    await expectAccessible(host)
+  })
+
+  test("I160:  the popup and its arrow are filled alike, and opaque", async () => {
+    const host = await render(`<p>${NEW}</p>`).then((p) => p.querySelector("epic-change")!)
+    await userEvent.click(part(host, "words"))
+    await ElementFixture.settle()
+    const box = popup(host).shadowRoot!.querySelector<HTMLElement>("[part~=popup]")!
+    const body = getComputedStyle(box)
+    const arrow = getComputedStyle(box, "::before")
+    expect(arrow.backgroundColor).toBe(body.backgroundColor)
+    expect(body.backgroundColor).not.toMatch(/^rgba\(.*, 0(\.\d+)?\)$|^transparent$/)
+    expect(body.backdropFilter).toBe("none")
   })
 })

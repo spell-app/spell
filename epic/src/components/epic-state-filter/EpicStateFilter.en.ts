@@ -20,7 +20,7 @@ export const epicStateFilterVocabulary = {
   noun: "state-filter",
   ui: false,
   description:
-    "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill " +
+    "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill " +
     "per state the items are in, in the state's colour, with how many;  solid while that state's items show, " +
     "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
@@ -32,7 +32,8 @@ export const epicStateFilterVocabulary = {
       kind: "string",
       description:
         "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state " +
-        "with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+        "with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The " +
+        "Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
     },
     {
       name: "marked",

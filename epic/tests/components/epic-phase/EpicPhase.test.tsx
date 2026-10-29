@@ -456,26 +456,78 @@ describe("<epic-phase> title, folded and open", () => {
   })
 })
 
-// Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"
-describe("<epic-phase> toggle-all", () => {
-  test("folded or open, last before the chevron;  a click opens the phase and its items, the next folds them", async () => {
+// epic `epic-engine` I161 (Owen, 2026-10-29:  "holding down option is 'expand all'"):  no toggle-all in the row
+describe("<epic-phase> ⌥-click", () => {
+  test("⌥-click on its chevron opens the phase and its items;  again, folds them and it", async () => {
     const host = await ElementFixture.render<E.DOMElement>(
       `<epic-phase id="p2" title="Two" status="todo"><epic-item id="t1" title="Do it" status="open"><p>How.</p>` +
         `</epic-item></epic-phase>`
     )
     await inner(host).ready
     await ElementFixture.settle(host)
-    const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
-    const expand = tools.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
-    expect([tools.lastElementChild === expand, expand.title]).toEqual([true, "Open everything in P1 · Two"])
-    expand.click()
+    expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).toBeNull()
+    const toggle = inner(host).shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle"]')!
+    const altClick = () =>
+      toggle.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
+    altClick()
     await vi.waitFor(() => expect(host.querySelector("epic-item")!.matches(":state(open)")).toBe(true))
     expect(host.matches(":state(open)")).toBe(true)
+    altClick()
     await ElementFixture.tick()
-    // one button:  still last, now folding everything inside
-    expect([tools.lastElementChild === expand, expand.title]).toEqual([true, "Fold everything in P1 · Two"])
-    expand.click()
-    await vi.waitFor(() => expect(host.querySelector("epic-item")!.matches(":state(open)")).toBe(false))
-    expect(host.matches(":state(open)")).toBe(true)
+    expect([host.matches(":state(open)"), host.querySelector("epic-item")!.matches(":state(open)")]).toEqual([
+      false,
+      false
+    ])
+  })
+})
+
+// epic `epic-engine` I161 (Owen, 2026-10-29:  "Should show pointer when over content in these headers, drag cursor when
+// over whitespace")
+describe("<epic-phase> its title row's cursors", () => {
+  /** The cursor over each piece of `phase`'s title row. */
+  function cursors(phase: Element) {
+    const section = inner(phase).shadowRoot!
+    const at = (selector: string, root: ParentNode = section) => getComputedStyle(root.querySelector(selector)!).cursor
+    return {
+      space: at('[part~="heading"]'),
+      row: at('[part~="title"]'),
+      chevron: at('[part~="toggle"]'),
+      time: at('[part~="estimate"]', phase.shadowRoot!)
+    }
+  }
+
+  test("a to-do phase on a reviewed page:  grab over the empty space, the pointer over its content", async () => {
+    await adoptWorking([])
+    try {
+      const section = await render(
+        `<epic-section id="phases" kind="phases">` +
+          `<epic-phase id="p-todo" title="Send Countdown" status="todo" estimate="4-6h"></epic-phase>` +
+          `<epic-phase id="p-done" title="Built" status="done" estimate="2h"></epic-phase></epic-section>`
+      )
+      const todo = section.querySelector("#p-todo")!
+      await vi.waitFor(() => expect(todo.matches(":state(movable)")).toBe(true))
+      expect(cursors(todo)).toEqual({ space: "grab", row: "grab", chevron: "pointer", time: "pointer" })
+      // done:  it never drags, and a click on its empty space folds it:  the pointer all over
+      expect(cursors(section.querySelector("#p-done")!)).toEqual({
+        space: "pointer",
+        row: "pointer",
+        chevron: "pointer",
+        time: "pointer"
+      })
+      // while a phase is dragged (`PhaseDrag` marks every phase):  grabbing, wherever the pointer is
+      todo.setAttribute("data-dragging", "")
+      expect(cursors(todo)).toEqual({ space: "grabbing", row: "grabbing", chevron: "grabbing", time: "grabbing" })
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
+  })
+
+  test("not reviewed:  the pointer all over, as a click anywhere on the row folds it", async () => {
+    const host = await ElementFixture.render<E.DOMElement>(
+      `<epic-phase id="p3" title="Three" status="todo" estimate="1h"></epic-phase>`
+    )
+    await inner(host).ready
+    await ElementFixture.settle(host)
+    expect(cursors(host)).toEqual({ space: "pointer", row: "pointer", chevron: "pointer", time: "pointer" })
   })
 })

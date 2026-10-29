@@ -14,7 +14,12 @@ describe("Solitaire project", () => {
   const files = loadFixtureProject("Solitaire")
 
   test("loads files in import order", () => {
-    expect(files.map(({ path }) => path)).toEqual(["/Card.spellml", "/Deck.spellml", "/Pile.spellml", "/Solitaire.spellml"])
+    expect(files.map(({ path }) => path)).toEqual([
+      "/Card.spellml",
+      "/Deck.spellml",
+      "/Pile.spellml",
+      "/Solitaire.spellml"
+    ])
   })
 
   test("parses the same way every time", () => {

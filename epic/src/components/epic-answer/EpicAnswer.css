@@ -46,7 +46,10 @@
    *   the head ends the frame
    */
   :host(:state(in-thread)) {
-    --_epic-thread-rule: var(--epic-thread-rule, var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b))));
+    --_epic-thread-rule: var(
+      --epic-thread-rule,
+      var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)))
+    );
     margin-top: 0;
   }
   :host(:state(thread-start)) {
@@ -148,21 +151,28 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  /* who said it:  a small round mark with their initial, before their name (`--_epic-who-mark`, `--_epic-who-initial`) */
+  /* who said it:  their initial before their name, drawn as an item's id chip (`T1`, I165:  "(c) should be same
+     styling as a T1 etc, no?"), in the speaker's colour (`--_epic-who-mark`, `--_epic-who-initial`)
+     - the item chip's shared tokens (`--epic-chip-height`, `--epic-chip-font-size`, `EpicItem.css`):
+       a pill, mono 600, its letters trimmed to the capitals and centred both ways
+     - the band's type is smaller than an item line's (11.5px to 13.8px, measured in an item's details):
+       the chip scaled back up by that, so it's the item's chip's size (11px type, 17.7px tall) */
   .reply .who::before {
+    --_epic-who-chip-size: calc(var(--epic-chip-font-size, 0.8em) * 1.2);
+    --_epic-who-chip-height: var(--epic-chip-height, 1.6em);
     content: var(--_epic-who-initial, "C");
-    display: inline-grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 3.1em;
     margin-inline-end: 6px;
-    border-radius: 50%;
+    padding: calc((var(--_epic-who-chip-height) - 1cap) / 2) 0.6em;
+    text-align: center;
+    text-box: trim-both cap alphabetic;
+    border-radius: 999px;
     background: var(--_epic-who-mark);
     color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-    vertical-align: 1px;
+    font: 600 var(--_epic-who-chip-size) / 1 var(--ui-font-family-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    letter-spacing: 0.02em;
   }
   /* the fold chevron close to the avatar (I152:  "Too much space between collapse arrow and O avatar"):
      back over the band's 12px column gap (kept for the date), so the chevron's stroke sits ~6px from the mark */

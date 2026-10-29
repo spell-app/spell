@@ -24,6 +24,7 @@
 ```
 
 That's a `.spellml` file:  a Spell template, one tag per thing it declares, and prose between them.
+(Its old ending, `.spellx`, still opens, compiles and colours the same, everywhere a `.spellml` file does.)
 It compiles to exactly the program its plain Spell twin does, because Spell's own parser reads it:
 each tag line is read as the line of plain Spell it stands for.
 

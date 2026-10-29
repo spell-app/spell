@@ -1,6 +1,6 @@
 {
   "name": "spell",
-  "version": "0.8.0",
+  "version": "0.8.6",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
@@ -1162,8 +1162,8 @@
     "kit:test": "vp test run",
     "kit:lint": "vp lint --report-unused-disable-directives --max-warnings 0 src bin scripts tools tests vite.config.ts vitest.config.ts",
     "kit:lint:fix": "vp lint --fix src bin scripts tools tests vite.config.ts vitest.config.ts",
-    "kit:format": "vp fmt .",
-    "kit:format:check": "vp fmt --check .",
+    "kit:format": "vp fmt src bin scripts tools tests vite.config.ts vitest.config.ts package.json tsconfig.json tsconfig.node.json tsconfig.tsx.json repos.json5 .yarnrc.yml .github .epic .claude-plugin",
+    "kit:format:check": "vp fmt src bin scripts tools tests vite.config.ts vitest.config.ts package.json tsconfig.json tsconfig.node.json tsconfig.tsx.json repos.json5 .yarnrc.yml .github .epic .claude-plugin --check",
     "kit:review": "yarn kit:ts && yarn kit:lint:fix && yarn kit:format && yarn kit:test && echo '== REVIEW PASSED\n===========\n'",
     "/////// THE spell COMMAND (src/cli/, bin/spell.mjs)": "",
     "spell": "node bin/spell.mjs",

@@ -7,7 +7,7 @@
     <title>epic-change</title>
     <meta
       name="description"
-      content="The &lt;epic-change&gt; element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&amp;A chip, Accept and Reopen."
+      content="The &lt;epic-change&gt; element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&amp;A chip;  a click on the words opens a popup:  which answer, when, the words it replaced, Reopen."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -42,7 +42,7 @@
             &lt;epic-change&gt;
             <ui-header
               >The &lt;epic-change&gt; element: words an answer changed, marked in the text, with the question's folded
-              chip, Accept and Reopen.</ui-header
+              chip, and a popup on a click.</ui-header
             >
           </ui-header>
         </ui-container>
@@ -52,8 +52,8 @@
         <article class="site-article">
           <p class="lede">
             A change mark: when an answer rewrites the Overview or a phase, the changed or new words show on an orange
-            ground, with a small chip naming the question that changed them. Accept clears the orange and keeps the chip
-            for good; Reopen opens the question again.
+            ground, with a small chip naming the question that changed them. A click on the words opens a popup: which
+            answer changed them and when, the words they replaced, and Reopen, which opens the question again.
           </p>
           <p class="meta">
             For anyone reading or writing an epic page's markup, or changing this element.<br />
@@ -79,12 +79,18 @@
           <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>
-              A paragraph with two marks, as an Overview holds them after an answer. The first waits for Owen's Accept;
-              the second he accepted, so only its chip is left. Click a chip to unfold its question and answer.
+              A paragraph with two marks, as an Overview holds them after an answer. The first is quiet now, older than 3
+              days; the second was accepted on a page from before. Click the words for their popup, a chip to unfold its
+              question and answer.
             </p>
             <p>
               Caveats and todos were two sections. Now there is
-              <epic-change id="ch1" item="q16" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it"
+              <epic-change
+                id="ch1"
+                item="q16"
+                at="2026-10-24 15:10"
+                answer="One list, Caveats;  todos fold into it"
+                was="a Caveats list and a Todo list"
                 >one list, Caveats, and todos fold into it</epic-change
               >, and tests take the letter
               <epic-change
@@ -99,7 +105,7 @@
             <p class="meta">
               Live: the real element, drawn by the epics pack this page loads (the main checkout's, until this change
               merges). On an epic page, the question's title comes from the page too; here there is no Q16, so only the
-              answer shows. Accept and Reopen show only on an epic page being reviewed.
+              answer shows. Reopen shows only on an epic page being reviewed, while the change is new (3 days).
             </p>
           </ui-section>
 
@@ -123,11 +129,12 @@
               </ui-content>
             </ui-accordion>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>after the tool's next write:  stamped · 3 lines</ui-title>
+              <ui-title>after the tool's next write:  stamped, with the words it replaced · 4 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
                     <epic-change item="q16" id="ch1" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it"
+                      was="a Caveats list and a Todo list"
                       >one list, Caveats, and todos fold into it</epic-change
                     >
                   </script></ui-code
@@ -192,13 +199,13 @@
                   <tr>
                     <td><code>id</code></td>
                     <td><code>ch1</code>, <code>ch2</code> ...</td>
-                    <td>Its Accept and Reopen marks' key, and a link's target. None: no buttons yet.</td>
+                    <td>Its Reopen mark's key, and a link's target. None: no button yet.</td>
                     <td>the tool, on its next write</td>
                   </tr>
                   <tr>
                     <td><code>at</code></td>
                     <td>a time (<code>2026-10-24 15:10</code>)</td>
-                    <td>When the words changed: the words' tooltip.</td>
+                    <td>When the words changed: the popup's first line, "Changed by Q16 (10/24/26 15:10)".</td>
                     <td>the tool, when missing</td>
                   </tr>
                   <tr>
@@ -211,10 +218,22 @@
                     <td>the tool, once the question has one</td>
                   </tr>
                   <tr>
+                    <td><code>was</code></td>
+                    <td>plain text</td>
+                    <td>
+                      The words it replaced: the popup's "Originally". None: new words, or a mark from before
+                      2026-10-29 (epic <code>epic-engine</code> I160).
+                    </td>
+                    <td>
+                      the tool, as it stamps the mark:  it finds them in the page as it was, on disk, else its last
+                      commits
+                    </td>
+                  </tr>
+                  <tr>
                     <td><code>accepted</code></td>
                     <td>a time</td>
-                    <td>Owen accepted it: no orange, the chip stays.</td>
-                    <td><code>epic inbox apply</code></td>
+                    <td>Accepted on a page from before changes needed no approval: no orange, the chip stays.</td>
+                    <td><code>epic inbox apply</code>, for an old Accept mark</td>
                   </tr>
                 </tbody>
               </table>
@@ -235,7 +254,10 @@
                     </tr>
                     <tr>
                       <td><code>words</code></td>
-                      <td>The changed words, a <code>&lt;mark&gt;</code>: orange until accepted.</td>
+                      <td>
+                        The changed words, a <code>&lt;mark&gt;</code>: orange while new (3 days). A click, Enter or Space
+                        opens the popup.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>chip</code></td>
@@ -246,12 +268,16 @@
                       <td>The question's title and answer, after the chip, while unfolded.</td>
                     </tr>
                     <tr>
-                      <td><code>buttons</code></td>
-                      <td>Accept and Reopen, under the chip on hover or focus, while reviewed.</td>
+                      <td><code>popup</code></td>
+                      <td>
+                        The words' popup, a <code>&lt;ui-popup&gt;</code>: which answer changed them and when,
+                        "Originally" and the words they replaced, and Reopen while reviewed and new. A click elsewhere or
+                        Escape closes it.
+                      </td>
                     </tr>
                     <tr>
-                      <td><code>:state(accepted)</code></td>
-                      <td>Owen accepted it.</td>
+                      <td><code>:state(quiet)</code></td>
+                      <td>No longer new (3 days), or accepted before: no orange, the chip muted.</td>
                     </tr>
                     <tr>
                       <td><code>:state(open)</code></td>
@@ -274,10 +300,15 @@
                 >, "Colours").
               </li>
               <li>The words: an orange ground behind the text, wrapping with the line, each line's piece rounded.</li>
-              <li>The chip: small mono capitals in an orange outline; accepted, grey and muted.</li>
+              <li>The chip: small mono capitals in an orange outline; quiet, grey and muted.</li>
               <li>
-                Accept (green tick) and Reopen (blue) float just under the chip on hover or keyboard focus, and while
-                it's unfolded (a phone has no hover): out of the line, so nothing in the paragraph moves.
+                A click on the words (never a hover;  Owen, 2026-10-29) opens the popup under them, its arrow at them:
+                "Changed by Q16 (10/24/26 15:10)", then "<i>Originally:</i> the words it replaced", then Reopen (blue)
+                while the page is reviewed and the change new. A click elsewhere or Escape closes it.
+              </li>
+              <li>
+                The popup is opaque, the page's own colour, its arrow the same:  a theme's glass blurs only behind the
+                box, never behind its arrow, which then showed the text under it.
               </li>
               <li>Unfolded, the question and answer follow the chip in the line, smaller and muted.</li>
               <li>
@@ -296,20 +327,20 @@
                 hands a command.
               </li>
               <li>
-                <code>epic change &lt;epic&gt; [--for q16]</code> stamps them (id, time, answer) and lists the ones
-                waiting; any other <code>epic</code> edit stamps them too. <code>--for</code> names the marks written
+                <code>epic change &lt;epic&gt; [--for q16]</code> stamps them (id, time, answer, the words they
+                replaced) and lists the ones waiting; any other <code>epic</code> edit stamps them too. <code>--for</code> names the marks written
                 with no <code>item</code>.
               </li>
               <li>
-                Accept and Reopen are marks in the page's inbox, under the mark's id; <code>epic inbox apply</code>
-                makes an Accept <code>accepted</code>, and reopens the question for a Reopen.
+                Reopen is a mark in the page's inbox, under the mark's id; <code>epic inbox apply</code> reopens the
+                question (an old Accept mark makes it <code>accepted</code>).
               </li>
             </ul>
           </ui-section>
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-10-24 against branch <code>epic-engine</code>.</p>
+            <p class="meta">Last checked 2026-10-29 against branch <code>epic-engine</code>.</p>
           </footer>
         </article>
       </ui-container>

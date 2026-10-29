@@ -96,7 +96,9 @@ describe("edits", () => {
   test("moved() swaps a chunk with the one before it, prose left in place", () => {
     const cells = NotebookCells.of(CARD, "/Card.spellml")
     const text = NotebookCells.moved(CARD, cells, chunk(CARD, "color"), "up")
-    const titles = NotebookCells.of(text, "/Card.spellml").flatMap((cell) => (cell.kind === "chunk" ? [cell.title] : []))
+    const titles = NotebookCells.of(text, "/Card.spellml").flatMap((cell) =>
+      cell.kind === "chunk" ? [cell.title] : []
+    )
     expect(titles).toEqual(["card", "color", "suit", "is red", "turn it over"])
     expect(text).toContain("A card has a suit.")
   })

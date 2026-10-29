@@ -550,6 +550,11 @@ export type PlanMark = {
   stage?: string
   /** a phase dragged to another place (`action: "move"`, epic `epic-engine` P34):  its new number */
   to?: number
+  /**
+   * Owen's comments in the part's text (`c4` ...):  a revisit's content (epic `epic-engine` I140);  an approve's, to
+   * fold into the plan, still approved (I163)
+   */
+  comments?: string[]
   /** when Owen made the mark (ISO) */
   at?: string
 }

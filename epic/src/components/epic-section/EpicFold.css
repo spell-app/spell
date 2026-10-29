@@ -129,8 +129,23 @@
     align-items: flex-start;
     letter-spacing: -0.012em;
   }
+  /*
+   * the fold button as wide as what it draws (chevron, icon, title), not the whole row:  so the row's CURSORS can
+   * differ (epic `epic-engine` I161;  Owen, 2026-10-29:  "pointer when over content in these headers, drag cursor when
+   * over whitespace")
+   * - over the chevron, icon, title, badge and buttons:  the pointer
+   * - over the empty space:  the pointer too, as a click there still folds (`EpicFold.onTitleRowClick()`);  a to-do
+   *   phase on a reviewed page, the grab cursor, where it drags (`EpicPhase.css`)
+   */
   ui-section::part(toggle) {
     align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+  }
+  ui-section::part(title),
+  ui-section::part(badge),
+  ui-section::part(actions) {
+    cursor: pointer;
   }
   /*
    * Everything in the title row sits on the title's FIRST line, centred on it, however many lines the title wraps to:

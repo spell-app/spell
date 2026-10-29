@@ -92,6 +92,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - NEVER in front of the reader (epic `epic-engine` I116):  a page in view shows an "Updated:  reload" pill, and
         reloads the moment it's out of sight (`visibilitychange`), or on a click;  one out of sight reloads at once.
       - A file rewritten with the same contents (a rebuilt bundle, a `touch`) isn't reported at all (`LiveReload`).
+      - Drawn with no flash (epic `epic-engine` I164;  Owen, 2026-10-29:  "use a page transition to redraw without visual
+        flash"):  the reload is a replace navigation to the page itself, which Chromium runs a cross-document view
+        transition for (never for `location.reload()`), and the new page waits behind the old one until it's ready
+        (`holdReveal()`, inline in every served page's `<head>`), then cross-fades in, 150ms
+        - ready:  the page says so (`SPELL_SERVER.reveal()`:  the docs runtime once landed and themed), after what it
+          asked to wait for (`revealAfter()`:  Spell UI's site, its layout), and its `<ui-root>`s are ready;
+          at most 2.5s;  no fade under `prefers-reduced-motion`
+        - every other navigation (a link, back) skips the transition:  as before
+        - measured on an epic page:  a white frame, ~150ms of bare background, the page at its top, then the place;
+          now none of those frames
     - A worktree's pages on the main server (`/worktrees/<w>/`):
       epics' `RunningEpics` reports that worktree's docs assets and packs too.
       - It reports them as `/.claude/worktrees/<w>/...`, the path the live client reads them under (`servedPath()`).
@@ -293,6 +303,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a planner over ANY keyed tree (`PatchTree`:  the DOM is one;  a Spell notebook's chunks another), its steps a
         list (`PatchStep`:  text, attribute, replace, remove, insert, move), their nodes named by place
         (`#p-x/section[2]/p[3]/text()[1]`);  a runner that applies them to the live DOM
+      - `redraw()`:  a page's patch as ONE short cross-fade (`crossFade()`, a same-document view transition) when it
+        changes what's on screen;  straight in when it's off screen, motion is reduced or a field has the focus
+        (epic `epic-engine` I164);  a part's body swapped in goes through `crossFade()` too
       - plain DOM, no imports:  any page's bundle takes it;  its class docstring has the rules
     - the site header every page shows
       - its TABS are data (`SiteTab`, epic `repo-split` I4):  it names no site's parts

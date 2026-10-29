@@ -123,6 +123,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *     a review button, a note box button, a Choose pill (Owen, 2026-10-10:  "collapse the item", so he moves on)
  *   - no collapse-all of its own (Owen, 2026-10-25:  "I don't like the 'collapse all' chevron here moving the buttons
  *     over ... lose it entirely");  the page's collapse-all folds the item and everything in it (`collapse()`)
+ *   - ⌥-click (Alt-click) on its chevron or line:  it and everything in it open, or fold (`Fold.toggleFrom()`, I161)
  * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
  *   - into its LIGHT children, replacing the placeholder;  `ui-loaded` then
  *   - from `file://` it can't load:  the `Loads from ... (needs the page server)` note, as today

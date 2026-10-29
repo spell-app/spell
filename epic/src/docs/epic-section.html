@@ -144,12 +144,14 @@
               <ul>
                 <li>
                   They sit after the title, before its tools (the Phases toggles, an item section's state filter, an
-                  Overview sub-section's review buttons), expand-all, collapse-all and the fold chevron.
+                  Overview sub-section's review buttons); the fold chevron is at the row's start.
                 </li>
                 <li>
-                  Expand-all, the double chevron pointing down, shows folded or open: it opens the block and everything
-                  in it (sections, phases, items, asides and cards), parts loading as they open. Collapse-all shows
-                  beside it while it's open.
+                  ⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and
+                  everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open
+                  one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row
+                  has no expand-all or collapse-all button of its own (epic <code>epic-engine</code> I161): the page's
+                  toolbar keeps one.
                 </li>
                 <li>A click on one never folds or unfolds it.</li>
                 <li>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</li>

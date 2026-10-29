@@ -491,13 +491,33 @@ const GLOB_CALL = /import\.meta\.glob\s*(?:<[^()]*>)?\s*\(/g
 /** `import.meta.glob()`'s options this build knows. */
 type GlobOptions = { eager?: boolean; query?: string; import?: string }
 
-/** Where the parenthesis opened just before `from` closes, strings skipped;  `path` names the file in an error. */
+/**
+ * Where the parenthesis opened just before `from` closes, strings and comments skipped;  `path` names the file in an
+ * error.
+ * - Comments are skipped so an apostrophe in one (`// a family's other files`) isn't read as a string's start:
+ *   that string never closed, and the search started over from the top, forever (epic `repo-split` P22).
+ */
 function closingParen(code: string, from: number, path: string): number {
   let depth = 1
   for (let at = from; at < code.length; at++) {
     const char = code[at]
+    const skipTo = (end: number) => {
+      if (end < 0)
+        throw new SyntaxError(
+          `PackageBuild:  an import.meta.glob() in ${path} has a string or comment that never closes`
+        )
+      return end
+    }
+    if (char === "/" && code[at + 1] === "/") {
+      at = skipTo(code.indexOf("\n", at))
+      continue
+    }
+    if (char === "/" && code[at + 1] === "*") {
+      at = skipTo(code.indexOf("*/", at + 2)) + 1
+      continue
+    }
     if (char === '"' || char === "'" || char === "`") {
-      at = code.indexOf(char, at + 1)
+      at = skipTo(code.indexOf(char, at + 1))
       continue
     }
     if (char === "(") depth++

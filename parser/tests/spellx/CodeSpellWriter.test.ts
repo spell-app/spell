@@ -45,7 +45,8 @@ describe("CodeSpellWriter", () => {
   })
 
   test("the language's example word stays an example, though a pack has a component by that name (`<ui-example>`)", () => {
-    const text = '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
+    const text =
+      '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
     const written = SX.CodeSpellWriter.write(text, {
       componentTag: (word) => (word === "example" ? "ui-example" : word === "text" ? "ui-text" : undefined)
     })
@@ -55,7 +56,8 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a paragraph's blank line stays:  its line break (Owen, 2026-10-27)", () => {
-    const text = '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
+    const text =
+      '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
     const written = SX.CodeSpellWriter.write(text, {
       componentTag: (word) => (word === "text" ? "ui-text" : undefined)
     })

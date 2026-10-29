@@ -97,9 +97,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a section's badge and tools stay beside its title while the title fits on one line beside them;  only when it
         doesn't (the side bar, a phone) do they wrap, together, onto a row of their own at its end (epic `epic-engine`
         I149:  under 480px they always did before)
-      - collapse-all still shows only while open, before the chevron, as it did:  it moves the buttons before it
-      - expand-all (a fold's:  the Overview, a section, a phase;  Owen, 2026-10-20) shows folded or open, just before
-        collapse-all:  it opens the block and everything in it, cards too, parts loading as they open (`expandAll()`)
+      - no expand-all or collapse-all button in a title row (epic `epic-engine` I161;  Owen, 2026-10-29:  "combine the
+        'expand/collapse all' with the normal disclosure triangle -- holding down option is 'expand all'"):
+        - ⌥-click (Alt-click) on any fold's chevron or title, or ⌥+Enter / ⌥+Space on its focused chevron, opens it and
+          everything in it, cards too, parts loading as they open (`expandAll()`);  on an open one, folds everything
+          in it, then itself (`Fold.toggleFrom()`, `EpicFold.toggleDeep()`)
+        - every chevron's tooltip ends with what ⌥-click does (`DEEP_TIPS`;  `<ui-section>`'s `toggleTipMore`)
+        - the Log stays folded under it, as under the page's expand-all (`staysFolded`, I155)
+        - the page toolbar keeps its one toggle-all (`Fold.toggleAllButton()`):  it has no chevron to hold
+      - its cursors (I161;  Owen:  "pointer when over content in these headers, drag cursor when over whitespace"):
+        the fold button is only as wide as its chevron, icon and title;  the pointer over those, the badge and the
+        buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`), but the grab
+        cursor on a to-do phase while the page is reviewed (`PhaseDrag`), grabbing while one is dragged
       - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
       - NOT `<ui-section>` on guides:  at phone width a title there still runs on under its buttons,
         fading out (`spell-doc.css`;  Owen, 2026-10-10:  "stay in place and overlap")
@@ -148,7 +157,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - the Overview's keyed `summary`, on its title row (epic `epic-engine` I55):
             `<epic-summary>` drew them under its lede before
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
-        its own `<epic-review buttons="change">` in a tooltip on its words
+        its own `<epic-review buttons="change">` in the popup a click on its words opens (I160)
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
@@ -257,6 +266,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main
           checkout)
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
+    - the kit after epic `repo-split` P20 · One Repo (epic `epic-engine` P49):
+      - `peers`:  the repos BESIDE it, its `repos.json5`'s `"peer": true` entries (spell-brand), never part of an
+        epic's worktree;  `epic config peers` prints them, and `/worktrees` lists their own worktrees
+      - `kit`:  a peer's settings name the kit, `{ "top": "../spell" }`:  it takes the kit's content folder, windows
+        and voices, and keeps its own worktrees (`../<repo>.worktrees/`) and install;  a warning when the kit doesn't
+        list it as a peer
+      - `oldLayout`:  a worktree cut before P20, with a worktree of an old child repo still inside it
+        (`foundCheckouts()`);  `leftBehind()` is one holding work not crossed over yet (`isCrossed()`, by the commit
+        maps):  removal and `epic merge` refuse it, `epic worktree merge-main` runs the carry-on command
+        (`spell rename branches`) after merging `main`;  to delete once none is left ([the code-debt log](../../agents/CODE-DEBT.md))
     - a repo MOVED behind compat links (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
       - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:
         an unrepaired worktree's `.git` file names the OLD one
@@ -1214,6 +1233,9 @@ In `tools/`:
     - Its `<epic-*>` blocks start folded by themselves.
       - The runtime reopens the ones the reader left open, before they first draw (`restoreEpicFolds()`).
       - It saves their toggles as a section's.
+      - EXCEPT the Log, which starts folded on EVERY load, a live reload's too, and which the page's expand-all
+        leaves folded (`STAYS_FOLDED`, `EpicSection.staysFolded`;  Owen, 2026-10-29, epic `epic-engine` I155):
+        a link into it, a click and its own expand-all still open it.
     - Below the last line, a window's worth of empty ground (`--spell-doc-pad-end`, on `.spell-doc-main`):
       so folding near the page's end never leaves the page shorter than where it's scrolled to,
       and what was clicked stays put (Owen, 2026-10-10, `airplane` J10).
@@ -1274,6 +1296,9 @@ In `tools/`:
     - The patch is the kit's ONE patcher (`PagePatch`, `spell/server/site`;  epic `epic-engine` P40), with this
       runtime's rules (`patcher`):  a list of small steps, text edited in place;  the page comes with the change.
     - Scroll, folds, open panels and typed text stay.
+    - Shown as ONE short cross-fade when it changes what's on screen (`patcher.redraw()`, the kit's `PagePatch.crossFade()`;
+      epic `epic-engine` I164):  never a half-drawn frame;  straight in when it's off screen, motion is reduced, or a
+      field has the focus.
     - Anything the runtime adds inside `main` must carry `data-spell-added`, so the patch steps around it.
     - Pages with scripts of their own still reload.
       Inert data blocks (`<script type="text/plain">`) don't count.
@@ -1288,6 +1313,9 @@ In `tools/`:
       - every fold open before it, items and a link's unfolds too:
         this runtime keeps them as the page goes (`keepFoldsForReload()`, `sessionStorage`)
       - a half-written note (the review inbox's drafts) and comment drafts (`localStorage`)
+    - with no flash (epic `epic-engine` I164):  the new page waits behind the old one (the kit's `holdReveal()`, a
+      cross-document view transition) until this runtime has landed and the page wears its theme
+      (`SpellUI.themed`), then cross-fades in:  `SPELL_SERVER.reveal()`
     - not while you type in a field:  an "Updated:  reload" pill waits, and it reloads once you leave the field
     - so a merge's new widgets show up by themselves:  VS Code's window needs reloading only when the EXTENSION changes
     - `<body>`'s attributes are patched too.
@@ -1299,6 +1327,8 @@ In `tools/`:
     - an epic page's `<epic-*>` blocks and items:  a split epic page's parts (`wireSourceBodies()`)
     - The patch leaves what a host loaded alone.
     - A changed body file (the live client's `spell-server:changed`) re-fetches its open host in place.
+      - the old body stays up until the new one is in, then one short cross-fade (`PagePatch.crossFade()`, at most
+        `BODY_WAIT_MS`), when the host is on screen
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
@@ -1566,7 +1596,30 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - which comments:  those waiting for Claude whose anchor is the part's (`<id>` or `<id>#<kind>-<n>`), from the
       routes' `waitingComments`
     - `wait` prints them under the revisit, its content (`takeWork()`'s `inlineComments`);  `inbox` names them
+      - never on their own too:  `takeWork()`'s `comments` leaves out the ones a sent revisit carries (I158)
     - NOT the phase's orange pen:  that counts its plan changes (`changes`, `<epic-update>` blocks)
+  - A COMMENT SAVED IN A PART'S TEXT presses its Revisit by itself (epic `epic-engine` I158;  Owen, 2026-10-29:
+    "When I add a comment to a phase, it should show as `revisit` automatically")
+    - the comments route does it as it saves the comment, under the inbox's lock (`ReviewInbox.noteComment()`):
+      the docs runtime writes comments, so the review client never sees one saved;  the page reads the new mark
+    - a new comment (or one put back, Undo) whose anchor lies in an item, a phase or an Overview part (`partOf()`,
+      `itemIds()`):
+      - no mark yet:  the revisit above, `{ action: "revisit", when: "soon", note: "see my comments in its text:  C4",
+        comments: ["c4"] }`
+      - a revisit:  the comment joins its `comments`, its note's last line names them all (`withInlineComments()`)
+      - a pick:  that revisit, carrying the pick ("pick B, but ...")
+      - an Approve / Accept plan:  still approved, the comment joining its `comments` (epic `epic-engine` I163)
+      - any other mark (Make Todo, a revisit asked now):  left alone
+    - APPROVE on such a revisit (Approve, Accept Phase, Accept plan;  epic `epic-engine` I163;  Owen, 2026-10-29:  "just
+      incorporate the feedback and auto-approve rather than asking me again") keeps them (`ReviewClient.press()`):
+      `{ action: "approve", note, comments }`;  clicked again, the revisit again
+      - `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan, the comments
+        left waiting;  Claude folds them in with `update <name>#P<n> --plan ... --accepted` (written accepted, no
+        second Accept) and answers each
+    - deleted or cleared (`dropComment()`):  out of every revisit naming it;  nothing left in one (no comment, no words
+      of Owen's):  a pick goes back to the plain pick, else the mark goes
+    - Send counts one mark and the comment;  `wait` hands the comment over once, inside the revisit
+    - the page header, the Overview as a whole, a guide:  nothing new
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
@@ -1982,6 +2035,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - the bullhorn (a green check circle once done)
       - its id, `C3`:  small and muted, an outline and no fill (epic `epic-workflow` P23;  `M3` until `epic-engine` P44)
       - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  its tooltip the full place
+        - a saved thread's header:  the start of Owen's own words instead (I162):  the page highlights what was selected
       - No date:  each message has its time.
     - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
       ("same semantics/look as pills in item header").

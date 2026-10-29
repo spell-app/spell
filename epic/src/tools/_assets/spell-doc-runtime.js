@@ -95,6 +95,7 @@ import {
   growField,
   noteToast,
   readJSON,
+  restoreEpicFolds,
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
@@ -160,6 +161,12 @@ const FOLD_HOLD_MS = 600
  * and their parts load.
  */
 const RESTORE_HOLD_MS = 1500
+
+/**
+ * How long a part's body swapped in may hold the old one on screen, in ms (`reloadBody()`'s cross-fade):  the page
+ * shows the old frame meanwhile, and takes no clicks
+ */
+const BODY_WAIT_MS = 1000
 
 /** What the reader does that stops the page landing by itself:  he's moving it. */
 const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"]
@@ -293,7 +300,10 @@ async function start() {
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
   if (main.querySelector("epic-page")) {
-    restoreEpicFolds(main, kept)
+    restoreEpicFolds(main.querySelectorAll(kept ? EPIC_OPENERS : EPIC_FOLDS), {
+      saved: readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`),
+      kept
+    })
     await epicsDrawn(main)
   }
   const outline = outlineOf(main)
@@ -325,6 +335,8 @@ async function start() {
   await nextFrame(2)
   sticky.measure()
   land(landing, jump, follow)
+  // a live reload held the new page behind the old one until now:  it cross-fades in, landed and themed (I164)
+  void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
   void wireComments(main, { go })
@@ -1101,6 +1113,7 @@ const patcher = new PagePatch({
  *   its `ETag` is the one served) with the new source, and changes only what differs in the live page:
  *   the kit's patcher (`patcher`, `PagePatch.page()`), a list of small steps, text edited in place;
  *   everything else keeps its scroll, folds, open panels, focus and typed text
+ * - drawn as ONE short cross-fade when it changes what's on screen (`patcher.redraw()`;  epic `epic-engine` I164)
  * - then re-wires what the runtime built from the markup (`rewire()`) and fires `spell-doc:updated` on `window`,
  *   `detail.changed`:  the elements added, replaced or re-attributed
  * - a full reload instead (`reload()`, which keeps the scroll) when the page can't be patched safely:
@@ -1159,7 +1172,7 @@ function wireLiveUpdate(main) {
       patched =
         before === null
           ? null
-          : patcher.page({
+          : await patcher.redraw({
               before: parse(before),
               after: parse(html),
               live: page.main,
@@ -1243,7 +1256,8 @@ function canPatch(main) {
  *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
  * - a body's FILE changed (the page server's `spell-server:changed`, `liveClient.ts`):  a host that has loaded it
- *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`);  one that hasn't drops the
+ *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`), the old body on screen
+ *   until the new one is in, then a short cross-fade (`PagePatch.crossFade()`, I164);  one that hasn't drops the
  *   cached copy, so its first open fetches the new one
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
  */
@@ -1282,8 +1296,13 @@ function wireSourceBodies(main, live, enqueue) {
         host.addEventListener(LOADED, done, { once: true })
         setTimeout(done, 2000)
       })
-    await host.reload?.()
-    PagePatch.keepAnchor(anchor)
+    // the old body stays up until the new one is in, then one short cross-fade (I164):  never the host's loading look
+    await PagePatch.crossFade(async () => {
+      const swapped = loaded || bodyIn(host)
+      await host.reload?.()
+      await swapped
+      PagePatch.keepAnchor(anchor)
+    }, PagePatch.isOnScreen(host))
     if (!active) return
     await loaded
     for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrame(1)
@@ -1293,6 +1312,14 @@ function wireSourceBodies(main, live, enqueue) {
     active.focus({ preventScroll: true })
     if (caret) active.setSelectionRange(...caret)
   }
+}
+
+/** Resolves once `host`'s body is in (its `ui-loaded`), or after `BODY_WAIT_MS` at most. */
+function bodyIn(host) {
+  return new Promise((done) => {
+    host.addEventListener(LOADED, done, { once: true })
+    setTimeout(done, BODY_WAIT_MS)
+  })
 }
 
 /** The element with the focus, inside shadow roots too (`document.activeElement` stops at their hosts). */
@@ -2069,6 +2096,7 @@ function buildToolbar(page, outline, counts) {
  *     - a link to an id inside still lands (`reveal()` unfolds around it)
  *     - its `<epic-*>` blocks start folded by themselves;
  *       the ones the reader left open open again (`restoreEpicFolds()`, before they draw),
+ *       but the Log, which starts folded on every load (`STAYS_FOLDED`),
  *       and their toggles are saved as a section's
  * - HEADINGS:  a chevron button starts each h2 / h3,
  *   and a click anywhere on the heading (not on a link or button in it) toggles it too;
@@ -2320,21 +2348,6 @@ function wireFolds(main, outline, kept) {
       unfolded = true
     }
     return unfolded
-  }
-}
-
-/**
- * An epic page's blocks the reader left open on this page (saved folds, `spell-folds:<path>`):
- * open again, before they first draw (their `open` attribute), so nothing animates;
- * the rest start folded, as the blocks do.
- * - `kept`:  after a live reload, every block AND item open before it (`takeKeptFolds()`), whoever opened it
- */
-function restoreEpicFolds(main, kept) {
-  const saved = readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`)
-  for (const block of main.querySelectorAll(kept ? EPIC_OPENERS : EPIC_FOLDS)) {
-    if (!block.id) continue
-    if (kept && block.id in kept) block.toggleAttribute("open", kept[block.id])
-    else if (saved[block.id] === false) block.setAttribute("open", "")
   }
 }
 

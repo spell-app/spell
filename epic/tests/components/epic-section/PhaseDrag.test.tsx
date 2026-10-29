@@ -55,7 +55,7 @@ describe("PhaseDrag (epic `epic-engine` P34)", () => {
     dragTo(titleOf(host, "p-four"), topOf(host, "p-two"))
     expect(order(host)).toEqual(["p-one", "p-four", "p-two", "p-three"])
     expect(move).toHaveBeenCalledWith("p-four", 2)
-    expect(host.querySelector("[data-drop], [data-dragged]")).toBeNull()
+    expect(host.querySelector("[data-drop], [data-dragged], [data-dragging]")).toBeNull()
   })
 
   test("a done phase never drags;  nothing goes above one;  not while the page isn't reviewed", async () => {

@@ -35,14 +35,14 @@ describe("EpicConfig", () => {
       installOnCreate: false,
       installTimeout: 600,
       extraInstalls: "",
-      "windows.default": "spell-app",
-      "windows.repoName": "spell-app",
-      "windows.contentName": "spell-app-dev",
+      "windows.default": "spell",
+      "windows.repoName": "spell",
+      "windows.contentName": "spell.epics",
       "windows.worktreeOnly": false,
       "windows.settings": "{}",
       linkSessionFolders: false,
       sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
-      engineFolder: join(TOP, "spell-epic"),
+      engineFolder: "",
       repoTemplates: "",
       windowsFolder: join(TOP, "spell-app-dev", "windows"),
       "app.path": "/editor/",
@@ -63,7 +63,12 @@ describe("EpicConfig", () => {
       "pageVoices.epic-page": "code",
       checkoutPatches: "",
       promptAck: true,
-      renamedRepos: "{}"
+      renamedRepos: "{}",
+      peers: "",
+      kit: "",
+      "oldLayout.carryOn": "",
+      "oldLayout.commitMaps": "",
+      "oldLayout.oldClones": ""
     })
     // no app declared
     expect(config.app).toBeUndefined()
@@ -142,7 +147,7 @@ describe("EpicConfig", () => {
     expect(EpicConfig.settingsFrom("").windows.settings).toEqual({})
     const settings = EpicConfig.settingsFrom('{ "windows": { "settings": { "js/ts.experimental.useTsgo": false } } }')
     expect(settings.windows.settings).toEqual({ "js/ts.experimental.useTsgo": false })
-    expect(settings.windows.default).toBe("spell-app")
+    expect(settings.windows.default).toBe("spell")
     expect(() => EpicConfig.settingsFrom('{ "windows": { "settings": [] } }', "x.json5")).toThrow(
       /"windows.settings" must be an object/
     )
@@ -161,9 +166,9 @@ describe("EpicConfig", () => {
     const settings = EpicConfig.settingsFrom('{ "installCommand": "", "sharedFolders": ["epics", "sagas"] }')
     expect(settings.installCommand).toBe("")
     expect(settings.sharedFolders).toEqual(["epics", "sagas"])
-    // `""`:  no engine link
-    expect(new EpicConfig(MAIN).engineFolder).toBe(join(TOP, "spell-epic"))
-    expect(EpicConfig.settingsFrom('{ "engineFolder": "" }').engineFolder).toBe("")
+    // `""` (the default since epic-engine P49:  the engine is the kit's `epic/`):  no engine link
+    expect(new EpicConfig(MAIN).engineFolder).toBeUndefined()
+    expect(EpicConfig.settingsFrom('{ "engineFolder": "../spell-epic" }').engineFolder).toBe("../spell-epic")
     // epic-eject T11:  the repo's own templates, none by default;  a folder from each checkout's root, as written
     expect(new EpicConfig(MAIN).repoTemplates).toBe("")
     expect(EpicConfig.settingsFrom('{ "repoTemplates": "docs/templates" }').repoTemplates).toBe("docs/templates")

@@ -51,13 +51,24 @@ export class PackHotSwap {
     event.preventDefault()
     Promise.all(sources.map((source) => ComponentPacks.reload(source!, PackHotSwap.swap))).then(
       (results) => {
-        if (results.includes("reload")) location.reload()
+        if (results.includes("reload")) PackHotSwap.reload()
       },
       (error: unknown) => {
         console.error("PackHotSwap:  couldn't swap the rebuilt pack in;  reloading", error)
-        location.reload()
+        PackHotSwap.reload()
       }
     )
+  }
+
+  /**
+   * Reload the page:  through the live client when it's there (`SPELL_SERVER.reload()`), which keeps the scroll and
+   * holds the new page behind the old one until it's ready (epic `epic-engine` I164);  else a plain reload.
+   * - measured before:  `location.reload()` here lost the scroll and the item open, through ~150ms of bare background
+   */
+  private static reload() {
+    const server = (globalThis as { SPELL_SERVER?: { reload?: () => void } }).SPELL_SERVER
+    if (server?.reload) server.reload()
+    else location.reload()
   }
 
   /** `install()` ran. */

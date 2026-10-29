@@ -567,6 +567,11 @@ export type MergeMainReport = {
   renamed?: { file: string; renames: string[] }[]
   /** why that step didn't run, in one line:  a kit with no `spell ui rename`, a failure;  never fails the merge */
   renameSkipped?: string
+  /**
+   * an OLD-LAYOUT worktree crossed over after the merge (`MainMerge.carryOn()`, epic-engine's P49):  the carry-on
+   * `command`, the child `repos` it had to cross, whether it worked;  left out when there was nothing to cross
+   */
+  carriedOn?: { command: string; repos: string[]; ok: boolean }
 }
 
 /**

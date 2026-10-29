@@ -57,6 +57,8 @@ import {
   type StatusState
 } from "./planDoc.types"
 
+import { ChangeOriginals } from "./ChangeOriginals"
+import { CommentList } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -65,6 +67,7 @@ import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
 import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
+import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { CHANGE_ID, STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
@@ -521,8 +524,10 @@ export class PlanDoc extends PlanReader {
   /**
    * Set phase `n`'s fields:  `{ symptom, changes, goal, files, verify }`, as HTML;  each one given replaces that
    * field, or is made in its place;  `""` removes it.  Returns the fields set, by label (`Symptom` ...).
+   * - `plan`:  Claude's build plan, waiting for Owen's Accept;  `accepted` (`--accepted`, epic `epic-engine` I163):
+   *   written accepted, for a plan Owen accepted with comments that it now folds in (no second Accept)
    */
-  setPhaseFields(n: number, values: PhaseFieldValues): string[] {
+  setPhaseFields(n: number, values: PhaseFieldValues, { accepted = false }: { accepted?: boolean } = {}): string[] {
     const phase = this.phase(n)
     const set: string[] = []
     for (const name of PHASE_FIELDS) {
@@ -533,11 +538,16 @@ export class PlanDoc extends PlanReader {
     }
     // Claude's build plan (epic `epic-engine` P33):  a new one waits for Owen's Accept;  removed, nothing waits
     if (values.plan !== undefined) {
-      // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
+      // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase");
+      // nor a plan Owen accepted with comments, now folded in (`accepted`, epic `epic-engine` I163)
       const docReview = DOC_REVIEW.test(PhaseIds.titleOf(phase))
-      if (values.plan && docReview) this.acceptPlan(phase)
+      if (values.plan && (docReview || accepted)) this.acceptPlan(phase)
       else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
-      const said = docReview ? "accepted, the doc pass" : "waiting for Owen's Accept"
+      const said = docReview
+        ? "accepted, the doc pass"
+        : accepted
+          ? "accepted, Owen's comments folded in"
+          : "waiting for Owen's Accept"
       const label = PhaseIds.labelOf(phase)
       this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
@@ -555,6 +565,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
+   * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
+   * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
+   * - none given:  the item ids `html` names, said when every one has a mark of this pass (`UpdateMarks`:  stamped
+   *   within `SAME_PASS_MINUTES`, or not stamped yet) and `html` names no file (a move the marks can't say)
+   * - names no item:  `[]`, a change no item caused
+   */
+  marksSay(n: number, html: string, forIds?: readonly string[]): string[] {
+    const phase = this.phase(n)
+    const given = forIds?.map((id) => id.toLowerCase())
+    const text = this.incoming(html)
+      .map((node) => node.textContent ?? "")
+      .join(" ")
+    if (!given && UpdateMarks.namesFile(text)) return []
+    const ids = given ?? UpdateMarks.idsIn(text)
+    const marked = UpdateMarks.marked(phase, ids, given ? undefined : this.now)
+    return ids.length && marked.length === ids.length ? ids.map((id) => id.toUpperCase()) : []
+  }
+
+  /**
    * A change to phase `n`'s plan, `html` (what changed, and why), as one `<epic-update at summary>` block at the END of
    * the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the phase
    * description"), after the ones before it.
@@ -565,6 +595,7 @@ export class PlanDoc extends PlanReader {
    * - it STAYS when a phase is done (unlike the UPDATE markers);  the phase's `changes` counts it
    *   (`writeChangeCounts()`, every edit)
    * - old prose shapes in `html` (a Net effect paragraph, a code accordion ...) become elements (`IncomingHtml`)
+   * - NOT for a change an answer caused, which its change marks say:  `marksSay()` first (`updated` asks it)
    * - SIDE EFFECT:  logs it
    */
   addPhaseUpdate(n: number, html: string, { summary }: { summary?: string } = {}): void {
@@ -1100,6 +1131,9 @@ export class PlanDoc extends PlanReader {
    * - `accept` / `reopen` on a change mark (`ch3`, epic `epic-engine` P30;  `applyChange()`):  the change stands
    *   (`accepted`), or its question opens again
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
+   * - an approve carrying Owen's comments in its text (`comments`, epic `epic-engine` I163):  applied as any approve
+   *   (a waiting plan accepted), its line saying `, with comments to fold in:  C4, C5`;  the comments stay waiting,
+   *   for the session to fold in and answer
    */
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
@@ -1107,7 +1141,7 @@ export class PlanDoc extends PlanReader {
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     const part = this.reviewPart(mark.id)
     if (part) {
-      const result = this.applyToPart(part, mark)
+      const result = withCommentsToFold(this.applyToPart(part, mark), mark)
       if (result.applied) this.log(`${String(mark.id).toUpperCase()} ${result.did}`)
       return result
     }
@@ -1116,7 +1150,7 @@ export class PlanDoc extends PlanReader {
     // skipping a todo IS dropping it (its own note box's x is Drop It;  a skip comes from a page drawn before)
     const todoSkip = mark.action === "skip" && PlanItem.kindOfItem(item) === "todo"
     const applied = todoSkip ? { ...mark, action: "drop" as const } : mark
-    const result = this.applyAction(item, applied)
+    const result = withCommentsToFold(this.applyAction(item, applied), mark)
     if (result.applied) {
       this.log(`${item.id.toUpperCase()} ${result.did}`)
       this.reviewedAs(item, applied.action === "pick" ? "approve" : applied.action)
@@ -2379,6 +2413,8 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *   - `was`:  the words it replaced, found in the doc's earlier versions (`earlierVersions`, `ChangeOriginals`;
+   *     epic `epic-engine` I160), when first stamped;  none for new words, or when no version tells
    *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
    *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
    *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
@@ -2396,6 +2432,8 @@ export class PlanDoc extends PlanReader {
       const data: Partial<EpicData<"epic-change">> = {}
       if (!CHANGE_ID.test(change.id)) {
         data.id = `ch${next++}`
+        const was = change.hasAttribute("was") ? undefined : ChangeOriginals.find(change, this.earlierVersions)
+        if (was) data.was = was
         if (this.markHandled(change)) changed++
       }
       if (!change.hasAttribute("at")) data.at = now
@@ -2618,6 +2656,17 @@ const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 /** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
   return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
+}
+
+/**
+ * An approve's result, saying the comments it carries (epic `epic-engine` I163):
+ * `plan accepted:  build it, with comments to fold in:  C4, C5`.
+ * - any other mark, or none carried:  `result` as it is
+ */
+function withCommentsToFold(result: MarkResult, mark: PlanMark): MarkResult {
+  if (!result.applied || mark.action !== "approve" || !mark.comments?.length) return result
+  const ids = mark.comments.map(CommentList.label).join(", ")
+  return { ...result, did: `${result.did}, with comments to fold in:  ${ids}` }
 }
 
 /**

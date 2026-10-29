@@ -63,7 +63,7 @@ describe("<epic-thread>", () => {
       body: !!part(host, "body")
     }).toEqual({
       id: "C3",
-      headline: "“2. Context”",
+      headline: "“Why asyncio? And `await`?”",
       tip: "Comment C3, on “2. Context”\n(Open this thread)",
       expanded: "false",
       body: false

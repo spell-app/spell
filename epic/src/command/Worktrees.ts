@@ -245,10 +245,18 @@ export class Worktrees {
     if (!path) throw new EpicCommandError(`no worktree ${target} in this repo:  epic worktree list names them`)
     const main = named?.main ?? this.main
     if (RealPath.same(path, main)) throw new EpicCommandError(`${path} is the main checkout:  never removed`)
+    // an OLD-LAYOUT worktree's child checkouts (epic-engine's P49):  refused, even forced, while one holds work of its
+    // own;  else each removed first, from its old clone, as they're inside this one
+    const config = new EpicConfig(main)
+    const said = config.leftBehindSaid(path, config.leftBehind(path))
+    if (said) throw new EpicCommandError(`kept ${path}:  ${said}`)
+    const found = config.oldCheckouts(path)
     const lines: string[] = []
     const stopped = CheckoutServers.said(CheckoutServers.stop(path))
     if (stopped) lines.push(`${stopped}`)
     const branch = named?.branch ?? Worktrees.listOf(main).find((it) => it.path === path)?.branch
+    for (const { repo, main: clone, worktree } of found)
+      lines.push(...Worktrees.removeOne(worktree, clone, { force }).map((line) => `${repo}:  ${line}`))
     lines.push(...Worktrees.removeOne(path, main, { force, sessions: this.main }))
     if (branches && branch && branch !== "(detached)") lines.push(Worktrees.deleteBranch(main, branch))
     return lines
@@ -326,6 +334,8 @@ export class Worktrees {
   /**
    * Each worktree in the worktrees' folders:  `{ name, path, branch }`.
    * - the folders:  `.claude/worktrees/`, or beside the repo and the old place too (`EpicConfig.worktreesFolders`)
+   * - and each peer's own (`EpicConfig.peers`:  spell-brand's `../spell-brand.worktrees/`), `main` its checkout:
+   *   so `/worktrees` lists a peer's `/isolate` worktrees too
    * - `path` as git lists it:  an unrepaired worktree's old path, after a move behind a compat link, matches its
    *   folder all the same (`RealPath`, epic `epic-engine` I59)
    */
@@ -333,14 +343,18 @@ export class Worktrees {
     const config = this.config
     // this repo's own:  `main` left out, it's `this.main`
     const own = Worktrees.namedIn(this.main, config.worktreesFolders).map(({ main: _, ...it }) => it)
+    // each PEER's (spell-brand's, beside the kit;  epic-engine's P49, Q50 D):  its own lone worktrees, in its own folder
+    const peers = config.peers
+      .filter(({ main }) => existsSync(join(main, ".git")))
+      .flatMap(({ main }) => Worktrees.namedIn(main, new EpicConfig(main).worktreesFolders))
     const top = config.top
-    if (!top) return own
+    if (!top) return [...own, ...peers]
     // a multi-repo top:  also each child repo's worktrees in its OWN old places (from before its top's)
     const children = top.repos
       .map((repo) => join(this.main, repo))
       .filter((main) => existsSync(join(main, ".git")))
       .flatMap((main) => Worktrees.namedIn(main, new EpicConfig(main).worktreesFolders.slice(1)))
-    return [...own, ...children]
+    return [...own, ...children, ...peers]
   }
 
   /** The worktrees of the repo at `main` in `roots`:  `{ name, path, branch, main }`, detached ones left out. */
@@ -703,14 +717,22 @@ function mergeMainLines(report: MergeMainReport): string[] {
 /** `merge-main`'s report, for a person:  what the merge itself did. */
 function mergeResultLines(report: MergeMainReport): string[] {
   const { branch, result, conflicts, untracked, regenerated, review, unstaged, installed } = report
-  const { renamed = [], renameSkipped } = report
+  const { renamed = [], renameSkipped, carriedOn } = report
+  // an old-layout worktree crossed over (`MainMerge.carryOn()`, epic-engine's P49)
+  const crossed = !carriedOn
+    ? []
+    : carriedOn.ok
+      ? [`  crossed ${carriedOn.repos.join(", ")} over into the folders:  \`${carriedOn.command}\``]
+      : [
+          `  \`${carriedOn.command}\` FAILED crossing ${carriedOn.repos.join(", ")} over:  see what it said, then run it again`
+        ]
   const install = !installed
     ? []
     : installed.ok
       ? [`  installed the packages:  \`${installed.command}\` (${installed.lockfiles.join(", ")} changed)`]
       : [`  \`${installed.command}\` FAILED (${installed.lockfiles.join(", ")} changed):  run it yourself`]
-  if (result === "up-to-date") return [`${branch}:  main is already in it`]
-  if (result === "fast-forward") return [`${branch}:  fast-forwarded to main`, ...install]
+  if (result === "up-to-date") return [`${branch}:  main is already in it`, ...crossed]
+  if (result === "fast-forward") return [`${branch}:  fast-forwarded to main`, ...install, ...crossed]
   if (result === "conflicts") {
     return [
       `${branch}:  stopped mid-merge;  resolve these, \`git add\` them, then \`epic worktree merge-main --continue\`:`,
@@ -734,6 +756,7 @@ function mergeResultLines(report: MergeMainReport): string[] {
           ...renamed.flatMap(({ file, renames }) => renames.map((rename) => `    ${file}   ${rename}`))
         ]
       : []),
-    ...(renameSkipped ? [`  spell ui rename skipped:  ${renameSkipped}`] : [])
+    ...(renameSkipped ? [`  spell ui rename skipped:  ${renameSkipped}`] : []),
+    ...crossed
   ]
 }

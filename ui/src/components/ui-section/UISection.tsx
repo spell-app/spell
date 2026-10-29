@@ -228,6 +228,19 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return this.disclosure.toggle(originalEvent)
   }
 
+  /**
+   * More for the fold button's tooltip, on a line of its own after `Open this section`:  a component that draws the
+   * section sets it (the epic page's blocks:  `⌥-click:  open everything inside`).
+   * - a property, not an attribute:  nothing a page writes
+   */
+  @E.state accessor toggleTipMore: string | undefined = undefined
+
+  /** The fold button's tooltip:  `Open this section` / `Close this section`, then `toggleTipMore`. */
+  get toggleTip(): string {
+    const tip = this.translationForKey(this.isFolded ? "openSection" : "closeSection")
+    return this.toggleTipMore ? `${tip}\n${this.toggleTipMore}` : tip
+  }
+
   /** A click on the toggle (Enter / Space on the button click it too). */
   private readonly onToggleClick = (event: MouseEvent) => {
     // a link or control inside a rich `slot="label"` title acts on its own, as in an accordion's title
@@ -642,9 +655,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             part={this.partForName("toggle")}
             aria-expanded={this.isCollapsible ? this.disclosure.ariaExpanded : undefined}
             aria-controls={this.isCollapsible ? CONTENT_ID : undefined}
-            title={
-              this.isCollapsible ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined
-            }
+            title={this.isCollapsible ? this.toggleTip : undefined}
             disabled={this.isCollapsible && this.disabled ? true : undefined}
             aria-describedby={this.hasDescription && this.isCollapsible ? TIP_ID : undefined}
             onClick={this.onToggleClick}
@@ -691,7 +702,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
         class={FOLD_ICON_CLASS}
         part={this.partForName("fold-icon")}
         aria-hidden="true"
-        title={onClick ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined}
+        title={onClick ? this.toggleTip : undefined}
         onClick={onClick}
       >
         {this.foldGlyph.svg}
