@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `SessionStart` hook (the plugin's `hooks/hooks.json`):  says when the content repo's last sync stopped
- * on a conflict (epic `epic-friend` P5).
+ * Claude Code's and Codex's `SessionStart` hook (`hooks.json`, `codex-hooks.json`):  says when the content repo's last
+ * sync stopped on a conflict (epic `epic-friend` P5).
  * - The end-of-turn commit syncs the content repo with its remote ([shared-commit.mjs](shared-commit.mjs)), detached:
  *   nobody sees what it came to.  A conflict it couldn't settle is undone, and kept in the content repo's git folder
  *   (`SyncState`).

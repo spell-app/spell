@@ -51,7 +51,15 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
   - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
   - A repo's own house style adds its specifics on top, and wins where they disagree.
-- Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
+- Working an epic WITHOUT the skills (Codex, or any agent but Claude Code):  run `epic guide` and follow it
+  (epic `epic-friend` P11).
+  - It prints the workflow in plain steps, from [the epic skill's guide.md](skills/epic/guide.md):
+    find the epic, plan, build each phase, take what the person sends, finish.
+  - End EVERY turn with `epic turn end`:  the shared plans committed and synced.
+    Codex's hooks run it for you once installed (`epic plugin install --codex`) and trusted (`/hooks`).
+  - Wait for the person's next Send with `epic inbox wait <epic>`.
+- Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it;  Codex's, [codex-hooks.json](hooks/codex-hooks.json),
+  three of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):

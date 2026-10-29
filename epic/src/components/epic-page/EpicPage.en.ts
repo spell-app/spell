@@ -420,6 +420,40 @@ export const epicPageVocabulary = {
       description: "The pill while nobody listens, before the command it copies."
     },
     {
+      key: "listeningMine",
+      text: "Your {agent} is listening",
+      description:
+        "After the review line, while an agent other than Claude waits on the inbox (`epic inbox wait`, epic " +
+        "`epic-friend` P11):  `{agent}` its name, Codex.  Claude listening says nothing, as before."
+    },
+    {
+      key: "listeningOf",
+      text: "{person}'s {agent} is listening",
+      description: "The same, for someone else's agent:  `{person}`, whose it is."
+    },
+    {
+      key: "listeningTitle",
+      text: "It waits for your Send (epic inbox wait), and hears it at once",
+      description: "The listening words' tooltip."
+    },
+    {
+      key: "idleMine",
+      text: "Your {agent} isn't listening:  ask it to run",
+      description:
+        "The pill while nobody listens and the last to listen was an agent other than Claude (Q14:  Send never " +
+        "wakes it), before the command it copies, `epic inbox wait <epic>`."
+    },
+    {
+      key: "idleOf",
+      text: "{person}'s {agent} isn't listening:  ask it to run",
+      description: "The same, for someone else's agent."
+    },
+    {
+      key: "copyWait",
+      text: "Copy the command, for the agent to run",
+      description: "The pill's tooltip, while it names an agent that isn't listening."
+    },
+    {
       key: "airplanePill",
       text: "Airplane mode:  this waits for",
       description: "The pill in airplane mode, before `/airplane land`."

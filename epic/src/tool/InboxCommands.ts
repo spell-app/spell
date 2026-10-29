@@ -4,6 +4,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 
 import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
 import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
@@ -64,8 +65,11 @@ export class InboxCommands {
       case undefined:
         return this.print(name, this.owner.read(file), file, Boolean(flags.json))
       case "watch": {
-        const session = stringFlag(flags.session) ?? process.env.CLAUDE_CODE_SESSION_ID
-        if (!session) throw new PlanDocError("watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
+        const session = stringFlag(flags.session) ?? EpicHome.sessionId()
+        if (!session)
+          throw new PlanDocError(
+            "watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID or $CODEX_THREAD_ID)"
+          )
         ReviewInbox.update(path, (box) => box.setListening(session))
         return this.owner.print(`listening:  session ${session}`)
       }
@@ -278,16 +282,21 @@ export class InboxCommands {
    * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code 2
    * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
    * - the poll reads without the lock (atomic writes:  never half a file);  only taking locks
+   * - LISTENS while it waits, when nobody else does (epic `epic-friend` P11):  any agent's way to hear a Send, so the
+   *   page says "Your Codex is listening" (`setListening()` with this process's pid:  gone the moment it ends);
+   *   a session already listening (`watch`, Claude's poller) keeps the place
    * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every `LISTEN_HEARTBEAT_MS`
    *   (`touchListening()`, one locked write), so a session killed mid-wait goes stale on the page (`liveListener()`)
    * - the epic's GUIDES too (epic `epic-workflow` P13, J27):  a Send on any page the epic owns (`SeeAlso.ownerOf()`)
    *   wakes it, its comments taken from the page's inbox (`GuideSends`), printed under the page they're on
    */
-  private async waitForWork(name: string, file: string, { timeout = "3300", json }: Flags): Promise<number | void> {
+  private async waitForWork(name: string, file: string, flags: Flags): Promise<number | void> {
+    const { timeout = "3300", json } = flags
     const path = ReviewInbox.pathFor(file)
     const seconds = timeoutOf(timeout)
     const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
+    listen()
     let beat = 0
     for (;;) {
       let work = null as TakenWork | null
@@ -303,6 +312,20 @@ export class InboxCommands {
     if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
     else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
     return 2
+
+    /**
+     * Listen on the inbox, as this process, when nobody does:  the session's id, else the agent's and the pid.
+     * - best effort:  an inbox that can't be written now is waited on all the same
+     */
+    function listen(): void {
+      try {
+        if (peek(path).liveListener()) return
+        const session = stringFlag(flags.session) ?? EpicHome.sessionId() ?? `${EpicHome.agentName()}-${process.pid}`
+        ReviewInbox.update(path, (box) => box.liveListener() || box.setListening(session, undefined, process.pid))
+      } catch (error) {
+        if (!(error instanceof InboxError)) console.error("inbox wait:  can't say it's listening:", error)
+      }
+    }
 
     /** The inbox, or an empty one while it can't be read (hand-edited mid-poll):  the next poll tries again. */
     function peek(path: string): ReviewInbox {

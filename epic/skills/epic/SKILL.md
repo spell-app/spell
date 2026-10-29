@@ -22,6 +22,10 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     (the `Stop` hook, [shared-commit.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs)).
   - NEVER commit, stage, `git checkout --` or `git restore` it in the repo.
     Nor the changelog, the docs' home page, or a details page.
+- The same workflow in plain steps, for any agent:  [guide.md](guide.md), beside this file, which `epic guide [topic]`
+  prints (epic `epic-friend` P11).
+  - Its last topic, `claude-only-tools`, is the plain way to do each step that leans on a tool only Claude Code has.
+  - A change to a step here that any agent takes changes it there too:  ONE copy of each step's words for the others.
 - Rules for the doc (sections, ids, markers, prose):  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md).
   Read it first.
   - It's spell-epic's, with every template:  `epic pages template epics/plan-doc.md` prints its path.

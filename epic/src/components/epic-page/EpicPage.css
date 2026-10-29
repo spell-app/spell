@@ -462,6 +462,22 @@
     outline: 2px solid var(--ui-focus-color, var(--epic-accent));
     outline-offset: 1px;
   }
+  /* an agent other than Claude listening (epic `epic-friend` P11):  after the command, a green dot before it */
+  .review-line .listener {
+    margin-inline-start: 12px;
+    color: var(--epic-ink);
+    white-space: nowrap;
+  }
+  .review-line .listener::before {
+    content: "";
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--ui-green, #21ba45);
+    vertical-align: 0.1em;
+  }
   .review-line .done {
     color: var(--epic-ink);
     font-weight: 600;

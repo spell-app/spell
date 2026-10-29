@@ -997,3 +997,27 @@ test("phase P1 planning [off];  phase-body sets it by itself while the plan isn'
   expect(working()).toEqual([])
   expect(printed.slice(0, 2)).toEqual(["P1 planning:  on", "P1 planning:  off"])
 })
+
+// epic `epic-friend` P11:  any agent hears a Send with `epic inbox wait`;  the page says whose agent it is
+test("wait:  LISTENS while it waits, as this process, naming the person and the agent;  a session already listening keeps the place", async () => {
+  const before = process.env.SPELL_EPIC_AGENT
+  process.env.SPELL_EPIC_AGENT = "codex"
+  try {
+    expect(await commands().inbox.run("x", file, ["wait"], { timeout: "1", session: "thread-9" })).toBe(2)
+    expect(ReviewInbox.read(inboxFile).listening).toMatchObject({
+      session: "thread-9",
+      pid: process.pid,
+      person: "Owen",
+      agent: "codex"
+    })
+    // a Claude session listening (`watch`):  its place, untouched
+    ReviewInbox.update(inboxFile, (inbox) => inbox.setListening("claude-1"))
+    process.env.SPELL_EPIC_AGENT = "claude"
+    const watched = ReviewInbox.read(inboxFile).listening
+    await commands().inbox.run("x", file, ["wait"], { timeout: "1", session: "thread-9" })
+    const { seen: _seen, ...kept } = watched!
+    expect(ReviewInbox.read(inboxFile).listening).toMatchObject(kept)
+  } finally {
+    process.env.SPELL_EPIC_AGENT = before
+  }
+})

@@ -52,6 +52,17 @@ import { SessionMoves } from "./SessionMoves"
  * - Claude Code's folder:  `ClaudeHome.home()` (`$CLAUDE_CONFIG_DIR`, else `~/.claude`);  the `PATH` folder:
  *   `~/.local/bin`.  A test hands in both.
  * - Throws `EpicCommandError` when the kit has no plugin in `epic/`, or a list of Claude Code's won't parse.
+ *
+ * `--codex` (epic `epic-friend` P11) sets it up for Codex instead (`installCodex()`):
+ * 1. the plugin's Codex hooks ([codex-hooks.json](../../hooks/codex-hooks.json)) in Codex's own hooks file,
+ *    `<codex>/hooks.json`, run from the kit's `epic/` by its full path:  each turn's end runs `epic turn end`, and a
+ *    new session hears when its worktree is behind `main` or the last sync stopped on a conflict
+ *    - Codex's user hooks file, not the plugin's own:  Codex's docs say a plugin's hooks run in a plugin installed by
+ *      hand in its desktop app, and say nothing of the CLI;  `~/.codex/hooks.json` reaches every Codex
+ *    - its other hooks kept;  ours from an older install (another kit folder) replaced, never doubled
+ *    - Codex runs a hook only once the person trusts it, in its `/hooks` screen, and again after it changes
+ * 2. `epic` on the terminal's `PATH`, as step 6 above
+ * - Codex's folder:  `$CODEX_HOME`, else `~/.codex`;  a test hands it in.
  ****************/
 export class PluginInstall {
   /** Claude Code's own folder (`~/.claude`) */
@@ -62,17 +73,21 @@ export class PluginInstall {
   readonly bin: string
   /** the time written into Claude Code's lists */
   readonly now: () => Date
+  /** Codex's own folder (`~/.codex`):  `--codex` writes its hooks file there */
+  readonly codexHome: string
 
   constructor({
     home = ClaudeHome.home(),
     kit = PluginInstall.mainKit(),
     bin = join(homedir(), ".local", "bin"),
-    now = () => new Date()
+    now = () => new Date(),
+    codexHome = process.env.CODEX_HOME || join(homedir(), ".codex")
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
     this.bin = bin
     this.now = now
+    this.codexHome = codexHome
   }
 
   /** The kit's MAIN checkout:  the repo this file is in, through a worktree too. */
@@ -82,12 +97,15 @@ export class PluginInstall {
 
   /** Run `epic plugin <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
   async run(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json"])
+    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json", "codex"])
     const [verb] = positional
     if (verb !== "install") throw new EpicCommandError(`unknown verb '${verb ?? ""}':  epic plugin install`)
     const kit = stringFlag(flags.kit)
-    const installer = kit ? new PluginInstall({ home: this.home, kit: resolve(kit), bin: this.bin }) : this
-    const report = installer.install({ dryRun: flags.dryRun === true })
+    const installer = kit
+      ? new PluginInstall({ home: this.home, kit: resolve(kit), bin: this.bin, codexHome: this.codexHome })
+      : this
+    const dryRun = flags.dryRun === true
+    const report = flags.codex ? installer.installCodex({ dryRun }) : installer.install({ dryRun })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of PluginInstall.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -123,15 +141,39 @@ export class PluginInstall {
     return report
   }
 
+  /**
+   * Set the plugin up for Codex (`--codex`, the class's Codex steps);  what it changed, or would with `dryRun`.
+   * - SIDE EFFECT (not `dryRun`):  writes Codex's hooks file, and the `epic` link
+   * - throws `EpicCommandError` when the kit has no Codex hooks file, or Codex's won't parse
+   */
+  installCodex({ dryRun = false }: { dryRun?: boolean } = {}): PluginInstallReport {
+    const report: PluginInstallReport = {
+      plugin: "epic for Codex",
+      version: this.version(),
+      from: this.engine,
+      dryRun,
+      changes: [],
+      agent: "codex"
+    }
+    const change = (text: string) => report.changes.push(text)
+    this.codexHooks({ dryRun, change })
+    this.binLink({ dryRun, change })
+    return report
+  }
+
   /** What `report` says, a line each:  every change, or that there was none. */
   static lines(report: PluginInstallReport): string[] {
     const head = `${report.plugin} ${report.version}, from ${report.from}`
     if (!report.changes.length) return [`${head}:  already installed;  nothing to change`]
     const verb = report.dryRun ? "would change" : "changed"
+    const then =
+      report.agent === "codex"
+        ? "then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them"
+        : "then:  /reload-plugins in each running session (or start a new one)"
     return [
       `${head}:  ${verb} ${report.changes.length}`,
       ...report.changes.map((line) => `  ${line}`),
-      ...(report.dryRun ? [] : ["then:  /reload-plugins in each running session (or start a new one)"])
+      ...(report.dryRun ? [] : [then])
     ]
   }
 
@@ -241,6 +283,57 @@ export class PluginInstall {
   }
 
   ////////////////
+  // ## Codex
+  ////////////////
+
+  /** Codex's step 1:  the plugin's Codex hooks in `<codex>/hooks.json`, by full path;  its other hooks kept. */
+  private codexHooks(step: Step): void {
+    const source = join(this.engine, "hooks", CODEX_HOOKS)
+    if (!existsSync(source))
+      throw new EpicCommandError(
+        `epic plugin install --codex:  ${this.kit} has no Codex hooks (epic/hooks/${CODEX_HOOKS});  ` +
+          "pass the kit's checkout:  --kit ~/www/spell",
+        EXIT.ERRORS
+      )
+    const ours = PluginInstall.codexHooksFor(this.engine)
+    const file = join(this.codexHome, "hooks.json")
+    const theirs = (existsSync(file) ? readJson(file) : {}) as CodexHooksFile
+    const merged = PluginInstall.withCodexHooks(theirs, ours)
+    if (JSON.stringify(merged) === JSON.stringify(theirs)) return
+    const events = Object.keys(ours.hooks).join(", ")
+    step.change(`${file}:  the epic hooks (${events}), run from ${join(this.engine, "hooks")}`)
+    if (!step.dryRun) writeJson(file, merged)
+  }
+
+  /**
+   * The plugin's Codex hooks, as the file in its `hooks/` holds them, each command's `${PLUGIN_ROOT}` made `engine`:
+   * a user hooks file has no plugin root to name.
+   */
+  static codexHooksFor(engine: string): CodexHooksFile {
+    const text = readFileSync(join(engine, "hooks", CODEX_HOOKS), "utf8")
+    const hooks = JSON.parse(text) as CodexHooksFile
+    for (const groups of Object.values(hooks.hooks))
+      for (const group of groups)
+        for (const hook of group.hooks) hook.command = hook.command.replaceAll(PLUGIN_ROOT, engine)
+    return hooks
+  }
+
+  /**
+   * `theirs` (Codex's hooks file) with `ours` in it:  every group of ours appended to its event, after taking out any
+   * group whose command runs one of the plugin's hook scripts (an older install, from wherever).
+   * - their own hooks, and their file's other keys, kept as they are;  a plain copy
+   */
+  static withCodexHooks(theirs: CodexHooksFile, ours: CodexHooksFile): CodexHooksFile {
+    const merged = JSON.parse(JSON.stringify(theirs)) as CodexHooksFile
+    const events = (merged.hooks ??= {})
+    for (const [event, groups] of Object.entries(events))
+      events[event] = groups.filter((group) => !group.hooks?.some((hook) => OUR_HOOK.test(hook.command ?? "")))
+    for (const [event, groups] of Object.entries(ours.hooks)) events[event] = [...(events[event] ?? []), ...groups]
+    for (const [event, groups] of Object.entries(events)) if (!groups.length) delete events[event]
+    return merged
+  }
+
+  ////////////////
   // ## The links
   ////////////////
 
@@ -324,6 +417,8 @@ export type PluginInstallProps = {
   bin?: string
   /** the time written into Claude Code's lists;  default now */
   now?: () => Date
+  /** Codex's folder;  default `$CODEX_HOME`, else `~/.codex` */
+  codexHome?: string
 }
 
 /** What `install()` did, or would do. */
@@ -338,6 +433,17 @@ export type PluginInstallReport = {
   dryRun: boolean
   /** each change, a line;  none:  it was installed already */
   changes: string[]
+  /** the agent it was set up for, when not Claude Code:  `codex` (`--codex`) */
+  agent?: "codex"
+}
+
+/**
+ * A Codex hooks file (`~/.codex/hooks.json`, and the plugin's `hooks/codex-hooks.json`):  each event's groups, each
+ * group's command hooks.  The rest of its keys kept as they are.
+ * - SEE:  https://learn.chatgpt.com/docs/hooks
+ */
+export type CodexHooksFile = Record<string, unknown> & {
+  hooks: Record<string, { matcher?: string; hooks: { type: string; command: string; [key: string]: unknown }[] }[]>
 }
 
 /** A step's options:  whether to write, and where its changes are said. */
@@ -370,6 +476,15 @@ const NEW_TEMPLATES = "epic/templates/epics/"
 
 /** A skill link's target in an older folder of the plugin's:  `.../spell-epic/skills/epic`, `.../epic/skills/epic`. */
 const OLD_SKILL = /(?:^|\/)(?:spell-)?epic\/skills\/[^/]+\/?$/
+
+/** The plugin's Codex hooks, in its `hooks/`. */
+const CODEX_HOOKS = "codex-hooks.json"
+
+/** What the plugin's Codex hooks name its folder by, in a plugin;  the kit's `epic/` in a user hooks file. */
+const PLUGIN_ROOT = "${PLUGIN_ROOT}"
+
+/** A command that runs one of the plugin's hook scripts:  `node "/.../epic/hooks/shared-commit.mjs"`. */
+const OUR_HOOK = /(?:^|[/"'])(?:spell-)?epic\/hooks\/[\w-]+\.mjs\b/
 
 /** Whether `key` is the old plugin, or any plugin of its marketplace:  `spell-epic@spell-epic`. */
 function isOldPlugin(key: string): boolean {

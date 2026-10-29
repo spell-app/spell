@@ -198,3 +198,111 @@ describe("run()", () => {
     await expect(installer().run(["remove"])).rejects.toThrow(/epic plugin install/)
   })
 })
+
+////////////////
+// ## Codex (epic `epic-friend` P11)
+////////////////
+
+/** The real plugin's folder:  its Codex hooks file and manifest, copied into the made-up kit. */
+const REAL = join(import.meta.dirname, "..", "..")
+
+/** Codex's scratch folder:  NEVER the machine's own `~/.codex`. */
+const codexHome = join(top, "codex")
+
+/** Codex's hooks file, parsed. */
+function codexHooks(): any {
+  return JSON.parse(readFileSync(join(codexHome, "hooks.json"), "utf8"))
+}
+
+/** Every command in a Codex hooks file, by event. */
+function commandsOf(file: any): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(file.hooks as Record<string, { hooks: { command: string }[] }[]>).map(([event, groups]) => [
+      event,
+      groups.flatMap((group) => group.hooks.map((hook) => hook.command))
+    ])
+  )
+}
+
+describe("the plugin's Codex hooks", () => {
+  test("valid:  Codex's event names only, each command a hook script the plugin has, run from its root", () => {
+    const file = JSON.parse(readFileSync(join(REAL, "hooks", "codex-hooks.json"), "utf8"))
+    expect(Object.keys(file.hooks).sort()).toEqual(["SessionStart", "Stop"])
+    for (const command of Object.values(commandsOf(file)).flat()) {
+      const [, script] = /^node "\$\{PLUGIN_ROOT\}\/(hooks\/[\w-]+\.mjs)"$/.exec(command) ?? []
+      expect(script, command).toBeDefined()
+      expect(existsSync(join(REAL, script!)), script).toBe(true)
+    }
+    expect(commandsOf(file).Stop).toEqual(['node "${PLUGIN_ROOT}/hooks/shared-commit.mjs"'])
+  })
+
+  test("the Codex manifest names that file;  Claude Code's own hooks file stays Claude's", () => {
+    const manifest = JSON.parse(readFileSync(join(REAL, ".codex-plugin", "plugin.json"), "utf8"))
+    expect(manifest).toMatchObject({ name: "epic", hooks: "./hooks/codex-hooks.json" })
+    const claudes = JSON.parse(readFileSync(join(REAL, "hooks", "hooks.json"), "utf8"))
+    expect(Object.keys(claudes.hooks)).toContain("WorktreeCreate")
+  })
+})
+
+describe("installCodex()", () => {
+  beforeEach(() => {
+    rmSync(codexHome, { recursive: true, force: true })
+    writeFileSync(join(engine, "hooks", "codex-hooks.json"), readFileSync(join(REAL, "hooks", "codex-hooks.json")))
+  })
+
+  /** An installer for Codex, on the scratch folders. */
+  function codexInstaller(): PluginInstall {
+    return new PluginInstall({ home, kit, bin, now: () => NOW, codexHome })
+  }
+
+  test("a fresh machine:  Codex's hooks file made, every command the kit's script by its full path;  run again, nothing", () => {
+    const report = codexInstaller().installCodex()
+    expect(report.changes).toEqual([
+      `${join(codexHome, "hooks.json")}:  the epic hooks (SessionStart, Stop), run from ${join(engine, "hooks")}`,
+      `PATH:  ${join(bin, "epic")} links to ${join(engine, "bin", "epic")}`
+    ])
+    expect(commandsOf(codexHooks())).toEqual({
+      SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`],
+      Stop: [`node "${engine}/hooks/shared-commit.mjs"`]
+    })
+    expect(PluginInstall.lines(report).at(-1)).toMatch(/in Codex, \/hooks, and trust them/)
+    expect(codexInstaller().installCodex().changes).toEqual([])
+  })
+
+  test("the person's own Codex hooks kept;  an older install's (another kit folder) replaced, never doubled", () => {
+    mkdirSync(codexHome, { recursive: true })
+    const mine = { type: "command", command: "say done" }
+    writeFileSync(
+      join(codexHome, "hooks.json"),
+      JSON.stringify({
+        description: "mine",
+        hooks: {
+          Stop: [
+            { hooks: [mine] },
+            { hooks: [{ type: "command", command: 'node "/old/spell/epic/hooks/shared-commit.mjs"' }] }
+          ],
+          PreToolUse: [{ matcher: "Bash", hooks: [mine] }]
+        }
+      })
+    )
+    codexInstaller().installCodex()
+    const file = codexHooks()
+    expect(file.description).toBe("mine")
+    expect(commandsOf(file)).toEqual({
+      Stop: ["say done", `node "${engine}/hooks/shared-commit.mjs"`],
+      PreToolUse: ["say done"],
+      SessionStart: [`node "${engine}/hooks/behind-main.mjs"`, `node "${engine}/hooks/sync-notice.mjs"`]
+    })
+  })
+
+  test("--dry-run writes nothing;  run() takes --codex;  a kit with no Codex hooks is refused", async () => {
+    expect(codexInstaller().installCodex({ dryRun: true }).changes).toHaveLength(2)
+    expect(existsSync(join(codexHome, "hooks.json"))).toBe(false)
+    expect(await codexInstaller().run(["install", "--codex", "--json"])).toBe(0)
+    expect(existsSync(join(codexHome, "hooks.json"))).toBe(true)
+    // Claude Code's lists untouched by --codex
+    expect(existsSync(join(home, "settings.json"))).toBe(false)
+    rmSync(join(engine, "hooks", "codex-hooks.json"))
+    expect(() => codexInstaller().installCodex()).toThrow(/has no Codex hooks/)
+  })
+})

@@ -481,6 +481,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `PluginInstall`:  `epic plugin install`, the plugin installed in Claude Code as `epic@spell`, in place from the
       kit's `epic/` (epic `epic-engine` P49, Q45):  Claude Code's three lists, the cache link, the skill links,
       `~/.local/bin/epic`, the old `spell-epic@spell-epic` taken out;  writes the files itself, safe to run again
+      - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
+        written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
+        hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
+    - ANY AGENT (epic `epic-friend` P11):
+      - `EpicGuide`:  `epic guide [<topic>]`, the workflow in plain steps, printed from the epic skill's own
+        [guide.md](../skills/epic/guide.md) (ONE copy:  the skill links it);  `claude-only-tools`, the plain way to do
+        each step that leans on a tool only Claude Code has
+      - `TurnEnd`:  `epic turn end`, the end of every agent's turn:  `Shared.sync()`, quiet with nothing to do;  the
+        end-of-turn hook ([shared-commit.mjs](../hooks/shared-commit.mjs)), Claude Code's and Codex's, starts it
+        detached (`TurnEnd.inBackground()`), so there's one path;  plain `node` loads it by path
     - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
       (`CODE_ROOT`);  `mustGit()`, a git run whose failure is the verb's own error
       - running git is the kit's `Git` (`spell/server/Git`), a checkout's main checkout without a git run its
@@ -1709,6 +1719,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
   - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
     `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
+    - or an agent's own `epic inbox wait` (epic `epic-friend` P11):  `wait` listens itself while nobody else does,
+      so a Codex session that waits shows as listening, and stops the moment it ends
+  - `listening.person`, `listening.agent`:  whose agent listens (`EpicHome`), stamped by `setListening()`;
+    `forPage()` adds `lastListener`, the record once nobody listens, so the page says "Your Codex is listening",
+    or, gone, "Your Codex isn't listening:  ask it to run `epic inbox wait <epic>`" (Send never wakes it, Q14)
     - a newer poller of the same session (the next turn's `Stop` hook) takes the place over (I144)
   - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
     next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.

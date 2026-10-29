@@ -717,8 +717,8 @@ function statusLines(status: SharedStatus): string[] {
   ]
 }
 
-/** `commit`'s and `sync`'s lines:  what was committed, then what the sync came to. */
-function syncLines(commits: string[], sync?: SyncReport): string[] {
+/** `commit`'s, `sync`'s and `epic turn end`'s lines (`TurnEnd`):  what was committed, then what the sync came to. */
+export function syncLines(commits: string[], sync?: SyncReport): string[] {
   const lines = [commits.length ? `committed ${commits.join(", ")}` : "nothing to commit"]
   if (!sync) return lines
   for (const { epic, renames } of sync.renumbered ?? [])

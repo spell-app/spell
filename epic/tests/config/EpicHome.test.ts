@@ -151,3 +151,14 @@ describe("EpicHome.agent():  which agent runs `epic` (epic `epic-friend` P10, Q1
     ])
   })
 })
+
+describe("EpicHome.sessionId():  the agent's session running `epic` (epic `epic-friend` P11)", () => {
+  test("Claude Code's `CLAUDE_CODE_SESSION_ID`, else Codex's thread;  neither:  undefined", () => {
+    expect([
+      EpicHome.sessionId({ CLAUDE_CODE_SESSION_ID: "s-1", CODEX_THREAD_ID: "t-1" }),
+      EpicHome.sessionId({ CODEX_THREAD_ID: " t-1 " }),
+      EpicHome.sessionId({ CLAUDE_CODE_SESSION_ID: "" }),
+      EpicHome.sessionId({})
+    ]).toEqual(["s-1", "t-1", undefined, undefined])
+  })
+})

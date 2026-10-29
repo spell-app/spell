@@ -42,9 +42,11 @@ Three things to know before you start:
   `epic init` makes the team's shared repo with GitHub's command, `gh`.
   GitLab, Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
-- **Claude Code only, for now.**
-  The skills, the hooks and the moves between worktrees and windows are Claude Code's,
+- **Claude Code first.**
+  The skills and the moves between worktrees and windows are Claude Code's,
   and the window moves assume VS Code on macOS.
+  Codex, or any other agent, works an epic from `epic guide` and its own end-of-turn step:
+  [With Codex](#with-codex).
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
   `/isolate done`'s merge, and the worktree removed after it.
@@ -462,6 +464,78 @@ A comment you leave on a page is shared with the plans, the moment the turn's sy
 in the page's review inbox, a file never committed.
 What Claude makes of a mark lands in the epic page, under your name, which everyone shares.
 
+## <a id="with-codex"></a>With Codex (or another agent)
+
+```sh
+epic guide --list
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+workflow           The loop, start to finish
+find               Find the epic and its page
+plan               Plan an epic
+build              Build a phase
+review             Take what the person sends from the page
+turn               End every turn
+done               Finish an epic
+claude-only-tools  What Claude Code has, and what any agent does instead
+```
+
+</details>
+
+_The epic workflow, for an agent with none of the skills:  `epic guide` prints it, `epic guide build` one topic._
+
+Bob uses Codex, Ana uses Claude Code, and they work the same epic:  the same pages, the same comments,
+each answer stamped with whose agent wrote it, "Codex (Bob)".
+Claude Code gets the workflow from the plugin's skills;  any other agent gets it from `epic guide`.
+
+**Setting Codex up**, once per machine, from the clone of Spell:
+
+```sh
+node epic/bin/epic plugin install --codex
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+epic for Codex 0.8.0, from ~/www/spell/epic:  changed 2
+  ~/.codex/hooks.json:  the epic hooks (SessionStart, Stop), run from ~/www/spell/epic/hooks
+  PATH:  ~/.local/bin/epic links to ~/www/spell/epic/bin/epic
+then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them
+```
+
+</details>
+
+- It writes three hooks into Codex's own hooks file, `~/.codex/hooks.json` (`$CODEX_HOME` moves it):
+  - as each turn ends, `epic turn end`:  the plans committed and synced, as Claude's turns do
+  - as a session starts, two notices:  its worktree is behind `main`, or the last sync stopped on a conflict
+- Your own hooks in that file stay;  run again, it changes nothing.
+- **Codex runs a hook only once you trust it**:  `/hooks` in Codex, once, and again whenever the hooks change.
+- Codex knows which agent it is by itself (it marks every command with `CODEX_THREAD_ID`).
+  Another agent names itself with `SPELL_EPIC_AGENT=gemini`, set in its own settings.
+
+**What the agent runs**, in the workflow `epic guide` prints:
+- `epic turn end`, as its turn's last step, when no hook runs it:  safe to run twice, quiet with nothing to do.
+- `epic inbox wait <epic>`, to hear your Send:
+  it waits until you press Send on the epic page, prints the work, and ends.
+  - While it waits, the page says so after its review line:  "Your Codex is listening" (on Ana's page, "Bob's Codex").
+  - Send never wakes a Codex that isn't waiting.
+    With work sent and nobody listening, the page says "Your Codex isn't listening:  ask it to run `epic inbox wait seo`",
+    and a click copies the command.
+
+**Still Claude Code's only, for now:**
+- the skills:  Codex follows `epic guide` instead (the skills under Codex are next)
+- the question modal, details pages opened in the side bar, background agents:
+  `epic guide claude-only-tools` lists the plain way to do each
+- waking a session from the page, session titles, window moves, and the worktree hooks
+- the time a phase took counts only Claude's sessions
+
+Untried so far with a real Codex:  the steps above are tested against stand-ins for Codex's files and hooks.
+
 ## The content folder:  your plans, in a repo of their own
 
 Every page the agent writes lands in one of four folders, each linked into your checkout:
@@ -596,6 +670,9 @@ The skills know how to plan, build and review;  what your project counts as "don
 They look for it in your repo's own `AGENTS.md`.
 Spell's `CLAUDE.md` loads its own with one line, `@AGENTS.md`;  yours can too.
 
+For an agent without the skills (Codex reads `AGENTS.md` by itself), one more line there finds the workflow:
+"Working an epic:  run `epic guide`, and end every turn with `epic turn end`."
+
 What they look for:
 - the checks to run before a phase is done
 - its changelog, if it keeps one:
@@ -672,7 +749,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - Saved prompts go to `~/.spell/prompts/`.
    - `epic worktree merge-main` updates Vitest snapshots with Spell's own command, `yarn vp test run --update`.
-6. **Claude Code only.**
+6. **Claude Code first.**
+   The skills are Claude Code's;  Codex follows `epic guide`, with its end-of-turn hooks ([With Codex](#with-codex)).
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
 7. **VS Code and macOS.**
    The window bridge finds a session's window through its parent processes;
@@ -684,7 +762,7 @@ its epics planned, built in worktrees and reviewed on their pages, each reply an
 every comment seen by the team and answered by its writer's own Claude.
 **Not yet:**
 - an install without a clone of Spell
-- an agent other than Claude Code
+- the skills under an agent other than Claude Code, and Send waking one
 - a host other than GitHub, without making the shared repo by hand
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:
@@ -694,7 +772,7 @@ every comment seen by the team and answered by its writer's own Claude.
   - `windows.settings`
 
 🌱 Two are planned:  the plugin from Claude Code's plugin marketplace, with no clone,
-and the same workflow driven from Codex and other agents
+and the skills themselves under Codex and other agents
 ([the epic engine's front page](epic/README.md#-coming) says where each stands).
 
 ## See also

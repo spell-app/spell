@@ -425,8 +425,10 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 - **Other agents:**  the same workflow driven from Codex and other coding agents:
   planning on the page, worktrees, the review loop.
   The pages, the `epic` command and the content folder are plain files and programs any agent can use;
-  the skills and hooks around them are Claude Code's.
-  Where it stands:  planned;  Claude Code only for now.
+  the skills around them are Claude Code's.
+  Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`, and Codex has the
+  end-of-turn hooks ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#with-codex));
+  the skills under Codex are next.
 - **npm packages:**  spell-epic, Spell UI and the kit published, so a repo that isn't Spell installs it alone.
   Where it stands:  planned;  today everything installs inside the kit.
 

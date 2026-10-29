@@ -5,6 +5,7 @@ import { suggest } from "spell/util/string"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicCheckout } from "spell/epic/command/EpicCheckout"
+import { EpicGuide } from "spell/epic/command/EpicGuide"
 import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { Hub } from "spell/epic/command/Hub"
@@ -18,6 +19,7 @@ import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
 import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
+import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -45,7 +47,10 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `pages`:  the docs pages' tools (spell-app's `spell dev docs` until epic `repo-split` P13;  epic `epic-eject` P9), passed through
  *   - `loc`:  lines of code per repo and folder, and the LOC guide rewritten (`LinesOfCode`, epic `epic-engine` I122)
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
- *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49)
+ *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49);
+ *     `--codex`:  its hooks for Codex (epic `epic-friend` P11)
+ *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
+ *     `epic-friend` P11)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
  *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
@@ -487,6 +492,21 @@ export class EpicProgram {
         "a checkout links in only the folders its config names (sharedFolders)",
       (args) => new Shared().run(args)
     )
+
+    epic.commandsGroup("Any agent:  the workflow, and each turn's end:")
+
+    this.verb(epic.command("guide"), (args) => new EpicGuide().run(args))
+      .description(
+        "the epic workflow in plain steps, for any agent (Codex, Claude Code ...):  find, plan, build, review, end " +
+          "each turn, finish;  a topic alone, claude-only-tools among them"
+      )
+      .usage("[<topic>] [--list] [--path]")
+      .addHelpText("after", example("epic guide build"))
+    this.group(
+      epic.command("turn"),
+      "an agent's turn:  end, the shared plans committed and synced, what the end-of-turn hooks run",
+      (args) => new TurnEnd().run(args)
+    )
   }
 
   ////////////////
@@ -609,7 +629,8 @@ export class EpicProgram {
 
     this.group(
       epic.command("plugin"),
-      "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic)",
+      "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic);  " +
+        "install --codex:  its hooks for Codex",
       (args) => new PluginInstall().run(args)
     )
   }

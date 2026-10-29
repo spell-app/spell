@@ -23,6 +23,9 @@ ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (e
 READ [the commands guide](spell.epics/guides/dev/commands/commands.md) FIRST,**
 and suggest where it belongs before building it (below, "Commands").
 
+**Working an epic without Claude Code's skills (Codex, or any other agent):  run `epic guide`, and follow it;**
+end every turn with `epic turn end` ([the epic folder's AGENTS.md](epic/AGENTS.md);  epic `epic-friend` P11).
+
 ## The kit
 
 - ONE git repo since epic `repo-split` P20.  It holds:

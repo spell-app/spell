@@ -135,6 +135,15 @@ export class EpicHome {
     return EpicHome.agent(env).name
   }
 
+  /**
+   * The agent's SESSION running `epic`:  Claude Code's `CLAUDE_CODE_SESSION_ID`, else Codex's thread
+   * (`CODEX_THREAD_ID`);  `undefined` for neither (epic `epic-friend` P11:  `epic inbox wait` names its listener by it).
+   * - NEVER throws
+   */
+  static sessionId(env: Record<string, string | undefined> = process.env): string | undefined {
+    return SESSION_MARKS.map((variable) => env[variable]?.trim()).find(Boolean)
+  }
+
   /** The setting that names the agent, over its mark:  `SPELL_EPIC_AGENT=codex`. */
   static readonly AGENT_ENV = "SPELL_EPIC_AGENT"
 
@@ -214,6 +223,9 @@ const AGENT_MARKS: readonly (readonly [variable: string, agent: string])[] = [
   ["CLAUDECODE", "claude"],
   ["CODEX_THREAD_ID", "codex"]
 ]
+
+/** Where each agent puts its session's id on the commands it runs, in order (`EpicHome.sessionId()`). */
+const SESSION_MARKS = ["CLAUDE_CODE_SESSION_ID", "CODEX_THREAD_ID"]
 
 /** `person.json5`'s shape. */
 type PersonFile = {

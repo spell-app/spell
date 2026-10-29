@@ -523,7 +523,7 @@ They live in the content folder, a git repo of its own beside the checkout, whic
 (a repo whose config names `sharedFolders` links those in too):
 that's why `main` and each worktree edit ONE page.
 
-You'll rarely type these:  the turn-end hook runs `epic shared commit` after every turn.
+You'll rarely type these:  the turn-end hook runs `epic turn end`, which is `epic shared commit`, after every turn.
 
 | Verb | What it does |
 | --- | --- |
@@ -532,6 +532,15 @@ You'll rarely type these:  the turn-end hook runs `epic shared commit` after eve
 | `epic shared link` | links this checkout's shared folders in, the ones its config names (`sharedFolders`);  `--all`:  every checkout's |
 | `epic shared commit` | commits whatever changed in the content folder, one commit per epic, guide or folder;  `--quiet`, `--session <id>` |
 | `epic shared migrate <worktree>` | moves a worktree cut before the content folder existed onto it;  `--dry-run` |
+
+### Any agent:  the workflow, and each turn's end
+
+Codex, or any agent without the skills, works an epic from these two.
+
+| Verb | What it does |
+| --- | --- |
+| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has |
+| `epic turn end` | ends an agent's turn:  the content folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
 
 ### Windows and the page server
 
@@ -595,14 +604,14 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 
 ### The repo's settings
 
-Two verbs:  `init` sets a repo up, and `config` says what it set;  `plugin install` sets Claude Code up.
+Two verbs:  `init` sets a repo up, and `config` says what it set;  `plugin install` sets Claude Code up, or Codex.
 Every key of the config file, and what `epic init` writes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file).
 
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
-| `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins` |
+| `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
 | `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 
 ### Pages you answer on, agents, airplane mode

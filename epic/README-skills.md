@@ -250,9 +250,14 @@ Each of those is a row here, by when it happens.
 | a session leaves a worktree | [left-worktree.mjs](hooks/left-worktree.mjs);  `PostToolUse` on `ExitWorktree`, 10 seconds | reminds the reply to end with its closing line, "*You can close this tab*", only when nothing is left:  no unmerged work, no agent running, no question waiting |
 | you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened |
 | a turn ends | [handoff.mjs](hooks/handoff.mjs);  `Stop`, Claude Code's default | moves the session to another window, when a move was armed (`epic window handoff <name>`, which refuses when this hook won't run) |
-| a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | commits the content folder (`epic shared commit`), one commit per group of files, `auto: epic seo`;  detached, so the turn never waits for git |
+| a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the content folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
+- Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):
+  `behind-main.mjs` and `sync-notice.mjs` as a session starts, `shared-commit.mjs` as a turn ends.
+  - Its own file because Codex reads Claude Code's `hooks.json` by default, which names events Codex hasn't got.
+  - `epic plugin install --codex` copies them into `~/.codex/hooks.json`;  Codex runs them once you trust them, in
+    its `/hooks` screen.
 - Each runs `node "${CLAUDE_PLUGIN_ROOT}/hooks/<script>"`:  the plugin's own folder, wherever it's installed.
 - Why the worktree guard exists:  Claude Code brings a reopened session back into its worktree
   only when it ENTERED it, with its own worktree tool.

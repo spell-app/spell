@@ -1,0 +1,25 @@
+{
+  "description": "spell-epic's hooks for Codex (epic epic-friend P11):  each turn's end commits and syncs the shared plans (epic turn end), and a new session hears when its worktree is behind main or the last sync stopped on a conflict.  Codex's own file:  Claude Code's hooks.json names events Codex hasn't got.  epic plugin install --codex copies it into ~/.codex/hooks.json, ${PLUGIN_ROOT} made the kit's epic/ folder",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${PLUGIN_ROOT}/hooks/behind-main.mjs\"", "timeout": 10 },
+          { "type": "command", "command": "node \"${PLUGIN_ROOT}/hooks/sync-notice.mjs\"", "timeout": 10 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/shared-commit.mjs\"",
+            "timeout": 30,
+            "statusMessage": "epic turn end:  committing the shared plans"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -949,16 +949,31 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     }
   ],
+  turn: [
+    {
+      name: "end",
+      usage: "[--session <id>] [--quiet]",
+      description:
+        "end an agent's turn:  commit the shared plans, then sync them with the team's content repo (contentRemote);  " +
+        "what Claude's and Codex's end-of-turn hooks run, for any agent to run by hand;  quiet with nothing to do",
+      example: "epic turn end",
+      flags: {
+        "--session <id>": "the session whose turn it was (a commit trailer)",
+        "--quiet": "print nothing"
+      }
+    }
+  ],
   plugin: [
     {
       name: "install",
-      usage: "[--kit <folder>] [--dry-run] [--json]",
+      usage: "[--codex] [--kit <folder>] [--dry-run] [--json]",
       description:
         "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/:  the old " +
         "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
-        "safe to run again",
-      example: "epic plugin install --dry-run",
+        "--codex:  for Codex instead, its hooks in ~/.codex/hooks.json and epic on your PATH;  safe to run again",
+      example: "epic plugin install --codex --dry-run",
       flags: {
+        "--codex": "set it up for Codex:  the end-of-turn and session-start hooks, in Codex's hooks file",
         "--kit <folder>": "the kit's checkout to install from (default this code's main checkout, ~/www/spell)",
         "--dry-run": "only say what it would change",
         "--json": "print the report as JSON"
@@ -1087,7 +1102,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `plugin` (`PluginInstall`)
+ *   `hub` (`Hub`), `repo` (`Repos`), `turn` (`TurnEnd`), `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
 export type GroupName =
@@ -1105,6 +1120,7 @@ export type GroupName =
   | "server"
   | "hub"
   | "repo"
+  | "turn"
   | "plugin"
   | "pages"
 
@@ -1270,7 +1286,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  the review inbox
   inbox: {
     "--json": "print it as JSON",
-    "--session <id>": "watch:  the session that waits (default this one)",
+    "--session <id>": "watch, wait:  the session that waits (default this one)",
     "--timeout <time>": `wait:  how long (default 3300):  ${TIME}`,
     "--all": "apply:  the marks sent or not",
     "--clear": "status:  nothing being done",
@@ -1327,5 +1343,6 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--dry-run": "with --rename:  only say what it would change",
     "--json": "print it as JSON"
   },
-  whois: { "--json": "print it as JSON" }
+  whois: { "--json": "print it as JSON" },
+  guide: { "--list": "the topics, a line each", "--path": "the guide's file, for an agent to read" }
 }

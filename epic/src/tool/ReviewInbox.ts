@@ -134,7 +134,7 @@ export class ReviewInbox {
   working: Record<string, WorkingEntry> = {}
   /** requests Owen called off ("nevermind"), per item */
   canceled: Record<string, InboxCancel> = {}
-  /** the Claude session waiting on this inbox, else `null` */
+  /** the session waiting on this inbox (Claude's, Codex's ...), else `null` */
   listening: InboxListener | null = null
   /** the `sent` time a waiting session last took, else `null` */
   handedOver: string | null = null
@@ -643,14 +643,27 @@ export class ReviewInbox {
   }
 
   /**
-   * Claude session `session` started (or, `null`, stopped) waiting on this inbox.
+   * Session `session` started (or, `null`, stopped) waiting on this inbox.
    * - `seen`:  its first heartbeat (`touchListening()`)
-   * - `pid`:  the session's MONITOR's process (`InboxMonitor`, its poller):  live while it runs, with no heartbeat
+   * - `pid`:  the process that listens, live while it runs, with no heartbeat:  a Claude session's MONITOR
+   *   (`InboxMonitor`, its poller), or the `epic inbox wait` of an agent that listens by itself (epic `epic-friend` P11)
+   * - who:  the machine's person and the agent running `epic` (`EpicHome.personName()`, `agentName()`), so the page
+   *   can say whose agent it is:  "Your Codex is listening".
    * - the page says "No Claude session is reviewing this doc" while it's `null`, or stale
    *   (`liveListener()`;  decision D6)
    */
   setListening(session: string | null, at = isoTime(), pid?: number): InboxListener | null {
-    this.listening = session === null ? null : { session, since: at, seen: at, ...(pid ? { pid } : {}) }
+    this.listening =
+      session === null
+        ? null
+        : {
+            session,
+            since: at,
+            seen: at,
+            ...(pid ? { pid } : {}),
+            person: EpicHome.personName(),
+            agent: EpicHome.agentName()
+          }
     // nobody listening:  nobody doing anything either (P35)
     if (session === null) this.doing = null
     // a session took over:  the wake did its job, and the next Send with nobody listening may wake again
@@ -708,6 +721,8 @@ export class ReviewInbox {
   /**
    * The inbox as the page reads it (every route's answer):
    * the whole inbox, but `listening` `null` once stale (`liveListener()`), so the page keeps no clock rule of its own.
+   * - `lastListener`:  who listened last, while nobody does now (the stale record):  the page names that agent, and
+   *   how to wake it (epic `epic-friend` P11);  `null` while someone listens, or nobody ever did
    * - plus `unsentComments`, the ids of the comments Send would hand over (`unsentComments`):
    *   the threads' rules stay here, in `CommentList`
    * - a plain copy:  this inbox is untouched
@@ -718,6 +733,7 @@ export class ReviewInbox {
     return {
       ...this.toRecord(),
       listening,
+      lastListener: listening ? null : this.listening,
       // a session gone (or none) is doing nothing:  its last line never lingers (P35)
       doing: listening ? this.doing : null,
       // a wake under way has nothing to say yet
@@ -1167,7 +1183,12 @@ export type DoingItem = { id: string; title: string }
  * The inbox as the routes answer (`ReviewInbox.forPage()`):
  * the file's JSON, plus `unsentComments`, the ids of the comments the page's Send would hand over.
  */
-export type PageInbox = InboxRecord & { unsentComments: string[]; waitingComments: WaitingComment[] }
+export type PageInbox = InboxRecord & {
+  unsentComments: string[]
+  waitingComments: WaitingComment[]
+  /** who listened last, while nobody does now (`forPage()`);  `null` while someone does, or nobody ever did */
+  lastListener: InboxListener | null
+}
 
 /**
  * A comment waiting for Claude, as the page reads it (`PageInbox.waitingComments`):  its id and where it is
@@ -1247,10 +1268,18 @@ export type InboxCancel = { action: NowAction; at: string; told: boolean }
 
 /**
  * The session waiting on the inbox:  `seen` its last heartbeat (missing in an old file).
- * - `pid`:  the session's monitor's process, when the monitor listens:  live while it runs, with no heartbeat
- *   (`liveListener()`)
+ * - `pid`:  the process that listens, a session's monitor or an agent's own `epic inbox wait`:  live while it runs,
+ *   with no heartbeat (`liveListener()`)
+ * - `person`, `agent`:  whose agent it is (`setListening()`;  missing in a file from before epic `epic-friend` P11)
  */
-export type InboxListener = { session: string; since: string; seen?: string; pid?: number }
+export type InboxListener = {
+  session: string
+  since: string
+  seen?: string
+  pid?: number
+  person?: string
+  agent?: string
+}
 
 /**
  * The page server's wake of the epic (`ReviewInbox.claimWake()`, epic `epic-workflow` P16).
