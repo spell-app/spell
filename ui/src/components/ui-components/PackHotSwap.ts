@@ -77,9 +77,9 @@ export class PackHotSwap {
 
   /**
    * Reload the page:  through the live client when it's there (`SPELL_SERVER.reload()`), else a plain reload.
-   * - the live client's never reloads a page in view:  its "Updated:  reload" pill waits until it's out of sight
-   *   (epic `epic-engine` I116, I171);  it keeps the scroll, and holds the new page behind the old one until it's
-   *   ready (I164)
+   * - the live client's reloads quietly (epic `epic-engine` I172):  it keeps the scroll, holds the new page behind
+   *   the old one until it's ready, then cross-fades it in (I164);  while the reader types in a field, it waits for
+   *   the field to lose the focus
    * - measured before:  `location.reload()` here lost the scroll and the item open, through ~150ms of bare background
    */
   private static reload() {

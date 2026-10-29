@@ -16,8 +16,9 @@ const root = mkdtempSync(join(tmpdir(), "srv-live-"))
 let server: PageServer
 let browser: Browser
 
-/** A page long enough to scroll, with a section to address. */
+/** A page long enough to scroll, with a section to address, and a field to type in. */
 const PAGE = `<!doctype html><html><head><title>T</title></head><body><main>
+  <input id="field" aria-label="Field">
   ${"<p>filler text</p>".repeat(150)}<section id="more"><p>More</p></section>${"<p>filler text</p>".repeat(150)}
 </main></body></html>\n`
 
@@ -84,13 +85,38 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
     await page.close()
   })
 
-  it('`reload()` never reloads a page in view:  the "Updated" pill waits instead (I171)', async () => {
+  it("`reload()` in view reloads quietly (I172):  held and cross-faded, its scroll kept, no pill", async () => {
+    const page = await opened("", 1234)
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    ])
+    await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
+    expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
+    expect(await page.evaluate(() => Math.round(scrollY))).toBe(1234)
+    expect(await page.locator("body > button").count()).toBe(0)
+    await page.close()
+  })
+
+  it("`reload()` waits while the reader types in a field, and reloads once it loses the focus (I172)", async () => {
     const page = await opened()
     const origin = await page.evaluate(() => performance.timeOrigin)
+    await page.getByLabel("Field").fill("half a thought")
     await page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
     await page.waitForTimeout(800)
     expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin)
-    expect(await page.getByRole("button", { name: "Updated:  reload" }).isVisible()).toBe(true)
+    await Promise.all([page.waitForEvent("load"), page.evaluate(() => (document.activeElement as HTMLElement).blur())])
+    expect(await page.evaluate(() => performance.timeOrigin)).not.toBe(origin)
+    await page.close()
+  })
+
+  it("a field focused but not typed in doesn't hold a reload", async () => {
+    const page = await opened()
+    await page.getByLabel("Field").focus()
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    ])
     await page.close()
   })
 

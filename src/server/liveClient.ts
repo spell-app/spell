@@ -30,11 +30,9 @@ import type { SiteTab } from "spell/server/site/site.types"
  *       else the client does, on `load`
  * - `reload()`, `reloadNow()`:  added by `liveClient()`:  reload, keeping the scroll, the new page held behind the old one
  *   until it's ready (`holdReveal()`)
- *   - `reload()`:  NEVER in front of the reader (epic `epic-engine` I116, I171):  at once when the page is out of sight,
- *     else the "Updated:  reload" pill, and the reload once it's out of sight (or on a click);  for a page whose own hot
+ *   - `reload()`:  QUIETLY (epic `epic-engine` I172):  at once, held and cross-faded, unless the reader is typing in a
+ *     field;  then once the field loses the focus (or the page goes out of sight);  for a page whose own hot
  *     reload failed half way (Spell UI's `PackHotSwap`)
- *     - it reloaded NOW until I171:  a merge whose pack the swap refused reloaded every epic page in view, in every
- *       VS Code window
  *   - `reloadNow()`:  now, whatever the reader is doing
  * - `reveal(settle?)`, `revealAfter(ready)`:  added by `holdReveal()`:  a live reload's new page waits behind the old
  *   one until it's ready
@@ -161,13 +159,15 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
  *   - half a second after the last change (a build writes many files), through `reloadGate()`
- *   - NEVER a reload the reader sees (epic `epic-engine` I116;  Owen, 2026-10-25:  "This is really, really, REALLY
- *     bugging me"):  a page in view keeps its old code, a small "Updated" pill says new code waits, and it reloads
- *     the moment it's out of sight (another tab, VS Code's view hidden:  `visibilitychange`), or on a click on the pill
- *   - one out of sight already reloads at once, keeping its place
+ *   - QUIETLY (epic `epic-engine` I172;  Owen, 2026-10-29, of the pill before it:  "why do we have this?"):
+ *     the reload is held behind the old frame until the new page is ready, then cross-faded in (`holdReveal()`),
+ *     its scroll and folds kept, so the reader sees the page change and nothing else
+ *     - except while the reader TYPES in a field (`typing()`):  it waits until the field loses the focus,
+ *       or the page goes out of sight
+ *     - it replaced I116's "Updated:  reload" pill, which held new code back until the page was out of sight
  *   - any other `.js` (a repo tool) is none of the page's business
  * - the server restarted (its socket says `hello` from another `run`):
- *   reloads the same way, out of sight, for the new `/api/server/live.js` and write token
+ *   reloads the same way, quietly, for the new `/api/server/live.js` and write token
  * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
@@ -224,24 +224,35 @@ export function liveClient(scrollKey: string): void {
   const RELOAD_QUIET_MS = 500
   // every script the page fetched, as served paths (`servedPath()`):  `performance` drops entries past its buffer
   const fetched = new Set<string>()
-  // the small "Updated" pill, while a hot reload waits for the reader to finish typing
-  let pill: HTMLButtonElement | undefined
   // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
   const changedScripts = new Set<string>()
   // the `ETag`s the page's own saves got back, of versions it shows already (`shown`):  their changes are `own`
   const ownEtags = new Set<string>()
   // the server restarted since:  the page reloads whatever it takes, for the new client and write token
   let restarted = false
-  // new code the page couldn't take waits for a reload:  it comes once the page is out of sight (`reloadUnseen()`)
+  // a reload waits for the reader to leave the field they type in (`reloadQuietly()`)
   let stale = false
-  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload, waiting: showPill })
+  // the reader typed or changed something in the focused field since it got the focus (`typing()`)
+  let edited = false
+  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload })
 
   restoreScroll()
   watchFetches()
   // a worktree's page:  its root links open the worktree's files (`worktreeHref()`), however they're followed
   // (a click, a middle click, the keyboard);  before `followInFrame()` reads the link
   for (const type of ["pointerdown", "click", "auxclick"]) addEventListener(type, layUnderWorktree, true)
-  addEventListener("focusout", () => gate.settle(), true)
+  // a field's text counts as typed once it changes after the field got the focus (`input` crosses shadow roots)
+  addEventListener("focusin", () => (edited = false), true)
+  addEventListener("input", () => (edited = true), true)
+  addEventListener(
+    "focusout",
+    () => {
+      gate.settle()
+      // after the focus lands:  moved on to another field, that one isn't typed in yet
+      if (stale) setTimeout(() => stale && !typing() && reload())
+    },
+    true
+  )
   document.addEventListener("visibilitychange", () => {
     if (stale && document.visibilityState === "hidden") reload()
   })
@@ -251,7 +262,7 @@ export function liveClient(scrollKey: string): void {
     return y
   }
   config.readPage = readPage
-  config.reload = reloadUnseen
+  config.reload = reloadQuietly
   config.reloadNow = reload
   // in a frame (VS Code's "Epic Docs" view):  say where we are, and step back / forward when the frame's parent asks
   if (window.parent !== window) {
@@ -327,7 +338,7 @@ export function liveClient(scrollKey: string): void {
     }
     const address = servedPath(location.pathname, location.href, config!.worktreesPath)
     const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded(), address })
-    if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadUnseen)
+    if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadQuietly)
     else if (action === "style") swapStyles(path)
     else if (action === "script") {
       changedScripts.add(path)
@@ -400,17 +411,18 @@ export function liveClient(scrollKey: string): void {
     })
     if (!restarted && paths.length && !dispatchEvent(offer)) return
     restarted = false
-    reloadUnseen()
+    reloadQuietly()
   }
 
   /**
-   * Reload for new code, but never in front of the reader (I116):  at once when the page is out of sight, else
-   * the "Updated" pill, and the reload when it next goes out of sight (or a click on the pill).
+   * Reload for new code, quietly (epic `epic-engine` I172):  at once, held behind the old frame and cross-faded in
+   * (`reload()`), unless the reader is typing in a field (`typing()`);  then once it loses the focus, or the page
+   * goes out of sight.
+   * - it replaced I116's "Updated:  reload" pill, which waited for the page to go out of sight
    */
-  function reloadUnseen() {
-    if (document.visibilityState === "hidden") return reload()
+  function reloadQuietly() {
+    if (document.visibilityState === "hidden" || !typing()) return reload()
     stale = true
-    showPill(true)
   }
 
   /**
@@ -446,11 +458,10 @@ export function liveClient(scrollKey: string): void {
     const server = config as ServerConfig
     const page = pushed ?? (await readPage())
     const own = !!page.etag && ownEtags.delete(page.etag)
-    // the reload, if the page can't take the change (or a patch fails), never in front of the reader (I116):
-    // it waits until the page is out of sight, the "Updated" pill meanwhile
-    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload: reloadUnseen }
+    // the reload, if the page can't take the change (or a patch fails):  quietly, never while the reader types (I172)
+    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload: reloadQuietly }
     const change = new CustomEvent("spell-server:reloading", { cancelable: true, detail })
-    if (dispatchEvent(change) && !own) return reloadUnseen()
+    if (dispatchEvent(change) && !own) return reloadQuietly()
     etag = page.etag
     server.etag = page.etag
   }
@@ -533,40 +544,19 @@ export function liveClient(scrollKey: string): void {
   }
 
   /**
-   * Is the reader typing in a field?  Then a hot reload waits (`reloadGate()`).
+   * Is the reader typing in a field?  Then a reload waits (`reloadGate()`, `reloadQuietly()`).
    * - the focused element, through shadow roots (`ui-textarea`'s own textarea):
    *   a text input, a textarea, rich text (contenteditable)
+   * - and its text typed or changed since it got the focus (`edited`):  a field merely clicked into doesn't hold it
    */
   function typing(): boolean {
+    if (!edited) return false
     let focused = document.activeElement
     while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
     if (!(focused instanceof HTMLElement)) return false
     if (focused.isContentEditable || focused instanceof HTMLTextAreaElement) return true
     const notText = /^(button|checkbox|radio|range|reset|submit|color|file|image|hidden)$/
     return focused instanceof HTMLInputElement && !notText.test(focused.type)
-  }
-
-  /**
-   * Show (`on`) or drop the "Updated:  reload" pill:  a hot reload waits for the reader to leave the field they type in.
-   * - bottom right, small;  a click reloads now
-   * - on `<body>`, outside `main`, and marked `data-spell-added`:  a live update in place never touches it
-   */
-  function showPill(on: boolean) {
-    if (!on) return pill?.remove()
-    if (pill?.isConnected) return
-    pill = document.createElement("button")
-    pill.dataset.spellAdded = ""
-    pill.type = "button"
-    pill.textContent = "Updated:  reload"
-    pill.title =
-      "This page's code changed.  It reloads by itself, keeping its place, once it's out of sight;  click to reload now."
-    pill.style.cssText =
-      "position:fixed;bottom:12px;right:12px;z-index:2147483647;padding:4px 10px;border:0;border-radius:999px;" +
-      "background:#1e70bf;color:#fff;font:12px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgb(0 0 0 / 25%)"
-    // a click mustn't take the focus:  the field's `focusout` would start the reload's wait first
-    pill.addEventListener("mousedown", (event) => event.preventDefault())
-    pill.addEventListener("click", () => reload())
-    document.body.append(pill)
   }
 
   /**
@@ -1131,23 +1121,20 @@ export function worktreeHref(href: string, pagePath: string): string {
 
 /**
  * One hot reload for many changes:  `request()` reloads `wait` ms after the LAST request.
- * - `typing()` by then:  the reload waits (`waiting(true)`) until `settle()` (focus left a field),
- *   then `wait` ms more for quiet, and asks again
- * - `waiting(false)` just before it reloads
+ * - `typing()` by then:  the reload waits until `settle()` (focus left a field), then `wait` ms more for quiet,
+ *   and asks again
  * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
  */
-export function reloadGate({ wait, typing, reload, waiting }: ReloadGateProps): ReloadGate {
+export function reloadGate({ wait, typing, reload }: ReloadGateProps): ReloadGate {
   let timer: ReturnType<typeof setTimeout> | undefined
   let held = false
   const fire = () => {
     timer = undefined
     if (typing()) {
       held = true
-      waiting?.(true)
       return
     }
     held = false
-    waiting?.(false)
     reload()
   }
   const later = () => {
@@ -1167,13 +1154,11 @@ export function reloadGate({ wait, typing, reload, waiting }: ReloadGateProps): 
  * - `wait`:  ms of quiet before it reloads
  * - `typing()`:  is the reader typing in a field now?
  * - `reload()`:  reload the page
- * - `waiting(on)`:  a reload waits for the reader (`true`), or doesn't any more
  */
 export type ReloadGateProps = {
   wait: number
   typing: () => boolean
   reload: () => void
-  waiting?: (on: boolean) => void
 }
 
 /** What `reloadGate()` returns:  `request()` a reload;  `settle()` when focus leaves a field. */

@@ -87,16 +87,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           component pack swapped in place by Spell UI's `PackHotSwap`)
           - the swap is ONE short cross-fade (`PagePatch.crossFade()`), held until the re-rendered elements have drawn
           - new observed attributes, and a new version of a family's DOM class, swap in too (`HotDefinitions`, I171)
-          - a swap that fails after all asks `SPELL_SERVER.reload()`, which waits behind the pill like any other
-            (I171:  it reloaded at once, and a merge adding attributes to the epic elements reloaded every epic page in
-            view, in every VS Code window, 2026-10-29)
+          - a swap that fails after all asks `SPELL_SERVER.reload()`:  a quiet reload like any other (below)
       - anything else:  `spell-server:changed`, and the page decides
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
-      - NEVER in front of the reader (epic `epic-engine` I116):  a page in view shows an "Updated:  reload" pill, and
-        reloads the moment it's out of sight (`visibilitychange`), or on a click;  one out of sight reloads at once.
+      - QUIET (epic `epic-engine` I172;  Owen, 2026-10-29, of the pill before it:  "why do we have this?"):
+        a page in view reloads by itself, held behind its old frame and cross-faded in (below), its scroll and folds
+        kept;  in VS Code's views too
+        - except while the reader TYPES in a field (`typing()`:  the focus in an input, a textarea or rich text,
+          its text changed since it got the focus):  it waits until the field loses the focus, or the page goes out of
+          sight;  a field merely clicked into doesn't hold it
+        - a comment draft is kept in the browser as it's typed (the docs runtime), so a reload loses none of it
         - a page's own `SPELL_SERVER.reload()` too;  `SPELL_SERVER.reloadNow()` is the one that doesn't wait
+        - it replaced I116's "Updated:  reload" pill, which held a page in view on its old code until it went out of
+          sight
       - A file rewritten with the same contents (a rebuilt bundle, a `touch`) isn't reported at all (`LiveReload`).
       - Drawn with no flash (epic `epic-engine` I164;  Owen, 2026-10-29:  "use a page transition to redraw without visual
         flash"):  the reload is a replace navigation to the page itself, which Chromium runs a cross-document view

@@ -1356,7 +1356,8 @@ In `tools/`:
     - with no flash (epic `epic-engine` I164):  the new page waits behind the old one (the kit's `holdReveal()`, a
       cross-document view transition) until this runtime has landed and the page wears its theme
       (`SpellUI.themed`), then cross-fades in:  `SPELL_SERVER.reveal()`
-    - not while you type in a field:  an "Updated:  reload" pill waits, and it reloads once you leave the field
+    - not while you type in a field:  it waits, and reloads once you leave the field (epic `epic-engine` I172:  no
+      "Updated:  reload" pill any more)
     - so a merge's new widgets show up by themselves:  VS Code's window needs reloading only when the EXTENSION changes
     - `<body>`'s attributes are patched too.
     - An epic page's `<epic-*>` elements are patched, never replaced, keeping their page state
