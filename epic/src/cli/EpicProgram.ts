@@ -575,10 +575,10 @@ export class EpicProgram {
 
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
-        "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
-          ".gitignore lines;  safe to run again"
+        "set this repo up for epics:  its .epic/config.json5, the content repo beside it (made, or cloned from the " +
+          "team's), shared on GitHub, the links and their .gitignore lines;  safe to run again"
       )
-      .usage("[--name <name>] [--dry-run] [--json]")
+      .usage("[--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--dry-run] [--json]")
       .addHelpText("after", INIT_HELP)
 
     this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))
@@ -965,7 +965,8 @@ Examples:
 const CONFIG_HELP = `
 The keys (folders print absolute;  the file's are relative to the main checkout):
   contentFolder        the shared content repo:  epics, guides, sagas, the logs
-  baseBranch           the branch worktrees start from and merge into
+  contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
+  baseBranch          the branch worktrees start from and merge into
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
                        (../spell-app.worktrees), the old .claude/worktrees still read then
   installCommand       what makes a new worktree ready to run
@@ -1013,10 +1014,18 @@ In the repo's main checkout (or any worktree of it), each step skipped when it's
   .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
                        the base branch from git, the install command its lock file names (none without one),
                        window names from the repo's;  a file already there is kept
-  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/
+  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
+                       cloned instead, when the config names the team's (contentRemote) and it isn't here
+  the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
+                       (<repo>-epics), makes it private, pushes, and writes its address in the config
+                       (contentRemote);  needs GitHub's command, gh, logged in:  without it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
-Then commit .epic/config.json5 and .gitignore on the base branch.
+Then commit .epic/config.json5 and .gitignore on the base branch, and push it:  a teammate's epic init then
+clones the plans.
+
+--content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
+--no-remote makes none, and the plans stay on this machine.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
@@ -1025,6 +1034,8 @@ anywhere else.
 Examples:
   epic init --dry-run
   epic init --name Ana
+  epic init --content-repo my-app-epics
+  epic init --remote git@github.com:my-team/my-app-epics.git
   epic init`
 
 const WHOAMI_HELP = `

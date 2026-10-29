@@ -29,6 +29,7 @@ describe("EpicConfig", () => {
     expect(config.settings).toEqual(EpicConfig.DEFAULTS)
     expect(config.values()).toEqual({
       contentFolder: join(TOP, "spell-app-dev"),
+      contentRemote: "",
       baseBranch: "main",
       worktreesFolder: join(MAIN, ".claude", "worktrees"),
       installCommand: "yarn install",

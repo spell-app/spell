@@ -378,6 +378,38 @@ export class Shared {
     return importFrom ? "imported" : "created"
   }
 
+  /** The shared repo's remote (`origin`):  its address, `""` for none or no repo yet. */
+  get remote(): string {
+    const { dir } = this.config
+    return existsSync(join(dir, ".git")) ? (Git.out(["remote", "get-url", "origin"], dir) ?? "") : ""
+  }
+
+  /**
+   * Clone the shared repo from `address` into `config.dir`, which isn't there yet:  a later person's `epic init`
+   * (epic `epic-friend` P4).  Git's words when it failed (offline, no access), else `undefined`.
+   * - plain git:  no `gh`
+   * - SIDE EFFECT:  makes the folder, and the folder above it
+   */
+  clone(address: string): string | undefined {
+    const { dir } = this.config
+    mkdirSync(dirname(dir), { recursive: true })
+    const run = Git.run(["clone", "-q", address, dir], dirname(dir), { timeout: NETWORK_WAIT })
+    return run.ok ? undefined : run.err || `exit ${run.code}`
+  }
+
+  /**
+   * Make `address` the shared repo's remote (`origin`) and push its branch there, tracking it:  the first person's
+   * `epic init` (epic `epic-friend` P4).  Git's words when the push failed, else `undefined`.
+   * - throws `EpicCommandError` when git can't set the remote
+   * - SIDE EFFECT:  `git remote add` (or `set-url`) and `git push -u origin HEAD` in the shared repo
+   */
+  publish(address: string): string | undefined {
+    const { dir } = this.config
+    gitOrThrow(["remote", this.remote ? "set-url" : "add", "origin", address], dir)
+    const push = Git.run(["push", "-q", "-u", "origin", "HEAD"], dir, { timeout: NETWORK_WAIT })
+    return push.ok ? undefined : push.err || `exit ${push.code}`
+  }
+
   /**
    * Commit whatever changed in the shared repo:  `epic shared commit`, run by the `Stop` hook after every turn.
    * - ONE commit per group of files (`Shared.group()`)
@@ -501,6 +533,9 @@ const STALE = 120_000
 
 /** How long one git command may take in the shared repo, ms. */
 const GIT_WAIT = 30_000
+
+/** How long a clone or a push of the shared repo may take, ms:  over the network. */
+const NETWORK_WAIT = 120_000
 
 /** Shared folders committed as one group each (`Shared.group()`). */
 const WHOLE_FOLDERS = new Set(["pages", "templates", "ui", "brand", "agents"])

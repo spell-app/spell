@@ -255,7 +255,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
     where a repo keeps its epic things, from ONE file, `.epic/config.json5`.
     - the keys:
-      - the content folder, the base branch, the worktrees' folder, the install command, the window names,
+      - the content folder and its remote (`contentRemote`, the shared repo's address;  epic `epic-friend` P4),
+        the base branch, the worktrees' folder, the install command, the window names,
         whether session folders are linked;  and the repo's app (`app`, epic `epic-engine` I49), which the epic
         server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
       - each one's default is spell-app's layout before the file existed;  `app`'s:  none
@@ -329,6 +330,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
       - the repo list, the ask listeners, the worktree guard, ditched files, the server prune and the window registry
         all ask it;  plain `node` loads it
+    - `GitHub` (epic `epic-friend` P4):  GitHub's command, `gh`, the ONE runner of it:  `status()` (installed,
+      logged in), `login()` (`EpicHome.refreshGithub()`'s), `isOrganization()`, `createRepo()`, `addressOf()`
+      (SSH or HTTPS, as gh's `git_protocol` says);  never throws but where it says so;  `$SPELL_EPIC_GH` names a
+      stand-in;  plain `node` loads it
+      - only `epic whoami` and `epic init` run it:  never a page served or a hook
     - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
       titles, the end first (`titles()`), its end (`tail()`), the question waiting (`pendingQuestion()`);  plain
       `node` loads it (the handoff hook)
@@ -364,6 +370,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
         - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
           `epic-friend` P1)
+        - and the SHARED repo, the content repo's remote (epic `epic-friend` P4, Q1):  the first person's makes it
+          on GitHub (`GitHub`), private, named as asked (`<repo>-epics`;  `--content-repo`), pushes, and writes its
+          address in the config (`contentRemote`);  a later person's clones it where the content folder is missing
+          (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
+          says how to get it and does the rest
       - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
         what the content folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)

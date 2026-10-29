@@ -11,7 +11,7 @@ import {
   writeFileSync
 } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Git } from "spell/server/Git"
@@ -44,8 +44,8 @@ git(MAIN, "add", "-A")
 git(MAIN, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "first")
 
 describe("epic init", () => {
-  test("--dry-run:  says what it would do, and writes nothing", () => {
-    const report = new RepoInit({ main: MAIN }).init({ dryRun: true })
+  test("--dry-run:  says what it would do, and writes nothing", async () => {
+    const report = await new RepoInit({ main: MAIN }).init({ dryRun: true })
     expect(report.config.action).toBe("written")
     expect(report.content).toEqual({ folder: CONTENT, action: "created", made: ["epics", "sagas", "guides", "pages"] })
     expect(report.links.map((link) => link.action)).toEqual(Array(4).fill("would link (missing)"))
@@ -55,8 +55,8 @@ describe("epic init", () => {
     expect(RepoInit.lines(report).at(-1)).toBe("dry run:  nothing changed")
   })
 
-  test("the config for THIS repo:  beside it, its branch, no install command, its name", () => {
-    new RepoInit({ main: MAIN }).init()
+  test("the config for THIS repo:  beside it, its branch, no install command, its name", async () => {
+    await new RepoInit({ main: MAIN }).init()
     const config = new EpicConfig(MAIN)
     expect(config.contentFolder).toBe(CONTENT)
     expect(config.worktreesFolder).toBe(join(TEMP, "try.worktrees"))
@@ -96,23 +96,23 @@ describe("epic init", () => {
     expect(readFileSync(join(CONTENT, "README.md"), "utf8")).not.toMatch(/spell-app/)
   })
 
-  test("run again:  every step is done, nothing changes;  a repo's own .gitignore lines are kept", () => {
+  test("run again:  every step is done, nothing changes;  a repo's own .gitignore lines are kept", async () => {
     const ignore = join(MAIN, ".gitignore")
     writeFileSync(ignore, `node_modules/\n\n${readFileSync(ignore, "utf8")}`)
     const before = readFileSync(join(MAIN, EpicConfig.FILE), "utf8")
-    const report = new RepoInit({ main: MAIN }).init()
+    const report = await new RepoInit({ main: MAIN }).init()
     expect(report.config.action).toBe("kept")
     expect(report.content.action).toBe("exists")
     expect(report.links.map((link) => link.action)).toEqual(Array(4).fill("ok"))
     expect(report.gitignore.action).toBe("ok")
     expect(readFileSync(join(MAIN, EpicConfig.FILE), "utf8")).toBe(before)
     expect(readFileSync(ignore, "utf8")).toMatch(/^node_modules\/\n\n# shared:start/)
-    expect(RepoInit.lines(report).at(-1)).toBe("set up already")
+    expect(RepoInit.lines(report)).toContain("set up already")
   })
 
-  test("a content folder missing one of its folders:  added, and linked", () => {
+  test("a content folder missing one of its folders:  added, and linked", async () => {
     rmSync(join(CONTENT, "guides"), { recursive: true })
-    const report = new RepoInit({ main: MAIN }).init()
+    const report = await new RepoInit({ main: MAIN }).init()
     expect(report.content).toEqual({ folder: CONTENT, action: "added", made: ["guides"] })
     expect(existsSync(join(MAIN, "guides"))).toBe(true)
   })
@@ -126,16 +126,16 @@ describe("epic init", () => {
 })
 
 describe("epic init:  the person's name", () => {
-  test("--dry-run:  git's name would be kept;  nothing written", () => {
+  test("--dry-run:  git's name would be kept;  nothing written", async () => {
     rmSync(EpicHome.folder(), { recursive: true, force: true })
-    const report = new RepoInit({ main: MAIN }).init({ dryRun: true })
+    const report = await new RepoInit({ main: MAIN }).init({ dryRun: true })
     expect(report.person).toEqual({ name: "Ana Lima", action: "would keep" })
     expect(existsSync(EpicHome.personFile())).toBe(false)
   })
 
-  test("no name given, none kept:  git's name kept;  run again, kept already", () => {
-    expect(new RepoInit({ main: MAIN }).init().person).toEqual({ name: "Ana Lima", action: "kept" })
-    const again = new RepoInit({ main: MAIN }).init()
+  test("no name given, none kept:  git's name kept;  run again, kept already", async () => {
+    expect((await new RepoInit({ main: MAIN }).init()).person).toEqual({ name: "Ana Lima", action: "kept" })
+    const again = await new RepoInit({ main: MAIN }).init()
     expect(again.person).toEqual({ name: "Ana Lima", action: "already" })
     expect(RepoInit.lines(again)).toContain(`you:  Ana Lima, kept in ${EpicHome.personFile()} already`)
   })
@@ -208,6 +208,179 @@ describe("RepoInit's statics", () => {
     expect(RepoInit.withIgnoreBlock("dist/\n", [], "../x.epics")).toBe("dist/\n")
   })
 })
+
+describe("epic init:  the shared repo (epic-friend P4)", () => {
+  test("gh missing:  nothing made;  says how to get gh, and the README;  the rest of init done", async () => {
+    const app = codeRepo("no-gh")
+    const report = await new RepoInit({ main: app }).init()
+    expect(report.remote).toEqual({ action: "no gh" })
+    expect(report.links.map((link) => link.action)).toEqual(Array(4).fill("linked"))
+    expect(new EpicConfig(app).contentRemote).toBe("")
+    const lines = RepoInit.lines(report)
+    expect(lines).toContain(
+      "shared repo:  not made:  GitHub's command, gh, isn't installed.  Sharing the epics works only with GitHub for now:"
+    )
+    expect(lines).toContain("  brew install gh        (other systems:  https://cli.github.com)")
+    expect(lines).toContain("  gh auth login")
+    expect(lines.at(-1)).toBe("more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md")
+  })
+
+  test("gh logged out:  nothing made, the same two commands", async () => {
+    const app = codeRepo("logged-out")
+    const report = await withGh(stubGh(app, { loggedIn: false }), () => new RepoInit({ main: app }).init())
+    expect(report.remote).toEqual({ action: "logged out" })
+    expect(RepoInit.lines(report)).toContain("  gh auth login")
+  })
+
+  test("gh logged in:  made private on GitHub as <repo>-epics, pushed, its address in the config", async () => {
+    const app = codeRepo("first")
+    const gh = stubGh(app)
+    const report = await withGh(gh, () => new RepoInit({ main: app }).init())
+    const bare = join(gh.repos, "ana", "first-epics.git")
+    expect(report.remote).toEqual({ action: "made", repo: "ana/first-epics", address: bare })
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/first-epics --private --description /m)
+    // the content repo's commit is there
+    expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+    expect(new EpicConfig(app).contentRemote).toBe(bare)
+    const lines = RepoInit.lines(report)
+    expect(lines).toContain("shared repo:  made ana/first-epics on GitHub, private, and pushed")
+    expect(lines).toContain(
+      "next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them, " +
+        "and push it:  then a teammate's epic init clones the plans"
+    )
+    // run again:  there already, nothing made
+    const again = await withGh(gh, () => new RepoInit({ main: app }).init())
+    expect(again.remote).toEqual({ action: "already", address: bare })
+    expect(RepoInit.lines(again)).toContain("set up already")
+  })
+
+  test("a later person:  epic init in a clone of the code repo CLONES the shared repo, and links it;  no gh", async () => {
+    const app = join(TEMP, "first", "first")
+    git(app, "add", "-A")
+    git(app, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "epics")
+    const friend = join(TEMP, "friend", "first")
+    mkdirSync(dirname(friend))
+    git(TEMP, "clone", "-q", app, friend)
+    const dry = await new RepoInit({ main: friend }).init({ dryRun: true })
+    expect(dry.content.action).toBe("would clone")
+    expect(existsSync(join(TEMP, "friend", "first.epics"))).toBe(false)
+    const report = await new RepoInit({ main: friend }).init()
+    const content = join(TEMP, "friend", "first.epics")
+    expect(report.content).toEqual({ folder: content, action: "cloned", made: [] })
+    expect(report.remote.action).toBe("cloned")
+    expect(git(content, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+    expect(realpathSync(join(friend, "epics"))).toBe(join(content, "epics"))
+    const lines = RepoInit.lines(report)
+    expect(lines).toContain(`${content}:  cloned from ${join(TEMP, "first", "gh-repos", "ana", "first-epics.git")}`)
+    expect(lines).toContain("next:  epic server start, to see the epics")
+  })
+
+  test("the code repo an organization's:  the shared repo goes there too", async () => {
+    const app = codeRepo("team")
+    git(app, "remote", "add", "origin", "git@github.com:acme/team.git")
+    const gh = stubGh(app)
+    const report = await withGh(gh, () => new RepoInit({ main: app }).init({ contentRepo: "team-plans" }))
+    expect(report.remote).toMatchObject({ action: "made", repo: "acme/team-plans" })
+  })
+
+  test("--remote:  a repo made already, pushed to;  --no-remote:  none", async () => {
+    const app = codeRepo("given")
+    const bare = join(TEMP, "given", "plans.git")
+    git(TEMP, "init", "-q", "--bare", bare)
+    const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+    try {
+      expect(await new RepoInit({ main: app }).run(["--remote", bare, "--json"])).toBe(0)
+    } finally {
+      out.mockRestore()
+    }
+    expect(new EpicConfig(app).contentRemote).toBe(bare)
+    expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+
+    const alone = codeRepo("alone")
+    const report = await withGh(stubGh(alone), () => new RepoInit({ main: alone }).init({ noRemote: true }))
+    expect(report.remote).toEqual({ action: "skipped" })
+    expect(new EpicConfig(alone).contentRemote).toBe("")
+    expect(RepoInit.lines(report)).toContain("shared repo:  none (--no-remote):  the plans stay on this machine")
+  })
+
+  test("--dry-run:  says what it would make, makes nothing", async () => {
+    const app = codeRepo("dry")
+    const gh = stubGh(app)
+    const report = await withGh(gh, () => new RepoInit({ main: app }).init({ dryRun: true, contentRepo: "dry-x" }))
+    expect(report.remote).toEqual({ action: "would make", repo: "ana/dry-x" })
+    expect(existsSync(gh.log) && readFileSync(gh.log, "utf8")).not.toMatch(/repo create/)
+  })
+
+  test("--content-repo, --remote and --no-remote:  one at a time;  a repo name GitHub takes", async () => {
+    const init = new RepoInit({ main: MAIN })
+    await expect(init.run(["--remote", "x", "--no-remote"])).rejects.toThrow(/give one of/)
+    await expect(init.run(["--content-repo", "no way"])).rejects.toThrow(/isn't a GitHub repo name/)
+  })
+
+  test("keepRemote():  in place in the line epic init writes;  added to an older file, its comments kept", () => {
+    const file = join(TEMP, "config.json5")
+    writeFileSync(file, RepoInit.configText(RepoInit.settingsFor(MAIN)))
+    RepoInit.keepRemote(file, "git@github.com:o/x.git")
+    expect(readFileSync(file, "utf8")).toMatch(/\n {2}"contentRemote": "git@github.com:o\/x.git",\n/)
+    writeFileSync(file, '// mine\n{\n  "baseBranch": "main"\n}\n')
+    RepoInit.keepRemote(file, "git@github.com:o/x.git")
+    expect(readFileSync(file, "utf8")).toMatch(/^\/\/ mine\n/)
+    expect(EpicConfig.settingsFrom(readFileSync(file, "utf8")).contentRemote).toBe("git@github.com:o/x.git")
+  })
+})
+
+/** A code repo `<TEMP>/<name>/<name>` with one commit, nothing set up for epics. */
+function codeRepo(name: string): string {
+  const app = join(TEMP, name, name)
+  mkdirSync(app, { recursive: true })
+  git(app, "init", "-q", "-b", "main")
+  writeFileSync(join(app, "README.md"), `# ${name}\n`)
+  git(app, "add", "-A")
+  git(app, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "first")
+  return app
+}
+
+/**
+ * A stand-in `gh` beside the code repo at `app`, logged in as `ana` (unless `loggedIn` is `false`):
+ * `repo create` makes a local BARE repo in `repos`, `repo view` gives its path as both addresses, `acme` is an
+ * organization;  every call logged in `log`.
+ */
+function stubGh(app: string, { loggedIn = true } = {}): { command: string; repos: string; log: string } {
+  const dir = dirname(app)
+  const command = join(dir, "gh")
+  const repos = join(dir, "gh-repos")
+  const log = join(dir, "gh.log")
+  writeFileSync(
+    command,
+    `#!/bin/sh
+echo "$*" >> "${log}"
+case "$1 $2" in
+  "--version "*) echo "gh version 2.0.0" ;;
+  "auth status") ${loggedIn ? "exit 0" : 'echo "You are not logged into any GitHub hosts." >&2; exit 1'} ;;
+  "api user") echo ana ;;
+  "api users/acme") echo Organization ;;
+  "api users/"*) echo User ;;
+  "repo create") mkdir -p "${repos}/$(dirname "$3")" && git init -q --bare "${repos}/$3.git" ;;
+  "repo view") echo "{\\"url\\":\\"${repos}/$3.git\\",\\"sshUrl\\":\\"${repos}/$3.git\\"}" ;;
+  "config get") echo https ;;
+  *) echo "stub gh:  $*" >&2; exit 1 ;;
+esac
+`
+  )
+  chmodSync(command, 0o755)
+  return { command, repos, log }
+}
+
+/** `work()`, with `$SPELL_EPIC_GH` naming the stand-in `gh`, put back after. */
+async function withGh<T>(gh: { command: string }, work: () => Promise<T>): Promise<T> {
+  const was = process.env.SPELL_EPIC_GH
+  process.env.SPELL_EPIC_GH = gh.command
+  try {
+    return await work()
+  } finally {
+    process.env.SPELL_EPIC_GH = was
+  }
+}
 
 /** `git <args>` in `cwd`. */
 function git(cwd: string, ...args: string[]): string {

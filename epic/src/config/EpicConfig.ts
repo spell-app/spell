@@ -64,6 +64,7 @@ export class EpicConfig {
   /** every value with no file, or for a key the file leaves out:  how spell-app worked before the file existed */
   static readonly DEFAULTS: EpicSettings = {
     contentFolder: "../spell-app-dev",
+    contentRemote: "",
     baseBranch: "main",
     worktreesFolder: ".claude/worktrees",
     installCommand: "yarn install",
@@ -196,6 +197,15 @@ export class EpicConfig {
   ////////////////
   // ## The values
   ////////////////
+
+  /**
+   * the shared content repo's address (`contentRemote`, epic `epic-friend` P4):  where everyone pulls the plans from
+   * and pushes them to, as git takes it (`git@github.com:o/x-epics.git`);  `""` when it has none
+   * - `epic init` writes it as it makes the shared repo, and clones it where the content folder is missing
+   */
+  get contentRemote(): string {
+    return this.settings.contentRemote
+  }
 
   /** the shared content repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
   get contentFolder(): string {
@@ -635,6 +645,7 @@ export class EpicConfig {
   values(): Record<string, string | boolean | number> {
     return {
       contentFolder: this.contentFolder,
+      contentRemote: this.contentRemote,
       baseBranch: this.baseBranch,
       worktreesFolder: this.worktreesFolder,
       installCommand: this.installCommand,
@@ -736,6 +747,7 @@ export class EpicConfig {
     const app = appGiven as Record<string, unknown>
     return {
       contentFolder: valueOf(given, "contentFolder", defaults.contentFolder, file),
+      contentRemote: valueOf(given, "contentRemote", defaults.contentRemote, file, "", { empty: true }),
       baseBranch: valueOf(given, "baseBranch", defaults.baseBranch, file),
       worktreesFolder: valueOf(given, "worktreesFolder", defaults.worktreesFolder, file),
       installCommand: valueOf(given, "installCommand", defaults.installCommand, file, "", { empty: true }),
@@ -792,6 +804,10 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  * What `.epic/config.json5` holds:  where a repo keeps its epic things.  Every key is optional in the file.
  * - `contentFolder`:  the shared content repo, relative to the main checkout (`../spell-app-dev`):
  *   the epics, guides, sagas and logs every checkout links in (`epic shared`, the turn-end commit hook)
+ * - `contentRemote`:  the shared content repo's address, as git takes it (`git@github.com:o/my-app-epics.git`;
+ *   epic `epic-friend` P4);  `""` (the default):  none, the plans stay on this machine
+ *   - the FIRST person's `epic init` makes the repo on GitHub and writes it;  a later person's clones it, where the
+ *     content folder is missing
  * - `baseBranch`:  the branch worktrees start from and merge into (`main`):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
  * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`.claude/worktrees`), one folder each:
@@ -865,6 +881,7 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  */
 export type EpicSettings = {
   contentFolder: string
+  contentRemote: string
   baseBranch: string
   worktreesFolder: string
   installCommand: string

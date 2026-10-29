@@ -1,18 +1,20 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
+import { DataFile } from "spell/server/DataFile"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
+import { GitHub } from "spell/epic/config/GitHub"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { Shared } from "./Shared"
 
 /****************
  * ### `RepoInit`
- * `epic init [--name <name>] [--dry-run] [--json]`:  set a repo up for epics (epic `epic-eject` P9),
- * in its main checkout or any worktree of it.
+ * `epic init [--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--dry-run] [--json]`:
+ * set a repo up for epics (epic `epic-eject` P9), in its main checkout or any worktree of it.
  *
  * In order, each step skipped when it's done already, so it's safe to run again:
  * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`settingsFor()`):
@@ -24,6 +26,16 @@ import { Shared } from "./Shared"
  *    - a file already there is kept as it is
  * 2. makes the content folder, a git repo of its own, with a folder for each of `sharedFolders`
  *    (`Shared.init()`):  `epics`, `sagas`, `guides`, `pages`
+ *    - a LATER person (the config names its `contentRemote`, the folder is missing):  clones it instead
+ *      (`Shared.clone()`, plain git;  epic `epic-friend` P4)
+ * 2b. gives the content repo its REMOTE, so a team shares the plans (`remoteStep()`, epic `epic-friend` P4, Q1):
+ *    - the FIRST person:  asks what to call it (`CLI.ask()`, suggesting `<repo>-epics`;  `--content-repo`
+ *      answers), makes it on GitHub, private (`GitHub.createRepo()`), pushes, and writes its address into the
+ *      config (`contentRemote`)
+ *      - its owner:  the code repo's when that's an organization, else the person's own GitHub account
+ *      - GitHub only, for now:  without `gh`, or logged out, it says how to get it, and carries on without
+ *    - `--remote <address>`:  a repo made already;  `--no-remote`:  none, the plans stay on this machine
+ *    - a content repo with a remote already:  its address written into the config, when it isn't there
  * 3. links those folders in at the checkout's root (`Shared.link()`)
  * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:  the links
  *    - not the window files (`epic window`:  each machine's own):
@@ -34,7 +46,7 @@ import { Shared } from "./Shared"
  *      with no terminal (a skill, a Claude session), that suggestion
  *    - a name kept already stays, unless `--name` gives another
  *
- * - `--dry-run`:  says what it would do, and writes nothing
+ * - `--dry-run`:  says what it would do, and writes nothing (it asks `gh` whether it could make the shared repo)
  * - `--json`:  the report as JSON
  * - it commits nothing in the repo:  it says which files to commit (the config and `.gitignore`),
  *   since every new worktree branches from the base branch and needs the `.gitignore` to leave the links alone
@@ -50,11 +62,21 @@ export class RepoInit {
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
-    const { flags } = parseVerbArgs(args, ["dryRun", "json"])
+    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote"])
     const dryRun = flags.dryRun === true
+    const remote = stringFlag(flags.remote)
+    const contentRepo = stringFlag(flags.contentRepo)
+    const noRemote = flags.noRemote === true
+    if ([remote, contentRepo, noRemote || undefined].filter(Boolean).length > 1)
+      throw new EpicCommandError("epic init:  give one of --content-repo, --remote or --no-remote")
+    if (contentRepo && !REPO_NAME.test(contentRepo))
+      throw new EpicCommandError(
+        `epic init:  --content-repo ${contentRepo} isn't a GitHub repo name;  letters, digits, ".", "-" and "_" only`
+      )
     // asked only when it'd be kept, and never into JSON's output
-    const name = stringFlag(flags.name) ?? (dryRun || flags.json ? undefined : await RepoInit.askName())
-    const report = this.init({ dryRun, name })
+    const ask = !dryRun && !flags.json
+    const name = stringFlag(flags.name) ?? (ask ? await RepoInit.askName() : undefined)
+    const report = await this.init({ dryRun, name, remote, contentRepo, noRemote, ask })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of RepoInit.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -62,11 +84,18 @@ export class RepoInit {
 
   /**
    * Set the repo up (the class's steps);  what it did, or would do with `dryRun`.
-   * - `name`:  the name to keep for this machine's person (`EpicHome`);  none:  git's, when no name is kept yet
-   * - SIDE EFFECT (not `dryRun`):  writes the config and `.gitignore`, makes the content repo and the links, keeps
-   *   the person's name in the epic home
+   * - the options:  `InitOptions`
+   * - SIDE EFFECT (not `dryRun`):  writes the config and `.gitignore`, makes (or clones) the content repo and the
+   *   links, may make the shared repo on GitHub and push to it, keeps the person's name in the epic home
    */
-  init({ dryRun = false, name }: { dryRun?: boolean; name?: string } = {}): InitReport {
+  async init({
+    dryRun = false,
+    name,
+    remote,
+    contentRepo,
+    noRemote = false,
+    ask = false
+  }: InitOptions = {}): Promise<InitReport> {
     const { main } = this
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
@@ -83,17 +112,28 @@ export class RepoInit {
       config: { file: configFile, action: hadConfig ? "kept" : "written", settings },
       content: { folder: content, action: "exists", made: [] },
       links: [],
+      remote: { action: "skipped" },
       gitignore: { file: join(main, ".gitignore"), action: "ok" },
       person: RepoInit.personStep({ dryRun, name })
+    }
+    const config = { main, dir: content, worktrees: [], links: folders }
+    const shared = new Shared({ checkout: main, config })
+    // a later person:  the shared repo's address in the config, the folder missing:  cloned
+    const address = settings.contentRemote
+    if (address && !noRemote && !existsSync(content)) {
+      report.remote = { action: dryRun ? "would clone" : "cloned", address }
+      const error = dryRun ? undefined : shared.clone(address)
+      if (error) report.remote = { action: "clone failed", address, error }
     }
     // the content repo, and any of its folders missing
     const isRepo = existsSync(join(content, ".git"))
     const missing = folders.filter((folder) => !existsSync(join(content, folder)))
     report.content.made = isRepo ? missing : folders
     report.content.action = isRepo ? (missing.length ? "added" : "exists") : "created"
-    const config = { main, dir: content, worktrees: [], links: folders }
-    const shared = new Shared({ checkout: main, config })
-    if (!dryRun) {
+    if (report.remote.action === "cloned") report.content.action = "cloned"
+    if (report.remote.action === "would clone") report.content = { folder: content, action: "would clone", made: [] }
+    if (report.remote.action === "clone failed") report.content = { folder: content, action: "missing", made: [] }
+    if (!dryRun && report.content.action !== "missing") {
       if (!isRepo) shared.init()
       else
         for (const folder of missing) {
@@ -101,8 +141,14 @@ export class RepoInit {
           writeFileSync(join(content, folder, ".gitkeep"), "")
         }
     }
-    // the links:  what each is now, and what linking does
-    report.links = dryRun
+    // its remote:  made, added or found, unless it was just cloned (or couldn't be)
+    if (!["cloned", "would clone", "clone failed"].includes(report.remote.action))
+      report.remote = await this.remoteStep({ shared, settings, dryRun, remote, contentRepo, noRemote, ask })
+    // the address written:  the report's settings say so too
+    if (REMOTE_WRITTEN.has(report.remote.action) && report.remote.address)
+      report.config.settings = { ...report.config.settings, contentRemote: report.remote.address }
+    // the links:  what each is now, and what linking does;  none into a content repo that isn't there
+    report.links = report.content.action === "missing" ? [] : dryRun
       ? folders.map((path) => {
           const state = shared.linkState(main, path)
           return { path, action: state === "ok" ? "ok" : `would link (${state})` }
@@ -118,6 +164,62 @@ export class RepoInit {
     return report
   }
 
+  /**
+   * The content repo's REMOTE (the class's step 2b):  what it did, or would do with `dryRun`.
+   * - a remote already:  its address written into the config when it isn't there (`recorded`)
+   *   - `remote` naming another:  throws `EpicCommandError`, saying how to change it
+   * - `noRemote`:  `skipped`
+   * - `remote`, else the config's `contentRemote`:  made the remote, pushed (`added`)
+   * - else made on GitHub (`made`), when `gh` is there and logged in (`no gh`, `logged out`);  `failed` with gh's
+   *   words when GitHub said no
+   *   - its name:  `contentRepo`, else asked when `ask` (in a terminal), else `<repo>-epics`
+   * - a push that failed is in `error`:  the repo and its address stand
+   * - SIDE EFFECT (not `dryRun`):  the repo on GitHub, the remote, the push, `contentRemote` in the config
+   */
+  async remoteStep({ shared, settings, dryRun, remote, contentRepo, noRemote, ask }: RemoteStepOptions): Promise<RemoteReport> {
+    const configFile = join(this.main, EpicConfig.FILE)
+    const origin = shared.remote
+    if (origin) {
+      if (remote && remote !== origin)
+        throw new EpicCommandError(
+          `epic init:  the content repo's remote is ${origin} already;  to change it:  git -C ${shared.config.dir} ` +
+            `remote set-url origin ${remote}, then epic init again`
+        )
+      if (settings.contentRemote === origin) return { action: "already", address: origin }
+      if (!dryRun) RepoInit.keepRemote(configFile, origin)
+      return { action: dryRun ? "would record" : "recorded", address: origin }
+    }
+    if (noRemote) return { action: "skipped" }
+    const given = remote ?? settings.contentRemote
+    if (given) {
+      if (dryRun) return { action: "would add", address: given }
+      const error = shared.publish(given)
+      if (given !== settings.contentRemote) RepoInit.keepRemote(configFile, given)
+      return { action: "added", address: given, ...(error && { error }) }
+    }
+    // made on GitHub:  only with gh, logged in (Owen:  "this only works with GitHub for now")
+    const gh = GitHub.status()
+    if (gh === "missing") return { action: "no gh" }
+    const owner = gh === "ready" ? RepoInit.ownerFor(this.main) : undefined
+    if (!owner) return { action: "logged out" }
+    const suggestion = `${basename(this.main)}-epics`
+    const repoName = contentRepo ?? (ask ? await CLI.ask(REPO_QUESTION, { suggestion }) : suggestion)
+    if (!REPO_NAME.test(repoName))
+      return { action: "failed", repo: `${owner}/${repoName}`, error: "letters, digits, \".\", \"-\" and \"_\" only" }
+    const repo = `${owner}/${repoName}`
+    if (dryRun) return { action: "would make", repo }
+    let address: string
+    try {
+      GitHub.createRepo(repo, { description: `The epic pages of ${basename(this.main)}:  plans, guides and sagas` })
+      address = GitHub.addressOf(repo)
+    } catch (error) {
+      return { action: "failed", repo, error: (error as Error).message }
+    }
+    const error = shared.publish(address)
+    RepoInit.keepRemote(configFile, address)
+    return { action: "made", repo, address, ...(error && { error }) }
+  }
+
   ////////////////
   // ## Statics:  the values, the files' text, the report's lines
   ////////////////
@@ -130,6 +232,33 @@ export class RepoInit {
     if (!Git.run(["rev-parse", "--git-dir"], cwd).ok)
       throw new EpicCommandError("epic init:  not in a git repo.  Run it in the repo's checkout (git init first)")
     return Git.mainRoot(cwd)
+  }
+
+  /**
+   * Whose GitHub account a new shared repo goes in, for the code repo at `main`:  the code repo's owner when that's
+   * an ORGANIZATION (its `origin` on GitHub), else the person's own login;  `undefined` when gh knows no login.
+   * - why not always the code repo's owner:  a person can't make a repo in someone else's own account
+   * - runs `gh` (the login, kept as `EpicHome.refreshGithub()` keeps it;  the owner's kind)
+   */
+  static ownerFor(main: string): string | undefined {
+    const login = EpicHome.refreshGithub()
+    const origin = Git.out(["remote", "get-url", "origin"], main)
+    const owner = origin ? GitHub.ownerIn(origin) : undefined
+    if (owner && owner !== login && GitHub.isOrganization(owner)) return owner
+    return login
+  }
+
+  /**
+   * Write `address` into config file `file` as its `contentRemote`, keeping the rest as written.
+   * - the line `epic init` writes is changed in place;  a file without one (written before epic `epic-friend` P4)
+   *   gets the key through `DataFile`, its comments kept
+   * - SIDE EFFECT:  writes the file
+   */
+  static keepRemote(file: string, address: string): void {
+    const text = readFileSync(file, "utf8")
+    const line = /^(\s*"contentRemote":\s*)"(?:[^"\\]|\\.)*"/m
+    if (line.test(text)) writeFileSync(file, text.replace(line, (_all, key: string) => key + JSON.stringify(address)))
+    else DataFile.edit<Record<string, unknown>>(file, (settings) => ({ ...settings, contentRemote: address }))
   }
 
   /**
@@ -163,6 +292,7 @@ export class RepoInit {
   /**
    * The settings `epic init` writes for the repo whose main checkout is `main`:
    * - `contentFolder`:  `../<repo>.epics`;  `worktreesFolder`:  `../<repo>.worktrees`, both beside the repo
+   * - `contentRemote`:  `""`, none yet:  `remoteStep()` writes it
    * - `baseBranch`:  the remote's default branch (`origin/HEAD`), else the main checkout's branch, else `main`
    * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
    * - `installOnCreate`:  on when there is one, so a worktree's window never opens without its packages
@@ -186,6 +316,7 @@ export class RepoInit {
     const installCommand = RepoInit.installCommandOf(main)
     return {
       contentFolder: `../${repo}.epics`,
+      contentRemote: "",
       baseBranch: RepoInit.baseBranchOf(main),
       worktreesFolder: `../${repo}.worktrees`,
       installCommand,
@@ -234,6 +365,9 @@ export class RepoInit {
 {
   // the content repo:  epic pages, sagas, guides, pages;  a git repo of its own, read from there
   "contentFolder": ${value("contentFolder")},
+  // the content repo's address, which everyone pulls from and pushes to ("":  none, the plans stay on this machine);
+  // epic init writes it as it makes the shared repo, and clones it where the content folder is missing
+  "contentRemote": ${value("contentRemote")},
   // the branch worktrees start from and merge into
   "baseBranch": ${value("baseBranch")},
   // where new worktrees go, one folder each:  <worktreesFolder>/<name>
@@ -319,28 +453,95 @@ export class RepoInit {
         : Object.entries({ ...config.settings, ...prefixed("windows.", config.settings.windows) })
             .filter(([key]) => key !== "windows")
             .map(([key, value]) => `  ${key}:  ${JSON.stringify(value)}`)),
-      content.action === "exists"
-        ? `${content.folder}:  there already`
-        : content.action === "added"
-          ? `${content.folder}:  ${report.dryRun ? "would add" : "added"} ${content.made.join(", ")}`
-          : `${content.folder}:  ${report.dryRun ? "would make it" : "made"}, a git repo with ${content.made.join(", ")}`,
+      contentLineFor(report),
+      ...remoteLinesFor(report),
       ...report.links.map(({ path, action }) => `${join(report.main, path)}:  ${action}`),
       `${report.gitignore.file}:  ${report.gitignore.action === "ok" ? "lists the links already" : `${would}${report.gitignore.action}`}`,
       personLineFor(report.person)
     ]
     if (report.dryRun) return [...lines, "dry run:  nothing changed"]
+    const remote = report.remote
+    const configChanged = config.action === "written" || REMOTE_WRITTEN.has(remote.action)
     const toCommit = [
-      ...(config.action === "written" ? [EpicConfig.FILE] : []),
+      ...(configChanged ? [EpicConfig.FILE] : []),
       ...(report.gitignore.action === "ok" ? [] : [".gitignore"])
     ]
-    return [
-      ...lines,
-      ...(toCommit.length
-        ? [
-            `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}`
-          ]
-        : ["set up already"])
-    ]
+    const next = toCommit.length
+      ? [
+          `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}` +
+            (remote.address && configChanged ? ", and push it:  then a teammate's epic init clones the plans" : "")
+        ]
+      : remote.action === "cloned"
+        ? ["next:  epic server start, to see the epics"]
+        : content.action === "exists" && !REMOTE_WRITTEN.has(remote.action)
+          ? ["set up already"]
+          : []
+    const more = SHOW_README.has(remote.action) ? [`more on sharing the epics:  ${README_EPICS}`] : []
+    return [...lines, ...next, ...more]
+  }
+}
+
+/** What `epic init` says about the content folder. */
+function contentLineFor({ content, remote, dryRun }: InitReport): string {
+  const { folder } = content
+  switch (content.action) {
+    case "exists":
+      return `${folder}:  there already`
+    case "added":
+      return `${folder}:  ${dryRun ? "would add" : "added"} ${content.made.join(", ")}`
+    case "cloned":
+      return `${folder}:  cloned from ${remote.address}`
+    case "would clone":
+      return `${folder}:  would clone it from ${remote.address}`
+    case "missing":
+      return `${folder}:  couldn't clone ${remote.address}:  ${remote.error}`
+    default /* case "created" */:
+      return `${folder}:  ${dryRun ? "would make it" : "made"}, a git repo with ${content.made.join(", ")}`
+  }
+}
+
+/** What `epic init` says about the content repo's remote:  none for a clone (the content line says it). */
+function remoteLinesFor({ remote, content, main }: InitReport): string[] {
+  const { address, repo, error } = remote
+  const pushByHand = `  push it by hand:  git -C ${content.folder} push -u origin HEAD`
+  const pushed = (what: string) =>
+    error ? [`shared repo:  ${what};  the push failed:  ${error}`, pushByHand] : [`shared repo:  ${what}, and pushed`]
+  const inConfig = `${EpicConfig.FILE} (contentRemote)`
+  switch (remote.action) {
+    case "cloned":
+    case "would clone":
+      return []
+    case "clone failed":
+      return [`  check you can reach it (git clone ${address} ${content.folder}), then run epic init again`]
+    case "made":
+      return [...pushed(`made ${repo} on GitHub, private`), `  its address, ${address}, is in ${inConfig}`]
+    case "would make":
+      return [`shared repo:  would make ${repo} on GitHub, private, push to it, and write its address in ${inConfig}`]
+    case "added":
+      return [...pushed(`${address}, the content repo's remote now`), `  its address is in ${inConfig}`]
+    case "would add":
+      return [`shared repo:  would make ${address} the content repo's remote, push to it, and write it in ${inConfig}`]
+    case "recorded":
+    case "would record":
+      return [`shared repo:  ${address}, ${remote.action === "recorded" ? "written" : "would be written"} in ${inConfig}`]
+    case "already":
+      return [`shared repo:  ${address}`]
+    case "skipped":
+      return [`shared repo:  none (--no-remote):  the plans stay on this machine`]
+    case "failed":
+      return [
+        `shared repo:  couldn't make ${repo} on GitHub:  ${error}`,
+        `  another name:  epic init --content-repo <name>;  a repo you made:  epic init --remote <address>`
+      ]
+    default /* case "no gh", "logged out" */: {
+      const why = remote.action === "no gh" ? "GitHub's command, gh, isn't installed" : "gh isn't logged in to GitHub"
+      return [
+        `shared repo:  not made:  ${why}.  Sharing the epics works only with GitHub for now:`,
+        "  brew install gh        (other systems:  https://cli.github.com)",
+        "  gh auth login",
+        `  then epic init again, in ${main};  or epic init --remote <address>, for a repo you made yourself`
+      ]
+    }
   }
 }
 
@@ -357,15 +558,113 @@ export type InitReport = {
   main: string
   dryRun: boolean
   config: { file: string; action: "written" | "kept"; settings: EpicSettings }
-  content: { folder: string; action: "created" | "added" | "exists"; made: string[] }
+  /**
+   * the content folder:  `created` (a new repo), `cloned` from the shared repo, `added` folders, `exists`;
+   * `would clone` (a dry run);  `missing` when the clone failed
+   */
+  content: {
+    folder: string
+    action: "created" | "cloned" | "added" | "exists" | "would clone" | "missing"
+    made: string[]
+  }
+  /** the content repo's remote, the shared repo:  `RemoteReport` */
+  remote: RemoteReport
   links: { path: string; action: string }[]
   gitignore: { file: string; action: "ok" | "updated" | "written" }
   /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
   person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
 }
 
+/**
+ * What `epic init` did about the content repo's remote, the SHARED repo (`RepoInit.remoteStep()`):
+ * - `action`:
+ *   - `cloned`:  a later person's content folder, cloned from `address`;  `clone failed`, git's words in `error`
+ *   - `made`:  `repo` made on GitHub, pushed to, its `address` written in the config
+ *   - `added`:  `address` (`--remote`, or the config's) made the remote, pushed to
+ *   - `recorded`:  the remote the content repo had, written in the config;  `already`:  there already
+ *   - `skipped`:  `--no-remote`
+ *   - `no gh`, `logged out`:  GitHub's command missing, or not logged in:  nothing made
+ *   - `failed`:  GitHub said no (`error`:  gh's words)
+ *   - `would ...`:  a dry run's
+ * - `error`:  also a push that failed (`made`, `added`):  the remote stands, the push is left to do by hand
+ */
+export type RemoteReport = {
+  action: RemoteAction
+  /** the shared repo's address, as git takes it */
+  address?: string
+  /** the GitHub repo made, or that would be:  `owner/name` */
+  repo?: string
+  /** git's or gh's words, when something failed */
+  error?: string
+}
+
+/** What `epic init` did about the shared repo:  `RemoteReport`. */
+export type RemoteAction =
+  | "cloned"
+  | "clone failed"
+  | "made"
+  | "added"
+  | "recorded"
+  | "already"
+  | "skipped"
+  | "no gh"
+  | "logged out"
+  | "failed"
+  | "would clone"
+  | "would make"
+  | "would add"
+  | "would record"
+
+/** What `RepoInit.init()` takes. */
+export type InitOptions = {
+  /** only say what it would do;  default `false` */
+  dryRun?: boolean
+  /** the name to keep for this machine's person (`EpicHome`);  none:  git's, when no name is kept yet */
+  name?: string
+  /** the shared repo's address, made already (`--remote`):  made the content repo's remote, and pushed to */
+  remote?: string
+  /** the name to give the shared repo on GitHub (`--content-repo`);  none:  asked, else `<repo>-epics` */
+  contentRepo?: string
+  /** no remote, no shared repo (`--no-remote`):  the plans stay on this machine;  default `false` */
+  noRemote?: boolean
+  /** whether to ask the shared repo's name in a terminal (`CLI.ask()`);  default `false`:  the suggestion */
+  ask?: boolean
+}
+
+/** What `RepoInit.remoteStep()` takes:  `init()`'s options, the content repo and the settings in force. */
+export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo"> & {
+  shared: Shared
+  settings: EpicSettings
+  dryRun: boolean
+  noRemote: boolean
+  ask: boolean
+}
+
 /** What `epic init` asks, in a terminal, when no name is kept. */
 const NAME_QUESTION = "What do you want to be called?"
+
+/** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub. */
+const REPO_QUESTION = "What should the shared epics repo be called?"
+
+/** A GitHub repo name:  letters, digits, `.`, `-` and `_`, at most 100. */
+const REPO_NAME = /^[\w.-]{1,100}$/
+
+/** The remote steps that write the shared repo's address into the config, so it's to commit. */
+const REMOTE_WRITTEN: ReadonlySet<RemoteAction> = new Set(["made", "added", "recorded"])
+
+/** The remote steps after which `epic init` points at the epics README. */
+const SHOW_README: ReadonlySet<RemoteAction> = new Set([
+  "cloned",
+  "clone failed",
+  "made",
+  "added",
+  "no gh",
+  "logged out",
+  "failed"
+])
+
+/** The epics README, on GitHub (it's the kit's `README-epics.md`):  how a team shares the epics. */
+const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.md"
 
 /**
  * The content repo's folders for a new repo:  what the epic tooling reads and writes.
