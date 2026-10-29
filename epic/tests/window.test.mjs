@@ -216,7 +216,7 @@ test("a worktree's window:  the main root first, then the worktree's root, then 
   const workspace = Window.worktreeWorkspace("ui", "seo")
   // the file's in the content folder's windows/ongoing (epic-eject P13):  paths relative to it
   assert.deepEqual(workspace.folders, [
-    { path: "../../../spell-app", name: "spell" },
+    { path: "../../../spell-app", name: "spell-app" },
     { path: "../../../spell-app/.claude/worktrees/seo", name: "⎇ seo" },
     // `[]` on a machine without `../spell-app-dev`
     ...Window.sharedFolder(dirname(Window.worktreeFile("seo")))
@@ -480,7 +480,7 @@ test("a repo moved behind a compat link (I59):  `init` drops the content folder 
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {
   const workspace = Window.workspace("ui")
   assert.deepEqual(workspace.folders, [
-    { path: "../../spell-app", name: "spell" },
+    { path: "../../spell-app", name: "spell-app" },
     ...Window.sharedFolder(dirname(Window.file("ui")))
   ])
   const exclude = workspace.settings["files.exclude"]

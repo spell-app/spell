@@ -58,7 +58,7 @@ export const epicOptionVocabulary = {
       kind: "string",
       format: "date",
       description:
-        "A STANDING set's option Owen picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, " +
+        "A STANDING set's option you picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, " +
         "folded under `Picked`."
     },
 

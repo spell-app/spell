@@ -189,6 +189,7 @@ class FakeRoutes {
     now: [],
     working: {},
     listening: null,
+    lastListener: null,
     unsentComments: [],
     waitingComments: [],
     woken: null,

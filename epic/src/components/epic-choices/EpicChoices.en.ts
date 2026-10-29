@@ -33,19 +33,19 @@ export const epicChoicesVocabulary = {
       name: "multiple",
       kind: "boolean",
       description:
-        "Pick any:  Owen may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is " +
-        "reviewed its heading's switch flips it;  the flip goes with his Send."
+        "Pick any:  you may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is " +
+        "reviewed its heading's switch flips it;  the flip goes with your Send."
     },
     {
       name: "fixed",
       kind: "boolean",
-      description: "Owen may NOT add options:  no Add choice.  None:  every open set takes his (Owen's comment C4)."
+      description: "You may NOT add options:  no Add choice.  None:  every open set takes yours (comment C4)."
     },
     {
       name: "closed",
       kind: "boolean",
       description:
-        "The set is DONE (Owen's comment C11):  no more picks, and no options added, edited or removed;  drawn " +
+        "The set is DONE (comment C11):  no more picks, and no options added, edited or removed;  drawn " +
         "answered.  `epic option close`."
     },
     {
@@ -80,7 +80,7 @@ export const epicChoicesVocabulary = {
   events: [],
   slots: [
     { name: "", description: "The options." },
-    { name: "picked", description: "A standing set's options Owen picked (`picked-on`):  folded under Picked." },
+    { name: "picked", description: "A standing set's options you picked (`picked-on`):  folded under Picked." },
     { name: "removed", description: "Its removed options (`removed`), never erased:  folded under Removed (n)." }
   ],
   parts: [
@@ -96,7 +96,7 @@ export const epicChoicesVocabulary = {
       description:
         "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
     },
-    { name: "cards", description: "Open:  the cards' grid, Owen's added ones and Add choice's form too (P50)." },
+    { name: "cards", description: "Open:  the cards' grid, the ones you added and Add choice's form too (P50)." },
     {
       name: "heading",
       description:
@@ -112,7 +112,7 @@ export const epicChoicesVocabulary = {
     { name: "add", description: "While reviewed, unless `fixed`:  the Add choice button under the cards." },
     {
       name: "added",
-      description: "An option Owen added, not applied yet:  a card in the options' look, dashed until sent."
+      description: "An option you added, not applied yet:  a card in the options' look, dashed until sent."
     },
     { name: "picked", description: "A standing set's folded Picked list, at its end." },
     { name: "removed", description: "The folded Removed list, at its end." }
@@ -154,7 +154,7 @@ export const epicChoicesVocabulary = {
     },
     { key: "closedMark", text: "Closed", description: "After a closed set's heading, with nothing chosen." },
 
-    // P50:  how it's answered, Add choice, Owen's added options, the folded lists
+    // P50:  how it's answered, Add choice, the options you added, the folded lists
     { key: "pickOne", text: "Pick one", description: "The heading's switch, off:  one option at most." },
     { key: "pickAny", text: "Pick any", description: "The heading's switch, on (or its words):  several options." },
     {

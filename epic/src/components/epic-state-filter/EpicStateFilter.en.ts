@@ -49,8 +49,8 @@ export const epicStateFilterVocabulary = {
       name: "phases",
       kind: "boolean",
       description:
-        "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order " +
-        "(`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue " +
+        "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown " +
+        "(`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue " +
         "badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
         "words."
     },

@@ -64,7 +64,7 @@ export const epicAskVocabulary = {
     },
     {
       name: "how",
-      description: '`Pick one` / `Pick any`:  a switch Owen flips (`role="switch"`, epic `epic-engine` P50).'
+      description: '`Pick one` / `Pick any`:  a switch you flip (`role="switch"`, epic `epic-engine` P50).'
     },
     { name: "tools", description: "Its buttons:  Select all, Open | All." },
     { name: "other", description: 'The Other box, an `<epic-text-box type="other">`, after the options.' }

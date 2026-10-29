@@ -52,7 +52,7 @@ export const epicOptionFormVocabulary = {
   ],
   slots: [],
   parts: [
-    { name: "base", description: "The form:  Owen's ivory card." },
+    { name: "base", description: "The form:  your ivory card." },
     { name: "heading", description: "Its first line." },
     { name: "title", description: "The title's `<input>`." },
     { name: "note", description: "The note's `<epic-text-box>`, which grows as it's typed." },

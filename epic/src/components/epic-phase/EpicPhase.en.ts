@@ -176,7 +176,7 @@ export const epicPhaseVocabulary = {
     },
     {
       name: "choices-open",
-      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for your pick."
     },
     {
       name: "changed",
@@ -260,12 +260,12 @@ export const epicPhaseVocabulary = {
     {
       key: "choiceOpen",
       text: "1 choice open",
-      description: "After its title (P50):  a set in its body waits for Owen's pick."
+      description: "After its title (P50):  a set in its body waits for your pick."
     },
     {
       key: "choicesOpenCount",
       text: "{count} choices open",
-      description: "After its title (P50):  sets in its body wait for Owen's picks."
+      description: "After its title (P50):  sets in its body wait for your picks."
     },
     {
       key: "changedTip",
