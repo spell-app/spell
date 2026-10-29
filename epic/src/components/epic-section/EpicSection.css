@@ -204,6 +204,26 @@
     font-size: 12px;
   }
 
+  /* the Manual tests section's button while Claude prepares the tests (epic `epic-engine` P51):  its icon turns */
+  .start-testing[data-busy]::part(icon) {
+    animation: epic-section-turn 1.2s linear infinite;
+  }
+  @keyframes epic-section-turn {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .start-testing[data-busy]::part(icon) {
+      animation: none;
+    }
+  }
+  /* a run across every epic:  the next epic with open tests, once every test here is answered */
+  .next-epic {
+    margin: 8px 0 2px;
+    font-size: 14px;
+  }
+
   /* a phase being dragged (`PhaseDrag`, epic `epic-engine` P34):  no text selected on the way, the grabbing cursor */
   :host([data-dragging]) {
     cursor: grabbing;

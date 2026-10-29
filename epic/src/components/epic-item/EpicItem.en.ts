@@ -168,6 +168,15 @@ export const epicItemVocabulary = {
         "stays open;  gone once a run passes it."
     },
     {
+      name: "prepared",
+      kind: "string",
+      format: "place",
+      description:
+        "A manual test Start testing wrote out for Owen (epic `epic-engine` P51):  its place in his order, `1` first.  " +
+        "The Manual tests section opens the prepared tests in that order, and once every open test has it, its " +
+        "button is Next test."
+    },
+    {
       name: "source",
       kind: "string",
       description:

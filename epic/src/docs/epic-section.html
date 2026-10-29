@@ -748,9 +748,15 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
-                The Manual tests section's title, while the page is reviewed and a test is open: a blue
-                <b>Start testing · 9</b> (epic <code>epic-engine</code> P4), which starts the page's test run
-                (<a href="epic-test-run.html" target="src-spell-epic-src-docs-epic-test-run-html"><code>&lt;epic-test-run&gt;</code></a>, the event <code>epic-test-opening</code>).
+                The Manual tests section's title, while the page is reviewed and a test is open (epic
+                <code>epic-engine</code> P51):  a blue <b>Start testing · 9</b>, which asks Claude to prepare the tests (it
+                checks what it can itself and writes out the rest, step by step, with a screenshot);
+                <b>Preparing tests</b>, its icon turning, while it does (a click calls it off);  then the first test opens,
+                and the button is <b>Next test · 3 left</b>, opening the next test not answered yet.  A test is answered
+                where it is:  Approve if it passed, a note (a screenshot pasted or dropped in it) for what you saw, the
+                note box's x if it no longer applies.  The address's <code>?test=1</code> presses the button as the
+                page loads;  with <code>&amp;all=1</code> (<code>epic test --all</code>), the section's last line links
+                the next epic with open tests once every test here is answered.
               </li>
               <li>
                 Its title: always in full, as many lines as it needs, folded or open. Everything in its title row sits

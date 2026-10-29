@@ -724,12 +724,20 @@ export class PlanDocCommands {
    * an agent's details or reply into one item, under the doc's lock.
    * - a test's fields instead of, or before, the file's HTML (epic `epic-engine` P4):
    *   `--step`, `--should`, `--example`, `--if-not` (`TestCommands.fieldsOf()`)
+   * - `--prepared <n>` on a test (epic `epic-engine` P51):  Start testing wrote it out for Owen, its place `n` in his
+   *   order (`<epic-item prepared="2">`);  alone, it only stamps it
    * - refused while Owen called the request off on the page ("nevermind", epic `windows-and-review` P2):
    *   nothing lands
    */
   private async details(name: string, file: string, rest: string[], flags: Flags): Promise<void> {
     const id = need(rest[0], "an item id")
     const fields = this.tests.fieldsOf(id, flags)
+    const prepared = this.tests.preparedOf(id, flags)
+    if (prepared && !fields.html && stringFlag(flags.file) === undefined) {
+      refuseCanceled(name, file, id)
+      await this.edit(file, (plan) => plan.prepareTest(id, prepared))
+      return
+    }
     const given = stringFlag(flags.file) !== undefined || !fields.html
     const html =
       fields.html + (given ? readFileSync(need(flags.file as string | undefined, "--file <html file>"), "utf8") : "")
@@ -738,6 +746,7 @@ export class PlanDocCommands {
     await this.edit(file, (plan) => {
       if (flags.more) plan.addMore(id, html)
       else plan.setDetails(id, html, { append: Boolean(flags.append) })
+      if (prepared) plan.prepareTest(id, prepared)
       plan.log(
         `${id.toUpperCase()} ${flags.more ? "more details added" : flags.append ? "reply added" : "details rewritten"}`
       )

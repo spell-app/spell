@@ -183,8 +183,11 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         `<epic-review buttons="update">` before its date;  `<epic-phase>`'s pen marks all of its new ones
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill, pencil and ✕, and `<epic-choices>`' switch and Add choice (P50:  one mark per set)
-      - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
-        and the epics left to test (`openTests()`)
+      - `<epic-section kind="tests">`'s Start testing (epic `epic-engine` P51):  the request for now (`prepareTests()`)
+        and, with `all`, the epics left to test (`openTests()`)
+      - `<epic-review>`'s note pictures (P51):  saved beside the page (`saveShot()`), put in the note's mark
+        (`attachShot()`);  `Pictures`, beside the client, reads a paste or a drop and turns any image into a PNG,
+        for `<epic-option-form>` too
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
@@ -218,8 +221,8 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
     - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
-      what's typed and not sent:  the three forms, `<epic-review>`'s note, `<epic-test-run>`'s comment, the docs
-      pages' comments and the syntax page
+      what's typed and not sent:  the three forms, `<epic-review>`'s note, the docs pages' comments
+      and the syntax page
       - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
         one save at a time, tries a failed one again every 3s, sends at once as the page hides or goes (`keepalive`)
       - one wording of where it stands:  "not saved yet", "saving…", "saved 14:04", "kept in this browser only:  ..."
@@ -1690,22 +1693,47 @@ Each kind of page has ONE name, written everywhere a person reads it.
     a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.
-  - A TEST's answer from Owen's test run (epic `epic-engine` P4), on a test only:
-    `{ action: "test", result, note?, shot? }`
+  - A note's PICTURE (epic `epic-engine` P51), in any note box (`<epic-review>`'s, on every item, phase and part):
+    - pasted (⌘V), dropped on the box, or chosen with the small picture button in the field's top corner
+    - saved beside the page (`POST shot`, below), drawn as a thumbnail under the words (a click:  full size in
+      `<ui-zoom>`);  its ✕ takes it out
+    - it rides in the note's mark as `shot` (`attachShot()`):  revisit, todo, next, drop and skip take one, checked as
+      `NOTE_SHOT` in `ReviewInbox.toMark()`;  a picture alone makes a revisit with an empty note
+    - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's, next's
+      or drop's picture in Owen's kept reply (`keepNote()`)
+  - TESTS, answered on the page (epic `epic-engine` P51, Q53;  Owen, 2026-10-29:  "I don't think we need P/F/S/N if
+    testing feedback/etc are integrated in the epic doc"):  no test run, no test mode, no `<epic-test-run>`
+    - Approve on a test:  `apply` closes it, passed
+    - a Revisit note on it, or a comment in its Step or Should (which presses Revisit itself, I158):  left for the
+      session, which closes it (his note says it passed) or files "M3 failed:  <title>", linked both ways
+    - the note box's ✕ (`skip`) on a test:  `apply` CANCELS it, "no longer applies"
+      (`PlanDoc.applyAction()` hands it to `applyTest()`'s skip)
+    - left alone:  still open
+  - START TESTING, the Manual tests section's button:  a request for now, `prepare`, keyed on the section's id,
+    `tests` (`TESTS_ID`;  `ReviewClient.prepareTests()`)
+    - `ReviewInbox.itemIds()` lists `tests` when the page has `<epic-section kind="tests">`;  only `tests` takes
+      `prepare`, and it takes nothing else
+    - nobody listening:  the page server wakes the epic, as for Add Details
+    - "Preparing tests" while queued or worked;  a click calls it off (nevermind)
+    - `epic inbox done <name>#tests` ends it:  the page opens the first open test (`#m3` in the address, then a
+      `hashchange`:  the docs runtime unfolds and opens it), unless Owen is typing in a field
+      ("Tests ready:  Next test opens the first")
+    - every open test `prepared`:  "Next test · 3 left" (open tests with no mark of his yet), the next one after the
+      one it opened last, round to the start;  none left:  "Go through the tests · N";  it never asks Claude again
+    - `prepared="2"` on a test (format `place`):  its place in Owen's order, written by
+      `epic details <name>#M3 --prepared <n>`
+    - Owen's ORDER, on the page and in `epic test --list` (`inTestOrder()`, review.types.ts):  prepared tests by
+      place, then page order, deferred last
+    - `?test=1` in the address presses it once as the page loads, then leaves the address (`all=1` stays);
+      `epic test <name>[#M3]` opens that, `epic test --all` the first epic with `?test=1&all=1`
+    - with `all`, once every open test here has a mark, the section's last line links the next epic with open tests
+      (`GET /api/epics/tests`, [epicRoutes.ts](tool/epicRoutes.ts), `EpicTests.waiting()`), else "Every epic's tests
+      are answered:  Send hands them to Claude"
+  - An OLD test-run mark, `{ action: "test", result, note?, shot? }` (epic `epic-engine` P4, before P51), still applies,
+    so nothing sent before is lost:
     - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
-    - `shot`:  his screenshot, `tests/m3-<stamp>.png` from the page's folder (`POST shot`, below)
-    - sent with Send;  `epic inbox apply <name>` applies it:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
-      - `PlanDoc.applyMark()`:  passed closes, failed files a new issue with the note and screenshot,
-        skip cancels, not now defers
-    - the run itself is `<epic-page>`'s test mode (`?test=1`), drawn by `<epic-test-run>` (Epic UI's page says how):
-      - one card per test, from its `<epic-field label="Step">` ... (an older test's prose as its Step)
-      - the answers P / F / S / N
-      - a COMMENT box on every card:  the mark's `note`, with any answer
-        - before one, the inbox's draft;  `apply` keeps it on the test as Owen's reply
-      - its place in the address (`#m3`), kept there against the runtime's scroll-follow (`spell-doc:scrolled-to`)
-      - `epic test <name>` opens it;  `epic test --all` the first epic with open tests
-      - the run's last card leads to the next (`GET /api/epics/tests`, [epicRoutes.ts](tool/epicRoutes.ts),
-        `EpicTests.waiting()`)
+    - `PlanDoc.applyTest()`:  passed closes, failed files a new issue with the note and screenshot, skip cancels,
+      not now defers;  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
   - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `C1` ...
     - Written through the comments route.
     - Sent with Send, as marks are (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude).
@@ -1738,6 +1766,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST draft { page, id, action, note }`:  a note box's text as typed
     - `POST now { page, id, action, note? }`:  Add Details, or revisit now, queued on `now`
       - revisit now keeps the item's pick
+      - `prepare` under `tests`:  Start testing (epic `epic-engine` P51)
     - `POST cancel { page, id }`:  "nevermind"
     - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
       every revisit waiting asked now too (`reviewNow()`)
@@ -1746,15 +1775,15 @@ Each kind of page has ONE name, written everywhere a person reads it.
       (`asked`), else `/epic review <epic>` typed into its tab (`sent`);  its tab open already, VS Code would refuse
       ("Session is already open"), so the bridge types nothing and the answer says so (`tab-open`;  I144)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key
-    - `POST shot { page, id, png }`:  a test run's screenshot (a PNG data URL, at most 8 MB, else 413), written
-      beside the page in `tests/` (`TestShots`), never over a file;  answers `{ shot }`, its path, which the
-      failure's mark carries (epic `epic-engine` P4)
+    - `POST shot { page, id, png }`:  a picture for any item's note or an option (a PNG data URL, at most 8 MB, else
+      413), written beside the page as `tests/<id>-<stamp>.png` (`TestShots`), never over a file;  answers `{ shot }`,
+      its path, which the mark carries (epic `epic-engine` P4;  any item since P51)
   - A page whose token is stale (its server restarted) takes the new one from the page as served now,
     and retries once (`ReviewClient`).
     So nothing typed is refused for a restart.
   - `page`:  the doc's URL path (`/worktrees/<w>/...` too).
     - only `<name>.plan.html` (else 403)
-    - only ids of its items (else 400)
+    - only ids of its items, and `tests` when it has a Manual tests section (else 400)
   - Each answer is the whole inbox, but with `listening` `null` once stale (`ReviewInbox.forPage()`).
     - Plus `unsentComments`:  the ids of the comments Send would hand over.
       The page counts them for Send, and keeps no rule of its own for a thread.
@@ -2600,13 +2629,14 @@ In this order, from the epic folder, `epic/` (a page by its path in the checkout
       and its jumps, Cmd / Ctrl + K on a comment's id and on words (the site's search), the router's swap
     - on a scratch copy of the set's folder unless `--docs`;  nobody woken
     - Run it after touching the comments' code or look, or Epic UI's layout.
-  - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4):
-    - a test run on a scratch copy of an epic page, its Manual tests section replaced by scratch tests
-      (the new shape and older prose-only ones):  Start testing, Passed, Failed with a note and a pasted screenshot, Skip, Not now, a
-      reload mid-run, the summary and Send results, Esc;  the marks read back from the copy's inbox file
-    - a run across every epic (`?test=1&all=1`):  the summary's Next opens the next copy in test mode
+  - `node src/demo/check-test-run.mjs [--doc <name>] [outDir]`, from the root (epic `epic-engine` P4, P51):
+    - Start testing on a scratch copy of an epic page, its Manual tests section replaced by scratch tests
+      (the new shape and older prose-only ones):  the button, Preparing tests, the first test opening once the
+      request is done, Next test, a picture pasted into a note, Approve on a test;  the marks read back from the
+      copy's inbox file
     - at 390 and 1200px, light and dark, reduced motion
-    - Run it after touching `<epic-test-run>`, the page's test mode, or the test marks' routes.
+    - Run it after touching the Manual tests section's button, `<epic-review>`'s note pictures, or the test marks'
+      routes.
   - `node src/demo/check-fold-epics.mjs [--doc <name>] [--item <id>] [--guide <path>] [outDir]`, from the root:
     - A fold never moves what was clicked:  the line or title stays put, within 1px, for 1.5s after the click.
     - Items a link landed on (at once, mid window, near the page's end), one opened by a click,

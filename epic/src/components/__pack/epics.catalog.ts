@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  483d238f6e672cbb
+// sources:  41ea311e74b683ae
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -23,7 +23,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","to-see","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-mark": {"folder":"epic-mark","attributes":["item","link"]},
@@ -51,7 +51,6 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
-  "epic-test-run": {"folder":"epic-test-run","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":6}]},"attributes":["all"]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
   "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},

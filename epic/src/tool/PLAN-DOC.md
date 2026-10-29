@@ -382,14 +382,23 @@ As `plan-doc.md`, "Ids":
       - `skip`:  the note box's x, nothing to do
     - `review-as` is the record (the log, `review` outcomes, the state above), never drawn on the buttons:
       once Claude has handled a mark, they clear, and the chip shows the result.
+    - A note's PICTURE (epic `epic-engine` P51):  any note box takes one, pasted (⌘V), dropped, or chosen with its
+      picture button.
+      - saved beside the page, `tests/<id>-<stamp>.png` (`POST shot`), and shown under the words
+      - it rides in the mark as `shot` (revisit, todo, next, drop and skip take one);  a picture alone is a revisit
+      - `epic inbox` and `wait` print `screenshot:  tests/...png` under the mark;  `inbox apply` keeps a skip's,
+        next's or drop's picture in Owen's kept reply
   - `limit`:  a todo that's a LIMIT to know about, not work (epic `epic-engine` P32, Q16;  a caveat until P44):  drawn
     calmer, never offered for the next phase, with an item's buttons (Approve, Revisit, Make Todo).
     - a todo without it is WORK still to do:  the plane, Revisit, the x (below)
     - `add <name>#T` writes work;  `--limit` (or `#limit`, the old `#caveat`) a limit
-  - `failed`:  a test that failed in Owen's test run, the issue it was filed as (`i42`;  epic `epic-engine` P4).
-    - written by `inbox apply`, the test left open;  gone once a run passes it
+  - `failed`:  a test that failed, the issue it was filed as (`i42`;  epic `epic-engine` P4).
+    - written by `inbox apply` for an old `test` mark (below), the test left open;  gone once it passes
+  - `prepared`:  a manual test Start testing wrote out for Owen, its place in his order (`prepared="2"`, 1 first;
+    format `place`;  epic `epic-engine` P51).
+    - written by `epic details <name>#M3 --prepared <n>`
 - A MANUAL TEST (`m3`, epic `epic-engine` P4;  `t3` before P44, `v3` before P32):
-  its text is FIELDS, in this order, so Owen's test run can step him through it, one at a time, on the page:
+  its text is FIELDS, in this order, so Owen can do it straight off the page, in the Manual tests section:
 
   ```html
   <epic-item id="m3" title="The sitemap lists every guide" status="open">
@@ -403,19 +412,42 @@ As `plan-doc.md`, "Ids":
   - Step and Should, always;  Example and If not when there's one.
   - `epic add <name>#M "title" --step ... --should ... [--example <png> | "text"] [--if-not ...]` writes them
     (`EpicTests.fieldsHTML()`);  `details <name>#M3 --step ...` rewrites a test in them.
-  - A Step's `a.epic-test-action` links are pages to open:  the run shows each as a button.
+  - A Step's `a.epic-test-action` links are pages to open:  the page shows each as a button.
   - Screenshots live beside the page in `tests/`, their paths from the page's folder:
-    Claude's examples `tests/m3.png`, Owen's failures `tests/m3-20261019-1432.png`.
+    Claude's examples `tests/m3.png`, the pictures in Owen's notes `tests/m3-20261019-1432.png` (`POST shot`).
     - An older one keeps its file name (`tests/t3-...`, `v3-...`):  the page names it by path.
-  - An older test has only prose, still valid:  the run shows the prose as its Step.
+  - An older test has only prose, still valid:  the page shows the prose as its Step.
     No migration step:  the fields are new content a test MAY have, nothing an old page must change.
-  - Owen's answers in the run are review marks, `{ action: "test", result, note?, shot? }`, applied by
-    `inbox apply` (`PlanDoc.applyMark()`):
+  - Owen answers a test WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,
+    no Passed / Failed / Skip / Not now, no P / F / S / N keys):
+    - Approve:  passed;  `inbox apply` closes it.
+    - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):  what he saw, often with
+      a picture.  Left for the session, which closes the test when his note says it passed, else files an issue,
+      "M3 failed:  <title>", holding his note and picture, linked both ways, the test left open.
+    - The note box's x (`skip`):  `inbox apply` CANCELS it, "no longer applies";  a note says why.
+    - Left alone:  still open.
+  - A test Claude checked itself and saw pass, Claude MAY close (Q58):  with a Done card saying how it was checked,
+    the picture attached.  The one exception to "a manual test is Owen's to close".
+  - START TESTING, the Manual tests section's button (on its title, while reviewed and a test is open):
+    - "Start testing · 9":  a request for now, `{ action: "prepare" }` keyed on the section's id, `tests`;
+      only `tests` takes `prepare`, and it takes nothing else.
+      - the session checks what it can, writes the rest out (the explicit Step, an Example), orders them so tests in
+        the same window come together, stamps each `prepared`, then `inbox done <name>#tests`
+      - nobody listening:  the page server wakes the epic, as for Add Details
+    - "Preparing tests" while it's worked;  a click calls it off.
+    - Done:  the page opens the first open test (unless Owen is typing in a field:  "Tests ready").
+    - Every open test prepared:  "Next test · 3 left" (open tests with no mark of his yet), the next unanswered one
+      after the last it opened, round to the start;  none left, "Go through the tests · N".
+      It never asks Claude again.
+  - Owen's ORDER, on the page and in `epic test --list`:  prepared tests first by place, then page order,
+    deferred last (`inTestOrder()`).
+  - An OLD mark from the test run before P51, `{ action: "test", result, note?, shot? }`, still applies
+    (`PlanDoc.applyTest()`), so nothing sent before is lost:
     - `passed`:  `done`, reviewed, `failed` gone
     - `failed`:  a new issue, "M3 failed:  <title>", linking the test, with his note and an `<img>` of his
       screenshot;  the test stays open (a closed one reopens), reviewed, `failed="i42"`, a Noted card linking it
     - `skip`:  `canceled` ("no longer applies"), reviewed
-    - `notnow`:  `deferred`, today:  the run puts deferred tests last
+    - `notnow`:  `deferred`:  last in his order
 - A WORK todo's review buttons (no `limit`;  Owen, 2026-10-09):  the plane, Revisit, the x,
   in one group.  No Approve or Make Todo.
   - The plane (`next`, green):  "Do it in the next phase".
@@ -628,7 +660,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - An open ISSUE or TODO (not a `limit`) closes in the same write, as `close` does (`PlanDoc.finishWork()`):
       `done`, green, `taken-in` its phase, the log's `I3 closed:  <title>`.
     - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is Owen's to
-      close (Approve, his test run);  a `limit` has nothing to do.
+      close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
   - `update <name>#<id> noted "<what>"`:  a STEP done, the item not finished:

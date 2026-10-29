@@ -192,7 +192,13 @@ export type TestResult = (typeof TEST_RESULTS)[number]
  */
 export const TESTS_API = "/api/epics/tests"
 
-/** The biggest screenshot a failed test takes, as the shot route caps it (`POST shot`). */
+/**
+ * The Manual tests section's key in the inbox (epic `epic-engine` P51):  its Start testing, a request for now
+ * (`prepare`).  As `ReviewInbox`'s `TESTS_ID` (a copy:  that module is node-only).
+ */
+export const TESTS_ID = "tests"
+
+/** The biggest picture a note box or an option takes, as the shot route caps it (`POST shot`). */
 export const SHOT_MAX_BYTES = 8 * 1024 * 1024
 
 /** The running-agents routes (`src/tools/agentRoutes.ts`):  every reply is the epic's list, `{ agents }`. */
@@ -423,7 +429,23 @@ export function isSent(mark: { action: string; when?: string; at: string }, sent
 
 /** Is `mark` an immediate request (Add Details, revisit now), handed over when made?  As `ReviewInbox`'s. */
 export function isImmediate(mark: { action: string; when?: string }): boolean {
-  return mark.action === "details" || (mark.action === "revisit" && mark.when === "now")
+  return mark.action === "details" || mark.action === "prepare" || (mark.action === "revisit" && mark.when === "now")
+}
+
+/**
+ * Open tests in the order Owen goes through them (epic `epic-engine` P51), the ONE rule the page's Manual tests
+ * section and `epic test --list` share:
+ * - the PREPARED ones first (`prepared`, Start testing's place for each:  same window together), by that place
+ * - then the rest in page order, the deferred ones (an older run's Not now) last
+ * - `tests` in page order;  a new list, `tests` untouched
+ */
+export function inTestOrder<T extends { prepared?: string | null; deferred?: string | null }>(
+  tests: readonly T[]
+): T[] {
+  const place = (test: T) => Number(test.prepared) || Infinity
+  const prepared = tests.filter((test) => place(test) < Infinity).sort((a, b) => place(a) - place(b))
+  const rest = tests.filter((test) => place(test) === Infinity)
+  return [...prepared, ...rest.filter((test) => !test.deferred), ...rest.filter((test) => test.deferred)]
 }
 
 /**

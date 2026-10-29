@@ -242,7 +242,6 @@ declare module "@solidjs/web/types/jsx.js" {
       // the pack's own families it draws in its shadow root (Spell UI's:  `spell/ui/jsx`)
       "epic-new-item": EpicJSXAttributes
       "epic-agents": EpicJSXAttributes
-      "epic-test-run": EpicJSXAttributes
     }
   }
 }

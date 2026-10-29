@@ -237,24 +237,11 @@ export const epicPageVocabulary = {
       name: "agents",
       description:
         "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
-    },
-    {
-      name: "test-run",
-      description:
-        "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests " +
-        "section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, " +
-        "`epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
     }
   ],
   states: [
     { name: "future", description: "A future epic." },
-    { name: "commits", description: "Every commit shows (the git toggle is on)." },
-    {
-      name: "testing",
-      description:
-        "Test mode (epic `epic-engine` P4):  a test run shows over its blocks, until Esc or Done testing.  Page state, " +
-        "never in a doc."
-    }
+    { name: "commits", description: "Every commit shows (the git toggle is on)." }
   ],
   texts: [
     {

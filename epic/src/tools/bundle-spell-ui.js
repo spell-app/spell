@@ -172,7 +172,7 @@ const ICONS = {
   "solid/gear": ["gear", "cog"], // a fold's gear menu (`EpicFold.renderGear()`, I166)
   "solid/square-check": ["square check", "check square"], // a gear menu's entry, on
   "regular/square": ["square outline"], // ... and off
-  // a test run's screenshot picker (`<epic-test-run>`, epic `epic-engine` I75)
+  // a picture chooser:  a note box's (`<epic-review>`, epic `epic-engine` P51), an option's (`<epic-option-form>`)
   "regular/file-image": ["file image"],
   "solid/calendar": ["calendar"],
   // the pony (`brand/pony.html`, epic `claude-design`)

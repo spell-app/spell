@@ -1253,7 +1253,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
-    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't"
+    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't",
+    "--prepared <n>": "a manual test:  written out for Owen by Start testing, nth in his order"
   },
   summarize: { "--file <condensed.html>": "what the item shows now, as HTML" },
   restore: {

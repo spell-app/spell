@@ -269,15 +269,6 @@ function quietFor(ms) {
 // ## Start
 ////////////////
 
-/**
- * Is the page an epic page showing its TEST RUN (epic `epic-engine` P4)?
- * `<epic-page testing>`, or the address's `?test` before the page has set it.
- * - the run owns the address's `#id` then (the test it's on):  scroll-follow and a live reload leave it alone (J44)
- */
-function isTestRun() {
-  return !!document.querySelector("epic-page[testing]") || new URLSearchParams(location.search).has("test")
-}
-
 /** Highlight at once (plain DOM);  wire the widgets once their elements are defined. */
 async function start() {
   loadEpicsPack()
@@ -293,8 +284,7 @@ async function start() {
     // never the section the address names:  `<epic-*>` blocks follow the address's `#hash` by themselves as they
     // first connect, and landed on its top (I23 of `epic-engine`);  the address follows the scroll again once landed
     landing.hash = undefined
-    // a test run's `#v3` is the run's place, not a section (epic `epic-engine` J44)
-    if (location.hash && !isTestRun()) history.replaceState(history.state, "", `${location.pathname}${location.search}`)
+    if (location.hash) history.replaceState(history.state, "", `${location.pathname}${location.search}`)
   }
   // an old phase address (`#p7`) shows the phase's stable id it landed on (`addressedId()`)
   else if (landing.hash && landing.hash !== TocIndex.decode(location.hash.slice(1)))
@@ -2880,7 +2870,6 @@ function addressedId(id) {
  * - the ADDRESS follows too, once `followAddress()` has been called (`land()`, after the page has landed):
  *   the current entry's `#id` replaces the URL's hash (`history.replaceState()`:  no history entry, no jump);
  *   not while a followed link is pinned (its click set the hash), and no hash above the first entry;
- *   never while an epic page shows its TEST RUN (`isTestRun()`):  its `#v3` is the test it's on (epic `epic-engine` J44)
  *   - so a reload, or VS Code restarting the view, lands on the section being read
  *   - `replaceState()` fires no `hashchange`:  `spell-doc:scrolled-to` on `window` tells the live client, which tells
  *     VS Code's view (`liveClient.ts` `reportPlace()`)
@@ -2946,7 +2935,7 @@ function followScroll(main, outline, rail) {
    * - only once `followAddress()` was called, and only when it changes
    */
   function writeAddress(id) {
-    if (!addressing || hashId() === id || isTestRun()) return
+    if (!addressing || hashId() === id) return
     history.replaceState(history.state, "", `${location.pathname}${location.search}${id ? `#${id}` : ""}`)
     dispatchEvent(new Event("spell-doc:scrolled-to"))
   }

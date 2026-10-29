@@ -1020,6 +1020,18 @@ export class PlanDoc extends PlanReader {
     return calm ? "not urgent" : "urgent"
   }
 
+  /**
+   * Stamp test `id` PREPARED (epic `epic-engine` P51):  Start testing wrote it out for Owen, `place` its place in his
+   * order (1 first);  the page opens the prepared tests in that order, and Next test skips straight to them.
+   * - logged;  the item's `changed` stamped
+   */
+  prepareTest(id: string, place: number): void {
+    const item = this.item(id)
+    Markup.set(item, { prepared: String(place) })
+    this.stamp(item)
+    this.log(`${item.id.toUpperCase()} prepared for Owen's testing, number ${place}`)
+  }
+
   /** Put item `id` off (`deferred`, today):  still outstanding, shown as such next review;  returns its title. */
   defer(id: string): string {
     const item = this.item(id)
@@ -1140,6 +1152,9 @@ export class PlanDoc extends PlanReader {
    *   it records Owen's choice;  nothing is built yet
    * - `drop`, a todo's x:  canceled (struck through, grey), "dropped by Owen in review" in the log;  reviewed
    * - `skip`, every other note box's x (Owen, 2026-10-09):  nothing to do
+   *   - on a TEST it's "no longer applies" (epic `epic-engine` P51, Q53):  canceled, as a test run's Skip did
+   *     (`applyTest()`)
+   * - a note box's picture (`shot`, P51) goes with its note into Owen's reply
    *   - reviewed, no status card, its state as it was (an open question stays open)
    *   - on a todo it's `drop`
    * - `next`, `drop`, `skip` with a note:  the note kept first, as Owen's reply (`keepNote()`)
@@ -1234,20 +1249,22 @@ export class PlanDoc extends PlanReader {
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
         const where = phase ? `P${phase.number} · ${phase.name}` : "the next phase"
-        if (note) this.keepNote(item.id, { note, action: "next phase", at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "next phase", at, shot })
         this.queue(item.id, where)
         const card = phase ? `Queued for ${where}` : `Queued for the next phase:  there's no phase to do yet`
         this.noteStatus(item.id, PlanMarkup.text(card))
         return { applied: true, did: `queued for ${where}${phase ? "" : " (no phase to do yet)"}` }
       }
       case "drop": {
-        if (note) this.keepNote(item.id, { note, action: "drop", at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "drop", at, shot })
         this.setItem(item.id, "canceled")
         this.review(item.id)
         return { applied: true, did: "canceled:  dropped by Owen in review" }
       }
       case "skip": {
-        if (note) this.keepNote(item.id, { note, action: "skip", at })
+        // a TEST's x (epic `epic-engine` P51):  it no longer applies, as a test run's Skip did
+        if (kind === "test") return this.applyTest(item, kind, { result: "skip", note, shot, at })
+        if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "skip", at, shot })
         this.review(item.id)
         return { applied: true, did: `skipped:  nothing to do, reviewed${note ? " (his note kept)" : ""}` }
       }

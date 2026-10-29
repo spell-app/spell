@@ -47,6 +47,8 @@ class FakeRoutes {
   readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
     const route = input.replace("/api/epics/review/", "").replace(/\?.*/, "")
     if (route !== "inbox") this.answer(route, JSON.parse(init!.body as string) as Record<string, unknown>)
+    if (route === "shot")
+      return new Response(JSON.stringify({ shot: SHOT }), { headers: { "content-type": "application/json" } })
     return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
   })
 
@@ -76,7 +78,7 @@ class FakeRoutes {
       else delete this.inbox.marks[key]
     }
     if (route === "now") {
-      const action = body.action as "details" | "revisit"
+      const action = body.action as "details" | "revisit" | "prepare"
       this.inbox.now.push({ id, action, at })
       this.inbox.marks[id] =
         action === "revisit"
@@ -87,6 +89,15 @@ class FakeRoutes {
 }
 
 let routes: FakeRoutes
+
+/** The path the shot route answers (epic `epic-engine` P51). */
+const SHOT = "tests/j9-20261029-1432.png"
+
+/** A 1x1 PNG, as a pasted screenshot. */
+const PNG_BYTES = Uint8Array.from(
+  atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="),
+  (char) => char.charCodeAt(0)
+)
 
 /** A started client on `routes`, adopted as the page's;  `server` none:  not served. */
 async function adoptClient({ served = true } = {}) {
@@ -155,7 +166,10 @@ function button(host: Element, action: string): HTMLElement {
 
 /** `host`'s note box buttons' `how`, in order. */
 function noteButtons(host: Element): string[] {
-  return Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => it.dataset.how!)
+  return Array.from(
+    deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"),
+    (it) => it.dataset.how!
+  )
 }
 
 /** Wait for the client's writes and Solid's updates. */
@@ -256,7 +270,7 @@ describe("<epic-item> review controls", () => {
     await adoptClient()
     const host = await render(`<epic-item id="t5" title="A todo" status="open" open><p>Text</p></epic-item>`)
     const how = () =>
-      Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => [
+      Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"), (it) => [
         it.dataset.how,
         it.dataset.color
       ])
@@ -366,7 +380,10 @@ describe("<epic-item> review controls", () => {
     expect(actions(host)).toEqual(["todo", "revisit", "approve"])
     expect(actions(host).map((action) => button(host, action).dataset.fill)).toEqual(["none", "none", "none"])
     expect(
-      Array.from(deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button"), (it) => it.dataset.how)
+      Array.from(
+        deep(host).querySelectorAll<HTMLElement>("[part~='note-box'] >>> button[data-how]"),
+        (it) => it.dataset.how
+      )
     ).toEqual(["soon", "skip"])
   })
 
@@ -866,6 +883,95 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(actions(older)).toEqual([])
     const alone = await render(`<epic-summary>Two sentences.</epic-summary>`)
     expect(actions(alone)).toEqual([])
+  })
+})
+
+// epic `epic-engine` P51:  a picture in any note box;  a test's x
+describe("<epic-review> note pictures", () => {
+  test("a picture pasted in the note box:  saved, a revisit carrying it, its thumbnail shown;  its x takes it out", async () => {
+    await adoptClient()
+    const host = await render(`<epic-item id="j9" title="A call" status="open" open><p>Text</p></epic-item>`)
+    const box = deep(host).querySelector<HTMLElement>("[part~='details'] [part~='note-box'] >>> .note-box")!
+    const data = new DataTransfer()
+    data.items.add(new File([PNG_BYTES], "shot.png", { type: "image/png" }))
+    box.dispatchEvent(
+      new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true, cancelable: true })
+    )
+    await vi.waitFor(() => expect(routes.inbox.marks.j9).toMatchObject({ action: "revisit", shot: SHOT }))
+    await ElementFixture.tick()
+    const shotPost = routes.posts.find(([route]) => route === "shot")!
+    expect([shotPost[1].id, String(shotPost[1].png).startsWith("data:image/png;base64,")]).toEqual(["j9", true])
+    const thumb = () =>
+      deep(host).querySelector<HTMLImageElement>("[part~='details'] [part~='note-box'] >>> .note-picture img")
+    await vi.waitFor(() => expect(thumb()?.getAttribute("src")).toBe(SHOT))
+    deep(host)
+      .querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-picture button")!
+      .click()
+    await settle()
+    expect(routes.inbox.marks.j9).toBeUndefined()
+  })
+
+  test("the picture button chooses a file;  a test's x says it no longer applies", async () => {
+    await adoptClient()
+    const host = await render(`<epic-item id="m4" title="A test" status="open" open><p>Step</p></epic-item>`)
+    const pick = deep(host).querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-pick")!
+    expect(pick.title).toMatch(/^Add a picture:  paste one/)
+    const x = deep(host).querySelector<HTMLButtonElement>(
+      "[part~='details'] [part~='note-box'] >>> button[data-how='skip']"
+    )!
+    expect(x.title).toBe("No longer applies:  cancel this test;  a note here says why")
+  })
+})
+
+// epic `epic-engine` P51 (Q53):  tests answered on the page, Start testing preparing them first
+describe("<epic-section kind=tests> Start testing", () => {
+  const TESTS = `<epic-section id="tests" kind="tests">
+    <epic-item id="m1" title="One" status="open"></epic-item>
+    <epic-item id="m2" title="Two" status="open"></epic-item>
+    <epic-item id="m3" title="Done" status="done"></epic-item>
+  </epic-section>`
+
+  /** The section's button. */
+  const testButton = (host: Element) => deep(host).querySelector<HTMLElement>("ui-button.start-testing")!
+
+  test("Start testing · 2 asks Claude to prepare them;  Preparing tests while it does;  then the first opens", async () => {
+    const client = await adoptClient()
+    history.replaceState(null, "", location.pathname)
+    const host = await render(TESTS)
+    expect(testButton(host).textContent).toContain("Start testing · 2")
+    testButton(host).click()
+    await settle()
+    expect(routes.posts.at(-1)).toEqual(["now", { page: PAGE, id: "tests", action: "prepare" }])
+    await ElementFixture.tick()
+    expect(testButton(host).textContent).toContain("Preparing tests")
+    // Claude prepared them:  M2 first, its request done
+    host.querySelector("#m2")!.setAttribute("prepared", "1")
+    host.querySelector("#m1")!.setAttribute("prepared", "2")
+    routes.inbox.now = []
+    delete routes.inbox.marks.tests
+    await client.refresh()
+    await vi.waitFor(() => expect(location.hash).toBe("#m2"))
+    expect(testButton(host).textContent).toContain("Next test · 2 left")
+    testButton(host).click()
+    expect(location.hash).toBe("#m1")
+    history.replaceState(null, "", location.pathname)
+  })
+
+  test("every open test prepared:  Next test counts the ones not answered, and skips them", async () => {
+    await adoptClient()
+    history.replaceState(null, "", location.pathname)
+    const host = await render(TESTS.replace(/(id="m[12]")/g, '$1 prepared="1"'))
+    await routes.fetch("/api/epics/review/mark", {
+      method: "POST",
+      body: JSON.stringify({ page: PAGE, id: "m1", mark: { action: "approve" } })
+    })
+    await ReviewClient.forPage().refresh()
+    await ElementFixture.tick()
+    expect(testButton(host).textContent).toContain("Next test · 1 left")
+    testButton(host).click()
+    expect(location.hash).toBe("#m2")
+    expect(routes.posts.some(([route]) => route === "now")).toBe(false)
+    history.replaceState(null, "", location.pathname)
   })
 })
 

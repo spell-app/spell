@@ -262,8 +262,32 @@ export const COUNT_ATTRIBUTES = [
   "to-see",
   "changes",
   "choices-open",
-  "done-at"
+  "done-at",
+  // a manual test Start testing wrote out (epic `epic-engine` P51):  the Manual tests section's button follows
+  "prepared"
 ]
+
+////////////////
+// ## Testing (epic `epic-engine` P51)
+////////////////
+
+/**
+ * The address's query that presses the Manual tests section's Start testing as the page loads (`epic test <epic>`,
+ * an old test run's link):  `?test=1`;  `?test=1&all=1` (or `?test=all`), one epic of `epic test --all`.
+ */
+export const TEST_QUERY = "test"
+
+/** With `TEST_QUERY`:  a run across every epic (`epic test --all`):  the section links the next epic once done. */
+export const ALL_QUERY = "all"
+
+/** `?test=all`:  the same as `?test=1&all=1`. */
+export const TEST_ALL = "all"
+
+/** A manual test's item:  open ones are what Start testing goes through. */
+export const TEST_ITEMS = ":scope > epic-item[id^='m']"
+
+/** A manual test's id:  `m3`. */
+export const TEST_ID = /^m\d+$/
 
 /*
  * Its runs (the item lines and phase title rows drawn as rounded cards) are the page sheet's since epic `epic-engine`

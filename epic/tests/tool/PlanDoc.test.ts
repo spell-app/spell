@@ -2576,6 +2576,55 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // epic `epic-engine` P51 (Q53):  answered inline, with the page's own marks
+  test("inline:  Approve closes it;  the note box's x cancels it, his note and picture kept;  a revisit is left", () => {
+    const plan = withTests()
+    const at = new Date(2026, 9, 1, 9, 30).toISOString()
+    expect(plan.applyMark({ id: "m1", action: "approve" }).did).toBe("approved:  closed (passed)")
+    expect(
+      plan.applyMark({ id: "m3", action: "skip", note: "Moot.", shot: "tests/m3-20261029-1432.png", at }).did
+    ).toBe('canceled:  no longer applies (Owen\'s run):  "Moot."')
+    const reply = el(plan, "m3").querySelector('epic-reply[from="Owen"]')!
+    expect([
+      el(plan, "m3").getAttribute("status"),
+      reply.getAttribute("re"),
+      reply.querySelector("img")?.getAttribute("src")
+    ]).toEqual(["canceled", "test skipped", "tests/m3-20261029-1432.png"])
+    const left = plan.applyMark({
+      id: "m2",
+      action: "revisit",
+      when: "soon",
+      note: "It half worked",
+      shot: "tests/m2-20261029-1432.png",
+      at
+    })
+    expect(left.applied).toBe(false)
+    expect(el(plan, "m2").getAttribute("status")).toBe("open")
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("another item's x keeps the note's picture in his reply", () => {
+    const plan = withTests()
+    plan.addItem("judgement", "a call")
+    plan.applyMark({ id: "j1", action: "skip", shot: "tests/j1-20261029-1432.png" })
+    expect(el(plan, "j1").querySelector('epic-reply[from="Owen"] img')?.getAttribute("src")).toBe(
+      "tests/j1-20261029-1432.png"
+    )
+    expect(el(plan, "j1").getAttribute("status")).toBe("open")
+  })
+
+  test("prepared (Start testing):  stamped with its place;  Owen's order puts the prepared first, by place", () => {
+    const plan = withTests()
+    plan.prepareTest("m3", 1)
+    plan.prepareTest("m1", 2)
+    expect(el(plan, "m3").getAttribute("prepared")).toBe("1")
+    expect(EpicTests.openIn(plan).map((test) => test.id)).toEqual(["M3", "M1", "M2"])
+    expect(plan.document.querySelector("#log > epic-event:last-of-type")?.textContent).toContain(
+      "M1 prepared for Owen's testing, number 2"
+    )
+    expect(problems(plan)).toEqual([])
+  })
+
   test("a test's answer on anything but a test is dropped (`gone`);  an unknown result is left", () => {
     const plan = withTests()
     plan.addItem("todo", "a todo")
