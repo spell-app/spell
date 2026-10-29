@@ -106,6 +106,14 @@ export const epicPhaseVocabulary = {
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
+      name: "to-see",
+      kind: "string",
+      description:
+        "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the " +
+        "epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts " +
+        "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+    },
+    {
       name: "plan",
       kind: "enum",
       values: ["waiting", "accepted"],
@@ -119,8 +127,8 @@ export const epicPhaseVocabulary = {
       name: "changes",
       kind: "number",
       description:
-        "How many plan changes (`<epic-update>` blocks) it holds, written by the epic tool on every edit:  its " +
-        "title row says so while it isn't done, folded too (its body, a part, loads only when it opens)."
+        "An OLDER page's count of its plan changes (`<epic-update>` blocks), from before epic `epic-engine` I168:  its " +
+        "pen says so until the epic tool's next write puts `to-see` in its place."
     },
     FOLD_OPEN_ATTRIBUTE
   ],
@@ -152,7 +160,14 @@ export const epicPhaseVocabulary = {
     },
     {
       name: "changed",
-      description: "In its title, while it isn't done:  its plan changed, an orange pen and how many times (`changes`)."
+      description:
+        "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet " +
+        "or marked Seen since)."
+    },
+    {
+      name: "seen-all",
+      description:
+        "After the pen, while the page is reviewed:  a round ✓ `<ui-button>` marking every new update Seen at once."
     },
     {
       name: "tools",
@@ -224,8 +239,15 @@ export const epicPhaseVocabulary = {
     },
     {
       key: "changedTip",
-      text: "Its plan changed:  {count} × Update, at the end of its description",
-      description: "The title's pen while it isn't done:  its tooltip and name;  `count` how many changes."
+      text:
+        "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for " +
+        "everyone;  unseen, each goes quiet by itself 3 days after it was written",
+      description: "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
+    },
+    {
+      key: "seenAllTip",
+      text: "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+      description: "The pen's ✓:  what it does."
     }
   ],
   children: [

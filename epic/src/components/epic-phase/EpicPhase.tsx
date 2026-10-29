@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
+import { PlanDates } from "spell/epic/dates"
 import { PageStages, PhaseIds } from "spell/epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
@@ -37,8 +38,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
- *   - while it isn't done and its plan changed (`changes`, written by the tool):  an orange pen and how many times,
- *     so a folded phase says so too (its body, a part, isn't loaded until it opens)
+ *   - while it isn't done and has NEW updates (`to-see`, written by the tool, less the ones quiet or marked Seen since;
+ *     epic `epic-engine` I168):  an orange pen and how many, so a folded phase says so too (its body, a part, isn't
+ *     loaded until it opens);  none left, no pen
+ *     - while the page is reviewed, a ✓ after it:  Seen on every one at once
+ *     - an older page's `changes` (every plan change) until the tool's next write
  *   - the estimate as a badge;  once done and timed, what it took instead (`21m`), the estimate its tooltip
  *     (`~3-4h`;  Owen, M1 and M3 on epic `epic-engine` P41)
  * - Its children, in order (the vocabulary's):
@@ -95,9 +99,28 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** The pen of its title's mark:  its plan changed. */
   readonly changedGlyph = new E.IconGlyph({ owner: this, name: () => "pen to square" })
 
-  /** How many plan changes its title says it has:  `changes`, while it isn't done;  0 for none. */
+  /**
+   * Its update blocks still NEW, by id (epic `epic-engine` I168):  `to-see`'s, less the ones gone quiet since it was
+   * written (`PlanDates.isQuiet()`) or marked Seen in the review inbox, while it isn't done.
+   */
+  get newUpdates(): string[] {
+    if (this.shownStatus === "done") return []
+    const now = new Date()
+    return (this.toSee ?? "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((token) => token.split("@"))
+      .filter(([id, at]) => !PlanDates.isQuiet(at, now) && this.reviewState.markOf(id)?.action !== "seen")
+      .map(([id]) => id)
+  }
+
+  /**
+   * How many plan changes its title's pen counts:  its new updates (`newUpdates`);  0 for none.
+   * - an older page, with `changes` and no `to-see` yet:  `changes`, until the epic tool's next write
+   */
   get changedCount(): number {
-    return this.shownStatus === "done" ? 0 : (this.changes ?? 0)
+    if (this.toSee === undefined && this.changes) return this.shownStatus === "done" ? 0 : this.changes
+    return this.newUpdates.length
   }
 
   /** What it took (`took`), shown once it's done;  `undefined` before, or never measured. */
@@ -322,26 +345,54 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   ////////////////
 
   /**
-   * Its title's mark while it isn't done and its plan changed:  the pen and how many times, in orange;
-   * its name and tooltip say so (`changedTip`).
+   * Its title's mark while it isn't done and has new updates:  the pen and how many, in orange;
+   * its name and tooltip say so, and what Seen does (`changedTip`).
+   * - while the page is reviewed, a ✓ after it (epic `epic-engine` I168):  Seen on every one of them at once
    */
   private changedMark(): JSX.Element {
     return (
-      <Show when={this.changedCount}>
-        {(count) => (
-          <span
-            class={CHANGED}
-            part={this.partForName("changed")}
-            role="img"
-            aria-label={this.translationForKey("changedTip", { count: count() })}
-            title={this.translationForKey("changedTip", { count: count() })}
-          >
-            {this.changedGlyph.svg}
-            {count()}
-          </span>
-        )}
-      </Show>
+      <>
+        <Show when={this.changedCount}>
+          {(count) => (
+            <span
+              class={CHANGED}
+              part={this.partForName("changed")}
+              role="img"
+              aria-label={this.translationForKey("changedTip", { count: count() })}
+              title={this.translationForKey("changedTip", { count: count() })}
+            >
+              {this.changedGlyph.svg}
+              {count()}
+            </span>
+          )}
+        </Show>
+        <Show when={this.showsSeenAll}>
+          <ui-button
+            class={SEEN_ALL}
+            part={this.partForName("seen-all")}
+            appearance="circular basic"
+            size="mini"
+            icon="check"
+            title={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
+            aria-label={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
+            onClick={(event: MouseEvent) => this.seeAll(event)}
+          />
+        </Show>
+      </>
     )
+  }
+
+  /** The pen's ✓ shows:  the page reviewed, new updates to mark (not an older page's `changes`). */
+  get showsSeenAll(): boolean {
+    return this.reviewState.reviewing() && this.newUpdates.length > 0
+  }
+
+  /** The pen's ✓:  every new update marked Seen;  the click goes no further (the title row would fold). */
+  @E.untracked
+  private seeAll(event: MouseEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.reviewState.markSeen(this.newUpdates)
   }
 
   ////////////////
@@ -391,8 +442,9 @@ export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary>
 const WORKING = "working"
 const SPINNER = "spinner"
 
-/** Class of the shadow markup:  the title's mark, its plan changed. */
+/** Classes of the shadow markup:  the title's mark, its plan changed;  the ✓ after it, Seen on them all. */
 const CHANGED = "changed"
+const SEEN_ALL = "seen-all"
 
 /** A phase's status => its icon (Spell UI's names, from the docs bundle's set). */
 const STATUS_ICONS = {

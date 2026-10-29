@@ -820,6 +820,49 @@ test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere e
 })
 
 ////////////////
+// ## Seen on an update block (epic `epic-engine` I168)
+////////////////
+
+// Owen, 2026-10-29:  "How do I clear these 'update' marks?"
+test("the inbox takes ONLY Seen on an update (`up3`), and Seen nowhere else", () => {
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.setMark("up3", { action: "seen" }, M1)).toMatchObject({ action: "seen" })
+  expect(() => inbox.setMark("up3", { action: "approve" }, M1)).toThrow("an update takes Seen, not approve")
+  expect(() => inbox.setMark("q1", { action: "seen" }, M1)).toThrow("only an update (up3 ...) takes Seen")
+  expect(() => inbox.setMark("ch2", { action: "seen" }, M1)).toThrow()
+})
+
+test("itemIds:  an update block takes Seen while its host's `to-see` lists it, or it's in the page not `seen`", () => {
+  const html =
+    `<epic-section id="phases" kind="phases"><epic-phase id="p-one" title="One" status="active" ` +
+    `to-see="up1@2026-10-01T09:05 up2"></epic-phase></epic-section>` +
+    `<epic-update id="up5" at="2026-10-01 09:05" summary="x"></epic-update>` +
+    `<epic-update id="up6" at="2026-10-01 09:05" seen="2026-10-02 10:00" summary="y"></epic-update>`
+  const ids = ReviewInbox.itemIds(html)
+  expect(["up1", "up2", "up5", "up6"].map((id) => ids.has(id))).toEqual([true, true, true, false])
+})
+
+test("apply:  Seen stamps `seen` on the block, for everyone;  it leaves its phase's `to-see`;  the mark is cleared", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Retry Logic", { goal: "<ul><li>retries</li></ul>" })
+  plan.addPhaseUpdate(1, "<p>split in two</p>", { summary: "Split in two" })
+  plan.updateStates()
+  const update = plan.document.querySelector("epic-update")!.id
+  expect(plan.phaseElements[0]!.getAttribute("to-see")).toMatch(new RegExp(`^${update}@`))
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark(update, { action: "seen" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.document.getElementById(update)!.hasAttribute("seen")).toBe(true)
+  expect(after.phaseElements[0]!.hasAttribute("to-see")).toBe(false)
+  expect(printed.join("\n")).toContain(`${update.toUpperCase()}  seen:  Split in two`)
+  expect(ReviewInbox.read(inboxFile).marks[update]).toBeUndefined()
+})
+
+////////////////
 // ## The new flow (epic `epic-engine` P33)
 ////////////////
 

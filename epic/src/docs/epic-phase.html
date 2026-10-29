@@ -86,7 +86,7 @@
           <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
 
-            <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
+            <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" to-see="up1">
               <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
               <epic-field name="changes"
                 ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves
@@ -98,7 +98,7 @@
                   <li>the 6 docs still in one file come out split</li>
                 </ul></epic-field
               >
-              <epic-update at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
+              <epic-update id="up1" at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
                 ><p>Owen's review: the old Overnight report section goes, so P6 is open again.</p></epic-update
               >
             </epic-phase>
@@ -108,7 +108,7 @@
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
-                    <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
+                    <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" to-see="up1">
                       <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
                       <epic-field name="changes"
                         ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves nothing was lost:
@@ -120,7 +120,7 @@
                           <li>the 6 docs still in one file come out split</li>
                         </ul></epic-field
                       >
-                      <epic-update at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
+                      <epic-update id="up1" at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
                         ><p>Owen's review:  the old Overnight report section goes, so P6 is open again.</p></epic-update
                       >
                     </epic-phase>
@@ -131,8 +131,14 @@
             <ul>
               <li>
                 Its title line: the half-filled blue circle (under way), <code>P6 · Converter</code>, and the estimate
-                <code>4-6h</code>; and, since its plan changed, an orange pen and <code>1</code> (its
-                <code>changes</code>).
+                <code>4-6h</code>; and, since it has a new update, an orange pen and <code>1</code> (its
+                <code>to-see</code>, written by the epic tool).
+              </li>
+              <li>
+                The pen counts only updates still NEW (epic <code>epic-engine</code> I168): not marked Seen, and written
+                less than 3 days ago. None left, no pen. Its tooltip says what Seen does. While the page is reviewed, a
+                round ✓ after it marks every one Seen at once. (This example's update is weeks old, so it's grey already:
+                its <code>to-see</code> is written by hand here, with no date.)
               </li>
               <li>
                 Click it to open: Symptom, Changes and Goal, then its plan change, titled

@@ -67,6 +67,9 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       `{ action: "accept" }` (the change stands:  `inbox apply` marks it `accepted`, the orange goes, its chip
  *       stays) or `{ action: "reopen" }` (`inbox apply` reopens the question it names;  the mark stays orange)
  *       - only a change takes them, and a change takes nothing else;  `accept` without a `stage` is a change's
+ *     - an UPDATE block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id (`UPDATE_ID`):
+ *       `{ action: "seen" }`;  `inbox apply` stamps `seen` on the block (folded to one grey line, out of its phase's
+ *       pen, for everyone);  only an update takes it, and an update takes nothing else
  *   - `drafts`:  `{ [id]: { action, note, at } }`, a note box's text as Owen types it (`setDraft()`),
  *     until the mark that uses it;  never sent or counted
  *   - `urgency`:  `{ [id]: { calm, at } }`, Owen's click on an open judgement call's or issue's id chip
@@ -368,6 +371,7 @@ export class ReviewInbox {
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
     if (checked) checkChangeMark(key, checked)
+    if (checked) checkSeenMark(key, checked)
     if (!checked || !ReviewInbox.isImmediate(checked)) this.now = this.now.filter((each) => each.id !== key)
     if (checked) this.marks[key] = checked
     else delete this.marks[key]
@@ -1043,13 +1047,22 @@ export class ReviewInbox {
    * - the stage button's, `stage`, while `<epic-page stage>` is a stage one ends (`ACCEPT_STAGES`, epic `epic-engine` P29)
    * - every change mark waiting for Accept (`ch3`, epic `epic-engine` P30):  listed in its host's `to-accept` (the
    *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
+   * - every update block not seen (`up3`, epic `epic-engine` I168):  listed in its host's `to-see` (`up3@<at>`), or
+   *   an `<epic-update id>` without `seen` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
     const ids = new Set<string>()
-    const tags = /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change)\b[^>]*>/g
+    const tags = /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change|epic-update)\b[^>]*>/g
     for (const [tag, name] of html.matchAll(tags)) {
       for (const change of /\sto-accept="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? []) if (change) ids.add(change)
+      for (const update of /\sto-see="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? [])
+        if (update) ids.add(update.split("@")[0].toLowerCase())
+      if (name === "epic-update") {
+        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
+        if (id && UPDATE_ID.test(id.toLowerCase()) && !/\sseen[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        continue
+      }
       if (name === "epic-change") {
         const id = /\sid="([^"]+)"/.exec(tag)?.[1]
         if (id && !/\saccepted[\s=>]/.test(tag)) ids.add(id.toLowerCase())
@@ -1263,6 +1276,7 @@ export const INBOX_VERSION = 1
  * - `accept`:  the page header's stage button (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
+ * - `seen`:  an update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), under its id
  */
 export const ACTIONS = [
   "approve",
@@ -1278,7 +1292,8 @@ export const ACTIONS = [
   "accept",
   "defer",
   "move",
-  "reopen"
+  "reopen",
+  "seen"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
@@ -1313,6 +1328,12 @@ export const STAGE_ID = "stage"
  * given by the epic tool (`PlanDoc.updateChanges()`).
  */
 export const CHANGE_ID = /^ch\d+$/
+
+/**
+ * An update block's id, its key in the inbox (`<epic-update id="up3">`, epic `epic-engine` I168):  `up` and a number,
+ * given by the epic tool (`PlanDoc.updateUpdates()`).
+ */
+export const UPDATE_ID = /^up\d+$/
 
 /** The stages a stage button ends:  every stage but `building`. */
 export const ACCEPT_STAGES = PageStages.ALL.filter(PageStages.isPlanning)
@@ -1397,6 +1418,16 @@ function checkChangeMark(key: string, mark: CheckedMark) {
   if (key === STAGE_ID) throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
   const what = mark.action === "accept" ? "Accept with no stage" : "Reopen"
   throw new InboxError(`only a change (ch3 ...) takes ${what}:  ${key}`)
+}
+
+/**
+ * An update block (`UPDATE_ID`) takes only Seen, and Seen goes on nothing else (epic `epic-engine` I168):
+ * an `InboxError` otherwise.
+ */
+function checkSeenMark(key: string, mark: CheckedMark) {
+  const isUpdate = UPDATE_ID.test(key)
+  if (isUpdate && mark.action !== "seen") throw new InboxError(`an update takes Seen, not ${mark.action}:  ${key}`)
+  if (!isUpdate && mark.action === "seen") throw new InboxError(`only an update (up3 ...) takes Seen:  ${key}`)
 }
 
 /** Is `action` one of `ACTIONS`? */

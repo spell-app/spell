@@ -6,6 +6,8 @@ import { E } from "spell/element"
 import { PlanDates } from "spell/epic/dates"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
+// its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
+import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 
 import { epicUpdateVocabulary } from "./EpicUpdate.en"
 
@@ -24,7 +26,14 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - Before the date, the `actions` slot (`Fold.actions()`):  the page's own buttons, and the docs runtime's
  *     bullhorn;  a click on one never folds it.
  *   - What changed under the title row.
- *   - Orange, our colour for "changed since you looked":  a faint orange ground and outline.
+ *   - Orange, our colour for "changed since you looked":  a faint orange ground and outline, while it's NEW.
+ *   - QUIET once seen or old (epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear these 'update' marks?"):
+ *     grey, folded to its title row (its date and summary), out of its phase's pen;  kept, as the record
+ *     - seen:  its `seen` (written by `epic inbox apply`, for everyone), or its Seen mark in the review inbox (at once,
+ *       for Owen, before it's applied)
+ *     - old:  more than 3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`)
+ *   - While it's new, stamped (`id`) and the page is reviewed:  a ✓ Seen before the date
+ *     (`<epic-review buttons="update">`)
  *   - Folds by its title row (Owen, 2026-10-08:  everything in a section box folds):
  *     open to start with;  page state, never written;  folded, `hidden="until-found"`.
  *   - Where it sits is the doc's business (`PLAN-DOC.md`, "Updates"):
@@ -46,13 +55,41 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   /** Light-DOM slot occupancy:  has it buttons in its `actions` slot? */
   readonly slots = new E.SlotContent(this.domElement)
 
-  /** A block's open or folded state:  open to start with. */
-  readonly fold = new Fold(() => true)
+  /** Its view of the review inbox, keyed by its id (`up3`):  Seen shows while the page is reviewed. */
+  readonly review = new ReviewState(() => this.id)
+
+  /** Follow the inbox while connected (kept alive:  a removed one must stop listening). */
+  @E.whileConnected
+  protected followReviews() {
+    return this.review.connect()
+  }
+
+  /** A block's open or folded state:  open while new, folded once quiet;  the reader's click wins. */
+  readonly fold = new Fold(() => !this.isQuiet)
 
   /** A block, unfolded. */
   @E.cssState("open")
   get isOpen(): boolean {
     return this.isBlock && this.fold.isOpen()
+  }
+
+  /** Marked seen:  `seen` in the page, or its Seen mark in the review inbox (sent or not). */
+  get isSeen(): boolean {
+    return !!this.seen || this.review.mark()?.action === "seen"
+  }
+
+  /**
+   * QUIET:  grey, folded to its title row.  A block seen (`isSeen`), or more than 3 days old (`PlanDates.isQuiet()`,
+   * the change marks' rule too).
+   */
+  @E.cssState("quiet")
+  get isQuiet(): boolean {
+    return this.isBlock && (this.isSeen || PlanDates.isQuiet(this.at, new Date()))
+  }
+
+  /** Seen shows:  new, stamped (an id), the page reviewed. */
+  get showsSeen(): boolean {
+    return !this.isQuiet && !!this.id && this.review.reviewing()
   }
 
   /** Drawn as a block:  it has a summary, a date or what changed (not a bare label). */
@@ -77,11 +114,12 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
     return PlanDates.format(this.at)
   }
 
-  /** The date's tooltip:  `at` as written, then the phase under way then. */
+  /** The date's tooltip:  `at` as written, then the phase under way then, then when it was seen. */
   get dateTip(): string | undefined {
     if (!this.at) return undefined
     const during = this.phase === undefined ? "" : ` · ${this.translationForKey("during", { phase: this.phase })}`
-    return `${this.at}${during}`
+    const seen = this.seen ? ` · ${this.translationForKey("seenAt", { when: PlanDates.format(this.seen) })}` : ""
+    return `${this.at}${during}${seen}`
   }
 
   render(): JSX.Element {
@@ -108,9 +146,18 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
           {/* the date (and the page's own buttons) float right of the title's FIRST line only:  the lines under it run
               the full width */}
           <div class={WORDS}>
-            <Show when={this.date || this.hasActions}>
+            <Show when={this.date || this.hasActions || this.showsSeen}>
               <span class={WHEN}>
                 {Fold.actions({ part: this.partForName("actions"), hidden: () => !this.hasActions })}
+                <Show when={this.showsSeen}>
+                  <epic-review
+                    of={this.id}
+                    shows="buttons"
+                    buttons="update"
+                    part={this.partForName("seen")}
+                    label={this.translationForKey("buttonsLabel")}
+                  />
+                </Show>
                 <Show when={this.date}>
                   <time class={TIME} part={this.partForName("time")} datetime={this.at} title={this.dateTip}>
                     {this.date}

@@ -147,6 +147,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `Markup`:  make, read, set, append
     - `MarkupCheck`:  validate a doc
   - `dates/` -- `PlanDates`:  every date an element draws, from whatever form the doc holds.
+    - and when a dated mark goes QUIET (`isQuiet()`, 3 days:  `QUIET_DAYS`):  change marks, update blocks, a phase's
+      pen, the tool's own reads (epic `epic-engine` I168)
     - `10/8/26 14:34`;  `10/8/26` for a day
     - NOT the log's (`<epic-event>`).
     - A time alone (`saved 14:42`):  `PlanDates.clock()`.
@@ -177,6 +179,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
             `<epic-summary>` drew them under its lede before
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
         its own `<epic-review buttons="change">` in the popup a click on its words opens (I160)
+      - `<epic-update>` (epic `epic-engine` I168):  a new block's Seen, keyed by its id (`up3`),
+        `<epic-review buttons="update">` before its date;  `<epic-phase>`'s pen marks all of its new ones
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
@@ -1603,6 +1607,15 @@ Each kind of page has ONE name, written everywhere a person reads it.
       them, and a change takes nothing else
     - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
     - `epic inbox apply` reopens the question for Reopen (an old Accept:  `accepted`, quiet):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
+  - An UPDATE block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear
+    these 'update' marks?"):  `{ action: "seen" }` under its id;  a ✓ before a new block's date, and one after its
+    phase's pen for all of them
+    - the block folds to one grey line at once, out of the pen;  Send carries it;  `epic inbox apply` stamps
+      `seen="<time>"` on it, for everyone
+    - only an update takes it, and an update takes nothing else;  markable while its host's `to-see` lists it, or it's
+      in the page not `seen`
+    - unseen, a block goes quiet by itself 3 days after its `at`, the change marks' rule (`PlanDates.isQuiet()`):
+      [PLAN-DOC.md](tool/PLAN-DOC.md), "Updates"
   - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`):
     - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
       moved after the others)
@@ -1619,7 +1632,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       routes' `waitingComments`
     - `wait` prints them under the revisit, its content (`takeWork()`'s `inlineComments`);  `inbox` names them
       - never on their own too:  `takeWork()`'s `comments` leaves out the ones a sent revisit carries (I158)
-    - NOT the phase's orange pen:  that counts its plan changes (`changes`, `<epic-update>` blocks)
+    - NOT the phase's orange pen:  that counts its NEW update blocks (`to-see`, `<epic-update>`;  I168)
   - A COMMENT SAVED IN A PART'S TEXT presses its Revisit by itself (epic `epic-engine` I158;  Owen, 2026-10-29:
     "When I add a comment to a phase, it should show as `revisit` automatically")
     - the comments route does it as it saves the comment, under the inbox's lock (`ReviewInbox.noteComment()`):

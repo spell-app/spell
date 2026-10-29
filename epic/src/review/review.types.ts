@@ -126,6 +126,8 @@ export function isAirplane(): boolean {
  *   others, still to do)
  * - a CHANGE MARK (`<epic-change>`, epic `epic-engine` P30):  `accept` (the change stands:  the orange goes, the chip
  *   stays), `reopen` (its question is talked over again)
+ * - an UPDATE block (`<epic-update id="up3">`, epic `epic-engine` I168):  `seen` (folded to one grey line, out of its
+ *   phase's pen)
  */
 export const REVIEW_ACTIONS = [
   "approve",
@@ -137,6 +139,7 @@ export const REVIEW_ACTIONS = [
   "defer",
   "accept",
   "reopen",
+  "seen",
   // a phase dragged to another place (epic `epic-engine` P34):  `{ action: "move", to }`
   "move"
 ] as const

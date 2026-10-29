@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  3c4ad5541366f63c
+// sources:  717833ba227c3935
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -23,7 +23,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-mark": {"folder":"epic-mark","attributes":["item","link"]},
@@ -36,14 +36,14 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","plan","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","to-see","plan","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
-  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","open"]},
+  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","wand"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
@@ -55,7 +55,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
   "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},
-  "epic-update": {"folder":"epic-update","attributes":["at","summary","phase"]},
+  "epic-update": {"folder":"epic-update","attributes":["id","at","summary","phase","seen"]},
   "epic-updated": {"folder":"epic-phase","attributes":["at","phase","of"]},
   "epic-version": {"folder":"epic-original","attributes":["as-of"]}
 }

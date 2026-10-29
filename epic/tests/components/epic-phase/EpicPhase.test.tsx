@@ -242,6 +242,45 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
     expect(host.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
   })
 
+  // epic `epic-engine` I168 (Owen, 2026-10-29:  "How do I clear these 'update' marks?")
+  test("the pen counts its NEW updates (`to-see`):  less the ones quiet since, or marked Seen;  none, no pen", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(2026, 9, 12, 9, 0))
+    const routes = new SeenRoutes()
+    try {
+      // up1 is 4 days old by now:  quiet, though the tool listed it when it wrote the page
+      const toSee = "up1@2026-10-08T08:00 up2@2026-10-11T10:00 up3@2026-10-11T11:00"
+      let host = await render(`<epic-phase id="p2" title="Two" status="active" to-see="${toSee}"></epic-phase>`)
+      const pen = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="changed"]')
+      expect(pen()!.textContent).toBe("2")
+      expect(pen()!.title).toContain("✓ Seen")
+      expect(pen()!.title).toContain("3 days")
+      // not reviewed:  no ✓
+      expect(host.shadowRoot!.querySelector('[part~="seen-all"]')).toBeNull()
+      // reviewed (the client adopted before it draws, as on a page):  the ✓ marks every new one Seen;  the pen goes
+      await adoptSeenClient(routes)
+      host = await render(`<epic-phase id="p2b" title="Two" status="active" to-see="${toSee}"></epic-phase>`)
+      const all = await vi.waitFor(() => {
+        const button = host.shadowRoot!.querySelector<HTMLElement>('[part~="seen-all"]')
+        expect(button).not.toBeNull()
+        return button!
+      })
+      expect(all.title).toContain("all 2 new updates")
+      all.click()
+      await vi.waitFor(() => expect(Object.keys(routes.inbox.marks).sort()).toEqual(["up2", "up3"]))
+      await vi.waitFor(() => expect(pen()).toBeNull())
+      expect(Object.values(routes.inbox.marks).map((mark) => mark.action)).toEqual(["seen", "seen"])
+      // an older page:  `changes`, no `to-see` yet, counts as before;  a page the tool wrote with nothing new:  no pen
+      const older = await render(`<epic-phase id="p3" title="Three" status="active" changes="2"></epic-phase>`)
+      expect(older.shadowRoot!.querySelector('[part~="changed"]')!.textContent).toBe("2")
+      const none = await render(`<epic-phase id="p4" title="Four" status="active"></epic-phase>`)
+      expect(none.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
+    } finally {
+      ReviewClient.adopt(undefined)
+      vi.useRealTimers()
+    }
+  })
+
   test('an older doc\'s lines (`slot="changes"`) still show, unboxed, at the end of its body', async () => {
     const host = await render(
       `<epic-phase id="p2" title="Two" status="todo" open><epic-field name="goal">Fixed.</epic-field>` +
@@ -601,3 +640,42 @@ describe("<epic-phase> its title row's cursors", () => {
     expect(cursors(host)).toEqual({ space: "pointer", row: "pointer", chevron: "pointer", time: "pointer" })
   })
 })
+
+/** The review routes' `mark`, as `fetch`, over an inbox kept here (epic `epic-engine` I168):  each reply the whole inbox. */
+class SeenRoutes {
+  inbox = {
+    marks: {} as Record<string, { action: string; at: string }>,
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: {},
+    listening: null,
+    unsentComments: [],
+    waitingComments: [],
+    woken: null,
+    doing: null
+  }
+
+  readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
+    if (input.replace(/\?.*/, "").endsWith("/mark")) {
+      const body = JSON.parse(init!.body as string) as { id: string; mark: { action: string } | null }
+      if (body.mark) this.inbox.marks[body.id] = { ...body.mark, at: new Date().toISOString() }
+      else delete this.inbox.marks[body.id]
+    }
+    return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
+  })
+}
+
+/** A started, served client on `routes`, adopted as the page's:  the page is reviewed. */
+async function adoptSeenClient(routes: SeenRoutes): Promise<void> {
+  const client = new ReviewClient({
+    page: "/epics/demo/demo.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: routes.fetch as unknown as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+}

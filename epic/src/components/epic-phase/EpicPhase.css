@@ -172,6 +172,12 @@
     height: 0.95em;
     fill: currentColor;
   }
+  /* the pen's ✓:  Seen on every new update (I168);  a mini round button on the title's first line, clickable */
+  .seen-all {
+    margin-inline-start: 4px;
+    vertical-align: middle;
+    pointer-events: auto;
+  }
 
   /*
    * ## Dragged to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`)

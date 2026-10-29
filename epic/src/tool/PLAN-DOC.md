@@ -160,7 +160,7 @@ As `plan-doc.md`, "Ids":
 ## Phases
 
 ```html
-<epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" changes="1">
+<epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" to-see="up1@2026-10-29T10:00">
   <epic-field name="symptom">what's wrong today, one line</epic-field>
   <epic-field name="requests"
     ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>Owen's words</p></blockquote> ...</epic-field
@@ -264,7 +264,8 @@ As `plan-doc.md`, "Ids":
   - `phase`:  the phase active then.
   - They stay once the phase is done.
   - No box around them (Owen, 2026-10-11:  "lose the "Plan changes" surround"):  each is its own block.
-  - The phase's `changes`:  how many, written by the tool on every edit, in the skeleton.
+  - The phase's `to-see`:  the new ones (not seen, not quiet), written by the tool on every edit, in the skeleton;
+    its pen counts them ("Updates", I168).  Its `changes`, the count before I168, goes on the next write.
     While the phase isn't done, its title shows an orange pen and that count, folded too (its part not loaded).
   - Older docs:  `<epic-updated>` lines, in the phase's `changes` slot (P6, 2026-10-11) or in no slot, and COPIES of
     the to-do phases' first in the Phases section (`<epic-updated slot="changes" of="N">`, T14).
@@ -763,6 +764,30 @@ easily"), `components/epic-update/`:
   - `phase N done` removes phase N's bare labels and its updates OUTSIDE a phase (prose updates):  once the phase is
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.
+- NEW, then QUIET (epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear these 'update' marks?"):
+  - New:  orange, open, counted on its phase's pen.
+  - Quiet:  grey, folded to its title row (its date and summary), out of the pen;  kept, as the record.
+    - seen:  `seen="<time>"` on the block, written by `epic inbox apply` from its Seen mark (below), for everyone
+    - or old:  3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`, one copy for both)
+  - `id`:  each block's `up3`, given by the tool on every write (`updateUpdates()`), after the highest in the doc;
+    its Seen mark's inbox key.  A bare label never has one.
+  - SEEN, a review mark (`{ action: "seen" }` under the block's id):
+    - a ✓ before a new block's date while the page is reviewed (`<epic-review buttons="update">`), and a ✓ after
+      its phase's pen for all of them at once
+    - the block folds to a grey line at once (its mark in the inbox), for Owen;  Send carries it, as a change mark's
+      Reopen;  `inbox apply` stamps `seen`, logged (`UP3 seen:  Split in two`)
+    - only an update takes it, and an update takes nothing else (`ReviewInbox`)
+  - Each body host (an Overview sub-section, a phase, an item, the log) lists the new blocks inside it in `to-see`,
+    the skeleton's, as `to-accept` lists change marks:  `up3@2026-10-27T10:00 up5@...`, each id and its `at`, not
+    seen and not quiet as of that write.
+    - a phase's pen counts its entries less the ones gone quiet since, or marked Seen in the inbox;  none, no pen
+    - the review routes take a Seen mark on an id it lists (`ReviewInbox.itemIds()`), the body not loaded
+    - it replaces a phase's `changes` (every plan change, before I168), which the tool drops on its next write;
+      until then the pen shows `changes`
+  - No migration step:  `seen` is new and optional, an older block goes quiet by age, and every write stamps the ids
+    and `to-see`.
+  - Why a review mark, not a write at once:  the review routes never write the page (only `inbox apply` does, under
+    its lock), and Reopen, the other button that changes a mark's look, already goes this way.
 
 ## Change marks
 

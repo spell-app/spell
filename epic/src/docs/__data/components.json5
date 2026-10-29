@@ -2104,6 +2104,11 @@
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
         },
         {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+        },
+        {
           "name": "open",
           "kind": "boolean",
           "description": "Unfolded:  a click on its line, a link to it (`#q7`, or an id in `part-ids`), find-in-page.  Page state only:  the script never writes it, so a doc opens folded."
@@ -2495,6 +2500,11 @@
           "key": "reopenChange",
           "text": "Reopen",
           "description": "A change mark's button (the history):  its name."
+        },
+        {
+          "key": "seenUpdate",
+          "text": "Seen",
+          "description": "A new update block's button (the check):  its name."
         },
         {
           "key": "boxSkip",
@@ -4233,6 +4243,11 @@
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
         },
         {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+        },
+        {
           "name": "plan",
           "kind": "enum",
           "values": [
@@ -4244,7 +4259,7 @@
         {
           "name": "changes",
           "kind": "number",
-          "description": "How many plan changes (`<epic-update>` blocks) it holds, written by the epic tool on every edit:  its title row says so while it isn't done, folded too (its body, a part, loads only when it opens)."
+          "description": "An OLDER page's count of its plan changes (`<epic-update>` blocks), from before epic `epic-engine` I168:  its pen says so until the epic tool's next write puts `to-see` in its place."
         },
         {
           "name": "open",
@@ -4327,7 +4342,11 @@
         },
         {
           "name": "changed",
-          "description": "In its title, while it isn't done:  its plan changed, an orange pen and how many times (`changes`)."
+          "description": "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet or marked Seen since)."
+        },
+        {
+          "name": "seen-all",
+          "description": "After the pen, while the page is reviewed:  a round ✓ `<ui-button>` marking every new update Seen at once."
         },
         {
           "name": "tools",
@@ -4434,8 +4453,13 @@
         },
         {
           "key": "changedTip",
-          "text": "Its plan changed:  {count} × Update, at the end of its description",
-          "description": "The title's pen while it isn't done:  its tooltip and name;  `count` how many changes."
+          "text": "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for everyone;  unseen, each goes quiet by itself 3 days after it was written",
+          "description": "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
+        },
+        {
+          "key": "seenAllTip",
+          "text": "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+          "description": "The pen's ✓:  what it does."
         }
       ]
     },
@@ -5122,6 +5146,11 @@
           "name": "to-accept",
           "kind": "string",
           "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+        },
+        {
+          "name": "to-see",
+          "kind": "string",
+          "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
         },
         {
           "name": "open",
@@ -6870,6 +6899,12 @@
       "noun": "update",
       "attributes": [
         {
+          "name": "id",
+          "kind": "string",
+          "property": "epicId",
+          "description": "A block's `up3`, given by the epic tool on its next write (epic `epic-engine` I168):  the key its Seen mark goes under, and a link's target (`#up3`).  None:  just written, no Seen yet;  a bare label never has one."
+        },
+        {
           "name": "at",
           "kind": "string",
           "description": "When it changed:  `2026-10-11 14:30`, drawn `10/11/26 14:30` at the title's right."
@@ -6883,6 +6918,11 @@
           "name": "phase",
           "kind": "string",
           "description": "The phase active when it was written, by its number (`3`, `11.1`).  `phase 3 done` removes P3's bare labels and the updates outside a phase;  a phase's own plan changes stay."
+        },
+        {
+          "name": "seen",
+          "kind": "string",
+          "description": "When Owen marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until `PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
         }
       ],
       "slots": [
@@ -6922,6 +6962,10 @@
           "description": "In its title row, after the title and before its own buttons:  the `actions` slot."
         },
         {
+          "name": "seen",
+          "description": "A new block's ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons=\"update\">`."
+        },
+        {
           "name": "body",
           "description": "What changed, under the title row;  hidden (`until-found`) while folded."
         },
@@ -6937,7 +6981,11 @@
         },
         {
           "name": "open",
-          "description": "A block, unfolded:  it starts so (page state, never written)."
+          "description": "A block, unfolded:  it starts so while new, folded once seen or quiet (page state, never written)."
+        },
+        {
+          "name": "quiet",
+          "description": "A block seen (`seen`, or its Seen mark in the inbox) or older than 3 days (`PlanDates.isQuiet()`):  grey, folded to its title row."
         }
       ],
       "texts": [
@@ -6950,6 +6998,16 @@
           "key": "unfoldTip",
           "text": "Open this update",
           "description": "Tooltip of its fold button while folded."
+        },
+        {
+          "key": "buttonsLabel",
+          "text": "this update",
+          "description": "Seen's group, spoken."
+        },
+        {
+          "key": "seenAt",
+          "text": "Seen {when}",
+          "description": "The date's tooltip, after the full date:  when it was seen."
         },
         {
           "key": "title",

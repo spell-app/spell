@@ -80,6 +80,13 @@ export class ReviewState {
   readonly isMarked = (itemId: string): boolean =>
     this.readPage((client) => !!itemId && !!client.markOf(itemId.toLowerCase())) ?? false
 
+  /**
+   * Item `itemId`'s mark, if any:  the page's inbox, so any element reads any id's (a phase its update blocks' Seen,
+   * epic `epic-engine` I168).
+   */
+  readonly markOf = (itemId: string): InboxMark | undefined =>
+    this.readPage((client) => (itemId ? client.markOf(itemId.toLowerCase()) : undefined))
+
   /** Its mark, if any. */
   readonly mark = (): InboxMark | undefined => this.read((client, id) => client.markOf(id))
 
@@ -186,6 +193,17 @@ export class ReviewState {
   @E.untracked
   press(action: ReviewAction): "open-box" | "chosen" | undefined {
     return this.client?.press(this.id(), action)
+  }
+
+  /**
+   * Mark each of `ids` (update blocks, `up3`) SEEN, at once:  a phase's pen's ✓ (epic `epic-engine` I168).
+   * - one marked seen already is left alone (pressing it would take the mark off)
+   */
+  @E.untracked
+  markSeen(ids: readonly string[]) {
+    const client = this.client
+    if (!client) return
+    for (const id of ids) if (client.markOf(id.toLowerCase())?.action !== "seen") client.press(id.toLowerCase(), "seen")
   }
 
   /** Its id chip clicked:  urgent <-> not urgent (`docCalm`:  what the doc says). */
