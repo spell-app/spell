@@ -1,13 +1,13 @@
 ---
 name: bg
-description: Run a task in the BACKGROUND, so the Claude panel is free again in seconds -- one named helper agent (a fork of this session) does it, with a hard agent budget, and its report comes back when it's done.  Use for `/bg ["name"] [n] <task>` (`n`:  the most agents it may use in all, default 1), `/bg ?` (what's running), `/bg stop <name>`, or when Owen says "do this in the background", "run X in the background", "don't lock up the panel with this".
+description: Run a task in the BACKGROUND, so the Claude panel is free again in seconds -- one named helper agent (a fork of this session) does it, with a hard agent budget, and its report comes back when it's done.  Use for `/bg ["name"] [n] <task>` (`n`:  the most agents it may use in all, default 1), `/bg ?` (what's running), `/bg stop <name>`, or when the person says "do this in the background", "run X in the background", "don't lock up the panel with this".
 argument-hint: '["name"] [n] <task> | ? | stop <name>'
 ---
 
 # /bg
 
 Hand a task to a helper agent that works in the background (epic `skillz`), so the panel is free again at once.
-- Owen keeps talking to this session, or sends more `/bg` tasks, while it works.
+- The person keeps talking to this session, or sends more `/bg` tasks, while it works.
 - When it's done, its notice wakes this session, which reports.
 
 - Every agent this session starts, `/bg` or not, is NAMED and LISTED the same way.
@@ -84,7 +84,7 @@ No exploring, no reading the files the task names.
 Fill in the `<...>`;  keep the rest as it is.
 
 ```
-You are agent `<full name>`, working in the BACKGROUND for this session:  Owen isn't watching you.
+You are agent `<full name>`, working in the BACKGROUND for this session:  the person isn't watching you.
 
 The task, word for word:
 <task>
@@ -101,14 +101,14 @@ The task, word for word:
   shared content (`epics/`, `guides/`, `agents/` ...) edited at its REAL path,
   `<content>/<path>` (`<content>`:  what `epic config contentFolder` prints), never git-added;  in a worktree, plain separate shell commands
   (no `$(...)`, no `&&` chains, no `cd`).
-- You can't ask Owen anything:  no AskUserQuestion.  A choice he might make differently:  take the default the code
+- You can't ask the person anything:  no AskUserQuestion.  A choice they might make differently:  take the default the code
   and plan best support, and record it:  in an epic, `epic add <epic>#J "<the call>" --details
-  "<p>chose X over Y because Z</p>" --calm` (`--calm` unless it would surprise him:  the epic skill's "5. Each
+  "<p>chose X over Y because Z</p>" --calm` (`--calm` unless it would surprise them:  the epic skill's "5. Each
   phase", step 2);  else in your report.  A choice you can't make safely (it would delete or
   overwrite work, publish anything, or change what the task means):  stop there, and make it your report's question.
 - Other running agents:  `epic agents list`.  Don't edit files another one's task names.
 - Your LAST message is your report, short:  what changed (files), where to look, checks run with numbers, judgement
-  calls (ids), and anything that needs Owen, a question last.  Don't run `epic agents done` for yourself:  the
+  calls (ids), and anything that needs the person, a question last.  Don't run `epic agents done` for yourself:  the
   session does.
 ```
 
@@ -119,26 +119,26 @@ The helper's report reaches this session as a notice, between whatever else it's
    - It prints how long the agent worked (`<full name> done:  took 21m`, from its transcript), and logs it on the
      epic page.
 2. Reply, the FIRST line in bold, by itself:  `**Agent <full name> came back with:**`.
-   - Then the report, short, in Owen's words:  what changed, where to look, what needs him.
+   - Then the report, short, in the person's words:  what changed, where to look, what needs them.
    - Links as the root rules say:
      - a page:  side bar + browser, `epic pages link ... --show`
      - an epic page:  `--review`
      - files:  `[file.ts](path)`
-3. A question in its report that only Owen can answer:  AskUserQuestion, with the epic and what it's for.
+3. A question in its report that only the person can answer:  AskUserQuestion, with the epic and what it's for.
 4. An agent `blocked on` this one:  `epic agents set <its name> --status active`.
    - Then start it (Start, steps 4-6), in the same turn.
 
 ## Redirects
 
 In an epic, the epic page shows its running agents at the top ("Agents running"), each with a note box.
-- Owen types there to STEER an agent mid-task
+- The person types there to STEER an agent mid-task
   (P3 of epic `skillz`;  [agentRoutes.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/agentRoutes.ts)).
 - The note waits in the list, untold, until this session passes it on.
 - The waiter:  `epic agents wait`, with Bash `run_in_background: true`.
   - ONE per session, while any agent this session started runs.
   - Its exit wakes the session, by its code:
   - 0:  it printed the untold notes, `skillz-aaa:  <note>` each.  Per note:
-    - `SendMessage` to that agent:  "Owen redirects you, from the epic page:  <note>".
+    - `SendMessage` to that agent:  "<their name> redirects you, from the epic page:  <note>".
       Its `to` is the agent's `taskId`, from `epic agents list --json`.
     - Then `epic agents told <name>`:  the page shows it told.
     - One line in the reply per note:  `redirected:  <name>`.

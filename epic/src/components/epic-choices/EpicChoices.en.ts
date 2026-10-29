@@ -44,7 +44,7 @@ export const epicChoicesVocabulary = {
     { name: "open", description: "Answered, and its options unfolded." },
     {
       name: "answering",
-      description: "An `<epic-ask>`'s options (a page Owen answers on):  one card a row, each with a tick box."
+      description: "An `<epic-ask>`'s options (a page you answer on):  one card a row, each with a tick box."
     }
   ],
   texts: [

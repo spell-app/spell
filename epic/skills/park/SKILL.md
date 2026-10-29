@@ -1,6 +1,6 @@
 ---
 name: park
-description: Park this session's work so it can be picked up quickly later -- commit it as a WIP commit in its own worktree `<name>` and leave a PARKED note saying where it stopped and what's next;  `/park <other>` tells another running session to park itself.  Holds the shared "Resume" steps `/unpark` and `/wait-for` use.  Use for `/park [<name>]`, or when Owen says "park this" / "park <name>" / "shelve this until <x> is done".
+description: Park this session's work so it can be picked up quickly later -- commit it as a WIP commit in its own worktree `<name>` and leave a PARKED note saying where it stopped and what's next;  `/park <other>` tells another running session to park itself.  Holds the shared "Resume" steps `/unpark` and `/wait-for` use.  Use for `/park [<name>]`, or when the person says "park this" / "park <name>" / "shelve this until <x> is done".
 argument-hint: "[<name>]"
 ---
 
@@ -22,7 +22,7 @@ and make it cheap to pick back up.
 - Status, from the repo root or a worktree (`spell help dev`):
   - `epic worktree status <name>`:  JSON, where a worktree / branch / plan / session stands
   - `epic park list|candidates|wait`
-- Running `/park` IS Owen's go-ahead to commit the WIP commit:  no "stage, then ask".
+- Running `/park` IS the person's go-ahead to commit the WIP commit:  no "stage, then ask".
   Nothing else gets committed.
 - Style:  caveman lite, as in `/epic`.
 
@@ -34,7 +34,7 @@ What `$ARGUMENTS` means:
   "Park another session" below
 - matches nothing:  it's the name to park this session under
 
-0. In plan mode:  ask Owen to leave it (shift+tab) first,
+0. In plan mode:  ask the person to leave it (shift+tab) first,
    as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
 1. `<name>`:
    - in a worktree:  that worktree's name
@@ -99,7 +99,7 @@ What `$ARGUMENTS` means:
    2. ...
 
    ## Open questions
-   1. <anything waiting on Owen;  "none">
+   1. <anything waiting on the person;  "none">
 
    ## Waiting for
    <filled in by /wait-for;  "nothing">
@@ -146,7 +146,7 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
      - there's no `node_modules/`
    - the checks of each package this branch touches (its `AGENTS.md` says which;  spell-app's `yarn ts`, `yarn test`)
      - those packages:  `git diff --name-only main...HEAD`
-4. Can't resolve a conflict (keeping both sides needs Owen's call), or checks fail on this branch's code:
+4. Can't resolve a conflict (keeping both sides needs the person's call), or checks fail on this branch's code:
    - `git merge --abort` if still merging
    - then AskUserQuestion, listing each file and why
    - Stop there.
@@ -155,6 +155,6 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
    - add `Resumed <YYYY-MM-DD HH:MM>, merged main at <hash>` under "Where it stopped"
    - log it in the epic page, as in step 5 above
    - carry on with "Next steps"
-   - Leave the WIP commit as it is (a merge sits on top now):  squash later if Owen wants.
+   - Leave the WIP commit as it is (a merge sits on top now):  squash later if the person wants.
 6. One line:  "resumed `<name>`:  merged main (<n> conflicts fixed), checks <pass/fail>;  now on:  <next step>".
    Then do it.

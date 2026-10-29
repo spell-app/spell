@@ -1,6 +1,6 @@
 ---
 name: unpark
-description: Pick a parked session's work back up -- find its worktree and PARKED note, offer to open the worktree's own VS Code window if this isn't it, merge the new `main` in and carry on with its next steps.  Use for `/unpark [<name>]`, or when Owen says "unpark <name>" / "pick <name> back up" / "resume the parked <name>".
+description: Pick a parked session's work back up -- find its worktree and PARKED note, offer to open the worktree's own VS Code window if this isn't it, merge the new `main` in and carry on with its next steps.  Use for `/unpark [<name>]`, or when the person says "unpark <name>" / "pick <name> back up" / "resume the parked <name>".
 argument-hint: "[<name>]"
 ---
 
@@ -54,7 +54,7 @@ Then AskUserQuestion:
       ([the isolate skill](../isolate/SKILL.md), "Start", step 2b).
   - "Open new window":
     1. not yet in the worktree:  `EnterWorktree` with `name: "<name>"`
-       - never its `path`:  outside `.claude/worktrees/`, Claude Code asks Owen every time (epic `epic-engine` P16)
+       - never its `path`:  outside `.claude/worktrees/`, Claude Code asks the person every time (epic `epic-engine` P16)
     2. both from the worktree's root, as [the isolate skill](../isolate/SKILL.md)'s "Start", steps 4-5:
        - `epic window open <name>` (`--pkg <pkg>` when this isn't a package window)
        - then `epic window handoff <name>`

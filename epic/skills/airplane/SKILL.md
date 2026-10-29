@@ -1,15 +1,15 @@
 ---
 name: airplane
-description: Get the laptop ready for Owen to work on the epics and docs with NO Claude (on a plane, or bad wifi) -- check and fix what pages need offline, turn airplane mode on, say how it works;  `/airplane land` afterwards gathers everything he left (marks, notes, new items, requests for now, new epics) across every epic and page, works through it in the background, and asks which new epics to start.  Use for `/airplane`, `/airplane land`, `/airplane status`, or when Owen says "I'm going offline", "I'm getting on a plane", "I'm back, go through what I left".
+description: Get the laptop ready for the person to work on the epics and docs with NO Claude (on a plane, or bad wifi) -- check and fix what pages need offline, turn airplane mode on, say how it works;  `/airplane land` afterwards gathers everything they left (marks, notes, new items, requests for now, new epics) across every epic and page, works through it in the background, and asks which new epics to start.  Use for `/airplane`, `/airplane land`, `/airplane status`, or when the person says "I'm going offline", "I'm getting on a plane", "I'm back, go through what I left".
 argument-hint: '[land | status]'
 ---
 
 # /airplane
 
-Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (epic `airplane`).
-- He reads epic pages and guides in VS Code's right side bar, marks items, writes notes, adds todos and questions.
+Airplane mode:  the person works on the pages ALONE, with no internet and no Claude (epic `airplane`).
+- They read epic pages and guides in VS Code's right side bar, mark items, write notes, add todos and questions.
 - Every page saves to this laptop's page server.
-- `/airplane` gets the laptop ready before;  `/airplane land` works through what he left, after.
+- `/airplane` gets the laptop ready before;  `/airplane land` works through what they left, after.
 
 - The repo actions are `epic airplane ...` ([airplane.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/airplane.ts));
   this skill holds the dialog.
@@ -34,15 +34,15 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
    - Each check's result:  `ok`, `fixed`, `fail` or `note`.
    - `page server`:  `--fix` starts it, or restarts one older than its code
    - `offline pages`:  `--fix` points every page's highlight.js at the repo's copy.
-     Anything else remote it names:  fix the page by hand, or tell Owen which pages will look plain.
+     Anything else remote it names:  fix the page by hand, or tell the person which pages will look plain.
    - `extension`, too old:  spell-epic's VS Code extension, rebuilt and installed
      as [its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md) says.
      - From the kit's main checkout, never a branch behind it:  it installs into VS Code.
-     - Then ask Owen to reload the window (Developer:  Reload Window).
+     - Then ask the person to reload the window (Developer:  Reload Window).
    - `waiting`:  marks already in the inboxes from before:  say which epics;  they'll be gathered at landing too
 2. Running sessions:  `epic worktree list`.
    - A session mid-work will stall offline:
-     list them for Owen, one line each, and ask (modal, multi-select) which to `/park` first.
+     list them for the person, one line each, and ask (modal, multi-select) which to `/park` first.
    - Nothing running:  skip.
 3. The docs first?  Ask, ALWAYS (Owen, 2026-10-10, epic `airplane` J20:
    "When I airplane, ask if I want to do docs-check first").
@@ -58,7 +58,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
        the shared docs it fixes are committed at the turn's end.
    - No:  go on.
 4. `epic airplane on`.
-5. Reply, short, for Owen about to close the lid:
+5. Reply, short, for the person about to close the lid:
    - what was fixed, and anything still failing, in bold
    - `/docs-check`, when it ran:  how many fixes, and where to review them
    - how it works on the plane, as bullets:
@@ -85,7 +85,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 
 ## `/airplane land`:  after
 
-Owen is back online.  Gather everything, work through it in the background, then hand him the review.
+The person is back online.  Gather everything, work through it in the background, then hand them the review.
 
 1. `epic airplane inbox --json`:  everything waiting, by place:
    - each epic's marks, sent or not, its drafts, requests for now, and new items from the page's `+`
@@ -97,9 +97,9 @@ Owen is back online.  Gather everything, work through it in the background, then
    - (goals thoughts:  parked since 2026-10-11)
    - A comment is listed when it's Claude's turn on its THREAD:
      - a new one
-     - or one Owen REPLIED on since Claude answered
-       (his latest words:  the last of its `replies`, `by: "Owen"`)
-     - Those he closed ("that's good", "skip it") aren't.
+     - or one the person REPLIED on since Claude answered
+       (their latest words:  the last of its `replies`, `by: "<their name>"`)
+     - Those they closed ("that's good", "skip it") aren't.
    - Run it FIRST, while the switch is on:  its `since` is when the flight began, which picks the details answers.
 2. `epic airplane off`.
 
@@ -130,7 +130,7 @@ Owen is back online.  Gather everything, work through it in the background, then
        it, so they're swept in here.
      - The phase is made the first time;  the epic too, if it isn't there yet (standing).
      - A page whose phase is still open gets an Updated block in it.
-     - A reply on a thread goes too, under its comment ("Owen replied on the thread").
+     - A reply on a thread goes too, under its comment ("<their name> replied on the thread").
    - Each is marked taken on its page.
    - `/epic review feedback` works them, as its Overview says (what "done" is for a feedback phase):
      - as it starts:  `epic comments working <page>#<id> on`, and the thread shows "Claude: thinking…"
@@ -147,15 +147,15 @@ Owen is back online.  Gather everything, work through it in the background, then
      - Never `done` (Owen, 2026-10-10, and epic `epic-engine` I148:  a Done card means the item is finished).
      - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
-     - First `epic inbox working <name>#C3 on`:  his thread shows "Claude: thinking…" until the answer lands.
+     - First `epic inbox working <name>#C3 on`:  their thread shows "Claude: thinking…" until the answer lands.
      - Into the item or phase it's on, then `epic inbox done <name>#C3 --file <answer.html>`.
-       - The answer goes on his thread too:  his turn, and the thinking stub gone.
-     - A reply of his:  answer his latest words.
+       - The answer goes on their thread too:  their turn, and the thinking stub gone.
+     - A reply of theirs:  answer their latest words.
    - Page notes were gathered in 4b with the comments.
      - One written into a page since:  read the page and the note, and answer under it.
      - `epic notes answer <page>#<id> --file`
    - Details answers:  as `/details` takes them.  (Goals thoughts:  goals is parked, epic `epic-goals`.)
-   - Nothing is decided for Owen:  an answer that needs him ends in option cards, and the item stays red.
+   - Nothing is decided for the person:  an answer that needs them ends in option cards, and the item stays red.
 
 5b. New epics, made with the Epics page's New epic (`newEpics`):
    ask which to start, with CHECKBOXES (Owen, 2026-10-09).
@@ -169,9 +169,9 @@ Owen is back online.  Gather everything, work through it in the background, then
      - One line per window.
    - not picked:  they stay future epics, seedlings on the Epics page;  `/epic <name>` any time
    - asked while the agents of step 5 run:  the modal doesn't wait for them
-6. Drafts (text he typed and never submitted):  never acted on.
-   List them for Owen as a question each, in the reply (or a details page when there are more than 4).
-7. When every agent is back:  the summary (what landed where, in words, ids after;  what needs Owen, in bold),
+6. Drafts (text they typed and never submitted):  never acted on.
+   List them for the person as a question each, in the reply (or a details page when there are more than 4).
+7. When every agent is back:  the summary (what landed where, in words, ids after;  what needs the person, in bold),
    then `/epic review <name>` on the epic with the most waiting, as that skill's "7.2 Start".
 
 ## `/airplane status`

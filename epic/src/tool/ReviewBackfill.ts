@@ -143,7 +143,7 @@ type TranscriptEntry = {
 const MENTIONED_ID = new RegExp(`\\b([${Object.values(ItemLetters).join("")}d])(\\d+)\\b`, "gi")
 
 /**
- * A user entry whose text is Claude Code's, not Owen's:
+ * A user entry whose text is Claude Code's, not Owen's (whoever typed into the session:  its own transcript):
  * - skill bodies, reminders, interrupt notices
  * - background agents' notices (`<task-notification>`, which name agents "T1", "T2" ...)
  * - command output, a compacted session's summary

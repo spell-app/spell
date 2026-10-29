@@ -243,7 +243,7 @@ export type MissedMove = {
   name: string
   /** why the hook can't run, when that's known (`pluginProblem()`) */
   problem: string | null
-  /** what's said, for Owen and Claude both */
+  /** what's said, for the person and Claude both */
   message: string
 }
 

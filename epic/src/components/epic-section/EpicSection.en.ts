@@ -89,7 +89,7 @@ export const epicSectionVocabulary = {
       kind: "string",
       format: "ids",
       description:
-        "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
+        "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     FOLD_OPEN_ATTRIBUTE

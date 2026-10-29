@@ -8,8 +8,8 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-status>`
- * Claude's status card on an item:  what Claude took Owen's review mark to mean,
- * then that it's done (work was done) or noted (Owen's choice recorded).
+ * Claude's status card on an item:  what Claude took your review mark to mean,
+ * then that it's done (work was done) or noted (your choice recorded).
  ****************/
 export const epicStatusVocabulary = {
   tag: "epic-status",
@@ -21,10 +21,10 @@ export const epicStatusVocabulary = {
     "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's " +
     "reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a " +
     "summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only " +
-    "recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The " +
+    "recorded what you chose (a pick, a todo made or queued):  what was recorded and what happens next.  The " +
     "heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a " +
     "LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 " +
-    "→ Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before Owen's first reply) " +
+    "→ Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before your first reply) " +
     "first in the item's details, above the Choices.",
   attributes: [
     {
@@ -35,7 +35,7 @@ export const epicStatusVocabulary = {
       // makes `Markup.set()`'s untyped data `never`.  The tool always writes it
       description:
         "`underway` (blue:  Claude is on it;  absent too), `done` (green:  work was done), `noted` (a calm " +
-        "outline:  Claude recorded what Owen chose, nothing built yet;  Owen, 2026-10-10)."
+        "outline:  Claude recorded what you chose, nothing built yet;  Owen, 2026-10-10)."
     },
     {
       name: "at",
@@ -68,7 +68,7 @@ export const epicStatusVocabulary = {
         "The reading:  what Claude understood the task to be, in a sentence or two;  a card born noted:  what was " +
         "recorded and what happens next, in one line."
     },
-    { name: "summary", description: "Once done, and only when worth saying:  what Owen should know about it." }
+    { name: "summary", description: "Once done, and only when worth saying:  what you should know about it." }
   ],
   parts: [
     { name: "base", description: "The card:  blue underway, green done, a calm outline noted." },
@@ -96,7 +96,7 @@ export const epicStatusVocabulary = {
     { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
     { name: "line", description: "In an item:  drawn as a line, not a card." },
     { name: "merged", description: "A line's earlier card, drawn in by the run's last one:  hidden." },
-    { name: "drive-by", description: "Taken before Owen's first reply on the item:  its line above the Choices." },
+    { name: "drive-by", description: "Taken before your first reply on the item:  its line above the Choices." },
     { name: "in-thread", description: "Its line in the item's thread's brown block, after the replies." },
     { name: "thread-end", description: "Last in the thread's block:  its bottom corners rounded." }
   ],
@@ -106,7 +106,7 @@ export const epicStatusVocabulary = {
 
     { key: "underway", text: "{who} • Underway", description: "The heading while Claude is on it." },
     { key: "done", text: "{who} • Done", description: "The heading once work was done." },
-    { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what Owen chose." },
+    { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what you chose." },
     {
       key: "claude",
       text: "Claude",
@@ -119,11 +119,11 @@ export const epicStatusVocabulary = {
     },
     { key: "stepUnderway", text: "Underway", description: "A line's step while Claude is on it." },
     { key: "stepDone", text: "Done", description: "A line's step once work was done." },
-    { key: "stepNoted", text: "Noted", description: "A line's step once Claude recorded what Owen chose." },
+    { key: "stepNoted", text: "Noted", description: "A line's step once Claude recorded what you chose." },
     {
       key: "earlier",
       text: "your earlier comment",
-      description: "After a drive-by's steps:  it's about a comment Owen made before answering."
+      description: "After a drive-by's steps:  it's about a comment you made before answering."
     },
     {
       key: "started",

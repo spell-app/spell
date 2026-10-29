@@ -341,7 +341,7 @@ export class Sessions {
       CLI.out(JSON.stringify(digest, null, 2))
       return EXIT.OK
     }
-    CLI.out(`transcript:  ${digest.path}\n\n## Owen's prompts\n\n`)
+    CLI.out(`transcript:  ${digest.path}\n\n## The person's prompts\n\n`)
     for (const { when, text } of digest.prompts) CLI.out(`- ${when}  ${cut(text, PROMPT_LIMIT)}`)
     CLI.out(`\n## Last reply\n\n${cut(digest.lastReply ?? "(none)", REPLY_LIMIT)}`)
     if (digest.pending?.length) {

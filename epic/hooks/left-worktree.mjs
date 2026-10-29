@@ -32,7 +32,7 @@ try {
             "This session just left its worktree, which closes out its work:  close this reply as the isolate " +
             `skill's "Closing line" says (${skill}).  End it with a line of its own, \`*You can close this tab*\`, ` +
             "only when nothing is left for this session:  no uncommitted or unmerged work, no background task or " +
-            "agent running, no question waiting on Owen.  Otherwise leave the line out and say what keeps the tab " +
+            "agent running, no question waiting on the person.  Otherwise leave the line out and say what keeps the tab " +
             "open." +
             (kept
               ? "  The worktree is still on disk:  with the line, also ask (AskUserQuestion) whether to run " +

@@ -127,7 +127,7 @@ describe("GuideChanges.gather()", () => {
       { page: "guides/memory/memory.html", phase: "1", as: "update", comments: [more] }
     ])
     expect(epicText()).toMatch(
-      /<epic-update[^>]*summary="1 comment more from Owen"[^>]*>[\s\S]*1 comment more from Owen[\s\S]*And the second table\?/
+      /<epic-update[^>]*summary="1 comment more"[^>]*>[\s\S]*1 comment more:[\s\S]*And the second table\?/
     )
     expect(other).toBe("c1")
   })

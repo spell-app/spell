@@ -539,7 +539,7 @@ export class PlanDoc extends PlanReader {
       const docReview = DOC_REVIEW.test(PhaseIds.titleOf(phase))
       if (values.plan && docReview) this.acceptPlan(phase)
       else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
-      const said = docReview ? "accepted, the doc pass" : "waiting for Owen's Accept"
+      const said = docReview ? "accepted, the doc pass" : "waiting for the person's Accept"
       const label = PhaseIds.labelOf(phase)
       this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
@@ -1647,7 +1647,7 @@ export class PlanDoc extends PlanReader {
     if (!card)
       throw new PlanDocError(
         `${id.toUpperCase()} has no underway status card:  \`epic update <name>#${id} underway "<reading>"\` first ` +
-          `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded Owen's choice)`
+          `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded the person's choice)`
       )
     Markup.set<"epic-status">(card, { state, doneAt: PlanTime.clockTime(this.now) })
     for (const block of this.statusBlocks(summary ?? "")) {

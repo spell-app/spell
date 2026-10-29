@@ -23,7 +23,7 @@ export const epicOptionVocabulary = {
       kind: "string",
       required: true,
       format: "letter",
-      description: "`A`, `B` ...:  what `<epic-choices chosen>` and Owen's pick name."
+      description: "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
     },
     {
       name: "title",
@@ -34,12 +34,12 @@ export const epicOptionVocabulary = {
     },
     { name: "recommended", kind: "boolean", description: "The one Claude recommends." },
 
-    // an option of an `<epic-ask>`, on a page Owen answers on (epic `epic-workflow` P12)
+    // an option of an `<epic-ask>`, on a page you answer on (epic `epic-workflow` P12)
     {
       name: "selected",
       kind: "boolean",
       description:
-        "In an `<epic-ask>`:  ticked to start with, until Owen picks (the review's item picker ticks what isn't " +
+        "In an `<epic-ask>`:  ticked to start with, until you pick (the review's item picker ticks what isn't " +
         "reviewed yet).  The tick itself is page state, its question's."
     },
     {
@@ -69,12 +69,12 @@ export const epicOptionVocabulary = {
       name: "ui-selected",
       detail: "{ letter: string, selected: true, more: boolean }",
       description:
-        "In an `<epic-ask>`:  Owen ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
+        "In an `<epic-ask>`:  You ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
     },
     {
       name: "ui-deselected",
       detail: "{ letter: string, selected: false, more: boolean }",
-      description: "In an `<epic-ask>`:  Owen unticked it.  Its question takes it, and draws the result."
+      description: "In an `<epic-ask>`:  You unticked it.  Its question takes it, and draws the result."
     }
   ],
   slots: [

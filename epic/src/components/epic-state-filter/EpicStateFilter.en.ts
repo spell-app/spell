@@ -38,7 +38,7 @@ export const epicStateFilterVocabulary = {
       name: "marked",
       kind: "number",
       description:
-        "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
+        "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
         "badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a " +
         "click does nothing.  None, or 0:  no badge."
     },

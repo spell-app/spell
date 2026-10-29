@@ -1,20 +1,20 @@
 ---
 name: wtf
-description: Remind Owen what's going on -- in THIS session, or (`/wtf <name>`) in the plan / isolate session named `<name>`:  the goal, where the work lives (worktree, branch), the epic page and its phase, what's done, what's running, what's waiting on him -- with live links into the epic page.  A `?` (`/wtf ?`, `/wtf <name>?`, or Owen typing `wtf?`) also puts the open questions in a modal.  Use for `/wtf`, or when Owen asks "where are we?", "what's going on?", "remind me what we're doing", "where is <name> at?".
+description: Remind the person what's going on -- in THIS session, or (`/wtf <name>`) in the plan / isolate session named `<name>`:  the goal, where the work lives (worktree, branch), the epic page and its phase, what's done, what's running, what's waiting on them -- with live links into the epic page.  A `?` (`/wtf ?`, `/wtf <name>?`, or the person typing `wtf?`) also puts the open questions in a modal.  Use for `/wtf`, or when the person asks "where are we?", "what's going on?", "remind me what we're doing", "where is <name> at?".
 argument-hint: "[<name>] [?]"
 ---
 
 # /wtf
 
-Owen has lost the thread:  hand it back in one screen.
+The person has lost the thread:  hand it back in one screen.
 - Read-only:  change nothing, start nothing, commit nothing.
-- The one exception:  relaying his answers, step 4.
+- The one exception:  relaying their answers, step 4.
 
 ## 1. Arguments
 
 - `$ARGUMENTS` holds an optional name, and an optional `?`.
   - The `?` stands alone, or stuck to the name:  `seo?`.
-- `?`, or Owen typed `wtf?` without the slash:  ASK mode (step 4).
+- `?`, or the person typed `wtf?` without the slash:  ASK mode (step 4).
 - No `<name>`:  THIS session.
 - `<name>`:  the plan or isolate session of that name.
   - worktree and branch `<name>`;  its folder:  `epic worktree path <name>`
@@ -29,11 +29,11 @@ Owen has lost the thread:  hand it back in one screen.
   - `<name>`:
     - `epic session find <name>` lists its sessions, newest first.
     - `epic session transcript <id>` digests one:
-      Owen's prompts, its last reply, a question still waiting for an answer.
+      the person's prompts, its last reply, a question still waiting for an answer.
     - Several sessions:  digest the newest, mention the others.
     - Running or not:  `epic worktree list`.
   - either way:
-    - Owen's LAST stated intent (his words, not the plan's)
+    - The person's LAST stated intent (their words, not the plan's)
     - what's been done
     - what was asked, and not yet answered
 - Where:  in the session's checkout (`git -C "$(epic worktree path <name>)"` for `<name>`):
@@ -66,15 +66,15 @@ Plain words, no jargon;  coined names defined in a few words.
 - Sections with nothing in them are left out.
 - For `<name>`, the first line says which session:  its name, id, running / idle / waiting / not running.
 
-1. **Goal** -- one or two sentences:  what Owen asked for, in his words.
-   If the work has drifted from his most recently stated intent, say how, in **bold**.
+1. **Goal** -- one or two sentences:  what the person asked for, in their words.
+   If the work has drifted from their most recently stated intent, say how, in **bold**.
 2. **Where** -- worktree and branch (or `main`), and what's uncommitted or staged.
    - Never the epic page, logs or docs pages:  shared content, committed for you.
    - The epic page, linked.
 3. **Plan** -- the phases as one line each, linked, with status:  done, ACTIVE, to do.
 4. **Done** -- numbered, in the order it happened, each a few words.
 5. **In flight** -- agents, background jobs, wakeups:  what each is doing.
-6. **Waiting on you** -- numbered (Owen refers to them by number):
+6. **Waiting on you** -- numbered (the person refers to them by number):
    - open questions (linked)
    - a modal the session is sitting on
    - issues needing a call
@@ -87,7 +87,7 @@ Not ASK mode:  stop here.
 
 ## 4. ASK mode (`?`)
 
-- Nothing waiting on Owen:  add "Nothing to answer.", and stop.
+- Nothing waiting on the person:  add "Nothing to answer.", and stop.
 - Else, after the reply, AskUserQuestion with the questions from "Waiting on you"
   (4 per call, more calls if needed):
   - the epic page's open questions, with their options (labels as the doc's, recommended first)
@@ -96,6 +96,6 @@ Not ASK mode:  stop here.
 - Answers:
   - this session:  act on them as if asked directly (`epic decide <name>#Q<n> "..."` for plan questions).
   - `<name>`:  that session owns the work, so relay, don't act.
-    - `SendMessage` to it (its name from `ListAgents`), with each question and Owen's answer.
+    - `SendMessage` to it (its name from `ListAgents`), with each question and the person's answer.
     - Not running, or not in `ListAgents`:
-      give Owen the answers as one block to paste there, with `claude --resume <id>`.
+      give the person the answers as one block to paste there, with `claude --resume <id>`.

@@ -72,8 +72,8 @@ export const NEW_KIND_TEXTS = [
   },
   { key: "newQuestion", text: "Question", description: "Kind:  a question." },
   { key: "newIssue", text: "Issue", description: "Kind:  an issue." },
-  { key: "newTest", text: "Manual test", description: "Kind:  a manual test, for Owen to try by hand." },
-  { key: "newPhase", text: "Phase", description: "Kind:  a phase, which Claude drafts from its name and Owen's note." }
+  { key: "newTest", text: "Manual test", description: "Kind:  a manual test, for you to try by hand." },
+  { key: "newPhase", text: "Phase", description: "Kind:  a phase, which Claude drafts from its name and your note." }
 ] as const
 
 /** The rest of `<epic-new-item>`'s texts. */

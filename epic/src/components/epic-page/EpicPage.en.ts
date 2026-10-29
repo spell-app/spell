@@ -126,8 +126,7 @@ export const epicPageVocabulary = {
     { name: "", description: "The Overview, then the sections." },
     {
       name: "durable",
-      description:
-        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
+      description: 'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
     },
     {
       name: "toolbar",
@@ -186,8 +185,8 @@ export const epicPageVocabulary = {
         "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
         "some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While " +
         "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, " +
-        "with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
-        "dotted once each has his mark;  its tooltip names them."
+        "with Claude's build plans waiting for your Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
+        "dotted once each has your mark;  its tooltip names them."
     },
     { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
     {

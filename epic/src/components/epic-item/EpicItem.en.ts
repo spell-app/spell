@@ -70,8 +70,8 @@ export const epicItemVocabulary = {
       kind: "enum",
       values: ["attention", "replied", "progress", "open", "recent", "handled", "old"],
       description:
-        "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs Owen), `replied` " +
-        "(orange:  Claude answered with options, Owen's turn to pick), `progress` (blue:  Claude is working on it), " +
+        "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` " +
+        "(orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), " +
         "`open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), " +
         "`handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
     },
@@ -108,13 +108,13 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description: "An answered question:  its details read question, Choices, then the answer."
     },
-    { name: "reviewed", kind: "string", format: "date", description: "Gone through with Owen, that day." },
+    { name: "reviewed", kind: "string", format: "date", description: "Gone through with you, that day." },
     {
       name: "review-as",
       kind: "enum",
       values: ["approve", "todo", "revisit", "now", "next", "drop", "skip"],
       description:
-        "How Owen's review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into " +
+        "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into " +
         "the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the " +
         "buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
     },
@@ -156,7 +156,7 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description:
         "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  " +
-        "For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip " +
+        "For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip " +
         "while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
     },
     {
@@ -164,7 +164,7 @@ export const epicItemVocabulary = {
       kind: "string",
       format: "item id",
       description:
-        "A test that FAILED in Owen's test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It " +
+        "A test that FAILED in your test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It " +
         "stays open;  gone once a run passes it."
     },
     {
@@ -186,7 +186,7 @@ export const epicItemVocabulary = {
       kind: "string",
       format: "ids",
       description:
-        "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
+        "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
@@ -238,7 +238,7 @@ export const epicItemVocabulary = {
     {
       name: "status",
       description:
-        "Claude's status cards (`<epic-status slot=\"status\">`, P13):  drawn last in its details, under Owen's " +
+        'Claude\'s status cards (`<epic-status slot="status">`, P13):  drawn last in its details, under your ' +
         "marked note, above the note box."
     }
   ],
@@ -353,19 +353,19 @@ export const epicItemVocabulary = {
     {
       key: "tipUrgencyUnsent",
       text: "not sent yet",
-      description: "Id chip tooltip:  Owen changed its urgency, not sent yet."
+      description: "Id chip tooltip:  You changed its urgency, not sent yet."
     },
     {
       key: "tipMarkUnsent",
       text: "you chose {chosen} · not sent yet",
-      description: "Id chip tooltip:  Owen's mark (the chosen button, `{chosen}`), not sent:  the chip dashed."
+      description: "Id chip tooltip:  Your mark (the chosen button, `{chosen}`), not sent:  the chip dashed."
     },
     {
       key: "tipMarkSent",
       text: "you chose {chosen} · sent",
-      description: "Id chip tooltip:  Owen's mark (the chosen button, `{chosen}`), sent:  the chip outlined."
+      description: "Id chip tooltip:  Your mark (the chosen button, `{chosen}`), sent:  the chip outlined."
     },
-    { key: "tipPick", text: "pick {letter}", description: "Id chip tooltip:  Owen's pick, as `{chosen}`." },
+    { key: "tipPick", text: "pick {letter}", description: "Id chip tooltip:  Your pick, as `{chosen}`." },
     {
       key: "failedMark",
       text: "failed → {id}",
@@ -412,7 +412,7 @@ export const epicItemVocabulary = {
     {
       tag: "epic-reply",
       description:
-        "Owen's note asking for More Details, kept right before the card that answers it (epic `epic-engine` P27):  " +
+        "Your note asking for More Details, kept right before the card that answers it (epic `epic-engine` P27):  " +
         "drawn folded."
     },
     { tag: "epic-more", max: 1, description: "More Details, added after its text." },

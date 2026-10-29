@@ -48,13 +48,36 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 ### viewer
 
 - **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
-- **Not:**  reader, person.
+- **Not:**  reader.
+  - NOT "person" either in Spell UI's docs code, where "viewer" was chosen first;  "person" is the epics' code word
+    for who wrote something (below).
 - **Score:**  `\b(reader|person)\b` · in `ui/src/docs-components/`
 - **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
   - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10;
     P14 made them "viewer" (Spell UI's docs components).
 - **Not the same word:**  WWOD §6's "reader", the person reading any text we write (a docstring, a README, a page):
   it's about writing, not the code's name for who looks at a page, so it stays.
+
+### person
+
+- **Say:**  person, in code, for whoever is at the keyboard and writes on a page:  a turn of `person` | `claude`,
+  `EpicHome.person()`, `NEEDS_PERSON`;  "the person", in the skills, where a step is about whoever reviews.
+- **Not:**  Owen (or any one person's name), user, reviewer.
+  - "Owen" stays in quotes, dated rules and history:  `(Owen, 2026-10-25:  "...")`.
+  - `ActiveTime`'s `ASKS_OWEN` and `ReviewBackfill`'s `NOT_OWEN` read a session's own transcripts:  whoever typed
+    there, not a page's person;  their docstrings say so.
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q7 (A:  "you" on pages, "person" in code).
+
+### you
+
+- **Say:**  you, your, on a page, to whoever is looking:  "waiting on you", "your test run", "You" on your own reply;
+  the epic help (`epic --help`) says it too.  Another person's words show their name, an agent's "Claude (Ana)".
+- **Not:**  Owen, the user, the reviewer.
+- **Score:**  `\bOwen\b(?!(,\s+\d{4}-\d\d-\d\d|:\s+"))` · in `epic/src/components/**.en.ts`
+  - a dated quote (`Owen, 2026-10-25:  "..."`) is history, and doesn't count
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q7 (A).
+  - P3 made the components' English text, the epic help and the skills say it;  their test,
+    `epic/tests/definitions/VocabularyWords.test.ts`, fails on a new one.
 
 ### from / by
 

@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-text-box>`
- * A box Owen types in, on a page he answers on:  the page's notes, a comment, Other, the feedback.
+ * A box you type in, on a page you answer on:  the page's notes, a comment, Other, the feedback.
  ****************/
 export const epicTextBoxVocabulary = {
   tag: "epic-text-box",
@@ -18,11 +18,11 @@ export const epicTextBoxVocabulary = {
   noun: "text box",
   ui: false,
   description:
-    "A box Owen types in, on a page he answers on (epic `epic-workflow` P12):  one line to start, growing with its " +
-    "text.  What he types is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a " +
+    "A box you type in, on a page you answer on (epic `epic-workflow` P12):  one line to start, growing with its " +
+    "text.  What you type is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a " +
     "section or an option, a question's Other, a choice page's feedback.  The page's notes box also " +
     "shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off " +
-    "the page, under its old title, sent with the rest until Owen drops it.",
+    "the page, under its old title, sent with the rest until you drop it.",
   attributes: [
     {
       name: "type",

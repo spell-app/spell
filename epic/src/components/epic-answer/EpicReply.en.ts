@@ -19,7 +19,7 @@ export const epicReplyVocabulary = {
   description:
     "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its " +
     "children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until " +
-    "Owen has seen it.",
+    "you've seen it.",
   attributes: [
     {
       name: "from",
@@ -61,7 +61,7 @@ export const epicReplyVocabulary = {
     },
     {
       name: "new",
-      description: "`NEW`, after `who`, on Claude's newest reply in an item until Owen has seen it (orange)."
+      description: "`NEW`, after `who`, on Claude's newest reply in an item until you've seen it (orange)."
     },
     { name: "date", description: "The heading's right:  `at`, `10/6/26 23:55`, on the top line;  never wraps." },
     { name: "body", description: "The reply;  not drawn when empty;  hidden (`until-found`) while folded." }
@@ -74,7 +74,7 @@ export const epicReplyVocabulary = {
     {
       name: "new",
       description:
-        "Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser:  an orange " +
+        "Claude's newest reply in its item (none of yours after it), not seen yet in this browser:  an orange " +
         "edge and `NEW`.  Seen once on screen for 1.2s."
     }
   ],
@@ -93,7 +93,7 @@ export const epicReplyVocabulary = {
       text: "Claude ({person})",
       description: "Who wrote it, in its heading:  another person's session's Claude (`agent`, `from`)."
     },
-    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until Owen has seen it." },
+    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." },
     {
       key: "newTip",
       text: "Claude's newest reply:  new since you looked",

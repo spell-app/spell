@@ -6,25 +6,25 @@ disable-model-invocation: true
 
 # /bedtime
 
-Owen is going to sleep.
-Ask everything NOW, then get it all done:  run the chosen phases to the end without him.
+The person is going to sleep.
+Ask everything NOW, then get it all done:  run the chosen phases to the end without them.
 
 The EPIC PAGE is the record, as on any day:
 - every judgement call, problem and loose end is an item in it (a loose end:  a todo, `#T`)
 - each phase gets its Done list and Commits
-- the night's judgement calls and issues show RED there, until he reviews them
+- the night's judgement calls and issues show RED there, until they review them
 - So no morning report (D5 of `review-review`):  in the morning, `/epic review <name>` goes through what's red.
 
 - `<name>`:  the epic id.
 - Bedtime mode:  `epic bedtime <name> start "P<a>-P<b>"` turns it on, `... done "<summary>"` off.
   Both go in the log.
   - While it's on, every item a command touches is marked the night's:  green until reviewed (D2).
-    Unless it waits on Owen (an open judgement call or issue):  red beats green.
+    Unless it waits on the person (an open judgement call or issue):  red beats green.
   - And `epic summary <name> --json` has `"bedtime": "P<a>-P<b>"` while it's on:
     that's how a compacted session knows it's still running.
     - `null` when off
 - Style:  as in `/epic`:
-  the epic page written for Owen coming back cold ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
+  the epic page written for the person coming back cold ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
 
 ## 1. Find the phases
 
@@ -38,13 +38,13 @@ The EPIC PAGE is the record, as on any day:
   - The move to the worktree's window ends the turn.
     The session picks up with `continue` in the new window, at step 2.
 - No phases:  say so in one line and stop.
-- In plan mode:  ask Owen to leave it (shift+tab) first,
+- In plan mode:  ask the person to leave it (shift+tab) first,
   as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
 
 ## 2. Pick phases (modal, or one page with step 3)
 
 More than fits ONE modal call:  steps 2 and 3 go on ONE details page instead (Owen, 2026-10-03),
-so he answers everything in one sitting.
+so they answer everything in one sitting.
 - "More than fits":  the phase pick plus step 3's questions, over 4 questions, or over 4 options in one.
 - The spec:
   - `where`:  the epic and what it's for
@@ -59,8 +59,8 @@ so he answers everything in one sitting.
   - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](https://github.com/spell-app/spell/blob/main/epic/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
-  - Owen's Send wakes the session with the answers as text.
-    See [the details skill](../details/SKILL.md);  write it as "Writing for Owen" there says.
+  - The person's Send wakes the session with the answers as text.
+    See [the details skill](../details/SKILL.md);  write it as "Writing for the person" there says.
 - Woken:  record the answers (step 3's "Record the answers"), then step 3's "Then", and on into the night.
   - The session must run unattended from here:  say so in the reply before ending the turn (auto mode or allow-rules).
 
@@ -69,7 +69,7 @@ Else, the modals:
 - AskUserQuestion, `multiSelect`, "Which phases tonight?":
   - first option "All", then the to-do phases in order, labelled `P<n> · <Name>`
   - 4 options per question:  "All" + 3 phases in the first, 4 phases per question after (up to 4 questions)
-  - more than 15 phases:  Owen types a range in "Other" (`P5-P9`)
+  - more than 15 phases:  the person types a range in "Other" (`P5-P9`)
 - "All", or nothing picked:  every to-do phase.
   Run them in plan order, whatever order they were picked in.
 
@@ -82,7 +82,7 @@ Then ask, in one or more AskUserQuestion calls (4 questions each, recommended op
 - Not in a worktree (the session's folder isn't a worktree's:  `epic worktree list` marks it):  "Isolate first?".
   - Options:  "Isolate as `<proposed-name>` (Recommended)", "New branch here (`git switch -c`)", "Stop".
   - Never commit to `main`.
-- How many agents may the work use:  ONLY if Owen said "watch token budget";  otherwise up to 5, unasked.
+- How many agents may the work use:  ONLY if the person said "watch token budget";  otherwise up to 5, unasked.
 - Every real question:  ambiguous goals, choices between designs, anything a phase's text leaves open.
   - Ask generously:  this is the LAST chance.
     A question asked now beats a judgement call made at 3am.
@@ -101,7 +101,7 @@ Then:
 ## 4. Bedtime mode
 
 Until the run ends (step 6), these OVERRIDE the root rules and memory:
-- NO AskUserQuestion, no "should I go on?":  Owen's asleep, and a question stalls the night.
+- NO AskUserQuestion, no "should I go on?":  the person's asleep, and a question stalls the night.
   Decide, record, go on.
 - Commit after each phase without asking:  the `/bedtime` run is the ask.
   Stage the phase's files by name, never `git add -A`.
@@ -112,13 +112,13 @@ Until the run ends (step 6), these OVERRIDE the root rules and memory:
   - delete anything outside the worktree
   - Something needing those:  `add <name>#T` (a todo:  work still to do), and go on.
 
-Owen writing in this session mid-run means he's awake:  bedtime mode ends there.
+The person writing in this session mid-run means they're awake:  bedtime mode ends there.
 - Say which phase it was on.
 - Run step 6's "At the end" for what's done.
 - Go back to the root rules.
 
 Everything else stands:
-- the repo's own rules (its `AGENTS.md`) and Owen's standing ones;  in spell-app, say:
+- the repo's own rules (its `AGENTS.md`) and the person's standing ones;  in spell-app, say:
   - its VS Code extension rebuilt after each stage
   - the parser speed test, on parser changes
   - the three logs:
@@ -129,7 +129,7 @@ Everything else stands:
 
 1. `epic phase <name>#P<N> active`.
 2. Do the work, and run its verify and the touched packages' checks (the repo's `AGENTS.md` says which).
-3. JUDGEMENT CALL (a choice Owen might have made differently):
+3. JUDGEMENT CALL (a choice the person might have made differently):
    pick the option the plan and code best support, then record it, with the options and why:
 
    ```sh
@@ -137,7 +137,7 @@ Everything else stands:
    ```
 
    - It prints the id (`J4`).
-     The epic page's "Judgement calls" section is where Owen finds them, open until he reviews each.
+     The epic page's "Judgement calls" section is where the person finds them, open until they review each.
    - Its details ([plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Prose"):
      - the options it weighed (any item kind takes them):
        an `<epic-choices>` of `<epic-option letter title [recommended]>`
@@ -146,12 +146,12 @@ Everything else stands:
    - CALM by default:  add `--calm` (last), so it shows yellow (open) rather than red.  An issue too.
      - Owen:  "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
        (2026-10-10, "the principle of least surprise").
-     - RED (no `--calm`) only when it would surprise him:
-       - it goes against something he said
-       - it drops, narrows or changes what he asked for
-       - a real fork he'd plausibly have picked differently AND that matters to him
-         (cost, behaviour he'll notice, something hard to undo)
-       - or it needs his answer before work can go on
+     - RED (no `--calm`) only when it would surprise them:
+       - it goes against something they said
+       - it drops, narrows or changes what they asked for
+       - a real fork they'd plausibly have picked differently AND that matters to them
+         (cost, behaviour they'll notice, something hard to undo)
+       - or it needs their answer before work can go on
      - Following the repo's house style is one case of calm, not the only one.
      - The rule in full:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 2.
    - The phase's "To review" line lists it by itself:  the tool writes it on every edit.
@@ -159,7 +159,7 @@ Everything else stands:
    - Agents you start record theirs the same way:  put the command in their prompt.
 4. Checks fail, and you can't fix them:
    - commit what's there as `WIP P<n>:  <name>`
-   - `add <name>#I "P<n> WIP:  <what fails>" ...`:  red in the doc until Owen reviews it
+   - `add <name>#I "P<n> WIP:  <what fails>" ...`:  red in the doc until the person reviews it
    - go on only with later phases that don't build on this one
    - skip the rest, saying why in the skipped phase's log line:  `log <name> "P<m> skipped:  builds on WIP P<n> (I<k>)"`
 5. `epic phase <name>#P<N> done --done "<ul>...</ul>"`:  what was built, as `/epic` writes it.
@@ -181,10 +181,10 @@ Everything else stands:
   ```
 
 - `epic lint <name>`, then `epic open <name> --review`.
-  - Owen wakes to the doc, the night's calls and issues red.
+  - The person wakes to the doc, the night's calls and issues red.
   - Nothing to commit for the doc (shared content, committed for you).
 - Final reply:  the summary, the judgement calls by phase (in words, ids after), and the problems.
-  - Then ONE AskUserQuestion (Owen answers in the morning):  "Go through the night?".
+  - Then ONE AskUserQuestion (the person answers in the morning):  "Go through the night?".
   - "Review it now (Recommended)":  runs `/epic review <name>`, judgement calls first.
     That's [the epic skill](../epic/SKILL.md), "7. Review".
   - "Later":  `/epic review <name>` any time.
@@ -195,7 +195,7 @@ Everything else stands:
 ```
 bedtime <name> start "P3-P6"            bedtime mode on;  logs "Bedtime started"
 phase <name>#P<N> active|done           each phase;  done --done "<ul>...</ul>" writes its Done list
-add <name>#J|#I|#T ...                  every call, problem, loose end:  an item (--calm unless it'd surprise Owen)
+add <name>#J|#I|#T ...                  every call, problem, loose end:  an item (--calm unless it'd surprise the person)
 commit <name>#P<N> <sha> "..."          the phase's commit, under its Commits
 log <name> "P<n> done|WIP|skipped ..."  what happened, timestamped
 bedtime <name> done "summary"           bedtime mode off;  logs "Bedtime done"

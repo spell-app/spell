@@ -1,6 +1,6 @@
 ---
 name: designer
-description: Review a page's LOOK the way Owen would -- screenshot it headlessly (desktop, a narrow window and phone, light and dark, scrolled under its stuck bars, hover and open states), hold every shot up against the designer's rules (Owen's own design asks, quoted, then the craft rules from interfaces.dev and jakub.kr), and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase it fixes the obvious ones itself and asks about bigger changes with before / after pictures.  Use for `/designer <page | URL> [focus]`, at the end of any epic phase that changed a page or an element, or when Owen says "how does this look?", "review the design of ...", "what would a designer say about ...", "check the UI of ...".
+description: Review a page's LOOK the way Owen would -- screenshot it headlessly (desktop, a narrow window and phone, light and dark, scrolled under its stuck bars, hover and open states), hold every shot up against the designer's rules (Owen's own design asks, quoted, then the craft rules from interfaces.dev and jakub.kr), and report findings ranked, each with the rule it breaks and the fix;  at the end of a UI phase it fixes the obvious ones itself and asks about bigger changes with before / after pictures.  Use for `/designer <page | URL> [focus]`, at the end of any epic phase that changed a page or an element, or when the person says "how does this look?", "review the design of ...", "what would a designer say about ...", "check the UI of ...".
 argument-hint: "<page | URL> [focus]"
 ---
 
@@ -43,7 +43,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
      what shows through them, are only in these
    - a focus naming a control, a menu, a fold:  a `--hover` or `--click` on it
    - which server:  a docs page comes from this checkout's page server, a component set's page at its address (the tool
-     finds both);  a worktree's page as Owen sees it:  `--base http://127.0.0.1:4747/worktrees/<w>`
+     finds both);  a worktree's page as the person sees it:  `--base http://127.0.0.1:4747/worktrees/<w>`
    - its JSON's `problems` (console errors, a selector that matched nothing) are findings too
 3. Look at EVERY shot (`Read` on each PNG).
    - Reading one:  procedures.md, explain-interface's guide.  Sizes are ratios:  never report a px value from an image
@@ -54,18 +54,18 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
      `HIGH`, `MEDIUM`, `LOW` (its "HIGH on sight" list:  content overlapped, unreadable text ...).
    - Ranked:  by severity, then a broken T rule before a C rule, then what a person notices first.
    - One root cause, one finding, every place listed;  at most 15.  No padding to the cap, no praise.
-   - Only what a shot shows:  a rule marked "Live look" (motion, timing) is a question for Owen, never a finding.
+   - Only what a shot shows:  a rule marked "Live look" (motion, timing) is a question for the person, never a finding.
    - Last, one line:  "Considered, left out:" with each rule you weighed and didn't apply, and why (a deliberate choice,
      another theme's rule).
 5. What happens to them:
-   - **Owen asked** (`/designer ...`):  the numbered list, short;  then a modal, "Fix these?", the obvious ones
+   - **The person asked** (`/designer ...`):  the numbered list, short;  then a modal, "Fix these?", the obvious ones
      recommended.
    - **The end of a UI phase** (Q12;  Owen, 2026-10-23:  "yes, and fix obvious things, ask about bigger changes with
      pictures"), before `epic phase ... done`, for a phase that changed a page or an element:
      - OBVIOUS:  ONE place, a SETTLED rule (any T rule not in designer.md's "Where his asks pull two ways", or a C rule
        no T rule pulls against), and no new look to choose:  an icon off centre, padding past the house spacing, a
        ring on a toolbar icon, a label wrapping, a contrast fail.  Fix it, shoot again, and list it in the phase's Done.
-     - BIGGER (a layout, a new surface, a colour, anything in "pull two ways", anything Owen could want either way):
+     - BIGGER (a layout, a new surface, a colour, anything in "pull two ways", anything the person could want either way):
        ASK, with pictures.
        - A details page ([the details skill](../details/SKILL.md)), one question per change:  the before shot, an after
          shot (the change tried in the page, shot, then undone), the rule it answers;  options "Do it" / "Leave it" /
@@ -74,7 +74,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
          `epic add <epic>#I "<what> (designer)" --details "..." --calm`.
    - **The agent type**:  returns the ranked list to the session that asked;  it changes nothing itself.
 6. Learn (designer.md says so in its header):
-   - Owen gives design feedback, in any session:  add it to "Owen's taste" in the same turn, his words quoted, with
+   - The person gives design feedback, in any session:  add it to "Owen's taste" in the same turn, their words quoted, with
      the epic, phase and date (a new `T<n>`, or a quote added to the rule it repeats).
-   - Owen rejects a finding:  note it under its rule;  rejected twice, reword the rule or drop it.
+   - The person rejects a finding:  note it under its rule;  rejected twice, reword the rule or drop it.
    - Commit it with the turn's other spell-epic changes:  the rules are code, versioned per branch.

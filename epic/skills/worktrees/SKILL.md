@@ -1,13 +1,13 @@
 ---
 name: worktrees
-description: Take stock of every running Claude session (which worktree, branch and folder each is in) and everything open in this repo -- worktrees, branches, `/park`ed and `/bedtime` work, epic pages with phases left -- sorted into what's in process, what's hung or parked, and what's dead but still hanging on;  then let Owen pick which groups to deal with, do the picked actions (remove, merge, end, open, unpark ...) and take stock again.  Use for `/worktrees`, `/worktrees sessions` (the table alone), or when Owen asks "what's open?", "what worktree is X in", "which sessions are running where", "what did I leave running?", "clean up the worktrees", or can't find a session.  Epics alone:  `/epics`.
+description: Take stock of every running Claude session (which worktree, branch and folder each is in) and everything open in this repo -- worktrees, branches, `/park`ed and `/bedtime` work, epic pages with phases left -- sorted into what's in process, what's hung or parked, and what's dead but still hanging on;  then let the person pick which groups to deal with, do the picked actions (remove, merge, end, open, unpark ...) and take stock again.  Use for `/worktrees`, `/worktrees sessions` (the table alone), or when the person asks "what's open?", "what worktree is X in", "which sessions are running where", "what did I leave running?", "clean up the worktrees", or can't find a session.  Epics alone:  `/epics`.
 argument-hint: "[sessions]"
 ---
 
 # /worktrees
 
-Owen has lots going at once:  show it all in one screen, sort it, and clean up what he picks.
-- Nothing changes before he picks it in a modal.
+The person has lots going at once:  show it all in one screen, sort it, and clean up what they pick.
+- Nothing changes before they pick it in a modal.
 - It was `/whassup` plus the old global `/worktrees`, merged 2026-10-03.
 
 - The tools, from the repo root or any worktree.  Read-only.
@@ -54,12 +54,12 @@ Owen has lots going at once:  show it all in one screen, sort it, and clean up w
      - a session whose branch isn't the one its worktree is named for
    - Then the worktrees no session is in, one line.
 3. The three groups, in the order above, as numbered lists.
-   - Owen refers to items by number:  1, 2 ... in the first group, carrying on in the next.
+   - The person refers to items by number:  1, 2 ... in the first group, carrying on in the next.
    - Per item:  its kind and name in bold, then its `why` in plain words.
      - e.g. `worktree seo`, `session SVG from image`
    - An empty group:  one line, "nothing".
 4. Everything empty apart from this session:  "all clear", and stop.
-5. A session Owen asks about isn't listed:  it isn't running.
+5. A session the person asks about isn't listed:  it isn't running.
    - Find its transcript:  `ls ~/.claude/projects/*/<id>*.jsonl`.
    - Offer `/session <id>`, or `cd <its cwd> && claude --resume <id>`.
 
@@ -83,8 +83,8 @@ ONE details page asks about every item instead (Owen, 2026-10-03):
   - `epic ask create <slug> --from <spec.json>`:  the spec in the scratchpad.
     Its shape:  `DetailsSpec`, in [details.js](https://github.com/spell-app/spell/blob/main/epic/src/tools/details.js).
   - Then `epic ask show <slug> --wait`, with Bash `run_in_background: true`.
-  - Owen's Send wakes the session with the answers as text.
-    See [the details skill](../details/SKILL.md);  write it as "Writing for Owen" there says.
+  - The person's Send wakes the session with the answers as text.
+    See [the details skill](../details/SKILL.md);  write it as "Writing for the person" there says.
 - Woken:  each answer is that item's pick, then step 4.
   - "Other" text and notes:  follow them.
     Unclear:  ask in chat.
@@ -109,11 +109,11 @@ For each picked group, AskUserQuestion, multiSelect, ONE question per item (4 pe
 
 ## 4. Do 'em
 
-In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) last, so their output isn't buried.
+In the order the person will want to see them:  quick looks (`wtf`, `open`, `answer`) last, so their output isn't buried.
 
 - Commands:  each line its own Bash call, from the MAIN checkout's root (the report's `main`).
   - In a worktree session, the harness refuses git commands aimed outside the worktree.
-  - Collect each refused line, and give Owen the list at the end:
+  - Collect each refused line, and give the person the list at the end:
     to paste, or to run `/worktrees` again from a session in the main checkout.
 - A command fails:  NEVER retry with `--force` / `-D`.
   - e.g. a dirty worktree for `epic worktree remove`, unmerged work for `git branch -d`
@@ -139,10 +139,10 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
     - Its tab shows it ended;  `/session <id>` brings it back.
   - `wtf`:  the `wtf` skill with `<name>`;  show its reply.
   - `open`:  the `session` skill with the session id.
-  - `answer`:  the `wtf` skill with `<name>?`, which shows the waiting question and relays Owen's answer.
+  - `answer`:  the `wtf` skill with `<name>?`, which shows the waiting question and relays the person's answer.
   - `unpark` / `wakeup`:  they must run IN that work's session.
     - Running:  `SendMessage` to it ("Run `/unpark`" / "Run `/wakeup`", asked by this session).
-    - Not running:  tell Owen to open a new session and run it there.
+    - Not running:  tell the person to open a new session and run it there.
       Running them here would move THIS session.
   - `nudge`:  `SendMessage` to the session that's waiting:  "`<target>` is done:  run `/unpark <name>`".
   - `apply` / `drop` (a stash):
@@ -160,4 +160,4 @@ In the order Owen will want to see them:  quick looks (`wtf`, `open`, `answer`) 
 2. One line per item whose group changed, or that went away ("**worktree ui-import**:  dead -> gone").
    - Then the three groups again, as in step 1.
    - Commands refused in step 4:  listed last, ready to paste.
-3. Stop there:  no second "What's next?" unless Owen asks.
+3. Stop there:  no second "What's next?" unless the person asks.

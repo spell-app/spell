@@ -60,7 +60,7 @@ export const epicChangeVocabulary = {
       kind: "string",
       format: "time",
       description:
-        "When Owen accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no " +
+        "When you accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no " +
         "orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
     }
   ],

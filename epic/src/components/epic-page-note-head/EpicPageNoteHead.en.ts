@@ -9,7 +9,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-page-note-head>`
- * The head line of an old PAGE NOTE (`<spell-note>`):  who and when, its first line while folded, its status;  a
+ * The head line of an old PAGE NOTE (`<spell-note>`):  when, its first line while folded, its status;  a
  * click folds the note.
  ****************/
 export const epicPageNoteHeadVocabulary = {
@@ -20,11 +20,11 @@ export const epicPageNoteHeadVocabulary = {
   ui: false,
   description:
     "The head line of an old page note (`<spell-note>`, epic `airplane` P3:  written into a guide before comments " +
-    'replaced them, read only since), drawn by the docs runtime first in each note:  "Owen · 10/10 14:02", the ' +
+    'replaced them, read only since), drawn by the docs runtime first in each note:  "You · 10/10 14:02", the ' +
     "note's first line while it's folded, its status (new yellow, answered violet, done grey) and how many replies.  " +
     "The whole line is one button:  a click folds or unfolds the note.",
   attributes: [
-    { name: "at", kind: "string", description: "When Owen wrote it, as the note says:  `2026-10-09 22:10`." },
+    { name: "at", kind: "string", description: "When it was written, as the note says:  `2026-10-09 22:10`." },
     {
       name: "status",
       kind: "enum",
@@ -45,12 +45,12 @@ export const epicPageNoteHeadVocabulary = {
     {
       name: "epic-note-opened",
       detail: "{ open: true }",
-      description: "Owen clicked it:  the note should open."
+      description: "You clicked it:  the note should open."
     },
     {
       name: "epic-note-closed",
       detail: "{ open: false }",
-      description: "Owen clicked it:  the note should fold."
+      description: "You clicked it:  the note should fold."
     }
   ],
   slots: [],
@@ -60,7 +60,11 @@ export const epicPageNoteHeadVocabulary = {
   ],
   states: [],
   texts: [
-    { key: "who", text: "Owen", description: "Who wrote a page note." },
+    {
+      key: "who",
+      text: "Note",
+      description: "The line's first word:  old page notes name no author (written before names were kept)."
+    },
     { key: "reply", text: "1 reply", description: "After the status:  one reply." },
     { key: "replies", text: "{count} replies", description: "After the status:  several replies." }
   ],

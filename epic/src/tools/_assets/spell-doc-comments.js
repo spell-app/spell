@@ -181,7 +181,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   shown `C3`, small and muted in each thread's header, before its summary (`<epic-thread>`)
  *   - the server keys them `c3`, and a typed id takes `C3`, `c3` or `cm3` (`ThreadFacts.numberOf()`);  `M3` is a
  *     manual test's
- * - JUMPING to the threads waiting on Owen (Claude spoke last;
+ * - JUMPING to the threads waiting on the person (Claude spoke last;
  *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
  *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
  *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
@@ -612,17 +612,17 @@ class PageComments {
   }
 
   ////////////////
-  // ## Jumping to the threads waiting on Owen
+  // ## Jumping to the threads waiting on the person
   ////////////////
 
-  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `owen`). */
-  get waitingOnOwen() {
+  /** The comments waiting on the person:  Claude spoke last on their threads (`turn` `person`). */
+  get waitingOnPerson() {
     return this.list.filter((comment) => comment.turn === "person")
   }
 
-  /** The comments waiting on Owen whose threads are drawn, in page order. */
+  /** The comments waiting on the person whose threads are drawn, in page order. */
   waitingInPageOrder() {
-    return this.waitingOnOwen
+    return this.waitingOnPerson
       .map((comment) => ({ comment, thread: this.threadOf(comment.id) }))
       .filter((each) => each.thread)
       .sort((a, b) => (a.thread.compareDocumentPosition(b.thread) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
@@ -642,7 +642,7 @@ class PageComments {
 
   /**
    * The toolbar's BULLHORN:  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a guide's alike),
-   * an orange count of the threads waiting on Owen;  hidden when none.
+   * an orange count of the threads waiting on the person;  hidden when none.
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
@@ -682,7 +682,7 @@ class PageComments {
   }
 
   /**
-   * The toolbar's bullhorn, clicked:  land on the next thread waiting on Owen after the one it last landed on, in
+   * The toolbar's bullhorn, clicked:  land on the next thread waiting on the person after the one it last landed on, in
    * page order;  after the last, the first again.
    */
   nextWaiting() {

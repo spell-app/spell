@@ -355,7 +355,7 @@ export class InboxCommands {
     const lines: string[] = []
     if (canceled.length) {
       lines.push(
-        `canceled (${canceled.length}):  Owen said "nevermind":  stop each one's background agent (TaskStop), then ` +
+        `canceled (${canceled.length}):  the person said "nevermind":  stop each one's background agent (TaskStop), then ` +
           `\`epic inbox done ${name}#<id>\``
       )
       for (const each of canceled) lines.push(`  - ${line(each)}  (${each.action})`)
@@ -510,7 +510,7 @@ export class InboxCommands {
     )
     if (filed.length)
       lines.push(
-        `failed tests (${filed.length}):  tell Owen one line each, the issue's link ` +
+        `failed tests (${filed.length}):  tell the person one line each, the issue's link ` +
           `(\`epic pages link ${file} --hash <issue> --review\`):`
       )
     for (const { test, issue } of filed) lines.push(`  ${test.toUpperCase()} -> ${issue.toUpperCase()}`)
@@ -591,7 +591,7 @@ export class InboxCommands {
     const extras = [
       none.length ? `no mark:  ${upper(none)}` : "",
       kept.length ? `changed since, kept for the next send:  ${upper(kept)}` : "",
-      notes.length ? `Owen's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
+      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
     ].filter(Boolean)
     this.owner.print(`${label}:  ${upper(keys)}${extras.length ? `  (${extras.join(";  ")})` : ""}`)
   }
@@ -739,7 +739,7 @@ const NO_WORK: TakenWork = { now: [], sent: null, canceled: [] }
 /** A sent mark's heading in `wait`'s print, where its action alone doesn't say it. */
 const SENT_HEADINGS: Partial<Record<string, string>> = {
   revisit: "revisit, to talk over",
-  test: "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers",
+  test: "test, the person's test run:  passed closes, failed files an issue, skip cancels, not now defers",
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
   skip: "skip, nothing to do"
@@ -828,7 +828,7 @@ function upper(ids: string[]): string {
   return ids.map(shown).join(", ")
 }
 
-/** An item's id as Owen reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
+/** An item's id as the person reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
 function shown(id: string): string {
   return CommentList.isCommentId(id) ? CommentList.label(id) : id.toUpperCase()
 }

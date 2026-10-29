@@ -71,8 +71,8 @@ export class WorktreeGuard {
         `⎇ ${name}:  this session was reopened outside its worktree;  Claude moves back in first.`,
         `This session worked in worktree ${name} (${recorded}) when it was last open, but it was reopened in ` +
           `${here}, the folder of the window it was opened from.  Before anything else, run EnterWorktree with ` +
-          `name "${name}" (never its path, which makes Claude Code ask Owen), unless \`pwd\` already prints ` +
-          `${recorded}, and say so in one line.  Stay where you are only if Owen says it left that worktree on ` +
+          `name "${name}" (never its path, which makes Claude Code ask the person), unless \`pwd\` already prints ` +
+          `${recorded}, and say so in one line.  Stay where you are only if the person says it left that worktree on ` +
           `purpose.`
       )
     }
@@ -135,8 +135,8 @@ export class WorktreeGuard {
       `This session works in, or was last in, worktree ${name} of ${config.main} (${folder}), but epic ${name} is ` +
         `worked in ANOTHER repo:  ${EpicRepo.refusal(home)}  Before anything else:  edit NOTHING in ${folder} ` +
         `(a link in it may lead into the other repo's main checkout);  if you're in it, ExitWorktree with action ` +
-        `"keep";  never EnterWorktree it.  Tell Owen in one line, and offer \`epic window launch ${name}\`.  ` +
-        `Removing the stray worktree is Owen's call, once no session works in it.`
+        `"keep";  never EnterWorktree it.  Tell the person in one line, and offer \`epic window launch ${name}\`.  ` +
+        `Removing the stray worktree is the person's call, once no session works in it.`
     )
   }
 
@@ -161,10 +161,10 @@ export class WorktreeGuard {
     return last
   }
 
-  /** The hook's JSON:  `systemMessage` for Owen, `additionalContext` for Claude. */
-  static output(forOwen: string, forClaude: string): GuardOutput {
+  /** The hook's JSON:  `systemMessage` for the person, `additionalContext` for Claude. */
+  static output(forPerson: string, forClaude: string): GuardOutput {
     return {
-      systemMessage: forOwen,
+      systemMessage: forPerson,
       hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: forClaude }
     }
   }
@@ -173,7 +173,7 @@ export class WorktreeGuard {
 /** The `SessionStart` hook's stdin, as far as the guard reads it. */
 export type GuardInput = { cwd?: string; transcript_path?: string; source?: string; session_id?: string }
 
-/** The hook's answer:  a line for Owen, and context for Claude. */
+/** The hook's answer:  a line for the person, and context for Claude. */
 export type GuardOutput = {
   systemMessage: string
   hookSpecificOutput: { hookEventName: "SessionStart"; additionalContext: string }

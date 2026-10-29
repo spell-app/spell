@@ -1304,17 +1304,17 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
-                                                   wouldn't surprise Owen, yellow (open) rather than red
+                                                   wouldn't surprise you, yellow (open) rather than red
   add <name> test "title" --step html --should html [--example <png> | "text"] [--if-not html]
-                                                   a test Owen's test run steps him through:  what to do (a
+                                                   a test your test run steps you through:  what to do (a
                                                    Step may hold <a class="epic-test-action" href> links,
                                                    the run's buttons), what should happen, an example (a
                                                    screenshot, copied to tests/<id>.png), what to tell Claude
   test <name> [--at <id>]  /  test <name> --list [--json]
-                                                   Owen's test run:  the page in the Review tab in test mode
+                                                   your test run:  the page in the Review tab in test mode
                                                    (?test=1), at test <id>;  --list:  its open tests, in the
                                                    run's order (deferred ones last)
-  test --all [--list] [--json]                     every epic with open tests, in Owen's saga order;  the
+  test --all [--list] [--json]                     every epic with open tests, in your saga order;  the
                                                    first opened in test mode (?test=1&all=1)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
@@ -1322,7 +1322,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
   choose <name> <id> <letter> ["outcome"] [--set N]
-                                                   an option Owen settled IN CONVERSATION, on any item, as the
+                                                   an option you settled IN CONVERSATION, on any item, as the
                                                    page's pick records it:  chosen on the item's latest card
                                                    set (--set N:  the Nth);  a question answered, a judgement
                                                    call closed, any item reviewed;  a Noted card (the outcome)
@@ -1362,7 +1362,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   items <name> --section issues --spec <file>      the review's item picker, a details page spec:
                                                    \`epic ask create <slug> --from <file>\`
   list [--json]                                    every epic:  status, where it runs, not reviewed / all
-  backfill <name> | --all [--apply]                items Owen already went through, from past sessions;
+  backfill <name> | --all [--apply]                items you already went through, from past sessions;
                                                    a dry run unless --apply (review-backfill.js)
   summaries <file.html> ...                        \`summary --json\` of each doc, by path (worktrees' too):
                                                    JSON \`{ <file>: summary | { error } }\`;  for \`/epics\`
@@ -1385,7 +1385,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    a worktree.  New docs start split;  every command reads and
                                                    writes either shape
   join <name>                                      a split doc back into one file
-  inbox <name> [--json]                            the marks Owen left on the page (<name>.inbox.json5), by
+  inbox <name> [--json]                            the marks you left on the page (<name>.inbox.json5), by
                                                    action, sent or not;  requests for now, agents at work,
                                                    the session listening
   inbox <name> watch [--session <id>]  /  ignore
@@ -1402,7 +1402,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   inbox working <name> <id> on|off                 the page's spinner on an item or a phase (P20, its id);  a comment (C3):  its
                                                    thread's "Claude: thinking…" (done C3 turns it off)
   inbox done <name> <id>...                        an agent finished an item:  its mark and spinner go (a mark
-                                                   Owen changed meanwhile stays)
+                                                   you changed meanwhile stays)
   inbox clear <name> <id>...                       drop marks (a revisit talked over)
   details <name> <id> --file <html> [--append | --more]  /  details <name> <V id> --step ... --should ...
                                                    replace an item's details with the file's HTML, or (--append)
@@ -1413,8 +1413,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   summarize <name> <id> --file <html>              condense an item after a lot of back and forth:  the file's
                                                    HTML replaces what it shows;  its text, replies, More Details
                                                    and unpicked Choices move into its Original Discussion
-                                                   (folded);  Owen's picks, the answer, status cards stay
-  status <name> <id> underway "html"              Claude took Owen's mark on an item (or an Overview section):
+                                                   (folded);  your picks, the answer, status cards stay
+  status <name> <id> underway "html"              Claude took your mark on an item (or an Overview section):
                                                    a blue "Claude • Underway" card with Claude's reading of
                                                    the task (a sentence or two, no file names);  spinner on
   status <name> <id> done ["html"]                 the item's WORK is finished (an issue fixed, a todo built):
@@ -1422,7 +1422,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
-  status <name> <id> noted "html"                  a STEP done, the item not finished:  Owen's choice recorded,
+  status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
                                                    an answer, details or a summary written, a request called
                                                    off:  a calm "Claude • Noted" card saying what was done and
                                                    what happens next ("Chose
@@ -1470,7 +1470,7 @@ function bedtime(plan: PlanDoc, [action, ...args]: string[]): void {
 function refuseCanceled(name: string, file: string, id: string): void {
   if (!ReviewInbox.read(ReviewInbox.pathFor(file)).isCanceled(id)) return
   throw new PlanDocError(
-    `${id.toUpperCase()}:  Owen called this request off on the page ("nevermind"):  nothing written.  ` +
+    `${id.toUpperCase()}:  the person called this request off on the page ("nevermind"):  nothing written.  ` +
       `\`epic inbox done ${name}#${id}\` and stop.`
   )
 }

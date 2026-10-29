@@ -1,6 +1,6 @@
 ---
 name: isolate
-description: Move this session into its own git worktree `<name>` (worktree, branch and session all named `<name>`) and either open it in a new, tinted VS Code window or stay in this one (Owen picks, `should-stay` recommends);  `/isolate done` offers to merge it into `main` and to open a pull request for it, then leaves it.  Use for `/isolate <name>`, `/isolate done`, or when Owen says "isolate as <name>" / "isolate this" about the current session.
+description: Move this session into its own git worktree `<name>` (worktree, branch and session all named `<name>`) and either open it in a new, tinted VS Code window or stay in this one (the person picks, `should-stay` recommends);  `/isolate done` offers to merge it into `main` and to open a pull request for it, then leaves it.  Use for `/isolate <name>`, `/isolate done`, or when the person says "isolate as <name>" / "isolate this" about the current session.
 argument-hint: <name> | done
 ---
 
@@ -13,7 +13,7 @@ Work in worktree `<name>`, so this session's edits never collide with another se
 - The worktree, its branch and the session share one name.
 - `/epic` runs these steps too.
 - The session either moves to a NEW window of the worktree's own, or STAYS in this one.
-  Owen picks, each time (step 2b).
+  The person picks, each time (step 2b).
 
 ## A multi-repo top
 
@@ -104,7 +104,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - [window.mjs](https://github.com/spell-app/spell/blob/main/epic/src/window.mjs), "Staying put"
 3. `EnterWorktree` with `name: "<name>"`.
    - Reusing one:  the same, by `name`:  the worktree hook finds it.  NEVER `path` (epic `epic-engine` P16):  Claude
-     Code asks Owen before entering a path outside `.claude/worktrees/`, every time.
+     Code asks the person before entering a path outside `.claude/worktrees/`, every time.
    - Already in it (`pwd` is in that folder:  a new tab of the worktree's window):  NOT again.
      - Entering again would be a no-op at best (epic `epic-engine` P12, r11:  "You keep asking for permission to
        EnterWorktree, it has to stop").
@@ -129,7 +129,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
    - This isn't a package window (a worktree's ...):  `open` takes the whole repo's window and its look
      (`epic config windows`, its `default`).
      - Never ask which package (Owen, 2026-10-07).
-     - `--pkg <pkg>` only when Owen names one.
+     - `--pkg <pkg>` only when the person names one.
    - `epic window` works before the worktree's install (`epic config installCommand`).
      - `epic` is the plugin's, with its own packages.
    - It fails otherwise:  say so in one line, skip step 5, and do "Continue" now, in this window.
@@ -144,17 +144,17 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      then shows beside the session in the new window.
    - It fails:  say so in one line, and do "Continue" now, in this window.
      - "this session can't move" (exit 1:  the end-of-turn hook won't run, epic `epic-engine` P26):  NO turn end
-       for a move that won't happen.  Give Owen its `fix:` line in one line, then do "Continue" in this window, or,
-       if he'd rather work there, `epic window launch <name>` (a new session in its window).
+       for a move that won't happen.  Give the person its `fix:` line in one line, then do "Continue" in this window, or,
+       if they'd rather work there, `epic window launch <name>` (a new session in its window).
 6. END THE TURN now, so the move happens at once.
    - Nothing else this turn:  no install, no exploring, no questions.
    - One line:  "isolated in worktree `<name>` (branch `<name>`);  moving to `⎇ <name>`:
      press enter on `continue` there".
-   - Why:  the move waits for the turn to end, and Owen waits for the move.
+   - Why:  the move waits for the turn to end, and the person waits for the move.
 
 ## Stay:  in this window
 
-After step 3, when Owen picked "Stay in this window":  no `open`, no `handoff`, no turn end.
+After step 3, when the person picked "Stay in this window":  no `open`, no `handoff`, no turn end.
 
 0. `epic window stay <name>`:  the window says so at once.
    - It's titled `⎇ <name>`, its title bar tinted:  no reload, the Claude panel untouched.
@@ -168,7 +168,7 @@ After step 3, when Owen picked "Stay in this window":  no `open`, no `handoff`, 
 
 ## Continue:  the first turn in the new window
 
-The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or anything else):
+The turn after step 6, whatever the person sends (`continue`, typed in by the move, or anything else):
 0. The prompt hook says this session "was to move ... and didn't" (the end-of-turn hook never ran):  the session is
    still in the OLD window.  Say so in one line with its fix, and carry on here (or `epic window launch <name>`).
 1. Old tab still open in the old window (its title didn't match):  say so in one line, close it by hand.
@@ -194,19 +194,19 @@ The session MUST stay titled `🚧 <name>` while its work is under way.
   - `📅 <name>`:  a future epic written down
   - `✅ <name>`:  merged (`epic session done`)
 - Why:  the handoff finds its old tab by title,
-  and Owen finds it in the panel's list by name, its icon saying where it stands.
-- It drifts:  Claude's own title ("Doc-plan SEO") wins when the hook never ran, or Owen renamed it.
+  and the person finds it in the panel's list by name, its icon saying where it stands.
+- It drifts:  Claude's own title ("Doc-plan SEO") wins when the hook never ran, or the person renamed it.
   - The hook never runs for a plain-words "isolate as ...", or a resumed or reopened session.
 - Check, and rename if needed, whenever an isolated or epic session STARTS or RESUMES work:
   - "Continue" above (the first turn in the new window)
   - each `/epic` phase start ("5. Each phase", step 1;  Doc Review is a phase too)
   - [the park skill](../park/SKILL.md)'s "Resume" (`/unpark`, `/wait-for`)
-  - Owen reopening the session to carry on ("start P3", "continue")
+  - The person reopening the session to carry on ("start P3", "continue")
 - How:  `epic session title "🚧 <name>"`.
   - It checks first:  its tab already shows `🚧 <name>` (or it's queued), it does nothing.
     - "Shows":  the session's running record says so, else its transcript's LAST title line is `🚧 <name>`.
       Claude's own title written after it may be what the tab shows.
-  - Else it queues it, which lands on Owen's NEXT prompt.
+  - Else it queues it, which lands on the person's NEXT prompt.
   - `--force`:  queues it all the same.  "Continue" and a resume use it.
   - The prompt hook titles a typed `/isolate`, `/epic` or `/unpark <name>` so by itself.
   - Renamed:  one line, "session renamed `🚧 <name>` (was "<old>");  shows on your next message".
@@ -221,7 +221,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
 - In short:
   1. `merge-main`, if `main` moved
   2. `epic merge <name>`, from the worktree:  it moves the MAIN checkout's `main`
-     - no `ExitWorktree` and back:  entering asks Owen every time (epic `epic-engine` P12)
+     - no `ExitWorktree` and back:  entering asks the person every time (epic `epic-engine` P12)
 - `/isolate done` in a standing epic's session:  say it stands, and ask first ("Stop standing, and finish?").
 
 ## Finish:  `/isolate done`
@@ -280,7 +280,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
          with the command the checkout lists for it, in `.epic/generators.json5`.
          Then it commits the merge ("Merge main into `<name>`").
        - Its `REVIEW` lines:  snapshot entries with a value NEITHER side had, i.e. new behaviour nobody looked at.
-         Show each to Owen, in bold, in the summary.
+         Show each to the person, in bold, in the summary.
        - It fails (a generator errors):  the merge is left in progress.
          Fix the cause, then `epic worktree merge-main --continue`;
          or `git merge --abort` and step 3's "Can't fix them".
@@ -341,7 +341,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
 5. NO move back:  the session stays in the window it's in (the worktree's, or the one it stayed in).
    - Why:  Owen (2026-10-03) "we don't need to go back into the originating window.
      That's just confusing things".
-   - The worktree's window stays open for Owen to read the summary;  he closes it.
+   - The worktree's window stays open for the person to read the summary;  they close it.
    - Its file goes with `epic window close <name>` later, or `/worktrees` lists it.
      That file:  `$(epic config windowsFolder)/ongoing/<name>.code-workspace`.
    - NEVER `handoff <name> --back` from here.
@@ -356,7 +356,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - `epic merge <name>`:  it checks the main checkout is on `main`, with nothing uncommitted (another session may be
      working there), then fast-forwards.
      - Stray files there:  as the epic skill's "5. Each phase", step 5 says (a snapshot moved aside by itself;  a few
-       others only once Owen says so, `--ditch`).
+       others only once the person says so, `--ditch`).
      - Refused (`main` moved since step 2, somebody's work there):  say so, and don't merge.
      - A multi-repo top:  `epic merge <name>` in the main TOP checkout.
        - It fast-forwards ONLY the repos whose `<name>` branch has commits beyond their `main`, each in its own
@@ -366,7 +366,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
      - `/isolate <name>` re-enters the worktree to merge `main` in again.
    - Merged:  `epic session done`.
      - This session's name gets a ✅ (`✅ <name>`), so the Claude panel tells finished work from live work.
-     - It shows after Owen's next message here:  a hook applies it, and nothing else can.
+     - It shows after the person's next message here:  a hook applies it, and nothing else can.
      - `/isolate <name>`, `/epic <name>` or `/unpark <name>` takes it off again (epic `windows-and-review` P6).
 
 7b. Agents' worktrees, WITHOUT asking (Owen, 2026-10-05), now in the main checkout.
@@ -407,7 +407,7 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
 - Only when nothing is left for THIS session:
   - no uncommitted or unmerged work
   - no background task or agent still running
-  - no question waiting on Owen
+  - no question waiting on the person
   - Open items may remain only if they're recorded elsewhere (the epic page, the code-debt log ...)
     and need no context from this session.
 - Otherwise leave the line out, and say what keeps the tab open.

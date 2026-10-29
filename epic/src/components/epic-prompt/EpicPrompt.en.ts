@@ -17,8 +17,8 @@ export const epicPromptVocabulary = {
   noun: "prompt",
   ui: false,
   description:
-    "The prompt that started the plan, as Owen typed it:  folded under `Kickoff prompt` in the Overview, on the " +
-    "ivory of his voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
+    "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the " +
+    "ivory of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
   attributes: [],
   events: [],
   slots: [{ name: "", description: "The prompt:  `<p>`s." }],

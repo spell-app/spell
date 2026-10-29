@@ -1,6 +1,6 @@
 ---
 name: session
-description: Find and reopen a saved Claude Code session in the VS Code Claude panel, or title THIS session -- things the panel has no `/resume` or `/rename` for.  Use for `/session` (asks which session), `/session <words or id>` (find and open), `/session name [title]` (title this one, as `/title` does), or when Owen says "resume / reopen / go back to the <x> session".
+description: Find and reopen a saved Claude Code session in the VS Code Claude panel, or title THIS session -- things the panel has no `/resume` or `/rename` for.  Use for `/session` (asks which session), `/session <words or id>` (find and open), `/session name [title]` (title this one, as `/title` does), or when the person says "resume / reopen / go back to the <x> session".
 argument-hint: "[<words> | <id> | name [<title>]]"
 ---
 

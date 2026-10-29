@@ -36,7 +36,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: '<page> [--title "..."] [--description "..."] [--from <questions.json5>]',
       description:
         "ask the same question again:  the ONE page rewritten in place (from --from, else left to edit), the round " +
-        "before folded at its bottom with what Owen sent;  never a second page (create refuses one)",
+        "before folded at its bottom with what you sent;  never a second page (create refuses one)",
       example: "epic ask round seo/pick-layout --from round2.json5",
       flags: {
         "--title <title>": "the page's title",
@@ -58,7 +58,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "<page> [--timeout 8h]",
       description:
-        "wait until Owen sends an answer, print it and exit 0 (timeout:  exit 2);  run it in the background:  " +
+        "wait until you send an answer, print it and exit 0 (timeout:  exit 2);  run it in the background:  " +
         "its exit wakes the session",
       example: "epic ask wait seo/pick-layout",
       flags: {
@@ -68,7 +68,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "answer",
       usage: "<page> [--round <n>]",
-      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
+      description: "print the answer you already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic ask answer seo/pick-layout",
       flags: {
         "--round <n>": "an earlier round's answer, as it was sent"
@@ -78,7 +78,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "draft",
       usage: "<page>",
       description:
-        "print what Owen typed on the page and hasn't sent (exit 1 if nothing);  run it before rewriting a page " +
+        "print what you typed on the page and hasn't sent (exit 1 if nothing);  run it before rewriting a page " +
         "he may have open",
       example: "epic ask draft seo/pick-layout",
       flags: {}
@@ -116,7 +116,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "create",
       usage: '<slug> --rows <rows.json5> [--title "..."] [--epic <epic>] [--description "..."]',
       description:
-        "make a choice page from its rows (a table of names Claude recommends, Owen's call on each), and print its path",
+        "make a choice page from its rows (a table of names Claude recommends, your call on each), and print its path",
       example: "epic choices create boolean-names --rows rows.json5 --epic seo",
       flags: {
         "--rows <rows.json5>": "the rows (required)",
@@ -130,7 +130,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: '<page> --rows <rows.json5> [--title "..."] [--description "..."]',
       description:
         "ask the same question again:  the ONE page rewritten with the new rows, the round before folded at its " +
-        "bottom with what Owen sent;  never a second page (create refuses one)",
+        "bottom with what you sent;  never a second page (create refuses one)",
       example: "epic choices round seo/boolean-names --rows round2.json5",
       flags: {
         "--rows <rows.json5>": "the new round's rows (required)",
@@ -152,7 +152,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "<page> [--timeout 8h]",
       description:
-        'wait until Owen presses "Do it", print his answer and exit 0 (timeout:  exit 2);  run it in the background',
+        'wait until you press "Do it", print your answer and exit 0 (timeout:  exit 2);  run it in the background',
       example: "epic choices wait seo/boolean-names",
       flags: {
         "--timeout <time>": "how long to wait:  8h (the default), 30m, 1h30m, or seconds"
@@ -161,7 +161,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "answer",
       usage: "<page> [--round <n>]",
-      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
+      description: "print the answer you already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic choices answer seo/boolean-names",
       flags: {
         "--round <n>": "an earlier round's answer, as it was sent"
@@ -180,7 +180,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "list",
       usage: "[<epic>] [--all] [--json]",
       description:
-        "every comment Owen left on a docs page, still waiting for Claude;  with an epic, only that epic's;  " +
+        "every comment you left on a docs page, still waiting for Claude;  with an epic, only that epic's;  " +
         "--all:  taken and answered ones too",
       example: "epic comments list seo",
       flags: {
@@ -233,7 +233,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "list",
       usage: "[<epic>] [--all] [--json]",
       description:
-        "every new page note Owen left on a docs page;  with an epic, only on the pages it owns;  --all:  answered " +
+        "every new page note you left on a docs page;  with an epic, only on the pages it owns;  --all:  answered " +
         "and done ones too",
       example: "epic notes list seo",
       flags: {
@@ -304,7 +304,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "[--every <s>] [--max <s>] [--json]",
       description:
-        "wait until Owen sends an agent a note from the epic page (exit 0, printing it), or none is left running " +
+        "wait until you send an agent a note from the epic page (exit 0, printing it), or none is left running " +
         "(exit 3);  run it in the background",
       example: "epic agents wait",
       flags: {
@@ -317,7 +317,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "told",
       usage: "<name>",
-      description: "Owen's notes to the agent were passed on:  the page shows them told",
+      description: "your notes to the agent were passed on:  the page shows them told",
       example: "epic agents told docstrings",
       flags: {
         "--epic <epic>": "that epic's list (default this checkout's)"
@@ -337,7 +337,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "on",
       usage: "",
-      description: "turn airplane mode on:  everything Owen leaves on the pages waits for /airplane land",
+      description: "turn airplane mode on:  everything you leave on the pages waits for /airplane land",
       example: "epic airplane on",
       flags: {
         "--json": "print the state as JSON"
@@ -365,7 +365,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "inbox",
       usage: "[--since <iso>] [--json]",
-      description: "everything Owen left while flying, by place:  what /airplane land works through",
+      description: "everything you left while flying, by place:  what /airplane land works through",
       example: "epic airplane inbox",
       flags: {
         "--since <iso>": "since then (default:  since airplane mode went on)",
@@ -1100,7 +1100,7 @@ export type GroupVerb = {
   name: string
   /** its arguments:  `<slug> [--epic <epic>]` */
   usage: string
-  /** what it does, for Owen */
+  /** what it does, for the person running it */
   description: string
   /** a whole command line:  `epic ask create pick-layout --epic seo` */
   example: string
@@ -1129,7 +1129,7 @@ const TIME = "8h, 30m, 1h30m, or seconds"
 export const VERB_FLAGS: Record<string, VerbFlags> = {
   // requests from other sessions (`Requests`)
   send: {
-    "--text <words>": "Owen's words, verbatim",
+    "--text <words>": "your words, verbatim",
     "--file <file>": "his words, from a file",
     "--images <n>": "how many of the images he pasted last to keep (default none)",
     "--context <text>": "what he was looking at:  a page, a file, an item",
@@ -1142,7 +1142,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--from <who>": "who sent it, with --file"
   },
   home: {},
-  merge: { "--ditch": "move up to 3 hand-made stray files aside too, once Owen says so" },
+  merge: { "--ditch": "move up to 3 hand-made stray files aside too, once you say so" },
 
   // an epic page:  making and reading (the `epic` tool's)
   create: {
@@ -1175,7 +1175,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--symptom <html>": "what's wrong:  one line",
     "--changes <html>": "what changes:  two or three lines",
     "--goal <html>": "its goal",
-    "--plan <html>": "Claude's build plan, which waits for Owen's Accept",
+    "--plan <html>": "Claude's build plan, which waits for your Accept",
     "--files <html>": "the files it touches",
     "--verify <html>": "how it's checked",
     "--estimate <time>": "its estimate, e.g. 1-2h",
@@ -1186,7 +1186,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--symptom <html>": "a phase's symptom",
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
-    "--plan <html>": "a phase's build plan, waiting for Owen's Accept",
+    "--plan <html>": "a phase's build plan, waiting for your Accept",
     "--files <html>": "a phase's files",
     "--verify <html>": "how a phase is checked",
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
@@ -1220,7 +1220,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
-    "--calm": "not urgent (yellow):  a judgement or issue that wouldn't surprise Owen",
+    "--calm": "not urgent (yellow):  a judgement or issue that wouldn't surprise you",
     "--limit": "a todo:  a limit to know about, not work",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",

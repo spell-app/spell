@@ -1,6 +1,6 @@
 ---
 name: voice
-description: Rewrite docs guides in a VOICE -- the repo's rules for how a kind of page is written (`epic voice`) -- keeping every fact, id and number, then stamp each one done;  background agents do the writing, up to 5.  Use for `/voice [<page>...] [--voice <name>]` (no pages:  every guide not done yet), or when Owen says "run the voice over the guides", "rewrite <guide> in the readme voice", "bring the guides up to the voice".
+description: Rewrite docs guides in a VOICE -- the repo's rules for how a kind of page is written (`epic voice`) -- keeping every fact, id and number, then stamp each one done;  background agents do the writing, up to 5.  Use for `/voice [<page>...] [--voice <name>]` (no pages:  every guide not done yet), or when the person says "run the voice over the guides", "rewrite <guide> in the readme voice", "bring the guides up to the voice".
 argument-hint: "[<page>...] [--voice <name>]"
 ---
 
@@ -53,7 +53,7 @@ Keep, exactly:
 - every fact, number, name, command, path, caveat and link;  every section and its id (other pages link to them)
 - the markup:  <ui-section>, <ui-table>, <epic-*> and every other element and attribute stay as they are;
   you change the TEXT inside them, and may split a paragraph into a list or join two short ones
-- code blocks, tables' data, quotes of Owen ("Owen, 2026-10-10:  ..."), dated history (feeds, "before <date>" notes)
+- code blocks, tables' data, quotes of people ("Owen, 2026-10-10:  ..."), dated history (feeds, "before <date>" notes)
 - anything between generated markers (index:start / index:end, areas:start / areas:end)
 - a guide's internal names:  these pages are for the team, so repos and tools are named as they are
 
@@ -80,5 +80,5 @@ then anything you left, with why.
 Short:
 1. `<n> guides gone over in the <voice> voice (<words before> -> <words after> words);  <m> left`, and why each.
 2. Per agent:  its guides, one line each, as its report said.
-3. Where to review:  the content folder's `auto: guides/...` commits, one per folder, each reverted whole if Owen
+3. Where to review:  the content folder's `auto: guides/...` commits, one per folder, each reverted whole if the person
    doesn't like it;  the guides themselves (`epic pages link <page> --show`).

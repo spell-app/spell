@@ -21,7 +21,7 @@ describe("<epic-page-note-head>", () => {
       look: part(head, "status").dataset.status,
       expanded: part(head, "base").getAttribute("aria-expanded")
     }).toEqual({
-      text: "Owen · 10/9 22:10Show icons as I will click themanswered · 1 reply",
+      text: "Note · 10/9 22:10Show icons as I will click themanswered · 1 reply",
       status: "answered · 1 reply",
       look: "answered",
       expanded: "false"

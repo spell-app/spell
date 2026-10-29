@@ -77,8 +77,8 @@ export const epicSendButtonsVocabulary = {
       name: "wand",
       kind: "boolean",
       description:
-        "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere since Owen, " +
-        '2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back later"), so only a press sends.  ' +
+        "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere, so only a press " +
+        'sends (Owen, 2026-10-25:  "remove the wand EVERYWHERE ...  We may bring the wand back later").  ' +
         "`manual` before, the other way round, for a page a command waits on (`<epic-run>`)."
     }
   ],

@@ -1,6 +1,6 @@
 ---
 name: docs-check
-description: Make the docs an epic wrote (besides its epic page) agree with what was chosen and built, then with each other -- its guide, other guides, AGENTS.md / README files, skills, templates, its changelog entry -- fixed in place, uncommitted, the diff left for Owen to review;  what it can't decide goes into the epic page as judgement calls.  Use for `/docs-check <epic...>`, `/docs-check` alone (asks which epics), or when Owen says "check the docs for <epic>", "make the docs consistent", "are the docs true to what we chose?", "check the docs before I fly".
+description: Make the docs an epic wrote (besides its epic page) agree with what was chosen and built, then with each other -- its guide, other guides, AGENTS.md / README files, skills, templates, its changelog entry -- fixed in place, uncommitted, the diff left for the person to review;  what it can't decide goes into the epic page as judgement calls.  Use for `/docs-check <epic...>`, `/docs-check` alone (asks which epics), or when the person says "check the docs for <epic>", "make the docs consistent", "are the docs true to what we chose?", "check the docs before I fly".
 argument-hint: "<epic...>"
 ---
 
@@ -50,7 +50,7 @@ what we chose,  then goes through all of those docs as a group, and makes sure t
   - the epics merged since the last flight, or done in the last week, newest first
     - from `epic list --json`:  those with `status` `done`
     - at most 4 options, "Other" for names
-  - Run by a background agent (no Owen to ask):  the epic this session works on, and say so in the report.
+  - Run by a background agent (no person to ask):  the epic this session works on, and say so in the report.
 - Several epics:  pass 1 per epic, then pass 2 over ALL their docs together (a doc two epics touched is read once).
 
 ## What's binding
@@ -60,7 +60,7 @@ From `decisions --json`, later beats earlier:
 - a question born answered (a decision):  its title
 - a judgement call:
   - closed:  accepted, binding
-  - open:  how it was built, binding until Owen says otherwise
+  - open:  how it was built, binding until the person says otherwise
   - canceled:  reversed:  a doc that describes it as how things work is wrong
 - a closed todo or issue:  done
 - a canceled one:  moot, so a doc still promising it is wrong
@@ -78,7 +78,7 @@ From `decisions --json`, later beats earlier:
 
 - the epic page itself:  it's the record.  A contradiction INSIDE it goes into the report as a judgement call.
 - code, names, strings the code uses
-- Owen's own words:  his quotes, kickoff prompts, `<epic-answer>` text
+- People's own words:  their quotes, kickoff prompts, `<epic-answer>` text
 - dated records:  the logs in `agents/`, other epics' changelog entries, `<epic-updated>` lines
 - generated files:
   - the docs' home page (`pages/index.html`), list pages, bundles
@@ -129,7 +129,7 @@ From `decisions --json`, later beats earlier:
      (the root `AGENTS.md`, "Shared content").
      - the path:  `<content>/<path>`
      - `<content>`:  what `epic config contentFolder` prints
-     - The turn's end commits them (`auto: guides/...`), one commit per folder, which Owen can revert whole.
+     - The turn's end commits them (`auto: guides/...`), one commit per folder, which the person can revert whole.
    - An edited docs page:
      format, links and check-spell, as [epics' AGENTS.md](${CLAUDE_PLUGIN_ROOT}/src/AGENTS.md) says ("Finishing a page", steps 2-4).
 9. Report ("Report").

@@ -572,7 +572,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
   await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
   const work = printed.join("\n")
   expect(work).toContain(
-    "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
+    "test, the person's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
   )
   expect(work).toMatch(
     /M2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/m2-20261007-1000\.png/
@@ -585,7 +585,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     "M2  failed (Owen's run):  filed I1",
     "M3  canceled:  no longer applies (Owen's run)",
     "M4  not now:  deferred (Owen's run)",
-    `failed tests (1):  tell Owen one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
+    `failed tests (1):  tell the person one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
     "  M2 -> I1"
   ])
   const after = PlanDoc.parse(readFileSync(file, "utf8"))

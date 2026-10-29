@@ -217,7 +217,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The elements:
       - `<epic-ask>`, `<epic-text-box>`, `<epic-send>`, `<epic-choice-rows>` / `<epic-choice-row>`, `<epic-choices-bar>`
       - and `<epic-option>`'s answering mode, an option of an `<epic-ask>` (a tick box, a comment box)
-      - Their pages:  Epic UI's "Pages Owen answers on".
+      - Their pages:  Epic UI's "Pages you answer on".
     - `<epic-text-box>` is written in pages (the notes, a section's comment)
       AND drawn by others in their shadow roots (Other, an option's comment, the feedback).
       - Each family drawing it imports its barrel first.
@@ -979,7 +979,7 @@ In `tools/`:
   - No page script for details and choice pages since epic `epic-workflow` P12.
     - They're written in the epics pack's elements, which draw and send them (see "Details pages").
     - `details.css`, `details.js` and `syntax-choices.js` are gone.
-    - `spell-doc.css` has their pages' few own lines ("Pages Owen answers on").
+    - `spell-doc.css` has their pages' few own lines ("Pages you answer on").
   - `syntax-choices.css`:  the spell syntax guide's boxes and bar (`spell-syntax.js`).
     - A choice page drew with it before P12.
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the content folder's `goals/`.
@@ -1738,7 +1738,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     pointed at it;  so its See Also lists one link per question
   - the code:  [rounds.js](tools/rounds.js)
 - Written in the epics pack's `<epic-*>` elements (epic `epic-workflow` P12), so a question reads as an epic page's.
-  - Each element has its page in Epic UI (`/components/epics/`, "Pages Owen answers on").
+  - Each element has its page in Epic UI (`/components/epics/`, "Pages you answer on").
   - a question:  a `<ui-section id>` holding an `<epic-ask>`
     - the `<epic-ask>` holds an `<epic-question>`, and an `<epic-choices>` of `<epic-option>`s
     - the section's id is its answer's key

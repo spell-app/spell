@@ -79,7 +79,7 @@ export class EpicProgram {
   constructor() {
     const epic = new Command("epic")
       .description(
-        "Work with epics:  their pages (epics/<name>/), the pages Owen answers on, worktrees, sessions, windows, " +
+        "Work with epics:  their pages (epics/<name>/), the pages you answer on, worktrees, sessions, windows, " +
           "agents, airplane mode."
       )
       .usage("<verb> <epic>[#<id>] [arguments]")
@@ -128,7 +128,7 @@ export class EpicProgram {
     const requests = (verb: Command) => this.verb(verb, (args) => new Requests().run([verb.name(), ...args]))
 
     requests(epic.command("send"))
-      .description("send an epic a request:  Owen's words and screenshots;  no epic:  the tooling home")
+      .description("send an epic a request:  your words and screenshots;  no epic:  the tooling home")
       .usage('[<epic>] --text "..." | --file <file> [--images <n>] [--context "..."] [--from <session>] [--json]')
       .addHelpText("after", example('epic send seo --text "the comment box is too narrow" --images 1'))
 
@@ -139,7 +139,7 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase:  Owen's words and screenshots into its Requests field;  or, with no phase, " +
+        "file a request into a phase:  your words and screenshots into its Requests field;  or, with no phase, " +
           'mark where it went:  "dropped:  done in P3"'
       )
       .usage('<epic>#P3 <request id>  |  <epic> <request id> "where it went"')
@@ -153,7 +153,7 @@ export class EpicProgram {
     requests(epic.command("merge"))
       .description(
         "a standing epic's phase onto main at once, fast-forward only;  run in the main checkout;  a stray snapshot " +
-          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once Owen says so"
+          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once you say so"
       )
       .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
@@ -185,7 +185,7 @@ export class EpicProgram {
     this.page(
       epic.command("change"),
       'stamp the change marks written by hand (<epic-change item="q13">words</epic-change>:  their id, time and ' +
-        "answer), then list the ones waiting for Owen's Accept;  --for:  the item of the marks that name none " +
+        "answer), then list the ones waiting for your Accept;  --for:  the item of the marks that name none " +
         "(any epic edit stamps them too)",
       "epic change seo --for q13"
     ).usage("<epic> [--for <item id>]")
@@ -328,7 +328,7 @@ export class EpicProgram {
     ).usage('<epic>#Q3 "answer" [--details <html>] [--option A]')
     this.page(
       epic.command("choose"),
-      "an option Owen settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
+      "an option you settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
         "card set (--set N:  the Nth), the item answered / closed / reviewed, a Noted card",
       `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`
     ).usage('<epic>#J9 <letter> ["outcome"] [--set N]')
@@ -347,7 +347,7 @@ export class EpicProgram {
     this.page(
       epic.command("summarize"),
       "condense an item after a lot of back and forth:  the file replaces what it shows;  its text and every reply " +
-        "move into its Original Discussion, folded;  Owen's picks and the answer stay",
+        "move into its Original Discussion, folded;  your picks and the answer stay",
       "epic summarize seo#J3 --file condensed.html"
     ).usage("<epic>#J3 --file <condensed.html>")
     this.page(
@@ -380,7 +380,7 @@ export class EpicProgram {
 
     this.page(
       epic.command("inbox"),
-      "the marks and comments Owen sends from the page, and how a review session takes them"
+      "the marks and comments you send from the page, and how a review session takes them"
     )
       .usage(
         '[watch | ignore | wait | apply] <epic>  |  status <epic> "<text>" [--items q3,c2] | --clear  |  ' +
@@ -389,7 +389,7 @@ export class EpicProgram {
       .addHelpText("after", INBOX_HELP)
     this.page(
       epic.command("test"),
-      "Owen's test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
+      "your test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
         "epic's;  --list:  the open tests"
     )
       .usage("<epic>[#M3] [--list [--json]]  |  --all [--list] [--json]")
@@ -416,7 +416,7 @@ export class EpicProgram {
     ).usage('<epic> start "P3-P6,P9" | done "summary"')
     this.page(
       epic.command("backfill"),
-      "items Owen already went through in past sessions:  a dry run unless --apply",
+      "items you already went through in past sessions:  a dry run unless --apply",
       "epic backfill seo --apply"
     ).usage("<epic> | --all [--apply]")
     this.page(
@@ -609,27 +609,27 @@ export class EpicProgram {
   /** `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`:  the docs tools passed through. */
   private addToolGroups(): void {
     const epic = this.epic
-    epic.commandsGroup("Pages Owen answers on, agents, airplane mode:")
+    epic.commandsGroup("Pages you answer on, agents, airplane mode:")
 
     const tool = (name: EpicToolName) => (args: string[]) => EpicTools.run(name, args)
     this.group(
       epic.command("ask"),
-      "details pages:  a question explained on a page in VS Code's side bar, Owen answering on it",
+      "details pages:  a question explained on a page in VS Code's side bar, you answering on it",
       tool("details")
     )
     this.group(
       epic.command("choices"),
-      "choice pages:  a table of names Claude recommends, Owen's call on each",
+      "choice pages:  a table of names Claude recommends, your call on each",
       tool("choices")
     )
     this.group(
       epic.command("comments"),
-      "comments Owen leaves on docs pages:  list, wait for, gather, mark and answer them",
+      "comments you leave on docs pages:  list, wait for, gather, mark and answer them",
       tool("comments")
     )
     this.group(
       epic.command("notes"),
-      "page notes Owen left on docs pages (before comments):  list, answer, mark done",
+      "page notes you left on docs pages (before comments):  list, answer, mark done",
       tool("notes")
     )
     this.group(
@@ -1068,7 +1068,7 @@ word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
-  noted "<what>"                                          a STEP done, the item not finished:  Owen's choice
+  noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
 
 Examples:
@@ -1081,7 +1081,7 @@ Examples:
 
 /** After `epic saga --help`. */
 const SAGA_HELP = `
-The sagas' list, in Owen's order:  sagas/sagas.json5.  An epic names its saga:  <epic-page saga="<id>">.
+The sagas' list, in your order:  sagas/sagas.json5.  An epic names its saga:  <epic-page saga="<id>">.
   epic saga list [--json]                         the sagas in order, each with its epics and guide count
   epic saga set <epic> <saga>                     the saga an epic serves (--none:  no saga);  logged
   epic saga create <id> "Title" --purpose "..." [--after <id>]
@@ -1103,8 +1103,8 @@ Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   T todo   M manual test (checked by hand)   D decision (a question born answered)
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
---calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
-A manual test (M) Owen's test run steps him through, its fields HTML, or plain text:
+--calm (last):  a judgement or issue that wouldn't surprise you, yellow rather than red.
+A manual test (M) your test run steps you through, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run;
                       the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
@@ -1121,14 +1121,14 @@ Examples:
 
 /** After `epic test --help`. */
 const TEST_HELP = `
-The run shows one open test at a time:  its Step, Should, Example and If not;  Owen answers Passed, Failed (a note
+The run shows one open test at a time:  its Step, Should, Example and If not;  you answer Passed, Failed (a note
 and a screenshot), Skip or Not now, and Send hands them to the session listening (epic inbox apply seo).
 
 Examples:
   epic test seo                   the run, in the Review tab (the page with ?test=1)
   epic test seo#M3                ... at M3
   epic test seo --list [--json]   its open tests, in the run's order:  page order, Not now ones last
-  epic test --all [--list]        every epic with open tests, in Owen's saga order;  the first one opened,
+  epic test --all [--list]        every epic with open tests, in your saga order;  the first one opened,
                                   its last card leading to the next`
 
 /** After `epic inbox --help`. */
@@ -1136,7 +1136,7 @@ const INBOX_HELP = `
 The inbox's own verb first, then the epic:  epic inbox wait seo, epic inbox done seo#J3.
 
 Examples:
-  epic inbox seo                  what Owen sent from the page:  requests, marks, comments
+  epic inbox seo                  what you sent from the page:  requests, marks, comments
   epic inbox watch seo            this session waits on the inbox (the page says someone's reviewing);  ignore:  stopped
   epic inbox wait seo             block until there's work, print it, exit 0 (run it in the background)
   epic inbox apply seo [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not

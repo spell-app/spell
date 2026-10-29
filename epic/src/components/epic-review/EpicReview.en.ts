@@ -10,7 +10,7 @@ import { REVIEW_KINDS, REVIEW_NAME_TEXTS, REVIEW_SHOWS, REVIEW_TEXTS } from "./E
 
 /****************
  * ### `<epic-review>`
- * The review controls (P9):  what Owen does with an item, an Overview sub-section, a phase or the summary
+ * The review controls (P9):  what you do with an item, an Overview sub-section, a phase or the summary
  * while the page is reviewed.
  ****************/
 export const epicReviewVocabulary = {
@@ -95,8 +95,8 @@ export const epicReviewVocabulary = {
       name: "epic-chosen",
       detail: "{ of: string }",
       description:
-        "Owen chose an action with it:  a review button that chose one (not one clearing a mark or calling a request " +
-        "off), or a note box button.  An `<epic-item>` folds, so he moves on to the next."
+        "You chose an action with it:  a review button that chose one (not one clearing a mark or calling a request " +
+        "off), or a note box button.  An `<epic-item>` folds, so you move on to the next."
     }
   ],
   slots: [],

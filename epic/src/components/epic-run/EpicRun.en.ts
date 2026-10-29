@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-run>`
- * A run page's body:  a command asks Owen, he answers each row, Send, and the command carries on.
+ * A run page's body:  a command asks you, you answer each row, Send, and the command carries on.
  ****************/
 export const epicRunVocabulary = {
   tag: "epic-run",
@@ -18,12 +18,12 @@ export const epicRunVocabulary = {
   noun: "run",
   ui: false,
   description:
-    "A run page's body (epic `epic-engine` P23):  a COMMAND stopped to ask Owen (the kit's `SRV.CommandRun`), and " +
-    "waits for his answers.  It reads the run from the page server (`GET /api/runs/<id>`) and draws who is waiting " +
+    "A run page's body (epic `epic-engine` P23):  a COMMAND stopped to ask you (the kit's `SRV.CommandRun`), and " +
+    "waits for your answers.  It reads the run from the page server (`GET /api/runs/<id>`) and draws who is waiting " +
     "(`spell translate todos --to es` is waiting, with a green dot;  nobody, once the run stopped, finished or " +
     "its heartbeat went stale), the command's progress lines, updated live, then a table:  the command's columns " +
-    "and a row per thing to answer (`<epic-run-row>`).  Each answer is saved as he gives it;  Send, at the bottom, " +
-    "says the answers are done, and the waiting command carries on with them.  Send again whenever he likes:  the " +
+    "and a row per thing to answer (`<epic-run-row>`).  Each answer is saved as you give it;  Send, at the bottom, " +
+    "says the answers are done, and the waiting command carries on with them.  Send again whenever you like:  the " +
     "page never locks.  Steering (P25):  a STATUS CARD of the run's passes when the command writes them (a line " +
     "each:  its name, a small bar and `212 of 380`, its calls, its time;  the running one live, done ones quiet), " +
     "and an EFFORT picker when it offers one (`fast | balanced | best`, saved at once, taking effect at the next " +

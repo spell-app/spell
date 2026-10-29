@@ -57,9 +57,9 @@ export class AnswerThread {
     let start = flow.length
     while (start > 0 && flow[start - 1].localName === REPLY_TAG) start--
     const replies = flow.slice(start)
-    const owenStarts = AnswerThread.timeOf(replies.find(AnswerThread.isPersons)?.getAttribute("at"))
+    const personStarts = AnswerThread.timeOf(replies.find(AnswerThread.isPersons)?.getAttribute("at"))
 
-    // Claude's newest:  his last reply, with none of Owen's after it
+    // Claude's newest:  his last reply, with none of the person's after it
     const last = allReplies.at(-1)
     this.newestReply = last && !AnswerThread.isPersons(last) ? last : undefined
 
@@ -71,7 +71,7 @@ export class AnswerThread {
     // the lines:  drive-bys first (above the Choices), then the thread's
     const isDriveBy = (status: Element) => {
       const at = AnswerThread.timeOf(status.getAttribute("at"))
-      return owenStarts !== undefined && at !== undefined && at < owenStarts
+      return personStarts !== undefined && at !== undefined && at < personStarts
     }
     const driveBys = statuses.filter(isDriveBy)
     const threads = statuses.filter((status) => !isDriveBy(status))

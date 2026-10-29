@@ -40,7 +40,7 @@ export const epicTestRunVocabulary = {
       name: "epic-test-closed",
       detail: "{}",
       description:
-        'Owen left the run:  Esc, or "Done testing".  `<epic-page>` shows its blocks again;  the run has sent its ' +
+        'You left the run:  Esc, or "Done testing".  `<epic-page>` shows its blocks again;  the run has sent its ' +
         "unsent answers (I52)."
     }
   ],

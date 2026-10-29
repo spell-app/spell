@@ -42,7 +42,7 @@ try {
           hookEventName: input.hook_event_name ?? "SessionStart",
           additionalContext:
             `This worktree (branch ${branch}) is ${commits} behind ${main}, so its code and pages are that old.  ` +
-            `Tell Owen in one line, and offer (AskUserQuestion) to merge ${main} in ` +
+            `Tell the person in one line, and offer (AskUserQuestion) to merge ${main} in ` +
             `now:  \`epic worktree merge-main\`, "Merge ${main} now (Recommended)" / "Not now".`
         }
       })

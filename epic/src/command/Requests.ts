@@ -143,7 +143,7 @@ export class Requests {
     const file = stringFlag(flags.file)
     const text = file !== undefined ? readFileSync(file, "utf8") : flags.text
     if (typeof text !== "string" || !text.trim())
-      throw new EpicCommandError('send:  Owen\'s words?  --text "..." or --file <file>')
+      throw new EpicCommandError('send:  your words?  --text "..." or --file <file>')
     const images = Number(flags.images ?? 0)
     if (!Number.isInteger(images) || images < 0) throw new EpicCommandError(`send:  --images ${flags.images}?  a count`)
     const sent = this.send({
@@ -571,7 +571,7 @@ export class Requests {
   }
 
   /**
-   * A request as `request.md`:  a header of `key: value` lines between `---`, then Owen's words, then the context.
+   * A request as `request.md`:  a header of `key: value` lines between `---`, then the person's words, then the context.
    * - static:  pure
    *
    * ```md
@@ -586,7 +586,7 @@ export class Requests {
    * images: image-1.png
    * ---
    *
-   * ## Owen's words
+   * ## The person's words
    *
    * comment mechanism doesn't look right
    *
@@ -607,7 +607,7 @@ export class Requests {
       ...(request.images.length ? [`images: ${request.images.join(", ")}`] : [])
     ]
     const context = request.context ? `\n## Context\n\n${request.context.trim()}\n` : ""
-    return `---\n${header.join("\n")}\n---\n\n## Owen's words\n\n${request.text.trim()}\n${context}`
+    return `---\n${header.join("\n")}\n---\n\n## The person's words\n\n${request.text.trim()}\n${context}`
   }
 
   /**
@@ -631,7 +631,7 @@ export class Requests {
       status: fields.status ?? "new",
       filed: fields.filed || undefined,
       phase: fields.phase || undefined,
-      text: words.replace(/^\s*## Owen's words\s*/, "").trim(),
+      text: words.replace(/^\s*## (?:Owen|The person)'s words\s*/, "").trim(),
       context: context?.trim() || undefined,
       images: fields.images ? fields.images.split(/,\s*/) : []
     }

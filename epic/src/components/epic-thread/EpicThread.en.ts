@@ -10,7 +10,7 @@ import { THREAD_BOXED } from "./EpicThread.types"
 
 /****************
  * ### `<epic-thread>`
- * One comment's whole THREAD on a page:  its header, Owen's answer, the messages, then his reply box.
+ * One comment's whole THREAD on a page:  its header, your answer, the messages, then your reply box.
  ****************/
 export const epicThreadVocabulary = {
   tag: "epic-thread",
@@ -22,10 +22,10 @@ export const epicThreadVocabulary = {
     "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs " +
     "runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, " +
     "an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green " +
-    "check circle once done), its id (`C3`), the first words it's on;  while it's Owen's turn, his answer (an " +
-    "item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his " +
-    "words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange " +
-    "while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen " +
+    "check circle once done), its id (`C3`), the first words it's on;  while it's your turn, your answer (an " +
+    "item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had your " +
+    "words, the trash.  Then the messages in order (`<epic-thread-message>`), and your reply box, slotted.  Orange " +
+    "while Claude spoke last and you haven't answered (`unseen`).  It draws what it's given and says what you " +
     "did:  the comments' code saves and redraws.",
   attributes: [
     {
@@ -48,7 +48,7 @@ export const epicThreadVocabulary = {
       name: "unseen",
       kind: "boolean",
       description:
-        "ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).  The whole thread's ground, " +
+        "ORANGE:  Claude spoke last and you haven't answered yet (✓, a reply, ×).  The whole thread's ground, " +
         'Claude\'s latest reply stronger.  Orange is our colour for "changed since you looked".'
     },
     {
@@ -61,8 +61,8 @@ export const epicThreadVocabulary = {
       kind: "enum",
       values: THREAD_BOXED,
       description:
-        "Owen's words now in the box under it, so the thread leaves them out:  `first` (his first words, in the " +
-        "pen's box), `pending` (his pending reply, in the reply box).  The pen hides while `first`."
+        "Your words now in the box under it, so the thread leaves them out:  `first` (your first words, in the " +
+        "pen's box), `pending` (your pending reply, in the reply box).  The pen hides while `first`."
     },
     {
       name: "saved",
@@ -80,28 +80,28 @@ export const epicThreadVocabulary = {
     {
       name: "epic-thread-opened",
       detail: "{ open: true }",
-      description: "Owen clicked its header (not one of its buttons):  it unfolded."
+      description: "You clicked its header (not one of its buttons):  it unfolded."
     },
     {
       name: "epic-thread-closed",
       detail: "{ open: false }",
-      description: "Owen clicked its header (not one of its buttons):  it folded."
+      description: "You clicked its header (not one of its buttons):  it folded."
     },
     {
       name: "epic-thread-editing",
       detail: "{}",
-      description: "The pen:  Owen will change his first words, while Claude hasn't had them."
+      description: "The pen:  You'll change your first words, while Claude hasn't had them."
     },
     {
       name: "epic-thread-removing",
       detail: "{}",
-      description: "The trash:  Owen deletes the comment, at once (Undo in the toast that follows)."
+      description: "The trash:  You delete the comment, at once (Undo in the toast that follows)."
     },
     {
       name: "epic-thread-answered",
       detail: '{ act: "good" | "reply" | "skip" | "reopen" }',
       description:
-        "Owen's answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's " +
+        "Your answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's " +
         "good, Reply, Skip it;  Reopen once done."
     }
   ],
@@ -109,22 +109,22 @@ export const epicThreadVocabulary = {
     {
       name: "",
       description:
-        "Owen's box, last in its body while open:  the reply box, or the pen's box over his first words (a " +
+        "Your box, last in its body while open:  the reply box, or the pen's box over your first words (a " +
         "`<ui-textarea>`, which the comments' code keeps across redraws)."
     }
   ],
   parts: [
     { name: "base", description: "The thread:  its header, then its body while open." },
-    { name: "header", description: "Its header:  the fold, Owen's answer, the pen, the trash;  a click folds it." },
+    { name: "header", description: "Its header:  the fold, your answer, the pen, the trash;  a click folds it." },
     {
       name: "fold",
       description: "The fold:  the chevron, the bullhorn (a check circle once done), its id, the first words it's on."
     },
     { name: "id", description: "Its id, `C3`:  small and muted, an outline and no fill." },
     { name: "headline", description: "The first words it's on, in quotes;  its tooltip says the block in full." },
-    { name: "answer", description: "Owen's answer while it's his turn (the review pills), or Reopen once done." },
+    { name: "answer", description: "Your answer while it's your turn (the review pills), or Reopen once done." },
     { name: "body", description: "The messages and the box:  shown while open." },
-    { name: "reply", description: "Owen's box, its floppy in the corner." }
+    { name: "reply", description: "Your box, its floppy in the corner." }
   ],
   states: [],
   texts: [
@@ -163,8 +163,8 @@ export const epicThreadVocabulary = {
       text: ", to work into the page there.",
       description: "Claude took it into an epic's phase:  after the link."
     },
-    { key: "good", text: "That's good.", description: "The Done line:  Owen said that's good." },
-    { key: "skip", text: "Skipped:  nothing more to do.", description: "The Done line:  Owen skipped it." },
+    { key: "good", text: "That's good.", description: "The Done line:  You said that's good." },
+    { key: "skip", text: "Skipped:  nothing more to do.", description: "The Done line:  You skipped it." },
     { key: "builtIn", text: "Built in", description: "The Done line:  before the commit Claude named." },
     { key: "thinking", text: "thinking…", description: "Claude's stub while he thinks about it (`working`)." }
   ],
