@@ -199,10 +199,22 @@ export class EpicDocs {
 
   /** The epic's changelog entry:  `guides/changelog.html`, its `<ui-section id="<name>">`, and whether it's there. */
   changelogEntry(): ChangelogEntry {
-    const file = join(this.files.content, CHANGELOG)
+    return EpicDocs.changelogEntryIn(this.files.content, this.name)
+  }
+
+  /**
+   * Epic `name`'s changelog entry in content folder `content`, without reading its epic page:
+   * `spell content update` looks up one per epic its commits name (epic `content` P3).
+   * - `title`:  the entry's heading, `2026-10-29 · Content`, when it's there
+   * - NEVER throws:  no changelog is no entry
+   */
+  static changelogEntryIn(content: string, name: string): ChangelogEntry {
+    const file = join(content, CHANGELOG)
     const html = existsSync(file) ? readFileSync(file, "utf8") : ""
-    const found = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegExp(this.name)}"`).test(html)
-    return { path: CHANGELOG, anchor: this.name, found }
+    const tag = new RegExp(`<ui-section\\b[^>]*\\bid="${escapeRegExp(name)}"[^>]*>`).exec(html)?.[0]
+    if (!tag) return { path: CHANGELOG, anchor: name, found: false }
+    const title = /\b(?:label|header)="([^"]*)"/.exec(tag)?.[1]
+    return { path: CHANGELOG, anchor: name, found: true, ...(title ? { title } : {}) }
   }
 
   ////////////////
@@ -421,6 +433,8 @@ export type ChangelogEntry = {
   anchor: string
   /** is the entry there? */
   found: boolean
+  /** its heading, `2026-10-29 · Content`, when it's there */
+  title?: string
 }
 
 /** `EpicDocs.find()`'s answer:  `plan-doc docs <name> --json`. */

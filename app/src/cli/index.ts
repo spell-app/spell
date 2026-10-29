@@ -8,6 +8,7 @@
  * - NOTE: deliberately left out, as side effects the moment they're imported:
  *   - `consoleGuard.ts`:  silences `console.*`
  *   - `languageCommands.ts`:  the hook's work, loaded after `consoleGuard`
+ *   - `ContentUpdate.ts`:  `spell content update`'s work, which loads the epic tool
  */
 export * as CLI from "."
 export * from "./cli.types"

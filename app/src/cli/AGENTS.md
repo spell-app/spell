@@ -11,8 +11,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
-  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`, and
-    `spell content check [--bless]`
+  - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
+    `spell content check [--bless]` and `spell content update [--json] [--done]`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)
@@ -41,9 +41,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `languageCommands`:  the parser folder's `LanguageCommands` (its `spell/parser/cli` types),
     each on a new `CliSession`.
   - `appCommands`:  `create`, `serve`, `projects`, the same way.
-  - `spell app vscode` and `spell content check` load no spell:
-    [vscodeCommand.ts](commands/vscodeCommand.ts) and [contentCheckCommand.ts](commands/contentCheckCommand.ts),
-    imported directly.
+  - `spell app vscode`, `spell content check` and `spell content update` load no spell:
+    [vscodeCommand.ts](commands/vscodeCommand.ts), [contentCheckCommand.ts](commands/contentCheckCommand.ts) and
+    [contentUpdateCommand.ts](commands/contentUpdateCommand.ts), imported directly.
+    - `spell content update`'s work is [ContentUpdate.ts](ContentUpdate.ts):  git, the content folder, and the epic
+      tool's node files (`PlanCommits`, `EpicDocs`, `PlanDocFiles`), the only app code that imports the epic folder.
 - Spell itself is NOT here.
   - It's the folders beside this one (lsp, spaces) and the folders below (the parser folder's spell, parser and
     core;  the kit's util).
@@ -104,6 +106,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [consoleGuard.ts](consoleGuard.ts):  importing it silences `console.*`
   - [languageCommands.ts](languageCommands.ts):  `loadApp()` loads it after `consoleGuard`
   - [commands.ts](commands.ts) and [hooks.ts](hooks.ts):  the kit loads them by path
+  - [ContentUpdate.ts](ContentUpdate.ts):  it loads the epic tool, which nothing else here needs
 
 ## Tests
 

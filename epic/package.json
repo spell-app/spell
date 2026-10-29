@@ -125,5 +125,8 @@
     "bin": {
       "epic": "cli/epicMain"
     }
-  }
+  },
+  "spellTypes": [
+    "tsconfig.json"
+  ]
 }
