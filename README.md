@@ -450,12 +450,12 @@ the versions and counts will have moved on by the time you run it.
 ~/www/spell/node_modules/       the ONE install:  node_modules/spell links to the repo, each folder is a workspace
 ~/www/spell/dist-types/         built declarations, for the type checks (git-ignored)
 ~/www/spell/spell.epics/        the content folder:  guides, epic pages, sagas, the logs (yours, local only)
-~/www/spell/spell.spaces/       your own Spell projects:  a plain folder
 ~/www/spell.worktrees/<epic>/   an epic's worktree of the repo, every folder on the epic's branch
+~/www/spell.spaces/             your own Spell projects:  a plain folder, beside the repo
 ```
 
 - `~/www/spell` is the convention every example on these pages uses.
-- Git ignores both data folders, `dist-types/` and `node_modules/`.
+- Git ignores `spell.epics/`, `dist-types/` and `node_modules/`.
 - The two dotted folders are yours, and nothing in the repo writes them on its own;
   they're data, not code, so neither is a workspace.
   - `spell.epics/` is a git repo of its own, on your machine.

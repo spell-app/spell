@@ -6,10 +6,8 @@
 /spell-*/
 # the page server's projects beside the kit, each checkout's own (page/settings.ts LOCAL_SETTINGS)
 /page-server.local.json5
-# the two data folders (epic repo-split J5):  the content repo (its own git repo, local only) and your projects (a plain
-# folder)
+# the content repo (epic repo-split J5):  its own git repo, local only;  your projects, spell.spaces, are beside the kit
 /spell.epics
-/spell.spaces
 
 node_modules
 .yarn/install-state.gz
