@@ -175,6 +175,22 @@ describe("<epic-choices>", () => {
     await expectAccessible(host)
   })
 
+  test("the pick's line atop the panels (I153):  its day and what happens next;  none before I153, nor while open", async () => {
+    const note = "recorded as the answer;  waiting for a phase to take it up"
+    const { host } = await choices(
+      `<epic-choices chosen="B" chosen-on="2026-10-29" chosen-note="${note}">${OPTIONS}</epic-choices>`
+    )
+    expect(part(host, "panels")!.firstElementChild).toBe(part(host, "note"))
+    expect(part(host, "note")!.textContent).toBe(`Chosen 10/29/26:  ${note}`)
+    host.removeAttribute("chosen-on")
+    await ElementFixture.tick()
+    expect(part(host, "note")!.textContent).toBe(`Chosen:  ${note}`)
+    const before = await choices(`<epic-choices chosen="B">${OPTIONS}</epic-choices>`)
+    expect(part(before.host, "note")).toBeNull()
+    const open = await choices(`<epic-choices chosen-note="${note}">${OPTIONS}</epic-choices>`)
+    expect(part(open.host, "note")).toBeNull()
+  })
+
   test("a panel's header folds and unfolds it", async () => {
     const { options } = await choices(`<epic-choices chosen="A">${OPTIONS}</epic-choices>`)
     const [, b] = options

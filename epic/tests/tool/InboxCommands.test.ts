@@ -104,9 +104,10 @@ test("apply:  a sent pick on a judgement call's reply cards (I8) approves it wit
   expect([
     j1.getAttribute("status"),
     j1.getAttribute("review-as"),
-    // as written to disk, formatted:  whitespace squeezed
-    j1.querySelector("epic-status")!.textContent!.replace(/\s+/g, " ").trim()
-  ]).toEqual(["done", "approve", `Chose C · Option C: recorded, the call accepted; ${after.nextStepWords()}`])
+    // the pick's line on its set, no Noted card (I153)
+    j1.querySelectorAll("epic-choices")[1]!.getAttribute("chosen-note"),
+    j1.querySelector("epic-status")
+  ]).toEqual(["done", "approve", `recorded, the call accepted;  ${after.nextStepWords()}`, null])
   expect(after.findItem("q1")!.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
   expect(printed.join("\n")).toContain("J1  picked C:  Option C (a reply's options);  approved:  closed (accepted)")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
@@ -476,7 +477,7 @@ test("status done on an issue (I148):  the card turns green AND the issue closes
   expect(printed).toEqual(["I1 underway:  it stays red", "I1 done, closed:  it stays red"])
 })
 
-test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, with a Noted card;  logged", async () => {
+test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, its line on the set;  logged", async () => {
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   const options = `<epic-choices><epic-option letter="A" title="Option A"></epic-option><epic-option letter="B" title="Option B"></epic-option></epic-choices>`
   plan.setDetails("j1", `<p>weighed</p>${options}`)
@@ -489,7 +490,8 @@ test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, w
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   const j1 = after.findItem("j1")!
   expect(j1.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
-  expect(j1.querySelector('epic-status[state="noted"]')!.textContent).toMatch(/^Chose B · Option B:\s+recorded after/)
+  expect(j1.querySelector("epic-choices")!.getAttribute("chosen-note")).toMatch(/^recorded after the talk/)
+  expect(j1.querySelector('epic-status[state="noted"]')).toBeNull()
   expect(after.toString()).toMatch(/J1 picked B:\s+Option B \(kept from the revisit\)/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })

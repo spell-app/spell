@@ -26,6 +26,21 @@ export const epicChoicesVocabulary = {
       kind: "string",
       format: "letter",
       description: "The chosen option's `letter`, once answered;  absent while the question is open."
+    },
+    {
+      name: "chosen-on",
+      kind: "string",
+      format: "date",
+      description:
+        "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown " +
+        "inside the unfolded Choices, with `chosen-note`."
+    },
+    {
+      name: "chosen-note",
+      kind: "string",
+      description:
+        "What recording the pick did, and what happens next:  `recorded as the answer;  waiting for a phase to take it " +
+        "up`.  Shown inside the unfolded Choices, so a pick needs no Noted card of its own (I153)."
     }
   ],
   events: [],
@@ -37,7 +52,12 @@ export const epicChoicesVocabulary = {
       name: "chosen",
       description: "Answered with an option chosen:  `✓ Chosen:  B · Bananas` in the toggle, green, folded or not."
     },
-    { name: "panels", description: "Answered:  the box of option panels, hidden while folded." }
+    { name: "panels", description: "Answered:  the box of option panels, hidden while folded." },
+    {
+      name: "note",
+      description:
+        "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
+    }
   ],
   states: [
     { name: "answered", description: "Its question is answered (`chosen`, or `answered` on its item):  folded." },
@@ -56,6 +76,17 @@ export const epicChoicesVocabulary = {
       key: "chosen",
       text: "Chosen:  {name}",
       description: "After the heading:  the chosen option, `{name}` its letter and title (`B · Bananas`)."
+    },
+    {
+      key: "chosenNote",
+      text: "Chosen {date}:  {note}",
+      description: "Atop the unfolded panels:  when the pick was recorded, `{date}`, and what happens next, `{note}`."
+    },
+    { key: "chosenOn", text: "Chosen {date}", description: "Atop the unfolded panels:  a pick with a day, no note." },
+    {
+      key: "chosenNoteOnly",
+      text: "Chosen:  {note}",
+      description: "Atop the unfolded panels:  a pick with a note, no day."
     }
   ],
   children: [{ tag: "epic-option", min: 1, description: "The options, `A`, `B` ..." }],

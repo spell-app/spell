@@ -217,6 +217,15 @@
     border-radius: 10px;
     background: var(--_epic-choices-card);
   }
+  /* the pick's line atop the panels:  when it was recorded, what happens next */
+  .pick-note {
+    margin: 0;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--_epic-choices-rule);
+    color: var(--_epic-choices-muted);
+    font-size: 0.9em;
+    line-height: 1.4;
+  }
   .panels[hidden] {
     display: block;
     content-visibility: hidden;

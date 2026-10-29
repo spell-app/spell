@@ -123,7 +123,11 @@
                   subclass on purpose.
                 </p></epic-question
               >
-              <epic-choices chosen="A">
+              <epic-choices
+                chosen="A"
+                chosen-on="2026-10-29"
+                chosen-note="recorded as the answer;  waiting for a phase to take it up"
+              >
                 <epic-option letter="A" title="Both, by kind" recommended
                   ><p>
                     Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).
@@ -241,6 +245,25 @@
                     <td>The chosen option's <code>letter</code>, once answered; absent while the question is open.</td>
                     <td></td>
                   </tr>
+                  <tr>
+                    <td><code>chosen-on</code></td>
+                    <td>date</td>
+                    <td>
+                      The day Owen's pick was recorded (<code>epic inbox apply</code>, <code>epic choose</code>, a
+                      revisit's pick kept); shown inside the unfolded Choices, with <code>chosen-note</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>chosen-note</code></td>
+                    <td>text</td>
+                    <td>
+                      What recording the pick did, and what happens next:
+                      <code>recorded as the answer; waiting for a phase to take it up</code>. Shown inside the unfolded
+                      Choices, so a pick needs no Noted card of its own (I153).
+                    </td>
+                    <td></td>
+                  </tr>
                 </tbody></table
             ></ui-table>
             <ui-section id="epic-choices-slots" label="Slots" sticky="stack" collapsible dividing open="false"
@@ -297,6 +320,13 @@
                     <tr>
                       <td><code>panels</code></td>
                       <td>Answered: the box of option panels, hidden while folded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>note</code></td>
+                      <td>
+                        Answered, with <code>chosen-on</code> or <code>chosen-note</code>: the pick's line atop the
+                        panels, <code>Chosen 10/29/26: ...</code>.
+                      </td>
                     </tr>
                   </tbody>
                 </table></ui-table

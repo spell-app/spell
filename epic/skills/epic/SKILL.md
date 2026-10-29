@@ -432,7 +432,7 @@ than just being able to move on").
    - Owen settles an item's options IN WORDS (a reply, the chat:  "require the parens"), not with the page's pick:
      `choose <name>#<id> <letter> "<outcome>"` right away, before or with building it.
      - It records it as his pick would:  that card set's `chosen`, the item green (a question answered, a call
-       closed;  an issue or todo only reviewed), a Noted card with the outcome.
+       closed;  an issue or todo only reviewed), the outcome on the set, shown in its Choices (no Noted card, I153).
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
    - A choice made WITHOUT Owen (he is away, or an agent decided):  `add <name>#J`.
      - Ids `J1` ...;  see `/bedtime`.
@@ -809,8 +809,8 @@ Every card you finish says what REALLY happened, one of three
 2026-10-26, epic `epic-engine` I148:  a fixed issue with two Done cards stayed red):
 - `status ... underway "<reading>"`:  you're on it.
 - `status ... noted "<what;  what happens next>"`:  a STEP done, the item NOT finished.
-  - his choice recorded ("B it is";  a todo made;  "do it next phase"):
-    `"Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build"`
+  - his choice recorded (a todo made;  "do it next phase"):  `"Queued for P9 · Build"`
+    - NOT a pick:  `choose` / `apply` record it inside the item's Choices, no card (I153)
   - an answer or reply written, details added, the item condensed:  `"Answered his note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
@@ -891,8 +891,8 @@ want you to just do it").
        issue linking the test
    - A pick works on ANY item's cards, a reply's too (I8 of `epic-components`):
      a question is answered with it, any other item approved with it.
-   - `apply` itself gives each pick, todo made and todo queued its outlined NOTED card;  an approval gets none (Q19):
-     - "Chose B · ...:  recorded ...;  waiting for ..."
+   - `apply` itself gives each todo made and todo queued its outlined NOTED card;  an approval gets none (Q19):
+     - a pick gets none either:  its line ("recorded ...;  waiting for ...") goes inside the item's Choices (I153)
      - "Made todo T23 ..."
      - "Queued for P10 · ..."
    - Then each "to talk over" (revisit soon), one at a time:
@@ -916,8 +916,8 @@ want you to just do it").
      - `status ... underway`, then answer the note about B.
      - Once he agrees (in words, a reply or the chat), record it yourself, on any item:
        `epic choose <name>#<id> B "Owen, <date>:  '<his words>'"`.
-     - Then `status ... noted "Chose B · ...:  recorded after the talk"`.
-     - `inbox clear` / `done` KEEP his pick as that set's `chosen` (with a Noted card), unless you decided otherwise.
+     - No Noted card for it:  `choose` writes the pick's line inside the item's Choices (I153).
+     - `inbox clear` / `done` KEEP his pick as that set's `chosen` (with its line), unless you decided otherwise.
        Once he picked, the card says Chosen.
    - The page counts this session as gone once its heartbeat is 90s old.
      - `wait` stamps it every 30s.

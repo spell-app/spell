@@ -1181,7 +1181,7 @@
         },
         {
           "name": "note",
-          "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 2026-10-29:  ...`."
+          "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
         }
       ],
       "states": [
