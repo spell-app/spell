@@ -2110,8 +2110,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
             one taken before:  "<epic> P<n>", at `#p<n>`
       - A green Done line once closed:  a check, "That's good." or "Skipped", the commit Claude named.
         A faint green ring, the same way.
-      - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in Claude's box.
-        - its words violet and italic, a turning `circle notch`, its time when he started
+      - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in a box of its own.
+        - the page's BLUE, Claude at work on it (the Underway card's, a phase's spinner;  epic `epic-engine` I169;
+          Owen, 2026-10-29:  "Seems like this should be blue?"):  a light blue box, a faint blue ring, its words blue and
+          italic, "Claude:" in the ink;  violet before, his voice's colour
+        - a turning `circle notch`, its time when he started
         - His answer takes its place.
         - Owen, 2026-10-10:
           "What does it look like when you're thinking?  You could put in a stub and replace that when you've thought".

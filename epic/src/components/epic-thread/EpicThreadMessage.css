@@ -8,8 +8,10 @@
  *   bordered (but keep spacing the same)").
  * - Claude's:  a light violet box, its outline only a faint ring drawn as a shadow, its border clear, so nothing
  *   moves ("lighten border around your replies, make it just border-as-shadow").
- * - The Done line:  green, a faint green ring, the same way.  The thinking stub:  Claude's box, his words violet and
- *   italic.
+ * - The Done line:  green, a faint green ring, the same way.
+ * - The thinking stub:  the page's BLUE, "Claude is working on it" (the status card's Underway, a phase's spinner):
+ *   a light blue box, a faint blue ring, its words blue and italic, "Claude:" in the ink (Owen, 2026-10-29, I169:
+ *   "Seems like this should be blue?";  violet before, his voice's colour, though nothing was said yet).
  * - Claude's latest reply on an orange thread (`latest`):  a stronger orange, a faint orange ring.
  * - Public tokens are never declared here:  it reads the page's (`--spell-*`, `--ui-*`), with fallbacks.
  */
@@ -19,6 +21,7 @@
 @layer ui.components.epic-thread-message {
   :host {
     --_epic-message-violet: var(--ui-violet, #6435c9);
+    --_epic-message-blue: var(--ui-blue-text, var(--ui-blue, #1a67e0));
     --_epic-message-green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_epic-message-orange: var(--ui-orange, #f2711c);
     --_epic-message-ink: var(--spell-ink, var(--ui-text-color, CanvasText));
@@ -38,15 +41,20 @@
   :host([older]) .words {
     color: color-mix(in srgb, var(--_epic-message-ink) 72%, var(--_epic-message-ivory));
   }
-  :host(:is([by="claude"], [by="thinking"])) {
+  :host([by="claude"]) {
     background: color-mix(in srgb, var(--_epic-message-violet) 9%, var(--_epic-message-paper));
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-violet) 16%, transparent);
   }
+  :host([by="thinking"]) {
+    background: color-mix(in srgb, var(--_epic-message-blue) 9%, var(--_epic-message-paper));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--_epic-message-blue) 22%, transparent);
+  }
   :host([by="thinking"]) .words {
-    color: var(--_epic-message-violet);
+    color: var(--_epic-message-blue);
     font-style: italic;
   }
   :host([by="thinking"]) .who {
+    color: var(--_epic-message-ink);
     font-style: normal;
   }
   :host([by="done"]) {
