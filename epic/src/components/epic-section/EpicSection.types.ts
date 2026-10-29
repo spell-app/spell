@@ -189,6 +189,17 @@ export const SECTION_LOOKS = {
   log: { icon: "clock rotate left", title: "logTitle" }
 } as const
 
+/**
+ * The section kinds that stay FOLDED:  every load starts them folded, and the page's expand-all leaves them so
+ * (`EpicSection.staysFolded`):  the Log.
+ * - Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log:  Should start out collapsed always, doesn't auto expand
+ *   with 'expand all'"
+ * - a link into it, its own title and its own expand-all still open it
+ * - SEE:  the docs runtime's `STAYS_FOLDED` (`spell-doc-helpers.js`), the same kinds as a selector:
+ *   it restores the folds before the components are defined
+ */
+export const STAYS_FOLDED_KINDS: readonly string[] = ["log"]
+
 /** A page section's look:  `SECTION_LOOKS`' values. */
 export type SectionLook = (typeof SECTION_LOOKS)[keyof typeof SECTION_LOOKS]
 

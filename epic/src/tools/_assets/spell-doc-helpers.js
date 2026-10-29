@@ -279,3 +279,28 @@ export function sectionNumber(section) {
 export function pagePath() {
   return decodeURIComponent(location.pathname).replace(/^.*\/(?=(?:guides|epics|templates|pages)\/)/, "")
 }
+
+/**
+ * An epic page's blocks that start FOLDED on every load, whatever the reader left them as:  the Log.
+ * - Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log:  Should start out collapsed always"
+ * - a link to it, or to an id inside it, still opens it (the block follows the address itself);  so does a click
+ * - the page's expand-all leaves it folded too:  `<epic-section>`'s `staysFolded`, the same kinds
+ *   (`STAYS_FOLDED_KINDS`, `EpicSection.types.ts`)
+ */
+export const STAYS_FOLDED = 'epic-section[kind="log"]'
+
+/**
+ * Open again the epic page blocks `blocks` the reader left open, before they first draw (their `open` attribute),
+ * so nothing animates;  the rest start folded, as the blocks do.
+ * - `saved`:  the page's saved folds (`{ [id]: folded }`, `spell-folds:<path>`)
+ * - `kept`:  after a live reload, every block and item open before it (`{ [id]: open }`), whoever opened it;
+ *   over `saved`
+ * - NEVER a block that stays folded (`STAYS_FOLDED`):  folded on every load
+ */
+export function restoreEpicFolds(blocks, { saved, kept }) {
+  for (const block of blocks) {
+    if (!block.id || block.matches(STAYS_FOLDED)) continue
+    if (kept && block.id in kept) block.toggleAttribute("open", kept[block.id])
+    else if (saved[block.id] === false) block.setAttribute("open", "")
+  }
+}

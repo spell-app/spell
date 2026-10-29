@@ -1341,7 +1341,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /** The toolbar's toggle-all, its last use:  everything opened. */
   @E.state accessor allOpen = false
 
-  /** The toolbar's expand-all:  every section, phase and item on the page opened (`expandAllUnder()`). */
+  /**
+   * The toolbar's expand-all:  every section, phase and item on the page opened (`expandAllUnder()`),
+   * but the Log, which stays folded (`EpicSection.staysFolded`).
+   */
   @E.untracked
   private expandAll() {
     expandAllUnder(this.domElement)

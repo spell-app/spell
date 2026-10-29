@@ -1224,6 +1224,9 @@ In `tools/`:
     - Its `<epic-*>` blocks start folded by themselves.
       - The runtime reopens the ones the reader left open, before they first draw (`restoreEpicFolds()`).
       - It saves their toggles as a section's.
+      - EXCEPT the Log, which starts folded on EVERY load, a live reload's too, and which the page's expand-all
+        leaves folded (`STAYS_FOLDED`, `EpicSection.staysFolded`;  Owen, 2026-10-29, epic `epic-engine` I155):
+        a link into it, a click and its own expand-all still open it.
     - Below the last line, a window's worth of empty ground (`--spell-doc-pad-end`, on `.spell-doc-main`):
       so folding near the page's end never leaves the page shorter than where it's scrolled to,
       and what was clicked stays put (Owen, 2026-10-10, `airplane` J10).
