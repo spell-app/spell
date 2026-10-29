@@ -131,10 +131,10 @@ describe("spell help", () => {
   })
 })
 
-describe("every repo's commands, under one name (epic repo-split P13)", () => {
-  test("help lists each installed repo's commands under its name:  the language's, and the app's under app", () => {
+describe("every folder's commands, under one name (epic repo-split P13)", () => {
+  test("help lists each folder's commands under its name:  the language's, and the app's under app", () => {
     const { stdout } = spell(["help"])
-    for (const repo of ["spell", "spell-parser", "spell-app"]) expect(stdout).toMatch(new RegExp(`^${repo}:$`, "m"))
+    for (const folder of ["spell", "parser", "app"]) expect(stdout).toMatch(new RegExp(`^${folder}:$`, "m"))
     for (const command of ["lint", "speedtest", "app", "projects"])
       expect(stdout).toMatch(new RegExp(`^ {2}${command} `, "m"))
     expect(spell(["help", "app"]).stdout).toMatch(/^ {2}create \[options\] <name>/m)
