@@ -55,7 +55,6 @@ import {
   type StateFilterEntry
 } from "./EpicSection.types"
 
-import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inline"
 import foldCSS from "./EpicFold.css?inline"
 import sectionCSS from "./EpicSection.css?inline"
 import runsPageCSS from "./EpicSection.runs.css?inline"
@@ -176,7 +175,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     styleSheets: {
       "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
-      "epic-collapse-all": collapseAllCSS,
       "epic-state-chips": chipsCSS,
       "epic-section": sectionCSS
     }
@@ -249,7 +247,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * It stays FOLDED (the Log, `STAYS_FOLDED_KINDS`):  the page's expand-all leaves it folded (`expandAllUnder()`),
    * and every load starts it folded (the docs runtime's `STAYS_FOLDED`).
-   * - a link into it, a click on its title and its own expand-all still open it
+   * - a link into it, a click on its title and ⌥-click on its own chevron still open it
    */
   get staysFolded(): boolean {
     return STAYS_FOLDED_KINDS.includes(this.kind ?? "")

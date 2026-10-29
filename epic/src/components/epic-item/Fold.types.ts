@@ -4,7 +4,7 @@
  * - Who has one:  `<epic-section>`, `<epic-overview>`, `<epic-phase>`, `<epic-item>`, `<epic-aside>`, `<epic-code>`,
  *   `<epic-update>` (drawn as a block)
  * - Where its buttons go:  after the title, BEFORE the element's own buttons
- *   (the fold chevron, collapse-all, review pills, the state chips, the date)
+ *   (the fold chevron, review pills, the state chips, the date)
  * - A click on one never folds or unfolds the element (`CONTROLS`, in `Fold.tsx`).
  * - The docs runtime puts a block's bullhorn there too (`spell-doc-runtime.js`, `addBullhorn()`).
  * - Data only:  vocabularies import it, so nothing here runs, and nothing is imported.

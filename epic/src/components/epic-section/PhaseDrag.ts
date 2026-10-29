@@ -8,7 +8,7 @@ import { E } from "spell/ui/core"
  *   body, and a phase's body is prose
  * - a press on the title row (the fold button, the title, its badge) that MOVES 6px starts the drag;  a press that
  *   doesn't stays a click and folds as before;  after a drag the click that follows is swallowed, so it doesn't fold
- * - never from the row's buttons (the review pills, the collapse-all), a link, or anything typed in
+ * - never from the row's buttons (the review pills, the state chips), a link, or anything typed in
  * - while dragging:  a line on the phase it would land before or after (`data-drop`), only where the tool would let it
  *   go (every phase between its place and the new one still to do:  `PlanDoc.movePhase()`);  Escape calls it off
  * - a drop moves the phase AT ONCE, on the page, and hands `move(id, to)` its new place (1-based):  a mark that waits for
@@ -112,11 +112,14 @@ export class PhaseDrag {
   // ## The drag
   ////////////////
 
-  /** The drag starts:  the phase marked as dragged, the section as dragging (no text selection). */
+  /**
+   * The drag starts:  the phase marked as dragged, the section as dragging (no text selection), and every phase too,
+   * so its title row shows the grabbing cursor over its own (`EpicPhase.css`)
+   */
   private begin(phase: Element) {
     this.drag = { phase, from: this.phases.indexOf(phase) + 1 }
     phase.setAttribute(DRAGGED, "")
-    this.host.setAttribute(DRAGGING, "")
+    for (const each of [this.host, ...this.phases]) each.setAttribute(DRAGGING, "")
   }
 
   /** The pointer is at `y`:  where it would land, drawn as a line on that phase (`data-drop`);  none where it can't. */
@@ -162,7 +165,7 @@ export class PhaseDrag {
   /** The drag is over:  its marks off the page. */
   end() {
     this.drag?.phase.removeAttribute(DRAGGED)
-    this.host.removeAttribute(DRAGGING)
+    for (const each of [this.host, ...this.phases]) each.removeAttribute(DRAGGING)
     for (const phase of this.host.querySelectorAll(`[${DROP}]`)) phase.removeAttribute(DROP)
     this.drag = undefined
   }
@@ -184,7 +187,7 @@ export class PhaseDrag {
 
   /**
    * The phase whose TITLE ROW `event` pressed, one of `host`'s own;  `undefined` for anything else:  its body, or one
-   * of the row's controls (the review pills, a link, the collapse-all), which keep their clicks.
+   * of the row's controls (the review pills, a link), which keep their clicks.
    */
   static phaseFrom(event: Event, host: Element): Element | undefined {
     const path = event.composedPath() as Element[]
@@ -228,7 +231,7 @@ const PHASE_TAG = "epic-phase"
 /** On the phase being dragged. */
 export const DRAGGED = "data-dragged"
 
-/** On the section while a phase is dragged:  no text selection, the grabbing cursor. */
+/** On the section and its phases while a phase is dragged:  no text selection, the grabbing cursor. */
 export const DRAGGING = "data-dragging"
 
 /** On the phase a drop would land beside:  `before` or `after` (the line's side). */

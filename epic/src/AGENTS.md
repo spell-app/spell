@@ -97,9 +97,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a section's badge and tools stay beside its title while the title fits on one line beside them;  only when it
         doesn't (the side bar, a phone) do they wrap, together, onto a row of their own at its end (epic `epic-engine`
         I149:  under 480px they always did before)
-      - collapse-all still shows only while open, before the chevron, as it did:  it moves the buttons before it
-      - expand-all (a fold's:  the Overview, a section, a phase;  Owen, 2026-10-20) shows folded or open, just before
-        collapse-all:  it opens the block and everything in it, cards too, parts loading as they open (`expandAll()`)
+      - no expand-all or collapse-all button in a title row (epic `epic-engine` I161;  Owen, 2026-10-29:  "combine the
+        'expand/collapse all' with the normal disclosure triangle -- holding down option is 'expand all'"):
+        - ⌥-click (Alt-click) on any fold's chevron or title, or ⌥+Enter / ⌥+Space on its focused chevron, opens it and
+          everything in it, cards too, parts loading as they open (`expandAll()`);  on an open one, folds everything
+          in it, then itself (`Fold.toggleFrom()`, `EpicFold.toggleDeep()`)
+        - every chevron's tooltip ends with what ⌥-click does (`DEEP_TIPS`;  `<ui-section>`'s `toggleTipMore`)
+        - the Log stays folded under it, as under the page's expand-all (`staysFolded`, I155)
+        - the page toolbar keeps its one toggle-all (`Fold.toggleAllButton()`):  it has no chevron to hold
+      - its cursors (I161;  Owen:  "pointer when over content in these headers, drag cursor when over whitespace"):
+        the fold button is only as wide as its chevron, icon and title;  the pointer over those, the badge and the
+        buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`), but the grab
+        cursor on a to-do phase while the page is reviewed (`PhaseDrag`), grabbing while one is dragged
       - CSS and the elements' own drawing only:  the page's markup is unchanged, so no migration step
       - NOT `<ui-section>` on guides:  at phone width a title there still runs on under its buttons,
         fading out (`spell-doc.css`;  Owen, 2026-10-10:  "stay in place and overlap")

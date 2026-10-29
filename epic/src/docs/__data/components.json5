@@ -3371,10 +3371,6 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "toggle-all",
-          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
-        },
-        {
           "name": "note",
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
@@ -3428,16 +3424,6 @@
           "key": "partError",
           "text": "Couldn't load {source}.",
           "description": "Its part couldn't be loaded."
-        },
-        {
-          "key": "expandAll",
-          "text": "Open everything in {name}",
-          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Fold everything in {name}",
-          "description": "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
         },
         {
           "key": "title",
@@ -4298,10 +4284,6 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "toggle-all",
-          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
-        },
-        {
           "name": "note",
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
@@ -4366,16 +4348,6 @@
           "key": "partError",
           "text": "Couldn't load {source}.",
           "description": "Its part couldn't be loaded."
-        },
-        {
-          "key": "expandAll",
-          "text": "Open everything in {name}",
-          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Fold everything in {name}",
-          "description": "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
         },
         {
           "key": "statusTodo",
@@ -5185,10 +5157,6 @@
           "description": "Around its children:  sets `--epic-stack` for them."
         },
         {
-          "name": "toggle-all",
-          "description": "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds everything inside again."
-        },
-        {
           "name": "note",
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
@@ -5265,16 +5233,6 @@
           "key": "partError",
           "text": "Couldn't load {source}.",
           "description": "Its part couldn't be loaded."
-        },
-        {
-          "key": "expandAll",
-          "text": "Open everything in {name}",
-          "description": "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Fold everything in {name}",
-          "description": "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
         },
         {
           "key": "epicsTitle",

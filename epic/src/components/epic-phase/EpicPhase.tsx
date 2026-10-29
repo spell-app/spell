@@ -16,7 +16,6 @@ import { DOC_REVIEW, type ContentsEntry } from "spell/epic/components/epic-secti
 import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
 
-import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inline"
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
 import phaseCSS from "./EpicPhase.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
@@ -65,7 +64,6 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     styleSheets: {
       "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
-      "epic-collapse-all": collapseAllCSS,
       "epic-phase": phaseCSS
     }
   } satisfies Partial<E.ElementSetup>
@@ -244,7 +242,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
       ),
       // its time pill (the estimate, or what a done phase took) just BEFORE the review controls (Owen, 2026-10-25:
       // "time moved to the right, I preferred it to the left so the buttons lined up row to row";  I123 had it after
-      // them), in the tools:  the review buttons end at one right edge on every row, the toggle-all after them
+      // them), in the tools:  the review buttons end at one right edge on every row
       tools: () => (
         <>
           <Show when={this.timeShown}>

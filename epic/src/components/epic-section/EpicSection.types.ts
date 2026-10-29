@@ -63,13 +63,6 @@ export const FOLD_PARTS = [
     description: "The `<ui-section>` drawing the title bar and fold:  its own parts through `::part()` from inside."
   },
   { name: "body", description: "Around its children:  sets `--epic-stack` for them." },
-  {
-    name: "toggle-all",
-    description:
-      "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside " +
-      "it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds " +
-      "everything inside again."
-  },
   { name: "note", description: "The `Loads from parts/x.html ...` line, when its part can't load." }
 ] as const
 
@@ -87,17 +80,7 @@ export const FOLD_TEXTS = [
     text: "Loads from {source} when opened (needs the page server).",
     description: "Its part can't load:  the page was opened from disk."
   },
-  { key: "partError", text: "Couldn't load {source}.", description: "Its part couldn't be loaded." },
-  {
-    key: "expandAll",
-    text: "Open everything in {name}",
-    description: "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
-  },
-  {
-    key: "collapseAll",
-    text: "Fold everything in {name}",
-    description: "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
-  }
+  { key: "partError", text: "Couldn't load {source}.", description: "Its part couldn't be loaded." }
 ] as const
 
 ////////////////
@@ -116,6 +99,8 @@ export type SectionStack = {
   readonly stickTop: number
   /** where titles inside it stick:  below its own, px from the viewport's top */
   readonly innerStackTop: number
+  /** its fold button's tooltip's last line:  what ⌥-click does (`EpicFold.onTipShown()`) */
+  toggleTipMore: string | undefined
 }
 
 /** `detail` of a folding element's `ui-opening` / `ui-closing`. */
@@ -194,7 +179,7 @@ export const SECTION_LOOKS = {
  * (`EpicSection.staysFolded`):  the Log.
  * - Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log:  Should start out collapsed always, doesn't auto expand
  *   with 'expand all'"
- * - a link into it, its own title and its own expand-all still open it
+ * - a link into it, its own title and ⌥-click on its own chevron still open it
  * - SEE:  the docs runtime's `STAYS_FOLDED` (`spell-doc-helpers.js`), the same kinds as a selector:
  *   it restores the folds before the components are defined
  */
