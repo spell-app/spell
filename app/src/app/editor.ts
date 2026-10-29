@@ -851,13 +851,14 @@ export class EditorStore extends Observable {
 
   /**
    * `file` was edited in its Monaco model, and has taken the text -- see `SpellModels`.
-   * - Compiles 2 seconds after input settles, if it's in the project we're showing.
+   * - Compiles `EDIT_COMPILE_DELAY` seconds after input settles, if it's in the project we're showing;
+   *   Cmd / Ctrl+Enter compiles at once (`onInputDidMount()`).
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {
     editor.keepEdit(file)
     // by path:  cheap, and the same however the project was reached
-    if (file.project.path === editor.project?.path) editor.compileAppSoon(2)
+    if (file.project.path === editor.project?.path) editor.compileAppSoon(EDIT_COMPILE_DELAY)
   }
 
   /**
@@ -928,6 +929,11 @@ let loadingRuntime: Promise<SpellRuntime> | undefined
 let appRoot: HTMLElement | undefined
 /** Scope explorer on the in-page language service, once Monaco's loaded -- NOT spell state.  See `editor.setScopeExplorer()`. */
 let scopeExplorer: LSP.ScopeExplorer | undefined
+/**
+ * Seconds after typing stops before the running app recompiles (Owen, 2026-10-29:  "change refresh page to 10 seconds";
+ * it was 2).  Cmd / Ctrl+Enter compiles at once.
+ */
+const EDIT_COMPILE_DELAY = 10
 /** Projects imported compiled that `refreshScopes()` has parsed:  once each. */
 const parsedImports = new WeakSet<SP.SpellProject>()
 
