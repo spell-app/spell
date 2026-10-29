@@ -30,3 +30,6 @@ process.env.SPELL_EPIC_AGENT = TEST_AGENT
 // and Codex's folders (`CodexHome`):  its hooks file and agents, and the skills it lists, never the machine's
 process.env.CODEX_HOME = join(home, "codex")
 process.env.SPELL_EPIC_AGENTS_HOME = join(home, "agents")
+// and the editor named (`Editor`, epic `epic-friend` P16):  VS Code, whichever editor's terminal runs the tests, so
+// what a test prints never depends on it;  a test of `Editor` hands in its own environment
+process.env.SPELL_EPIC_EDITOR = "code"

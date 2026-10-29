@@ -24,6 +24,7 @@ import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { CodexHome } from "spell/epic/config/CodexHome"
+import { Editor } from "spell/epic/config/Editor"
 
 const top = realpathSync(mkdtempSync(join(tmpdir(), "plugin-install-")))
 const home = join(top, "claude")
@@ -207,7 +208,9 @@ describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
   test("Windows:  epic.cmd runs bin/epic with node, no file link;  run again, nothing", () => {
     const windows = () => new PluginInstall({ home, kit, bin, now: () => NOW, platform: "win32", code: () => "" })
     const report = windows().install()
-    expect(readFileSync(join(bin, "epic.cmd"), "utf8")).toBe(`@echo off\r\nnode "${join(engine, "bin", "epic")}" %*\r\n`)
+    expect(readFileSync(join(bin, "epic.cmd"), "utf8")).toBe(
+      `@echo off\r\nnode "${join(engine, "bin", "epic")}" %*\r\n`
+    )
     expect(existsSync(join(bin, "epic"))).toBe(false)
     expect(report.changes.some((line) => line.startsWith(`PATH:  ${join(bin, "epic.cmd")} runs`))).toBe(true)
     expect(windows().install().changes).toEqual([])
@@ -216,13 +219,17 @@ describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
   test("the extension:  installed from vscode/spell-epic.vsix unless VS Code has that version;  no code:  said", () => {
     const vscode = join(engine, "vscode")
     mkdirSync(vscode, { recursive: true })
-    writeFileSync(join(vscode, "package.json"), '{ "publisher": "spell-app", "name": "spell-epic", "version": "0.2.0" }')
+    writeFileSync(
+      join(vscode, "package.json"),
+      '{ "publisher": "spell-app", "name": "spell-epic", "version": "0.2.0" }'
+    )
     writeFileSync(join(vscode, "spell-epic.vsix"), "")
     try {
       const calls: string[][] = []
       let listed = "spell-app.spell-epic@0.1.0\n"
       const code = (args: string[]) => (calls.push(args), args[0] === "--list-extensions" ? listed : "")
-      const withCode = (run: (args: string[]) => string | undefined = code) => new PluginInstall({ home, kit, bin, now: () => NOW, code: run })
+      const withCode = (run: (args: string[]) => string | undefined = code, editor = new Editor("code")) =>
+        new PluginInstall({ home, kit, bin, now: () => NOW, editor, code: run })
       expect(withCode().install().changes.at(-1)).toBe(
         "VS Code:  extension spell-app.spell-epic 0.2.0 installed;  then:  Developer:  Reload Window"
       )
@@ -231,6 +238,14 @@ describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
       expect(withCode().install().changes).toEqual([])
       expect(withCode(() => undefined).install().changes).toEqual([
         `VS Code:  no code command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in VS Code:  Install from VSIX...`
+      ])
+      // into Cursor when it's the editor (P16):  the same flags, its own name and command in what's said
+      listed = "spell-app.spell-epic@0.1.0\n"
+      expect(withCode(code, new Editor("cursor")).install().changes.at(-1)).toBe(
+        "Cursor:  extension spell-app.spell-epic 0.2.0 installed;  then:  Developer:  Reload Window"
+      )
+      expect(withCode(() => undefined, new Editor("cursor")).install().changes).toEqual([
+        `Cursor:  no cursor command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in Cursor:  Install from VSIX...`
       ])
     } finally {
       rmSync(vscode, { recursive: true, force: true })

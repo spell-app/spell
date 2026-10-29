@@ -47,7 +47,7 @@ Three things to know before you start:
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
   The skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
-  in VS Code, on macOS, Linux or Windows (Windows and Linux not yet tried by a person).
+  in VS Code or Cursor, on macOS, Linux or Windows (Cursor, Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](#with-codex).
 - **It has run end to end outside Spell once**, in a throwaway repo:
@@ -286,12 +286,18 @@ epic ... (...) .../epic
 
 ### And the extension
 
-The Review tab, where you mark up a page, and the moves between windows need Spell's VS Code extension.
+The Review tab, where you mark up a page, and the moves between windows need Spell's VS Code extension:
+the same one in VS Code or Cursor, which runs VS Code's extensions.
 No script installs it:
 three commands and a reload, in [the extension's README](epic/README-vscode.md#install-it--three-commands-and-a-reload).
 - build it in the clone's `epic/vscode/` folder
 - install the `.vsix`
 - reload your windows
+
+In Cursor, the epic tools use `cursor` where VS Code's take `code`:  they tell from the window they run in.
+- Say it outright with `editor` in `.epic/config.json5` (below), or for one machine `SPELL_EPIC_EDITOR=cursor`.
+- Cursor keeps its right side bar for its own agent, so the Review tab may not show there:
+  open it with **View: Open View...** › Review, then drag it where you want it (or **View: Move View**).
 
 Then, in a Claude Code session in your repo, `/epic <name> <what to plan>`:
 
@@ -594,6 +600,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `linkSessionFolders` | `true` | whether each worktree's saved Claude sessions show in every window's Claude panel |
 | `sharedFolders` | `epics`, `sagas`, `guides`, `pages` | the content folders each checkout links in at its root |
 | `colors` | not written:  none | a colour for each person (by the short name `epic whoami` prints) and each agent (`codex`) on the epic pages, `{ people: { ana: "green" }, agents: { codex: "#0f8b8d" } }`:  a Spell UI colour name (red, orange, yellow, olive, green, teal, blue, violet, purple, pink, brown, grey, black), drawn from the theme so it suits light and dark, or any CSS colour;  their replies and comment-thread messages draw in it, an agent's words in the agent's;  anyone left out keeps the shared person or agent colour |
+| `editor` | not written:  `""` | the editor the tools drive, `code` (VS Code) or `cursor`, when neither this machine (`SPELL_EPIC_EDITOR`) nor the window they run in says;  `""`:  VS Code |
 | `engineFolder` | `""` | an engine checkout to link in at each checkout's root, for a repo whose own code imports the engine;  `""`:  none |
 | `repoTemplates` | `""` | the repo's own page templates, a folder from each checkout's root;  `""`:  only the engine's |
 | `app.path` | not written:  a comment shows how | the repo's APP:  its address on the epic server, `/editor/`, the top bar's App tab |
@@ -748,7 +755,10 @@ What you'd trip on today, roughly in the order you'd meet it.
    The skills run in Codex too, but five stay Claude Code's, and so do waking a session from the page, session
    titles and window moves ([With Codex](#with-codex));  any other agent follows `epic guide`.
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
-7. **VS Code, tried only on macOS.**
+7. **VS Code or Cursor, tried only on macOS, and Cursor only from its command line.**
+   Cursor takes VS Code's command-line flags, so the tools run `cursor` where they'd run `code`
+   (`--install-extension` checked against a scratch profile, Cursor 3.22);
+   its windows, the Review tab's place and Claude Code's panel in it haven't been tried by a person yet.
    Linux and Windows have their own way of listing processes, linking folders and reading a pasted picture
    (`wl-paste` or `xclip` on Linux, PowerShell on Windows), but no person has run them there yet.
    - Windows:  a session's window can't be told from its process (Windows doesn't say which files a process has open),
@@ -782,6 +792,7 @@ every comment seen by the team and answered by its writer's own agent, Claude Co
 **Not yet:**
 - `npx spell@next epic init` itself, until the next `spell@next` is published:  a clone runs it today
 - the VS Code extension without a clone
+- Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the shared repo by hand
 - two repos reviewed from one server

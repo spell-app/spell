@@ -11,6 +11,7 @@ In Codex:  each step that needs a Claude Code tool says what Codex does instead,
 
 A DETAILS PAGE:  a small page that explains one decision.
 - It shows in the "Review" view:  VS Code's right side bar, beside "Epic Docs", where the person answers things.
+  - In Cursor:  the same view, wherever the person put it (**View: Open View...** › Review).
 - The person picks on the page, and clicks Send.
 - The page server writes their answer beside the page,
   and a waiter running in the background exits with it, which wakes this session.

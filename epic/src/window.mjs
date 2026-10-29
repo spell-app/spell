@@ -199,6 +199,7 @@ import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
+import { Editor } from "spell/epic/config/Editor.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
@@ -670,7 +671,7 @@ export class Window {
   }
 
   /**
-   * `open`:  (re)write worktree `name`'s window file and open it with `code`;  returns `{ file, colors }`.
+   * `open`:  (re)write worktree `name`'s window file and open it with the editor's command (`code`, `cursor`:  `Editor`);  returns `{ file, colors }`.
    * - `noOpen` (`open <name> --no-open`):  write the file only, its colours in it, and never run `code`
    *   - for a window opened later by hand, and a check that changes nothing on the screen (epic `epic-eject` P9)
    * - already open:  VS Code focuses that window
@@ -702,8 +703,9 @@ export class Window {
     delete workspace.settings["workbench.colorCustomizations"]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
     // by its real path:  VS Code resolves the file's relative folders from the path it's opened by, links not followed
-    const run = Processes.run("code", [real(file)], { env: codeEnv() })
-    if (run.status !== 0) throw new Error(`\`code ${file}\` failed:  ${run.stderr || run.error?.message}`)
+    const editor = CONFIG.editor
+    const run = editor.run([real(file)], { env: codeEnv() })
+    if (run.status !== 0) throw new Error(`\`${editor.command} ${file}\` failed:  ${run.stderr || run.error?.message}`)
     return { file, colors }
   }
 
@@ -928,7 +930,7 @@ export class Window {
   /**
    * `resume`:  carry out `handoff` (a record);  returns what happened.
    * - `titles`:  the labels the session's tab may show (one string or several, in order)
-   * - opens window `to` (`code`, which just focuses it when open) and waits up to `WINDOW_START_TIMEOUT` for it
+   * - opens window `to` (the editor's command, `code` or `cursor`, which just focuses it when open) and waits up to `WINDOW_START_TIMEOUT` for it
    * - opens the session there (its `prompt` typed in), then its `show` doc beside it, then closes its tab
    *   (`close: "tab"`, by `titles`) or the whole window (`"window"`) in window `from`
    * - `from` gone, or no title for a tab:  closes nothing;  `matches`:  how many tabs showed each title
@@ -938,7 +940,7 @@ export class Window {
     const { sessionId, to, from, close, remove, show, prompt } = handoff
     titles = [titles ?? []].flat().filter(Boolean)
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error(`bad session id '${sessionId}'`)
-    if (!Window.windowOf(to)) Processes.run("code", [real(to)], { env: codeEnv() })
+    if (!Window.windowOf(to)) CONFIG.editor.run([real(to)], { env: codeEnv() })
     const window = await Window.waitFor(to)
     await Window.request("open-session", prompt ? { sessionId, prompt } : { sessionId }, window)
     let shown
@@ -987,13 +989,13 @@ export class Window {
   }
 
   /**
-   * Whether this process runs in VS Code:
-   * a session in the Claude Code extension, or anything in VS Code's integrated terminal.
+   * Whether this process runs in VS Code, or Cursor (epic `epic-friend` P16:  the same extensions, its own marks):
+   * a session in the Claude Code extension, or anything in the editor's integrated terminal.
    * - NOT whether a VS Code window is open:  a CLI session in another terminal is "not in VS Code", even with the
    *   repo open in a window, so its docs go to the browser
    */
   static get inVSCode() {
-    return process.env.CLAUDE_CODE_ENTRYPOINT === "claude-vscode" || process.env.TERM_PROGRAM === "vscode"
+    return process.env.CLAUDE_CODE_ENTRYPOINT === "claude-vscode" || Editor.ofWindow() !== undefined
   }
 
   /**
@@ -1877,7 +1879,6 @@ function isAncestor(ancestor, pid, processes) {
   }
   return false
 }
-
 
 /** The worktree `cwd` is in (`.../.claude/worktrees/<name>/...`:  `EpicConfig.worktreeNameOf()`), else `null`. */
 export function worktreeOf(cwd) {

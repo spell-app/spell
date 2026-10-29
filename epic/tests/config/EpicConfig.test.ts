@@ -70,6 +70,7 @@ describe("EpicConfig", () => {
       "pageVoices.epic-page": "code",
       checkoutPatches: "",
       promptAck: true,
+      editor: "code",
       renamedRepos: "{}",
       colors: '{"people":{},"agents":{}}',
       peers: "",
@@ -359,6 +360,14 @@ describe("EpicConfig", () => {
       /x\.json5's "colors" must be .* each a Spell UI colour name \(red, orange, .*black\) or a CSS colour/
     )
     expect(() => EpicConfig.settingsFrom('{ colors: ["teal"] }', "x.json5")).toThrow(TypeError)
+  })
+
+  test("editor (epic `epic-friend` P16):  code or cursor, any case;  none by default;  refuses any other", () => {
+    expect(EpicConfig.settingsFrom("").editor).toBe("")
+    expect(EpicConfig.settingsFrom('{ editor: "Cursor" }').editor).toBe("cursor")
+    expect(() => EpicConfig.settingsFrom('{ editor: "zed" }', "x.json5")).toThrow(
+      /x\.json5's "editor" must be one of code, cursor/
+    )
   })
 
   test("renamedRepos (epic-engine I150):  old repo addresses to new;  none by default;  refuses anything else", () => {

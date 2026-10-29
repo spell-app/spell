@@ -19,6 +19,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
   - That's the checkbox icon;  never the "Epic Docs" tab, the book (Owen's rule, 2026-10-07).
+  - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
+    **View: Open View...** › Review finds it;  epic `epic-friend` P16).
 
 - Shared content:  the epic page lives in `epics/`, which the repo doesn't track (epic `shared-content`, 2026-10-04).
   - In every checkout, `epics/` is a link into ONE shared repo, the content folder (`epic config contentFolder`).
@@ -281,6 +283,7 @@ All in the FIRST turn, in this order, then the turn ends.
    - It shows in the right side bar's Review tab (the checkbox icon) of the window the session moves to,
      once it has:  one tab, reloaded on every later `open`.
    - Needs spell-epic's VS Code extension ([its README](${CLAUDE_PLUGIN_ROOT}/README-vscode.md)).
+   - In Cursor:  the same extension and view;  if the person can't see it, point them at **View: Open View...** › Review.
    - MUST print "... shows in ... once this session moves there".
      Why:  only a PENDING move defers it;  before the handoff, it shows in THIS window's side bar, the one being left.
 6. Isolate "Start", step 6:  END THE TURN.

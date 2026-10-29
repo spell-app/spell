@@ -16,10 +16,10 @@ import { dirname, join, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
 import { Links } from "spell/server/Links"
-import { Processes } from "spell/server/Processes"
 import { CLI } from "spell/cli"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { CodexHome, EPIC_HOOK, PLUGIN_HOOK_FLAG } from "spell/epic/config/CodexHome"
+import { Editor } from "spell/epic/config/Editor"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { SessionMoves } from "./SessionMoves"
@@ -99,7 +99,9 @@ export class PluginInstall {
   readonly engine: string
   /** the system it installs on:  links and `epic`'s place on the `PATH` differ on Windows */
   readonly platform: NodeJS.Platform
-  /** runs VS Code's `code` command:  its output, or `undefined` when it can't run or fails */
+  /** the editor the extension goes into, VS Code or Cursor (`Editor`, epic `epic-friend` P16) */
+  readonly editor: Editor
+  /** runs the editor's command (`code`, `cursor`):  its output, or `undefined` when it can't run or fails */
   readonly code: (args: string[]) => string | undefined
 
   constructor({
@@ -110,7 +112,8 @@ export class PluginInstall {
     codexHome = CodexHome.home(),
     agentsHome = CodexHome.agentsHome(),
     platform = process.platform,
-    code = runCode
+    editor = Editor.of(),
+    code = (args) => runEditor(editor, args)
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
@@ -120,6 +123,7 @@ export class PluginInstall {
     this.agentsHome = agentsHome
     this.engine = PluginInstall.pluginFolder(kit)
     this.platform = platform
+    this.editor = editor
     this.code = code
   }
 
@@ -587,10 +591,11 @@ export class PluginInstall {
 
   /**
    * Step 7:  the epic VS Code extension (its Review tab, the window moves), from the plugin's
-   * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when VS Code has
+   * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when the editor has
    * that version already.
+   * - into the editor `Editor` names (P16):  VS Code, or Cursor (`cursor --install-extension`, the same flags)
    * - no `.vsix` (a checkout that hasn't built one:  `yarn vscode:package`):  nothing, and no change said
-   * - no `code` command:  one line saying so
+   * - no editor command (`code`, `cursor`):  one line saying so
    */
   private extension(step: Step): void {
     const folder = join(this.engine, "vscode")
@@ -598,17 +603,22 @@ export class PluginInstall {
     if (!existsSync(vsix) || !existsSync(join(folder, "package.json"))) return
     const { publisher, name, version } = readJson(join(folder, "package.json")) as Record<string, string>
     const id = `${publisher}.${name}`
+    const { name: editorName, command } = this.editor
     const listed = this.code(["--list-extensions", "--show-versions"])
     if (listed === undefined) {
-      step.change(`VS Code:  no code command, so ${vsix} isn't installed;  in VS Code:  Install from VSIX...`)
+      step.change(
+        `${editorName}:  no ${command} command, so ${vsix} isn't installed;  in ${editorName}:  Install from VSIX...`
+      )
       return
     }
     if (listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())) return
     if (!step.dryRun && this.code(["--install-extension", vsix, "--force"]) === undefined) {
-      step.change(`VS Code:  \`code --install-extension ${vsix}\` failed;  in VS Code:  Install from VSIX...`)
+      step.change(
+        `${editorName}:  \`${command} --install-extension ${vsix}\` failed;  in ${editorName}:  Install from VSIX...`
+      )
       return
     }
-    step.change(`VS Code:  extension ${id} ${version} installed;  then:  Developer:  Reload Window`)
+    step.change(`${editorName}:  extension ${id} ${version} installed;  then:  Developer:  Reload Window`)
   }
 
   /**
@@ -646,7 +656,9 @@ export type PluginInstallProps = {
   agentsHome?: string
   /** the system to install on;  default `process.platform` */
   platform?: NodeJS.Platform
-  /** runs VS Code's `code` command;  default the real one (`Processes.run()`), a test hands in a stand-in */
+  /** the editor the extension goes into;  default `Editor.of()`:  this machine's, else the window's, else VS Code */
+  editor?: Editor
+  /** runs the editor's command;  default the real one (`Editor.run()`), a test hands in a stand-in */
   code?: (args: string[]) => string | undefined
 }
 
@@ -751,9 +763,9 @@ function sourceName(source: MarketplaceSource): string {
   return source.source === "directory" ? source.path : `github:${source.repo}`
 }
 
-/** VS Code's `code` command run with `args`:  its output, or `undefined` when it can't run or fails. */
-function runCode(args: string[]): string | undefined {
-  const run = Processes.run("code", args)
+/** `editor`'s command (`code`, `cursor`) run with `args`:  its output, or `undefined` when it can't run or fails. */
+function runEditor(editor: Editor, args: string[]): string | undefined {
+  const run = editor.run(args)
   return run.status === 0 ? run.stdout : undefined
 }
 

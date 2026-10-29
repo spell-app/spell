@@ -175,6 +175,8 @@ export class Sessions {
    * `open <key>`:  open the one session whose id starts with `key` (else whose title is exactly `key`).
    * - one transcript copied into two project folders is one session
    * - a session running in a terminal or Desktop is refused:  the panel can't take it over
+   * - in the editor the tools drive (`EpicConfig.editor`, epic `epic-friend` P16):
+   *   `cursor --open-url cursor://...` in Cursor
    */
   private open(key: string): number {
     if (!key) throw new EpicCommandError("open:  which session?")
@@ -191,9 +193,12 @@ export class Sessions {
       throw new EpicCommandError(`open:  ${hit.id.slice(0, 8)} is running in the ${place}, not VS Code`, EXIT.ERRORS)
     }
     const target = Sessions.windowOf(live ? live.pid : Sessions.thisPid())
-    const url = `vscode://anthropic.claude-code/open?session=${hit.id}${target === undefined ? "" : `&windowId=${target}`}`
-    const run = SRV.Processes.run("code", ["--open-url", url], { stdio: "inherit" })
-    if (run.status !== 0) throw new EpicCommandError("open:  `code --open-url` failed", EXIT.ERRORS)
+    const editor = EpicConfig.of(Git.mainRoot()).editor
+    const url = editor.url(
+      `anthropic.claude-code/open?session=${hit.id}${target === undefined ? "" : `&windowId=${target}`}`
+    )
+    const run = editor.run(["--open-url", url], { stdio: "inherit" })
+    if (run.status !== 0) throw new EpicCommandError(`open:  \`${editor.command} --open-url\` failed`, EXIT.ERRORS)
     CLI.out(`opened ${hit.id.slice(0, 8)} "${hit.title}" in window ${target ?? "?"}${live ? " (where it runs)" : ""}`)
     return EXIT.OK
   }
@@ -750,7 +755,6 @@ function readJSON(path: string): Record<string, unknown> {
 function collapse(text: string): string {
   return text.split(/\s+/).filter(Boolean).join(" ")
 }
-
 
 /** `ms` as local `MM-DD HH:MM`. */
 function stamp(ms: number): string {

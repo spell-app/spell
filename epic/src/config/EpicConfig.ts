@@ -11,6 +11,7 @@ import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { PeopleColors } from "./PeopleColors.ts"
+import { Editor, EDITOR_IDS } from "./Editor.ts"
 import { VoiceColor } from "./VoiceColor.ts"
 
 /****************
@@ -91,6 +92,7 @@ export class EpicConfig {
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true,
+    editor: "",
     renamedRepos: {},
     colors: { people: {}, agents: {} },
     top: "",
@@ -641,6 +643,14 @@ export class EpicConfig {
   }
 
   /**
+   * The editor the tools drive, VS Code or Cursor (`Editor`, epic `epic-friend` P16):  this machine's
+   * (`$SPELL_EPIC_EDITOR`), else the window's, else the repo's `editor`, else VS Code
+   */
+  get editor(): Editor {
+    return Editor.of({ setting: this.settings.editor })
+  }
+
+  /**
    * the repo's OLD GitHub addresses, each to the one it was renamed to (`renamedRepos`, epic `epic-engine` I150):
    * what `EpicRepo` reads so an epic page recording the old name is still this repo's
    */
@@ -947,6 +957,7 @@ export class EpicConfig {
       ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
+      editor: this.editor.id,
       renamedRepos: JSON.stringify(this.renamedRepos),
       colors: JSON.stringify(this.colors),
       peers: this.peers.map((peer) => `${peer.name}=${peer.main}`).join(","),
@@ -1117,6 +1128,7 @@ export class EpicConfig {
       pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
+      editor: editorOf(given, defaults.editor, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
       colors: colorsOf(given, defaults.colors, file),
       top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
@@ -1264,6 +1276,8 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
+ *   `code` (VS Code) or `cursor` (`Editor`, epic `epic-friend` P16);  `""` (the default):  VS Code
  * - `renamedRepos`:  the repo's OLD GitHub addresses, each to the address it was renamed to
  *   (`{ "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" }`, epic `epic-engine` I150);
  *   `{}` (the default):  none
@@ -1302,6 +1316,7 @@ export type EpicSettings = {
   pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
+  editor: string
   renamedRepos: Record<string, string>
   colors: EpicColors
   top: string
@@ -1567,9 +1582,7 @@ function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: st
     (typeof half === "object" &&
       half !== null &&
       !Array.isArray(half) &&
-      Object.entries(half).every(
-        ([name, color]) => name.trim() && VoiceColor.isColor(color)
-      ))
+      Object.entries(half).every(([name, color]) => name.trim() && VoiceColor.isColor(color)))
   const { people, agents } = (value ?? {}) as Record<string, unknown>
   const ok = typeof value === "object" && value !== null && !Array.isArray(value) && isNames(people) && isNames(agents)
   if (!ok)
@@ -1578,6 +1591,21 @@ function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: st
         `each a Spell UI colour name (${VoiceColor.NAMES.join(", ")}) or a CSS colour, not ${JSON.stringify(value)}`
     )
   return { people: { ...(people as Record<string, string>) }, agents: { ...(agents as Record<string, string>) } }
+}
+
+/**
+ * `given.editor`:  `code` or `cursor`, any case, or `""`;  left out, `fallback`.
+ * - throws `TypeError` naming the file for anything else
+ */
+function editorOf(given: Record<string, unknown>, fallback: string, file: string): string {
+  const value = given.editor
+  if (value === undefined || value === "") return fallback
+  const id = Editor.named(value)
+  if (!id)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "editor" must be one of ${EDITOR_IDS.join(", ")}, not ${JSON.stringify(value)}`
+    )
+  return id
 }
 
 /**

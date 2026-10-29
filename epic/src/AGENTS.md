@@ -394,6 +394,16 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       (SSH or HTTPS, as gh's `git_protocol` says);  never throws but where it says so;  `$SPELL_EPIC_GH` names a
       stand-in;  plain `node` loads it
       - only `epic whoami` and `epic init` run it:  never a page served or a hook
+    - `Editor` (epic `epic-friend` P16):  which editor the tools drive, VS Code (`code`) or Cursor (`cursor`), the ONE
+      reader of it:  `$SPELL_EPIC_EDITOR` (this machine's), else the window's own marks in the environment
+      (`ofWindow()`:  Cursor's `CURSOR_TRACE_ID`, its macOS bundle id, its folders in VS Code's `VSCODE_*` paths), else
+      the repo's `editor` (`EpicConfig.editor`), else `code`
+      - its command (`run()`, through `Processes`), its name for what people read, its URL scheme (`url()`:
+        `vscode://`, `cursor://`);  Cursor takes VS Code's flags, so nothing else differs
+      - who:  the window script's opens, `PluginInstall`'s extension step, `Sessions`' `open`, the docs tools'
+        doc-preview fallback (`--open-url`, every system), `Window.inVSCode`
+      - the tests' setup pins it to `code` (`SPELL_EPIC_EDITOR`), so no output depends on the editor running them
+      - plain `node` loads it (`spell/epic/config/Editor.ts`)
     - `PeopleColors` (epic `epic-friend` P13):  the colour each person picked, one file each in the content folder's
       `people/` (`people/ana-lima.json5`, `{ name, color }`), synced with the plans;  `EpicConfig.colors` reads them in,
       the config's own winning;  `epic init` writes one, `epic whoami --rename` moves it (`NameSweep`);  `slugOf()` is

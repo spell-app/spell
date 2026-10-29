@@ -407,7 +407,19 @@ Where the bridge can let you down:
     Windows.
   - Windows can't say which files a process has open, so a session's window isn't found there:
     `epic session open` opens in the last window.
-  - Bringing VS Code forward after a link, and `epic open`'s `vscode://` fallback, work on macOS only.
+  - Bringing VS Code forward after a link works on macOS only;  `epic open`'s fallback, the doc-preview URI, goes
+    through the editor's own `--open-url` on every system.
+- **Cursor too, tried only from its command line** (epic `epic-friend` P16).
+  - Cursor runs VS Code's extensions, and its command takes VS Code's flags:  the tools run `cursor` where they'd
+    run `code`, and its links start `cursor://` (`Editor`, `spell/epic/config/Editor`).
+  - Which one:  `SPELL_EPIC_EDITOR` on this machine, else the window the command runs in (Cursor's marks in the
+    environment), else `editor` in `.epic/config.json5`, else VS Code.
+  - `epic plugin install` puts the `.vsix` into the editor it names:  `cursor --install-extension` was checked
+    against a scratch Cursor profile (Cursor 3.22).
+  - Cursor keeps its right side bar for its own agent (since its 3.15.6, Claude Code's panel opens as an editor tab:
+    [Cursor's forum](https://forum.cursor.com/t/claude-code-extension-no-longer-appears-in-the-right-sidebar-after-cursor-3-15-6-update/167700)),
+    so Review and Epic Docs may not show there:  **View: Open View...**, then drag the view where you want it, or
+    **View: Move View**.  No person has tried that, nor a window move, in Cursor yet.
 
 ## Working on it
 
