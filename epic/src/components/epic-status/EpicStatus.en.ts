@@ -85,8 +85,9 @@ export const epicStatusVocabulary = {
     { name: "line", description: "In an item:  drawn as a line, not a card." },
     { name: "merged", description: "A line's earlier card, drawn in by the run's last one:  hidden." },
     { name: "drive-by", description: "Taken before Owen's first reply on the item:  its line above the Choices." },
-    { name: "in-thread", description: "Its line in the item's thread's brown block, after the replies." },
-    { name: "thread-end", description: "Last in the thread's block:  its bottom corners rounded." }
+    { name: "in-thread", description: "Its line in the item's thread, after the replies:  inside the thread's one frame." },
+    { name: "thread-end", description: "Last in the thread:  the frame's bottom edge and corners." },
+    { name: "thread-hidden", description: "The thread's head is folded:  hidden with the rest of the thread." }
   ],
   texts: [
     { key: "foldTip", text: "Close this status card", description: "Tooltip of its fold button while open." },

@@ -3,6 +3,7 @@ import { DoneCardsClose } from "./DoneCardsClose"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { PicksInChoices } from "./PicksInChoices"
 import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
@@ -42,7 +43,8 @@ export class Migrations {
     new ChangesAfterGoal(),
     new ItemRenames(),
     new RootLinks(),
-    new DoneCardsClose()
+    new DoneCardsClose(),
+    new PicksInChoices()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

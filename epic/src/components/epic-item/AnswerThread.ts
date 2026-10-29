@@ -4,7 +4,10 @@ import { PlanDates } from "spell/epic/dates"
  * ### `AnswerThread`
  * How an item draws the talk after its question (epic `epic-engine` P27, Owen's layout A, 2026-10-24):
  * worked out from its light children, so pages need no markup of their own for it.
- * - The THREAD:  Owen's words and Claude's replies (`<epic-reply>`), one brown block, in the order said.
+ * - The THREAD:  Owen's words and Claude's replies (`<epic-reply>`), ONE section in the order said (I152):
+ *   one card frame round them all, a thin rule between them, its corners rounded at its start and end
+ *   - its HEAD:  its first reply, whose band is the section's header;  folding it folds the whole thread
+ *     (everything after it hides), through its item (`ItemLink`)
  *   - the replies that END the details:  a reply before another card (Owen's note asking for More Details, kept
  *     above Claude's card) is a card of its own, folded to start with (`asksForMore()`)
  *   - an answer card whose item already says "Chosen: X" (`<epic-choices chosen>`) is redundant:  no band;
@@ -30,7 +33,7 @@ export class AnswerThread {
   /** Claude's newest reply, if Owen hasn't replied since:  it wears NEW until seen. */
   readonly newestReply: Element | undefined
 
-  /** Each card's place in the thread's block:  only cards IN it (a thread needs a reply, or an answer's body). */
+  /** Each card's place in the thread's section:  only cards IN it (a thread needs a reply). */
   private readonly places = new Map<Element, ThreadPlace>()
 
   /** Each status card that draws a line, and its line;  `merged` for the ones it drew in. */
@@ -97,10 +100,18 @@ export class AnswerThread {
     }
     // the said note has no element of the item's:  `null` holds its place
     const members: (Element | null)[] = [...opening, ...(options.said ? [null] : []), ...leads]
+    // its head:  the first reply, after a redundant answer's body
+    const headIndex = answerInThread.length
     members.forEach((member, index) => {
-      if (member) this.places.set(member, { start: index === 0, end: index === members.length - 1 })
+      if (member)
+        this.places.set(member, {
+          start: index === 0,
+          end: index === members.length - 1,
+          head: index === headIndex,
+          underHead: index > headIndex
+        })
     })
-    this.said = options.said ? { start: false, end: !leads.length } : undefined
+    this.said = options.said ? { start: false, end: !leads.length, head: false, underHead: true } : undefined
   }
 
   /**
@@ -115,7 +126,7 @@ export class AnswerThread {
   // ## What a card asks
   ////////////////
 
-  /** `card`'s place in the brown block, if it's in it. */
+  /** `card`'s place in the thread's section, if it's in it. */
   placeOf(card: Element): ThreadPlace | undefined {
     return this.places.get(card)
   }
@@ -202,12 +213,16 @@ export type ThreadOptions = {
   said?: boolean
 }
 
-/** A card's place in the thread's brown block. */
+/** A card's place in the thread's section:  one card frame round all its cards. */
 export type ThreadPlace = {
-  /** first in the block:  its top corners rounded, space above it */
+  /** first in the section:  the frame's top edge and corners, space above it */
   start: boolean
-  /** last in the block:  its bottom corners rounded */
+  /** last in the section:  the frame's bottom edge and corners */
   end: boolean
+  /** the thread's head, its first reply:  its band is the section's header, its fold folds the whole thread */
+  head: boolean
+  /** after the head:  hidden while the head is folded */
+  underHead: boolean
 }
 
 /** A status card's state, as a line says it. */

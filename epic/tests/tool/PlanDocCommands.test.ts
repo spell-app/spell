@@ -254,10 +254,11 @@ describe("PlanDocCommands choose:  an option Owen settled in conversation, on an
     const plan = FILES.read(file)
     const sets = Array.from(plan.item("j1").querySelectorAll("epic-choices"), (set) => set.getAttribute("chosen"))
     expect([plan.item("j1").getAttribute("status"), sets]).toEqual(["done", [null, "C"]])
-    // the doc is written formatted:  its spaces squeezed
-    expect(plan.item("j1").querySelector("epic-status")!.textContent!.replace(/\s+/g, " ")).toBe(
-      "Chose C · Way C: recorded, the call accepted; Owen: 'C, please'; built"
+    // the outcome on the set, no Noted card (I153)
+    expect(plan.item("j1").querySelectorAll("epic-choices")[1]!.getAttribute("chosen-note")).toBe(
+      "recorded, the call accepted;  Owen:  'C, please';  built"
     )
+    expect(plan.item("j1").querySelector("epic-status")).toBeNull()
 
     await owner.run(["add", "x", "question", "Which?", "--details", `<p>why</p>${options("A", "B")}`])
     expect(await owner.run(["choose", "x", "q1", "B", "--set", "1"])).toBe(0)

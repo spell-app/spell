@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
+import { PlanDates } from "spell/epic/dates"
 import { Fold } from "spell/epic/components/epic-item/Fold"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
 import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
@@ -29,6 +30,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - Answered (`chosen`, or `answered` on its `<epic-item>`):  folded away under a `Choices` aside.
  *   - its options panels in one box, the chosen one marked and open
  *   - find-in-page unfolds it
+ *   - atop the panels, the pick's own line (`chosen-on`, `chosen-note`):  `Chosen 10/29/26:  recorded as the
+ *     answer;  waiting for a phase to take it up`, so a pick needs no Noted card of its own (I153)
  *   - the folded heading names the chosen one, green with a check (`Choices  ✓ Chosen:  B · Bananas`),
  *     so the pick stays in sight while folded (Owen, 2026-10-10)
  * - An `<epic-ask>`'s options, pick one:  a radio group (`role="radiogroup"`, labelled by the question's
@@ -96,6 +99,21 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
     return title.trim() ? `${letter}${LETTER_SEPARATOR}${title.trim()}` : letter
   }
 
+  /**
+   * The pick's line atop the unfolded panels:  when it was recorded and what happens next,
+   * `Chosen 10/29/26:  recorded as the answer;  waiting for a phase to take it up`.
+   * - `undefined` with no option chosen, or neither `chosen-on` nor `chosen-note` (a pick from before I153)
+   */
+  get pickNote(): string | undefined {
+    if (!this.chosenLetter) return undefined
+    const date = PlanDates.format(this.chosenOn?.trim())
+    const note = this.chosenNote?.trim()
+    if (date && note) return this.translationForKey("chosenNote", { date, note })
+    if (date) return this.translationForKey("chosenOn", { date })
+    if (note) return this.translationForKey("chosenNoteOnly", { note })
+    return undefined
+  }
+
   /** Answered and unfolded. */
   @E.cssState("open")
   get isOpen(): boolean {
@@ -156,6 +174,13 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             part={this.partForName("panels")}
             hidden={this.fold.hidden()}
           >
+            <Show when={this.pickNote}>
+              {(line) => (
+                <p class={PICK_NOTE} part={this.partForName("note")}>
+                  {line()}
+                </p>
+              )}
+            </Show>
             <slot />
           </div>
         </Show>
@@ -229,6 +254,9 @@ const PANELS = "panels"
 
 /** `id` of that box, for its toggle's `aria-controls`. */
 const PANELS_ID = "panels"
+
+/** Class of the pick's line atop the unfolded panels (`pickNote`). */
+const PICK_NOTE = "pick-note"
 
 /** Class of the folded heading's chosen option (`Chosen:  B · Bananas`), and of its check. */
 const CHOSEN_MARK = "chosen-mark"

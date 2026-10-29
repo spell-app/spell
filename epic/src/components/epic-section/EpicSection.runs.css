@@ -157,12 +157,15 @@
   /*
    * top-level sections in a RUN (Owen, 2026-10-26:  "top of group 7 shouldn't be square, bottom of 7 & top of 8 should
    * be square"):  a FOLDED section touches the one after it, so its bottom and that one's top are square;  the run's
-   * free ends stay round (`EpicSection.css` reads the two)
+   * free ends stay round (`EpicFold.css` reads the two);  the Overview is the first of them (r42)
    */
-  epic-section:not([kind="overview-part"], [hidden], [open]):has(+ epic-section:not([kind="overview-part"], [hidden])) {
+  :is(epic-overview, epic-section:not([kind="overview-part"])):not([hidden], [open]):has(
+      + epic-section:not([kind="overview-part"], [hidden])
+    ) {
     --epic-section-bottom-radius: 0px;
   }
-  epic-section:not([kind="overview-part"], [hidden], [open]) + epic-section:not([kind="overview-part"], [hidden]) {
+  :is(epic-overview, epic-section:not([kind="overview-part"])):not([hidden], [open])
+    + epic-section:not([kind="overview-part"], [hidden]) {
     --epic-section-top-radius: 0px;
   }
 }

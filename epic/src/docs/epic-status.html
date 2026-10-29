@@ -396,11 +396,15 @@
                     </tr>
                     <tr>
                       <td><code>in-thread</code></td>
-                      <td>Its line in the item's thread's brown block, after the replies.</td>
+                      <td>Its line in the item's thread, after the replies: inside the thread's one frame.</td>
                     </tr>
                     <tr>
                       <td><code>thread-end</code></td>
-                      <td>Last in the thread's block: its bottom corners rounded.</td>
+                      <td>Last in the thread: the frame's bottom edge and corners.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-hidden</code></td>
+                      <td>The thread's first reply is folded: hidden with the rest of the thread.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -444,7 +448,7 @@
               </li>
               <li>What Claude did: the last card's summary, else its reading.</li>
               <li>
-                Last in the item's thread, after Claude's reply, on its brown ground. A DRIVE-BY's line (a card taken
+                Last in the item's thread, after Claude's reply, inside the thread's one frame, hidden while the thread's first reply is folded. A DRIVE-BY's line (a card taken
                 before Owen's first reply, about a comment he made before answering) goes first in the item's details,
                 above the Choices, with <i>your earlier comment</i> after its steps.
               </li>
@@ -477,9 +481,8 @@
                 alone)
               </li>
               <li>
-                <code>epic inbox apply &lt;name&gt;</code>: a card born done for each pick (<code
-                  >Chose B · &lt;option&gt;</code
-                >) and each todo it files; none for an approval
+                <code>epic inbox apply &lt;name&gt;</code>: a card born done for each todo it files; none for an approval, and
+                none for a pick, whose line goes in its Choices (<code>&lt;epic-choices chosen-note&gt;</code>)
               </li>
               <li>
                 A rewrite of the item's text leaves its cards where they are: they never reach its Original Discussion.

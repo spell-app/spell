@@ -353,6 +353,12 @@
     background: var(--_epic-act-ivory);
     font-size: 15px;
   }
+  /* in its item's thread (`<epic-item>` gives the host `in-thread`):  a member of the thread's one frame, no box */
+  :host(.in-thread) .said {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
   .said > ui-icon {
     flex: none;
     align-self: center;

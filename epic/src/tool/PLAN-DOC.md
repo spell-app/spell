@@ -449,12 +449,15 @@ As `plan-doc.md`, "Ids":
   - A question is answered with the option:  no other set stays chosen.
   - Any other item is APPROVED with it:  an open judgement call closed, accepted;  reviewed.
   - Either way:
-    - a Noted card:  `Chose B · <title>:  <what was recorded>;  <what happens next>`
-    - e.g. `recorded as the answer;  waiting for the next phase, P9 · <name>`
+    - the set records the pick, drawn inside its folded Choices (I153):
+      `<epic-choices chosen="B" chosen-on="2026-10-29" chosen-note="recorded as the answer;  waiting for ...">`
+      - `chosen-note`:  `<what was recorded>;  <what happens next>`
+      - NO Noted card:  it said again what the Choices header says (Owen, 2026-10-29:  "should be part of the
+        collapsed 'chosen' section");  only an underway card on the item still turns Noted, `Chose B · ...`
     - and the option in the log line
   - A pick riding on a revisit ("pick B, but ..."):  left for the talk.
     - Claude finishes the mark (`inbox done | clear`) without a `decide --option`:
-      the pick is still written as that set's `chosen`, with a Noted card (`keepPick()`).
+      the pick is still written as that set's `chosen`, with its line (`keepPick()`):  `recorded after the talk;  ...`.
     - Once Owen picked, the card says Chosen (Owen, 2026-10-10).
 - The way in (`IncomingHtml`):  agents may still write the OLD shapes.
   - Every command taking HTML turns them into elements on the way in, so a doc never holds them.
@@ -568,7 +571,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 | card             | when                                                                  | says, in one line                                   |
 | ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
 | `Claude • Underway` | Claude is on it                                                     | what Claude took the task to be                     |
-| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a pick, a todo made or queued, a new item made, a choice talked over), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
+| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a todo made or queued, a new item made, a choice talked over;  a pick goes in its Choices, I153), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Made todo T23 to follow this up.` |
 | `Claude • Done`  | the item's WORK is finished:  an issue fixed, a todo built;  an open issue or todo CLOSES with it | the reading kept, a summary when worth saying     |
 
 ```html
@@ -580,7 +583,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
   <p slot="summary">Recommended a file each:  JSON would need every template escaped.</p>
 </epic-status>
 <epic-status slot="status" state="noted" at="2026-10-08 15:02">
-  <p>Chose B · Keep one file per template:  recorded as the answer;  waiting for the next phase, P9 · Build</p>
+  <p>Queued for P9 · Build</p>
 </epic-status>
 ```
 
@@ -618,14 +621,12 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - Spinner off.
     - `done --filed "<what>"`, the older spelling, writes the same Noted card.
   - `inbox apply`:  a card born NOTED for each of these (none for an approval):
-    - each pick and todo it files (Q19):
-      - a pick:  `Chose B · <option>:  recorded ...;  waiting for ...`
-      - a todo:  `Made todo T23 to follow this up.`
+    - each todo it files (Q19):  `Made todo T23 to follow this up.`
+      - a pick has none since I153:  its set's `chosen-on` and `chosen-note`, drawn in its Choices
     - each todo it queues:  `Queued for P10 · <name>`
     - each new item it makes:  `Made from the page:  Owen's new todo, ...`
-  - `inbox done | clear` of a mark carrying a pick:  a Noted card with the pick kept,
-    `Chose B · ...:  recorded after the talk;  ...`.
-    Unless a `decide --option` already chose in that set.
+  - `inbox done | clear` of a mark carrying a pick:  the pick kept on its set, `chosen-note` `recorded after the
+    talk;  ...`.  Unless a `decide --option` already chose in that set.
   - The reading and summary are HTML, as `updated` takes:
     - inline runs go in a `<p>`;  blocks stay
     - plain text works as it is (`&lt;` for a `<`)
@@ -921,6 +922,13 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - each one a note in the report, with its card's time and title:  an older page's Done card may have meant only
       "this step done" (an answer written), Noted today, so read the dry run's list before running it
     - idempotent:  a closed item is left
+  - `picks-in-choices` (2026-10-29, on command;  epic `epic-engine` I153):  each pick's Noted card moves into its
+    item's Choices (`PicksInChoices`), where a pick is recorded since
+    - which:  an item's Noted card whose whole text is `Chose B · ...`, the item having a set with `chosen="B"`;
+      a card with a summary (underway first) says more:  left
+    - the set takes the card's day (`chosen-on`) and what it recorded, from `recorded ...` on (`chosen-note`);  the card
+      goes;  ONE log line names the items (`Picks' Noted cards moved into their Choices:  J3, Q5`)
+    - idempotent:  a moved card is gone
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

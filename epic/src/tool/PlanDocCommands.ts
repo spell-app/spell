@@ -1325,7 +1325,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    an option Owen settled IN CONVERSATION, on any item, as the
                                                    page's pick records it:  chosen on the item's latest card
                                                    set (--set N:  the Nth);  a question answered, a judgement
-                                                   call closed, any item reviewed;  a Noted card (the outcome)
+                                                   call closed, any item reviewed;  the outcome in its Choices
   close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it

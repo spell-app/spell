@@ -50,7 +50,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`
  *   - a run of cards about one task is ONE line, drawn by its last card, the others hidden (`AnswerThread`):
  *     each card's state and when, then the last card's summary, else its reading
- *   - LAST in the item's thread, after Claude's reply;  a DRIVE-BY's (taken before Owen's first reply) first in the
+ *   - LAST in the item's thread, after Claude's reply, inside the thread's one frame (I152), hidden while the
+ *     thread's head is folded;  a DRIVE-BY's (taken before Owen's first reply) first in the
  *     item's details, above the Choices (`order`, in the details' column), "your earlier comment" after its steps
  *   - outside an item (an Overview sub-section):  the card, as before
  ****************/
@@ -112,21 +113,27 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
     return this.isLine && this.line?.where === "drive-by"
   }
 
-  /** Its place in its item's thread's brown block;  `undefined` outside one. */
+  /** Its place in its item's thread's section;  `undefined` outside one. */
   get place(): ThreadPlace | undefined {
     return this.link.thread()?.placeOf(this.domElement)
   }
 
-  /** In the thread's brown block. */
+  /** In the thread's section:  inside its one frame. */
   @E.cssState("in-thread")
   get isInThread(): boolean {
     return !!this.place
   }
 
-  /** Last in the thread's block. */
+  /** Last in the thread's section:  the frame's bottom. */
   @E.cssState("thread-end")
   get endsThread(): boolean {
     return !!this.place?.end
+  }
+
+  /** After the thread's head, which is folded:  hidden with it (I152). */
+  @E.cssState("thread-hidden")
+  get isThreadHidden(): boolean {
+    return !!this.place?.underHead && this.link.threadFolded()
   }
 
   /** Its state as a step says it. */

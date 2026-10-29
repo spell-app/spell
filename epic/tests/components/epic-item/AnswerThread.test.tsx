@@ -88,9 +88,9 @@ describe("AnswerThread.of()", () => {
       answer: thread.placeOf(item.querySelector("epic-answer")!)
     }).toEqual({
       chosen: true,
-      owens: { start: true, end: false },
-      claudes: { start: false, end: false },
-      done: { start: false, end: true },
+      owens: { start: true, end: false, head: true, underHead: false },
+      claudes: { start: false, end: false, head: false, underHead: true },
+      done: { start: false, end: true, head: false, underHead: true },
       noted: "merged",
       line: {
         where: "thread",
@@ -113,7 +113,7 @@ describe("AnswerThread.of()", () => {
     const status = item.querySelector("epic-status")!
     expect({ line: thread.lineOf(status), place: thread.placeOf(status) }).toEqual({
       line: { where: "thread", steps: [{ state: "noted", at: "2026-10-19 12:36" }] },
-      place: { start: false, end: true }
+      place: { start: false, end: true, head: false, underHead: true }
     })
   })
 
@@ -142,7 +142,7 @@ describe("AnswerThread.of()", () => {
     }).toEqual({
       line: { where: "drive-by", steps: [{ state: "noted", at: "2026-10-19 12:36" }] },
       newest: undefined,
-      said: { start: false, end: true },
+      said: { start: false, end: true, head: false, underHead: true },
       chosen: false
     })
   })
@@ -207,9 +207,9 @@ describe("<epic-item>'s thread, drawn", () => {
       claudes: claudes.matches(":state(new)"),
       tag: tag()?.textContent
     }).toEqual({ owens: false, claudes: true, tag: "NEW" })
-    // its card's rule orange (I116:  a 1px orange rule and ring, where a 3px edge was), not Owen's
-    const rule = (reply: Element) => getComputedStyle(reply.shadowRoot!.querySelector("[part~='base']")!).borderTopColor
-    expect(rule(claudes)).not.toBe(rule(owens))
+    // its card's edge orange (in the thread's one frame, I152:  an inset orange edge, the frame's rule kept), not Owen's
+    const edge = (reply: Element) => getComputedStyle(reply.shadowRoot!.querySelector("[part~='base']")!).boxShadow
+    expect({ claudes: edge(claudes).includes("inset"), owens: edge(owens) }).toEqual({ claudes: true, owens: "none" })
     claudes.scrollIntoView()
     await expect.poll(() => claudes.matches(":state(new)"), { timeout: 4000 }).toBe(false)
     expect(JSON.parse(localStorage.getItem(SEEN_KEY)!)).toEqual({ q16: "2026-10-24 15:34" })
@@ -218,6 +218,59 @@ describe("<epic-item>'s thread, drawn", () => {
     const again = await ElementFixture.render(ANSWERED)
     await ElementFixture.settle()
     expect(again.querySelectorAll("epic-reply")[1].matches(":state(new)")).toBe(false)
+  })
+})
+
+describe("<epic-item>'s thread, ONE section (I152)", () => {
+  test("one frame:  no grey ground, no gaps, its edges in line, rounded only at its start and end", async () => {
+    const host = await ElementFixture.render(ANSWERED)
+    await ElementFixture.settle()
+    const [owens, claudes] = host.querySelectorAll<HTMLElement>("epic-reply")
+    const done = host.querySelectorAll<HTMLElement>("epic-status")[1]
+    const card = (element: HTMLElement) =>
+      element.shadowRoot!.querySelector<HTMLElement>("[part~='base']")!.getBoundingClientRect()
+    const radius = (element: HTMLElement, corner: "TopLeft" | "BottomLeft") =>
+      getComputedStyle(element.shadowRoot!.querySelector("[part~='base']")!)[`border${corner}Radius`]
+    expect({
+      ground: [owens, claudes, done].map((element) => getComputedStyle(element).backgroundColor),
+      gaps: [card(claudes).top - card(owens).bottom, card(done).top - card(claudes).bottom].map(Math.round),
+      lefts: new Set([owens, claudes, done].map((element) => Math.round(card(element).left))).size,
+      rights: new Set([owens, claudes, done].map((element) => Math.round(card(element).right))).size,
+      corners: [radius(owens, "TopLeft"), radius(owens, "BottomLeft"), radius(claudes, "TopLeft"), radius(done, "BottomLeft")]
+    }).toEqual({
+      ground: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"],
+      gaps: [0, 0],
+      lefts: 1,
+      rights: 1,
+      corners: ["10px", "0px", "0px", "10px"]
+    })
+  })
+
+  test("the first reply's fold folds the WHOLE thread:  the reply after it and the status line hide, and come back with it", async () => {
+    const host = await ElementFixture.render(ANSWERED)
+    await ElementFixture.settle()
+    const [owens, claudes] = host.querySelectorAll<HTMLElement>("epic-reply")
+    const done = host.querySelectorAll<HTMLElement>("epic-status")[1]
+    const shown = () => [claudes, done].map((element) => getComputedStyle(element).display)
+    const button = owens.shadowRoot!.querySelector<HTMLElement>("[part~='toggle']")!
+    expect(shown()).toEqual(["block", "block"])
+    button.click()
+    await ElementFixture.settle()
+    expect({ shown: shown(), headEnds: owens.matches(":state(thread-end)"), open: owens.matches(":state(open)") }).toEqual({
+      shown: ["none", "none"],
+      headEnds: true,
+      open: false
+    })
+    button.click()
+    await ElementFixture.settle()
+    expect({ shown: shown(), headEnds: owens.matches(":state(thread-end)") }).toEqual({
+      shown: ["block", "block"],
+      headEnds: false
+    })
+    // a later reply's own fold folds only itself
+    claudes.shadowRoot!.querySelector<HTMLElement>("[part~='toggle']")!.click()
+    await ElementFixture.settle()
+    expect(getComputedStyle(done).display).toBe("block")
   })
 })
 

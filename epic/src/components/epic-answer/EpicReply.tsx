@@ -44,7 +44,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - Claude's (or anyone's but Owen's):  violet, the brand's action colour, apart from the warm answer card.
  * - Owen's (`from="Owen"`):  his ivory, as his note box and answer card (decision Q20).
  * - In an item (epic `epic-engine` P27, Owen's layout A):
- *   - one of the THREAD's brown block, with the item's other replies and its status lines (`AnswerThread`)
+ *   - one of the THREAD's section, with the item's other replies and its status lines (`AnswerThread`):
+ *     one card frame round them all, a thin rule between them (I152)
+ *   - the thread's HEAD (its first reply):  its band is the section's header, and its fold folds the whole thread,
+ *     through its item (`ItemLink.foldThread()`);  the replies after it hide while it's folded
  *   - Claude's NEWEST reply (none of Owen's after it):  an orange edge and a NEW tag in its band, until Owen has
  *     seen it (`SeenReplies`:  on screen for 1.2s, remembered in this browser);  orange:  changed since you looked
  ****************/
@@ -73,27 +76,47 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
   /** What Owen has seen of its item's replies, in this browser. */
   readonly seen = new SeenReplies()
 
-  /** Its place in its item's thread's brown block;  `undefined` outside one. */
+  /** Its place in its item's thread's section;  `undefined` outside one. */
   get place(): ThreadPlace | undefined {
     return this.link.thread()?.placeOf(this.domElement)
   }
 
-  /** In the thread's brown block. */
+  /** In the thread's section:  inside its one frame. */
   @E.cssState("in-thread")
   get isInThread(): boolean {
     return !!this.place
   }
 
-  /** First in the block:  its top corners rounded. */
+  /** First in the section:  the frame's top corners. */
   @E.cssState("thread-start")
   get startsThread(): boolean {
     return !!this.place?.start
   }
 
-  /** Last in the block:  its bottom corners rounded. */
+  /** Last in the section, or its head while folded (the rest hidden):  the frame's bottom corners. */
   @E.cssState("thread-end")
   get endsThread(): boolean {
-    return !!this.place?.end
+    return !!this.place?.end || (this.isThreadHead && !this.isOpen)
+  }
+
+  /** The thread's head, its first reply:  its fold folds the whole thread. */
+  get isThreadHead(): boolean {
+    return !!this.place?.head
+  }
+
+  /** After the thread's head, which is folded:  hidden with it. */
+  @E.cssState("thread-hidden")
+  get isThreadHidden(): boolean {
+    return !!this.place?.underHead && this.link.threadFolded()
+  }
+
+  /** The thread's head, folded or opened:  the item folds or opens the rest of the thread with it (page state). */
+  @E.onChange("isThreadHead", "isOpen")
+  protected onHeadFolded(isHead: boolean, open: boolean) {
+    if (!isHead) return
+    this.link.foldThread(!open)
+    // no longer the head (or gone):  the thread stands open
+    return () => this.link.foldThread(false)
   }
 
   /** Claude's newest reply on its item, not seen yet:  orange edge, NEW. */
