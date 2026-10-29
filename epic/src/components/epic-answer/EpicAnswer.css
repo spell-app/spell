@@ -7,6 +7,7 @@
  * - a reply:  who said it first, as a small round mark and their name;  the date quiet at the right (`.dated`)
  *   - an agent's (Claude's):  white, its mark Claude's terracotta
  *   - a person's (`.person`, everyone's alike):  violet, faint, as the comment box;  its mark violet
+ *   - both the page's theme tokens, `--epic-voice-*` (`EpicPage.css`), read here through the private aliases
  *   - the mark's letter:  the name's initial, from the heading's `data-initial` (`EpicReply.initial`)
  * - More Details:  plain, its heading a small muted eyebrow that folds it
  * - every card folds, the folded box `hidden="until-found"`:
@@ -249,22 +250,25 @@
 }
 
 @layer ui.components.epic-answer.variations {
-  /* Claude's:  white, its name and mark Claude's terracotta */
+  /*
+   * ## Voices:  the page's theme tokens (`--epic-voice-*`, `<epic-page>`'s `:host`:  tweak them there), today's
+   * values as the fallbacks
+   * - Claude's:  white, its name and mark Claude's terracotta
+   */
   .reply {
-    --_epic-who-mark: light-dark(#c96442, #d97757);
-    --_epic-card-accent: light-dark(#a8502f, #e59a7c);
+    --_epic-who-mark: var(--epic-voice-agent, light-dark(#c96442, #d97757));
+    --_epic-card-accent: var(--epic-voice-agent-text, light-dark(#a8502f, #e59a7c));
   }
   /* a person's voice:  violet, faint, as the comment box (I111);  every person's alike (epic `epic-friend` P2) */
   .reply.person {
-    --_epic-who-mark: var(--ui-violet, #6550ca);
+    --_epic-who-mark: var(--epic-voice-person, var(--ui-violet, #6550ca));
     /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
-    --_epic-card-fill: color-mix(
-      in oklab,
-      var(--ui-violet, #6550ca) 5%,
-      light-dark(#fff, var(--ui-background, Canvas))
+    --_epic-card-fill: var(
+      --epic-voice-person-fill,
+      color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, var(--ui-background, Canvas)))
     );
-    --_epic-card-rule: color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent);
-    --_epic-card-accent: var(--ui-violet-text, var(--ui-violet, #6550ca));
+    --_epic-card-rule: var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
+    --_epic-card-accent: var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)));
   }
   .more {
     --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));

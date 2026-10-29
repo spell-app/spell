@@ -29,6 +29,8 @@
     --_epic-act-muted: var(--epic-muted, var(--ui-text-muted, GrayText));
     --_epic-act-ink: var(--ui-text-color, CanvasText);
     --_epic-act-paper: var(--ui-background, Canvas);
+    /* a person's voice, the note box's:  the page's theme token (`--epic-voice-person`, `EpicPage.css`) */
+    --_epic-act-voice: var(--epic-voice-person, var(--ui-violet, #6550ca));
     --_epic-act-rule: var(--epic-rule, var(--ui-border-color, GrayText));
     --_epic-act-green: var(--ui-green, #00853a);
     --_epic-act-blue: var(--ui-blue, #1a67e0);
@@ -195,7 +197,7 @@
     margin: 0;
   }
 
-  /* ## The note box:  Owen's voice, on ivory -- the note, and Revisit Later / the x stacked at its right */
+  /* ## The note box:  the person's voice -- the note, and Revisit Later / the x stacked at its right */
   .note-box {
     display: flex;
     gap: 6px;
@@ -205,7 +207,11 @@
      * the page's violet, faint, its frame a touch darker (Owen, 2026-10-25, the answer-look page's Q2:  "B ... frame is a
      * little darker ... 1px shadow rather than 2";  tan before)
      */
-    border: 1px solid var(--epic-note-frame, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
+    border: 1px solid
+      var(
+        --epic-note-frame,
+        var(--epic-voice-person-rule, color-mix(in oklab, var(--_epic-act-voice) 26%, transparent))
+      );
     /*
      * its corners, top and bottom:  an item's or a phase's drawer sets its own (`--epic-note-radius-top` / `-bottom`);
      * what's inside is rounded to them, less the 7px between (its 1px frame, its 6px padding;  designer rule T68,
@@ -216,8 +222,8 @@
     --_epic-note-inner-top: max(0px, calc(var(--_epic-note-top) - 7px));
     --_epic-note-inner-bottom: max(0px, calc(var(--_epic-note-bottom) - 7px));
     border-radius: var(--_epic-note-top) var(--_epic-note-top) var(--_epic-note-bottom) var(--_epic-note-bottom);
-    background: var(--epic-note-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--_epic-act-paper)));
-    box-shadow: 0 1px 0 color-mix(in oklab, var(--ui-violet, #6550ca) 12%, transparent);
+    background: var(--epic-note-fill, color-mix(in oklab, var(--_epic-act-voice) 5%, var(--_epic-act-paper)));
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--_epic-act-voice) 12%, transparent);
     font-size: 15px;
   }
   /* the note, its Saved mark (a floppy, its tooltip the time) in the lower right corner */

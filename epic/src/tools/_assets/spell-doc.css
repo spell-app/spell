@@ -84,6 +84,22 @@
   --spell-state-old: var(--ui-grey-background, light-dark(#eeeeee, #34343b));
   --spell-state-old-on: var(--ui-grey-text, GrayText);
   /*
+   * ## Voices:  who said it (epic `epic-friend` T11):  an agent's (Claude's) terracotta, a person's (you, everyone)
+   * violet;  a reply card's round mark, its name, a person's card fill and rule.  TWEAK THEM HERE for the docs pages.
+   * - the same values as `<epic-page>`'s `--epic-voice-*` (`spell-epic`, `EpicPage.css`):  change both
+   * - handed to the `<epic-*>` elements on a docs page below ("Voices on a docs page")
+   */
+  --spell-voice-agent: light-dark(#c96442, #d97757);
+  --spell-voice-agent-text: light-dark(#a8502f, #e59a7c);
+  --spell-voice-person: var(--ui-violet, #6550ca);
+  --spell-voice-person-text: var(--ui-violet-text, var(--spell-voice-person));
+  --spell-voice-person-fill: color-mix(
+    in oklab,
+    var(--spell-voice-person) 5%,
+    light-dark(#fff, var(--ui-background, Canvas))
+  );
+  --spell-voice-person-rule: color-mix(in oklab, var(--spell-voice-person) 26%, transparent);
+  /*
    * an Epics card's star while it's a favourite:  the page's yellow, a star's own colour (epic `airplane` J22, Owen
    * 2026-10-10:  "make it yellow";  the brand's gold-brown before).  Not starred:  its outline, grey.
    * - the one place yellow doesn't mean "open":  a star reads as a favourite, never as a state
@@ -906,6 +922,18 @@ pre code {
   --epic-state-open-on: var(--spell-state-open-on);
   --epic-state-recent: var(--spell-state-recent);
   --epic-state-recent-on: var(--spell-state-recent-on);
+}
+/*
+ * ## Voices on a docs page:  a reply card or a note box outside an epic page takes the page's (`--spell-voice-*`)
+ * - never one inside an `<epic-page>`:  it inherits the page's own, which a page's `epic-page { ... }` may override
+ */
+.spell-doc-main :is(epic-reply, epic-review):not(epic-page *) {
+  --epic-voice-agent: var(--spell-voice-agent);
+  --epic-voice-agent-text: var(--spell-voice-agent-text);
+  --epic-voice-person: var(--spell-voice-person);
+  --epic-voice-person-text: var(--spell-voice-person-text);
+  --epic-voice-person-fill: var(--spell-voice-person-fill);
+  --epic-voice-person-rule: var(--spell-voice-person-rule);
 }
 .spell-doc-main :is(.plan-items, .spell-epics) > [data-spell-hidden] {
   display: none;

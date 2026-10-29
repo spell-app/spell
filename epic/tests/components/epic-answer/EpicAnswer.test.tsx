@@ -140,6 +140,31 @@ describe("<epic-reply>", () => {
   })
 })
 
+describe("<epic-reply>'s voices (epic `epic-friend` T11)", () => {
+  /** The colour of a reply's round mark, before its name (`.who::before`). */
+  function markOf(reply: Element): string {
+    return getComputedStyle(part(reply, "who")!, "::before").backgroundColor
+  }
+
+  test("the theme's `--epic-voice-*` tokens colour them:  the agent's mark, the person's mark and card;  none set:  today's terracotta and violet", async () => {
+    const replies = `<epic-reply from="Claude" agent="claude"><p>Done</p></epic-reply><epic-reply from="Ana"><p>Why?</p></epic-reply>`
+    const plain = await ElementFixture.render(`<div>${replies}</div>`)
+    const [claude, ana] = Array.from(plain.children)
+    expect(markOf(claude)).toBe("rgb(201, 100, 66)")
+    expect(markOf(ana)).not.toBe(markOf(claude))
+
+    const themed = await ElementFixture.render(
+      `<div style="--epic-voice-agent: rgb(0, 128, 128); --epic-voice-person: rgb(10, 20, 30); --epic-voice-person-fill: rgb(1, 2, 3)">${replies}</div>`
+    )
+    const [agent, person] = Array.from(themed.children)
+    expect([markOf(agent), markOf(person), getComputedStyle(part(person, "base")!).backgroundColor]).toEqual([
+      "rgb(0, 128, 128)",
+      "rgb(10, 20, 30)",
+      "rgb(1, 2, 3)"
+    ])
+  })
+})
+
 describe("<epic-more>", () => {
   test("a card headed More Details, open to start with;  its heading folds it;  passes axe", async () => {
     const host = await ElementFixture.render(`<epic-more><p>More</p></epic-more>`)

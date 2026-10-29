@@ -1428,8 +1428,11 @@ In `tools/`:
     - blue:  do it now / Claude is working on it (every Send)
     - green:  decided or done
     - orange:  ONLY changed-since-you-looked, and warnings
-    - violet:  Claude's voice
-    - ivory:  Owen's
+    - violet:  a person's voice (you, everyone alike);  terracotta:  an agent's (Claude's).
+      Theme tokens, `--epic-voice-*`, tweaked in `<epic-page>`'s theme block (`EpicPage.css`, "Voices";  epic
+      `epic-friend` T11);  the docs pages' copies `spell-doc.css`'s `--spell-voice-*`
+      - comment threads still draw Claude's messages violet, from before
+    - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
   - The table, with examples:  [the plan-doc guide](../templates/epics/plan-doc.md), "Colours".
