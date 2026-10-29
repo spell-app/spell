@@ -1,10 +1,10 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/parser/` of the `spell-parser` package (`spell/parser/parser`).
+when working with code in this folder, `src/parser/` of the kit's parser folder (`spell/parser/parser`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -92,13 +92,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - As WWOD §4 (examples there are ours):  `import { P } from "spell/parser/parser"`.
 - [barrel.test.ts](../../tests/parser/barrel.test.ts) is the smoke test for circular imports through the barrel:
   run it after moving files.
-  - The tests live in the repo's `tests/parser/`, at the same paths as the code under `src/parser/`.
+  - The tests live in the parser folder's `tests/parser/`, at the same paths as the code under `src/parser/`.
 
 ## Decorators
 
 As WWOD §12, plus:
 
-- The repo's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
+- The parser folder's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
   (`spell/toolchain/decorators`).
 
 ## Types / Exports

@@ -1,36 +1,38 @@
 # AGENTS.md
 
-> **Since epic `repo-split` P20, `epic/` is a FOLDER of the kit's ONE repo and ONE package, `spell`**, at
-> `~/www/spell/epic/`, not a repo or package of its own (it was spell-epic, with its history merged in).
-> - Its files are imported as `spell/epic/<path under src/>`;  its `package.json` is a folder manifest (its scripts,
->   settings and dependencies, no `exports`:  the kit's hold them).
-> - TypeScript reads every folder's source:  no `spell-types --below`.
-> - ONE CI workflow and ONE `yarn.lock`, the kit's;  `git` here is the kit's repo.
-> - Where this file still says "this repo", "child repo" or names `spell-epic/...` imports, this note wins.
+This file guides AI coding agents (Claude Code, Codex, and others) working in `epic/`, the epic tooling:
+a folder of the kit `spell`.
 
-This file guides AI coding agents (Claude Code, Codex, and others) working in spell-epic.
-
-- spell-epic is the epic tooling, lifted out of spell-app (epic `epic-eject` P6).
+- It's the epic tooling, a Claude Code plugin, lifted out of spell-app (epic `epic-eject` P6).
   [The README](README.md) says what it is and how it's laid out;  [README-adopting.md](README-adopting.md), how it's
   installed.
-- The house style is Spell's, WWOD:  **READ it FIRST**, from the kit around this repo:
-  [WWOD](../agents/wwod/WWOD.md).
-  - No `agents/` link at the root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as agent types.
-- spell-epic is a child repo of the kit `spell`, and a workspace of its ONE install (`yarn install` in the kit;
-  epic `epic-engine` P10):  the other repos' packages (`spell-ui`, `spell/server` ...) are `workspace:*`
-  dependencies, imported by their package names (WWOD §4), never by a path into a sibling repo.
-  - `tsc` reads their built declarations (`dist-types/`):  `yarn ts` builds them first (`spell-types --below`).
+- The house style is Spell's, WWOD:  **READ it FIRST**, from the kit:  [WWOD](../agents/wwod/WWOD.md).
+  - No `agents/` link at the folder's root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as
+    agent types.
+- A folder of the kit's ONE repo and ONE package, `spell`, at `~/www/spell/epic/` (epic `repo-split` P20).
+  - It was a repo of its own, spell-epic, until then, and was merged in with its history.
+  - The one repo, install, `yarn.lock` and CI workflow are the kit's:
+    [the kit's AGENTS.md](../AGENTS.md), "The kit" and "CI".
+- Its [package.json](package.json) is a FOLDER MANIFEST, not a package:
+  a private workspace of the kit's install, still named `spell-epic`.
+  - It holds the folder's scripts, its settings (`"pageServer"`, `"spellPack"`, `"spellPublish"`), its `epic` bin
+    and its dependencies.
+  - No `exports`:  the kit's [package.json](../package.json) holds every folder's names ("Imports", below).
+- It stands on the kit's `src/` and on Spell UI (`ui/`), by their import names (WWOD §4), never by a path into
+  another folder.
+  - TypeScript reads their source, as it reads this folder's:  `yarn ts` builds no declarations first.
   - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts), on the kit's
     `spell/toolchain/sourceNames`).
   - Their source runs here as it is, by those names:  `tsx` (`bin/epic`, the `tsx` scripts), Vite and Vitest.
-- spell-epic is ONE package, `spell-epic` (epic `epic-eject` J14), laid out as a plain JS repo:
+  - Only `app/` sits above it (the lint's `spell/no-upward-import`).
+- Laid out as a plain JS project (epic `epic-eject` J14):
   - `src/`:  the code, the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
   - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
-  - the plugin's parts at the root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
+  - the plugin's parts at the folder's root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
 - [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
   - Its links lead from where it is now:  the content folder's pages through `../../spell.epics/`,
-    the kit's and the other repos' files by their folders (`../../ui/`, `../../agents/`).
+    the kit's and the other folders' files by their paths (`../../ui/`, `../../agents/`).
   - Some of its prose still speaks from spell-app's checkout, which serves the content folder's pages.
 - Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), IN FULL first.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
@@ -45,9 +47,10 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   - The last three are named by no kind of page yet (`"pageVoices"`):  ask for one by name, `epic voice blog`
     (epic `readme` P15).
   - `code`:  docstrings, comments, `AGENTS.md` files, epic pages:  each repo's own house style (Spell's:  WWOD §6),
-    so spell-epic ships no file for it.
+    so the plugin ships no file for it.
   - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a
-    file) and which voice each kind of page takes (`"pageVoices"`);  a child repo of a multi-repo top takes the top's.
+    file) and which voice each kind of page takes (`"pageVoices"`);  a repo whose settings name a top
+    (spell-brand's name the kit) takes the top's.
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
   - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
   - A repo's own house style adds its specifics on top, and wins where they disagree.
@@ -63,31 +66,32 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.
 - Imports:  "Imports" below.
-- Checks, from the root:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every repo:  the kit's
-  `yarn ts` / `yarn test` / `yarn lint`.
+- Checks, from `epic/`:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every folder:  the kit's
+  `yarn ts` / `yarn test` / `yarn lint`, at its root.
 
 ## Imports
 
 As WWOD §4, plus these.
 
-- ONE name per file, the same in every repo (epic `repo-split` P14, Q47):  the package name and the file's path under
-  `src/`, no extension, inside this repo too.
-  - `spell-epic` (the barrel, `EP`), `spell/epic/markup`, `spell/epic/tool/PlanDoc`,
+- ONE name per file, the same from every folder (epic `repo-split` P14, Q47;  P20):  `spell/epic/` plus the file's
+  path under `src/`, no extension, inside `epic/` too.
+  - `spell/epic` (the barrel, `EP`), `spell/epic/markup`, `spell/epic/tool/PlanDoc`,
     `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
-    The one file code imports from OUTSIDE `src/` has an explicit `exports` key:  `epic/vscode/src/docUrls.ts`,
-    for its test.
-- How every tool finds them:  `package.json`'s `exports`, no alias table anywhere.
+    The one file code imports from OUTSIDE `src/` has an explicit key in the kit's `exports`:
+    `spell/epic/vscode/src/docUrls.ts`, for its test.
+  - Nothing imports by the folder's old name, `spell-epic/...`:  the hooks too say `spell/epic/...`.
+- How every tool finds them:  the kit's [package.json](../package.json) `exports`, no alias table anywhere.
   - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the
-    source.
+    source, this folder's and every other's.
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
-  - Every folder barrel has an explicit key (`"./markup"`, `"./components/epic-page"` ...):  `tsx`, run from another
-    repo through `node_modules` (the kit's page server loads the route modules), finds a file without its
+  - Every folder barrel has an explicit key (`"./epic/markup"`, `"./epic/components/epic-page"` ...):  `tsx`, run
+    through `node_modules/spell` (the kit's page server loads the route modules), finds a file without its
     extension but not a folder's `index`.
   - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
-    (`spell/toolchain/sourceNames`) finds our packages' names as their source files.
-- PLAIN `node` writes the extension, as it needs it (the `"./*.ts"` key):  `spell/epic/config/EpicConfig.ts`,
+    (`spell/toolchain/sourceNames`) finds our names as their source files.
+- PLAIN `node` writes the extension, as it needs it (the `"./epic/*.ts"` key):  `spell/epic/config/EpicConfig.ts`,
   `spell/epic/window.mjs`, `spell/epic/tools/pages.js`.
   - Plain node runs the hooks, the window script, and the docs tools' `.js` scripts (`details.js`, `update.js` ...):
     every file they load, of ours, imports this way, and of the kit's only its explicitly exported files

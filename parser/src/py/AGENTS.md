@@ -1,10 +1,10 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/py/` of the `spell-parser` package (`spell/parser/py`).
+when working with code in this folder, `src/py/` of the kit's parser folder (`spell/parser/py`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -15,7 +15,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - NOT here:  `spell_quart`, Python's web server, which serves a program as a web app on Quart.
     It's in the spaces package, [its Python side](../../../app/src/spaces/server/py/pyproject.toml)
     ([spaces' AGENTS.md](../../../app/src/spaces/AGENTS.md);  epic `people-and-orgs` P14).
-- A folder of the `spell-parser` package, its entry `spell/parser/py`:
+- A folder of the kit's parser folder, its entry `spell/parser/py`:
   no `package.json` of its own (epic `repo-split` P11).
   - Its TypeScript is the folder's own files (`index.ts`, `PyWriter.ts` ...), as every folder's.
   - `core/` is a uv project of its own, beside them:  yarn, TypeScript, oxlint and oxfmt don't look in it.
@@ -27,14 +27,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `P.forEachNode()`
     - `P.jsShapes` (`unwrapped()`, `isCoreCall()` ...)
 - `spell` imports it, for its targets (`SP.TARGETS`).
-- The repo's checks (its `package.json` scripts) cover both:
+- The parser folder's checks (its `package.json` scripts) cover both:
   - the TypeScript:  tsc, oxlint / oxfmt and vitest (its project, `py`)
   - then `core/`:  ruff and pytest
-- Tests live in the repo's `tests/py/`, at the same paths as the code they test:
-  - TypeScript, found by vitest (the repo's `vitest.config.ts`, its `py` project):
+- Tests live in the parser folder's `tests/py/`, at the same paths as the code they test:
+  - TypeScript, found by vitest (the parser folder's `vitest.config.ts`, its `py` project):
     - [PyWriter.ts](PyWriter.ts) => [PyWriter.test.ts](../../tests/py/PyWriter.test.ts)
   - `core/tests/` => `tests/py/core/tests/`
-    - Its pytest finds them by its `testpaths`;  the repo's checks hand ruff their folder too.
+    - Its pytest finds them by its `testpaths`;  the parser folder's checks hand ruff their folder too.
 
 ## The writers (the TypeScript)
 
@@ -85,8 +85,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `core` stands in for the running program's own core (`using_core()`):  one per web visitor.
   - Standard library only (decision Q33):  any standard module is fine;  a package from outside it, ask Owen first.
 - A uv project, [pyproject.toml](core/pyproject.toml) with its `uv.lock`:  Python 3.12 or later.
-  - Tests are pytest's, in the repo's `tests/py/core/tests/`;  lint and format, ruff.
-  - The repo's checks run them, from its root (its `package.json` scripts):
+  - Tests are pytest's, in the parser folder's `tests/py/core/tests/`;  lint and format, ruff.
+  - The parser folder's checks run them, from its root (its `package.json` scripts):
 
     ```sh
     uv run --directory src/py/core pytest -q                                     # yarn test
