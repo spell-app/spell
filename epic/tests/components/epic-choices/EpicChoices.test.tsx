@@ -7,6 +7,7 @@ import { ReviewClient } from "spell/epic/review"
 
 // NOT `epic-item`:  the options read only their item's attributes, so an undefined `<epic-item>` does
 import "spell/epic/components/epic-choices"
+import "spell/epic/components/epic-item"
 
 ////////////////
 // ## Fakes
@@ -486,8 +487,13 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
     toggle().click()
     await settle()
     expect(markOf(routes, "q1")).toEqual({ action: "pick", multiple: true, choices: 0 })
+    // a flip alone answers nothing:  its chip not drawn as marked (Owen, 2026-10-29:  "Switched 'pick many' and Q4
+    // thinks it was decided, even though I didn't pick one")
+    const chip = () => host.closest("epic-item")!.shadowRoot!.querySelector<HTMLElement>("[part~='chip'], .chip")!
+    expect(chip().hasAttribute("data-marked")).toBe(false)
     pillOf(options[1])!.click()
     await settle()
+    expect(chip().hasAttribute("data-marked")).toBe(true)
     pillOf(options[0])!.click()
     await settle()
     expect(markOf(routes, "q1")).toEqual({ action: "pick", pick: "B A", multiple: true, choices: 0 })

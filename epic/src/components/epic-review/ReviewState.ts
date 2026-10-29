@@ -77,9 +77,15 @@ export class ReviewState {
    * Has item `itemId` a mark in the inbox, sent or not (epic `epic-engine` P43:  marked in this pass)?
    * - until Claude's `epic inbox apply` takes it off;  a draft being typed, or a comment, isn't a mark
    * - the page's inbox, so any element reads it for any item:  a section counts its items with it
+   * - NOT a set change that picks nothing (the pick-one / pick-any switch, an option added or edited):  no answer
+   *   yet, so the item keeps its colour and its count (Owen, 2026-10-29:  "Switched 'pick many' and Q4 thinks it was
+   *   decided, even though I didn't pick one")
    */
   readonly isMarked = (itemId: string): boolean =>
-    this.readPage((client) => !!itemId && !!client.markOf(itemId.toLowerCase())) ?? false
+    this.readPage((client) => {
+      const mark = itemId ? client.markOf(itemId.toLowerCase()) : undefined
+      return !!mark && !(mark.action === "pick" && !mark.pick)
+    }) ?? false
 
   /**
    * Item `itemId`'s mark, if any:  the page's inbox, so any element reads any id's (a phase its update blocks' Seen,

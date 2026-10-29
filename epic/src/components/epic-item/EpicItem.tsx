@@ -165,9 +165,10 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /**
    * Owen marked it in this pass, not applied yet (epic `epic-engine` P43):  its id chip ringed in the blue badge's blue
-   * (Owen, 2026-10-25:  "the T1 should be blue outline")
+   * (Owen, 2026-10-25:  "the T1 should be blue outline");  the section's count's rule, so a set change that picks
+   * nothing isn't one (`ReviewState.isMarked()`)
    */
-  readonly isMarkedInPass = (): boolean => !!this.reviewState.mark()
+  readonly isMarkedInPass = (): boolean => this.reviewState.isMarked(this.id ?? "")
 
   /** Its line, once drawn:  folding keeps it where it is on screen (`keepLinePut()`). */
   private lineBox: HTMLElement | undefined
