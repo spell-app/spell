@@ -1,5 +1,6 @@
-import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
+
+import { Processes } from "spell/server/Processes"
 
 /**
  * `spell server prune`:  find the web servers left running by checkouts that are gone, and stop them.
@@ -8,7 +9,7 @@ import { existsSync } from "node:fs"
  * - So they're found by PROCESS, not by pid file:
  *   - `ps` lists the page servers (`.../src/server/page/cli.ts serve`, the kit's;  `.../server/src/...` before epic `repo-split` P14, `.../packages/server/...` before P9)
  *     and the vite dev servers (`.../node_modules/vite.../ dev`)
- *   - `lsof` gives each one's working folder, and the port it listens on
+ *   - `Processes` gives each one's working folder, and the port it listens on (`lsof`, `/proc`, or PowerShell)
  * - A server is an orphan when its checkout AND its working folder are both gone:
  *   one whose checkout exists is NEVER stopped (`orphanServers()`).
  */
@@ -19,9 +20,6 @@ const PAGE_SERVER = /\/(?:(?:packages\/)?server\/src|src\/server)\/page\/cli\.ts
 /** What runs a vite dev server, through Vite+ or vite itself. */
 const VITE_SERVER =
   /(?:^|[\s/])node_modules\/(?:vite-plus\/bin\/vp|vite\/bin\/vite\.js|vite\/dist\/vite\/node\/cli\.js|\.bin\/vite|\.bin\/vp)\s+dev\b/
-
-/** What `lsof` adds to a folder that's been deleted, on some systems. */
-const DELETED = / \(deleted\)$/
 
 /** A web server, as `ps` and `lsof` show it. */
 export type ServerProcess = {
@@ -84,43 +82,23 @@ function checkoutOf({ command, cwd }: ServerProcess): string | undefined {
 
 /**
  * Every page server and vite dev server running on this machine, with its folder and port.
- * - SIDE EFFECT:  runs `ps`, and `lsof` twice
+ * - SIDE EFFECT:  asks the system (`Processes`), on macOS, Linux and Windows
  * - NEVER throws:  a tool that's missing or fails gives what it could
  */
 export function serverProcesses(): ServerProcess[] {
-  const servers = parsePs(run("ps", ["-axo", "pid=,command="])).filter(
-    (it) => it.pid !== process.pid && kindOf(it.command)
-  )
+  const servers = [...Processes.table({ args: true })]
+    // Windows writes its paths with `\`:  the patterns read `/`
+    .map(([pid, { command }]) => ({ pid, command: command.replace(/\\/g, "/") }))
+    .filter((it) => it.pid !== process.pid && kindOf(it.command))
   if (!servers.length) return []
-  const pids = servers.map((it) => it.pid).join(",")
-  const cwds = parseLsof(run("lsof", ["-a", "-p", pids, "-d", "cwd", "-Fn"]))
-  const listens = parseLsof(run("lsof", ["-a", "-p", pids, "-iTCP", "-sTCP:LISTEN", "-P", "-n", "-Fn"]))
+  const pids = servers.map((it) => it.pid)
+  const cwds = Processes.folderOf(pids)
+  const ports = Processes.portsOf(pids)
   return servers.map((server) => {
-    const cwd = cwds.get(server.pid)?.[0]?.replace(DELETED, "")
-    const port = Number(listens.get(server.pid)?.[0]?.split(":").pop())
+    const cwd = cwds.get(server.pid)
+    const port = ports.get(server.pid)
     return { ...server, ...(cwd && { cwd }), ...(port && { port }) }
   })
-}
-
-/** `ps -o pid=,command=` output, as `{ pid, command }`s. */
-export function parsePs(text: string): ServerProcess[] {
-  const processes: ServerProcess[] = []
-  for (const line of text.split("\n")) {
-    const match = /^\s*(\d+)\s+(.+)$/.exec(line)
-    if (match) processes.push({ pid: Number(match[1]), command: match[2]! })
-  }
-  return processes
-}
-
-/** `lsof -F n` output (`p<pid>`, then `n<name>` lines):  each pid's names, in order. */
-export function parseLsof(text: string): Map<number, string[]> {
-  const names = new Map<number, string[]>()
-  let pid = 0
-  for (const line of text.split("\n")) {
-    if (line.startsWith("p")) pid = Number(line.slice(1))
-    else if (line.startsWith("n") && pid) names.set(pid, [...(names.get(pid) ?? []), line.slice(1)])
-  }
-  return names
 }
 
 /**
@@ -163,9 +141,4 @@ export function pruneReport(orphans: OrphanServer[], { dryRun = false } = {}): s
 /** `count` and `noun`, plural unless it's 1:  `1 server`, `3 servers`. */
 function plural(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`
-}
-
-/** `program`'s output, or "" if it fails to start;  a non-zero exit still gives what it printed (`lsof`). */
-function run(program: string, args: string[]): string {
-  return spawnSync(program, args, { encoding: "utf8", timeout: 15_000 }).stdout ?? ""
 }

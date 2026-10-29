@@ -98,8 +98,8 @@ As WWOD §4, plus these.
     `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
-    The one file code imports from OUTSIDE `src/` has an explicit key in the kit's `exports`:
-    `spell/epic/vscode/src/docUrls.ts`, for its test.
+    The two files code imports from OUTSIDE `src/` have an explicit key each in the kit's `exports`, for their tests:
+    `spell/epic/vscode/src/docUrls.ts`, `spell/epic/vscode/src/ClipboardImage.ts` (epic `epic-friend` P15).
   - Nothing imports by the folder's old name, `spell-epic/...`:  the hooks too say `spell/epic/...`.
 - How every tool finds them:  the kit's [package.json](../package.json) `exports`, no alias table anywhere.
   - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the

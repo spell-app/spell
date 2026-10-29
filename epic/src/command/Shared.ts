@@ -8,13 +8,13 @@ import {
   readlinkSync,
   rmSync,
   statSync,
-  symlinkSync,
   writeFileSync
 } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { FileLock } from "spell/server/FileLock"
 import { Git } from "spell/server/Git"
+import { Links } from "spell/server/Links"
 import { RealPath } from "spell/server/RealPath"
 import type { SRV } from "spell/server"
 import { CLI } from "spell/cli"
@@ -257,7 +257,7 @@ export class Shared {
         rmSync(at, { recursive: true, force: true })
       } else if (state !== "missing") rmSync(at, { force: true })
       mkdirSync(dirname(at), { recursive: true })
-      symlinkSync(relative(dirname(at), target), at)
+      Links.folder(at, relative(dirname(at), target))
       return { path, state, action: state === "real" ? "replaced" : "linked" }
     })
   }
@@ -312,7 +312,7 @@ export class Shared {
     if (stat && existsSync(at) && RealPath.of(at) === RealPath.of(engine)) return { path, state: "ok", action: "ok" }
     const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
     if (stat) rmSync(at, { force: true })
-    symlinkSync(relative(checkout, engine), at)
+    Links.folder(at, relative(checkout, engine))
     return { path, state, action: "linked" }
   }
 
@@ -346,7 +346,7 @@ export class Shared {
     if (stat && existsSync(at) && RealPath.of(at) === RealPath.of(content)) return { path, state: "ok", action: "ok" }
     const state = !stat ? "missing" : existsSync(at) ? "elsewhere" : "dangling"
     if (stat) rmSync(at, { force: true })
-    symlinkSync(relative(trees, content), at)
+    Links.folder(at, relative(trees, content))
     return { path, state, action: "linked" }
   }
 

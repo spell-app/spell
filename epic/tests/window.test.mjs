@@ -67,8 +67,6 @@ const {
   movedWindowFile,
   movedWorkspace,
   moveWindowFiles,
-  parseLsof,
-  processTable,
   stayAdvice,
   tint,
   titledFor,
@@ -77,6 +75,7 @@ const {
   withStay,
   worktreeOf
 } = await import("spell/epic/window.mjs")
+const { Processes } = await import("spell/server/Processes")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -746,7 +745,7 @@ test("show():  while a move is pending, the doc waits for the target window;  th
   await assert.rejects(Window.show("/a.html", { sessionId: SESSION }), /no window/)
 })
 
-test("processTable() + claudeSessions():  a window's sessions are its extension host's `claude` children", () => {
+test("Processes.parsePs() + claudeSessions():  a window's sessions are its extension host's `claude` children", () => {
   const ps = [
     "  100     1 /Applications/Visual Studio Code.app/Contents/MacOS/Code",
     "  200   100 /Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Plugin).app/Contents/MacOS/Code Helper (Plugin)",
@@ -755,7 +754,7 @@ test("processTable() + claudeSessions():  a window's sessions are its extension 
     "  303   200 node",
     "  400   999 /Users/o/.local/bin/claude"
   ].join("\n")
-  const processes = processTable(ps)
+  const processes = Processes.parsePs(ps)
   assert.deepEqual(processes.get(200), {
     ppid: 100,
     command:
@@ -763,10 +762,13 @@ test("processTable() + claudeSessions():  a window's sessions are its extension 
   })
   assert.deepEqual(claudeSessions(processes, 200), [301, 302])
   assert.deepEqual(claudeSessions(processes, 999), [400])
+  // Windows:  a backslashed path to claude.exe
+  const windows = Processes.parsePs("  500   200 C:\\Users\\o\\.vscode\\extensions\\claude-code\\claude.exe")
+  assert.deepEqual(claudeSessions(windows, 200), [500])
 })
 
-test("parseLsof() + worktreeOf():  each session's folder, and the worktree it's in", () => {
-  const cwds = parseLsof("p301\nfcwd\nn/repo/.claude/worktrees/seo/packages/ui\np302\nfcwd\nn/repo\n")
+test("Processes.parseLsof() + worktreeOf():  each session's folder, and the worktree it's in", () => {
+  const cwds = new Map([...Processes.parseLsof("p301\nfcwd\nn/repo/.claude/worktrees/seo/packages/ui\np302\nfcwd\nn/repo\n")].map(([pid, [cwd]]) => [pid, cwd]))
   assert.deepEqual(
     [...cwds],
     [

@@ -195,6 +195,7 @@ import { fileURLToPath } from "node:url"
 import { escapeRegExp } from "spell/util/string.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
+import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
@@ -701,7 +702,7 @@ export class Window {
     delete workspace.settings["workbench.colorCustomizations"]
     writeFileSync(file, `${JSON.stringify(workspace, null, 2)}\n`)
     // by its real path:  VS Code resolves the file's relative folders from the path it's opened by, links not followed
-    const run = spawnSync("code", [real(file)], { encoding: "utf8", env: codeEnv() })
+    const run = Processes.run("code", [real(file)], { env: codeEnv() })
     if (run.status !== 0) throw new Error(`\`code ${file}\` failed:  ${run.stderr || run.error?.message}`)
     return { file, colors }
   }
@@ -822,7 +823,7 @@ export class Window {
   static epicSessions(name, open, { self = process.env.CLAUDE_CODE_SESSION_ID } = {}) {
     const worktree = real(CONFIG.worktreeFolder(name))
     const entries = Window.entries()
-    const processes = processTable()
+    const processes = Processes.table()
     return liveSessions()
       .filter(({ title, cwd }) => {
         const at = cwd ? real(cwd) : ""
@@ -937,7 +938,7 @@ export class Window {
     const { sessionId, to, from, close, remove, show, prompt } = handoff
     titles = [titles ?? []].flat().filter(Boolean)
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error(`bad session id '${sessionId}'`)
-    if (!Window.windowOf(to)) spawnSync("code", [real(to)], { encoding: "utf8", env: codeEnv() })
+    if (!Window.windowOf(to)) Processes.run("code", [real(to)], { env: codeEnv() })
     const window = await Window.waitFor(to)
     await Window.request("open-session", prompt ? { sessionId, prompt } : { sessionId }, window)
     let shown
@@ -1017,11 +1018,11 @@ export class Window {
    */
   static shouldStay({ epic = false } = {}) {
     const window = Window.current()
-    const processes = window ? processTable() : new Map()
+    const processes = window ? Processes.table() : new Map()
     const sessions = window ? claudeSessions(processes, window.pid) : []
     const self = sessions.find((pid) => isAncestor(pid, process.pid, processes)) ?? null
     const others = sessions.filter((pid) => pid !== self)
-    const cwds = cwdsOf(others)
+    const cwds = Processes.folderOf(others)
     return stayAdvice({ window, others: others.map((pid) => ({ pid, cwd: cwds.get(pid) ?? null })), epic })
   }
 
@@ -1078,7 +1079,7 @@ export class Window {
   static current() {
     const entries = Window.entries()
     if (!entries.size) return null
-    const parents = parentPids()
+    const parents = Processes.parents()
     const seen = new Set()
     for (let pid = process.pid; pid > 1 && !seen.has(pid); pid = parents.get(pid) ?? 0) {
       if (entries.has(pid)) return entries.get(pid)
@@ -1759,30 +1760,6 @@ function delay(ms) {
   return new Promise((done) => setTimeout(done, ms))
 }
 
-/** Every process's parent pid, by pid:  ONE `ps` call (empty if `ps` fails). */
-function parentPids() {
-  return new Map([...processTable()].map(([pid, { ppid }]) => [pid, ppid]))
-}
-
-/**
- * Every process, by pid:  `{ ppid, command }`, from ONE `ps` call, or from `text` (its output, for tests);
- * empty if `ps` fails.
- * - `command`:  the executable's path, spaces and all
- */
-export function processTable(text) {
-  const processes = new Map()
-  if (text === undefined) {
-    const run = spawnSync("ps", ["-axo", "pid=,ppid=,comm="], { encoding: "utf8" })
-    if (run.status !== 0) return processes
-    text = run.stdout
-  }
-  for (const line of text.split("\n")) {
-    const match = /^\s*(\d+)\s+(\d+)\s+(.*)$/.exec(line)
-    if (match) processes.set(Number(match[1]), { ppid: Number(match[2]), command: match[3].trim() })
-  }
-  return processes
-}
-
 /**
  * The pids of the Claude Code sessions in the window whose extension host is `hostPid`:  its `claude` children.
  * - one per session, in a tab or the side bar.  NOT a `claude` in the window's terminal:
@@ -1790,7 +1767,7 @@ export function processTable(text) {
  */
 export function claudeSessions(processes, hostPid) {
   return [...processes]
-    .filter(([, { ppid, command }]) => ppid === hostPid && /(^|\/)claude$/.test(command))
+    .filter(([, { ppid, command }]) => ppid === hostPid && /(^|[\\/])claude(\.exe)?$/i.test(command))
     .map(([pid]) => pid)
 }
 
@@ -1901,26 +1878,6 @@ function isAncestor(ancestor, pid, processes) {
   return false
 }
 
-/** Each of `pids`' working folder, by pid:  ONE `lsof` call;  missing when `lsof` can't tell. */
-function cwdsOf(pids) {
-  if (!pids.length) return new Map()
-  const run = spawnSync("lsof", ["-a", "-d", "cwd", "-p", pids.join(","), "-Fpn"], { encoding: "utf8" })
-  return parseLsof(run.stdout ?? "")
-}
-
-/**
- * `lsof -Fpn` output -> each pid's file, by pid:  `p<pid>` starts a process, `n<path>` is its file.
- * - other lines (`fcwd` ...) skipped
- */
-export function parseLsof(text) {
-  const cwds = new Map()
-  let pid = 0
-  for (const line of text.split("\n")) {
-    if (line.startsWith("p")) pid = Number(line.slice(1))
-    else if (line.startsWith("n") && pid) cwds.set(pid, line.slice(1))
-  }
-  return cwds
-}
 
 /** The worktree `cwd` is in (`.../.claude/worktrees/<name>/...`:  `EpicConfig.worktreeNameOf()`), else `null`. */
 export function worktreeOf(cwd) {

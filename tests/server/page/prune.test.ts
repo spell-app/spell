@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { orphanServers, parseLsof, parsePs, pruneReport, type ServerProcess } from "spell/server/page"
+import { orphanServers, pruneReport, type ServerProcess } from "spell/server/page"
 
 const NODE = "/usr/local/bin/node"
 const TREES = "/repo/.claude/worktrees"
@@ -45,21 +45,6 @@ describe("orphanServers()", () => {
   test("the checkout comes from the working folder when the command names none", () => {
     const bare = { pid: 1, command: "node node_modules/vite-plus/bin/vp dev", cwd: `${TREES}/gone/packages/app` }
     expect(orphanServers([bare], (path) => EXISTING.has(path))[0]?.checkout).toBe(`${TREES}/gone/packages/app`)
-  })
-})
-
-describe("parsePs() / parseLsof()", () => {
-  test("pid and command per line;  each pid's names, in order", () => {
-    expect(parsePs("  135 node a.js serve\n 2329 vp dev --port 1\n")).toEqual([
-      { pid: 135, command: "node a.js serve" },
-      { pid: 2329, command: "vp dev --port 1" }
-    ])
-    expect(parseLsof("p135\nfcwd\nn/repo/gone\np155\nf12\nn127.0.0.1:4748\nn[::1]:4748\n")).toEqual(
-      new Map([
-        [135, ["/repo/gone"]],
-        [155, ["127.0.0.1:4748", "[::1]:4748"]]
-      ])
-    )
   })
 })
 

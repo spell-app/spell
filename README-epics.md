@@ -47,7 +47,7 @@ Three things to know before you start:
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
   The skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
-  and they assume VS Code on macOS.
+  in VS Code, on macOS, Linux or Windows (Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](#with-codex).
 - **It has run end to end outside Spell once**, in a throwaway repo:
@@ -748,10 +748,16 @@ What you'd trip on today, roughly in the order you'd meet it.
    The skills run in Codex too, but five stay Claude Code's, and so do waking a session from the page, session
    titles and window moves ([With Codex](#with-codex));  any other agent follows `epic guide`.
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
-7. **VS Code and macOS.**
-   The window bridge finds a session's window through its parent processes;
-   `vscode://` links are avoided because macOS hands them to whichever window is focused.
-   The extension is built and installed by hand.
+7. **VS Code, tried only on macOS.**
+   Linux and Windows have their own way of listing processes, linking folders and reading a pasted picture
+   (`wl-paste` or `xclip` on Linux, PowerShell on Windows), but no person has run them there yet.
+   - Windows:  a session's window can't be told from its process (Windows doesn't say which files a process has open),
+     so `epic session open` opens in the last window.
+   - `epic` is `epic.cmd` there, in `%USERPROFILE%\.local\bin`:  put that folder on your `PATH`.
+   - The window bridge finds a session's window through its parent processes;
+     `vscode://` links are avoided because macOS hands them to whichever window is focused.
+   - `epic plugin install` (and so `epic init`) installs the extension from `epic/vscode/spell-epic.vsix`;  in a
+     clone of Spell, build it first:  `yarn vscode:package` in `epic/`.
 8. **Spell's own page server knows your project only by a file you write.**
    You need it only to see your own component set or bundles on Spell's pages, not for epics:
    the epic server above serves your plans.

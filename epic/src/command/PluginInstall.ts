@@ -7,7 +7,7 @@ import {
   readlinkSync,
   realpathSync,
   rmSync,
-  symlinkSync,
+  statSync,
   writeFileSync
 } from "node:fs"
 import { createRequire } from "node:module"
@@ -15,6 +15,8 @@ import { homedir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
+import { Links } from "spell/server/Links"
+import { Processes } from "spell/server/Processes"
 import { CLI } from "spell/cli"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { CodexHome, EPIC_HOOK, PLUGIN_HOOK_FLAG } from "spell/epic/config/CodexHome"
@@ -95,6 +97,10 @@ export class PluginInstall {
   readonly agentsHome: string
   /** the plugin's folder:  the kit's `epic/`, or the published `spell-epic` package (`pluginFolder()`) */
   readonly engine: string
+  /** the system it installs on:  links and `epic`'s place on the `PATH` differ on Windows */
+  readonly platform: NodeJS.Platform
+  /** runs VS Code's `code` command:  its output, or `undefined` when it can't run or fails */
+  readonly code: (args: string[]) => string | undefined
 
   constructor({
     home = ClaudeHome.home(),
@@ -102,7 +108,9 @@ export class PluginInstall {
     bin = join(homedir(), ".local", "bin"),
     now = () => new Date(),
     codexHome = CodexHome.home(),
-    agentsHome = CodexHome.agentsHome()
+    agentsHome = CodexHome.agentsHome(),
+    platform = process.platform,
+    code = runCode
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
@@ -111,6 +119,8 @@ export class PluginInstall {
     this.codexHome = codexHome
     this.agentsHome = agentsHome
     this.engine = PluginInstall.pluginFolder(kit)
+    this.platform = platform
+    this.code = code
   }
 
   /**
@@ -207,6 +217,7 @@ export class PluginInstall {
     this.cache(plugin, marketplace, version, { dryRun, change })
     this.linkSkills(join(this.home, "skills"), "skills", { dryRun, change })
     this.binLink({ dryRun, change })
+    this.extension({ dryRun, change })
     return report
   }
 
@@ -549,13 +560,55 @@ export class PluginInstall {
    * - the published `spell` without `spell-epic`, which has none:  skipped, saying so
    */
   private binLink(step: Step): void {
-    const at = join(this.bin, "epic")
     const target = join(this.engine, "bin", "epic")
+    const at = join(this.bin, this.platform === "win32" ? "epic.cmd" : "epic")
     if (!existsSync(target)) {
       step.change(`PATH:  ${target} doesn't exist, so no ${at};  for the epic command:  npm install ${PLUGIN_PACKAGE}`)
       return
     }
+    if (this.platform === "win32") return this.binScript(at, target, step)
     if (this.link(at, target, step)) step.change(`PATH:  ${at} links to ${target}`)
+  }
+
+  /**
+   * Step 6 on Windows:  `epic.cmd`, a script that runs the plugin's `bin/epic` with node (epic `epic-friend` P15).
+   * - Windows runs no file without an extension, and links one only with Developer Mode on:  a `.cmd` needs neither
+   * - SIDE EFFECT (not `dryRun`):  writes it, and makes its folder
+   */
+  private binScript(at: string, target: string, step: Step): void {
+    const script = `@echo off\r\nnode "${target}" %*\r\n`
+    if (existsSync(at) && readFileSync(at, "utf8") === script) return
+    if (!step.dryRun) {
+      mkdirSync(this.bin, { recursive: true })
+      writeFileSync(at, script)
+    }
+    step.change(`PATH:  ${at} runs ${target};  put ${this.bin} on your PATH if it isn't`)
+  }
+
+  /**
+   * Step 7:  the epic VS Code extension (its Review tab, the window moves), from the plugin's
+   * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when VS Code has
+   * that version already.
+   * - no `.vsix` (a checkout that hasn't built one:  `yarn vscode:package`):  nothing, and no change said
+   * - no `code` command:  one line saying so
+   */
+  private extension(step: Step): void {
+    const folder = join(this.engine, "vscode")
+    const vsix = join(folder, VSIX)
+    if (!existsSync(vsix) || !existsSync(join(folder, "package.json"))) return
+    const { publisher, name, version } = readJson(join(folder, "package.json")) as Record<string, string>
+    const id = `${publisher}.${name}`
+    const listed = this.code(["--list-extensions", "--show-versions"])
+    if (listed === undefined) {
+      step.change(`VS Code:  no code command, so ${vsix} isn't installed;  in VS Code:  Install from VSIX...`)
+      return
+    }
+    if (listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())) return
+    if (!step.dryRun && this.code(["--install-extension", vsix, "--force"]) === undefined) {
+      step.change(`VS Code:  \`code --install-extension ${vsix}\` failed;  in VS Code:  Install from VSIX...`)
+      return
+    }
+    step.change(`VS Code:  extension ${id} ${version} installed;  then:  Developer:  Reload Window`)
   }
 
   /**
@@ -570,7 +623,9 @@ export class PluginInstall {
     if (dryRun) return true
     if (stat) rmSync(at, { recursive: true, force: true })
     mkdirSync(dirname(at), { recursive: true })
-    symlinkSync(target, at)
+    // a folder:  a junction on Windows, which needs no special rights
+    if (statSync(target).isDirectory()) Links.folder(at, target, this.platform)
+    else Links.file(at, target, this.platform)
     return true
   }
 }
@@ -589,6 +644,10 @@ export type PluginInstallProps = {
   codexHome?: string
   /** the open skills format's folder, whose `skills/` Codex lists;  default `$SPELL_EPIC_AGENTS_HOME`, else `~/.agents` */
   agentsHome?: string
+  /** the system to install on;  default `process.platform` */
+  platform?: NodeJS.Platform
+  /** runs VS Code's `code` command;  default the real one (`Processes.run()`), a test hands in a stand-in */
+  code?: (args: string[]) => string | undefined
 }
 
 /** What `install()` did, or would do. */
@@ -667,6 +726,9 @@ const NEW_TEMPLATES = "epic/templates/epics/"
 /** A skill link's target in an older folder of the plugin's:  `.../spell-epic/skills/epic`, `.../epic/skills/epic`. */
 const OLD_SKILL = /(?:^|\/)(?:spell-)?epic\/skills\/[^/]+\/?$/
 
+/** The VS Code extension's package, in the plugin's `vscode/`:  `yarn vscode:package` writes it. */
+const VSIX = "spell-epic.vsix"
+
 /** The plugin's Codex hooks, in its `hooks/`. */
 const CODEX_HOOKS = "codex-hooks.json"
 
@@ -687,6 +749,12 @@ function isOldPlugin(key: string): boolean {
 /** Where `source` is, for a report line:  the folder, or `github:<repo>`. */
 function sourceName(source: MarketplaceSource): string {
   return source.source === "directory" ? source.path : `github:${source.repo}`
+}
+
+/** VS Code's `code` command run with `args`:  its output, or `undefined` when it can't run or fails. */
+function runCode(args: string[]): string | undefined {
+  const run = Processes.run("code", args)
+  return run.status === 0 ? run.stdout : undefined
 }
 
 /** JSON file `file`;  throws `EpicCommandError` when it won't parse. */

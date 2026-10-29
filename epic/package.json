@@ -118,7 +118,9 @@
       ".claude-plugin",
       ".codex-plugin",
       "src/AGENTS.md",
-      "src/tool/PLAN-DOC.md"
+      "src/tool/PLAN-DOC.md",
+      "vscode/package.json",
+      "vscode/spell-epic.vsix"
     ],
     "bin": {
       "epic": "cli/epicMain"

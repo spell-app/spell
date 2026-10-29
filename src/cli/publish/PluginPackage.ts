@@ -60,7 +60,11 @@ export class PluginPackage extends PublishedPackage {
     )
     chmodSync(bin, 0o755)
     writeFileSync(join(this.stageDir, "package.json"), `${JSON.stringify(this.manifest(), null, 2)}\n`)
-    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings: [] }
+    // the VS Code extension `epic plugin install` installs (epic `epic-friend` P15):  built beforehand, never here
+    const warnings = existsSync(join(this.stageDir, VSIX))
+      ? []
+      : [`no ${VSIX}:  \`yarn vscode:package\` in epic/ first, or epic plugin install can't install the extension`]
+    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings }
     return this.built
   }
 
@@ -206,6 +210,9 @@ function filesUnder(folder: string): string[] {
 
 /** The plugin's name in Claude Code:  `/plugin install epic@spell` (Owen, 2026-10-26, Q58). */
 export const PLUGIN_NAME = "epic"
+
+/** The epic VS Code extension's package, as the plugin ships it (`PluginInstall`'s step 7). */
+const VSIX = "vscode/spell-epic.vsix"
 
 /** The plugin manifests' folders:  Claude Code's, and Codex's (epic `epic-friend` P12). */
 const MANIFEST_FOLDERS = [".claude-plugin", ".codex-plugin"]

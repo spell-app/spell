@@ -262,15 +262,19 @@ export class RepoInit {
 
   /**
    * The epic plugin, installed for Claude Code when it isn't yet (the class's step 0);  what it did, or would.
+   * - installed already:  its install run anyway, which changes nothing but what's missing, such as the VS Code
+   *   extension (epic `epic-friend` P15);  `already` when it changed nothing
    * - NEVER throws:  a failure is `failed`, with its words, and init carries on
-   * - SIDE EFFECT (not `dryRun`, not installed):  Claude Code's settings and lists, the links (`PluginInstall`)
+   * - SIDE EFFECT (not `dryRun`):  Claude Code's settings and lists, the links, the extension (`PluginInstall`)
    */
   pluginStep({ dryRun }: { dryRun: boolean }): PluginReport {
     try {
       const installer = this.plugin()
-      if (installer.isInstalled()) return { action: "already" }
-      if (dryRun) return { action: "would install" }
-      return { action: "installed", changes: installer.install().changes.length }
+      const installed = installer.isInstalled()
+      if (dryRun) return { action: installed ? "already" : "would install" }
+      const changes = installer.install().changes.length
+      if (installed && !changes) return { action: "already" }
+      return { action: "installed", changes }
     } catch (error) {
       return { action: "failed", error: (error as Error).message }
     }

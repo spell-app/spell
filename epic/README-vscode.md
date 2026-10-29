@@ -78,6 +78,9 @@ yarn package                               # bundles out/extension.js, then writ
 code --install-extension spell-epic.vsix
 ```
 
+Or let `epic plugin install` (and so `epic init`) install it:  it installs `vscode/spell-epic.vsix` with
+`code --install-extension` whenever VS Code doesn't have that version yet (epic `epic-friend` P15).
+
 Then reload each window ("Developer:  Reload Window", in the Command Palette):
 a window keeps running the copy it started with.
 A reload restarts that window's Claude panel too, so do it between turns.
@@ -397,8 +400,14 @@ Where the bridge can let you down:
   `open-session` calls its `claude-vscode.primaryEditor.open`, with the prompt as its second argument
   (as of its version 2.1.287);  `close-session-tab` finds its tabs by their webview type.
   A change there can break both, and no other agent's extension is driven at all.
-- **Made on macOS.**
-  Bringing VS Code forward after a link, and `epic open`'s `vscode://` fallback, work there only.
+- **Made on macOS;  Linux and Windows not yet tried by a person** (epic `epic-friend` P15).
+  - The process table, a process's folder and open files, links and running `code` go through the kit's
+    `Processes` and `Links` (`spell/server`), which ask each system its own way.
+  - A pasted picture:  `ClipboardImage`, AppleScript on macOS, `wl-paste` or `xclip` on Linux, PowerShell on
+    Windows.
+  - Windows can't say which files a process has open, so a session's window isn't found there:
+    `epic session open` opens in the last window.
+  - Bringing VS Code forward after a link, and `epic open`'s `vscode://` fallback, work on macOS only.
 
 ## Working on it
 

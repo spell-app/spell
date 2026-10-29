@@ -200,7 +200,7 @@ describe("RepoInit's statics", () => {
 })
 
 describe("epic init:  one command (epic-friend P13)", () => {
-  test("the plugin:  installed when Claude Code doesn't have it, first;  run again, there already", async () => {
+  test("the plugin:  installed when Claude Code doesn't have it, first;  run again, its install changes nothing", async () => {
     const app = codeRepo("plugin")
     const plugin = stubPlugin()
     const init = new RepoInit({ main: app, plugin: plugin.make, hub: stubHub().make })
@@ -211,7 +211,8 @@ describe("epic init:  one command (epic-friend P13)", () => {
     )
     const again = await init.init({ plugin: true })
     expect(again.plugin).toEqual({ action: "already" })
-    expect(plugin.calls).toEqual(["install"])
+    // run anyway (epic-friend P15):  it installs what's missing, such as the VS Code extension
+    expect(plugin.calls).toEqual(["install", "install"])
   })
 
   test("the plugin:  a dry run installs nothing;  a failure is one line, and init carries on;  off by default", async () => {
@@ -495,11 +496,13 @@ function stubPlugin({ installed = false, fails }: { installed?: boolean; fails?:
     calls,
     make: () => ({
       isInstalled: () => installed,
+      // as `PluginInstall.install()`:  run again, nothing to change
       install: () => {
         calls.push("install")
         if (fails) throw new Error(fails)
+        const changes = installed ? [] : ["a", "b", "c"]
         installed = true
-        return { plugin: "epic@spell", version: "1.0.0", from: "/kit/epic", dryRun: false, changes: ["a", "b", "c"] }
+        return { plugin: "epic@spell", version: "1.0.0", from: "/kit/epic", dryRun: false, changes }
       }
     })
   }

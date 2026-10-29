@@ -5,6 +5,7 @@ import { constants } from "node:os"
 import { dirname, join } from "node:path"
 
 // By its file, not the server's barrel:  every `spell` command loads this, and needs no linkedom
+import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 
@@ -69,7 +70,9 @@ export function runChild(
   args: string[],
   options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}
 ): Promise<number> {
-  const child = spawn(command, args, { ...options, stdio: "inherit" })
+  // Windows:  `npx`, `code` ... are `.cmd` files, which only a shell starts
+  const call = Processes.call(command, args)
+  const child = spawn(call.command, call.args, { ...options, stdio: "inherit", shell: call.shell })
   const ignore = () => {}
   const pass = (signal: NodeJS.Signals) => child.kill(signal)
   process.on("SIGINT", ignore)
