@@ -125,12 +125,12 @@ describe("LspToMonaco", () => {
   })
 
   describe("on real answers, for the Solitaire example's deck, in spellx", () => {
-    const deckPath = resolve(environment.systemFilesRoot, "examples", "Solitaire", "Deck.spellx")
+    const deckPath = resolve(environment.systemFilesRoot, "examples", "Solitaire", "Deck.spellml")
     const deckUri = pathToFileURL(deckPath).href
     const deckText = readFileSync(deckPath, "utf8")
     const workspace = new SpellDiskWorkspace()
     const service = new LSP.SpellLanguageService(workspace)
-    /** LSP position of `needle` in Deck.spellx, plus `delta` characters. */
+    /** LSP position of `needle` in Deck.spellml, plus `delta` characters. */
     const at = (needle: string, delta = 0) => {
       const before = deckText.slice(0, deckText.indexOf(needle) + delta).split("\n")
       return { line: before.length - 1, character: before.at(-1)!.length }

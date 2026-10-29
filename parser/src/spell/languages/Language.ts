@@ -330,7 +330,7 @@ export type ParserMessages = Record<ParserMessageKey, string>
 
 /**
  * The language part of a spell file's name, before its `.spell`:  `es` in `Carta.es.spell`, `pt-BR` in `x.pt-BR.spell`.
- * - A spellx file says it the same way:  `Carta.es.spellx` (epic `elemental-spell`).
+ * - A spellx file says it the same way:  `Carta.es.spellml` (epic `elemental-spell`).
  * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
  */
 const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spellx?(?::[\d-]*)?$/

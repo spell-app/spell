@@ -3,9 +3,9 @@ import { SP } from "spell/parser/spell"
 
 /**
  * A `.spell` file written as SPELLX (epic `elemental-spell` P12, Q19):
- * `SpellxWriter.write(file)` => its `.spellx` text, a fresh layout of the same program.
+ * `SpellxWriter.write(file)` => its `.spellml` text, a fresh layout of the same program.
  * - The other way from `SX.CodeSpellWriter`, and the same idea:  each declaration line is written as the tag whose
- *   code-spell TWIN (`SP.SpellxTwin`) it is, so the `.spellx` compiles to exactly what the `.spell` did.
+ *   code-spell TWIN (`SP.SpellxTwin`) it is, so the `.spellml` compiles to exactly what the `.spell` did.
  * - Rule by rule, from the file's PARSE:  each line's statement says what it declares (`create_type`,
  *   `define_property_has`, `to_do_something` ...), and the language's twin words say how it's worded
  *   (`SP.SpellxTwinWords`), so a Spanish file is written in Spanish spellx too.
@@ -42,8 +42,8 @@ export class SpellxWriter {
   /**
    * The spellx `file` reads as, for people to look at:  the editors' "Show as Spellx" view of a `.spell` file.
    * - A `.spell` file:  written as spellx from its last parse, so unsaved edits show.
-   * - A `.spellx` file:  its own text.
-   * - A view only, never saved:  a template lives in ONE file, `.spell` or `.spellx`, never both
+   * - A `.spellml` file:  its own text.
+   * - A view only, never saved:  a template lives in ONE file, `.spell` or `.spellml`, never both
    *   (Owen, 2026-10-25, epic `elemental-spell` J95:  "one file").
    * - Throws `TypeError` if a `.spell` file hasn't been parsed yet.
    */

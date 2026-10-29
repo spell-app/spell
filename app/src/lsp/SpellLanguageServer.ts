@@ -212,7 +212,7 @@ export class SpellLanguageServer {
           { globPattern: "**/__project.json5" },
           { globPattern: "**/project.json" },
           { globPattern: "**/*.spell" },
-          { globPattern: "**/*.spellx" }
+          { globPattern: "**/*.spellml" }
         ]
       })
       .catch(() => undefined)

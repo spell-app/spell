@@ -85,11 +85,11 @@ export class SpellFile extends TextFile {
   }
 
   /**
-   * The form we're written in, by our name:  `Card.spellx` is spellx, spell's tag-shaped form;  `Card.spell` code spell.
+   * The form we're written in, by our name:  `Card.spellml` is spellx, spell's tag-shaped form;  `Card.spell` code spell.
    * - Both parse to the same program, by the same rules:  spellx through its own tokenizer (epic `elemental-spell` P6).
    */
   get form(): SP.SpellForm {
-    return this.file?.endsWith(".spellx") ? "spellx" : "spell"
+    return this.file?.endsWith(".spellml") ? "spellx" : "spell"
   }
 
   /** Pointer to our `SpellProject`. */

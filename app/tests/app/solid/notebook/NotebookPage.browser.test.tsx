@@ -204,7 +204,7 @@ type TestFile = { path: string; form: "spellx"; contents: string; match: unknown
 async function mount(options: { width?: number; contents?: string } = {}) {
   const contents = options.contents ?? COUNTER
   const runtime = await testRuntime()
-  const { code } = compiledSpellProject([{ path: "/Counter.spellx", contents }])
+  const { code } = compiledSpellProject([{ path: "/Counter.spellml", contents }])
   const appRoot = document.createElement("div")
   document.body.append(appRoot)
   // its imports, as a project's compile writes them above its code
@@ -212,12 +212,12 @@ async function mount(options: { width?: number; contents?: string } = {}) {
   const error = await runtime.runApp(header + code, { appRoot, coreUrl: RUNTIME_URL })
   expect(error).toBeUndefined()
 
-  const incremental = incrementalSpellProject([{ path: "/Counter.spellx", contents }])
+  const incremental = incrementalSpellProject([{ path: "/Counter.spellml", contents }])
   const file: TestFile = {
-    path: "/Counter.spellx",
+    path: "/Counter.spellml",
     form: "spellx",
     contents,
-    match: incremental.getFile("/Counter.spellx")!.match,
+    match: incremental.getFile("/Counter.spellml")!.match,
     saves: 0,
     async save() {
       this.saves++

@@ -1,6 +1,6 @@
 ## A notebook:  a page of prose, live examples and its own templates
 // Built into spell (epic `elemental-spell` P16):  compiled once, into the core's `Notebook`.
-// A notebook made from it says what's on its page with `to draw its content:`;  a `.spellx` notebook writes that as
+// A notebook made from it says what's on its page with `to draw its content:`;  a `.spellml` notebook writes that as
 // its body:  markdown, drawing tags and `<example>`s.
 a "notebook" is a page where:
 	- it has slots "content"

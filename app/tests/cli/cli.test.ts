@@ -48,7 +48,7 @@ const REPO_ROOT = resolve(import.meta.dirname, "..", "..")
 /** The page server's root, where its pid file is:  the kit around this repo (epic `repo-split` P16). */
 const SERVER_ROOT = pageServerRoot(REPO_ROOT)
 
-/** The Solitaire example's folder:  its files are spell files a test can name, `Card.spellx`. */
+/** The Solitaire example's folder:  its files are spell files a test can name, `Card.spellml`. */
 const SOLITAIRE = fixtureFolder("Solitaire")
 
 /** Temp folder holding `tempProject()`s -- its REAL path:  on macOS `tmpdir()` is a symlink, and spell reports real paths. */
@@ -74,7 +74,7 @@ function prefixed(prefix: string, files: Record<string, number>): Record<string,
 
 /**
  * A throwaway project `name` in `TEMP`, of one file `<name>.spell` holding `source`.  Returns its folder.
- * - `suffix`:  the file's end, `.spellx` for a spellx file
+ * - `suffix`:  the file's end, `.spellml` for a spellx file
  */
 function tempProject(name: string, source: string, suffix = SP.SPELL_SUFFIX): string {
   const folder = resolve(TEMP, name)
@@ -200,7 +200,7 @@ describe("spell app serve", () => {
       const projects = await (await fetch(`${editor}/api/projects/list/@spell/examples`)).text()
       expect(projects).toContain("@spell/examples/Solitaire")
       // a file by its URL, `/spaces/<address>`, through vite's proxy
-      const file = await fetch(`${editor}/spaces/@spell/examples/Solitaire/Solitaire.spellx`)
+      const file = await fetch(`${editor}/spaces/@spell/examples/Solitaire/Solitaire.spellml`)
       expect(file.status).toBe(200)
 
       child.kill("SIGINT")
@@ -257,7 +257,7 @@ describe("spell compile", () => {
 
   test("a spell file prints its javascript", () => {
     // Solitaire's card
-    const { status, stdout } = spell(["compile", "Card.spellx"], SOLITAIRE)
+    const { status, stdout } = spell(["compile", "Card.spellml"], SOLITAIRE)
     expect(status).toBe(0)
     // after the file's heading and docstring;  just code:  declarations go in the project's declarations file
     expect(stdout).toMatch(/^core\.heading\([^]*\nexport class Card extends TwoSidedView \{/)
@@ -391,14 +391,14 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
     const { status, stdout } = spell(["lint", ".", "--fix"], habits)
     expect(stdout).toBe(
       [
-        "Habits.spellx:7:4  fixed:  <ui-button> is <button> in spellx",
-        "Habits.spellx:8:4  fixed:  <ui-text> is <text> in spellx",
-        "Habits.spellx:8:9  on-click= is HTML's habit:  in spellx, handle it in the template, with <on click>...</>",
+        "Habits.spellml:7:4  fixed:  <ui-button> is <button> in spellx",
+        "Habits.spellml:8:4  fixed:  <ui-text> is <text> in spellx",
+        "Habits.spellml:8:9  on-click= is HTML's habit:  in spellx, handle it in the template, with <on click>...</>",
         ""
       ].join("\n")
     )
     expect(status).toBe(1)
-    expect(readFileSync(resolve(habits, "Habits.spellx"), "utf8")).toBe(
+    expect(readFileSync(resolve(habits, "Habits.spellml"), "utf8")).toBe(
       SOURCE.replace("<ui-button>Go</ui-button>", "<button>Go</button>").replace("<ui-text", "<text")
     )
   }, 30_000)
@@ -497,15 +497,15 @@ const CARD_PAGE = `<ui-property-editor schema="Card" label="Card">
 
 describe("spell describe", () => {
   test("a file:  what it declares", () => {
-    const { status, stdout } = spell(["describe", "Card.spellx"], SOLITAIRE)
+    const { status, stdout } = spell(["describe", "Card.spellml"], SOLITAIRE)
     expect(status).toBe(0)
-    expect(stdout).toMatch(/^Card\.spellx\n {2}A playing card\n {2}template Card {2}is a TwoSidedView\n/)
+    expect(stdout).toMatch(/^Card\.spellml\n {2}A playing card\n {2}template Card {2}is a TwoSidedView\n/)
   })
 
   test("one thing, by name -- ignoring case, and spaces ~== `_`", () => {
     const { status, stdout } = spell(["describe", ".", "STOCK pile"], fixtureFolder("Solitaire"))
     expect(status).toBe(0)
-    expect(stdout).toMatch(/^template StockPile is a Pile\nSolitaire\.spellx:\d+\n/)
+    expect(stdout).toMatch(/^template StockPile is a Pile\nSolitaire\.spellml:\d+\n/)
   })
 
   test("a member of a thing", () => {
@@ -893,11 +893,11 @@ describe("spell spellx convert", () => {
     const folder = tempProject("Deal", 'a "card" is a thing where:\n\t- its "rank" is 1\n')
     const dryRun = spell(["spellx", "convert", "--dry-run", "."], folder)
     expect(dryRun.status).toBe(0)
-    expect(dryRun.stdout).toBe('// Deal.spellx\n<spell-thing "card">\n\t<property "rank">1</>\n</spell-thing>\n')
-    expect(existsSync(resolve(folder, "Deal.spellx"))).toBe(false)
+    expect(dryRun.stdout).toBe('// Deal.spellml\n<spell-thing "card">\n\t<property "rank">1</>\n</spell-thing>\n')
+    expect(existsSync(resolve(folder, "Deal.spellml"))).toBe(false)
 
-    expect(spell(["spellx", "convert", "."], folder).stdout).toBe("Deal.spellx\n")
-    expect(readFileSync(resolve(folder, "Deal.spellx"), "utf8")).toContain('<property "rank">1</>')
+    expect(spell(["spellx", "convert", "."], folder).stdout).toBe("Deal.spellml\n")
+    expect(readFileSync(resolve(folder, "Deal.spellml"), "utf8")).toContain('<property "rank">1</>')
   })
 
   test("never writes into a test project", () => {
@@ -907,8 +907,8 @@ describe("spell spellx convert", () => {
   })
 })
 
-// epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellx` file
-describe("a project of a .spellx file alone, no .spell copy", () => {
+// epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellml` file
+describe("a project of a .spellml file alone, no .spell copy", () => {
   const SOURCE =
     '<spell-thing "card">\n\t<property "rank">7</>\n\t<action "show it">\n\t\tprint its rank\n\t</>\n</spell-thing>\n\n' +
     "<spell>\n\tshow a new card\n</spell>\n"
@@ -992,7 +992,7 @@ describe("spell explain", () => {
   test("--in a project:  what it declares, as the editor's hover shows it", () => {
     const { status, stdout } = spell(["explain", "tableau", "--in", "@spell/examples/Solitaire"])
     expect(status).toBe(0)
-    expect(stdout).toMatch(/Solitaire\.spellx:\d+\ntemplate Tableau is a Pile\n/)
+    expect(stdout).toMatch(/Solitaire\.spellml:\d+\ntemplate Tableau is a Pile\n/)
   })
 
   test("--in a project:  what the projects it imports declare, too", () => {

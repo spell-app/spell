@@ -279,7 +279,7 @@ function languageOf(files: string[]): string | undefined {
   return languages.size === 1 && language !== "en" ? language : undefined
 }
 
-/** A spell file's name:  `.spell` or `.spellx`. */
+/** A spell file's name:  `.spell` or `.spellml`. */
 const SPELL_FILE = /\.spellx?$/
 
 /**

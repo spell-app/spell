@@ -3,23 +3,23 @@
   "description": "Spell UI's Shape page as notebooks:  its Examples, Usage, API and Theming tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
   "imports": [
     {
-      "path": "/Examples.spellx",
+      "path": "/Examples.spellml",
       "active": true
     },
     {
-      "path": "/Usage.spellx",
+      "path": "/Usage.spellml",
       "active": true
     },
     {
-      "path": "/API.spellx",
+      "path": "/API.spellml",
       "active": true
     },
     {
-      "path": "/Theming.spellx",
+      "path": "/Theming.spellml",
       "active": true
     },
     {
-      "path": "/TabBar.spellx",
+      "path": "/TabBar.spellml",
       "active": true
     }
   ]

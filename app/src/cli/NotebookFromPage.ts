@@ -7,9 +7,9 @@ import { SP } from "spell/parser/spell"
  * A Spell UI component page (`ui/docs/ui-button.html`) as a project of notebooks, one per tab
  * (epic `elemental-spell` P19):  `spell app notebook convert`.
  * - What it writes, by file name:
- *   - `<Tab>.spellx` per tab (`Examples.spellx`, `Usage.spellx` ...):  the page's title and subtitle, the tab bar,
+ *   - `<Tab>.spellml` per tab (`Examples.spellml`, `Usage.spellml` ...):  the page's title and subtitle, the tab bar,
  *     the tab's section tabs, then each section, in order
- *   - `TabBar.spellx`:  the tab bar every notebook draws, `<button-tab-bar showing="usage"/>`, its own tab selected
+ *   - `TabBar.spellml`:  the tab bar every notebook draws, `<button-tab-bar showing="usage"/>`, its own tab selected
  *   - `__project.json5`
  * - Each example's markup in spellx's bare names (`<button>` is `<ui-button>`), as Avatar's notebooks are written:
  *   - the web's own tags as Spell UI's (epic `elemental-spell` P26;  `webTagsAsSpellUI()`):  `<p>` is
@@ -64,7 +64,7 @@ export class NotebookFromPage {
         element,
         value: element.getAttribute("value") ?? slugOf(label),
         label,
-        file: `${fileNameOf(label)}.spellx`
+        file: `${fileNameOf(label)}.spellml`
       }
     })
     if (!this.tabs.length)
@@ -118,14 +118,14 @@ export class NotebookFromPage {
   get files(): Map<string, string> {
     const files = new Map<string, string>()
     for (const tab of this.tabs) files.set(tab.file, this.notebookFor(tab))
-    files.set("TabBar.spellx", this.tabBar())
+    files.set("TabBar.spellml", this.tabBar())
     files.set("__project.json5", this.projectFile())
     return files
   }
 
   /** `__project.json5`:  each notebook, then the tab bar. */
   private projectFile(): string {
-    const imports = [...this.tabs.map((tab) => tab.file), "TabBar.spellx"]
+    const imports = [...this.tabs.map((tab) => tab.file), "TabBar.spellml"]
       .map((file) => `    {\n      "path": "/${file}",\n      "active": true\n    }`)
       .join(",\n")
     const tabs = listOf(this.tabs.map((tab) => tab.label))
@@ -138,7 +138,7 @@ export class NotebookFromPage {
     )
   }
 
-  /** `TabBar.spellx`:  the tabs, a segmented menu of links, the one `showing` names selected. */
+  /** `TabBar.spellml`:  the tabs, a segmented menu of links, the one `showing` names selected. */
   private tabBar(): string {
     const values = this.tabs.map((tab) => tab.value)
     const items = this.tabs.map(
@@ -779,7 +779,7 @@ export class NotebookFromPage {
     return new URL(value, `http://page${this.options.page}`).pathname
   }
 
-  /** Tab `tab`'s notebook's address in the editor:  `/edit/@spell/notebooks/Button/Usage.spellx`. */
+  /** Tab `tab`'s notebook's address in the editor:  `/edit/@spell/notebooks/Button/Usage.spellml`. */
   private addressOf(tab: Tab): string {
     return `/edit/${this.project}/${tab.file}`
   }

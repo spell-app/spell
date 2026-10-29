@@ -15,7 +15,7 @@ import {
  * `notebook` template, its body a drawing of markdown, markup and `<example>`s, with templates of its own.
  * - It reads as its code-spell twin:  `counter notebook is a notebook :`, its drawing `- to draw its content :`,
  *   each run of prose a `<markdown>` block (a new one at each `##`), its templates before it, and `start` after it.
- * - A notebook is only ever a `.spellx` file:  its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must
+ * - A notebook is only ever a `.spellml` file:  its `.spell` twin is made in memory (`SX.CodeSpellWriter`), and must
  *   compile to the same program.
  */
 describe("a spellx notebook", () => {
@@ -47,7 +47,7 @@ describe("a spellx notebook", () => {
 
   test("written as code spell, in memory, it compiles to the same program", () => {
     const written = SX.CodeSpellWriter.write(COUNTER, {
-      path: "/Counter.spellx",
+      path: "/Counter.spellml",
       // the project's own views, as the editor reads them off the parse
       componentTag: (word) => (word === "counter" ? "test-project-counter" : SP.ComponentPacks.tagFor(word, "en"))
     })
@@ -60,7 +60,7 @@ describe("a spellx notebook", () => {
   })
 
   test("its chunk tree keeps every cell where it's written:  prose, its template, its examples", () => {
-    const file = SX.SpellxView.read(COUNTER, { path: "/Counter.spellx" })
+    const file = SX.SpellxView.read(COUNTER, { path: "/Counter.spellml" })
     expect(file.diagnostics).toEqual([])
     const [notebook] = file.nodes
     expect(notebook).toMatchObject({ kind: "template", type: "notebook", name: "counter notebook" })
@@ -90,7 +90,7 @@ describe("a spellx notebook", () => {
       "\t</ejemplo>",
       "</encanto-cuaderno>"
     ].join("\n")
-    const { code, errors } = compiled(text, "/Contador.es.spellx")
+    const { code, errors } = compiled(text, "/Contador.es.spellml")
     expect(errors).toEqual([])
     expect(code).toContain("export class CuadernoDelContador extends Notebook {")
     expect(code).toContain('return "bloqueado"')
@@ -112,16 +112,16 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const { code, errors } = compiled(text, "/Raw.spellx")
+    const { code, errors } = compiled(text, "/Raw.spellml")
     expect(errors).toEqual([])
     expect(code).toContain('h("ui-button", { color: "primary" }, "Go"),')
     expect(code).toContain('h("div", { class: "note" }, "hi"),')
     expect(code).toContain('h("spell-example", { name: "a button" }, h("ui-button", "Go"))')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Raw.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Raw.spellml" })
     expect(written).toContain('\t\t<ui-button color="primary">Go</ui-button>\n\t\t<div class="note">hi</div>\n')
     expect(compiled(written, "/Raw.spell").code).toBe(code)
     // a cell of its own in the chunk tree
-    const [notebook] = SX.SpellxView.read(text, { path: "/Raw.spellx" }).templates
+    const [notebook] = SX.SpellxView.read(text, { path: "/Raw.spellml" }).templates
     expect(notebook!.children.map((cell) => (cell.kind === "declaration" ? cell.type : cell.kind))).toEqual([
       "prose",
       "html",
@@ -146,7 +146,7 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const { code, errors } = compiled(text, "/Avatar.spellx")
+    const { code, errors } = compiled(text, "/Avatar.spellml")
     expect(errors).toEqual([])
     expect(code).toContain(
       [
@@ -158,7 +158,7 @@ describe("a spellx notebook", () => {
       ].join("\n")
     )
     expect(code).not.toContain('h("html"')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellml" })
     expect(compiled(written, "/Avatar.spell").code).toBe(code)
   })
 
@@ -171,7 +171,7 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const { code, errors } = compiled(text, "/API.spellx")
+    const { code, errors } = compiled(text, "/API.spellml")
     expect(errors).toEqual([])
     expect(code).toContain('h("ui-docs-api", { tag: "ui-avatar", only: "attributes"')
   })
@@ -192,11 +192,11 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const { code, errors } = compiled(text, "/Script.spellx")
+    const { code, errors } = compiled(text, "/Script.spellml")
     expect(errors).toEqual([])
     expect(code).toContain('h("script", { type: "application/json" }, "{\\"days\\": [1, 3, 5]}\\n[x]")')
     expect(code).toContain('h("style", ":root { --brand: red; }")')
-    const written = SX.CodeSpellWriter.write(text, { path: "/Script.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Script.spellml" })
     expect(compiled(written, "/Script.spell").code).toBe(code)
   })
 
@@ -211,7 +211,7 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const { code, errors } = compiled(text, "/Entity.spellx")
+    const { code, errors } = compiled(text, "/Entity.spellml")
     expect(errors).toEqual([])
     expect(code).toContain('h("code", "<ui-button> & {x}")')
   })
@@ -226,35 +226,35 @@ describe("a spellx notebook", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const written = SX.CodeSpellWriter.write(text, { path: "/Inline.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Inline.spellml" })
     expect(written).toContain("<ui-segment><ui-text>B</ui-text> <ui-text>C</ui-text></ui-segment>")
-    expect(compiled(written, "/Inline.spell").code).toBe(compiled(text, "/Inline.spellx").code)
+    expect(compiled(written, "/Inline.spell").code).toBe(compiled(text, "/Inline.spellml").code)
   })
 
   test("an edit re-parses as a fresh parse would", () => {
-    const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+    const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
     for (const edit of [
       ["Clicked", "Pressed"],
       ["## Try it", "## Try this"],
       ["one counter", "a counter"]
     ]) {
       const contents = COUNTER.replace(edit[0]!, edit[1]!)
-      project.update("/Counter.spellx", contents)
+      project.update("/Counter.spellml", contents)
       expect(summarizeIncremental(project), edit[1]).toEqual(
-        summarize(parseSpellProject([{ path: "/Counter.spellx", contents }]))
+        summarize(parseSpellProject([{ path: "/Counter.spellml", contents }]))
       )
     }
   })
 
   describe("SP.SpellProject.compileChunk():  one cell, compiled on its own", () => {
     test("an example:  its drawing, an expression", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
       const text = COUNTER.replace("one counter", "a counter")
       const start = text.indexOf("<example")
       const end = text.indexOf("</example>") + "</example>".length
       const chunk = SP.SpellProject.compileChunk({
         into: project,
-        path: "/Counter.spellx",
+        path: "/Counter.spellml",
         text,
         span: { start, end },
         kind: "drawing"
@@ -266,13 +266,13 @@ describe("a spellx notebook", () => {
     })
 
     test("a template:  its whole class, by its name", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
       const text = COUNTER.replace("Clicked", "Pressed")
       const start = text.indexOf("<spell-view")
       const end = text.indexOf("</spell-view>") + "</spell-view>".length
       const chunk = SP.SpellProject.compileChunk({
         into: project,
-        path: "/Counter.spellx",
+        path: "/Counter.spellml",
         text,
         span: { start, end },
         kind: "template"
@@ -295,12 +295,12 @@ describe("a spellx notebook", () => {
         "</spell-notebook>",
         ""
       ].join("\n")
-      const project = incrementalSpellProject([{ path: "/API.spellx", contents: text }])
+      const project = incrementalSpellProject([{ path: "/API.spellml", contents: text }])
       const start = text.indexOf("<html>")
       const end = text.indexOf("</html>") + "</html>".length
       const chunk = SP.SpellProject.compileChunk({
         into: project,
-        path: "/API.spellx",
+        path: "/API.spellml",
         text,
         span: { start, end },
         kind: "drawing"
@@ -310,13 +310,13 @@ describe("a spellx notebook", () => {
     })
 
     test("a broken one:  its errors, on its lines", () => {
-      const project = incrementalSpellProject([{ path: "/Counter.spellx", contents: COUNTER }])
+      const project = incrementalSpellProject([{ path: "/Counter.spellml", contents: COUNTER }])
       const text = COUNTER.replace("<counter/>", "<countr/>")
       const start = text.indexOf("<example")
       const end = text.indexOf("</example>") + "</example>".length
       const chunk = SP.SpellProject.compileChunk({
         into: project,
-        path: "/Counter.spellx",
+        path: "/Counter.spellml",
         text,
         span: { start, end },
         kind: "drawing"
@@ -352,7 +352,7 @@ const COUNTER = [
 ].join("\n")
 
 /** `text`, one file at `path` of its own project, compiled:  its code without markers or comments, and its errors. */
-function compiled(text: string, path = "/Counter.spellx") {
+function compiled(text: string, path = "/Counter.spellml") {
   const [file] = parseSpellProject([{ path, contents: text }]).files
   const code = file!.compiled
     .replace(/\/\*! SPELL: DECLARES[^]*?\*\/\n?/g, "")

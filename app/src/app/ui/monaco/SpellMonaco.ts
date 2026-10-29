@@ -13,7 +13,7 @@ import { SpellLanguageFeatures } from "./SpellLanguageFeatures"
  * Spell in Monaco:  the `spell` and `spellx` languages and their features, and the options every `<MonacoEditor>`
  * starts with.
  * - Two languages, one per form of spell, since each colours its lines with its own tokenizer (`SpellTokensProvider`):
- *   code spell, `Card.spell`, and spellx, its tag-shaped form, `Card.spellx`.
+ *   code spell, `Card.spell`, and spellx, its tag-shaped form, `Card.spellml`.
  *   Everything else -- editing, the language features, headings -- is the same for both.
  * - `register()` once, before the first editor -- `<MonacoEditor>` and `models` both do.
  * - Language features come from `LSP.SpellLanguageService`, in-process -- see `SpellLanguageFeatures`.
@@ -26,7 +26,7 @@ export class SpellMonaco {
   /** Language id for code spell, `Card.spell`. */
   static LANGUAGE = "spell"
 
-  /** Language id for spellx, spell's tag-shaped form, `Card.spellx`. */
+  /** Language id for spellx, spell's tag-shaped form, `Card.spellml`. */
   static SPELLX_LANGUAGE = "spellx"
 
   /** Both of spell's languages:  what its features and headings are for. */
@@ -136,7 +136,7 @@ export class SpellMonaco {
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
     monaco.languages.register({ id: LANGUAGE, extensions: [".spell"], mimetypes: ["text/spell", "text/x-spell"] })
-    monaco.languages.register({ id: SPELLX_LANGUAGE, extensions: [".spellx"], mimetypes: ["text/x-spellx"] })
+    monaco.languages.register({ id: SPELLX_LANGUAGE, extensions: [".spellml"], mimetypes: ["text/x-spellx"] })
     const colourEach = () => {
       monaco.languages.setTokensProvider(LANGUAGE, new SpellTokensProvider())
       monaco.languages.setTokensProvider(SPELLX_LANGUAGE, SpellTokensProvider.forSpellx())
@@ -168,7 +168,7 @@ export class SpellMonaco {
   /** Monaco language id for a file named `path`, by its extension. */
   static languageForPath(path: string | undefined): string {
     const extension = path?.match(/\.[^./]+$/)?.[0]
-    if (extension === ".spellx") return SpellMonaco.SPELLX_LANGUAGE
+    if (extension === ".spellml") return SpellMonaco.SPELLX_LANGUAGE
     if (SP.isSpellSourceName(extension)) return SpellMonaco.LANGUAGE
     if (extension === ".js" || extension === ".jsx") return "javascript"
     if (extension === ".css") return "css"

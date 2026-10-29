@@ -16,9 +16,9 @@ describe("spellx groups", () => {
   beforeAll(registerTestComponentPack)
 
   test("a heading in code spell:  the same program, nothing compiled for it", () => {
-    const spellx = compiled(CARD, "/Card.spellx")
+    const spellx = compiled(CARD, "/Card.spellml")
     expect(spellx.errors).toEqual([])
-    const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spellx" })
+    const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spellml" })
     expect(written).toContain(
       '\t// Face up or face down\n\t- group "direction"\n\t- its "direction" is one of up, down\n'
     )
@@ -31,16 +31,16 @@ describe("spellx groups", () => {
   })
 
   test("`alias=` on a property with no body:  each one an alias, as its twin's lines under it", () => {
-    const { code, errors } = compiled(CARD, "/Card.spellx")
+    const { code, errors } = compiled(CARD, "/Card.spellml")
     expect(errors).toEqual([])
     expect(code).toContain("isFaceDirection(direction) {")
     expect(code).toContain("isASuit(suit) {")
-    const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spellx" })
+    const written = SX.CodeSpellWriter.write(CARD, { path: "/Card.spellml" })
     expect(written).toContain('\t- its "suit" is one of clubs, diamonds, hearts or spades\n\t\t- it "is a (suit)"\n')
   })
 
   test("each member joins the nearest group above it;  `group=` overrides", () => {
-    const [card] = SX.SpellxView.read(CARD, { path: "/Card.spellx" }).templates
+    const [card] = SX.SpellxView.read(CARD, { path: "/Card.spellml" }).templates
     const groups = SX.SpellxFile.groupsOf(card!).map(({ name, group, members }) => ({
       name,
       description: group?.attributes.find((each) => each.name === "description")?.value,
@@ -64,7 +64,7 @@ describe("spellx groups", () => {
     const [file] = parseSpellProject([{ path: "/Card.spell", contents: text }]).files
     const spellx = SX.SpellxWriter.write({ text, match: file!.match!, scope: file!.scope })
     expect(spellx).toContain('\t<group "direction" description="Face up or face down" />\n')
-    expect(compiled(spellx, "/Card.spellx").code).toBe(compiled(text, "/Card.spell").code)
+    expect(compiled(spellx, "/Card.spellml").code).toBe(compiled(text, "/Card.spell").code)
   })
 
   test('in Spanish:  `<grupo>`, `grupo=`, and its twin `- grupo "..."`', () => {
@@ -76,9 +76,9 @@ describe("spellx groups", () => {
       '\t<acción "voltearla" grupo="dirección">poner su dirección a arriba</>',
       "</encanto-vista>"
     ].join("\n")
-    const spellx = compiled(text, "/Carta.es.spellx")
+    const spellx = compiled(text, "/Carta.es.spellml")
     expect(spellx.errors).toEqual([])
-    const written = SX.CodeSpellWriter.write(text, { path: "/Carta.es.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Carta.es.spellml" })
     expect(written).toContain(
       '\t- grupo "dirección"\n\t- para voltearla: poner su dirección a arriba\n\t- grupo "aspecto"\n'
     )

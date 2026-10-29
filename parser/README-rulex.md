@@ -237,7 +237,7 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The Solitaire example's card](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx) has the
+[The Solitaire example's card](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellml) has the
 same alias, written `alias="is a (rank)"` on its rank, and Spell writes it the same syntax:
 
 ```sh

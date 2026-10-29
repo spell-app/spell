@@ -2,7 +2,7 @@ import { SX } from "spell/parser/spellx"
 import { dedented, indentAt, indented, replaceSpan } from "spell/app/app/solid/NotebookCells"
 
 /**
- * A `.spellx` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).
+ * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).
  * - The cells come from the file's chunk tree (`SX.SpellxView`):  what's inside its `<spell-notebook>`, in order.
  *   - `prose`:  a run of markdown;  a new cell at each `##` heading, which starts a section of the page
  *   - `heading`:  the page's title or a section's start, written as a tag rather than markdown (either works):
@@ -21,7 +21,7 @@ import { dedented, indentAt, indented, replaceSpan } from "spell/app/app/solid/N
  */
 export class NotebookPageCells {
   /**
-   * The notebook in `text`, a `.spellx` file at `path` (its language from its name):  its tag and its cells.
+   * The notebook in `text`, a `.spellml` file at `path` (its language from its name):  its tag and its cells.
    * - `undefined` when the file holds no notebook.
    * - NEVER throws.
    */

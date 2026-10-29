@@ -1,5 +1,5 @@
 /**
- * Spellx:  spell's tag-shaped form, a `.spellx` file (epic `elemental-spell`).
+ * Spellx:  spell's tag-shaped form, a `.spellml` file (epic `elemental-spell`).
  * - Its namespace is `SX`:  `import { SX } from "spell/parser/spellx"`, then `SX.SpellxView.read(text)`.
  * - What's here:
  *   - `spellx.types.ts`:  the chunk tree's nodes, spans and diagnostics

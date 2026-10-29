@@ -941,14 +941,14 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 }
 
 /****************
- * Turning over:  a card draws both its sides (Card.spellx), back to back, and turns over in 3D
+ * Turning over:  a card draws both its sides (Card.spellml), back to back, and turns over in 3D
  * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).
  *   Its back side is drawn already turned half round, so it faces you when the card does.
  * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.
  * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a
  *   card that cut its own content would draw flat, and its sides couldn't turn with it.
  * - A card that's drawn already turned shows that side at once:  only a change turns it.
- * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellx), so it turns over before it moves.
+ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellml), so it turns over before it moves.
  ****************/
 
 [layout] > * {

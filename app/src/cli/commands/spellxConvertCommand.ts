@@ -7,14 +7,14 @@ import { CLI } from "spell/app/cli"
 /**
  * `spell spellx convert [projects...]`:  write each `.spell` file as SPELLX, the same program in tags
  * (epic `elemental-spell` P12) -- `SX.SpellxWriter`.
- * - `Card.spell` => `Card.spellx` beside it;  `Carta.es.spell` => `Carta.es.spellx`, in Spanish spellx.
+ * - `Card.spell` => `Card.spellml` beside it;  `Carta.es.spell` => `Carta.es.spellml`, in Spanish spellx.
  * - What it converts:
  *   - a project:  each of its `.spell` files
  *   - a `.spell` file:  just that one
- *   - a `.spellx` file is left alone
+ *   - a `.spellml` file is left alone
  * - Lists each file it wrote, then a count on stderr.
- *   - `--dry-run`:  writes nothing, and prints each `.spellx` file instead, under a `// <path>` line.
- * - An existing `.spellx` beside it is written over.
+ *   - `--dry-run`:  writes nothing, and prints each `.spellml` file instead, under a `// <path>` line.
+ * - An existing `.spellml` beside it is written over.
  * - NOTE:  the `.spell` file stays.  A project holding both declares everything twice,
  *   so move one of them out before it compiles again.
  * - NEVER writes inside `spaces/@spell/test/`:  test projects stay frozen.  `--dry-run` may read them.
@@ -57,7 +57,7 @@ export async function spellxConvertCommand(
   return CLI.EXIT.OK
 }
 
-/** Where `path`'s spellx goes:  `Card.spell` => `Card.spellx`, `Carta.es.spell` => `Carta.es.spellx`. */
+/** Where `path`'s spellx goes:  `Card.spell` => `Card.spellml`, `Carta.es.spell` => `Carta.es.spellml`. */
 export function spellxPathFor(path: string): string {
-  return path.replace(/\.spell$/, ".spellx")
+  return path.replace(/\.spell$/, ".spellml")
 }

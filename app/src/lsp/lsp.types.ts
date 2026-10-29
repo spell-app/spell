@@ -264,10 +264,10 @@ export type SetDescriptionParams = {
  * - `js`:  javascript, `js/solid`, what the editor and the runners run -- the default
  * - `ts`:  TypeScript on Solid, `ts/solid`, as a person writes it
  * - `py`:  Python on `spell_core`, `py`
- * - `spell`:  the CODE SPELL a `.spellx` file means, its "Show as Code Spell" view (epic `elemental-spell` P8);
+ * - `spell`:  the CODE SPELL a `.spellml` file means, its "Show as Code Spell" view (epic `elemental-spell` P8);
  *   a `.spell` file's own text
- * - `spellx`:  a `.spell` file written as SPELLX, its "Show as Spellx" view (J95);  a `.spellx` file's own text
- * - The other form is a VIEW, never a file:  a template lives in ONE file, `.spell` or `.spellx` (J95).
+ * - `spellx`:  a `.spell` file written as SPELLX, its "Show as Spellx" view (J95);  a `.spellml` file's own text
+ * - The other form is a VIEW, never a file:  a template lives in ONE file, `.spell` or `.spellml` (J95).
  */
 export type CompiledTarget = "js" | "ts" | "py" | "spell" | "spellx"
 

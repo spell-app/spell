@@ -2,7 +2,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
 /**
- * The CODE SPELL a `.spellx` file means, as text (epic `elemental-spell` P8, Q70):
+ * The CODE SPELL a `.spellml` file means, as text (epic `elemental-spell` P8, Q70):
  * `CodeSpellWriter.write(text)` => the `.spell` text it reads as, for people to look at ("Show as .spell").
  * - Written line by line from each tag's TWIN, the very line spell's rules parse it as (`SP.SpellxTwin`):
  *   - a template's tag:  its twin, `a "flip tile" is a view :`
@@ -11,7 +11,7 @@ import { SP } from "spell/parser/spell"
  *   - every other line (a body's spell, a drawing's markup):  as written
  *   - a description:  its comment lines just above its twin, the docstring code spell writes;  prose:  comments
  *   - closers:  nothing, as code spell's indentation already says where a body ends
- * - Not a step in the compile:  a `.spellx` file compiles from its own parse (Q70);
+ * - Not a step in the compile:  a `.spellml` file compiles from its own parse (Q70);
  *   this is what it MEANS, in the form people already read.
  * - A drawing's markup as code spell writes it:  a bare component name as its tag (`<text>` => `<ui-text>`, through
  *   `componentTag`), each `</>` naming what it closes.
@@ -20,8 +20,8 @@ import { SP } from "spell/parser/spell"
  */
 export class CodeSpellWriter {
   /**
-   * The code spell `text`, a `.spellx` file, reads as.
-   * - `options.path`:  the file's path, which says its language (`Carta.es.spellx` is Spanish)
+   * The code spell `text`, a `.spellml` file, reads as.
+   * - `options.path`:  the file's path, which says its language (`Carta.es.spellml` is Spanish)
    * - `options.language`:  its language, over what its path says
    * - NEVER throws on a file:  a line spellx can't read is written as it is.
    */
