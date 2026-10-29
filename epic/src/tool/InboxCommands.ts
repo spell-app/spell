@@ -9,6 +9,7 @@ import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, typ
 
 import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
 import { GuideInbox, type GuideSend } from "./GuideInbox"
+import { OptionSets } from "./OptionSets"
 import type { PlanDoc } from "./PlanDoc"
 import type { PlanReader } from "./PlanReader"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
@@ -254,6 +255,9 @@ export class InboxCommands {
     function extra(mark: PrintedMark) {
       const parts: string[] = []
       if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
+      // an option set's other changes (epic `epic-engine` P50):  added, edited, removed, the flip
+      const change = OptionSets.markWords(mark)
+      if (change) parts.push(change)
       if (mark.when) parts.push(mark.when)
       if (mark.result) parts.push(TEST_WORDS[mark.result])
       if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)

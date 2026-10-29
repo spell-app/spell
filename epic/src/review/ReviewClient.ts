@@ -11,6 +11,7 @@ import {
   TEST_RESULTS,
   commentsOf,
   emptyInbox,
+  hasSetChange,
   inboxOf,
   inlineCommentsNote,
   isAnchoredIn,
@@ -430,6 +431,22 @@ export class ReviewClient extends PageStore {
     const pick = letter ? { pick: letter, ...(choices !== undefined && { choices }) } : {}
     if (mark?.action !== "revisit") return this.save(id, letter ? { action: "pick", ...pick } : null)
     return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...pick })
+  }
+
+  /**
+   * ONE option set's whole change, its mark's set fields (`SetChange`, epic `epic-engine` P50):  picks, the
+   * pick-one / pick-any flip, options added, edited and removed;  `{}` drops them.
+   * - `id`:  what holds the set, an item, a phase or a standing set (`s-upgrades`)
+   * - a revisit keeps its note and comments, its pick fields replaced ("pick B, but ...");  one asked NOW turns
+   *   `soon`, as `choose()` does
+   * - anything else becomes a plain pick mark, or none
+   */
+  changeSet(id: string, change: PickFields): Promise<boolean> {
+    const mark = this.inbox.marks[id]
+    const fields = pickOf(change)
+    const changed = hasSetChange(fields)
+    if (mark?.action !== "revisit") return this.save(id, changed ? { action: "pick", ...fields } : null)
+    return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...commentsOf(mark), ...fields })
   }
 
   /**

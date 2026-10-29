@@ -370,13 +370,22 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   ////////////////
 
   /**
-   * Its title's mark while it isn't done and has new updates:  the pen and how many, in orange;
+   * Its title's marks:  `1 choice open` in red while a set in its body waits for Owen's pick (`choices-open`, the
+   * tool's, as its body is a part:  epic `epic-engine` P50);
+   * then, while it isn't done and has new updates:  the pen and how many, in orange;
    * its name and tooltip say so, and what Seen does (`changedTip`).
    * - while the page is reviewed, a ✓ after it (epic `epic-engine` I168):  Seen on every one of them at once
    */
   private changedMark(): JSX.Element {
     return (
       <>
+        <Show when={Number(this.choicesOpen) > 0 && this.shownStatus !== "done"}>
+          <span class={CHOICES_OPEN} part={this.partForName("choices-open")}>
+            {this.translationForKey(Number(this.choicesOpen) === 1 ? "choiceOpen" : "choicesOpenCount", {
+              count: Number(this.choicesOpen)
+            })}
+          </span>
+        </Show>
         <Show when={this.changedCount}>
           {(count) => (
             <span
@@ -463,6 +472,8 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPhase extends E.AttributeValues<typeof epicPhaseVocabulary> {}
 
+/** Class of its title's `1 choice open` (P50). */
+const CHOICES_OPEN = "choices-open"
 /** Class of its status icon's box while Claude is at work on it, and of the spinner in it (I147). */
 const WORKING = "working"
 const SPINNER = "spinner"

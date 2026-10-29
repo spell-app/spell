@@ -175,6 +175,10 @@ export const epicPhaseVocabulary = {
         "spinner instead."
     },
     {
+      name: "choices-open",
+      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+    },
+    {
       name: "changed",
       description:
         "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet " +
@@ -254,6 +258,16 @@ export const epicPhaseVocabulary = {
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
     },
     {
+      key: "choiceOpen",
+      text: "1 choice open",
+      description: "After its title (P50):  a set in its body waits for Owen's pick."
+    },
+    {
+      key: "choicesOpenCount",
+      text: "{count} choices open",
+      description: "After its title (P50):  sets in its body wait for Owen's picks."
+    },
+    {
       key: "changedTip",
       text:
         "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for " +
@@ -319,6 +333,14 @@ export const epicPhaseVocabulary = {
       description:
         "Changes:  what changes, two or three lines;  after Goal, next to the plan (epic `epic-engine` P45;  Owen, " +
         '2026-10-25:  "Move `changes` below `goal` so it\'s next to the plan").'
+    },
+    {
+      tag: "epic-field",
+      where: { attribute: "name", values: ["choices"] },
+      max: 1,
+      description:
+        "Choices:  the phase's own option sets (`<epic-choices>`, epic `epic-engine` P50), a fork that belongs to this " +
+        "phase alone;  picked on the page, keyed by the phase (`epic update ...#P3 --choices`)."
     },
     {
       tag: "epic-update",

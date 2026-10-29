@@ -172,7 +172,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               data-fill={this.review.isSent() ? "outline" : "dashed"}
               title={this.translationForKey(this.review.isSent() ? "pickedSent" : "pickedUnsent", { letter: pick() })}
             >
-              {pick()}
+              {/* a pick-any set's several (`A C +1`, epic `epic-engine` P50):  one tight word, `AC+1` */}
+              {pick().replace(/\s+/g, "")}
             </span>
           )}
         </Show>

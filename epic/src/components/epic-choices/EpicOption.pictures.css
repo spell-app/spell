@@ -1,0 +1,24 @@
+/*
+ * `<epic-option>`'s PAGE sheet (`EpicOption.tsx` registers it once, `page: true`;  epic `epic-engine` P50):
+ * an option's pictures, small.
+ * - They're the option's light DOM (an `<img>` in its text, or a `<p><a><img></a></p>`):
+ *   out of reach of its shadow sheet, so they're drawn from the page.
+ * - Thumbnails:  200px wide or 140px tall at most, a thin border;  a click shows one full size (the page's `<ui-zoom>`).
+ * - `!important`:  a picture's own `style="max-width: 100%"` is inline, which beats any rule but an important one.
+ */
+
+@layer ui.components.epic-option.page;
+
+@layer ui.components.epic-option.page {
+  epic-option img {
+    box-sizing: border-box;
+    width: auto !important;
+    height: auto !important;
+    max-width: min(200px, 100%) !important;
+    max-height: 140px !important;
+    border: 1px solid var(--epic-rule, var(--ui-border-color, rgba(34, 36, 38, 0.15)));
+    border-radius: 4px;
+    vertical-align: top;
+    cursor: zoom-in;
+  }
+}

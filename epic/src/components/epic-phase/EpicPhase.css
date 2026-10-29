@@ -194,6 +194,15 @@
     height: 0.95em;
     fill: currentColor;
   }
+  /* `1 choice open` (P50):  a set in its body waits for Owen's pick, red as its chip */
+  .choices-open {
+    margin-left: 8px;
+    color: var(--ui-red-text, var(--ui-red));
+    font-size: 0.8em;
+    font-weight: 700;
+    vertical-align: 0.05em;
+    white-space: nowrap;
+  }
   /* the pen's ✓:  Seen on every new update (I168);  a mini round button on the title's first line, clickable */
   .seen-all {
     margin-inline-start: 4px;

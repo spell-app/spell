@@ -42,10 +42,52 @@
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
   }
+  /* how it's answered:  a switch, pick one / pick any (epic `epic-engine` P50), as an epic page's set heading draws it */
   .how {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: none;
     color: var(--ui-text-muted, GrayText);
-    font-size: 0.85em;
-    font-weight: 600;
+    font: 600 0.85em / 1.4 var(--ui-font-family, inherit);
+    cursor: pointer;
+  }
+  .how:hover,
+  .how[aria-checked="true"] {
+    color: var(--ui-green-text, var(--ui-green, #21ba45));
+  }
+  .how:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 2px;
+  }
+  .knob {
+    position: relative;
+    box-sizing: border-box;
+    width: 26px;
+    height: 15px;
+    border: 1px solid var(--ui-border-color-strong, var(--ui-border-color, GrayText));
+    border-radius: 999px;
+    background: var(--ui-surface, Canvas);
+  }
+  .knob::after {
+    content: "";
+    position: absolute;
+    top: 1.5px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ui-text-muted, GrayText);
+    transition: translate 0.12s;
+  }
+  .how[aria-checked="true"] .knob {
+    border-color: var(--ui-green-border, var(--ui-green, #21ba45));
+  }
+  .how[aria-checked="true"] .knob::after {
+    translate: 11px 0;
+    background: var(--ui-green, #21ba45);
   }
   .tools {
     display: inline-flex;

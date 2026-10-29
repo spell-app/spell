@@ -24,6 +24,19 @@ export class PlanMarkup {
     return escapeHTML(String(value))
   }
 
+  /**
+   * Plain `text` as `<p>`s, escaped:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none.
+   * - a prompt's, a note's, an option's text Owen typed (epic `epic-engine` P50)
+   */
+  static paragraphs(text: string | null | undefined): string {
+    return String(text ?? "")
+      .trim()
+      .split(/\n\s*\n/)
+      .filter((paragraph) => paragraph.trim())
+      .map((paragraph) => `<p>${PlanMarkup.text(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
+      .join("")
+  }
+
   /** `value` escaped for HTML text AND a double-quoted attribute:  placeholders sit in both. */
   static escapeAll(value: unknown): string {
     return escapeHTML(String(value))

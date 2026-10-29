@@ -158,7 +158,7 @@
     {
       "path": "epic-ask.html",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options with tick boxes, Other, its state as a chip.",
+      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "tag": "epic-ask",
       "sections": [
         {

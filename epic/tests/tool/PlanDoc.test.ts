@@ -1657,9 +1657,10 @@ describe("PlanDoc review inbox", () => {
     expect(todo.textContent).toContain("Owen:  after the flight")
     const phase = el(plan, "p1")
     expect(phase.querySelector(':scope > epic-status[slot="status"][state="noted"] a[href="#t2"]')).not.toBeNull()
+    // a phase's pick is its own option sets' (epic `epic-engine` P50):  none here
     expect(plan.applyMark({ id: "p1", action: "pick", pick: "A" })).toEqual({
       applied: false,
-      left: "P1 (phase):  can't pick A"
+      left: "P1 has no option cards"
     })
     expect(plan.applyMark({ id: "p1", action: "revisit", when: "soon", note: "too big?" })).toMatchObject({
       applied: false,

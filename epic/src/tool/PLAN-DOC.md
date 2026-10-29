@@ -875,6 +875,65 @@ question's does.
   field (open items added during it) and items nested in a phase don't count.
 - Reopened or canceled (`setItem()`):  `taken-in` goes.
 
+## Option sets
+
+An option set (`<epic-choices>`) works anywhere on the page (epic `epic-engine` P50):
+on a question, inside a phase, or as a standing set.
+The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), beside this file.
+
+- Where a choice goes:
+  - a fork that belongs to ONE phase:  inside that phase, its Choices field, not a separate question
+  - a cross-cutting one:  a question, as before
+  - an open-ended list Owen picks from round after round:  a standing set, in the Choices section
+- Its settings, any mix:
+  - `multiple`:  pick any;  `chosen` may name several letters, `chosen="A C"`
+  - `fixed`:  Owen may NOT add options (every other open set takes his)
+  - `closed`:  done;  no picks, adds or edits, and a mark on it is left, not applied
+  - `standing`, `title`:  a standing set, in the Choices section
+- Where they sit, and what keys their marks (`choices`, a set's position, counts as written):
+  - an item's:  any of its sets, never one in its Original Discussion (`PlanItem.choiceSets()`)
+  - a phase's:  `<epic-field name="choices">`, after Changes, before its Update blocks and Plan;  every set in its
+    body counts, keyed by the phase's id
+    - `epic update <epic>#P3 --choices "<epic-choices>...</epic-choices>"` writes or replaces it
+    - the skeleton's `<epic-phase choices-open="1">`:  its sets neither `chosen` nor `closed` (every edit)
+    - Accept plan takes an open set's recommended option, as an approval does on a question
+  - a standing set:  `<epic-section id="choices" kind="choices">`, between the Overview and the Phases, only on a page
+    that has one;  in the skeleton, never a part
+    - each set `<epic-choices id="s-<slug>" title="..." standing [multiple]>`, keyed by its id
+    - `epic add <epic>#choices "Title" [--multiple] [--note "..."]` makes the section the first time, then the set
+- ONE mark per set carries its whole change (`ReviewInbox`'s `PickFields`):
+
+  ```text
+  { action: "pick", pick: "A C +1", choices: 0, multiple: true,
+    added: [{ key: "+1", title, note?, shot? }], edited: [{ letter, title, note? }], removed: ["E"] }
+  ```
+
+  - `pick` the whole pick list after the change;  `+1` names the first added option;  absent when only the set changes
+  - an old mark, `{ pick: "B" }`, reads as before
+- What `epic inbox apply` does with it, in order:
+  - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
+    `by="owen"`, its note as `<p>`s, its picture an `<img>`
+  - an edit keeps the earlier text:  `<div slot="was" data-title="<old title>">` holding the old body, one per edit,
+    oldest first;  `edited` its day
+  - a removal stays:  `removed` its day, `slot="removed"`, out of `chosen`
+  - the picks:  an item's into `chosen` (a pick-one set keeps the newest), a question answered with their titles;  a
+    phase's into `chosen` too, the phase NOT approved, its line asking the session to adjust its plan;  a standing
+    set's stamped `picked-on`, `slot="picked"`, never `chosen`, the set staying open
+  - its line names it all:  `picked A · Keep folds, D · Faster builds;  added D · Faster builds;  edited B;  removed C`
+- From the tool, the same changes:
+
+  ```sh
+  epic choose seo#Q4 A C ["outcome"] [--set N]       # several letters:  a pick-any set
+  epic option add seo#Q4 "Title" ["note"] [--image <png>] [--set N]
+  epic option edit seo#Q4 B [--title "..."] [--note "..."]
+  epic option remove seo#Q4 B
+  epic option close seo#s-upgrades
+  ```
+
+- Lint (`Markup.validate()`):  a standing set's id `s-<slug>` and its title;  `slot="removed"` needs `removed`,
+  `slot="picked"` needs `picked-on`;  several letters in `chosen` only in a `multiple` set.
+- No migration:  an existing set stays pick-one, and takes Owen's options by the new default.
+
 ## Migrations
 
 Named, dated, idempotent steps that bring an older page's markup up to today's, by page KIND

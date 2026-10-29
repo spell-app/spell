@@ -43,6 +43,9 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - `choices`:  WHICH of the item's option card sets, by position, 0 the first (`PlanItem.choiceSets()`):
  *         one item may hold several (its text's, a reply's)
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
+ *     - an option set's whole change (epic `epic-engine` P50), ONE mark per set, keyed by what holds it (an item, a
+ *       phase, a standing set's `s-upgrades`):  `{ action: "pick", pick: "A C +1", choices, multiple, added, edited,
+ *       removed }` (`PickFields`);  `pick` may be absent when it only changes the set
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
  *     - a revisit whose content is Owen's comments in the part's text (epic `epic-engine` I140):
@@ -741,7 +744,7 @@ export class ReviewInbox {
       if (comments.length || note) {
         const left = { action: "revisit", when: mark.when, note, ...(comments.length && { comments }), ...pick }
         this.setMark(id, left, at)
-      } else this.setMark(id, pick.pick ? { action: "pick", ...pick } : null, at)
+      } else this.setMark(id, hasOptionChange(pick) ? { action: "pick", ...pick } : null, at)
       changed.push(id)
     }
     return changed
@@ -934,9 +937,12 @@ export class ReviewInbox {
    * - `action`:  one of `ACTIONS`
    * - `revisit`:  `when` `soon` (default) or `now`;  `note` trimmed, `""` when none
    *   - `pick` too, when given (a letter):  "pick B, but ...", a pick with a remark, talked over rather than applied
-   * - `pick`:  `pick` an option card's letter, `A`-`Z`
+   * - `pick`:  `pick` an option card's letter, `A`-`Z`;  a pick-any set's, the whole pick list, `A C +1`
+   *   (`toPickFields()`, epic `epic-engine` P50)
+   *   - and the set's other changes, any mix:  `multiple` (the pick-one / pick-any flip), `added`, `edited`,
+   *     `removed`;  with one of those, `pick` may be absent
    * - with a pick:  `choices` too, when given:
-   *   which of the item's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
+   *   which of the holder's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
    * - `accept` (the page header's stage button, epic `epic-engine` P29):  `stage`, the stage it ends, one of
    *   `ACCEPT_STAGES`;  none:  a change mark's Accept (P30), `{ action: "accept" }`
@@ -955,7 +961,7 @@ export class ReviewInbox {
    */
   static toMark(mark: unknown): CheckedMark {
     if (!mark || typeof mark !== "object" || Array.isArray(mark)) throw new InboxError("a mark is an object, or null")
-    const { action, when = "soon", note = "", pick, choices } = mark as Record<string, unknown>
+    const { action, when = "soon", note = "", pick } = mark as Record<string, unknown>
     if (action === "new") return toNewItem(mark as Record<string, unknown>)
     if (action === "test") return toTestAnswer(mark as Record<string, unknown>)
     if (!isAction(action)) throw new InboxError(`no such action:  ${action} (${ACTIONS.join(" | ")})`)
@@ -970,12 +976,11 @@ export class ReviewInbox {
         action,
         when: when as RevisitWhen,
         note: note.trim(),
-        pick: toLetter(pick),
-        ...toChoices(choices),
+        ...toPickFields(mark as Record<string, unknown>),
         ...inline
       }
     }
-    if (action === "pick") return { action, pick: toLetter(pick), ...toChoices(choices) }
+    if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
     // an Approve / Accept plan that keeps Owen's comments in the part's text (epic `epic-engine` I163):  approved,
     // the comments to fold in
     if (action === "approve") {
@@ -1026,11 +1031,20 @@ export class ReviewInbox {
 
   /**
    * `mark`'s pick, to carry into another mark:  `{ pick, choices? }`, or `{}` when it has none.
+   * - and the rest of its set's change (epic `epic-engine` P50):  `multiple`, `added`, `edited`, `removed`
    * - "pick B, but ...":  a pick that becomes a revisit, or a revisit asked now, keeps WHICH cards it picked from
    */
   static pickOf(mark: PickFields | null | undefined): PickFields {
-    if (!mark?.pick) return {}
-    return { pick: mark.pick, ...(mark.choices !== undefined && { choices: mark.choices }) }
+    if (!mark || !hasOptionChange(mark)) return {}
+    const { pick, choices, multiple, added, edited, removed } = mark
+    return {
+      ...(pick && { pick }),
+      ...(choices !== undefined && { choices }),
+      ...(multiple !== undefined && { multiple }),
+      ...(added?.length && { added }),
+      ...(edited?.length && { edited }),
+      ...(removed?.length && { removed })
+    }
   }
 
   /** Is `mark` an immediate request (`requestNow()`), not one waiting for a send? */
@@ -1047,17 +1061,26 @@ export class ReviewInbox {
    * - the stage button's, `stage`, while `<epic-page stage>` is a stage one ends (`ACCEPT_STAGES`, epic `epic-engine` P29)
    * - every change mark waiting for Accept (`ch3`, epic `epic-engine` P30):  listed in its host's `to-accept` (the
    *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
+   * - every STANDING option set not closed (`<epic-choices id="s-upgrades" standing>`, epic `epic-engine` P50)
    * - every update block not seen (`up3`, epic `epic-engine` I168):  listed in its host's `to-see` (`up3@<at>`), or
    *   an `<epic-update id>` without `seen` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
     const ids = new Set<string>()
-    const tags = /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change|epic-update)\b[^>]*>/g
+    const tags =
+      /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change|epic-update|epic-choices)\b[^>]*>/g
     for (const [tag, name] of html.matchAll(tags)) {
       for (const change of /\sto-accept="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? []) if (change) ids.add(change)
       for (const update of /\sto-see="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? [])
         if (update) ids.add(update.split("@")[0].toLowerCase())
+      // a standing option set, open (epic `epic-engine` P50):  its own marks, by its id (`s-upgrades`)
+      if (name === "epic-choices") {
+        const id = /\sid="([^"]+)"/.exec(tag)?.[1]?.toLowerCase()
+        const open = /\sstanding[\s=>]/.test(tag) && !/\sclosed[\s=>]/.test(tag)
+        if (id && STANDING_ID.test(id) && open) ids.add(id)
+        continue
+      }
       if (name === "epic-update") {
         const id = /\sid="([^"]+)"/.exec(tag)?.[1]
         if (id && UPDATE_ID.test(id.toLowerCase()) && !/\sseen[\s=>]/.test(tag)) ids.add(id.toLowerCase())
@@ -1181,12 +1204,32 @@ export type TestFields = { result?: TestResult; shot?: string }
 export type NewItemFields = { kind?: NewKind; title?: string; near?: string }
 
 /**
- * A pick's fields, on a mark or a `now` request:
- * - `pick`:  the option's letter
- * - `choices`:  which of the item's `<epic-choices>` it's from, by position (`PlanItem.choiceSets()`);
- *   none for the item's own (`choicesOf()`)
+ * A pick's fields, on a mark or a `now` request:  ONE option set's whole change (epic `epic-engine` P50).
+ * - `pick`:  the option's letter;  a pick-any set's whole pick list after the change, a space between (`A C +1`:
+ *   `+1` the first option added);  absent when the mark only changes the set
+ * - `choices`:  which of the holder's `<epic-choices>` it's from, by position:  an item's `PlanItem.choiceSets()`
+ *   (none for its own, `choicesOf()`), a phase's every set in its body, a standing set itself (`OptionSets.setsOf()`)
+ * - `multiple`:  the pick-one / pick-any flip:  `true` sets `multiple`, `false` removes it;  absent, unchanged
+ * - `added`:  Owen's new options, `+1`, `+2` ...;  `edited`:  options edited in place;  `removed`:  letters removed
  */
-export type PickFields = { pick?: string; choices?: number }
+export type PickFields = {
+  pick?: string
+  choices?: number
+  multiple?: boolean
+  added?: AddedOption[]
+  edited?: EditedOption[]
+  removed?: string[]
+}
+
+/**
+ * An option Owen added from the page (Add choice, epic `epic-engine` P50):
+ * - `key`:  `+1`, `+2` ...:  what `pick` names it by, until it has a letter
+ * - `title`;  `note`:  its text, plain;  `shot`:  its picture, `tests/q52-20261029-1432.png` (`POST shot`)
+ */
+export type AddedOption = { key: string; title: string; note?: string; shot?: string }
+
+/** An option Owen edited in place (epic `epic-engine` P50):  its `letter`, its new `title`, its new `note` (plain). */
+export type EditedOption = { letter: string; title: string; note?: string }
 
 /** A mark with its item id:  `markList`, `sentMarks`, `unsentMarks`. */
 export type ListedMark = { id: string } & InboxMark
@@ -1371,6 +1414,24 @@ export const WAKE_COOLDOWN_MS = 10 * 60_000
 /** An option card's letter. */
 const OPTION_LETTER = /^[A-Z]$/
 
+/** An option Owen added, before it has a letter (epic `epic-engine` P50):  `+1`, `+2` ... */
+export const ADDED_KEY = /^\+[1-9]\d?$/
+
+/** A standing option set's id, its key in the inbox (epic `epic-engine` P50):  `s-` and a slug, `s-upgrades`. */
+export const STANDING_ID = /^s-[a-z0-9][a-z0-9-]*$/
+
+/** The most options one mark adds, edits or removes:  a sanity bound, the alphabet. */
+const MAX_OPTION_CHANGES = 26
+
+/** The longest note an added or edited option may have:  a few paragraphs. */
+const MAX_OPTION_NOTE = 20_000
+
+/**
+ * An option's picture, from the epic page's folder (`POST shot`, epic `epic-engine` P50):  its holder's id, then the
+ * time, `tests/q52-20261029-1432.png`, `tests/p-choices-20261029-1432-2.png`.
+ */
+export const OPTION_SHOT = /^tests\/[a-z][a-z0-9-]*-\d{8}-\d{4}(?:-\d+)?\.png$/
+
 /** The highest card set position a pick may name:  a sanity bound, far above any item's count. */
 const MAX_CHOICES = 99
 
@@ -1449,6 +1510,94 @@ function isNoteAction(action: unknown): action is NoteAction {
 function toLetter(pick: unknown): string {
   if (typeof pick !== "string" || !OPTION_LETTER.test(pick)) throw new InboxError(`pick which option?  ${pick}`)
   return pick
+}
+
+/** Does `mark` change an option set at all:  a pick, a flip, or options added, edited or removed? */
+function hasOptionChange(mark: PickFields): boolean {
+  const { pick, multiple, added, edited, removed } = mark
+  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
+}
+
+/**
+ * A pick mark's set change (`PickFields`), checked (`ReviewInbox.toMark()`;  epic `epic-engine` P50), in a fixed order:
+ * `{ pick?, choices?, multiple?, added?, edited?, removed? }`.
+ * - `pick`:  one letter (`B`), or a pick-any set's list:  letters and added keys (`A C +1`), each once
+ * - `added`:  each `{ key, title, note?, shot? }`, its key `+N` and once;  `edited`:  `{ letter, title, note? }`;
+ *   `removed`:  letters;  at most `MAX_OPTION_CHANGES` each, titles a line (`MAX_TITLE`)
+ * - `+N` in `pick` must name an option in `added`
+ * - an `InboxError` for anything else, or a mark that changes nothing
+ */
+function toPickFields(mark: Record<string, unknown>): PickFields {
+  const { pick, choices, multiple, added, edited, removed } = mark
+  const fields: PickFields = {
+    ...(pick !== undefined && pick !== null && pick !== "" && { pick: toPick(pick) }),
+    ...toChoices(choices),
+    ...(multiple !== undefined && multiple !== null && { multiple: toFlag(multiple) }),
+    ...toList(added, "added", toAdded),
+    ...toList(edited, "edited", toEdited),
+    ...toList(removed, "removed", toLetter)
+  }
+  const keys = new Set(fields.added?.map((option) => option.key))
+  if (keys.size !== (fields.added?.length ?? 0)) throw new InboxError("added options:  each key once (+1, +2 ...)")
+  for (const token of fields.pick?.split(" ") ?? [])
+    if (ADDED_KEY.test(token) && !keys.has(token)) throw new InboxError(`pick ${token}?  no option added as ${token}`)
+  if (!hasOptionChange(fields)) throw new InboxError(`pick which option?  ${pick}`)
+  return fields
+}
+
+/** `pick` as a letter, or a pick-any set's list (`A C +1`), each token once;  an `InboxError` otherwise. */
+function toPick(pick: unknown): string {
+  if (typeof pick !== "string") throw new InboxError(`pick which option?  ${pick}`)
+  const tokens = pick.trim().split(/\s+/)
+  const bad = tokens.find((token) => !OPTION_LETTER.test(token) && !ADDED_KEY.test(token))
+  if (bad !== undefined || new Set(tokens).size !== tokens.length || tokens.length > 2 * MAX_OPTION_CHANGES)
+    throw new InboxError(`pick which options?  ${JSON.stringify(pick)} (letters and added keys, each once:  A C +1)`)
+  return tokens.join(" ")
+}
+
+/** `multiple`, the pick-one / pick-any flip, as a boolean;  an `InboxError` otherwise. */
+function toFlag(multiple: unknown): boolean {
+  if (typeof multiple !== "boolean") throw new InboxError(`pick one or pick any?  ${JSON.stringify(multiple)}`)
+  return multiple
+}
+
+/**
+ * `list` (a mark's `added`, `edited` or `removed`), each entry checked by `check`, as `{ [name]: list }`;  `{}` for
+ * none or an empty list.
+ * - an `InboxError` unless it's a list of at most `MAX_OPTION_CHANGES`
+ */
+function toList<T>(list: unknown, name: string, check: (entry: unknown) => T): Record<string, T[]> {
+  if (list === undefined || list === null) return {}
+  if (!Array.isArray(list) || list.length > MAX_OPTION_CHANGES)
+    throw new InboxError(`${name}:  a list of at most ${MAX_OPTION_CHANGES}`)
+  return list.length ? { [name]: list.map(check) } : {}
+}
+
+/** An added option, checked:  `{ key, title, note?, shot? }`;  an `InboxError` otherwise. */
+function toAdded(entry: unknown): AddedOption {
+  const { key, title, note, shot } = (entry ?? {}) as Record<string, unknown>
+  if (typeof key !== "string" || !ADDED_KEY.test(key)) throw new InboxError(`an added option's key?  ${key} (+1)`)
+  const given = shot !== undefined && shot !== null && shot !== ""
+  if (given && (typeof shot !== "string" || !OPTION_SHOT.test(shot)))
+    throw new InboxError(`not an option's picture:  ${JSON.stringify(shot)} (tests/q52-20261029-1432.png)`)
+  return { key, ...toOptionText(title, note), ...(given && { shot: shot as string }) }
+}
+
+/** An edited option, checked:  `{ letter, title, note? }`;  an `InboxError` otherwise. */
+function toEdited(entry: unknown): EditedOption {
+  const { letter, title, note } = (entry ?? {}) as Record<string, unknown>
+  return { letter: toLetter(letter), ...toOptionText(title, note) }
+}
+
+/** An option's `title` (trimmed, a line) and `note` (trimmed, kept when there is one);  an `InboxError` otherwise. */
+function toOptionText(title: unknown, note: unknown): { title: string; note?: string } {
+  if (typeof title !== "string" || !title.trim()) throw new InboxError("an option needs a title")
+  if (title.trim().length > MAX_TITLE) throw new InboxError(`a title is a line:  ${MAX_TITLE} characters at most`)
+  if (note !== undefined && note !== null && typeof note !== "string") throw new InboxError("an option's note is text")
+  if (typeof note === "string" && note.length > MAX_OPTION_NOTE)
+    throw new InboxError(`an option's note:  ${MAX_OPTION_NOTE} characters at most`)
+  const text = typeof note === "string" ? note.trim() : ""
+  return { title: title.trim(), ...(text && { note: text }) }
 }
 
 /**
@@ -1531,9 +1680,9 @@ export function isoTime(date = new Date()): string {
 
 /**
  * Whether a mark may be keyed by `key`:  an item's id, a letter or two and a number (`q7`, `j12`;  an Overview
- * sub-section's `o3`:  `isItemId()`), or a phase's stable id (`p-epic-migrate`, since P15;  an older page's `p3` has
- * an item id's shape).
+ * sub-section's `o3`:  `isItemId()`), a phase's stable id (`p-epic-migrate`, since P15;  an older page's `p3` has
+ * an item id's shape), or a standing option set's (`s-upgrades`, epic `epic-engine` P50).
  */
 function isMarkKey(key: string): boolean {
-  return isItemId(key) || PhaseIds.isStable(key)
+  return isItemId(key) || PhaseIds.isStable(key) || STANDING_ID.test(key)
 }

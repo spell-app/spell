@@ -165,6 +165,7 @@ export type FoldAttributes = {
  */
 export const SECTION_LOOKS = {
   epics: { icon: "map", title: "epicsTitle" },
+  choices: { icon: "square check", title: "choicesTitle" },
   phases: { icon: "layer group", title: "phasesTitle" },
   questions: { icon: "file circle question", title: "questionsTitle" },
   judgements: { icon: "gavel", title: "judgementsTitle" },

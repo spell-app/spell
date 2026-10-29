@@ -9,6 +9,7 @@ import { EpicTests, type EpicTestCount, type OpenTest, type TestFieldValues } fr
 import type { PlanDoc } from "./PlanDoc"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 import { TEST_SHOTS } from "./TestShots"
+import { PlanMarkup } from "./PlanMarkup"
 
 /****************
  * ### `TestCommands`
@@ -144,10 +145,47 @@ export class TestCommands {
     if (flags.limit && kind === "todo") kind = "limit"
     else if (flags.limit && kind !== "limit") throw new PlanDocError(`--limit is a todo's (T), not a ${kind}'s`)
     const { html, example } = this.fieldsOf(plan.nextId(kind), flags)
-    const details = `${html}${stringFlag(flags.details) ?? ""}`
+    const details = `${html}${stringFlag(flags.details) ?? ""}${itemOptions(kind, flags)}`
     const id = plan.addItem(kind, title, { ...flags, details })
     return { id, example }
   }
+}
+
+/**
+ * `--options "*Do it | Don't"` on a judgement call or a question (epic `epic-engine` P50, request r44;  Owen, on a
+ * call that needed his yes / no:  "In future, this could be a question block!"):  an option set after its details,
+ * so he picks on the page;  `""` without the flag.
+ * - each option split by ` | `, lettered A, B ... in order;  a leading `*` marks the recommended one;  a leading
+ *   `A:` is its letter, given (`"A:Do it | B:Don't"`), else the first letter nobody has
+ * - its pros and cons, or a picture:  `epic option edit` / `epic option add` afterwards
+ * - throws on another kind, or with fewer than two options
+ */
+function itemOptions(kind: string, flags: Flags): string {
+  const given = stringFlag(flags.options)
+  if (given === undefined) return ""
+  if (kind !== "judgement" && kind !== "question")
+    throw new PlanDocError(`--options is a judgement call's (J) or a question's (Q), not a ${kind}'s`)
+  const entries = given
+    .split(/\s+\|\s+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  if (entries.length < 2) throw new PlanDocError(`--options:  two or more, split by " | ":  "*Do it | Don't"`)
+  const parsed = entries.map((entry) => {
+    const recommended = entry.startsWith("*")
+    const text = recommended ? entry.slice(1).trim() : entry
+    const lettered = /^([A-Z]):\s*(.+)$/.exec(text)
+    return { recommended, text: lettered?.[2] ?? text, given: lettered?.[1] }
+  })
+  // an option without a letter takes the first one nobody has
+  const used = new Set(parsed.map((each) => each.given).filter(Boolean))
+  const options = parsed.map(({ recommended, text, given }) => {
+    let letter = given
+    for (let code = 65; !letter; code++) if (!used.has(String.fromCharCode(code))) letter = String.fromCharCode(code)
+    used.add(letter)
+    const title = PlanMarkup.attribute(text)
+    return `<epic-option letter="${letter}" title="${title}"${recommended ? " recommended" : ""}></epic-option>`
+  })
+  return `<epic-choices>${options.join("")}</epic-choices>`
 }
 
 /** A test's fields as `TestCommands.fieldsOf()` makes them:  the HTML, and an example screenshot to copy. */

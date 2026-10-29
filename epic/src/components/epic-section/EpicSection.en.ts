@@ -50,6 +50,7 @@ export const epicSectionVocabulary = {
       values: [
         "overview-part",
         "epics",
+        "choices",
         "phases",
         "questions",
         "judgements",
@@ -201,6 +202,7 @@ export const epicSectionVocabulary = {
   texts: [
     ...FOLD_TEXTS,
     { key: "epicsTitle", text: "Epics" },
+    { key: "choicesTitle", text: "Choices", description: "The standing option sets' section (P50)." },
     { key: "phasesTitle", text: "Phases" },
     { key: "questionsTitle", text: "Questions" },
     { key: "judgementsTitle", text: "Judgement calls" },
@@ -259,6 +261,17 @@ export const epicSectionVocabulary = {
       slot: "status",
       when: { attribute: "kind", values: ["overview-part"] },
       description: "An Overview sub-section's status cards from Claude, oldest first (`plan-doc status`)."
+    },
+    {
+      tag: "epic-choices",
+      when: { attribute: "kind", values: ["choices"] },
+      description:
+        'The Choices section\'s standing sets (epic `epic-engine` P50):  `<epic-choices id="s-<slug>" title standing>`.'
+    },
+    {
+      tag: "flow",
+      when: { attribute: "kind", values: ["choices"] },
+      description: "The Choices section's notes:  a set's lead, before it (`epic add <epic>#choices --note`)."
     },
     { tag: "epic-phase", when: { attribute: "kind", values: ["phases"] }, description: "The phases, in order." },
     {

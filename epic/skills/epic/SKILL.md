@@ -299,6 +299,15 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 3. Each open question:  `epic add <name>#Q "title" --details "..."`, explained with examples ("5. Each phase", item 7).
    - ONE question, ONE choice set (`<epic-choices>`):  two choices are two questions.
      `epic lint` says `ASKS:` for an item asking two open sets at once (I88):  Owen could pick in only one.
+   - WHERE a choice goes (epic `epic-engine` P50;  `PLAN-DOC.md`, "Option sets"):
+     - a fork that belongs to ONE phase:  inside that phase, its Choices field
+       (`epic update <name>#P3 --choices "<epic-choices>...</epic-choices>"`), not a separate question:
+       the phase's story stays together, and Accept plan takes its recommended option
+     - a cross-cutting one:  a question, as here
+     - an open-ended list Owen picks from round after round:  a STANDING set in the Choices section
+       (`epic add <name>#choices "Title" [--multiple]`, then `epic option add <name>#s-<slug> "Title" "note"`)
+     - `multiple` where several can be picked;  `fixed` where an added option makes no sense (every other set takes
+       Owen's);  `epic option close <name>#<id>` once a set is done
    - Loose ends:  `#T` (a todo, work still to do), `#T ... --limit` (a limit to know about).
 4. `epic lint <name>`, `epic open <name> --review`, then LISTEN:  `epic inbox listen <name>`, then
    `epic inbox wait <name>` in the background ("7. Review", 7.3:  every Send wakes this session).
@@ -446,6 +455,9 @@ than just being able to move on").
    - A choice:  `add <name>#D` (a question born answered).
    - Owen settles an item's options IN WORDS (a reply, the chat:  "require the parens"), not with the page's pick:
      `choose <name>#<id> <letter> "<outcome>"` right away, before or with building it.
+     - several letters in a pick-any set (`choose <name>#Q4 A C "..."`);  a phase's set (`#P3`) or a standing set
+       (`#s-upgrades`) as its target
+     - an option to add, reword or drop:  `epic option add | edit | remove <name>#<id> ...` (the old text kept, folded)
      - It records it as his pick would:  that card set's `chosen`, the item green (a question answered, a call
        closed;  an issue or todo only reviewed), the outcome on the set, shown in its Choices (no Noted card, I153).
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
@@ -462,6 +474,11 @@ than just being able to move on").
          - it needs his answer before work can go on
        - Following the repo's house style is one case of calm, not the only one.
        - Never ask:  decide, and record it.
+       - A call that needs his YES / NO (it went ahead, but he may say "don't"):  give it an option set, so he picks on
+         the page (epic `epic-engine` P50, request r44;  Owen, 2026-10-29:  "In future, this could be a question
+         block!"):  `add <name>#J "..." --options "*Do it | Don't" --calm`, `*` the one taken.
+         - a question takes `--options` too (`add <name>#Q "..." --options "A:Red | B:Blue"`)
+         - pros and cons on an option afterwards:  `epic option edit <name>#J5 A --note "..."`
        - Owen flips it from its id chip while reviewing;  `epic calm <name>#<id> [<id>...] [--loud]` from the CLI.
    - Items added while the phase is active carry it.
      - The phase's "To review" line lists the ones Owen hasn't reviewed;  the script writes it on every edit.
@@ -774,6 +791,9 @@ epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Revi
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
 epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
+                                           a pick on a PHASE's set ("P3's choices:  ...;  adjust its plan"):  rewrite
+                                           that phase's plan to it;  on a STANDING set ("...:  act on this round"):
+                                           act on the picked options, add new ones as they come (epic-engine P50)
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
 epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on

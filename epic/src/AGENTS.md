@@ -182,7 +182,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `<epic-update>` (epic `epic-engine` I168):  a new block's Seen, keyed by its id (`up3`),
         `<epic-review buttons="update">` before its date;  `<epic-phase>`'s pen marks all of its new ones
       - `<epic-new-item>`:  the page's toolbar button, and the Todo and Questions sections' New todo / question
-      - `<epic-option>`'s Choose pill
+      - `<epic-option>`'s Choose pill, pencil and ✕, and `<epic-choices>`' switch and Add choice (P50:  one mark per set)
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
         and the epics left to test (`openTests()`)
       - The controls show while `<epic-page reviewing>` is set.
@@ -1616,6 +1616,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - A question's pick with a remark is ONE revisit mark carrying `pick`:
       `{ action: "revisit", when, note, pick }`.
     - It's talked over, never applied by itself.
+  - An OPTION SET's whole change is ONE mark (epic `epic-engine` P50), under what holds the set:  an item's id, a
+    phase's (its Choices field), or a standing set's own (`s-upgrades`, the Choices section)
+    - `{ action: "pick", pick: "A C +1", choices, multiple?, added?, edited?, removed? }`:  the picks (a pick-any set's
+      whole list, `+1` an option Owen added), the pick-one / pick-any flip, his new options, edits and removals
+    - the page works it out in ONE place, `SetChange` (`epic-choices/`), saved by `ReviewClient.changeSet()`;
+      `<epic-choices>` draws the heading's switch, Add choice (`<epic-option-form>`) and his added cards,
+      `<epic-option>` its pill, pencil and ✕
+    - `epic inbox apply` writes it (`OptionSets`):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Option sets"
   - A CHANGE MARK's button (`<epic-change id="ch3">`, epic `epic-engine` P30):  Reopen, under its id;  no Accept
     since changes need no approval (Owen, 2026-10-25)
     - `{ action: "reopen" }`;  an old `{ action: "accept" }` (no `stage`) still applies;  only a change takes

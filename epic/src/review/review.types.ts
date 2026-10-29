@@ -20,6 +20,8 @@ import type {
   NowRequest,
   PageInbox,
   PickFields,
+  AddedOption,
+  EditedOption,
   WaitingComment,
   WorkingEntry
 } from "spell/epic/tool/ReviewInbox"
@@ -345,6 +347,8 @@ export type {
   NowAction,
   NowRequest,
   PickFields,
+  AddedOption,
+  EditedOption,
   WaitingComment,
   WorkingEntry
 }
@@ -423,12 +427,32 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
 }
 
 /**
- * `mark`'s pick, to carry into another mark (a revisit's "pick B, but ..."):  `{ pick, choices? }`, or `{}`.
+ * `mark`'s pick and the rest of its set change (epic `epic-engine` P50), to carry into another mark (a revisit's
+ * "pick B, but ..."):  `{ pick, choices, multiple, added, edited, removed }`, each only when given;  `{}` with no change.
  * As `ReviewInbox.pickOf()`.
  */
 export function pickOf(mark: PickFields | null | undefined): PickFields {
-  if (!mark?.pick) return {}
-  return { pick: mark.pick, ...(mark.choices !== undefined && { choices: mark.choices }) }
+  if (!mark || !hasSetChange(mark)) return {}
+  const { pick, choices, multiple, added, edited, removed } = mark
+  return {
+    ...(pick && { pick }),
+    ...(choices !== undefined && { choices }),
+    ...(multiple !== undefined && { multiple }),
+    ...(added?.length && { added }),
+    ...(edited?.length && { edited }),
+    ...(removed?.length && { removed })
+  }
+}
+
+/** Does `mark` change its option set at all:  a pick, the flip, an option added, edited or removed? */
+export function hasSetChange(mark: PickFields): boolean {
+  const { pick, multiple, added, edited, removed } = mark
+  return Boolean(pick || multiple !== undefined || added?.length || edited?.length || removed?.length)
+}
+
+/** The letters (and added keys, `+1`) a pick names:  `"A C +1"` => `["A", "C", "+1"]`;  `[]` for none. */
+export function pickedLetters(pick: string | null | undefined): string[] {
+  return (pick ?? "").split(/[\s,]+/).filter(Boolean)
 }
 
 /** `mark`'s comments, to carry into another revisit (epic `epic-engine` I140):  `{ comments }`, or `{}`. */
@@ -481,10 +505,11 @@ export function withInlineComments(note: string, ids: readonly string[]): string
 
 /**
  * Is `mark`'s pick option `letter` of card set `choices` (its position among the item's sets, I8)?
+ * - a pick-any set's mark names several (`A C`, P50):  any of them
  * A mark without `choices` (from before I8) picks from the item's OWN set:  `own` says whether set `choices` is it.
  */
 export function picks(mark: PickFields | null | undefined, letter: string, choices: number, own: boolean): boolean {
-  if (mark?.pick !== letter) return false
+  if (!mark || !pickedLetters(mark.pick).includes(letter)) return false
   return mark.choices === undefined ? own : mark.choices === choices
 }
 

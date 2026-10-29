@@ -78,6 +78,28 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   /** What Owen picked (or the answer sent);  `undefined` until he does:  `startingPicks` then. */
   @E.state accessor chosen: readonly string[] | undefined = undefined
 
+  /**
+   * Pick any, as Owen switched it on the page (epic `epic-engine` P50, Q55):  the switch in its line;  `undefined`
+   * until he flips it, its `multiple` meanwhile.  Page state only:  the answer carries the picks themselves.
+   */
+  @E.state accessor flipped: boolean | undefined = undefined
+
+  /** Pick several:  its switch, else `multiple`. */
+  get isMultiple(): boolean {
+    return this.flipped ?? !!this.multiple
+  }
+
+  /** The switch flipped:  to pick one with several picked, the newest pick stays (the last), the others go. */
+  @E.untracked
+  private flip() {
+    const multiple = !this.isMultiple
+    this.flipped = multiple === !!this.multiple ? undefined : multiple
+    if (!multiple && this.picks.length > 1) {
+      this.chosen = this.picks.slice(-1)
+      this.form?.edited()
+    }
+  }
+
   /** The letters picked. */
   get picks(): readonly string[] {
     return this.chosen ?? this.startingPicks
@@ -163,7 +185,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
    * the first shown;  `undefined` with `multiple`, where every tick box is a stop.
    */
   get tabStop(): string | undefined {
-    if (this.multiple) return undefined
+    if (this.isMultiple) return undefined
     const shown = this.shownOptions.map(letterOf)
     return shown.find((letter) => this.isPicked(letter)) ?? shown[0]
   }
@@ -229,11 +251,20 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
           >
             {this.chipLabel}
           </span>
-          <span class={HOW} part={this.partForName("how")}>
-            {this.translationForKey(this.multiple ? "pickSeveral" : "pickOne")}
-          </span>
+          <button
+            type="button"
+            class={HOW}
+            part={this.partForName("how")}
+            role="switch"
+            aria-checked={this.isMultiple ? "true" : "false"}
+            title={this.translationForKey(this.isMultiple ? "toOneTip" : "toSeveralTip")}
+            onClick={() => this.flip()}
+          >
+            <span class={KNOB} aria-hidden="true" />
+            {this.translationForKey(this.isMultiple ? "pickSeveral" : "pickOne")}
+          </button>
           <span class={TOOLS} part={this.partForName("tools")}>
-            <Show when={this.multiple && this.selectAll}>
+            <Show when={this.isMultiple && this.selectAll}>
               <ui-button
                 size="mini"
                 appearance="basic circular"
@@ -278,7 +309,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
           part={this.partForName("other")}
           type="other"
           for={this.key}
-          placeholder={this.translationForKey(this.multiple ? "otherSeveral" : "otherOne")}
+          placeholder={this.translationForKey(this.isMultiple ? "otherSeveral" : "otherOne")}
           onInput={this.onOtherInput}
         />
       </div>
@@ -303,7 +334,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     const { selected, more } = (event as CustomEvent<{ selected: boolean; more: boolean }>).detail
     const letter = letterOf(option)
     const ticked = selected || more
-    const others = this.multiple ? this.picks.filter((each) => each !== letter) : []
+    const others = this.isMultiple ? this.picks.filter((each) => each !== letter) : []
     this.chosen = ticked ? [...others, letter] : others
     this.moreWanted = more
       ? [...this.moreWanted.filter((each) => each !== letter), letter]
@@ -320,10 +351,10 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   @E.on("keydown")
   protected onArrowKey(event: KeyboardEvent) {
     const step = ARROW_STEPS[event.key]
-    if (!step || this.multiple || event.altKey || event.ctrlKey || event.metaKey) return
+    if (!step || this.isMultiple || event.altKey || event.ctrlKey || event.metaKey) return
     const path = event.composedPath()
     const box = path[0]
-    if (!(box instanceof HTMLInputElement) || box.type !== "radio") return
+    if (!(box instanceof HTMLElement) || box.getAttribute("role") !== "radio") return
     const shown = this.shownOptions
     const at = shown.findIndex((option) => path.includes(option))
     if (at < 0) return
@@ -423,6 +454,9 @@ const ARROW_STEPS: Readonly<Record<string, number>> = { ArrowDown: 1, ArrowRight
 
 /** An option's tick box, in its shadow root (`<epic-option>`'s `tick` part). */
 const TICK_PART = '[part~="tick"]'
+
+/** The switch's knob, in its line. */
+const KNOB = "knob"
 
 /** The answer key of "Provide more details":  `<key>-more`. */
 const MORE_SUFFIX = "-more"

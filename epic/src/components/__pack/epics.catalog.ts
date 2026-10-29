@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  484237685db675ee
+// sources:  483d238f6e672cbb
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -15,7 +15,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","was","accepted"]},
   "epic-choice-row": {"folder":"epic-choice-rows","attributes":["name","file","line","purpose","note","current","recommended"]},
   "epic-choice-rows": {"folder":"epic-choice-rows","skeleton":{"height":"8em"},"attributes":["stacked","no-file","blank","noun","reorder"]},
-  "epic-choices": {"folder":"epic-choices","attributes":["chosen","chosen-on","chosen-note"]},
+  "epic-choices": {"folder":"epic-choices","attributes":["chosen","multiple","fixed","closed","standing","title","chosen-on","chosen-note"]},
   "epic-choices-bar": {"folder":"epic-choices-bar","skeleton":{"height":"3em"},"attributes":[]},
   "epic-code": {"folder":"epic-code","attributes":["title","language","open"]},
   "epic-comment-pane": {"folder":"epic-comment-pane","attributes":["headline","about","saved","failed","deletable","near"]},
@@ -31,7 +31,8 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-net-effect": {"folder":"epic-net-effect","attributes":["option","recommended"]},
   "epic-new-item": {"folder":"epic-new-item","skeleton":{"display":"inline","width":"1em","height":"1em"},"attributes":["open","adds","near","editing"]},
   "epic-note": {"folder":"epic-note","attributes":["state","title"]},
-  "epic-option": {"folder":"epic-choices","attributes":["letter","title","recommended","selected","done","badge","badge-color","state-icon","state-color","state-label"]},
+  "epic-option": {"folder":"epic-choices","attributes":["letter","title","recommended","by","edited","removed","picked-on","selected","done","badge","badge-color","state-icon","state-color","state-label"]},
+  "epic-option-form": {"folder":"epic-option-form","skeleton":{"height":"4em"},"attributes":["heading","option-title","note","shot","for","submit"]},
   "epic-original": {"folder":"epic-original","attributes":[]},
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},

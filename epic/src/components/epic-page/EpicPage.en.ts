@@ -126,8 +126,7 @@ export const epicPageVocabulary = {
     { name: "", description: "The Overview, then the sections." },
     {
       name: "durable",
-      description:
-        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
+      description: 'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
     },
     {
       name: "toolbar",
@@ -465,6 +464,14 @@ export const epicPageVocabulary = {
       when: { attribute: "kind", values: ["saga"] },
       max: 1,
       description: "A saga page's Epics, after its Overview:  the cards of the epics serving it."
+    },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["choices"] },
+      max: 1,
+      description:
+        "Choices:  standing option sets, open round after round (epic `epic-engine` P50), between the Overview and " +
+        "the Phases;  only on a page that has one."
     },
     { tag: "epic-section", where: { attribute: "kind", values: ["phases"] }, max: 1, description: "2. Phases." },
     {

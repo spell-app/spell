@@ -344,6 +344,7 @@ const FIELD_LOOKS = {
   changes: { icon: "wand magic sparkles", label: "changes" },
   requests: { icon: "comment dots", label: "requests" },
   goal: { icon: "bullseye", label: "goal" },
+  choices: { icon: "square check", label: "choices" },
   plan: { icon: "route", label: "plan" },
   done: { icon: "circle check", label: "done" },
   files: { icon: "folder", label: "files" },

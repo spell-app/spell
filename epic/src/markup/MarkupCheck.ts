@@ -126,7 +126,35 @@ export class MarkupCheck {
     const chosen = element.localName === "epic-choices" ? element.getAttribute("chosen") : null
     if (chosen !== null) {
       const letters = elementChildren(element).map((option) => option.getAttribute("letter"))
-      if (!letters.includes(chosen)) this.add("bad value", element, `\`chosen="${chosen}"\` names no option`)
+      const picked = chosen.trim().split(/\s+/)
+      if (picked.some((letter) => !letters.includes(letter)))
+        this.add("bad value", element, `\`chosen="${chosen}"\` names no option`)
+      else if (picked.length > 1 && !element.hasAttribute("multiple"))
+        this.add("bad value", element, `\`chosen="${chosen}"\` names several options:  only a \`multiple\` set does`)
+    }
+    if (element.localName === "epic-choices") this.checkOptionSet(element, id)
+    if (element.localName === "epic-option") {
+      // a removed option, a standing set's pick:  the slot and its date go together (epic `epic-engine` P50)
+      const slot = element.getAttribute("slot")
+      const dated = SLOT_DATES[slot ?? ""]
+      if (dated && !element.hasAttribute(dated))
+        this.add("missing attribute", element, `\`slot="${slot}"\` needs \`${dated}\``)
+    }
+  }
+
+  /**
+   * An option set's place (epic `epic-engine` P50):  a STANDING set sits in the Choices section, with an id
+   * `s-<slug>` and a title;  the Choices section holds only standing sets.
+   */
+  private checkOptionSet(set: Element, id: string | null) {
+    const inSection =
+      set.parentElement?.localName === "epic-section" && set.parentElement.getAttribute("kind") === "choices"
+    if (set.hasAttribute("standing") || inSection) {
+      if (!set.hasAttribute("standing"))
+        this.add("missing attribute", set, "a set in the Choices section is `standing`")
+      if (id === null || !STANDING_SET_ID.test(id))
+        this.add("wrong id", set, "a standing set's id is `s-<slug>` (`s-upgrades`):  its marks are keyed by it")
+      if (!set.hasAttribute("title")) this.add("missing attribute", set, "a standing set needs `title`")
     }
   }
 
@@ -261,6 +289,12 @@ export class MarkupCheck {
     this.problems.push({ kind, element, where: describe(element), message })
   }
 }
+
+/** An option's slot => the date attribute it needs (epic `epic-engine` P50). */
+const SLOT_DATES: Record<string, string> = { removed: "removed", picked: "picked-on" }
+
+/** A standing option set's id:  `s-` and a slug (`ReviewInbox`'s `STANDING_ID`, which this module can't import). */
+const STANDING_SET_ID = /^s-[a-z0-9][a-z0-9-]*$/
 
 /** Whether `node` is an element. */
 function isElement(node: Node | ParentNode): node is Element {

@@ -133,6 +133,7 @@ export type AttributeTest = {
  * - `sha` -- a git commit, 7 to 40 hex digits
  * - `url` -- a web address, `https://github.com/spell-app/spell-parser`
  * - `letter` -- an option's letter, `A` to `Z`
+ * - `letters` -- option letters, space-separated:  a pick-any set's `chosen="A C"` (epic `epic-engine` P50)
  * - `epic name` -- the epic's folder name, `epic-components`
  * - `saga id` -- a saga's id, one or two words:  `drawable-spell`, `epics` (`sagas/sagas.json5`;  epic `epic-workflow` P15)
  */
@@ -148,6 +149,7 @@ export const Formats = {
   sha: /^[0-9a-f]{7,40}$/,
   url: /^https?:\/\/\S+$/,
   letter: /^[A-Z]$/,
+  letters: /^[A-Z]( [A-Z])*$/,
   "epic name": /^[a-z0-9]+(-[a-z0-9]+)*$/,
   "saga id": /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/
 } as const
@@ -164,11 +166,14 @@ export type FormatName = keyof typeof Formats
  * uses (`#decisions`:  "Questions" kept its old id).
  * - `overview-part`, the Overview's sub-sections, isn't here:  its ids are `o1`, `o2` ... (`OVERVIEW_PART_ID`);  nor
  *   `report` (`REPORT`), whose ids are its own.
+ * - `choices`:  the standing option sets (`<epic-choices standing>`, epic `epic-engine` P50), only on a page that
+ *   has one
  * - `epics`:  a SAGA page's Epics (`<epic-page kind="saga">`, epic `epic-workflow` P15), the cards of the epics
  *   serving it (`<epic-cards>`);  never on an epic page.
  */
 export const SectionIds = {
   epics: "epics",
+  choices: "choices",
   phases: "phases",
   questions: "decisions",
   judgements: "judgements",

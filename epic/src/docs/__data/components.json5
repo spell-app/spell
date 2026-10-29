@@ -353,7 +353,7 @@
         },
         {
           "name": "how",
-          "description": "`Pick one` or `Pick several`."
+          "description": "`Pick one` / `Pick any`:  a switch Owen flips (`role=\"switch\"`, epic `epic-engine` P50)."
         },
         {
           "name": "tools",
@@ -382,12 +382,22 @@
         {
           "key": "pickOne",
           "text": "Pick one",
-          "description": "Its line, without `multiple`."
+          "description": "Its line's switch, off:  without `multiple` (or flipped)."
         },
         {
           "key": "pickSeveral",
-          "text": "Pick several",
-          "description": "Its line, with `multiple`."
+          "text": "Pick any",
+          "description": "Its line's switch, on:  `multiple` (or flipped)."
+        },
+        {
+          "key": "toSeveralTip",
+          "text": "Let me pick several",
+          "description": "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
+        },
+        {
+          "key": "toOneTip",
+          "text": "Back to one pick:  the newest pick stays, the others turn off",
+          "description": "The switch's tooltip while it's pick any."
         },
         {
           "key": "selectAll",
@@ -1147,7 +1157,33 @@
         {
           "name": "chosen",
           "kind": "string",
-          "description": "The chosen option's `letter`, once answered;  absent while the question is open."
+          "description": "The chosen option's `letter`, once answered;  absent while the question is open.  A `multiple` set's may name several, a space between (`chosen=\"A C\"`)."
+        },
+        {
+          "name": "multiple",
+          "kind": "boolean",
+          "description": "Pick any:  Owen may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is reviewed its heading's switch flips it;  the flip goes with his Send."
+        },
+        {
+          "name": "fixed",
+          "kind": "boolean",
+          "description": "Owen may NOT add options:  no Add choice.  None:  every open set takes his (Owen's comment C4)."
+        },
+        {
+          "name": "closed",
+          "kind": "boolean",
+          "description": "The set is DONE (Owen's comment C11):  no more picks, and no options added, edited or removed;  drawn answered.  `epic option close`."
+        },
+        {
+          "name": "standing",
+          "kind": "boolean",
+          "description": "A standing set, in the page's Choices section:  never folds away as answered.  Each round's picks are stamped on their options (`picked-on`) and folded under Picked;  the rest stay open, and Claude adds more."
+        },
+        {
+          "name": "title",
+          "kind": "string",
+          "property": "epicTitle",
+          "description": "A standing set's title, drawn as its heading (`Upgrades on offer`).  Its `id` keys its marks."
         },
         {
           "name": "chosen-on",
@@ -1164,6 +1200,14 @@
         {
           "name": "",
           "description": "The options."
+        },
+        {
+          "name": "picked",
+          "description": "A standing set's options Owen picked (`picked-on`):  folded under Picked."
+        },
+        {
+          "name": "removed",
+          "description": "Its removed options (`removed`), never erased:  folded under Removed (n)."
         }
       ],
       "events": [],
@@ -1187,6 +1231,38 @@
         {
           "name": "note",
           "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
+        },
+        {
+          "name": "cards",
+          "description": "Open:  the cards' grid, Owen's added ones and Add choice's form too (P50)."
+        },
+        {
+          "name": "heading",
+          "description": "Open, while reviewed or pick any, or a standing set:  the line above the cards, its title and its switch."
+        },
+        {
+          "name": "title",
+          "description": "A standing set's title, in its heading."
+        },
+        {
+          "name": "switch",
+          "description": "While reviewed:  `Pick one` / `Pick any`, a `<button role=\"switch\">`;  flipped from the set's own, dashed until sent."
+        },
+        {
+          "name": "add",
+          "description": "While reviewed, unless `fixed`:  the Add choice button under the cards."
+        },
+        {
+          "name": "added",
+          "description": "An option Owen added, not applied yet:  a card in the options' look, dashed until sent."
+        },
+        {
+          "name": "picked",
+          "description": "A standing set's folded Picked list, at its end."
+        },
+        {
+          "name": "removed",
+          "description": "The folded Removed list, at its end."
         }
       ],
       "states": [
@@ -1201,6 +1277,10 @@
         {
           "name": "answering",
           "description": "An `<epic-ask>`'s options (a page Owen answers on):  one card a row, each with a tick box."
+        },
+        {
+          "name": "reviewed",
+          "description": "The page is reviewed and the set takes changes (not `closed`, nor an Original's):  pills, the switch, Add choice, pencils."
         }
       ],
       "texts": [
@@ -1238,6 +1318,131 @@
           "key": "chosenNoteOnly",
           "text": "Chosen:  {note}",
           "description": "Atop the unfolded panels:  a pick with a note, no day."
+        },
+        {
+          "key": "closedMark",
+          "text": "Closed",
+          "description": "After a closed set's heading, with nothing chosen."
+        },
+        {
+          "key": "pickOne",
+          "text": "Pick one",
+          "description": "The heading's switch, off:  one option at most."
+        },
+        {
+          "key": "pickAny",
+          "text": "Pick any",
+          "description": "The heading's switch, on (or its words):  several options."
+        },
+        {
+          "key": "switchToAnyTip",
+          "text": "Let me pick several:  sent with your next Send",
+          "description": "The switch's tooltip while it's pick one."
+        },
+        {
+          "key": "switchToOneTip",
+          "text": "Back to one pick:  the newest pick stays, the others turn off;  sent with your next Send",
+          "description": "The switch's tooltip while it's pick any."
+        },
+        {
+          "key": "addChoice",
+          "text": "Add choice",
+          "description": "The button under the cards."
+        },
+        {
+          "key": "addTip",
+          "text": "Add an option of your own:  sent with your next Send, picked",
+          "description": "Add choice's tooltip."
+        },
+        {
+          "key": "newChoice",
+          "text": "New choice",
+          "description": "Add choice's form:  its heading."
+        },
+        {
+          "key": "add",
+          "text": "Add",
+          "description": "Add choice's form:  its Save button."
+        },
+        {
+          "key": "editNew",
+          "text": "Change your choice",
+          "description": "An added option's form:  its heading."
+        },
+        {
+          "key": "newLetter",
+          "text": "New",
+          "description": "An added option's letter, until it's applied and given one."
+        },
+        {
+          "key": "choose",
+          "text": "Choose",
+          "description": "An added option's pill."
+        },
+        {
+          "key": "chosenNotSent",
+          "text": "Chosen · not sent",
+          "description": "An added option's pill, picked, not sent."
+        },
+        {
+          "key": "chosenSent",
+          "text": "Chosen · sent",
+          "description": "An added option's pill, picked, sent."
+        },
+        {
+          "key": "tipNewChoose",
+          "text": "Pick your option",
+          "description": "An added option's pill's tooltip."
+        },
+        {
+          "key": "tipNewPicked",
+          "text": "Your option is picked:  click to un-pick",
+          "description": "... once picked."
+        },
+        {
+          "key": "addedNotSent",
+          "text": "Yours · not sent",
+          "description": "Under an added option:  it goes with the next Send."
+        },
+        {
+          "key": "addedSent",
+          "text": "Yours · sent",
+          "description": "Under an added option, once sent."
+        },
+        {
+          "key": "editTip",
+          "text": "Edit {letter}",
+          "description": "A card's pencil:  its tooltip and name."
+        },
+        {
+          "key": "removeTip",
+          "text": "Remove {letter}",
+          "description": "A card's ✕:  its tooltip and name."
+        },
+        {
+          "key": "zoomTip",
+          "text": "Show it full size",
+          "description": "An option's picture:  its tooltip."
+        },
+        {
+          "key": "pickedList",
+          "text": "Picked ({count})",
+          "description": "A standing set's folded list of picked options."
+        },
+        {
+          "key": "removedList",
+          "text": "Removed ({count})",
+          "description": "The folded list of removed options."
+        },
+        {
+          "key": "foldListTip",
+          "text": "Fold the list",
+          "description": "A folded list's button, while open."
+        },
+        {
+          "key": "unfoldListTip",
+          "text": "Show the list",
+          "description": "A folded list's button, while folded."
         }
       ]
     },
@@ -1720,13 +1925,14 @@
             "changes",
             "requests",
             "goal",
+            "choices",
             "plan",
             "done",
             "files",
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
@@ -1803,6 +2009,11 @@
         {
           "key": "goal",
           "text": "Goal:"
+        },
+        {
+          "key": "choices",
+          "text": "Choices:",
+          "description": "A phase's own option sets (P50)."
         },
         {
           "key": "plan",
@@ -3025,6 +3236,26 @@
           "description": "The one Claude recommends."
         },
         {
+          "name": "by",
+          "kind": "string",
+          "description": "Who added it, when not Claude:  `owen`, an option he added from the page (Add choice, P50)."
+        },
+        {
+          "name": "edited",
+          "kind": "string",
+          "description": "The day it was last edited in place (P50):  its earlier title and text are kept in its `was` slot, folded."
+        },
+        {
+          "name": "removed",
+          "kind": "string",
+          "description": "The day it was removed (P50), never erased:  it sits in its set's `removed` slot, folded under `Removed (1)`;  no pill, no pencil."
+        },
+        {
+          "name": "picked-on",
+          "kind": "string",
+          "description": "A STANDING set's option Owen picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, folded under `Picked`."
+        },
+        {
           "name": "selected",
           "kind": "boolean",
           "description": "In an `<epic-ask>`:  ticked to start with, until Owen picks (the review's item picker ticks what isn't reviewed yet).  The tick itself is page state, its question's."
@@ -3069,6 +3300,10 @@
         {
           "name": "title",
           "description": "A title with markup, in place of `title`."
+        },
+        {
+          "name": "was",
+          "description": "Its earlier titles and text, one `<div data-title>` per edit, oldest first (P50)."
         }
       ],
       "events": [
@@ -3122,7 +3357,11 @@
         },
         {
           "name": "tick",
-          "description": "In an `<epic-ask>`:  its tick box (round for pick one), labelled by its title."
+          "description": "In an `<epic-ask>`:  its Choose pill, the epic page's (P50, Q55), a `<button role=\"radio\">` (pick one) or `role=\"checkbox\"`, labelled by its title."
+        },
+        {
+          "name": "comment-link",
+          "description": "In an `<epic-ask>`:  the Comment link its comment box folds under."
         },
         {
           "name": "badge",
@@ -3139,6 +3378,14 @@
         {
           "name": "comment",
           "description": "In an `<epic-ask>`:  the comment box under it, an `<epic-text-box>` for `<key>-<letter>`."
+        },
+        {
+          "name": "was",
+          "description": "With earlier text (its `was` slot, P50):  the folded `Was` line at its body's end."
+        },
+        {
+          "name": "change",
+          "description": "An edit or removal not applied yet (P50):  `Edited · not sent` and Undo, under the card."
         }
       ],
       "states": [
@@ -3169,6 +3416,14 @@
         {
           "name": "filtered",
           "description": "In an `<epic-ask filter>`:  `done`, and hidden while it shows Open."
+        },
+        {
+          "name": "retired",
+          "description": "Removed (`removed`), or a standing set's picked one (`picked-on`):  a small panel in a folded list."
+        },
+        {
+          "name": "removing",
+          "description": "Removed in its set's mark, not applied yet:  faded, with Undo."
         }
       ],
       "texts": [
@@ -3213,6 +3468,16 @@
           "description": "The pill's tooltip."
         },
         {
+          "key": "tipTicked",
+          "text": "{letter} is picked:  click to un-pick",
+          "description": "In an `<epic-ask>`:  a picked option's pill's tooltip."
+        },
+        {
+          "key": "commentLink",
+          "text": "Comment",
+          "description": "In an `<epic-ask>`:  the link its comment box folds under (P50, Q55)."
+        },
+        {
           "key": "tipChosen",
           "text": "{letter} is picked:  click to un-pick",
           "description": "The picked pill's tooltip."
@@ -3246,6 +3511,61 @@
           "key": "commentLabel",
           "text": "Comment on {letter} · {title}",
           "description": "In an `<epic-ask>`:  its comment box's name, for a screen reader."
+        },
+        {
+          "key": "editHeading",
+          "text": "Edit {letter}",
+          "description": "The pencil's form:  its heading."
+        },
+        {
+          "key": "pickedOn",
+          "text": "Picked {date}",
+          "description": "A standing set's picked option:  when."
+        },
+        {
+          "key": "was",
+          "text": "Was",
+          "description": "The folded line of its earlier text."
+        },
+        {
+          "key": "foldWasTip",
+          "text": "Fold its earlier text",
+          "description": "The `Was` line's button, while open."
+        },
+        {
+          "key": "unfoldWasTip",
+          "text": "Show its earlier text",
+          "description": "The `Was` line's button, while folded."
+        },
+        {
+          "key": "editedNotSent",
+          "text": "Edited · not sent",
+          "description": "Under a card edited, not sent yet."
+        },
+        {
+          "key": "editedSent",
+          "text": "Edited · sent",
+          "description": "Under a card edited, sent, not applied yet."
+        },
+        {
+          "key": "removedNotSent",
+          "text": "Removed · not sent",
+          "description": "Under a card removed, not sent yet."
+        },
+        {
+          "key": "removedSent",
+          "text": "Removed · sent",
+          "description": "Under a card removed, sent, not applied yet."
+        },
+        {
+          "key": "undo",
+          "text": "Undo",
+          "description": "After a change's line:  takes it back out of the mark."
+        },
+        {
+          "key": "undoTip",
+          "text": "Take this change back",
+          "description": "Undo's tooltip."
         }
       ]
     },
@@ -4351,6 +4671,10 @@
           "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
         {
+          "name": "choices-open",
+          "description": "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+        },
+        {
           "name": "changed",
           "description": "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet or marked Seen since)."
         },
@@ -4460,6 +4784,16 @@
           "key": "tookTip",
           "text": "~{estimate}",
           "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
+        },
+        {
+          "key": "choiceOpen",
+          "text": "1 choice open",
+          "description": "After its title (P50):  a set in its body waits for Owen's pick."
+        },
+        {
+          "key": "choicesOpenCount",
+          "text": "{count} choices open",
+          "description": "After its title (P50):  sets in its body wait for Owen's picks."
         },
         {
           "key": "changedTip",
@@ -5125,6 +5459,7 @@
           "values": [
             "overview-part",
             "epics",
+            "choices",
             "phases",
             "questions",
             "judgements",
@@ -5333,6 +5668,11 @@
         {
           "key": "epicsTitle",
           "text": "Epics"
+        },
+        {
+          "key": "choicesTitle",
+          "text": "Choices",
+          "description": "The standing option sets' section (P50)."
         },
         {
           "key": "phasesTitle",
@@ -7263,7 +7603,7 @@
       "folder": "epic-ask",
       "mainTag": "epic-ask",
       "title": "<epic-ask>",
-      "summary": "A question Owen answers on the page: its options with tick boxes, Other, its state as a chip.",
+      "summary": "A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.",
       "status": "done",
       "docs": false,
       "tags": [

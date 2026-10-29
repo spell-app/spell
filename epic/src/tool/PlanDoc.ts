@@ -71,6 +71,7 @@ import { PlanTime } from "./PlanTime"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
+import { OptionSets } from "./OptionSets"
 import { CHANGE_ID, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
 
 /****************
@@ -526,7 +527,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Set phase `n`'s fields:  `{ symptom, changes, goal, files, verify }`, as HTML;  each one given replaces that
+   * Set phase `n`'s fields:  `{ symptom, changes, goal, files, verify, choices }`, as HTML;  each one given replaces that
    * field, or is made in its place;  `""` removes it.  Returns the fields set, by label (`Symptom` ...).
    * - `plan`:  Claude's build plan, waiting for Owen's Accept;  `accepted` (`--accepted`, epic `epic-engine` I163):
    *   written accepted, for a plan Owen accepted with comments that it now folds in (no second Accept)
@@ -539,6 +540,11 @@ export class PlanDoc extends PlanReader {
       if (html === undefined) continue
       this.setField(phase, name, html)
       set.push(`${name[0]!.toUpperCase()}${name.slice(1)}`)
+    }
+    // its own option sets (epic `epic-engine` P50):  a field of `<epic-choices>`, not one `addPhase()` fills with TBD
+    if (values.choices !== undefined) {
+      this.setField(phase, "choices", values.choices)
+      set.push("Choices")
     }
     // Claude's build plan (epic `epic-engine` P33):  a new one waits for Owen's Accept;  removed, nothing waits
     if (values.plan !== undefined) {
@@ -561,11 +567,14 @@ export class PlanDoc extends PlanReader {
   /**
    * Owen accepted phase `phase`'s build plan (Accept plan, epic `epic-engine` P33):  the plan field `accepted` (now),
    * the phase `plan="accepted"`;  Claude builds it next.
+   * - an option set in its body still open takes its recommended option, as an approval does on a question (epic
+   *   `epic-engine` P50:  `OptionSets.takeRecommended()`);  returns what it took, for the log line (`""` for none)
    */
-  acceptPlan(phase: Element): void {
+  acceptPlan(phase: Element): string {
     const field = phase.querySelector(':scope > epic-field[name="plan"]')
     if (field) Markup.set<"epic-field">(field, { accepted: PlanTime.clockTime(this.now) })
     Markup.set<"epic-phase">(phase, { plan: "accepted" })
+    return new OptionSets(this).takeRecommended(phase)
   }
 
   /**
@@ -1151,6 +1160,9 @@ export class PlanDoc extends PlanReader {
    * - `accept` / `reopen` on a change mark (`ch3`, epic `epic-engine` P30;  `applyChange()`):  the change stands
    *   (`accepted`), or its question opens again
    * - `seen` on an update block (`up3`, epic `epic-engine` I168;  `applySeen()`):  stamped `seen`, for everyone
+   * - a pick is an option set's whole change (epic `epic-engine` P50;  `OptionSets`):  picks, the pick-one / pick-any
+   *   flip, options added, edited and removed;  a phase's set and a standing set (`s-upgrades`) too;  a `closed` set's
+   *   mark is left
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
    * - an approve carrying Owen's comments in its text (`comments`, epic `epic-engine` I163):  applied as any approve
    *   (a waiting plan accepted), its line saying `, with comments to fold in:  C4, C5`;  the comments stay waiting,
@@ -1161,6 +1173,9 @@ export class PlanDoc extends PlanReader {
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
+    // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
+    const options = new OptionSets(this).applyToHolder(mark)
+    if (options) return options
     const part = this.reviewPart(mark.id)
     if (part) {
       const result = withCommentsToFold(this.applyToPart(part, mark), mark)
@@ -1193,7 +1208,8 @@ export class PlanDoc extends PlanReader {
   }
 
   /** `applyMark()`'s work on `item`, the log line aside. */
-  applyAction(item: Element, { action, pick, choices, when, note, at, result, shot }: PlanMark): MarkResult {
+  applyAction(item: Element, mark: PlanMark): MarkResult {
+    const { action, pick, choices, when, note, at, result, shot } = mark
     const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
@@ -1207,7 +1223,7 @@ export class PlanDoc extends PlanReader {
         return { applied: true, did: `approved:  ${this.approve(item, kind, open)}` }
       }
       case "pick":
-        return this.pickOption(item, kind, open, pick, choices)
+        return new OptionSets(this).applyToItem(item, mark)
       case "todo": {
         const from = { label: item.id.toUpperCase(), link: item.id, what: kind, title: PlanItem.titleOf(item) }
         const todo = this.followUp(from, note)
@@ -1331,7 +1347,7 @@ export class PlanDoc extends PlanReader {
    * - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
    * - anything else (an open todo, limit or issue;  a closed item):  reviewed
    */
-  private approve(item: Element, kind: string, open: boolean): string {
+  approve(item: Element, kind: string, open: boolean): string {
     if (open && (kind === "judgement" || kind === "test")) {
       this.setItem(item.id, "done")
       this.review(item.id)
@@ -1353,7 +1369,7 @@ export class PlanDoc extends PlanReader {
    *   - `outcome` (`choose()`'s, a choice settled in conversation):  in place of what happens next
    * - left for Claude when the item has no such set, or the set no such option
    */
-  private pickOption(
+  pickOption(
     item: Element,
     kind: string,
     open: boolean,
@@ -1440,7 +1456,7 @@ export class PlanDoc extends PlanReader {
    * - the item's underway card, if any, still turns Noted with the pick's words (`Chose B · <title>:  <what>`):
    *   a spinner is never left running
    */
-  private notePick(item: Element, set: Element, option: OptionCard, what: string) {
+  notePick(item: Element, set: Element, option: OptionCard, what: string): void {
     Markup.set<"epic-choices">(set, { chosenOn: this.today, chosenNote: what })
     if (this.underwayCard(this.statusHost(item.id))) this.noteStatus(item.id, pickedWords(option, what))
   }
@@ -1832,6 +1848,7 @@ export class PlanDoc extends PlanReader {
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
     changed += this.updateUpdates()
     changed += this.updateDoneAt()
+    changed += OptionSets.updateOpenCounts(this.phaseElements)
     return changed
   }
 
@@ -2314,8 +2331,8 @@ export class PlanDoc extends PlanReader {
       case "approve":
         // a phase whose build plan waits:  Accept plan (P33)
         if (part.kind === "phase" && part.element.getAttribute("plan") === "waiting") {
-          this.acceptPlan(part.element)
-          return { applied: true, did: "plan accepted:  build it" }
+          const took = this.acceptPlan(part.element)
+          return { applied: true, did: `plan accepted:  build it${took}` }
         }
         return { applied: true, did: "approved" }
       case "skip":
@@ -2759,12 +2776,7 @@ const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {
-  return String(prompt ?? "")
-    .trim()
-    .split(/\n\s*\n/)
-    .filter((paragraph) => paragraph.trim())
-    .map((paragraph) => `<p>${PlanMarkup.text(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
-    .join("")
+  return PlanMarkup.paragraphs(prompt)
 }
 
 /** The doc pass's phase, by its name:  `Doc Review` (epic `epic-engine` P33:  it floats to the end). */
