@@ -1,6 +1,6 @@
 {
   "name": "spell-app",
-  "version": "0.9.0",
+  "version": "0.8.5",
   "private": true,
   "description": "Spell's editor and its servers:  the app, spaces, the language server, the spell CLI, the page server's Spell layer, and the spell language's VS Code extension",
   "license": "MIT",
