@@ -8,15 +8,12 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell 0.8.0
-spell-parser 0.8.0
-spell-ui 0.8.0
-spell-app 0.8.0
+spell ...
 ```
 
 </details>
 
-_Every repo that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
+_One package, one version, in about 0.1 s:  every folder that adds commands to `spell` ships inside it._
 
 One command over every Spell repo.
 If you've used `git`, `gh` or `cargo`, you know the shape:  one program, a verb after it, `--help` on everything.
