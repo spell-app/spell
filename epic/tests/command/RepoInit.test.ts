@@ -175,21 +175,8 @@ describe("epic init:  the person's name", () => {
 })
 
 describe("RepoInit's statics", () => {
-  test("the install command, from the lock file;  none without one", () => {
-    const dir = join(TEMP, "locks")
-    mkdirSync(dir)
-    expect(RepoInit.installCommandOf(dir)).toBe("")
-    writeFileSync(join(dir, "package.json"), "{}")
-    expect(RepoInit.installCommandOf(dir)).toBe("npm install")
-    writeFileSync(join(dir, "pnpm-lock.yaml"), "")
-    expect(RepoInit.installCommandOf(dir)).toBe("pnpm install")
-    writeFileSync(join(dir, "yarn.lock"), "")
-    expect(RepoInit.installCommandOf(dir)).toBe("yarn install")
-    expect(RepoInit.settingsFor(dir).installOnCreate).toBe(true)
-  })
-
   test("the config's text reads back as the settings it was written from", () => {
-    const settings = RepoInit.settingsFor(MAIN)
+    const settings = EpicConfig.defaultsFor(MAIN)
     expect(EpicConfig.settingsFrom(RepoInit.configText(settings))).toEqual(settings)
   })
 
@@ -321,7 +308,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
 
   test("keepRemote():  in place in the line epic init writes;  added to an older file, its comments kept", () => {
     const file = join(TEMP, "config.json5")
-    writeFileSync(file, RepoInit.configText(RepoInit.settingsFor(MAIN)))
+    writeFileSync(file, RepoInit.configText(EpicConfig.defaultsFor(MAIN)))
     RepoInit.keepRemote(file, "git@github.com:o/x.git")
     expect(readFileSync(file, "utf8")).toMatch(/\n {2}"contentRemote": "git@github.com:o\/x.git",\n/)
     writeFileSync(file, '// mine\n{\n  "baseBranch": "main"\n}\n')

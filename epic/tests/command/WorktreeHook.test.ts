@@ -49,7 +49,7 @@ function config(settings: Record<string, unknown>): void {
   mkdirSync(join(MAIN, ".epic"), { recursive: true })
   writeFileSync(
     join(MAIN, ".epic", "config.json5"),
-    JSON.stringify({ worktreesFolder: "../repo.worktrees", ...settings })
+    JSON.stringify({ worktreesFolder: "../repo.worktrees", linkSessionFolders: false, ...settings })
   )
 }
 
@@ -205,6 +205,78 @@ describe("worktree hook", () => {
     const kept = hook("remove", { worktree_path: made.stdout, cwd: MAIN })
     expect(kept.status).toBe(1)
     expect(kept.stderr).toMatch(/uncommitted changes/)
+  })
+})
+
+describe("a repo `epic init` never set up (epic-friend P6):  Claude Code's own worktrees, every other hook quiet", () => {
+  /** A repo with no `.epic/config.json5`, whose branch isn't `main`:  where Spell's defaults failed every worktree. */
+  const PLAIN = join(TEMP, "plain")
+  mkdirSync(PLAIN)
+  git(PLAIN, "init", "-q", "-b", "trunk")
+  writeFileSync(join(PLAIN, "README.md"), "# plain\n")
+  writeFileSync(join(PLAIN, "yarn.lock"), "")
+  git(PLAIN, "add", "-A")
+  git(PLAIN, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "first")
+
+  test("create:  .claude/worktrees/<name>, on a new branch worktree-<name>, from what's checked out;  nothing else", () => {
+    const made = hook("create", { name: "seo", cwd: PLAIN })
+    expect(made.status, made.stderr).toBe(0)
+    expect(made.stdout).toBe(join(PLAIN, ".claude", "worktrees", "seo"))
+    expect(made.stderr).not.toMatch(/invalid reference/)
+    expect(git(made.stdout, "branch", "--show-current")).toBe("worktree-seo")
+    expect(git(made.stdout, "rev-parse", "HEAD")).toBe(git(PLAIN, "rev-parse", "trunk"))
+    // no install (it has a lock file), no session-folder link, nothing beside the repo
+    expect(made.stderr).not.toMatch(/yarn install/)
+    expect(existsSync(SessionFolders.folderOf(made.stdout, CLAUDE))).toBe(false)
+    expect(existsSync(join(TEMP, "plain.worktrees"))).toBe(false)
+    // again:  the same worktree
+    expect(hook("create", { name: "seo", cwd: PLAIN }).stderr).toMatch(/reusing/)
+  })
+
+  test("an agent's worktree keeps Claude Code's name, even from a session in another worktree", () => {
+    const made = hook("create", { name: "agent-a1b2", cwd: join(PLAIN, ".claude", "worktrees", "seo") })
+    expect(made.status, made.stderr).toBe(0)
+    expect(made.stdout).toBe(join(PLAIN, ".claude", "worktrees", "agent-a1b2"))
+    expect(git(made.stdout, "branch", "--show-current")).toBe("worktree-agent-a1b2")
+  })
+
+  test("remove:  the worktree and its branch;  never uncommitted work, nor a branch's own commits", () => {
+    const busy = hook("create", { name: "busy", cwd: PLAIN }).stdout
+    writeFileSync(join(busy, "draft.txt"), "work\n")
+    const kept = hook("remove", { worktree_path: busy, cwd: PLAIN })
+    expect(kept.status).toBe(1)
+    expect(kept.stderr).toMatch(/uncommitted changes/)
+    rmSync(join(busy, "draft.txt"))
+    expect(hook("remove", { worktree_path: busy, cwd: PLAIN }).stderr).toMatch(/removed .* and branch worktree-busy/)
+    expect(existsSync(busy)).toBe(false)
+    // a commit only its branch has:  the worktree goes, the branch stays
+    const ahead = hook("create", { name: "ahead", cwd: PLAIN }).stdout
+    writeFileSync(join(ahead, "new.txt"), "new\n")
+    git(ahead, "add", "-A")
+    git(ahead, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "x")
+    expect(hook("remove", { worktree_path: ahead, cwd: PLAIN }).stderr).toMatch(/kept branch worktree-ahead/)
+    expect(git(PLAIN, "branch", "--list", "worktree-ahead")).toMatch(/worktree-ahead/)
+  })
+
+  test("every other hook does nothing there, and exits 0", () => {
+    const worktree = join(PLAIN, ".claude", "worktrees", "seo")
+    for (const name of [
+      "behind-main",
+      "left-worktree",
+      "server-prune",
+      "shared-commit",
+      "sync-notice",
+      "worktree-guard"
+    ]) {
+      const run = spawnSync(process.execPath, [join(dirname(HOOK), `${name}.mjs`)], {
+        input: JSON.stringify({ cwd: worktree, session_id: "s1", source: "startup", hook_event_name: "SessionStart" }),
+        encoding: "utf8",
+        env: { ...process.env, CLAUDE_CONFIG_DIR: CLAUDE, SPELL_EPIC_HOME: join(TEMP, "home") }
+      })
+      expect(run.status, name).toBe(0)
+      expect(run.stdout, name).toBe("")
+    }
+    expect(existsSync(join(TEMP, "home"))).toBe(false)
   })
 })
 

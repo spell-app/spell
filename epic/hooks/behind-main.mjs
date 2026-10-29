@@ -8,7 +8,8 @@
  * - stdin `{ cwd, hook_event_name, tool_input, ... }`.
  *   The folder checked:  `tool_input.path` (an `EnterWorktree` by path), else `cwd` (by name, the skills' way since
  *   epic `epic-engine` P16).
- * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`):
+ *   the plugin's hooks run in every repo.
  * - On `main`, outside git, or not behind:  nothing.
  * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):
  *   offer the merge.
@@ -18,7 +19,7 @@
  * - Always exits 0, within a few seconds:  never blocks a session.
  */
 import { spawn } from "node:child_process"
-import { existsSync, openSync, readFileSync } from "node:fs"
+import { openSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { Git } from "spell/server/Git"
@@ -28,8 +29,7 @@ try {
   const dir = input.tool_input?.path ?? input.cwd
   // loaded in here, so a config that won't read never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
-  const config = dir && EpicConfig.of(dir)
-  const main = config && existsSync(config.file) && config.baseBranch
+  const main = dir && EpicConfig.ofSetUp(dir)?.baseBranch
   if (main) patchInBackground(dir)
   const behind = main && behindMain(dir, main)
   if (behind) {

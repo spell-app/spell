@@ -17,7 +17,7 @@ import { Shared } from "./Shared"
  * set a repo up for epics (epic `epic-eject` P9), in its main checkout or any worktree of it.
  *
  * In order, each step skipped when it's done already, so it's safe to run again:
- * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`settingsFor()`):
+ * 1. writes `.epic/config.json5` (`EpicConfig`), with values for THIS repo (`EpicConfig.defaultsFor()`):
  *    - the content folder `../<repo>.epics`
  *    - the base branch from git
  *    - worktrees in `../<repo>.worktrees`
@@ -99,7 +99,7 @@ export class RepoInit {
     const { main } = this
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
-    const settings = hadConfig ? new EpicConfig(main).settings : RepoInit.settingsFor(main)
+    const settings = hadConfig ? new EpicConfig(main).settings : EpicConfig.defaultsFor(main)
     if (!hadConfig && !dryRun) {
       mkdirSync(dirname(configFile), { recursive: true })
       writeFileSync(configFile, RepoInit.configText(settings))
@@ -308,68 +308,6 @@ export class RepoInit {
   }
 
   /**
-   * The settings `epic init` writes for the repo whose main checkout is `main`:
-   * - `contentFolder`:  `../<repo>.epics`;  `worktreesFolder`:  `../<repo>.worktrees`, both beside the repo
-   * - `contentRemote`:  `""`, none yet:  `remoteStep()` writes it
-   * - `baseBranch`:  the remote's default branch (`origin/HEAD`), else the main checkout's branch, else `main`
-   * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
-   * - `installOnCreate`:  on when there is one, so a worktree's window never opens without its packages
-   * - `extraInstalls`:  none (`[]`);  the file says what it's for
-   * - `windows`:  named for the repo and its content folder;  `worktreeOnly` on (every worktree is beside the repo)
-   *   - no VS Code `settings` of its own (`{}`):  left out of the file (`configText()`)
-   * - `linkSessionFolders` on:  each worktree's saved sessions show in every window's Claude panel
-   * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
-   * - `engineFolder`:  `""`, no `spell-epic` link:  only spell-app reaches the engine's code through one
-   * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's
-   *   (spell-epic's `templates/`, epic `epic-eject` T11)
-   * - `windowsFolder`:  `../<repo>.epics/windows`, the content folder's `windows/` (epic `epic-eject` P13)
-   * - `app`:  none (the default);  the file shows how to declare one, in a comment
-   * - `checkoutPatches`:  none (`[]`);  the file shows one, in a comment
-   * - `promptAck`:  on, the default
-   * - `renamedRepos`:  none (`{}`);  the file shows one, in a comment
-   * - static:  needs no instance
-   */
-  static settingsFor(main: string): EpicSettings {
-    const repo = basename(main)
-    const installCommand = RepoInit.installCommandOf(main)
-    return {
-      contentFolder: `../${repo}.epics`,
-      contentRemote: "",
-      baseBranch: RepoInit.baseBranchOf(main),
-      worktreesFolder: `../${repo}.worktrees`,
-      installCommand,
-      installOnCreate: Boolean(installCommand),
-      installTimeout: EpicConfig.DEFAULTS.installTimeout,
-      extraInstalls: [],
-      windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true, settings: {} },
-      linkSessionFolders: true,
-      sharedFolders: [...INIT_FOLDERS],
-      engineFolder: "",
-      repoTemplates: "",
-      windowsFolder: `../${repo}.epics/windows`,
-      app: { ...EpicConfig.DEFAULTS.app },
-      repos: "",
-      voices: {},
-      pageVoices: { ...EpicConfig.DEFAULTS.pageVoices },
-      checkoutPatches: [],
-      promptAck: true,
-      renamedRepos: {}
-    }
-  }
-
-  /** The branch worktrees start from in the repo at `main`:  `origin/HEAD`'s branch, else `main`'s own, else `main`. */
-  static baseBranchOf(main: string): string {
-    const remote = Git.run(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], main)
-    if (remote.ok && remote.out.includes("/")) return remote.out.slice(remote.out.indexOf("/") + 1)
-    return Git.run(["branch", "--show-current"], main).out || "main"
-  }
-
-  /** The install command the lock file at `main`'s root names (`INSTALLERS`, first match);  `""` with none. */
-  static installCommandOf(main: string): string {
-    return INSTALLERS.find(([file]) => existsSync(join(main, file)))?.[1] ?? ""
-  }
-
-  /**
    * `.epic/config.json5`'s text for `settings`:  every key, each with a comment saying what it is.
    * - in JSON5's JSON-compatible part (what `EpicConfig.parse()` and `DataFile` read)
    */
@@ -379,7 +317,7 @@ export class RepoInit {
     return `// Where this repo keeps its epic things, for spell-epic's \`epic\` command, hooks and skills.
 // - Written by \`epic init\`;  \`epic config\` prints what's in force.
 // - Folders are relative to this repo's main checkout;  every worktree reads this (the main checkout's) file.
-// - Every key is optional:  one left out takes spell-epic's default.
+// - Every key is optional:  one left out reads as \`epic init\` writes it for this repo;  \`epic config\` shows it.
 {
   // the content repo:  epic pages, sagas, guides, pages;  a git repo of its own, read from there
   "contentFolder": ${value("contentFolder")},
@@ -685,28 +623,6 @@ const SHOW_README: ReadonlySet<RemoteAction> = new Set([
 
 /** The epics README, on GitHub (it's the kit's `README-epics.md`):  how a team shares the epics. */
 const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.md"
-
-/**
- * The content repo's folders for a new repo:  what the epic tooling reads and writes.
- * - `epics`:  epic pages, their parts, inboxes, `home.json5` and `favorites.json5`
- * - `sagas`:  the sagas' list and pages
- * - `guides`:  the durable docs epics write
- * - `pages`:  the docs home and the scratch details pages
- * - not spell-app's own (`brand`, `ui`, `goals`, `agents`), nor `templates`, which are spell-epic's
- */
-const INIT_FOLDERS = ["epics", "sagas", "guides", "pages"]
-
-/** Lock files and the install command each names, first match wins. */
-const INSTALLERS: [file: string, command: string][] = [
-  ["yarn.lock", "yarn install"],
-  ["pnpm-lock.yaml", "pnpm install"],
-  ["bun.lock", "bun install"],
-  ["bun.lockb", "bun install"],
-  ["package-lock.json", "npm install"],
-  ["package.json", "npm install"],
-  ["uv.lock", "uv sync"],
-  ["Gemfile.lock", "bundle install"]
-]
 
 /** The `.gitignore` block's first and last lines, as spell-app's own `.gitignore` has them. */
 const BLOCK_START = "# shared:start"

@@ -3,6 +3,8 @@
  * Claude Code's `WorktreeCreate` / `WorktreeRemove` hooks (the plugin's `hooks/hooks.json`):
  * `worktree.mjs create|remove`, the hook's JSON on stdin.
  * They replace Claude's own git worktree logic, for `EnterWorktree`, `claude -w` and agents' `isolation: "worktree"`.
+ * - In EVERY repo, since the plugin is installed for the machine:  in a repo `epic init` never set up
+ *   (`EpicConfig.ofSetUp()`), they do what Claude Code does by itself ("A repo not set up", below).
  *
  * ## Why a hook
  * - Where sessions are saved:
@@ -12,12 +14,12 @@
  *   - a session in a worktree a hook made stays saved where it started:
  *     the repo root, which every window lists (`src/window.mjs`)
  *   - checked with CLI 2.1.287
- * - Names agree:  worktree `.claude/worktrees/<name>`, branch `<name>` (Claude's own adds `worktree-`).
- * - Branches from local `main` (unpushed work included), not `origin/main`.
+ * - Names agree:  worktree `../<repo>.worktrees/<name>`, branch `<name>` (Claude's own adds `worktree-`).
+ * - Branches from the LOCAL base branch (unpushed work included), not `origin/main`.
  * - The folders and the branch come from the repo's `.epic/config.json5` (`EpicConfig`):
- *   `worktreesFolder`, `baseBranch`, `contentFolder`;  the names above are their defaults.
- *   - `worktreesFolder` may be BESIDE the repo (`../spell-app.worktrees`, epic `epic-eject` P8):
- *     new worktrees go there, and the old ones are still found in `.claude/worktrees` (`EpicConfig.worktreeFolder()`).
+ *   `worktreesFolder`, `baseBranch`, `contentFolder`;  a key left out, the repo's own (`EpicConfig.defaultsFor()`).
+ *   - `worktreesFolder` BESIDE the repo since epic `epic-eject` P8:  new worktrees go there,
+ *     and the old ones are still found in `.claude/worktrees` (`EpicConfig.worktreeFolder()`).
  *
  * ## create
  * - stdin `{ name, cwd, session_id, transcript_path, ... }`
@@ -79,6 +81,16 @@
  *     (once, for the whole folder), each child's worktree and branch go, then the top's
  * - A single repo (no `repos`, other people's setups):  everything above, as before.
  *
+ * ## A repo not set up (epic `epic-friend` P6)
+ * - No `.epic/config.json5`:  NOT an epic repo, so nothing of the above, and no default of Spell's.
+ *   - Before P6 it ran the above with Spell's defaults, cut from a branch named `main`:
+ *     in a repo whose branch is called something else, every Claude Code worktree failed (`invalid reference: main`).
+ * - `create`:  Claude Code's own plain worktree (`createPlain()`):
+ *   - `.claude/worktrees/<name>`, on a new branch `worktree-<name>` (or that branch, when it's there)
+ *   - cut from the remote's default branch (`origin/HEAD`), else what's checked out
+ *   - no links, no install, no renaming an agent's worktree
+ * - `remove`:  the worktree, and its branch when nothing would be lost (`removePlain()`)
+ *
  * ## remove
  * - stdin `{ worktree_path, cwd, ... }`.
  * - Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at session exit, and when an agent finishes.
@@ -110,6 +122,9 @@ const NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 
 /** Claude's name for an agent's worktree (`isolation: "worktree"`). */
 const AGENT = /^agent-[0-9a-f]+$/
+
+/** Claude Code's prefix for its own worktrees' branches:  `worktree-<name>` (`createPlain()`). */
+const PLAIN_BRANCH = "worktree-"
 
 /** An agent's worktree once prefixed:  `<owner>-agent-<id>`;  `$1` is the owner. */
 const OWNED_AGENT = /^(.+)-agent-[0-9a-f]+$/
@@ -166,11 +181,15 @@ class Worktree {
     return config.worktreeNameOf(realpathSync(cwd)) ?? ""
   }
 
-  /** `create`:  make (or reuse) worktree `<name>` on branch `<name>`;  returns its path. */
+  /**
+   * `create`:  make (or reuse) worktree `<name>` on branch `<name>`;  returns its path.
+   * - a repo not set up for epics:  Claude Code's own plain worktree (`createPlain()`)
+   */
   static create({ name, cwd }) {
     if (!NAME.test(name ?? "")) throw new Error(`worktree name must match ${NAME}:  got "${name}"`)
     const root = Worktree.root(cwd)
-    const config = new EpicConfig(root)
+    const config = EpicConfig.ofSetUp(root)
+    if (!config) return Worktree.createPlain(name, root)
     const owner = AGENT.test(name) ? Worktree.owner(config, cwd) : ""
     if (owner) name = `${owner}-${name}`
     // ANOTHER repo's epic:  never a worktree of its name here, even one made before (epic `epic-engine` I47)
@@ -195,6 +214,30 @@ class Worktree {
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
     // `installCommand: ""`:  a repo with nothing to install
     if (config.installOnCreate && config.installCommand) Worktree.installAll(path, config)
+    return path
+  }
+
+  /**
+   * `create` in a repo NOT set up for epics (no `.epic/config.json5`):  the worktree Claude Code makes by itself.
+   * - `.claude/worktrees/<name>` in the main checkout (`EpicConfig.CLAUDE_WORKTREES`), reused when it's there
+   * - on branch `worktree-<name>`, new, from the remote's default branch (`origin/HEAD`), else from what's checked out;
+   *   that branch itself when it's there already
+   * - nothing else:  no shared links, session links or install;  an agent's worktree keeps its own name
+   */
+  static createPlain(name, root) {
+    const path = join(root, EpicConfig.CLAUDE_WORKTREES, name)
+    if (Worktree.isLive(path)) {
+      console.error(`worktree hook:  reusing ${path}`)
+      return path
+    }
+    const branch = `${PLAIN_BRANCH}${name}`
+    const base = Git.run(["rev-parse", "--verify", "--quiet", "refs/remotes/origin/HEAD"], root).ok
+      ? "origin/HEAD"
+      : "HEAD"
+    const args = Worktree.hasBranch(root, branch) ? [path, branch] : ["-b", branch, path, base]
+    console.error(`worktree hook:  not an epic repo:  git worktree add ${args.join(" ")}`)
+    mkdirSync(dirname(path), { recursive: true })
+    Worktree.git(root, "worktree", "add", "--quiet", ...args)
     return path
   }
 
@@ -401,6 +444,7 @@ class Worktree {
     path = realpathSync(path)
     const root = Worktree.root(path)
     const config = new EpicConfig(root)
+    if (!config.isSetUp) return Worktree.removePlain(path, root)
     // a multi-repo top's epic worktree, or a child's in it (epic `epic-engine` P10):  every repo's
     const name = config.top?.worktreeNameOf(path)
     if (name) return Worktree.removeAll(name, config.top)
@@ -453,6 +497,20 @@ class Worktree {
       removed.push(repo)
     }
     return `removed ${path} (${removed.join(", ")}) and branch ${name} in each${servers}`
+  }
+
+  /**
+   * `remove` in a repo NOT set up for epics:  worktree `path` (`createPlain()`'s), and its branch.
+   * - never loses work:  a worktree with uncommitted changes is kept (throws);  a branch with commits the checked-out
+   *   branch lacks is kept, and said
+   */
+  static removePlain(path, root) {
+    if (Worktree.git(path, "status", "--porcelain")) throw new Error(`kept ${path}:  it has uncommitted changes`)
+    const branch = Worktree.git(path, "branch", "--show-current")
+    Worktree.git(root, "worktree", "remove", path)
+    if (!branch) return `removed ${path}`
+    const deleted = Git.run(["branch", "-d", branch], root).ok
+    return `removed ${path}${deleted ? ` and branch ${branch}` : `;  kept branch ${branch}:  it has commits not merged`}`
   }
 
   /** Stop checkout `path`'s servers (`CheckoutServers.stop()`):  `", stopped ..."` for the report, or `""`;  never throws. */

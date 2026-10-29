@@ -49,15 +49,18 @@ export class ReviewBackfill {
   sessionsOf(name: string, mainRoot: string): BackfillSession[] {
     const slug = ReviewBackfill.projectSlug(mainRoot)
     const config = new EpicConfig(mainRoot)
-    // the project folder Claude made for a session started IN the worktree:  its folder's slug
-    const worktreeSlug = ReviewBackfill.projectSlug(config.worktreeFolder(name))
+    // the project folder Claude made for a session started IN the worktree:  its folder's slug, in any of the places
+    // worktrees go (beside the repo, or Claude Code's own `.claude/worktrees`), on disk or not
+    const worktreeSlugs = new Set(
+      config.worktreesFolders.map((folder) => ReviewBackfill.projectSlug(join(folder, name)))
+    )
     if (!existsSync(this.projects)) return []
     const found: BackfillSession[] = []
     // each real folder once:  a linked worktree's folder (epic `epic-eject` Q4) IS main's, and would claim every session
     for (const folder of ClaudeHome.projectFolders(this.projects)) {
       if (folder !== slug && !folder.startsWith(`${slug}-`)) continue
       // an older session made its worktree's own project folder:  every session in it is the epic's
-      const worktreeFolder = folder === worktreeSlug
+      const worktreeFolder = worktreeSlugs.has(folder)
       for (const file of readdirSync(join(this.projects, folder))) {
         if (!file.endsWith(".jsonl")) continue
         const path = join(this.projects, folder, file)

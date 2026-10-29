@@ -19,7 +19,7 @@ import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
  * - the Claude panel's own reopen can't be fixed from here (it marks only `.claude/worktrees/<name>` folders),
  *   and a hook can't move a session:  it can only tell Claude
  *
- * What it tells Claude (`check()`), on a start-up or a resume, in a repo that uses epics (`.epic/config.json5`):
+ * What it tells Claude (`check()`), on a start-up or a resume, in a repo set up for epics (`EpicConfig.ofSetUp()`):
  * 1. LOST:  the transcript's last worktree note names a worktree that still exists,
  *    but the session's folder is outside it.
  *    Claude is told to `EnterWorktree` back into it before anything else.
@@ -55,9 +55,9 @@ export class WorktreeGuard {
     const { cwd, transcript_path: transcript, source } = input
     if (!cwd || (source !== "startup" && source !== "resume")) return undefined
     // a child repo of a multi-repo top (epic `epic-engine` P10):  the TOP's worktrees, whose each holds every repo's
-    const own = EpicConfig.of(cwd)
+    const own = EpicConfig.ofSetUp(cwd)
+    if (!own) return undefined
     const config = own.top ?? own
-    if (!existsSync(config.file)) return undefined
     const here = RealPath.of(cwd)
     // Claude Code's own note first;  none at all (never entered, never left):  the guard's record (rule 2)
     const last = WorktreeGuard.lastNote(transcript)

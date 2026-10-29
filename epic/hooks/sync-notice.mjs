@@ -8,18 +8,18 @@
  * - Said the way the behind-main notice says it ([behind-main.mjs](behind-main.mjs)):  a line for the person
  *   (`systemMessage`), and one for Claude (`additionalContext`).
  * - stdin `{ cwd, hook_event_name, ... }`.
- * - Only in a repo that uses epics (it has `.epic/config.json5`), whose content repo exists:  else nothing.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`),
+ *   whose content repo exists:  else nothing.
  * - Always exits 0, at once:  it reads one small file, no git.
  */
-import { existsSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a config that won't read never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
   const { SyncState } = await import("spell/epic/command/SyncState.ts")
-  const config = input.cwd && EpicConfig.of(input.cwd)
-  const dir = config && existsSync(config.file) && config.contentFolder
+  const dir = input.cwd && EpicConfig.ofSetUp(input.cwd)?.contentFolder
   const notice = dir && SyncState.notice(dir)
   if (notice)
     console.log(

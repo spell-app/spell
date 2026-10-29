@@ -8,6 +8,9 @@ import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
+/** the kit's config, as committed (comments and all):  Spell's own layout, every value spelled out */
+const KIT_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../../..", EpicConfig.FILE)
+
 /** spell-epic's own config, as committed (comments and all). */
 const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../..", EpicConfig.FILE)
 
@@ -24,28 +27,31 @@ function configFile(main: string, text: string): void {
 }
 
 describe("EpicConfig", () => {
-  test("no file:  the defaults, today's spell-app layout, folders from the main checkout", () => {
+  test("no file:  the repo's own values, as `epic init` would write them (epic-friend P6);  NOT set up", () => {
     const config = new EpicConfig(MAIN)
-    expect(config.settings).toEqual(EpicConfig.DEFAULTS)
+    expect(config.isSetUp).toBe(false)
+    expect(EpicConfig.ofSetUp(INSIDE)).toBeUndefined()
+    expect(config.settings).toEqual(EpicConfig.defaultsFor(MAIN))
     expect(config.values()).toEqual({
-      contentFolder: join(TOP, "spell-app-dev"),
+      contentFolder: join(TOP, "repo.epics"),
       contentRemote: "",
       baseBranch: "main",
-      worktreesFolder: join(MAIN, ".claude", "worktrees"),
-      installCommand: "yarn install",
+      worktreesFolder: join(TOP, "repo.worktrees"),
+      // no lock file:  nothing to install
+      installCommand: "",
       installOnCreate: false,
       installTimeout: 600,
       extraInstalls: "",
-      "windows.default": "spell-app",
-      "windows.repoName": "spell-app",
-      "windows.contentName": "spell-app-dev",
-      "windows.worktreeOnly": false,
+      "windows.default": "repo",
+      "windows.repoName": "repo",
+      "windows.contentName": "repo.epics",
+      "windows.worktreeOnly": true,
       "windows.settings": "{}",
-      linkSessionFolders: false,
-      sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
-      engineFolder: join(TOP, "spell-epic"),
+      linkSessionFolders: true,
+      sharedFolders: "epics,sagas,guides,pages",
+      engineFolder: "",
       repoTemplates: "",
-      windowsFolder: join(TOP, "spell-app-dev", "windows"),
+      windowsFolder: join(TOP, "repo.epics", "windows"),
       "app.path": "/editor/",
       "app.url": "",
       "app.urlFile": "",
@@ -68,12 +74,92 @@ describe("EpicConfig", () => {
     })
     // no app declared
     expect(config.app).toBeUndefined()
+    // a worktree in Claude Code's own place is still found there;  new ones go beside the repo
     expect(config.worktreeFolder("seo")).toBe(INSIDE)
-    expect(config.worktreesPattern).toBe(".claude/worktrees")
-    // one place:  nothing moved
-    expect(config.worktreesFolders).toEqual([join(MAIN, ".claude", "worktrees")])
+    expect(config.worktreeFolder("new")).toBe(join(TOP, "repo.worktrees", "new"))
+    expect(config.worktreesPattern).toBeUndefined()
+    expect(config.worktreesFolders).toEqual([join(TOP, "repo.worktrees"), join(MAIN, ".claude", "worktrees")])
     expect(config.worktreesPatterns).toEqual([".claude/worktrees"])
-    expect(config.worktreeOnlyWindow("seo")).toBe(false)
+    expect(config.worktreeOnlyWindow("seo")).toBe(true)
+  })
+
+  test("set up:  a file there, read from any worktree (`ofSetUp()`, the hooks' one check)", () => {
+    const main = fakeMainCheckout(join(TOP, "set-up"))
+    const worktree = fakeWorktree(main, join(TOP, "set-up.worktrees", "seo"))
+    expect(EpicConfig.ofSetUp(worktree)).toBeUndefined()
+    configFile(main, "{}")
+    expect(EpicConfig.ofSetUp(worktree)?.main).toBe(main)
+    expect(new EpicConfig(main).isSetUp).toBe(true)
+  })
+
+  test("a key left out reads as the repo's own (`defaultsFor()`):  never another repo's", () => {
+    const main = fakeMainCheckout(join(TOP, "my-app"))
+    writeFileSync(join(main, "pnpm-lock.yaml"), "")
+    writeFileSync(join(main, ".git", "HEAD"), "ref: refs/heads/trunk\n")
+    configFile(main, '{ "contentFolder": "../plans" }')
+    const config = new EpicConfig(main)
+    expect(config.contentFolder).toBe(join(TOP, "plans"))
+    // what follows another key follows it:  the content folder's name in a window, its windows/
+    expect(config.windows).toEqual({
+      default: "my-app",
+      repoName: "my-app",
+      contentName: "plans",
+      worktreeOnly: true,
+      settings: {}
+    })
+    expect(config.windowsFolder).toBe(join(TOP, "plans", "windows"))
+    expect(config.worktreesFolder).toBe(join(TOP, "my-app.worktrees"))
+    expect(config.installCommand).toBe("pnpm install")
+    expect(config.installOnCreate).toBe(true)
+    // the base branch from git:  what's checked out, with no remote and no main or master
+    expect(config.baseBranch).toBe("trunk")
+    writeFileSync(join(main, ".git", "packed-refs"), "abc refs/heads/master\n")
+    expect(new EpicConfig(main).baseBranch).toBe("master")
+    mkdirSync(join(main, ".git", "refs", "remotes", "origin"), { recursive: true })
+    writeFileSync(join(main, ".git", "refs", "remotes", "origin", "HEAD"), "ref: refs/remotes/origin/develop\n")
+    expect(new EpicConfig(main).baseBranch).toBe("develop")
+    // an install command named as none:  nothing run in a new worktree either
+    configFile(main, '{ "installCommand": "" }')
+    expect(new EpicConfig(main).installOnCreate).toBe(false)
+  })
+
+  test("the kit's own config names every value Spell's layout needs:  none comes from the repo's defaults", () => {
+    const text = readFileSync(KIT_CONFIG, "utf8")
+    const named = EpicConfig.parse(text) as Record<string, Record<string, unknown>>
+    for (const key of ["contentFolder", "baseBranch", "worktreesFolder", "installCommand", "installOnCreate"])
+      expect(named[key], key).toBeDefined()
+    for (const key of ["linkSessionFolders", "sharedFolders", "engineFolder", "windowsFolder"])
+      expect(named[key], key).toBeDefined()
+    for (const key of ["default", "repoName", "contentName", "worktreeOnly"])
+      expect(named.windows[key], key).toBeDefined()
+    // so they read the same in any folder:  nothing left to the repo's name or its git
+    const here = EpicConfig.settingsFrom(text, KIT_CONFIG, "/somewhere/spell")
+    const elsewhere = EpicConfig.settingsFrom(text, KIT_CONFIG, join(TOP, "other-name"))
+    expect(here).toEqual(elsewhere)
+    expect(here).toMatchObject({
+      contentFolder: "spell.epics",
+      worktreesFolder: "../spell.worktrees",
+      installCommand: "yarn install",
+      installOnCreate: true,
+      windows: { default: "spell", repoName: "spell", contentName: "spell.epics", worktreeOnly: true },
+      linkSessionFolders: true,
+      sharedFolders: [],
+      engineFolder: "",
+      windowsFolder: "spell.epics/windows"
+    })
+  })
+
+  test("the install command, from the lock file;  none without one", () => {
+    const dir = join(TOP, "locks")
+    mkdirSync(dir)
+    expect(EpicConfig.installCommandOf(dir)).toBe("")
+    writeFileSync(join(dir, "package.json"), "{}")
+    expect(EpicConfig.installCommandOf(dir)).toBe("npm install")
+    writeFileSync(join(dir, "pnpm-lock.yaml"), "")
+    expect(EpicConfig.installCommandOf(dir)).toBe("pnpm install")
+    writeFileSync(join(dir, "yarn.lock"), "")
+    expect(EpicConfig.installCommandOf(dir)).toBe("yarn install")
+    expect(EpicConfig.defaultsFor(dir).installOnCreate).toBe(true)
   })
 
   test("the repo's committed config reads as JSON5 reads it (`DataFile`'s reader)", () => {
@@ -108,7 +194,7 @@ describe("EpicConfig", () => {
 
   test("worktrees moved beside the repo:  new ones go there, old ones are found where they are", () => {
     const moved = fakeMainCheckout(join(TOP, "moved"))
-    configFile(moved, '{ "worktreesFolder": "../moved.worktrees" }')
+    configFile(moved, '{ "worktreesFolder": "../moved.worktrees", "windows": { "worktreeOnly": false } }')
     const old = fakeWorktree(moved, join(moved, ".claude", "worktrees", "old"))
     const config = new EpicConfig(moved)
     expect(config.worktreeFolder("old")).toBe(old)
@@ -141,9 +227,10 @@ describe("EpicConfig", () => {
 
   test("windows.settings (epic intellisense P4):  VS Code settings every window file gets;  none by default", () => {
     expect(EpicConfig.settingsFrom("").windows.settings).toEqual({})
-    const settings = EpicConfig.settingsFrom('{ "windows": { "settings": { "js/ts.experimental.useTsgo": false } } }')
+    const text = '{ "windows": { "settings": { "js/ts.experimental.useTsgo": false } } }'
+    const settings = EpicConfig.settingsFrom(text, EpicConfig.FILE, MAIN)
     expect(settings.windows.settings).toEqual({ "js/ts.experimental.useTsgo": false })
-    expect(settings.windows.default).toBe("spell-app")
+    expect(settings.windows.default).toBe("repo")
     expect(() => EpicConfig.settingsFrom('{ "windows": { "settings": [] } }', "x.json5")).toThrow(
       /"windows.settings" must be an object/
     )
@@ -162,9 +249,9 @@ describe("EpicConfig", () => {
     const settings = EpicConfig.settingsFrom('{ "installCommand": "", "sharedFolders": ["epics", "sagas"] }')
     expect(settings.installCommand).toBe("")
     expect(settings.sharedFolders).toEqual(["epics", "sagas"])
-    // `""`:  no engine link
-    expect(new EpicConfig(MAIN).engineFolder).toBe(join(TOP, "spell-epic"))
-    expect(EpicConfig.settingsFrom('{ "engineFolder": "" }').engineFolder).toBe("")
+    // `""`, the default:  no engine link
+    expect(new EpicConfig(MAIN).engineFolder).toBeUndefined()
+    expect(EpicConfig.settingsFrom('{ "engineFolder": "../spell-epic" }').engineFolder).toBe("../spell-epic")
     // epic-eject T11:  the repo's own templates, none by default;  a folder from each checkout's root, as written
     expect(new EpicConfig(MAIN).repoTemplates).toBe("")
     expect(EpicConfig.settingsFrom('{ "repoTemplates": "docs/templates" }').repoTemplates).toBe("docs/templates")
@@ -211,7 +298,12 @@ describe("EpicConfig", () => {
     )
     const config = new EpicConfig(main)
     expect(config.contentFolder).toBe(join(TOP, "content", "with-slashes"))
-    expect(config.windows).toEqual({ ...EpicConfig.DEFAULTS.windows, default: "whole" })
+    expect(config.windows).toEqual({
+      ...EpicConfig.DEFAULTS.windows,
+      default: "whole",
+      repoName: "partial",
+      contentName: "with-slashes"
+    })
     expect(config.linkSessionFolders).toBe(true)
     expect(config.baseBranch).toBe("main")
   })

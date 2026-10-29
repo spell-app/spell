@@ -33,7 +33,7 @@ import {
  *   so a move there needs no second edit here.
  * - The DEFAULT repo is served at `/` as well as `/r/<name>/`:  the one named `default`, else the first added.
  * - `epic repo add | list | remove | default` edit it (`Repos`);  nothing else writes it.
- * - The folder:  `~/.epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
+ * - The folder:  `~/.spell-epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
  * - Takes no lock:  one person adds a repo now and then.
  ****************/
 export class RepoList {

@@ -49,7 +49,7 @@ Two things to know before you start:
   `/isolate done`'s merge, and the worktree removed after it.
   - The setup on this page has run on a second fresh repo since,
     as far as an epic page drawn by the epic server and a worktree made and removed.
-  - Nine rough edges are listed at the end, not hidden.
+  - Seven rough edges are listed at the end, not hidden.
 
 ## The plans live beside your repo, not in it
 
@@ -136,7 +136,8 @@ epic ... (...) .../spell-epic
 
 - `--version` names the code that answers:  its commit, its branch and the checkout it's in.
 - `~/.local/bin`, where the link goes, may not be on your `PATH`:  put the link wherever yours looks.
-- Installed for the machine, its worktree hook runs in every repo, not just yours:  rough edge 2, below.
+- Installed for the machine, its hooks run in every repo, not just yours:
+  in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
 
 ### 2. `epic init`, in your repo
 
@@ -246,17 +247,18 @@ You'd open it for one of four things:
 - a repo made of several repos (`repos`)
 
 It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`EpicConfig`](src/config/EpicConfig.ts).
-- Every key is optional.
+- Every key is optional:  one left out reads as `epic init` would write it for YOUR repo, the middle column below.
 - Folders are relative to the main checkout, and every worktree reads the main checkout's file:
   a branch's change to it counts once it's merged.
 - `epic config [<key>] [--json]` prints what's in force, folders made absolute.
 - The hooks act only in a repo that has the file.
-  The worktree hook is the exception:  it makes every Claude Code worktree, file or not (rough edge 2).
+  In any other repo, the worktree hook makes the worktree Claude Code would make by itself:
+  `.claude/worktrees/<name>`, on a new branch `worktree-<name>`, with nothing linked or installed.
 
 | Key | `epic init` writes | What it sets |
 | --- | --- | --- |
 | `contentFolder` | `"../<repo>.epics"` | the content repo:  epics, sagas, guides, pages |
-| `baseBranch` | from git:  the remote's default branch, else the branch the main checkout is on | the branch worktrees start from and merge into |
+| `baseBranch` | from git:  the remote's default branch, else `main` or `master`, else the branch the main checkout is on | the branch worktrees start from and merge into |
 | `worktreesFolder` | `"../<repo>.worktrees"` | where new worktrees go, one folder each, `<worktreesFolder>/<name>` |
 | `installCommand` | from the lock file;  `""` with none | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
 | `installOnCreate` | `true` with an install | whether the worktree hook runs the install before it hands the worktree over |
@@ -293,31 +295,14 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
   - `spell-epic`'s own, [.epic/config.json5](.epic/config.json5)
 
 <details>
-<summary>The values a key takes when the file leaves it out:  Spell's, not yours</summary>
+<summary>The values a key takes when the file leaves it out:  your repo's own</summary>
 
-The built-in defaults describe an older Spell checkout, the one the tooling grew up in.
-`epic init` writes every key but `app`, `repos`, `checkoutPatches`, `voices`, `pageVoices`, `promptAck` and
-`windows.settings`, whose defaults are neutral:  keep the rest in the file.
-
-| Key | Default |
-| --- | --- |
-| `contentFolder` | `"../spell-app-dev"` |
-| `baseBranch` | `"main"` |
-| `worktreesFolder` | `".claude/worktrees"` |
-| `installCommand` | `"yarn install"` |
-| `installOnCreate` | `false` |
-| `installTimeout` | `600` |
-| `extraInstalls` | `[]` |
-| `windows` | `default` and `repoName` `"spell-app"`, `contentName` `"spell-app-dev"`, `worktreeOnly` `false`, `settings` `{}` |
-| `linkSessionFolders` | `false` |
-| `sharedFolders` | seven of Spell's own content folders, among them `epics`, `guides`, `pages`, `goals`, `sagas` and `agents` |
-| `engineFolder` | `"../spell-epic"` |
-| `repoTemplates`, `windowsFolder`, `repos` | `""`;  `windowsFolder` `""` means the content folder's `windows/` |
-| `app` | `path` `"/editor/"`, the rest `""` |
-| `checkoutPatches` | `[]` |
-| `voices` | `{}` |
-| `pageVoices` | `readme` and `guide` `"readme"`, `code` and `epic-page` `"code"` |
-| `promptAck` | `true` |
+A key the file leaves out reads as `epic init` would write it for your repo:  the middle column above.
+- worked out from the repo, each time it's read:  its name, its lock file, its branches
+- `windows.contentName` and `windowsFolder` follow the `contentFolder` you name;
+  `installOnCreate`, the `installCommand` you name
+- the keys `epic init` doesn't write take the defaults the last column gives
+- `epic config` prints every value in force
 
 - NEVER list `agents` in `sharedFolders` in a repo that's also a loaded plugin.
   - Claude Code reads a plugin's root `agents/` as agent types.
@@ -346,7 +331,7 @@ Before it hands the worktree over, the hook:
   What each worktree verb keeps, and the clean-up after a folder deleted another way:
   [README-cli.md](README-cli.md#worktrees-sessions-and-parked-work).
 - `epic worktree move <name> | --idle` moves worktrees left inside the repo, in `.claude/worktrees`
-  where the hook puts them in a repo with no config, to beside it.
+  where Claude Code puts its own, to beside it.
 - Why a worktree's session must enter it through Claude Code's own worktree tool, not just start in its folder:
   the worktree guard, in [README-skills.md](README-skills.md#hooks).
 
@@ -388,7 +373,7 @@ epic hub url ~/www/my-app.epics/epics/seo/seo.plan.html
 - `epic hub url <file>` prints the address that serves any page of a registered repo, starting the server first.
 - In your repo, `epic server` is this server too:  a repo `epic init` set up has no page server of its own.
   Spell's own repos have one each, which runs beside it, never instead of it.
-- Its files are in `~/.epic/`, a folder `SPELL_EPIC_HOME` moves:
+- Its files are in `~/.spell-epic/`, a folder `SPELL_EPIC_HOME` moves:
   - `repos.json5`:  the repos
   - `server.json`:  its process
   - `server.log`
@@ -422,29 +407,21 @@ What you'd trip on today, roughly in the order you'd meet it.
 1. **It installs only inside a Spell checkout.**
    `spell-epic` depends on Spell UI and the kit through the kit's one install, not from npm.
    So you clone Spell to plan work in a repo that has nothing to do with it.
-2. **Its worktree hook runs in every repo.**
-   Installed for the machine, the plugin makes EVERY Claude Code worktree, in repos with no config too,
-   with the defaults:  in the repo's `.claude/worktrees`, cut from a branch named `main`.
-   In a repo whose branch is called something else, Claude Code's worktrees fail
-   (`fatal: invalid reference: main`) until you run `epic init` there, which reads the branch from git.
-3. **A key you leave out takes Spell's value.**
-   The defaults are an older Spell checkout's (the fold under "The config file"):
-   delete `contentFolder`, and the tools look for `../spell-app-dev`, then quietly use your checkout itself.
-4. **The review controls reach the DEFAULT repo only.**
+2. **The review controls reach the DEFAULT repo only.**
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
    `epic repo default <name>` picks which repo that is.
-5. **Your pages wear Spell's look.**
+3. **Your pages wear Spell's look.**
    They load Spell's theme, and the top bar's tabs are Spell's own areas, not yours.
-6. **The pages assume one reviewer.**
+4. **The pages assume one reviewer.**
    A reply is Claude's or one named person's:  the skills, the colours table, a few element strings
    and `epic --help` itself use the first name of the person who reviews Spell's epics.
-7. **A few skills reach for Spell's own tools.**
+5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - Saved prompts go to `~/.spell/prompts/`.
    - `epic worktree merge-main` updates Vitest snapshots with Spell's own command, `yarn vp test run --update`.
-8. **Claude Code only.**
+6. **Claude Code only.**
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
-9. **VS Code and macOS.**
+7. **VS Code and macOS.**
    The window bridge finds a session's window through its parent processes;
    `vscode://` links are avoided because macOS hands them to whichever window is focused.
 

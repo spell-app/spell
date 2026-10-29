@@ -10,19 +10,20 @@
  * - And deletes the removed worktrees' leftover folders in the epic home's `trash/` (`LeftoverFolders.sweep()`, r22),
  *   every session start.
  * - QUIET:  nothing on stdout;  what it stopped, a line on stderr (Claude Code's debug log).
- * - stdin `{ cwd, ... }`.  Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in
- *   every repo.
+ * - stdin `{ cwd, ... }`.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`):
+ *   the plugin's hooks run in every repo.
  * - Plain `node`:  `CheckoutServers.ts` loads with its types stripped.
  * - Always exits 0, within a few seconds:  never blocks a session.
  * - Its tests:  `tests/command/CheckoutServers.test.ts`, which runs this file as the hook too.
  */
-import { existsSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so code that won't load never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
-  if (input.cwd && existsSync(EpicConfig.of(input.cwd).file)) {
+  if (input.cwd && EpicConfig.ofSetUp(input.cwd)) {
     const { CheckoutServers } = await import("spell/epic/command/CheckoutServers.ts")
     const { stopped } = CheckoutServers.atSessionStart()
     if (stopped.length) console.error(`server-prune hook:  ${CheckoutServers.said(stopped)}, their checkouts gone`)

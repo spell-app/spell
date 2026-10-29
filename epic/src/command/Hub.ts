@@ -23,7 +23,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
  *
  * - Its repos:  `epic repo` (`Repos`).
- * - Its files:  `~/.epic/` (`server.json`, `server.log`).
+ * - Its files:  `~/.spell-epic/` (`server.json`, `server.log`).
  * - The server's code loads on first use (a dynamic `import()`):  the other verbs don't pay for it.
  ****************/
 export class Hub {

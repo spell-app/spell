@@ -987,7 +987,8 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   pageVoices.<kind>    the voice each kind of page is written in ("pageVoices", over the defaults)
   checkoutPatches      the ids of the fixes every checkout gets, comma-separated:  a file copied from main, or
                        a command run once (epic worktree patch)
-Any worktree reads the main checkout's file;  a key it leaves out takes its default.
+Any worktree reads the main checkout's file;  a key it leaves out reads as epic init would write it for
+this repo.
 
 Examples:
   epic config contentFolder

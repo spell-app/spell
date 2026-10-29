@@ -9,7 +9,7 @@
 ////////////////
 
 /**
- * spell-epic's folder in the home folder, `~/.epic/`:
+ * spell-epic's folder in the home folder, `~/.spell-epic/`:
  * it holds `repos.json5` (`REPOS_FILE`), the server's pid file and its log.
  * - `SPELL_EPIC_HOME` puts it elsewhere:  tests give a temp folder, so no test touches the real one
  */
