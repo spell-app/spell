@@ -262,7 +262,7 @@ export type ItemDescription = {
   id: string
   /**
    * `PlanItem.kindOf()`'s:  `judgement`, `overview` (an Overview sub-section, Q14), `item` (an id of no kind);
-   * `phase` and `summary` (epic `airplane` P2);  `stage`, the page header's stage button (epic `epic-engine` P29)
+   * `phase` and `summary` (epic `airplane` P2);  `stage`, `<epic-stage-button>` (epic `epic-engine` P29)
    */
   kind: string
   /** its status, `open` when missing */

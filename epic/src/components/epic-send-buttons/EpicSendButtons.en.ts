@@ -50,20 +50,6 @@ export const epicSendButtonsVocabulary = {
     },
     { name: "busy", kind: "boolean", description: "A send on its way:  the plane spins, and a press does nothing." },
     {
-      name: "accept",
-      kind: "string",
-      description:
-        "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept " +
-        "Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  " +
-        "The countdown's ring goes round its check, and its end only sends marks, never accepts.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
-    },
-    {
-      name: "accepted",
-      kind: "boolean",
-      description:
-        "The stage button pressed:  outlined green, waiting for the session to move the page on.  Only with `accept`."
-    },
-    {
       name: "asks",
       kind: "enum",
       values: SEND_ASKS,
@@ -101,20 +87,17 @@ export const epicSendButtonsVocabulary = {
     },
     {
       name: "count",
-      description: "The badge on the plane:  how many things a press sends;  none on the stage button."
+      description: "The badge on the plane:  how many things a press sends."
     },
     {
       name: "ring",
-      description:
-        "The countdown's ring round the plane (the stage button's check), its ends round, draining clockwise;  only " +
-        "while it counts."
+      description: "The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts."
     }
   ],
   states: [
     { name: "countdown", description: "Auto Send is on, and this Send counts down (`countdown`)." },
     { name: "counting", description: "The countdown is running:  something waits, and the ring drains." },
-    { name: "waiting", description: "Auto Send is off and something isn't sent:  the plane is filled blue." },
-    { name: "stage", description: "The plane's place holds the stage button (`accept`)." }
+    { name: "waiting", description: "Auto Send is off and something isn't sent:  the plane is filled blue." }
   ],
   texts: [
     { key: "group", text: "Send", description: "The group's name, for a screen reader." },

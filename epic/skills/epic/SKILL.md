@@ -275,7 +275,9 @@ Staying in this window (step 0):  skip steps 4 and 6.
 NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 - The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
   only the Overview, Questions and Todo until Owen presses Accept Overview.
-- Three stages, each ended by Owen's button in the page header (`epic stage <name>` prints and sets it):
+- Three stages, each ended by Owen's Accept on the title row of what it accepts (epic `epic-engine` I180;  the page
+  header's before;  `epic stage <name>` prints and sets it):  Accept Overview on the Overview's, Accept Phases on the
+  Phases section's, before its gear;  the header's Send stays the paper plane:
   1. `overview`:  Claude writes the Overview and its questions;  each answer rewrites it.  Accept Overview ->
   2. `phases`:  Claude writes the phases AND each one's build plan, in one pass ("4b. Build plans");  Owen Defers any,
      then ONE Accept Phases accepts the phases and their plans together ->
@@ -411,7 +413,7 @@ than just being able to move on").
 - Then listen (`epic inbox wait <name>`) and END THE TURN with the Phases section's link pair:  "The phases and their
   build plans are up, P3-P9:  one Accept Phases takes both".
 - The Doc Review phase's plan never waits:  `--plan` on it is accepted as it's written (Owen, 2026-10-25).
-- Owen accepts them on the page:  the header's Accept Phases (in the `phases` stage:  the phases and every waiting plan,
+- Owen accepts them on the page:  Accept Phases on the Phases section's title row (in the `phases` stage:  the phases and every waiting plan,
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or he says "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.

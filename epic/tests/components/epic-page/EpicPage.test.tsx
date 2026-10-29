@@ -23,6 +23,7 @@ import "spell/ui/components/ui-theme-menu"
 import "spell/epic/components/epic-page"
 import "spell/epic/components/epic-overview"
 import "spell/epic/components/epic-section"
+import "spell/epic/components/epic-review"
 import "spell/epic/components/epic-phase"
 import "spell/epic/components/epic-commit"
 import "spell/epic/components/epic-item"
@@ -1499,6 +1500,12 @@ function shownBlocks(host: Element): string[] {
     .map((block) => (block as unknown as { contentsEntry?: { label: string } }).contentsEntry?.label ?? block.id)
 }
 
+/** The stage button's `<button>` on `block`'s title row (`<epic-stage-button>`, I180);  `undefined` for none. */
+function stageButtonOf(block: Element): HTMLButtonElement | undefined {
+  const button = block.shadowRoot?.querySelector('[part~="stage-button"]')
+  return button?.shadowRoot?.querySelector<HTMLButtonElement>('[part~="base"]') ?? undefined
+}
+
 /** `phase`'s review buttons, by action. */
 function pillsOf(phase: Element): string[] {
   const review = phase.shadowRoot!.querySelector('epic-review[shows="buttons"]')
@@ -1537,36 +1544,67 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
   })
 
-  test("the header's stage button:  Accept Overview in Send's place, what's open in its tooltip;  a press sends its mark;  building:  Send again", async () => {
+  // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane")
+  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press sends its mark;  pressed:  outlined green", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await adoptClient(routes)
     const host = await render(stagedPage("overview"))
-    const button = () => plane(host)
-    await vi.waitFor(() => expect(button()?.textContent).toContain("Accept Overview"))
-    expect(button().title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
-    // no wand (Owen, 2026-10-25:  "remove the wand EVERYWHERE")
-    expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).toBeNull()
-    button().click()
+    const accept = () => stageButtonOf(host.querySelector("epic-overview")!)
+    await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Overview"))
+    // the header:  the plane, no green words;  the step label says the stage
+    expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+    expect(plane(host).textContent!.trim()).toBe("")
+    expect(step(host)?.words).toBe("OVERVIEW")
+    // none on the Phases section, which this stage hides anyway
+    expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
+    expect(accept()!.title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
+    const grey = getComputedStyle(accept()!).borderTopColor
+    accept()!.click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
     expect(routes.posts[0]![1]).toEqual({
       page: "/epics/demo/demo.plan.html",
       id: "stage",
       mark: { action: "accept", stage: "overview" }
     })
+    // the Overview stays folded:  a click on its tool isn't one on its title
+    expect(host.querySelector("epic-overview")!.hasAttribute("open")).toBe(false)
     routes.inbox.marks.stage = { action: "accept", stage: "overview", at }
     await ReviewClient.forPage().refresh()
-    await vi.waitFor(() => expect(sendGroup(host).hasAttribute("accepted")).toBe(true))
-    expect(button().title).toBe("Overview accepted:  waiting for Claude to write the phases")
-    // the session moved it on:  Accept Phases;  then building, the plane
-    host.setAttribute("stage", "phases")
-    await vi.waitFor(() => expect(button().textContent).toContain("Accept Phases"))
-    expect(sendGroup(host).hasAttribute("accepted")).toBe(false)
-    host.setAttribute("stage", "building")
-    await vi.waitFor(() => expect(sendGroup(host).hasAttribute("accept")).toBe(false))
-    expect(button().textContent).not.toContain("Accept")
+    await vi.waitFor(() => expect(accept()!.title).toBe("Overview accepted:  waiting for Claude to write the phases"))
+    expect(accept()!.dataset.state).toBe("accepted")
+    expect(getComputedStyle(accept()!).borderTopColor).not.toBe(grey)
+    expect(getComputedStyle(accept()!).borderTopColor).toBe(getComputedStyle(accept()!).color)
+    // the plane's press is a plain Send in a stage:  never a second accept mark
+    plane(host).click()
+    await ElementFixture.settle()
+    expect(routes.posts.filter(([route]) => route === "mark")).toHaveLength(1)
     await expectAccessible(host)
+  })
+
+  test("phases:  Accept Phases on the Phases section's title row, before its gear, not the Overview's;  a press marks `stage`;  building:  none", async () => {
+    const routes = new FakeRoutes()
+    await adoptClient(routes)
+    const host = await render(stagedPage("phases"))
+    const section = host.querySelector('epic-section[kind="phases"]')!
+    const accept = () => stageButtonOf(section)
+    await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Phases"))
+    expect(stageButtonOf(host.querySelector("epic-overview")!)).toBeUndefined()
+    expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+    // on the title row, before the gear:  there while the section is folded
+    const stageHost = section.shadowRoot!.querySelector('[part~="stage-button"]')!
+    const gear = section.shadowRoot!.querySelector('[part~="gear"]')!
+    expect(stageHost.compareDocumentPosition(gear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(section.hasAttribute("open")).toBe(false)
+    expect(accept()!.getBoundingClientRect().height).toBeGreaterThan(0)
+    accept()!.click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    expect(routes.posts[0]![1]).toMatchObject({ id: "stage", mark: { action: "accept", stage: "phases" } })
+    // the session moved it on:  building, no stage button anywhere, the plane as ever
+    host.setAttribute("stage", "building")
+    await vi.waitFor(() => expect(accept()).toBeUndefined())
+    expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
   })
 
   // Owen, 2026-10-25:  "This just needs to be `send|wand` and not green -- I may not be accepting the phases"
@@ -1589,7 +1627,6 @@ describe("<epic-page> stages", () => {
     const host = await render(html)
     await vi.waitFor(() => expect(sendGroup(host).getAttribute("asks")).toBe("waiting"))
     // no green Accept:  the plane alone, no stage words, no wand
-    expect(sendGroup(host).hasAttribute("accept")).toBe(false)
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
     expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).toBeNull()
     expect(plane(host).title).toBe("2 build plans wait for your Accept:  P1, P3 · Send 1 mark to Claude")
@@ -1628,6 +1665,8 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(plane(host).title).toBeTruthy())
     expect(host.shadowRoot!.querySelector('[part~="changes"]')).toBeNull()
     expect(plane(host).title).not.toMatch(/to accept/)
+    await vi.waitFor(() => expect(stageButtonOf(host.querySelector("epic-overview")!)?.title).toBeTruthy())
+    expect(stageButtonOf(host.querySelector("epic-overview")!)!.title).not.toMatch(/to accept/)
   })
 
   test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {

@@ -175,7 +175,7 @@ export type ReviewAction = (typeof REVIEW_ACTIONS)[number]
 export const SUMMARY_ID = "summary"
 
 /**
- * The page header's stage button's key in the inbox (Accept Overview, Accept Phases:  epic `epic-engine` P29).
+ * The stage button's key in the inbox (`<epic-stage-button>`) (Accept Overview, Accept Phases:  epic `epic-engine` P29).
  * As `ReviewInbox`'s `STAGE_ID`:  a copy, since that module is node-only.
  */
 export const STAGE_ID = "stage"

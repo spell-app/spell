@@ -1201,7 +1201,7 @@ export class PlanDoc extends PlanReader {
    *   made, as `plan-doc add` makes one (`addFromPage()`)
    * - `test`, a test's answer from the page's test run (epic `epic-engine` P4:  `applyTest()`):
    *   passed closes it, failed files an issue, skip cancels it, not now defers it
-   * - `accept`, the page header's stage button (`stage`, epic `epic-engine` P29) (`applyAccept()`):  the page moves
+   * - `accept`, `<epic-stage-button>`'s (`stage`, epic `epic-engine` P29) (`applyAccept()`):  the page moves
    *   on from the stage it ended, `overview` -> `phases` -> `building`;  dropped when the page has moved on already
    * - `defer`, a phase's Defer while the phases are agreed (P29):  moved after the other phases, still to do
    * - `accept` / `reopen` on a change mark (`ch3`, epic `epic-engine` P30;  `applyChange()`):  the change stands
@@ -2480,7 +2480,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * The page header's stage button, Accept Overview or Accept Phases (epic `epic-engine` P29):
+   * The stage button (`<epic-stage-button>`), Accept Overview or Accept Phases (epic `epic-engine` P29):
    * the page moves on from the stage the mark ended (`stage`) to the next (`PageStages.next()`).
    * - the page in another stage by now (moved by hand, or the mark sent twice):  dropped (`gone`), nothing changed
    * - Accept Phases accepts every build plan waiting too (epic `epic-engine` I125;  Owen, 2026-10-25:  "the mode where

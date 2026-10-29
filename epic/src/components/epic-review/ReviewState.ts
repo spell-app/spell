@@ -140,6 +140,9 @@ export class ReviewState {
   readonly isSent = (): boolean =>
     this.read((client, id) => !!client.markOf(id) && client.isSent(client.markOf(id)!)) ?? false
 
+  /** How many marks, urgencies and comments wait for Send (`ReviewClient.unsentCount`).  The page's. */
+  readonly unsentCount = (): number => this.readPage((client) => client.unsentCount) ?? 0
+
   /** Is a Claude session listening?  The page's, so read with or without an id. */
   readonly listening = (): boolean => this.readPage((client) => client.listening) ?? false
 

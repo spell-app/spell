@@ -11,7 +11,6 @@ import {
   AUTO_SEND_CHOICES,
   NOBODY_LISTENING,
   SAGA_PREFIX,
-  STAGE_ID,
   SendCountdown,
   ServerLink,
   isAirplane,
@@ -73,7 +72,6 @@ import {
   type HeaderMarks,
   type PageSignals,
   type PhaseLine,
-  type StageButton,
   type StepLabel
 } from "./EpicPage.types"
 
@@ -142,12 +140,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - `overview`:  only the Overview, Questions and Todo show;  `phases`:  the Phases and Issues too;  `building` (or none):
  *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
  *     what shows (`spell-doc-runtime.js` reads the same rule)
- *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON
- *     (Q14:  "Accept Overview", then "Accept Phases";  `stageButton()`)
- *     - a press sends what's unsent, with an accept mark (`accept()`),
- *       and the session moves the page on (`epic inbox apply`)
- *     - its tooltip says what's still open ("2 questions open"):  a reminder, never a lock
- *   - Send's plane is back once building starts
+ *   - Send is the paper plane in every stage (epic `epic-engine` I180;  Owen, 2026-10-29:  "This should just be normal
+ *     paper plane");  the stage's Accept is on the title row of the work it accepts (`<epic-stage-button>`):
+ *     "Accept Overview" on the Overview's (Q14), "Accept Phases" on the Phases section's;  the step label says the stage
+ *     - before I180 it took the plane's place here, a green check and its words (P29)
  *   - building, while a phase's build plan waits (`plansWaiting()`):  Send as ever, RINGED (its border 2px #666, darker than its hairline),
  *     "waiting on you", its tooltip naming them ("2 build plans wait for your Accept:  P43, P44");  dotted once
  *     every one has his mark
@@ -366,38 +362,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):
-   * its words, its tooltip, and whether it was pressed (its mark, `stage`, in the inbox).
-   * - `undefined` once building, or not reviewed
-   * - the tooltip says what's still open:  the open questions ("2 questions open"), a reminder, never a lock
-   */
-  readonly stageButton = createMemo((): StageButton | undefined => {
-    this.signals.layout.get()
-    const stage = this.pageStage
-    const client = this.review.client
-    if (!this.review.reviewing() || !client) return undefined
-    if (!PageStages.isPlanning(stage)) return undefined
-    const mark = client.inbox.marks[STAGE_ID]
-    const accepted = mark?.action === "accept" && mark.stage === stage
-    const texts = STAGE_TEXTS[stage]
-    const open = this.domElement.querySelectorAll(OPEN_QUESTIONS).length
-    const unsent = client.unsentMarkCount + client.unsentCommentCount - (accepted && !client.isSent(mark) ? 1 : 0)
-    const still = open
-      ? this.translationForKey(open === 1 ? "openQuestionsOne" : "openQuestionsMany", { count: open })
-      : this.translationForKey("nothingOpen")
-    const tip = accepted
-      ? this.translationForKey(texts.accepted)
-      : [
-          this.translationForKey(texts.tip),
-          still,
-          unsent ? this.translationForKey("acceptSends", { count: unsent }) : ""
-        ]
-          .filter(Boolean)
-          .join(" · ")
-    return { label: this.translationForKey(texts.label), tip, accepted }
-  })
-
-  /**
    * While building, Claude's build plans that wait for Owen's Accept, as the header's Send shows them
    * (epic `epic-engine` I119;  Owen, 2026-10-25:  "Accept plan needs to be in the top bar, otherwise I won't see it if
    * it's scrolled off", then "This just needs to be `send|wand` and not green -- I may not be accepting the phases"):
@@ -430,8 +394,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     // still being agreed (epic `epic-engine` P29):  the stage, not a phase that may not show yet
     const stage = this.pageStage
     if (PageStages.isPlanning(stage)) {
-      // the stage button says it already, in its words:  no second label beside it (and room for the name on a phone)
-      if (this.stageButton()) return undefined
       const texts = STAGE_TEXTS[stage]
       return {
         color: "grey",
@@ -996,7 +958,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * - a press, or the countdown running out:  `onSendAsked()`
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
-    const stage = () => this.stageButton()
     const plans = () => this.plansWaiting()
     const sendTip = () => {
       const words = this.sendWords(marks())
@@ -1008,14 +969,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("send")}
         state={marks().send}
         countdown=""
-        accept={stage()?.label}
-        accepted={stage()?.accepted ? "" : undefined}
         asks={plans()?.asks}
-        send-tip={
-          stage()
-            ? this.withNobody(stage()!.tip, marks(), true)
-            : this.withNobody(sendTip(), marks(), marks().send !== "idle")
-        }
+        send-tip={this.withNobody(sendTip(), marks(), marks().send !== "idle")}
       />
     )
   }
@@ -1028,27 +983,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.on(SEND_ASKED, { target: "renderRoot" })
   protected onSendAsked(event: CustomEvent<SendAskedDetail>) {
     event.stopPropagation()
-    if (!event.detail.auto && this.stageButton()) void this.accept()
-    else void this.review.client?.send({ now: event.detail.auto })
-  }
-
-  /**
-   * The STAGE BUTTON pressed (Accept Overview, Accept Phases;  epic `epic-engine` P29):
-   * the page's accept mark (`{ action: "accept", stage }`, keyed `stage`), then Send,
-   * so it goes at once with whatever else is unsent, and wakes the epic when nobody listens.
-   * - pressed again once accepted:  sent again, nothing more (the mark stands until the session applies it)
-   */
-  @E.untracked
-  private async accept() {
-    const client = this.review.client
-    if (!client) return
-    const stage = this.pageStage
-    if (!PageStages.isPlanning(stage)) return
-    const mark = client.markOf(STAGE_ID)
-    if (mark?.action !== "accept" || mark.stage !== stage) {
-      if (!(await client.save(STAGE_ID, { action: "accept", stage }))) return
-    }
-    await client.send()
+    void this.review.client?.send({ now: event.detail.auto })
   }
 
   /**
@@ -1663,33 +1598,24 @@ type FilterHost = E.DOMElement & {
 /** The sections, which filter their items. */
 const SECTIONS = "epic-section"
 
-/** The stage button's texts, by the stage it ends. */
 /** The phases whose build plan waits for Owen's Accept, not done (`plansWaiting()`). */
 const PLANS_WAITING =
   ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"], [title="Doc Review" i])'
 
+/** The step label's texts while the page is in a stage (`step()`), by stage. */
 const STAGE_TEXTS = {
   overview: {
-    label: "acceptOverview",
-    tip: "acceptOverviewTip",
-    accepted: "acceptedOverview",
     step: "stageOverview",
     stepTip: "stageOverviewTip"
   },
   phases: {
-    label: "acceptPhases",
-    tip: "acceptPhasesTip",
-    accepted: "acceptedPhases",
     step: "stagePhases",
     stepTip: "stagePhasesTip"
   }
 } as const
 
-/** The open questions:  what the stage button's tooltip counts (epic `epic-engine` P29). */
 /** The pill holding the changes to accept and the step label, joined (`EpicPage.css`). */
 const STEP_PILL = "step-pill"
-
-const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"

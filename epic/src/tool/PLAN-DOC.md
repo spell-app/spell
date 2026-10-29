@@ -249,7 +249,8 @@ As `plan-doc.md`, "Ids":
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
-  - The header's stage button (Accept Overview, Accept Phases) leaves the inbox mark `stage`,
+  - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases
+    section's;  the page header's before epic `epic-engine` I180) leaves the inbox mark `stage`,
     `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other

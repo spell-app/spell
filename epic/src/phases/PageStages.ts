@@ -7,7 +7,8 @@
  * - Written as `<epic-page stage="overview">`;  a page with none (every page made before P29) reads as `building`,
  *   so it looks as it always did:  an optional attribute, no migration.
  * - Hiding a section is only a VIEW:  the file still holds every section, and the tool reads them all.
- * - The page header's stage button ends a stage ("Accept Overview", "Accept Phases"):  its mark moves the page on
+ * - Its STAGE BUTTON ends a stage (`<epic-stage-button>`):  "Accept Overview" on the Overview's title row, "Accept
+ *   Phases" on the Phases section's (epic `epic-engine` I180;  the page header's before);  its mark moves the page on
  *   (`next()`), when `epic inbox apply` applies it;  `epic stage <epic> <stage>` sets it by hand.
  * - STATIC, pure, node-safe:  the elements, the docs runtime's toolbar and the epic tool all read this ONE rule.
  ****************/
@@ -61,6 +62,14 @@ export class PageStages {
   }
 
   /**
+   * How many questions are open on `page` (an `<epic-page>`):  its Questions section's open items, what a stage
+   * button's tooltip counts (a reminder, never a lock).
+   */
+  static openQuestions(page: Element | null | undefined): number {
+    return page?.querySelectorAll(OPEN_QUESTIONS).length ?? 0
+  }
+
+  /**
    * Is `element` hidden by its page's stage?  True for a top-level `<epic-section>` its page's stage doesn't show,
    * and for anything inside one.
    * - the Overview and its sub-sections never are;  outside an `<epic-page>`, nothing is
@@ -77,3 +86,6 @@ export type PageStage = (typeof PageStages.ALL)[number]
 
 /** A stage the page is still being agreed in, which a stage button ends:  `overview` or `phases`. */
 export type PlanningStage = Exclude<PageStage, "building">
+
+/** A page's open questions, from the `<epic-page>`:  what a stage button's tooltip counts (`openQuestions()`). */
+const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'

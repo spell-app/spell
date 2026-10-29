@@ -1,7 +1,9 @@
 /**
  * Check the epic page HEADER of epic `epic-engine` P53 (Send Countdown) in a real browser:  Send at the header's
  * middle with Auto Send's ring part-filled round the plane, the session's bare spinner beside it, the gear's menu with
- * each sub-menu open (Auto Send, Theme), and a stage's Accept with its ring.
+ * each sub-menu open (Auto Send, Theme);  and a page in each stage (epic `epic-engine` I180):  the header still the plain
+ * paper plane, with its ring, and the stage's Accept on the title row of what it accepts:  Accept Overview on the
+ * Overview's, Accept Phases on the Phases section's, before its gear.
  *
  * Usage (from the epic folder):
  *   node src/demo/check-send-header.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
@@ -15,7 +17,7 @@
  *   - the ring round the plane, inside the header;  the spinner and the gear on the plane's middle line (1px)
  *   - nothing wider than the window, the gear's menu and its sub-menus included
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
- *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<w>-<scheme>.png`
+ *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -56,7 +58,7 @@ const flagged = new Set(["--doc", "--bundle"].flatMap((name) => (args.includes(n
 const CONTENT = join(HERE, "shots", "send-header")
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? CONTENT
 const NAME = "send-header"
-const STAGED = "send-header-stage"
+const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
 const problems = []
 const summary = {}
 
@@ -67,14 +69,14 @@ const summary = {}
 rmSync(join(CONTENT, "epics"), { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 const marked = copyEpic(NAME, "")
-copyEpic(STAGED, "overview")
+for (const [stage, name] of Object.entries(STAGED)) copyEpic(name, stage)
 const server = await DemoServer.start({ content: CONTENT })
 const browser = await BrowserPage.launch()
 try {
   for (const width of [1200, 400])
     for (const scheme of ["light", "dark"]) {
       await header(width, scheme)
-      await stage(width, scheme)
+      for (const which of Object.keys(STAGED)) await stage(which, width, scheme)
     }
 } catch (error) {
   problems.push(`threw:  ${error.stack ?? error}`)
@@ -150,21 +152,59 @@ async function header(width, scheme) {
   await page.close()
 }
 
-/** A page in its Overview stage:  Accept Overview with the ring round its check. */
-async function stage(width, scheme) {
-  const tag = `${width}-${scheme}`
-  writeInbox(STAGED)
-  const page = await openPage(STAGED, width, scheme)
+/**
+ * A page in `which` stage (`overview`, `phases`;  epic `epic-engine` I180):  the header's Send still the paper plane,
+ * its ring counting;  the stage's Accept on the title row of its block (the Overview, the Phases section), folded,
+ * before the Phases section's gear;  nothing wider than the window.
+ */
+async function stage(which, width, scheme) {
+  const tag = `${which}-${width}-${scheme}`
+  const name = STAGED[which]
+  writeInbox(name)
+  const page = await openPage(name, width, scheme)
   await page
-    .waitForFunction(() => sendRoot()?.querySelector(".accept .ring"), null, { timeout: 8000 })
-    .catch(() => problems.push(`${tag}:  no ring round Accept's check`))
-  await page.clock.fastForward(60_000)
+    .waitForFunction((which) => stageButton(which), which, { timeout: 8000 })
+    .catch(() => problems.push(`${tag}:  no Accept on its block's title row`))
+  await page.clock.fastForward(45_000)
   await page.waitForTimeout(1300)
-  const measured = await page.evaluate(() => measure())
-  await page.screenshot({ path: join(out, `stage-${tag}.png`), clip: clipOf(measured.header, width) })
+  const found = await page.evaluate((which) => {
+    const button = stageButton(which)
+    const block = stageBlock(which)
+    const row = block.shadowRoot.querySelector('[part~="tools"]')
+    const gear = block.shadowRoot.querySelector('[part~="gear"]')
+    const icon = sendRoot().querySelector('[part~="send"] ui-icon')?.getAttribute("name")
+    const box = (element) => element && element.getBoundingClientRect().toJSON()
+    return {
+      plane: icon,
+      planeWords: sendRoot().querySelector('[part~="send"]').textContent.trim(),
+      ring: !!sendRoot().querySelector('[part~="ring"]'),
+      words: button?.textContent.trim(),
+      button: box(button),
+      row: box(row),
+      gear: box(gear),
+      folded: block.getAttribute("open") !== "true" && !block.hasAttribute("open"),
+      header: measure().header,
+      wide: widest()
+    }
+  }, which)
+  const words = which === "overview" ? "Accept Overview" : "Accept Phases"
+  if (found.plane !== "paper plane" || found.planeWords)
+    problems.push(`${tag}:  the header's Send isn't the plain plane (${found.plane}, "${found.planeWords}")`)
+  if (!found.ring) problems.push(`${tag}:  no ring round the plane`)
+  if (found.words !== words) problems.push(`${tag}:  Accept says "${found.words}", not "${words}"`)
+  if (found.button) {
+    const middle = found.button.top + found.button.height / 2
+    if (middle < found.row.top - 0.5 || middle > found.row.bottom + 0.5)
+      problems.push(`${tag}:  Accept isn't on its block's title row`)
+    if (found.gear && found.button.right > found.gear.left + 0.5) problems.push(`${tag}:  Accept isn't before the gear`)
+    if (found.button.right > width + 0.5) problems.push(`${tag}:  Accept leaves the window`)
+  }
+  if (found.wide) problems.push(`${tag}:  wider than the window:  ${found.wide}`)
+  summary[tag] = { words: found.words, folded: found.folded, button: found.button }
+  const bottom = Math.max(found.header.bottom, found.row?.bottom ?? 0)
+  await page.screenshot({ path: join(out, `stage-${tag}.png`), clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) } })
   await page.close()
 }
-
 /** Screenshot the gear's menu, from the header down to its bottom;  check nothing leaves the window. */
 async function shotMenu(page, name, width) {
   const box = await page.evaluate(() => {
@@ -215,6 +255,12 @@ function HELPERS() {
   window.spinner = () =>
     page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ?? null
   window.gearButton = () => page_().querySelector('[part~="gear"]')
+  window.stageBlock = (which) =>
+    document.querySelector(which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]')
+  window.stageButton = (which) =>
+    stageBlock(which)
+      ?.shadowRoot?.querySelector('[part~="stage-button"]')
+      ?.shadowRoot?.querySelector('[part~="base"]') ?? null
   window.gearMenu = () => page_().querySelector('[part~="gear-menu"]')
   window.gearRows = () => Array.from(page_().querySelectorAll('[part~="gear-row"]'))
   window.measure = () => {

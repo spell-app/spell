@@ -158,6 +158,9 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *     choice of it), through `--epic-files-display` / `--epic-verify-display`, which the fields read
  *   - a phase's own gear chooses for it alone (`<epic-phase>`)
  *   - remembered per page, under the toggles' old key
+ * - While the page agrees its phases (`<epic-page stage="phases">`, reviewed), "Accept Phases" before the gear
+ *   (`<epic-stage-button>`, `EpicFold.renderStageButton()`;  epic `epic-engine` I180):  the header's green pill in
+ *   Send's place before (P29)
  * - No Plan changes box above the phases any more (Owen, 2026-10-11):  each phase draws its own (`<epic-phase>`).
  *   An older doc's copies (`<epic-updated slot="changes">`, T14) have no slot to show in;  the tool removes them.
  * - An item section with no items says "None yet".
@@ -466,6 +469,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           ? () => (
               <>
                 {this.filter()}
+                {/* Accept Phases, before the gear, while the phases are agreed (I180) */}
+                {this.renderStageButton("phases", this.reviewState.reviewing)}
                 {this.gear()}
               </>
             )

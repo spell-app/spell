@@ -80,6 +80,13 @@ export const epicOverviewVocabulary = {
         "An older doc's folded Kickoff prompt:  a `<details>` around the `prompt` slot (`<epic-prompt>` draws its own)."
     },
     { name: "estimate", description: "The estimate line." },
+    {
+      name: "stage-button",
+      description:
+        '"Accept Overview" (an `<epic-stage-button>`, epic `epic-engine` I180), last on its title row:  only while the ' +
+        'page is reviewed and agrees its Overview (`<epic-page stage="overview">`).  A press accepts the Overview, ' +
+        "and sends;  outlined green until the session moves the page on."
+    },
     ...REVIEW_PARTS
   ],
   states: [...FOLD_STATES],

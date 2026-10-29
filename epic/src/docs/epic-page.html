@@ -924,7 +924,7 @@
                   <tr>
                     <th>Stage</th>
                     <th>What shows</th>
-                    <th>The header's button</th>
+                    <th>Its Accept</th>
                     <th>An open phase's pills</th>
                   </tr>
                 </thead>
@@ -932,19 +932,19 @@
                   <tr>
                     <td><code>overview</code></td>
                     <td>the Overview, Questions, Todos</td>
-                    <td>Accept Overview</td>
+                    <td>Accept Overview, on the Overview's title row</td>
                     <td>(no phases show)</td>
                   </tr>
                   <tr>
                     <td><code>phases</code></td>
                     <td>the Phases too</td>
-                    <td>Accept Phases</td>
+                    <td>Accept Phases, on the Phases section's title row</td>
                     <td>Looks good, Defer</td>
                   </tr>
                   <tr>
                     <td><code>building</code>, or none</td>
                     <td>everything</td>
-                    <td>Send (the paper plane)</td>
+                    <td>none:  each phase's plan is accepted on its row</td>
                     <td>Make Todo, Revisit</td>
                   </tr>
                 </tbody>
@@ -956,13 +956,16 @@
                 sections are numbered as they show (<code>2. Questions</code> while the Overview is agreed).
               </li>
               <li>
-                The button sits where Send's paper plane does. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
-                Auto Send's ring goes round its check, but the countdown's end only sends the marks, never accepts (J143).
+                The header's Send is the paper plane in every stage (epic <code>epic-engine</code> I180;  Owen, 2026-10-29:
+                "This should just be normal paper plane"):  the Accept is on the title row of the work it accepts, a
+                green check and its words (<code>&lt;epic-stage-button&gt;</code>), there while the section is folded.
+                Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
+                Before I180 it took the plane's place;  Auto Send's countdown only ever sends the marks, never accepts (J143).
               </li>
               <li>
-                A press sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
+                A press of Accept sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
                 page on a stage, then writes the phases (after the Overview) or starts building (after the phases).
-                Pressed, the button is outlined green until then.
+                Pressed, Accept is outlined green until then.
               </li>
               <li>
                 Building, while Claude's build plan for a phase waits for Owen's Accept, the header keeps Send,
