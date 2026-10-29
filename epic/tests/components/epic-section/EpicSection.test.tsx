@@ -72,7 +72,7 @@ describe("<epic-section>", () => {
     await expectAccessible(host)
   })
 
-  test("draws its numbered title, no tooltip;  starts FOLDED, with a grey rule and no gap below", async () => {
+  test("draws its numbered title, no tooltip;  starts FOLDED, a grey rule under its title bar and no gap below", async () => {
     const host = await render(
       `<div><epic-section id="phases" kind="phases"></epic-section>` +
         `<epic-section id="decisions" kind="questions"><p>An item</p></epic-section></div>`
@@ -83,8 +83,14 @@ describe("<epic-section>", () => {
     expect(inner(questions).hasAttribute("info")).toBe(false)
     expect(host.matches(":state(open)")).toBe(false)
     expect(inner(host).getAttribute("open")).toBe("false")
+    // the rule is the title bar's, in the page's column, never the host's edge to edge (r42)
     const style = getComputedStyle(host)
-    expect({ rule: style.borderBottomWidth, gap: style.marginBottom }).toEqual({ rule: "1px", gap: "0px" })
+    const bar = getComputedStyle(inner(host).shadowRoot!.querySelector("[part~=title]")!)
+    expect({ rule: bar.borderBottomWidth, hostRule: style.borderBottomWidth, gap: style.marginBottom }).toEqual({
+      rule: "1px",
+      hostRule: "0px",
+      gap: "0px"
+    })
   })
 
   test("a click on its title goes through the host's cancelable `ui-opening`;  open, a gap below and no rule", async () => {
