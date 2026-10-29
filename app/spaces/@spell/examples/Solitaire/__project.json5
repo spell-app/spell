@@ -3,19 +3,19 @@
   "description": "Klondike solitaire in spellx, Spell in tags:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, with keys and a right-click menu;  `pause for` animates the deal",
   "imports": [
     {
-      "path": "/Card.spellx",
+      "path": "/Card.spellml",
       "active": true
     },
     {
-      "path": "/Deck.spellx",
+      "path": "/Deck.spellml",
       "active": true
     },
     {
-      "path": "/Pile.spellx",
+      "path": "/Pile.spellml",
       "active": true
     },
     {
-      "path": "/Solitaire.spellx",
+      "path": "/Solitaire.spellml",
       "active": true
     },
     {

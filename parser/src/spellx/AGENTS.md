@@ -11,13 +11,13 @@ when working with code in this folder, `src/spellx/` of the `spell-parser` packa
 
 ## Overview
 
-- SPELLX:  spell's tag-shaped form, a `.spellx` file (epic `elemental-spell`).
+- SPELLX:  spell's tag-shaped form, a `.spellml` file (epic `elemental-spell`).
   - A template in a prefixed tag (`<spell-view "playing card">`), its members in short tags inside it
     (`<property>`, `<alias>`, `<action>`, `<on mouse down>`, `<draw "front">` ...), prose between them.
   - The plan, and every decision its shape follows:
     [its epic page](../../../spell.epics/epics/elemental-spell/elemental-spell.plan.html).
   - Its page for people:  [README-spellx.md](../../README-spellx.md).
-- A `.spellx` file is read by spell's OWN parser (P6, Q69 A):  `spell/parser/spell`'s `SpellxTokenizer` reads its tags as
+- A `.spellml` file is read by spell's OWN parser (P6, Q69 A):  `spell/parser/spell`'s `SpellxTokenizer` reads its tags as
   tokens, and each tag line parses as its code-spell twin (`SpellxTwin`, J44).  It compiles there, with the rest of spell.
 - This folder is its CHUNK TREE, for the editor, the notebook (P12) and agents (J30):
   - [spellx.types.ts](spellx.types.ts):  the tree's nodes, spans and diagnostics
@@ -35,7 +35,7 @@ when working with code in this folder, `src/spellx/` of the `spell-parser` packa
 - The tests live in the repo's `tests/spellx/`, at the same paths as the code.
   - `fixtures/`:  the epic page's example files (its Overview's o1), English and Spanish;
     their outlines are snapshots (P3's hand-written reader's, which the view still gives).
-  - The compile-equality pairs (`X.spellx` beside `X.spell`) are spell's:  the repo's `tests/spell/spellx/`.
+  - The compile-equality pairs (`X.spellml` beside `X.spell`) are spell's:  the repo's `tests/spell/spellx/`.
 
 ## Types / Exports
 

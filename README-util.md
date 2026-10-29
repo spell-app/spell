@@ -25,7 +25,7 @@ turn it over
 it is face up should be yes
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx):
+_Two lines of `test card setup`, in Solitaire's [Card.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellml):
 the test passes, all 19 checks._
 
 On signals that hold a write back, the second line would still read the card face down, and the language would fail its own test.
@@ -400,7 +400,7 @@ Each class has a schema:  its props' types, defaults and legal values.
 and an accessor pair;  `@prop` writes the same runtime shape by hand:
 
 ```js
-// compiled from Card.spellx
+// compiled from Card.spellml
 static { this.declareProp("suit", { oneOf: Card.Suits }) }
 get suit() { return this.getProp("suit") }
 set suit(value) { this.setProp("suit", value) }

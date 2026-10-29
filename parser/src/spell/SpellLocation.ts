@@ -149,9 +149,9 @@ export class SpellLocation {
   }
 
   /**
-   * Is this a spell source file, code spell or spellx, in any language -- `Card.spell`, `Carta.es.spellx`?
+   * Is this a spell source file, code spell or spellx, in any language -- `Card.spell`, `Carta.es.spellml`?
    * - Not `extension === ".spell"`:  a language's file's is `.es.spell` (epic `spanish` P19).
-   * - `.spellx` too (epic `elemental-spell` P8):  its `SpellFile` reads it in that form.
+   * - `.spellml` too (epic `elemental-spell` P8):  its `SpellFile` reads it in that form.
    */
   get isSpellFile(): boolean {
     return SP.isSpellSourceName(this.file)

@@ -14,7 +14,7 @@ from spell_core.things import prop
 class Notebook(Page):
     """
     Built into spell (epic `elemental-spell` P16):  compiled once, into the core's `Notebook`.
-    A notebook made from it says what's on its page with `to draw its content:`;  a `.spellx` notebook writes that as
+    A notebook made from it says what's on its page with `to draw its content:`;  a `.spellml` notebook writes that as
     its body:  markdown, drawing tags and `<example>`s.
     """
 

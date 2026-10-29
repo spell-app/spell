@@ -10,7 +10,7 @@ import { View } from "./View"
 export class Page extends View {
   /**
    * Draw this page as the program's page, as an app starts:  `core.startDrawing()`.
-   * - Compiles from `start the counter notebook`, which a `.spellx` notebook says by itself (epic `elemental-spell` P16).
+   * - Compiles from `start the counter notebook`, which a `.spellml` notebook says by itself (epic `elemental-spell` P16).
    */
   start(): void {
     core.startDrawing(this)

@@ -93,7 +93,7 @@ export function SpellEditor(props: { mode: Mode }) {
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
- * - A NOTEBOOK's project (a `.spellx` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
+ * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
  *   - Its title is then a menu of the project's notebooks, the lock after it, and what happened to the last edit
@@ -146,7 +146,7 @@ export function AppPane() {
  * - Output:  what the program logged, and how compiling and running it went (`<ConsoleViewer>`).
  * - JavaScript:  the compiled code (`<OutputRoot>`);  TypeScript and Python:  the project as those targets write it.
  * - The file's other form, a read-only view (epic `elemental-spell` J95:  a template lives in ONE file):
- *   - Code Spell, on a `.spellx` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
+ *   - Code Spell, on a `.spellml` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
  *   - Spellx, on a `.spell` file:  it written as spellx (`SX.SpellxWriter`)
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
  * - At the right, whatever tab shows:  Clear Console, on Output only, and Close (`onClose`).
@@ -219,7 +219,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
 /**
  * `project`'s notebook, if it's one (`NotebookController.notebooksIn()`).
  * - The one open in the editor (`open`), when it's a notebook:  a project of several shows each at its own address,
- *   `/edit/@spell/notebooks/Avatar/Usage.spellx` (epic `elemental-spell` P18).
+ *   `/edit/@spell/notebooks/Avatar/Usage.spellml` (epic `elemental-spell` P18).
  * - Else its first.
  */
 function notebookOf(
@@ -261,7 +261,7 @@ editorPrefs.declare(TAB_PREF, { oneOf: PROGRAM_TABS }).rename("spellEditor.progr
 
 /**
  * Tab `id`, titled in the page's language.
- * - `spell`, the file's other form:  "Code Spell" on a `.spellx` file, "Spellx" on a `.spell` file (`form`).
+ * - `spell`, the file's other form:  "Code Spell" on a `.spellml` file, "Spellx" on a `.spell` file (`form`).
  */
 function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<ProgramTabId> {
   const text = id === "spell" && form !== "spellx" ? "spellxTab" : TAB_LOOKS[id].text

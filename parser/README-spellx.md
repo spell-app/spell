@@ -23,7 +23,7 @@
 </spell-view>
 ```
 
-That's a `.spellx` file:  a Spell template, one tag per thing it declares, and prose between them.
+That's a `.spellml` file:  a Spell template, one tag per thing it declares, and prose between them.
 It compiles to exactly the program its plain Spell twin does, because Spell's own parser reads it:
 each tag line is read as the line of plain Spell it stands for.
 
@@ -71,7 +71,7 @@ Here, a word that isn't Spell's is an error that names the closest one, or the w
 ```
 
 The words come from the file's language, so a Spanish file says the same things in Spanish
-(`Carta.es.spellx`):
+(`Carta.es.spellml`):
 
 ```html
 <encanto-vista "carta de la baraja" alias="carta" plantilla="vista reversible">
@@ -135,18 +135,18 @@ The catch, and it catches everybody once:  a body line ending in `</>` ends its 
 
 ## Using it
 
-A `.spellx` file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
+A `.spellml` file in a project compiles with the rest:  list it in the project's `__project.json5` as any `.spell` file,
 and the two kinds use what each other declares.
 
 **One file per template.**
-A template lives in ONE file, `Card.spell` or `Card.spellx`, never both:  two copies drift apart.
+A template lives in ONE file, `Card.spell` or `Card.spellml`, never both:  two copies drift apart.
 The other form is a read-only view, written when you ask for it:
 - on a `.spell` file, Show as Spellx (VS Code's title bar;  the editor app's Spellx tab)
-- on a `.spellx` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
+- on a `.spellml` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
 - Edits happen only in the real file, so the view always matches it.
 
-The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx)
-and [Task List](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/TaskList/TaskList.spellx),
+The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellml)
+and [Task List](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/TaskList/TaskList.spellml),
 in the editor's examples.
 - Their card is a two sided view, drawing only its `<draw "front">` and `<draw "back">`;
   their filter, a toolbar of actions with `selected-when=`;  their game's moves, keys and a right-click menu.
@@ -157,7 +157,7 @@ Its tree, for a tool or an agent walking it:
 ```ts
 import { SX } from "spell/parser/spellx"
 
-const file = SX.SpellxView.read(text, { path: "Card.spellx" })
+const file = SX.SpellxView.read(text, { path: "Card.spellml" })
 
 file.templates[0].name                // "playing card"
 file.diagnostics                      // [] -- or each spellx mistake, its span and its message
@@ -167,7 +167,7 @@ for (const { node, depth } of file.walk()) ...
 
 - It's built from the tokens Spell's parser reads the file as, so it's cheap:  no rules run, nothing compiles.
   What the rules say of a body's Spell is the compiled file's errors.
-- The file's name says its language:  `Carta.es.spellx` reads Spanish;  `options.language` overrides it.
+- The file's name says its language:  `Carta.es.spellml` reads Spanish;  `options.language` overrides it.
 - Every node has a `span`, start and end offsets into the text;  `file.positionOf(offset)` turns one into a line and
   column.
 - A code line's span is its text exactly:  `text.slice(line.span.start, line.span.end) === line.text`.
@@ -200,7 +200,7 @@ for (const { node, depth } of file.walk()) ...
 spell spellx convert @spell/examples/calculator --dry-run
 ```
 
-- `Card.spell` becomes `Card.spellx`, beside it;  `Carta.es.spell` becomes `Carta.es.spellx`, in Spanish spellx.
+- `Card.spell` becomes `Card.spellml`, beside it;  `Carta.es.spell` becomes `Carta.es.spellml`, in Spanish spellx.
   The `.spell` file stays:  keep ONE of the two, and list it in the project's `__project.json5`.
   Both, and the project declares everything twice.
 - To just look at a file as spellx, Show as Spellx writes it without a second file.
@@ -225,7 +225,7 @@ spell spellx convert @spell/examples/calculator --dry-run
 
 ## The edges
 
-**Real today:**  a `.spellx` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
+**Real today:**  a `.spellml` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
 its tree reads as above.
 
 **Components by their bare names:**  a drawing writes `<text>`, `<button>`, `<botón>` in a Spanish file, and gets
@@ -339,7 +339,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
   block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
 - `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
-- A notebook is only ever a `.spellx` file.  The editor shows its page, editable in place, at
+- A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at
   `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
 - `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's
   element, or a template's class.
@@ -360,18 +360,18 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 
 | File | What it holds |
 | --- | --- |
-| [SpellxTokenizer.ts](src/spell/SpellxTokenizer.ts) | Spell's tokenizer for a `.spellx` file:  tag heads, closers and prose as tokens;  its mistakes |
+| [SpellxTokenizer.ts](src/spell/SpellxTokenizer.ts) | Spell's tokenizer for a `.spellml` file:  tag heads, closers and prose as tokens;  its mistakes |
 | [SpellxTokens.ts](src/spell/SpellxTokens.ts) | those tokens |
 | [SpellxTwin.ts](src/spell/SpellxTwin.ts) | each tag line as its plain Spell twin |
 | [spellx.types.ts](src/spellx/spellx.types.ts) | the tree's nodes, spans and diagnostics |
 | [SpellxView.ts](src/spellx/SpellxView.ts) | a file's tree, built from its tokens |
 | [SpellxFile.ts](src/spellx/SpellxFile.ts) | a file's tree:  `walk()`, `toOutline()`, `positionOf()` |
 | [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx:  `spell spellx convert`, and the editors' Show as Spellx |
-| [CodeSpellWriter.ts](src/spellx/CodeSpellWriter.ts) | a `.spellx` file written as plain Spell:  the editor's Show as Code Spell |
+| [CodeSpellWriter.ts](src/spellx/CodeSpellWriter.ts) | a `.spellml` file written as plain Spell:  the editor's Show as Code Spell |
 | [Language.ts](src/spell/languages/Language.ts) | `SpellxWords`, the shape of a language's spellx words |
 | [en/words.ts](src/spell/languages/en/words.ts), [es/words.ts](src/spell/languages/es/words.ts) | each language's words, its `spellx` table:  the tags, and each tag's twin (`twins`) |
 | [en/parserMessages.ts](src/spell/languages/en/parserMessages.ts) | the messages, the `spellx-*` keys |
-| [tests/spell/spellx/](tests/spell/spellx/) | each `X.spellx` beside the `X.spell` it compiles the same as, English and Spanish |
+| [tests/spell/spellx/](tests/spell/spellx/) | each `X.spellml` beside the `X.spell` it compiles the same as, English and Spanish |
 | [tests/spellx/](tests/spellx/) | the tree's tests;  `fixtures/` holds the epic's example files |
 
 ## See also

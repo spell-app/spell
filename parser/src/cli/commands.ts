@@ -244,11 +244,11 @@ export default function languageCommands(spell: Command): void {
   spellx
     .command("convert")
     .description(
-      "write each .spell file as spellx, the same program in tags:  Card.spell => Card.spellx beside it, " +
-        "Carta.es.spell => Carta.es.spellx -- never in the test projects"
+      "write each .spell file as spellx, the same program in tags:  Card.spell => Card.spellml beside it, " +
+        "Carta.es.spell => Carta.es.spellml -- never in the test projects"
     )
     .argument("[projects...]", PROJECTS_ARG)
-    .option("--dry-run", "write nothing:  print each .spellx file instead")
+    .option("--dry-run", "write nothing:  print each .spellml file instead")
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("spellxConvert", projects, command))
 }

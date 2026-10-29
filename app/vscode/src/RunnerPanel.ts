@@ -31,7 +31,7 @@ import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
  ****************/
 export class RunnerPanel {
   /**
-   * The editor languages a spell source file is:  code spell, and spellx, its tag-shaped form (`Card.spellx`;
+   * The editor languages a spell source file is:  code spell, and spellx, its tag-shaped form (`Card.spellml`;
    * epic `elemental-spell` P8).
    */
   static readonly LANGUAGES: readonly string[] = ["spell", "spellx"]

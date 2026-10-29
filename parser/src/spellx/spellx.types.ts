@@ -1,8 +1,8 @@
 /**
- * Spellx's types:  the CHUNK TREE a `.spellx` file reads into, its spans and its diagnostics (epic `elemental-spell`).
+ * Spellx's types:  the CHUNK TREE a `.spellml` file reads into, its spans and its diagnostics (epic `elemental-spell`).
  * - The bottom of the folder's import graph:  `import type` only, so it erases completely.
  *   `SpellxFile` and `SpellxView` stand on it.
- * - A chunk tree is what a `.spellx` file SAYS, in the order it says it, every node with its exact span:
+ * - A chunk tree is what a `.spellml` file SAYS, in the order it says it, every node with its exact span:
  *   nothing is compiled, every body stays raw spell text.
  *   - Spell's own parser reads the file (P6:  each tag as its code-spell twin);  this tree is what it SAYS, for the
  *     editor, the notebook (P12) and agents, which walk it (`SpellxFile.walk()`).
@@ -332,7 +332,7 @@ export type SpellxNodeKind = SpellxNode["kind"]
 ////////////////
 
 /**
- * Something wrong in a `.spellx` file's spellx:  a word spellx doesn't know, a closer for another tag, a tag never closed ...
+ * Something wrong in a `.spellml` file's spellx:  a word spellx doesn't know, a closer for another tag, a tag never closed ...
  * - What the spellx tokenizer noted while reading it (`SP.spellxErrorOf()`), in the file's language.
  * - COLLECTED, never thrown.  What the rules say of a body's spell is the parsed file's (`SP.SpellFile.errors`).
  */

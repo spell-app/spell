@@ -194,14 +194,14 @@ describe("project-utils", () => {
     expect(index.imports.map((it) => it.path)).toEqual(["/Paged.spell", `/Card${SP.EDITOR_PAGE_SUFFIX}`])
   })
 
-  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellx` file
-  test("a .spellx file is an import of its own, as a .spell file is", async () => {
+  // epic `elemental-spell` J95, Owen 2026-10-25:  "one file" -- a template is a `.spell` file OR a `.spellml` file
+  test("a .spellml file is an import of its own, as a .spell file is", async () => {
     const projectId = project("Tags")
     const folder = resolve(workspace, "Tags")
-    writeFileSync(resolve(folder, "Card.spellx"), '<spell-thing "card">\n</spell-thing>\n')
+    writeFileSync(resolve(folder, "Card.spellml"), '<spell-thing "card">\n</spell-thing>\n')
 
     const index = await projectUtils.getIndex(projectId)
-    expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellx"])
+    expect(index.imports.map((it) => it.path)).toEqual(["/Tags.spell", "/Card.spellml"])
   })
 
   // the bug of 2026-10-22:  a project copied to a folder of another name read its old words file as spell

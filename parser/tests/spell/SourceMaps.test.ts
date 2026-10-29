@@ -8,7 +8,7 @@ import { compiledSpellProject, registerTestComponentPack } from "spell/parser/sp
  * Source maps (epic `elemental-spell` P14):  each line of compiled javascript back to the spell line it came from.
  * - Marks made as the code is written, then taken out again (`P.SourceMarks`):
  *   the code must be EXACTLY what it is with no map.
- * - Every mapped line points at its statement's line, in `.spell` and `.spellx` files alike.
+ * - Every mapped line points at its statement's line, in `.spell` and `.spellml` files alike.
  */
 describe("source maps", () => {
   beforeAll(registerTestComponentPack)

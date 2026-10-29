@@ -33,7 +33,7 @@ const COUNTER = [
 
 /** The Counter notebook, `@spell/notebooks/Counter`, as committed:  its title and sections written as tags. */
 const TAGGED = readFileSync(
-  new URL("../../../../spaces/@spell/notebooks/Counter/Counter.spellx", import.meta.url),
+  new URL("../../../../spaces/@spell/notebooks/Counter/Counter.spellml", import.meta.url),
   "utf8"
 )
 
@@ -54,7 +54,7 @@ const CARDS = [
  * about, the rest of the file byte for byte.
  */
 describe("NotebookPageCells", () => {
-  const model = NotebookPageCells.of(COUNTER, "/Counter.spellx")!
+  const model = NotebookPageCells.of(COUNTER, "/Counter.spellml")!
 
   test("its cells, in order:  prose split at each ## heading, what it draws", () => {
     expect(model.name).toBe("counter notebook")
@@ -73,7 +73,7 @@ describe("NotebookPageCells", () => {
   })
 
   test("an edit changes only its cell's span, its indent put back on every line", () => {
-    const [template] = NotebookPageCells.of(CARDS, "/Cards.spellx")!.cells
+    const [template] = NotebookPageCells.of(CARDS, "/Cards.spellml")!.cells
     const edited = NotebookPageCells.withCode(CARDS, template!, template!.code.replace("to up", "to down"))
     expect(edited).toBe(CARDS.replace("to up", "to down"))
     const example = model.cells[2]!.examples![0]!
@@ -98,7 +98,7 @@ describe("NotebookPageCells", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const [example] = NotebookPageCells.of(text, "/Examples.spellx")!.cells[0]!.examples!
+    const [example] = NotebookPageCells.of(text, "/Examples.spellml")!.cells[0]!.examples!
     expect(example).toMatchObject({ name: "", html: true })
     expect(example!.body.code).toBe('<ui-comment>\n\t<ui-avatar src="elliot.jpg"></ui-avatar>\n</ui-comment>')
     const edited = NotebookPageCells.withCode(text, example!.body, "<ui-comment>\n\t<code>hi</code>\n</ui-comment>")
@@ -108,7 +108,7 @@ describe("NotebookPageCells", () => {
   test("move up, then down:  back as it was;  delete, add and lock", () => {
     const moved = NotebookPageCells.moved(COUNTER, model.cells, 2, "up")
     expect(moved.indexOf('<example "One counter">')).toBeLessThan(moved.indexOf("## Counter"))
-    const back = NotebookPageCells.of(moved, "/Counter.spellx")!
+    const back = NotebookPageCells.of(moved, "/Counter.spellml")!
     expect(NotebookPageCells.moved(moved, back.cells, 1, "down")).toBe(COUNTER)
 
     const deleted = NotebookPageCells.deleted(COUNTER, model.cells[2]!)
@@ -123,13 +123,13 @@ describe("NotebookPageCells", () => {
 
     const locked = NotebookPageCells.withLock(COUNTER, model, true)
     expect(locked.split("\n")[0]).toBe('<spell-notebook "counter notebook" locked>')
-    const relocked = NotebookPageCells.of(locked, "/Counter.spellx")!
+    const relocked = NotebookPageCells.of(locked, "/Counter.spellml")!
     expect(relocked.locked).toBe(true)
     expect(NotebookPageCells.withLock(locked, relocked, false)).toBe(COUNTER)
   })
 
   test('written as tags:  the title\'s `<header level="1">`, each `<section label>`, each `<text>` before an example', () => {
-    const tagged = NotebookPageCells.of(TAGGED, "/Counter.spellx")!
+    const tagged = NotebookPageCells.of(TAGGED, "/Counter.spellml")!
     const cells = tagged.cells.map(({ kind, heading, title, lead, name, description }) =>
       Object.fromEntries(Object.entries({ kind, heading, title, lead, name, description }).filter(([, v]) => v))
     )
@@ -157,7 +157,7 @@ describe("NotebookPageCells", () => {
   })
 
   test("a template's groups:  each one's members together, under its name and description", () => {
-    const [template] = NotebookPageCells.of(CARDS, "/Cards.spellx")!.cells
+    const [template] = NotebookPageCells.of(CARDS, "/Cards.spellml")!.cells
     expect(template!.groups).toEqual([
       { name: "direction", description: "Face up or face down", members: ["direction", "turn it over"] }
     ])
@@ -165,7 +165,7 @@ describe("NotebookPageCells", () => {
 
   test("in Spanish, locked is bloqueado", () => {
     const text = '<encanto-cuaderno "cuaderno">\n\t# Hola\n</encanto-cuaderno>\n'
-    const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spellx")!
+    const spanish = NotebookPageCells.of(text, "/Cuaderno.es.spellml")!
     expect(NotebookPageCells.withLock(text, spanish, true).split("\n")[0]).toBe(
       '<encanto-cuaderno "cuaderno" bloqueado>'
     )

@@ -83,12 +83,12 @@ export function showNotebook(path: string) {
   navigate(window.location.pathname.startsWith(RUN_PREFIX) ? location.runnerUrl : location.editorUrl)
 }
 
-/** A notebook's name in the menu:  its file's, without `.spellx`. */
+/** A notebook's name in the menu:  its file's, without `.spellml`. */
 function nameOf(file: SP.SpellFile): string {
   return file.path
     .split("/")
     .at(-1)!
-    .replace(/\.spellx$/, "")
+    .replace(/\.spellml$/, "")
 }
 
 /** The words of each status. */

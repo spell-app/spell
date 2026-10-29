@@ -1,14 +1,14 @@
 /**
- * Turns a command-line argument into what it names:  a project, a spell file (`.spell` or `.spellx`), or a whole
+ * Turns a command-line argument into what it names:  a project, a spell file (`.spell` or `.spellml`), or a whole
  * project root.
  * - Spell addresses (`SP.SpellLocation.isAddress()`, epic `people-and-orgs` P4):
  *   - `@spell/examples/Solitaire`, `owen@spell/errors`:  a project
- *   - `@spell/examples/Solitaire/Card.spellx`:  a file in one
+ *   - `@spell/examples/Solitaire/Card.spellml`:  a file in one
  *   - `@spell/examples`, `owen@spell`:  a whole group;  `@spell`:  every group in that space
  * - `@here` ~== `.`, and `@here/Foo.spell` ~== `./Foo.spell`:
  *   the command line's own word, not an address.
  * - Anything else is a path on disk, from the current folder:
- *   - a `.spell` or `.spellx` file, or a project's file (`__project.json5`)
+ *   - a `.spell` or `.spellml` file, or a project's file (`__project.json5`)
  *   - a folder:  the project it's in, or a known root's folder, e.g. `spaces/@spell/examples`
  * - NEVER a folder that isn't inside a project:  it has no project file, so it isn't one.
  *   - Loading it would no longer write one there (the disk reader saves only into a project file that exists),
@@ -107,7 +107,7 @@ async function resolveLocation(arg: string, path: string): Promise<CLI.CliProjec
     throw new CLI.CliError(`No project '${location.projectId}' (looked in ${projectDir})`)
   if (location.isProjectPath) return { kind: "project", arg, project: new SP.SpellProject(location.projectId) }
 
-  if (!location.isSpellFile) throw new CLI.CliError(`'${arg}' isn't a .spell or .spellx file`)
+  if (!location.isSpellFile) throw new CLI.CliError(`'${arg}' isn't a .spell or .spellml file`)
   if (!existsSync(location.serverPath)) throw new CLI.CliError(`No file '${arg}' (looked for ${location.serverPath})`)
   return { kind: "file", arg, file: new SP.SpellFile(location.path) }
 }
@@ -128,7 +128,7 @@ async function resolveDiskPath(arg: string, path: string): Promise<CLI.CliProjec
   const isFolder = statSync(path).isDirectory()
   const isManifest = SP.isProjectFile(basename(path))
   if (!isFolder && !isManifest && !SP.isSpellSourceName(path)) {
-    throw new CLI.CliError(`'${arg}' isn't a .spell or .spellx file, a project's ${SP.PROJECT_FILE} or a folder`)
+    throw new CLI.CliError(`'${arg}' isn't a .spell or .spellml file, a project's ${SP.PROJECT_FILE} or a folder`)
   }
 
   if (isFolder) {

@@ -15,7 +15,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
 /**
  * A project importing another, through `project.json` -- as `SpellProject` does it in the app.
  * - Solitaire split in two, in a temp `@local/<folder>` group:  `lib`, a copy of its cards, deck and piles (`Card`,
- *   `Deck`, `Pile`), and apps importing it, e.g. a copy of its game, `Solitaire.spellx`.
+ *   `Deck`, `Pile`), and apps importing it, e.g. a copy of its game, `Solitaire.spellml`.
  * - Nothing is written into the repo.
  * - spaces' since epic `repo-split` C11 (spell-parser's `tests/spell/` before):  it loads projects through spaces'
  *   disk reader, which spell-parser's tests never import.
@@ -102,13 +102,13 @@ describe("SpellProject imports", () => {
   let lib: SP.SpellProject
   beforeAll(async () => {
     installDiskFetch()
-    lib = makeProject("lib", ["Card.spellx", "Deck.spellx", "Pile.spellx"], { version: "1.2.0" })
+    lib = makeProject("lib", ["Card.spellml", "Deck.spellml", "Pile.spellml"], { version: "1.2.0" })
     await lib.compile()
   })
 
   test("targets:  `js/solid` always, then `project.json`'s;  an unknown one throws, naming the ones there are", async () => {
     expect(lib.targets.map(({ name }) => name)).toEqual(["js/solid"])
-    const project = makeProject("targets", ["Deck.spellx"], { targets: ["nope"] })
+    const project = makeProject("targets", ["Deck.spellml"], { targets: ["nope"] })
     await project.load(undefined)
     expect(() => project.targets).toThrow(/There's no target 'nope':  try js\/solid/)
   })
@@ -121,7 +121,7 @@ describe("SpellProject imports", () => {
       can: { draw: false }
     }
     try {
-      const draws = makeProject("draws", ["Card.spellx"], { targets: ["test/no-draw"] })
+      const draws = makeProject("draws", ["Card.spellml"], { targets: ["test/no-draw"] })
       await expect(draws.compile()).rejects.toThrow(/'draws' draws a UI, which target 'test\/no-draw' can't/)
       const quiet = makeProject(
         "quiet",
@@ -159,37 +159,37 @@ describe("SpellProject imports", () => {
   })
 
   test("a project parses against another's compiled declarations -- not its sources", async () => {
-    const app = makeProject("app", ["Solitaire.spellx"], { imports: [{ path: `${root}/lib`, active: true }] })
+    const app = makeProject("app", ["Solitaire.spellml"], { imports: [{ path: `${root}/lib`, active: true }] })
     await app.parse()
     expect(app.parseError).toBeUndefined()
-    expect(app.spellFiles.map((file) => file.filePath)).toEqual(["/Solitaire.spellx"])
+    expect(app.spellFiles.map((file) => file.filePath)).toEqual(["/Solitaire.spellml"])
     expect(app.scope!.parentScope).toBeInstanceOf(P.ImportScope)
     expect(errorsIn(app)).toEqual([])
   })
 
   test("`source: true` parses the other project's files ahead of ours instead", async () => {
     const imports = [{ path: `${root}/lib`, active: true, source: true }]
-    const app = makeProject("app_from_source", ["Solitaire.spellx"], { imports })
+    const app = makeProject("app_from_source", ["Solitaire.spellml"], { imports })
     await app.parse()
     expect(app.spellFiles.map((file) => file.filePath)).toEqual([
-      "/Card.spellx",
-      "/Deck.spellx",
-      "/Pile.spellx",
-      "/Solitaire.spellx"
+      "/Card.spellml",
+      "/Deck.spellml",
+      "/Pile.spellml",
+      "/Solitaire.spellml"
     ])
     expect(app.scope!.parentScope).not.toBeInstanceOf(P.ImportScope)
     expect(errorsIn(app)).toEqual([])
   })
 
   test("declaring something it also imports is a parse error", async () => {
-    const app = makeProject("app_clash", ["Card.spellx"], { imports: [{ path: `${root}/lib`, active: true }] })
+    const app = makeProject("app_clash", ["Card.spellml"], { imports: [{ path: `${root}/lib`, active: true }] })
     await expect(app.parse()).rejects.toThrow()
     expect(app.parseError).toMatch(/declares 'Card', which it also imports from '@local\/.*\/lib'/)
   })
 
   test("importing a project that's never been compiled is a parse error", async () => {
-    makeProject("never_compiled", ["Card.spellx"])
-    const app = makeProject("app_uncompiled", ["Solitaire.spellx"], {
+    makeProject("never_compiled", ["Card.spellml"])
+    const app = makeProject("app_uncompiled", ["Solitaire.spellml"], {
       imports: [{ path: `${root}/never_compiled`, active: true }]
     })
     await expect(app.parse()).rejects.toThrow()

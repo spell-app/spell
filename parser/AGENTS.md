@@ -19,7 +19,7 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in th
   - `core`:  the runtime compiled spell runs on
   - `py`:  Python's writers, and `spell_core`, a uv project
   - `spell`:  the language
-  - `spellx`:  spell's tag-shaped form, `.spellx` files
+  - `spellx`:  spell's tag-shaped form, `.spellml` files
   - `cli`:  the language's `spell` commands
 - It may use:  the kit:  util's helpers (by package name, `spell/util`) and the toolchain;
   and, in `cli` only, the kit's command line (`spell/cli`) and its server's command runs (`spell/server`, loaded only
@@ -69,7 +69,7 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
 | [core](src/core/AGENTS.md) | `spell/parser/core` | `SC` | the runtime compiled spell runs on |
 | [py](src/py/AGENTS.md) | `spell/parser/py` | `PY` | Python's writers (its TypeScript) and `spell_core` (`core/`, a uv project) |
 | [spell](src/spell/AGENTS.md) | `spell/parser/spell` | `SP` | the spell LANGUAGE on the parser, and `PARSING.md`;  its page for people is [README-spell.md](README-spell.md) |
-| [spellx](src/spellx/AGENTS.md) | `spell/parser/spellx` | `SX` | spellx, spell's tag-shaped form:  the chunk tree a `.spellx` file reads into (spell's own parser reads and compiles it);  its page for people is [README-spellx.md](README-spellx.md) |
+| [spellx](src/spellx/AGENTS.md) | `spell/parser/spellx` | `SX` | spellx, spell's tag-shaped form:  the chunk tree a `.spellml` file reads into (spell's own parser reads and compiles it);  its page for people is [README-spellx.md](README-spellx.md) |
 | [cli](src/cli/AGENTS.md) | `spell/parser/cli` | | the language's `spell` commands (`commands.ts`), and their types |
 
 - Outside `src/`, and never imported:

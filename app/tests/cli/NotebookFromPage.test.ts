@@ -80,5 +80,5 @@ function examplesOf(markup: string): string {
     into: "@spell/notebooks",
     tagFor: (bare) => `ui-${bare}`
   })
-  return converter.files.get("Examples.spellx")!
+  return converter.files.get("Examples.spellml")!
 }

@@ -80,7 +80,7 @@ spell app serve @spell/examples/calculator
 The table and its pictures come from the example projects, so a new example shows up by running one command.
 Everything else on this page is written by hand.
 
-1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellx` files.
+1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
@@ -297,8 +297,8 @@ _From Tic-Tac-Toe:  a phrase with three blanks, which the game says eight times,
 
 Every framework has its to-do list, and this is Spell's:
 [Task List](spaces/@spell/examples/TaskList/), 141 lines of Spell in two files, and a style sheet.
-- [Task.spellx](spaces/@spell/examples/TaskList/Task.spellx):  what a task is, and how it draws.
-- [TaskList.spellx](spaces/@spell/examples/TaskList/TaskList.spellx):  the list of tasks, then the app around it.
+- [Task.spellml](spaces/@spell/examples/TaskList/Task.spellml):  what a task is, and how it draws.
+- [TaskList.spellml](spaces/@spell/examples/TaskList/TaskList.spellml):  the list of tasks, then the app around it.
 
 It's written in spellx, Spell in tags:  a tag for each template, and inside it a tag for each property, alias and drawing,
 with Markdown around them for a person to read
@@ -536,12 +536,12 @@ Klondike in four files, written in spellx, as Task List is.
 Its cards, its deck and its piles are its own files, before the game, in its project file's order:
 
 ```json5
-[{ "path": "/Card.spellx" }, { "path": "/Deck.spellx" }, { "path": "/Pile.spellx" }, { "path": "/Solitaire.spellx" }]
+[{ "path": "/Card.spellml" }, { "path": "/Deck.spellml" }, { "path": "/Pile.spellml" }, { "path": "/Solitaire.spellml" }]
 ```
 
 _From [its project file](spaces/@spell/examples/Solitaire/__project.json5), shortened:  each file sees the ones before it._
 
-So [Solitaire.spellx](spaces/@spell/examples/Solitaire/Solitaire.spellx) is only the game:
+So [Solitaire.spellml](spaces/@spell/examples/Solitaire/Solitaire.spellml) is only the game:
 the solitaire itself, how a click or a drag plays a card, and its kinds of pile, each saying what it may take or give up.
 
 ```html
@@ -561,9 +561,9 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
   ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)),
   and a `<spell>` block inside one is plain Spell.
 - `<group>` tags and `##` lines are headings:  for a person to read, which the editor shows in bold.
-- [Card.spellx](spaces/@spell/examples/Solitaire/Card.spellx) says what its suits, ranks and colors are:
+- [Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml) says what its suits, ranks and colors are:
   `suit = clubs` reads one, and a foundation draws its suit's ace, by the card's `picture`.
-- The card is a `two sided view` ([Card.spellx](spaces/@spell/examples/Solitaire/Card.spellx)):
+- The card is a `two sided view` ([Card.spellml](spaces/@spell/examples/Solitaire/Card.spellml)):
   its direction, face up or down, and `turn it over` come from that built-in template,
   and it says what its `<draw "front">` and its `<draw "back">` look like.
 - It draws both sides at once, one over the other (its own `<draw>`):
@@ -595,12 +595,12 @@ The deal is a loop with a pause in it, so you watch it happen:
 	wait for: play from the stock
 ```
 
-_From a `<spell>` block in Solitaire.spellx:  plain Spell, in the outline style._
+_From a `<spell>` block in Solitaire.spellml:  plain Spell, in the outline style._
 
 - `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
 - Written `animation` instead of `to`, an action runs one at a time:
   asking for it again while it runs does nothing, so a second Restart can't deal on top of the first.
-- A card is in one pile at a time, as [Pile.spellx](spaces/@spell/examples/Solitaire/Pile.spellx) says
+- A card is in one pile at a time, as [Pile.spellml](spaces/@spell/examples/Solitaire/Pile.spellml) says
   (`a card belongs to one pile`):  adding it to the stock takes it off the pile it was in.
 
 What you see:

@@ -112,16 +112,16 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     property lock
     enumeration Locks
   project Solitaire
-    file Card.spellx
+    file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
-    file Deck.spellx
+    file Deck.spellml
       type Deck (is a List)
       function test a new deck
-    file Pile.spellx
+    file Pile.spellml
       type Pile (is a ViewableList)
       function test piles
-    file Solitaire.spellx
+    file Solitaire.spellml
       type Solitaire (is a App)
       variable solitaire (Solitaire)
       type StockPile (is a Pile)
@@ -185,17 +185,17 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     property lock
     enumeration Locks
   project lib (imported)
-    file Card.spellx
+    file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
-    file Deck.spellx
+    file Deck.spellml
       type Deck (is a List)
       function test a new deck
-    file Pile.spellx
+    file Pile.spellml
       type Pile (is a ViewableList)
       function test piles
   project app
-    file Solitaire.spellx
+    file Solitaire.spellml
       type Solitaire (is a App)
       variable solitaire (Solitaire)
       type StockPile (is a Pile)

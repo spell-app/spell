@@ -151,7 +151,7 @@ export const PARSER_MESSAGES = {
   "the-property-of-a-type": "the {property} of a {type}",
 
   ////////////////
-  // ## Spellx:  what spell says about a .spellx file, as it reads it (epic `elemental-spell`)
+  // ## Spellx:  what spell says about a .spellml file, as it reads it (epic `elemental-spell`)
   ////////////////
 
   /** A tag word spellx doesn't know, with the closest it does:  `{tag}` is `<propety>`, `{suggestion}` `<property>`. */

@@ -18,7 +18,7 @@ const MAX_LISTED = 12
 /**
  * `spell watch [projects...]`:  recompile each project -- or `--check-only`, re-check it -- whenever its files change.
  * - None named:  the project here -- or, outside one, asks.  See `CliSession.defaultProject()`.
- * - Watches each project's folder:  `.spell`, `.spellx` and `.css` files, and `project.json`.
+ * - Watches each project's folder:  `.spell`, `.spellml` and `.css` files, and `project.json`.
  * - NOT `<Project>.spell.js` or `<Project>.scopes.js`, which compiling writes --
  *   the scope pack after each recompile with no errors.
  * - Changes go through the language server's workspace, so only what changed re-parses.
