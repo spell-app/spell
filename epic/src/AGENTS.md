@@ -257,6 +257,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main
           checkout)
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
+    - the kit after epic `repo-split` P20 · One Repo (epic `epic-engine` P49):
+      - `peers`:  the repos BESIDE it, its `repos.json5`'s `"peer": true` entries (spell-brand), never part of an
+        epic's worktree;  `epic config peers` prints them, and `/worktrees` lists their own worktrees
+      - `kit`:  a peer's settings name the kit, `{ "top": "../spell" }`:  it takes the kit's content folder, windows
+        and voices, and keeps its own worktrees (`../<repo>.worktrees/`) and install;  a warning when the kit doesn't
+        list it as a peer
+      - `oldLayout`:  a worktree cut before P20, with a worktree of an old child repo still inside it
+        (`foundCheckouts()`);  `leftBehind()` is one holding work not crossed over yet (`isCrossed()`, by the commit
+        maps):  removal and `epic merge` refuse it, `epic worktree merge-main` runs the carry-on command
+        (`spell rename branches`) after merging `main`;  to delete once none is left ([the code-debt log](../../agents/CODE-DEBT.md))
     - a repo MOVED behind compat links (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
       - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:
         an unrepaired worktree's `.git` file names the OLD one
@@ -1214,6 +1224,9 @@ In `tools/`:
     - Its `<epic-*>` blocks start folded by themselves.
       - The runtime reopens the ones the reader left open, before they first draw (`restoreEpicFolds()`).
       - It saves their toggles as a section's.
+      - EXCEPT the Log, which starts folded on EVERY load, a live reload's too, and which the page's expand-all
+        leaves folded (`STAYS_FOLDED`, `EpicSection.staysFolded`;  Owen, 2026-10-29, epic `epic-engine` I155):
+        a link into it, a click and its own expand-all still open it.
     - Below the last line, a window's worth of empty ground (`--spell-doc-pad-end`, on `.spell-doc-main`):
       so folding near the page's end never leaves the page shorter than where it's scrolled to,
       and what was clicked stays put (Owen, 2026-10-10, `airplane` J10).

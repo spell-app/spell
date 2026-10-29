@@ -39,6 +39,7 @@ import {
   PHASE_TOGGLES_KEY,
   REPORT,
   SECTION_LOOKS,
+  STAYS_FOLDED_KINDS,
   TOGGLE,
   type ContentsEntry,
   type EpicSectionVocabulary,
@@ -233,6 +234,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     void this.slots.filledSlots
     if (!this.counts() || isServer) return NOTHING_COUNTED
     return Array.from(this.domElement.querySelectorAll(COUNTED))
+  }
+
+  /**
+   * It stays FOLDED (the Log, `STAYS_FOLDED_KINDS`):  the page's expand-all leaves it folded (`expandAllUnder()`),
+   * and every load starts it folded (the docs runtime's `STAYS_FOLDED`).
+   * - a link into it, a click on its title and its own expand-all still open it
+   */
+  get staysFolded(): boolean {
+    return STAYS_FOLDED_KINDS.includes(this.kind ?? "")
   }
 
   /** Its count:  `{ open, total }`;  `undefined` for a kind that isn't counted, or with nothing to count. */

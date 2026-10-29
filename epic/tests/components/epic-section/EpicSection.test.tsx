@@ -4,6 +4,8 @@ import { E, UI } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
+import { expandAllUnder } from "spell/epic/components/epic-item/Fold"
+
 import "spell/ui/components/ui-section"
 import "spell/epic/components/epic-section"
 import "spell/epic/components/epic-phase"
@@ -236,6 +238,25 @@ function shownIds(host: Element): string[] {
     .filter((item) => getComputedStyle(item).display !== "none")
     .map((item) => item.id)
 }
+
+// Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log ... doesn't auto expand with 'expand all'"
+describe("<epic-section kind=log> stays folded", () => {
+  test("the page's expand-all opens every section but the Log, and nothing inside it;  its own expand() still opens it", async () => {
+    const host = await render(
+      `<div><epic-section id="decisions" kind="questions"><p>An item</p></epic-section>` +
+        `<epic-section id="log" kind="log"><epic-section id="inside" kind="overview-part"></epic-section></epic-section></div>`
+    )
+    const wrap = host.parentElement!
+    const log = wrap.querySelector<FoldHost>("#log")!
+    const isOpen = (id: string) => wrap.querySelector(`#${id}`)!.matches(":state(open)")
+    expect(expandAllUnder(wrap)).toBe(1)
+    await ElementFixture.tick()
+    expect([isOpen("decisions"), isOpen("log"), isOpen("inside")]).toEqual([true, false, false])
+    expect((log.component as unknown as { expand(): boolean }).expand()).toBe(true)
+    await ElementFixture.tick()
+    expect(isOpen("log")).toBe(true)
+  })
+})
 
 describe("<epic-section> counts and state filter", () => {
   afterEach(() => {

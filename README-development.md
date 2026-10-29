@@ -99,7 +99,7 @@ Every folder answers to the same script names, so `yarn test` means the same thi
 | `ts` | the type check:  the folder's own programs and its tests', reading every folder below as source (the app's terminal screens read built declarations, rebuilt first) |
 | `lint` | oxlint, strict:  a warning fails, and so does an unused disable comment;  plus ruff, for Python |
 | `lint:fix` | the same, fixing what it can |
-| `format` | oxfmt, and ruff's formatter for Python;  it rewrites files |
+| `format` | oxfmt, and ruff's formatter for Python, over the folder's own files and its own ignore list;  it rewrites files |
 | `test` | Vitest, every project in the folder;  then pytest for its Python, and the epic folder's `node --test` scripts |
 | `review` | `ts`, `lint:fix`, `format`, `test`, in that order, stopping at the first that fails;  then "REVIEW PASSED" |
 
@@ -440,7 +440,7 @@ The root (`~/www/spell`)
 
 `epic/`
 - checks:  `ts`, `test` (with `test:scripts` and `test:vscode`), `test:node`, `test:watch`,
-  `lint`, `lint:fix`, `format`, `review`
+  `lint`, `lint:fix`, `format`, `format:check`, `review`
 - `epic`, `plan-doc` (`epic`, in its own order), `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
 - the docs tools:  `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `details`
 

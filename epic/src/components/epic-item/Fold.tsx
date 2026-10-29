@@ -283,6 +283,7 @@ export function foldAllUnder(root: Element): number {
  * - the page toolbar's (Owen, 2026-10-13:  "Add expand all button next to collapse all"):
  *   - every section, phase and item inside it, through their own `expand()`:  the cancelable `ui-opening`, as a click's,
  *     so the page remembers each as a click's
+ *   - NOT a block that stays folded (`staysFolded`:  the Log;  epic `epic-engine` I155), nor what's inside it
  *   - NOT the cards and panels inside them (asides, code, replies ...):  those stay as the reader left them, so an
  *     opened page reads as a list of items, not every aside at once
  * - a fold title's (`cards`, `EpicFold.expandAll()`;  Owen, 2026-10-20):  the cards and panels too, through their
@@ -294,13 +295,22 @@ export function expandAllUnder(root: Element, { cards = false }: { cards?: boole
   for (const element of root.querySelectorAll("*")) {
     if (!element.localName.startsWith(EPIC_PREFIX)) continue
     const component = (element as Partial<E.DOMElement>).component as Collapsible | undefined
-    if (!component) continue
+    if (!component || insideFolded(element, root)) continue
     const open = component.expand
       ? component.expand()
       : cards && component.fold instanceof Fold && component.fold.open()
     if (open) opened++
   }
   return opened
+}
+
+/** `element` is, or is inside, a block under `root` that stays folded (`staysFolded`):  expand-all leaves it alone. */
+function insideFolded(element: Element, root: Element): boolean {
+  for (let at: Element | null = element; at && at !== root; at = at.parentElement) {
+    const component = (at as Partial<E.DOMElement>).component as Collapsible | undefined
+    if (component?.staysFolded) return true
+  }
+  return false
 }
 
 /**
@@ -314,6 +324,8 @@ type Collapsible = {
   expand?: () => boolean
   /** its box's fold */
   fold?: unknown
+  /** expand-all leaves it, and what's inside it, folded (`EpicSection.staysFolded`:  the Log) */
+  staysFolded?: boolean
 }
 
 /**
