@@ -41962,6 +41962,12 @@
           "type": "length"
         },
         {
+          "name": "--ui-dropdown-icon-column",
+          "default": "0",
+          "description": "1: every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's menus are); 0: only when another row has an icon",
+          "type": "length"
+        },
+        {
           "name": "--ui-dropdown-header-color",
           "default": "var(--ui-text-dark)",
           "type": "color"
@@ -44978,6 +44984,11 @@
           "type": "time"
         },
         {
+          "name": "--ui-menu-segmented-pressed-shadow",
+          "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)",
+          "type": "other"
+        },
+        {
           "name": "--ui-menu-font-family",
           "default": "var(--ui-font-family)",
           "type": "other"
@@ -45005,11 +45016,6 @@
         {
           "name": "--ui-menu-header-weight",
           "default": "var(--ui-font-weight-bold)",
-          "type": "other"
-        },
-        {
-          "name": "--ui-menu-segmented-pressed-shadow",
-          "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)",
           "type": "other"
         }
       ]

@@ -229,6 +229,8 @@
   .gear {
     flex: none;
     margin-inline-start: 4px;
+    /* its entries' ticks:  a column kept for the check, ticked or not */
+    --ui-dropdown-icon-column: 1;
   }
   .gear::part(icon) {
     display: none;
