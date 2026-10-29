@@ -945,7 +945,7 @@
                     <td><code>building</code>, or none</td>
                     <td>everything</td>
                     <td>none:  each phase's plan is accepted on its row</td>
-                    <td>Make Todo, Revisit</td>
+                    <td>Do this, Revisit</td>
                   </tr>
                 </tbody>
               </table>
@@ -958,12 +958,16 @@
               <li>
                 The header's Send is the paper plane in every stage (epic <code>epic-engine</code> I180;  Owen, 2026-10-29:
                 "This should just be normal paper plane"):  the Accept is on the title row of the work it accepts, a
-                green check and its words (<code>&lt;epic-stage-button&gt;</code>), there while the section is folded.
+                green thumbs up and its words (<code>&lt;epic-stage-button&gt;</code>), there while the section is folded.
                 Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
                 Before I180 it took the plane's place;  Auto Send's countdown only ever sends the marks, never accepts (J143).
               </li>
               <li>
-                A press of Accept sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
+                A press of Accept starts a FIVE-MINUTE countdown (epic <code>epic-engine</code> I181;  Owen, 2026-10-29:  "make
+                'accept overview' and 'accept phases' 5 minute countdown"):  a green ring fills in round its thumbs up, its tooltip
+                says how long is left, and a second press calls it off.  Its accept mark waits in the inbox, held till then:
+                no Send before then carries it, and a reload carries on where it was.  When it runs out, the page sends it with
+                what's unsent, waking the epic when nobody listens.  Nothing typed on the page starts it again. The session's <code>epic inbox apply</code> moves the
                 page on a stage, then writes the phases (after the Overview) or starts building (after the phases).
                 Pressed, Accept is outlined green until then.
               </li>

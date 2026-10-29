@@ -30,7 +30,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * Whose controls (`buttons`), which picks the buttons:
  * - `item`:  an item's four (`REVIEW_BUTTONS`), the note box's two (`NOTE_BUTTONS`)
  * - `todo`:  a todo's three (`TODO_BUTTONS`), and its note box's (`TODO_NOTE_BUTTONS`)
- * - `part`:  a part of the plan -- an Overview sub-section, a phase, the summary:  no Approve (`PART_BUTTONS`)
+ * - `part`:  a part of the plan -- an Overview sub-section, the summary:  no Approve (`PART_BUTTONS`)
+ * - `phase`:  a phase, still to do (epic `epic-engine` I181):  Do this, Revisit (`PHASE_BUTTONS`);  its note box a part's
  * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):
  *   That's good, Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
@@ -43,12 +44,13 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `update`:  a new update block's (`<epic-update id="up3">`, epic `epic-engine` I168):  Seen (`UPDATE_BUTTONS`);
  *   no note box
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
- *   I140):  a part's buttons, then the green check of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
+ *   I140):  a phase's buttons, then the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
  */
 export const REVIEW_KINDS = [
   "item",
   "todo",
   "part",
+  "phase",
   "thread",
   "closed",
   "proposal",
@@ -109,6 +111,7 @@ export type ReviewButtonSpec = {
     | "seenUpdate"
     | "acceptPlan"
     | "deferPhase"
+    | "doThis"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -122,6 +125,7 @@ export type ReviewButtonSpec = {
     | "reopenChangeTip"
     | "seenUpdateTip"
     | "acceptPlanTip"
+    | "doThisTip"
 }
 
 /**
@@ -159,6 +163,18 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
 export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((spec) => spec.action !== "approve")
 
 /**
+ * A phase's review buttons, still to do (epic `epic-engine` I181):  Do this, Revisit.
+ * - Do this (`todo`, green:  decided), the thumbs up:  "yes, I want you to do this" (Owen, 2026-10-29:  "it's
+ *   already a phase, you wouldn't make it a todo");  the same `todo` mark, which `inbox apply` takes on a phase as
+ *   a go-ahead, never a new todo
+ * - the thumbs up wherever a button means "accept this" rather than "make this a todo" (Owen, 2026-10-29)
+ */
+export const PHASE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "todo", color: "green", icon: "thumbs up", label: "doThis", tip: "doThisTip" },
+  { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" }
+]
+
+/**
  * An open phase's review buttons while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
  * P29;  Owen, 2026-10-24:  "when in 'approval' mode like this, these buttons were 'looks good' and 'defer'"):
  * - Looks good (`approve`, green:  decided):  the phase stands as written;  `inbox apply` notes it
@@ -176,7 +192,8 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
  * - Revisit (`revisit`, blue):  notes on the plan, for Claude to rewrite it
  */
 export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
-  { action: "approve", color: "green", icon: "circle check", label: "acceptPlan", tip: "acceptPlanTip" },
+  // the thumbs up:  it means "accept this" (Owen, 2026-10-29;  epic `epic-engine` I181), the circled check before
+  { action: "approve", color: "green", icon: "thumbs up", label: "acceptPlan", tip: "acceptPlanTip" },
   // Revisit between them (Owen, 2026-10-25:  "revisit should be between accept / defer")
   { action: "revisit", color: "blue", icon: "history", label: "revisit", tip: "revisitTip" },
   // Owen, 2026-10-25:  "Add a 'Defer Phase' button next to 'Accept Phase'":  after the other phases, still to do
@@ -208,22 +225,30 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   item: REVIEW_BUTTONS,
   todo: TODO_BUTTONS,
   part: PART_BUTTONS,
+  phase: PHASE_BUTTONS,
   thread: [],
   closed: [],
   proposal: PROPOSAL_BUTTONS,
   change: CHANGE_BUTTONS,
   update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
-  accepted: PART_BUTTONS
+  accepted: PHASE_BUTTONS
 }
 
 /**
  * The check of a to-do phase whose plan is accepted (`buttons="accepted"`;  Owen, 2026-10-26, epic `epic-engine` I140:
  * "Accepted-but-unstarted phases should show checkmark pill green so I can see they are good to go"):
  * - last in the group, where an item's Approve is, drawn as a chosen Approve, its mark sent:  outlined green
+ * - a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than
+ *   'make this a todo'"):  a check before
  * - a STATE, not a mark:  a click does nothing (Revisit is how the plan is talked over again);  no `data-action`
  */
-export const ACCEPTED_CHECK = { color: "green", icon: "check", label: "planAccepted", tip: "planAcceptedTip" } as const
+export const ACCEPTED_CHECK = {
+  color: "green",
+  icon: "thumbs up",
+  label: "planAccepted",
+  tip: "planAcceptedTip"
+} as const
 
 /**
  * A comment THREAD's answer buttons (`buttons="thread"` or `"closed"`;  epic `epic-engine` P3):
@@ -332,6 +357,7 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   item: NOTE_BUTTONS,
   todo: TODO_NOTE_BUTTONS,
   part: NOTE_BUTTONS,
+  phase: NOTE_BUTTONS,
   thread: [],
   closed: [],
   proposal: NOTE_BUTTONS,
@@ -473,6 +499,12 @@ export const REVIEW_NAME_TEXTS = [
     description: "A todo's review button:  Revisit's name."
   },
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
+  {
+    key: "doThis",
+    text: "Do this",
+    description:
+      "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+  },
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
   {
     key: "acceptPlan",
@@ -504,6 +536,11 @@ export const REVIEW_TEXTS = [
     key: "todoTip",
     text: "Follow it up later, as a todo:  work still to do",
     description: "Review button:  what Make Todo does."
+  },
+  {
+    key: "doThisTip",
+    text: "Yes:  build this phase",
+    description: "A to-do phase's review button:  what Do this does."
   },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
   {

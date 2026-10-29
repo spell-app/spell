@@ -61,15 +61,17 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     does
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
- *   (epic `airplane` P2;  `<epic-review buttons="part">`):
- *   - Make Todo, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
+ *   (epic `airplane` P2;  `<epic-review buttons="phase">`):
+ *   - Do this, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
+ *     - Do this, a thumbs up, was Make Todo until epic `epic-engine` I181 (Owen, 2026-10-29:  "it's already a phase,
+ *       you wouldn't make it a todo"):  the same `todo` mark, which `inbox apply` takes as a go-ahead on a phase
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
  *   - Revisit and Edit unfold it (`epic-note-showing`)
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
- *   - still to do, its plan accepted (`plan="accepted"`, I140):  Make Todo, Revisit and a green check, a state saying
+ *   - still to do, its plan accepted (`plan="accepted"`, I140):  Do this, Revisit and a green thumbs up, a state saying
  *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
  * - Its GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), last on its title row, with an `id`:
  *   "Show this phase's files" and "Show this phase's checks", ticked while it shows them
@@ -250,10 +252,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
-  get reviewKind(): "proposal" | "plan" | "accepted" | "part" {
+  get reviewKind(): "proposal" | "plan" | "accepted" | "phase" {
     if (this.isProposed) return "proposal"
     if (this.isPlanWaiting) return "plan"
-    return this.isPlanAccepted ? "accepted" : "part"
+    return this.isPlanAccepted ? "accepted" : "phase"
   }
 
   /**
@@ -487,7 +489,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   // ## Review
   ////////////////
 
-  /** The review buttons at the title's end:  Make Todo, Revisit;  proposed, Looks good and Defer. */
+  /** The review buttons at the title's end:  Do this, Revisit;  proposed, Looks good and Defer. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
   }

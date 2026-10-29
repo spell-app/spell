@@ -2720,6 +2720,11 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "doThis",
+          "text": "Do this",
+          "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+        },
+        {
           "key": "looksGood",
           "text": "Looks good",
           "description": "A phase's review button while the phases are agreed."
@@ -4526,7 +4531,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {

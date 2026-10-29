@@ -17,7 +17,8 @@
  *   - the ring round the plane, inside the header;  the spinner and the gear on the plane's middle line (1px)
  *   - nothing wider than the window, the gear's menu and its sub-menus included
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
- *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`
+ *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`, and each stage's Accept
+ *   pressed, 2 minutes into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -203,6 +204,31 @@ async function stage(which, width, scheme) {
   summary[tag] = { words: found.words, folded: found.folded, button: found.button }
   const bottom = Math.max(found.header.bottom, found.row?.bottom ?? 0)
   await page.screenshot({ path: join(out, `stage-${tag}.png`), clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) } })
+  // pressed (I181):  its 5-minute countdown, the green ring round its thumbs up, inside the button;  2 minutes on
+  await page.evaluate((which) => stageButton(which).click(), which)
+  await page.waitForTimeout(600)
+  await page.clock.fastForward(120_000)
+  await page.waitForTimeout(1300)
+  const counting = await page.evaluate((which) => {
+    const button = stageButton(which)
+    const ring = button?.querySelector('[part~="ring"]')
+    const box = (element) => element && element.getBoundingClientRect().toJSON()
+    return { state: button?.dataset.state, title: button?.title, ring: box(ring), button: box(button) }
+  }, which)
+  if (counting.state !== "counting") problems.push(`${tag}:  pressed, Accept isn't counting (${counting.state})`)
+  if (!counting.ring) problems.push(`${tag}:  pressed, no ring round its thumbs up`)
+  else if (
+    counting.ring.top < counting.button.top - 0.5 ||
+    counting.ring.bottom > counting.button.bottom + 0.5 ||
+    counting.ring.left < counting.button.left - 0.5
+  )
+    problems.push(`${tag}:  the ring leaves the button`)
+  if (!/goes to Claude in \d:\d\d/.test(counting.title ?? "")) problems.push(`${tag}:  no time left in its tooltip`)
+  summary[`${tag}-counting`] = { title: counting.title, ring: counting.ring }
+  await page.screenshot({
+    path: join(out, `stage-${which}-counting-${width}-${scheme}.png`),
+    clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) }
+  })
   await page.close()
 }
 /** Screenshot the gear's menu, from the header down to its bottom;  check nothing leaves the window. */

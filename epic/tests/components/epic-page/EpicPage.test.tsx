@@ -5,7 +5,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { Markup } from "spell/epic/markup"
-import { AgentsClient, ReviewClient, SendCountdown, clockOf, type Inbox } from "spell/epic/review"
+import { AgentsClient, ReviewClient, STAGE_COUNTDOWN_MS, SendCountdown, clockOf, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
@@ -491,7 +491,9 @@ class FakeRoutes {
       }
       if (route === "mark") {
         const { id, mark } = body as { id: string; mark: Inbox["marks"][string] | null }
-        if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
+        // a stage button's accept (I181):  dated when it goes, as `ReviewInbox.stamped()` does
+        const ahead = mark?.countdown ? STAGE_COUNTDOWN_MS : 0
+        if (mark) this.inbox.marks[id] = { ...mark, at: new Date(Date.now() + ahead).toISOString() }
         else delete this.inbox.marks[id]
       }
       if (route === "new") {
@@ -1544,8 +1546,8 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
   })
 
-  // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane")
-  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press sends its mark;  pressed:  outlined green", async () => {
+  // epic `epic-engine` I180 (Owen, 2026-10-29:  "This should just be normal paper plane");  its countdown I181
+  test("a stage:  the header keeps the paper plane;  Accept Overview on the Overview's title row, what's open in its tooltip;  a press holds its mark, counting;  run out:  sent, outlined green", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.listening = { session: "s1", since: at, seen: at }
@@ -1559,19 +1561,29 @@ describe("<epic-page> stages", () => {
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section, which this stage hides anyway
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
-    expect(accept()!.title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
+    expect(accept()!.title).toBe(
+      "The Overview is agreed:  Claude writes the phases next · 2 questions open · " +
+        "goes to Claude 5 minutes after a press, unless you press again"
+    )
+    expect(accept()!.querySelector("ui-icon")!.getAttribute("name")).toBe("thumbs up")
     const grey = getComputedStyle(accept()!).borderTopColor
     accept()!.click()
-    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark"]))
     expect(routes.posts[0]![1]).toEqual({
       page: "/epics/demo/demo.plan.html",
       id: "stage",
-      mark: { action: "accept", stage: "overview" }
+      mark: { action: "accept", stage: "overview", countdown: true }
     })
     // the Overview stays folded:  a click on its tool isn't one on its title
     expect(host.querySelector("epic-overview")!.hasAttribute("open")).toBe(false)
-    routes.inbox.marks.stage = { action: "accept", stage: "overview", at }
-    await ReviewClient.forPage().refresh()
+    // counting:  the ring round the thumbs up, how long is left in its tooltip;  nothing sent
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
+    expect(accept()!.querySelector('[part~="ring"]')).not.toBeNull()
+    expect(accept()!.title).toMatch(/goes to Claude in [45]:\d\d:  click to call it off$/)
+    // run out (its `at` passed):  the page sends it
+    routes.inbox.marks.stage = { action: "accept", stage: "overview", countdown: true, at }
+    await vi.waitFor(async () => expect(await ReviewClient.forPage().refresh()).toBe(true))
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]), { timeout: 3000 })
     await vi.waitFor(() => expect(accept()!.title).toBe("Overview accepted:  waiting for Claude to write the phases"))
     expect(accept()!.dataset.state).toBe("accepted")
     expect(getComputedStyle(accept()!).borderTopColor).not.toBe(grey)
@@ -1599,12 +1611,62 @@ describe("<epic-page> stages", () => {
     expect(section.hasAttribute("open")).toBe(false)
     expect(accept()!.getBoundingClientRect().height).toBeGreaterThan(0)
     accept()!.click()
-    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
-    expect(routes.posts[0]![1]).toMatchObject({ id: "stage", mark: { action: "accept", stage: "phases" } })
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark"]))
+    expect(routes.posts[0]![1]).toMatchObject({
+      id: "stage",
+      mark: { action: "accept", stage: "phases", countdown: true }
+    })
     // the session moved it on:  building, no stage button anywhere, the plane as ever
     host.setAttribute("stage", "building")
     await vi.waitFor(() => expect(accept()).toBeUndefined())
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+  })
+
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
+  test("Accept's countdown:  Send never carries the held accept;  a second press calls it off;  a reload carries on where it was", async () => {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.listening = { session: "s1", since: at, seen: at }
+    routes.inbox.marks.q1 = { action: "approve", at }
+    await adoptClient(routes)
+    const host = await render(stagedPage("phases"))
+    const accept = () => stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)
+    await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Phases"))
+    accept()!.click()
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
+    // the header's Send counts only the approve:  the held accept is the stage button's till its time
+    await vi.waitFor(() => expect(plane(host).title).toMatch(/1 mark/))
+    plane(host).click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    const client = ReviewClient.forPage()
+    expect(client.isSent(client.markOf("stage")!)).toBe(false)
+    expect(accept()!.dataset.state).toBe("counting")
+    // a second press calls it off:  the mark gone, back to unpressed
+    accept()!.click()
+    await vi.waitFor(() =>
+      expect(routes.posts.at(-1)).toEqual(["mark", { page: "/epics/demo/demo.plan.html", id: "stage", mark: null }])
+    )
+    await vi.waitFor(() => expect(accept()!.dataset.state).toBe("idle"))
+    expect(accept()!.querySelector('[part~="ring"]')).toBeNull()
+    // a reload with one pressed 2 minutes ago:  3 minutes left, the ring 40% filled
+    ReviewClient.adopt(undefined)
+    const pressed = Date.now() - 2 * 60_000
+    routes.inbox.marks.stage = {
+      action: "accept",
+      stage: "phases",
+      countdown: true,
+      at: new Date(pressed + STAGE_COUNTDOWN_MS).toISOString()
+    }
+    await adoptClient(routes)
+    const again = await render(stagedPage("phases"))
+    const reloaded = () => stageButtonOf(again.querySelector('epic-section[kind="phases"]')!)
+    await vi.waitFor(() => expect(reloaded()?.dataset.state).toBe("counting"))
+    expect(reloaded()!.title).toMatch(/goes to Claude in (3:00|2:5\d):/)
+    const done = reloaded()!.querySelector<SVGCircleElement>('[part~="ring"] .done')!
+    expect(Number.parseFloat(done.style.strokeDasharray)).toBeCloseTo(40, 0)
+    const sends = routes.posts.filter(([route]) => route === "send").length
+    await new Promise((resolve) => setTimeout(resolve, 1200))
+    expect(routes.posts.filter(([route]) => route === "send")).toHaveLength(sends)
   })
 
   // Owen, 2026-10-25:  "This just needs to be `send|wand` and not green -- I may not be accepting the phases"

@@ -176,10 +176,17 @@ export class InboxCommands {
     const inbox = ReviewInbox.read(path)
     const guides = new GuideSends(this.owner.files.root, name).waiting()
     const unsent = new Set(inbox.unsentMarks.map((mark) => mark.id))
+    // a stage button's accept counting down (epic `epic-engine` I181):  neither sent nor unsent, till its time
+    const held = new Set(inbox.heldMarks.map((mark) => mark.id))
     const unsentUrgency = new Set(inbox.unsentUrgency.map((entry) => entry.id))
     const marks = Object.fromEntries(ACTIONS.map((action) => [action, [] as PrintedMark[]]))
     for (const mark of inbox.markList)
-      marks[mark.action]?.push({ ...mark, title: markTitle(plan, mark), sent: !unsent.has(mark.id) })
+      marks[mark.action]?.push({
+        ...mark,
+        title: markTitle(plan, mark),
+        sent: !unsent.has(mark.id) && !held.has(mark.id),
+        ...(held.has(mark.id) && { held: true })
+      })
     const report = {
       file: path,
       sent: inbox.sent,
@@ -264,7 +271,8 @@ export class InboxCommands {
       if (mark.shot) parts.push(`screenshot ${mark.shot}`)
       if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
       if (mark.comments?.length) parts.push(`his comments ${upper(mark.comments)}`)
-      if (!mark.sent) parts.push("unsent")
+      if (mark.held) parts.push(`held:  goes at ${mark.at}, unless Owen calls it off`)
+      else if (!mark.sent) parts.push("unsent")
       else if (ReviewInbox.isImmediate(mark)) parts.push("requested now")
       return parts.length ? `  · ${parts.join(" · ")}` : ""
     }
@@ -768,7 +776,9 @@ const SENT_HEADINGS: Partial<Record<string, string>> = {
   test: "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers",
   next: "next, a todo for the next phase",
   drop: "drop, a todo dropped",
-  skip: "skip, nothing to do"
+  skip: "skip, nothing to do",
+  // a phase's todo is its Do this (epic `epic-engine` I181):  `apply` takes it as a go-ahead, an item's makes a todo
+  todo: "todo:  an item's makes a todo;  a phase's is Do this, a go-ahead to build it"
 }
 
 /** A test answer's result in words, as `inbox` and `wait` print it. */
@@ -779,8 +789,11 @@ const TEST_WORDS: Record<string, string> = {
   notnow: "not now:  can't do it yet"
 }
 
-/** A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent. */
-type PrintedMark = Omit<ListedMark, "title"> & { title: string | null; sent: boolean }
+/**
+ * A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent.
+ * - `held`:  a stage accept counting down (epic `epic-engine` I181), neither sent nor unsent till its time
+ */
+type PrintedMark = Omit<ListedMark, "title"> & { title: string | null; sent: boolean; held?: boolean }
 
 /** A sent mark and what `PlanDoc.applyMark()` did with it. */
 type Applied = { mark: ListedMark } & MarkResult

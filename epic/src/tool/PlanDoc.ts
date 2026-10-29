@@ -2432,6 +2432,8 @@ export class PlanDoc extends PlanReader {
    * - approve is noted (none of them has review marks:  the log says it)
    * - skip (the note box's x, Owen, 2026-10-09) too:  nothing to do;  its note kept (`keepNote()`), when typed
    * - todo makes a todo linking back, and a Noted status card on it
+   *   - EXCEPT on a phase:  its first pill is "Do this" (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a
+   *     phase, you wouldn't make it a todo"):  a go-ahead, noted on it (his note kept), for Claude to build it
    * - pick isn't for them
    * - revisit and details are Claude's, as for an item
    */
@@ -2448,6 +2450,11 @@ export class PlanDoc extends PlanReader {
         if (note) this.keepNote(part.id, { note, action: "skip", at })
         return { applied: true, did: `skipped:  nothing to do${note ? " (his note kept)" : ""}` }
       case "todo": {
+        if (part.kind === "phase") {
+          if (note) this.keepNote(part.id, { note, action: "do this", at })
+          this.noteStatus(part.id, PlanMarkup.text("Go ahead:  Owen wants this phase built"))
+          return { applied: true, did: `go ahead:  build it${note ? " (his note kept)" : ""}` }
+        }
         const todo = this.followUp(part, note)
         this.noteStatus(part.id, filedTodo(todo))
         return { applied: true, did: `to todo ${todo.toUpperCase()}` }

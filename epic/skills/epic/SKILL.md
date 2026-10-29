@@ -277,7 +277,9 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
   only the Overview, Questions and Todo until Owen presses Accept Overview.
 - Three stages, each ended by Owen's Accept on the title row of what it accepts (epic `epic-engine` I180;  the page
   header's before;  `epic stage <name>` prints and sets it):  Accept Overview on the Overview's, Accept Phases on the
-  Phases section's, before its gear;  the header's Send stays the paper plane:
+  Phases section's, before its gear;  the header's Send stays the paper plane
+  - a press counts down FIVE MINUTES (a green ring round its thumbs up;  I181), a second press calling it off:  the
+    accept reaches the inbox's sent marks only then, so `inbox wait` hears it 5 minutes after the press
   1. `overview`:  Claude writes the Overview and its questions;  each answer rewrites it.  Accept Overview ->
   2. `phases`:  Claude writes the phases AND each one's build plan, in one pass ("4b. Build plans");  Owen Defers any,
      then ONE Accept Phases accepts the phases and their plans together ->
@@ -852,6 +854,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 5. END THE TURN, short:
    "Mark items in the Review tab:  each item's buttons;
    a todo's plane queues it for the next phase, its x drops it;
+   a phase's thumbs up (Do this) says go ahead and build it;
    a note box's x skips it (nothing to do);
    the header's paper plane sends the rest.  I'm listening."
    - Then the doc's link pair.
@@ -867,6 +870,9 @@ Every card you finish says what REALLY happened, one of three
 - `status ... underway "<reading>"`:  you're on it.
 - `status ... noted "<what;  what happens next>"`:  a STEP done, the item NOT finished.
   - his choice recorded (a todo made;  "do it next phase"):  `"Queued for P9 · Build"`
+  - a phase's Do this (its thumbs up, a `todo` mark;  Make Todo before epic `epic-engine` I181):  NOT a todo to make
+    (Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a todo"):  `apply` notes "Go ahead" on it;
+    build it (its plan first, when it has none accepted), or say why not yet
     - NOT a pick:  `choose` / `apply` record it inside the item's Choices, no card (I153)
   - an answer or reply written, details added, the item condensed:  `"Answered his note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`

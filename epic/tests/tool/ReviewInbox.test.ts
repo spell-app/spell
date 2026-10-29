@@ -16,6 +16,7 @@ import {
   WAKE_COOLDOWN_MS,
   isoTime
 } from "spell/epic/tool/ReviewInbox"
+import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
 
 const M1 = "2026-10-04T15:00:00-04:00"
 const M2 = "2026-10-04T15:01:00-04:00"
@@ -443,6 +444,26 @@ describe("ReviewInbox, Claude's side", () => {
 })
 
 describe("ReviewInbox.takeWork()", () => {
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
+  test("a stage button's accept (`countdown`) is dated 5 minutes ahead, HELD:  no send before then carries it", () => {
+    const inbox = new ReviewInbox()
+    const pressed = new Date()
+    const mark = inbox.setMark("stage", { action: "accept", stage: "phases", countdown: true }, isoTime(pressed))!
+    expect(Date.parse(mark.at) - pressed.getTime()).toBe(STAGE_COUNTDOWN_MS)
+    expect(mark).toMatchObject({ action: "accept", stage: "phases", countdown: true })
+    inbox.setMark("j1", { action: "approve" }, isoTime(pressed))
+    expect(inbox.heldMarks.map((each) => each.id)).toEqual(["stage"])
+    expect(inbox.unsentMarks.map((each) => each.id)).toEqual(["j1"])
+    // a Send (a press, Auto Send, Review Now) a minute in:  the approve goes, the accept waits
+    inbox.markSent(isoTime(new Date(pressed.getTime() + 60_000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1"])
+    // the page's send once the 5 minutes are up:  the accept goes
+    inbox.markSent(isoTime(new Date(pressed.getTime() + STAGE_COUNTDOWN_MS + 1000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1", "stage"])
+    // without `countdown` (the CLI, an older page):  stamped as it's made
+    expect(inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)!.at).toBe(M1)
+  })
+
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)
