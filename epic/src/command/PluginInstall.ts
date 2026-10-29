@@ -70,7 +70,8 @@ import { SessionMoves } from "./SessionMoves"
  * 3. the plugin's agents (the designer, coherence) as Codex's custom agents, `<codex>/agents/epic-<name>.toml`,
  *    generated from Claude Code's agent files
  * 4. `epic` on the terminal's `PATH`, as step 6 above
- * - Codex's folder:  `$CODEX_HOME`, else `~/.codex` (`CodexHome`);  the skills' `~/.agents`;  a test hands both in.
+ * - Codex's folder:  `$CODEX_HOME`, else `~/.codex` (`CodexHome`);  the skills' `$SPELL_EPIC_AGENTS_HOME`, else
+ *   `~/.agents`;  a test hands both in, and the tests' setup points both at scratch folders.
  ****************/
 export class PluginInstall {
   /** Claude Code's own folder (`~/.claude`) */
@@ -92,7 +93,7 @@ export class PluginInstall {
     bin = join(homedir(), ".local", "bin"),
     now = () => new Date(),
     codexHome = CodexHome.home(),
-    agentsHome = join(homedir(), ".agents")
+    agentsHome = CodexHome.agentsHome()
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
@@ -506,7 +507,7 @@ export type PluginInstallProps = {
   now?: () => Date
   /** Codex's folder;  default `$CODEX_HOME`, else `~/.codex` */
   codexHome?: string
-  /** the open skills format's folder, whose `skills/` Codex lists;  default `~/.agents` */
+  /** the open skills format's folder, whose `skills/` Codex lists;  default `$SPELL_EPIC_AGENTS_HOME`, else `~/.agents` */
   agentsHome?: string
 }
 

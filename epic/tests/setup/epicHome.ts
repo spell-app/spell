@@ -5,6 +5,8 @@
  *   without it a test's output would say whoever runs it, and a test writing into the home would write into theirs
  * - a test that wants another home or person sets `$SPELL_EPIC_HOME` itself, as `PersonCommands.test.ts` does:  its
  *   own module runs after this
+ * - and Codex's folders scratch ones too (`$CODEX_HOME`, `$SPELL_EPIC_AGENTS_HOME`):  `epic plugin install --codex` writes
+ *   there, and a test that forgot its own once linked skills into the machine's `~/.agents/skills` (epic `epic-friend` I10)
  * - run before each file (the `node` project's `setupFiles`)
  */
 import { mkdtempSync, writeFileSync } from "node:fs"
@@ -25,3 +27,6 @@ process.env.SPELL_EPIC_GH = join(home, "no-gh")
 // and the agent named, so what an agent writes is Claude's whichever agent runs the tests (`EpicHome.agent()`, epic
 // `epic-friend` P10:  under Codex, its mark would say `codex`)
 process.env.SPELL_EPIC_AGENT = TEST_AGENT
+// and Codex's folders (`CodexHome`):  its hooks file and agents, and the skills it lists, never the machine's
+process.env.CODEX_HOME = join(home, "codex")
+process.env.SPELL_EPIC_AGENTS_HOME = join(home, "agents")

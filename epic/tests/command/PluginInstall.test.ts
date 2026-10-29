@@ -17,8 +17,8 @@ import {
   symlinkSync,
   writeFileSync
 } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { homedir, tmpdir } from "node:os"
+import { dirname, join } from "node:path"
 
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
@@ -341,6 +341,19 @@ describe("installCodex()", () => {
     expect(existsSync(join(home, "settings.json"))).toBe(false)
     rmSync(join(engine, "hooks", "codex-hooks.json"))
     expect(() => codexInstaller().installCodex()).toThrow(/has no Codex hooks/)
+  })
+})
+
+describe("Codex's folders in tests (I10)", () => {
+  test("the setup points them at scratch ones:  no test writes the machine's ~/.codex or ~/.agents/skills", () => {
+    const scratch = realpathSync(tmpdir())
+    for (const folder of [CodexHome.home(), CodexHome.agentsHome(), CodexHome.skillsFolder()]) {
+      expect(realpathSync(dirname(dirname(folder))).startsWith(scratch), folder).toBe(true)
+      expect(folder.startsWith(join(homedir(), ".")), folder).toBe(false)
+    }
+    const installer = new PluginInstall()
+    expect(installer.agentsHome).toBe(CodexHome.agentsHome())
+    expect(installer.codexHome).toBe(CodexHome.home())
   })
 })
 

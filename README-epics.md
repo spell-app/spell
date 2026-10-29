@@ -517,7 +517,7 @@ then:  in Codex, /hooks, and trust them (once, and again whenever they change); 
 - It writes three hooks into Codex's own hooks file, `~/.codex/hooks.json` (`$CODEX_HOME` moves it):
   - as each turn ends, `epic turn end`:  the plans committed and synced, as Claude's turns do
   - as a session starts, two notices:  its worktree is behind `main`, or the last sync stopped on a conflict
-- It links each of the plugin's skills into `~/.agents/skills/`, where the Codex CLI finds your own skills in every repo:
+- It links each of the plugin's skills into `~/.agents/skills/` (`$SPELL_EPIC_AGENTS_HOME` moves `~/.agents`), where the Codex CLI finds your own skills in every repo:
   the same files Claude Code reads, so an edit to one shows in both at once.
 - It writes the plugin's two reviewers, the designer and coherence, as Codex custom agents in `~/.codex/agents/`:
   generated from Claude Code's agent files, so edit those and run it again.

@@ -490,8 +490,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - one route for the hooks:  the plugin's own Codex hooks file passes `--codex-plugin`, and a script started so
           does nothing while the user file runs it (`CodexHome.skipPluginHook()`)
       - `CodexHome` (`spell/epic/config/CodexHome`):  Codex's folders, the ONE reader of where they are, as
-        `ClaudeHome` is Claude Code's:  `$CODEX_HOME` else `~/.codex`, `~/.agents/skills`, whether its hooks file runs
-        ours;  plain `node` loads it (the hooks)
+        `ClaudeHome` is Claude Code's:  `$CODEX_HOME` else `~/.codex`, `~/.agents/skills` (`$SPELL_EPIC_AGENTS_HOME`
+        moves `~/.agents`), whether its hooks file runs ours;  plain `node` loads it (the hooks)
+        - the tests' setup (`tests/setup/epicHome.ts`) points both at scratch folders:  no test writes the machine's
+          (I10)
     - ANY AGENT (epic `epic-friend` P11):
       - `EpicGuide`:  `epic guide [<topic>]`, the workflow in plain steps, printed from the epic skill's own
         [guide.md](../skills/epic/guide.md) (ONE copy:  the skill links it);  `claude-only-tools`, the plain way to do

@@ -9,6 +9,7 @@ import { join } from "node:path"
  *
  * ```ts
  * CodexHome.home()           // => "/Users/owen/.codex"        its hooks file, its custom agents
+ * CodexHome.agentsHome()     // => "/Users/owen/.agents"        the open skills format's own folder
  * CodexHome.skillsFolder()   // => "/Users/owen/.agents/skills" the person's own skills, for any agent
  * CodexHome.hasEpicHooks()   // => true, once `epic plugin install --codex` wrote ours into its hooks file
  * ```
@@ -16,6 +17,8 @@ import { join } from "node:path"
  * - Where (Codex's docs, read 2026-10-29):
  *   - `$CODEX_HOME`, else `~/.codex`:  `hooks.json`, `agents/<name>.toml`, `config.toml`
  *   - `~/.agents/skills/`:  the person's skills, which the Codex CLI lists in every repo;  it follows links
+ *     - `$SPELL_EPIC_AGENTS_HOME` moves `~/.agents`:  ours, not Codex's, so every test points it at a scratch folder
+ *       (epic `epic-friend` I10:  a test once linked skills into the machine's own)
  * - SEE:  https://learn.chatgpt.com/docs/build-skills, https://learn.chatgpt.com/docs/hooks,
  *   https://learn.chatgpt.com/docs/agent-configuration/subagents.md
  * - STATIC, and each takes its folder (default the machine's), so a test reads a scratch one.
@@ -28,8 +31,16 @@ export class CodexHome {
     return process.env.CODEX_HOME || join(homedir(), ".codex")
   }
 
-  /** The person's own skills, for Codex and any agent reading the open skills format:  `~/.agents/skills`. */
-  static skillsFolder(agentsHome = join(homedir(), ".agents")): string {
+  /**
+   * The open skills format's own folder:  `$SPELL_EPIC_AGENTS_HOME`, else `~/.agents`.
+   * - Read on every call:  the tests' setup sets it to a scratch folder, so no test writes the machine's
+   */
+  static agentsHome(): string {
+    return process.env[AGENTS_HOME_ENV] || join(homedir(), ".agents")
+  }
+
+  /** The person's own skills, for Codex and any agent reading the open skills format:  `<agentsHome>/skills`. */
+  static skillsFolder(agentsHome = CodexHome.agentsHome()): string {
     return join(agentsHome, "skills")
   }
 
@@ -70,6 +81,9 @@ export class CodexHome {
     return argv.includes(PLUGIN_HOOK_FLAG) && CodexHome.hasEpicHooks(home)
   }
 }
+
+/** Moves `~/.agents` (`CodexHome.agentsHome()`):  the tests' scratch one. */
+export const AGENTS_HOME_ENV = "SPELL_EPIC_AGENTS_HOME"
 
 /** What the plugin's Codex hooks file passes each script, so it knows the plugin started it. */
 export const PLUGIN_HOOK_FLAG = "--codex-plugin"
