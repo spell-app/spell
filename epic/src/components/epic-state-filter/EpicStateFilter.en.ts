@@ -34,7 +34,8 @@ export const epicStateFilterVocabulary = {
       description:
         "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state " +
         "with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The " +
-        "Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
+        "Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, " +
+        "updated, progress, scheduled, recent, old."
     },
     {
       name: "marked",
@@ -43,6 +44,15 @@ export const epicStateFilterVocabulary = {
         "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue " +
         "badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a " +
         "click does nothing.  None, or 0:  no badge."
+    },
+    {
+      name: "phases",
+      kind: "boolean",
+      description:
+        "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order " +
+        "(`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue " +
+        "badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own " +
+        "words."
     },
     {
       name: "shown",
@@ -64,7 +74,11 @@ export const epicStateFilterVocabulary = {
   slots: [],
   parts: [
     { name: "base", description: "The group of chips." },
-    { name: "chip", description: "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`." },
+    {
+      name: "chip",
+      description:
+        "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed`."
+    },
     { name: "marked", description: "The blue badge of the items marked in this pass (`marked`):  not a button." }
   ],
   states: [],

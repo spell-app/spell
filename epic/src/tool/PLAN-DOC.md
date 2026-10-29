@@ -287,6 +287,11 @@ As `plan-doc.md`, "Ids":
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
   - Older phases have none, until asked.
+- `done-at`:  WHEN it was done, written as it's set done (`isoMinutes`, the log's time;  epic `epic-engine` I170),
+  removed when it's set to anything else.
+  - A phase done before I170 takes its log's last `P3 done` line's time on the page's next write (`updateDoneAt()`);
+    none, no attribute.
+  - The page draws it green for 3 days after (`PlanDates.isQuiet()`), then grey:  its Phases chip and status circle.
 - `to-review`:  written by the tool on every edit, LAST.
   - It lists items added while this phase was active (`phase="N"`),
     still open, not reviewed, not under way.

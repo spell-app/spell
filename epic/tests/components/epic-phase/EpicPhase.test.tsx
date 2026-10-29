@@ -207,6 +207,40 @@ describe("<epic-phase> while Claude works on it", () => {
   })
 })
 
+// epic `epic-engine` I170 (Owen, 2026-10-29:  "The order, one chip per phase:  red, orange, blue (working), dotted blue,
+// green, grey")
+describe("<epic-phase> while Claude works on it, its plan changed", () => {
+  test("orange beats blue:  the spinner orange, its chip `updated`, not in the blue counts;  worked on alone, blue", async () => {
+    await adoptWorking(["p-changed", "p-quiet"])
+    try {
+      const now = new Date()
+      const at = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T00:00`
+      const section = await render(
+        `<epic-section id="phases" kind="phases">` +
+          `<epic-phase id="p-changed" title="Changed" status="active" plan="accepted" to-see="up1@${at}"></epic-phase>` +
+          `<epic-phase id="p-quiet" title="Quiet" status="todo" plan="accepted"></epic-phase></epic-section>`
+      )
+      const status = (id: string) =>
+        section.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+      await vi.waitFor(() => expect(status("p-changed").querySelector(".spinner")).not.toBeNull())
+      expect([status("p-changed").dataset.state, status("p-quiet").dataset.state]).toEqual(["updated", "progress"])
+      expect(getComputedStyle(status("p-changed")).color).not.toBe(getComputedStyle(status("p-quiet")).color)
+      const filter = section.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
+      const chip = filter.shadowRoot!.querySelector<HTMLElement>('button[data-state="updated"]')!
+      expect([chip.textContent, getComputedStyle(status("p-changed")).color]).toEqual([
+        "1",
+        getComputedStyle(chip).borderTopColor
+      ])
+      // the blue badge and the toolbar's blue count:  the quiet one alone
+      expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("1")
+      const entry = (section as Element & { contentsEntry?: { count?: { running?: number } } }).contentsEntry
+      expect(entry?.count?.running).toBe(1)
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
+  })
+})
+
 describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround)", () => {
   /** A phase of `status`, its plan changed twice:  `changes="2"`, and (`lines`) the two updates loaded. */
   function changed(status: string, { lines = true } = {}) {

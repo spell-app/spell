@@ -949,7 +949,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
-    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  marked in this pass, or being worked on"])
+    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
     // its plan accepted:  Claude is working on it, no longer writing the plan

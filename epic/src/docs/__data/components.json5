@@ -4248,6 +4248,11 @@
           "description": "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
         },
         {
+          "name": "choices-open",
+          "kind": "number",
+          "description": "How many option sets in its body are still open (neither `chosen` nor `closed`;  epic `epic-engine` P50), written by the epic tool on every edit:  its title row says so while its body, a part, isn't loaded.  None:  no attribute."
+        },
+        {
           "name": "plan",
           "kind": "enum",
           "values": [
@@ -4255,6 +4260,11 @@
             "accepted"
           ],
           "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
+        },
+        {
+          "name": "done-at",
+          "kind": "string",
+          "description": "When it was done (ISO), written by the epic tool as it's set done, and for an older done phase from the log's `P3 done` line (epic `epic-engine` I170):  done in the last 3 days, green;  before, or none, grey."
         },
         {
           "name": "changes",
@@ -5252,7 +5262,7 @@
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
         },
         {
           "name": "hidden-note",
@@ -5758,12 +5768,17 @@
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's (`phases`), a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157, I170):  attention, updated, progress, scheduled, recent, old."
         },
         {
           "name": "marked",
           "kind": "number",
           "description": "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
+        },
+        {
+          "name": "phases",
+          "kind": "boolean",
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order (`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
           "name": "shown",
@@ -5786,7 +5801,7 @@
         },
         {
           "name": "chip",
-          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`."
+          "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `data-fill` (`dotted`:  a phase scheduled), `aria-pressed`."
         },
         {
           "name": "marked",
@@ -5871,19 +5886,39 @@
           "description": "A state chip's words:  `old` (grey)."
         },
         {
-          "key": "phaseUndone",
-          "text": "still to do",
-          "description": "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+          "key": "markedPhaseWords",
+          "text": "{count} with Claude:  under way, being worked on, or marked in this pass",
+          "description": "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked in this pass (epic `epic-engine` I170)."
+        },
+        {
+          "key": "phaseAttention",
+          "text": "need you:  a plan to accept, or a choice open",
+          "description": "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
         },
         {
           "key": "phaseUpdated",
-          "text": "with news for you (a plan to accept, or changed)",
-          "description": "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its plan changed, the orange pen)."
+          "text": "changed since you looked",
+          "description": "A Phases chip's words:  `updated` (orange:  new plan changes, not seen and not 3 days old yet)."
         },
         {
-          "key": "phaseComplete",
-          "text": "done",
-          "description": "A Phases chip's words:  `complete` (green)."
+          "key": "phaseProgress",
+          "text": "under way, or being worked on",
+          "description": "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+        },
+        {
+          "key": "phaseScheduled",
+          "text": "scheduled, not running yet",
+          "description": "A Phases chip's words:  `scheduled` (dotted blue:  still to do, nothing waiting on Owen)."
+        },
+        {
+          "key": "phaseRecent",
+          "text": "done in the last 3 days",
+          "description": "A Phases chip's words:  `recent` (green)."
+        },
+        {
+          "key": "phaseOld",
+          "text": "done a while ago",
+          "description": "A Phases chip's words:  `old` (grey:  done over 3 days ago)."
         }
       ]
     },

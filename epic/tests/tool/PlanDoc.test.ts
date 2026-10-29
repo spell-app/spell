@@ -193,6 +193,32 @@ describe("PlanDoc phases", () => {
     expect(el(plan, "p1").querySelector('[name="done"]')!.textContent).toBe("built it again")
   })
 
+  // epic `epic-engine` I170:  green for 3 days after it's done, then grey
+  test("done stamps `done-at`;  any other status removes it;  an older done phase takes its log's `P1 done`", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.setPhase(1, "done")
+    expect(el(plan, "p1").getAttribute("done-at")).toBe(PlanTime.isoMinutes(NOW))
+    plan.setPhase(1, "active")
+    expect(el(plan, "p1").hasAttribute("done-at")).toBe(false)
+    plan.setPhase(1, "done")
+    plan.setPhase(2, "done")
+    // a phase done before I170:  no `done-at`, its log line the record
+    el(plan, "p2").removeAttribute("done-at")
+    const said = Array.from(plan.document.querySelectorAll("#log > epic-event")).findLast(
+      (event) => event.textContent === "P2 done"
+    )!
+    said.setAttribute("at", "2026-09-20T08:00+00:00")
+    expect(plan.updateStates()).toBeGreaterThan(0)
+    expect(el(plan, "p2").getAttribute("done-at")).toBe("2026-09-20T08:00+00:00")
+    // no log line:  none, and nothing to change
+    el(plan, "p2").removeAttribute("done-at")
+    said.remove()
+    expect(plan.updateDoneAt()).toBe(0)
+    expect(el(plan, "p2").hasAttribute("done-at")).toBe(false)
+  })
+
   test("estimates:  the phase's attribute, totalled in the Overview, what's left;  none without one", () => {
     const plan = freshPlan()
     const total = () => plan.overview.getAttribute("estimate")

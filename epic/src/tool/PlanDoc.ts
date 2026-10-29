@@ -467,12 +467,15 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
+   * - `done` stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other status
+   *   removes it
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
   setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    Markup.set<"epic-phase">(this.phase(n), { status })
+    const doneAt = status === "done" ? PlanTime.isoMinutes(this.now) : undefined
+    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
     if (status === "done") {
       this.removeUpdateMarkers(n)
@@ -1807,6 +1810,7 @@ export class PlanDoc extends PlanReader {
    * - each phase's "To review" field (`updateToReview()`)
    * - the update blocks:  their ids, and each host's `to-see` (`updateUpdates()`, I168)
    * - the change marks:  new ones given their id, time and answer, each host's `to-accept` (`updateChanges()`)
+   * - each done phase's `done-at`, from the log when it has none (`updateDoneAt()`, I170)
    */
   updateStates(): number {
     let changed = 0
@@ -1827,6 +1831,29 @@ export class PlanDoc extends PlanReader {
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
     changed += this.updateUpdates()
+    changed += this.updateDoneAt()
+    return changed
+  }
+
+  /**
+   * Give each done phase with no `done-at` the time its log says it was done (its last `P3 done` line;  epic
+   * `epic-engine` I170):  its Phases chip and circle are green for 3 days after, then grey.  Returns how many.
+   * - a phase done before I170 gets it on the page's next write;  `setPhase()` stamps the rest as they're done
+   * - no such line:  none (drawn grey);  the log names a phase by its number at the time (`activeWindow()`'s caveat)
+   */
+  updateDoneAt(): number {
+    let changed = 0
+    for (const phase of this.phaseElements) {
+      if (phase.getAttribute("status") !== "done" || phase.hasAttribute("done-at")) continue
+      const said = new RegExp(`^${escapeRegExp(PhaseIds.labelOf(phase))} done\\b`)
+      const done = Array.from(this.findSection("log")?.querySelectorAll("epic-event") ?? []).findLast((event) =>
+        said.test(event.textContent?.trim() ?? "")
+      )
+      const at = done?.getAttribute("at")
+      if (!at) continue
+      Markup.set<"epic-phase">(phase, { doneAt: at })
+      changed++
+    }
     return changed
   }
 

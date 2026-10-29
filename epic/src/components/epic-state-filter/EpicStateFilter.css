@@ -38,7 +38,10 @@
     font-variant-numeric: tabular-nums;
     cursor: pointer;
   }
-  /* the item states' colours (decision Q20):  blue Claude is on it, red needs Owen, yellow open, green done lately */
+  /*
+   * the item states' colours (decision Q20):  blue Claude is on it, red needs Owen, yellow open, green done lately;
+   * a phase's chips the same (I170), grey its `old`
+   */
   .chip[data-color="blue"] {
     --_chip: var(--epic-state-progress, var(--ui-blue));
     --_chip-on: var(--epic-state-progress-on, var(--ui-blue-on));
@@ -79,6 +82,23 @@
   .chip[aria-pressed="true"] {
     background: var(--_chip);
     color: var(--_chip-on);
+  }
+  /*
+   * a phase scheduled, not running (epic `epic-engine` I170;  Owen, 2026-10-29:  "scheduled not running - blue dotted
+   * outline"):  its DOTTED outline in blue, its count in blue, never filled;  hidden, faded
+   * - 2px, the dots' size:  1.5px dots blur into a line
+   */
+  .chip[data-fill="dotted"] {
+    padding-block: calc((18px - 4px - 1cap) / 2);
+    border-width: 2px;
+    border-style: dotted;
+  }
+  .chip[data-fill="dotted"][aria-pressed="true"] {
+    background: transparent;
+    color: var(--_chip);
+  }
+  .chip[data-fill="dotted"][aria-pressed="false"] {
+    opacity: 0.45;
   }
   .chip:hover {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--_chip) 25%, transparent);

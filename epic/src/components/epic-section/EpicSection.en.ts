@@ -161,8 +161,10 @@ export const epicSectionVocabulary = {
       name: "filter",
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
-        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, " +
-        "updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first " +
+        "that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange " +
+        "changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last " +
+        "3 days, grey done before."
     },
     {
       name: "hidden-note",

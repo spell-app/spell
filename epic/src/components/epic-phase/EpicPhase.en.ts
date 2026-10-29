@@ -114,6 +114,14 @@ export const epicPhaseVocabulary = {
         "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
     },
     {
+      name: "choices-open",
+      kind: "number",
+      description:
+        "How many option sets in its body are still open (neither `chosen` nor `closed`;  epic `epic-engine` P50), " +
+        "written by the epic tool on every edit:  its title row says so while its body, a part, isn't loaded.  None:  " +
+        "no attribute."
+    },
+    {
       name: "plan",
       kind: "enum",
       values: ["waiting", "accepted"],
@@ -122,6 +130,14 @@ export const epicPhaseVocabulary = {
         "buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  " +
         "good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not " +
         "loaded."
+    },
+    {
+      name: "done-at",
+      kind: "string",
+      format: "time",
+      description:
+        "When it was done (ISO), written by the epic tool as it's set done, and for an older done phase from the " +
+        "log's `P3 done` line (epic `epic-engine` I170):  done in the last 3 days, green;  before, or none, grey."
     },
     {
       name: "changes",
