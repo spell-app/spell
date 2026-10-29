@@ -40,9 +40,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - `spell pack create <name>` makes `spell-<name>/` in the kit, a pack that is a repo of its own,
   laid out as spell-brand is.
   - From [templates/](templates/README.md);  the commands page gets the new repo's scripts.
-  - NOTE:  the kit's `workspaces` name only its four folders since epic `repo-split` P20, not `spell-*`,
-    so the next `yarn install` doesn't take the new repo in by itself (`createPack()` still says it does).
-  - It never touches the kit's `repos.json5`:  the new repo has no remote yet, and says what to do next.
+  - It adds `spell-<name>` to the kit's `workspaces`, after its folders (`parser`, `ui`, `epic`, `app`):
+    so the next `yarn install` takes it in, and it's one of `kitFolders()`, which `spell pack` searches too.
+  - It refuses a name of one of the kit's folders:  `ui`, `spell-ui`'s, or `epics`, `epic/`'s pack.
+  - It never touches the kit's `repos.json5`, the repos BESIDE the kit;  it says what to do next.
 - NEVER imports `epic/` or `app/`:  they're above Spell UI (the lint's `spell/no-upward-import`).
   - Nor `parser/`, though it's below:  Spell UI uses nothing of Spell's language
     ([Spell UI's AGENTS.md](../../AGENTS.md), "Layout", "Nothing of spell").

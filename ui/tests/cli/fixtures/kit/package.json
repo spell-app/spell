@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
-    "spell-*"
+    "parser",
+    "ui",
+    "epic",
+    "app"
   ],
   "type": "module",
   "resolutions": {
