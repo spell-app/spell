@@ -304,6 +304,27 @@ describe("ReviewClient.move() (a phase dragged, epic `epic-engine` P34)", () => 
 })
 
 describe("ReviewClient writes", () => {
+  test("changeSet():  a page server older than P50 drops the pick-one / pick-any flip:  said, and false (I178)", async () => {
+    const server = new FakeServer()
+    // the old server kept a pick mark as `{ action, pick, choices }`, dropping the rest
+    const setMark = server.inbox.setMark.bind(server.inbox)
+    server.inbox.setMark = (id, mark) => {
+      const { action, pick, choices } = mark as { action: string; pick?: string; choices?: number }
+      return setMark(id, mark && { action, pick, choices })
+    }
+    const { client } = await started(server)
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    expect(await client.changeSet("q1", { pick: "B", choices: 0 })).toBe(true)
+    expect(notices).toEqual([])
+    expect(await client.changeSet("q1", { pick: "B", multiple: true, choices: 0 })).toBe(false)
+    expect(client.markOf("q1")).toMatchObject({ action: "pick", pick: "B", choices: 0 })
+    expect(client.markOf("q1")!.multiple).toBe(undefined)
+    expect(notices).toHaveLength(1)
+    expect(notices[0]).toContain("spell server start")
+    expect(notices[0]).toContain("`multiple`")
+  })
+
   test("a stale token is refreshed from the page as served now, and the write tried again", async () => {
     const { client, server } = await started()
     server.token = "token-2"
