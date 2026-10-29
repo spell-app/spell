@@ -1608,7 +1608,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
         comments: ["c4"] }`
       - a revisit:  the comment joins its `comments`, its note's last line names them all (`withInlineComments()`)
       - a pick:  that revisit, carrying the pick ("pick B, but ...")
-      - any other mark (Approve, Make Todo, a revisit asked now):  left alone
+      - an Approve / Accept plan:  still approved, the comment joining its `comments` (epic `epic-engine` I163)
+      - any other mark (Make Todo, a revisit asked now):  left alone
+    - APPROVE on such a revisit (Approve, Accept Phase, Accept plan;  epic `epic-engine` I163;  Owen, 2026-10-29:  "just
+      incorporate the feedback and auto-approve rather than asking me again") keeps them (`ReviewClient.press()`):
+      `{ action: "approve", note, comments }`;  clicked again, the revisit again
+      - `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan, the comments
+        left waiting;  Claude folds them in with `update <name>#P<n> --plan ... --accepted` (written accepted, no
+        second Accept) and answers each
     - deleted or cleared (`dropComment()`):  out of every revisit naming it;  nothing left in one (no comment, no words
       of Owen's):  a pick goes back to the plain pick, else the mark goes
     - Send counts one mark and the comment;  `wait` hands the comment over once, inside the revisit
@@ -2028,6 +2035,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - the bullhorn (a green check circle once done)
       - its id, `C3`:  small and muted, an outline and no fill (epic `epic-workflow` P23;  `M3` until `epic-engine` P44)
       - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  its tooltip the full place
+        - a saved thread's header:  the start of Owen's own words instead (I162):  the page highlights what was selected
       - No date:  each message has its time.
     - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
       ("same semantics/look as pills in item header").
