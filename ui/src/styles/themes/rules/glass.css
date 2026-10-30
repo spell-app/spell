@@ -16,7 +16,8 @@
   :root,
   :root :where(.ui-typography) {
     background-color: var(--ui-background);
-    background-image: var(--glass-wallpaper);
+    /* a tint's gradient (`--ui-wallpaper`, epic `debut` P23) wins over the theme's own */
+    background-image: var(--ui-wallpaper, var(--glass-wallpaper));
     background-attachment: fixed;
   }
 

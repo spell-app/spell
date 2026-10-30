@@ -140,6 +140,7 @@ import { themeEditorEs } from "spell/ui/components/ui-theme-editor/UIThemeEditor
 import { themeTokenEs } from "spell/ui/components/ui-theme-editor/UIThemeToken.es"
 import { colorChipEs } from "spell/ui/components/ui-theme-editor/UIColorChip.es"
 import { themeMenuEs } from "spell/ui/components/ui-theme-menu/UIThemeMenu.es"
+import { hueSwatchesEs } from "spell/ui/components/ui-theme-menu/UIHueSwatches.es"
 import { tocEs } from "spell/ui/components/ui-toc/UIToc.es"
 import { exampleEs } from "spell/ui/components/ui-example/UIExample.es"
 import { toastEs } from "spell/ui/components/ui-toast/UIToast.es"
@@ -776,6 +777,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   themeTokenEs,
   colorChipEs,
   themeMenuEs,
+  hueSwatchesEs,
   tocEs,
   exampleEs,
   toastEs,

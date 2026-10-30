@@ -37,6 +37,12 @@ function inner<T extends Element = HTMLElement>(host: Element, selector: string)
   return host.shadowRoot!.querySelector<T>(selector)!
 }
 
+/** The swatch `selector` names in colour choice `name`'s row (`<ui-hue-swatches>`, its own shadow root). */
+function swatch(host: Element, name: string, selector: string): HTMLElement {
+  const row = inner(host, `ui-property[name="${name}"] ui-hue-swatches`)
+  return row.shadowRoot!.querySelector<HTMLElement>(`[part~=swatch]${selector}`)!
+}
+
 /** Press page `id`'s toggle in the bar, and wait for the bench to follow. */
 async function pressPage(host: Element, id: string): Promise<void> {
   const item = inner(host, `.page-toggles ui-item[value="${id}"]`)
@@ -160,13 +166,14 @@ describe("<ui-theme-editor> Basics", () => {
     const host = await editor()
     await applied(host)
     const events = changes(host)
-    inner(host, 'ui-property[name="primary"] button[value="pink"]').click()
+    swatch(host, "primary", '[value="pink"]').click()
     await applied(host)
     expect(events).toHaveLength(1)
     expect(events[0]!.detail.value.primary).toBe("pink")
     expect(events[0]!.detail.css).toContain("--ui-primary: var(--ui-pink);")
     expect(token("--ui-primary")).toBe(token("--ui-pink"))
-    expect(inner(host, 'ui-property[name="primary"] button[value="pink"]').getAttribute("aria-checked")).toBe("true")
+    await ElementFixture.settle()
+    expect(swatch(host, "primary", '[value="pink"]').getAttribute("aria-checked")).toBe("true")
     expect(host.matches(":state(changed)")).toBe(true)
   })
 
@@ -198,7 +205,7 @@ describe("<ui-theme-editor> Basics", () => {
   it("arrow keys in a swatch row move and choose", async () => {
     const host = await editor()
     // from the chosen swatch, the row's tab stop, as a person presses it
-    const chosen = inner(host, 'ui-property[name="secondary"] .swatches [aria-checked="true"]')
+    const chosen = swatch(host, "secondary", '[aria-checked="true"]')
     chosen.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
     await ElementFixture.settle()
     expect(host.theme?.secondary).toBe("red")

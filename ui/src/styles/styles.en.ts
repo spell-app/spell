@@ -629,7 +629,8 @@ export const themeTree = {
     strong: "--ui-surface-strong",
     bar: "--ui-bar-background",
     code: "--ui-code-background",
-    highlight: "--ui-highlight"
+    highlight: "--ui-highlight",
+    wallpaper: "--ui-wallpaper"
   },
   borders: {
     width: "--ui-border-width",

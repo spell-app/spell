@@ -35,8 +35,8 @@ import type { Styles } from "./Styles"
  *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
  *       reads only sheets
  *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
- * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current theme).  ONE
- *   `theme` slot, so switching themes replaces its text in place.
+ * - Registry names in `UI.styles` (`slots`):  `classic` (the base), `theme` (the current theme) and `tint` (a tint
+ *   worn over it, epic `debut` P23).  ONE of each, so switching replaces its text in place.
  ****************/
 export class Themes {
   /**
@@ -63,7 +63,7 @@ export class Themes {
   ]
 
   /** `UI.styles` names:  base slot and theme slot */
-  readonly slots = { base: BASE, theme: "theme" } as const
+  readonly slots = { base: BASE, theme: "theme", tint: "tint" } as const
 
   /** every sheet in the folder, `classic` and `dark` included, A-Z */
   readonly sheets: readonly string[] = Object.keys(THEME_LOADERS).sort()
@@ -106,9 +106,11 @@ export class Themes {
    * - `undefined` (or `""`):  neither, our own look.
    * - Concurrent calls:  the LAST one wins, even if an earlier theme's chunk arrives after it.
    * - Throws a `TypeError` on an unknown name, or `"dark"` (see the class docs).
+   * - `tint`:  a tint's sheet, worn over the theme in a slot of its own, after it (epic `debut` P23, J90):
+   *   so a theme and a tint picked in a row land in order;  none:  the tint taken off.
    * - SIDE EFFECT:  once its sheets are on, `UIT.THEME_APPLIED_EVENT` on `document`.
    */
-  async apply(name: string | undefined): Promise<void> {
+  async apply(name: string | undefined, { tint = "" }: { tint?: string } = {}): Promise<void> {
     if (name === "") name = undefined
     if (name !== undefined && (!this.has(name) || name === DARK)) {
       throw new TypeError(
@@ -121,11 +123,15 @@ export class Themes {
     const theme = name === undefined || name === BASE ? "" : await this.load(name)
     if (call !== this.calls) return
     const options = { page: true, shadow: true }
-    // `register()` keeps first-registration order, and the theme MUST follow the base:  without the base, drop
-    // the theme first, so both go back in order
-    if (!this.styles.has(this.slots.base)) this.styles.register(this.slots.theme, "", options)
+    // `register()` keeps first-registration order, and the theme MUST follow the base, the tint the theme:  without
+    // the base, drop the theme and the tint first, so all three go back in order
+    if (!this.styles.has(this.slots.base)) {
+      this.styles.register(this.slots.theme, "", options)
+      this.styles.register(this.slots.tint, "", options)
+    }
     this.styles.register(this.slots.base, base, options)
     this.styles.register(this.slots.theme, theme, options)
+    this.styles.register(this.slots.tint, name === undefined ? "" : tint, options)
     if (typeof document !== "undefined")
       document.dispatchEvent(new CustomEvent(THEME_APPLIED_EVENT, { detail: { name } }))
   }

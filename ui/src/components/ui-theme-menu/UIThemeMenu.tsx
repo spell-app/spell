@@ -143,6 +143,14 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     await applied
   }
 
+  /** Choose tint `tint` for the theme chosen (`undefined`:  none), as the viewer did with `event`. */
+  async chooseTint(tint: UIT.ThemeHue | undefined, event?: Event): Promise<void> {
+    if (tint === ThemePreference.chosen.tint) return
+    const applied = ThemePreference.setTint(tint)
+    this.emitChange(event)
+    await applied
+  }
+
   /** Flip the scheme the page shows, light <-> dark, as the viewer did with `event`. */
   flipScheme(event?: Event): void {
     ThemePreference.flipScheme()
@@ -195,9 +203,10 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
 
   /** Fire `ui-changed` with the theme and scheme now. */
   private emitChange(originalEvent?: Event): void {
-    const { theme, scheme } = ThemePreference.chosen
+    const { theme, scheme, tint } = ThemePreference.chosen
     const detail: ThemeMenuChange = {
       theme,
+      ...(tint && { tint }),
       scheme,
       shown: ThemePreference.shownScheme(),
       originalEvent
@@ -286,7 +295,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   private palette(): JSX.Element {
     const label = () =>
       this.translationForKey("palette", {
-        title: this.themeMenu.titleFor(this.chosenTheme),
+        title: this.themeMenu.pickTitleFor(this.chosenTheme, this.chosen.tint),
         scheme: this.translationForKey(SCHEME_TEXTS[this.chosen.scheme])
       })
     return (
@@ -348,6 +357,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         >
           <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
         </div>
+        {this.tints()}
         <Show when={this.benchAddress}>
           <div class={DIVIDER_CLASS} role="separator" />
           <a
@@ -364,6 +374,30 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         </Show>
         <slot name={this.slotForName("end")} />
       </div>
+    )
+  }
+
+  /**
+   * The tint row (epic `debut` P23):  `<ui-hue-swatches>`, none first, then each colour the theme chosen takes
+   * (`ThemePreference.tintsFor()`), by its own name;  fourteen wrap to two rows where it's narrow.
+   * - Arrow keys move along it and pick, as the theme editor's colour rows.
+   */
+  private tints(): JSX.Element {
+    return (
+      <ui-hue-swatches
+        part={this.partForName("tints")}
+        class={TINTS_CLASS}
+        wrap=""
+        value={this.chosen.tint ?? ""}
+        hues={ThemePreference.tintsFor(this.chosenTheme).join(" ")}
+        none-label={this.translationForKey("noTint")}
+        aria-label={this.translationForKey("tintName")}
+        title={this.translationForKey("tintName")}
+        on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
+          event.stopPropagation()
+          void this.chooseTint(event.detail.value as UIT.ThemeHue | undefined, event)
+        }}
+      />
     )
   }
 
@@ -453,7 +487,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    *   (Owen, 2026-10-23:  "'1 theme' button should be palette icon")
    */
   private dropdown(): JSX.Element {
-    const label = () => this.themeMenu.labelFor(this.chosenTheme)
+    const label = () => this.themeMenu.labelFor(this.chosenTheme, this.chosen.tint)
     return (
       <ui-dropdown
         part={this.partForName("theme")}
@@ -472,6 +506,9 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           dropdown.addEventListener("ui-changed", (event) => this.onDropdownChange(event))
         }
       >
+        <div slot="header" class={TINTS_HEADER_CLASS}>
+          {this.tints()}
+        </div>
         <span slot="trigger">
           <Show when={this.compact} fallback={label()}>
             <ui-icon name={PALETTE_ICON} aria-hidden="true"></ui-icon>
@@ -636,6 +673,12 @@ const BENCH_ICON = "external alternate"
 
 /** Class word of the overlay's Theme bench row. */
 const BENCH_CLASS = "bench"
+
+/** The tint row's class word, in the panel. */
+const TINTS_CLASS = "tints"
+
+/** The box round the tint row in the dropdown's header. */
+const TINTS_HEADER_CLASS = "tints-header"
 
 /** Icon marking the chosen theme in the overlay's list (`fomantic` pack). */
 const CHECK_ICON = "check"

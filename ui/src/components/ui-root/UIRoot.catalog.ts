@@ -525,6 +525,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "link"
     ]
   },
+  "ui-hue-swatches": {
+    folder: "ui-theme-menu",
+    skeleton: { display: "inline", width: "22em", height: "1.6em" },
+    attributes: ["value", "hues", "none-label", "none-colors", "wrap"]
+  },
   "ui-icon": {
     folder: "ui-icon",
     skeleton: { display: "inline", width: "1em", height: "1em" },

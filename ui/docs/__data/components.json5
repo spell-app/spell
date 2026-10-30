@@ -12260,6 +12260,297 @@
       "href": "ui-header.html"
     },
     {
+      "tag": "ui-hue-swatches",
+      "name": "Hue swatches",
+      "folder": "ui-theme-menu",
+      "topics": [
+        "selection",
+        "controls"
+      ],
+      "aka": [
+        "swatches",
+        "colour picker",
+        "color picker",
+        "accent colour",
+        "tint picker",
+        "colour row"
+      ],
+      "description": "Hue swatches pick one of Spell UI's colours, or none:  a row of small round swatches, the picked one ringed, arrow keys moving and picking as in any radio group.",
+      "noun": "swatches",
+      "attributes": [
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "The colour picked:  a hue's name (`pink`);  empty:  the first swatch, none (or the theme's own)."
+        },
+        {
+          "name": "hues",
+          "kind": "string",
+          "description": "The colours offered, by name, space-separated (`red teal pink`);  none given:  all of Spell UI's, in order."
+        },
+        {
+          "name": "none-label",
+          "kind": "string",
+          "description": "The first swatch's name, for its tooltip and a screen reader:  what picking no colour means here;  none given:  `None`."
+        },
+        {
+          "name": "none-colors",
+          "kind": "string",
+          "description": "The first swatch's colour, drawn in two halves, light and dark (`#7c55e6 #b39cff`):  the theme's own;  none given:  a hollow ring."
+        },
+        {
+          "name": "wrap",
+          "kind": "keyOnly",
+          "description": "Wraps onto more rows where it's narrow, each swatch full size;  without it, one row of shrinking ones."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-changed",
+          "detail": "{ value: string | undefined, originalEvent?: Event }",
+          "description": "A swatch was picked:  its hue's name, `undefined` for the first (none)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "swatches",
+          "description": "The row (`role=radiogroup`)."
+        },
+        {
+          "name": "swatch",
+          "description": "One swatch (`role=radio`)."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "label",
+          "text": "Colour",
+          "description": "The row's accessible name."
+        },
+        {
+          "key": "none",
+          "text": "None",
+          "description": "The first swatch's name, when `none-label` gives none."
+        },
+        {
+          "key": "red",
+          "text": "Red",
+          "description": "A colour's name."
+        },
+        {
+          "key": "orange",
+          "text": "Orange",
+          "description": "A colour's name."
+        },
+        {
+          "key": "yellow",
+          "text": "Yellow",
+          "description": "A colour's name."
+        },
+        {
+          "key": "olive",
+          "text": "Olive",
+          "description": "A colour's name."
+        },
+        {
+          "key": "green",
+          "text": "Green",
+          "description": "A colour's name."
+        },
+        {
+          "key": "teal",
+          "text": "Teal",
+          "description": "A colour's name."
+        },
+        {
+          "key": "blue",
+          "text": "Blue",
+          "description": "A colour's name."
+        },
+        {
+          "key": "violet",
+          "text": "Violet",
+          "description": "A colour's name."
+        },
+        {
+          "key": "purple",
+          "text": "Purple",
+          "description": "A colour's name."
+        },
+        {
+          "key": "pink",
+          "text": "Pink",
+          "description": "A colour's name."
+        },
+        {
+          "key": "brown",
+          "text": "Brown",
+          "description": "A colour's name."
+        },
+        {
+          "key": "grey",
+          "text": "Grey",
+          "description": "A colour's name."
+        },
+        {
+          "key": "black",
+          "text": "Black",
+          "description": "A colour's name."
+        }
+      ],
+      "mainTag": "ui-theme-menu",
+      "main": false,
+      "page": false,
+      "href": "ui-theme-menu.html#ui-hue-swatches"
+    },
+    {
       "tag": "ui-icon",
       "name": "Icon",
       "folder": "ui-icon",
@@ -34494,8 +34785,8 @@
       "events": [
         {
           "name": "ui-changed",
-          "detail": "{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
-          "description": "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load."
+          "detail": "{ theme: string, tint?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
+          "description": "The viewer picked a theme, a tint or a scheme here;  `theme` is a `UI.themes` name, `tint` one of Spell UI's colours (none:  the theme as it is);  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load."
         }
       ],
       "parts": [
@@ -34542,6 +34833,10 @@
         {
           "name": "bench",
           "description": "The overlay's Theme bench row, a link opening it in a new window."
+        },
+        {
+          "name": "tints",
+          "description": "The tint row, under the themes (`<ui-hue-swatches>`):  none first, then every colour the chosen theme takes."
         }
       ],
       "states": [
@@ -34703,6 +34998,86 @@
           "key": "benchTip",
           "text": "Open the theme bench in a new window, in this theme",
           "description": "Its tooltip."
+        },
+        {
+          "key": "tinted",
+          "text": "{title} - {tint}",
+          "description": "A theme in a tint (epic `debut` P23), in the dropdown's text and the palette's name:  `Glass - Pink`."
+        },
+        {
+          "key": "tintName",
+          "text": "Tint",
+          "description": "The tint row's heading and accessible name."
+        },
+        {
+          "key": "noTint",
+          "text": "No tint:  the theme as it is",
+          "description": "The tint row's first swatch."
+        },
+        {
+          "key": "red",
+          "text": "Red",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "orange",
+          "text": "Orange",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "yellow",
+          "text": "Yellow",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "olive",
+          "text": "Olive",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "green",
+          "text": "Green",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "teal",
+          "text": "Teal",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "blue",
+          "text": "Blue",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "violet",
+          "text": "Violet",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "purple",
+          "text": "Purple",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "pink",
+          "text": "Pink",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "brown",
+          "text": "Brown",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "grey",
+          "text": "Grey",
+          "description": "A tint's name:  the colour's."
+        },
+        {
+          "key": "black",
+          "text": "Black",
+          "description": "A tint's name:  the colour's."
         }
       ],
       "mainTag": "ui-theme-menu",
@@ -48234,7 +48609,8 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-theme-menu"
+        "ui-theme-menu",
+        "ui-hue-swatches"
       ],
       "tokens": [
         {

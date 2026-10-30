@@ -36,9 +36,15 @@ export class ThemeMenu {
     return UIT.ThemeNames.titleOf(name)
   }
 
-  /** The dropdown's text for chosen theme `theme`:  `Merlot theme`. */
-  labelFor(theme: string): string {
-    return this.text("themeLabel", { title: this.titleFor(theme) })
+  /** Theme `theme` in tint `tint`, as people read it:  `Glass - Pink`;  no tint, `Glass` (epic `debut` P23). */
+  pickTitleFor(theme: string, tint?: UIT.ThemeHue): string {
+    const title = this.titleFor(theme)
+    return tint ? this.text("tinted", { title, tint: this.text(tint) }) : title
+  }
+
+  /** The dropdown's text for chosen theme `theme` in tint `tint`:  `Merlot theme`, `Glass - Pink theme`. */
+  labelFor(theme: string, tint?: UIT.ThemeHue): string {
+    return this.text("themeLabel", { title: this.pickTitleFor(theme, tint) })
   }
 }
 

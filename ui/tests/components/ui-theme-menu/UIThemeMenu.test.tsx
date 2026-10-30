@@ -6,6 +6,7 @@ import { OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell/ui/runtime"
+import { UIT } from "spell/ui/core"
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
 import {
   THEME_KEYS,
@@ -601,5 +602,55 @@ describe("<ui-theme-menu> persistence", () => {
     } finally {
       spy.mockRestore()
     }
+  })
+})
+
+////////////////
+// ## Tints
+////////////////
+
+describe("<ui-theme-menu> tints", () => {
+  /** The tint row's swatch for `hue` (`""`:  none), in its own shadow root. */
+  function tint(host: Element, hue: string) {
+    const swatches = part(host, "tints")
+    return swatches.shadowRoot!.querySelector<HTMLElement>(`[part~=swatch][value="${hue}"]`)!
+  }
+
+  it("draws a tint row under the themes:  none first, then every one of Spell UI's colours, by its own name", async () => {
+    const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
+    await ElementFixture.settle()
+    const swatches = [...part(host, "tints").shadowRoot!.querySelectorAll<HTMLElement>("[part~=swatch]")]
+    expect(swatches.map((swatch) => swatch.getAttribute("value"))).toEqual(["", ...UIT.ThemeHues])
+    expect(tint(host, "pink").getAttribute("title")).toBe("Pink")
+    expect(tint(host, "").getAttribute("aria-checked")).toBe("true")
+  })
+
+  it("a swatch tints the theme:  remembered with it as one name, the label says both, one ui-changed", async () => {
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
+    const changes: ThemeMenuChange[] = []
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
+    row(host, "paper").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("paper"))
+    await ElementFixture.settle()
+    tint(host, "pink").click()
+    await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.tint)).toBe(true))
+    expect(ThemePreference.chosen).toMatchObject({ theme: "paper", tint: "pink" })
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper:pink")
+    expect(changes.at(-1)).toMatchObject({ theme: "paper", tint: "pink" })
+    await ElementFixture.settle()
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Paper - Pink, Auto")
+    const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+    expect(token("--ui-primary")).toBe(token("--ui-pink"))
+    // none:  the theme as it is
+    tint(host, "").click()
+    await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.tint)).toBe(false))
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper")
+  })
+
+  it("the dropdown says the tint too:  `Glass - Pink theme`", async () => {
+    await ThemePreference.setTheme("glass")
+    await ThemePreference.setTint("pink")
+    const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
+    expect(labelOf(host)).toBe("Glass - Pink theme")
   })
 })

@@ -24,7 +24,8 @@ export const themeMenuEs = {
     schemes: "esquemas",
     "scheme-option": "opcion-esquema",
     tip: "consejo",
-    theme: "tema"
+    theme: "tema",
+    tints: "tintes"
   },
   texts: {
     themeLabel: "Tema {title}",
@@ -47,6 +48,22 @@ export const themeMenuEs = {
     dark: "Oscuro",
     auto: "Auto",
     bench: "Banco de temas",
-    benchTip: "Abrir el banco de temas en una ventana nueva, con este tema"
+    benchTip: "Abrir el banco de temas en una ventana nueva, con este tema",
+    tinted: "{title} - {tint}",
+    tintName: "Tinte",
+    noTint: "Sin tinte:  el tema tal cual",
+    red: "Rojo",
+    orange: "Naranja",
+    yellow: "Amarillo",
+    olive: "Oliva",
+    green: "Verde",
+    teal: "Verde azulado",
+    blue: "Azul",
+    violet: "Violeta",
+    purple: "Morado",
+    pink: "Rosa",
+    brown: "Marrón",
+    grey: "Gris",
+    black: "Negro"
   }
 } as const satisfies E.TagDictionary

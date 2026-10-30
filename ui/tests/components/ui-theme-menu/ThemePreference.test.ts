@@ -209,6 +209,33 @@ function fakeSpace(kept: Record<string, unknown> = {}) {
   return { kept, saved }
 }
 
+describe("ThemePreference:  tints (epic `debut` P23)", () => {
+  test("keeps a theme and its tint as one name, `glass:pink`, and reads it back as two", () => {
+    expect(ThemePreference.pickText("glass", "pink")).toBe("glass:pink")
+    expect(ThemePreference.pickText("glass")).toBe("glass")
+    expect(ThemePreference.pickOf("glass:pink")).toEqual({ theme: "glass", tint: "pink" })
+    expect(ThemePreference.pickOf("glass:mauve")).toEqual({ theme: "glass" })
+  })
+
+  test("a stored tinted theme comes back tinted, and a new theme keeps the tint", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "paper:teal")
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(ThemePreference.chosen).toMatchObject({ theme: "paper", tint: "teal" })
+    expect(UI.styles.has(UI.themes.slots.tint)).toBe(true)
+    await ThemePreference.setTheme("merlot")
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot:teal")
+  })
+
+  test("another page's tinted pick, from the space, is worn", async () => {
+    fakeSpace()
+    await ThemePreference.restore()
+    await ThemePreference.heard({ store: THEME_STORE, key: "theme", value: "pop:blue" })
+    expect(ThemePreference.chosen).toMatchObject({ theme: "pop", tint: "blue" })
+    expect(UI.themes.current).toBe("pop")
+  })
+})
+
 describe("ThemePreference.applyScheme()", () => {
   test("a scheme switch turns transitions off for a frame (`SCHEME_SWITCHING`)", async () => {
     const root = document.documentElement

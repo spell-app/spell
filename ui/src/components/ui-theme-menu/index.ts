@@ -1,6 +1,7 @@
 /**
- * The theme menu's family:  defines `<ui-theme-menu>` and exports its component, `UIThemeMenu`,
- * its list (`ThemeMenu`) and the remembered theme and scheme (`ThemePreference`).
+ * The theme menu's family:  defines `<ui-theme-menu>` and `<ui-hue-swatches>` (its tint row, and the theme editor's
+ * colour rows), and exports their components, `UIThemeMenu` and `UIHueSwatches`,
+ * its list (`ThemeMenu`) and the remembered theme, tint and scheme (`ThemePreference`).
  * - The docs site's own widget until epic `debut` P17 made it a real element:
  *   every place shows it (the editor, the epic pages and guides, Spell UI's pages).
  * - SIDE EFFECT:  importing it defines the tag, and the widgets its shadow DOM is built of:
@@ -15,6 +16,7 @@
  */
 
 import { UIThemeMenu } from "./UIThemeMenu"
+import { UIHueSwatches } from "./UIHueSwatches"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
 
@@ -24,6 +26,7 @@ import "spell/ui/components/ui-popup"
 import "spell/ui/components/ui-icon"
 
 UIThemeMenu.define()
+UIHueSwatches.define()
 
-export { UIThemeMenu, ThemeMenu, ThemePreference }
+export { UIThemeMenu, UIHueSwatches, ThemeMenu, ThemePreference }
 export type { SchemeChoice, ShownScheme, ThemeAndScheme, ThemeMenuChange } from "./UIThemeMenu.types"

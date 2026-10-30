@@ -35331,6 +35331,188 @@
       "declarations": [
         {
           "kind": "class",
+          "name": "UIHueSwatches",
+          "tagName": "ui-hue-swatches",
+          "customElement": true,
+          "summary": "Hue swatches pick one of Spell UI's colours, or none:  a row of small round swatches, the picked one ringed, arrow keys moving and picking as in any radio group.",
+          "description": "Hue swatches pick one of Spell UI's colours, or none:  a row of small round swatches, the picked one ringed, arrow keys moving and picking as in any radio group.\n\nAlso known as:  swatches, colour picker, color picker, accent colour, tint picker, colour row.",
+          "attributes": [
+            {
+              "name": "value",
+              "description": "The colour picked:  a hue's name (`pink`);  empty:  the first swatch, none (or the theme's own).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
+              "name": "hues",
+              "description": "The colours offered, by name, space-separated (`red teal pink`);  none given:  all of Spell UI's, in order.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "hues"
+            },
+            {
+              "name": "none-label",
+              "description": "The first swatch's name, for its tooltip and a screen reader:  what picking no colour means here;  none given:  `None`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "noneLabel"
+            },
+            {
+              "name": "none-colors",
+              "description": "The first swatch's colour, drawn in two halves, light and dark (`#7c55e6 #b39cff`):  the theme's own;  none given:  a hollow ring.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "noneColors"
+            },
+            {
+              "name": "wrap",
+              "description": "Wraps onto more rows where it's narrow, each swatch full size;  without it, one row of shrinking ones.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "wrap"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-changed",
+              "description": "A swatch was picked:  its hue's name, `undefined` for the first (none).",
+              "type": {
+                "text": "CustomEvent<{ value: string | undefined, originalEvent?: Event }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "swatches",
+              "description": "The row (`role=radiogroup`)."
+            },
+            {
+              "name": "swatch",
+              "description": "One swatch (`role=radio`)."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
           "name": "UIThemeMenu",
           "tagName": "ui-theme-menu",
           "customElement": true,
@@ -35463,9 +35645,9 @@
           "events": [
             {
               "name": "ui-changed",
-              "description": "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.",
+              "description": "The viewer picked a theme, a tint or a scheme here;  `theme` is a `UI.themes` name, `tint` one of Spell UI's colours (none:  the theme as it is);  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.",
               "type": {
-                "text": "CustomEvent<{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }>"
+                "text": "CustomEvent<{ theme: string, tint?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }>"
               }
             }
           ],
@@ -35519,6 +35701,10 @@
             {
               "name": "bench",
               "description": "The overlay's Theme bench row, a link opening it in a new window."
+            },
+            {
+              "name": "tints",
+              "description": "The tint row, under the themes (`<ui-hue-swatches>`):  none first, then every colour the chosen theme takes."
             }
           ],
           "cssStates": [
@@ -35615,6 +35801,22 @@
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "UIHueSwatches",
+          "declaration": {
+            "name": "UIHueSwatches",
+            "module": "src/components/ui-theme-menu/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-hue-swatches",
+          "declaration": {
+            "name": "UIHueSwatches",
+            "module": "src/components/ui-theme-menu/index.ts"
+          }
+        },
         {
           "kind": "js",
           "name": "UIThemeMenu",

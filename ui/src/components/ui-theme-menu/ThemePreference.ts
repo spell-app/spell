@@ -14,6 +14,7 @@ import {
   DEFAULT_THEME,
   OLD_THEME_KEYS,
   SCHEME_SWITCHING,
+  TINTS_LEFT_OUT,
   SchemeChoices,
   THEME_KEYS,
   THEME_STORE,
@@ -138,10 +139,47 @@ export class ThemePreference {
    * - An old name is taken as its new one;  a name no longer in the set is forgotten, for the default theme.
    */
   static async setTheme(name: string): Promise<void> {
-    ThemePreference.update({ ...ThemePreference.chosen, theme: name })
-    PrefStore.setAt(THEME_KEYS.theme, name === ThemePreference.defaultTheme ? undefined : name)
-    ThemePreference.saveToSpace("theme", name)
+    const tint = ThemePreference.tintFor(name, ThemePreference.chosen.tint)
+    ThemePreference.update({ ...ThemePreference.chosen, theme: name, tint })
+    ThemePreference.remember(name, tint)
     await ThemePreference.applyTheme(name)
+  }
+
+  /**
+   * Choose tint `tint` for the theme chosen (`undefined`:  none, the theme as it is):  remember it with the theme as
+   * one name (`glass:pink`), tell subscribers, wear it (epic `debut` P23).
+   * - A tint the theme leaves out (`ThemePreference.tintsFor()`):  none.
+   * - Resolves once its sheet is on.
+   */
+  static async setTint(tint: UIT.ThemeHue | undefined): Promise<void> {
+    const { theme } = ThemePreference.chosen
+    const allowed = ThemePreference.tintFor(theme, tint)
+    ThemePreference.update({ ...ThemePreference.chosen, tint: allowed })
+    ThemePreference.remember(theme, allowed)
+    await ThemePreference.applyTheme(theme)
+  }
+
+  /**
+   * The tints theme `theme` offers:  every one of Spell UI's colours (`UIT.ThemeHues`), by its own name, but those
+   * that can't read on it, light or dark (`TINTS_LEFT_OUT`, from the contrast test).
+   */
+  static tintsFor(theme: string): readonly UIT.ThemeHue[] {
+    const leftOut = TINTS_LEFT_OUT[theme] ?? []
+    return UIT.ThemeHues.filter((hue) => !leftOut.includes(hue))
+  }
+
+  /**
+   * The text a theme and its tint are kept as:  `glass:pink`;  no tint, `glass` alone.
+   * - and `pickOf()` reads one back
+   */
+  static pickText(theme: string, tint?: UIT.ThemeHue): string {
+    return tint ? `${theme}${TINT_SEPARATOR}${tint}` : theme
+  }
+
+  /** A kept pick's theme and tint:  `glass:pink` => `{ theme: "glass", tint: "pink" }`;  a tint that isn't one, none. */
+  static pickOf(text: string): { theme: string; tint?: UIT.ThemeHue } {
+    const [theme = "", tint] = text.split(TINT_SEPARATOR)
+    return UIT.ThemeHues.includes(tint as UIT.ThemeHue) ? { theme, tint: tint as UIT.ThemeHue } : { theme }
   }
 
   /** Choose colour scheme `scheme` (`system`:  follow the OS):  remember it, tell subscribers, show it on `<html>`. */
@@ -311,6 +349,18 @@ export class ThemePreference {
     return ThemePreference.spaced ?? undefined
   }
 
+  /** Keep theme `theme` and tint `tint` as this browser's copy, and in the space:  one text (`pickText()`). */
+  private static remember(theme: string, tint: UIT.ThemeHue | undefined): void {
+    const text = ThemePreference.pickText(theme, tint)
+    PrefStore.setAt(THEME_KEYS.theme, text === ThemePreference.defaultTheme ? undefined : text)
+    ThemePreference.saveToSpace("theme", text)
+  }
+
+  /** `tint`, if theme `theme` offers it (`tintsFor()`);  else none. */
+  private static tintFor(theme: string, tint: UIT.ThemeHue | undefined): UIT.ThemeHue | undefined {
+    return tint && ThemePreference.tintsFor(theme).includes(tint) ? tint : undefined
+  }
+
   /**
    * Keep `value` at `key` in the person's space, when this page keeps its choice there.
    * - Not waited on:  the page already shows it.  NEVER throws:  `ServerPlace` logs a failure.
@@ -335,9 +385,11 @@ export class ThemePreference {
     }
     if (typeof theme !== "string" || !theme) return
     PrefStore.setAt(THEME_KEYS.theme, theme === ThemePreference.defaultTheme ? undefined : theme)
-    if (ThemePreference.fromAddress.theme || theme === ThemePreference.chosen.theme) return
-    ThemePreference.update({ ...ThemePreference.chosen, theme })
-    await ThemePreference.applyTheme(theme)
+    const pick = ThemePreference.pickOf(theme)
+    const { chosen } = ThemePreference
+    if (ThemePreference.fromAddress.theme || (pick.theme === chosen.theme && pick.tint === chosen.tint)) return
+    ThemePreference.update({ ...chosen, ...pick, tint: pick.tint })
+    await ThemePreference.applyTheme(pick.theme)
   }
 
   /**
@@ -413,7 +465,7 @@ export class ThemePreference {
   private static update(chosen: ThemeAndScheme): void {
     const old = ThemePreference.chosen
     ThemePreference.current = chosen
-    if (old.theme === chosen.theme && old.scheme === chosen.scheme) return
+    if (old.theme === chosen.theme && old.scheme === chosen.scheme && old.tint === chosen.tint) return
     ThemePreference.tell(chosen)
   }
 
@@ -423,9 +475,11 @@ export class ThemePreference {
   }
 
   /**
-   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be);  the one worn instead, if any (`wear()`).
+   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be), in the tint chosen;  the one worn
+   * instead, if any (`wear()`), as it is.
    * - Only a theme of the set (`UI.themes.own`):
    *   an old name is chosen again as its new one, anything else as the default theme.
+   * - The tint's sheet is the theme editor's (`ThemeDraft.tintCss()`), loaded only when one is chosen.
    */
   private static async applyTheme(name: string): Promise<void> {
     const { themes } = await UI.load()
@@ -433,7 +487,10 @@ export class ThemePreference {
     if (known !== name && name === ThemePreference.fromAddress.theme)
       return ThemePreference.applyAddressed(themes, name)
     if (known !== name) return ThemePreference.setTheme(known)
-    await themes.apply(ThemePreference.worn ?? name)
+    const { tint } = ThemePreference.chosen
+    if (ThemePreference.worn || !tint) return themes.apply(ThemePreference.worn ?? name)
+    const { ThemeDraft } = await import("spell/ui/components/ui-theme-editor/ThemeDraft")
+    await themes.apply(name, { tint: ThemeDraft.tintCss(name, tint) })
   }
 
   /**
@@ -464,10 +521,8 @@ export class ThemePreference {
    * `system`).
    */
   private static read(): ThemeAndScheme {
-    return {
-      theme: ThemePreference.fromAddress.theme || ThemePreference.stored().theme,
-      scheme: ColorScheme.chosen() ?? "system"
-    }
+    const { theme, tint } = ThemePreference.pickOf(ThemePreference.fromAddress.theme || ThemePreference.stored().theme)
+    return { theme, scheme: ColorScheme.chosen() ?? "system", ...(tint && { tint }) }
   }
 
   /**
@@ -498,6 +553,9 @@ export class ThemePreference {
     return found
   }
 }
+
+/** What joins a theme and its tint, kept as one text:  `glass:pink` (`ThemePreference.pickText()`). */
+const TINT_SEPARATOR = ":"
 
 /** The page server's live channel, as a page it didn't serve opens it (the kit's `LiveReload.events`). */
 const LIVE_CHANNEL = "/api/server/live"

@@ -7,6 +7,7 @@
 
 // Import directly:  the scheme's key, with no pref store
 import { COLOR_SCHEME_KEY } from "spell/util/persist/persist.types"
+import type { UIT } from "spell/ui/core"
 import type { themeMenuVocabulary } from "./UIThemeMenu.en"
 
 ////////////////
@@ -29,6 +30,8 @@ export type ThemeMenuShow = "both" | "theme" | "scheme" | "menu"
 export type ThemeMenuChange = {
   /** the theme chosen, a `UI.themes` name */
   theme: string
+  /** its tint, one of Spell UI's colours;  none:  the theme as it is */
+  tint?: UIT.ThemeHue
   /** the chosen scheme;  `system`:  following the OS */
   scheme: SchemeChoice
   /** the scheme the page shows:  `scheme`, or the OS's while following it */
@@ -53,13 +56,21 @@ export type SchemeChoice = (typeof SchemeChoices)[number]
 /** The scheme the page SHOWS:  `system` resolved through the OS (`prefers-color-scheme`). */
 export type ShownScheme = Exclude<SchemeChoice, "system">
 
-/** The theme and scheme chosen now (`ThemePreference.chosen`). */
+/** The theme, its tint and the scheme chosen now (`ThemePreference.chosen`). */
 export type ThemeAndScheme = {
   /** a `UI.themes` name, one of `UI.themes.own` (`spell`, `fruity` ...) */
   readonly theme: string
   /** the chosen scheme;  `system` follows the OS */
   readonly scheme: SchemeChoice
+  /** the theme's tint (epic `debut` P23):  one of Spell UI's colours;  none:  the theme as it is */
+  readonly tint?: UIT.ThemeHue
 }
+
+/**
+ * The tints a theme leaves out of its row, by theme:  each a colour that can't read on it, light or dark, as its
+ * primary or its page (`colors.contrast.test.ts` works them out, and fails while this differs).
+ */
+export const TINTS_LEFT_OUT: Readonly<Record<string, readonly UIT.ThemeHue[]>> = {}
 
 /** The theme a person who never picked one sees, in every place:  Glass (epic `debut` Q39). */
 export const DEFAULT_THEME = "glass"

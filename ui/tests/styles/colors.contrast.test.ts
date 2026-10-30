@@ -7,6 +7,10 @@ import { codeRoles, hueAliases, hueStates, hues, semanticAliases, semanticColors
 import { A11y } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
 import { ThemeHarness } from "spell/ui/test-helpers/ThemeHarness"
+import { UIT } from "spell/ui/core"
+import { ThemeDraft } from "spell/ui/components/ui-theme-editor/ThemeDraft"
+import { WALLPAPER_THEME } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
+import { TINTS_LEFT_OUT } from "spell/ui/components/ui-theme-menu/UIThemeMenu.types"
 
 import layersRaw from "spell/ui/styles/layers.css?raw"
 import tokensRaw from "spell/ui/styles/tokens.css?raw"
@@ -127,6 +131,75 @@ for (const theme of THEMES) {
       }
     )
   })
+}
+
+describe("tints (WCAG AA), every theme in every one of Spell UI's colours (epic `debut` P23)", () => {
+  it("leaves out of a theme's tint row exactly the colours that can't read on it, light or dark (`TINTS_LEFT_OUT`)", async () => {
+    const leftOut: Record<string, string[]> = {}
+    const failures: string[] = []
+    for (const theme of THEMES.filter((name) => name !== undefined)) {
+      for (const hue of UIT.ThemeHues) {
+        const problems = await tintProblems(theme, hue)
+        if (!problems.length) continue
+        ;(leftOut[theme] ??= []).push(hue)
+        failures.push(...problems)
+      }
+    }
+    expect(leftOut, failures.join("\n")).toEqual(TINTS_LEFT_OUT)
+  })
+})
+
+/**
+ * Why theme `theme` in tint `hue` can't be offered, light and dark:  `[]` when it reads.
+ * - the primary's text on the primary (a button), links and text on the page, at both ends of its gradient
+ */
+async function tintProblems(theme: string, hue: UIT.ThemeHue): Promise<string[]> {
+  const sheets = [layersRaw, tokensRaw, colorsRaw, sizesRaw, utilitiesRaw].map((css) => {
+    const sheet = new CSSStyleSheet()
+    sheet.replaceSync(css)
+    return sheet
+  })
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, ...sheets]
+  try {
+    await UI.themes.apply(theme, { tint: ThemeDraft.tintCss(theme, hue) })
+    const problems: string[] = []
+    for (const scheme of SCHEMES) {
+      const probe = renderProbe(scheme, "primary")
+      const name = `${theme} ${hue} ${scheme}`
+      problems.push(...check(probe, name, "--ui-color-on", ["--ui-color"], CONTRAST_TEXT))
+      // a wallpaper theme (Fruity) takes the tint in its washes, not the gradient:  its page colour
+      const ends =
+        theme === WALLPAPER_THEME
+          ? [resolve(probe, "--ui-background")]
+          : GRADIENT_ENDS.map((end) => paintedRaw(probe, end(hue)))
+      for (const text of ["--ui-text-color", "--ui-link"]) {
+        for (const [index, end] of ends.entries()) {
+          const ratio = A11y.contrast(resolve(probe, text), [end])
+          if (ratio < CONTRAST_TEXT)
+            problems.push(`${name}: ${text} on the gradient's end ${index} is ${ratio.toFixed(2)}:1`)
+        }
+      }
+      probe.parentElement?.remove()
+    }
+    return problems
+  } finally {
+    await UI.themes.apply(undefined)
+    document.adoptedStyleSheets = document.adoptedStyleSheets.filter((sheet) => !sheets.includes(sheet))
+  }
+}
+
+/** The page gradient's two ends in `hue`, as CSS (`ThemeDraft.gradient()`'s stops). */
+const GRADIENT_ENDS = [0, 1].map(
+  (index) => (hue: UIT.ThemeHue) =>
+    ThemeDraft.gradient(hue)
+      .slice("linear-gradient(".length, -1)
+      .split(/,\s(?=light-dark)/)[index]!
+)
+
+/** CSS colour text `color` as the browser computes it on `probe`. */
+function paintedRaw(probe: HTMLElement, color: string): string {
+  probe.style.color = color
+  return getComputedStyle(probe).color
 }
 
 /**

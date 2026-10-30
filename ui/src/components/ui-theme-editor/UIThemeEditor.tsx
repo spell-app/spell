@@ -1729,7 +1729,10 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   // ## The Basics' fields
   ////////////////
 
-  /** A colour choice:  a row of swatches, the theme's own first, its colour shown and said. */
+  /**
+   * A colour choice:  a row of swatches (`<ui-hue-swatches>`, the theme menu's tint row too), the theme's own first,
+   * its colour shown and said.
+   */
   private hueProperty(key: HueKey): JSX.Element {
     const t = this.text
     const chosen = () => this.theme[key]
@@ -1745,60 +1748,21 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         description={t(`${key}Tip`)}
         output={chosen() ? t(chosen()!) : this.ownLabel(ownText())}
       >
-        <div class="swatches" role="radiogroup" aria-label={t(key)} onKeyDown={(event) => this.onSwatchKey(event, key)}>
-          {this.swatch(key, undefined, own, ownText)}
-          <For each={UIT.ThemeHues}>{(hue) => this.swatch(key, hue)}</For>
-        </div>
+        <ui-hue-swatches
+          class="swatches"
+          value={chosen() ?? ""}
+          aria-label={t(key)}
+          none-label={this.ownLabel(ownText())}
+          none-colors={own()
+            .map((color) => color.hex)
+            .join(" ")}
+          on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
+            event.stopPropagation()
+            this.choose({ [key]: event.detail.value as UIT.ThemeHue | undefined })
+          }}
+        />
       </ui-property>
     )
-  }
-
-  /**
-   * One swatch:  `hue`, or the theme's own (`undefined`), drawn in its colour:  light and dark halves while Both
-   * show;  its hex in its tooltip.
-   */
-  private swatch(
-    key: HueKey,
-    hue: UIT.ThemeHue | undefined,
-    own: () => { scheme: Scheme; hex: string }[] = () => [],
-    ownText: () => string = () => ""
-  ): JSX.Element {
-    const name = () => (hue ? this.text(hue) : this.ownLabel(ownText()))
-    const isChosen = () => this.theme[key] === hue
-    const style = () => {
-      if (hue) return `--_swatch: var(--ui-${hue})`
-      const [first, second] = own()
-      return `--_own-light: ${first?.hex ?? FALLBACK_HEX}; --_own-dark: ${(second ?? first)?.hex ?? FALLBACK_HEX}`
-    }
-    return (
-      <button
-        type="button"
-        role="radio"
-        class={["swatch", hue ?? OWN]}
-        value={hue ?? OWN}
-        style={style()}
-        aria-checked={isChosen() ? "true" : "false"}
-        aria-label={name()}
-        title={name()}
-        tabindex={isChosen() ? 0 : -1}
-        onClick={() => this.choose({ [key]: hue })}
-      />
-    )
-  }
-
-  /**
-   * Arrow keys in a swatch row:  move AND choose, wrapping, as in any radio group;  Home / End to the ends.
-   * - The chosen swatch is the tab stop, drawn by `swatch()` (`tabindex: "left alone"`).
-   */
-  private onSwatchKey(event: KeyboardEvent, key: HueKey): void {
-    const hues = [undefined, ...UIT.ThemeHues]
-    UI.focus.arrowKey(event, {
-      container: event.currentTarget as HTMLElement,
-      items: "button",
-      orientation: "both",
-      tabindex: "left alone",
-      onChange: (_swatch, index) => this.choose({ [key]: hues[index] })
-    })
   }
 
   /** A font choice:  a select, each font shown in itself, the theme's own first:  "Theme's own · Palatino". */
