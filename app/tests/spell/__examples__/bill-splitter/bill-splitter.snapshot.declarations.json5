@@ -59,6 +59,7 @@
         "statement",
         "expression"
       ],
+      "group": "The table:  the diners, one a row",
       "kind": "method",
       "name": "remove (a diner)",
       "defined": "/BillSplitter.spell:3437-3508"
@@ -152,6 +153,7 @@
     {
       "property": "table",
       "of": "Diner",
+      "group": "The table:  the diners, one a row",
       "datatype": "Table",
       "exclusive": true,
       "defined": "/BillSplitter.spell:3380-3408"

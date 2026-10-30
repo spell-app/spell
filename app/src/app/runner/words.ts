@@ -41,6 +41,8 @@ export async function wordsIn(text: string): Promise<SP.SpellWordsData | undefin
  * `all` the words a run has -- its program's, then each project's it imports -- as one:
  * a type's words from the first that has it.  `undefined` if there are none.
  * - Its `messages` are the first's:  what the core says, in the program's own language.
+ * - Each type's `groups` (epic `debut` P26) as its members:  from the first that has them,
+ *   or for `"by member"`, every one's in turn.
  * - `members`:  `"by member"` takes each member's words from the first that has it, for ONE project's words files,
  *   one per language its files are in, each with its own files' members (epic `spanish` P19):
  *   one type may have members in each.  See `wordsOfLanguages()`.
@@ -52,13 +54,18 @@ export function mergedWords(
   const present = all.filter((words) => words !== undefined)
   if (!present.length) return undefined
   const types: SP.SpellWordsData["types"] = {}
+  const groups: NonNullable<SP.SpellWordsData["groups"]> = {}
   for (const words of present) {
     for (const [type, own] of Object.entries(words.types)) {
       types[type] = members === "by member" ? { ...own, ...types[type] } : (types[type] ?? own)
     }
+    // each type's groups:  every language's, one after another, for one project;  the first that has them, across
+    for (const [type, own] of Object.entries(words.groups ?? {})) {
+      groups[type] = members === "by member" ? [...(groups[type] ?? []), ...own] : (groups[type] ?? own)
+    }
   }
   const { lang, messages } = present[0]!
-  return messages ? { lang, types, messages } : { lang, types }
+  return { lang, types, ...(messages && { messages }), ...(Object.keys(groups).length && { groups }) }
 }
 
 /**

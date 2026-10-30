@@ -113,11 +113,12 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
         autoDeclared.set(after, [...(autoDeclared.get(after) ?? []), Block.autoDeclarationAST(statement, declared)])
       }
     }
-    const context = { block: match, docs, docComments, isFileTopLevel }
+    const context: StatementsContext = { block: match, docs, docComments, isFileTopLevel }
     match.matched.forEach((item, index) => {
       // `Block.parse()` only ever pushes `Match`es onto `matched`, each a `line` / nested `block` whose rule
       // returns a statement-shaped node -- not statically representable.
       if (!(item instanceof P.Match)) return
+      context.group = this.groupOpenedBy(match, index) ?? context.group
       statements.push(...this.statementsFor(item, index, context))
       const statement = this.statementOf(item)
       if (statement && autoDeclared.has(statement)) statements.push(...autoDeclared.get(statement)!)
@@ -141,8 +142,9 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
   private statementsFor(
     item: P.Match,
     index: number,
-    { block, docs, docComments, isFileTopLevel }: StatementsContext
+    context: StatementsContext
   ): SP.HoistableStatement[] {
+    const { block, docs, docComments, isFileTopLevel, group } = context
     const statements: SP.HoistableStatement[] = []
     const heading = isFileTopLevel ? this.headingText(item) : undefined
     if (heading) statements.push(new P.ASTHeadingInvocation(item, { heading }))
@@ -153,7 +155,9 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const statement = this.statementOf(item)
     // an auto-declaring `set` says what it declared where its file declares it -- see `autoDeclarationAST()`
     const declarations =
-      statement && !Block.isAutoDeclaring(statement) ? SP.SpellDeclarations.commentFor(statement) : undefined
+      statement && !Block.isAutoDeclaring(statement) ? SP.SpellDeclarations.commentFor(statement, group) : undefined
+    // a group's description goes with its first member's declaration only
+    if (declarations && group?.description) context.group = { name: group.name }
     const doc = statement && docs.get(statement)
     if (!doc) {
       // a comment-only line that's part of a docstring compiles with its statement, below
@@ -327,6 +331,34 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
     return (comment.tokens[0] as P.CommentToken).commentSymbol.startsWith("#")
   }
 
+  /**
+   * The group of members line `item` opens, if it opens one (epic `debut` P26):
+   * - a group's line, `- group "rank"`, its description the comment on its line (spellx's twin),
+   *   else the comment-only lines directly above it (code spell's:  `// Ace is low`, then `- group "rank"`)
+   * - a heading's, `## turning it over`
+   * - The members below it are in it, up to the next:  `getAST()` hands it to their declarations,
+   *   its description to the first of them only (`statementsFor()`).
+   * - Duck-typed:  `Block` can't import `DefineGroup` without a cycle.
+   */
+  private groupOpenedBy(block: P.Match, index: number): SP.MemberGroup | undefined {
+    const item = block.matched[index] as P.Match
+    const heading = this.headingText(item)
+    if (heading) return { name: heading }
+    const statement = this.statementOf(item)
+    const name = statement && (statement.rule as Partial<SP.GroupRule>).groupName?.(statement)
+    if (name === undefined) return undefined
+    let comments = item.matched.filter((it): it is P.Match => it instanceof P.Match && this.isComment(it))
+    if (!comments.length) {
+      for (let before = index - 1; before >= 0; before--) {
+        const comment = this.commentOnlyLine(block.matched[before])
+        if (!comment || this.isHeading(comment)) break
+        comments = [comment, ...comments]
+      }
+    }
+    const description = comments.map((it) => this.commentText(it).trim()).join(" ")
+    return description ? { name, description } : { name }
+  }
+
   /** Text of `item`, if it's a heading's line -- `undefined` for any other, or one with no text, e.g. `#####`. */
   private headingText(item: P.Match): string | undefined {
     const comment = this.commentOnlyLine(item)
@@ -349,6 +381,8 @@ type StatementsContext = {
   docComments: Set<P.Match>
   /** Is it a file's top level? */
   isFileTopLevel: boolean
+  /** The group of members the line being compiled is under, if any -- see `groupOpenedBy()`. */
+  group?: SP.MemberGroup
 }
 
 /** A statement's docstring -- see `Block.getDocComments()`. */

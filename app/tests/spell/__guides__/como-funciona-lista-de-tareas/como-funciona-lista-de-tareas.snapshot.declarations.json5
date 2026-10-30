@@ -69,6 +69,7 @@
     {
       "property": "agenda",
       "of": "Tarea",
+      "group": "La agenda:  las tareas, mostradas según su filtro",
       "datatype": "Agenda",
       "exclusive": true,
       "defined": "/ComoFuncionaListaDeTareas.es.spell:1676-1708"

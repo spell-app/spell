@@ -30,5 +30,11 @@ export const words = {
     "undo-step": "Deshacer {step}",
     redo: "Rehacer",
     "redo-step": "Rehacer {step}"
+  },
+  groups: {
+    Carta: [
+      { name: "La mesa:  una columna, y una mano de cartas para probar en ella", members: ["jugar"] },
+      { name: "Una pila, y una columna", members: ["pila"] }
+    ]
   }
 }

@@ -6,6 +6,7 @@ import type { ThingExplorerState, ThingOrder } from "spell/app/app/ui/ui.types"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { tracked } from "./tracked"
 import { SCOPE_ICONS, SectionMarker, sectionStartsAt } from "./ScopeDetailsPane"
+import { ThingMembers } from "./ThingMembers"
 import { TreeRow } from "./TypeExplorer"
 
 import "./TypeExplorer.css"
@@ -333,6 +334,7 @@ function ThingIcon(props: { isList: boolean }) {
  *   an undeclared property is a plain field, NOT observable.
  * - An action which takes no arguments, e.g. `turn over`, has a ▶ to do it -- see `ThingRegistry.perform()`.
  * - Each property and action in spell's words, if `words` has them:  see `memberWords()`.
+ * - Its properties in the file's order, group by group, as the Inspector lists them (`ThingMembers.bandsOf()`).
  ****************/
 function ThingDetails(props: ThingDetailsProps) {
   const label = tracked(() => props.things.labelOf(props.thing))
@@ -342,7 +344,12 @@ function ThingDetails(props: ThingDetailsProps) {
     void props.things.version
     return props.things.propertiesOf(props.thing)
   })
-  const names = createMemo(() => properties().map(({ name }) => name))
+  // in the file's order, by its groups, as the Inspector's bands list them (`ThingMembers`, epic `debut` P26)
+  const names = createMemo(() => {
+    const stored = properties().flatMap(({ name, computed }) => (computed ? [] : [name]))
+    const bands = ThingMembers.bandsOf(props.thing, { stored, properties: properties(), words: props.words })
+    return bands.flatMap((band) => band.members.map((member) => member.name))
+  })
   const computed = createMemo(() => new Set(properties().flatMap(({ name, computed }) => (computed ? [name] : []))))
   const actions = createMemo(() => props.things.actionsOf(props.thing))
   const isList = createMemo(() => untrack(() => isListThing(props.things, props.thing)))

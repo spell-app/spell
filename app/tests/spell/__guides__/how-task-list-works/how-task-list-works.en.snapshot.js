@@ -18,5 +18,10 @@ export const words = {
       activeCount: "active count",
       draw: "draw it"
     }
+  },
+  groups: {
+    Task: [
+      { name: "The checklist:  the tasks, shown as its filter says", members: ["checklist"] }
+    ]
   }
 }

@@ -31,6 +31,7 @@
       "property": "rango",
       "classVariable": "Rangos",
       "of": "Carta",
+      "group": "rango de la carta",
       "enumeration": [
         "as",
         2,
@@ -51,6 +52,7 @@
     {
       "property": "valor",
       "of": "Carta",
+      "group": "rango de la carta",
       "datatype": "number",
       "defined": "/Carta.es.spell:399-436"
     },
@@ -59,6 +61,7 @@
       "output": "es_un_$rango",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es un (rango)\"",
       "values": {
@@ -85,6 +88,7 @@
       "output": "es_una_figura",
       "rule": "method_postfix",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es una figura\"",
       "returns": "choice",
@@ -95,6 +99,7 @@
       "output": "es_una_carta_numérica",
       "rule": "method_postfix",
       "of": "Carta",
+      "group": "rango de la carta",
       "kind": "method",
       "name": "\"es una carta numérica\"",
       "returns": "choice",
@@ -104,6 +109,7 @@
       "property": "palo",
       "classVariable": "Palos",
       "of": "Carta",
+      "group": "palo de la carta",
       "enumeration": [
         "tréboles",
         "diamantes",
@@ -117,6 +123,7 @@
       "output": "es_un_$palo",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "palo de la carta",
       "kind": "method",
       "name": "\"es un (palo)\"",
       "values": {
@@ -132,6 +139,7 @@
     {
       "property": "color",
       "of": "Carta",
+      "group": "palo de la carta",
       "defined": "/Carta.es.spell:836-917"
     },
     {
@@ -149,6 +157,7 @@
     {
       "property": "nombre",
       "of": "Carta",
+      "group": "cartas concretas",
       "datatype": "text",
       "defined": "/Carta.es.spell:943-985"
     },
@@ -157,6 +166,7 @@
       "output": "es_el_$rango_de_$palo",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "cartas concretas",
       "kind": "method",
       "name": "\"es el (rango) de (palo)\"",
       "values": {
@@ -188,6 +198,7 @@
       "property": "dirección",
       "classVariable": "Direcciones",
       "of": "Carta",
+      "group": "su dirección:  boca arriba o boca abajo",
       "enumeration": [
         "arriba",
         "abajo"
@@ -199,6 +210,7 @@
       "output": "está_boca_$dirección",
       "rule": "quoted_property",
       "of": "Carta",
+      "group": "su dirección:  boca arriba o boca abajo",
       "kind": "method",
       "name": "\"está boca (dirección)\"",
       "values": {
@@ -218,6 +230,7 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla boca arriba",
       "returns": "nothing",
@@ -233,6 +246,7 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla boca abajo",
       "returns": "nothing",
@@ -248,6 +262,7 @@
         "statement",
         "expression"
       ],
+      "group": "voltear la carta",
       "kind": "method",
       "name": "voltearla",
       "waits": true,
@@ -256,22 +271,26 @@
     {
       "property": "imagen",
       "of": "Carta",
+      "group": "voltear la carta",
       "defined": "/Carta.es.spell:1969-2064"
     },
     {
       "property": "cara",
       "of": "Carta",
+      "group": "voltear la carta",
       "defined": "/Carta.es.spell:2137-2747"
     },
     {
       "property": "símbolo",
       "of": "Carta",
+      "group": "dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse",
       "datatype": "text",
       "defined": "/Carta.es.spell:3329-3452"
     },
     {
       "property": "estado",
       "of": "Carta",
+      "group": "el \"estado\" de la carta, para depurar",
       "datatype": "text",
       "defined": "/Carta.es.spell:3499-3723"
     },
@@ -284,6 +303,7 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "jugar una carta",
       "defined": "/Solitario.es.spell:7065-7324"
@@ -297,6 +317,7 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "poner una carta en una pila",
       "params": [
@@ -318,6 +339,7 @@
         "statement",
         "expression"
       ],
+      "group": "Jugar una carta:  qué hace un clic o un arrastre",
       "kind": "method",
       "name": "contar los puntos de una carta en una pila",
       "params": [
@@ -493,12 +515,14 @@
     {
       "property": "estado",
       "of": "Pila",
+      "group": "estado de la pila, para depurar",
       "datatype": "text",
       "defined": "/Pila.es.spell:1050-1211"
     },
     {
       "property": "pila",
       "of": "Carta",
+      "group": "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes",
       "datatype": "Pila",
       "exclusive": true,
       "defined": "/Pila.es.spell:1297-1327"

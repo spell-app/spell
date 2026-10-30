@@ -50,6 +50,7 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a square:  the turn's mark, if the square is empty and nobody has won",
       "kind": "method",
       "name": "play (a square)",
       "returns": "nothing",
@@ -64,6 +65,7 @@
     {
       "property": "board",
       "of": "Square",
+      "group": "The board:  nine squares, three a row -- styles.css lays them out",
       "datatype": "Board",
       "exclusive": true,
       "defined": "/TicTacToe.spell:769-798"

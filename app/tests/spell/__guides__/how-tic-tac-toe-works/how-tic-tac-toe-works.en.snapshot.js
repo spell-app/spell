@@ -20,5 +20,11 @@ export const words = {
       checkForAWinner: "check for a winner",
       draw: "draw it"
     }
+  },
+  groups: {
+    Square: [
+      { name: "Playing a square", members: ["play"] },
+      { name: "A square:  empty, or holding an X or an O", members: ["board"] }
+    ]
   }
 }

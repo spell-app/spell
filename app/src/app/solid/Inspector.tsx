@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 import { SP } from "spell/parser/spell"
-import { editor } from "spell/app/app/editor"
+import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
 import { ValueSets } from "spell/ui/vocabulary"
@@ -17,6 +17,7 @@ import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from
 import { eventsInSource, handlersInSource, type WrittenEvent } from "./InspectorSource"
 import { on } from "./on"
 import { SplitPanel } from "./SplitPanel"
+import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
 
 import "./Inspector.css"
 
@@ -647,8 +648,11 @@ function knownPanels(remembered: unknown): InspectorPanel[] | undefined {
   return remembered.filter((panel): panel is InspectorPanel => (INSPECTOR_PANELS as readonly string[]).includes(panel))
 }
 
-/** One of the properties card's folding bands:  a group of a Spell UI element's fields, or its Events or Actions. */
-export type InspectorBand = E.AttributeGroup | "events" | "actions"
+/**
+ * One of the properties card's folding bands:  a group of a Spell UI element's fields, its Events or Actions,
+ * or a band of a thing's properties (`thing:Card:rank`;  `thing:open:builtIn` for one that starts folded).
+ */
+export type InspectorBand = E.AttributeGroup | "events" | "actions" | `thing:${string}`
 
 /** The properties card's folded sections (remembered:  `FOLDED_GROUPS_PREF`). */
 const [foldedGroups, setFoldedGroups] = createSignal<readonly InspectorBand[]>(
@@ -1191,7 +1195,7 @@ function PropertiesCard(): JSX.Element {
               )}
             </Show>
             <Show when={!part.layout}>
-              <ThingFields value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
+              <ThingBands value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
             </Show>
             <Show when={part.element}>{(element) => <EventsBand element={element()} />}</Show>
             <Show when={!part.layout}>
@@ -1246,25 +1250,65 @@ function sectionsFor(fields: FieldSpec[], hasText: boolean): InspectorSection[] 
 type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: FieldSpec[] }
 
 /****************
- * ### `<ThingFields>`
- * A thing's properties, as the properties card lists them:  a field each, or a link to the thing it holds;
- * then, for a list, its items, a link each.
+ * ### `<ThingBands>`
+ * A thing's properties as the properties card lists them (epic `debut` P26):
+ * in folding bands named by its file's groups and headings (`rank`, `suit`, `drawing`), in the file's order
+ * (`ThingMembers.bandsOf()`);  then, for a list, its items, a link each.
+ * - A stored property:  a field to change it, or a link to the thing it holds (`<ThingLink>`).
+ * - A computed one (Value, Color, Picture, is a face card):  its value, read only, live as the program changes it
+ *   (`<ComputedField>`).
+ * - Each by its words in the program (`is a face card`), when the words file has them.
+ * - The built-in `id` last, in a band that starts folded.
  ****************/
-function ThingFields(props: { value: object; schema: ReturnType<typeof ClassSchemas.fromClass> }): JSX.Element {
+function ThingBands(props: { value: object; schema: ReturnType<typeof ClassSchemas.fromClass> }): JSX.Element {
   const holds = (name: string) => (props.value as Record<string, unknown>)[name]
   const items = () => itemsOf(props.value)?.filter(isThing) ?? []
+  const bands = createMemo(
+    () => {
+      const things = runtimeCore()?.things
+      const properties = things && isThing(props.value) ? things.propertiesOf(props.value as never) : []
+      const stored = props.schema.attributes.map((attribute) => attribute.name)
+      return ThingMembers.bandsOf(props.value, { stored, properties, words: editor.programWords })
+    },
+    // the same bands, the same rows:  a change of keys alone doesn't draw them again
+    { equals: (a, b) => bandsKey(a) === bandsKey(b) }
+  )
   return (
     <>
-      <For each={props.schema.attributes}>
-        {(attribute) => (
-          <Show when={isThing(holds(attribute.name))} fallback={<ui-property name={attribute.name} />}>
-            <ThingLink
-              label={PropertySchemas.labelOf(attribute)}
-              thing={holds(attribute.name) as object}
-              step={attribute.name}
-            />
-          </Show>
-        )}
+      <For each={bands()}>
+        {(band) => {
+          const fold: InspectorBand = band.isBuiltIn ? `thing:open:${band.key}` : `thing:${band.key}`
+          const isFolded = () => Inspector.isGroupFolded(fold) !== !!band.isBuiltIn
+          const setFolded = (folded: boolean) => Inspector.setGroupFolded(fold, folded !== !!band.isBuiltIn)
+          return (
+            <ui-property-group
+              label={band.isBuiltIn ? appTexts.text("inspectorBuiltIn") : band.title}
+              description={band.description}
+              collapsible=""
+              open={isFolded() ? "false" : undefined}
+              ref={(group) => {
+                on("ui-closing", () => setFolded(true))(group)
+                on("ui-opening", () => setFolded(false))(group)
+              }}
+            >
+              <For each={band.members}>
+                {(member) => (
+                  <Show
+                    when={member.kind === "stored"}
+                    fallback={<ComputedField thing={props.value} member={member} />}
+                  >
+                    <Show
+                      when={isThing(holds(member.name))}
+                      fallback={<ui-property name={member.name} label={memberLabel(member)} />}
+                    >
+                      <ThingLink label={memberLabel(member)} thing={holds(member.name) as object} step={member.name} />
+                    </Show>
+                  </Show>
+                )}
+              </For>
+            </ui-property-group>
+          )
+        }}
       </For>
       <Show when={items().length}>
         <div class="InspectorItems">
@@ -1274,6 +1318,69 @@ function ThingFields(props: { value: object; schema: ReturnType<typeof ClassSche
       </Show>
     </>
   )
+}
+
+/** What a thing's bands are, as text:  each band's key and its members' names, to tell a real change. */
+function bandsKey(bands: MemberBand[]): string {
+  return bands.map((band) => `${band.key}=${band.members.map((member) => member.name).join(",")}`).join(";")
+}
+
+/** A member's label:  its words in the program, first letter up (`Is a face card`), else from its name. */
+function memberLabel(member: ThingMember): string {
+  const words = member.words ?? PropertySchemas.labelOf({ name: member.name, kind: "string", description: "" })
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+/****************
+ * ### `<ComputedField>`
+ * A thing's computed property (`value`, `color`, `picture`):  its value, read only, as text with no box,
+ * so it doesn't look like a field to type in.
+ * - Read live:  it follows what the getter reads, as a stored property's field does.
+ * - A yes or no is a read-only check;  a thing, a link to it (`<ThingLink>`);  a list, its count.
+ * - One that throws shows its error, dimmed:  reading it ran the program's code.
+ ****************/
+function ComputedField(props: { thing: object; member: ThingMember }): JSX.Element {
+  const read = createMemo((): { value?: unknown; error?: unknown } => {
+    try {
+      return { value: (props.thing as Record<string, unknown>)[props.member.name] }
+    } catch (error) {
+      return { error }
+    }
+  })
+  return (
+    <Show
+      when={isThing(read().value)}
+      fallback={
+        <ui-property
+          name={props.member.name}
+          label={memberLabel(props.member)}
+          readonly=""
+          class={["InspectorComputed", { failed: "error" in read() }]}
+        >
+          <Show
+            when={typeof read().value === "boolean"}
+            fallback={<ui-input size="small" appearance="transparent" readonly="" value={computedText(read())} />}
+          >
+            <ui-checkbox readonly="" selected={read().value ? "" : undefined} />
+          </Show>
+        </ui-property>
+      }
+    >
+      <ThingLink label={memberLabel(props.member)} thing={read().value as object} step={props.member.name} />
+    </Show>
+  )
+}
+
+/** What a computed property's field shows:  its value as text, a list's count, or its error's message. */
+function computedText(read: { value?: unknown; error?: unknown }): string {
+  if ("error" in read) return read.error instanceof Error ? read.error.message : String(read.error)
+  const { value } = read
+  if (value === undefined || value === null) return ""
+  if (Array.isArray(value)) return appTexts.text("inspectorItems", { count: value.length })
+  const items = typeof value === "object" ? itemsOf(value) : undefined
+  if (items) return appTexts.text("inspectorItems", { count: items.length })
+  if (typeof value === "object" || typeof value === "function") return JSON.stringify(value) ?? ""
+  return String(value as string | number | boolean | bigint | symbol)
 }
 
 /****************

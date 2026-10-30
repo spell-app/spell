@@ -100,6 +100,7 @@
     {
       "property": "week",
       "of": "Habit",
+      "group": "The week:  the habits, one a row",
       "datatype": "Week",
       "exclusive": true,
       "defined": "/HabitTracker.spell:2144-2171"

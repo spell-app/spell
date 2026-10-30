@@ -97,6 +97,7 @@
         "statement",
         "expression"
       ],
+      "group": "The table:  a column, and a hand of cards to try on it",
       "kind": "method",
       "name": "try (a card)",
       "defined": "/HowSolitaireWorks.spell:2328-2597"
@@ -110,6 +111,7 @@
     {
       "property": "pile",
       "of": "Card",
+      "group": "A pile, and a column",
       "datatype": "Pile",
       "exclusive": true,
       "defined": "/HowSolitaireWorks.spell:1364-1390"

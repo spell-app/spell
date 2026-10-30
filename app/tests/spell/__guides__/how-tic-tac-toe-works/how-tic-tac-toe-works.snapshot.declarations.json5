@@ -50,6 +50,7 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a square",
       "kind": "method",
       "name": "play (a square)",
       "returns": "nothing",
@@ -64,6 +65,7 @@
     {
       "property": "board",
       "of": "Square",
+      "group": "A square:  empty, or holding an X or an O",
       "datatype": "Board",
       "exclusive": true,
       "defined": "/HowTicTacToeWorks.spell:961-990"

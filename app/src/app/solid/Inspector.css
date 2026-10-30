@@ -588,3 +588,9 @@ ui-icon.InspectorPick.picking {
     cursor: pointer;
   }
 }
+
+/* a thing's computed property:  its value as text, no box (epic `debut` P26);  one that threw, dimmed */
+.Inspector ui-property.InspectorComputed.failed {
+  opacity: 0.55;
+  font-style: italic;
+}

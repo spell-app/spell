@@ -15,6 +15,7 @@
     {
       "property": "name",
       "of": "Plant",
+      "group": "2. Properties",
       "datatype": "text",
       "defined": "/TourOfSpell.spell:1019-1037"
     },
@@ -22,6 +23,7 @@
       "property": "days_between_waterings",
       "asWritten": "days between waterings",
       "of": "Plant",
+      "group": "2. Properties",
       "datatype": "number",
       "defined": "/TourOfSpell.spell:1041-1081"
     },
@@ -29,6 +31,7 @@
       "property": "days_since_watered",
       "asWritten": "days since watered",
       "of": "Plant",
+      "group": "2. Properties",
       "datatype": "number",
       "defined": "/TourOfSpell.spell:1085-1121"
     },
@@ -37,6 +40,7 @@
       "output": "is_thirsty",
       "rule": "method_postfix",
       "of": "Plant",
+      "group": "3. Rules",
       "kind": "method",
       "name": "\"is thirsty\"",
       "returns": "choice",
@@ -45,6 +49,7 @@
     {
       "property": "status",
       "of": "Plant",
+      "group": "3. Rules",
       "datatype": "text",
       "defined": "/TourOfSpell.spell:1414-1491"
     },
@@ -57,6 +62,7 @@
         "statement",
         "expression"
       ],
+      "group": "3. Rules",
       "kind": "method",
       "name": "water it",
       "defined": "/TourOfSpell.spell:1569-1615"
@@ -70,6 +76,7 @@
         "statement",
         "expression"
       ],
+      "group": "4. Drawing",
       "kind": "method",
       "name": "draw it",
       "defined": "/TourOfSpell.spell:1873-2115"
@@ -83,6 +90,7 @@
     {
       "property": "windowsill",
       "of": "Plant",
+      "group": "Many things together:  a windowsill",
       "datatype": "Windowsill",
       "exclusive": true,
       "defined": "/TourOfSpell.spell:2316-2349"

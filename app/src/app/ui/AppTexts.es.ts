@@ -121,6 +121,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorTip: "Elige una parte de la app con la mira, para ver qué es y cambiarla.",
   inspectorPicking: "Haz clic en una parte de la app;  Alt y clic, en cualquier parte de dentro.  Esc deja de elegir.",
   inspectorText: "Texto",
+  inspectorBuiltIn: "Incorporado",
   inspectorItems: "Sus {count} elementos",
   "inspectorGroup.name": "Nombre",
   "inspectorGroup.content": "Contenido",

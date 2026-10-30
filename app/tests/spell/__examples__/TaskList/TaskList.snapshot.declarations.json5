@@ -129,6 +129,7 @@
     {
       "property": "checklist",
       "of": "Task",
+      "group": "The checklist",
       "datatype": "Checklist",
       "exclusive": true,
       "defined": "/TaskList.spellml:1371-1402"
@@ -193,6 +194,7 @@
         "statement",
         "expression"
       ],
+      "group": "filter",
       "kind": "method",
       "name": "draw it",
       "defined": "/TaskList.spellml:3318-4292"
@@ -206,6 +208,8 @@
         "statement",
         "expression"
       ],
+      "group": "filter",
+      "groupDescription": "Which tasks the list shows:  the toolbar ticks the one it's showing",
       "kind": "method",
       "name": "show all",
       "defined": "/TaskList.spellml:2647-2762"
@@ -219,6 +223,7 @@
         "statement",
         "expression"
       ],
+      "group": "filter",
       "kind": "method",
       "name": "show to do",
       "defined": "/TaskList.spellml:2767-2900"
@@ -232,6 +237,7 @@
         "statement",
         "expression"
       ],
+      "group": "filter",
       "kind": "method",
       "name": "show done",
       "defined": "/TaskList.spellml:2905-3039"
@@ -245,6 +251,7 @@
         "statement",
         "expression"
       ],
+      "group": "filter",
       "kind": "method",
       "name": "remove the done tasks",
       "defined": "/TaskList.spellml:3044-3153"

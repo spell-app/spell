@@ -88,6 +88,7 @@
         "statement",
         "expression"
       ],
+      "group": "La mesa:  una columna, y una mano de cartas para probar en ella",
       "kind": "method",
       "name": "jugar una carta",
       "defined": "/ComoFuncionaSolitario.es.spell:2527-2807"
@@ -102,6 +103,7 @@
     {
       "property": "pila",
       "of": "Carta",
+      "group": "Una pila, y una columna",
       "datatype": "Pila",
       "exclusive": true,
       "defined": "/ComoFuncionaSolitario.es.spell:1545-1575"

@@ -64,7 +64,38 @@ export class SpellWords {
       if (!Object.keys(members).length) delete types[type]
     }
     const messages = SpellWords.messagesFor(lang)
-    return messages ? { lang, types, messages } : { lang, types }
+    const groups = SpellWords.groupsOf(declarations.statements.filter(isIn), writer)
+    return { lang, types, ...(messages && { messages }), ...(groups && { groups }) }
+  }
+
+  /**
+   * Each type's members by group, from `statements` (epic `debut` P26) -- see `SP.SpellWordsData.groups`.
+   * - A member's declaration names its group (`group: "rank"`);  the group's first member, its description too.
+   * - Groups in the order their first member is declared, each member once;  a group with none is left out.
+   * - `undefined` when no type has any.
+   */
+  static groupsOf(
+    statements: SP.SpellDeclaration[],
+    writer: SpellWordsWriter = P.JSWriter.instance
+  ): Record<string, SP.SpellWordsGroup[]> | undefined {
+    const groups: Record<string, SP.SpellWordsGroup[]> = {}
+    const descriptions = new Map<string, string>()
+    for (const { group, of, groupDescription } of statements) {
+      if (group && of && groupDescription) descriptions.set(`${of}\n${group}`, groupDescription)
+    }
+    for (const statement of statements) {
+      const { group, of } = statement
+      const member = group && of ? SpellWords.memberOf(statement, writer) : undefined
+      if (!member) continue
+      const typeGroups = (groups[of!] ??= [])
+      let entry = typeGroups.find((each) => each.name === group)
+      if (!entry) {
+        const description = descriptions.get(`${of}\n${group}`)
+        typeGroups.push((entry = { name: group!, ...(description && { description }), members: [] }))
+      }
+      if (!entry.members.includes(member.name)) entry.members.push(member.name)
+    }
+    return Object.keys(groups).length ? groups : undefined
   }
 
   /**
@@ -106,7 +137,8 @@ export class SpellWords {
    *     Card: {
    *       moveToPile: "move (a card) to (a pile)",
    * ```
-   * - Then `messages`, if it has any:  `"expect-failed": "Inesperado: ..."`.
+   * - Then `messages`, if it has any:  `"expect-failed": "Inesperado: ..."`;
+   *   then `groups`, if it has any:  `Card: [{ name: "rank", members: ["rank", "value"] }, ...]`.
    * - One member a line, so a diff shows which changed.  Keys bare where they're identifiers, as a person writes.
    * - Plain data, so `read()` reads it back with `JSON5`.
    */
@@ -114,12 +146,16 @@ export class SpellWords {
     const types = Object.entries(words.types).map(([type, members]) => {
       return `    ${literalKey(type)}: {\n${literalLines(members, "      ").join(",\n")}\n    }`
     })
+    const sections = [
+      types.length ? `  types: {\n${types.join(",\n")}\n  }` : "  types: {}",
+      ...(words.messages ? [`  messages: {\n${literalLines(words.messages, "    ").join(",\n")}\n  }`] : []),
+      ...(words.groups ? [`  groups: {\n${groupLines(words.groups).join(",\n")}\n  }`] : [])
+    ]
     return [
       `/*! ${WORDS_MARKER} ${projectName} ${words.lang} */`,
       "export const words = {",
       `  lang: ${JSON.stringify(words.lang)},`,
-      (types.length ? `  types: {\n${types.join(",\n")}\n  }` : "  types: {}") + (words.messages ? "," : ""),
-      ...(words.messages ? [`  messages: {\n${literalLines(words.messages, "    ").join(",\n")}\n  }`] : []),
+      sections.join(",\n"),
       "}",
       ""
     ].join("\n")
@@ -210,6 +246,20 @@ function unquoted(text: string): string {
 /** Each of `entries` as a line of an object literal, after `indent`:  `moveToPile: "move (a card) to (a pile)"`. */
 function literalLines(entries: Record<string, string>, indent: string): string[] {
   return Object.entries(entries).map(([key, text]) => `${indent}${literalKey(key)}: ${JSON.stringify(text)}`)
+}
+
+/**
+ * Each type's groups as the words file holds them, one group a line, so a diff shows which changed:
+ * `    Card: [\n      { name: "rank", members: ["rank", "value"] },\n ...`.
+ */
+function groupLines(groups: Record<string, SP.SpellWordsGroup[]>): string[] {
+  return Object.entries(groups).map(([type, list]) => {
+    const lines = list.map((group) => {
+      const description = group.description === undefined ? "" : `, description: ${JSON.stringify(group.description)}`
+      return `      { name: ${JSON.stringify(group.name)}${description}, members: [${group.members.map((name) => JSON.stringify(name)).join(", ")}] }`
+    })
+    return `    ${literalKey(type)}: [\n${lines.join(",\n")}\n    ]`
+  })
 }
 
 /** `key` bare if it's an identifier, else quoted, e.g. `moveToPile` but `"is-a"`. */

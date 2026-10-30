@@ -28,5 +28,13 @@ export const words = {
       showDone: "show done",
       removeTheDoneTasks: "remove the done tasks"
     }
+  },
+  groups: {
+    Task: [
+      { name: "The checklist", members: ["checklist"] }
+    ],
+    TaskList: [
+      { name: "filter", description: "Which tasks the list shows:  the toolbar ticks the one it's showing", members: ["draw", "showAll", "showToDo", "showDone", "removeTheDoneTasks"] }
+    ]
   }
 }

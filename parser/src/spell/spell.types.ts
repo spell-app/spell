@@ -599,6 +599,46 @@ export type SpellWordsData = {
    * - Only for a language other than English:  English's are the core's own.
    */
   messages?: Record<string, string>
+  /**
+   * Each type's members by GROUP, in the order its file says them, by the type's class name (epic `debut` P26):
+   * `{ Card: [{ name: "rank", description: "Ace is low ...", members: ["rank", "isARank", "value"] }, ...] }`.
+   * - A group:  a template's `- group "rank"` (spellx's `<group "rank" .../>`), or a heading over its members
+   *   (`## turning it over`).
+   * - Members by compiled name, as in `types`;  one under no group isn't listed.
+   * - Left out when no type has any.
+   * - The Inspector shows a thing's fields in these bands.
+   */
+  groups?: Record<string, SpellWordsGroup[]>
+}
+
+/** One group of a type's members, in a words file -- see `SpellWordsData.groups`. */
+export type SpellWordsGroup = {
+  /** As written:  `rank`, or a heading's text, `turning it over:  face up or down`. */
+  name: string
+  /** What its line says of it, if anything:  a group's `description`. */
+  description?: string
+  /** Its members' compiled names, in the file's order. */
+  members: string[]
+}
+
+/**
+ * The group a template's member is under, as `Block` hands it to `SpellDeclarations.declarationFor()`
+ * (epic `debut` P26):  the last `- group "rank"` above it in its block, or the last heading (`## drawing`).
+ */
+export type MemberGroup = {
+  /** Its name:  `rank`, or the heading's text. */
+  name: string
+  /** The comment on a group's line:  its `description` in spellx. */
+  description?: string
+}
+
+/**
+ * What a rule that opens a group of a template's members has (`DefineGroup`), duck-typed by `Block` and
+ * `SpellDeclarations`, which can't import it.
+ */
+export type GroupRule = {
+  /** The name of the group `match` opens:  `rank`. */
+  groupName(match: P.Match): string
 }
 
 /** The slots `- it has slots "front" and "back"` declared on its type, for the project's declarations -- see `HasSlots`. */
@@ -694,6 +734,10 @@ export type SpellDeclaration = {
    * (epic `elemental-spell` Q71) -- see `P.TypeScope.slotOutputs`.
    */
   slotOutputs?: Record<string, string>
+  /** The group of its template's members it's in (`rank`), or the heading it's under -- see `MemberGroup`. */
+  group?: string
+  /** `group`'s description, on its first member only:  the comment on the group's line. */
+  groupDescription?: string
   /**
    * `importableAs` name of the class its rule was `specialize()`d from, e.g. `"method_call"`.
    * - Its OTHER keys here are what that class's `specialize()` takes, e.g. `output` + `alias`.

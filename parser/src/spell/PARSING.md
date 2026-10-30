@@ -1674,7 +1674,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - It's a `/*! SPELL: DECLARES {...} */` comment.
     - It goes below any docstring.
     - For a class member, it's indented in its class's body (`commentFor()`).
-    - It's ONE flat JS object literal, 3-7 lines, merging the scope records it added (`declarationFor()`):
+    - It's ONE flat JS object literal, 3-8 lines, merging the scope records it added (`declarationFor()`):
       e.g. `{ property: "suit", classVariable: "Suits", of: "Card", enumeration: [...] }`.
   - `SpellProject`'s "Combining output" `split()`s the markers back OUT.
     - The compiled JS is just code.
@@ -1697,6 +1697,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `kind` + `name`:  what its rule's `getDeclaration()` says, for editors.
       - e.g. `name: "draw (a card)"`
       - Unless a key already says, e.g. `type`.
+    - `group`:  the group of its template's members a member is under (epic `debut` P26).
+      - `Block.getAST()` hands each line the last group opened above it in its block:
+        a `- group "rank"` (spellx's `<group>`), or a heading, `## turning it over`.
+      - Its first member's says its description too, `groupDescription: "Ace is low"`:
+        the comment on the group's line, else the comment lines just above it.
+      - The group's own line has no marker:  it would leave a line behind in the compiled code.
+      - The words file lists each type's members by group from them (`SP.SpellWords.groupsOf()`):
+        the Inspector's bands.
     - only what's known:
       - a method's `params` and `returns`
         - e.g. `params: [{ name: "pile", datatype: "Pile" }]`

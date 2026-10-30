@@ -17,5 +17,13 @@ export const words = {
       waitADay: "wait a day",
       draw: "draw it"
     }
+  },
+  groups: {
+    Plant: [
+      { name: "2. Properties", members: ["name", "daysBetweenWaterings", "daysSinceWatered"] },
+      { name: "3. Rules", members: ["isThirsty", "status", "water"] },
+      { name: "4. Drawing", members: ["draw"] },
+      { name: "Many things together:  a windowsill", members: ["windowsill"] }
+    ]
   }
 }

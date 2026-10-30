@@ -20,5 +20,10 @@ export const words = {
       addSomeone: "add someone",
       draw: "draw it"
     }
+  },
+  groups: {
+    Diner: [
+      { name: "The table:  the diners, one a row", members: ["remove", "table"] }
+    ]
   }
 }

@@ -12,36 +12,42 @@
     {
       "property": "input",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/Calculator.spell:364-397"
     },
     {
       "property": "output",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/Calculator.spell:398-432"
     },
     {
       "property": "left",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/Calculator.spell:433-464"
     },
     {
       "property": "right",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/Calculator.spell:465-497"
     },
     {
       "property": "total",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "number",
       "defined": "/Calculator.spell:498-534"
     },
     {
       "property": "operator",
       "of": "Calculator",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/Calculator.spell:535-571"
     },
@@ -54,6 +60,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "clear (a calculator)",
       "defined": "/Calculator.spell:594-746"
@@ -67,6 +74,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "update the total of (a calculator)",
       "defined": "/Calculator.spell:748-1175"
@@ -80,6 +88,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "append (digit as text) to (a calculator)",
       "params": [
@@ -99,6 +108,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "apply (op as text) to (a calculator)",
       "params": [
@@ -118,6 +128,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "finish (a calculator)",
       "returns": "nothing",
@@ -132,6 +143,7 @@
         "statement",
         "expression"
       ],
+      "group": "How it draws:  the display, then the keypad, four keys a row",
       "kind": "method",
       "name": "draw (a calculator)",
       "defined": "/Calculator.spell:2204-3701"

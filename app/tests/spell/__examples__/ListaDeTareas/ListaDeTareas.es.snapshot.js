@@ -36,5 +36,10 @@ export const words = {
     "undo-step": "Deshacer {step}",
     redo: "Rehacer",
     "redo-step": "Rehacer {step}"
+  },
+  groups: {
+    Tarea: [
+      { name: "La agenda:  las tareas, cada una un elemento propio dentro de ella", members: ["agenda"] }
+    ]
   }
 }

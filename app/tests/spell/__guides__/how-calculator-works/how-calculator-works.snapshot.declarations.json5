@@ -13,12 +13,14 @@
     {
       "property": "total",
       "of": "AddingMachine",
+      "group": "What it keeps",
       "datatype": "number",
       "defined": "/HowCalculatorWorks.spell:796-837"
     },
     {
       "property": "input",
       "of": "AddingMachine",
+      "group": "What it keeps",
       "datatype": "text",
       "defined": "/HowCalculatorWorks.spell:913-951"
     },
@@ -31,6 +33,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "press (digit as text) on (an adding machine)",
       "params": [
@@ -50,6 +53,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "add the input to (an adding machine)",
       "returns": "nothing",
@@ -64,6 +68,7 @@
         "statement",
         "expression"
       ],
+      "group": "What its keys do",
       "kind": "method",
       "name": "clear (an adding machine)",
       "defined": "/HowCalculatorWorks.spell:1615-1685"
@@ -77,6 +82,7 @@
         "statement",
         "expression"
       ],
+      "group": "How it draws:  the display, then the keys",
       "kind": "method",
       "name": "draw (an adding machine)",
       "defined": "/HowCalculatorWorks.spell:1888-2453"

@@ -1,6 +1,7 @@
 import type { Core } from "spell/parser/core/core.types"
 import type { SP } from "spell/parser/spell"
 import type { WrittenEvent } from "./InspectorSource"
+import { wordsOfName } from "./ThingMembers"
 
 /****************
  * ### `InspectorActions`
@@ -190,11 +191,6 @@ function actionFrom(
     .reduce((rest, parameter) => rest.replace(new RegExp(`\\s*\\b${parameter.words}\\b`, "i"), ""), words)
     .trim()
   return { name, words, label: label || words, parameters, type }
-}
-
-/** A class or method name in words:  `StockPile` => `stock pile`, `turnOver` => `turn over`. */
-function wordsOfName(name: string): string {
-  return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
 }
 
 /** A word before a thing's type, in an action's words:  `a pile`, `the pile`. */

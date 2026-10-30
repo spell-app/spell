@@ -48,10 +48,10 @@ describe("SpellDeclarations, inline", () => {
     expect(old.statements).toEqual(declarations.statements)
   })
 
-  test("each statement's comment is short:  3-7 lines", () => {
+  test("each statement's comment is short:  3-8 lines (a group's first member's says its description too)", () => {
     const comments = compiled.match(/\/\*! SPELL: DECLARES \{[\s\S]*? \*\//g)!
     expect(comments.length).toBe(declarations.statements.length)
-    for (const comment of comments) expect(comment.split("\n").length).toBeLessThanOrEqual(7)
+    for (const comment of comments) expect(comment.split("\n").length).toBeLessThanOrEqual(8)
   })
 
   test("reads a class member's comment, indented in its class's body", () => {

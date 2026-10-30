@@ -10,5 +10,12 @@ export const words = {
       clear: "clear (an adding machine)",
       draw: "draw (an adding machine)"
     }
+  },
+  groups: {
+    AddingMachine: [
+      { name: "What it keeps", members: ["total", "input"] },
+      { name: "What its keys do", members: ["pressDigitOnAddingMachine", "addTheInputToAddingMachine", "clear"] },
+      { name: "How it draws:  the display, then the keys", members: ["draw"] }
+    ]
   }
 }

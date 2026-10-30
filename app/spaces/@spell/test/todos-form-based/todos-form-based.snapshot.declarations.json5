@@ -14,12 +14,14 @@
     {
       "property": "title",
       "of": "Task",
+      "group": "Todo app example",
       "datatype": "text",
       "defined": "/todo.spell:38-64"
     },
     {
       "property": "completed",
       "of": "Task",
+      "group": "Todo app example",
       "datatype": "choice",
       "defined": "/todo.spell:65-109"
     },
@@ -28,6 +30,7 @@
       "output": "is_complete",
       "rule": "method_postfix",
       "of": "Task",
+      "group": "Todo app example",
       "kind": "method",
       "name": "\"is complete\"",
       "returns": "choice",
@@ -38,6 +41,7 @@
       "output": "is_active",
       "rule": "method_postfix",
       "of": "Task",
+      "group": "Todo app example",
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
@@ -51,12 +55,14 @@
     {
       "property": "tasks",
       "of": "TodosApp",
+      "group": "Todo app example",
       "datatype": "list of tasks",
       "defined": "/todo.spell:220-275"
     },
     {
       "property": "newTaskName",
       "of": "TodosApp",
+      "group": "Todo app example",
       "datatype": "text",
       "defined": "/todo.spell:276-322"
     },
@@ -64,6 +70,7 @@
       "property": "filter",
       "classVariable": "Filters",
       "of": "TodosApp",
+      "group": "Todo app example",
       "enumeration": [
         "all",
         "active",
@@ -74,6 +81,7 @@
     {
       "property": "shownTasks",
       "of": "TodosApp",
+      "group": "Todo app example",
       "datatype": "list of tasks",
       "defined": "/todo.spell:384-584"
     },
@@ -86,6 +94,7 @@
         "statement",
         "expression"
       ],
+      "group": "Todo app example",
       "kind": "method",
       "name": "draw (a todos-app)",
       "defined": "/todo.spell:1173-2970"

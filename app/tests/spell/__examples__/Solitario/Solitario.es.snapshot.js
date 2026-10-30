@@ -100,5 +100,21 @@ export const words = {
     "undo-step": "Deshacer {step}",
     redo: "Rehacer",
     "redo-step": "Rehacer {step}"
+  },
+  groups: {
+    Carta: [
+      { name: "rango de la carta", members: ["rango", "valor", "esUnRango", "esUnaFigura", "esUnaCartaNumérica"] },
+      { name: "palo de la carta", members: ["palo", "esUnPalo", "color"] },
+      { name: "cartas concretas", members: ["nombre", "esElRangoDePalo"] },
+      { name: "su dirección:  boca arriba o boca abajo", members: ["dirección", "estáBocaDirección"] },
+      { name: "voltear la carta", members: ["voltearBocaArriba", "voltearBocaAbajo", "voltear", "imagen", "cara"] },
+      { name: "dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse", members: ["símbolo"] },
+      { name: "el \"estado\" de la carta, para depurar", members: ["estado"] },
+      { name: "Jugar una carta:  qué hace un clic o un arrastre", members: ["jugar", "ponerEnPila", "contarLosPuntosDeCartaEnPila"] },
+      { name: "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes", members: ["pila"] }
+    ],
+    Pila: [
+      { name: "estado de la pila, para depurar", members: ["estado"] }
+    ]
   }
 }

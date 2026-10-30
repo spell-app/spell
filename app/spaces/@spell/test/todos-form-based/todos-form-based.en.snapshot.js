@@ -15,5 +15,13 @@ export const words = {
       shownTasks: "shownTasks",
       draw: "draw (a todos-app)"
     }
+  },
+  groups: {
+    Task: [
+      { name: "Todo app example", members: ["title", "completed", "isComplete", "isActive"] }
+    ],
+    TodosApp: [
+      { name: "Todo app example", members: ["tasks", "newTaskName", "filter", "shownTasks", "draw"] }
+    ]
   }
 }

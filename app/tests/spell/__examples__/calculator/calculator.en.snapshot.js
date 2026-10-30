@@ -16,5 +16,12 @@ export const words = {
       finish: "finish (a calculator)",
       draw: "draw (a calculator)"
     }
+  },
+  groups: {
+    Calculator: [
+      { name: "What it keeps", members: ["input", "output", "left", "right", "total", "operator"] },
+      { name: "What its keys do", members: ["clear", "updateTheTotalOfCalculator", "appendDigitToCalculator", "applyOpToCalculator", "finish"] },
+      { name: "How it draws:  the display, then the keypad, four keys a row", members: ["draw"] }
+    ]
   }
 }

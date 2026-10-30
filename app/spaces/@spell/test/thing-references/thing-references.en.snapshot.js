@@ -5,5 +5,10 @@ export const words = {
     Pile: {
       name: "name"
     }
+  },
+  groups: {
+    Pile: [
+      { name: "Thing references:  one thing by its type and its name, or its place", members: ["name"] }
+    ]
   }
 }

@@ -24,6 +24,8 @@
       "property": "rank",
       "classVariable": "Ranks",
       "of": "Card",
+      "group": "rank",
+      "groupDescription": "Ace is low:  ace = 1 ... king = 13",
       "enumeration": [
         "ace",
         2,
@@ -70,6 +72,7 @@
     {
       "property": "value",
       "of": "Card",
+      "group": "rank",
       "datatype": "number",
       "defined": "/Card.spellml:530-572"
     },
@@ -78,6 +81,7 @@
       "output": "is_a_face_card",
       "rule": "method_postfix",
       "of": "Card",
+      "group": "rank",
       "kind": "method",
       "name": "\"is a face card\"",
       "returns": "choice",
@@ -88,6 +92,7 @@
       "output": "is_a_number_card",
       "rule": "method_postfix",
       "of": "Card",
+      "group": "rank",
       "kind": "method",
       "name": "\"is a number card\"",
       "returns": "choice",
@@ -97,6 +102,7 @@
       "property": "suit",
       "classVariable": "Suits",
       "of": "Card",
+      "group": "suit",
       "enumeration": [
         "clubs",
         "diamonds",
@@ -126,6 +132,7 @@
       "property": "color",
       "classVariable": "Colors",
       "of": "Card",
+      "group": "suit",
       "enumeration": [
         "red",
         "black"
@@ -135,12 +142,15 @@
     {
       "property": "symbol",
       "of": "Card",
+      "group": "suit",
       "datatype": "text",
       "defined": "/Card.spellml:909-1014"
     },
     {
       "property": "name",
       "of": "Card",
+      "group": "names",
+      "groupDescription": "What a person, a test or the console calls it",
       "datatype": "text",
       "defined": "/Card.spellml:1108-1153"
     },
@@ -149,6 +159,7 @@
       "output": "is_the_$rank_of_$suit",
       "rule": "quoted_property",
       "of": "Card",
+      "group": "names",
       "kind": "method",
       "name": "\"is the (rank) of (suit)\"",
       "values": {
@@ -179,6 +190,7 @@
     {
       "property": "state",
       "of": "Card",
+      "group": "names",
       "datatype": "text",
       "defined": "/Card.spellml:1194-1454"
     },
@@ -191,6 +203,8 @@
         "statement",
         "expression"
       ],
+      "group": "drawing",
+      "groupDescription": "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css",
       "kind": "method",
       "name": "draw it",
       "defined": "/Card.spellml:1619-1784"
@@ -198,6 +212,7 @@
     {
       "property": "picture",
       "of": "Card",
+      "group": "drawing",
       "datatype": "text",
       "defined": "/Card.spellml:1795-2388"
     },
@@ -210,6 +225,7 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a card",
       "kind": "method",
       "name": "play a card",
       "defined": "/Solitaire.spellml:6291-6542"
@@ -223,6 +239,7 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a card",
       "kind": "method",
       "name": "put a card on a pile",
       "params": [
@@ -244,6 +261,7 @@
         "statement",
         "expression"
       ],
+      "group": "Playing a card",
       "kind": "method",
       "name": "count the points for a card on a pile",
       "params": [
@@ -351,6 +369,7 @@
     {
       "property": "pile",
       "of": "Card",
+      "group": "A pile of cards",
       "datatype": "Pile",
       "exclusive": true,
       "defined": "/Pile.spellml:2044-2070"
@@ -427,78 +446,92 @@
     {
       "property": "stock",
       "of": "Solitaire",
+      "group": "piles",
+      "groupDescription": "One of each, made with the solitaire",
       "datatype": "StockPile",
       "defined": "/Solitaire.spellml:573-627"
     },
     {
       "property": "discards",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "DiscardPile",
       "defined": "/Solitaire.spellml:632-694"
     },
     {
       "property": "clubs",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Foundation",
       "defined": "/Solitaire.spellml:699-767"
     },
     {
       "property": "diamonds",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Foundation",
       "defined": "/Solitaire.spellml:772-849"
     },
     {
       "property": "hearts",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Foundation",
       "defined": "/Solitaire.spellml:854-925"
     },
     {
       "property": "spades",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Foundation",
       "defined": "/Solitaire.spellml:930-1001"
     },
     {
       "property": "T1",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1006-1051"
     },
     {
       "property": "T2",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1056-1101"
     },
     {
       "property": "T3",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1106-1151"
     },
     {
       "property": "T4",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1156-1201"
     },
     {
       "property": "T5",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1206-1251"
     },
     {
       "property": "T6",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1256-1301"
     },
     {
       "property": "T7",
       "of": "Solitaire",
+      "group": "piles",
       "datatype": "Tableau",
       "defined": "/Solitaire.spellml:1306-1351"
     },
@@ -511,6 +544,7 @@
         "statement",
         "expression"
       ],
+      "group": "piles",
       "kind": "method",
       "name": "create it",
       "defined": "/Solitaire.spellml:1356-1560"
@@ -524,6 +558,8 @@
         "statement",
         "expression"
       ],
+      "group": "dealing",
+      "groupDescription": "Each pauses a moment, so a deal animates",
       "kind": "method",
       "name": "reset the stock",
       "defined": "/Solitaire.spellml:1649-1907"
@@ -537,6 +573,7 @@
         "statement",
         "expression"
       ],
+      "group": "dealing",
       "kind": "method",
       "name": "play from the stock",
       "waits": true,
@@ -551,6 +588,7 @@
         "statement",
         "expression"
       ],
+      "group": "dealing",
       "kind": "method",
       "name": "deal the cards",
       "waits": true,
@@ -565,6 +603,7 @@
         "statement",
         "expression"
       ],
+      "group": "game",
       "kind": "method",
       "name": "draw it",
       "defined": "/Solitaire.spellml:5018-5989"
@@ -578,6 +617,8 @@
         "statement",
         "expression"
       ],
+      "group": "game",
+      "groupDescription": "Its moves:  the menu's buttons, its keys, and the board's right click",
       "kind": "method",
       "name": "start a new game",
       "defined": "/Solitaire.spellml:3158-3250"
@@ -591,6 +632,7 @@
         "statement",
         "expression"
       ],
+      "group": "game",
       "kind": "method",
       "name": "auto play",
       "waits": true,
@@ -605,6 +647,7 @@
         "statement",
         "expression"
       ],
+      "group": "game",
       "kind": "method",
       "name": "cheat",
       "returns": "nothing",

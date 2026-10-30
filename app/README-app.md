@@ -458,7 +458,10 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 
 The sliders button in the app's header opens the Inspector, a column at the window's far right.
 Point at the app and a part of it is outlined;  click, and its properties are there to change.
-- A drawn Spell thing, a card in Solitaire:  its type's properties, rank, suit, direction.
+- A drawn Spell thing, a card in Solitaire:  its type's properties, in bands named by its file's groups,
+  in the file's order (rank, suit, names, drawing), then those it inherits (two sided view).
+  - What it works out, Value, Color, Picture, is a face card:  its value as text, read only, live as the game plays.
+  - Its built-in `id` last, folded.
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
@@ -471,6 +474,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  picking stops once something's picked,
   and the crosshairs start it again.  Esc stops it.
+- The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
 **Not yet:**  a change isn't written back into the code, nor an event's code typed there.

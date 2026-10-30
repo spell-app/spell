@@ -23,5 +23,10 @@ export const words = {
       addTheDraft: "add the draft",
       draw: "draw it"
     }
+  },
+  groups: {
+    Habit: [
+      { name: "The week:  the habits, one a row", members: ["week"] }
+    ]
   }
 }
