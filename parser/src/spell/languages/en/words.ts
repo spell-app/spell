@@ -163,7 +163,16 @@ export const englishWords: SP.LanguageWords = {
       group: "group"
     },
     notes: { description: "description", comment: "comment" },
-    handlers: { on: "on", when: "when", while: "while" },
+    handlers: {
+      on: "on",
+      when: "when",
+      while: "while",
+      // an ability's own tag (epic `debut` P27, Q47):  `<clickable when it is face down/>`
+      draggable: "draggable",
+      clickable: "clickable",
+      selectable: "selectable",
+      droppable: "droppable"
+    },
     controls: {
       if: "if",
       "otherwise if": "otherwise if",
@@ -189,6 +198,7 @@ export const englishWords: SP.LanguageWords = {
       draggable: "draggable",
       droppable: "droppable",
       selectable: "selectable",
+      clickable: "clickable",
       group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
@@ -237,9 +247,23 @@ export const englishWords: SP.LanguageWords = {
       group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
-      viewFlags: { draggable: "it is draggable", droppable: "it is droppable", selectable: "it is selectable" },
+      viewFlags: {
+        draggable: "it is draggable",
+        droppable: "it is droppable",
+        selectable: "it is selectable",
+        clickable: "it is clickable"
+      },
       start: "start {words}",
-      handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
+      handlers: {
+        on: "on {phrase} :",
+        when: "when {phrase} :",
+        while: "while {phrase} :",
+        draggable: "it is draggable {phrase} :",
+        clickable: "it is clickable {phrase} :",
+        selectable: "it is selectable {phrase} :",
+        droppable: "it is droppable {phrase} :",
+        "items draggable": "its {items} are draggable {phrase} :"
+      },
       controls: {
         if: "if {phrase}",
         "otherwise if": "otherwise if {phrase}",

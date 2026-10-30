@@ -1372,7 +1372,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   init: {
     "--name <name>": "the name you go by on the epics (else asked, or git's)",
     "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",
-    "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>-epics)",
+    "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>.epics)",
     "--remote <address>": "use this shared repo, made already",
     "--no-remote": "make no shared repo:  the plans stay on this machine",
     "--public": "make the shared repo public, without asking (else asked, or private)",

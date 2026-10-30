@@ -39,7 +39,7 @@ import { Shared } from "./Shared"
  *    - a LATER person (the config names its `contentRemote`, the folder is missing):  clones it instead
  *      (`Shared.clone()`, plain git;  epic `epic-friend` P4)
  * 2b. gives the content repo its REMOTE, so a team shares the plans (`remoteStep()`, epic `epic-friend` P4, Q1):
- *    - the FIRST person:  asks what to call it (`CLI.ask()`, suggesting `<repo>-epics`;  `--content-repo`
+ *    - the FIRST person:  asks what to call it (`CLI.ask()`, suggesting `<repo>.epics`;  `--content-repo`
  *      answers), and whether it's private or public (private suggested;  `--public` answers;  epic `epic-friend`
  *      T19), makes it on GitHub (`GitHub.createRepo()`), pushes, and writes its address into the config
  *      (`contentRemote`)
@@ -269,9 +269,7 @@ export class RepoInit {
   static async commitStep({ report, ask }: { report: InitReport; ask: boolean }): Promise<CommitReport> {
     const { main, dryRun } = report
     const base = report.config.settings.baseBranch
-    const files = [EpicConfig.FILE, ".gitignore"].filter((file) =>
-      Git.out(["status", "--porcelain", "--", file], main)
-    )
+    const files = [EpicConfig.FILE, ".gitignore"].filter((file) => Git.out(["status", "--porcelain", "--", file], main))
     if (!files.length) return { action: "none", files, branch: base }
     const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], main) ?? ""
     if (branch !== base) return { action: "other branch", files, branch }
@@ -345,7 +343,7 @@ export class RepoInit {
    * - `remote`, else the config's `contentRemote`:  made the remote, pushed (`added`)
    * - else made on GitHub (`made`), when `gh` is there and logged in (`no gh`, `logged out`);  `failed` with gh's
    *   words when GitHub said no
-   *   - its name:  `contentRepo`, else asked when `ask` (in a terminal), else `<repo>-epics`
+   *   - its name:  `contentRepo`, else asked when `ask` (in a terminal), else `<repo>.epics`
    *   - private or public:  `visibility`, else asked when `ask` (`askVisibility()`), else private
    * - a push that failed is in `error`:  the repo and its address stand
    * - SIDE EFFECT (not `dryRun`):  the repo on GitHub, the remote, the push, `contentRemote` in the config
@@ -385,7 +383,7 @@ export class RepoInit {
     if (gh === "missing") return { action: "no gh" }
     const owner = gh === "ready" ? RepoInit.ownerFor(this.main) : undefined
     if (!owner) return { action: "logged out" }
-    const suggestion = `${basename(this.main)}-epics`
+    const suggestion = `${basename(this.main)}.epics`
     const repoName = contentRepo ?? (ask ? await CLI.ask(REPO_QUESTION, { suggestion }) : suggestion)
     if (!REPO_NAME.test(repoName))
       return { action: "failed", repo: `${owner}/${repoName}`, error: 'letters, digits, ".", "-" and "_" only' }
@@ -467,40 +465,26 @@ export class RepoInit {
   }
 
   /**
-   * Whether the shared repo is private or public, asked in a terminal:  "Private or public?", private suggested.
-   * - takes `p`, `private` or `public`, any case (`visibilityFor()`);  anything else asks again, twice at most,
-   *   then private
-   * - no terminal:  private, asking nothing (`CLI.ask()`)
+   * Whether the shared repo is private or public, picked in a terminal from the two (`CLI.choose()`), private first.
+   * - no terminal:  private, asking nothing
    */
   static async askVisibility(): Promise<RepoVisibility> {
-    for (let tries = 0; tries < 3; tries++) {
-      const visibility = RepoInit.visibilityFor(await CLI.ask(VISIBILITY_QUESTION, { suggestion: "private" }))
-      if (visibility) return visibility
-      CLI.err('  "private" or "public", please (p is private)')
-    }
-    return "private"
-  }
-
-  /** The visibility an answer to "Private or public?" means:  `p` / `private`, `public`, any case;  else `undefined`. */
-  static visibilityFor(answer: string): RepoVisibility | undefined {
-    const word = answer.trim().toLowerCase()
-    if (word === "p" || word === "private") return "private"
-    if (word === "public") return "public"
-    return undefined
+    return (await CLI.choose(VISIBILITY_QUESTION, VISIBILITY_CHOICES)) as RepoVisibility
   }
 
   /**
-   * The name to keep, asked in a terminal:  "What do you want to be called?", suggesting their GitHub login, else
-   * git's `user.name` (Owen, 2026-10-29).
+   * The name to keep, asked in a terminal EVERY time (Owen, 2026-10-29:  "never asked for my user name"):
+   * "What do you want to be called?", suggesting the name kept already, else their GitHub login, else git's
+   * `user.name`;  Enter keeps it.
    * - the login looked up first (`EpicHome.refreshGithub()`), and kept, so pages never run `gh`
-   * - `undefined` when a name is kept already (it stays), or nothing was said and neither knows a name
+   * - `undefined` when nothing was said and nobody knows a name
    * - no terminal:  the suggestion, asking nothing (`CLI.ask()`)
    */
   static async askName(): Promise<string | undefined> {
     EpicHome.refreshGithub()
     const now = EpicHome.person()
-    if (now.source === "kept") return undefined
-    return (await CLI.ask(NAME_QUESTION, { suggestion: now.github ?? now.fullName ?? "" })) || undefined
+    const suggestion = (now.source === "kept" ? now.name : undefined) ?? now.github ?? now.fullName ?? ""
+    return (await CLI.ask(NAME_QUESTION, { suggestion })) || undefined
   }
 
   /**
@@ -532,19 +516,14 @@ export class RepoInit {
   }
 
   /**
-   * Their colour, asked in a terminal:  "Which colour should your words be?", listing `free`, the first suggested.
-   * - takes one of `free`, any case;  anything else asks again, twice at most, then the suggestion
-   * - no terminal:  the suggestion, asking nothing (`CLI.ask()`)
+   * Their colour, picked in a terminal from `free` (`CLI.choose()`), the first marked.
+   * - no terminal:  the first, asking nothing
    */
   static async askColor(free: readonly string[]): Promise<string> {
-    const suggestion = free[0]!
-    if (process.stdin.isTTY && process.stdout.isTTY) CLI.err(`  free:  ${free.join(", ")}`)
-    for (let tries = 0; tries < 3; tries++) {
-      const answer = (await CLI.ask(COLOR_QUESTION, { suggestion })).trim().toLowerCase()
-      if (free.includes(answer)) return answer
-      CLI.err(`  one of ${free.join(", ")}, please`)
-    }
-    return suggestion
+    return CLI.choose(
+      COLOR_QUESTION,
+      free.map((name) => ({ value: name, label: name }))
+    )
   }
 
   /**
@@ -660,19 +639,22 @@ export class RepoInit {
       ...(configChanged ? [EpicConfig.FILE] : []),
       ...(report.gitignore.action === "ok" ? [] : [".gitignore"])
     ]
-    const pushLine = remote.address && configChanged ? [`next:  push ${report.config.settings.baseBranch}:  then a teammate's epic init clones the plans`] : []
+    const pushLine =
+      remote.address && configChanged
+        ? [`next:  push ${report.config.settings.baseBranch}:  then a teammate's epic init clones the plans`]
+        : []
     const next = report.commit
       ? [...commitLinesFor(report.commit), ...(report.commit.action === "committed" ? pushLine : [])]
       : toCommit.length
-      ? [
-          `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}` +
-            (remote.address && configChanged ? ", and push it:  then a teammate's epic init clones the plans" : "")
-        ]
-      : remote.action === "cloned" && report.server?.action !== "started"
-        ? ["next:  epic server start, to see the epics"]
-        : content.action === "exists" && !REMOTE_WRITTEN.has(remote.action)
-          ? ["set up already"]
-          : []
+        ? [
+            `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}` +
+              (remote.address && configChanged ? ", and push it:  then a teammate's epic init clones the plans" : "")
+          ]
+        : remote.action === "cloned" && report.server?.action !== "started"
+          ? ["next:  epic server start, to see the epics"]
+          : content.action === "exists" && !REMOTE_WRITTEN.has(remote.action)
+            ? ["set up already"]
+            : []
     const more = SHOW_README.has(remote.action) ? [`more on sharing the epics:  ${README_EPICS}`] : []
     return [...lines, ...next, ...more]
   }
@@ -689,9 +671,14 @@ function commitLinesFor({ action, files, branch, error }: CommitReport): string[
     case "declined":
       return [`next:  commit ${named} on ${branch}, so every new worktree starts with them`]
     case "other branch":
-      return [`not committed:  you're on ${branch};  commit ${named} on the base branch, so every new worktree starts with them`]
+      return [
+        `not committed:  you're on ${branch};  commit ${named} on the base branch, so every new worktree starts with them`
+      ]
     case "failed":
-      return [`couldn't commit ${named} on ${branch}:  ${error}`, `  commit them by hand:  git commit -- ${files.join(" ")}`]
+      return [
+        `couldn't commit ${named} on ${branch}:  ${error}`,
+        `  commit them by hand:  git commit -- ${files.join(" ")}`
+      ]
     default:
       /* case "none" */ return []
   }
@@ -812,7 +799,9 @@ function colorLinesFor(color: ColorReport | undefined): string[] {
     case "would keep": {
       const kept = `your colour:  ${color.color}, ${color.action === "kept" ? "kept" : "would be kept"} in ${color.file}`
       if (color.shared === undefined) return [kept]
-      return [color.shared ? `${kept}, and pushed:  the team sees it` : `${kept};  the team sees it after your next turn`]
+      return [
+        color.shared ? `${kept}, and pushed:  the team sees it` : `${kept};  the team sees it after your next turn`
+      ]
     }
     case "already":
       return [`your colour:  ${color.color}`]
@@ -992,7 +981,7 @@ export type InitOptions = {
   name?: string
   /** the shared repo's address, made already (`--remote`):  made the content repo's remote, and pushed to */
   remote?: string
-  /** the name to give the shared repo on GitHub (`--content-repo`);  none:  asked, else `<repo>-epics` */
+  /** the name to give the shared repo on GitHub (`--content-repo`);  none:  asked, else `<repo>.epics` */
   contentRepo?: string
   /** whether the shared repo made on GitHub is private or public (`--public`);  none:  asked, else private */
   visibility?: RepoVisibility
@@ -1030,6 +1019,12 @@ const COLOR_QUESTION = "Which colour should your words be?"
 
 /** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub. */
 const REPO_QUESTION = "What should the shared epics repo be called?"
+
+/** "Private or public?"'s two choices, private first (`askVisibility()`). */
+const VISIBILITY_CHOICES = [
+  { value: "private", label: "private", hint: "only the people you add can see the plans" },
+  { value: "public", label: "public", hint: "anyone can read every epic page, guide and comment" }
+]
 
 /** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub:  who can see it. */
 const VISIBILITY_QUESTION = "Private or public?"

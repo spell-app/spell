@@ -12,7 +12,7 @@ npx spell@next epic init --name Ben
 Initializing Epic for repo ~/www/my-app
 plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  kept as it is
-joined git@github.com:ana/my-app-epics.git:  the plans cloned into ~/www/my-app.epics
+joined git@github.com:ana/my-app.epics.git:  the plans cloned into ~/www/my-app.epics
 ~/www/my-app/epics:  linked
 ~/www/my-app/sagas:  linked
 ~/www/my-app/guides:  linked
@@ -77,7 +77,7 @@ flowchart LR
     content["my-app.epics/:  epics, sagas, guides, pages"]
     trees["my-app.worktrees/:  one folder per epic"]
   end
-  github["GitHub:  my-app-epics, the team's copy"]
+  github["GitHub:  my-app.epics, the team's copy"]
   repo --- config
   repo -- "links to" --> content
   repo -- "worktrees in" --> trees
@@ -144,8 +144,8 @@ Initializing Epic for repo ~/www/my-app
 plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  written
 ~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
-shared repo:  made ana/my-app-epics on GitHub, private, and pushed
-  its address, git@github.com:ana/my-app-epics.git, is in .epic/config.json5 (contentRemote)
+shared repo:  made ana/my-app.epics on GitHub, private, and pushed
+  its address, git@github.com:ana/my-app.epics.git, is in .epic/config.json5 (contentRemote)
 ~/www/my-app/epics:  linked
 ~/www/my-app/sagas:  linked
 ~/www/my-app/guides:  linked
@@ -172,15 +172,17 @@ The first and last lines are in colour in a terminal;  the settings it wrote are
 - 🌱 `spell epic` is new:  until the next `spell@next` is published, run it from a clone of Spell
   ([Setup from zero](README.md#setup-from-zero)):  `node ~/www/spell/bin/spell.mjs epic init`.
 
-In a terminal, it asks five things:
-- **What do you want to be called?**  Your short name on the pages, suggesting your GitHub login.
+In a terminal, it asks five things, each question in yellow.
+A pick-one question is a numbered list:  the arrow keys and Enter, or a number key, pick.
+- **What do you want to be called?**  Your short name on the pages, suggesting the one you keep already,
+  else your GitHub login;  asked every time, Enter keeps it.
   `--name Ana` answers it.
 - **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
-  It lists Spell UI's colour names nobody on the team has yet, and suggests the first.
+  A list of Spell UI's colour names nobody on the team has yet, the first marked.
   `--color green` answers it;  any CSS colour works too.
-- **What should the shared repo be called?**  Suggesting `<repo>-epics`, here `my-app-epics`.
+- **What should the shared repo be called?**  Suggesting `<repo>.epics`, here `my-app.epics`.
   `--content-repo <name>` answers it.
-- **Private or public?**  Suggesting private:  `p`, `private` or `public`, in any case.
+- **Private or public?**  A list of the two, private marked.
   `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
   A public repo shows everything in the plans to anyone:  epic pages, guides, comments.
   `epic init` says so in a line of its own.

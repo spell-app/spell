@@ -6,7 +6,7 @@
  */
 import { P } from "spell/parser/parser"
 
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 
 import { events } from "./events.parser"
 import { DeclareEvent } from "./DeclareEvent"
@@ -228,6 +228,80 @@ events.addRule(On, {
             "    core.console.log(card.rank)",
             "  }",
             "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// A passive `when`, about the thing itself (epic `debut` P27, Q47):  `when clicked` is `on click` -- see `On`
+events.addRule(
+  Wording.specialize({
+    ruleName: "passive_event",
+    meanings: ["click", "double_click", "right_click", "drag", "drag_cancelled"]
+  }),
+  {
+    syntax:
+      "((click:clicked)|(double_click:double clicked)|(right_click:right clicked)|(drag:dragged)|(drag_cancelled:drag is cancelled|the drag is cancelled|drag cancelled))"
+  }
+)
+events.addRule(On, {
+  syntax: "when {passive:passive_event} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a card is a view where:",
+            "\t- when double clicked print 1",
+            "\t- when the drag is cancelled print 2"
+          ],
+          js: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event) {",
+            "    return core.console.log(1)",
+            "  }",
+            "",
+            "  onDragCancelled(event) {",
+            "    return core.console.log(2)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Card extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event: any /* spell: type unknown */) {",
+            "    return core.console.log(1)",
+            "  }",
+            "",
+            "  onDragCancelled(event: any /* spell: type unknown */) {",
+            "    return core.console.log(2)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-card", "card", [])',
+            "",
+            "  onDoubleClick(event: any /* spell: type unknown */) {",
+            "    return this.currentThing?.onDoubleClick(event)",
+            "  }",
+            "",
+            "  onDragCancelled(event: any /* spell: type unknown */) {",
+            "    return this.currentThing?.onDragCancelled(event)",
+            "  }",
+            "}",
+            "core.useElement(Card, CardElement)"
           ]
         }
       ]

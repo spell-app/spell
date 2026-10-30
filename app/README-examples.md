@@ -4,8 +4,8 @@
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
 	<spell>
-		- it can give up a card if: the card is face up
-		- it can take a card if:
+		- its cards are draggable when the card is face up
+		- droppable when:
 			if it is empty
 				return the card is a king
 			return its color is not the color of the card and its value is the value of the card + 1
@@ -311,31 +311,22 @@ with Markdown around them for a person to read
 First, what a task IS:
 
 ```html
-<spell-view "task">
+<spell-view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
-
-	<group "on the page"
-		description="A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it"
-	/>
-	<spell>
-		- it can be selected
-		- it can be dragged
-	</spell>
 ```
 
-- `<spell-view "task">` declares a new template;  each `<property>` gives it a property, with its kind.
-- `<group "on the page">` is a heading over the members after it, its `description=` what they're for.
+- `<spell-view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
+  - `selectable`:  a click selects a task, and shift or command (ctrl) selects more.
+  - `draggable`:  by its grip, to another place in its list (below).
+- Each `<property>` gives it a property, with its kind.
 - `one-of="low, normal or high"` is a choice of three values.
 - The aliases are new ways to talk about a task:  later lines can say `where it is active`.
 - A view makes each task an element of its own on the page, `<task-list-task>`.
-- A `<spell>` block holds plain Spell, here two outline bullets:
-  - `it can be selected`:  a click selects a task, and shift or command (ctrl) selects more.
-  - `it can be dragged`:  by its grip, to another place in its list (below).
 
 Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
 a form of its own, bound to the task.
@@ -760,6 +751,53 @@ Made Flashcards:  try  spell run <your space>/Flashcards
 - With no `--in`, it goes in your own space:  [setting one up](README-spaces.md#setting-up-spaces-for-your-own-project)
   says where that is, and how a project imports a library.
 - Then, in its folder, `spell app serve` opens the editor on it.
+
+## Keeping the examples current
+
+The examples and notebooks show what the language and Spell UI could do when they were written.
+Both keep learning, so now and then the examples catch up:
+
+1. `spell content update` lists what's new since the last time:
+   the commits under `parser/` and `ui/`, grouped by the epic each one names, with that epic's changelog entry;
+   Spell UI's new components and attributes;  the parser's new grammar.
+
+   ```sh
+   spell content update
+   ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   Since 6efbde477 (2026-10-25), a first guess:  no update recorded yet
+   up to 74fd4f9f6 (2026-10-29);  168 commits under parser/ and ui/
+
+   Epics (9)
+     debut  57 commits  changelog:  2026-10-23 · Debut:  Spell's public preview, ...
+   ...
+   New components (15)
+     <ui-space>  A space is a gap between things. ...
+   ...
+   New grammar (3)
+     DrawSlot (classes)  PLACE one of a view's slots in its drawing ...
+   ```
+
+   </details>
+
+2. Turn that into features worth showing, each with the examples and notebooks it would touch,
+   and add each to the content epic's standing set, "Upgrades on offer":
+   `epic option add content#s-upgrades-on-offer "Title" "note"`.
+   - End each note with the ids it covers (`component:ui-space`, `epic:debut`, `grammar:DrawSlot`):
+     the next `spell content update` marks those as on offer, picked or turned down.
+3. Tick the ones to build, and press Send:  the ticks become a "Content Update" phase, built like any other.
+   - Turned down (removed from the set), a feature isn't offered again.
+4. Once it's built, `spell content update --done`:  the next update starts from there.
+   - `--always <id>` upgrades a kind of change from then on without asking:
+     `--always component` every new component, `--always epic:debut` everything epic `debut` adds.
+
+- `--json` prints the same as JSON, for a script or a session.
+- It remembers the stop commit and the always rules in the content epic's folder of the shared content
+  (`epics/content/content-updates.json5`), never beside the examples.
 
 ## The frozen test projects
 

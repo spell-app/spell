@@ -1365,6 +1365,7 @@
             "and_or",
             "is_greater_or_less_than",
             "rounding",
+            "passive_event",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -1377,6 +1378,7 @@
             "drag_moment",
             "right_away",
             "draggable_or_droppable",
+            "when_or_if",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1400,6 +1402,9 @@
             },
             {
               "syntax": "((up:hacia arriba|para arriba)|(down:hacia abajo|para abajo))"
+            },
+            {
+              "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
             },
             {
               "syntax": "((start:principio|comienzo|inicio|frente|arriba)|(end:final|fin|fondo|abajo))"
@@ -1435,7 +1440,10 @@
               "syntax": "((immediately:de inmediato|inmediatamente|enseguida))"
             },
             {
-              "syntax": "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
+              "syntax": "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable)|(clicked:pulsable))"
+            },
+            {
+              "syntax": "((when:cuando)|(if:si))"
             },
             {
               "syntax": "((at_least:al menos|como mínimo|como minimo)|(at_most:como mucho|a lo sumo|como máximo|como maximo))"
@@ -2255,7 +2263,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 25,
+          "line": 30,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -2285,6 +2293,21 @@
                 },
                 "py": {
                   "code": "core.on(\"card-click\")"
+                }
+              }
+            },
+            {
+              "syntax": "cuando {passive:passive_event} :? {statement_body}?",
+              "example": "una carta es una vista donde:\n\t- cuando se pulsa dos veces imprimir 1",
+              "outputs": {
+                "js": {
+                  "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: any ) {\n    return core.console.log(1)\n  }\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [])\n\n  onDoubleClick(event: any ) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n}\ncore.useElement(Carta, CartaElement)"
+                },
+                "py": {
+                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)"
                 }
               }
             },
@@ -2391,7 +2414,7 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -4381,21 +4404,21 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 29,
-          "purpose": "Which things a page lets people drag and select, and which lists they may drop them on.",
+          "line": 47,
+          "purpose": "What people may do to a type's things on the page -- drag, click, select, drop on them.",
           "syntaxes": [
             {
               "syntax": "(un|una) {type:known_type} se puede {what:drag_or_drop}",
               "example": "una carta se puede arrastrar",
               "outputs": {
                 "js": {
-                  "code": "Carta.canBeDragged = true"
+                  "code": "Carta.draggable = true"
                 },
                 "ts": {
-                  "code": "Carta.canBeDragged = true"
+                  "code": "Carta.draggable = true"
                 },
                 "py": {
-                  "code": "Carta.can_be_dragged = True"
+                  "code": "Carta.draggable = True"
                 }
               }
             },
@@ -4404,13 +4427,28 @@
               "example": "una carta es arrastrable",
               "outputs": {
                 "js": {
-                  "code": "Carta.canBeDragged = true"
+                  "code": "Carta.draggable = true"
                 },
                 "ts": {
-                  "code": "Carta.canBeDragged = true"
+                  "code": "Carta.draggable = true"
                 },
                 "py": {
-                  "code": "Carta.can_be_dragged = True"
+                  "code": "Carta.draggable = True"
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} cuando :? {expression_body}",
+              "example": "una carta es pulsable cuando su rango es 1",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Carta.prototype, \"clickableWhen\", {\n  get() {\n    return this.rango === 1\n  },\n  configurable: true\n})\nCarta.clickable = true"
+                },
+                "ts": {
+                  "code": "export interface Carta { readonly clickableWhen: boolean }\nObject.defineProperty(Carta.prototype, \"clickableWhen\", {\n  get(this: Carta) {\n    return this.rango === 1\n  },\n  configurable: true\n})\nCarta.clickable = true"
+                },
+                "py": {
+                  "code": "@Carta.add_property(\"clickable_when\")\ndef _carta_clickable_when(self) -> bool:\n    return self.rango == 1\n\nCarta.clickable = True"
                 }
               }
             },
@@ -4421,10 +4459,22 @@
               "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable}"
             },
             {
+              "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable} cuando :? {expression_body}"
+            },
+            {
               "syntax": "{type:subject_implied} se puede {what:drag_or_drop}"
             },
             {
               "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable} cuando :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable} cuando :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -4565,12 +4615,12 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 38,
+          "line": 57,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:known_type} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} si :? {expression_body}?",
-              "example": "una pile puede tomar una carta si: la pile está vacía",
+              "syntax": "(un|una) {type:known_type} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?",
+              "example": "una pile puede tomar una carta cuando: la pile está vacía",
               "outputs": {
                 "js": {
                   "code": "Pile.prototype.canTake = function (carta) {\n  return this.isEmpty\n}"
@@ -4599,16 +4649,25 @@
               }
             },
             {
-              "syntax": "{type:subject_it} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} si :? {expression_body}?"
+              "syntax": "{type:subject_it} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_it} (never:nunca puede|nunca pueden|no puede nunca|no pueden nunca) {verb:take_or_give_up} (un|una) {item:type}"
             },
             {
-              "syntax": "{type:subject_implied} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} si :? {expression_body}?"
+              "syntax": "{type:subject_implied} (puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_implied} (never:nunca puede|nunca pueden|no puede nunca|no pueden nunca) {verb:take_or_give_up} (un|una) {item:type}"
+            },
+            {
+              "syntax": "{type:subject_its} {item:plural_type} son arrastrables cuando :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} soltable cuando :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_it} es soltable cuando :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -5422,10 +5481,16 @@
               "syntax": "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
             },
             {
+              "syntax": "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+            },
+            {
               "syntax": "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
             },
             {
               "syntax": "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+            },
+            {
+              "syntax": "mientras {item:known_type} se? arrastra sobre (él|ella|ello)? :? {statement_body}?"
             },
             {
               "syntax": "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?"

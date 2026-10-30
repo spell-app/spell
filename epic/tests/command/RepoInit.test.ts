@@ -32,7 +32,10 @@ const before = { ...process.env }
 process.env.SPELL_EPIC_HOME = join(TEMP, "epic-home")
 process.env.GIT_CONFIG_GLOBAL = join(TEMP, "gitconfig")
 process.env.GIT_CONFIG_NOSYSTEM = "1"
-writeFileSync(join(TEMP, "gitconfig"), "[user]\n  name = Ana Lima\n  email = ana@example.com\n[commit]\n  gpgsign = false\n")
+writeFileSync(
+  join(TEMP, "gitconfig"),
+  "[user]\n  name = Ana Lima\n  email = ana@example.com\n[commit]\n  gpgsign = false\n"
+)
 afterAll(() => {
   for (const key of ["SPELL_EPIC_HOME", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM"])
     if (before[key] === undefined) delete process.env[key]
@@ -169,11 +172,11 @@ describe("epic init:  the person's name", () => {
     }
   })
 
-  test("no terminal to ask in:  git's name, asking nothing", async () => {
+  test("no terminal to ask in:  the name kept, else git's, asking nothing;  asked every time (Owen, 2026-10-29)", async () => {
     rmSync(EpicHome.folder(), { recursive: true, force: true })
     expect(await RepoInit.askName()).toBe("Ana Lima")
     EpicHome.keepPerson("Ana")
-    expect(await RepoInit.askName()).toBeUndefined()
+    expect(await RepoInit.askName()).toBe("Ana")
   })
 })
 
@@ -327,7 +330,9 @@ describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
     expect(said.at(-1)).toBe("Epics initialized!")
     expect(said.some((line) => line.startsWith("  contentFolder:"))).toBe(false)
     expect(said).toContain("committed .epic/config.json5 and .gitignore on main")
-    expect(git(app, "log", "-1", "--format=%s").trim()).toBe("epic init:  set up epics (.epic/config.json5, .gitignore)")
+    expect(git(app, "log", "-1", "--format=%s").trim()).toBe(
+      "epic init:  set up epics (.epic/config.json5, .gitignore)"
+    )
     expect(git(app, "status", "--porcelain")).toBe("")
     // run again:  nothing left to commit, nothing said about it
     const again = await printed(() => offline(app).run(["--no-remote", "--no-server"]))
@@ -338,7 +343,11 @@ describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
     const app = codeRepo("branchy")
     git(app, "checkout", "-q", "-b", "work")
     const report = await offline(app).init({ name: "Bo", noRemote: true, commit: true })
-    expect(report.commit).toEqual({ action: "other branch", files: [".epic/config.json5", ".gitignore"], branch: "work" })
+    expect(report.commit).toEqual({
+      action: "other branch",
+      files: [".epic/config.json5", ".gitignore"],
+      branch: "work"
+    })
     expect(RepoInit.lines(report).join("\n")).toMatch(/not committed:  you're on work/)
     git(app, "checkout", "-q", "main")
     const dry = await offline(app).init({ dryRun: true, noRemote: true, commit: true })
@@ -377,14 +386,14 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const app = codeRepo("first")
     const gh = stubGh(app)
     const report = await withGh(gh, () => new RepoInit({ main: app }).init())
-    const bare = join(gh.repos, "ana", "first-epics.git")
-    expect(report.remote).toEqual({ action: "made", repo: "ana/first-epics", address: bare, visibility: "private" })
-    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/first-epics --private --description /m)
+    const bare = join(gh.repos, "ana", "first.epics.git")
+    expect(report.remote).toEqual({ action: "made", repo: "ana/first.epics", address: bare, visibility: "private" })
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/first.epics --private --description /m)
     // the content repo's commit is there
     expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
     expect(new EpicConfig(app).contentRemote).toBe(bare)
     const lines = RepoInit.lines(report)
-    expect(lines).toContain("shared repo:  made ana/first-epics on GitHub, private, and pushed")
+    expect(lines).toContain("shared repo:  made ana/first.epics on GitHub, private, and pushed")
     expect(lines).toContain(
       "next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them, " +
         "and push it:  then a teammate's epic init clones the plans"
@@ -413,7 +422,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     expect(realpathSync(join(friend, "epics"))).toBe(join(content, "epics"))
     const lines = RepoInit.lines(report)
     expect(lines).toContain(
-      `joined ${join(TEMP, "first", "gh-repos", "ana", "first-epics.git")}:  the plans cloned into ${content}`
+      `joined ${join(TEMP, "first", "gh-repos", "ana", "first.epics.git")}:  the plans cloned into ${content}`
     )
     expect(lines).toContain("next:  epic server start, to see the epics")
   })
@@ -458,8 +467,8 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const app = codeRepo("shy")
     const gh = stubGh(app)
     const report = await withGh(gh, () => new RepoInit({ main: app }).init({ ask: true }))
-    expect(report.remote).toMatchObject({ action: "made", repo: "ana/shy-epics", visibility: "private" })
-    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/shy-epics --private /m)
+    expect(report.remote).toMatchObject({ action: "made", repo: "ana/shy.epics", visibility: "private" })
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/shy.epics --private /m)
     expect(RepoInit.lines(report).join("\n")).not.toMatch(/PUBLIC/)
   })
 
@@ -474,8 +483,8 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     } finally {
       out.mockRestore()
     }
-    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/open-epics --public /m)
-    expect(printed).toContain("shared repo:  made ana/open-epics on GitHub, public, and pushed")
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/open.epics --public /m)
+    expect(printed).toContain("shared repo:  made ana/open.epics on GitHub, public, and pushed")
     expect(printed).toContain(
       "  NOTE:  it's PUBLIC:  everything in the plans (epic pages, guides, comments) can be read by anyone"
     )
@@ -483,17 +492,11 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const dry = await withGh(stubGh(codeRepo("open-dry")), () =>
       new RepoInit({ main: join(TEMP, "open-dry", "open-dry") }).init({ dryRun: true, visibility: "public" })
     )
-    expect(dry.remote).toEqual({ action: "would make", repo: "ana/open-dry-epics", visibility: "public" })
+    expect(dry.remote).toEqual({ action: "would make", repo: "ana/open-dry.epics", visibility: "public" })
     expect(RepoInit.lines(dry)).toContain(
-      "shared repo:  would make ana/open-dry-epics on GitHub, public, push to it, and write its address in " +
+      "shared repo:  would make ana/open-dry.epics on GitHub, public, push to it, and write its address in " +
         ".epic/config.json5 (contentRemote)"
     )
-  })
-
-  test("Private or public?:  p, private or public, any case;  anything else isn't an answer", () => {
-    expect(
-      ["p", "P", "private", " Private ", "public", "PUBLIC", "pub", "yes", ""].map(RepoInit.visibilityFor)
-    ).toEqual(["private", "private", "private", "private", "public", "public", undefined, undefined, undefined])
   })
 
   test("--content-repo, --remote and --no-remote:  one at a time;  a repo name GitHub takes", async () => {

@@ -140,8 +140,9 @@ describe("every folder's commands, under one name (epic repo-split P13)", () => 
     expect(spell(["help", "app"]).stdout).toMatch(/^ {2}create \[options\] <name>/m)
   })
 
-  test("the old spellings are gone:  spell dev, spell epic, spell check, spell new, spell serve, spell explore", () => {
-    for (const command of ["dev", "epic", "check", "new", "serve", "explore", "speed", "icons", "static"]) {
+  // `spell epic` is a command again since epic `epic-friend` P13
+  test("the old spellings are gone:  spell dev, spell check, spell new, spell serve, spell explore", () => {
+    for (const command of ["dev", "check", "new", "serve", "explore", "speed", "icons", "static"]) {
       const { status, stderr } = spell([command])
       expect(status, command).not.toBe(0)
       expect(stderr, command).toContain(`unknown command '${command}'`)

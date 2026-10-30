@@ -56,6 +56,10 @@ template view <spell-view> "playing card" 1:1-20:14 aka="card" template="two sid
 
 It looks like HTML, and it isn't.
 Two `alias=` on one tag are two aliases;  `<on mouse down>` has spaces in its name;  `</>` closes whatever is open.
+A handler or an ability takes bare words, no quotes:
+`<on click play it />` is one line of code, closed on its own line;
+`<clickable when it is face down />` says when a card can be clicked.
+Longer code goes between `<on click>` and `</>` (or `</on>`, or `</on click>`).
 No HTML or JSX parser reads it:  Spell's parser does, and knows only Spell's own words.
 
 Spellx is the same program as plain Spell, cut into the pieces a person, an editor or an agent works with one at a
@@ -98,8 +102,9 @@ reversible:`, and reads to the same tree as the English card.
 | A block of markup drawn as written | `<html>` | `<html>` |
 | A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
+| An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
@@ -349,7 +354,8 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - A member of a template from another file:  a template's tag is in ONE file, and spellx has no tag that adds to it.
   Plain Spell's `a card:` does, in a `<spell>` chunk:  Solitaire's moves are its game's, written so.
 - A top-level action, a function:  `<action>` goes inside a template;  a `<spell>` chunk holds one.
-- `it can be dragged`, `it can take a card if:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
+- `it can take a card when:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
+  - An ability has its own tag:  `<clickable when it is face down/>`, a list's `<cards draggable when ... />`.
 - A quoted value in an attribute:  `selected-when="its showing is \"done\""` can't be written.
   A one-of value read bare there can be taken for an alias of the same word (`is done`):
   the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.

@@ -71,12 +71,15 @@
       description: "Would it let go of a thing moving elsewhere, e.g. `if the stock can give up the card`?\n- Yes, unless its type says otherwise:  `a stock-pile can give up a card if: the card is its last card`,\n  or `a foundation can never let go of a card`.\n- `release`, `remove` and `let go of` mean the same.\n- Only `move` asks.  `remove` and `empty` never do.",
       rules: [
         { name: "can_give_up", syntax: "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
         { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
         { name: "list_guard", syntax: "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" }
+        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_its} {item:plural_type} are draggable when :? {expression_body}" },
+        { name: "list_guard", syntax: "{type:subject_implied} droppable when :? {expression_body}" },
+        { name: "list_guard", syntax: "{type:subject_it} is droppable when :? {expression_body}" }
       ]
     },
     {
@@ -84,12 +87,15 @@
       description: "Would it take a thing moving to it, e.g. `if the tableau can take the card`?\n- Yes, unless its type says otherwise:  `a tableau can take a card if: ...`, answering yes or no.\n- `add` means the same.\n- Only `move` asks.  `add` never does.",
       rules: [
         { name: "can_take", syntax: "{operator:can_or_cannot} (add|take) {expression:operand}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
         { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
         { name: "list_guard", syntax: "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" }
+        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_its} {item:plural_type} are draggable when :? {expression_body}" },
+        { name: "list_guard", syntax: "{type:subject_implied} droppable when :? {expression_body}" },
+        { name: "list_guard", syntax: "{type:subject_it} is droppable when :? {expression_body}" }
       ]
     },
     {
@@ -279,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -360,15 +366,15 @@
     {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///Users/owen/www/spell/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
     }
   ]
 }

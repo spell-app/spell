@@ -271,6 +271,16 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (control === "otherwise" && this.phraseFrom(text, end).text) continue
       return { category: "control", kind: control, word: written, wordEnd: end }
     }
+    // a list's ability for its items, `<cards draggable when ...>` (epic `debut` P27, Q47):  the items' word, then
+    // the ability's
+    if (words.length >= 2) {
+      const second = text.slice(wordEnd, words[1]!.end).trim().toLowerCase()
+      const kind = handlers[second]
+      if (kind === "draggable" || kind === "items draggable") {
+        const end = words[1]!.end
+        return { category: "handler", kind: "items draggable", word: text.slice(wordStart, end), wordEnd: end }
+      }
+    }
     return { category: "unknown", kind: first, word: first, wordEnd }
   }
 
@@ -487,7 +497,11 @@ export class SpellxTokenizer extends P.Tokenizer {
   private readPhraseHead(text: string, word: TagWord): Head {
     const phrase = this.phraseFrom(text, word.wordEnd)
     const head: Head = { attributes: [], selfClosing: phrase.selfClosing, end: phrase.end, errors: [] }
-    if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
+    if (!phrase.closed && word.category === "handler") {
+      // a one-line tag runs on:  its code belongs between tags (Q47)
+      const open = `<${`${word.word} ${phrase.text}`.trim().split(/\s+/).slice(0, 2).join(" ")}>`
+      head.errors.push(this.message("spellx-one-line-tag", { tag: `<${word.word}>`, open }))
+    } else if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
     let phraseText = phrase.text
     if (word.category === "handler") {
       for (let attribute = this.trailingAttribute(phraseText); attribute;) {
@@ -503,7 +517,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       }
     }
     if (phraseText) head.phrase = this.textAt(text, phrase.start, phrase.start + phraseText.length, false)
-    else if (word.kind !== "otherwise")
+    else if (word.kind !== "otherwise" && !SP.SPELLX_ABILITY_KINDS.includes(word.kind))
       head.errors.push(this.message("spellx-missing-phrase", { tag: `<${word.word}>`, word: word.word }))
     return head
   }
@@ -577,7 +591,7 @@ export class SpellxTokenizer extends P.Tokenizer {
       if (!closer) continue
       const after = line.slice(at + closer.raw.length)
       if (after && !TRAILING_COMMENT.test(after)) continue
-      return !closer.word || this.isSpellxWord(closer.word) ? closer : undefined
+      return !closer.word || this.isSpellxWord(firstWordOf(closer.word)) ? closer : undefined
     }
     return undefined
   }
@@ -605,7 +619,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     this.frames.pop()
     this.closedChain = frame.chain ? frame : undefined
-    if (closer.word && !this.isWordFor(closer.word, frame))
+    if (closer.word && !this.isWordFor(closer.word, frame, (frame.token as SP.SpellxTagToken).tag?.phrase?.text))
       errors.push(this.message("spellx-mismatched-closer", { closer: closer.raw, open: `<${frame.word}>` }))
     return withErrors(token, errors)
   }
@@ -616,7 +630,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     this.inlineCloser = undefined
     const closer = this.readCloser(text, start)!
     const token = new SP.SpellxCloserToken({ start, raw: closer.raw, value: closer.raw, word: closer.word })
-    if (closer.word && !this.isWordFor(closer.word, tag.tag))
+    if (closer.word && !this.isWordFor(closer.word, tag.tag, tag.tag.phrase?.text))
       SP.addSpellxError(
         token,
         this.message("spellx-mismatched-closer", { closer: closer.raw, open: `<${tag.tag.word}>` })
@@ -703,9 +717,19 @@ export class SpellxTokenizer extends P.Tokenizer {
   // ## Words
   ////////////////
 
-  /** Does `word`, in a named closer, close `tag`:  its word, any word meaning the same, or its first word? */
-  private isWordFor(word: string, tag: { category: string; kind: string; word: string }): boolean {
-    const lower = word.toLowerCase()
+  /**
+   * Does `word`, in a named closer, close `tag`:  its word, any word meaning the same, or its first word?
+   * - A handler's closer may go on into its phrase (Q47):  `</on click>` closes `<on click>`, as `</on>` and `</>` do.
+   */
+  private isWordFor(word: string, tag: { category: string; kind: string; word: string }, phrase?: string): boolean {
+    const lower = word.toLowerCase().replace(/[ \t]+/g, " ")
+    if (lower.includes(" ")) {
+      const head = firstWordOf(lower)
+      if (!this.isWordFor(head, tag)) return false
+      const written = `${tag.word} ${phrase ?? ""}`.toLowerCase().replace(/[ \t]+/g, " ")
+      const rest = lower.slice(head.length)
+      return written.startsWith(lower) || `${head}${written.slice(tag.word.length)}`.startsWith(`${head}${rest}`)
+    }
     if (lower === tag.word.toLowerCase() || lower === firstWordOf(tag.word)) return true
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     switch (tag.category) {
@@ -919,7 +943,7 @@ const TRAILING_COMMENT = /^\s+\/\//
 /** An attribute ending a handler's phrase, `description="..."`:  its leading space, its word and its value. */
 const TRAILING_ATTRIBUTE = /(\s+)([\p{L}\p{M}\d_-]+)="([^"]*)"\s*$/u
 
-const CLOSER = /^<\/([\p{L}\p{M}\d_-]*)[ \t]*>/u
+const CLOSER = /^<\/((?:[\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+)*)?)[ \t]*>/u
 
 /** The most words a handler's or control's word has:  `de lo contrario si`. */
 const MOST_WORDS_IN_A_TAG_WORD = 4

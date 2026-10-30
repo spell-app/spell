@@ -5,7 +5,7 @@ exports[`testing spell module events, in Spanish > rule group specs > match snap
   "cancel_event": "eventName?",
   "declare_event": "type|event|props?",
   "input_state": "operator?",
-  "on": "eventName|props?|body?",
+  "on": "eventName?|props?|body?|passive?",
   "pass_event": "eventName?",
   "send": "eventName|target?|props?",
   "trigger": "eventName|props?",

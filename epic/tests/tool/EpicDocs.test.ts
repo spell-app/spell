@@ -162,7 +162,7 @@ describe("EpicDocs on a scratch checkout", () => {
     ])
     expect(list.counts).toEqual({ wrote: 5, related: 1, linked: 1, swept: 1 })
     expect(list.docs.find((doc) => doc.path === "README.md")!.commits).toHaveLength(1)
-    expect(list.changelog).toEqual({ path: "guides/changelog.html", anchor: "x", found: true })
+    expect(list.changelog).toEqual({ path: "guides/changelog.html", anchor: "x", found: true, title: "2026-10-01 · X" })
     expect(list.planDoc).toBe("epics/x/x.plan.html")
   })
 

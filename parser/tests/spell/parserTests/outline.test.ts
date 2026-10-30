@@ -1054,8 +1054,8 @@ describe("outline style", () => {
         "a pile is a viewable list of cards where:",
         "\t- can be dropped on"
       ])
-      expect(js).toContain("static canBeDragged = true")
-      expect(js).toContain("static canBeDroppedOn = true")
+      expect(js).toContain("static draggable = true")
+      expect(js).toContain("static droppable = true")
     })
 
     test("`- it is draggable`, `- is droppable`:  the same flags;  `is not` turns one off for a sub-type (outline-spell P28)", () => {
@@ -1067,9 +1067,9 @@ describe("outline style", () => {
         "a pile is a viewable list of cards where:",
         "\t- is droppable"
       ])
-      expect(js).toContain("static canBeDragged = true")
-      expect(js).toContain("static canBeDragged = false")
-      expect(js).toContain("static canBeDroppedOn = true")
+      expect(js).toContain("static draggable = true")
+      expect(js).toContain("static draggable = false")
+      expect(js).toContain("static droppable = true")
     })
 
     test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
@@ -1119,7 +1119,7 @@ describe("outline style", () => {
         "to show the selection of a to-do",
         "\tprint the length of the selection of the to-do"
       ])
-      expect(js).toContain("static canBeSelected = true")
+      expect(js).toContain("static selectable = true")
       expect(js).toContain("core.console.log(core.itemCountOf(this.selection))")
     })
 

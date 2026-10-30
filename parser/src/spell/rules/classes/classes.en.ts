@@ -29,7 +29,7 @@ import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
-import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE } from "./ListGuard"
+import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE, ITEMS_DRAGGABLE, DROPPABLE_WHEN } from "./ListGuard"
 import { MarkdownDescription } from "./MarkdownDescription"
 import { MustRule } from "./MustRule"
 import { NamedThing } from "./NamedThing"
@@ -51,7 +51,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
-import { DragAndDrop } from "./DragAndDrop"
+import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
@@ -86,7 +86,9 @@ classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragg
 // When a list's drag handler runs, for `drag_handler`:  `when a card is dropped on it`
 classes.addRule(
   Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
-  { syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))" }
+  {
+    syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of|dragged out)|(dropped_on:dropped on|dropped))"
+  }
 )
 
 // No wait, for `items_reordered`:  `- its items can be reordered immediately`
@@ -94,13 +96,21 @@ classes.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immedia
   syntax: "((immediately:immediately|right away))"
 })
 
-// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
+// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`, `clickable when ...`
 classes.addRule(
-  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  Wording.specialize({
+    ruleName: "draggable_or_droppable",
+    meanings: ["dragged", "dropped_on", "selected", "clicked"]
+  }),
   {
-    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable)|(clicked:clickable))"
   }
 )
+
+// What starts a condition, for `list_guard`:  `when`, or the old `if`, which still works with a warning (Q42)
+classes.addRule(Wording.specialize({ ruleName: "when_or_if", meanings: ["when", "if"] }), {
+  syntax: "((when:when)|(if:if))"
+})
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
 classes.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -587,8 +597,8 @@ classes.addRule(CanBelongToMany, {
   ]
 })
 
-// `a card can be dragged`, `a pile can be dropped on`:  dragging is opt-in (epic `outline-spell` P28)
-classes.addRule(DragAndDrop, {
+// `a card can be dragged`, `a pile can be dropped on`:  the old words, one release more, with a warning (epic `debut` P27)
+classes.addRule(OLD_ABILITY_WORDS, {
   syntax: "(a|an) {type:known_type} can be {what:drag_or_drop}",
   tests: [
     {
@@ -597,17 +607,17 @@ classes.addRule(DragAndDrop, {
         scope.parse(["a card is a view", "a pile is a viewable list of cards"].join("\n"), "block")
       },
       tests: [
-        ["a card can be dragged", "Card.canBeDragged = true"],
-        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"],
-        ["a card can be selected", "Card.canBeSelected = true"]
+        ["a card can be dragged", "Card.draggable = true"],
+        ["a pile can be dropped on", "Pile.droppable = true"],
+        ["a card can be selected", "Card.selectable = true"]
       ]
     }
   ]
 })
 
-// as adjectives:  `a card is draggable`, `a pile is not droppable`
+// ONE word per ability:  `a card is draggable`, `a pile is not droppable`, `a card is clickable when it is face down`
 classes.addRule(DragAndDrop, {
-  syntax: "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+  syntax: `(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}`,
   tests: [
     {
       compileAs: "block",
@@ -615,31 +625,108 @@ classes.addRule(DragAndDrop, {
         scope.parse(["a card is a view", "a pile is a viewable list of cards"].join("\n"), "block")
       },
       tests: [
-        ["a card is draggable", "Card.canBeDragged = true"],
-        ["a pile is droppable", "Pile.canBeDroppedOn = true"],
-        ["a card is not draggable", "Card.canBeDragged = false"],
-        ["a card is selectable", "Card.canBeSelected = true"]
+        ["a card is draggable", "Card.draggable = true"],
+        ["a pile is droppable", "Pile.droppable = true"],
+        ["a card is not draggable", "Card.draggable = false"],
+        ["a card is selectable", "Card.selectable = true"],
+        ["a card is clickable", "Card.clickable = true"]
+      ]
+    }
+  ]
+})
+
+// with a condition (Q42, Q47):  `a card is clickable when it is face down`, the colon optional
+classes.addRule(DragAndDrop, {
+  syntax: `(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["a card is a view", "a card has a rank as a number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "a card is clickable when its rank is 1",
+          [
+            'Object.defineProperty(Card.prototype, "clickableWhen", {',
+            "  get() {",
+            "    return this.rank === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.clickable = true"
+          ],
+          [
+            "export interface Card { readonly clickableWhen: boolean }",
+            'Object.defineProperty(Card.prototype, "clickableWhen", {',
+            "  get(this: Card) {",
+            "    return this.rank === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.clickable = true"
+          ]
+        ],
+        [
+          "a card is draggable when: its rank > 1",
+          [
+            'Object.defineProperty(Card.prototype, "draggableWhen", {',
+            "  get() {",
+            "    return this.rank > 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.draggable = true"
+          ],
+          [
+            "export interface Card { readonly draggableWhen: boolean }",
+            'Object.defineProperty(Card.prototype, "draggableWhen", {',
+            "  get(this: Card) {",
+            "    return this.rank > 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Card.draggable = true"
+          ]
+        ]
       ]
     }
   ]
 })
 
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
-classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
-classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
+// and its short forms (epic `debut` P27, Q47):  `on` or `when`, the small words optional, "on it" understood --
+// `- on card dropped:`, `- when a card is dragged out of it:`, `- while card dragged over:`
+// (with no article, only a type it knows:  `something` is any thing)
+classes.addRule(DragHandler, {
+  syntax: "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
+})
+classes.addRule(DragHandler, {
+  syntax: "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
+})
+classes.addRule(DragHandler, { syntax: "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is? dragged over it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while {item:known_type} is? dragged over it? :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is? dragged over it? :? {statement_body}?" })
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
 classes.addRule(ItemsReordered, {
   syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
 })
 
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:
-// `- it can be dragged`, `- can be dropped on`
+// `- it is draggable`, `- is droppable`, the old `- it can be dragged`;  and with no "it is" (Q47):
+// `- draggable`, `- clickable when it is face down`
 for (const subject of ["subject_it", "subject_implied"]) {
-  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
-  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
+  classes.addRule(OLD_ABILITY_WORDS, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
+  classes.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}`
+  })
+  classes.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION}`
+  })
 }
+classes.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable}` })
+classes.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable} ${ABILITY_CONDITION}` })
 
 classes.addRule(SavedInline, {
   syntax: "(a|an) {type:known_type} is saved inline",
@@ -769,7 +856,7 @@ classes.addRule(ListGuard, {
       },
       tests: [
         [
-          "a pile can take a card if: it is empty",
+          "a pile can take a card when: it is empty",
           ["Pile.prototype.canTake = function (card) {", "  return this.isEmpty", "}"],
           [
             "export interface Pile { canTake(card: Card): boolean }",
@@ -781,7 +868,7 @@ classes.addRule(ListGuard, {
         {
           title: "an indented body, `the pile` and `the card`",
           input: [
-            "a pile can add a card if:",
+            "a pile can add a card when:",
             "\tif the pile is empty return yes",
             "\treturn the card is not the last card of the pile"
           ],
@@ -800,7 +887,7 @@ classes.addRule(ListGuard, {
           ]
         },
         [
-          "a pile can give up a card if: the card is its last card",
+          "a pile can give up a card when: the card is its last card",
           ["Pile.prototype.canGiveUp = function (card) {", "  return card === this.lastItem", "}"],
           [
             "export interface Pile { canGiveUp(card: Card): boolean }",
@@ -866,6 +953,13 @@ for (const subject of ["subject_it", "subject_implied"]) {
     classes.addRule(ListGuard, { syntax: `{type:${subject}} ${guard}` })
   }
 }
+// the short forms (epic `debut` P27, Q47) -- tests in `parserTests/outline.test.ts`:
+// `- its cards are draggable when the card is face up`, `- droppable when the card is one lower`
+classes.addRule(ListGuard.specialize({ shortFor: "give_up" }), { syntax: ITEMS_DRAGGABLE })
+classes.addRule(ListGuard.specialize({ shortFor: "take" }), { syntax: DROPPABLE_WHEN })
+classes.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_it} is droppable when :? {expression_body}"
+})
 
 classes.addRule(NewThing, {
   syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?",

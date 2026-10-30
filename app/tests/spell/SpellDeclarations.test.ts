@@ -168,7 +168,7 @@ describe("SpellDeclarations.importScope()", () => {
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
       expect(card.declaredAt?.path).toBe(`${projectId}/Card.spellml`)
-      expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view">\n/)
+      expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view" draggable>\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its tag
       const suits = /^<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a \(suit\)"\s*\/?>?$/
       expect(sourceAt(card.variables.get("suit", "LOCAL_ONLY")?.declaredAt)).toMatch(suits)

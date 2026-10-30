@@ -19,6 +19,7 @@ import type { messageMethods } from "./messages"
 import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
+import type { abilityMethods } from "./abilities"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -92,6 +93,7 @@ export type Core = typeof coreMethods &
   typeof describedMethods &
   typeof sendingMethods &
   typeof actingMethods &
+  typeof abilityMethods &
   typeof deprecatedMethods
 
 // ## Tests

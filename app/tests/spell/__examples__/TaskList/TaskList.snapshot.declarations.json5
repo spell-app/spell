@@ -11,19 +11,19 @@
     {
       "type": "Task",
       "superType": "View",
-      "defined": "/Task.spellml:138-1496"
+      "defined": "/Task.spellml:289-1439"
     },
     {
       "property": "title",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:159-206"
+      "defined": "/Task.spellml:331-378"
     },
     {
       "property": "notes",
       "of": "Task",
       "datatype": "text",
-      "defined": "/Task.spellml:211-270"
+      "defined": "/Task.spellml:383-442"
     },
     {
       "property": "priority",
@@ -34,13 +34,13 @@
         "normal",
         "high"
       ],
-      "defined": "/Task.spellml:275-323"
+      "defined": "/Task.spellml:447-495"
     },
     {
       "property": "done",
       "of": "Task",
       "datatype": "choice",
-      "defined": "/Task.spellml:329-355"
+      "defined": "/Task.spellml:501-527"
     },
     {
       "syntax": "{operator:is_or_is_not} done",
@@ -50,7 +50,7 @@
       "kind": "method",
       "name": "\"is done\"",
       "returns": "choice",
-      "defined": "/Task.spellml:360-395"
+      "defined": "/Task.spellml:532-567"
     },
     {
       "syntax": "{operator:is_or_is_not} active",
@@ -60,7 +60,7 @@
       "kind": "method",
       "name": "\"is active\"",
       "returns": "choice",
-      "defined": "/Task.spellml:400-436"
+      "defined": "/Task.spellml:572-608"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -73,7 +73,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Task.spellml:671-1288"
+      "defined": "/Task.spellml:614-1231"
     },
     {
       "syntax": "test checking one off",
@@ -82,7 +82,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "checking one off",
-      "defined": "/Task.spellml:1300-1487"
+      "defined": "/Task.spellml:1243-1430"
     },
     {
       "type": "Checklist",
@@ -251,30 +251,30 @@
     }
   ],
   "codeLines": [
-    9,
-    13,
-    19,
-    24,
-    30,
-    35,
-    39,
-    44,
+    11,
+    15,
+    21,
+    26,
+    32,
+    37,
+    41,
+    46,
     71,
-    96,
-    101,
-    107,
-    130,
-    144,
-    151,
-    154,
-    160,
-    165,
-    170,
-    183,
-    190,
-    256,
+    97,
+    102,
+    108,
+    131,
+    145,
+    152,
+    155,
+    161,
+    166,
+    171,
+    184,
+    191,
     257,
     258,
-    259
+    259,
+    260
   ]
 }
