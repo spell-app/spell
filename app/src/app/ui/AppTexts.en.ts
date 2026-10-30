@@ -347,6 +347,7 @@ export const APP_TEXTS = {
 
   editedSinceSaved: "Edited since it was saved",
   editorKeys: "⌘S save · ⌘↵ run",
+  editorKeysNoSave: "⌘↵ run",
   compiling: "Compiling…",
   compiled: "Compiled",
   saved: "Saved",

@@ -26,7 +26,7 @@ import { CLI } from "spell/app/cli"
  *      - `_redirects`, the editor's routes to `index.html` (Netlify, Cloudflare Pages)
  * - `serve()` shows it as a host would:  the files as they are, the editor's page for every other page.
  * - `buildViewer()` writes `<spell-viewer>` ALONE, run mode only, and a few projects, into a site of your own
- *   (spell.app's page, epic `repo-split` P25):  no editor, no lists.
+ *   (spell.app's page, epic `repo-split` P25):  no lists, and no editor unless asked (`<spell-editor static>`).
  * - Builds only:  no deploy yet (epic `debut` Q6).
  * - Node only;  a part of `spell app preview` (`previewCommand.ts`).
  */
@@ -66,22 +66,31 @@ export class PreviewSite {
    * with no editor and no server:  `<spell-viewer project="@spell/examples/Solitaire">`.
    * 1. the element, built (`yarn build:element`), then copied to `<folder>/element/`,
    *    where its page loads it from:  `<script type="module" src="/element/spell-viewer.js">`
-   *    - but not what only the editor uses (`VIEWER_LEAVES_OUT`):  the editor, Monaco, source maps
+   *    - but not what it never loads (`VIEWER_LEAVES_OUT`):  source maps, the editor and Monaco
+   *    - `withEditor`:  `<spell-editor>` and Monaco too (`EDITOR_LEAVES_OUT`), for `<spell-editor static>`,
+   *      loaded from `/element/spell-editor.js`
    * 2. each project, compiled where it's out of date:  its files and build at `<folder>/spaces/<project>/`,
    *    where the viewer reads them, as `build()` writes them;  and the projects it imports
+   *    - `withEditor`:  its index too, `api/projects/index/<project>.json`, which the editor opens it from
    * - The page server's paths, from the site's root:  so the site is a domain's own (`https://spell.app`).
    * - SIDE EFFECT:  replaces `element/` and each project's folder;  the rest of `folder` is the site's own, untouched.
    * - Returns the projects written, imported ones too.
    * - throws `CLI.CliError` if the element's build fails, with what it said
    */
-  async buildViewer(session: CLI.CliSession, projectIds: string[]): Promise<string[]> {
+  async buildViewer(
+    session: CLI.CliSession,
+    projectIds: string[],
+    { withEditor = false }: { withEditor?: boolean } = {}
+  ): Promise<string[]> {
     await this.runYarn(["build:element"])
     const element = join(this.folder, VIEWER_FOLDER)
     rmSync(element, { recursive: true, force: true })
-    copyFiles(ELEMENT_FOLDER, element, (path) => !VIEWER_LEAVES_OUT.some((pattern) => pattern.test(path)))
+    const leavesOut = withEditor ? EDITOR_LEAVES_OUT : VIEWER_LEAVES_OUT
+    copyFiles(ELEMENT_FOLDER, element, (path) => !leavesOut.some((pattern) => pattern.test(path)))
+    rmSync(join(this.folder, SP.SpellUrls.INDEX), { recursive: true, force: true })
     await CLI.compileCommand(session, projectIds, { stale: true })
     const written = new Set<string>()
-    for (const projectId of projectIds) await this.writeProject(projectId, written, { withIndex: false })
+    for (const projectId of projectIds) await this.writeProject(projectId, written, { withIndex: withEditor })
     return [...written]
   }
 
@@ -240,16 +249,22 @@ const ELEMENT_FOLDER = join(APP_FOLDER, "dist-element")
 const VIEWER_FOLDER = "element"
 
 /**
- * What `buildViewer()` leaves out of the element's build, by path in it:  what only the editor needs.
+ * What `buildViewer({ withEditor })` leaves out of the element's build, by path in it:  what the page never loads.
  * - source maps
- * - `<spell-editor>` and `<spell-code>`, Monaco among them:  `<spell-viewer>` loads them only for one inside it
+ * - `<spell-code>`:  code shown on a docs page
  * - Semantic UI's sources and scripts:  the viewer adopts only its one sheet, `semantic.min.css`, and its `themes/`
  */
-const VIEWER_LEAVES_OUT = [
+const EDITOR_LEAVES_OUT = [
   /\.map$/,
-  /^\/spell-(editor|code)[-.]/,
+  /^\/spell-code[-.]/,
   /^\/semantic-ui-css\/(components\/|semantic\.(css|js|min\.js)$)/
 ]
+
+/**
+ * What `buildViewer()` leaves out with no editor:  `EDITOR_LEAVES_OUT`, and `<spell-editor>`, Monaco among it --
+ * `<spell-viewer>` loads it only for one inside it.
+ */
+const VIEWER_LEAVES_OUT = [...EDITOR_LEAVES_OUT, /^\/spell-editor[-.]/]
 
 /** Vite's mode for the static build:  the app's `STATIC_MODE` (`spell/app/app/static/staticBuild`), copied. */
 const STATIC_MODE = "static"

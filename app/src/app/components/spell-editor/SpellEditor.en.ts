@@ -28,6 +28,13 @@ export const spellEditorVocabulary = {
         "  Edits SAVE back to it:  every compile saves the files edited since, and Cmd+S saves."
     },
     {
+      name: "static",
+      kind: "boolean",
+      description:
+        "Its project is a static site's plain files, as `spell app preview viewer --editor` writes them, not the " +
+        "spell server's:  edits stay in this page until it reloads, and NOTHING is saved."
+    },
+    {
       name: "file",
       kind: "string",
       description: "Which file to show first, e.g. `Card.spell`;  default, its first spell file.  Tabs show the others."

@@ -715,7 +715,21 @@ Then the page loads the viewer and names a project:
   the paths the page server answers, so the viewer reads them as plain files.
 - It replaces those two folders, and leaves the rest of the site alone.
 - Like the preview, the site must be a domain's own:  the paths are absolute (`/element/`, `/spaces/`).
-- Spell's own site, spell.app, plays Solitaire this way, in English and in Spanish.
+
+To let visitors change the code too, add `--editor`, and put a `<spell-editor static>` beside the viewer:
+
+```html
+<spell-editor static project="@spell/examples/Solitaire" app="#game"></spell-editor>
+<spell-viewer id="game" project="@spell/examples/Solitaire"></spell-viewer>
+```
+
+- `--editor` copies `<spell-editor>` and Monaco too (13 files, 6.9 MB, 1.7 MB gzipped),
+  and writes each project's index into `api/projects/index/`, which the editor opens it from.
+- `static` reads the project from those plain files, through the preview's `StaticFiles`,
+  and keeps every edit in the page's memory:  nothing is saved, and a reload starts over.
+- Each edit compiles in the page, and the game redraws.
+- Load `/element/spell-editor.js` only when someone asks for the editor, and the page stays light until then.
+- Spell's own site, spell.app, plays Solitaire this way, in English and in Spanish, with an "Edit the code" button.
 
 ## The builds:  one Solid per page, however many bundles
 

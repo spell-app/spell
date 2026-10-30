@@ -959,7 +959,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app serve [project]` | starts the Spell editor and the kit's page server, and opens the editor on a project, until `Ctrl-C` |
 | `spell app vscode [build \| install]` | builds the VS Code language extension, `spell-language.vsix`, and installs it;  no verb does both |
 | `spell app preview build` | builds the editor as plain files any web host serves, with the examples and guides compiled in:  a visitor's edits stay in their browser, until "Reset Example" |
-| `spell app preview viewer <folder> <project...>` | writes `<spell-viewer>` alone (run mode, no editor) and those projects, compiled, into a site's folder, at the paths the page server would answer (`element/`, `spaces/<project>/`) |
+| `spell app preview viewer <folder> <project...>` | writes `<spell-viewer>` alone (run mode, no editor) and those projects, compiled, into a site's folder, at the paths the page server would answer (`element/`, `spaces/<project>/`);  `--editor` adds `<spell-editor>` and each project's index, for `<spell-editor static>`, which saves nothing |
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 

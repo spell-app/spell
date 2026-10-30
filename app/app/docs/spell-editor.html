@@ -128,6 +128,11 @@
                 it. <code>file</code> picks the file shown first; tabs show the others.
               </li>
               <li>Edits SAVE back to the project: every compile saves the files edited since, and Cmd+S saves.</li>
+              <li>
+                Or, with <code>static</code>: it reads the project from a static site's plain files, as
+                <code>spell app preview viewer --editor</code> writes them, and saves nothing. Edits stay in the page
+                until it reloads.
+              </li>
               <li>It compiles as it opens the project, 2 seconds after typing stops, and at once on Cmd+Enter.</li>
               <li>
                 After each compile with no parse errors, it sends <code>spell-compiled</code>, and each linked app runs

@@ -7,8 +7,9 @@ import { CLI } from "spell/app/cli"
  * `spell app preview build | serve | viewer` (Owen's names, epic `debut` Q16):
  *   the editor's static build, the public preview, or the viewer alone.
  * - `build`:  writes it, `app/dist-static/` (`CLI.PreviewSite.build()`), and lists what it holds.
- * - `viewer <folder> <project...>`:  `<spell-viewer>` alone, run mode only, and those projects,
- *   into a site's folder (`CLI.PreviewSite.buildViewer()`;  spell.app's page, epic `repo-split` P25).
+ * - `viewer <folder> <project...> [--editor]`:  `<spell-viewer>`, run mode only, and those projects,
+ *   into a site's folder (`CLI.PreviewSite.buildViewer()`;  spell.app's page, epic `repo-split` P25);
+ *   `--editor`:  `<spell-editor>` too, for `<spell-editor static>`.
  * - `serve [--port <port>] [--headless]`:  shows the build as a host would, on loopback,
  *   and opens it in a browser, until `Ctrl-C`.
  *   - No page server:  the page reads only the build's files, so it shows what a host would.
@@ -21,7 +22,7 @@ export async function previewCommand(
   options: CLI.PreviewOptions
 ): Promise<number> {
   const [verb, ...rest] = args
-  if (verb === "viewer") return viewerCommand(session, rest)
+  if (verb === "viewer") return viewerCommand(session, rest, options)
   const site = new CLI.PreviewSite()
   if (verb === "build") {
     const status = new CLI.StatusReporter(session.isInteractive)
@@ -57,20 +58,24 @@ export async function previewCommand(
 }
 
 /**
- * `spell app preview viewer <folder> <project...>`:  writes `<spell-viewer>` and the projects into `folder`,
- * and lists them.
+ * `spell app preview viewer <folder> <project...> [--editor]`:  writes `<spell-viewer>` (and `<spell-editor>`)
+ * and the projects into `folder`, and lists them.
  * - throws `CLI.CliError` without a folder and a project
  */
-async function viewerCommand(session: CLI.CliSession, [folder, ...projectIds]: string[]): Promise<number> {
+async function viewerCommand(
+  session: CLI.CliSession,
+  [folder, ...projectIds]: string[],
+  options: CLI.PreviewOptions
+): Promise<number> {
   if (!folder || !projectIds.length) {
     throw new CLI.CliError(`\`spell app preview viewer\` takes a folder, then the projects to show`)
   }
   const site = new CLI.PreviewSite(resolve(folder))
   const status = new CLI.StatusReporter(session.isInteractive)
-  const row = status.start("Building <spell-viewer> and its projects")
+  const row = status.start(`Building <spell-viewer>${options.editor ? " and <spell-editor>" : ""}, and the projects`)
   let written: string[]
   try {
-    written = await site.buildViewer(session, projectIds)
+    written = await site.buildViewer(session, projectIds, { withEditor: options.editor })
   } catch (error) {
     status.done(row, "failed", error instanceof Error ? error.message : String(error))
     status.finish()

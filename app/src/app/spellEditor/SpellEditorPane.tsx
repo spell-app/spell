@@ -52,7 +52,7 @@ export function SpellEditorPane(props: SpellEditorPaneProps) {
       </div>
       <div class={["SpellEditorStatus", props.status.state]}>
         <span class="message">{statusText(props.status)}</span>
-        <span class="keys">{appTexts.text("editorKeys")}</span>
+        <span class="keys">{appTexts.text(props.saves === false ? "editorKeysNoSave" : "editorKeys")}</span>
       </div>
     </div>
   )
@@ -70,6 +70,11 @@ export type SpellEditorPaneProps = {
   monaco: MonacoModule | undefined
   /** Is `file` edited since it was saved?  Read in JSX:  the caller makes it reactive. */
   isDirty: (file: SP.SpellFile) => boolean
+  /**
+   * Do its edits save anywhere?  Default `true`.
+   * - `false`:  the status line offers no Cmd+S (`<spell-editor static>`).
+   */
+  saves?: boolean
   /** A tab was clicked. */
   onSelect: (file: SP.SpellFile) => void
   /** The Monaco editor was made -- and Monaco itself, which is loaded lazily. */

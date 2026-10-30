@@ -345,6 +345,7 @@ const APP_TEXTS_ES: AppTextPack = {
 
   editedSinceSaved: "Editado desde que se guardó",
   editorKeys: "⌘S guardar · ⌘↵ ejecutar",
+  editorKeysNoSave: "⌘↵ ejecutar",
   compiling: "Compilando…",
   compiled: "Compilado",
   saved: "Guardado",

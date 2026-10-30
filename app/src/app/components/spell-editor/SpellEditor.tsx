@@ -1,5 +1,7 @@
 import type { JSX } from "@solidjs/web"
 
+import { withoutAccents } from "spell/util/string"
+
 import { E } from "spell/element"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
@@ -12,6 +14,11 @@ import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
 import { wordsOfLanguages } from "spell/app/app/runner/words"
 import { SpellEditorPane, type SpellEditorStatus, type MonacoModule } from "spell/app/app/spellEditor/SpellEditorPane"
 import { spellEditorVocabulary } from "./SpellEditor.en"
+
+// Spell's project groups (`@spell/examples` ...), so `project` resolves:
+// registered in this bundle's own copy of spell, as a `<spell-viewer>` beside us registers them in ITS copy.
+// Spell UI's names:  `loadSpellUINames()`.
+import "spell/app/spaces/models/projectGroups"
 
 // Every Solid computation follows spell cells (the project's files).
 import "spell/app/app/solid/cellsBridge"
@@ -61,6 +68,7 @@ export interface DOMSpellEditorElement extends E.AttributeValues<typeof spellEdi
  * - `project="@spell/examples/Solitaire"`:
  *   from the spell server's `/api`, as `<spell-viewer project>`.
  *   - Edits SAVE back to it:  every compile saves the files edited since, and Cmd+S saves.
+ *   - `static`:  from a static site's plain files instead, and NOTHING is saved (`installStaticFiles()`).
  * - Compiles when it opens the project, `COMPILE_DELAY` after typing stops, and at once on Cmd+Enter.
  *   After each compile with no parse errors:
  *   - `compiled` holds what it made, a `SpellCompiled`
@@ -182,6 +190,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     this.setStatus({ state: "compiling" })
     try {
       await this.save()
+      await loadSpellUINames(project)
       await project.compile()
     } catch (error) {
       if (project === this.openedProject) this.setStatus({ state: "failed", message: messageOf(error) })
@@ -290,6 +299,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
     this.setStatus({ state: "loading" })
     let project: SP.SpellProject
     try {
+      if (this.static) await installStaticFiles()
       project = new SP.SpellProject(SP.SpellProject.projectIdForImport(attribute))
       await project.load()
     } catch (error) {
@@ -456,6 +466,7 @@ export class SpellEditor extends E.UIComponent<typeof spellEditorVocabulary> {
         status={this.status}
         monaco={this.monacoModule}
         isDirty={this.isDirty}
+        saves={!this.static}
         onSelect={(file) => this.showFile(file)}
         onMount={(editor, api) => this.onEditorMount(editor, api)}
         onUnmount={(editor) => this.onEditorUnmount(editor)}
@@ -486,6 +497,57 @@ let monacoModule: Promise<MonacoModule> | undefined
 function loadMonaco(): Promise<MonacoModule> {
   monacoModule ??= import("spell/app/app/solid/monaco")
   return monacoModule
+}
+
+/** Spell UI's `RootLoader`, the page's, once `loadSpellUINames()` has registered its names with spell. */
+let rootLoader: Promise<RootLoaderType> | undefined
+
+/** The page's `RootLoader` (`spell/ui/components/ui-root`), typed without importing it. */
+type RootLoaderType = (typeof import("spell/ui/components/ui-root"))["RootLoader"]
+
+/**
+ * Register Spell UI's names for a spellx drawing's bare tags, as `"spell-ui"` (`SP.ComponentPacks`), and load those of
+ * `project`'s languages:  `<menu>` => `<ui-menu>`, `<menú>` in a Spanish file => `<es-menu>`.
+ * - From the PAGE's Spell UI (`spell-solid-shared.js`), its catalog and dictionaries:  this bundle may not carry its
+ *   own copy of Spell UI (`sharedSolid()`), so it can't load spaces' `spellUIPack`, which the app and the
+ *   command line use.  The same names:  a catalog tag without its `ui-`;  a language's tag, `<lang>-<name>`.
+ * - A language other than English:  `RootLoader.useLanguage()`, as a `<spell-viewer>` running a Spanish app does --
+ *   SIDE EFFECT:  Spell UI's texts on the page switch to it.
+ * - Loaded the first time a project compiles, then once per language.
+ */
+async function loadSpellUINames(project: SP.SpellProject): Promise<void> {
+  rootLoader ??= import("spell/ui/components/ui-root").then(({ RootLoader }) => {
+    SP.ComponentPacks.register({
+      name: SPELL_UI_PACK,
+      tagFor(word, language) {
+        const tag = `${language === "en" ? "ui" : language}-${withoutAccents(word)}`
+        return RootLoader.folderFor(tag) ? tag : undefined
+      }
+    })
+    return RootLoader
+  })
+  const loader = await rootLoader
+  for (const { lang } of project.languages) await loader.useLanguage(lang)
+}
+
+/** The pack spell draws a project with when its project file names none:  `SP.ComponentPacks.DEFAULT`'s. */
+const SPELL_UI_PACK = "spell-ui"
+
+/** The page's `StaticFiles` for `static` editors, once installed. */
+let staticFiles: Promise<unknown> | undefined
+
+/**
+ * Read every project file from a static site's plain files from now on, and keep edits in this page's memory:
+ * the static preview's `StaticFiles`, installed once for the page, for `<spell-editor static>`.
+ * - A save, the files edited or what a compile built, never leaves the page:  no request is sent for it.
+ * - Loaded only then:  an editor on the page server never downloads it.
+ * - SIDE EFFECT:  every `LoadableFile` on the page reads through it (`StaticFiles.install()`).
+ */
+function installStaticFiles(): Promise<unknown> {
+  staticFiles ??= import("spell/app/app/static/StaticFiles").then(({ StaticFiles }) =>
+    new StaticFiles({ place: "memory", oldStorage: null }).install()
+  )
+  return staticFiles
 }
 
 /** How many parse errors `project`'s spell files have, plus 1 if it couldn't parse at all. */

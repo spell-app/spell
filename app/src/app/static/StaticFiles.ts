@@ -8,7 +8,8 @@ import {
   parseJSON,
   parseJSON5,
   type $FetchParams,
-  type PrefPlace
+  type PrefPlace,
+  type PrefPlaceName
 } from "spell/util"
 import { SP } from "spell/parser/spell"
 
@@ -37,6 +38,8 @@ import "./static.css"
  *     moved into the database once, on first use;  every read and save waits for that (`ready()`)
  * - The page's own `fetch()`es of compiled files read the build's copies:
  *   they load OTHER projects, which a visitor can't edit (`fetchCompiled()`, the runners' `fetchText()`).
+ * - `<spell-editor static>` makes one too, its edits kept in memory only (`place: "memory"`):
+ *   a site's own page, its project written by `spell app preview viewer --editor` (epic `repo-split` P25).
  * - Browser code;  imports only `spell/util` and spell's barrel.
  */
 export class StaticFiles {
@@ -54,7 +57,7 @@ export class StaticFiles {
 
   constructor({ place = DatabasePlace.shared, oldStorage = storageOrNone() }: StaticFilesProps = {}) {
     this.edits = new PrefStore(EDITS_STORE, { place })
-    this.oldStorage = oldStorage
+    this.oldStorage = oldStorage ?? undefined
   }
 
   /**
@@ -187,10 +190,14 @@ export class StaticFiles {
 
 /** Props for a `StaticFiles`. */
 export type StaticFilesProps = {
-  /** Where edits are kept:  default the browser's database (`DatabasePlace.shared`);  a test's own. */
-  place?: PrefPlace
-  /** Where edits were kept before:  default `localStorage`;  a test's own. */
-  oldStorage?: Storage
+  /**
+   * Where edits are kept:  default the browser's database (`DatabasePlace.shared`).
+   * - `"memory"`:  this page only, until it reloads (`<spell-editor static>`)
+   * - a test's own
+   */
+  place?: PrefPlaceName | PrefPlace
+  /** Where edits were kept before:  default `localStorage`;  a test's own;  `null` for none, nothing to move. */
+  oldStorage?: Storage | null
 }
 
 /** The store of the files a visitor changed, in the browser's database:  each under its address. */
