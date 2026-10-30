@@ -5,13 +5,17 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 
 <spell-app "solitaire">
 	<property "score">a number</>
-	<property "hint" description="What the card being dragged would add to the score, e.g. (+10):  shown beside it">text</>
+	<property "moves" description="The cards played this game:  a stock card turned over isn't one">a number</>
+	<property "hint" description="Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win">text</>
+	// a change to a property is an event:  each runs just after the change lands
 	<when its score changes>
 		// every card on a foundation:  the game is won
 		set home to the number of cards in its clubs + the number of cards in its diamonds
 		set home to home + the number of cards in its hearts + the number of cards in its spades
 		if home is 52: set its hint to " -- You won!"
 	</>
+	// a card played:  the last hint goes
+	<when its moves change: clear its hint/>
 	<property "deck">a new deck</>
 
 	<group "piles" description="One of each, made with the solitaire"/>
@@ -74,6 +78,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	<group "game" description="Its moves:  the menu's buttons, its keys, and the board's right click"/>
 	<action "start a new game" shortcut="N">
 		clear its score
+		clear its moves
 		clear its hint
 		deal the cards
 	</action>
@@ -124,6 +129,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		<container>
 			<ui-menu>
 				<item kind="header">Klondike Solitaire</item>
+				<item>Moves: {its moves}</item>
 				<item>Score: {its score}{its hint}</item>
 				<ui-menu position="right">
 					<item aria-label="Auto play" title="Auto play" onClick={auto play}><icon name="fast forward"/></item>
@@ -166,7 +172,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		return put the card on end pile
 
 	// the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-	// - the pile it left turns its new last card up, and the move scores
+	// - the pile it left turns its new last card up;  the move counts, and scores
 	to put a card on a pile
 		set start pile to the pile of the card
 		if start pile cannot give up the card return no
@@ -177,6 +183,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		if the start pile is a tableau and the start pile is not empty
 			pause for 200 msec
 			turn the last card of the start pile face up
+		set the moves of the solitaire to the moves of the solitaire + 1
 		set the score of the solitaire to the score of the solitaire + points
 		return yes
 
@@ -186,9 +193,16 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		if the pile of the card is the discards of the solitaire return 5
 		return 0
 
+	// each card's events, and when it may be clicked:  the Inspector lists them, as written here
 	a card:
+		// only a card face up, or the stock's, can be clicked:  the others show no pointer
+		- clickable when it is face up or its pile is the stock of the solitaire
 		// a click plays it
 		- on click play it
+		// a drag starting clears the last hint
+		- when dragged clear the hint of the solitaire
+		// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
+		- on drag cancelled set the hint of the solitaire to " -- Not there"
 
 	a pile:
 		// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
@@ -223,8 +237,9 @@ While one's empty, it shows its placeholder, if it has one.
 	<property "layout">stacked</>
 	<spell>
 		- it can never take a card
-		- its cards are draggable when the card is its last card
 	</spell>
+	// only its top card may be picked up
+	<cards draggable when the card is its last card/>
 </spell-view>
 
 <spell-view "foundation" template="pile" description="Where a suit is built up, ace to king, one card at a time">
@@ -232,10 +247,12 @@ While one's empty, it shows its placeholder, if it has one.
 	<property "suit">a card suit</>
 	<spell>
 		- it can never let go of a card
-		- droppable when:
-			if the card is not the last card of the pile of the card return no
-			return its suit is the suit of the card and its value + 1 is the value of the card
 	</spell>
+	// one card at a time, the last of its pile:  its suit, one higher
+	<droppable when>
+		if the card is not the last card of the pile of the card return no
+		return its suit is the suit of the card and its value + 1 is the value of the card
+	</>
 	<draw "placeholder" description="A light grey ace of its suit, face up">
 		<text part="placeholder">{the picture of a new card whose rank is ace and suit is its suit}</text>
 	</draw>
@@ -243,13 +260,14 @@ While one's empty, it shows its placeholder, if it has one.
 
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
-	<spell>
-		- its cards are draggable when the card is face up
-		- droppable when:
-			if it is empty
-				return the card is a king
-			return its color is not the color of the card and its value is the value of the card + 1
-	</spell>
+	// its face-up cards may be picked up, with every card on them
+	<cards draggable when the card is face up/>
+	// a king onto an empty one;  else one lower, in the other color
+	<droppable when>
+		if it is empty
+			return the card is a king
+		return its color is not the color of the card and its value is the value of the card + 1
+	</>
 
 	<test "the moves">
 		set the column to a new tableau with name = "T1"

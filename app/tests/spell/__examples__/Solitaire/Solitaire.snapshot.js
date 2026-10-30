@@ -120,7 +120,7 @@ export class Card extends TwoSidedView {
 
   /**
    * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-   * - the pile it left turns its new last card up, and the move scores
+   * - the pile it left turns its new last card up;  the move counts, and scores
    */
   async putOnPile(pile) {
     const startPile = this.pile
@@ -132,6 +132,7 @@ export class Card extends TwoSidedView {
       await core.pauseFor(200, "msec")
       startPile.lastItem?.turnFaceUp()
     }
+    solitaire.moves = solitaire.moves + 1
     solitaire.score = solitaire.score + points
     return true
   }
@@ -148,11 +149,27 @@ export class Card extends TwoSidedView {
     return this.play()
   }
 
+  /** a drag starting clears the last hint */
+  onDrag(event) {
+    solitaire.hint = ""
+  }
+
+  /** dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so */
+  onDragCancelled(event) {
+    solitaire.hint = " -- Not there"
+  }
+
   static draggable = true
 
   get pile() {
     return Pile.ownerOf(this)
   }
+
+  get clickableWhen() {
+    return this.isFaceDirection("up") || this.pile === solitaire.stock
+  }
+
+  static clickable = true
 }
 // Ace is low:  ace = 1 ... king = 13
 
@@ -445,17 +462,29 @@ export class Solitaire extends App {
   get score() { return this.getProp("score") }
   set score(value) { this.setProp("score", value) }
 
-  /** What the card being dragged would add to the score, e.g. (+10):  shown beside it */
+  /** The cards played this game:  a stock card turned over isn't one */
+  // - its "moves" is a number
+  static { this.declareProp("moves", { type: "number" }) }
+  get moves() { return this.getProp("moves") }
+  set moves(value) { this.setProp("moves", value) }
+
+  /** Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win */
   // - its "hint" is text
   static { this.declareProp("hint", { type: "text" }) }
   get hint() { return this.getProp("hint") }
   set hint(value) { this.setProp("hint", value) }
 
+  /** a change to a property is an event:  each runs just after the change lands */
   onScoreChange(event) {
     /** every card on a foundation:  the game is won */
     let home = this.clubs.length + this.diamonds.length
     home = home + this.hearts.length + this.spades.length
     if (home === 52) this.hint = " -- You won!"
+  }
+
+  /** a card played:  the last hint goes */
+  onMovesChange(event) {
+    this.hint = ""
   }
 
   // - its "deck" is a new deck
@@ -594,6 +623,7 @@ export class Solitaire extends App {
     return h("ui-container",
       h("ui-menu",
         h("ui-item", { kind: "header" }, "Klondike Solitaire"),
+        h("ui-item", "Moves: ", () => this.moves),
         h("ui-item", "Score: ", () => this.score, () => this.hint),
         h("ui-menu", { position: "right" },
           h("ui-item", {
@@ -637,6 +667,7 @@ export class Solitaire extends App {
 
   startANewGame() {
     this.score = 0
+    this.moves = 0
     this.hint = ""
     this.dealTheCards()
   }
@@ -704,6 +735,8 @@ core.describeAction(Solitaire, "cheat", { title: "cheat", shortcuts: ["C"] })
 core.describeMenu(Solitaire, "gameMenu", { items: ["startANewGame", "-", "autoPlay", "cheat"] })
 
 core.heading("Playing a card")
+// each card's events, and when it may be clicked:  the Inspector lists them, as written here
+// only a card face up, or the stock's, can be clicked:  the others show no pointer
 
 core.heading("The piles")
 ///////////////
@@ -711,6 +744,13 @@ core.heading("The piles")
 ///////////////
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
+
+/** only its top card may be picked up */
+
+/** one card at a time, the last of its pile:  its suit, one higher */
+
+/** its face-up cards may be picked up, with every card on them */
+/** a king onto an empty one;  else one lower, in the other color */
 
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

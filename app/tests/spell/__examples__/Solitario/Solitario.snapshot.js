@@ -1,4 +1,4 @@
-import { core, List, App, View, ViewableList, h, positionOf, spellPosition, position, trigger, on } from "@spell/core"
+import { core, List, App, View, ViewableList, h, positionOf, spellPosition, position, trigger } from "@spell/core"
 
 core.heading("Una carta de la baraja -- en el estilo de esquema:  su nombre, luego lo que es cierto de ella")
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ export class Carta extends View {
 
   /**
    * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-   * - la pila que dejó voltea su nueva última carta, y el movimiento suma puntos
+   * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
    */
   async ponerEnPila(pila) {
     const pilaInicial = this.pila
@@ -191,6 +191,7 @@ export class Carta extends View {
       it?.voltearBocaArriba()
     }
 
+    solitario.movimientos = solitario.movimientos + 1
     solitario.puntuación = solitario.puntuación + puntos
     return true
   }
@@ -202,11 +203,32 @@ export class Carta extends View {
     return 0
   }
 
+  /** un clic la juega */
+  onClick(event) {
+    return this.jugar()
+  }
+
+  /** al empezar un arrastre, la última pista se va */
+  onDrag(event) {
+    solitario.pista = ""
+  }
+
+  /** soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice */
+  onDragCancelled(event) {
+    solitario.pista = " -- Ahí no"
+  }
+
   static draggable = true
 
   get pila() {
     return Pila.ownerOf(this)
   }
+
+  get clickableWhen() {
+    return this.estáBocaDirección("arriba") || this.pila === solitario.reserva
+  }
+
+  static clickable = true
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -650,11 +672,30 @@ export class Solitario extends App {
   get puntuación() { return this.getProp("puntuación") }
   set puntuación(value) { this.setProp("puntuación", value) }
 
-  /** lo que sumaría el movimiento que se arrastra, p. ej. " (+10)":  se ve a su lado, mientras una carta está sobre una pila */
+  /** las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta */
+  // sus "movimientos" es un número
+  static { this.declareProp("movimientos", { type: "number" }) }
+  get movimientos() { return this.getProp("movimientos") }
+  set movimientos(value) { this.setProp("movimientos", value) }
+
+  /** lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. " (+10)", un arrastre que no cae en nada, una victoria */
   // su "pista" es texto
   static { this.declareProp("pista", { type: "text" }) }
   get pista() { return this.getProp("pista") }
   set pista(value) { this.setProp("pista", value) }
+
+  /** el cambio de una propiedad es un evento:  cada uno corre justo después del cambio */
+  onPuntuaciónChange(event) {
+    /** cada carta en una fundación:  el juego está ganado */
+    let colocadas = this.tréboles.length + this.diamantes.length
+    colocadas = colocadas + this.corazones.length + this.espadas.length
+    if (colocadas === 52) this.pista = " -- ¡Ganaste!"
+  }
+
+  /** una carta jugada:  la última pista se va */
+  onMovimientosChange(event) {
+    this.pista = ""
+  }
 
   // su "mazo" es un nuevo mazo
   static { this.declareProp("mazo", { init: () => new Mazo(), early: true }) }
@@ -800,6 +841,7 @@ export class Solitario extends App {
 
   empezarElJuego() {
     this.puntuación = 0
+    this.movimientos = 0
     this.pista = ""
     this.repartirLasCartas()
   }
@@ -861,6 +903,7 @@ export class Solitario extends App {
     return h("es-contenedor",
       h("es-menu",
         h("es-elemento", { clase: "encabezado" }, "Solitario Klondike"),
+        h("es-elemento", () => `Movimientos: ${this.movimientos}`),
         h("es-elemento", () => `Puntos: ${this.puntuación}${this.pista}`),
         h("es-menu", { posicion: "derecha" },
           h("es-elemento", {
@@ -907,11 +950,8 @@ export class Solitario extends App {
 export const solitario = new Solitario()
 
 core.heading("Jugar una carta:  qué hace un clic o un arrastre")
-/** un clic juega la carta;  un arrastre la pone donde se suelta */
-on("clic-carta", (event) => {
-  const { carta } = event
-  carta.jugar()
-})
+// los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
+// solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
 
 core.heading("Inicio")
 //## Inicio
@@ -927,7 +967,12 @@ core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están s
 // Cómo están sus cartas es su disposición:  styles.css dibuja cada una.
 // Mientras está vacía, muestra su marcador, si tiene uno.
 
-/** una carta a la vez:  la última de su pila */
+/** solo su carta de arriba se puede levantar */
+
+/** una carta a la vez, la última de su pila:  su palo, uno más alto */
+
+/** sus cartas boca arriba se pueden levantar, con cada carta sobre ellas */
+/** un rey en una vacía;  si no, uno más bajo, del otro color */
 
 core.heading("Pruebas")
 /** Pruebas */

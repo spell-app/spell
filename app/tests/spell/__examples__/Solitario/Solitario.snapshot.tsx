@@ -1,4 +1,4 @@
-import { core, List, App, View, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, trigger, on } from "@spell/core"
+import { core, List, App, View, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, trigger } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("Una carta de la baraja -- en el estilo de esquema:  su nombre, luego lo que es cierto de ella")
@@ -170,7 +170,7 @@ export class Carta extends View {
 
   /**
    * la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-   * - la pila que dejó voltea su nueva última carta, y el movimiento suma puntos
+   * - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
    */
   async ponerEnPila(pila: Pila) {
     const pilaInicial = this.pila
@@ -191,6 +191,7 @@ export class Carta extends View {
       it?.voltearBocaArriba()
     }
 
+    solitario.movimientos = solitario.movimientos + 1
     solitario.puntuación = solitario.puntuación + puntos
     return true
   }
@@ -202,11 +203,32 @@ export class Carta extends View {
     return 0
   }
 
+  /** un clic la juega */
+  onClick(event: any /* spell: type unknown */) {
+    return this.jugar()
+  }
+
+  /** al empezar un arrastre, la última pista se va */
+  onDrag(event: any /* spell: type unknown */) {
+    solitario.pista = ""
+  }
+
+  /** soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice */
+  onDragCancelled(event: any /* spell: type unknown */) {
+    solitario.pista = " -- Ahí no"
+  }
+
   static draggable = true
 
   get pila() {
     return Pila.ownerOf(this)!
   }
+
+  get clickableWhen(): boolean {
+    return this.estáBocaDirección("arriba") || this.pila === solitario.reserva
+  }
+
+  static clickable = true
 }
 
 /**
@@ -260,6 +282,18 @@ export class CartaElement extends SpellElement<Carta> {
 
   contarLosPuntosDeCartaEnPila(pila: Pila) {
     return this.currentThing?.contarLosPuntosDeCartaEnPila(pila)
+  }
+
+  onClick(event: any /* spell: type unknown */) {
+    return this.currentThing?.onClick(event)
+  }
+
+  onDrag(event: any /* spell: type unknown */) {
+    return this.currentThing?.onDrag(event)
+  }
+
+  onDragCancelled(event: any /* spell: type unknown */) {
+    return this.currentThing?.onDragCancelled(event)
   }
 }
 core.useElement(Carta, CartaElement)
@@ -834,10 +868,28 @@ export class Solitario extends App {
   @prop({ type: "number" })
   accessor puntuación!: number
 
-  /** lo que sumaría el movimiento que se arrastra, p. ej. " (+10)":  se ve a su lado, mientras una carta está sobre una pila */
+  /** las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta */
+  // sus "movimientos" es un número
+  @prop({ type: "number" })
+  accessor movimientos!: number
+
+  /** lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. " (+10)", un arrastre que no cae en nada, una victoria */
   // su "pista" es texto
   @prop({ type: "text" })
   accessor pista!: string
+
+  /** el cambio de una propiedad es un evento:  cada uno corre justo después del cambio */
+  onPuntuaciónChange(event: any /* spell: type unknown */) {
+    /** cada carta en una fundación:  el juego está ganado */
+    let colocadas = this.tréboles.length + this.diamantes.length
+    colocadas = colocadas + this.corazones.length + this.espadas.length
+    if (colocadas === 52) this.pista = " -- ¡Ganaste!"
+  }
+
+  /** una carta jugada:  la última pista se va */
+  onMovimientosChange(event: any /* spell: type unknown */) {
+    this.pista = ""
+  }
 
   // su "mazo" es un nuevo mazo
   @prop({ init: () => new Mazo(), early: true })
@@ -969,6 +1021,7 @@ export class Solitario extends App {
 
   empezarElJuego() {
     this.puntuación = 0
+    this.movimientos = 0
     this.pista = ""
     this.repartirLasCartas()
   }
@@ -1031,6 +1084,7 @@ export class Solitario extends App {
       <es-contenedor>
         <es-menu>
           <es-elemento clase="encabezado">Solitario Klondike</es-elemento>
+          <es-elemento>{`Movimientos: ${this.movimientos}`}</es-elemento>
           <es-elemento>{`Puntos: ${this.puntuación}${this.pista}`}</es-elemento>
           <es-menu posicion="derecha">
             <es-elemento aria-label="Jugar solo" onClick={() => this.jugarSolo()} style="cursor:pointer;user-select:none">
@@ -1077,6 +1131,7 @@ export class Solitario extends App {
 export class SolitarioElement extends SpellElement<Solitario> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "solitario", [
     { name: "puntuación", kind: "number", description: "Its puntuación." },
+    { name: "movimientos", kind: "number", description: "Its movimientos." },
     { name: "pista", kind: "string", description: "Its pista." },
     { name: "mazo", kind: "json", description: "Its mazo." },
     { name: "reserva", kind: "json", description: "Its reserva." },
@@ -1093,6 +1148,14 @@ export class SolitarioElement extends SpellElement<Solitario> {
     { name: "-c6", kind: "json", description: "Its C6." },
     { name: "-c7", kind: "json", description: "Its C7." }
   ])
+
+  onPuntuaciónChange(event: any /* spell: type unknown */) {
+    return this.currentThing?.onPuntuaciónChange(event)
+  }
+
+  onMovimientosChange(event: any /* spell: type unknown */) {
+    return this.currentThing?.onMovimientosChange(event)
+  }
 
   create() {
     return this.currentThing?.create()
@@ -1130,8 +1193,8 @@ core.useElement(Solitario, SolitarioElement)
 export const solitario = new Solitario()
 
 core.heading("Jugar una carta:  qué hace un clic o un arrastre")
-/** un clic juega la carta;  un arrastre la pone donde se suelta */
-on<{ carta: Carta }>("clic-carta", ({ carta }) => carta.jugar())
+// los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
+// solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
 
 core.heading("Inicio")
 //## Inicio
@@ -1147,7 +1210,12 @@ core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están s
 // Cómo están sus cartas es su disposición:  styles.css dibuja cada una.
 // Mientras está vacía, muestra su marcador, si tiene uno.
 
-/** una carta a la vez:  la última de su pila */
+/** solo su carta de arriba se puede levantar */
+
+/** una carta a la vez, la última de su pila:  su palo, uno más alto */
+
+/** sus cartas boca arriba se pueden levantar, con cada carta sobre ellas */
+/** un rey en una vacía;  si no, uno más bajo, del otro color */
 
 core.heading("Pruebas")
 /** Pruebas */

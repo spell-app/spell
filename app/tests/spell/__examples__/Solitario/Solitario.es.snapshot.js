@@ -62,6 +62,7 @@ export const words = {
     },
     Solitario: {
       puntuación: "puntuación",
+      movimientos: "movimientos",
       pista: "pista",
       mazo: "mazo",
       reserva: "reserva",

@@ -13,8 +13,18 @@
 ## El solitario:  sus pilas, sus movimientos, el juego solo y su dibujo
 solitario es una aplicación donde:
 	- su "puntuación" es un número
-	// lo que sumaría el movimiento que se arrastra, p. ej. " (+10)":  se ve a su lado, mientras una carta está sobre una pila
+	// las cartas jugadas en este juego:  voltear una carta de la reserva no cuenta
+	- sus "movimientos" es un número
+	// lo que dice junto a la puntuación:  lo que sumaría un arrastre, p. ej. " (+10)", un arrastre que no cae en nada, una victoria
 	- su "pista" es texto
+	// el cambio de una propiedad es un evento:  cada uno corre justo después del cambio
+	- cuando su puntuación cambia:
+		// cada carta en una fundación:  el juego está ganado
+		poner colocadas a el número de cartas en sus tréboles + el número de cartas en sus diamantes
+		poner colocadas a colocadas + el número de cartas en sus corazones + el número de cartas en sus espadas
+		si colocadas es 52: poner su pista a " -- ¡Ganaste!"
+	// una carta jugada:  la última pista se va
+	- al cambiar sus movimientos: limpiar su pista
 	- su "mazo" es un nuevo mazo
 
 	// una de cada pila, hecha con el solitario
@@ -83,6 +93,7 @@ solitario es una aplicación donde:
 
 	- para empezar el juego:
 		limpiar su puntuación
+		limpiar sus movimientos
 		limpiar su pista
 		repartir las cartas
 
@@ -135,6 +146,7 @@ solitario es una aplicación donde:
 		devolver <es-contenedor>
 			<es-menu>
 				<es-elemento clase="encabezado">Solitario Klondike</es-elemento>
+				<es-elemento>{"Movimientos: " + sus movimientos}</es-elemento>
 				<es-elemento>{"Puntos: " + su puntuación + su pista}</es-elemento>
 				<es-menu posicion="derecha">
 					<es-elemento aria-label="Jugar solo" onClick={jugar solo}>
@@ -183,7 +195,7 @@ para jugar una carta
 	devolver poner la carta en pila final
 
 // la carta, y cada carta sobre ella, a la pila, si las reglas de las pilas la dejan ir y tomarla;  dice si se movió
-// - la pila que dejó voltea su nueva última carta, y el movimiento suma puntos
+// - la pila que dejó voltea su nueva última carta;  el movimiento cuenta, y suma puntos
 para poner una carta en una pila
 	poner pila inicial a la pila de la carta
 	si pila inicial no puede soltar la carta devolver no
@@ -203,6 +215,7 @@ para poner una carta en una pila
 		imprimir "volteando (" + el nombre de pila inicial + ": " + su estado + ")"
 		voltear eso boca arriba
 
+	poner los movimientos del solitario a los movimientos del solitario + 1
 	poner la puntuación del solitario a la puntuación del solitario + puntos
 	devolver sí
 
@@ -212,9 +225,16 @@ para contar los puntos de una carta en una pila
 	si la pila de la carta es los descartes del solitario devolver 5
 	devolver 0
 
-// un clic juega la carta;  un arrastre la pone donde se suelta
-al clic-carta con una carta
-	jugar la carta
+// los eventos de cada carta, y cuándo se puede pulsar:  el Inspector los muestra, como están escritos aquí
+una carta:
+	// solo una carta boca arriba, o la de la reserva, se puede pulsar:  las otras no muestran el puntero
+	- es pulsable cuando está boca arriba o su pila es la reserva del solitario
+	// un clic la juega
+	- cuando se pulsa jugar la carta
+	// al empezar un arrastre, la última pista se va
+	- cuando se arrastra limpiar la pista del solitario
+	// soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice
+	- cuando se cancela el arrastre poner la pista del solitario a " -- Ahí no"
 
 una pila:
 	// mientras una carta que tomaría está sobre ella, la puntuación muestra lo que sumaría -- se va al irse la carta
@@ -250,6 +270,7 @@ una "pila de reserva" es una pila donde:
 una "pila de descartes" es una pila donde:
 	- su disposición es apilada
 	- nunca puede tomar una carta
+	// solo su carta de arriba se puede levantar
 	- sus cartas son arrastrables cuando la carta es su última carta
 
 // una fundación:  donde se arma un palo, del as al rey
@@ -257,7 +278,7 @@ una "fundación" es una pila donde:
 	- su disposición es apilada
 	- su "palo" es un palo de carta
 	- nunca puede soltar una carta
-	// una carta a la vez:  la última de su pila
+	// una carta a la vez, la última de su pila:  su palo, uno más alto
 	- soltable cuando:
 		si la carta no es la última carta de la pila de la carta devolver no
 		devolver su palo es el palo de la carta y su valor + 1 es el valor de la carta
@@ -268,7 +289,9 @@ una "fundación" es una pila donde:
 // una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
 una "columna" es una pila donde:
 	- su disposición es vertical
+	// sus cartas boca arriba se pueden levantar, con cada carta sobre ellas
 	- sus cartas son arrastrables cuando la carta está boca arriba
+	// un rey en una vacía;  si no, uno más bajo, del otro color
 	- soltable cuando:
 		si está vacía
 			devolver la carta es un rey

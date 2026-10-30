@@ -344,9 +344,10 @@ const BARE_ABILITY =
 const EVENT_START = /^(?:on|when|while|al|cuando|mientras)\s/i
 /**
  * How an ability starts:  what it can do (`it can be dragged`, `its cards can be dragged`),
- * or what it's able to be (`draggable when`, `its cards are draggable when`);  Spanish's `se puede arrastrar`.
+ * or what it's able to be (`draggable when`, `its cards are draggable when`, a list's tag `<cards draggable when ...>`);
+ * Spanish's `se puede arrastrar`.
  */
-const ABILITY_START = /^(?:(?:it|its\s+\w+)\s+)?(?:(?:is|are)\s+)?(?:can\b|\w+able\b)|^(?:se\s+)?puede\b/i
+const ABILITY_START = /^(?:(?:it|(?:its\s+)?\w+)\s+)?(?:(?:is|are)\s+)?(?:can\b|\w+able\b)|^(?:se\s+)?puede\b/i
 
 /** Where the colon ending a line's words is, outside quotes:  -1 if none. */
 function colonIn(text: string): number {

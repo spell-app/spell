@@ -5,13 +5,18 @@
 
 solitaire is an app:
 	- its "score" is a number
-	// What the card being dragged would add to the score, e.g. (+10):  shown beside it
+	// The cards played this game:  a stock card turned over isn't one
+	- its "moves" is a number
+	// Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
 	- its "hint" is text
+	// a change to a property is an event:  each runs just after the change lands
 	- when its score changes:
 		// every card on a foundation:  the game is won
 		set home to the number of cards in its clubs + the number of cards in its diamonds
 		set home to home + the number of cards in its hearts + the number of cards in its spades
 		if home is 52: set its hint to " -- You won!"
+	// a card played:  the last hint goes
+	- when its moves change: clear its hint
 	- its "deck" is a new deck
 
 	// One of each, made with the solitaire
@@ -76,6 +81,7 @@ solitaire is an app:
 	- to start a new game:
 		- shortcut N
 		clear its score
+		clear its moves
 		clear its hint
 		deal the cards
 	// Play every card that can go somewhere, until none can
@@ -123,6 +129,7 @@ solitaire is an app:
 		<ui-container>
 			<ui-menu>
 				<ui-item kind="header">Klondike Solitaire</ui-item>
+				<ui-item>Moves: {its moves}</ui-item>
 				<ui-item>Score: {its score}{its hint}</ui-item>
 				<ui-menu position="right">
 					<ui-item aria-label="Auto play" title="Auto play" onClick={auto play}><ui-icon name="fast forward"/></ui-item>
@@ -162,7 +169,7 @@ to play a card
 	return put the card on end pile
 
 // the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-// - the pile it left turns its new last card up, and the move scores
+// - the pile it left turns its new last card up;  the move counts, and scores
 to put a card on a pile
 	set start pile to the pile of the card
 	if start pile cannot give up the card return no
@@ -173,6 +180,7 @@ to put a card on a pile
 	if the start pile is a tableau and the start pile is not empty
 		pause for 200 msec
 		turn the last card of the start pile face up
+	set the moves of the solitaire to the moves of the solitaire + 1
 	set the score of the solitaire to the score of the solitaire + points
 	return yes
 
@@ -182,9 +190,16 @@ to count the points for a card on a pile
 	if the pile of the card is the discards of the solitaire return 5
 	return 0
 
+// each card's events, and when it may be clicked:  the Inspector lists them, as written here
 a card:
+	// only a card face up, or the stock's, can be clicked:  the others show no pointer
+	- clickable when it is face up or its pile is the stock of the solitaire
 	// a click plays it
 	- on click play it
+	// a drag starting clears the last hint
+	- when dragged clear the hint of the solitaire
+	// dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so
+	- on drag cancelled set the hint of the solitaire to " -- Not there"
 
 a pile:
 	// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
@@ -214,6 +229,7 @@ a "stock pile" is a pile:
 a "discard pile" is a pile:
 	- its "layout" is stacked
 	- it can never take a card
+	// only its top card may be picked up
 	- its cards are draggable when the card is its last card
 
 // Where a suit is built up, ace to king, one card at a time
@@ -221,6 +237,7 @@ a "foundation" is a pile:
 	- its "layout" is stacked
 	- its "suit" is a card suit
 	- it can never let go of a card
+	// one card at a time, the last of its pile:  its suit, one higher
 	- droppable when:
 		if the card is not the last card of the pile of the card return no
 		return its suit is the suit of the card and its value + 1 is the value of the card
@@ -231,7 +248,9 @@ a "foundation" is a pile:
 // A column, built down from king to ace, red and black in turn
 a "tableau" is a pile:
 	- its "layout" is vertical
+	// its face-up cards may be picked up, with every card on them
 	- its cards are draggable when the card is face up
+	// a king onto an empty one;  else one lower, in the other color
 	- droppable when:
 		if it is empty
 			return the card is a king

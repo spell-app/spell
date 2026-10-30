@@ -48,6 +48,7 @@ export const words = {
     },
     Solitaire: {
       score: "score",
+      moves: "moves",
       hint: "hint",
       deck: "deck",
       stock: "stock",

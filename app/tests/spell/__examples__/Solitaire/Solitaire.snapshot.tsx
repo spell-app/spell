@@ -122,7 +122,7 @@ export class Card extends TwoSidedView {
 
   /**
    * the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-   * - the pile it left turns its new last card up, and the move scores
+   * - the pile it left turns its new last card up;  the move counts, and scores
    */
   async putOnPile(pile: Pile) {
     const startPile = this.pile
@@ -134,6 +134,7 @@ export class Card extends TwoSidedView {
       await core.pauseFor(200, "msec")
       startPile.lastItem?.turnFaceUp()
     }
+    solitaire.moves = solitaire.moves + 1
     solitaire.score = solitaire.score + points
     return true
   }
@@ -150,11 +151,27 @@ export class Card extends TwoSidedView {
     return this.play()
   }
 
+  /** a drag starting clears the last hint */
+  onDrag(event: any /* spell: type unknown */) {
+    solitaire.hint = ""
+  }
+
+  /** dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so */
+  onDragCancelled(event: any /* spell: type unknown */) {
+    solitaire.hint = " -- Not there"
+  }
+
   static draggable = true
 
   get pile() {
     return Pile.ownerOf(this)!
   }
+
+  get clickableWhen(): boolean {
+    return this.isFaceDirection("up") || this.pile === solitaire.stock
+  }
+
+  static clickable = true
 }
 
 /**
@@ -203,6 +220,14 @@ export class CardElement extends SpellElement<Card> {
 
   onClick(event: any /* spell: type unknown */) {
     return this.currentThing?.onClick(event)
+  }
+
+  onDrag(event: any /* spell: type unknown */) {
+    return this.currentThing?.onDrag(event)
+  }
+
+  onDragCancelled(event: any /* spell: type unknown */) {
+    return this.currentThing?.onDragCancelled(event)
   }
 }
 core.useElement(Card, CardElement)
@@ -614,16 +639,27 @@ export class Solitaire extends App {
   @prop({ type: "number" })
   accessor score!: number
 
-  /** What the card being dragged would add to the score, e.g. (+10):  shown beside it */
+  /** The cards played this game:  a stock card turned over isn't one */
+  // - its "moves" is a number
+  @prop({ type: "number" })
+  accessor moves!: number
+
+  /** Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win */
   // - its "hint" is text
   @prop({ type: "text" })
   accessor hint!: string
 
+  /** a change to a property is an event:  each runs just after the change lands */
   onScoreChange(event: any /* spell: type unknown */) {
     /** every card on a foundation:  the game is won */
     let home = this.clubs.length + this.diamonds.length
     home = home + this.hearts.length + this.spades.length
     if (home === 52) this.hint = " -- You won!"
+  }
+
+  /** a card played:  the last hint goes */
+  onMovesChange(event: any /* spell: type unknown */) {
+    this.hint = ""
   }
 
   // - its "deck" is a new deck
@@ -749,6 +785,7 @@ export class Solitaire extends App {
       <ui-container>
         <ui-menu>
           <ui-item kind="header">Klondike Solitaire</ui-item>
+          <ui-item>Moves: {this.moves}</ui-item>
           <ui-item>Score: {this.score}{this.hint}</ui-item>
           <ui-menu position="right">
             <ui-item aria-label="Auto play" title="Auto play" onClick={() => this.autoPlay()} style="cursor:pointer;user-select:none">
@@ -784,6 +821,7 @@ export class Solitaire extends App {
 
   startANewGame() {
     this.score = 0
+    this.moves = 0
     this.hint = ""
     this.dealTheCards()
   }
@@ -842,6 +880,7 @@ export class Solitaire extends App {
 export class SolitaireElement extends SpellElement<Solitaire> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "solitaire", [
     { name: "score", kind: "number", description: "Its score." },
+    { name: "moves", kind: "number", description: "Its moves." },
     { name: "hint", kind: "string", description: "Its hint." },
     { name: "deck", kind: "json", description: "Its deck." },
     { name: "stock", kind: "json", description: "Its stock." },
@@ -861,6 +900,10 @@ export class SolitaireElement extends SpellElement<Solitaire> {
 
   onScoreChange(event: any /* spell: type unknown */) {
     return this.currentThing?.onScoreChange(event)
+  }
+
+  onMovesChange(event: any /* spell: type unknown */) {
+    return this.currentThing?.onMovesChange(event)
   }
 
   create() {
@@ -911,6 +954,8 @@ core.describeAction(Solitaire, "cheat", { title: "cheat", shortcuts: ["C"] })
 core.describeMenu(Solitaire, "gameMenu", { items: ["startANewGame", "-", "autoPlay", "cheat"] })
 
 core.heading("Playing a card")
+// each card's events, and when it may be clicked:  the Inspector lists them, as written here
+// only a card face up, or the stock's, can be clicked:  the others show no pointer
 
 core.heading("The piles")
 ///////////////
@@ -918,6 +963,13 @@ core.heading("The piles")
 ///////////////
 // Each kind of pile, what it may take or give up, and how it lies.
 // While one's empty, it shows its placeholder, if it has one.
+
+/** only its top card may be picked up */
+
+/** one card at a time, the last of its pile:  its suit, one higher */
+
+/** its face-up cards may be picked up, with every card on them */
+/** a king onto an empty one;  else one lower, in the other color */
 
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

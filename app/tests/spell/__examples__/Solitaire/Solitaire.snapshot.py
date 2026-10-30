@@ -138,7 +138,7 @@ class Card(TwoSidedView):
     async def put_on_pile(self, pile: Pile) -> bool:
         """
         the card, and every card on it, onto the pile, if the piles' rules let it go and take it;  it says whether it moved
-        - the pile it left turns its new last card up, and the move scores
+        - the pile it left turns its new last card up;  the move counts, and scores
         """
         start_pile = self.pile
         assert start_pile is not None
@@ -152,6 +152,7 @@ class Card(TwoSidedView):
         if isinstance(start_pile, Tableau) and (start_pile):
             await core.pause_for(200, "msec")
             start_pile.last_item.turn_face_up()
+        solitaire.moves = solitaire.moves + 1
         solitaire.score = solitaire.score + points
         return True
 
@@ -167,11 +168,25 @@ class Card(TwoSidedView):
         """a click plays it"""
         return await self.play()
 
+    def on_drag(self, event: Any) -> None:
+        """a drag starting clears the last hint"""
+        solitaire.hint = ""
+
+    def on_drag_cancelled(self, event: Any) -> None:
+        """dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so"""
+        solitaire.hint = " -- Not there"
+
     draggable = True
 
     @property
     def pile(self) -> Pile | None:
         return Pile.owner_of(self)
+
+    @property
+    def clickable_when(self) -> bool:
+        return self.is_face_direction("up") or self.pile == solitaire.stock
+
+    clickable = True
 
 
 # Ace is low:  ace = 1 ... king = 13
@@ -510,16 +525,25 @@ class Solitaire(App):
     # - its "score" is a number
     score = prop(type="number")
 
-    # What the card being dragged would add to the score, e.g. (+10):  shown beside it
+    # The cards played this game:  a stock card turned over isn't one
+    # - its "moves" is a number
+    moves = prop(type="number")
+
+    # Said beside the score:  what a drag would add, e.g. (+10), a drop nowhere, a win
     # - its "hint" is text
     hint = prop(type="text")
 
     def on_score_change(self, event: Any) -> None:
+        """a change to a property is an event:  each runs just after the change lands"""
         # every card on a foundation:  the game is won
         home = len(self.clubs) + len(self.diamonds)
         home = home + len(self.hearts) + len(self.spades)
         if home == 52:
             self.hint = " -- You won!"
+
+    def on_moves_change(self, event: Any) -> None:
+        """a card played:  the last hint goes"""
+        self.hint = ""
 
     # - its "deck" is a new deck
     deck = prop(init=lambda: Deck(), early=True)
@@ -632,6 +656,7 @@ class Solitaire(App):
             h(
                 "ui-menu",
                 h("ui-item", {"kind": "header"}, "Klondike Solitaire"),
+                h("ui-item", "Moves: ", self.moves),
                 h("ui-item", "Score: ", self.score, self.hint),
                 h(
                     "ui-menu",
@@ -690,6 +715,7 @@ class Solitaire(App):
 
     async def start_a_new_game(self) -> None:
         self.score = 0
+        self.moves = 0
         self.hint = ""
         await self.deal_the_cards()
 
@@ -756,11 +782,21 @@ core.describe_action(Solitaire, "cheat", {"title": "cheat", "shortcuts": ["C"]})
 # - its "game menu" is a menu of "start a new game" , "-" , "auto play" and "cheat"
 core.describe_menu(Solitaire, "game_menu", {"items": ["start_a_new_game", "-", "auto_play", "cheat"]})
 
+# each card's events, and when it may be clicked:  the Inspector lists them, as written here
+# only a card face up, or the stock's, can be clicked:  the others show no pointer
+
 ##############
 # ## The piles
 ##############
 # Each kind of pile, what it may take or give up, and how it lies.
 # While one's empty, it shows its placeholder, if it has one.
+
+# only its top card may be picked up
+
+# one card at a time, the last of its pile:  its suit, one higher
+
+# its face-up cards may be picked up, with every card on them
+# a king onto an empty one;  else one lower, in the other color
 
 
 def test_the_moves() -> Any:

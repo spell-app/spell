@@ -57,17 +57,20 @@ describe("handlersInSource()", () => {
 describe("eventsInSource()", () => {
   const SOLITAIRE = [card, pile, solitaire]
 
-  test("a card:  its ability, then its click, as written, with its code", () => {
+  test("a card:  its abilities, then its events, as written, each with its code", () => {
     expect(eventsInSource(["card"], SOLITAIRE)).toEqual([
       { kind: "ability", words: "draggable", code: "" },
-      { kind: "event", words: "on click", code: "play it" }
+      { kind: "ability", words: "clickable when", code: "it is face up or its pile is the stock of the solitaire" },
+      { kind: "event", words: "on click", code: "play it" },
+      { kind: "event", words: "when dragged", code: "clear the hint of the solitaire" },
+      { kind: "event", words: "on drag cancelled", code: 'set the hint of the solitaire to " -- Not there"' }
     ])
   })
 
   test("a tableau:  its own conditions first, then what it inherits from a pile;  each event's lines under it", () => {
     const rows = eventsInSource(["tableau", "pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
-      ["ability", "its cards are draggable when"],
+      ["ability", "cards draggable when"],
       ["ability", "droppable when"],
       ["ability", "droppable"],
       ["event", "while card dragged over"],
@@ -97,6 +100,13 @@ describe("eventsInSource()", () => {
       { kind: "ability", words: "clickable when", code: "it is face down" },
       { kind: "ability", words: "draggable when", code: "it is face up" },
       { kind: "event", words: "when clicked", code: "play it" }
+    ])
+  })
+
+  test("the game:  its properties' changes, as written", () => {
+    expect(eventsInSource(["solitaire"], SOLITAIRE).map((row) => [row.words, row.code.split("\n")[0]])).toEqual([
+      ["when its score changes", "// every card on a foundation:  the game is won"],
+      ["when its moves change", "clear its hint"]
     ])
   })
 
