@@ -27,12 +27,10 @@
  *     here:  that rule keeps a library's bundles from pinning all of Solid, but this map exists so a pack can use any
  *     export, which no tree-shaker can know ahead.  So the whole of `solid-js` / `@solidjs/web` stays in this bundle
  *     (`ui`'s own code never holds such a map).
- * - The theme:  the one the viewer picked, remembered per place (`ThemePreference`, as the editor's;  epic `debut` P17,
- *   J87, J94), applied as soon as the bundle runs.
- *   - an epic page (an `<epic-page>` in it):  Fruity until the viewer picks another, kept under its own key
- *     (`EPIC_PAGES`), the editor's glass look (Owen, 2026-10-24)
- *   - every other page (the guides):  Spell UI's pages' own, Spell by default, under their key
- *   - light / dark:  ONE choice for every Spell site (`ColorScheme`)
+ * - The theme:  the ONE the person picked, for every place Spell draws (`ThemePreference`, epic `debut` P21:
+ *   kept in their space, the editor's and Spell UI's pages' too), applied as soon as the bundle runs;
+ *   Glass until they pick another
+ *   - light / dark:  part of the same choice (`ColorScheme`)
  *   - a theme remembered under an old name comes back as its new one (`studio` as `merlot`)
  *   - Spell's sheet adds the brand's roles (`--spell-surface-warm`, `--spell-type-lede` ...), which `spell-doc.css` and
  *     the other docs sheets read for eyebrows, ledes, asides and panels;  in another theme they're missing, and every
@@ -99,12 +97,6 @@ export const packModules = Object.freeze({
 })
 
 /**
- * An epic page's own theme settings:  Fruity until the viewer picks another, remembered apart from the guides'.
- * - Every other page takes `ThemePreference`'s own:  Spell, under Spell UI's pages' key.
- */
-const EPIC_PAGES = Object.freeze({ defaultTheme: "fruity", themeKey: "spell-epic:theme" })
-
-/**
  * Put the theme menu in the site header's `theme` slot, where its light / dark button was (Q30).
  * - Read as the bundle runs, from the end of `<body>`:  the page's markup is all there.
  * - A header DOCKED in a page's own chrome:  none, the page has its own control.
@@ -119,8 +111,6 @@ function addThemeMenu() {
   header.append(menu)
 }
 
-// an epic page:  read before the first read of the pair (`restore()`, the menu)
-if (document.querySelector("epic-page")) ThemePreference.site(EPIC_PAGES)
 /**
  * Resolves once the page wears its theme (`ThemePreference.restore()`);  never rejects.
  * - a live reload's new page waits for it before it shows (the docs runtime's `reveal()`, epic `epic-engine` I164):

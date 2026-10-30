@@ -45,7 +45,10 @@ describe("spellRepos(), the kit installed from npm", () => {
       join(kit, "package.json"),
       JSON.stringify({ name: "spell", workspaces: ["parser"], spell: { commands: "./c.js" } })
     )
-    writeFileSync(join(kit, "parser", "package.json"), JSON.stringify({ name: "spell-parser", spell: { commands: "./c.js" } }))
+    writeFileSync(
+      join(kit, "parser", "package.json"),
+      JSON.stringify({ name: "spell-parser", spell: { commands: "./c.js" } })
+    )
     expect(CLI.spellRepos(kit).map((repo) => repo.root)).toEqual([kit, join(kit, "parser")])
     rmSync(project, { recursive: true, force: true })
   })

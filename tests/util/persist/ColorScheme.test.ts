@@ -44,20 +44,26 @@ describe("ColorScheme.choose()", () => {
 })
 
 describe("ColorScheme.chosen()", () => {
-  test.each([
-    ["spell-site:theme", "dark"],
-    ["spell-ui-site:scheme", "light"]
-  ])("moves an old key's scheme (%s) to the one key, once", (key, scheme) => {
-    localStorage.setItem(key, scheme)
-    expect(ColorScheme.chosen()).toBe(scheme)
-    expect(localStorage.getItem(COLOR_SCHEME_KEY)).toBe(scheme)
-    for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
-  })
+  test.each([["spell-ui-site:scheme", "light"]])(
+    "moves an old key's scheme (%s) to the one key, once",
+    (key, scheme) => {
+      localStorage.setItem(key, scheme)
+      expect(ColorScheme.chosen()).toBe(scheme)
+      expect(localStorage.getItem(COLOR_SCHEME_KEY)).toBe(scheme)
+      for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
+    }
+  )
 
   test("an old key never overrides the one key", () => {
     localStorage.setItem(COLOR_SCHEME_KEY, "light")
-    localStorage.setItem("spell-site:theme", "dark")
+    localStorage.setItem("spell-ui-site:scheme", "dark")
     expect(ColorScheme.chosen()).toBe("light")
+  })
+
+  test("the theme's key (`spell-site:theme`, the site header's scheme before 2026-10-04) is left alone", () => {
+    localStorage.setItem("spell-site:theme", "glass")
+    expect(ColorScheme.chosen()).toBeUndefined()
+    expect(localStorage.getItem("spell-site:theme")).toBe("glass")
   })
 
   test("anything but `light` or `dark` is nothing chosen", () => {

@@ -5,6 +5,7 @@ import { createEffect } from "solid-js"
 import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { uiReady } from "./loadUI"
 import { tracked } from "./tracked"
 
@@ -12,13 +13,14 @@ import "./EditorTheme.css"
 
 /****************
  * ### `EditorTheme`
- * The editor app's theme:  one of Spell's themes and light / dark, picked from its menu bar, remembered in the browser.
- * - The same set and the same menu as every other place (epic `debut` P17):
- *   - the remembering and applying:  Spell UI's `ThemePreference`
+ * The editor app's theme:  one of Spell's themes and light / dark, picked from its menu bar.
+ * - The same set, the same menu and the SAME choice as every other place (epic `debut` P17, P21):
+ *   - the remembering and applying:  Spell UI's `ThemePreference`, kept in the person's space
+ *     (`@spell/owen@/__prefs/spell-site.json5`), which the editor's dev server reaches through its `/api`;
+ *     a theme picked on an epic page or Spell UI's pages shows here too, at once, and the other way round
+ *   - the read-only public build, with no page server:  kept in the browser (`isStaticBuild`)
  *   - the menu:  `<ui-theme-menu>` (`<ThemeMenu>`, below)
- * - The editor starts in Fruity (`DEFAULT_THEME`, epic `debut` Q14), and keeps its own theme key:
- *   a theme picked on the docs site never changes the editor's, nor the other way round.
- *   - Light / dark is ONE choice for every Spell site:  the docs' key.
+ * - Glass until the person picks another (`ThemePreference`'s default, epic `debut` Q39).
  * - Every theme dresses the editor's chrome (`EditorTheme.css`):
  *   a floating top bar, panels with gaps and rounded corners,
  *   from the theme's own bar and panel tokens (`--ui-bar-*`, `--ui-panel-*`, epic `debut` J89).
@@ -33,12 +35,6 @@ import "./EditorTheme.css"
  * - The editor app's only:  NEVER from `<spell-viewer>` / `<spell-editor>`, which live on other people's pages.
  ****************/
 export class EditorTheme {
-  /** The theme the editor starts in:  Fruity, Glass on its pastel wallpaper (epic `debut` Q14). */
-  static DEFAULT_THEME = "fruity"
-
-  /** The `localStorage` key of the editor's chosen theme. */
-  static THEME_KEY = "spell-app:theme"
-
   /**
    * Apply the remembered theme:  light / dark at once, the theme once its sheet loads.
    * - Call once, from the editor's entry.
@@ -52,7 +48,7 @@ export class EditorTheme {
     try {
       await uiReady
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
-      ThemePreference.site({ defaultTheme: EditorTheme.DEFAULT_THEME, themeKey: EditorTheme.THEME_KEY })
+      ThemePreference.keepIn(isStaticBuild ? "browser" : "space")
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()

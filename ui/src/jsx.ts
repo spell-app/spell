@@ -33453,12 +33453,12 @@ export interface UIThemeEditorAttributes {
    */
   "prop:value"?: unknown
   /**
-   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
+   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   pages?: unknown
   /**
-   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
+   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `pages` -- `prop:` stays only for compiled spell
    */

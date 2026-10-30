@@ -33237,7 +33237,7 @@
           "name": "pages",
           "kind": "json",
           "reflect": false,
-          "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme."
+          "description": "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself wears the theme."
         },
         {
           "name": "disabled",

@@ -226,13 +226,10 @@ describe("Bundle.specs()", () => {
 
 // the ONE list, as the kit's settings merge it:  Spell UI's part names its site's bundle, spell-brand's its pages'
 // (spell-app's own test until epic `repo-split` P16);  only where spell-brand is beside the kit (the kit's CI has none)
-describe.skipIf(!SRV.Bundle.packageDirFor("spell-brand", KIT))(
-  "the kit's bundles",
-  () => {
-    test("the installed repos' settings name every bundle, each once", () => {
-      const outputs = SRV.Bundle.specs(KIT).map((spec) => spec.name)
-      expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())
-      expect(new Set(outputs).size).toBe(outputs.length)
-    })
-  }
-)
+describe.skipIf(!SRV.Bundle.packageDirFor("spell-brand", KIT))("the kit's bundles", () => {
+  test("the installed repos' settings name every bundle, each once", () => {
+    const outputs = SRV.Bundle.specs(KIT).map((spec) => spec.name)
+    expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())
+    expect(new Set(outputs).size).toBe(outputs.length)
+  })
+})

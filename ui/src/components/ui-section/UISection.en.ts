@@ -299,10 +299,14 @@ export const sectionVocabulary = {
   states: [
     { name: "collapsed", description: "Closed." },
     { name: "stuck", description: "With `sticky`:  the title bar is stuck to the top." },
-    { name: "stacked", description: 'With `sticky="stack"` (or `sticky` right inside a stacked section):  a bar of the stack.' },
+    {
+      name: "stacked",
+      description: 'With `sticky="stack"` (or `sticky` right inside a stacked section):  a bar of the stack.'
+    },
     {
       name: "tucked",
-      description: "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+      description:
+        "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
     },
     {
       name: "tucks",

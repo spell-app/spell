@@ -57,6 +57,16 @@ export class ColorScheme {
   }
 
   /**
+   * Remember `scheme`, chosen somewhere else (`undefined`:  follow the OS), and show what this page should now:
+   * the address's scheme still wins for this visit, unlike `choose()`.
+   * - e.g. Spell UI's `ThemePreference`, taking the person's scheme from their space, or another page's pick
+   */
+  static remember(scheme: ColorSchemeName | undefined): void {
+    PrefStore.setAt(COLOR_SCHEME_KEY, scheme)
+    ColorScheme.apply(ColorScheme.chosen())
+  }
+
+  /**
    * Show `scheme` on `root` (default `<html>`):  its class (the other one off) and the same inline `color-scheme`.
    * - `undefined`:  neither, so the page's own `color-scheme` (`light dark`) follows the OS
    */

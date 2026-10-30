@@ -294,7 +294,12 @@ await themes.apply(undefined) // no theme:  the plain default look
   the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
 - To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's nine themes and Light, Dark or Auto,
-  remembered for each viewer (`ThemePreference`);  every Spell place shows it.
+  ONE choice for every Spell place (`ThemePreference`):  picked in any menu, the editor, an epic page and Spell UI's
+  pages all draw in it, open tabs too.
+  - Kept in the person's space, beside their other preferences:  `@spell/<person>@/__prefs/spell-site.json5`,
+    `{ theme: "glass", scheme: "dark" }`, which they can edit by hand;  a page without the page server keeps it in
+    the browser.
+  - Glass until they pick another.
   - Its Theme bench row opens the theme bench in a new window, in the theme chosen.
 - A page's address can say its theme and scheme for that visit:  `?theme=glass&scheme=dark`.
   - It wins over what the viewer chose there, and is never remembered:  picking from the menu still is.

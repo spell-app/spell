@@ -89,7 +89,7 @@ describe("Spell UI in Spanish (`components.es.ts`)", () => {
     expect(names.localize("es-boton", "animation", "fade up")).toEqual({ attribute: "animacion", value: "fade up" })
   })
 
-  it("words `font`'s values in Spanish, a size left a number:  `letra=\"negrita serifa 14\"`", () => {
+  it('words `font`\'s values in Spanish, a size left a number:  `letra="negrita serifa 14"`', () => {
     expect(names.canonicalize("es-boton", "letra", "negrita serifa 14")).toEqual({
       attribute: "font",
       value: "bold serif 14"

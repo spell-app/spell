@@ -493,7 +493,10 @@ Each one dresses the whole editor:
   with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
   - Glass and Fruity's bar is a full pill;  Merlot's panels meet edge to edge, and Spell's bar has no box of its own.
 - The bars' and panels' colours, corners and shadows are the theme's own, as the docs pages' bars are.
-- The editor remembers its own theme, apart from the docs site's;  light or dark is ONE choice for every Spell site.
+- The theme is ONE choice for every Spell place:  pick Merlot dark in the editor, and the epic pages and Spell UI's
+  pages draw in it too, open tabs at once;  and the other way round.
+  - Kept in your space, `@spell/<you>@/__prefs/spell-site.json5`;  the read-only public build keeps it in the
+    browser.
 - The code itself is always Shades of Purple, the VS Code theme, ported to Monaco with a matching light version.
   It follows the page's light or dark, under any theme, and colours Spell's headings, keywords, types, properties,
   actions and constants from the parse.

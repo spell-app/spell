@@ -29,7 +29,10 @@ export function designCommand(verb: string, args: string[]): Promise<number> {
   if (verb === "bundle" || verb === "check") {
     const brand = brandFolder(CLI.findCheckout(CLI.KIT_MARKER))
     if (!brand) throw new CLI.CliError(`spell design ${verb} runs spell-brand's script:  no spell-brand beside the kit`)
-    return CLI.runChild("yarn", [`design:${verb}`, ...args], { cwd: brand, env: { ...process.env, INIT_CWD: process.cwd() } })
+    return CLI.runChild("yarn", [`design:${verb}`, ...args], {
+      cwd: brand,
+      env: { ...process.env, INIT_CWD: process.cwd() }
+    })
   }
   if (!SYNC_VERBS.includes(verb)) throw new CLI.CliError(`unknown verb '${verb}':  ${DESIGN_VERBS.join(", ")}`)
   return CLI.runTool(DESIGN_TOOLS.sync, [verb, ...args])

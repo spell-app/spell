@@ -666,7 +666,6 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     if (!doc?.documentElement) return
     try {
       if (parts.theme) {
-        win.localStorage.setItem(page.themeKey, this.baseTheme)
         const runtime = await UIThemeEditor.runtimeOf(win)
         await runtime?.themes.apply(this.baseTheme)
       }

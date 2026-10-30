@@ -1,10 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
+import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS, ServerPlace } from "spell/util/persist"
 import { UI } from "spell/ui/runtime"
 
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
-import { DEFAULT_THEME, SCHEME_SWITCHING, THEME_KEYS } from "spell/ui/components/ui-theme-menu/UIThemeMenu.types"
+import {
+  DEFAULT_THEME,
+  OLD_THEME_KEYS,
+  SCHEME_SWITCHING,
+  THEME_KEYS,
+  THEME_STORE
+} from "spell/ui/components/ui-theme-menu/UIThemeMenu.types"
+
+import "spell/ui/components/ui-root"
 
 beforeEach(async () => {
   // the real OS's scheme never matters
@@ -16,6 +24,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await clean()
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 describe("THEME_KEYS.scheme", () => {
@@ -25,30 +34,39 @@ describe("THEME_KEYS.scheme", () => {
 })
 
 describe("ThemePreference.reset()", () => {
-  test.each([
-    ["spell-site:theme", "dark"],
-    ["spell-ui-site:scheme", "light"]
-  ])("moves an old key's scheme (%s) to the one key, once", (key, scheme) => {
-    localStorage.setItem(key, scheme)
-    ThemePreference.reset()
-    expect(ThemePreference.chosen.scheme).toBe(scheme)
-    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe(scheme)
-    for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
-  })
+  test.each([["spell-ui-site:scheme", "light"]])(
+    "moves an old key's scheme (%s) to the one key, once",
+    (key, scheme) => {
+      localStorage.setItem(key, scheme)
+      ThemePreference.reset()
+      expect(ThemePreference.chosen.scheme).toBe(scheme)
+      expect(localStorage.getItem(THEME_KEYS.scheme)).toBe(scheme)
+      for (const old of OLD_COLOR_SCHEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
+    }
+  )
 
   test("an old key never overrides the one key", () => {
     localStorage.setItem(THEME_KEYS.scheme, "light")
-    localStorage.setItem("spell-site:theme", "dark")
+    localStorage.setItem("spell-ui-site:scheme", "dark")
     ThemePreference.reset()
     expect(ThemePreference.chosen.scheme).toBe("light")
+  })
+
+  test.each(OLD_THEME_KEYS)("moves a place's own old theme key (%s) to the one key, once", (key) => {
+    localStorage.setItem(key, "merlot")
+    ThemePreference.reset()
+    expect(ThemePreference.chosen.theme).toBe("merlot")
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
+    for (const old of OLD_THEME_KEYS) expect(localStorage.getItem(old)).toBeNull()
   })
 })
 
 describe("ThemePreference.restore()", () => {
-  test("with nothing stored, restore() applies the Spell theme", async () => {
-    expect(DEFAULT_THEME).toBe("spell")
+  test("with nothing stored, restore() applies Glass, every place's default (Q39)", async () => {
+    expect(DEFAULT_THEME).toBe("glass")
+    expect(ThemePreference.keptIn).toBe("browser")
     await ThemePreference.restore()
-    expect(UI.themes.current).toBe("spell")
+    expect(UI.themes.current).toBe("glass")
     expect(UI.styles.has(UI.themes.slots.theme)).toBe(true)
   })
 
@@ -86,39 +104,110 @@ describe("ThemePreference.restore()", () => {
   })
 })
 
-describe("ThemePreference.site()", () => {
-  afterEach(() => ThemePreference.site({ defaultTheme: DEFAULT_THEME, themeKey: THEME_KEYS.theme }))
-
-  test("another place's own default theme and key:  the docs' theme key is left alone", async () => {
+describe("ThemePreference:  ONE choice, kept in the person's space", () => {
+  test("restore() wears the space's theme and scheme, over the browser's copy, and keeps them as the copy", async () => {
     localStorage.setItem(THEME_KEYS.theme, "merlot")
-    ThemePreference.site({ defaultTheme: "fruity", themeKey: "test-site:theme" })
-    ThemePreference.reset()
+    const space = fakeSpace({ theme: "paper", scheme: "dark" })
     await ThemePreference.restore()
-    expect(UI.themes.current).toBe("fruity")
-
-    await ThemePreference.setTheme("glass")
-    expect(localStorage.getItem("test-site:theme")).toBe("glass")
-    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
-
-    // its default is stored as no key at all, as the docs' is
-    await ThemePreference.setTheme("fruity")
-    expect(localStorage.getItem("test-site:theme")).toBeNull()
-    localStorage.removeItem("test-site:theme")
+    expect(UI.themes.current).toBe("paper")
+    expect(ThemePreference.chosen).toEqual({ theme: "paper", scheme: "dark" })
+    expect(document.documentElement.classList.contains("ui-dark")).toBe(true)
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper")
+    expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
+    expect(space.saved).toEqual([])
   })
 
-  test("a pair read FIRST (a menu Spell UI defined before the place said its own) is read again, and subscribers told", () => {
-    ThemePreference.reset()
-    expect(ThemePreference.chosen.theme).toBe(DEFAULT_THEME)
-    const heard = vi.fn()
-    const unsubscribe = ThemePreference.subscribe(heard)
-    localStorage.setItem("test-site:theme", "merlot")
-    ThemePreference.site({ defaultTheme: "fruity", themeKey: "test-site:theme" })
-    expect(ThemePreference.chosen.theme).toBe("merlot")
-    expect(heard).toHaveBeenCalledWith(expect.objectContaining({ theme: "merlot" }))
-    unsubscribe()
-    localStorage.removeItem("test-site:theme")
+  test("a space holding nothing yet takes this browser's pick, once (an old key's too);  nothing picked, nothing saved", async () => {
+    localStorage.setItem("spell-epic:theme", "merlot")
+    localStorage.setItem(THEME_KEYS.scheme, "light")
+    const space = fakeSpace()
+    await ThemePreference.restore()
+    await vi.waitFor(() => expect(space.kept).toEqual({ theme: "merlot", scheme: "light" }))
+    expect(UI.themes.current).toBe("merlot")
+
+    await clean()
+    const empty = fakeSpace()
+    await ThemePreference.restore()
+    expect(empty.saved).toEqual([])
+  })
+
+  test("a pick is saved in the space, theme and scheme", async () => {
+    const space = fakeSpace()
+    await ThemePreference.restore()
+    await ThemePreference.setTheme("merlot")
+    ThemePreference.setScheme("dark")
+    await vi.waitFor(() => expect(space.kept).toEqual({ theme: "merlot", scheme: "dark" }))
+  })
+
+  test("another page's pick, heard over the live channel, is worn at once;  another store's is not", async () => {
+    fakeSpace()
+    await ThemePreference.restore()
+    await ThemePreference.heard({ store: THEME_STORE, key: "theme", value: "pop" })
+    expect(UI.themes.current).toBe("pop")
+    await ThemePreference.heard({ store: THEME_STORE, key: "scheme", value: "dark" })
+    expect(ThemePreference.chosen.scheme).toBe("dark")
+    await ThemePreference.heard({ store: "spellEditor", key: "theme", value: "paper" })
+    expect(UI.themes.current).toBe("pop")
+  })
+
+  test("the address still wins over the space, for this visit", async () => {
+    const before = location.href
+    history.replaceState(null, "", `${location.pathname}?theme=glass`)
+    try {
+      ThemePreference.reset()
+      fakeSpace({ theme: "paper" })
+      await ThemePreference.restore()
+      expect(UI.themes.current).toBe("glass")
+      expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper")
+    } finally {
+      history.replaceState(null, "", before)
+    }
+  })
+
+  test("a nested <ui-root theme> draws its own scheme, and never touches the person's choice", async () => {
+    const space = fakeSpace({ theme: "merlot", scheme: "light" })
+    await ThemePreference.restore()
+    const root = document.createElement("ui-root")
+    root.setAttribute("theme", "dark")
+    root.innerHTML = "<p>inside</p>"
+    document.body.append(root)
+    try {
+      await customElements.whenDefined("ui-root")
+      expect(ThemePreference.chosen).toEqual({ theme: "merlot", scheme: "light" })
+      expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("light")
+      expect(space.saved).toEqual([])
+    } finally {
+      root.remove()
+    }
   })
 })
+
+/**
+ * This page keeps its choice in a stand-in space, `kept` (its `/api/prefs`, answered in memory):
+ * returns it, and what was saved, in order.
+ * - No live channel of its own:  a test hears another page's pick through `heard()`.
+ */
+function fakeSpace(kept: Record<string, unknown> = {}) {
+  const saved: [string, unknown][] = []
+  // `ServerPlace` asks with a path and, to save, a JSON body
+  const fetch = vi.fn(async (input: string, init?: { body?: string }) => {
+    const url = new URL(input, location.href)
+    if (url.pathname.endsWith("/load")) {
+      const key = url.searchParams.get("key") ?? ""
+      return Response.json(key in kept ? { value: kept[key] } : {})
+    }
+    const { key, value } = JSON.parse(init?.body ?? "{}") as { key: string; value: unknown }
+    kept[key] = value
+    saved.push([key, value])
+    return Response.json({ value })
+  })
+  vi.spyOn(ServerPlace, "shared", "get").mockReturnValue(
+    new ServerPlace({ fetch: fetch as unknown as typeof globalThis.fetch })
+  )
+  vi.stubGlobal("WebSocket", undefined)
+  ThemePreference.keepIn("space")
+  return { kept, saved }
+}
 
 describe("ThemePreference.applyScheme()", () => {
   test("a scheme switch turns transitions off for a frame (`SCHEME_SWITCHING`)", async () => {
@@ -148,7 +237,7 @@ describe("ThemePreference.HEAD_SCRIPT", () => {
 
 /** Back to no stored theme (so the default theme, in memory), nothing applied, the system scheme. */
 async function clean() {
-  for (const key of [THEME_KEYS.theme, THEME_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS]) {
+  for (const key of [THEME_KEYS.theme, THEME_KEYS.scheme, ...OLD_COLOR_SCHEME_KEYS, ...OLD_THEME_KEYS]) {
     localStorage.removeItem(key)
   }
   ThemePreference.reset()

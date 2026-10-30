@@ -71,7 +71,6 @@ const PAGE: PreviewPage = {
   url: "/src/test-helpers/fixtures/sources/page.html",
   width: 800,
   reach: "same origin",
-  themeKey: "spell-ui-test:theme",
   icon: "file"
 }
 

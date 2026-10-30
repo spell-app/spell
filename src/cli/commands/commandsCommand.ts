@@ -88,7 +88,10 @@ function packageManifests(root: string): Array<[string, string]> {
 /** The kit's folders, by their package's name (`spell-epic` => `<root>/epic`), in the kit's order. */
 function folders(root: string): Map<string, string> {
   return new Map(
-    kitFolders(root).map((dir) => [(JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name: string }).name, dir])
+    kitFolders(root).map((dir) => [
+      (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name: string }).name,
+      dir
+    ])
   )
 }
 

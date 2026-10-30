@@ -62,7 +62,6 @@ export const TEXT_SIZES = { min: 12, max: 20, step: 1 } as const
  * - `url`:  the page's address;  `undefined` while the host finds it, `""` when it can't be reached (`note` says why)
  * - `width`:  the window width it's drawn at, px:  the frame is scaled down to its cell, so the page lays out as on a
  *   desk (Phone:  `PHONE_WIDTH`, every page)
- * - `themeKey`:  where the page keeps its chosen theme:  the editor writes it, as the page's own menu would
  * - `ownPrefix`:  the start of the page's OWN tokens, which no theme file holds (the Spell editor's `--spell-`):
  *   the editor shows those it declares in a group of their own, and copies them as a rule for the page's sheet
  * - `fullView`:  ask the page for its full view (`PageMessage.fullMonty`):  the Spell editor's Debug, side bars,
@@ -77,7 +76,6 @@ export type PreviewPage = {
   note?: string
   width: number
   reach: PageReach
-  themeKey: string
   /** its icon, where the token column says which pages read a token */
   icon: string
   ownPrefix?: string

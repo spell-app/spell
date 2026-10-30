@@ -25,7 +25,7 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  * ### `<ui-theme-menu>`
  * The component behind `<ui-theme-menu>`:  a page's theme and light / dark, picked from Spell's own themes.
  * - Every place shows the same menu (epic `debut` P17):  the editor, the epic pages and guides, Spell UI's pages.
- *   Each place keeps its own default theme and remembered pick (`ThemePreference.site()`).
+ *   One pick for all of them, kept in the person's space (`ThemePreference`, epic `debut` P21).
  *
  * - Its shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`, holding by `show`:
  *   - `both` (the default):  ONE round icon button, compact enough for a side column or a phone's top bar

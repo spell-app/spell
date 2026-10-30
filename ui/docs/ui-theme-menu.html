@@ -113,11 +113,12 @@
                   any page, not only these.
 
                   - It lists Spell's own themes:  Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop and Matrix, each with a line saying what it is.
-                  - A pick applies the theme to the page and every element on it, and remembers it for the next page
-                    (`ThemePreference`).  Light / dark is ONE choice for every Spell site.
+                  - A pick applies the theme to the page and every element on it, and remembers it (`ThemePreference`):
+                    ONE choice, theme and light / dark, for every Spell place, kept in the person's space, so the
+                    editor, the epic pages and these pages all draw in it, open tabs at once.
                   - A page that restores the remembered theme before any menu shows calls
-                    `ThemePreference.restore()`;  a place with its own default theme and remembered pick calls
-                    `ThemePreference.site({ defaultTheme, themeKey })` first, as the Spell editor does.
+                    `ThemePreference.restore()`;  a page the page server didn't serve, but whose `/api` reaches it,
+                    calls `ThemePreference.keepIn("space")` first, as the Spell editor does.
                   - Its `end` slot adds rows of the page's own under the themes:  the editor's "Edit theme...".
                   - `show="menu"` draws the panel alone, in place, as the body of a sub-menu in a menu of your own
                     (an epic page's gear menu).  Its `chosenTheme` names the theme chosen, for the row that opens it

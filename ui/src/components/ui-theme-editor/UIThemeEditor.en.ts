@@ -55,7 +55,7 @@ export const themeEditorVocabulary = {
       reflect: false,
       description:
         "PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  " +
-        "`id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself " +
+        "`id`, `label`, `url`, `width`, `reach`, `icon` ...).  None:  a sample app, and the page itself " +
         "wears the theme."
     }
   ],

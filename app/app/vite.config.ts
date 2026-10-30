@@ -35,9 +35,11 @@ export default defineConfig({
     host: "0.0.0.0",
     // the page server's:  the API, a project's files, the elements' bundles for the demo pages (`appRoutes.ts`), Spell UI's pages
     proxy: {
+      // its websocket too:  the live channel, which tells the editor the person's theme changed (`ThemePreference`)
       "/api": {
         target: `http://${environment.api_server}:${environment.expressPort}`,
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       },
       // a project's files, by their URL:  `/spaces/<project>/<file>` (`SP.SpellUrls`)
       "/spaces": {

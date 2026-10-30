@@ -570,9 +570,7 @@ describe("PageServer", () => {
     writeFileSync(join(engine, "templates", "durable.html"), "<title>Guide Template</title>\n")
     expect((await ask(port, "GET", "/templates/durable.html")).text).toContain("<title>Guide Template</title>")
     expect((await ask(port, "GET", "/templates/missing.html")).status).toBe(404)
-    expect(engineRoutePath("/templates/goals/index.html", server.engineRoutes)).toBe(
-      "/epic/templates/goals/index.html"
-    )
+    expect(engineRoutePath("/templates/goals/index.html", server.engineRoutes)).toBe("/epic/templates/goals/index.html")
     expect(engineRoutePath("/worktrees/seo/templates/durable.html", server.engineRoutes)).toBe(
       "/epic/templates/durable.html"
     )

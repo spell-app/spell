@@ -375,6 +375,8 @@ export function liveClient(scrollKey: string): void {
       }
       if (event === "change" && data.path)
         onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
+      // a person's pref saved (`PREF_SAVED_EVENT`, spell/util's persist types):  the page's own code follows it
+      if (event === "pref-saved") dispatchEvent(new CustomEvent("spell-server:pref-saved", { detail: data }))
       // a server run other than the one that served the page:  it restarted, maybe on new code
       if (event === "hello" && config!.run && data.run && data.run !== config!.run) {
         restarted = true

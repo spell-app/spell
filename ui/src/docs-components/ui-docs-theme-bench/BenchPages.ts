@@ -35,7 +35,6 @@ export class BenchPages {
         note: place.at === "editor" ? noEditor : undefined,
         width: place.width,
         reach: place.at === "editor" ? "messages" : "same origin",
-        themeKey: place.themeKey,
         icon: place.icon,
         ownPrefix: place.ownPrefix,
         fullView: place.fullView
@@ -63,7 +62,7 @@ export const EDITOR_REDIRECT = "/editor"
 
 /**
  * Each page:  where it's served (the page server, or the editor app), its path there, the width it's drawn at,
- * where it keeps its theme, its icon;  the editor's own tokens (`--spell-`), and its full view.
+ * its icon;  the editor's own tokens (`--spell-`), and its full view.
  */
 const PLACES: Readonly<
   Record<
@@ -72,7 +71,6 @@ const PLACES: Readonly<
       at: "page server" | "editor"
       path: string
       width: number
-      themeKey: string
       icon: string
       ownPrefix?: string
       fullView?: boolean
@@ -83,7 +81,6 @@ const PLACES: Readonly<
     at: "editor",
     path: "/edit/@spell/examples/Solitaire",
     width: 1440,
-    themeKey: "spell-app:theme",
     icon: "laptop code",
     ownPrefix: "--spell-",
     fullView: true
@@ -92,21 +89,18 @@ const PLACES: Readonly<
     at: "page server",
     path: "/epics/debut/debut.plan.html",
     width: 1280,
-    themeKey: "spell-epic:theme",
     icon: "tasks"
   },
   ui: {
     at: "page server",
     path: "/components/ui/ui-button.html",
     width: 1280,
-    themeKey: "spell-ui-site:theme",
     icon: "cubes"
   },
   notebook: {
     at: "editor",
     path: "/edit/@spell/notebooks/Avatar",
     width: 1440,
-    themeKey: "spell-app:theme",
     icon: "book open"
   }
 }

@@ -248,7 +248,13 @@ export const BUNDLE_RECORD = ".bundle.json"
  * - the site header (`spell/server/site`)
  * - the lock file
  */
-const SPELL_UI_SOURCES = ["spell/ui/src", "spell/src/element", "spell/ui/vite.config.ts", "spell/src/server/site", "yarn.lock"]
+const SPELL_UI_SOURCES = [
+  "spell/ui/src",
+  "spell/src/element",
+  "spell/ui/vite.config.ts",
+  "spell/src/server/site",
+  "yarn.lock"
+]
 
 /**
  * How each bundle built on demand is built.
@@ -271,7 +277,12 @@ export const BUNDLES: BundleSpec[] = [
     run: ["yarn", "site:bundle"],
     output: "site/_assets",
     entry: "site.js",
-    sources: [...SPELL_UI_SOURCES, "spell/ui/site/_src", "spell/ui/vite.site.config.ts", "spell/ui/scripts/site-bundle.ts"]
+    sources: [
+      ...SPELL_UI_SOURCES,
+      "spell/ui/site/_src",
+      "spell/ui/vite.site.config.ts",
+      "spell/ui/scripts/site-bundle.ts"
+    ]
   },
   {
     name: "brand",

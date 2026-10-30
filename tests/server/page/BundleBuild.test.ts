@@ -191,9 +191,7 @@ describe("BundleBuild.bundleFileFor()", () => {
 
   test("this checkout's bundle folders, through the sets' overlay;  nothing else", () => {
     expect(build.folders).toEqual(BUNDLES)
-    expect(build.bundleFileFor("/components/ui/_assets/ui-button.js")).toBe(
-      join(repo, "ui/site/_assets/ui-button.js")
-    )
+    expect(build.bundleFileFor("/components/ui/_assets/ui-button.js")).toBe(join(repo, "ui/site/_assets/ui-button.js"))
     expect(build.bundleFileFor("/ui/site/_assets/site.css")).toBe(join(repo, "ui/site/_assets/site.css"))
     expect(build.bundleFileFor("/spell-brand/_assets/ui/a%20b.js")).toBe(join(repo, "spell-brand/_assets/ui/a b.js"))
     expect(build.bundleFileFor("/components/ui/__data/components.json5")).toBeUndefined()
@@ -210,15 +208,9 @@ describe("BundleBuild.bundleFileFor()", () => {
     const beside = mkdtempSync(join(tmpdir(), "page-server-bundles-beside-"))
     const app = join(beside, "spell-app")
     const sets = { ui: { name: "Spell UI", dir: "../ui/docs", assets: "../ui/site/_assets" } }
-    put(
-      app,
-      "package.json",
-      JSON.stringify({ pageServer: { bundles: ["../ui/site/_assets"], componentSets: sets } })
-    )
+    put(app, "package.json", JSON.stringify({ pageServer: { bundles: ["../ui/site/_assets"], componentSets: sets } }))
     const there = new BundleBuild({ root: app })
-    expect(there.bundleFileFor("/_beside/ui/site/_assets/site.js")).toBe(
-      join(beside, "ui/site/_assets/site.js")
-    )
+    expect(there.bundleFileFor("/_beside/ui/site/_assets/site.js")).toBe(join(beside, "ui/site/_assets/site.js"))
     expect(there.bundleFileFor("/components/ui/_assets/site.js")).toBe(join(beside, "ui/site/_assets/site.js"))
     expect(there.bundleFileFor("/_beside/ui/docs/ui-button.html")).toBeUndefined()
     rmSync(beside, { recursive: true, force: true })

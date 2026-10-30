@@ -142,7 +142,7 @@ describe("<ui-theme-menu> markup", () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     expect(part(host, "controls").className).toBe("ui themes")
     expect(part(host, "palette").localName).toBe("button")
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Auto")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Glass, Auto")
     const overlay = part(host, "overlay")
     expect(overlay.localName).toBe("ui-popup")
     expect(overlay.getAttribute("open-on")).toBe("click")
@@ -160,7 +160,7 @@ describe("<ui-theme-menu> markup", () => {
       "adjust"
     ])
     expect([...host.shadowRoot!.querySelectorAll("[part~=tip]")].map((tip) => tip.textContent)).toEqual([
-      "Theme and light / dark:  Spell, Auto"
+      "Theme and light / dark:  Glass, Auto"
     ])
     expect(host.matches(":state(following)")).toBe(true)
     expect(host.matches(":state(dark)")).toBe(false)
@@ -230,18 +230,18 @@ describe("<ui-theme-menu> markup", () => {
 })
 
 describe("<ui-theme-menu> overlay", () => {
-  it("lists Spell's own themes (Spell checked), each with its description:  no Plain, no Classic, no Fomantic", async () => {
+  it("lists Spell's own themes (Glass, the default, checked), each with its description:  no Plain, no Classic, no Fomantic", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     expect(rows(host).map(([value]) => value)).toEqual([...UI.themes.own])
     expect(rows(host)).toContainEqual(["merlot", "Merlot"])
     expect(rows(host).map(([value]) => value)).not.toContain("classic")
     expect(rows(host).map(([value]) => value)).not.toContain("default")
-    expect(row(host, "spell").getAttribute("aria-checked")).toBe("true")
+    expect(row(host, "glass").getAttribute("aria-checked")).toBe("true")
     expect(row(host, "spell").querySelector(".description")!.textContent).toBe("The Spell brand")
     expect(row(host, "merlot").querySelector(".description")!.textContent).toBe("A wine-dark studio")
     expect(host.shadowRoot!.querySelector(".menu > .header")).toBeNull()
     // one tab stop:  the chosen theme
-    expect(rows(host).filter(([value]) => row(host, value).tabIndex === 0)).toEqual([["spell", "Spell"]])
+    expect(rows(host).filter(([value]) => row(host, value).tabIndex === 0)).toEqual([["glass", "Glass"]])
   })
 
   it("opens on the palette button, focuses the chosen theme;  arrows move;  Escape closes back to the button", async () => {
@@ -251,12 +251,12 @@ describe("<ui-theme-menu> overlay", () => {
     palette.focus()
     await userEvent.keyboard("{Enter}")
     await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
-    await vi.waitFor(() => expect(focused()).toBe(row(host, "spell")))
+    await vi.waitFor(() => expect(focused()).toBe(row(host, "glass")))
     await ElementFixture.settle()
     expect(host.matches(":state(open)")).toBe(true)
     expect(host.shadowRoot!.querySelectorAll("[part~=tip]")[0]!.classList.contains("muted")).toBe(true)
 
-    await userEvent.keyboard("{ArrowDown}")
+    await userEvent.keyboard("{Home}{ArrowDown}")
     expect(focused()).toBe(row(host, UI.themes.own[1]!))
     await userEvent.keyboard("{ArrowUp}{ArrowUp}")
     expect(focused()).toBe(row(host, rows(host).at(-1)![0]))
@@ -307,7 +307,7 @@ describe("<ui-theme-menu> menu (show=menu)", () => {
     expect(choices(host).map(([value]) => value)).toEqual(["light", "dark", "system"])
     expect(part(host, "menu").getAttribute("role")).toBe("menu")
     expect(rows(host).map(([value]) => value)).toEqual([...UI.themes.own])
-    expect(row(host, "spell").getAttribute("aria-checked")).toBe("true")
+    expect(row(host, "glass").getAttribute("aria-checked")).toBe("true")
     expect(part(host, "bench")).not.toBeNull()
     await expectAccessible(host)
   })
@@ -404,7 +404,7 @@ describe("<ui-theme-menu> scheme", () => {
       ["dark", "false"],
       ["system", "false"]
     ])
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Light")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Glass, Light")
     choice(host, "dark").click()
     await ElementFixture.settle()
     expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("dark")
@@ -431,7 +431,7 @@ describe("<ui-theme-menu> scheme", () => {
     part(host, "palette").click()
     await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
     // Shift+Tab from the theme list reaches the scheme control's one tab stop:  the chosen scheme
-    await vi.waitFor(() => expect(focused()).toBe(row(host, "spell")))
+    await vi.waitFor(() => expect(focused()).toBe(row(host, "glass")))
     await userEvent.keyboard("{Shift>}{Tab}{/Shift}")
     expect(focused()).toBe(choice(host, "system"))
     await userEvent.keyboard("{ArrowRight}")
@@ -476,7 +476,7 @@ describe("<ui-theme-menu> dropdown (show=theme)", () => {
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     expect(dropdownRows(host).map(([value]) => value)).toEqual([...UI.themes.own, "theme bench"])
     expect(dropdownRows(host)).toContainEqual(["glass", "Glass"])
-    expect(labelOf(host)).toBe("Spell theme")
+    expect(labelOf(host)).toBe("Glass theme")
   })
 
   it("a pick applies it and fires one ui-changed (the dropdown's own is stopped)", async () => {
@@ -502,7 +502,7 @@ describe("<ui-theme-menu> Theme bench", () => {
     const bench = part<HTMLAnchorElement>(host, "bench")
     expect(bench.target).toBe("_blank")
     expect(bench.getAttribute("title")).toBe("Open the theme bench in a new window, in this theme")
-    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=spell&pages=app`)
+    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=glass&pages=app`)
     row(host, "merlot").click()
     await ElementFixture.settle()
     expect(part<HTMLAnchorElement>(host, "bench").href).toContain("?theme=merlot")
@@ -511,7 +511,7 @@ describe("<ui-theme-menu> Theme bench", () => {
   it("`bench` names the site it's on;  `none`:  no row", async () => {
     const host = await render(`<ui-theme-menu bench="http://127.0.0.1:4747/"></ui-theme-menu>`)
     expect(part<HTMLAnchorElement>(host, "bench").href).toBe(
-      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=spell&pages=app"
+      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=glass&pages=app"
     )
     const none = await render(`<ui-theme-menu bench="none"></ui-theme-menu>`)
     expect(none.shadowRoot!.querySelector("[part~=bench]")).toBeNull()
@@ -542,11 +542,11 @@ describe("<ui-theme-menu> Theme bench", () => {
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     pick(host, "theme bench")
     expect(open).toHaveBeenCalledWith(
-      `${location.origin}/components/ui/theme-bench.html?theme=spell&pages=app`,
+      `${location.origin}/components/ui/theme-bench.html?theme=glass&pages=app`,
       "_blank",
       "noopener"
     )
-    expect(ThemePreference.chosen.theme).toBe("spell")
+    expect(ThemePreference.chosen.theme).toBe("glass")
   })
 })
 
@@ -575,15 +575,15 @@ describe("<ui-theme-menu> persistence", () => {
     expect(choice(next, "dark").getAttribute("aria-checked")).toBe("true")
   })
 
-  it("system and Spell (the default) are stored as absent keys", async () => {
+  it("system and Glass (the default) are stored as absent keys", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     choice(host, "dark").click()
     await ElementFixture.settle()
     choice(host, "system").click()
     row(host, "merlot").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
-    row(host, "spell").click()
-    await vi.waitFor(() => expect(UI.themes.current).toBe("spell"))
+    row(host, "glass").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("glass"))
     expect(localStorage.getItem(THEME_KEYS.scheme)).toBeNull()
     expect(localStorage.getItem(THEME_KEYS.theme)).toBeNull()
   })

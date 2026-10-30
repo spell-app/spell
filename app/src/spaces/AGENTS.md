@@ -173,10 +173,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Each person's preferences, kept in their space (epic `prefs-and-undo` P2):  [SpacePrefs.ts](server/node/prefs/SpacePrefs.ts).
   - One JSON5 file per store, in the person's `__prefs/` folder:
     - the editor's:  `@spell/owen@/__prefs/spellEditor.json5`
+    - the person's theme and light / dark, every place's (Spell UI's `ThemePreference`, epic `debut` P21):
+      `@spell/owen@/__prefs/spell-site.json5`, `{ theme, scheme }`
     - a store named like a project is a folder and a file:  `__prefs/@owen/solitaire.json5`
   - Through `SpaceStorage` and spaces' JSON5 writer:  a person's comments stay.
   - One change at a time to each file.
   - A store name that would reach outside `__prefs/`, or a key that can't be one:  `SRV.HttpError(400)`.
+  - Every save is told to every open page (`onPrefSaved()`, in the routes):  the app's route module sends it over the
+    page server's live channel, `{ event: "pref-saved", data: { store, key, value } }`, so a page showing that pref
+    follows it at once.
 - Its routes ([prefsRoutes.ts](server/node/prefs/prefsRoutes.ts)), what the kit's `ServerPlace` asks:
   - load and save a key:  `GET /api/prefs/load`, `POST /api/prefs/save`
   - list and forget the keys under a prefix:  `GET /api/prefs/keys`, `POST /api/prefs/forget`

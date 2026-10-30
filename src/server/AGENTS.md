@@ -89,6 +89,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - new observed attributes, and a new version of a family's DOM class, swap in too (`HotDefinitions`, I171)
           - a swap that fails after all asks `SPELL_SERVER.reload()`:  a quiet reload like any other (below)
       - anything else:  `spell-server:changed`, and the page decides
+    - A route module may send its own events to every page (`LiveReload.send()`):  the app's sends `pref-saved`
+      when a person's pref is saved (their theme, epic `debut` P21), which the live client hands on as
+      `spell-server:pref-saved` on `window` (the kit's `PREF_SAVED_EVENT` / `PREF_SAVED_PAGE_EVENT`).
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
