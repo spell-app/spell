@@ -57,8 +57,8 @@ export function err(text: string): void {
  * Ask the person at the terminal `question`;  their answer, else `suggestion`.
  * - asks only in a real terminal (stdin AND stdout a TTY):  a skill, a Claude session, a pipe or CI has none,
  *   so it answers `suggestion` at once, asking nothing
- * - the question in colour, to stand out from what's typed (`questionText()`);  the suggestion after it, dim
- *   (`What do you want to be called? (Ana Lima) `);
+ * - the question in colour, to stand out from what's typed (`questionText()`);  the suggestion after it,
+ *   in the terminal's own colour, readable on a dark background (`What do you want to be called? (Ana Lima) `);
  *   Enter alone, or only spaces, takes it
  * - `input` / `output`:  the streams, `process.stdin` / `process.stdout` by default (tests hand their own)
  * - NEVER throws:  a closed terminal (Ctrl+D) answers `suggestion`
@@ -71,7 +71,7 @@ export async function ask(
   const terminal = createInterface({ input, output })
   try {
     const asked = questionText(question)
-    const answer = await terminal.question(suggestion ? `${asked} ${chalk.dim(`(${suggestion})`)} ` : `${asked} `)
+    const answer = await terminal.question(suggestion ? `${asked} (${suggestion}) ` : `${asked} `)
     return answer.trim() || suggestion
   } catch {
     return suggestion
@@ -102,7 +102,7 @@ export async function choose(
   )
   const lines = () =>
     choices.map(({ label, hint }, index) => {
-      const line = `${index === at ? "❯" : " "} ${index + 1}. ${label}${hint ? chalk.dim(`  ${hint}`) : ""}`
+      const line = `${index === at ? "❯" : " "} ${index + 1}. ${label}${hint ? `  -- ${hint}` : ""}`
       return index === at ? chalk.cyan(line) : line
     })
   output.write(`${questionText(question)}\n${lines().join("\n")}\n`)
@@ -158,7 +158,7 @@ export type Choice = {
   value: string
   /** what the list shows */
   label: string
-  /** a few dim words after it */
+  /** a few words after it, after ` -- ` */
   hint?: string
 }
 
