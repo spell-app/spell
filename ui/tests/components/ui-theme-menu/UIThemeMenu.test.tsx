@@ -8,6 +8,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell/ui/runtime"
 import { UIT } from "spell/ui/core"
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
+import { SavedTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   THEME_KEYS,
   type SchemeChoice,
@@ -652,5 +653,41 @@ describe("<ui-theme-menu> tints", () => {
     await ThemePreference.setTint("pink")
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
     expect(labelOf(host)).toBe("Glass - Pink theme")
+  })
+})
+
+////////////////
+// ## My themes (epic `debut` P25)
+////////////////
+
+describe("<ui-theme-menu> My themes", () => {
+  afterEach(() => localStorage.removeItem("spell-ui:themes"))
+
+  it("lists My themes first, under their heading, above Spell's;  picking one wears it, remembered by its id", async () => {
+    const mine = SavedTheme.save({
+      name: "Sunset",
+      choices: { name: "Sunset", base: "paper", primary: "orange" },
+      css: "@layer ui.app { :root { --ui-primary: var(--ui-orange); } }"
+    })
+    const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
+    expect(host.shadowRoot!.querySelector(".menu > .header")?.textContent).toBe("My themes")
+    expect(rows(host)[0]).toEqual([`mine:${mine.id}`, "Sunset"])
+    expect(rows(host)[1]![0]).toBe("spell")
+    row(host, `mine:${mine.id}`).click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("paper"))
+    await vi.waitFor(() => expect(UI.styles.has("theme-edits")).toBe(true))
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe(`mine:${mine.id}`)
+    await ElementFixture.settle()
+    expect(part(host, "tints")).toBeNull()
+    // another theme takes its sheet off
+    row(host, "merlot").click()
+    await vi.waitFor(() => expect(UI.styles.has("theme-edits")).toBe(false))
+  })
+
+  it("one deleted since:  the default theme", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "mine:gone")
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(UI.themes.current).toBe("glass")
   })
 })

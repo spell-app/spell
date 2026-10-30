@@ -12,6 +12,9 @@ import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEdi
 /** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄, the pages turned off and their order. */
 const KEPT_KEYS = [
   "spell-ui:theme-draft",
+  "spell-ui:theme-editing",
+  "spell-ui:themes",
+  "spell-ui:theme",
   "spell-ui:theme-editor-folds",
   "spell-ui:theme-editor-swapped",
   "spell-ui:theme-editor-schemes",
@@ -99,7 +102,6 @@ async function withPages() {
 
 function forget() {
   history.replaceState(history.state, "", TEST_ADDRESS)
-  SavedTheme.forget()
   for (const key of KEPT_KEYS) localStorage.removeItem(key)
 }
 beforeEach(forget)
@@ -143,15 +145,13 @@ describe("<ui-theme-editor> starting", () => {
     expect(inner(host, ".sample.ui-light").hidden).toBe(false)
   })
 
-  it("starts from `value`, else the theme being made, else the kept theme", async () => {
+  it("starts from `value`, else the theme being made", async () => {
     const given = await editor(`<ui-theme-editor value='{"primary": "pink", "corners": "soft"}'></ui-theme-editor>`)
     expect(given.theme).toMatchObject({ primary: "pink", corners: "soft", base: "fruity" })
     given.remove()
-    SavedTheme.save({ name: "Kept", base: "fruity", primary: "teal" }, "/* kept */")
-    const kept = await editor()
-    expect(kept.theme).toMatchObject({ name: "Kept", primary: "teal" })
-    kept.component.choose({ primary: "red" })
-    kept.remove()
+    const first = await editor()
+    first.component.choose({ name: "Kept", primary: "red" })
+    first.remove()
     const draft = await editor()
     expect(draft.theme).toMatchObject({ name: "Kept", primary: "red" })
   })
@@ -223,7 +223,7 @@ describe("<ui-theme-editor> Basics", () => {
   it("Start over drops every change but the name and the base", async () => {
     const host = await editor(`<ui-theme-editor value='{"name": "Sunrise", "primary": "pink"}'></ui-theme-editor>`)
     host.component.tune("--ui-radius-l", "20px")
-    inner(host, ".actions ui-button:last-child").click()
+    inner(host, ".actions ui-button:first-child").click()
     await ElementFixture.settle()
     expect(host.theme).toEqual({ name: "Sunrise", base: "fruity" })
   })
@@ -234,13 +234,6 @@ describe("<ui-theme-editor> Basics", () => {
 ////////////////
 
 describe("<ui-theme-editor> kept and copied", () => {
-  it("a theme kept on a base under its old name opens on its new one:  Studio as Merlot", async () => {
-    SavedTheme.save({ name: "Kept", base: "studio", primary: "teal" }, "/* kept */")
-    expect(await SavedTheme.restore()).toBe(true)
-    expect(UI.themes.current).toBe("merlot")
-    expect(SavedTheme.choices?.base).toBe("merlot")
-  })
-
   it("Copy changes copies the theme file's JSON5, and sends `ui-copied`", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
     const host = await editor(`<ui-theme-editor value='{"depth": "flat"}'></ui-theme-editor>`)
@@ -572,3 +565,88 @@ describe("<ui-theme-editor> with pages", () => {
     expect(localStorage.getItem("spell-ui:theme-editor-swapped")).toBe("true")
   })
 })
+
+////////////////
+// ## My themes (epic `debut` P25)
+////////////////
+
+describe("<ui-theme-editor> My themes", () => {
+  it("Save keeps it by its name;  a rename and Save again keeps its id;  Save as new makes another", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Sunset", primary: "orange" })
+    const first = host.component.save()
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Sunset"])
+    expect(first.css).toContain("--ui-primary: var(--ui-orange);")
+    host.component.choose({ name: "Dusk" })
+    const renamed = host.component.save()
+    expect(renamed.id).toBe(first.id)
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Dusk"])
+    const copy = host.component.saveAsNew()
+    expect(copy.id).not.toBe(first.id)
+    expect(SavedTheme.list.map((theme) => theme.name)).toEqual(["Dusk", "Dusk 2"])
+  })
+
+  it("Start from one of My themes copies it:  a new theme, not saved yet, the original as it was", async () => {
+    const original = SavedTheme.save({
+      name: "Ocean",
+      choices: { name: "Ocean", base: "glass", primary: "teal" },
+      css: ""
+    })
+    const host = await editor()
+    await applied(host)
+    host.component.startFrom(original.id)
+    expect(host.theme).toMatchObject({ name: "Ocean 2", base: "glass", primary: "teal" })
+    expect(host.component.editingId).toBeUndefined()
+    host.component.choose({ primary: "pink" })
+    expect(SavedTheme.get(original.id)?.choices.primary).toBe("teal")
+  })
+
+  it("Delete asks first, then forgets it", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Gone" })
+    const saved = host.component.save()
+    const confirm = vi.spyOn(UI.modals, "confirm").mockResolvedValue(true)
+    await host.component.remove()
+    expect(confirm).toHaveBeenCalled()
+    expect(SavedTheme.get(saved.id)).toBeUndefined()
+    confirm.mockRestore()
+  })
+
+  it("Export writes a theme file;  importing it back gives the same sheet, a name already there taking ' 2'", async () => {
+    const host = await editor()
+    await applied(host)
+    host.component.choose({ name: "Coral", primary: "red", corners: "pill" })
+    const saved = host.component.save()
+    const text = host.component.exportText
+    expect(text).toContain(`"extends": "${host.theme!.base}"`)
+    expect(text).toContain('"title": "Coral"')
+    await host.component.importFile(new File([text], "coral.theme.json5"))
+    const imported = SavedTheme.list.at(-1)!
+    expect(imported.name).toBe("Coral 2")
+    expect(declarations(imported.css)).toEqual(declarations(saved.css))
+  })
+
+  it("a file that isn't a theme says so, and adds nothing", async () => {
+    const host = await editor()
+    await applied(host)
+    await host.component.importFile(new File(['{ "surfaces": { "nope": "#fff" } }'], "bad.theme.json5"))
+    expect(SavedTheme.list).toEqual([])
+    expect(host.component.importError).toMatch(/bad\.theme\.json5 isn't a theme file/)
+  })
+
+  it("the one theme a browser kept before opens as the first of My themes, named after its base", () => {
+    localStorage.setItem(
+      "spell-ui:theme",
+      JSON.stringify({ choices: { name: "x", base: "fruity", primary: "teal" }, css: "/* kept */" })
+    )
+    expect(SavedTheme.list.map((theme) => [theme.name, theme.choices.primary])).toEqual([["My Fruity", "teal"]])
+    expect(localStorage.getItem("spell-ui:theme")).toBeNull()
+  })
+})
+
+/** A sheet's declarations, by token, whatever their order and comments. */
+function declarations(css: string): Record<string, string> {
+  return Object.fromEntries([...css.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((match) => [match[1], match[2]!.trim()]))
+}

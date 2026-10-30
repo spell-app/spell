@@ -35009,9 +35009,9 @@
             },
             {
               "name": "ui-saved",
-              "description": "Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now.",
+              "description": "Save, Save as new, Import or Delete changed My themes (`SavedTheme`, epic `debut` P25):  `value` and `css` the theme saved, `id` its id;  a delete sends neither.",
               "type": {
-                "text": "CustomEvent<{ value?: ThemeChoices, css: string }>"
+                "text": "CustomEvent<{ value?: ThemeChoices, css: string, id?: string }>"
               }
             }
           ],

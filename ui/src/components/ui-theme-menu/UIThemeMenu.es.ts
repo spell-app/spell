@@ -50,6 +50,7 @@ export const themeMenuEs = {
     bench: "Banco de temas",
     benchTip: "Abrir el banco de temas en una ventana nueva, con este tema",
     tinted: "{title} - {tint}",
+    myThemes: "Mis temas",
     tintName: "Tinte",
     noTint: "Sin tinte:  el tema tal cual",
     red: "Rojo",

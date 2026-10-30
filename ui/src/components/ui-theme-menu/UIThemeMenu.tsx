@@ -6,6 +6,8 @@ import { E, UI, UIT } from "spell/ui/core"
 import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
+// Import directly:  My themes, without the editor
+import { SavedTheme, type MyTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   DEFAULT_THEME,
   SchemeChoices,
@@ -126,11 +128,15 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     return ThemePreference.subscribe((chosen) => this.follow(chosen))
   }
 
-  /** Take `chosen`, and the OS's scheme now. */
+  /** Take `chosen`, the OS's scheme and My themes now. */
   private follow(chosen: ThemeAndScheme): void {
     this.chosen = chosen
     this.osScheme = ThemePreference.osScheme()
+    this.myThemes = SavedTheme.list
   }
+
+  /** My themes (`SavedTheme.list`), listed first (epic `debut` P25):  read again on connect, on change, as it opens. */
+  @E.state accessor myThemes: readonly MyTheme[] = isServer ? [] : SavedTheme.list
 
   ////////////////
   // ## Choosing
@@ -227,7 +233,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    */
   @E.derived
   get themeMenu(): ThemeMenu {
-    return new ThemeMenu({ themes: UI.themes.own, text: this.texts })
+    return new ThemeMenu({ themes: UI.themes.own, text: this.texts, mine: this.myThemes })
   }
 
   /**
@@ -383,21 +389,24 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    * - Arrow keys move along it and pick, as the theme editor's colour rows.
    */
   private tints(): JSX.Element {
+    // one of My themes:  its colours are its own, no row
     return (
-      <ui-hue-swatches
-        part={this.partForName("tints")}
-        class={TINTS_CLASS}
-        wrap=""
-        value={this.chosen.tint ?? ""}
-        hues={ThemePreference.tintsFor(this.chosenTheme).join(" ")}
-        none-label={this.translationForKey("noTint")}
-        aria-label={this.translationForKey("tintName")}
-        title={this.translationForKey("tintName")}
-        on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
-          event.stopPropagation()
-          void this.chooseTint(event.detail.value as UIT.ThemeHue | undefined, event)
-        }}
-      />
+      <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
+        <ui-hue-swatches
+          part={this.partForName("tints")}
+          class={TINTS_CLASS}
+          wrap=""
+          value={this.chosen.tint ?? ""}
+          hues={ThemePreference.tintsFor(this.chosenTheme).join(" ")}
+          none-label={this.translationForKey("noTint")}
+          aria-label={this.translationForKey("tintName")}
+          title={this.translationForKey("tintName")}
+          on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
+            event.stopPropagation()
+            void this.chooseTint(event.detail.value as UIT.ThemeHue | undefined, event)
+          }}
+        />
+      </Show>
     )
   }
 
@@ -596,7 +605,10 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    */
   private wireOverlay(popup: HTMLElement): void {
     popup.addEventListener("ui-opening", (event) => {
-      if (!event.defaultPrevented) this.isOpen = true
+      if (event.defaultPrevented) return
+      this.isOpen = true
+      // a theme saved in the editor since:  listed as it opens
+      this.myThemes = SavedTheme.list
     })
     popup.addEventListener("ui-closing", (event) => {
       if (!event.defaultPrevented) this.isOpen = false

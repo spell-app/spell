@@ -165,6 +165,11 @@ export const themeMenuVocabulary = {
       description:
         "A theme in a tint (epic `debut` P23), in the dropdown's text and the palette's name:  `Glass - Pink`."
     },
+    {
+      key: "myThemes",
+      text: "My themes",
+      description: "The heading of the themes the person saved, above Spell's (epic `debut` P25)."
+    },
     { key: "tintName", text: "Tint", description: "The tint row's heading and accessible name." },
     { key: "noTint", text: "No tint:  the theme as it is", description: "The tint row's first swatch." },
     { key: "red", text: "Red", description: "A tint's name:  the colour's." },

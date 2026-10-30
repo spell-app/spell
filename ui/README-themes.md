@@ -217,6 +217,11 @@ Any theme can wear a tint, any of Spell UI's colours by its own name:  Glass, or
 It replaces the theme's primary, and tints the page behind everything as a soft gradient;  the theme menu's tint row
 picks it, and it's remembered with the theme (`glass:pink`).
 
+A theme made in the theme editor is saved by name, as one of My themes, as many as you like:  Save, Save as new,
+Delete, and Export / Import as a `.theme.json5` theme file.
+Every theme menu lists them first, under "My themes", above Spell's own.
+A Spell admin, working on Spell, can also save one into Spell UI:  a real theme file and sheet in its themes folder.
+
 Every theme colours code too, light and dark:  `--ui-code-<role>` (`keyword`, `string`, `comment`, `type` ...), which
 `<ui-code>` and the Spell editor's code read alike.
 - A theme file sets them in its `code` group;  one that sets none takes each from its own colours (the recipe,

@@ -14,6 +14,7 @@ import JSON5 from "json5"
 
 import { SRV } from "spell/server"
 import * as peopleRoutes from "spell/app/spaces/server/node/people/peopleRoutes"
+import * as themesRoutes from "spell/app/spaces/server/node/themes/themesRoutes"
 import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
@@ -84,6 +85,10 @@ api.get("/compile/file", projectUtils.request_compileFile)
 // this machine's person, and their orgs -- see `peopleRoutes.ts`.
 api.get("/people/me", peopleRoutes.request_getMe)
 api.post("/people/me", peopleRoutes.request_saveMe)
+
+// Save into Spell UI, a Spell admin's -- see `themesRoutes.ts` (epic `debut` P25)
+api.get("/themes/spell-ui", themesRoutes.request_canSaveIntoSpellUi)
+api.post("/themes/spell-ui", themesRoutes.request_saveIntoSpellUi)
 
 ////////////////
 // ## Preferences

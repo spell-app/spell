@@ -51,6 +51,8 @@ export class Themes {
 
   /** our own themes (not Fomantic ports), in a picker's order:  applied like one */
   readonly own: readonly string[] = [
+    // a Spell admin's Save into Spell UI adds a theme between the markers (epic `debut` P25):  keep them
+    // own:start
     "spell",
     "glass",
     "fruity",
@@ -60,6 +62,7 @@ export class Themes {
     "crisp",
     "pop",
     "matrix"
+    // own:end
   ]
 
   /** `UI.styles` names:  base slot and theme slot */

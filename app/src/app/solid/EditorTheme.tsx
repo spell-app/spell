@@ -27,8 +27,8 @@ import "./EditorTheme.css"
  *   - The theme chosen is marked by its own name:  `<html data-spell-theme="glass">`.
  *   - What's the editor's alone is keyed on that name:
  *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no box.
- * - A theme made with Spell UI's theme editor and kept in this browser (`SavedTheme`) is worn over its base,
- *   while that base is the theme chosen (`SavedTheme.follow()`, epic `debut` P6).
+ * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
+ *   P25):  picked in the menu like any theme, its base worn, then its sheet.
  * - The code's colours are the theme's own (epic `debut` P22):  Monaco reads them off the page, light or dark,
  *   and follows each change by itself (`CodeThemes`, `spell/app/app/ui/monaco/themes`).
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
@@ -110,33 +110,18 @@ export class EditorTheme {
   }
 
   /**
-   * Wear the theme the theme editor kept (`SavedTheme`):  its base chosen, as the menu would, and its sheet over it;
-   * none kept (Stop using):  take its sheet off.
-   * - NEVER throws:  a failure says so on the console.
+   * Theme `theme` is chosen:  mark `<html>` with its name, which the editor's chrome is keyed on;  one of My themes
+   * (`mine:<id>`), the theme it builds on.
+   * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
-  static async wearKept(): Promise<void> {
-    try {
-      const [{ ThemePreference }, { SavedTheme }] = await Promise.all([
-        import("spell/ui/components/ui-theme-menu/ThemePreference"),
-        import("spell/ui/components/ui-theme-editor/SavedTheme")
-      ])
-      const base = SavedTheme.choices?.base
-      // a new base:  choosing it puts the kept sheet on too (`follow()`);  the same one:  the sheet changed
-      if (base && base !== ThemePreference.chosen.theme) await ThemePreference.setTheme(base)
-      else await SavedTheme.follow(ThemePreference.chosen.theme)
-    } catch (error) {
-      console.error("EditorTheme.wearKept():  couldn't wear the kept theme", error)
-    }
-  }
-
-  /** Theme `theme` is chosen:  mark `<html>` with its name, and wear the kept theme on it, if any. */
   private static follow(theme: string | undefined): void {
-    if (theme) document.documentElement.dataset.spellTheme = theme
-    else delete document.documentElement.dataset.spellTheme
-    // the theme made in Spell UI's theme editor and kept in this browser (`SavedTheme`), worn while its base is chosen
     void import("spell/ui/components/ui-theme-editor/SavedTheme")
-      .then(({ SavedTheme }) => SavedTheme.follow(theme))
-      .catch((error: unknown) => console.error("EditorTheme:  couldn't wear the theme kept in the browser", error))
+      .then(({ SavedTheme }) => {
+        const shown = SavedTheme.picked(theme)?.choices.base ?? theme
+        if (shown) document.documentElement.dataset.spellTheme = shown
+        else delete document.documentElement.dataset.spellTheme
+      })
+      .catch((error: unknown) => console.error("EditorTheme:  couldn't mark the theme", error))
   }
 }
 

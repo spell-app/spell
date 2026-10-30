@@ -10,6 +10,8 @@ import {
   type PrefSaved
 } from "spell/util/persist/persist.types"
 import { E, UI, UIT, type Themes } from "spell/ui/core"
+// Import directly:  My themes, without the editor
+import { SavedTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   DEFAULT_THEME,
   OLD_THEME_KEYS,
@@ -49,7 +51,8 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  *   - The old keys, each place's own before P21 (`OLD_THEME_KEYS`), are moved over once, and from there into the
  *     space when it holds nothing yet.
  * - Theme:  `DEFAULT_THEME` (Glass, epic `debut` Q39) until the person picks another,
- *   one of Spell's own themes (`UI.themes.own`).
+ *   one of Spell's own themes (`UI.themes.own`), in a tint (`glass:pink`, P23), or one of My themes (`mine:<id>`,
+ *   `SavedTheme`, P25):  its base, then its sheet;  one deleted since:  the default.
  *   - A theme remembered under its old name comes back as its new one (`studio` as `merlot`, `UIT.ThemeNames`).
  *   - Any other name no longer in the set (Plain, Classic, a Fomantic theme, before epic `debut` P17):
  *     the default, and forgotten.
@@ -164,6 +167,8 @@ export class ThemePreference {
    * that can't read on it, light or dark (`TINTS_LEFT_OUT`, from the contrast test).
    */
   static tintsFor(theme: string): readonly UIT.ThemeHue[] {
+    // one of My themes:  its colours are its own (epic `debut` P25)
+    if (theme.startsWith(SavedTheme.PREFIX)) return []
     const leftOut = TINTS_LEFT_OUT[theme] ?? []
     return UIT.ThemeHues.filter((hue) => !leftOut.includes(hue))
   }
@@ -178,6 +183,7 @@ export class ThemePreference {
 
   /** A kept pick's theme and tint:  `glass:pink` => `{ theme: "glass", tint: "pink" }`;  a tint that isn't one, none. */
   static pickOf(text: string): { theme: string; tint?: UIT.ThemeHue } {
+    if (text.startsWith(SavedTheme.PREFIX)) return { theme: text }
     const [theme = "", tint] = text.split(TINT_SEPARATOR)
     return UIT.ThemeHues.includes(tint as UIT.ThemeHue) ? { theme, tint: tint as UIT.ThemeHue } : { theme }
   }
@@ -326,6 +332,9 @@ export class ThemePreference {
     const params = new URLSearchParams(typeof location === "undefined" ? "" : location.search)
     return (ThemePreference.addressed = { theme: params.get(ADDRESS_PARAMS.theme) || undefined })
   }
+
+  /** One of My themes' sheets is on the page, put there by `applyTheme()`:  taken off when another theme's chosen. */
+  private static isWearingMine = false
 
   /** The theme the page wears whatever is chosen (`wear()`);  `undefined`:  the one chosen. */
   private static worn: string | undefined
@@ -487,6 +496,16 @@ export class ThemePreference {
     if (known !== name && name === ThemePreference.fromAddress.theme)
       return ThemePreference.applyAddressed(themes, name)
     if (known !== name) return ThemePreference.setTheme(known)
+    // one of My themes (`mine:<id>`, epic `debut` P25):  its base, then its sheet
+    const mine = ThemePreference.worn ? undefined : SavedTheme.picked(name)
+    if (mine) {
+      ThemePreference.isWearingMine = true
+      return SavedTheme.wear(mine.choices.base, mine.css)
+    }
+    if (ThemePreference.isWearingMine) {
+      ThemePreference.isWearingMine = false
+      SavedTheme.putOnPage("")
+    }
     const { tint } = ThemePreference.chosen
     if (ThemePreference.worn || !tint) return themes.apply(ThemePreference.worn ?? name)
     const { ThemeDraft } = await import("spell/ui/components/ui-theme-editor/ThemeDraft")
@@ -512,6 +531,7 @@ export class ThemePreference {
    * or, no longer a theme (`classic`, a Fomantic theme), the default theme.
    */
   private static knownName(themes: Themes, name: string): string {
+    if (SavedTheme.picked(name)) return name
     const now = UIT.ThemeNames.nameNow(themes, name)
     return themes.own.includes(now) ? now : ThemePreference.defaultTheme
   }

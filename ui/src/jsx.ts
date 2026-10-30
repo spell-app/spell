@@ -33657,10 +33657,10 @@ export interface UIThemeEditorEventMap {
    */
   "ui-copied": CustomEvent<{ text: string }>
   /**
-   * `ui-saved`:  Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now.
-   * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
+   * `ui-saved`:  Save, Save as new, Import or Delete changed My themes (`SavedTheme`, epic `debut` P25):  `value` and `css` the theme saved, `id` its id;  a delete sends neither.
+   * - `event.detail`:  `{ value?: ThemeChoices, css: string, id?: string }`
    */
-  "ui-saved": CustomEvent<{ value?: UIT.ThemeChoices; css: string }>
+  "ui-saved": CustomEvent<{ value?: UIT.ThemeChoices; css: string; id?: string }>
 }
 
 /** `<ui-theme-editor>`'s own attributes, from its vocabulary. */
@@ -33868,8 +33868,8 @@ export interface UIThemeEditorAttributes {
    */
   "on-ui-copied"?: (event: UIThemeEditorEventMap["ui-copied"]) => void
   /**
-   * `ui-saved`:  Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now.
-   * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
+   * `ui-saved`:  Save, Save as new, Import or Delete changed My themes (`SavedTheme`, epic `debut` P25):  `value` and `css` the theme saved, `id` its id;  a delete sends neither.
+   * - `event.detail`:  `{ value?: ThemeChoices, css: string, id?: string }`
    */
   "on-ui-saved"?: (event: UIThemeEditorEventMap["ui-saved"]) => void
 }

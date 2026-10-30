@@ -4,10 +4,13 @@ import { isServer, type JSX } from "@solidjs/web"
 // Import directly:  in `core`'s util barrel the pref store cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI, UIT } from "spell/ui/core"
+// Import directly:  the `spell/ui/styles` barrel carries every foundation sheet as text, which the editor never needs
+import { ThemeFile } from "spell/ui/styles/ThemeFile"
+import type { ThemeData } from "spell/ui/styles/styles.types"
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
 import { BenchAddress, type BenchView } from "./BenchAddress"
 import { PageBridge } from "./PageBridge"
-import { SavedTheme } from "./SavedTheme"
+import { SavedTheme, type MyTheme } from "./SavedTheme"
 import { ThemeDraft } from "./ThemeDraft"
 import { ThemeTokens, type TokenGroup, type TokenSource } from "./ThemeTokens"
 import { TokenColor } from "./TokenColor"
@@ -132,10 +135,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   /** The choices made in the editor;  `undefined` until the first. */
   @E.state accessor edited: UIT.ThemeChoices | undefined = undefined
 
-  /** The theme being made in this browser, else the one kept, as the editor was made:  where it starts. */
-  private readonly keptAtStart = isServer
-    ? undefined
-    : ((PrefStore.getAt(DRAFT_KEY) as UIT.ThemeChoices | undefined) ?? SavedTheme.choices)
+  /** The theme being made in this browser, as the editor was made:  where it starts. */
+  private readonly keptAtStart = isServer ? undefined : (PrefStore.getAt(DRAFT_KEY) as UIT.ThemeChoices | undefined)
 
   /** Every choice it shows now:  the edits, else where it started. */
   get theme(): UIT.ThemeChoices {
@@ -313,18 +314,196 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   }
 
   ////////////////
-  // ## Forget, copy
+  // ## My themes:  save, open, delete, export, import (epic `debut` P25)
   ////////////////
 
-  /** The stylesheet kept in this browser (`SavedTheme`);  `undefined`:  none. */
-  @E.state accessor savedCss: string | undefined = isServer ? undefined : SavedTheme.css
+  /** The themes saved by name (`SavedTheme.list`), read again after each change here. */
+  @E.state accessor myThemes: readonly MyTheme[] = isServer ? [] : SavedTheme.list
 
-  /** Forget the kept theme (`SavedTheme.forget()`).  Sends `ui-saved` with no `value`. */
+  /**
+   * The one of My themes being changed in place, by its id:  Save writes it back;  `undefined`:  a new theme, which
+   * Save adds.  Kept in this browser with the draft.
+   */
+  @E.state accessor editingId: string | undefined = isServer
+    ? undefined
+    : (PrefStore.getAt(EDITING_KEY) as string | undefined)
+
+  /** The one of My themes being changed in place (`editingId`);  `undefined`:  a new one, or deleted since. */
+  get editing(): MyTheme | undefined {
+    return this.myThemes.find((theme) => theme.id === this.editingId)
+  }
+
+  /**
+   * Save the theme by its name:  the one being changed (`editingId`) written back, its id kept (a rename is its name
+   * changed, then Save);  else a new one of My themes.  Sends `ui-saved`.
+   * - No name:  `My theme`, or the first free one after it (`My theme 2`).
+   */
   @E.untracked
-  forget(): void {
-    SavedTheme.forget()
-    this.savedCss = undefined
+  save(): MyTheme {
+    const id = this.editing?.id
+    const name = this.theme.name.trim() || SavedTheme.freeName(this.text("defaultName"))
+    return this.keep(SavedTheme.save({ id, name, choices: { ...this.theme, name }, css: this.draft.css }))
+  }
+
+  /** Save the theme as a NEW one of My themes, a free name, the one opened left as it was.  Sends `ui-saved`. */
+  @E.untracked
+  saveAsNew(): MyTheme {
+    const name = SavedTheme.freeName(this.theme.name.trim() || this.text("defaultName"))
+    return this.keep(SavedTheme.save({ name, choices: { ...this.theme, name }, css: this.draft.css }))
+  }
+
+  /**
+   * Delete the one of My themes being changed, after asking (`UI.modals`);  the editor goes on with it as a new,
+   * unsaved theme.  Sends `ui-saved` with no `value`.
+   */
+  @E.untracked
+  async remove(): Promise<void> {
+    const theme = this.editing
+    if (!theme) return
+    const isSure = await UI.modals.confirm(this.text("removeAsk", { name: theme.name }))
+    if (!isSure) return
+    SavedTheme.remove(theme.id)
+    this.myThemes = SavedTheme.list
+    this.setEditing(undefined)
     this.send("ui-saved", { css: "" })
+  }
+
+  /** Open one of My themes, `id`, to change in place:  Save writes it back. */
+  @E.untracked
+  open(id: string): void {
+    const theme = SavedTheme.get(id)
+    if (!theme) return
+    this.setEditing(id)
+    this.keepDraft({ ...theme.choices, name: theme.name })
+  }
+
+  /**
+   * Start from one of My themes, `id`:  a COPY of it, a new theme not saved yet (Owen's C8:  "pick an existing theme
+   * to start with");  the original stays as it was.
+   */
+  @E.untracked
+  startFrom(id: string): void {
+    const theme = SavedTheme.get(id)
+    if (!theme) return
+    this.setEditing(undefined)
+    this.keepDraft({ ...theme.choices, name: SavedTheme.freeName(theme.name) })
+  }
+
+  /** The theme as a file to export:  a theme file, `<name>.theme.json5`, as Spell's own are;  `""` while files load. */
+  get exportText(): string {
+    const data = this.draft.data
+    if (!data) return ""
+    return `// ${this.draft.fileName}:  ${this.text("fileMade", { base: this.baseTheme })}\n${JSON.stringify(data, undefined, 2)}\n`
+  }
+
+  /** Export's link:  the file, as a `blob:` address, made again as the theme changes;  `""` while files load. */
+  @E.derived
+  get exportHref(): string {
+    if (this.exportUrl) URL.revokeObjectURL(this.exportUrl)
+    const text = this.exportText
+    this.exportUrl = text && !isServer ? URL.createObjectURL(new Blob([text], { type: "text/plain" })) : undefined
+    return this.exportUrl ?? ""
+  }
+
+  /** The `blob:` address `exportHref` made last:  let go of when another's made. */
+  private exportUrl: string | undefined
+
+  /** Why the last import was refused;  `undefined`:  none. */
+  @E.state accessor importError: string | undefined = undefined
+
+  /**
+   * Import theme file `file` (`.theme.json5`) as a new one of My themes, a name already there taking " 2", and open
+   * it.  A file that isn't a theme (`ThemeFile`'s own check):  says so, and adds nothing.
+   * - Every value it sets becomes a token set by hand, so its sheet is the file's.
+   * - NEVER throws.
+   */
+  @E.untracked
+  async importFile(file: File): Promise<void> {
+    this.importError = undefined
+    try {
+      const files = this.files ?? (await ThemeTokens.load())
+      const { default: JSON5 } = await import("json5")
+      const data = JSON5.parse(await file.text()) as ThemeData
+      const slug = file.name.replace(/\.theme\.json5$|\.json5?$/, "")
+      const values = new ThemeFile({ name: slug, data, themes: files.themes, palettes: files.palettes }).declarations()
+      const base =
+        typeof data.extends === "string" && UI.themes.own.includes(data.extends) ? data.extends : DEFAULT_BASE
+      const name = SavedTheme.freeName(typeof data.title === "string" && data.title ? data.title : slug)
+      const tokens = Object.fromEntries(values.map(([token, value]) => [token, { both: value }]))
+      const choices: UIT.ThemeChoices = { name, base, tokens }
+      const css = new ThemeDraft({ choices, files, text: this.text }).css
+      const saved = this.keep(SavedTheme.save({ name, choices, css }))
+      this.keepDraft(saved.choices)
+    } catch (error) {
+      this.importError = this.text("importBad", { file: file.name, problem: String((error as Error).message ?? error) })
+    }
+  }
+
+  /** Make `theme` the one being changed, read My themes again, and send `ui-saved`.  Returns it. */
+  private keep(theme: MyTheme): MyTheme {
+    this.myThemes = SavedTheme.list
+    this.setEditing(theme.id)
+    this.edited = { ...this.theme, name: theme.name }
+    PrefStore.setAt(DRAFT_KEY, this.edited)
+    this.send("ui-saved", { value: theme.choices, css: theme.css, id: theme.id })
+    return theme
+  }
+
+  /** Change in place the one of My themes `id`;  `undefined`:  a new theme.  Kept in this browser. */
+  private setEditing(id: string | undefined): void {
+    this.editingId = id
+    PrefStore.setAt(EDITING_KEY, id)
+  }
+
+  ////////////////
+  // ## Save into Spell UI (a Spell admin's, epic `debut` P25)
+  ////////////////
+
+  /** The page server says this person may save into Spell UI:  a Spell admin, on the page server. */
+  @E.state accessor canSaveIntoSpellUi = false
+
+  /** What saving into Spell UI said last:  done, or why not;  `undefined`:  nothing yet. */
+  @E.state accessor spellUiNote: string | undefined = undefined
+
+  /**
+   * Ask the page server, once connected, whether this person may save into Spell UI (`GET SPELL_UI_THEMES_API`).
+   * - A published site, a page with no app on its server, anyone not a Spell admin:  no.  NEVER throws.
+   */
+  @E.whileConnected
+  protected askSpellUi() {
+    if (isServer || location.protocol === "file:") return
+    void fetch(SPELL_UI_THEMES_API)
+      .then(async (answer) => (answer.ok ? ((await answer.json()) as { allowed?: boolean }) : {}))
+      .then(({ allowed }) => (this.canSaveIntoSpellUi = allowed === true))
+      .catch(() => (this.canSaveIntoSpellUi = false))
+  }
+
+  /**
+   * Write the theme into Spell UI as one of Spell's own (`POST SPELL_UI_THEMES_API`):  its theme file and sheet in
+   * Spell UI's themes folder, its name in the theme list;  a name already there asks first.
+   * - NEVER throws:  what went wrong is said (`spellUiNote`).
+   */
+  @E.untracked
+  async saveIntoSpellUi(overwrite = false): Promise<void> {
+    const body = { name: this.draft.slug, text: this.exportText, overwrite }
+    try {
+      const answer = await fetch(SPELL_UI_THEMES_API, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body)
+      })
+      const reply = (await answer.json().catch(() => ({}))) as { file?: string; error?: string }
+      if (answer.status === 409 && !overwrite) {
+        if (await UI.modals.confirm(this.text("intoSpellUiAsk", { name: this.draft.slug })))
+          return this.saveIntoSpellUi(true)
+        return
+      }
+      this.spellUiNote = answer.ok
+        ? this.text("intoSpellUiDone", { file: reply.file ?? this.draft.fileName })
+        : (reply.error ?? `${answer.status} ${answer.statusText}`)
+    } catch (error) {
+      this.spellUiNote = String(error)
+    }
   }
 
   /** Copy changes' copy:  the button says so for a moment after. */
@@ -1531,7 +1710,10 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     )
   }
 
-  /** Start over;  Stop using, while a theme is kept in this browser. */
+  /**
+   * Start over, Save, Save as new, Delete (one of My themes open), Export, Import, Open one of My themes, and for a
+   * Spell admin Save into Spell UI;  what's open, and what an import or a save into Spell UI said, under them.
+   */
   private actions(): JSX.Element {
     const t = this.text
     return (
@@ -1545,11 +1727,91 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         >
           {t("startOver")}
         </ui-button>
-        <Show when={this.savedCss !== undefined}>
-          <ui-button size="small" title={t("forgetTip")} onClick={() => this.forget()} appearance="basic">
-            {t("forget")}
+        <ui-button size="small" icon="save" color="primary" title={t("saveTip")} onClick={() => this.save()}>
+          {t("save")}
+        </ui-button>
+        <ui-button
+          size="small"
+          icon="copy outline"
+          title={t("saveAsTip")}
+          onClick={() => this.saveAsNew()}
+          appearance="basic"
+        >
+          {t("saveAs")}
+        </ui-button>
+        <Show when={this.editing}>
+          <ui-button
+            size="small"
+            icon="trash alternate outline"
+            title={t("removeTip")}
+            onClick={() => void this.remove()}
+            appearance="basic"
+          >
+            {t("remove")}
           </ui-button>
         </Show>
+        <ui-button
+          size="small"
+          icon="download"
+          appearance="basic"
+          link={this.exportHref || undefined}
+          download={this.draft.fileName}
+          title={t("exportTip", { file: this.draft.fileName })}
+        >
+          {t("exportTheme")}
+        </ui-button>
+        <ui-button
+          size="small"
+          icon="upload"
+          appearance="basic"
+          title={t("importTip")}
+          onClick={(event: MouseEvent) =>
+            ((event.currentTarget as HTMLElement).nextElementSibling as HTMLInputElement | null)?.click()
+          }
+        >
+          {t("importTheme")}
+        </ui-button>
+        <input
+          type="file"
+          class="import-file"
+          accept=".json5,.json"
+          hidden
+          aria-label={t("importTheme")}
+          onChange={(event) => {
+            const input = event.currentTarget
+            const file = input.files?.[0]
+            input.value = ""
+            if (file) void this.importFile(file)
+          }}
+        />
+        <Show when={this.myThemes.length}>
+          <ui-select
+            size="small"
+            value={this.editingId ?? ""}
+            placeholder={t("openMine")}
+            aria-label={t("openMine")}
+            on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => {
+              const id = String(event.detail.value)
+              if (id && id !== this.editingId) this.open(id)
+            }}
+          >
+            <For each={this.myThemes}>{(theme) => <ui-item value={theme.id}>{theme.name}</ui-item>}</For>
+          </ui-select>
+        </Show>
+        <Show when={this.canSaveIntoSpellUi}>
+          <ui-button
+            size="small"
+            icon="upload"
+            title={t("intoSpellUiTip")}
+            onClick={() => void this.saveIntoSpellUi()}
+            appearance="basic"
+          >
+            {t("intoSpellUi")}
+          </ui-button>
+        </Show>
+        <Show when={this.editing}>{(theme) => <p class="note">{t("editing", { name: theme().name })}</p>}</Show>
+        <Show when={this.importError}>{(error) => <p class="note error">{error()}</p>}</Show>
+        <Show when={this.spellUiNote}>{(note) => <p class="note">{note()}</p>}</Show>
       </div>
     )
   }
@@ -1590,11 +1852,19 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 aria-label={t("base")}
                 size="small"
                 fluid=""
-                on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) =>
-                  this.choose({ base: String(event.detail.value) })
-                }
+                on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => {
+                  const value = String(event.detail.value)
+                  if (value.startsWith(SavedTheme.PREFIX)) this.startFrom(value.slice(SavedTheme.PREFIX.length))
+                  else this.choose({ base: value })
+                }}
               >
                 <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
+                <Show when={this.myThemes.length}>
+                  <ui-item kind="header">{t("myThemes")}</ui-item>
+                  <For each={this.myThemes}>
+                    {(theme) => <ui-item value={SavedTheme.pickName(theme)}>{theme.name}</ui-item>}
+                  </For>
+                </Show>
               </ui-select>
             </ui-property>
           </>
@@ -2315,6 +2585,12 @@ const CHROME_THEME = "fruity"
 
 /** Where the theme being made is kept in this browser, as it changes. */
 const DRAFT_KEY = "spell-ui:theme-draft"
+
+/** Where the id of the one of My themes being changed in place is kept, beside the draft. */
+const EDITING_KEY = "spell-ui:theme-editing"
+
+/** The page server's route for saving into Spell UI:  spell-app's (`themesRoutes.ts`), a Spell admin's only. */
+const SPELL_UI_THEMES_API = "/api/themes/spell-ui"
 
 /** Where the tree's folds are kept. */
 const FOLDS_KEY = "spell-ui:theme-editor-folds"

@@ -5,86 +5,78 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
 
 /****************
  * ### `SavedTheme`
- * The theme a viewer made and kept in this browser, put back on any page that asks.
- * - The theme editor's Use this theme button kept it until Owen deleted the button (epic `debut`);
- *   its Stop using still forgets one kept before.
- *
- * - How the Spell editor uses it (its `EditorTheme`):
- *   - `follow(theme)`, each time its theme changes:  the kept sheet goes on while that theme is its base,
- *     so picking another look takes it off
- *   - `restore()` puts the kept base on too;  `has` says whether one is kept, for a menu entry
- *   - imported by its file, `spell/ui/components/ui-theme-editor/SavedTheme`:
- *     the family's barrel would load the editor too
- * - Kept in `localStorage` under `STORAGE_KEY`:  the choices AND the stylesheet's text,
- *   so a page restores it without the editor's texts or code (`ThemeDraft`, `ThemeFile`).
- *   - P25 (Saving Themes) moves it to the person's space.
- *   - Through `PrefStore`:  a private window or blocked storage keeps it for this page only.
- * - Restoring applies the base theme (`UI.themes.apply()`) and then the sheet, on the page (`wear()`):
+ * The themes a person made in the theme editor and saved by name:  "My themes" (epic `debut` P25), kept in this
+ * browser, put back on any page that picks one.
+ * - Each one (`MyTheme`):  an id, made once when it's first saved and never changed (a rename changes only its name:
+ *   WWOD §3, names aren't ids), its name, what the editor made (`UIT.ThemeChoices`) and the sheet made from it.
+ *   - The sheet is kept too, so a page wears it without the editor's texts or code (`ThemeDraft`, `ThemeFile`).
+ * - Any number:  `save()` adds one or writes one back by its id, `remove()` deletes one.
+ * - The one theme a browser kept before P25 (`OLD_KEY`) opens as the first of them, named after its base
+ *   (`My Fruity`), once.
+ * - Picked in the theme menu as `mine:<id>` (`ThemePreference`):  `wear()` puts its base theme on, then its sheet,
  *   the same two steps the editor takes, so it looks as it did there.
- * - Static:  one kept theme per browser.
+ * - Kept in `localStorage` (`LIST_KEY`), through `PrefStore`:  a private window or blocked storage keeps them for this
+ *   page only.  Export and import carry one to another browser (the editor's).
+ * - Static:  one list per browser.
+ * - Imported by its file (`spell/ui/components/ui-theme-editor/SavedTheme`) by the theme menu and the Spell editor:
+ *   the family's barrel would load the editor too.
  ****************/
 export class SavedTheme {
-  /** A theme is kept in this browser. */
-  static get has(): boolean {
-    return SavedTheme.read() !== undefined
+  /** The theme menu's prefix for one of My themes:  `mine:<id>`. */
+  static readonly PREFIX = "mine:"
+
+  /** Every saved theme, oldest first;  the one kept before P25 moved in first, once. */
+  static get list(): readonly MyTheme[] {
+    SavedTheme.moveOldTheme()
+    const kept = PrefStore.getAt(LIST_KEY)
+    return Array.isArray(kept) ? kept.filter(isMyTheme) : []
   }
 
-  /** The kept theme's choices;  `undefined` when none is kept (or storage is blocked). */
-  static get choices(): UIT.ThemeChoices | undefined {
-    return SavedTheme.read()?.choices
+  /** The saved theme with id `id`;  `undefined`:  none (deleted since). */
+  static get(id: string): MyTheme | undefined {
+    return SavedTheme.list.find((theme) => theme.id === id)
   }
 
-  /** The kept theme's stylesheet;  `undefined` when none is kept. */
-  static get css(): string | undefined {
-    return SavedTheme.read()?.css
+  /** The saved theme a theme menu's name names (`mine:<id>`);  `undefined`:  another theme, or one deleted since. */
+  static picked(name: string | undefined): MyTheme | undefined {
+    return name?.startsWith(SavedTheme.PREFIX) ? SavedTheme.get(name.slice(SavedTheme.PREFIX.length)) : undefined
   }
 
-  /**
-   * Keep `choices` and their stylesheet `css`, in place of any kept before.
-   * - NEVER throws:  blocked storage keeps nothing.
-   */
-  static save(choices: UIT.ThemeChoices, css: string): void {
-    const kept: KeptTheme = { choices, css }
-    PrefStore.setAt(STORAGE_KEY, kept)
-  }
-
-  /** Forget the kept theme.  NEVER throws. */
-  static forget(): void {
-    PrefStore.setAt(STORAGE_KEY, undefined)
+  /** The theme menu's name for saved theme `theme`:  `mine:<id>`. */
+  static pickName(theme: Pick<MyTheme, "id">): string {
+    return `${SavedTheme.PREFIX}${theme.id}`
   }
 
   /**
-   * Put the kept theme on the page:  its base theme, then its sheet.  True when one was kept.
-   * - SIDE EFFECT:  page-wide (`UI.themes`, `UI.styles`).
-   * - A kept base under its old name is kept again under its new one (`studio` => `merlot`, `UIT.ThemeNames`).
-   * - A kept base that's no longer a theme is forgotten, with a warning:  false.
+   * Save `theme`:  a new one (no `id`), its id made now;  else written back in its place, by its id.
+   * - Returns it as kept.
+   * - NEVER throws:  blocked storage keeps it for this page only.
    */
-  static async restore(): Promise<boolean> {
-    const kept = SavedTheme.read()
-    if (!kept) return false
-    const { themes } = await UI.load()
-    const base = UIT.ThemeNames.nameNow(themes, kept.choices.base)
-    if (base !== kept.choices.base) SavedTheme.save({ ...kept.choices, base }, kept.css)
-    try {
-      await SavedTheme.wear(base, kept.css)
-    } catch (error) {
-      E.Warnings.warn("SavedTheme", `the kept theme's base \`${kept.choices.base}\` is gone;  forgetting it`, error)
-      SavedTheme.forget()
-      return false
-    }
-    return true
+  static save({ id, name, choices, css }: SavedThemeInput): MyTheme {
+    const list = [...SavedTheme.list]
+    const theme: MyTheme = { id: id ?? SavedTheme.newId(), name, choices: { ...choices, name }, css }
+    const at = list.findIndex((kept) => kept.id === theme.id)
+    if (at === -1) list.push(theme)
+    else list[at] = theme
+    PrefStore.setAt(LIST_KEY, list)
+    return theme
   }
 
-  /**
-   * Wear the kept theme's sheet while the page's theme is `theme` and that's its base;  otherwise take it off.
-   * - A base kept under its old name counts as its new one (`studio` as `merlot`).
-   * - SIDE EFFECT:  page-wide (`UI.styles`).
-   */
-  static async follow(theme: string | undefined): Promise<void> {
-    const kept = SavedTheme.read()
-    const { themes, styles } = await UI.load()
-    const css = kept && UIT.ThemeNames.nameNow(themes, kept.choices.base) === theme ? kept.css : ""
-    if (css || styles.has(EDITS_SHEET)) styles.register(EDITS_SHEET, css, { page: true })
+  /** Delete saved theme `id`.  NEVER throws. */
+  static remove(id: string): void {
+    PrefStore.setAt(
+      LIST_KEY,
+      SavedTheme.list.filter((theme) => theme.id !== id)
+    )
+  }
+
+  /** `name`, or with " 2", " 3" ... after it when a saved theme has it already (an import's, epic `debut` P25). */
+  static freeName(name: string): string {
+    const taken = new Set(SavedTheme.list.map((theme) => theme.name))
+    if (!taken.has(name)) return name
+    let count = 2
+    while (taken.has(`${name} ${count}`)) count++
+    return `${name} ${count}`
   }
 
   ////////////////
@@ -92,7 +84,7 @@ export class SavedTheme {
   ////////////////
 
   /**
-   * Wear theme `base` on the page, then `css` over it (`EDITS_SHEET`):  what the editor makes, shown page-wide.
+   * Wear theme `base` on the page, then `css` over it (`EDITS_SHEET`):  what the editor makes, or a saved theme.
    * - SIDE EFFECT:  page-wide, every element on the page follows;  replaces the sheet worn before.
    * - Calls racing:  the LAST one wins (`putOnPage()` counts too), even when an earlier base loads later.
    * - Throws a `TypeError` when `base` isn't a theme (`UI.themes.apply()`).
@@ -116,21 +108,63 @@ export class SavedTheme {
   /** Counts `wear()` and `putOnPage()` calls:  only the last one's sheet lands. */
   private static calls = 0
 
-  /** What's kept, if it reads as a theme;  anything else is `undefined`. */
-  private static read(): KeptTheme | undefined {
-    const kept = PrefStore.getAt(STORAGE_KEY) as Partial<KeptTheme> | undefined
-    const isKept = typeof kept?.css === "string" && typeof kept.choices?.base === "string"
-    return isKept ? (kept as KeptTheme) : undefined
+  ////////////////
+  // ## Internals
+  ////////////////
+
+  /** A new theme's id:  the time and a few random letters, base 36. */
+  private static newId(): string {
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+  }
+
+  /**
+   * The one theme kept before P25 (`OLD_KEY`), moved in as the first of My themes, named after its base (`My Fruity`);
+   * the old key forgotten, so this runs once.
+   */
+  private static moveOldTheme(): void {
+    const old = PrefStore.getAt(OLD_KEY) as Partial<MyTheme> | undefined
+    if (old === undefined) return
+    PrefStore.setAt(OLD_KEY, undefined)
+    if (typeof old.css !== "string" || typeof old.choices?.base !== "string") return
+    const name = `My ${UIT.ThemeNames.titleOf(old.choices.base)}`
+    const kept = PrefStore.getAt(LIST_KEY)
+    const list = Array.isArray(kept) ? kept.filter(isMyTheme) : []
+    PrefStore.setAt(LIST_KEY, [
+      { id: SavedTheme.newId(), name, choices: { ...old.choices, name }, css: old.css },
+      ...list
+    ])
+    E.Warnings.devWarn("SavedTheme", `the theme kept in this browser is now "${name}", the first of My themes`)
   }
 }
 
-/** What `SavedTheme` keeps:  the choices, and the stylesheet made from them. */
-type KeptTheme = {
-  /** what the editor shows again */
+/** One of My themes:  a theme the person made and saved by name. */
+export type MyTheme = {
+  /** made once, when it's first saved, and never changed:  what the menu remembers (`mine:<id>`) */
+  id: string
+  /** what people call it;  a rename changes only this */
+  name: string
+  /** what the editor made:  its base theme, tint and colours ... */
   choices: UIT.ThemeChoices
-  /** what a page applies */
+  /** the sheet made from it, worn over its base */
   css: string
 }
 
-/** The `localStorage` key of the kept theme. */
-const STORAGE_KEY = "spell-ui:theme"
+/** What `SavedTheme.save()` takes:  a theme, its `id` when it's one already saved. */
+export type SavedThemeInput = Omit<MyTheme, "id"> & { id?: string }
+
+/** Whether `value` reads as one of My themes. */
+function isMyTheme(value: unknown): value is MyTheme {
+  const theme = value as Partial<MyTheme> | undefined
+  return (
+    typeof theme?.id === "string" &&
+    typeof theme.name === "string" &&
+    typeof theme.css === "string" &&
+    typeof theme.choices?.base === "string"
+  )
+}
+
+/** The `localStorage` key of My themes. */
+const LIST_KEY = "spell-ui:themes"
+
+/** The key of the ONE theme a browser kept before P25. */
+const OLD_KEY = "spell-ui:theme"
