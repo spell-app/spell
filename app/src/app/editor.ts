@@ -351,17 +351,30 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * The static build's "Reset Example":  forget the visitor's edits to current `project`, after asking,
-   * and show it as the build has it (`StaticFiles.reset()`).
-   * - SIDE EFFECT:  reloads the page, so every file, model and run starts from the build's copy.
+   * "Reset to Saved":  drop every change to current `project` not saved, after asking.
+   * - On a server:  each file with unsaved changes read from the server again, then a recompile.
+   * - The static build (no server, nothing saved):  forget the visitor's edits, and show the project as the build has
+   *   it (`StaticFiles.reset()`).
+   *   SIDE EFFECT:  reloads the page, so every file, model and run starts from the build's copy.
    */
   async resetApp(): Promise<void> {
     const { project, projectRoot } = editor
     if (!project) return
     const message = appTexts.text("resetAppConfirm", appTexts.groupWords(projectRoot))
     if (!(await editor.confirm({ message }))) return
-    await staticFiles.reset(project.projectId)
-    location.reload()
+    if (isStaticBuild) {
+      await staticFiles.reset(project.projectId)
+      location.reload()
+      return
+    }
+    editor.clearCompileAppSoon()
+    try {
+      const unsaved = project.imports.filter(({ file }) => file.isDirty)
+      await Promise.all(unsaved.map(({ file }) => file.reload()))
+      void editor.compileApp()
+    } catch (error) {
+      editor.showError(error)
+    }
   }
 
   /**
@@ -611,8 +624,11 @@ export class EditorStore extends Observable {
     const { file } = editor
     if (file?.isLoaded) await file.save(undefined)
   }
-  /** Reload current `file` from disk/storage and recompile. */
-  async reloadFile(): Promise<void> {
+  /**
+   * Revert current `file`:  read it from the server again, dropping its unsaved changes, and recompile
+   * ("Revert File", ⌘⇧R).
+   */
+  async revertFile(): Promise<void> {
     editor.clearCompileAppSoon()
     const { file } = editor
     if (file) {
@@ -783,16 +799,12 @@ export class EditorStore extends Observable {
   /**
    * Remember `inputEditor`, showing `editor.file`, in our `<InputEditor onMount />` event.
    * - `api` is Monaco itself, handed over as Monaco is loaded lazily -- see `spell/app/app/solid`'s `LazyMonaco`.
-   * - SIDE EFFECT:  adds our save / reload / compile keys, and follows its cursor + scrolling into `selection`.
-   *   Monaco disposes of both with the editor.
+   * - SIDE EFFECT:  follows its cursor + scrolling into `selection`;  Monaco disposes of it with the editor.
+   * - The page's keys (save, revert, compile) are the code editor's `<InputEditor>`'s to add (`addCodeEditorKeys()`).
    */
   onInputDidMount(inputEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco): void {
     inputEditorInstance = inputEditor
     inputEditorPath = editor.file?.path
-    const { KeyMod, KeyCode } = api
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, () => void editor.saveFile())
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyR, () => void editor.reloadFile())
-    inputEditor.addCommand(KeyMod.CtrlCmd | KeyCode.Enter, () => void editor.compileApp())
     inputEditor.onDidChangeCursorSelection(() => editor.onInputCursor("cursor"))
     inputEditor.onDidScrollChange((event) => {
       if (event.scrollTopChanged) editor.onInputCursor("scroll")
@@ -852,7 +864,7 @@ export class EditorStore extends Observable {
   /**
    * `file` was edited in its Monaco model, and has taken the text -- see `SpellModels`.
    * - Compiles `EDIT_COMPILE_DELAY` seconds after input settles, if it's in the project we're showing;
-   *   Cmd / Ctrl+Enter compiles at once (`onInputDidMount()`).
+   *   Cmd / Ctrl+Enter compiles at once (`EDITOR_HOTKEYS`).
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {

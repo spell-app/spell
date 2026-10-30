@@ -24,7 +24,7 @@ import "./Inspector.css"
 /****************
  * ### `Inspector`
  * Look inside the running app, and change it (epic `debut` P13):  a part picked in the app, its properties to edit.
- * - Open or closed:  `<InspectorToggle>` in the App pane's header;  remembered in the browser (`OPEN_PREF`).
+ * - Open or closed:  `<InspectorToggle>` in the top bar;  remembered in the browser (`OPEN_PREF`).
  * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click picks it:
  *   a drawn thing or a Spell UI control (an input, a button);  Alt-click picks any Spell UI element.
  *   - It starts as the Inspector opens, and stops once something's picked:  the app works as ever again.
@@ -49,6 +49,21 @@ export class Inspector {
   /** Is a click in the app a pick (reactive)? */
   static get isPicking(): boolean {
     return isPicking()
+  }
+
+  /**
+   * Does Inspect app's help show (reactive):  while inspecting, until the first pick ever, or until it's closed
+   * (`dismissHelp()`);  remembered in the browser (`inspector:helpSeen`).
+   */
+  static get isHelpShown(): boolean {
+    return isPicking() && !helpSeen()
+  }
+
+  /** Never show Inspect app's help again:  closed, or a part picked. */
+  static dismissHelp(): void {
+    if (helpSeen()) return
+    setHelpSeen(true)
+    editorPrefs.set(HELP_SEEN_PREF, true)
   }
 
   /** The part picked, if any (reactive). */
@@ -599,6 +614,8 @@ const INSPECTOR_ICON = "sliders horizontal"
 const PICKED_PREF = "inspector:picked"
 /** The start of the pref remembering the events added, a project's each (`Inspector.eventsPref`). */
 const EVENTS_PREF = "inspector:events"
+/** The pref remembering that Inspect app's help was seen:  closed, or a part picked (`Inspector.isHelpShown`). */
+const HELP_SEEN_PREF = "inspector:helpSeen"
 /** The pref remembering the phone's sheet's height, as dragged (`Inspector.sheetHeight`). */
 const SHEET_HEIGHT_PREF = "inspector:sheetHeight"
 /** Spell UI's tags start so. */
@@ -621,6 +638,8 @@ const CONTROL_TAGS = new Set([
 
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
 const [isOpen, setOpen] = createSignal(editorPrefs.get(OPEN_PREF) as boolean)
+editorPrefs.declare(HELP_SEEN_PREF, { type: "choice" })
+const [helpSeen, setHelpSeen] = createSignal(!!editorPrefs.get(HELP_SEEN_PREF))
 
 /**
  * The Inspector's cards, top to bottom:  what's picked, with its events and actions, then the app's views.
@@ -758,16 +777,28 @@ function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
 }
 
+/** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and picked. */
+const HOVER_MARK = "data-inspect-hover"
+const PICKED_MARK = "data-inspect-picked"
+/** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
+const INSET_MARK = "data-inspect-inset"
+
 /** The parts tree's stub icons:  a drawn thing's, a Spell UI element's. */
 const THING_ICON = "cube"
 const CONTROL_ICON = "square outline"
 
 /****************
  * ### `Picker`
- * The Inspector's hands in the app:  the outlines, and the listeners that pick.
- * - Plain DOM, no Solid:  two boxes on `<body>`, drawn over the app (`Inspector.css`), never inside it.
- *   - the HOVER box:  what a click would pick
- *   - the PICKED box:  what's picked, kept on it as the app moves (redrawn each frame while there is one)
+ * The Inspector's hands in the app:  the rings, and the listeners that pick.
+ * - Plain DOM, no Solid.
+ * - The RINGS are the part's own (epic `debut` P32):  marked `data-inspect-hover` / `data-inspect-picked`, its
+ *   `::after` draws a ring 3px outside it, pinned by CSS anchor positioning (`Inspector.css`):
+ *   the browser keeps it on the part through scrolls and drags, and no parent that hides its overflow cuts it.
+ *   - the HOVER ring:  what a click would pick, dashed
+ *   - the PICKED ring:  what's picked, solid
+ * - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead, as before:
+ *   no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
+ *   or an `::after` of its own;  the picked box follows it each frame
  * - The listeners are on the app's area, capturing:  they see a click before the app does, and stop it.
  ****************/
 class Picker {
@@ -789,6 +820,7 @@ class Picker {
         Picker.hover(undefined)
         Inspector.pick(part)
         Inspector.stopPicking()
+        Inspector.dismissHelp()
         // on a phone, the sheet comes up with what's picked
         setSheetUp(true)
       },
@@ -796,9 +828,7 @@ class Picker {
     )
     // and the presses before a click:  picking a draggable card mustn't start a drag
     area.addEventListener("pointerdown", (event) => Picker.partAt(event, area) && event.stopPropagation(), options)
-    window.addEventListener("keydown", (event) => event.key === "Escape" && Inspector.stopPicking(), {
-      signal: stop.signal
-    })
+    // Esc is the page's key:  `EDITOR_HOTKEYS.stopInspecting`
   }
 
   /** Stop listening, and hide the hover box. */
@@ -808,21 +838,63 @@ class Picker {
     Picker.hover(undefined)
   }
 
-  /** Outline `element` as the one a click would pick;  `undefined` hides the box. */
+  /** Ring `element` as the one a click would pick;  `undefined`:  none. */
   static hover(element: Element | undefined): void {
-    Picker.place(Picker.box("InspectorHover"), element)
+    const box = Picker.box("InspectorHover")
+    if (Picker.ring(HOVER_MARK, element)) Picker.place(box, undefined)
+    else Picker.place(box, element)
   }
 
-  /** Keep `element` outlined as picked, following it each frame;  `undefined` hides the box. */
+  /** Keep `element` ringed as picked (a box following it each frame, if it can't draw a ring);  `undefined`:  none. */
   static select(element: Element | undefined): void {
     Picker.selected = element
     const box = Picker.box("InspectorPicked")
+    if (Picker.ring(PICKED_MARK, element)) return Picker.place(box, undefined)
     const follow = () => {
       if (Picker.selected !== element) return
       Picker.place(box, element?.isConnected ? element : undefined)
       if (element) requestAnimationFrame(follow)
     }
     follow()
+  }
+
+  /**
+   * Move ring `mark` to `element` (`undefined`:  off whatever has it):  true if `element` draws it itself,
+   * false if it can't (`canRing()`), so a box stands in.
+   * - Pinned by its anchor;  a part that is its own `::after`'s containing block (a transform:  a flipped card) can't
+   *   anchor to itself, so its ring is 3px outside its own box instead (`INSET_MARK`).
+   */
+  private static ring(mark: string, element: Element | undefined): boolean {
+    if (element?.hasAttribute(mark)) return true
+    for (const marked of document.querySelectorAll(`[${mark}]`)) {
+      marked.removeAttribute(mark)
+      if (!marked.hasAttribute(HOVER_MARK) && !marked.hasAttribute(PICKED_MARK)) marked.removeAttribute(INSET_MARK)
+    }
+    if (!element || !Picker.canRing(element)) return false
+    element.setAttribute(mark, "")
+    if (Picker.isRingDrawn(element)) return true
+    element.setAttribute(INSET_MARK, "")
+    if (Picker.isRingDrawn(element)) return true
+    element.removeAttribute(mark)
+    element.removeAttribute(INSET_MARK)
+    return false
+  }
+
+  /** Does `element`'s ring take its place, a box round it:  its anchor found, or its inset applied? */
+  private static isRingDrawn(element: Element): boolean {
+    return parseFloat(getComputedStyle(element, "::after").width) > 0
+  }
+
+  /**
+   * Can `element` draw a ring itself:  a box of its own, in the page's document (so the page's sheet reaches it),
+   * and no `::after` of its own the ring would replace?
+   */
+  private static canRing(element: Element): boolean {
+    if (element.getRootNode() !== document) return false
+    if (getComputedStyle(element).display === "contents") return false
+    // its own `::after`, unless it's our ring already
+    const isRinged = element.hasAttribute(HOVER_MARK) || element.hasAttribute(PICKED_MARK)
+    return isRinged || getComputedStyle(element, "::after").content === "none"
   }
 
   /**
@@ -912,14 +984,14 @@ const FLUID_CONTROLS = "ui-property > :is(ui-input, ui-select, ui-dropdown, ui-t
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
  *   - what's picked (`<PropertiesCard>`), its events and actions as bands at its end
  *   - the app's views, things or templates (`<InspectorViews>`)
- * - Which cards show:  the App pane's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
+ * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
  * - Each card folds to its header (`<InspectorCard>`):  a folded card keeps its header's height, the others share
  *   the rest.
  * - Each is a card of its own, the page showing in the narrow seams between them, so they read as a set
  *   (Owen:  "separate panels ... we see background in the seams";  "less space between these panels").
  * - The cards' insides are the brand's Theme Creator inspector, in the Spell Brand theme whatever the editor
  *   wears:  that theme's tokens, re-declared on `.Inspector` (`UI.themes.scopedTokens()`, J63);
- *   their headers are the App pane's, in the editor's theme.
+ *   their headers are the panes', in the editor's theme.
  * - The app's parts are walked here (`appParts()`), so what was picked comes back whichever cards show.
  * - On a phone, its pane is a sheet (`<InspectorPane>`):  a bar to drag or close it heads the cards
  *   (`<InspectorSheetBar>`), and Esc puts it away.
@@ -1111,7 +1183,7 @@ const SMALLEST_CARD_BODY = 32
  * What's picked:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
  * `<ui-property-editor>` of every property it has, those it sets first
  * (Owen:  "lose that [More]. Show all of the properties").
- * - Picking again is the App pane's crosshairs (`<InspectorPick>`), beside the Inspector's button.
+ * - Picking again is the top bar's Inspect app (`<InspectorPick>`), beside the Inspector's button.
  * - Nothing picked:  the card is titled "Inspector", and says how to pick.
  * - Then its Events band (`<EventsBand>`), and a thing's Actions band (`<ActionsBand>`):
  *   what it does when people touch it, then what can be done to it (epic `debut` P28, P29;  Q45 A).
@@ -1475,7 +1547,7 @@ function chipFor(hue: string): string {
 
 /****************
  * ### `<InspectorToggle>`
- * The Inspector's button, in the App pane's header, right of the crosshairs:  its icon, then a dropdown arrow,
+ * The Inspector's button, in the top bar, right of Inspect app:  its icon, then a dropdown arrow,
  * as Events' "+" (Owen).
  * - The icon opens the column with the cards it last showed, or closes it (`Inspector.toggle()`).
  * - The arrow:  a menu of the cards, each checked when it shows;  choosing one shows or hides it.
@@ -1523,19 +1595,22 @@ export function InspectorToggle(): JSX.Element {
 
 /****************
  * ### `<InspectorPick>`
- * The crosshairs, in the App pane's header beside the Inspector's button:  pick a part of the app.
- * - A click starts picking, or stops it;  pressed (a round dip behind it) while picking.
- * - With the Inspector closed, it opens it, which starts picking.
+ * Inspect app, in the top bar beside the Inspector's button (and in the properties card's tip):
+ * pick a part of the app.
+ * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
+ * - With the Inspector closed, it opens it, which starts inspecting.
+ * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  ****************/
-export function InspectorPick(): JSX.Element {
+export function InspectorPick(props: { id?: string }): JSX.Element {
   return (
     <ui-icon
+      id={props.id}
       name="crosshairs"
       link=""
       class={["IconAction", "InspectorPick", { picking: Inspector.isPicking }]}
       label={appTexts.text("inspectorPick")}
       aria-pressed={Inspector.isPicking ? "true" : "false"}
-      data-tooltip={appTexts.text("inspectorPick")}
+      data-tooltip={Inspector.isHelpShown ? undefined : appTexts.text("inspectorPick")}
       data-position="bottom right"
       data-inverted=""
       onClick={() => {
@@ -1547,8 +1622,37 @@ export function InspectorPick(): JSX.Element {
   )
 }
 
+/****************
+ * ### `<InspectHelp>`
+ * Inspect app's help:  a small popup under its button, while inspecting, until the first pick ever or until it's
+ * closed (`Inspector.isHelpShown`):  "Click a part of the app to inspect it.  Alt-click for a part inside it.
+ * Esc stops."
+ * - `for`:  the button's id (`<InspectorPick id>`).
+ ****************/
+export function InspectHelp(props: { for: string }): JSX.Element {
+  return (
+    <ui-popup
+      for={props.for}
+      open-on="manual"
+      visible={Inspector.isHelpShown}
+      position="bottom right"
+      class="InspectHelp"
+      role="note"
+    >
+      <span class="InspectHelpText">{appTexts.text("inspectHelp")}</span>
+      <ui-icon
+        name="close"
+        link=""
+        class="InspectHelpClose"
+        label={appTexts.text("inspectHelpClose")}
+        onClick={() => Inspector.dismissHelp()}
+      />
+    </ui-popup>
+  )
+}
+
 /** Each card's name, in the menu of cards. */
-const PANEL_TEXTS: Record<InspectorPanel, AppTextKey> = {
+export const PANEL_TEXTS: Record<InspectorPanel, AppTextKey> = {
   properties: "inspectorProperties",
   views: "inspectorParts"
 }

@@ -56,7 +56,11 @@
 
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
-            <p>The editor's top toolbar, with the examples dropped down, Solitaire open:</p>
+            <p>
+              The examples dropped down, Solitaire open, as the editor's top bar drew it before its project menu
+              (<code title="app/src/app/solid/MenuBar.tsx">&lt;ProjectBarMenu&gt;</code>, epic <code>debut</code> P32)
+              took its place:
+            </p>
             <ui-image
               src="_images/ProjectDropdown.png"
               alt="The Example dropdown open over the editor, listing Calculator, Drawable Solitaire, FizzBuzz, Solitaire, Todos and more"
@@ -72,16 +76,15 @@
 
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
-            <p>The editor's top toolbar starts with the dropdown:</p>
+            <p>In a menu bar, the dropdown sits as a menu item:</p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>SpellEditor.tsx · the editor's toolbar · 8 lines</ui-title>
+              <ui-title>a bar with a project dropdown · 5 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
                     <AppMenu>
                       <Submenu left spring>
-                        <ProjectDropdown useRunner={props.mode === "run"} showActions />
-                        <Actions.resetApp />
+                        <ProjectDropdown useRunner={props.mode === "run"} />
                       </Submenu>
                     </AppMenu>
                   </script></ui-code

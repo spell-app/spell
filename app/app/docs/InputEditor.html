@@ -57,10 +57,10 @@
 
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
-            <p>The editor's code pane on Solitaire's Card.spell: its toolbar, then the code.</p>
+            <p>The editor's code pane on Solitaire's Card.spell: its file tabs, then the code.</p>
             <ui-image
               src="_images/InputEditor.png"
-              alt="The code pane:  a toolbar with File Card.spell, Compile, Save, Reload and New File, over spell code"
+              alt="The code pane:  the Solitaire example's files as tabs, Card.spellml chosen, over spell code"
               appearance="bordered rounded"
             >
             </ui-image>
@@ -74,7 +74,7 @@
           <ui-section id="2-using-it" label="2. Using it" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              The editor's page draws it as <code>InputRoot</code>, its toolbar on top, above the program's output on
+              The editor's page draws it as <code>InputRoot</code>, its file tabs on top, above the Program panel on
               the left:
             </p>
             <ui-accordion class="spell-code" appearance="styled">
@@ -82,9 +82,11 @@
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <SplitPanel id="spellEditor-left" rows="85%" resizable rounded>
+                    <SplitPanel id="spellEditor-left" rows={showsProgramPanel() ? "65%" : "100%"} resizable rounded>
                       <InputRoot />
-                      <ConsoleRoot />
+                      <Show when={showsProgramPanel()}>
+                        <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+                      </Show>
                     </SplitPanel>
                   </script></ui-code
                 >
@@ -92,18 +94,18 @@
             </ui-accordion>
             <ul>
               <li>
-                <a href="#InputRoot">InputRoot</a> is the pane: an <a href="#InputToolbar">InputToolbar</a> above an
-                <code>InputEditor</code>.
+                <a href="#InputRoot">InputRoot</a> is the pane: the project's files as tabs
+                (<code title="app/src/app/solid/FileTabs.tsx">&lt;FileTabs&gt;</code>) above an <code>InputEditor</code>.
               </li>
               <li>
-                The toolbar: the
-                <a href="FileDropdown.html" target="src-packages-app-docs-filedropdown-html">file dropdown</a> on the
-                left; Save, Reload and New File as icons on the right, each naming itself in a tooltip after two
-                seconds; then the file's "..." menu.
+                The tabs: every file of the project, in the theme's tab look, none closing; a dot on one not saved;
+                too many, ‹ › scroll them; too narrow for two tabs, the
+                <a href="FileDropdown.html" target="src-packages-app-docs-filedropdown-html">file dropdown</a>. Save,
+                Revert File and New File are the top bar's File menu's.
               </li>
               <li>No Compile button: the editor compiles two seconds after typing stops, and on Cmd+Enter.</li>
               <li>
-                The code is 17px, with no line numbers until the "..." menu's "Show line numbers" turns them on; the
+                The code is 17px, with no line numbers until the top bar's View › Line Numbers turns them on; the
                 browser remembers that choice (<code>LineNumbers</code>).
               </li>
               <li>

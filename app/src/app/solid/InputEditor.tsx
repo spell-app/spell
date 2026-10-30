@@ -2,25 +2,26 @@ import { Loading, Show, createEffect, createMemo, createSignal } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { monaco } from "spell/app/app/solid/monaco"
-import { Actions, ErrorBoundary, MoreMenu, PanelMenu, Submenu, tracked } from "spell/app/app/solid"
-import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { ErrorBoundary, tracked } from "spell/app/app/solid"
+import { addCodeEditorKeys } from "spell/app/app/pages/editorHotkeys"
 import { CodeSettings, CodeSettingsPanel } from "./CodeSettings"
-import { FileDropdown } from "./FileDropdown"
+import { FileTabs } from "./FileTabs"
 import { LazyMonaco } from "./LazyMonaco"
 
 import "./InputEditor.css"
 
 /****************
  * ### `<InputRoot>`
- * Root element to show the `<InputEditor/>` in `SpellEditor`.
+ * The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`).
+ * - Its actions (Save, Revert File, New File, the line numbers, the code editor's settings) are the top bar's menus
+ *   (epic `debut` P32).
  ****************/
 export function InputRoot(props: InputRootProps) {
   return (
     <div class="InputRoot">
       <Show when={props.showToolbar ?? true}>
-        <InputToolbar />
+        <FileTabs />
       </Show>
       <InputEditor showError={editor.showError} />
     </div>
@@ -29,53 +30,15 @@ export function InputRoot(props: InputRootProps) {
 
 /** Props for `<InputRoot>`. */
 export type InputRootProps = {
-  /** Show `<InputToolbar>` above editor.  Default:  `true`. */
+  /** Show the file tabs (`<FileTabs>`) above the code.  Default:  `true`. */
   showToolbar?: boolean
-}
-
-/****************
- * ### `<InputToolbar>`
- * Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips;
- * then a "..." menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), "Show line numbers",
- *   and "Settings…" (`<CodeSettingsPanel>`:  the code editor's popups).
- * - The static build has no file actions, so its menu holds only the line numbers and the settings.
- * - No Compile:  the editor compiles as you type, and on ⌘↵.
- ****************/
-export function InputToolbar() {
-  return (
-    <PanelMenu>
-      <Submenu left spring>
-        <FileDropdown />
-      </Submenu>
-      <Submenu right spring class="InputTools">
-        <Actions.saveFile iconOnly />
-        <Actions.reloadFile iconOnly />
-        <Actions.createFile iconOnly />
-        <MoreMenu direction="left" class="FileMoreMenu">
-          <Actions.FILE_DROPDOWN_ACTIONS />
-          <Show when={!isStaticBuild}>
-            <ui-item kind="divider" />
-          </Show>
-          <ui-item
-            value="lineNumbers"
-            icon={LineNumbers.isShowing ? "check square outline" : "square outline"}
-            onClick={() => LineNumbers.toggle()}
-          >
-            {appTexts.text("showLineNumbers")}
-          </ui-item>
-          <ui-item value="codeSettings" icon="cog" onClick={() => CodeSettings.toggleShowing()}>
-            {appTexts.text("codeSettings")}
-          </ui-item>
-        </MoreMenu>
-      </Submenu>
-    </PanelMenu>
-  )
 }
 
 /****************
  * ### `LineNumbers`
  * Does the code editor show line numbers?
- * - Off at first;  its toolbar's "..." menu turns them on, and the browser remembers (`spellEditor:lineNumbers`).
+ * - Off at first;  the top bar's View › Line Numbers turns them on, and the browser remembers
+ *   (`spellEditor:lineNumbers`).
  ****************/
 export class LineNumbers {
   /** Are they showing (reactive)? */
@@ -108,10 +71,11 @@ const [areShowing, setShowing] = createSignal(editorPrefs.get(LINE_NUMBERS_PREF)
  * ### `<InputEditor>`
  * The Monaco source editor on `editor.file`, guarded by an `<ErrorBoundary>`.
  * - `<FileEditor>` -- Monaco, loaded on first use (see `LazyMonaco`) -- remade per file:  keyed by its path.
- * - `editor.onInputDidMount()` wires save/reload/compile keys, and cursor/scroll events back into `editor`.
+ * - The page's keys (save, revert, compile) are made its own commands (`addCodeEditorKeys()`);
+ *   `editor.onInputDidMount()` wires its cursor and scroll events back into `editor`.
  * - `editor.onInputEffect()` (scroll to and select `file.initialSelection`) runs once the editor's made,
  *   and again whenever `editor.file`, its `isLoaded` or its `initialSelection` change.
- * - Over it, while showing, the code editor's settings (`<CodeSettingsPanel>`, from the toolbar's "..." menu).
+ * - Over it, while showing, the code editor's settings (`<CodeSettingsPanel>`, from the top bar's Edit menu).
  * - On an error:  `showError()` is told, and a plain-text `<FallbackEditor>` takes over.
  *   It heals by itself when what threw changes (see `<ErrorBoundary>`).
  * - NOTE: React's `match` prop (never passed, it reset the error on change) is gone:  the boundary heals itself.
@@ -177,13 +141,14 @@ function FallbackEditor() {
 }
 
 /**
- * The input editor is made:  show its line numbers or not, hand it to `editor`,
+ * The input editor is made:  show its line numbers or not, give it the page's keys, hand it to `editor`,
  * then select `file.initialSelection`, if any.
  * - Why the second step:  the editor arrives after the file did (Monaco loads lazily, and makes its editor once
  *   settled), so the `followInitialSelection()` run for that file came too early.
  */
 function didMount(inputEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco) {
   LineNumbers.applyTo(inputEditor)
+  addCodeEditorKeys(inputEditor, api)
   editor.onInputDidMount(inputEditor, api)
   editor.onInputEffect()
 }

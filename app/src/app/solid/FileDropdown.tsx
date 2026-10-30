@@ -24,16 +24,7 @@ import "./FileDropdown.css"
  * - SEE:  its App UI components page, `app/docs/FileDropdown.html` (`/components/app/FileDropdown.html`).
  ****************/
 export function FileDropdown(props: FileDropdownProps) {
-  /** What it shows, read from `editor` in one go. */
-  const state = tracked(() => {
-    const { project, file } = editor
-    const ready = !!project?.isLoaded && !!file
-    const files = ready ? project.imports.map(({ path, location }) => ({ path, name: location.file })) : []
-    // a file the project doesn't import (a `.spellml` beside its `.spell`) is listed too, by its file name
-    if (ready && !files.some((each) => each.path === file.path))
-      files.push({ path: file.path, name: file.path.split("/").at(-1) ?? file.path })
-    return { ready, path: file?.path ?? "", files }
-  })
+  const state = trackProjectFiles()
 
   const selectedName = () => state().files.find((file) => file.path === state().path)?.name
 
@@ -94,4 +85,36 @@ function choose(event: CustomEvent<{ value: string }>) {
       child.localName === "ui-item" && (child.getAttribute("value") ?? child.textContent?.trim()) === event.detail.value
   )
   ;(item as HTMLElement | undefined)?.click()
+}
+
+/** What `<FileDropdown>` and `<FileTabs>` show of `editor`'s project:  its files, and the one shown. */
+export type ProjectFilesState = {
+  /** The project's loaded, and a file of it is shown. */
+  ready: boolean
+  /** The path of the file shown;  `""` before there's one. */
+  path: string
+  /** Every file, in the project's order:  its path, its name, and whether it has changes not saved. */
+  files: { path: string; name: string; isDirty: boolean }[]
+}
+
+/**
+ * `editor`'s project's files and the one shown, read in one go through `tracked()`.
+ * - A file the project doesn't import (a `.spellml` beside its `.spell`) is listed after its imports, by its name.
+ * - Call in a component body:  `tracked()` goes with the component.
+ */
+export function trackProjectFiles(): () => ProjectFilesState {
+  return tracked(() => {
+    const { project, file } = editor
+    const ready = !!project?.isLoaded && !!file
+    const files = ready
+      ? project.imports.map(({ path, location, file: each }) => ({
+          path,
+          name: location.file ?? path,
+          isDirty: each.isDirty
+        }))
+      : []
+    if (ready && !files.some((each) => each.path === file.path))
+      files.push({ path: file.path, name: file.path.split("/").at(-1) ?? file.path, isDirty: file.isDirty })
+    return { ready, path: file?.path ?? "", files }
+  })
 }

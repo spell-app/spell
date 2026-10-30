@@ -28,10 +28,9 @@ export const APP_TEXTS = {
   modes: "Run, edit or debug",
   runMode: "Run",
   editMode: "Edit",
-  debugMode: "Debug",
-  showLineNumbers: "Show line numbers",
+  lineNumbers: "Line Numbers",
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
-  codeSettings: "Settings…",
+  codeSettings: "Code Editor Settings…",
   codeSettingsHeader: "Code editor",
   codeSettingsClose: "Close the code editor's settings",
   codeHover: "Hover info",
@@ -78,7 +77,7 @@ export const APP_TEXTS = {
   notebookPageNewText: "Some text.",
   notebookPageNewSection: "New section",
   notebookPageNewTemplate: "new view",
-  resetApp: "Reset {Type}",
+  resetToSaved: "Reset to Saved",
   runTests: "Run Tests",
   newProject: "New App",
   newExample: "New Example",
@@ -88,7 +87,7 @@ export const APP_TEXTS = {
   renameFile: "Rename File",
   deleteFile: "Delete File",
   save: "Save",
-  reload: "Reload",
+  revertFile: "Revert File",
   clearConsole: "Clear Console",
   alert: "Alert",
   confirm: "Confirm",
@@ -96,6 +95,36 @@ export const APP_TEXTS = {
   promptNumber: "Prompt Number",
   choose: "Choose",
   cancel: "Cancel",
+
+  ////////////////
+  // ## The top bar's menus (`MenuBar.tsx`, epic `debut` P32)
+  ////////////////
+
+  menuFile: "File",
+  menuEdit: "Edit",
+  menuView: "View",
+  menuRun: "Run",
+  menuHelp: "Help",
+  appMenus: "Menus",
+  projectMenu: "{project}:  its menu",
+  duplicateProject: "Duplicate {project}",
+  renameProject: "Rename {project}…",
+  deleteProject: "Delete {project}…",
+  menuProjectSettings: "Project Settings",
+  themeIs: "Theme:  {theme}",
+  moreProjects: "More {title}",
+  menuCompileAndRun: "Compile and Run",
+  undo: "Undo",
+  redo: "Redo",
+  find: "Find",
+  programPanel: "Program Panel",
+  inspectorCard: "Inspector:  {card}",
+  inspectApp: "Inspect App",
+  stopInspecting: "Stop Inspecting",
+  inspectHelp: "Click a part of the app to inspect it.  Alt-click for a part inside it.  Esc stops.",
+  inspectHelpClose: "Close",
+  fileTabs: "Files",
+  notSaved: "Not saved",
 
   ////////////////
   // ## The editor's panes:  their menus, and what they say while empty
@@ -269,7 +298,7 @@ export const APP_TEXTS = {
   // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
   spellxTab: "Spellx",
   inspector: "Inspector",
-  inspectorPick: "Pick a part of the app",
+  inspectorPick: "Inspect app",
   inspectorTip: "Pick a part of the app with the crosshairs, to see what it is and change it.",
   inspectorPicking: "Click a part of the app;  Alt-click for any part inside it.  Esc stops picking.",
   inspectorText: "Text",

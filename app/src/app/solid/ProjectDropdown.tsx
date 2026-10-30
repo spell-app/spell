@@ -5,8 +5,7 @@ import type { UIMenuJSXAttributes } from "spell/ui/jsx"
 import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts, type GroupWords } from "spell/app/app/ui/AppTexts"
-import { Actions, PROJECT_ICON, on, tracked } from "spell/app/app/solid"
-import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { PROJECT_ICON, on, tracked } from "spell/app/app/solid"
 
 import "./ProjectDropdown.css"
 
@@ -62,7 +61,6 @@ export type ProjectMenuProps = UIMenuJSXAttributes & {
  *   choosing sets it back during the event, and shows the project chosen, which then becomes `editor.project`.
  * - Its trigger shows the project's group icon before its name (a book for a guide ...):  the `trigger` slot.
  *   So does each item.
- * - `showActions`:  the project's actions at its foot (Rename, Duplicate, Delete;  New), in place of a "..." menu.
  * - A group of many projects (the notebooks, a page per Spell UI component) lists them in columns, so the list isn't
  *   one long scroll (Owen, 2026-10-27:  "Make the notebooks menu multi-column so it's not so overwhelming").
  * - Sits in a menu:  wrapped in a `<ui-item class="ProjectDropdown">`.  Look:  `ProjectDropdown.css`.
@@ -98,19 +96,6 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
               </ui-item>
             )}
           </For>
-          <Show when={props.showActions && !isStaticBuild}>
-            <ui-item kind="divider" />
-            <Actions.PROJECT_DROPDOWN_ACTIONS />
-            <ui-item kind="divider" />
-            {/* New:  the group's icon with a pencil on its corner, as a rich item */}
-            <ui-item value={NEW_PROJECT} onClick={() => void editor.createApp()}>
-              <ui-icons>
-                <ui-icon name={root().icon ?? PROJECT_ICON} />
-                <ui-icon corner="" name="pencil" />
-              </ui-icons>
-              {appTexts.text("createApp", root().words)}
-            </ui-item>
-          </Show>
         </Show>
       </ui-dropdown>
     </ui-item>
@@ -123,18 +108,10 @@ export type ProjectDropdownProps = {
   projectRoot?: SPACES.SpellProjectRoot
   /** Open it in Run, not Edit. */
   useRunner?: boolean
-  /**
-   * At its foot, the project's actions:  Rename, Duplicate, Delete, then New, each after a divider
-   * (choosing one does it, as a file dropdown's do) -- never in the static build, which has none.
-   */
-  showActions?: boolean
 }
 
 /** More projects than this in a group:  its menu lists them in columns (`ProjectDropdown.css`). */
 const MANY_PROJECTS = 16
-
-/** The New item's value:  what `choose()` finds it by. */
-const NEW_PROJECT = "new-project"
 
 /** What `<ProjectMenu>` / `<ProjectDropdown>` / the landing page's cards show of a project root. */
 export type ProjectRootState = {
@@ -215,7 +192,6 @@ export function openProject(path: string, useRunner?: boolean) {
 function choose(event: CustomEvent<{ value: string }>) {
   const dropdown = event.currentTarget as HTMLElement & { value?: unknown }
   dropdown.value = editor.project?.path ?? ""
-  // an action's item has no value:  found by its text, as a file dropdown's
   const item = [...dropdown.children].find(
     (child) =>
       child.localName === "ui-item" && (child.getAttribute("value") ?? child.textContent?.trim()) === event.detail.value

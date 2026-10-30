@@ -60,13 +60,14 @@
           <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="image"></ui-icon>
             <p>
-              The editor page's AppMenu, in three sections: Spell's hat and the project (its actions at the foot of its
-              menu) on the left; Run | Edit | Debug in the middle; on the right, the theme menu, Home and your avatar,
-              their glyphs 12px apart, the icons dark grey.
+              The editor page's AppMenu, in three sections: the project's menu (Spell's hat, its name) and File · Edit ·
+              View · Run · Help on the left; Run | Edit in the middle; on the right, one group of icons, their glyphs 12px
+              apart: in Edit, Inspect app and the Inspector's menu, a thin line, then Restart, the theme menu and your
+              avatar.
             </p>
             <ui-image
               src="_images/chrome.png"
-              alt="The editor's top bar, in Fruity: Spell's hat and name and the Solitaire project on the left; Run, Edit and Debug in the middle; the theme menu, Home and an avatar on the right"
+              alt="The editor's top bar: Spell's hat and the Solitaire menu, then File, Edit, View, Run and Help on the left; Run and Edit in the middle; Inspect app, the Inspector, Restart, the theme menu and an avatar on the right"
               appearance="bordered rounded"
             ></ui-image>
             <p class="meta">
@@ -75,9 +76,12 @@
               >.
             </p>
             <p>
-              Each pane's own toolbar is a PanelMenu, the pane's header: the input editor's, on
-              <a href="Actions.html" target="src-packages-app-docs-actions-html">Actions</a>; the App pane's, on
-              <a href="AppRoot.html" target="src-packages-app-docs-approot-html">AppRoot</a>.
+              The menus themselves are <code title="app/src/app/solid/MenuBar.tsx">MenuBar.tsx</code>'s: each a
+              <code>&lt;BarMenu&gt;</code>, its items <a href="Actions.html" target="src-packages-app-docs-actions-html"
+                >Actions</a
+              >
+              drawn as <code>&lt;ui-action&gt;</code>s with their keys. A pane's own toolbar is a PanelMenu, the pane's
+              header.
             </p>
           </ui-section>
 
@@ -85,21 +89,27 @@
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>The editor page's top bar, above: an AppMenu of three Submenus:</p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>SpellEditor.tsx · the editor page's top bar · 14 lines</ui-title>
+              <ui-title>SpellEditor.tsx · the editor page's top bar · 21 lines</ui-title>
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <AppMenu>
-                      <Submenu left spring mark>
-                        <ProjectDropdown useRunner={props.mode === "run"} showActions />
-                        <Actions.resetApp />
+                    <AppMenu class="EditorBar">
+                      <Submenu left spring>
+                        <ProjectBarMenu useRunner={props.mode === "run"} />
+                        <AppBarMenus mode={props.mode} />
                       </Submenu>
                       <Submenu center spring>
                         <ModeButtons current={props.mode} />
                       </Submenu>
-                      <Submenu right spring>
+                      <Submenu right spring class="BarTools">
+                        <Show when={props.mode === "edit"}>
+                          <InspectorPick id={INSPECT_APP_ID} />
+                          <InspectHelp for={INSPECT_APP_ID} />
+                          <InspectorToggle />
+                          <span class="BarToolsLine" role="separator" />
+                        </Show>
+                        <Actions.restartApp iconOnly />
                         <ThemeMenu />
-                        <Actions.showProjectChooser iconOnly />
                         <Actions.you />
                       </Submenu>
                     </AppMenu>
@@ -145,9 +155,9 @@
                 </ul>
               </li>
               <li>
-                The project's actions are at the foot of its dropdown (<code>showActions</code>): Rename, Duplicate,
-                Delete, then New. The code's toolbar has a MoreMenu of its own: the file's actions, then "Show line
-                numbers".
+                The project's actions are its menu's (<code>&lt;ProjectBarMenu&gt;</code>): New, Duplicate, Reset to
+                Saved, Rename, Delete, Project Settings, the theme, More Examples and Home. The file's actions are the
+                File menu's.
               </li>
               <li>
                 Each piece's host takes no room of its own (<code>display: contents</code>): style the boxes inside

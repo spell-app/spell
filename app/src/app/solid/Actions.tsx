@@ -1,4 +1,4 @@
-import { Match, Show, Switch, omit } from "solid-js"
+import { Match, Switch, omit } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import type { UIButtonAttributes } from "spell/ui/jsx"
@@ -8,11 +8,14 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import type * as Modals from "spell/app/app/solid/modals"
 import { tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { EDITOR_HOTKEYS, runCodeEditorAction, type HotkeyName } from "spell/app/app/pages/editorHotkeys"
 
 /****************
  * ### `<Action>`
  * One action as a menu item (`<ui-item appearance="link">`, the default) or a button (`<ui-button>`, with `button`).
  * - `title` is the text, `icon` an icon name (Fomantic's, see `loadUI.ts`).
+ * - `menu`:  an item of the top bar's menus (`MenuBar.tsx`), a `<ui-action>`:  its title and its key
+ *   (`shortcut`, from `EDITOR_HOTKEYS`), no icon, ticked while `active`.
  * - `iconOnly`:  just its icon, a plain `<ui-icon link>`, with `title` as its tooltip, below it, after a pause
  *   (`[data-tooltip]`, Spell UI's CSS-only tooltip;  the pause is the editor's, `chrome.css`).
  *   - A `<ui-icon>`, not an item:  an item's box is `display: contents`, which draws no tooltip.
@@ -25,7 +28,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
  * - SEE:  its App UI components page, `app/docs/Actions.html` (`/components/app/Actions.html`).
  ****************/
 export function Action(props: ActionProps) {
-  const rest = omit(props, "title", "button", "iconOnly", "icon", "active")
+  const rest = omit(props, "title", "button", "iconOnly", "icon", "active", "menu", "shortcut")
   return (
     <Switch
       fallback={
@@ -34,6 +37,11 @@ export function Action(props: ActionProps) {
         </ui-item>
       }
     >
+      <Match when={props.menu}>
+        <ui-action shortcut={props.shortcut} selected={props.active} {...omit(rest, "color")}>
+          {props.title}
+        </ui-action>
+      </Match>
       <Match when={props.iconOnly}>
         <ui-icon
           link=""
@@ -71,6 +79,10 @@ export type ActionProps = {
   button?: boolean
   /** Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`. */
   iconOnly?: boolean
+  /** An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon. */
+  menu?: boolean
+  /** Its key, in Spell UI's words (`mod+S`), shown by a `menu` item:  the entry's own, from `EDITOR_HOTKEYS`. */
+  shortcut?: string
   /** Highlighted:  the item's `selected`, the button's `selected`. */
   active?: boolean
   /** Hue:  of the item or icon while `active`;  of the button always. */
@@ -201,21 +213,20 @@ export const Actions = {
   restartApp: (props: ActionProps) => (
     <Action title={appTexts.text("restart")} icon="redo" onClick={() => editor.restartApp()} {...props} />
   ),
-  /** The static build's "Reset Example":  forget the visitor's edits (`editor.resetApp()`);  only there. */
-  resetApp: (props: ActionProps) => {
-    const groupWords = trackGroupWords()
-    return (
-      <Show when={isStaticBuild}>
-        <Action
-          title={appTexts.text("resetApp", groupWords())}
-          icon="undo"
-          class="resetApp"
-          onClick={() => void editor.resetApp()}
-          {...props}
-        />
-      </Show>
-    )
-  },
+  /** "Reset to Saved":  drop every unsaved change to the project, after asking (`editor.resetApp()`). */
+  resetApp: (props: ActionProps) => (
+    <Action title={appTexts.text("resetToSaved")} icon="undo" onClick={() => void editor.resetApp()} {...props} />
+  ),
+  /** Compile the program and run it (⌘↵). */
+  compileApp: (props: ActionProps) => (
+    <Action
+      title={appTexts.text("menuCompileAndRun")}
+      icon="play"
+      shortcut={EDITOR_HOTKEYS.compileApp.shortcut}
+      onClick={() => void editor.compileApp()}
+      {...props}
+    />
+  ),
 
   ////////////////
   // ## Project actions
@@ -246,7 +257,13 @@ export const Actions = {
   ////////////////
 
   createFile: (props: ActionProps) => (
-    <Action title={appTexts.text("newFile")} icon="file circle plus" onClick={() => editor.createFile()} {...props} />
+    <Action
+      title={appTexts.text("newFile")}
+      icon="file circle plus"
+      shortcut={EDITOR_HOTKEYS.createFile.shortcut}
+      onClick={() => editor.createFile()}
+      {...props}
+    />
   ),
   duplicateFile: (props: ActionProps) => (
     <Action
@@ -275,24 +292,35 @@ export const Actions = {
         active={fileIsDirty()}
         color="green"
         icon="cloud upload"
+        shortcut={EDITOR_HOTKEYS.saveFile.shortcut}
         onClick={() => editor.saveFile()}
         {...props}
       />
     )
   },
-  reloadFile: (props: ActionProps) => {
+  /** "Revert File":  read the file from the server again, dropping its unsaved changes (⌘⇧R). */
+  revertFile: (props: ActionProps) => {
     const fileIsDirty = tracked(() => !!editor.file?.isDirty)
     return (
       <Action
-        title={appTexts.text("reload")}
+        title={appTexts.text("revertFile")}
         active={fileIsDirty()}
         color="red"
         icon="arrow rotate left"
-        onClick={() => editor.reloadFile()}
+        shortcut={EDITOR_HOTKEYS.revertFile.shortcut}
+        onClick={() => editor.revertFile()}
         {...props}
       />
     )
   },
+
+  ////////////////
+  // ## The code editor's own -- run in it, with its own keys (`EDITOR_HOTKEYS`'s `codeEditorAction`)
+  ////////////////
+
+  undo: (props: ActionProps) => <CodeEditorAction hotkey="undo" title={appTexts.text("undo")} {...props} />,
+  redo: (props: ActionProps) => <CodeEditorAction hotkey="redo" title={appTexts.text("redo")} {...props} />,
+  find: (props: ActionProps) => <CodeEditorAction hotkey="find" title={appTexts.text("find")} {...props} />,
 
   ////////////////
   // ## Console
@@ -353,14 +381,6 @@ export const Actions = {
   // ## Groups of actions
   ////////////////
 
-  /** The project's own actions, at the foot of its dropdown:  rename, duplicate, delete it (New is apart). */
-  PROJECT_DROPDOWN_ACTIONS: (): JSX.Element => (
-    <>
-      <Actions.renameApp />
-      <Actions.duplicateApp />
-      <Actions.deleteApp />
-    </>
-  ),
   /** File dropdown items:  create, duplicate, rename, delete the file. */
   FILE_DROPDOWN_ACTIONS: (): JSX.Element => (
     <>
@@ -401,7 +421,6 @@ const HIDDEN_IN_STATIC_BUILD = [
   "prompt",
   "promptForNumber",
   "choose",
-  "PROJECT_DROPDOWN_ACTIONS",
   "FILE_DROPDOWN_ACTIONS"
 ] as const satisfies ReadonlyArray<keyof typeof Actions>
 
@@ -461,3 +480,20 @@ function DialogAction<P>(props: {
 
 /** Keys of `DialogActionProps` that are the item's, not the dialog's. */
 const DIALOG_ACTION_KEYS = ["callback", "title", "icon", "itemProps"] as const
+
+/****************
+ * ### `<CodeEditorAction>`
+ * An `<Action>` that runs one of the code editor's own actions (Undo, Find ...), showing its key.
+ * - `hotkey`:  its entry in `EDITOR_HOTKEYS`, which names the code editor's action and its key.
+ * - Run with the code editor focused first;  nothing while there's no code editor (Run).
+ ****************/
+function CodeEditorAction(props: ActionProps & { hotkey: Extract<HotkeyName, "undo" | "redo" | "find"> }) {
+  const hotkey = () => EDITOR_HOTKEYS[props.hotkey]
+  return (
+    <Action
+      shortcut={hotkey().shortcut}
+      onClick={() => runCodeEditorAction(hotkey().codeEditorAction)}
+      {...omit(props, "hotkey")}
+    />
+  )
+}

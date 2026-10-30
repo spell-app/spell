@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 import { memoryHistory, type MemoryHistoryAdapter } from "@solidjs/router"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Viewport } from "spell/test-helpers/Viewport"
 import { SPACES } from "spell/app/spaces"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { uiReady } from "spell/app/app/solid"
@@ -116,7 +117,7 @@ describe("editor hotkeys", () => {
   test.each([
     ["Mod+S", { key: "s", metaKey: true }, "saveFile"],
     ["Ctrl+S", { key: "s", ctrlKey: true }, "saveFile"],
-    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "reloadFile"],
+    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "revertFile"],
     ["Mod+Enter", { key: "Enter", metaKey: true }, "compileApp"],
     ["Mod+N", { key: "n", metaKey: true }, "createFile"]
   ] as const)("%s calls `editor.%s()`, instead of the browser's own", async (_name, init, method) => {
@@ -158,6 +159,8 @@ describe("editor hotkeys", () => {
 /** Draw the app's `<Routes>` at `url`, on a memory history.  Resolves once its `<ui-*>` are ready. */
 async function mountAt(url: string): Promise<{ host: HTMLElement; history: MemoryHistoryAdapter }> {
   await uiReady
+  // a desktop's width:  a phone only runs (`<SpellEditor>`), with no code column
+  await Viewport.resize(1280, 800)
   const history = memoryHistory(url)
   const router = createAppRouter(history)
   const host = document.createElement("div")
@@ -186,6 +189,9 @@ async function mountHotkeys(): Promise<HTMLElement> {
   flush()
   await Promise.resolve()
   flush()
+  // its keys go on Spell UI's keyboard once Spell UI has loaded
+  await uiReady
+  await Promise.resolve()
   return host
 }
 
@@ -204,12 +210,21 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
   return event
 }
 
-/** Spy on every `editor` method `EDITOR_HOTKEYS` runs. */
+/** Spy on every `editor` method `EDITOR_HOTKEYS` runs (Esc stops inspecting;  Undo, Redo and Find are Monaco's). */
 function spyOnHotkeys() {
-  expect(EDITOR_HOTKEYS).toHaveLength(4)
+  expect(Object.keys(EDITOR_HOTKEYS)).toEqual([
+    "saveFile",
+    "revertFile",
+    "compileApp",
+    "createFile",
+    "stopInspecting",
+    "undo",
+    "redo",
+    "find"
+  ])
   return {
     saveFile: spyOnEditor("saveFile", () => Promise.resolve()),
-    reloadFile: spyOnEditor("reloadFile", () => Promise.resolve()),
+    revertFile: spyOnEditor("revertFile", () => Promise.resolve()),
     compileApp: spyOnEditor("compileApp", () => Promise.resolve()),
     createFile: spyOnEditor("createFile", () => Promise.resolve())
   }

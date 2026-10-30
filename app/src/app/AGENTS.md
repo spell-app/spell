@@ -129,7 +129,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - `editor` navigates through `navigate()`, in [navigation.ts](pages/navigation.ts) (no Solid in it).
     - The router's root layout hands it its `navigate()`.
     - Route components call `followRoute()`, which hands the URL's params to `editor.selectPath()`.
-  - The editor page's shortcuts are ONE `keydown` listener ([editorHotkeys.ts](pages/editorHotkeys.ts)).
+  - The editor page's shortcuts are ONE list, `EDITOR_HOTKEYS` ([editorHotkeys.ts](pages/editorHotkeys.ts)):
+    the page's keys (on Spell UI's keyboard), the code editor's commands and the top bar's menus all read it.
 - `index.html` wraps the app in `<ui-root icons="fomantic">`.
   - So the app's icon names are Fomantic's ([loadUI.ts](solid/loadUI.ts)).
   - It still links `semantic.min.css`:  running programs draw with Semantic UI's class words.

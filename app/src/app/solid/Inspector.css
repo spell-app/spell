@@ -202,7 +202,48 @@
   }
 }
 
-/* the outlines over the app:  what a click would pick, and what's picked */
+/*
+ * The RINGS (epic `debut` P32):  drawn by the part itself, its `::after`, 3px outside it, pinned to it by CSS anchor
+ * positioning:  the browser keeps it there through scrolls and drags, and fixed, no parent that hides its overflow cuts
+ * it;  no pointer events, so a click goes where it would
+ * - the part under the pointer:  dashed, a little faint;  the part picked:  solid
+ * - `Picker` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
+ */
+[data-inspect-hover] {
+  anchor-name: --inspect-hover;
+}
+[data-inspect-picked] {
+  anchor-name: --inspect-picked;
+}
+:is([data-inspect-hover], [data-inspect-picked])::after {
+  content: "";
+  position: fixed;
+  position-anchor: --inspect-hover;
+  top: calc(anchor(top) - 3px);
+  left: calc(anchor(left) - 3px);
+  right: calc(anchor(right) - 3px);
+  bottom: calc(anchor(bottom) - 3px);
+  z-index: 2147483000;
+  box-sizing: border-box;
+  border-radius: calc(var(--ui-radius, 4px) + 3px);
+  outline: 2px dashed var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+[data-inspect-picked]::after {
+  position-anchor: --inspect-picked;
+  outline-style: solid;
+  background: none;
+  opacity: 1;
+}
+/* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
+   its own box (`Picker.ring()`) */
+[data-inspect-inset]::after {
+  inset: -3px;
+}
+
+/* the boxes over the app, for a part that can't ring itself:  what a click would pick, and what's picked */
 .InspectorBox {
   position: fixed;
   z-index: 2147483000;
@@ -422,11 +463,31 @@ ui-dropdown.InspectorAddEvent > ui-icon[slot="trigger"] {
   margin: 0;
 }
 
-/* the crosshairs (`<InspectorPick>`), pressed while picking:  a round dip behind the glyph, its size not counted */
+/*
+ * Inspect app (`<InspectorPick>`), pressed while inspecting:  held down, in the theme's primary colour, a sunken dip
+ * behind the glyph, its size not counted
+ */
 ui-icon.InspectorPick.picking {
-  border-radius: 50%;
-  background: color-mix(in oklab, var(--ui-text-color) 12%, transparent);
-  box-shadow: 0 0 0 5px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
+  border-radius: 6px;
+  color: var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
+  box-shadow:
+    0 0 0 5px color-mix(in oklab, var(--ui-primary) 22%, transparent),
+    inset 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+/* Inspect app's help (`<InspectHelp>`):  a small popup under its button, its words then a close */
+ui-popup.InspectHelp::part(popup) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 260px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+ui-popup.InspectHelp ui-icon.InspectHelpClose {
+  flex: none;
+  color: var(--ui-text-muted);
 }
 
 /* the trail in the properties card's header:  a pill a step, `›` between;  an earlier step goes back to it */

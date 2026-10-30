@@ -914,6 +914,16 @@
           "description": "Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`."
         },
         {
+          "name": "menu",
+          "type": "boolean",
+          "description": "An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon."
+        },
+        {
+          "name": "shortcut",
+          "type": "string",
+          "description": "Its key, in Spell UI's words (`mod+S`), shown by a `menu` item:  the entry's own, from `EDITOR_HOTKEYS`."
+        },
+        {
           "name": "active",
           "type": "boolean",
           "description": "Highlighted:  the item's `selected`, the button's `selected`."
@@ -955,8 +965,20 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "AppBarMenus",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "CodeEditorAction",
+          "file": "src/app/solid/Actions.tsx"
+        },
+        {
           "name": "DialogAction",
           "file": "src/app/solid/Actions.tsx"
+        },
+        {
+          "name": "ThemeSubMenu",
+          "file": "src/app/solid/MenuBar.tsx"
         }
       ],
       "href": "Actions.html"
@@ -1673,8 +1695,8 @@
       ],
       "usedIn": [
         {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
+          "name": "FileTabs",
+          "file": "src/app/solid/FileTabs.tsx"
         }
       ],
       "href": "FileDropdown.html"
@@ -1769,7 +1791,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Root element to show the `<InputEditor/>` in `SpellEditor`.",
+      "description": "The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`).",
       "noun": "InputRoot",
       "attributes": [],
       "slots": [],
@@ -1781,7 +1803,7 @@
         {
           "name": "showToolbar",
           "type": "boolean",
-          "description": "Show `<InputToolbar>` above editor.  Default:  `true`."
+          "description": "Show the file tabs (`<FileTabs>`) above the code.  Default:  `true`."
         }
       ],
       "usedIn": [
@@ -1791,33 +1813,6 @@
         }
       ],
       "href": "InputEditor.html#InputRoot"
-    },
-    {
-      "tag": "InputToolbar",
-      "name": "InputToolbar",
-      "folder": "InputEditor",
-      "mainTag": "InputEditor",
-      "main": false,
-      "page": false,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips; then a \"...\" menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), \"Show line numbers\", and \"Settings…\" (`<CodeSettingsPanel>`:  the code editor's popups).",
-      "noun": "InputToolbar",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "usedIn": [
-        {
-          "name": "InputRoot",
-          "file": "src/app/solid/InputEditor.tsx"
-        }
-      ],
-      "href": "InputEditor.html#InputToolbar"
     },
     {
       "tag": "LineNumbers",
@@ -2049,12 +2044,6 @@
           "description": "Icon name.  Default:  `\"ellipsis horizontal\"`."
         }
       ],
-      "usedIn": [
-        {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        }
-      ],
       "href": "chrome.html#MoreMenu"
     },
     {
@@ -2231,10 +2220,6 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        },
-        {
           "name": "OutputToolbar",
           "file": "src/app/solid/OutputEditor.tsx"
         },
@@ -2274,17 +2259,6 @@
           "name": "useRunner",
           "type": "boolean",
           "description": "Open it in Run, not Edit."
-        },
-        {
-          "name": "showActions",
-          "type": "boolean",
-          "description": "At its foot, the project's actions:  Rename, Duplicate, Delete, then New, each after a divider (choosing one does it, as a file dropdown's do) -- never in the static build, which has none."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "EditorToolbar",
-          "file": "src/app/pages/SpellEditor.tsx"
         }
       ],
       "href": "ProjectDropdown.html"
@@ -3255,10 +3229,6 @@
           "file": "src/app/pages/SpellEditor.tsx"
         },
         {
-          "name": "InputToolbar",
-          "file": "src/app/solid/InputEditor.tsx"
-        },
-        {
           "name": "OutputToolbar",
           "file": "src/app/solid/OutputEditor.tsx"
         },
@@ -3812,7 +3782,6 @@
       "tags": [
         "InputEditor",
         "InputRoot",
-        "InputToolbar",
         "LineNumbers"
       ],
       "tokens": []

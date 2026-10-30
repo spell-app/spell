@@ -387,7 +387,7 @@ each explorer reads something the program or its compile left behind.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
   - In the editor, its Types tab has the parser at hand, so it asks the language service in the page instead
-    ([Debug's Program panel](#run-edit-and-debug--the-app-and-the-program-panel)).
+    ([the Inspector's Views card](#run-and-edit--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -438,7 +438,7 @@ after that, only what read a changed value updates.
 - It's a debug global:  type `editor` in the browser's console.
   There `core` is the running program's runtime, and `parse()`, `compile()` and `tokenize()` are Spell's parser's.
 
-A compile, in the order Debug's Program Output tab logs it:
+A compile, in the order the Program panel's Output tab logs it:
 1. `compileApp()` clears the console, and compiles the project in the page with spell-parser's parser and writers.
    It saves the result, `<Project>.spell.js`, through the page server's API.
 2. It logs that JavaScript, its lines numbered, under "Compiled to javascript".
@@ -449,7 +449,7 @@ A compile, in the order Debug's Program Output tab logs it:
 
 A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
 - A template lives in ONE file, `.spell` or `.spellml`, never both:  its other form is a read-only view.
-  - Debug's Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
+  - The Program panel has it as a tab:  Code Spell on a `.spellml` file, Spellx on a `.spell` file.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
   - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
@@ -514,48 +514,49 @@ Each one dresses the whole editor:
 - **Not yet:**  a menu entry for that kept theme, and a design pass on Merlot and Spell,
   which were built to their first drawings with no round of polish.
 
-### Run, Edit and Debug:  the app, and the Program panel
+### Run and Edit:  the app, and the Program panel
 
-The top bar's Run | Edit | Debug buttons pick how much of the editor shows:
+The top bar's Run | Edit buttons pick how much of the editor shows:
 
 | Mode | What shows |
 | --- | --- |
 | Run | the app alone, the whole window:  the same page without its code column, `/run/<address>` |
-| Edit | the code on the left, the app on the right |
-| Debug | Edit, plus the Program panel under the code |
+| Edit | the code on the left, the app on the right;  the Program panel under the code, while it shows |
 
-- The editor remembers Edit or Debug, so the editor page opens the way you left it.
-  Run is a page of its own, with its own address.
-- The app is alone in its column, under a header:  its group's icon, the project's title, and Restart at the right.
+- Run is a page of its own, with its own address.
+- A phone only runs:  no Edit, for now.
+- The app is alone in its column, with no header:  its tools are the top bar's.
   - It stays running, never redrawn, while you move between the modes or open the panel.
-- The Program panel has seven tabs:
+- The Program panel shows from View › Program Panel, and the editor remembers it.
+  It has its tabs:
   - Program Output:  what the program logged, and how compiling and running it went
-  - Things:  what the program has made, live ([the Thing Explorer](#the-explorers-read-files-not-the-parser))
-  - Types:  every type the code knows, worked out after each compile by the language service the code editor runs;
-    a link goes to its line
   - JavaScript:  what the open file compiled to
   - TypeScript and Python:  the whole project as those targets write it, from the last compile
     (`SpellProject.codeFor()`, in spell-parser)
+  - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
   - Sentence Tree:  the Spell tree of the cursor's line
-- At the panel's right:  Clear Console, on Program Output only, and Close, which goes back to Edit.
+  - Things and Types are the Inspector's, in its Views card.
+- At the panel's right:  Clear Console, on Program Output only, and Close, which hides it.
 - It's the same pane VS Code's Run Project panel and `<spell-viewer>` use, `RunnerPane`:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.
 
-The rest of the top bar, left to right:
-- in a look, Spell's hat and name, a link to the landing page
-- the project dropdown, its trigger showing the project's group icon
-- Settings, an icon;  the project's "..." menu
-- at the right:  Home (the landing page, where every project is opened or made), an icon;
-  the theme menu, a palette;  and you, as an avatar
+The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
+- the project's menu:  Spell's hat, the project's name, bold
+  - New Example, Duplicate Solitaire, Reset to Saved, Rename, Delete, Project Settings, Theme ›, More Examples ›
+    (in columns past ten), Home
+- File · Edit · View · Run · Help, each item showing its key
+- Run | Edit, in the middle
+- at the right, one group of icons:  in Edit, Inspect app and the Inspector's menu, a thin line;
+  then Restart, the theme menu, a palette, and you, as an avatar
 
-Every project group has ONE icon, the same in the dropdown, the app's header and the landing page's cards:
+Every project group has ONE icon, the same in its menus and the landing page's cards:
 a folder for your projects, a lightbulb for examples, an open book for guides,
 a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/models/projectGroups.ts)).
 
-The code's own toolbar:
-- the file dropdown, its trigger showing the file's icon and name
-- Save, Reload and New File, as icons:  each names itself in a tooltip after two seconds
-- a "..." menu:  new, duplicate, rename or delete a file, and "Show line numbers"
+The code column:
+- every file of the project as a tab, none closing, a dot on one not saved;
+  too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
+- Save, Revert File and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
 - There's no Compile button:  the editor compiles two seconds after typing stops, and on `Mod+Enter`.
 - The code is 17px, with no line numbers until you turn them on;  the browser remembers that choice.
 
@@ -577,11 +578,14 @@ The editor's keys, with Command on a Mac or Control elsewhere (either works on b
 | Keys | What it does |
 | --- | --- |
 | `Mod+S` | save the file |
-| `Mod+Shift+R` | reload it from the server |
+| `Mod+Shift+R` | revert it:  read it from the server again, dropping unsaved changes |
 | `Mod+Enter` | compile and run |
 | `Mod+N` | a new file |
+| `Esc` | stop inspecting |
 
-- Inside Monaco, its own commands run the same keys;  outside it, one listener on the page does.
+- ONE list of them, `EDITOR_HOTKEYS` ([editorHotkeys.ts](src/app/pages/editorHotkeys.ts)):
+  the menus show each item's key from it, Monaco's commands are made from it, and the page's keys go through
+  Spell UI's keyboard.
 - `Mod+Z` and `Mod+Shift+Z` belong to whatever has the focus:
   - in the code, Monaco's undo and redo
   - in the running app, the program's:  what it did, one action at a time

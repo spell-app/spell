@@ -1,0 +1,174 @@
+/*
+ * Look of the top bar's menus (`MenuBar.tsx`):  the project's name, bold after Spell's hat, then File · Edit · View
+ * · Run · Help, quieter;  each menu a popup of `<ui-action>`s.
+ * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
+ * - The menus line up with each other and the bar:  every name the same height and baseline, the bar's own item
+ *   height, its text centred (Owen:  "I assume menus will line up properly").
+ */
+
+/* Spell UI's breakpoints (`@custom-media`), inlined at build time */
+@import "spell/ui/styles/media.css";
+
+/* every menu's name:  the bar's item, its padding the only room round it */
+ui-item.BarMenu::part(item) {
+  padding-inline: 9px;
+  align-self: stretch;
+  align-items: center;
+}
+
+/* File · Edit · View · Run · Help:  quieter than the project's name */
+.AppBarMenus {
+  display: contents;
+
+  & ui-item.BarMenu::part(item) {
+    color: var(--ui-text-muted);
+    font-weight: var(--ui-font-weight-normal, 400);
+  }
+  & ui-item.BarMenu:hover::part(item) {
+    color: var(--ui-text-color);
+  }
+}
+
+/* the project's menu:  the hat, the name bold, a caret */
+ui-item.ProjectBarMenu::part(item) {
+  padding-inline: 8px 10px;
+}
+.ProjectBarLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: var(--ui-font-weight-bold, 700);
+  color: var(--ui-text-color);
+
+  /* Spell's own hat, in the theme's primary colour:  the favicon's, without its dark square (as `<AppMark>`'s) */
+  & > .hat {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    background: var(--ui-primary, currentColor);
+    mask: url("/static/favicon/hat.svg") center / contain no-repeat;
+  }
+  & > .ProjectName {
+    white-space: nowrap;
+  }
+  & > ui-icon.ProjectCaret {
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+    font-size: 0.85em;
+    color: var(--ui-text-muted);
+  }
+}
+
+/*
+ * the popup:  the items, a sub-menu beside them;  near opaque, and what's under it blurred, so the code under a
+ * see-through theme's surface (Glass) doesn't read through it
+ */
+ui-popup.BarMenuPopup {
+  --ui-popup-background: color-mix(in oklab, var(--ui-surface) 25%, var(--ui-background));
+}
+ui-popup.BarMenuPopup::part(popup) {
+  padding: 4px;
+  max-width: none;
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+.BarMenuPanel {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+ui-menu.BarMenuItems::part(menu),
+.BarSubMenu ui-menu::part(menu) {
+  min-width: 220px;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/*
+ * each item a compact row, its title then its key at the end, no line between items (only the dividers'), its own
+ * fill only while pointed at or chosen
+ */
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action::part(item) {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: 6px 12px;
+  border-radius: var(--ui-radius-s, 6px);
+  white-space: nowrap;
+}
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action:not([kind="divider"])::part(item)::before {
+  display: none;
+}
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action::part(shortcut) {
+  margin-inline-start: auto;
+  padding-inline-start: 24px;
+}
+
+/* a divider:  a hairline across the menu, between groups */
+:is(ui-menu.BarMenuItems, .BarSubMenu ui-menu) > ui-action[kind="divider"]::part(item) {
+  min-height: 0;
+  height: 0;
+  margin: 4px 8px;
+  padding: 0;
+  border-top: 1px solid var(--ui-border-color);
+}
+
+/* a divider left first, last or doubled (the static build's hidden actions):  none */
+ui-menu.BarMenuItems > ui-action[kind="divider"]:is(:first-child, :last-child),
+ui-menu.BarMenuItems > ui-action[kind="divider"] + ui-action[kind="divider"] {
+  display: none;
+}
+
+/* a sub-menu's row:  its chevron at the end, where an item's key goes */
+ui-action.SubMenuRow ui-icon.SubMenuChevron {
+  --ui-icon-distance: 0;
+  margin-inline-start: auto;
+  padding-inline-start: 24px;
+  color: var(--ui-text-muted);
+}
+
+/* the sub-menu beside the items:  divided from them by a hairline */
+.BarSubMenu {
+  border-inline-start: 1px solid var(--ui-border-color);
+  padding-inline-start: 4px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+/* More Examples:  in columns of ten once there are more */
+ui-menu.ProjectsSubMenu.many::part(menu) {
+  display: grid;
+  width: max-content;
+  grid-template-rows: repeat(10, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, auto);
+}
+
+/* each project's group icon, a little room after it */
+ui-menu.ProjectsSubMenu ui-action::part(title) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* the theme sub-menu:  Spell UI's theme menu drawn in place, Edit Theme… under it */
+.ThemeSubMenu {
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+
+  /* Edit Theme…:  the theme menu's width, its divider too */
+  & > ui-menu::part(menu) {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* a phone runs only:  the project's menu stays, File · Edit · View · Run · Help go */
+@media (--ui-mobile) {
+  .AppBarMenus {
+    display: none;
+  }
+}

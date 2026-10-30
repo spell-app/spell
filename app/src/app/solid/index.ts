@@ -10,7 +10,8 @@
  * - Shared UI:
  *   - `chrome.tsx`:  `AppMenu`, `PanelMenu`, `Submenu`, `MenuHeader`, `Spring`, `MoreMenu`, the icon names
  *   - `Actions.tsx`:  `Action`, `Actions`
- *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit / Debug modes
+ *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit modes (and the Program panel shown)
+ *   - `MenuBar.tsx`:  the top bar's menus, the project's and File · Edit · View · Run · Help
  *   - `ErrorBoundary.tsx`:  `ErrorBoundary`
  *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `Markdown.tsx`
  * - The pages' shell (P8):
@@ -20,7 +21,7 @@
  *   - `ProjectMenu` / `ProjectDropdown`
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
- *   console, match and AST viewers, type and thing explorers, the Monaco editors, `FileDropdown`.
+ *   console, match and AST viewers, type and thing explorers, the Monaco editors, `FileDropdown`, `FileTabs`.
  * - NOTE: deliberately NOT here:
  *   - `./monaco`:  Monaco loads on first use, through `LazyMonaco`;  NEVER import it statically, types aside
  *   - `./modals`:  `editor.ts` imports it on first use (`import()`), so the editor never loads Solid up front
@@ -63,3 +64,4 @@ export * from "./SplitPanel"
 export * from "./AppContainer"
 export * from "./AppRoot"
 export * from "./ProjectDropdown"
+export * from "./MenuBar"

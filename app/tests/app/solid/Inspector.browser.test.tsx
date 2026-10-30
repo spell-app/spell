@@ -55,6 +55,55 @@ describe("picking", () => {
     expect(Inspector.isPicking).toBe(false)
   })
 
+  test("the rings are the part's own (epic `debut` P32):  dashed under the pointer, solid once picked", async () => {
+    const area = await inArea(`<div class="part" style="width: 80px; height: 40px"><ui-button>Go</ui-button></div>`)
+    const button = area.querySelector("ui-button")!
+    // a box of its own to ring:  a Spell UI host is `display: contents` by default
+    button.setAttribute("style", "display: inline-block")
+    cleanups.push(Inspector.watch(area))
+    Inspector.toggle()
+    flush()
+    button.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, composed: true }))
+    expect(button.hasAttribute("data-inspect-hover")).toBe(true)
+    const ring = getComputedStyle(button, "::after")
+    expect({ position: ring.position, anchor: ring.positionAnchor, pointerEvents: ring.pointerEvents }).toEqual({
+      position: "fixed",
+      anchor: "--inspect-hover",
+      pointerEvents: "none"
+    })
+    // 3px outside it, all round
+    expect(parseFloat(ring.width)).toBeCloseTo(button.getBoundingClientRect().width + 6, 0)
+
+    button.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    flush()
+    expect(button.hasAttribute("data-inspect-picked")).toBe(true)
+    expect(getComputedStyle(button, "::after").outlineStyle).toBe("solid")
+    // no box over it:  it draws its own
+    expect(document.querySelector<HTMLElement>("body > .InspectorPicked")?.hidden ?? true).toBe(true)
+  })
+
+  test("Inspect app's help shows while inspecting, until the first pick;  never again after", async () => {
+    const area = await inArea(`<ui-button>Go</ui-button>`)
+    cleanups.push(Inspector.watch(area))
+    const helpSeen = localStorage.getItem("spellEditor:inspector:helpSeen")
+    cleanups.push(() =>
+      helpSeen === null
+        ? localStorage.removeItem("spellEditor:inspector:helpSeen")
+        : localStorage.setItem("spellEditor:inspector:helpSeen", helpSeen)
+    )
+    Inspector.toggle()
+    flush()
+    expect(Inspector.isPicking).toBe(true)
+    area.querySelector("ui-button")!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    flush()
+    expect(Inspector.isHelpShown).toBe(false)
+    // inspecting again:  seen, so it stays away
+    Inspector.startPicking()
+    flush()
+    expect(Inspector.isPicking).toBe(true)
+    expect(Inspector.isHelpShown).toBe(false)
+  })
+
   test("the column shows what's picked, in a property editor", async () => {
     const area = await inArea(`<ui-input value="hi"></ui-input>`)
     const host = await mount(() => <InspectorColumn />)
@@ -315,7 +364,8 @@ describe("the phone's sheet", () => {
     expect(Inspector.isSheetUp).toBe(false)
     await vi.waitFor(() => expect(getComputedStyle(sheet).display).toBe("none"))
     expect(Inspector.picked?.label).toBe('<ui-button "Go" />')
-    expect(document.querySelector<HTMLElement>("body > .InspectorPicked")!.hidden).toBe(false)
+    // ringed by its own `::after` (epic `debut` P32)
+    expect(area.querySelector("ui-button")!.hasAttribute("data-inspect-picked")).toBe(true)
   })
 
   test("Esc puts the sheet away;  picking again puts it down until the next pick", async () => {

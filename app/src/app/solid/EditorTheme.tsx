@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { createEffect } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 
 import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
@@ -35,6 +35,11 @@ import "./EditorTheme.css"
  * - The editor app's only:  NEVER from `<spell-viewer>` / `<spell-editor>`, which live on other people's pages.
  ****************/
 export class EditorTheme {
+  /** The theme chosen, its title for people (`Fruity`, one of My themes' own name), once known (reactive). */
+  static get chosenTitle(): string {
+    return chosenTitle()
+  }
+
   /**
    * Apply the remembered theme:  light / dark at once, the theme once its sheet loads.
    * - Call once, from the editor's entry.
@@ -81,17 +86,19 @@ export class EditorTheme {
 
   /**
    * The editor's full view, as the theme editor previews it (`<ui-theme-editor>`, epic `debut` P24):
-   * Debug, the Inspector with every card, and a part picked:  a card, if the app draws one, else its first thing.
+   * Edit with its Program panel, the Inspector with every card, and a part picked:
+   * a card, if the app draws one, else its first thing.
    * - What's picked already stays.
    * - Waits up to 3s for the app to draw something to pick;  nothing by then, nothing's picked.
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async showFullView(): Promise<void> {
-    const [{ EditorMode }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
+    const [{ EditorMode, ProgramPanelShown }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
       import("./EditorMode"),
       import("./Inspector")
     ])
-    EditorMode.show("debug")
+    EditorMode.show("edit")
+    ProgramPanelShown.set(true)
     for (const panel of INSPECTOR_PANELS) Inspector.setShown(panel, true)
     if (Inspector.picked) return
     for (let tries = 0; tries < PICK_TRIES; tries++) {
@@ -115,11 +122,16 @@ export class EditorTheme {
    * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
   private static follow(theme: string | undefined): void {
-    void import("spell/ui/components/ui-theme-editor/SavedTheme")
-      .then(({ SavedTheme }) => {
-        const shown = SavedTheme.picked(theme)?.choices.base ?? theme
+    void Promise.all([
+      import("spell/ui/components/ui-theme-editor/SavedTheme"),
+      import("spell/ui/components/components.types")
+    ])
+      .then(([{ SavedTheme }, { ThemeNames }]) => {
+        const mine = SavedTheme.picked(theme)
+        const shown = mine?.choices.base ?? theme
         if (shown) document.documentElement.dataset.spellTheme = shown
         else delete document.documentElement.dataset.spellTheme
+        setChosenTitle(mine?.name ?? (theme ? ThemeNames.titleOf(theme) : ""))
       })
       .catch((error: unknown) => console.error("EditorTheme:  couldn't mark the theme", error))
   }
@@ -159,14 +171,7 @@ export function ThemeMenu(): JSX.Element {
  * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
 export function AppMark(): JSX.Element {
-  const shown = tracked(() => ({
-    title: editor.project?.title,
-    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
-  }))
-  createEffect(shown, ({ title, isNotebook }) => {
-    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
-    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
-  })
+  const shown = followTabTitle()
   return (
     <ui-item class="AppMark">
       <a link="" href="/">
@@ -176,6 +181,27 @@ export function AppMark(): JSX.Element {
     </ui-item>
   )
 }
+
+/**
+ * Name the browser's tab for the project shown, while the calling component is up:
+ * `Button • Spell Notebook`, `Solitaire • Spell`;  plain "Spell" with none.
+ * - Returns what it read:  the project's title, and whether it's a notebook.
+ * - Call in a component body:  `<AppMark>`'s, the editor's project menu's (`<ProjectBarMenu>`).
+ */
+export function followTabTitle(): () => { title: string | undefined; isNotebook: boolean } {
+  const shown = tracked(() => ({
+    title: editor.project?.title,
+    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
+  }))
+  createEffect(shown, ({ title, isNotebook }) => {
+    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
+    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
+  })
+  return shown
+}
+
+/** The chosen theme's title (`EditorTheme.chosenTitle`). */
+const [chosenTitle, setChosenTitle] = createSignal("")
 
 /** How many times `showFullView()` looks for a part to pick, while the app draws. */
 const PICK_TRIES = 30

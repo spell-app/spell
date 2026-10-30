@@ -189,9 +189,9 @@ ui-item.ThemeMenu ui-theme-menu {
 /*
  * The top bar's SPACING, one rule for every item in it (Owen, 2026-10-24:  "Make a rule to keep this spacing
  * consistent"):
- * - GROUPS stand `--spell-bar-group-gap` apart, at least:  the project on the left, Run | Edit | Debug in the middle,
+ * - GROUPS stand `--spell-bar-group-gap` apart, at least:  the menus on the left, Run | Edit in the middle,
  *   the icons on the right
- * - ICONS within a group (the palette, Home and the avatar;  a pane header's) stand
+ * - ICONS within a group (Inspect app, the Inspector's, Restart, the palette and the avatar;  a pane header's) stand
  *   `--spell-bar-icon-gap` apart, glyph to glyph:  each takes half of it on either side, and no margin of its own;
  *   an icon's box is its glyph's width (`--ui-icon-width: 1em`), not the usual 1.18em, with no room after it for a
  *   label (`--ui-icon-distance`):  both stood them further apart
@@ -239,7 +239,7 @@ ui-menu.AppMenu ui-item.ThemeMenu::part(item) {
   padding-inline: calc(var(--spell-bar-icon-gap) / 2);
 }
 
-/* `<ModeButtons>`:  Run | Edit | Debug, in the bar's middle:  its own section, so no room of its own either side */
+/* `<ModeButtons>`:  Run | Edit, in the bar's middle:  its own section, so no room of its own either side */
 ui-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
@@ -264,6 +264,19 @@ ui-menu.ModeTabs ui-item::part(item) {
   gap: 0.4em;
   /* the bar's short-menu rule takes every item's block padding, a nested menu's too:  the tabs' own back */
   padding-block: 0.45em;
+}
+
+/*
+ * the right group's thin line, between the Inspector's pair and the rest (Owen's "|"):  in the group's 12px rhythm,
+ * as tall as a glyph
+ */
+ui-menu.AppMenu .BarToolsLine {
+  align-self: center;
+  width: 1px;
+  height: 18px;
+  margin-inline: calc(var(--spell-bar-icon-gap) / 2);
+  background: currentColor;
+  opacity: 0.25;
 }
 
 /* the palette menu's "Edit theme..." row:  its icon the width of a theme row's check, so their words line up */
@@ -345,12 +358,15 @@ ui-toolbar.RunnerPaneToolbar::part(menu) {
 
 /*
  * Phones (Owen:  "Fix it now"):  the top bar fits its width
- * - the hat without its name, the project its icon (its name is the App pane's title), the modes their icons alone:
- *   all still read out
+ * - the hat without its name, the modes their icons alone:  all still read out
+ * - the editor's bar runs only (epic `debut` P32):  no Run | Edit, no app menus (`MenuBar.css`)
  * - each section its content's width:  too wide still, the bar scrolls sideways (above), never overlaps
  */
 @media (--ui-mobile) {
-  ui-menu.AppMenu :is(.AppName, .ProjectName),
+  ui-menu.EditorBar ui-item.ModeButtons {
+    display: none;
+  }
+  ui-menu.AppMenu .AppName,
   ui-menu.ModeTabs .ModeText {
     position: absolute;
     inline-size: 1px;

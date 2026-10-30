@@ -1,23 +1,26 @@
 import type { RouteSectionProps } from "@solidjs/router"
 import { Match, Show, Switch, createSignal, onCleanup } from "solid-js"
+import { isServer } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import {
   Actions,
+  AppBarMenus,
   AppMenu,
   AppRoot,
   ConsoleRoot,
-  EditorMode,
   InputRoot,
   Inspector,
   InspectorPane,
+  InspectHelp,
   InspectorPick,
   InspectorToggle,
   ModeButtons,
   OutputEditor,
   OutputRoot,
   PROJECT_ICON,
-  ProjectDropdown,
+  ProgramPanelShown,
+  ProjectBarMenu,
   SpellPage,
   SplitPanel,
   Submenu,
@@ -49,8 +52,9 @@ import "./SpellEditor.css"
  * - Run:  the program alone, the code column gone.
  *   - ONE page for both (Owen:  "a discontinuity in the page when I switch between run / edit"):
  *     switching keeps the page, its bar and the running program where they are;  only the code column comes and goes.
- * - In Debug (`EditorMode`), the Program panel (`<ProgramPanel>`) sits under the code:
- *   its output, things, types and compiled code.  Closing it goes back to Edit.
+ *   - A phone only runs (epic `debut` P32):  Run, whatever the address says.
+ * - The Program panel (`<ProgramPanel>`), while View › Program Panel shows it (`ProgramPanelShown`), sits under
+ *   the code:  its output and compiled code.  Its Close hides it.
  * - Showing or hiding the panel never redraws the code or the program:  the panel keeps each pane by its node.
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
@@ -60,18 +64,20 @@ import "./SpellEditor.css"
  ****************/
 export function SpellEditor(props: { mode: Mode }) {
   editorHotkeys()
-  const isRunning = () => props.mode === "run"
-  const isDebugging = () => props.mode === "debug"
+  const isPhone = phoneWidth()
+  const mode = (): Mode => (isPhone() ? "run" : props.mode)
+  const isRunning = () => mode() === "run"
+  const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
   const layout = () => columnsFor(isRunning(), Inspector.isOpen)
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
-      <EditorToolbar mode={props.mode} />
+      <EditorToolbar mode={mode()} />
       <SplitPanel id={layout().id} columns={layout().columns} resizable fluid spaced="tightly">
         <Show when={!isRunning()}>
-          <SplitPanel id="spellEditor-left" rows={isDebugging() ? "65%" : "100%"} resizable rounded>
+          <SplitPanel id="spellEditor-left" rows={showsProgramPanel() ? "65%" : "100%"} resizable rounded>
             <InputRoot />
-            <Show when={isDebugging()}>
-              <ProgramPanel onClose={() => EditorMode.show("edit")} />
+            <Show when={showsProgramPanel()}>
+              <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
             </Show>
           </SplitPanel>
         </Show>
@@ -88,16 +94,15 @@ export function SpellEditor(props: { mode: Mode }) {
 
 /****************
  * ### `<AppPane>`
- * The running program, under a header:  the project's group icon and its title;
- * at the right, Restart, the Inspector's crosshairs, Settings, and the Inspector's button (and its menu of cards).
+ * The running program, with no header of its own:  its tools are the top bar's (epic `debut` P32).
  * - The program's mount point (`<AppRoot>`) is drawn once, and never redrawn.
  * - Its body is the area the Inspector picks parts in (`Inspector.watch()`).
  * - Shown in every mode, Run's too:  the page keeps it as the code column comes and goes.
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
- *   - Its title is then a menu of the project's notebooks, the lock after it, and what happened to the last edit
- *     (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
+ *   - It keeps a header of its own:  its title, a menu of the project's notebooks, the lock after it, and what
+ *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -106,28 +111,15 @@ export function AppPane() {
   const [notebookPage, setNotebookPage] = createSignal<NotebookController>()
   return (
     <div class="AppPane">
-      <header class="AppPaneHeader">
-        <Show
-          when={notebookPage()}
-          keyed
-          fallback={
-            <h2>
-              <ui-icon name={root().icon ?? PROJECT_ICON} />
-              {title()}
-            </h2>
-          }
-        >
-          {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
-        </Show>
-        <Actions.restartApp iconOnly />
-        <InspectorPick />
-        <Actions.showProjectSettings iconOnly />
-        <InspectorToggle />
-        {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
-        <Show when={notebookPage()} keyed>
-          {(page) => <NotebookMenu controller={page} />}
-        </Show>
-      </header>
+      <Show when={notebookPage()} keyed>
+        {(page) => (
+          <header class="AppPaneHeader">
+            <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />
+            {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
+            <NotebookMenu controller={page} />
+          </header>
+        )}
+      </Show>
       <div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
         <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
           <AppRoot showToolbar={false} />
@@ -270,43 +262,72 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
 
 /****************
  * ### `<EditorToolbar>`
- * Top menu of the editor's page:  the project dropdown (the project's actions at its foot);
- * Run | Edit | Debug in the middle;  at the right, the theme menu, Home (the landing page) and the person.
- * - Restart, the Inspector's button and Settings are the App pane's (`<AppPane>`).
+ * The editor's top bar (epic `debut` P32, as Owen drew it):
+ * - left:  the project's menu (Spell's hat, its name), then File · Edit · View · Run · Help (`MenuBar.tsx`)
+ * - middle:  Run | Edit
+ * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Inspect app and the Inspector's menu, a thin
+ *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
- * - The static build's "Reset Example" sits by the project actions (`Actions.resetApp`, drawn only there).
+ * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
+ * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
   return (
-    <AppMenu>
-      <Submenu left spring mark>
-        <ProjectDropdown useRunner={props.mode === "run"} showActions />
-        <Actions.resetApp />
+    <AppMenu class="EditorBar">
+      <Submenu left spring>
+        <ProjectBarMenu useRunner={props.mode === "run"} />
+        <AppBarMenus mode={props.mode} />
       </Submenu>
       <Submenu center spring>
         <ModeButtons current={props.mode} />
       </Submenu>
-      <Submenu right spring>
+      <Submenu right spring class="BarTools">
+        <Show when={props.mode === "edit"}>
+          <InspectorPick id={INSPECT_APP_ID} />
+          <InspectHelp for={INSPECT_APP_ID} />
+          <InspectorToggle />
+          <span class="BarToolsLine" role="separator" />
+        </Show>
+        <Actions.restartApp iconOnly />
         <ThemeMenu />
-        <Actions.showProjectChooser iconOnly />
         <Actions.you />
       </Submenu>
     </AppMenu>
   )
 }
 
+/** Inspect app's button's id:  its help popup's target. */
+const INSPECT_APP_ID = "InspectApp"
+
 /****************
  * ### `<ProjectPageRoute>`
  * The `/edit/...` and `/run/...` routes:  `<SpellEditor>`, showing the project / file the URL names (`followRoute()`),
- * in Run for `/run/`, else in Edit or Debug, as `EditorMode` remembers.
+ * in Run for `/run/`, else in Edit.
  * - ONE route for both:  it stays mounted while only the URL's params change, the page (`edit`, `run`) too,
  *   so switching between Run and Edit, or between files, doesn't redraw the page.
  ****************/
 export function ProjectPageRoute(props: RouteSectionProps) {
   const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
   followRoute(() => props.params, page)
-  return <SpellEditor mode={page() === "runner" ? "run" : EditorMode.editing} />
+  return <SpellEditor mode={page() === "runner" ? "run" : "edit"} />
 }
+
+/**
+ * Is the window a phone's (Spell UI's `--ui-mobile`, 767px and narrower), as an accessor that follows it.
+ * - Call in a component body:  its listener goes with the component.
+ */
+function phoneWidth(): () => boolean {
+  if (isServer) return () => false
+  const query = window.matchMedia(PHONE_QUERY)
+  const [isPhone, setPhone] = createSignal(query.matches)
+  const follow = () => setPhone(query.matches)
+  query.addEventListener("change", follow)
+  onCleanup(() => query.removeEventListener("change", follow))
+  return isPhone
+}
+
+/** Spell UI's phone width (`--ui-mobile`, `spell/ui/styles/media.css`). */
+const PHONE_QUERY = "(width <= 767px)"
 
 /** The run page's word in its URL, `/run/...`. */
 const RUN_PAGE = "run"

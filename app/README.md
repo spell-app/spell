@@ -192,8 +192,8 @@ All of this runs now, on your own machine.
   becomes a piece of the page of its own, with its look written inside its definition
   ([Solitaire](spaces/@spell/examples/Solitaire/), below).
 - **Watch it while it runs:**  the things it made, and the kinds of thing it declares,
-  and the program written as TypeScript or Python, in Debug's panel under the code
-  ([Run, Edit and Debug](README-app.md#run-edit-and-debug--the-app-and-the-program-panel)).
+  and the program written as TypeScript or Python, in the Program panel under the code
+  ([Run and Edit](README-app.md#run-and-edit--the-app-and-the-program-panel)).
 - **Learn by changing a guide.**  Twelve guides are Spell programs that read as prose:
   a first walkthrough, A tour of Spell, and how each example works ([the guides](README-examples.md#guides--programs-that-read-as-prose)).
 - **Pick a theme.**  Glass, frosted panels over a wallpaper, is the default;  Studio and Spell's own are the other looks,
