@@ -12,6 +12,7 @@
  */
 export * from "./events.parser"
 export * from "./EventWords"
+export * from "./ChangedProperty"
 export * from "./Trigger"
 export * from "./Send"
 export * from "./EventPart"

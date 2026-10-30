@@ -25,7 +25,7 @@
  * - Pure javascript:  the mouse and keys come from `core.input` (`input.ts`), never from a browser event.
  * - The browser's events reach a view's thing through its element (spell-app's `SpellElement`), which calls `send()`.
  */
-import { core } from "./core"
+import { core, onPropertyChange } from "./core"
 import { defineCoreModule } from "./core.types"
 import { InputState } from "./input"
 import { SpellEvent } from "./SpellEvent"
@@ -145,6 +145,27 @@ function parentOf(thing: object): object | undefined {
   const { eventParent } = thing as { eventParent?: object }
   if (eventParent) return eventParent
   return holderOf(thing)
+}
+
+/**
+ * A property's CHANGE, as an event to its thing (epic `debut` P30):  `- when its score changes:` is the handler of
+ * `score-change`, `onScoreChange()`.
+ * - Sent only to a thing that has the handler, so it never goes up the chain to its pile or the app.
+ * - Just after the change lands (a microtask):  the handler reads the new value, as every other step will.
+ * - Once per change:  set twice, it's sent twice, each with its own `value` and `was`.
+ * - Its `sender` is the thing itself.
+ */
+function sendChange(target: object, property: string, was: unknown, value: unknown): void {
+  const type = `${dashed(property)}-change`
+  if (!handlerOf(target, type)) return
+  // `send()` never throws:  a failing handler is said on the console
+  queueMicrotask(() => void send(target, type, { value, was }, target))
+}
+onPropertyChange(sendChange)
+
+/** A property's compiled name as an event's words, dashed:  `highScore` => `high-score`, `puntuación` as it is. */
+function dashed(property: string): string {
+  return property.replace(/(\p{Ll}|\d)(\p{Lu})/gu, "$1-$2").toLowerCase()
 }
 
 /** Sending events, and the mouse and keys they come from:  `core.send()`, `core.input`. */

@@ -6,6 +6,12 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 <spell-app "solitaire">
 	<property "score">a number</>
 	<property "hint" description="What the card being dragged would add to the score, e.g. (+10):  shown beside it">text</>
+	<when its score changes>
+		// every card on a foundation:  the game is won
+		set home to the number of cards in its clubs + the number of cards in its diamonds
+		set home to home + the number of cards in its hearts + the number of cards in its spades
+		if home is 52: set its hint to " -- You won!"
+	</>
 	<property "deck">a new deck</>
 
 	<group "piles" description="One of each, made with the solitaire"/>

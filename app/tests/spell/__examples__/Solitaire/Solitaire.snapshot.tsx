@@ -619,6 +619,13 @@ export class Solitaire extends App {
   @prop({ type: "text" })
   accessor hint!: string
 
+  onScoreChange(event: any /* spell: type unknown */) {
+    /** every card on a foundation:  the game is won */
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) this.hint = " -- You won!"
+  }
+
   // - its "deck" is a new deck
   @prop({ init: () => new Deck(), early: true })
   accessor deck!: Deck
@@ -851,6 +858,10 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "-t6", kind: "json", description: "Its T6." },
     { name: "-t7", kind: "json", description: "Its T7." }
   ])
+
+  onScoreChange(event: any /* spell: type unknown */) {
+    return this.currentThing?.onScoreChange(event)
+  }
 
   create() {
     return this.currentThing?.create()

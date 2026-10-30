@@ -372,6 +372,13 @@ export class Solitaire extends App {
   get hint() { return this.getProp("hint") }
   set hint(value) { this.setProp("hint", value) }
 
+  onScoreChange(event) {
+    /** every card on a foundation:  the game is won */
+    let home = this.clubs.length + this.diamonds.length
+    home = home + this.hearts.length + this.spades.length
+    if (home === 52) this.hint = " -- You won!"
+  }
+
   // - its "deck" is a new deck
   static { this.declareProp("deck", { init: () => new Deck(), early: true }) }
   get deck() { return this.getProp("deck") }

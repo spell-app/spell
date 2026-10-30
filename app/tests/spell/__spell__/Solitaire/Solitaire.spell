@@ -7,6 +7,11 @@ solitaire is an app:
 	- its "score" is a number
 	// What the card being dragged would add to the score, e.g. (+10):  shown beside it
 	- its "hint" is text
+	- when its score changes:
+		// every card on a foundation:  the game is won
+		set home to the number of cards in its clubs + the number of cards in its diamonds
+		set home to home + the number of cards in its hearts + the number of cards in its spades
+		if home is 52: set its hint to " -- You won!"
 	- its "deck" is a new deck
 
 	// One of each, made with the solitaire

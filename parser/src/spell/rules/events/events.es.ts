@@ -8,9 +8,11 @@
 import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 
 import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
+import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
@@ -22,6 +24,9 @@ import { WhileHandler } from "./WhileHandler"
 
 /** Spanish's `events` rules. */
 export const eventsEs = new SpellParser({ module: "events" })
+
+/** `on`, preferred for a property's change:  `on its score change` names the property, not event `its-score-change`. */
+const ON_CHANGE = On.specialize({ priority: Priority.preferred })
 
 // a word that may link two words of an event's name:  `clic en carta`, `fin del juego` (epic `spanish` I11)
 eventsEs.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "(en|de|del|sobre)" })
@@ -249,6 +254,53 @@ eventsEs.addRule(On, {
       ]
     }
   ]
+})
+
+// el cambio de una propiedad (épica `debut` P30, Q47):  `- cuando (su) puntuación cambia:` es
+// `- al cambiar (su) puntuación:`, el evento `puntuación-change`
+eventsEs.addRule(ChangedProperty)
+eventsEs.addRule(ON_CHANGE, {
+  syntax: "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "un juego es una cosa donde:",
+            '\t- su "puntuación" es un número',
+            "\t- cuando su puntuación cambia imprimir su puntuación"
+          ],
+          js: [
+            "export class Juego extends Thing {",
+            '  // su "puntuación" es un número',
+            '  static { this.declareProp("puntuación", { type: "number" }) }',
+            '  get puntuación() { return this.getProp("puntuación") }',
+            '  set puntuación(value) { this.setProp("puntuación", value) }',
+            "",
+            "  onPuntuaciónChange(event) {",
+            "    return core.console.log(this.puntuación)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Juego extends Thing {",
+            '  // su "puntuación" es un número',
+            '  @prop({ type: "number" })',
+            "  accessor puntuación!: number",
+            "",
+            "  onPuntuaciónChange(event: any /* spell: type unknown */) {",
+            "    return core.console.log(this.puntuación)",
+            "  }",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+eventsEs.addRule(ON_CHANGE, {
+  syntax: "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
 })
 
 // `cuando volteada:`, lo mismo que `al volteada:` (Q42)

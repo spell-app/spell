@@ -1485,6 +1485,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       Its name is the FEWEST words whose rest parses as a whole statement, read in a throwaway handler scope
       (`it` the thing);  a line with a colon keeps the longest name, as before.
     - A passive `when` names the thing's own event by meaning (`passive_event`):  `when clicked` is `on click`.
+    - A property's CHANGE (epic `debut` P30):  `when its score changes`, `on score change` are event `score-change`,
+      the handler `onScoreChange()`.
+      - `changed_property` reads the property by its template's declared names, longest first (inherited ones too);
+        words that name none stay the event they always were.
+      - Its `on` is `preferred`, so `on its score change` names the property, not event `its-score-change`.
+      - The core sends it each time the property changes, just after the change lands (`noteSetting()`, `sending.ts`).
 - `getAST()` NEVER changes scope or looks it up.
   - ASTs are built lazily, e.g. at compile, when scope may have moved on.
   - What an AST needs from scope is looked up WHILE PARSING, into `match.data`:

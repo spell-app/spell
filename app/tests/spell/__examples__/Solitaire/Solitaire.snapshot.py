@@ -514,6 +514,13 @@ class Solitaire(App):
     # - its "hint" is text
     hint = prop(type="text")
 
+    def on_score_change(self, event: Any) -> None:
+        # every card on a foundation:  the game is won
+        home = len(self.clubs) + len(self.diamonds)
+        home = home + len(self.hearts) + len(self.spades)
+        if home == 52:
+            self.hint = " -- You won!"
+
     # - its "deck" is a new deck
     deck = prop(init=lambda: Deck(), early=True)
 

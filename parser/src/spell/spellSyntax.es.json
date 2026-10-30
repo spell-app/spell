@@ -2263,7 +2263,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 30,
+          "line": 33,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -2310,6 +2310,24 @@
                   "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)"
                 }
               }
+            },
+            {
+              "syntax": "cuando (su|sus|el|la)? {changed:changed_property} (cambia|ha cambiado) :? {statement_body}?",
+              "example": "un juego es una cosa donde:\n\t- su \"puntuación\" es un número\n\t- cuando su puntuación cambia imprimir su puntuación",
+              "outputs": {
+                "js": {
+                  "code": "export class Juego extends Thing {\n  static { this.declareProp(\"puntuación\", { type: \"number\" }) }\n  get puntuación() { return this.getProp(\"puntuación\") }\n  set puntuación(value) { this.setProp(\"puntuación\", value) }\n\n  onPuntuaciónChange(event) {\n    return core.console.log(this.puntuación)\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Juego extends Thing {\n  @prop({ type: \"number\" })\n  accessor puntuación!: number\n\n  onPuntuaciónChange(event: any ) {\n    return core.console.log(this.puntuación)\n  }\n}"
+                },
+                "py": {
+                  "code": "class Juego(Thing):\n    puntuación = prop(type=\"number\")\n\n    def on_puntuación_change(self, event: Any) -> Any:\n        return core.console.log(self.puntuación)"
+                }
+              }
+            },
+            {
+              "syntax": "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
             },
             {
               "syntax": "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
@@ -2416,6 +2434,16 @@
           "file": "src/spell/rules/events/EventWords.ts",
           "line": 21,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "ChangedProperty",
+          "ruleNames": ["changed_property"],
+          "internal": false,
+          "file": "src/spell/rules/events/ChangedProperty.ts",
+          "line": 17,
+          "purpose": "The property a change event names, `score` in `- when its score changes:` (epic `debut` P30).",
           "syntaxes": [],
           "aliases": []
         }

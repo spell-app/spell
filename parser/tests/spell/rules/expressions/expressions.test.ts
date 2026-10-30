@@ -94,6 +94,7 @@ describe("priority and precedence", () => {
         "menu_bar:  Priority.declaration",
         "min:  Priority.specific",
         "minus:  Precedence.sum",
+        "on:  Priority.preferred",
         "or:  Precedence.or",
         "ordinal_where_expression:  Priority.specific",
         "outline_specifier_text_kind:  Priority.specific",

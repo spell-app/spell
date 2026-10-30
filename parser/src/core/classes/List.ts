@@ -13,7 +13,7 @@ import {
   typedJSON,
   type PropInfo
 } from "spell/util"
-import { registerThing, noteItems, noteSetting, core } from "spell/parser/core/core"
+import { registerThing, noteItems, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { CollectionIterationCallback } from "spell/parser/core/collection-other"
 import type { Drawing } from "spell/parser/core/drawing"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -109,6 +109,8 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
     super(props)
     registerThing(this)
     if (runsCreate(List, new.target)) this.create(props)
+    // its starting values are set:  a change from now on is heard (`when its score changes`)
+    noteMade(this)
   }
 
   /** `items` array as state. */

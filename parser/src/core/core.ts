@@ -83,6 +83,7 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
  *   - an undoable action running:  the run's undo history records it (`UndoHistory.noteSetting()`, `undoing.ts`)
  *   - a program running elsewhere (`core.remote`, e.g. Python):
  *     it's set there too, e.g. a task's title typed into a page's form
+ *   - the thing's `when <property> changes` handler, once it's made (`onPropertyChange()`, epic `debut` P30)
  * - Nothing if it has that value already.
  */
 export function noteSetting(target: object, property: string, value: unknown): void {
@@ -92,7 +93,37 @@ export function noteSetting(target: object, property: string, value: unknown): v
   if (recording && !isNoted) recording.push({ target, property, was })
   core.RUNTIME?.history.noteSetting(target, property, was, value)
   ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+  if (madeThings.has(target) && !core.isCarryingOver) changeListener?.(target, property, was, value)
 }
+
+/**
+ * SIDE EFFECT:  `thing` has its starting values:  from now on, a change to one of its properties is a CHANGE its
+ * `when <property> changes` handler hears (epic `debut` P30) -- see `onPropertyChange()`.
+ * - `Thing` and `List` call it at the end of their constructors, after `create()`.
+ */
+export function noteMade(thing: object): void {
+  madeThings.add(thing)
+}
+
+/**
+ * Hear every CHANGE of a made thing's property (`noteMade()`), as `noteSetting()` notes it:  its new `value`, and
+ * the one it `was`.
+ * - ONE listener:  sending's (`sending.ts`), which sends the change to the thing's handler, if it has one.
+ *   It lives there, not here:  this module can't import sending's, which reads `core` as it loads.
+ * - Not while a recompiled program carries the last run's things over (`core.isCarryingOver`).
+ */
+export function onPropertyChange(listener: PropertyChangeListener): void {
+  changeListener = listener
+}
+
+/** What hears a thing's property change -- see `onPropertyChange()`. */
+export type PropertyChangeListener = (target: object, property: string, was: unknown, value: unknown) => void
+
+/** The things whose starting values are set -- see `noteMade()`. */
+const madeThings = new WeakSet<object>()
+
+/** Who hears a property's change -- see `onPropertyChange()`. */
+let changeListener: PropertyChangeListener | undefined
 
 /**
  * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`.

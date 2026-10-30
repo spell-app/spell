@@ -139,11 +139,7 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
    * - its `SPELL: DECLARES` comment
    * - its code
    */
-  private statementsFor(
-    item: P.Match,
-    index: number,
-    context: StatementsContext
-  ): SP.HoistableStatement[] {
+  private statementsFor(item: P.Match, index: number, context: StatementsContext): SP.HoistableStatement[] {
     const { block, docs, docComments, isFileTopLevel, group } = context
     const statements: SP.HoistableStatement[] = []
     const heading = isFileTopLevel ? this.headingText(item) : undefined

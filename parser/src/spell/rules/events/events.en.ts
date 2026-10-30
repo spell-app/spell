@@ -7,10 +7,12 @@
 import { P } from "spell/parser/parser"
 
 import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 
 import { events } from "./events.parser"
 import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
+import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
@@ -19,6 +21,9 @@ import { PassEvent } from "./PassEvent"
 import { CancelEvent } from "./CancelEvent"
 import { InputState } from "./InputState"
 import { WhileHandler } from "./WhileHandler"
+
+/** `on`, preferred for a property's change:  `on its score change` names the property, not event `its-score-change`. */
+const ON_CHANGE = On.specialize({ priority: Priority.preferred })
 
 // a word that may link two words of an event's name -- `on` is a plain word in English already (`card click on table`)
 events.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "on" })
@@ -302,6 +307,71 @@ events.addRule(On, {
             "  }",
             "}",
             "core.useElement(Card, CardElement)"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// a property's change (epic `debut` P30, Q47):  `- when its score changes:` is `- on score change:`, the event
+// `score-change` -- before `when {eventName:event_words}`, which would read `score-changes`
+events.addRule(ChangedProperty)
+events.addRule(ON_CHANGE, {
+  syntax:
+    "(when|on) (its|the)? {changed:changed_property} (changes|change|changed|has changed|is changed) :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "a game is a thing where:",
+            '\t- its "high score" is a number',
+            '\t- its "hint" is text',
+            "\t- when its high score changes:",
+            '\t\tset its hint to "Best yet!"',
+            "\t- on hint change print its hint"
+          ],
+          js: [
+            "export class Game extends Thing {",
+            '  // - its "high score" is a number',
+            '  static { this.declareProp("highScore", { type: "number" }) }',
+            '  get highScore() { return this.getProp("highScore") }',
+            '  set highScore(value) { this.setProp("highScore", value) }',
+            "",
+            '  // - its "hint" is text',
+            '  static { this.declareProp("hint", { type: "text" }) }',
+            '  get hint() { return this.getProp("hint") }',
+            '  set hint(value) { this.setProp("hint", value) }',
+            "",
+            "  onHighScoreChange(event) {",
+            '    this.hint = "Best yet!"',
+            "  }",
+            "",
+            "  onHintChange(event) {",
+            "    return core.console.log(this.hint)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Game extends Thing {",
+            '  // - its "high score" is a number',
+            '  @prop({ type: "number" })',
+            "  accessor highScore!: number",
+            "",
+            '  // - its "hint" is text',
+            '  @prop({ type: "text" })',
+            "  accessor hint!: string",
+            "",
+            "  onHighScoreChange(event: any /* spell: type unknown */) {",
+            '    this.hint = "Best yet!"',
+            "  }",
+            "",
+            "  onHintChange(event: any /* spell: type unknown */) {",
+            "    return core.console.log(this.hint)",
+            "  }",
+            "}"
           ]
         }
       ]

@@ -40,9 +40,11 @@ describe("incremental parsing ~== full parse", () => {
     expect(summarizeIncremental(incrementalSpellProject(files))).toEqual(original)
   })
 
-  // KNOWN BUG:  /Solitaire.spell fails -- incremental parsing loses an action's `waits: true` after an edit inside it
-  // (the suspected-bugs log, "## spell";  the code-debt log).  Expected to fail until it's fixed (epic `elemental-spell`).
-  const KNOWN_FAILING = new Set(["/Solitaire.spell"])
+  // KNOWN BUG:  incremental parsing loses an action's `waits: true` after an edit inside it
+  // (the suspected-bugs log, "## spell";  the code-debt log), not fixed yet (epic `elemental-spell`).
+  // /Solitaire.spell's every-`STEP`th-line edits no longer land inside such an action since its game gained
+  // `when its score changes` (epic `debut` P30, J160), so its test passes:  the bug is still there, untested here.
+  const KNOWN_FAILING = new Set<string>()
 
   for (const file of files) {
     const testEdits = KNOWN_FAILING.has(file.path) ? test.fails : test

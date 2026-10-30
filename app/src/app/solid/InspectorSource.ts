@@ -235,12 +235,26 @@ function rowsInTags(body: string): WrittenEvent[] {
       .trim()
     const kind = kindOf(words)
     if (!kind) continue
-    const close = isEmpty ? -1 : body.indexOf(`</${match[1]}>`, end)
-    const code = close < 0 ? "" : dedent(body.slice(end + 1, close).split("\n")).trim()
-    rows.push(code ? { kind, words, code } : splitShortForm({ kind, words, code }))
-    if (close > 0) opening.lastIndex = close
+    const close = isEmpty ? undefined : closingTagOf(body, match[1]!, end)
+    const code = close ? dedent(body.slice(end + 1, close.index).split("\n")).trim() : ""
+    // a one-line tag with a colon, `<on score change: show "You won!"/>`:  its words, then its code
+    const colon = code ? -1 : colonIn(words)
+    if (colon >= 0) rows.push({ kind, words: words.slice(0, colon).trim(), code: words.slice(colon + 1).trim() })
+    else rows.push(code ? { kind, words, code } : splitShortForm({ kind, words, code }))
+    if (close) opening.lastIndex = close.index + close.length
   }
   return rows
+}
+
+/**
+ * Where tag `name`, opened before `from`, closes:  `</on>`, `</>`, or its whole words, `</on score change>`
+ * (epic `debut` P27);  `undefined` if it doesn't.
+ */
+function closingTagOf(body: string, name: string, from: number): { index: number; length: number } | undefined {
+  const closing = new RegExp(`</(?:${escapeForRegExp(name)}(?:\\s[^>]*)?)?>`, "g")
+  closing.lastIndex = from
+  const found = closing.exec(body)
+  return found ? { index: found.index, length: found[0].length } : undefined
 }
 
 /** The rows under each outline header for `name` in `source`:  `a card:`, `a card is a thing where:`. */
@@ -315,11 +329,12 @@ function kindOf(words: string): WrittenEvent["kind"] | undefined {
 
 /**
  * A one-line event of a thing's own, its code after it with no colon:  `on click play it`, `when dragged ...`.
- * - Only the page's own events:  a program's several-word event name can't be told from its code by text alone.
+ * - Only the page's own events, and a property's change, up to its `changes` (`when its score changes show 1`,
+ *   epic `debut` P30):  a program's several-word event name can't be told from its code by text alone.
  * - REFACTOR:  ask spell's parser where the name ends (its `event_words`), as the compiler does (J145).
  */
 const ONE_LINE_EVENT =
-  /^((?:on|when)\s+(?:double\s+click(?:ed)?|right\s+click(?:ed)?|click(?:ed)?|drag\s+cancelled|(?:the\s+)?drag\s+is\s+cancelled|dragged|drag|mouse\s+(?:down|up|enter|leave)))\s+(\S.*)$/i
+  /^((?:on|when)\s+(?:double\s+click(?:ed)?|right\s+click(?:ed)?|click(?:ed)?|drag\s+cancelled|(?:the\s+)?drag\s+is\s+cancelled|dragged|drag|mouse\s+(?:down|up|enter|leave))|(?:on|when)\s+(?:(?:its|the)\s+)?\S+(?:\s+\S+){0,3}?\s+(?:changes|changed|change)|cuando\s+(?:(?:su|sus|el|la)\s+)?\S+(?:\s+\S+){0,3}?\s+cambia)\s+(\S.*)$/i
 
 /** A template tag's bare ability attribute:  `draggable` in `<spell-view "card" template="..." draggable>`. */
 const BARE_ABILITY =

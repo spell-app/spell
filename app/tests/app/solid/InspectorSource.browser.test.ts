@@ -100,6 +100,29 @@ describe("eventsInSource()", () => {
     ])
   })
 
+  test("a property's change (epic `debut` P30):  every form, outline and tag, `</>` and `</on ...>` closing", () => {
+    const source = `
+<spell-app "game">
+	<when its score changes>
+		if its score is 520
+			show "You won!"
+	</>
+	<on hint change: print its hint/>
+	<on best change>print 1</on best change>
+	<spell>
+		- when the level changes: print its level
+		- on round change print its round
+	</spell>
+</spell-app>`
+    expect(eventsInSource(["game"], [source])).toEqual([
+      { kind: "event", words: "when its score changes", code: 'if its score is 520\n\tshow "You won!"' },
+      { kind: "event", words: "on hint change", code: "print its hint" },
+      { kind: "event", words: "on best change", code: "print 1" },
+      { kind: "event", words: "when the level changes", code: "print its level" },
+      { kind: "event", words: "on round change", code: "print its round" }
+    ])
+  })
+
   test("an action's `enabled when`, in its own words;  none:  empty", () => {
     const source = `
 a card is a thing where:

@@ -102,3 +102,80 @@ describe("core.input", () => {
     }
   })
 })
+
+/**
+ * A property's change as an event to its thing (epic `debut` P30):  `- when its score changes:` compiles to
+ * `onScoreChange(event)`.
+ */
+describe("a property's change", () => {
+  /** A game that counts what its change handler hears. */
+  class Game extends Thing {
+    heard: string[] = []
+    get score(): number {
+      return this.getProp("score")
+    }
+    set score(value: number) {
+      this.setProp("score", value)
+    }
+    get highScore(): number {
+      return this.getProp("highScore")
+    }
+    set highScore(value: number) {
+      this.setProp("highScore", value)
+    }
+    create() {
+      // its starting value:  not a change
+      this.score = 0
+    }
+    onScoreChange(event: SentEvent & { value: number; was: number }) {
+      // the change has landed:  it reads the new value, as every other step will
+      this.heard.push(`${event.was}->${event.value} (reads ${this.score})`)
+    }
+    onHighScoreChange(event: SentEvent & { value: number }) {
+      this.heard.push(`high ${event.value}`)
+    }
+  }
+
+  beforeEach(() => {
+    core.resetRuntime()
+  })
+
+  test("once per change, just after it lands;  never for its starting values, nor for the same value", async () => {
+    const game = new Game()
+    expect(game.heard).toEqual([])
+    game.score = 10
+    expect(game.heard).toEqual([])
+    game.score = 10
+    game.score = 20
+    await Promise.resolve()
+    expect(game.heard).toEqual(["0->10 (reads 20)", "10->20 (reads 20)"])
+  })
+
+  test("a property of several words:  its handler by its camelCase name", async () => {
+    const game = new Game()
+    game.highScore = 5
+    await Promise.resolve()
+    expect(game.heard).toEqual(["high 5"])
+  })
+
+  test("a thing with no handler for it:  nothing is sent, not even up to the app", async () => {
+    class Player extends Thing {
+      get score(): number {
+        return this.getProp("score")
+      }
+      set score(value: number) {
+        this.setProp("score", value)
+      }
+    }
+    const heard: string[] = []
+    class Solitaire extends App {
+      onScoreChange() {
+        heard.push("app")
+      }
+    }
+    new Solitaire()
+    new Player().score = 3
+    await Promise.resolve()
+    expect(heard).toEqual([])
+  })
+})
