@@ -15,6 +15,9 @@ import type {
   SchemeRecipe
 } from "./styles.types"
 import {
+  codeEditorColors,
+  codeLightness,
+  codeRoles,
   borderAlphas,
   borderWidth,
   breakpoints,
@@ -252,6 +255,23 @@ export class StyleGenerator {
         )
       ]
     )
+    declarations.push(...this.codeDeclarations())
+    return declarations
+  }
+
+  /**
+   * The code's colours (`codeRoles`, `codeEditorColors`;  epic `debut` P22):  each role from a colour the theme
+   * already has, its hue and chroma, at a lightness that reads on the code's background in each scheme.
+   * - CSS relative colours, so they follow whatever theme is on the page:  nothing is worked out here.
+   */
+  private codeDeclarations(): GeneratedDeclaration[] {
+    const declarations: GeneratedDeclaration[] = Object.entries(codeEditorColors)
+    for (const [role, [source, lightness]] of this.entries(codeRoles)) {
+      const recipe = codeLightness[lightness]
+      // `/ 1`:  opaque, though its source (muted text) is see-through
+      const at = (l: number) => `oklch(from ${source} ${l} min(c, ${recipe!.chroma}) h / 1)`
+      declarations.push([`--ui-code-${role}`, recipe ? this.lightDark(at(recipe.light), at(recipe.dark)) : source])
+    }
     return declarations
   }
 

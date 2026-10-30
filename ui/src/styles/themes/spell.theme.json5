@@ -647,5 +647,37 @@
       // the frame was the theme's 16px round 20px pill ends)
       "frame-radius": "{own.spell-radius-2xl}"
     }
+  },
+  // The code's colours (epic `debut` P22):  Spell dark is Shades of Purple (Ahmad Awais's VS Code theme, v7.3.6, MIT), as the editor drew it since epic `debut` P3;  Spell light the Studio board's light Purple, its hues darkened for a pale page.
+  // - Every role's light and dark;  `editor` the editor's own (what's left out takes the recipe, `codeRoles`).
+  "code": {
+    "text": { "light": "#2d2b55", "dark": "#e1efff" },
+    // dark:  Shades of Purple's #b362ff, a step lighter:  4.23:1 on Spell's panel, now 4.5 or more
+    "heading": { "light": "#7b2fd6", "dark": "#bd78ff" },
+    "comment": { "light": "#7b2fd6", "dark": "#bd78ff" },
+    "keyword": { "light": "#a84700", "dark": "#ff9d00" },
+    "type": { "light": "#7a5d00", "dark": "#fad000" },
+    "library": { "light": "#1f7a52", "dark": "#80ffbb" },
+    "name": { "light": "#2d2b55", "dark": "#e1efff" },
+    "member": { "light": "#006d77", "dark": "#9effff" },
+    "parameter": { "light": "#8a5a00", "dark": "#ffee80" },
+    "action": { "light": "#006d77", "dark": "#9effff" },
+    "constant": { "light": "#c2185b", "dark": "#ff628c" },
+    "string": { "light": "#2b7a1f", "dark": "#a5ff90" },
+    "tag": { "light": "#9c27b0", "dark": "#fb94ff" },
+    "punctuation": { "light": "#565196", "dark": "#a599e9" },
+    "attr": { "light": "#006d77", "dark": "#9effff" },
+    "meta": { "light": "#565196", "dark": "#a599e9" },
+    "addition": { "light": "#2b7a1f", "dark": "#a5ff90" },
+    "deletion": { "light": "#c2185b", "dark": "#ff628c" },
+    "editor": {
+      "cursor": { "light": "#6a2bc2", "dark": "#fad000" },
+      "selection": { "light": "#b362ff40", "dark": "#b362ff88" },
+      "line": { "light": "#f1eeffcc", "dark": "#1f1f4199" },
+      "line-number": { "light": "#8c87c2", "dark": "#a599e9" },
+      "line-number-active": { "light": "#6a2bc2", "dark": "#fad000" },
+      "bracket": { "light": "#ad70fc40", "dark": "#ad70fc46" },
+      "find": { "light": "#ff730055", "dark": "#ff7300ab" }
+    }
   }
 }

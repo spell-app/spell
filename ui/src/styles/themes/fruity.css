@@ -10,5 +10,23 @@
       radial-gradient(at 72% 92%, light-dark(#b8e4ff, #1f4d7a) 0, transparent 46%);
     --ui-bar-track-radius: var(--ui-radius-pill);
     --ui-bar-wallpaper-tint: light-dark(#ffffff80, #1e1c26d9);
+    --ui-code-color: light-dark(#2b2238, #efe8f7);
+    --ui-code-heading: light-dark(#6f3cc4, #d3b8ff);
+    --ui-code-comment: light-dark(#6e6285, #a99bc4);
+    --ui-code-keyword: light-dark(#b8327a, #ff8fc8);
+    --ui-code-type: light-dark(#5b3fb8, #c8b6ff);
+    --ui-code-library: light-dark(#1f6fa8, #9fd8ff);
+    --ui-code-name: light-dark(#2b2238, #efe8f7);
+    --ui-code-member: light-dark(#1f6fa8, #8fd0ff);
+    --ui-code-parameter: light-dark(#9a4a14, #ffc6a8);
+    --ui-code-action: light-dark(#2357a8, #b8e4ff);
+    --ui-code-constant: light-dark(#b0306a, #ffa3c7);
+    --ui-code-string: light-dark(#2f7a3e, #b9f0c4);
+    --ui-code-tag: light-dark(#8a37b5, #e2a8ff);
+    --ui-code-punctuation: light-dark(#6e6285, #b3a6c9);
+    --ui-code-attr: light-dark(#1f6fa8, #8fd0ff);
+    --ui-code-meta: light-dark(#8a37b5, #e2a8ff);
+    --ui-code-addition: light-dark(#2f7a3e, #b9f0c4);
+    --ui-code-deletion: light-dark(#b3263a, #ff9aa8);
   }
 }

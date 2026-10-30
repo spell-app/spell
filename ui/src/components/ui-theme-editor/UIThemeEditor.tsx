@@ -2424,6 +2424,7 @@ const GROUP_TEXTS: Readonly<Record<string, ThemeEditorTextKey>> = {
   semantic: "groupSemantic",
   hues: "groupHues",
   shadows: "groupShadows",
+  code: "groupCode",
   motion: "groupMotion",
   components: "groupComponents"
 }

@@ -137,5 +137,26 @@
     --ui-docs-nav-current-background: var(--matrix-accent-wash);
     --ui-docs-nav-current-color: var(--matrix-accent-text);
     --ui-toolbar-button-radius: var(--ui-radius-s);
+    --ui-code-color: light-dark(#22302b, #cfdad4);
+    --ui-code-heading: light-dark(#0a6648, #a3e1c0);
+    --ui-code-comment: light-dark(#53675e, #8aa396);
+    --ui-code-keyword: light-dark(#0a6648, #a3e1c0);
+    --ui-code-type: light-dark(#0b6b6b, #79d4c8);
+    --ui-code-library: light-dark(#11706a, #8fe0d3);
+    --ui-code-name: light-dark(#22302b, #d8e4de);
+    --ui-code-member: light-dark(#1d6470, #8fd3e0);
+    --ui-code-parameter: light-dark(#8a5a00, #f2d9a0);
+    --ui-code-action: light-dark(#1c6a5c, #b8ecd2);
+    --ui-code-constant: light-dark(#a8392b, #e79583);
+    --ui-code-string: light-dark(#8a5600, #f2c778);
+    --ui-code-tag: light-dark(#0a6648, #a3e1c0);
+    --ui-code-punctuation: light-dark(#566b62, #7f968a);
+    --ui-code-attr: light-dark(#1d6470, #8fd3e0);
+    --ui-code-meta: light-dark(#566b62, #7f968a);
+    --ui-code-addition: light-dark(#0a6648, #a3e1c0);
+    --ui-code-deletion: light-dark(#a8392b, #e79583);
+    --ui-code-cursor: light-dark(#0b7552, #a3e1c0);
+    --ui-code-selection: light-dark(#0b755233, #a3e1c033);
+    --ui-code-gutter-active: light-dark(#0a6648, #a3e1c0);
   }
 }

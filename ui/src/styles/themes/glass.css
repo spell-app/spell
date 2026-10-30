@@ -212,5 +212,23 @@
     --ui-header-h3: 1.125;
     --ui-header-h4: 1.0625;
     --ui-header-sub-color: var(--ui-text-muted);
+    --ui-code-color: light-dark(#1f1f24, #e6e6eb);
+    --ui-code-heading: light-dark(#9b2393, #ff7ab2);
+    --ui-code-comment: light-dark(#5d6c79, #9aa5b1);
+    --ui-code-keyword: light-dark(#9b2393, #ff7ab2);
+    --ui-code-type: light-dark(#0b4f79, #dabaff);
+    --ui-code-library: light-dark(#6c36a9, #acf2e4);
+    --ui-code-name: light-dark(#1f1f24, #e6e6eb);
+    --ui-code-member: light-dark(#326d74, #78c2b3);
+    --ui-code-parameter: light-dark(#78492a, #ffa14f);
+    --ui-code-action: light-dark(#0f68a0, #6bc5e0);
+    --ui-code-constant: light-dark(#1c00cf, #d9c97c);
+    --ui-code-string: light-dark(#c41a16, #ff8170);
+    --ui-code-tag: light-dark(#6c36a9, #c39bf2);
+    --ui-code-punctuation: light-dark(#5d6c79, #a3a9b5);
+    --ui-code-attr: light-dark(#326d74, #78c2b3);
+    --ui-code-meta: light-dark(#78492a, #fd8f3f);
+    --ui-code-addition: light-dark(#1f7a3a, #7ed99a);
+    --ui-code-deletion: light-dark(#c41a16, #ff8170);
   }
 }

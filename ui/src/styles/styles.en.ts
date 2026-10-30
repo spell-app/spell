@@ -19,6 +19,7 @@ import type {
   SchemeColor,
   SchemeRecipe,
   SemanticDefinition,
+  CodeLightness,
   ShadowLayer,
   ThemeColorTokens,
   ThemeTree
@@ -488,6 +489,87 @@ export const shadows = {
 } as const satisfies Record<string, readonly ShadowLayer[]>
 
 ////////////////
+// ## Code
+////////////////
+
+/**
+ * The code's colours, by what they colour (epic `debut` P22):  every theme's, light and dark, as `--ui-code-<role>`
+ * (`text` is `--ui-code-color`).
+ * - The editor's code (Monaco, `CodeThemes`), every `<ui-code>` block and the Spell VS Code themes read the same ones.
+ * - Each role's RECIPE:  where a theme with no code colours of its own takes it from, `[source, lightness]`:
+ *   - `source`:  a colour the theme already has, its hue and chroma kept (`oklch(from <source> ...)`)
+ *   - lightness:  `strong` reads on the code's background in both schemes (OKLCH 0.48 light, 0.80 dark);
+ *     `soft`, comments and punctuation, a step quieter and greyer (0.50, 0.74)
+ *   - `StyleGenerator` writes them into `colors.css` (`ui.tokens`);  a theme file's `code` group sets any of them
+ *     by hand, and wins (`ui.theme`).
+ * - `colors.contrast.test.ts` holds every one to 4.5:1 on the theme's panel, comments too:  a Spell file's comments are
+ *   its prose.
+ * - The roles are the editor's (`ShadesOfPurple.rules()`'s), plus `attr`, `meta`, `addition` and `deletion`, which
+ *   `<ui-code>`'s highlight.js colours read;  its `number` and `title` take `constant` and `action`.
+ */
+export const codeRoles = {
+  /** a `#` heading comment:  the primary */
+  heading: ["var(--ui-primary)", "strong"],
+  /** a comment:  muted text, a step toward the primary */
+  comment: ["color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary))", "soft"],
+  /** spell's own words (`a`, `is a`, `if its`), a language's keywords:  the accent, else orange */
+  keyword: ["var(--ui-accent, var(--ui-orange))", "strong"],
+  /** a type's name:  the warning colour (a yellow) */
+  type: ["var(--ui-warning)", "strong"],
+  /** a type spell itself defines (`text`, `number`):  teal */
+  library: ["var(--ui-teal)", "strong"],
+  /** a variable's name:  the text's own hue */
+  name: ["var(--ui-text-color)", "plain"],
+  /** a property's name:  the info colour, toward the primary */
+  member: ["color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary))", "strong"],
+  /** a parameter's name:  between the warning colour and the keyword's */
+  parameter: ["color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange)))", "strong"],
+  /** an action's (a method's) name:  the info colour */
+  action: ["var(--ui-info)", "strong"],
+  /** a constant:  a number, `yes`, one of a list's choices:  pink */
+  constant: ["var(--ui-pink)", "strong"],
+  /** text in quotes:  the positive colour (a green) */
+  string: ["var(--ui-positive)", "strong"],
+  /** a drawing's tag (`<ui-form>`):  purple, toward the primary */
+  tag: ["color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary))", "strong"],
+  /** symbols and punctuation:  muted text */
+  punctuation: ["color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary))", "soft"],
+  /** an attribute's or a property's name in other languages:  as `member` */
+  attr: ["color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary))", "strong"],
+  /** a preprocessor line, a tag's angle brackets:  the info colour */
+  meta: ["var(--ui-info)", "strong"],
+  /** a diff's added line:  the positive colour */
+  addition: ["var(--ui-positive)", "strong"],
+  /** a diff's removed line:  the negative colour */
+  deletion: ["var(--ui-negative)", "strong"]
+} as const satisfies Record<string, readonly [source: string, lightness: CodeLightness]>
+
+/**
+ * Each lightness of `codeRoles`, OKLCH, light and dark, and the most chroma it keeps;
+ * `plain` keeps its source as it is (the code's own text).
+ */
+export const codeLightness = {
+  strong: { light: 0.48, dark: 0.8, chroma: 0.17 },
+  soft: { light: 0.5, dark: 0.74, chroma: 0.08 },
+  plain: undefined
+} as const satisfies Record<CodeLightness, { light: number; dark: number; chroma: number } | undefined>
+
+/**
+ * The editor's own colours, each from the theme's colours:  what `StyleGenerator` writes for `code > editor`.
+ * - A theme file's `code > editor` sets any of them by hand.
+ */
+export const codeEditorColors = {
+  "--ui-code-color": "var(--ui-text-color)",
+  "--ui-code-cursor": "var(--ui-primary-text)",
+  "--ui-code-selection": "color-mix(in oklab, var(--ui-primary) 30%, transparent)",
+  "--ui-code-current-line": "color-mix(in oklab, var(--ui-text-color) 6%, transparent)",
+  "--ui-code-gutter-color": "var(--ui-text-muted)",
+  "--ui-code-gutter-active": "var(--ui-primary-text)",
+  "--ui-code-bracket": "color-mix(in oklab, var(--ui-primary) 25%, transparent)",
+  "--ui-code-find": "color-mix(in oklab, var(--ui-warning) 40%, transparent)"
+} as const
+
+////////////////
 // ## The theme tree
 ////////////////
 
@@ -594,6 +676,19 @@ export const themeTree = {
     black: colorTokensFor("black")
   } satisfies Record<keyof typeof hues, ThemeColorTokens>,
   shadows: { ink: "--ui-shadow-ink", ...tokensFor(shadows, "--ui-shadow-") },
+  code: {
+    text: "--ui-code-color",
+    ...tokensFor(codeRoles, "--ui-code-"),
+    editor: {
+      cursor: "--ui-code-cursor",
+      selection: "--ui-code-selection",
+      line: "--ui-code-current-line",
+      "line-number": "--ui-code-gutter-color",
+      "line-number-active": "--ui-code-gutter-active",
+      bracket: "--ui-code-bracket",
+      find: "--ui-code-find"
+    }
+  },
   motion: {
     duration: tokensFor(durations, "--ui-duration-"),
     ease: { ...tokensFor(easings, "--ui-ease-"), default: "--ui-ease" },

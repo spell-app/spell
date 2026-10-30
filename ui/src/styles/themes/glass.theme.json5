@@ -357,5 +357,27 @@
       "h4": 1.0625,
       "sub-color": "{text.muted}"
     }
+  },
+  // The code's colours (epic `debut` P22):  Glass's own (Q41, "Both get their own"):  Apple's Xcode colours, its pink keywords, lavender types and coral strings, on the glass.
+  // - Every role's light and dark;  `editor` the editor's own (what's left out takes the recipe, `codeRoles`).
+  "code": {
+    "text": { "light": "#1f1f24", "dark": "#e6e6eb" },
+    "heading": { "light": "#9b2393", "dark": "#ff7ab2" },
+    "comment": { "light": "#5d6c79", "dark": "#9aa5b1" },
+    "keyword": { "light": "#9b2393", "dark": "#ff7ab2" },
+    "type": { "light": "#0b4f79", "dark": "#dabaff" },
+    "library": { "light": "#6c36a9", "dark": "#acf2e4" },
+    "name": { "light": "#1f1f24", "dark": "#e6e6eb" },
+    "member": { "light": "#326d74", "dark": "#78c2b3" },
+    "parameter": { "light": "#78492a", "dark": "#ffa14f" },
+    "action": { "light": "#0f68a0", "dark": "#6bc5e0" },
+    "constant": { "light": "#1c00cf", "dark": "#d9c97c" },
+    "string": { "light": "#c41a16", "dark": "#ff8170" },
+    "tag": { "light": "#6c36a9", "dark": "#c39bf2" },
+    "punctuation": { "light": "#5d6c79", "dark": "#a3a9b5" },
+    "attr": { "light": "#326d74", "dark": "#78c2b3" },
+    "meta": { "light": "#78492a", "dark": "#fd8f3f" },
+    "addition": { "light": "#1f7a3a", "dark": "#7ed99a" },
+    "deletion": { "light": "#c41a16", "dark": "#ff8170" }
   }
 }

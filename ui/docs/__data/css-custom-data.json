@@ -1255,13 +1255,6 @@
       }
     },
     {
-      "name": "--ui-code-color",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `var(--ui-text-color)`"
-      }
-    },
-    {
       "name": "--ui-code-font",
       "description": {
         "kind": "markdown",
@@ -1304,80 +1297,17 @@
       }
     },
     {
-      "name": "--ui-code-gutter-color",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `var(--ui-text-muted)`"
-      }
-    },
-    {
-      "name": "--ui-code-keyword",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#a626a4, #c678dd)`"
-      }
-    },
-    {
-      "name": "--ui-code-string",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#387a37, #98c379)`"
-      }
-    },
-    {
       "name": "--ui-code-number",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#986801, #d19a66)`"
-      }
-    },
-    {
-      "name": "--ui-code-comment",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#696969, #8b919c)`"
+        "value": "`<ui-code>`'s token.  Default:  `var(--ui-code-constant, light-dark(#986801, #d19a66))`"
       }
     },
     {
       "name": "--ui-code-title",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#2f5fd0, #61afef)`"
-      }
-    },
-    {
-      "name": "--ui-code-type",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#8a5a00, #e5c07b)`"
-      }
-    },
-    {
-      "name": "--ui-code-attr",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#b8322a, #e06c75)`"
-      }
-    },
-    {
-      "name": "--ui-code-meta",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#2f5fd0, #61afef)`"
-      }
-    },
-    {
-      "name": "--ui-code-addition",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#387a37, #98c379)`"
-      }
-    },
-    {
-      "name": "--ui-code-deletion",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-code>`'s token.  Default:  `light-dark(#b8322a, #e06c75)`"
+        "value": "`<ui-code>`'s token.  Default:  `var(--ui-code-action, light-dark(#2f5fd0, #61afef))`"
       }
     },
     {

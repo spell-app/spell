@@ -227,6 +227,9 @@ export type GeneratedDeclaration = [property: string, value: string]
  */
 export type ThemeLeaf = string | ThemeTokenPair
 
+/** How light a code role's recipe draws it (`codeLightness`):  `strong`, `soft` (comments), or `plain` (as its source). */
+export type CodeLightness = "strong" | "soft" | "plain"
+
 /** One token per scheme:  a `themeTree` leaf the scheme picks between by name, not by `light-dark()`. */
 export type ThemeTokenPair = {
   /** token for the light scheme, e.g. `--ui-red-on-light` */

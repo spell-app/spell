@@ -34018,6 +34018,11 @@
           "description": "Group:  `shadows`."
         },
         {
+          "key": "groupCode",
+          "text": "Code",
+          "description": "Group:  `code`, the code's colours (epic `debut` P22)."
+        },
+        {
           "key": "groupMotion",
           "text": "Motion",
           "description": "Group:  `motion`."
@@ -40932,11 +40937,6 @@
           "type": "color"
         },
         {
-          "name": "--ui-code-color",
-          "default": "var(--ui-text-color)",
-          "type": "color"
-        },
-        {
           "name": "--ui-code-font",
           "default": "var(--ui-font-family-mono)",
           "type": "other"
@@ -40967,58 +40967,13 @@
           "type": "other"
         },
         {
-          "name": "--ui-code-gutter-color",
-          "default": "var(--ui-text-muted)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-keyword",
-          "default": "light-dark(#a626a4, #c678dd)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-string",
-          "default": "light-dark(#387a37, #98c379)",
-          "type": "color"
-        },
-        {
           "name": "--ui-code-number",
-          "default": "light-dark(#986801, #d19a66)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-comment",
-          "default": "light-dark(#696969, #8b919c)",
+          "default": "var(--ui-code-constant, light-dark(#986801, #d19a66))",
           "type": "color"
         },
         {
           "name": "--ui-code-title",
-          "default": "light-dark(#2f5fd0, #61afef)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-type",
-          "default": "light-dark(#8a5a00, #e5c07b)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-attr",
-          "default": "light-dark(#b8322a, #e06c75)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-meta",
-          "default": "light-dark(#2f5fd0, #61afef)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-addition",
-          "default": "light-dark(#387a37, #98c379)",
-          "type": "color"
-        },
-        {
-          "name": "--ui-code-deletion",
-          "default": "light-dark(#b8322a, #e06c75)",
+          "default": "var(--ui-code-action, light-dark(#2f5fd0, #61afef))",
           "type": "color"
         }
       ]
@@ -51065,6 +51020,163 @@
           "default": "0 4px 8px -2px oklch(from var(--ui-shadow-ink) l c h / 0.12), 0 12px 28px -4px oklch(from var(--ui-shadow-ink) l c h / 0.22)",
           "description": "Shadow `overlay`.",
           "type": "other"
+        }
+      ]
+    },
+    {
+      "id": "code",
+      "title": "Code",
+      "description": "The code's colours, by what they colour:  the editor's code, every code block and the Spell VS Code themes.  A theme with none of its own takes each from its colours (epic `debut` P22).",
+      "tokens": [
+        {
+          "name": "--ui-code-color",
+          "default": "var(--ui-text-color)",
+          "description": "The code's text.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-cursor",
+          "default": "var(--ui-primary-text)",
+          "description": "Code:  `cursor`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-selection",
+          "default": "color-mix(in oklab, var(--ui-primary) 30%, transparent)",
+          "description": "Code:  `selection`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-current-line",
+          "default": "color-mix(in oklab, var(--ui-text-color) 6%, transparent)",
+          "description": "The line the cursor is on.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-color",
+          "default": "var(--ui-text-muted)",
+          "description": "Line numbers.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-gutter-active",
+          "default": "var(--ui-primary-text)",
+          "description": "The current line's number.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-bracket",
+          "default": "color-mix(in oklab, var(--ui-primary) 25%, transparent)",
+          "description": "Code:  `bracket`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-find",
+          "default": "color-mix(in oklab, var(--ui-warning) 40%, transparent)",
+          "description": "Code:  `find`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-heading",
+          "default": "light-dark( oklch(from var(--ui-primary) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-primary) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `heading`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-comment",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 65%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `comment`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-keyword",
+          "default": "light-dark( oklch(from var(--ui-accent, var(--ui-orange)) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-accent, var(--ui-orange)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `keyword`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-type",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-warning) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `type`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-library",
+          "default": "light-dark( oklch(from var(--ui-teal) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-teal) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `library`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-name",
+          "default": "var(--ui-text-color)",
+          "description": "Code:  `name`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-member",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `member`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-parameter",
+          "default": "light-dark( oklch( from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.48 min(c, 0.17) h / 1 ), oklch(from color-mix(in oklab, var(--ui-warning) 55%, var(--ui-accent, var(--ui-orange))) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `parameter`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-action",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `action`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-constant",
+          "default": "light-dark( oklch(from var(--ui-pink) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-pink) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `constant`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-string",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `string`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-tag",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-purple) 60%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `tag`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-punctuation",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.5 min(c, 0.08) h / 1), oklch(from color-mix(in oklab, var(--ui-text-muted) 80%, var(--ui-primary)) 0.74 min(c, 0.08) h / 1) )",
+          "description": "Code:  `punctuation`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-attr",
+          "default": "light-dark( oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.48 min(c, 0.17) h / 1), oklch(from color-mix(in oklab, var(--ui-info) 70%, var(--ui-primary)) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `attr`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-meta",
+          "default": "light-dark( oklch(from var(--ui-info) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-info) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `meta`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-addition",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-positive) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `addition`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-code-deletion",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.48 min(c, 0.17) h / 1), oklch(from var(--ui-negative) 0.8 min(c, 0.17) h / 1) )",
+          "description": "Code:  `deletion`.",
+          "type": "color"
         }
       ]
     },

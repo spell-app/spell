@@ -1356,6 +1356,93 @@
         }
       }
     },
+    "code": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "$ref": "#/definitions/value"
+        },
+        "heading": {
+          "$ref": "#/definitions/value"
+        },
+        "comment": {
+          "$ref": "#/definitions/value"
+        },
+        "keyword": {
+          "$ref": "#/definitions/value"
+        },
+        "type": {
+          "$ref": "#/definitions/value"
+        },
+        "library": {
+          "$ref": "#/definitions/value"
+        },
+        "name": {
+          "$ref": "#/definitions/value"
+        },
+        "member": {
+          "$ref": "#/definitions/value"
+        },
+        "parameter": {
+          "$ref": "#/definitions/value"
+        },
+        "action": {
+          "$ref": "#/definitions/value"
+        },
+        "constant": {
+          "$ref": "#/definitions/value"
+        },
+        "string": {
+          "$ref": "#/definitions/value"
+        },
+        "tag": {
+          "$ref": "#/definitions/value"
+        },
+        "punctuation": {
+          "$ref": "#/definitions/value"
+        },
+        "attr": {
+          "$ref": "#/definitions/value"
+        },
+        "meta": {
+          "$ref": "#/definitions/value"
+        },
+        "addition": {
+          "$ref": "#/definitions/value"
+        },
+        "deletion": {
+          "$ref": "#/definitions/value"
+        },
+        "editor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cursor": {
+              "$ref": "#/definitions/value"
+            },
+            "selection": {
+              "$ref": "#/definitions/value"
+            },
+            "line": {
+              "$ref": "#/definitions/value"
+            },
+            "line-number": {
+              "$ref": "#/definitions/value"
+            },
+            "line-number-active": {
+              "$ref": "#/definitions/value"
+            },
+            "bracket": {
+              "$ref": "#/definitions/value"
+            },
+            "find": {
+              "$ref": "#/definitions/value"
+            }
+          }
+        }
+      }
+    },
     "motion": {
       "type": "object",
       "additionalProperties": false,

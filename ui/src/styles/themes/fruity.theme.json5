@@ -27,5 +27,27 @@
       // - only over the wallpaper:  the editor's top bar keeps Glass's 50% at rest (`--ui-bar-rest-background`)
       "wallpaper-tint": { "light": "#ffffff80", "dark": "#1e1c26d9" }
     }
+  },
+  // The code's colours (epic `debut` P22):  Fruity's own (Q41):  pink and violet from its wallpaper, sky for names, a pastel green for text in quotes.
+  // - Every role's light and dark;  `editor` the editor's own (what's left out takes the recipe, `codeRoles`).
+  "code": {
+    "text": { "light": "#2b2238", "dark": "#efe8f7" },
+    "heading": { "light": "#6f3cc4", "dark": "#d3b8ff" },
+    "comment": { "light": "#6e6285", "dark": "#a99bc4" },
+    "keyword": { "light": "#b8327a", "dark": "#ff8fc8" },
+    "type": { "light": "#5b3fb8", "dark": "#c8b6ff" },
+    "library": { "light": "#1f6fa8", "dark": "#9fd8ff" },
+    "name": { "light": "#2b2238", "dark": "#efe8f7" },
+    "member": { "light": "#1f6fa8", "dark": "#8fd0ff" },
+    "parameter": { "light": "#9a4a14", "dark": "#ffc6a8" },
+    "action": { "light": "#2357a8", "dark": "#b8e4ff" },
+    "constant": { "light": "#b0306a", "dark": "#ffa3c7" },
+    "string": { "light": "#2f7a3e", "dark": "#b9f0c4" },
+    "tag": { "light": "#8a37b5", "dark": "#e2a8ff" },
+    "punctuation": { "light": "#6e6285", "dark": "#b3a6c9" },
+    "attr": { "light": "#1f6fa8", "dark": "#8fd0ff" },
+    "meta": { "light": "#8a37b5", "dark": "#e2a8ff" },
+    "addition": { "light": "#2f7a3e", "dark": "#b9f0c4" },
+    "deletion": { "light": "#b3263a", "dark": "#ff9aa8" }
   }
 }

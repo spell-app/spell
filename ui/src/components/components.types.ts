@@ -1948,6 +1948,13 @@ export type ThemeTokenEdit = { both: string } | { light?: string; dark?: string 
 ////////////////
 
 /**
+ * The `document` event `UI.themes.apply()` sends once a theme's sheets are on the page:  `CustomEvent<{ name }>`,
+ * `name` `undefined` for none.
+ * - For what reads a theme's colours off the page and must read them again (the editor's code, `CodeThemes`).
+ */
+export const THEME_APPLIED_EVENT = "ui-theme-applied"
+
+/**
  * A theme's names, ONE way for every place that shows or remembers one (epic `debut` P17, J94):
  * the theme menu (`<ui-theme-menu>`, `ThemePreference`) and the theme editor (its Start from, `SavedTheme`).
  * - Static and pure:  it reads only the name, and the theme list (`UI.themes`) it's handed.

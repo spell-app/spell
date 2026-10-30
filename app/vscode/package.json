@@ -333,6 +333,98 @@
         "id": "strikethrough",
         "description": "Markdown `~~struck~~` inside a comment."
       }
+    ],
+    "themes": [
+      {
+        "label": "Spell Crisp Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-crisp-light.json"
+      },
+      {
+        "label": "Spell Crisp Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-crisp-dark.json"
+      },
+      {
+        "label": "Spell Fruity Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-fruity-light.json"
+      },
+      {
+        "label": "Spell Fruity Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-fruity-dark.json"
+      },
+      {
+        "label": "Spell Glass Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-glass-light.json"
+      },
+      {
+        "label": "Spell Glass Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-glass-dark.json"
+      },
+      {
+        "label": "Spell Matrix Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-matrix-light.json"
+      },
+      {
+        "label": "Spell Matrix Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-matrix-dark.json"
+      },
+      {
+        "label": "Spell Merlot Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-merlot-light.json"
+      },
+      {
+        "label": "Spell Merlot Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-merlot-dark.json"
+      },
+      {
+        "label": "Spell Midnight Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-midnight-light.json"
+      },
+      {
+        "label": "Spell Midnight Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-midnight-dark.json"
+      },
+      {
+        "label": "Spell Paper Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-paper-light.json"
+      },
+      {
+        "label": "Spell Paper Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-paper-dark.json"
+      },
+      {
+        "label": "Spell Pop Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-pop-light.json"
+      },
+      {
+        "label": "Spell Pop Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-pop-dark.json"
+      },
+      {
+        "label": "Spell Light",
+        "uiTheme": "vs",
+        "path": "./themes/spell-light.json"
+      },
+      {
+        "label": "Spell Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/spell-dark.json"
+      }
     ]
   },
   "activationEvents": [

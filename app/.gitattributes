@@ -20,6 +20,10 @@ tests/cli/__snapshots__/contract/**                           linguist-generated
 app/docs/__data/components.json5                              linguist-generated merge=binary
 app/docs/__data/search.json5                                  linguist-generated merge=binary
 
+# the Spell extension's VS Code themes, one per Spell theme and scheme (`yarn tsx scripts/vscode-themes.ts`,
+# epic `debut` P22);  its `package.json` lists them, and stays hand-kept
+vscode/themes/*.json                                          linguist-generated merge=binary
+
 # vendored Fomantic build
 app/static/semantic-ui-css/**                                 linguist-vendored -diff
 

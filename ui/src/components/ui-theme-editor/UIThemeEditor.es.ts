@@ -140,6 +140,7 @@ export const themeEditorEs = {
     groupSemantic: "Avisos",
     groupHues: "Paleta",
     groupShadows: "Sombras",
+    groupCode: "Código",
     groupMotion: "Movimiento",
     groupComponents: "Componentes",
     pageOwn: "Las propias de {page}",

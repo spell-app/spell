@@ -40,6 +40,13 @@
       "run": ["yarn", "site:data"]
     },
     {
+      // every Spell theme as a VS Code theme, light and dark (epic `debut` P22):  read off the theme sheets above
+      "name": "VS Code themes",
+      "outputs": ["app/vscode/themes/*.json", "app/vscode/package.json"],
+      "cwd": "app",
+      "run": ["yarn", "tsx", "scripts/vscode-themes.ts"]
+    },
+    {
       "name": "spell libraries",
       "outputs": ["app/spaces/@spell/library/**/*.lib.ts"],
       "cwd": "app",

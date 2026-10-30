@@ -213,6 +213,14 @@ the last column is what a theme restyles on purpose.
 
 </details>
 
+Every theme colours code too, light and dark:  `--ui-code-<role>` (`keyword`, `string`, `comment`, `type` ...), which
+`<ui-code>` and the Spell editor's code read alike.
+- A theme file sets them in its `code` group;  one that sets none takes each from its own colours (the recipe,
+  `codeRoles`).
+  - Spell's are Shades of Purple in dark;  Matrix's a mint console;  Glass and Fruity have their own.
+- Each reads at 4.5:1 or more on the theme's panel and in a code block, comments too.
+- The same colours ship as VS Code themes, in the Spell extension:  "Spell Matrix Dark", "Spell Light" ...
+
 ## Five recipes
 
 ### 1. Sitewide defaults:  tokens on `:root`

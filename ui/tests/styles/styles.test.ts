@@ -32,11 +32,12 @@ const RAW_SHEETS = import.meta.glob<string>(["./**/*.css", "!./themes/archive/**
 })
 
 /**
- * 13.5 KB:  the gzip budget for `foundationCSS`.
+ * 14 KB:  the gzip budget for `foundationCSS`.
  * - Was 12 KB;  the per-colour `-on` / `-inverted-on` contrast tokens and their remaps added ~0.65 KB.
  * - Was 13 KB;  the shared `font` and `link` looks every element takes (epic `ui-gaps` P3) went 8 bytes over it.
+ * - Was 13.5 KB;  every theme's code colours, their recipe from its own colours (epic `debut` P22), added ~0.28 KB.
  */
-const FOUNDATION_GZIP_BUDGET = 13.5 * 1024
+const FOUNDATION_GZIP_BUDGET = 14 * 1024
 
 /** `true` when Vite's Lightning CSS lowered `light-dark()` in the barrel's sheets (default targets). */
 const LIGHT_DARK_LOWERED = colorsCSS.includes("--lightningcss-light")

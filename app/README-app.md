@@ -480,7 +480,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 **Not yet:**  a change isn't written back into the code, nor an event's code typed there.
 Restart, and the app is as the code says.
 
-### Themes, and Purple code
+### Themes, and their code colours
 
 The palette button at the top bar's right picks light, dark or auto, and one of Spell's four themes:
 the same menu, and the same themes, as on Spell's docs pages.
@@ -501,10 +501,13 @@ Each one dresses the whole editor:
   pages draw in it too, open tabs at once;  and the other way round.
   - Kept in your space, `@spell/<you>@/__prefs/spell-site.json5`;  the read-only public build keeps it in the
     browser.
-- The code itself is always Shades of Purple, the VS Code theme, ported to Monaco with a matching light version.
-  It follows the page's light or dark, under any theme, and colours Spell's headings, keywords, types, properties,
-  actions and constants from the parse.
-  - In Glass, Fruity and Merlot the code has no background of its own:  the panel shows through behind it.
+- The code takes the theme's own colours, light and dark:  pick Matrix, and it turns to a mint console.
+  It colours Spell's headings, keywords, types, properties, actions and constants from the parse.
+  - Every theme's code colours are part of the theme (its `code` group), read off the page as it draws, so the
+    theme bench's tuning shows at once;  Spell dark's are Shades of Purple, as the editor drew them before.
+  - Each one reads at 4.5:1 or more on its panel, comments too.
+  - The code has no background of its own:  the panel shows through behind it.
+  - The Spell extension carries the same colours as VS Code themes:  "Spell Matrix Dark" and the rest.
 - A theme made with Spell UI's theme editor and kept in the browser is worn over its base,
   while that base is the theme chosen.
 - All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx) and [the code themes](src/app/ui/monaco/themes/).

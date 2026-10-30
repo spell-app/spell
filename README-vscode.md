@@ -287,6 +287,10 @@ A `.spellml` file, Spell's tag-shaped form, gets all of it too, plus one view of
     that's how compiled Spell writes a view's style sheet.
   - `.spell` and `.spellml` files indent with tabs.
   - A `.spellml` file's tag heads (`<property "suit">`) are coloured as the Spell they read as.
+- **Spell's themes, as VS Code colour themes:**  one for each of Spell's themes, light and dark, 18 in all
+  ("Spell Matrix Dark", "Spell Light" ...):  Code › Settings › Theme › Color Theme (⌘K ⌘T).
+  - Each wears the theme's surfaces, accent and code colours, the side bar, tabs and status bar too:
+    the same colours the Spell editor's code takes in that theme.
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.

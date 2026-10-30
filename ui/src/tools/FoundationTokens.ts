@@ -281,6 +281,21 @@ const GROUPS: GroupDefinition[] = [
     ]
   },
   {
+    id: "code",
+    title: "Code",
+    description:
+      "The code's colours, by what they colour:  the editor's code, every code block and the Spell VS Code themes.  " +
+      "A theme with none of its own takes each from its colours (epic `debut` P22).",
+    color: true,
+    rules: [
+      [/^--ui-code-color$/, () => "The code's text."],
+      [/^--ui-code-current-line$/, () => "The line the cursor is on."],
+      [/^--ui-code-gutter-color$/, () => "Line numbers."],
+      [/^--ui-code-gutter-active$/, () => "The current line's number."],
+      [/^--ui-code-([\w-]+)$/, (match) => `Code:  \`${match[1]}\`.`]
+    ]
+  },
+  {
     id: "motion",
     title: "Motion",
     description: "Durations, easing curves, and how long a hover waits.",

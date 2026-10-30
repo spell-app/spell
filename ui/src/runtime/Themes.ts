@@ -1,3 +1,4 @@
+import { THEME_APPLIED_EVENT } from "spell/ui/components/components.types"
 import type { Styles } from "./Styles"
 
 /****************
@@ -105,6 +106,7 @@ export class Themes {
    * - `undefined` (or `""`):  neither, our own look.
    * - Concurrent calls:  the LAST one wins, even if an earlier theme's chunk arrives after it.
    * - Throws a `TypeError` on an unknown name, or `"dark"` (see the class docs).
+   * - SIDE EFFECT:  once its sheets are on, `UIT.THEME_APPLIED_EVENT` on `document`.
    */
   async apply(name: string | undefined): Promise<void> {
     if (name === "") name = undefined
@@ -124,6 +126,8 @@ export class Themes {
     if (!this.styles.has(this.slots.base)) this.styles.register(this.slots.theme, "", options)
     this.styles.register(this.slots.base, base, options)
     this.styles.register(this.slots.theme, theme, options)
+    if (typeof document !== "undefined")
+      document.dispatchEvent(new CustomEvent(THEME_APPLIED_EVENT, { detail: { name } }))
   }
 
   /**

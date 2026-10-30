@@ -290,6 +290,7 @@ export const themeEditorVocabulary = {
     { key: "groupSemantic", text: "Feedback", description: "Group:  positive, negative ... (`semantic`)." },
     { key: "groupHues", text: "Palette", description: "Group:  the named hues (`hues`)." },
     { key: "groupShadows", text: "Shadows", description: "Group:  `shadows`." },
+    { key: "groupCode", text: "Code", description: "Group:  `code`, the code's colours (epic `debut` P22)." },
     { key: "groupMotion", text: "Motion", description: "Group:  `motion`." },
     { key: "groupComponents", text: "Components", description: "Group:  each family's own tokens (`components`)." },
     {

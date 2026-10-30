@@ -249,5 +249,32 @@
     "toolbar": {
       "button-radius": "{radii.s}"
     }
+  },
+  // The code's colours (epic `debut` P22):  a mint console, as Owen's rack viewer ("yes mint"):  mint keywords and headings, teal types, amber strings, grey-green comments, coral constants;  light the same hues deepened.
+  // - Every role's light and dark;  `editor` the editor's own (what's left out takes the recipe, `codeRoles`).
+  "code": {
+    "text": { "light": "#22302b", "dark": "#cfdad4" },
+    "heading": { "light": "#0a6648", "dark": "#a3e1c0" },
+    "comment": { "light": "#53675e", "dark": "#8aa396" },
+    "keyword": { "light": "#0a6648", "dark": "#a3e1c0" },
+    "type": { "light": "#0b6b6b", "dark": "#79d4c8" },
+    "library": { "light": "#11706a", "dark": "#8fe0d3" },
+    "name": { "light": "#22302b", "dark": "#d8e4de" },
+    "member": { "light": "#1d6470", "dark": "#8fd3e0" },
+    "parameter": { "light": "#8a5a00", "dark": "#f2d9a0" },
+    "action": { "light": "#1c6a5c", "dark": "#b8ecd2" },
+    "constant": { "light": "#a8392b", "dark": "#e79583" },
+    "string": { "light": "#8a5600", "dark": "#f2c778" },
+    "tag": { "light": "#0a6648", "dark": "#a3e1c0" },
+    "punctuation": { "light": "#566b62", "dark": "#7f968a" },
+    "attr": { "light": "#1d6470", "dark": "#8fd3e0" },
+    "meta": { "light": "#566b62", "dark": "#7f968a" },
+    "addition": { "light": "#0a6648", "dark": "#a3e1c0" },
+    "deletion": { "light": "#a8392b", "dark": "#e79583" },
+    "editor": {
+      "cursor": { "light": "#0b7552", "dark": "#a3e1c0" },
+      "selection": { "light": "#0b755233", "dark": "#a3e1c033" },
+      "line-number-active": { "light": "#0a6648", "dark": "#a3e1c0" }
+    }
   }
 }

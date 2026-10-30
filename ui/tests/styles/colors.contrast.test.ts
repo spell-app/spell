@@ -2,7 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { clipped, CONTRAST_LARGE, CONTRAST_TEXT, CONTRAST_TEXT_AAA, oklchToRgb } from "spell/util/color"
 import { UI } from "spell/ui/runtime"
-import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell/ui/styles"
+import { codeRoles, hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell/ui/styles"
 
 import { A11y } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -112,6 +112,20 @@ for (const theme of THEMES) {
       }
       expect(failures).toEqual([])
     })
+
+    it.each(SCHEMES)(
+      "keeps every code colour readable on the panel and in a code block, comments too (%s)",
+      async (scheme) => {
+        await adoptFoundation(theme)
+        const probe = renderProbe(scheme, "")
+        const failures: string[] = []
+        for (const token of CODE_COLORS) {
+          for (const ground of CODE_GROUNDS)
+            failures.push(...check(probe, `${theme} ${scheme}`, token, ground, CONTRAST_TEXT))
+        }
+        expect(failures).toEqual([])
+      }
+    )
   })
 }
 
@@ -124,6 +138,21 @@ const TEXT_GROUNDS: readonly (readonly string[])[] = [
   ["--ui-surface"],
   ["--ui-surface-muted"],
   ["--ui-surface-strong"]
+]
+
+/**
+ * Every code colour (epic `debut` P22):  the code's text and each role, `--ui-code-<role>`.
+ * - Comments too:  in a Spell file the comments are the prose (Solitaire's "# A playing card ..."), not asides.
+ */
+const CODE_COLORS = ["--ui-code-color", ...Object.keys(codeRoles).map((role) => `--ui-code-${role}`)]
+
+/**
+ * What code is read on:  the editor's code is see-through on the theme's panel (J129);  a docs page's code block
+ * on its code background (`<ui-code>`'s, the inset surface where a theme sets none).
+ */
+const CODE_GROUNDS: readonly (readonly string[])[] = [
+  ["--ui-surface"],
+  ["--ui-code-background, var(--ui-surface-muted)"]
 ]
 
 /**

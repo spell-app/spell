@@ -90,16 +90,15 @@
 /*
  * ... and the code editors see-through, the panel behind the code:  Purple's near-white page and lavender margin
  * read as a white box laid in it (Owen:  "white background under `<spell-view "card">` is distracting")
- * - Merlot too:  the code on its wine panel, not a navy block in dark (Owen's pick, epic `debut` P17, Q4);
- *   the code's colours stay Purple's, only its background goes
+ * - Merlot too:  the code on its wine panel, not a navy block in dark (Owen's pick, epic `debut` P17, Q4)
  * - Spell too (its facelift, epic `debut` P19):  dark, the code on the aubergine panel, not Purple's navy block
  * - every theme since P20:  a navy block sat on Paper's lamplit brown, and in every new theme
+ * - the lines stuck at the top while scrolling take the panel, as painted over the page (`CodeThemes`):
+ *   the code scrolls under them
  */
 :root[data-spell-theme] .monaco-editor {
   --vscode-editor-background: transparent;
   --vscode-editorGutter-background: transparent;
-  /* the lines stuck at the top while scrolling keep Purple's own page (`ShadesOfPurple`):  the code scrolls under them */
-  --vscode-editorStickyScroll-background: light-dark(#fbfaff, #2d2b55);
 }
 
 /* Spell:  white cards with soft shadows on the brand's pale page;  the bar has no box */

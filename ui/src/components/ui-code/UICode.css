@@ -8,10 +8,12 @@
  *   - before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`
  * - Line numbers are a CSS counter per `.line` (`counter-reset` on the `<pre>` sets the start).
  *   Wrapped lines hang indented past the number, so a long line never runs under the gutter.
- * - Colours:  the docs' palette (Atom One, light / dark by `light-dark()`;
- *   light colours darkened to pass WCAG AA on the code background), one private alias per highlight.js group.
- *   The public tokens `--ui-code-<group>` (`keyword`, `string`, `number`, `comment`, `title`, `type`, `attr`,
- *   `meta`, `addition`, `deletion`) reach them from the page, an ancestor, the DOM element or `::part()`.
+ * - Colours:  the THEME's code colours (epic `debut` P22), one private alias per highlight.js group:
+ *   the public tokens `--ui-code-<group>` (`keyword`, `string`, `number`, `comment`, `title`, `type`, `attr`,
+ *   `meta`, `addition`, `deletion`), which every theme sets (`colors.css`'s recipe, or its own `code` group),
+ *   the same the editor's code reads;  `number` and `title` take the theme's `constant` and `action`.
+ *   - They reach the box from the page, an ancestor, the DOM element or `::part()`.
+ *   - A page without Spell UI's foundation sheets:  Atom One, light / dark, its light colours darkened to pass AA.
  * - Public tokens are NEVER declared here:  each is read through its private alias (`notes/theming.md`).
  */
 
@@ -38,9 +40,9 @@
     --_ui-code-gutter-color: var(--ui-code-gutter-color, var(--ui-text-muted));
     --_ui-code-keyword: var(--ui-code-keyword, light-dark(#a626a4, #c678dd));
     --_ui-code-string: var(--ui-code-string, light-dark(#387a37, #98c379));
-    --_ui-code-number: var(--ui-code-number, light-dark(#986801, #d19a66));
+    --_ui-code-number: var(--ui-code-number, var(--ui-code-constant, light-dark(#986801, #d19a66)));
     --_ui-code-comment: var(--ui-code-comment, light-dark(#696969, #8b919c));
-    --_ui-code-title: var(--ui-code-title, light-dark(#2f5fd0, #61afef));
+    --_ui-code-title: var(--ui-code-title, var(--ui-code-action, light-dark(#2f5fd0, #61afef)));
     --_ui-code-type: var(--ui-code-type, light-dark(#8a5a00, #e5c07b));
     --_ui-code-attr: var(--ui-code-attr, light-dark(#b8322a, #e06c75));
     --_ui-code-meta: var(--ui-code-meta, light-dark(#2f5fd0, #61afef));
