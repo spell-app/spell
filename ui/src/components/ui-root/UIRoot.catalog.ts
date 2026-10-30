@@ -737,6 +737,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "appearance",
+      "name",
+      "value",
       "choose",
       "position",
       "direction",
@@ -927,6 +929,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "name",
       "as",
+      "default",
       "options",
       "label",
       "description",
@@ -953,6 +956,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "source",
       "selector",
       "readonly",
+      "compact",
+      "columns",
+      "show-defaults",
       "output",
       "error",
       "size",
@@ -1001,6 +1007,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "state",
       "output",
       "error",
+      "columns",
+      "flags",
       "label",
       "hint",
       "level",
@@ -1241,6 +1249,12 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-sidebar": {
     folder: "ui-sidebar",
     attributes: ["position", "width", "transition", "inverted", "blurring", "persistent", "closedby"]
+  },
+  "ui-sides": {
+    folder: "ui-sides",
+    skeleton: { display: "inline", width: "8em", height: "4.5em" },
+    attributes: ["size", "value", "sides", "disabled", "readonly", "name", "required"],
+    formControl: true
   },
   "ui-slider": {
     folder: "ui-slider",
@@ -1501,6 +1515,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "color",
       "appearance",
+      "name",
+      "value",
       "choose",
       "position",
       "direction",

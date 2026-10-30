@@ -16403,6 +16403,22 @@
               "fieldName": "appearance"
             },
             {
+              "name": "name",
+              "description": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "value",
+              "description": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
               "name": "choose",
               "description": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).",
               "type": {
@@ -16646,9 +16662,16 @@
             },
             {
               "name": "ui-changed",
-              "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).",
+              "description": "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the items now on, in order (each one's `value`, else its text).",
               "type": {
-                "text": "CustomEvent<{ values: string[] }>"
+                "text": "CustomEvent<{ value?: string, values?: string[] }>"
+              }
+            },
+            {
+              "name": "ui-form-value",
+              "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.",
+              "type": {
+                "text": "CustomEvent<{}>"
               }
             }
           ],
@@ -16696,6 +16719,10 @@
             {
               "name": "dropdown",
               "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+            },
+            {
+              "name": "form-value",
+              "description": "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
             },
             {
               "name": "disabled",
@@ -23598,11 +23625,19 @@
             },
             {
               "name": "as",
-              "description": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type.",
+              "description": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons` (a segmented row), `radios`, `range`, `checkbox`, `toggle`, `color`, `sides`, `editor`, or one a page added.  None:  the default for its type;  four or fewer choices, all with icons:  `buttons`.",
               "type": {
                 "text": "string"
               },
               "fieldName": "as"
+            },
+            {
+              "name": "default",
+              "description": "Its value when nothing's been set, if the schema doesn't say:  a value other than it shows `:state(set)`, bold under the editor's `show-defaults`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "default"
             },
             {
               "name": "options",
@@ -23868,7 +23903,35 @@
             },
             {
               "name": "buttons",
-              "description": "Its control is a row of choices, one each (`as=\"buttons\"`)."
+              "description": "Its control is a row of radios, one each (`as=\"radios\"`)."
+            },
+            {
+              "name": "compact",
+              "description": "Its editor is `compact`."
+            },
+            {
+              "name": "show-defaults",
+              "description": "Its editor bolds a value other than its default (`show-defaults`)."
+            },
+            {
+              "name": "half",
+              "description": "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
+            },
+            {
+              "name": "inline-check",
+              "description": "A yes or no in a compact editor:  the box, then its label, on one line."
+            },
+            {
+              "name": "set",
+              "description": "Its value isn't its default (`default`, else the schema's;  none:  any value)."
+            },
+            {
+              "name": "flags",
+              "description": "It heads a run of yes-or-no properties, drawn as one select of pills."
+            },
+            {
+              "name": "flag",
+              "description": "It's in a run another property heads:  hidden, its pill in that one's select."
             },
             {
               "name": "field",
@@ -23968,6 +24031,30 @@
                 "text": "boolean"
               },
               "fieldName": "readonly"
+            },
+            {
+              "name": "compact",
+              "description": "Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "compact"
+            },
+            {
+              "name": "columns",
+              "description": "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it.",
+              "type": {
+                "text": "number"
+              },
+              "fieldName": "columns"
+            },
+            {
+              "name": "show-defaults",
+              "description": "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "showDefaults"
             },
             {
               "name": "output",
@@ -24569,6 +24656,18 @@
               "description": "Nothing can be changed (`readonly`)."
             },
             {
+              "name": "compact",
+              "description": "`compact`."
+            },
+            {
+              "name": "grid",
+              "description": "Its properties lay out on columns (`columns`, or `compact`)."
+            },
+            {
+              "name": "show-defaults",
+              "description": "`show-defaults`."
+            },
+            {
               "name": "error",
               "description": "In the error state (attribute, or failed validation)."
             },
@@ -24689,7 +24788,40 @@
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
             }
           ],
-          "cssProperties": []
+          "cssProperties": [
+            {
+              "name": "--ui-property-editor-font-size",
+              "default": "13px"
+            },
+            {
+              "name": "--ui-property-editor-row-gap",
+              "default": "8px"
+            },
+            {
+              "name": "--ui-property-editor-column-gap",
+              "default": "12px"
+            },
+            {
+              "name": "--ui-property-editor-label-distance",
+              "default": "3px"
+            },
+            {
+              "name": "--ui-property-editor-band-transform",
+              "default": "none"
+            },
+            {
+              "name": "--ui-property-editor-band-weight",
+              "default": "var(--ui-font-weight-bold, 700)"
+            },
+            {
+              "name": "--ui-property-editor-band-size",
+              "default": "13px"
+            },
+            {
+              "name": "--ui-property-editor-band-background",
+              "default": "var(--_ui-panel-subhead-background)"
+            }
+          ]
         },
         {
           "kind": "class",
@@ -24738,6 +24870,22 @@
                 "text": "string"
               },
               "fieldName": "error"
+            },
+            {
+              "name": "columns",
+              "description": "How many columns its properties lay out on (a short one takes one, the rest a whole row).  None:  its editor's (2 when the editor is `compact`).",
+              "type": {
+                "text": "number"
+              },
+              "fieldName": "columns"
+            },
+            {
+              "name": "flags",
+              "description": "Its yes-or-no properties:  `pills`, every run of them one select of pills;  `checkboxes`, never.  None:  three or more side by side are pills, fewer stay checkboxes.",
+              "type": {
+                "text": "\"pills\" | \"checkboxes\""
+              },
+              "fieldName": "flags"
             },
             {
               "name": "label",
@@ -25157,6 +25305,14 @@
             {
               "name": "error",
               "description": "Its `error`, or a property in it failing validation."
+            },
+            {
+              "name": "compact",
+              "description": "Its editor is `compact`:  a tight band."
+            },
+            {
+              "name": "grid",
+              "description": "Its properties lay out on columns (`columns`, or its editor's)."
             },
             {
               "name": "collapsed",
@@ -30172,6 +30328,246 @@
           "declaration": {
             "name": "UISidebar",
             "module": "src/components/ui-sidebar/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ui-sides/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UISides",
+          "tagName": "ui-sides",
+          "customElement": true,
+          "summary": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.",
+          "description": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.\n\nAlso known as:  margin, padding, box model, spacing, insets, sides.",
+          "attributes": [
+            {
+              "name": "size",
+              "description": "Size of its boxes, `mini` ... `massive`;  `medium` is the default.",
+              "type": {
+                "text": "\"mini\" | \"tiny\" | \"small\" | \"medium\" | \"large\" | \"big\" | \"huge\" | \"massive\""
+              },
+              "fieldName": "size"
+            },
+            {
+              "name": "sides",
+              "description": "Which sides it shows:  `top bottom`, `left right` (one row) ...  None:  all four, top / left and right / bottom.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "sides"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  left out of the form, not focusable.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "readonly",
+              "description": "Shows its lengths but they can't be changed.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "readOnly"
+            },
+            {
+              "name": "name",
+              "description": "Form field name.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "required",
+              "description": "Form validation:  every side shown must have a length.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "required"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "description": "Its lengths, in either form, given back in the form it was given:  CSS's text, one to four numbers (top right bottom left:  `value=\"10 20 10 20\"`), or an object, `{ top, left, right, bottom }` (as the property, or as JSON text in the attribute).  A side left out is empty.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-changed",
+              "description": "A length changed:  `value` in the form it was given.  A handler that re-sets `value` wins.",
+              "type": {
+                "text": "CustomEvent<{ value: string | { top?: number, left?: number, right?: number, bottom?: number }, originalEvent?: Event }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "sides",
+              "description": "The box of its number boxes."
+            },
+            {
+              "name": "side",
+              "description": "One side:  a `<label>` around its letter and its number box."
+            },
+            {
+              "name": "letter",
+              "description": "A side's letter (T, L, R, B), faded, inside its box."
+            },
+            {
+              "name": "input",
+              "description": "One side's native number box."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "Can't be used."
+            },
+            {
+              "name": "invalid",
+              "description": "Fails validation, once a person has interacted (`:user-invalid` semantics)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-sides-box-width",
+              "default": "5em"
+            },
+            {
+              "name": "--ui-sides-gap",
+              "default": "4px"
+            },
+            {
+              "name": "--ui-sides-letter-color",
+              "default": "var(--ui-text-muted)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UISides",
+          "declaration": {
+            "name": "UISides",
+            "module": "src/components/ui-sides/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-sides",
+          "declaration": {
+            "name": "UISides",
+            "module": "src/components/ui-sides/index.ts"
           }
         }
       ]
@@ -36433,6 +36829,22 @@
               "fieldName": "appearance"
             },
             {
+              "name": "name",
+              "description": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "value",
+              "description": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "value"
+            },
+            {
               "name": "choose",
               "description": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).",
               "type": {
@@ -36676,9 +37088,16 @@
             },
             {
               "name": "ui-changed",
-              "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).",
+              "description": "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the items now on, in order (each one's `value`, else its text).",
               "type": {
-                "text": "CustomEvent<{ values: string[] }>"
+                "text": "CustomEvent<{ value?: string, values?: string[] }>"
+              }
+            },
+            {
+              "name": "ui-form-value",
+              "description": "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.",
+              "type": {
+                "text": "CustomEvent<{}>"
               }
             }
           ],
@@ -36770,6 +37189,10 @@
             {
               "name": "dropdown",
               "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+            },
+            {
+              "name": "form-value",
+              "description": "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
             },
             {
               "name": "overflowing",

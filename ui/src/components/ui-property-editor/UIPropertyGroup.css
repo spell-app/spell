@@ -3,9 +3,14 @@
  * - `.output`:  a value at the end of the title bar (mono, muted).
  * - `.error-line`:  its own error, first in the content.
  * - `state` / an error tint the title (`.error`, `.info` ... on the box).
+ * - `:state(grid)`:  its content a grid of `--_property-editor-columns` columns (its own `columns`, else its
+ *   editor's);  its properties say how much of a row they take (`UIProperty.css`).
+ * - `:state(compact)` (its editor's;  epic `debut` P31):  a tight band, 4px above and below its title, its look
+ *   the theme's:  `--ui-property-editor-band-transform` (case), `-band-weight`, `-band-size`, `-band-background`.
+ *   Spell UI's own:  Title Case as written, 13px bold, on the panel's quiet band.
  */
 
-@layer ui.components.property-group.content, ui.components.property-group.states;
+@layer ui.components.property-group.content, ui.components.property-group.variations, ui.components.property-group.states;
 
 @layer ui.components.property-group.content {
   .output {
@@ -19,6 +24,56 @@
     margin: 0 0 0.75em;
     color: var(--ui-negative-text);
     font-size: 0.85714em;
+  }
+}
+
+@layer ui.components.property-group.variations {
+  /* ## In its editor's grid, a whole row;  its own content a grid while `:state(grid)` */
+  :host {
+    grid-column: 1 / -1;
+  }
+  :host(:state(grid)) .section > .content {
+    --_property-editor-field-width: auto;
+    display: grid;
+    /* the rows' gap is each field's own margin (the form's row distance), never the panel's gap on top of it */
+    row-gap: 0;
+    grid-template-columns: repeat(var(--_property-editor-columns, 1), minmax(0, 1fr));
+    column-gap: var(--_ui-property-editor-column-gap, var(--ui-form-gutter, 1em));
+    align-items: start;
+  }
+  :host(:state(grid)) .section > .content > :not(slot) {
+    grid-column: 1 / -1;
+  }
+
+  /* ## A compact editor's band:  tight, its look the theme's */
+  :host(:state(compact)) .ui.section.panel.sub {
+    --_ui-property-editor-band-transform: var(--ui-property-editor-band-transform, none);
+    --_ui-property-editor-band-weight: var(--ui-property-editor-band-weight, var(--ui-font-weight-bold, 700));
+    --_ui-property-editor-band-size: var(--ui-property-editor-band-size, 13px);
+    --_ui-property-editor-band-background: var(
+      --ui-property-editor-band-background,
+      var(--_ui-panel-subhead-background)
+    );
+    --_ui-panel-band-space: 4px;
+    --_ui-panel-gap: var(--_ui-property-editor-row-gap, 8px);
+  }
+  /* its properties at the editor's size, not a sub-panel's smaller one */
+  :host(:state(compact)) .ui.section.panel.sub > .content {
+    font-size: var(--_ui-property-editor-font-size, 1em);
+  }
+  :host(:state(compact)) .ui.section.panel.sub > .title {
+    padding-block: 4px;
+    background: var(--_ui-property-editor-band-background);
+  }
+  :host(:state(compact)) .ui.section.panel.sub > .title > .heading,
+  :host(:state(compact)) .ui.section.panel.sub > .title > .heading > .toggle {
+    font-size: var(--_ui-property-editor-band-size);
+    font-weight: var(--_ui-property-editor-band-weight);
+    letter-spacing: 0;
+    text-transform: var(--_ui-property-editor-band-transform);
+  }
+  :host(:state(compact)) .ui.section.panel.sub > .title > .heading > .toggle {
+    font-size: 1em;
   }
 }
 

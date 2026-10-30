@@ -6,6 +6,8 @@ import { E } from "spell/ui/core"
 // (SIDE EFFECT:  defines `<ui-panel>`, and `<ui-section>` / `<ui-sections>`:  a group is a panel's band)
 import { UIPanel } from "spell/ui/components/ui-panel"
 import type { SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
+import { UIProperty } from "./UIProperty"
+import { COLUMNS_PROPERTY, UIPropertyEditor } from "./UIPropertyEditor"
 import { propertyGroupVocabulary } from "./UIPropertyGroup.en"
 
 import groupCSS from "./UIPropertyGroup.css?inline"
@@ -91,6 +93,44 @@ export class UIPropertyGroup extends UIPanel {
   @E.state
   accessor isChanged = false
 
+  ////////////////
+  // ## Its editor's look (epic `debut` P31)
+  ////////////////
+
+  /** The editor around it, while connected. */
+  @E.state private accessor editor: DOMEditorLike | undefined = undefined
+
+  /** Find its editor on connect. */
+  @E.whileConnected
+  protected watchEditor() {
+    this.editor = UIProperty.editorAround(this.domElement) as DOMEditorLike | undefined
+    return () => {
+      this.editor = undefined
+    }
+  }
+
+  /** `:state(compact)`:  its editor is `compact`, so its band is tight (`UIPropertyGroup.css`). */
+  @E.cssState("compact")
+  get isCompact(): boolean {
+    return !!this.editor?.isCompact
+  }
+
+  /** How many columns its properties lay out on:  `columns`, else its editor's. */
+  get columnCount(): number {
+    return UIPropertyEditor.columnsFrom(this.attributes.columns) ?? this.editor?.columnCount ?? 1
+  }
+
+  /** `:state(grid)`:  its properties lay out on columns. */
+  @E.cssState("grid")
+  get isGrid(): boolean {
+    return this.columnCount > 1 || !!this.editor?.isGrid
+  }
+
+  /** Its column count, where its grid reads it. */
+  protected get contentStyle(): Record<string, string> | undefined {
+    return { ...super.contentStyle, [COLUMNS_PROPERTY]: String(this.columnCount) }
+  }
+
   /** `:state(readonly)`:  `readonly`. */
   @E.cssState("readonly")
   get isReadOnly(): boolean {
@@ -137,6 +177,13 @@ export class UIPropertyGroup extends UIPanel {
       </Show>
     )
   }
+}
+
+/** What a group reads of its editor's DOM element. */
+type DOMEditorLike = HTMLElement & {
+  readonly isCompact: boolean
+  readonly isGrid: boolean
+  readonly columnCount: number
 }
 
 /** The panel's class word for a sub-head band (`UIPanel.css`):  every group is one. */

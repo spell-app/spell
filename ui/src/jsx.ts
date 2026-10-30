@@ -17066,10 +17066,15 @@ export interface UIMenuEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
-   * - `event.detail`:  `{ values: string[] }`
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
-  "ui-changed": CustomEvent<{ values: string[] }>
+  "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "ui-form-value": CustomEvent<{}>
 }
 
 /** `<ui-menu>`'s own attributes, from its vocabulary. */
@@ -17138,6 +17143,26 @@ export interface UIMenuAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
+  /**
+   * A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
   /**
    * A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).
    * - takes:  `one` · `many`
@@ -17539,10 +17564,15 @@ export interface UIMenuAttributes {
    */
   "on-ui-choosing"?: (event: UIMenuEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
-   * - `event.detail`:  `{ values: string[] }`
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIMenuEventMap["ui-changed"]) => void
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-form-value"?: (event: UIMenuEventMap["ui-form-value"]) => void
 }
 
 /** `<ui-menu>` in JSX:  its own attributes, and HTML's global ones. */
@@ -21580,7 +21610,7 @@ export interface UIPropertyAttributes {
    */
   "prop:name"?: string
   /**
-   * Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type.
+   * Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons` (a segmented row), `radios`, `range`, `checkbox`, `toggle`, `color`, `sides`, `editor`, or one a page added.  None:  the default for its type;  four or fewer choices, all with icons:  `buttons`.
    * - takes:  text
    */
   as?: string
@@ -21589,6 +21619,16 @@ export interface UIPropertyAttributes {
    * @deprecated write `as` -- `prop:` stays only for compiled spell
    */
   "prop:as"?: string
+  /**
+   * Its value when nothing's been set, if the schema doesn't say:  a value other than it shows `:state(set)`, bold under the editor's `show-defaults`.
+   * - takes:  text
+   */
+  default?: string
+  /**
+   * `default`, as the DOM element's property.
+   * @deprecated write `default` -- `prop:` stays only for compiled spell
+   */
+  "prop:default"?: string
   /**
    * Where its choices come from, when not the schema's:  a source the page added (`UI.propertyControls.addChoices()`), or a list, `a, b, c`.
    * - takes:  text
@@ -22085,6 +22125,36 @@ export interface UIPropertyEditorAttributes {
    * @deprecated write `readonly` -- `prop:` stays only for compiled spell
    */
   "prop:readonly"?: boolean | ""
+  /**
+   * Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31).
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
+  /**
+   * How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it.
+   * - takes:  number
+   */
+  columns?: number | `${number}`
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
+  "prop:columns"?: number | `${number}`
+  /**
+   * A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).
+   * - takes:  flag (present / absent)
+   */
+  "show-defaults"?: boolean | ""
+  /**
+   * `show-defaults`, as the DOM element's property.
+   * @deprecated write `show-defaults` -- `prop:` stays only for compiled spell
+   */
+  "prop:showDefaults"?: boolean | ""
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text
@@ -22827,6 +22897,26 @@ export interface UIPropertyGroupAttributes {
    * @deprecated write `error` -- `prop:` stays only for compiled spell
    */
   "prop:error"?: string
+  /**
+   * How many columns its properties lay out on (a short one takes one, the rest a whole row).  None:  its editor's (2 when the editor is `compact`).
+   * - takes:  number
+   */
+  columns?: number | `${number}`
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
+  "prop:columns"?: number | `${number}`
+  /**
+   * Its yes-or-no properties:  `pills`, every run of them one select of pills;  `checkboxes`, never.  None:  three or more side by side are pills, fewer stay checkboxes.
+   * - takes:  `pills` · `checkboxes`
+   */
+  flags?: "pills" | "checkboxes"
+  /**
+   * `flags`, as the DOM element's property.
+   * @deprecated write `flags` -- `prop:` stays only for compiled spell
+   */
+  "prop:flags"?: "pills" | "checkboxes"
   /**
    * Title text;  a slotted `slot="label"` is the rich version (code, links).
    * - takes:  text
@@ -28641,6 +28731,252 @@ export interface UISidebarJSXAttributes
   extends
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UISidebarEventMap>>, keyof UISidebarAttributes>,
     UISidebarAttributes {}
+
+/** `<ui-sides>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISidesEventMap {
+  /**
+   * `ui-changed`:  A length changed:  `value` in the form it was given.  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string | { top?: number, left?: number, right?: number, bottom?: number }, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{
+    value: string | { top?: number; left?: number; right?: number; bottom?: number }
+    originalEvent?: Event
+  }>
+}
+
+/** `<ui-sides>`'s own attributes, from its vocabulary. */
+export interface UISidesAttributes {
+  /**
+   * Size of its boxes, `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * Its lengths, in either form, given back in the form it was given:  CSS's text, one to four numbers (top right bottom left:  `value="10 20 10 20"`), or an object, `{ top, left, right, bottom }` (as the property, or as JSON text in the attribute).  A side left out is empty.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  value?: unknown
+  /**
+   * Its lengths, in either form, given back in the form it was given:  CSS's text, one to four numbers (top right bottom left:  `value="10 20 10 20"`), or an object, `{ top, left, right, bottom }` (as the property, or as JSON text in the attribute).  A side left out is empty.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: unknown
+  /**
+   * Which sides it shows:  `top bottom`, `left right` (one row) ...  None:  all four, top / left and right / bottom.
+   * - takes:  text
+   */
+  sides?: string
+  /**
+   * `sides`, as the DOM element's property.
+   * @deprecated write `sides` -- `prop:` stays only for compiled spell
+   */
+  "prop:sides"?: string
+  /**
+   * Can't be used:  left out of the form, not focusable.
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Shows its lengths but they can't be changed.
+   * - takes:  flag (present / absent)
+   */
+  readonly?: boolean | ""
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
+  "prop:readOnly"?: boolean | ""
+  /**
+   * Form field name.
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * Form validation:  every side shown must have a length.
+   * - takes:  flag (present / absent)
+   */
+  required?: boolean | ""
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
+  "prop:required"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-changed`:  A length changed:  `value` in the form it was given.  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string | { top?: number, left?: number, right?: number, bottom?: number }, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UISidesEventMap["ui-changed"]) => void
+}
+
+/** `<ui-sides>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UISidesJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UISidesEventMap>>, keyof UISidesAttributes>, UISidesAttributes {}
 
 /** `<ui-slider>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISliderEventMap {
@@ -34931,10 +35267,15 @@ export interface UIToolbarEventMap {
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
   /**
-   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
-   * - `event.detail`:  `{ values: string[] }`
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
-  "ui-changed": CustomEvent<{ values: string[] }>
+  "ui-changed": CustomEvent<{ value?: string; values?: string[] }>
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "ui-form-value": CustomEvent<{}>
 }
 
 /** `<ui-toolbar>`'s own attributes, from its vocabulary. */
@@ -35003,6 +35344,26 @@ export interface UIToolbarAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
+  /**
+   * A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
   /**
    * A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).
    * - takes:  `one` · `many`
@@ -35404,10 +35765,15 @@ export interface UIToolbarAttributes {
    */
   "on-ui-choosing"?: (event: UIToolbarEventMap["ui-choosing"]) => void
   /**
-   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
-   * - `event.detail`:  `{ values: string[] }`
+   * `ui-changed`:  A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose="many"` menu's `values`, the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ value?: string, values?: string[] }`
    */
   "on-ui-changed"?: (event: UIToolbarEventMap["ui-changed"]) => void
+  /**
+   * `ui-form-value`:  A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-form-value"?: (event: UIToolbarEventMap["ui-form-value"]) => void
 }
 
 /** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -37351,7 +37717,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
        *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
-       * - events:  `ui-choosing`, `ui-changed`
+       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
        */
       "ui-menu": UIMenuJSXAttributes
       /**
@@ -37655,6 +38021,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-sidebar": UISidebarJSXAttributes
       /**
+       * `<ui-sides>`:  Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.
+       * - also known as:  margin, padding, box model, spacing, insets, sides
+       * - events:  `ui-changed`
+       */
+      "ui-sides": UISidesJSXAttributes
+      /**
        * `<ui-slider>`:  A slider lets people select values within a range.
        * - also known as:  range, range slider, volume, scrubber, track bar
        * - events:  `ui-moved`, `ui-changed`
@@ -37823,7 +38195,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
-       * - events:  `ui-choosing`, `ui-changed`
+       * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**
@@ -37914,6 +38286,7 @@ export interface UIEventMap {
   "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
   "ui-choosing": CustomEvent<unknown>
+  "ui-form-value": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
@@ -38031,6 +38404,7 @@ declare global {
     "ui-shape": UIHTMLElement<UIShapeEventMap>
     "ui-side": HTMLElement
     "ui-sidebar": UIHTMLElement<UISidebarEventMap>
+    "ui-sides": UIHTMLElement<UISidesEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
     "ui-space": HTMLElement
     "ui-stack": HTMLElement

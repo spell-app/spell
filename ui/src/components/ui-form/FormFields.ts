@@ -161,7 +161,8 @@ export class FormFields {
   /** Form-associated custom elements inside the `<ui-form>`:  no selector reaches them. */
   private customControls(): Element[] {
     return [...this.domElement.querySelectorAll("*")].filter(
-      (element) => (element.constructor as { formAssociated?: boolean }).formAssociated
+      (element) =>
+        (element.constructor as { formAssociated?: boolean }).formAssociated || element.matches(FORM_VALUE_STATE)
     )
   }
 
@@ -171,7 +172,7 @@ export class FormFields {
   ////////////////
 
   /** The value of a field made of `controls`;  `null` for none (Fomantic's shape, see the class doc). */
-  private static valueFor(controls: readonly Element[]): E.FieldValue {
+  static valueFor(controls: readonly Element[]): E.FieldValue {
     const [first] = controls
     if (!first) return null
     if (FormFields.isRadio(first)) {
@@ -222,7 +223,7 @@ export class FormFields {
   }
 
   /** Blank, as `depends` sees it. */
-  private static isBlank(value: E.FieldValue): boolean {
+  static isBlank(value: E.FieldValue): boolean {
     return value == null || value === false || value === "" || (Array.isArray(value) && !value.length)
   }
 
@@ -231,7 +232,11 @@ export class FormFields {
     if (element instanceof HTMLInputElement) return !BUTTON_TYPES.has(element.type)
     if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) return true
     if (element instanceof HTMLButtonElement || element instanceof HTMLFieldSetElement) return false
-    return "validity" in element && (element.constructor as { formAssociated?: boolean }).formAssociated === true
+    if ("validity" in element && (element.constructor as { formAssociated?: boolean }).formAssociated === true) {
+      return true
+    }
+    // a `ui-*` element holding a form value without being a form control:  a segmented `<ui-menu name>`
+    return element.matches(FORM_VALUE_STATE)
   }
 
   /**
@@ -364,3 +369,6 @@ const BUTTON_TYPES = new Set(["submit", "reset", "button", "image"])
 
 /** The controls `identifierFor()` already noted as unnamed:  each is noted once. */
 const UNNAMED_NOTED = new WeakSet<Element>()
+
+/** The state a `ui-*` element that holds a form value, but isn't form-associated, carries (`<ui-menu>`'s). */
+const FORM_VALUE_STATE = ":state(form-value)"

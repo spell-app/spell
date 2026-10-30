@@ -604,7 +604,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
           part={this.partForName("content")}
           hidden={this.isFolded || this.isVeiled ? "until-found" : undefined}
           tabindex={this.contentScrolls ? 0 : undefined}
-          style={this.height ? { [HEIGHT_PROPERTY]: this.height } : undefined}
+          style={this.contentStyle}
         >
           <Show when={this.bodyFailureText}>
             <p class={SOURCE_ERROR} part={this.partForName("error")} role="alert">
@@ -626,6 +626,11 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** Drawn at the end of the title bar, after the actions:  for a subclass (a property group's output);  nothing here. */
   protected titleBarEnd(): JSX.Element {
     return undefined
+  }
+
+  /** The content box's inline style:  its `height`;  a subclass may add its own (a property group's columns). */
+  protected get contentStyle(): Record<string, string> | undefined {
+    return this.height ? { [HEIGHT_PROPERTY]: this.height } : undefined
   }
 
   /** Drawn first in the content, before the slot:  for a subclass (a property group's error);  nothing here. */

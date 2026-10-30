@@ -155,6 +155,17 @@ export type AttributeSpec = {
   label?: string
   /** A tip for people, behind the field's info icon:  never the docs' `description`, written for developers. */
   tip?: string
+  /**
+   * A light hint for people, beside or under the field (`LaTeX`, `LaTeX or a #`):  a few words, never a sentence.
+   * - A compact editor shows it at the label row's end;  any other, under the control (epic `debut` P31).
+   */
+  hint?: string
+  /**
+   * An icon for each of its values, by value (`{ left: "align left", center: "align center" }`):
+   * shown in its select, or on its segmented buttons.
+   * - None:  the shared value set's own, if it has them (`ValueSets.iconsFor()`).
+   */
+  icons?: Readonly<Record<string, string>>
   /** Lowest number. */
   min?: number
   /** Highest number. */
@@ -222,11 +233,22 @@ export type AttributeReplacement =
  * - `text`, `number`, `boolean`, `date`:  one value of that type
  * - `choice`:  one of `values` (or `choicesFrom`'s)
  * - `icon`:  an icon's name (`star`, `address book`), picked from a grid of glyphs (`<ui-icon-picker>`)
+ * - `sides`:  four lengths, top / right / bottom / left (margin, padding), edited by `<ui-sides>`
  * - `list`:  many, each `of` a type
  * - `thing`:  a nested thing, with its own `attributesOf`
  * - `data`:  anything else (JSON), edited as text
  */
-export type ValueType = "text" | "number" | "boolean" | "date" | "choice" | "icon" | "list" | "thing" | "data"
+export type ValueType =
+  | "text"
+  | "number"
+  | "boolean"
+  | "date"
+  | "choice"
+  | "icon"
+  | "sides"
+  | "list"
+  | "thing"
+  | "data"
 
 /**
  * What a property editor reads (`<ui-property-editor schema>`):  a thing's name and its attributes.

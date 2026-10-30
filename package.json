@@ -507,6 +507,11 @@
       "types": "./ui/dist-types/src/components/ui-rating/index.d.ts",
       "default": "./ui/src/components/ui-rating/index.ts"
     },
+    "./ui/components/ui-sides": {
+      "spell-source": "./ui/src/components/ui-sides/index.ts",
+      "types": "./ui/dist-types/src/components/ui-sides/index.d.ts",
+      "default": "./ui/src/components/ui-sides/index.ts"
+    },
     "./ui/components/ui-reveal": {
       "spell-source": "./ui/src/components/ui-reveal/index.ts",
       "types": "./ui/dist-types/src/components/ui-reveal/index.d.ts",

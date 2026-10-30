@@ -20590,7 +20590,7 @@
       "name": "ui-menu",
       "description": {
         "kind": "markdown",
-        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`, `ui-changed`"
+        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`"
       },
       "attributes": [
         {
@@ -20715,6 +20715,20 @@
               "name": "borderless"
             }
           ]
+        },
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.\n\nTakes:  text"
+          }
         },
         {
           "name": "choose",
@@ -25988,7 +26002,14 @@
           "name": "as",
           "description": {
             "kind": "markdown",
-            "value": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type.\n\nTakes:  text"
+            "value": "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons` (a segmented row), `radios`, `range`, `checkbox`, `toggle`, `color`, `sides`, `editor`, or one a page added.  None:  the default for its type;  four or fewer choices, all with icons:  `buttons`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "default",
+          "description": {
+            "kind": "markdown",
+            "value": "Its value when nothing's been set, if the schema doesn't say:  a value other than it shows `:state(set)`, bold under the editor's `show-defaults`.\n\nTakes:  text"
           }
         },
         {
@@ -26384,6 +26405,27 @@
           "description": {
             "kind": "markdown",
             "value": "Shows every value;  nothing can be changed.  Reaches every property in it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "compact",
+          "description": {
+            "kind": "markdown",
+            "value": "Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "columns",
+          "description": {
+            "kind": "markdown",
+            "value": "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it.\n\nTakes:  number"
+          }
+        },
+        {
+          "name": "show-defaults",
+          "description": {
+            "kind": "markdown",
+            "value": "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -27108,6 +27150,28 @@
             "kind": "markdown",
             "value": "An error under the title, and the `error` state.\n\nTakes:  text"
           }
+        },
+        {
+          "name": "columns",
+          "description": {
+            "kind": "markdown",
+            "value": "How many columns its properties lay out on (a short one takes one, the rest a whole row).  None:  its editor's (2 when the editor is `compact`).\n\nTakes:  number"
+          }
+        },
+        {
+          "name": "flags",
+          "description": {
+            "kind": "markdown",
+            "value": "Its yes-or-no properties:  `pills`, every run of them one select of pills;  `checkboxes`, never.  None:  three or more side by side are pills, fewer stay checkboxes.\n\nTakes:  `pills` · `checkboxes`"
+          },
+          "values": [
+            {
+              "name": "pills"
+            },
+            {
+              "name": "checkboxes"
+            }
+          ]
         },
         {
           "name": "label",
@@ -33972,6 +34036,293 @@
           "description": {
             "kind": "markdown",
             "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            },
+            {
+              "name": "all-caps"
+            },
+            {
+              "name": "title-caps"
+            },
+            {
+              "name": "headline"
+            },
+            {
+              "name": "subhead"
+            },
+            {
+              "name": "serif"
+            },
+            {
+              "name": "sans-serif"
+            },
+            {
+              "name": "typewriter"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-sides",
+      "description": {
+        "kind": "markdown",
+        "value": "Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.\n\nAlso known as:  margin, padding, box model, spacing, insets, sides.\n\n**Events:**  `ui-changed`"
+      },
+      "attributes": [
+        {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Size of its boxes, `mini` ... `massive`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "sides",
+          "description": {
+            "kind": "markdown",
+            "value": "Which sides it shows:  `top bottom`, `left right` (one row) ...  None:  all four, top / left and right / bottom.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  left out of the form, not focusable.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "readonly",
+          "description": {
+            "kind": "markdown",
+            "value": "Shows its lengths but they can't be changed.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "Form field name.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "required",
+          "description": {
+            "kind": "markdown",
+            "value": "Form validation:  every side shown must have a length.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -41768,7 +42119,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`, `ui-form-value`"
       },
       "attributes": [
         {
@@ -41893,6 +42244,20 @@
               "name": "borderless"
             }
           ]
+        },
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's (epic `debut` P31).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "value",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  choosing one sets it, and sends `ui-changed` with `{ value }`.\n\nTakes:  text"
+          }
         },
         {
           "name": "choose",

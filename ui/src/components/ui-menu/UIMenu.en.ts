@@ -70,6 +70,22 @@ export const menuVocabulary = {
         "`secondary`, `text`, `link`, `borderless`."
     },
     {
+      name: "name",
+      group: "form",
+      kind: "string",
+      description:
+        "A `segmented` menu's name in a form:  the form reads its `value` and writes it back, as a select's " +
+        "(epic `debut` P31)."
+    },
+    {
+      name: "value",
+      group: "form",
+      kind: "string",
+      description:
+        "A `segmented` menu's chosen item, by its `value` (else its text):  setting it selects that item;  " +
+        "choosing one sets it, and sends `ui-changed` with `{ value }`."
+    },
+    {
       name: "choose",
       group: "behaviour",
       kind: "valueOnly",
@@ -228,10 +244,16 @@ export const menuVocabulary = {
     },
     {
       name: "ui-changed",
-      detail: "{ values: string[] }",
+      detail: "{ value?: string, values?: string[] }",
       description:
-        'A `choose="many"` menu\'s toggles changed:  `values` are the items now on, in order ' +
-        "(each one's `value`, else its text)."
+        "A `segmented` menu's choice changed:  `value`, the item chosen;  a `choose=\"many\"` menu's `values`, the " +
+        "items now on, in order (each one's `value`, else its text)."
+    },
+    {
+      name: "ui-form-value",
+      detail: "{}",
+      description:
+        "A `segmented` menu with a `name` is drawn, so it holds a form value now:  a `<ui-form>` around it binds it."
     }
   ],
   slots: [
@@ -255,7 +277,11 @@ export const menuVocabulary = {
     { name: "vertical", description: 'Items stacked (`direction="vertical"`).' },
     { name: "icons-only", description: "`shrinkable`:  the titles are gone, the icons only." },
     { name: "overflow", description: "`shrinkable`:  every item folded into the overflow button." },
-    { name: "dropdown", description: "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown." }
+    { name: "dropdown", description: "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown." },
+    {
+      name: "form-value",
+      description: "A `segmented` menu with a `name`:  a form reads and writes its `value`, as a select's."
+    }
   ],
   texts: [
     {

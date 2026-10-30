@@ -50,7 +50,7 @@ export class DOMFieldElement extends E.DOMElement<UIField> {
  * ### `UIField`
  * The component behind `<ui-field>`:  one field of a form.
  * Its box, `<div class="… field" part="field">`, holds:
- * - the label row (`.row`):  the label, then actions, the output, and the info icon with its tip
+ * - the label row (`.row`):  the label, then actions, the output, (a subclass's hint), and the info icon with its tip
  * - the control (`.control`, the default slot)
  * - then the hint and the errors
  *
@@ -132,14 +132,27 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     return !!this.descriptionText || this.slots.hasContent(this.slotForName("description"))
   }
 
-  /** Has a hint:  `hint`, or `slot="hint"`. */
+  /** The hint shown:  `hint`;  a subclass may find another (a property's, from its schema). */
+  get hintText(): string | undefined {
+    return this.hint
+  }
+
+  /** Has a hint:  `hintText`, or `slot="hint"`. */
   get hasHint(): boolean {
-    return !!this.hint || this.slots.hasContent(this.slotForName("hint"))
+    return !!this.hintText || this.slots.hasContent(this.slotForName("hint"))
+  }
+
+  /**
+   * The hint sits at the label row's end, before the info icon, instead of under the control:
+   * a subclass says so (a compact property editor's property).
+   */
+  get hasHintInRow(): boolean {
+    return false
   }
 
   /** Draws the label row:  it has something in it. */
   get hasRow(): boolean {
-    return this.hasLabel || this.hasActions || this.hasOutput || this.hasDescription
+    return this.hasLabel || this.hasActions || this.hasOutput || this.hasDescription || this.hasHintInRow
   }
 
   /** Glyph of the info icon, while there's a tip. */
@@ -215,12 +228,13 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         <Show when={this.hasRow} fallback={this.controlSlotElement()}>
           {this.labelRow()}
           <div class={CLASSES.control} part={this.partForName("control")}>
+            {this.controlStart()}
             {this.controlSlotElement()}
           </div>
         </Show>
-        <Show when={this.hasHint}>
+        <Show when={this.hasHint && !this.hasHintInRow}>
           <div class={CLASSES.hint} part={this.partForName("hint")}>
-            <slot name={this.slotForName("hint")}>{this.hint}</slot>
+            <slot name={this.slotForName("hint")}>{this.hintText}</slot>
           </div>
         </Show>
         <Show when={this.errors.length}>
@@ -249,6 +263,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             <slot name={this.slotForName("output")}>{this.output}</slot>
           </span>
         </Show>
+        <Show when={this.hasHint && this.hasHintInRow}>
+          <span class={CLASSES.hint} part={this.partForName("hint")} title={this.hintText}>
+            <slot name={this.slotForName("hint")}>{this.hintText}</slot>
+          </span>
+        </Show>
         <Show when={this.hasDescription}>
           <span
             class={CLASSES.info}
@@ -271,6 +290,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
   ////////////////
   // ## The control
   ////////////////
+
+  /** Drawn before the slotted control, under a label row:  a subclass's own (nothing here). */
+  protected controlStart(): JSX.Element {
+    return undefined
+  }
 
   /** The default slot, holding the control(s). */
   private controlSlot?: HTMLSlotElement

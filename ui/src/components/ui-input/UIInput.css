@@ -163,7 +163,8 @@
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     font-style: normal;
-    font-weight: var(--ui-font-weight-normal);
+    /* its owner's weight (a property editor's `show-defaults` bolds a changed value) */
+    font-weight: var(--_ui-input-owner-weight, var(--ui-font-weight-normal));
   }
 
   /* The native control. */

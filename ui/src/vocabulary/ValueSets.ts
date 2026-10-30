@@ -199,6 +199,19 @@ export class ValueSets {
     "modules"
   ] as const
 
+  /**
+   * An icon for each value of a set that has them, by set name:  what a select or segmented control draws beside
+   * (or instead of) each value's name (epic `debut` P31).
+   * - Not a set itself:  a plain static, so it isn't a `ValueSetName`.
+   * - An attribute's own `icons` win (`AttributeSpec.icons`).
+   */
+  static iconsBySet: Readonly<Partial<Record<string, Readonly<Record<string, string>>>>> = {
+    alignments: { left: "align left", center: "align center", right: "align right", justified: "align justify" },
+    verticalAlignments: { top: "arrow up", middle: "arrows alternate vertical", bottom: "arrow down" },
+    floats: { left: "arrow left", right: "arrow right" },
+    attachments: { top: "caret up", bottom: "caret down", left: "caret left", right: "caret right" }
+  }
+
   ////////////////
   // ## Lookup
   ////////////////
@@ -254,6 +267,17 @@ export class ValueSets {
   static setFor(spec: AttributeSpec): ValueSetName | readonly string[] | undefined {
     const kindValues: Partial<Record<AttributeKind, ValueSetName>> = KIND_VALUES
     return spec.values ?? kindValues[spec.kind]
+  }
+
+  /**
+   * The icons of an attribute's values, by value:  its own `icons`, else its value set's (`iconsBySet`).
+   * - `undefined` when neither has any.
+   */
+  static iconsFor(spec: AttributeSpec): Readonly<Record<string, string>> | undefined {
+    if (spec.icons) return spec.icons
+    const set = ValueSets.setFor(spec)
+    if (typeof set !== "string") return undefined
+    return ValueSets.iconsBySet[set]
   }
 
   ////////////////

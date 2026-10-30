@@ -1,0 +1,100 @@
+/*
+ * The style sheet of `<ui-sides>` (epic `debut` P31):  four number boxes for a margin or a padding.
+ * - Markup:  `div.ui [size] [row] sides` > `label.<side>.side` (`.letter`, `input`), one per side shown.
+ * - All four:  a cross, top over left and right over bottom;  `.row`:  the boxes side by side.
+ * - Each box's letter sits faded inside it, at its start;  its number at its end (numbers right-aligned).
+ * - Public tokens (`--ui-sides-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.sides.types, ui.components.sides.content, ui.components.sides.states;
+
+@layer ui.components.sides.types {
+  :host {
+    display: inline-block;
+    max-width: 100%;
+  }
+  .ui.sides {
+    --_ui-sides-box-width: var(--ui-sides-box-width, 5em);
+    --_ui-sides-gap: var(--ui-sides-gap, 4px);
+    --_ui-sides-letter-color: var(--ui-sides-letter-color, var(--ui-text-muted));
+    box-sizing: border-box;
+    display: grid;
+    grid-template-areas:
+      ". top top ."
+      "left left right right"
+      ". bottom bottom .";
+    grid-template-columns: repeat(4, minmax(0, calc(var(--_ui-sides-box-width) / 2)));
+    gap: var(--_ui-sides-gap);
+    font-family: var(--ui-font-family);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+  }
+  .ui.row.sides {
+    grid-template-areas: none;
+    grid-template-columns: repeat(2, minmax(0, var(--_ui-sides-box-width)));
+  }
+}
+
+@layer ui.components.sides.content {
+  .side {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+  .ui.sides:not(.row) > .side {
+    grid-area: var(--_sides-area);
+  }
+  .top.side {
+    --_sides-area: top;
+  }
+  .left.side {
+    --_sides-area: left;
+  }
+  .right.side {
+    --_sides-area: right;
+  }
+  .bottom.side {
+    --_sides-area: bottom;
+  }
+  .side > .letter {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0.5em;
+    display: flex;
+    align-items: center;
+    color: var(--_ui-sides-letter-color);
+    font-size: 0.85em;
+    pointer-events: none;
+  }
+  .side > input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: var(--ui-input-padding-block, 0.35em) var(--ui-input-padding-inline, 0.6em)
+      var(--ui-input-padding-block, 0.35em) 1.75em;
+    border: var(--ui-border-width, 1px) solid var(--ui-border-color);
+    border-radius: var(--ui-input-radius, var(--ui-radius-s, 4px));
+    background: var(--ui-surface);
+    color: var(--ui-text-color);
+    font: inherit;
+    font-weight: var(--_ui-input-owner-weight, var(--ui-font-weight-normal));
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    appearance: textfield;
+  }
+  .side > input::-webkit-inner-spin-button {
+    appearance: none;
+  }
+  .side > input:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: 1px;
+  }
+}
+
+@layer ui.components.sides.states {
+  .side > input:disabled {
+    opacity: var(--ui-disabled-opacity, 0.45);
+  }
+  .ui.sides[aria-invalid="true"] > .side > input {
+    border-color: var(--ui-negative-border, var(--ui-negative-text));
+  }
+}

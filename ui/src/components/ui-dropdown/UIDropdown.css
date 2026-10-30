@@ -348,6 +348,8 @@
   /* Text:  the current value, or the placeholder (`default`). */
   .ui.dropdown > .text {
     display: inline-block;
+    /* its owner's weight (a property editor's `show-defaults` bolds a changed value) */
+    font-weight: var(--_ui-input-owner-weight, inherit);
   }
   .ui.dropdown:not(.button) > .default.text {
     color: var(--_ui-dropdown-placeholder-color);

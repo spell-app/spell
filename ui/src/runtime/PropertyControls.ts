@@ -114,10 +114,22 @@ export type PropertyControl = {
    * - none:  no choices
    */
   choices?: "items" | "radios"
+  /**
+   * How much of a row its property takes on a property editor's grid (`columns`, a compact editor's two):
+   * `half` (one column) or `full` (the row), the default.
+   * - A property's own `width` wins (`width="1/2"`).
+   */
+  width?: "half" | "full"
+  /** A yes or no:  in a compact editor its property draws on one line, the box then its label. */
+  inline?: boolean
 }
 
-/** One choice:  a value, or a value and the text people see. */
-export type Choice = string | { value: string; text: string }
+/**
+ * One choice:  a value, or a value and the text people see.
+ * - `icon`:  an icon's name, drawn before its text (a select), or alone (a segmented row whose choices all have one)
+ * - `image`:  a picture's URL, drawn round before its text (a hue's chip)
+ */
+export type Choice = string | { value: string; text: string; icon?: string; image?: string }
 
 /** A choice source:  the choices, now or later. */
 export type ChoiceSource = () => readonly Choice[] | Promise<readonly Choice[]>
@@ -135,7 +147,9 @@ const INPUT = "input"
 
 /**
  * The built-in control kinds.
- * - `buttons` is a row of radios for now:  Spell UI has no segmented control a form reads (epic `property-editor` I3).
+ * - `buttons` is a segmented `<ui-menu>`, which a form reads as it reads a select (epic `debut` P31);
+ *   `radios`, a row of radios, is what `buttons` drew before.
+ * - `sides` draws `<ui-sides>`:  margin and padding, four numbers (epic `debut` P31).
  * - `color` is the browser's own picker for now:  Spell UI's colour pickers come later (epic `property-editor` T4).
  * - `icon` draws `<ui-icon-picker>`:  every `icon` attribute (a button's, a rating's) is picked from a grid of glyphs,
  *   not typed (epic `debut` P14).
@@ -143,14 +157,16 @@ const INPUT = "input"
 const BUILT_IN_KINDS: Record<string, PropertyControl> = {
   input: { tag: "ui-input", types: ["text", "data"] },
   text: { tag: "ui-textarea" },
-  number: { tag: "ui-input", attributes: { type: "number" }, types: ["number"] },
-  date: { tag: "ui-input", attributes: { type: "date" }, types: ["date"] },
-  select: { tag: "ui-select", choices: "items", types: ["choice"] },
+  number: { tag: "ui-input", attributes: { type: "number" }, types: ["number"], width: "half" },
+  date: { tag: "ui-input", attributes: { type: "date" }, types: ["date"], width: "half" },
+  select: { tag: "ui-select", choices: "items", types: ["choice"], width: "half" },
   icon: { tag: "ui-icon-picker", types: ["icon"] },
-  buttons: { tag: "ui-radio", choices: "radios" },
+  buttons: { tag: "ui-menu", attributes: { appearance: "segmented", size: "small" }, choices: "items", width: "half" },
+  radios: { tag: "ui-radio", choices: "radios" },
   range: { tag: "ui-slider" },
-  checkbox: { tag: "ui-checkbox", types: ["boolean"] },
-  toggle: { tag: "ui-checkbox", attributes: { type: "toggle" } },
-  color: { tag: "ui-input", attributes: { type: "color" } },
+  checkbox: { tag: "ui-checkbox", types: ["boolean"], inline: true },
+  toggle: { tag: "ui-checkbox", attributes: { type: "toggle" }, inline: true },
+  color: { tag: "ui-input", attributes: { type: "color" }, width: "half" },
+  sides: { tag: "ui-sides", types: ["sides"], width: "half" },
   editor: { tag: "ui-property-editor", types: ["thing"] }
 }

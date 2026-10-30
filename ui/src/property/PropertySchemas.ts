@@ -236,6 +236,7 @@ const KIND_FOR_TYPE: Record<V.ValueType, V.AttributeKind> = {
   date: "string",
   choice: "enum",
   icon: "icon",
+  sides: "json",
   list: "json",
   thing: "json",
   data: "json"

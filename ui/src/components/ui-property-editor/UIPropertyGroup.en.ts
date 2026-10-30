@@ -63,7 +63,24 @@ export const propertyGroupVocabulary = {
         kind: "string",
         description: 'A value at the end of the title bar;  `slot="output"`.'
       },
-      { name: "error", group: "form", kind: "string", description: "An error under the title, and the `error` state." }
+      { name: "error", group: "form", kind: "string", description: "An error under the title, and the `error` state." },
+      {
+        name: "columns",
+        group: "layout",
+        kind: "number",
+        description:
+          "How many columns its properties lay out on (a short one takes one, the rest a whole row).  " +
+          "None:  its editor's (2 when the editor is `compact`)."
+      },
+      {
+        name: "flags",
+        group: "appearance",
+        kind: "valueOnly",
+        values: ["pills", "checkboxes"],
+        description:
+          "Its yes-or-no properties:  `pills`, every run of them one select of pills;  `checkboxes`, never.  " +
+          "None:  three or more side by side are pills, fewer stay checkboxes."
+      }
     ] as const satisfies readonly E.AttributeSpec[],
     [sectionVocabulary.attributes],
     SOURCE_ONLY
@@ -99,7 +116,9 @@ export const propertyGroupVocabulary = {
     [
       { name: "changed", description: 'A property in it has an edit not saved yet (`apply="on save"`).' },
       { name: "readonly", description: "Nothing in it can be changed (`readonly`)." },
-      { name: "error", description: "Its `error`, or a property in it failing validation." }
+      { name: "error", description: "Its `error`, or a property in it failing validation." },
+      { name: "compact", description: "Its editor is `compact`:  a tight band." },
+      { name: "grid", description: "Its properties lay out on columns (`columns`, or its editor's)." }
     ] as const satisfies readonly E.StateSpec[],
     [sectionVocabulary.states],
     SOURCE_ONLY

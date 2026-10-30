@@ -450,11 +450,14 @@ export type InputChangeDetail = {
 /**
  * Inherited tokens an OWNER sets for the text controls inside it (`UIInput.css`), e.g. `<ui-field>` on its root.
  * - `width` -- the DOM element's inline size (`100%` in a field, `auto` in an inline one)
+ * - `weight` -- its value's text weight:  bold in a property showing a value other than its default
+ *   (`<ui-property-editor show-defaults>`);  read by inputs, selects, dropdowns and a segmented menu's chosen item
  * - `color` / `background` / `border` -- a field's state, as RESOLVED colours
  *   (declared where the state's remap runs), so a control's own `state` still wins
  */
 export const InputOwnerTokens = {
   width: "--_ui-input-owner-width",
+  weight: "--_ui-input-owner-weight",
   color: "--_ui-field-state-color",
   background: "--_ui-field-state-background",
   border: "--_ui-field-state-border"

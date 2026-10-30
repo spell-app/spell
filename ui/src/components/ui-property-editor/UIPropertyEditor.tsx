@@ -33,6 +33,26 @@ export class DOMPropertyEditorElement extends DOMFormElement {
   get currentSchema(): PropertySchema | undefined {
     return (this.component as UIPropertyEditor | undefined)?.currentSchema
   }
+
+  /** Compact (`compact`):  its groups and properties draw tight. */
+  get isCompact(): boolean {
+    return !!(this.component as UIPropertyEditor | undefined)?.isCompact
+  }
+
+  /** Its properties lay out on columns (`columns`, or `compact`). */
+  get isGrid(): boolean {
+    return !!(this.component as UIPropertyEditor | undefined)?.isGrid
+  }
+
+  /** Its column count, for a group without `columns` of its own. */
+  get columnCount(): number {
+    return (this.component as UIPropertyEditor | undefined)?.columnCount ?? 1
+  }
+
+  /** A value other than its default shows bold (`show-defaults`). */
+  get showsDefaults(): boolean {
+    return !!(this.component as UIPropertyEditor | undefined)?.showsDefaults
+  }
 }
 
 /****************
@@ -69,6 +89,10 @@ export class DOMPropertyEditorElement extends DOMFormElement {
  * - `apply="on save"`:  Save and Cancel under the properties (`part="footer"`).
  * - `readonly`:  every property in it is readonly (read as each connects).
  * - A NESTED editor, made by a property (`as="editor"`), edits that property's thing:  its `value` unless given.
+ * - `compact` (epic `debut` P31):  the tight look of an inspector, which its groups and properties read from it.
+ *   - Its properties lay out on `columns` (2 when compact):  a short one (a number, a select) one column, the rest
+ *     a row;  a group's own `columns` wins in it.
+ *   - `show-defaults`:  a value other than its property's default shows bold.
  ****************/
 export class UIPropertyEditor extends UIForm {
   // the form's names under the editor's tag, the section's and its own:  TypeScript only knows the form's literals
@@ -297,6 +321,39 @@ export class UIPropertyEditor extends UIForm {
   }
 
   ////////////////
+  // ## Compact, columns and defaults (epic `debut` P31)
+  ////////////////
+
+  /** `:state(compact)`:  `compact`, the tight look its groups and properties read too. */
+  @E.cssState("compact")
+  get isCompact(): boolean {
+    return E.Converters.boolean(this.attributes.compact)
+  }
+
+  /** How many columns its properties lay out on:  `columns`, else 2 when compact, else 1. */
+  get columnCount(): number {
+    return UIPropertyEditor.columnsFrom(this.attributes.columns) ?? (this.isCompact ? 2 : 1)
+  }
+
+  /** `:state(grid)`:  its properties lay out on columns. */
+  @E.cssState("grid")
+  get isGrid(): boolean {
+    return this.isCompact || this.columnCount > 1
+  }
+
+  /** `:state(show-defaults)`:  a value other than its default shows bold. */
+  @E.cssState("show-defaults")
+  get showsDefaults(): boolean {
+    return E.Converters.boolean(this.attributes["show-defaults"])
+  }
+
+  /** A `columns` attribute's count, `undefined` for none (or nonsense). */
+  static columnsFrom(text: string | null | undefined): number | undefined {
+    const count = Math.round(Number(text))
+    return text && count >= 1 ? count : undefined
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
@@ -304,6 +361,7 @@ export class UIPropertyEditor extends UIForm {
     return (
       <div
         class={this.rootClass}
+        style={{ [COLUMNS_PROPERTY]: String(this.columnCount) }}
         part={`${this.partForName(OWN.editor)} ${this.partForName(OWN.form)}`}
         inert={this.disabled || this.loading}
         aria-busy={this.loading ? "true" : undefined}
@@ -470,6 +528,12 @@ const OWN = {
   loading: "ui-loading",
   loaded: "ui-loaded"
 } as unknown as Record<string, never>
+
+/**
+ * Where its column count reaches its grid, and its groups':  inherited, so a group without `columns` takes it.
+ * - Plumbing, never set by a page:  `columns` is the API.
+ */
+export const COLUMNS_PROPERTY = "--_property-editor-columns"
 
 /** The section it draws, and its buttons. */
 const SECTION_TAG = "ui-section"

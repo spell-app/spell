@@ -124,11 +124,12 @@ describe("<ui-property-editor> schema", () => {
       { size: "lg", font: { family: "Lora" } }
     )
     expect(host.querySelectorAll("ui-property")).toHaveLength(2)
-    const radios = [...host.querySelectorAll("ui-property[name=size] ui-radio")] as (HTMLElement & {
-      selected: boolean
-    })[]
-    expect(radios.map((radio) => radio.getAttribute("value"))).toEqual(["sm", "md", "lg"])
-    expect(radios.map((radio) => radio.selected)).toEqual([false, false, true])
+    // `buttons`:  a segmented menu, which the form reads and writes as a select
+    const menu = host.querySelector("ui-property[name=size] ui-menu")!
+    expect(menu.getAttribute("appearance")).toBe("segmented")
+    const items = [...menu.querySelectorAll("ui-item")] as (HTMLElement & { selected: boolean })[]
+    expect(items.map((item) => item.getAttribute("value"))).toEqual(["sm", "md", "lg"])
+    await expect.poll(() => items.map((item) => item.selected)).toEqual([false, false, true])
     const family = host.querySelector("ui-property[name='font.family']")!
     expect(family.shadowRoot!.querySelector("[part~=label]")!.textContent).toBe("Font family")
     expect((family.querySelector("ui-input") as HTMLElement & { value: unknown }).value).toBe("Lora")
@@ -293,7 +294,7 @@ describe("<ui-property-editor source>", () => {
     expect(loaded).toBe(true)
     expect(host.getAttribute("label")).toBe("Theme")
     expect(host.querySelector("ui-property[name=title]")!.getAttribute("hint")).toBe("Used for the file name.")
-    await expect.poll(() => host.querySelectorAll("ui-property[name=size] ui-radio").length).toBe(3)
+    await expect.poll(() => host.querySelectorAll("ui-property[name=size] ui-menu ui-item").length).toBe(3)
     expect(host.querySelector("ui-property-group[label=More] ui-property[name=dark]")).not.toBeNull()
     expect(control(host, "title").value).toBe("Spell")
   })

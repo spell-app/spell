@@ -3,9 +3,16 @@
  * - Its `<ui-section>` (when it has a title) is an element of its own, styled by itself.
  * - `.footer`:  Save and Cancel under the properties, at the end of the line.
  * - `.output`:  a value at the end of the title bar (mono, muted);  `.error-line`:  its own error under the title.
+ * - `:state(grid)` (`columns`, or `compact`):  its properties on a grid of `--_property-editor-columns` columns,
+ *   set on the root from `columns`;  each property says how much of a row it takes (`UIProperty.css`), and
+ *   everything else here takes a whole row.
+ * - `:state(compact)`:  the tight look (epic `debut` P31), through private aliases its properties and groups read,
+ *   as custom properties inherit into what's slotted.
+ *   - `--ui-property-editor-font-size` (13px), `-row-gap` (8px), `-column-gap` (12px), `-label-distance` (3px)
+ *   - its controls tighter, set as the page would (`componentTokens.test.ts` lists each)
  */
 
-@layer ui.components.property-editor.content;
+@layer ui.components.property-editor.content, ui.components.property-editor.variations;
 
 @layer ui.components.property-editor.content {
   .footer {
@@ -24,5 +31,45 @@
     margin: 0 0 0.75em;
     color: var(--ui-negative-text);
     font-size: 0.85714em;
+  }
+}
+
+@layer ui.components.property-editor.variations {
+  /* ## On a grid:  the properties' row gap is their own margin, so a field never sits on a gap and a margin both */
+  :host(:state(grid)) .ui.form,
+  :host(:state(grid)) .ui.form > ui-section::part(content) {
+    --_property-editor-field-width: auto;
+    display: grid;
+    grid-template-columns: repeat(var(--_property-editor-columns, 1), minmax(0, 1fr));
+    column-gap: var(--_ui-property-editor-column-gap, var(--ui-form-gutter, 1em));
+    align-items: start;
+  }
+  :host(:state(grid)) .ui.form > :not(slot),
+  :host(:state(grid)) :is(.output, .error-line, .footer) {
+    grid-column: 1 / -1;
+  }
+
+  /* ## Compact:  an inspector's density */
+  :host(:state(compact)) .ui.form {
+    --_ui-property-editor-font-size: var(--ui-property-editor-font-size, 13px);
+    --_ui-property-editor-row-gap: var(--ui-property-editor-row-gap, 8px);
+    --_ui-property-editor-column-gap: var(--ui-property-editor-column-gap, 12px);
+    --_ui-property-editor-label-distance: var(--ui-property-editor-label-distance, 3px);
+    /* the form's own aliases, which its fields read:  regular labels (bold means "changed"), the text's size */
+    --_ui-form-row-distance: var(--_ui-property-editor-row-gap);
+    --_ui-form-label-distance: var(--_ui-property-editor-label-distance);
+    --_ui-form-label-font-size: 1em;
+    --_ui-form-label-font-weight: var(--ui-font-weight-normal, 400);
+    /* its controls size their text from the base size:  the editor's */
+    --ui-font-size: var(--_ui-property-editor-font-size);
+    /* controls about 26px tall */
+    --ui-input-padding-block: 0.3em;
+    --ui-input-padding-inline: 0.6em;
+    --ui-select-padding-block: 0.3em;
+    --ui-select-padding-inline: 0.6em;
+    --ui-dropdown-padding-block: 0.3em;
+    --ui-dropdown-padding-inline: 0.6em;
+    --ui-menu-segmented-item-padding: 0.4em 0.6em;
+    font-size: var(--_ui-property-editor-font-size);
   }
 }

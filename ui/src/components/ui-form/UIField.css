@@ -70,6 +70,18 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* A hint in the label row (a compact property editor's):  light, cut short, the whole text its tooltip */
+  .field > .row > .hint {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--_ui-field-hint-color);
+    font-size: 0.84615em;
+    font-weight: var(--ui-font-weight-normal);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* ## The info icon and its tip */
   .field > .row > .info {
     position: relative;

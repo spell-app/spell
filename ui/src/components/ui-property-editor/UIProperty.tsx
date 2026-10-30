@@ -1,7 +1,7 @@
 import { E, UI } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-form.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines the form family:  a property is a field, in a form)
-import { DOMFieldElement, UIField } from "spell/ui/components/ui-form"
+import { DOMFieldElement, FormFields, UIField } from "spell/ui/components/ui-form"
 import type { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
 import { PropertySchemas } from "spell/ui/property"
 import type { AttributeSpec, PropertySchema, ValueType } from "spell/ui/vocabulary"
@@ -38,6 +38,19 @@ export class DOMPropertyElement extends DOMFieldElement {
     const component = this.component as UIProperty | undefined
     if (component) component.isChanged = isChanged
   }
+
+  /** Its form showed a value in its control (`FormBinding`):  `:state(set)` reads it again. */
+  valueShown() {
+    ;(this.component as UIProperty | undefined)?.noteValueChanged()
+  }
+}
+
+/**
+ * The same run, property by property (or both none):  a property's `flagRun` doesn't change for an equal one.
+ * - Above the class:  `@state({ equals })` reads it while the class is defined.
+ */
+function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | undefined): boolean {
+  return a === b || (!!a && !!b && a.length === b.length && a.every((each, index) => each === b[index]))
 }
 
 /****************
@@ -61,6 +74,15 @@ export class DOMPropertyElement extends DOMFieldElement {
  *   - SIDE EFFECT:  adds and removes elements in its light DOM, marked `data-ui-made`.
  * - `readonly` nests:  its own, or a `readonly` group or editor around it, makes the control readonly.
  * - `:state(changed)`:  its edit is held, not saved yet (the editor says, `markChanged()`).
+ * - Its look in its editor (epic `debut` P31):
+ *   - `:state(half)`:  half a row on the editor's grid, by its control's kind (a number, a select) or its `width`
+ *   - in a `compact` editor (`:state(compact)`):  a yes or no on one line, the box then its label;  its hint at the
+ *     label row's end
+ *   - `:state(set)`:  its value isn't its default (`default`, else the schema's);  bold under `show-defaults`
+ *   - a run of three or more yes-or-no properties in one group is ONE select of pills (`FlagRun`):
+ *     the first draws it (`:state(flags)`), the rest hide (`:state(flag)`), each still its own property
+ *   - choices carry their icons (`ValueSets.iconsFor()`), a hue its colour's chip;  four or fewer, all with
+ *     icons, draw as a segmented row of icons (`buttons`)
  ****************/
 export class UIProperty extends UIField {
   // the field's names under the property's tag, and its own:  TypeScript only knows the field's literals
@@ -118,16 +140,33 @@ export class UIProperty extends UIField {
     return schema ? UIProperty.specFor(schema, this.propertyName) : undefined
   }
 
-  /** Its label:  the field's own `label`, else the schema's (or one made from its name). */
+  /** Its label:  its own (`ownLabel`);  "Options" while it heads a run of pills. */
   get labelText(): string | undefined {
+    return this.flagRun ? this.translationForKey(FLAGS_TEXT) : this.ownLabel
+  }
+
+  /** Its own label:  the field's `label`, else the schema's (or one made from its name). */
+  get ownLabel(): string | undefined {
     if (this.label) return this.label
     const spec = this.spec
     return spec ? PropertySchemas.labelOf(spec) : this.propertyName && PropertySchemas.labelOf(NAMED(this.propertyName))
   }
 
-  /** Its tip:  the field's own `description`, else the schema's `tip`. */
+  /** Its tip:  the field's own `description`, else the schema's `tip`;  the pills' row has none of its own. */
   get descriptionText(): string | undefined {
+    if (this.flagRun) return undefined
     return this.description ?? this.spec?.tip
+  }
+
+  /** Its hint:  the field's own `hint`, else the schema's. */
+  get hintText(): string | undefined {
+    if (this.flagRun) return undefined
+    return this.hint ?? this.spec?.hint
+  }
+
+  /** In a compact editor, its hint sits at the label row's end. */
+  get hasHintInRow(): boolean {
+    return this.isCompact
   }
 
   /** Its value's type, as a form edits it:  the schema's, else `text`. */
@@ -183,14 +222,26 @@ export class UIProperty extends UIField {
    */
   get controlKind(): string | undefined {
     if (!this.isReady) return undefined
-    return this.requestedKind ?? UI.propertyControls.kindFor(this.valueType)
+    if (this.requestedKind) return this.requestedKind
+    const choices = this.choices
+    const isIconRow =
+      this.valueType === CHOICE &&
+      !!choices?.length &&
+      choices.length <= MOST_SEGMENTS &&
+      choices.every(UIProperty.hasIcon)
+    return isIconRow ? SEGMENTED_KIND : UI.propertyControls.kindFor(this.valueType)
+  }
+
+  /** What its kind draws, while the runtime is in. */
+  get control(): PropertyControl | undefined {
+    const kind = this.controlKind
+    return kind ? UI.propertyControls.get(kind) : undefined
   }
 
   /** `:state(buttons)`:  its control is a row of choices (a kind drawn as `radios`). */
   @E.cssState("buttons")
   get isButtonRow(): boolean {
-    const kind = this.controlKind
-    return !!kind && UI.propertyControls.get(kind)?.choices === RADIOS
+    return this.control?.choices === RADIOS
   }
 
   /** Choices loaded from a source (`options`, `choicesFrom`), once they arrive. */
@@ -207,8 +258,17 @@ export class UIProperty extends UIField {
     const text = this.optionsText
     if (text && text.includes(",")) return text.split(",").map((choice) => choice.trim())
     if (text || this.spec?.choicesFrom) return this.loadedChoices
-    const set = this.spec && E.ValueSets.setFor(this.spec)
-    return set ? E.ValueSets.get(set) : undefined
+    const spec = this.spec
+    const set = spec && E.ValueSets.setFor(spec)
+    if (!set) return undefined
+    const icons = E.ValueSets.iconsFor(spec)
+    const values = E.ValueSets.get(set)
+    return icons ? values.map((value) => (icons[value] ? { value, text: value, icon: icons[value] } : value)) : values
+  }
+
+  /** Its choices are colours:  each drawn with a chip of its hue (`hueChip()`). */
+  get isHueChoice(): boolean {
+    return !!this.spec && E.ValueSets.setFor(this.spec) === HUES
   }
 
   /** A choice source to load:  `options` naming one, else the schema's `choicesFrom`. */
@@ -255,6 +315,8 @@ export class UIProperty extends UIField {
     const made = control.choices === "radios" ? this.radios(control) : [this.controlElement(control)]
     for (const element of made) element.setAttribute(MADE_ATTRIBUTE, "")
     this.domElement.append(...made)
+    this.noteValueChanged()
+    FlagRun.arrangeSoon(this.domElement.parentElement)
   }
 
   /** One control element of `control`'s kind:  named, limited, readonly, its choices as `<ui-item>`s. */
@@ -268,9 +330,20 @@ export class UIProperty extends UIField {
     if (spec?.step !== undefined) element.setAttribute("step", String(spec.step))
     if (this.isReadOnly) element.setAttribute("readonly", "")
     if (control.choices === "items") {
-      // no value and no default:  it reads "none", never blank
-      if (spec?.default === undefined) element.setAttribute("placeholder", this.translationForKey("none"))
-      for (const choice of this.choices ?? []) element.append(UIProperty.item(choice))
+      const choices = this.choices ?? []
+      const isSegmented = control.attributes?.appearance === SEGMENTED
+      // no value and no default:  it reads "none", never blank (a segmented row always shows its choices)
+      if (spec?.default === undefined && !isSegmented)
+        element.setAttribute("placeholder", this.translationForKey("none"))
+      // every segment an icon:  icons alone, each one's name its tooltip
+      const iconsOnly = isSegmented && choices.length > 0 && choices.every(UIProperty.hasIcon)
+      if (iconsOnly) element.setAttribute("icon", "")
+      for (const choice of choices) {
+        const item = UIProperty.item(choice, iconsOnly)
+        if (this.isHueChoice)
+          item.setAttribute("image", UIProperty.hueChip(item.getAttribute("value")!, this.domElement))
+        element.append(item)
+      }
     }
     if (control.tag === EDITOR_TAG) element.setAttribute(VALUE_FROM_ATTRIBUTE, this.propertyName)
     return element
@@ -293,7 +366,198 @@ export class UIProperty extends UIField {
    */
   @E.untracked
   private removeMadeControls() {
-    for (const child of [...this.domElement.children]) if (child.hasAttribute(MADE_ATTRIBUTE)) child.remove()
+    for (const child of [...this.domElement.children]) {
+      // the pills' select stays:  it follows its run, not its kind
+      if (child.hasAttribute(MADE_ATTRIBUTE) && child.getAttribute(MADE_ATTRIBUTE) !== FLAGS) child.remove()
+    }
+  }
+
+  ////////////////
+  // ## Its look in its editor (epic `debut` P31)
+  ////////////////
+
+  /** `:state(compact)`:  its editor is `compact`. */
+  @E.cssState("compact")
+  get isCompact(): boolean {
+    return !!this.editor?.isCompact
+  }
+
+  /** `:state(show-defaults)`:  its editor bolds a value other than its default. */
+  @E.cssState("show-defaults")
+  get showsDefaults(): boolean {
+    return !!this.editor?.showsDefaults
+  }
+
+  /**
+   * `:state(half)`:  half a row on its editor's grid (one column):  its own `width` (`1/2`, `8` of 16 or less),
+   * else its kind's (`PropertyControl.width`).  The pills' row takes the whole.
+   */
+  @E.cssState("half")
+  get isHalf(): boolean {
+    if (this.flagRun) return false
+    const width = this.attributes.width
+    const columns = width ? E.ValueSets.columns(width) : undefined
+    if (columns !== undefined) return columns <= HALF_OF_GRID
+    return this.control?.width === HALF
+  }
+
+  /** In a compact editor, a yes or no draws on one line:  the field's `inline`, the box before its label. */
+  @E.cssState("inline-check")
+  get isInlineCheck(): boolean {
+    return this.isCompact && !!this.control?.inline && !this.flagRun
+  }
+
+  protected classValue(name: E.AttributeName<typeof fieldVocabulary>): unknown {
+    if (name === "inline" && this.isInlineCheck) return true
+    return super.classValue(name)
+  }
+
+  ////////////////
+  // ## Set:  a value other than its default
+  ////////////////
+
+  /** Moves each time its control's value may have:  a person's edit, or its form showing one. */
+  @E.state private accessor valueVersion = 0
+
+  /** Its control's value may have changed:  `:state(set)` reads it again. */
+  @E.untracked
+  noteValueChanged() {
+    this.valueVersion++
+  }
+
+  /** A person edited its control. */
+  @E.on("ui-changed")
+  @E.on("input")
+  @E.on("change")
+  protected onValueEdited() {
+    this.noteValueChanged()
+  }
+
+  /** Its default:  its own `default`, else the schema's;  `undefined` for none. */
+  get defaultValue(): string | number | boolean | undefined {
+    return this.attributes.default ?? this.spec?.default
+  }
+
+  /**
+   * `:state(set)`:  its value isn't its default (any value at all, with none).
+   * - Never while its things disagree (`mixed`), or it's readonly.
+   * - Read from its control, the way its form reads it (`FormFields.valueFor()`).
+   */
+  @E.cssState("set")
+  get isSet(): boolean {
+    void this.valueVersion
+    if (this.isMixed || this.isReadOnly) return false
+    const controls = [...this.domElement.children].filter(
+      (child) => !child.slot && child.getAttribute(MADE_ATTRIBUTE) !== FLAGS
+    )
+    return UIProperty.differs(FormFields.valueFor(controls), this.defaultValue)
+  }
+
+  /**
+   * `value` isn't `fallback`:  a yes or no compared as one, anything else as text.
+   * - STATIC:  pure.
+   */
+  static differs(value: E.FieldValue, fallback: string | number | boolean | undefined): boolean {
+    if (fallback === undefined) return !FormFields.isBlank(value)
+    if (typeof fallback === "boolean" || fallback === "true" || fallback === "false") {
+      return !FormFields.isBlank(value) !== E.Converters.boolean(fallback)
+    }
+    const text = Array.isArray(value) ? value.join(",") : value == null ? "" : String(value)
+    return text !== String(fallback)
+  }
+
+  ////////////////
+  // ## A run of yes-or-no properties, as one select of pills
+  ////////////////
+
+  /** The properties its pills stand for, while it heads a run (`:state(flags)`);  set by `FlagRun`. */
+  @E.state({ equals: isSameRun }) accessor flagRun: readonly UIProperty[] | undefined = undefined
+
+  /** The property heading its run, while it's in one and doesn't head it (`:state(flag)`, hidden). */
+  @E.cssState("flag")
+  @E.state
+  accessor isFlagMember = false
+
+  /** `:state(flags)`:  it heads a run, drawing its pills. */
+  @E.cssState("flags")
+  get isFlagLead(): boolean {
+    return !!this.flagRun
+  }
+
+  /** A yes or no that may join a run:  its control is a checkbox kind, its own (not the author's). */
+  get canJoinFlags(): boolean {
+    return !!this.control?.inline && !this.holdsOwnControl && !this.requestedKind
+  }
+
+  /** Its checkbox's chosen state:  read again with its value. */
+  get isChosen(): boolean {
+    void this.valueVersion
+    const checkbox = this.madeCheckbox
+    return !!checkbox && FormFields.isChosen(checkbox)
+  }
+
+  /** The checkbox it made. */
+  @E.untracked
+  private get madeCheckbox(): Element | undefined {
+    return [...this.domElement.children].find((child) => child.getAttribute(MADE_ATTRIBUTE) === "" && !child.slot)
+  }
+
+  /** The names of its run's properties that are on:  the pills shown. */
+  get chosenFlags(): readonly string[] {
+    return (this.flagRun ?? []).filter((property) => property.isChosen).map((property) => property.propertyName)
+  }
+
+  /** The pills' select, while it heads a run. */
+  private flagsSelect: HTMLElement | undefined
+
+  /** Heading a run, or no longer:  make the pills' select, or take it away. */
+  @E.onChange("flagRun")
+  protected onFlagRunChanged(run: readonly UIProperty[] | undefined) {
+    this.flagsSelect?.remove()
+    this.flagsSelect = undefined
+    if (!run) return
+    const select = document.createElement(DROPDOWN_TAG)
+    select.setAttribute(MADE_ATTRIBUTE, FLAGS)
+    select.setAttribute("multiple", "")
+    select.setAttribute("fluid", "")
+    select.setAttribute("aria-label", this.translationForKey(FLAGS_TEXT))
+    for (const property of run) {
+      const item = UIProperty.item({ value: property.propertyName, text: property.ownLabel ?? property.propertyName })
+      const tip = property.description ?? property.spec?.tip
+      if (tip) item.setAttribute("title", tip)
+      select.append(item)
+    }
+    select.addEventListener("ui-changed", this.onFlagsPicked)
+    this.domElement.append(select)
+    this.flagsSelect = select
+    return () => select.removeEventListener("ui-changed", this.onFlagsPicked)
+  }
+
+  /** The pills shown follow its run's checkboxes. */
+  @E.onChange("chosenFlags", "flagRun")
+  protected onChosenFlagsChanged(chosen: readonly string[]) {
+    const select = this.flagsSelect as (HTMLElement & { value?: unknown }) | undefined
+    if (select) select.value = [...chosen]
+  }
+
+  /**
+   * A pill added or removed:  turn each of its run's checkboxes on or off to match, as a person's click would,
+   * so its form writes each property back.
+   * - Its own `ui-changed` stops here:  the select is no control of the form's.
+   */
+  @E.untracked
+  private readonly onFlagsPicked = (event: Event) => {
+    event.stopPropagation()
+    const picked = new Set(E.Converters.list((event as CustomEvent<{ value: unknown }>).detail?.value as string))
+    for (const property of this.flagRun ?? []) {
+      const checkbox = property.madeCheckbox as (Element & { checked: boolean }) | undefined
+      const isOn = picked.has(property.propertyName)
+      if (!checkbox || FormFields.isChosen(checkbox) === isOn) continue
+      checkbox.checked = isOn
+      checkbox.dispatchEvent(
+        new CustomEvent("ui-changed", { detail: { selected: isOn }, bubbles: true, composed: true })
+      )
+    }
   }
 
   ////////////////
@@ -322,23 +586,143 @@ export class UIProperty extends UIField {
     return spec
   }
 
-  /** A choice's value and text. */
-  private static choiceParts(choice: Choice): { value: string; text: string } {
+  /** A choice's value and text (and its icon and image, if it has them). */
+  private static choiceParts(choice: Choice): Exclude<Choice, string> {
     return typeof choice === "string" ? { value: choice, text: choice } : choice
   }
 
-  /** A `<ui-item value>` for a choice. */
-  private static item(choice: Choice): HTMLElement {
-    const { value, text } = UIProperty.choiceParts(choice)
+  /** A choice with an icon of its own. */
+  private static hasIcon(choice: Choice): boolean {
+    return typeof choice !== "string" && !!choice.icon
+  }
+
+  /**
+   * A `<ui-item value>` for a choice, with its icon (and image);
+   * `iconOnly`:  its icon alone, its text its tooltip and name.
+   */
+  private static item(choice: Choice, iconOnly = false): HTMLElement {
+    const { value, text, icon, image } = UIProperty.choiceParts(choice)
     const item = document.createElement("ui-item")
     item.setAttribute("value", value)
-    item.textContent = text
+    if (icon) item.setAttribute("icon", icon)
+    if (image) item.setAttribute("image", image)
+    if (iconOnly) {
+      item.setAttribute("title", text)
+      item.setAttribute("aria-label", text)
+    } else item.textContent = text
     return item
+  }
+
+  /**
+   * A round chip of `hue`'s colour, as an SVG `data:` URL:  a hue's choice shows it before its name.
+   * - The colour is worked out on a probe inside `near`, so it's the colour the theme there paints;
+   *   grey where it can't be read.
+   * - SIDE EFFECT:  adds and removes the probe.
+   */
+  static hueChip(hue: string, near: Element): string {
+    const probe = near.appendChild(document.createElement("span"))
+    probe.style.color = `var(--ui-${hue}, gray)`
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="${color}"/></svg>`
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`
   }
 }
 
 /** What a property reads of its editor's DOM element. */
-type DOMEditorLike = HTMLElement & { readonly currentSchema?: PropertySchema }
+type DOMEditorLike = HTMLElement & {
+  readonly currentSchema?: PropertySchema
+  readonly isCompact?: boolean
+  readonly showsDefaults?: boolean
+}
+
+/****************
+ * ### `FlagRun`
+ * Finds the runs of yes-or-no properties in a group (or an editor), and makes each run ONE select of pills:
+ * its first property heads it (`flagRun`), the rest hide (`isFlagMember`).
+ * - A run:  three or more side by side, by themselves;  a group's `flags` says otherwise
+ *   (`pills`:  any run;  `checkboxes`:  none).
+ * - Each property still has its checkbox, which its form binds:  the pills only turn them on and off.
+ * - Arranged a moment after any property in the group makes its control, so every one of them has.
+ ****************/
+class FlagRun {
+  /** Arrange `container`'s runs once the current code is done:  once, however many ask. */
+  static arrangeSoon(container: Element | null) {
+    if (!container || FlagRun.pending.has(container)) return
+    FlagRun.pending.add(container)
+    E.afterSolidUpdate(() => {
+      FlagRun.pending.delete(container)
+      FlagRun.arrange(container)
+    })
+  }
+
+  /** Find `container`'s runs and tell each property its part in them. */
+  static arrange(container: Element) {
+    const mode = container.getAttribute("flags")
+    const least = mode === PILLS ? 1 : mode === CHECKBOXES ? Infinity : LEAST_FLAGS
+    const runs: UIProperty[][] = []
+    let run: UIProperty[] = []
+    for (const child of container.children) {
+      const property = (child as E.DOMElement).component
+      if (property instanceof UIProperty && property.canJoinFlags) {
+        run.push(property)
+        continue
+      }
+      if (run.length) runs.push(run)
+      run = []
+    }
+    if (run.length) runs.push(run)
+    const leads = new Map<UIProperty, readonly UIProperty[]>()
+    const members = new Set<UIProperty>()
+    for (const each of runs) {
+      if (each.length < least) continue
+      leads.set(each[0], each)
+      for (const member of each.slice(1)) members.add(member)
+    }
+    for (const child of container.children) {
+      const property = (child as E.DOMElement).component
+      if (!(property instanceof UIProperty)) continue
+      property.flagRun = leads.get(property)
+      property.isFlagMember = members.has(property)
+    }
+  }
+
+  /** Containers waiting to be arranged. */
+  private static readonly pending = new WeakSet<Element>()
+}
+
+/** The label of the pills' select:  the property's own text (TypeScript knows only the field's). */
+const FLAGS_TEXT = "flags" as never
+
+/** The fewest yes-or-no properties side by side that make a select of pills. */
+const LEAST_FLAGS = 3
+
+/** A group's `flags`:  every run pills, or none. */
+const PILLS = "pills"
+const CHECKBOXES = "checkboxes"
+
+/** `MADE_ATTRIBUTE`'s value on the pills' select. */
+const FLAGS = "flags"
+
+/** The pills' select. */
+const DROPDOWN_TAG = "ui-dropdown"
+
+/** The value type of a choice, and the kind a row of icons draws as. */
+const CHOICE: ValueType = "choice"
+const SEGMENTED_KIND = "buttons"
+
+/** A segmented menu's look word. */
+const SEGMENTED = "segmented"
+
+/** The most choices drawn as a segmented row by themselves. */
+const MOST_SEGMENTS = 4
+
+/** The value set of colours. */
+const HUES = "hues"
+
+/** `PropertyControl.width`'s half;  half of the 16-column grid a `width` counts in. */
+const HALF = "half"
+const HALF_OF_GRID = 8
 
 /** A kind's choices drawn one control each. */
 const RADIOS = "radios"

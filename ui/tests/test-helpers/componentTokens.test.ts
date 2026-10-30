@@ -62,6 +62,19 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-modal-dimmer-background":
       "a zoom's backdrop is dark whatever the page's theme (its own `--ui-zoom-backdrop`):  it sets its modal's dimmer"
   },
+  "ui-property-editor/UIPropertyEditor.css": {
+    "--ui-input-padding-block": "a compact editor's inputs are tight, about 24px tall, as an inspector's",
+    "--ui-input-padding-inline": "a compact editor's inputs are tight, about 24px tall, as an inspector's",
+    "--ui-select-padding-block": "a compact editor's selects are tight, as its inputs",
+    "--ui-select-padding-inline": "a compact editor's selects are tight, as its inputs",
+    "--ui-dropdown-padding-block": "a compact editor's dropdowns (pills) are tight, as its inputs",
+    "--ui-dropdown-padding-inline": "a compact editor's dropdowns (pills) are tight, as its inputs",
+    "--ui-menu-segmented-item-padding": "a compact editor's segmented rows (icons) fit half a row"
+  },
+  "ui-property-editor/UIProperty.css": {
+    "--ui-checkbox-label-distance":
+      "a compact editor's yes or no:  its label is the field's, beside the box, not the box's own"
+  },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",
     "--ui-button-radius": "the bar's icon toggles are pills, as the bar's segmented menus",

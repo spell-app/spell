@@ -1374,8 +1374,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         choose="many"
         size="small"
         aria-label={t("pages")}
-        on-ui-changed={(event: CustomEvent<{ values: string[] }>) =>
-          this.showPages(this.orderedPageIds, event.detail.values)
+        on-ui-changed={(event: CustomEvent<{ value?: string; values?: string[] }>) =>
+          this.showPages(this.orderedPageIds, event.detail.values ?? [])
         }
       >
         <For each={this.orderedPageIds}>

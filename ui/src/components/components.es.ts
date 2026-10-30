@@ -102,6 +102,7 @@ import { propertyEditorEs } from "spell/ui/components/ui-property-editor/UIPrope
 import { propertyGroupEs } from "spell/ui/components/ui-property-editor/UIPropertyGroup.es"
 import { railEs } from "spell/ui/components/ui-rail/UIRail.es"
 import { ratingEs } from "spell/ui/components/ui-rating/UIRating.es"
+import { sidesEs } from "spell/ui/components/ui-sides/UISides.es"
 import { revealEs } from "spell/ui/components/ui-reveal/UIReveal.es"
 import { rootEs } from "spell/ui/components/ui-root/UIRoot.es"
 import { searchEs } from "spell/ui/components/ui-search/UISearch.es"
@@ -738,6 +739,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   propertyGroupEs,
   railEs,
   ratingEs,
+  sidesEs,
   revealEs,
   rootEs,
   searchEs,

@@ -118,6 +118,59 @@
               </ui-section>
             </ui-section>
 
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-compact" label="Compact" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`compact`:  an inspector's density.  Short fields (a number, a select, a row of icons, sides) share a row, a yes or no sits on one line with its label, three or more of them in a group become one select of pills, and a hint sits at the label row's end.  `show-defaults` bolds a value other than its default:  change Kind, or set Align back to left."
+                >
+                  <ui-property-editor
+                    compact
+                    show-defaults
+                    label="Routine"
+                    style="max-width: 340px"
+                    schema='{"name": "Routine", "attributes": [
+                      {"name": "name", "kind": "string", "type": "text", "description": "", "hint": "LaTeX", "tip": "Shown on the circuit."},
+                      {"name": "kind", "kind": "enum", "type": "choice", "values": ["gate", "measure", "reset"], "default": "gate", "description": ""},
+                      {"name": "steps", "kind": "number", "type": "number", "default": 1, "description": ""},
+                      {"name": "angle", "kind": "string", "type": "text", "description": "", "hint": "LaTeX or a #"},
+                      {"name": "align", "kind": "textAlign", "default": "left", "description": "", "tip": "Where its label sits."},
+                      {"name": "color", "kind": "color", "description": ""},
+                      {"name": "margin", "kind": "json", "type": "sides", "description": ""},
+                      {"name": "padding", "kind": "json", "type": "sides", "description": ""},
+                      {"name": "controlled", "kind": "boolean", "description": "", "tip": "Runs only when its control is on."},
+                      {"name": "inverse", "kind": "boolean", "description": ""},
+                      {"name": "barrier", "kind": "boolean", "description": ""},
+                      {"name": "visible", "kind": "boolean", "default": true, "description": ""},
+                      {"name": "locked", "kind": "boolean", "description": ""}
+                    ]}'
+                    value='{"name": "QFT", "kind": "gate", "steps": 3, "angle": "", "align": "center", "color": "violet", "margin": "0 0 0 0", "padding": "4 8 4 8", "controlled": true, "inverse": false, "barrier": true, "visible": true, "locked": false}'
+                  >
+                    <ui-property-group label="Defaults" collapsible>
+                      <ui-property name="name"></ui-property>
+                      <ui-property name="kind"></ui-property>
+                      <ui-property name="steps"></ui-property>
+                      <ui-property name="angle"></ui-property>
+                    </ui-property-group>
+                    <ui-property-group label="Appearance" collapsible>
+                      <ui-property name="align"></ui-property>
+                      <ui-property name="color"></ui-property>
+                      <ui-property name="margin"></ui-property>
+                      <ui-property name="padding"></ui-property>
+                    </ui-property-group>
+                    <ui-property-group label="Behaviour" collapsible>
+                      <ui-property name="controlled"></ui-property>
+                      <ui-property name="inverse"></ui-property>
+                      <ui-property name="barrier"></ui-property>
+                    </ui-property-group>
+                    <ui-property-group label="Layout" collapsible>
+                      <ui-property name="visible"></ui-property>
+                      <ui-property name="locked"></ui-property>
+                    </ui-property-group>
+                  </ui-property-editor>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
             <ui-section id="examples-pages" label="Pages" sticky="stack" collapsible dividing>
               <ui-section id="examples-pages-from-a-page" label="From a page" sticky="stack" collapsible dividing>
                 <ui-example

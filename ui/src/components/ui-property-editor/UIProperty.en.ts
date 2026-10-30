@@ -33,8 +33,17 @@ export const propertyVocabulary = {
         group: "appearance",
         kind: "string",
         description:
-          "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, " +
-          "`range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type."
+          "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, " +
+          "`buttons` (a segmented row), `radios`, `range`, `checkbox`, `toggle`, `color`, `sides`, `editor`, or one a " +
+          "page added.  None:  the default for its type;  four or fewer choices, all with icons:  `buttons`."
+      },
+      {
+        name: "default",
+        group: "form",
+        kind: "string",
+        description:
+          "Its value when nothing's been set, if the schema doesn't say:  a value other than it shows " +
+          "`:state(set)`, bold under the editor's `show-defaults`."
       },
       {
         name: "options",
@@ -63,8 +72,28 @@ export const propertyVocabulary = {
   states: passThrough<E.StateSpec>(
     [
       { name: "changed", description: 'Its edit is held, not saved yet (`apply="on save"`).' },
-      { name: "buttons", description: 'Its control is a row of choices, one each (`as="buttons"`).' }
+      { name: "buttons", description: 'Its control is a row of radios, one each (`as="radios"`).' },
+      { name: "compact", description: "Its editor is `compact`." },
+      { name: "show-defaults", description: "Its editor bolds a value other than its default (`show-defaults`)." },
+      {
+        name: "half",
+        description: "Half a row on its editor's grid:  its kind's width (a number, a select), or its `width`."
+      },
+      { name: "inline-check", description: "A yes or no in a compact editor:  the box, then its label, on one line." },
+      { name: "set", description: "Its value isn't its default (`default`, else the schema's;  none:  any value)." },
+      { name: "flags", description: "It heads a run of yes-or-no properties, drawn as one select of pills." },
+      { name: "flag", description: "It's in a run another property heads:  hidden, its pill in that one's select." }
     ] as const satisfies readonly E.StateSpec[],
     [fieldVocabulary.states]
+  ),
+  texts: passThrough<E.TextSpec>(
+    [
+      {
+        key: "flags",
+        text: "Options",
+        description: "The label of a run of yes-or-no properties drawn as one select of pills."
+      }
+    ] as const satisfies readonly E.TextSpec[],
+    [fieldVocabulary.texts]
   )
 } as const satisfies E.ComponentVocabulary

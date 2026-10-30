@@ -12,5 +12,7 @@ export const propertyGroupEs = {
   tag: "ui-property-group",
   name: "grupo-propiedades",
   aka: ["sección", "grupo de propiedades", "grupo de ajustes", "sección del inspector"],
+  attributes: { flags: "indicadores" },
+  values: { flags: { pills: "etiquetas", checkboxes: "casillas" } },
   texts: { loading: "Cargando…", closeSection: "Cerrar esta sección", openSection: "Abrir esta sección" }
 } as const satisfies E.TagDictionary

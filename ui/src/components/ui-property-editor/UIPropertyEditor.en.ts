@@ -47,6 +47,27 @@ const OWN_ATTRIBUTES = [
     kind: "boolean",
     description: "Shows every value;  nothing can be changed.  Reaches every property in it."
   },
+  {
+    name: "compact",
+    kind: "keyOnly",
+    description:
+      "Tight, as an inspector:  smaller type, labels in regular weight, 8px between rows, two columns, " +
+      "a yes or no on one line with its label, a hint at the label row's end, bands tightened (epic `debut` P31)."
+  },
+  {
+    name: "columns",
+    kind: "number",
+    description:
+      "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole " +
+      "row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it."
+  },
+  {
+    name: "show-defaults",
+    kind: "boolean",
+    description:
+      "A value other than its property's default shows bold, so what's been changed stands out " +
+      "(`:state(set)` on each property shows it either way)."
+  },
   { name: "output", kind: "string", description: 'A value at the end of the title bar;  `slot="output"`.' },
   { name: "error", kind: "string", description: "An error under the title, and the `error` state." }
 ] as const satisfies readonly E.AttributeSpec[]
@@ -99,7 +120,10 @@ export const propertyEditorVocabulary = {
   ),
   states: passThrough<E.StateSpec>(
     [
-      { name: "readonly", description: "Nothing can be changed (`readonly`)." }
+      { name: "readonly", description: "Nothing can be changed (`readonly`)." },
+      { name: "compact", description: "`compact`." },
+      { name: "grid", description: "Its properties lay out on columns (`columns`, or `compact`)." },
+      { name: "show-defaults", description: "`show-defaults`." }
     ] as const satisfies readonly E.StateSpec[],
     [formVocabulary.states, sectionVocabulary.states]
   ),
