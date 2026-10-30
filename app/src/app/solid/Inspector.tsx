@@ -13,7 +13,7 @@ import { isEditable } from "spell/app/app/pages/editorHotkeys"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
-import { eventsInSource, handlersInSource, type WrittenEvent } from "./InspectorSource"
+import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
 import { on } from "./on"
 import { SplitPanel } from "./SplitPanel"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -464,6 +464,21 @@ export class Inspector {
     const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
     const written = eventsInSource(InspectorActions.typeWordsOf(thing), sources)
     return written.length ? written : InspectorActions.eventsOf(thing)
+  }
+
+  /**
+   * The property editor `thing`'s type was written with, its markup (epic `debut` I86):  its `<property-editor>`,
+   * else the one of a type it inherits;  `""` if none, and the Inspector draws its bands.
+   * - Read from the program's spell as it is now, so an edit shows once the app runs again.
+   */
+  static ownEditorOf(thing: object): string {
+    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const words = [...SP.Language.all.values()].flatMap((language) =>
+      Object.entries(language.words.spellx?.notes ?? {})
+        .filter(([, kind]) => kind === "property editor")
+        .map(([word]) => word)
+    )
+    return propertyEditorInSource(InspectorActions.typeWordsOf(thing), sources, words)
   }
 
   /** Is `element` a drawn spell thing (`<solitaire-card>`), not a Spell UI element? */
@@ -1213,6 +1228,8 @@ const SMALLEST_CARD_BODY = 32
  * (Owen:  "lose that [More]. Show all of the properties").
  * - Picking again is the top bar's Inspect app (`<InspectorPick>`), beside the Inspector's button.
  * - Nothing picked:  the card is titled "Inspector", and says how to pick.
+ * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
+ *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
  * - Then its Events band (`<EventsBand>`), and a thing's Actions band (`<ActionsBand>`):
  *   what it does when people touch it, then what can be done to it (epic `debut` P28, P29;  Q45 A).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
@@ -1292,7 +1309,14 @@ function PropertiesCard(): JSX.Element {
               )}
             </Show>
             <Show when={!part.layout}>
-              <ThingBands value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
+              <Show
+                when={Inspector.ownEditorOf(part.value)}
+                fallback={
+                  <ThingBands value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
+                }
+              >
+                {(markup) => <OwnEditor markup={markup()} />}
+              </Show>
             </Show>
             <Show when={part.element}>{(element) => <EventsBand element={element()} />}</Show>
             <Show when={!part.layout}>
@@ -1304,6 +1328,39 @@ function PropertiesCard(): JSX.Element {
     </InspectorCard>
   )
 }
+
+/****************
+ * ### `<OwnEditor>`
+ * A type's own property editor, as its program wrote it (`<property-editor>`;  epic `debut` I86):
+ * its `<ui-property-group>`s and `<ui-property>`s, inside the card's `<ui-property-editor>`, bound to the thing.
+ * - The markup is the program's own, read from its source:  turned into elements as written,
+ *   less any `<script>` and `on...` handler, which the Inspector never runs.
+ * - An empty tag may close itself, `<ui-property name="rank" />`, as everywhere in spell.
+ * - Drawn again when the markup changes.
+ ****************/
+function OwnEditor(props: { markup: string }): JSX.Element {
+  const holder = document.createElement("div")
+  holder.className = "InspectorOwnEditor"
+  createEffect(
+    () => props.markup,
+    (markup) => {
+      const template = document.createElement("template")
+      // spell writes an empty tag `<ui-property name="rank" />`, as JSX does:  HTML would read it as left open
+      template.innerHTML = markup.replace(SELF_CLOSING_TAG, "<$1$2></$1>")
+      for (const script of template.content.querySelectorAll("script")) script.remove()
+      for (const element of template.content.querySelectorAll("*")) {
+        for (const attribute of [...element.attributes]) {
+          if (/^on/i.test(attribute.name)) element.removeAttribute(attribute.name)
+        }
+      }
+      holder.replaceChildren(template.content)
+    }
+  )
+  return holder
+}
+
+/** An element's tag closing itself, `<ui-property name="rank" />`:  its name, then its attributes. */
+const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
 
 /****************
  * ### `<LetGo>`

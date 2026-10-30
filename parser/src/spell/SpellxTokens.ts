@@ -126,8 +126,8 @@ export type SpellxProseTokenProps = P.CommentTokenProps & {
  */
 export class SpellxCommentToken extends P.CommentToken {}
 
-/** A spellx note:  a member's long `<description>`, or a `<comment>` among its lines. */
-type SpellxNoteKind = "description" | "comment"
+/** A spellx note:  a member's long `<description>`, a `<comment>` among its lines, or a `<property-editor>`. */
+type SpellxNoteKind = "description" | "comment" | "property editor"
 
 /**
  * What's wrong at `token`, as the spellx tokenizer found it:  a word spellx doesn't know, a tag never closed ...

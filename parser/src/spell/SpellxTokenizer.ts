@@ -170,7 +170,10 @@ export class SpellxTokenizer extends P.Tokenizer {
     }
     if (text.startsWith("</", start)) {
       const closer = this.readCloser(text, start)
-      if (closer) return this.closeTag(closer, indent)
+      // in a note, markup's own closer is its prose, `</ui-property-group>` in a `<property-editor>`:
+      // only `</>` or a spellx word's closes there
+      const isProse = closer?.word && this.isInNote(indent) && !this.isSpellxWord(firstWordOf(closer.word))
+      if (closer && !isProse) return this.closeTag(closer, indent)
     }
     if (text[start] === "<" && WORD_START.test(text[start + 1] ?? "")) {
       const word = this.tagWordAt(text, start)
@@ -302,6 +305,11 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
+  }
+
+  /** Is a line `indent` in inside a note:  a `<property-editor>`, a `<comment>` ... open at a shallower indent? */
+  private isInNote(indent: number) {
+    return this.frames.some((frame) => frame.category === "note" && frame.indent < indent)
   }
 
   /** Are we in a drawing:  inside a `<draw>`, maybe in a control in it? */

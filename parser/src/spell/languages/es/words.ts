@@ -153,7 +153,12 @@ export const spanishWords: SP.LanguageWords = {
       menu: "menu",
       grupo: "group"
     },
-    notes: { descripción: "description", descripcion: "description", comentario: "comment" },
+    notes: {
+      descripción: "description",
+      descripcion: "description",
+      comentario: "comment",
+      "editor-de-propiedades": "property editor"
+    },
     handlers: {
       al: "on",
       cuando: "when",

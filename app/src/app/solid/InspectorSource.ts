@@ -157,6 +157,35 @@ export function eventsInSource(typeNames: readonly string[], sources: readonly s
   return [...rows.filter((row) => row.kind === "ability"), ...rows.filter((row) => row.kind === "event")]
 }
 
+/**
+ * The property editor a type was written with, its markup as written (epic `debut` I86):
+ * `<property-editor>`'s lines inside `<spell-view "card"> ... </spell-view>`;  `""` if it has none.
+ * - `typeNames`:  the thing's type's words, then those it inherits (`InspectorActions.typeWordsOf()`):
+ *   its own type's first, so a type's own editor wins over the one it inherits.
+ * - `words`:  the tag's words, every language's (`<property-editor>`, `<editor-de-propiedades>`).
+ * - Closed by its own words or `</>`.
+ */
+export function propertyEditorInSource(
+  typeNames: readonly string[],
+  sources: readonly string[],
+  words: readonly string[]
+): string {
+  for (const name of typeNames) {
+    for (const source of sources) {
+      for (const body of typeBodies(source, name)) {
+        for (const word of words) {
+          const opening = new RegExp(`<${escapeForRegExp(word)}\\s*>`, "i").exec(body)
+          if (!opening) continue
+          const from = opening.index + opening[0].length
+          const close = closingTagOf(body, word, from)
+          return dedent(body.slice(from, close?.index).split("\n")).trim()
+        }
+      }
+    }
+  }
+  return ""
+}
+
 /** One of a type's events or abilities, as written:  `on click`, its code `play it`. */
 export type WrittenEvent = {
   /** An event (`on click`), or an ability (`it can give up a card if`). */
@@ -202,20 +231,32 @@ function escapeForRegExp(text: string): string {
 /** The rows inside each `<spell-view "name"> ... </spell-view>` (any `<spell-*>` tag) in `source`. */
 function rowsInTypeTags(source: string, name: string): WrittenEvent[] {
   const rows: WrittenEvent[] = []
+  for (const { head, body } of typeTagsIn(source, name)) {
+    // its bare ability attributes, `<spell-view "card" draggable>` (epic `debut` P27):  each an ability, as written
+    for (const ability of head.matchAll(BARE_ABILITY)) rows.push({ kind: "ability", words: ability[1]!, code: "" })
+    rows.push(...rowsInTags(body))
+    for (const block of body.matchAll(/<spell>([\s\S]*?)<\/spell>/g)) rows.push(...rowsInLines(block[1]!.split("\n")))
+  }
+  return rows
+}
+
+/** The bodies of each `<spell-view "name"> ... </spell-view>` (any `<spell-*>` tag) in `source`. */
+function typeBodies(source: string, name: string): string[] {
+  return typeTagsIn(source, name).map((tag) => tag.body)
+}
+
+/** Each `<spell-view "name"> ... </spell-view>` (any `<spell-*>` tag) in `source`:  its head, then its body. */
+function typeTagsIn(source: string, name: string): { head: string; body: string }[] {
+  const found: { head: string; body: string }[] = []
   const opening = new RegExp(`<spell-([\\w-]+)\\s+"${escapeForRegExp(name)}"`, "gi")
   let match: RegExpExecArray | null
   while ((match = opening.exec(source))) {
     const end = endOfTag(source, match.index + match[0].length)
     if (end < 0) continue
     const close = source.indexOf(`</spell-${match[1]}>`, end)
-    const body = source.slice(end + 1, close < 0 ? undefined : close)
-    // its bare ability attributes, `<spell-view "card" draggable>` (epic `debut` P27):  each an ability, as written
-    const head = source.slice(match.index, end)
-    for (const ability of head.matchAll(BARE_ABILITY)) rows.push({ kind: "ability", words: ability[1]!, code: "" })
-    rows.push(...rowsInTags(body))
-    for (const block of body.matchAll(/<spell>([\s\S]*?)<\/spell>/g)) rows.push(...rowsInLines(block[1]!.split("\n")))
+    found.push({ head: source.slice(match.index, end), body: source.slice(end + 1, close < 0 ? undefined : close) })
   }
-  return rows
+  return found
 }
 
 /** Event and ability tags in `body`:  `<on click description="...">play it</on>`, `<draggable when it is face up />`. */

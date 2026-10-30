@@ -591,8 +591,11 @@ export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page templ
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
 
-/** A spellx block of prose:  a member's long description, or a comment among its lines. */
-export type SpellxNoteKind = "description" | "comment"
+/**
+ * A spellx block of prose:  a member's long description, a comment among its lines,
+ * or a template's own property editor (`<property-editor>`):  the Inspector's layout for its things, as markup.
+ */
+export type SpellxNoteKind = "description" | "comment" | "property editor"
 
 /**
  * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);

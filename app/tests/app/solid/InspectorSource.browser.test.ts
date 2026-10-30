@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { enabledWhenInSource, eventsInSource, handlersInSource } from "spell/app/app/solid/InspectorSource"
+import {
+  enabledWhenInSource,
+  eventsInSource,
+  handlersInSource,
+  propertyEditorInSource
+} from "spell/app/app/solid/InspectorSource"
 
 import card from "../../../spaces/@spell/examples/Solitaire/Card.spellml?raw"
 import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
@@ -131,6 +136,18 @@ describe("eventsInSource()", () => {
       { kind: "event", words: "when the level changes", code: "print its level" },
       { kind: "event", words: "on round change", code: "print its round" }
     ])
+  })
+
+  test("a type's own `<property-editor>`:  its markup as written, its own type's first;  none:  empty", () => {
+    const words = ["property-editor", "editor-de-propiedades"]
+    const markup = propertyEditorInSource(["card", "two sided view"], [card], words)
+    expect(markup).toMatch(/^<ui-property-group label="Card" columns="2">/)
+    expect(markup).toContain('<ui-property name="suit" label="Suit" as="buttons" width="16" />')
+    expect(markup).not.toContain("property-editor")
+    const spanish =
+      '<spell-view "carta">\n\t<editor-de-propiedades>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>'
+    expect(propertyEditorInSource(["carta"], [spanish], words)).toBe('<ui-property name="palo" />')
+    expect(propertyEditorInSource(["pile"], [pile], words)).toBe("")
   })
 
   test("an action's `enabled when`, in its own words;  none:  empty", () => {

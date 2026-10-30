@@ -237,6 +237,20 @@ core.useElement(Card, CardElement)
 
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
+//
+// <ui-property-group label="Card" columns="2">
+// <ui-property name="rank" label="Rank" />
+// <ui-property name="direction" label="Face" as="buttons" />
+// <ui-property name="suit" label="Suit" as="buttons" width="16" />
+// </ui-property-group>
+// <ui-property-group label="What it is" columns="2" readonly>
+// <ui-property name="value" label="Value" width="1/2" />
+// <ui-property name="color" label="Color" width="1/2" />
+// <ui-property name="symbol" label="Symbol" width="1/2" />
+// <ui-property name="state" label="Short name" width="1/2" />
+// <ui-property name="name" label="Name" />
+// </ui-property-group>
+
 export function testCardSetup() {
   return core.test("test card setup", function testCardSetup() {
     const it = new Card()

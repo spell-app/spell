@@ -488,6 +488,10 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     flex-direction: row;
   }
 }
+/* a type's own property editor (`<OwnEditor>`):  its groups sit in the editor as its bands do */
+.Inspector .InspectorOwnEditor {
+  display: contents;
+}
 /* a list's items:  a full row, a link each, close together */
 .Inspector .InspectorItems {
   grid-column: 1 / -1;

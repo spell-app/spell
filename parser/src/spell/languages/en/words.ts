@@ -162,7 +162,8 @@ export const englishWords: SP.LanguageWords = {
       // a heading over the members after it (epic `elemental-spell` P16)
       group: "group"
     },
-    notes: { description: "description", comment: "comment" },
+    // a template's own property editor, as markup:  what the Inspector shows for its things (epic `debut` I86)
+    notes: { description: "description", comment: "comment", "property-editor": "property editor" },
     handlers: {
       on: "on",
       when: "when",

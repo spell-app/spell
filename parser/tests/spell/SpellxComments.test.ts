@@ -135,6 +135,37 @@ describe("spellx comments, `<!-- ... -->`", () => {
 })
 
 /** `lines`, one file of its own project at `path`, compiled:  its code without `DECLARES` headers, and its errors. */
+/**
+ * A template's own PROPERTY EDITOR, `<property-editor>` (epic `debut` I86):  a note, its lines markup as written,
+ * which the editor's Inspector draws for the template's things;  compiled as comments, as any note is.
+ */
+describe("a `<property-editor>`", () => {
+  const SPELLX = [
+    '<spell-view "card">',
+    '\t<property "suit">1</>',
+    "\t<property-editor>",
+    '\t\t<ui-property-group label="Card" columns="2">',
+    '\t\t\t<ui-property name="suit" />',
+    "\t\t</ui-property-group>",
+    "\t</property-editor>",
+    "</spell-view>"
+  ]
+
+  test("its markup is its own:  `</ui-property-group>` closes nothing of spellx's", () => {
+    const { code, errors } = compiled(SPELLX, "/Card.spellml")
+    expect(errors).toEqual([])
+    expect(code).toContain('// <ui-property name="suit" />')
+    expect(code).toContain("// </ui-property-group>")
+  })
+
+  test("in Spanish, `<editor-de-propiedades>`", () => {
+    const lines = SPELLX.map((line) => line.replace(/property-editor>/, "editor-de-propiedades>"))
+    const parentScope = SP.Language.rootScopeFor([SP.Language.forFile("/Carta.es.spellml")])
+    const [file] = parseSpellProject([{ path: "/Carta.es.spellml", contents: lines.join("\n") }], { parentScope }).files
+    expect(file!.errors.filter((error) => /editor-de-propiedades|ui-property/.test(String(error)))).toEqual([])
+  })
+})
+
 function compiled(lines: string[], path: string) {
   const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
   const code = file!.compiled.replace(/\/\*! SPELL: DECLARES[^]*?\*\/\n?/g, "")
