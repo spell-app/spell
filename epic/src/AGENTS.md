@@ -458,7 +458,7 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
           `epic-friend` P1)
         - and the SHARED repo, the content repo's remote (epic `epic-friend` P4, Q1):  the first person's makes it
-          on GitHub (`GitHub`), private, named as asked (`<repo>-epics`;  `--content-repo`), pushes, and writes its
+          on GitHub (`GitHub`), private, named as asked (`<repo>.epics`;  `--content-repo`), pushes, and writes its
           address in the config (`contentRemote`);  a later person's clones it where the content folder is missing
           (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
           says how to get it and does the rest

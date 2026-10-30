@@ -1207,7 +1207,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   (`EpicConfig.defaultsFor()`);  the defaults below are a repo `my-app`'s.
  * - `contentFolder`:  the shared content repo, relative to the main checkout (`../my-app.epics`):
  *   the epics, guides, sagas and logs every checkout links in (`epic shared`, the turn-end commit hook)
- * - `contentRemote`:  the shared content repo's address, as git takes it (`git@github.com:o/my-app-epics.git`;
+ * - `contentRemote`:  the shared content repo's address, as git takes it (`git@github.com:o/my-app.epics.git`;
  *   epic `epic-friend` P4);  `""` (the default):  none, the plans stay on this machine
  *   - the FIRST person's `epic init` makes the repo on GitHub and writes it;  a later person's clones it, where the
  *     content folder is missing
