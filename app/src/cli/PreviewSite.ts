@@ -25,6 +25,8 @@ import { CLI } from "spell/app/cli"
  *      - `404.html`, a copy of `index.html` (GitHub Pages)
  *      - `_redirects`, the editor's routes to `index.html` (Netlify, Cloudflare Pages)
  * - `serve()` shows it as a host would:  the files as they are, the editor's page for every other page.
+ * - `buildViewer()` writes `<spell-viewer>` ALONE, run mode only, and a few projects, into a site of your own
+ *   (spell.app's page, epic `repo-split` P25):  no editor, no lists.
  * - Builds only:  no deploy yet (epic `debut` Q6).
  * - Node only;  a part of `spell app preview` (`previewCommand.ts`).
  */
@@ -59,18 +61,50 @@ export class PreviewSite {
     return { groups, imported: [...written].filter((projectId) => !projectIds.includes(projectId)) }
   }
 
+  /**
+   * Write `<spell-viewer>` and projects `projectIds` into `folder`, for a page there to run them,
+   * with no editor and no server:  `<spell-viewer project="@spell/examples/Solitaire">`.
+   * 1. the element, built (`yarn build:element`), then copied to `<folder>/element/`,
+   *    where its page loads it from:  `<script type="module" src="/element/spell-viewer.js">`
+   *    - but not what only the editor uses (`VIEWER_LEAVES_OUT`):  the editor, Monaco, source maps
+   * 2. each project, compiled where it's out of date:  its files and build at `<folder>/spaces/<project>/`,
+   *    where the viewer reads them, as `build()` writes them;  and the projects it imports
+   * - The page server's paths, from the site's root:  so the site is a domain's own (`https://spell.app`).
+   * - SIDE EFFECT:  replaces `element/` and each project's folder;  the rest of `folder` is the site's own, untouched.
+   * - Returns the projects written, imported ones too.
+   * - throws `CLI.CliError` if the element's build fails, with what it said
+   */
+  async buildViewer(session: CLI.CliSession, projectIds: string[]): Promise<string[]> {
+    await this.runYarn(["build:element"])
+    const element = join(this.folder, VIEWER_FOLDER)
+    rmSync(element, { recursive: true, force: true })
+    copyFiles(ELEMENT_FOLDER, element, (path) => !VIEWER_LEAVES_OUT.some((pattern) => pattern.test(path)))
+    await CLI.compileCommand(session, projectIds, { stale: true })
+    const written = new Set<string>()
+    for (const projectId of projectIds) await this.writeProject(projectId, written, { withIndex: false })
+    return [...written]
+  }
+
   /** Vite's build of the editor, in its static mode, into `folder`. */
-  private buildEditor(): Promise<void> {
+  private async buildEditor(): Promise<void> {
     rmSync(this.folder, { recursive: true, force: true })
-    const args = ["vp", "build", "--mode", STATIC_MODE, "--outDir", this.folder, "--emptyOutDir"]
+    await this.runYarn(["vp", "build", "--mode", STATIC_MODE, "--outDir", this.folder, "--emptyOutDir"])
+    this.fixStaticLinks()
+  }
+
+  /**
+   * Run `yarn <args>` in the app's build folder, quietly.
+   * - throws `CLI.CliError` if it fails, with the end of what it said
+   */
+  private runYarn(args: string[]): Promise<void> {
     return new Promise((done, fail) => {
       const child = spawn("yarn", args, { cwd: APP_FOLDER, stdio: ["ignore", "pipe", "pipe"] })
       let output = ""
       for (const stream of [child.stdout, child.stderr]) stream.on("data", (chunk) => (output += String(chunk)))
-      child.once("error", (error) => fail(new CLI.CliError(`couldn't run Vite:  ${error.message}`)))
+      child.once("error", (error) => fail(new CLI.CliError(`couldn't run yarn:  ${error.message}`)))
       child.once("exit", (code) => {
-        if (code === 0) done(this.fixStaticLinks())
-        else fail(new CLI.CliError(`Vite's build failed (exit ${code}):\n${output.slice(-4000)}`))
+        if (code === 0) done()
+        else fail(new CLI.CliError(`\`yarn ${args.join(" ")}\` failed (exit ${code}):\n${output.slice(-4000)}`))
       })
     })
   }
@@ -112,23 +146,32 @@ export class PreviewSite {
 
   /**
    * Project `projectId`'s index, its files and what spell built of them;  then each project it imports, once.
-   * - Its index as the page server answers it, without writing its project file (`saving: "if it has one"`).
+   * - Its index as the page server answers it, without writing its project file (`saving: "if it has one"`):
+   *   unless `withIndex` is `false`, for `<spell-viewer>` alone, which never reads it.
    * - Its folder's files, then its build folder's over them:  their URLs sit side by side (`/spaces/<project>/`).
+   * - SIDE EFFECT:  what was in its folder before is gone.
    */
-  private async writeProject(projectId: string, written: Set<string>): Promise<void> {
+  private async writeProject(
+    projectId: string,
+    written: Set<string>,
+    { withIndex = true }: { withIndex?: boolean } = {}
+  ): Promise<void> {
     if (written.has(projectId)) return
     written.add(projectId)
     const index = await projectUtils.getIndex(projectId, { saving: "if it has one" })
-    this.writeJSON(SP.SpellUrls.INDEX + projectId, index)
+    if (withIndex) this.writeJSON(SP.SpellUrls.INDEX + projectId, index)
 
     const source = SP.SpellLocation.getProjectLocation(projectId).serverPath
     const target = join(this.folder, SP.SpellUrls.SPACES, projectId)
+    rmSync(target, { recursive: true, force: true })
     copyFiles(source, target)
     const built = projectUtils.buildFolderFor(source)
     if (built !== source && existsSync(built)) copyFiles(built, target)
 
     for (const { path } of index.imports) {
-      if (SP.SpellLocation.isAddress(path)) await this.writeProject(SP.SpellUrls.split(path).projectId, written)
+      if (SP.SpellLocation.isAddress(path)) {
+        await this.writeProject(SP.SpellUrls.split(path).projectId, written, { withIndex })
+      }
     }
   }
 
@@ -190,6 +233,24 @@ const APP_FOLDER = resolve(environment.repoDir, "app")
 /** Where the static build goes:  `app/dist-static/` (git-ignored). */
 export const STATIC_FOLDER = join(APP_FOLDER, "dist-static")
 
+/** `<spell-viewer>`'s build, `yarn build:element`'s. */
+const ELEMENT_FOLDER = join(APP_FOLDER, "dist-element")
+
+/** Where `buildViewer()` puts it in a site:  `/element/`, where the page server serves it too. */
+const VIEWER_FOLDER = "element"
+
+/**
+ * What `buildViewer()` leaves out of the element's build, by path in it:  what only the editor needs.
+ * - source maps
+ * - `<spell-editor>` and `<spell-code>`, Monaco among them:  `<spell-viewer>` loads them only for one inside it
+ * - Semantic UI's sources and scripts:  the viewer adopts only its one sheet, `semantic.min.css`, and its `themes/`
+ */
+const VIEWER_LEAVES_OUT = [
+  /\.map$/,
+  /^\/spell-(editor|code)[-.]/,
+  /^\/semantic-ui-css\/(components\/|semantic\.(css|js|min\.js)$)/
+]
+
 /** Vite's mode for the static build:  the app's `STATIC_MODE` (`spell/app/app/static/staticBuild`), copied. */
 const STATIC_MODE = "static"
 
@@ -211,14 +272,20 @@ const STATIC_ASSETS = ["semantic-ui-css", "lato", "favicon"]
 /** `spell app preview serve`'s port, unless told one:  beside the page server's 4747. */
 export const PREVIEW_PORT = 4848
 
-/** Copy folder `from`'s files into `to`, recursively, but no hidden ones (`.DS_Store`, `.git`). */
-function copyFiles(from: string, to: string): void {
+/**
+ * Copy folder `from`'s files into `to`, recursively, but no hidden ones (`.DS_Store`, `.git`).
+ * - `keep`:  which others to copy, by path in `from` (`/spell-viewer.js`);  default all
+ */
+function copyFiles(from: string, to: string, keep: (path: string) => boolean = () => true): void {
   mkdirSync(to, { recursive: true })
   for (const name of readdirSync(from)) {
     if (name.startsWith(".")) continue
     cpSync(join(from, name), join(to, name), {
       recursive: true,
-      filter: (path) => !/\/\./.test(path.slice(from.length))
+      filter: (path) => {
+        const inside = path.slice(from.length)
+        return !/\/\./.test(inside) && keep(inside)
+      }
     })
   }
 }

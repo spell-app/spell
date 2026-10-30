@@ -681,6 +681,42 @@ And it must be served at a domain's root:  the editor's routes and files are abs
 Home is still in the top bar, and Save and Reload on the code's toolbar:
 they read oddly when nothing goes to a server.
 
+### Just the app:  `<spell-viewer>` on your own site
+
+To show a project RUNNING on a page of your own, with no editor around it, write the viewer and the projects into
+your site's folder:
+
+```sh
+spell app preview viewer ~/www/my-site @spell/examples/Solitaire @spell/examples/Solitario
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ @spell/examples/Solitaire  up to date
+✓ @spell/examples/Solitario  up to date
+✓ Building <spell-viewer> and its projects  .../my-site
+element/, and spaces/ for:  @spell/examples/Solitaire, @spell/examples/Solitario
+```
+
+</details>
+
+Then the page loads the viewer and names a project:
+
+```html
+<script type="module" src="/element/spell-viewer.js"></script>
+<spell-viewer project="@spell/examples/Solitaire"></spell-viewer>
+```
+
+- It builds `<spell-viewer>` (`yarn build:element`) and copies it into `element/`:
+  about 2,400 files, 17 MB, without the editor, Monaco or source maps, which a viewer never loads.
+- Each project, compiled where it's out of date, goes into `spaces/<project>/`, with the projects it imports:
+  the paths the page server answers, so the viewer reads them as plain files.
+- It replaces those two folders, and leaves the rest of the site alone.
+- Like the preview, the site must be a domain's own:  the paths are absolute (`/element/`, `/spaces/`).
+- Spell's own site, spell.app, plays Solitaire this way, in English and in Spanish.
+
 ## The builds:  one Solid per page, however many bundles
 
 Five builds, each run from spell-app's folder, each into a folder of [app/](app/), and none committed:

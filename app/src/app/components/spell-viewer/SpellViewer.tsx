@@ -363,9 +363,13 @@ function nameOf(projectId: string): string {
   return projectId.slice(projectId.lastIndexOf("/") + 1)
 }
 
-/** URL of project `projectId`'s `<project><suffix>`, e.g. `/spaces/@spell/examples/Solitaire/Solitaire.spell.js`. */
+/**
+ * URL of project `projectId`'s `<project><suffix>`, e.g. `/spaces/@spell/examples/Solitaire/Solitaire.spell.js`.
+ * - `suffix` goes on AFTER the address is encoded:  the words' `{lang}` must stay as it is, for the runner to fill in
+ *   (encoded, `%7Blang%7D`, the runner never saw it, so a Spanish app loaded no words and drew no Spanish tags).
+ */
 function builtUrl(projectId: string, suffix: string): string {
-  return SpellUrls.fileUrl(`${projectId}/${nameOf(projectId)}${suffix}`)
+  return SpellUrls.SPACES + SpellUrls.encodeAddress(`${projectId}/${nameOf(projectId)}`) + suffix
 }
 
 /** What to run for `src="<url>"`:  from anywhere, with what goes with it beside it. */

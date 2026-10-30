@@ -3,6 +3,7 @@
  * - `spell app create <name>`:  a new spell project, in your space
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
+ * - `spell app preview viewer <folder> <project...>`:  `<spell-viewer>` alone and those projects, into a site's folder
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - Under `app` on purpose (Owen's names, 2026-10-21), not only on a clash as Q33 has it.
@@ -71,6 +72,17 @@ export default function appCommands(spell: Command): void {
     .option("--headless", "don't open a browser:  just print the URL")
     .action((_options, command: Command) =>
       CLI.runCommand(async () => (await loadApp()).appCommands.preview(["serve"], command.optsWithGlobals()))
+    )
+
+  preview
+    .command("viewer")
+    .description("put <spell-viewer> (run mode only, no editor) and these projects, compiled, into a site's folder")
+    .argument("<folder>", "the site's folder, e.g. ~/www/coming-soon:  its element/ and spaces/<project>/ are replaced")
+    .argument("<projects...>", "the projects its page shows, e.g. @spell/examples/Solitaire @spell/examples/Solitario")
+    .action((folder: string, projects: string[], _options, command: Command) =>
+      CLI.runCommand(async () =>
+        (await loadApp()).appCommands.preview(["viewer", folder, ...projects], command.optsWithGlobals())
+      )
     )
 
   const vscode = app
