@@ -67,7 +67,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Who reads them, through the `types` condition of the kit's `exports`
     (the kit's [AGENTS.md](../../AGENTS.md), "Imports across repos"):
     - the app's node program (`app/tsconfig.node.json`, React's JSX for the Ink screens), which has no
-      `spell-source` condition
+      `spell-source` condition:  the epic folder's among them, for `spell content update` (epic `content` P3)
     - spell-brand, a project beside the kit
   - Every other program reads every folder's SOURCE (`"customConditions": ["spell-source"]`), not these.
   - Not built yet (a fresh clone):  TS2307 in the readers.  Their `yarn ts` builds them first (`--below`).
@@ -79,7 +79,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit and each folder list their TypeScript programs in their `package.json`'s `"spellTypes"`,
   as their `tsconfig` files, in build order:  `["tsconfig.json", "tsconfig.node.json"]`, browser-safe code and node
   code.
-  - The kit, `parser/` and `ui/` list them;  `epic/` and `app/` don't (nothing reads their declarations).
+  - The kit, `parser/`, `ui/` and `epic/` list them;  `app/` doesn't (nothing reads its declarations).
+    - `epic/` since epic `content` P3:  the app's `spell content update` imports the epic tool's node files.
   - None listed:  its `tsconfig.json`.
 - How, for one program ([Declarations](declarations.ts)):
   1. `tsc` on its `tsconfig`, emitting declarations only, and their maps (so "Go to Definition" lands in the source),
@@ -92,7 +93,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
      - Nothing is rewritten:  the declarations name files by package name, as the source does (P14).
 - It IS the type check of the kit, `parser/` and `ui/`:  their `yarn ts` runs `spell-types` where it ran a bare `tsc`
   (the kit's:  `yarn kit:ts`).
-  - `epic/` and `app/` have no `"spellTypes"`, so they keep a plain `tsc`;  `spell-types --below` skips them.
+  - `epic/` keeps its plain `tsc` all the same:  `spell-types` builds its declarations for the app.
+  - `app/` has no `"spellTypes"`, so it keeps a plain `tsc`;  `spell-types --below` skips it.
 - The command, in the kit's or a folder's root:
 
   ```sh

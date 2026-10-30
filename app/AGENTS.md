@@ -194,7 +194,8 @@ Everything else is in the kit `spell` (`~/www/spell`):  its own `src/`, and the 
 - `app/` is the highest folder.
   - It NEEDS the kit's `src/`, `parser/` and `ui/`:  it imports them.
   - It names `epic/` nowhere since epic `repo-split` P16:  the epic folder declares its own part of the kit's page
-    server's settings.  No app source imports it.
+    server's settings.
+    - One command imports the epic tool's node files, by path:  `spell content update` (below, "The epic folder").
   - It imports nothing of spell-brand;  only the VS Code extension's build copies the brand's data, when it's there.
   - Nothing imports the app:  every arrow points down (the lint's `spell/no-upward-import`).
 
@@ -284,7 +285,7 @@ The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees
 As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 
 - The app's own commands are in its [commands.ts](src/cli/commands.ts):
-  `spell app create | serve | vscode`, `spell projects`, `spell content check [--bless]`.
+  `spell app create | serve | vscode`, `spell projects`, `spell content check [--bless]`, `spell content update`.
 - The language commands' work (`spell compile`, `run`, `lint` ...) is here too, behind a hook
   ([cli's AGENTS.md](src/cli/AGENTS.md)).
 
@@ -306,7 +307,10 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   - Claude Code runs its hooks and skills as the installed plugin (`epic@spell`;  `spell-epic@spell-epic` before
     epic `epic-engine`'s P49), and puts its `bin/epic` on every session's `PATH`;
     [the folder's Claude settings](.claude/settings.json) hold no hooks.
-- How the app reaches it:  it doesn't.
+- How the app reaches it:  only `spell content update` (epic `content` P3), which reuses the epic tool's own reading
+  of commit subjects, changelog entries and an epic page (`PlanCommits`, `EpicDocs`, `PlanDocFiles`, by path).
+  - The app's node program reads them by their built declarations, so the epic folder lists `"spellTypes"` and
+    `spell-types --below` builds them.
   - The page server's epic route modules, the folders it watches, the engine's routes (`/_epic/assets/`,
     `/_epic/pack/`, `/templates/`) and Epic UI at `/components/epics/` are the epic folder's own part of the kit's
     page server's settings, in its `package.json` ([the kit's server AGENTS.md](../src/server/AGENTS.md)).

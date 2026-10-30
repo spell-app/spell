@@ -752,6 +752,53 @@ Made Flashcards:  try  spell run <your space>/Flashcards
   says where that is, and how a project imports a library.
 - Then, in its folder, `spell app serve` opens the editor on it.
 
+## Keeping the examples current
+
+The examples and notebooks show what the language and Spell UI could do when they were written.
+Both keep learning, so now and then the examples catch up:
+
+1. `spell content update` lists what's new since the last time:
+   the commits under `parser/` and `ui/`, grouped by the epic each one names, with that epic's changelog entry;
+   Spell UI's new components and attributes;  the parser's new grammar.
+
+   ```sh
+   spell content update
+   ```
+
+   <details>
+   <summary>What it printed</summary>
+
+   ```text
+   Since 6efbde477 (2026-10-25), a first guess:  no update recorded yet
+   up to 74fd4f9f6 (2026-10-29);  168 commits under parser/ and ui/
+
+   Epics (9)
+     debut  57 commits  changelog:  2026-10-23 · Debut:  Spell's public preview, ...
+   ...
+   New components (15)
+     <ui-space>  A space is a gap between things. ...
+   ...
+   New grammar (3)
+     DrawSlot (classes)  PLACE one of a view's slots in its drawing ...
+   ```
+
+   </details>
+
+2. Turn that into features worth showing, each with the examples and notebooks it would touch,
+   and add each to the content epic's standing set, "Upgrades on offer":
+   `epic option add content#s-upgrades-on-offer "Title" "note"`.
+   - End each note with the ids it covers (`component:ui-space`, `epic:debut`, `grammar:DrawSlot`):
+     the next `spell content update` marks those as on offer, picked or turned down.
+3. Tick the ones to build, and press Send:  the ticks become a "Content Update" phase, built like any other.
+   - Turned down (removed from the set), a feature isn't offered again.
+4. Once it's built, `spell content update --done`:  the next update starts from there.
+   - `--always <id>` upgrades a kind of change from then on without asking:
+     `--always component` every new component, `--always epic:debut` everything epic `debut` adds.
+
+- `--json` prints the same as JSON, for a script or a session.
+- It remembers the stop commit and the always rules in the content epic's folder of the shared content
+  (`epics/content/content-updates.json5`), never beside the examples.
+
 ## The frozen test projects
 
 FizzBuzz and the to-do list Task List grew from have frozen twins beside them,
