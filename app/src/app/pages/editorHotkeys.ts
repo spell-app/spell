@@ -59,7 +59,7 @@ export function onEditorKeyDown(event: KeyboardEvent): void {
 }
 
 /** Was `event` typed into something editable:  a field, a `contenteditable`, or Monaco? */
-function isEditable(event: KeyboardEvent): boolean {
+export function isEditable(event: KeyboardEvent): boolean {
   const target = event.composedPath()[0]
   if (!(target instanceof HTMLElement)) return false
   return target.isContentEditable || target.matches("input, textarea, select") || !!target.closest(".monaco-editor")

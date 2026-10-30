@@ -66,6 +66,35 @@ describe("picking", () => {
     expect(editor.schema).toBe("ui-input")
     expect(host.querySelector(".InspectorCard h2")!.textContent!.trim()).toBe("<ui-input />")
   })
+
+  test("the pill's ✕ lets go of what's picked, and so does Esc;  Esc in a field doesn't (I92)", async () => {
+    const area = await inArea(`<ui-input value="hi"></ui-input>`)
+    const host = await mount(() => <InspectorColumn />)
+    Inspector.toggle()
+    Inspector.stopPicking()
+    Inspector.pick(area.querySelector("ui-input")!)
+    flush()
+    await ElementFixture.settle(host)
+    const letGo = host.querySelector<HTMLElement>(".InspectorCard h2 .InspectorLetGo")!
+    expect(letGo.getAttribute("title")).toBe("Let go of <ui-input /> (Esc)")
+    letGo.click()
+    flush()
+    expect(Inspector.picked).toBeUndefined()
+    // nothing picked:  the tip, with the pick button
+    expect(host.querySelector(".InspectorTip .InspectorPick")).not.toBeNull()
+
+    Inspector.pick(area.querySelector("ui-input")!)
+    flush()
+    const field = document.createElement("input")
+    document.body.append(field)
+    cleanups.push(() => field.remove())
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, composed: true }))
+    flush()
+    expect(Inspector.picked).toBeDefined()
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+    flush()
+    expect(Inspector.picked).toBeUndefined()
+  })
 })
 
 describe("the properties card", () => {

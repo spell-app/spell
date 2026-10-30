@@ -48,10 +48,11 @@ export function InspectorCard(props: {
           {props.title}
         </h2>
         {props.actions}
+        {/* an eye, not a ✕:  it hides the card, never lets go of what's picked (`<LetGo>`, I92) */}
         <ui-icon
-          name="close"
+          name="eye slash"
           link=""
-          class="IconAction"
+          class="IconAction InspectorHideCard"
           label={appTexts.text("inspectorHide")}
           data-tooltip={appTexts.text("inspectorHide")}
           data-position="bottom right"

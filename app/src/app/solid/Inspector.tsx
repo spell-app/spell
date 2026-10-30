@@ -9,6 +9,7 @@ import { PropertySchemas } from "spell/ui/property"
 import { ValueSets } from "spell/ui/vocabulary"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
+import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
@@ -173,6 +174,12 @@ export class Inspector {
     Picker.select((part && Inspector.outlinedElement(steps, part)) || element)
     const address = element && Inspector.addressOf(element)
     if (address) editorPrefs.set(Inspector.pickedPref, address)
+  }
+
+  /** Let go of what's picked:  no outline, and the properties card shows its nothing-picked state. */
+  static letGo(): void {
+    Inspector.pick(undefined)
+    editorPrefs.forget(Inspector.pickedPref)
   }
 
   /**
@@ -929,6 +936,21 @@ export function InspectorColumn(): JSX.Element {
       return () => window.removeEventListener("keydown", putAway)
     }
   )
+  // Esc lets go of what's picked, when it isn't stopping a pick or putting the sheet away, nor typed in a field
+  createEffect(
+    () => !!Inspector.picked,
+    (hasPick) => {
+      if (!hasPick) return
+      const letGo = (event: KeyboardEvent) => {
+        if (event.key !== "Escape" || event.defaultPrevented) return
+        // read before this Esc's own writes land:  picking or a sheet up, this Esc is theirs
+        if (Inspector.isPicking || Inspector.isSheetUp || isEditable(event)) return
+        Inspector.letGo()
+      }
+      window.addEventListener("keydown", letGo)
+      return () => window.removeEventListener("keydown", letGo)
+    }
+  )
   return (
     <Show when={Inspector.isOpen}>
       <aside class="InspectorColumn" aria-label={appTexts.text("inspector")}>
@@ -1116,7 +1138,10 @@ function PropertiesCard(): JSX.Element {
                         Inspector.backTo(crumb.depth)
                       }}
                     >
-                      {crumb.label}
+                      <span class="InspectorPartTagText">{crumb.label}</span>
+                      <Show when={!crumb.depth}>
+                        <LetGo label={crumb.label} />
+                      </Show>
                     </span>
                   </>
                 )}
@@ -1130,7 +1155,10 @@ function PropertiesCard(): JSX.Element {
         when={Inspector.inspected}
         keyed
         fallback={
-          <p class="InspectorTip">{appTexts.text(Inspector.isPicking ? "inspectorPicking" : "inspectorTip")}</p>
+          <p class="InspectorTip">
+            <InspectorPick />
+            {appTexts.text(Inspector.isPicking ? "inspectorPicking" : "inspectorTip")}
+          </p>
         }
       >
         {(part) => (
@@ -1173,6 +1201,29 @@ function PropertiesCard(): JSX.Element {
         )}
       </Show>
     </InspectorCard>
+  )
+}
+
+/****************
+ * ### `<LetGo>`
+ * The ✕ in the picked part's title pill:  lets go of it (`Inspector.letGo()`), as Esc does.
+ * - Owen:  "It's unclear how to turn the inspector off for selected thing".
+ * - Apart from the card's own hide button, which hides the card, not the pick.
+ ****************/
+function LetGo(props: { label: string }): JSX.Element {
+  const tip = () => appTexts.text("inspectorLetGo", { part: props.label })
+  return (
+    <ui-icon
+      name="close"
+      link=""
+      class="InspectorLetGo"
+      label={tip()}
+      title={tip()}
+      onClick={(event: MouseEvent) => {
+        event.stopPropagation()
+        Inspector.letGo()
+      }}
+    />
   )
 }
 

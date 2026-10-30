@@ -190,6 +190,13 @@
   font-size: 14px;
   line-height: 1.35;
   color: var(--ui-text-muted);
+
+  /* the pick button, before the words:  a pick starts here too (I92) */
+  & > .InspectorPick {
+    float: left;
+    margin: 1px 8px 0 0;
+    color: var(--ui-text-color);
+  }
 }
 
 /* the outlines over the app:  what a click would pick, and what's picked */
@@ -432,7 +439,26 @@ ui-icon.InspectorPick.picking {
   }
   & > .InspectorPartTag {
     flex: 0 1 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     white-space: nowrap;
+  }
+  & .InspectorPartTagText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* the picked part's let-go ✕, inside its pill (I92) */
+  & .InspectorLetGo {
+    flex: none;
+    margin-right: -4px;
+    font-size: 0.85em;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  & .InspectorLetGo:hover {
+    opacity: 1;
   }
   & > .InspectorPartTag.back {
     cursor: pointer;
