@@ -82,6 +82,26 @@ export type ProjectsOptions = GlobalOptions & {
 }
 
 /**
+ * `spell content check` flags.
+ * - `bless`:  rewrite every content snapshot instead of checking against it
+ */
+export type ContentCheckOptions = GlobalOptions & {
+  bless?: boolean
+}
+
+/**
+ * `spell content update` flags.
+ * - `json`:  print what's new as JSON, for the session
+ * - `done`:  record the update's end instead:  the stop commit moves to now
+ * - `always`:  with `done`, ids (or their start, `component`) to upgrade from now on without asking
+ */
+export type ContentUpdateOptions = GlobalOptions & {
+  json?: boolean
+  done?: boolean
+  always?: string[]
+}
+
+/**
  * `spell app preview serve` flags.
  * - `port`:  where to serve the static build -- default 4848 (`PREVIEW_PORT`), else any free one
  * - `headless`:  don't open a browser
@@ -216,3 +236,110 @@ export type StatusRow = {
   note?: string
   details?: string[]
 }
+
+////////////////
+// ## Content updates
+////////////////
+
+/**
+ * What `spell content update` remembers between updates, in the content epic's folder of the shared content
+ * (`epics/content/content-updates.json5`;  `ContentUpdate`).
+ * - `last`:  the commit the last update stopped at, and its commit time;  none before the first `--done`
+ * - `always`:  the "always upgrade" rules, oldest first
+ */
+export type ContentUpdateMemory = {
+  last?: { commit: string; date: string }
+  always: AlwaysRule[]
+}
+
+/**
+ * An "always upgrade" rule:  every listed change whose id is `id`, or starts `<id>:`, is upgraded without asking.
+ * - `id`:  `component:ui-toast`, `component` (every new component), `epic:debut`, `grammar:SpellIfChain` ...
+ * - `added`:  the day it was added, `2026-10-29`
+ */
+export type AlwaysRule = { id: string; added: string }
+
+/**
+ * What changed in the parser and Spell UI since the last content update (`ContentUpdate.gather()`).
+ * - `since`:  where it starts:  the last update's stop commit, or a first guess (`guessed`) before any `--done`
+ * - `head`:  where it ends, this checkout's `HEAD`
+ * - `epics`:  the commits under `parser/` and `ui/`, grouped by the epic their subjects name, most commits first
+ * - `components`, `attributes`, `grammar`:  Spell UI's new components, existing components' new attributes, and the
+ *   parser's new grammar rules
+ * - `options`:  what's in the epic page's standing set "Upgrades on offer" already
+ */
+export type ContentUpdateReport = {
+  since: { commit: string; date: string; guessed: boolean }
+  head: { commit: string; date: string }
+  epics: EpicChanges[]
+  components: NewComponent[]
+  attributes: NewAttribute[]
+  grammar: NewRule[]
+  options: OfferedOption[]
+}
+
+/**
+ * One epic's commits since the last update.
+ * - `id`:  `epic:<name>`, or `epic:other` for commits that name none
+ * - `epic`:  its name;  `null` for the others
+ * - `changelog`:  its entry in the changelog:  whether it's there, and its heading
+ * - `commits`:  newest first
+ * - `marks`:  an always rule it matches, options that cover it
+ */
+export type EpicChanges = {
+  id: string
+  epic: string | null
+  changelog?: { found: boolean; title?: string; path: string; anchor: string }
+  commits: UpdateCommit[]
+  marks: UpdateMark[]
+}
+
+/**
+ * One commit, as its subject says it.
+ * - `sha`:  short;  `date`:  its commit time, ISO;  `subject`:  the whole line
+ * - `phases`, `items`:  what the subject names (`P3`, `i3`), as `PlanCommits.parseCommitSubject()` reads it
+ */
+export type UpdateCommit = { sha: string; date: string; subject: string; phases: string[]; items: string[] }
+
+/**
+ * A Spell UI component that's new since the last update.
+ * - `id`:  `component:<tag>`;  `tag`:  `ui-space`;  `name`:  `Space`;  `description`:  its one line
+ */
+export type NewComponent = { id: string; tag: string; name: string; description: string; marks: UpdateMark[] }
+
+/**
+ * A new attribute on a component that was there before.
+ * - `id`:  `attribute:<tag>:<name>`;  `description`:  its one line, when it has one
+ */
+export type NewAttribute = { id: string; tag: string; name: string; description: string; marks: UpdateMark[] }
+
+/**
+ * A grammar rule that's new since the last update (the parser's syntax table, `spellSyntax.json`).
+ * - `id`:  `grammar:<className>`;  `module`:  its table (`lists`);  `ruleNames`:  what the grammar calls it;
+ *   `purpose`:  its docstring's first line
+ */
+export type NewRule = {
+  id: string
+  className: string
+  module: string
+  ruleNames: string[]
+  purpose: string
+  marks: UpdateMark[]
+}
+
+/**
+ * Why a listed change is marked:
+ * - `always`:  it matches always rule `rule`
+ * - `offered` / `picked` / `removed`:  an option of the standing set names its id in its title or note
+ *   (`letter`, `title`):  still on offer, picked by Owen, or turned down
+ */
+export type UpdateMark = { kind: "always"; rule: string } | { kind: OptionState; letter: string; title: string }
+
+/** Where a standing set's option stands:  on offer, picked (`slot="picked"`), or turned down (`slot="removed"`). */
+export type OptionState = "offered" | "picked" | "removed"
+
+/**
+ * An option of the standing set "Upgrades on offer".
+ * - `text`:  its title and note together, its earlier versions left out:  what the marks search for ids
+ */
+export type OfferedOption = { letter: string; title: string; text: string; state: OptionState }

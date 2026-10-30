@@ -12,6 +12,7 @@ import { SP } from "spell/parser/spell"
 import {
   FIXTURES_GROUP,
   PYTHON_FIXTURES,
+  bareNameOf,
   compiledFixture,
   fixtureImports,
   fixtureLanguages,
@@ -23,7 +24,7 @@ import { CLI } from "spell/app/cli"
 /**
  * The CORE CONTRACT:  every fixture project, compiled for each target, run headless as `spell run` runs it,
  * prints the SAME thing, line for line.
- * - What it prints is pinned in `__snapshots__/contract/<project>.out.txt` (`snapshotOf()`).
+ * - What it prints is pinned in `__snapshots__/contract/` (`snapshotOf()`).
  * - So a target's core is right when it prints what the snapshot says.
  *   - `js/solid` and `ts/solid` share `@spell/core` today.
  *   - Python's core, `spell_core` (spell-parser's `src/py/core`), prints the same
@@ -40,7 +41,7 @@ import { CLI } from "spell/app/cli"
  * - Only STDOUT is compared:  the program's own output, as data.
  *   A dump of a thing (`print the card`) goes to stderr, as do warnings (epic `python-target`, Q17):
  *   how a thing looks dumped is each target's own business.
- * - Changed on purpose:  `yarn vp test run tests/cli/contract.test.ts -u`, then read the diff.
+ * - Changed on purpose:  `spell content check --bless`, then read the diff.
  */
 const TARGET_FILES: Record<string, string> = { "js/solid": ".mjs", "ts/solid": ".tsx", py: ".py" }
 
@@ -56,7 +57,7 @@ async function printed(name: string, target: string, code = compiledFixture(name
   const folder = mkdtempSync(join(tmpdir(), "spell-contract-"))
   try {
     const projects = await importedProjects(name, target, folder)
-    const { exitCode, output, stdout } = await CLI.runCode("run", name, code, {
+    const { exitCode, output, stdout } = await CLI.runCode("run", bareNameOf(name), code, {
       extension,
       projects,
       capture: true,
@@ -107,15 +108,15 @@ function moduleNameOf(imported: string): string {
 }
 
 /**
- * Where fixture `name`'s output is pinned:  `__snapshots__/contract/<name>.out.txt`.
- * - An example or guide named as a frozen fixture is but for case gets its group too, `examples.Counter.out.txt`:
- *   the frozen `counter`'s `counter.out.txt` is the same file on a disk that ignores case.
+ * Where test project `name`'s output is pinned, in `__snapshots__/contract/`, by its group:
+ * - a fixture's (`@spell/test`) there:  `counter.out.txt`
+ * - an example's or a Spell guide's in its group's folder:  `examples/Counter.out.txt`, `guides/a-first-spell.out.txt`
+ * - So the example FizzBuzz and the fixture `fizzbuzz` are two files, on a disk that ignores case too.
  */
 function snapshotOf(name: string): string {
   const projectId = fixtureProjectId(name)
-  const clashes = fixtureProjectNames().some((other) => other !== name && other.toLowerCase() === name.toLowerCase())
-  const file = clashes && !projectId.startsWith(`${FIXTURES_GROUP}/`) ? `${projectId.split("/").at(-2)}.${name}` : name
-  return resolve(import.meta.dirname, `__snapshots__/contract/${file}.out.txt`)
+  const folder = projectId.startsWith(`${FIXTURES_GROUP}/`) ? "" : `${projectId.split("/").at(-2)}/`
+  return resolve(import.meta.dirname, `__snapshots__/contract/${folder}${bareNameOf(name)}.out.txt`)
 }
 
 /** Every target that runs a program:  all but a library (`ts/lib`), which keeps only the classes. */
@@ -172,7 +173,7 @@ class HelpersByName extends P.JSWriter {
 
 describe("a program compiled before P16, with core's old names", () => {
   test("prints what it prints today", async () => {
-    const name = "Solitaire"
+    const name = "@spell/examples/Solitaire"
     const helpersByName = compiledFixture(name, new HelpersByName())
     const before = helpersByName.replace(/\bcore\.(\w+)\(/g, (call, method: string) =>
       OLD_NAMES[method] ? `core.${OLD_NAMES[method]}(` : call
@@ -222,7 +223,7 @@ describe("drawing with h() from @spell/core, as `spell run` runs it", () => {
 })
 
 /** The fixtures that are games:  a `deck` of cards, each with its own click handler, `on_click`. */
-const GAMES = ["Solitaire"]
+const GAMES = ["@spell/examples/Solitaire"]
 
 /**
  * Where the board a run draws last starts, in its output's `lines`:  the last `<div id="spell-app-root">`.
@@ -253,7 +254,7 @@ describe("the core contract:  a game's patches give its whole state, click by cl
         const folder = mkdtempSync(join(tmpdir(), "spell-patches-"))
         try {
           await importedProjects(name, "py", folder)
-          const program = join(folder, `${name}.spell.py`)
+          const program = join(folder, `${bareNameOf(name)}.spell.py`)
           writeFileSync(program, compiledFixture(name, "py"))
           const args = ["run", "--quiet", "--project", SPELL_CORE, "python", PLAYER, program]
           const { status, stdout, stderr } = spawnSync("uv", [...args, "--seed", String(CONTRACT_SEED)], {
@@ -287,7 +288,7 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
         const folder = mkdtempSync(join(tmpdir(), "spell-page-"))
         try {
           await importedProjects(name, "py", folder)
-          const program = join(folder, `${name}.spell.py`)
+          const program = join(folder, `${bareNameOf(name)}.spell.py`)
           writeFileSync(program, compiledFixture(name, "py"))
           const run = ["run", "--quiet", "--project", SPELL_CORE, "python", "-m"]
           const ran = spawnSync("uv", [...run, "spell_core.run", program, "--seed", "1", "--no-pauses", "--state"], {
@@ -297,7 +298,7 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
           const state = ran.stdout.trimEnd().split("\n").at(-1)!
 
           // the page:  its drawing half, and those of the projects it imports, as modules beside it
-          const elements = join(folder, `${name}.elements.mjs`)
+          const elements = join(folder, `${bareNameOf(name)}.elements.mjs`)
           writeFileSync(elements, compiledFixture(name, PY.ElementsWriter.instance))
           const projects: Record<string, string> = {}
           const modules = [`import * as program from ${JSON.stringify(pathToFileURL(elements).href)}`]
@@ -319,7 +320,7 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
             `found(document, 'ui-item[aria-label="Auto play"]').dispatchEvent(new Event("click", { bubbles: true }))`,
             "console.log(JSON.stringify(sent))"
           ].join("\n")
-          const { exitCode, output, stdout } = await CLI.runCode("run", `${name}Page`, page, {
+          const { exitCode, output, stdout } = await CLI.runCode("run", `${bareNameOf(name)}Page`, page, {
             projects,
             capture: true,
             dom: true
@@ -329,7 +330,7 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
           const board = boardAt(lines)
           // the messages sent, then a blank line, then the board
           const [messages, drawn] = [lines[board - 2], lines.slice(board).join("\n")]
-          const snapshot = readFileSync(resolve(import.meta.dirname, `__snapshots__/contract/${name}.out.txt`), "utf8")
+          const snapshot = readFileSync(snapshotOf(name), "utf8")
           const expected = snapshot.trimEnd().split("\n")
           expect(drawn).toBe(expected.slice(boardAt(expected)).join("\n"))
 

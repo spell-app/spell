@@ -154,7 +154,17 @@ export const spanishWords: SP.LanguageWords = {
       grupo: "group"
     },
     notes: { descripción: "description", descripcion: "description", comentario: "comment" },
-    handlers: { al: "on", cuando: "when", mientras: "while" },
+    handlers: {
+      al: "on",
+      cuando: "when",
+      mientras: "while",
+      // la etiqueta propia de una capacidad (épica `debut` P27, Q47):  `<pulsable cuando está boca abajo/>`
+      arrastrable: "draggable",
+      arrastrables: "items draggable",
+      pulsable: "clickable",
+      seleccionable: "selectable",
+      soltable: "droppable"
+    },
     controls: {
       si: "if",
       "si no si": "otherwise if",
@@ -185,6 +195,7 @@ export const spanishWords: SP.LanguageWords = {
       arrastrable: "draggable",
       soltable: "droppable",
       seleccionable: "selectable",
+      pulsable: "clickable",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
       grupo: "group"
     },
@@ -235,9 +246,23 @@ export const spanishWords: SP.LanguageWords = {
       group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
-      viewFlags: { draggable: "es arrastrable", droppable: "es soltable", selectable: "es seleccionable" },
+      viewFlags: {
+        draggable: "es arrastrable",
+        droppable: "es soltable",
+        selectable: "es seleccionable",
+        clickable: "es pulsable"
+      },
       start: "iniciar {words}",
-      handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
+      handlers: {
+        on: "al {phrase} :",
+        when: "cuando {phrase} :",
+        while: "mientras {phrase} :",
+        draggable: "es arrastrable {phrase} :",
+        clickable: "es pulsable {phrase} :",
+        selectable: "es seleccionable {phrase} :",
+        droppable: "es soltable {phrase} :",
+        "items draggable": "sus {items} son arrastrables {phrase} :"
+      },
       controls: {
         if: "si {phrase}",
         "otherwise if": "de lo contrario si {phrase}",

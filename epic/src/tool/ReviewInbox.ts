@@ -8,7 +8,7 @@ import { DataFile } from "spell/epic/data/DataFile"
 import { isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
-import { partOf, withInlineComments } from "spell/epic/review/review.types"
+import { STAGE_COUNTDOWN_MS, isHeld, partOf, withInlineComments } from "spell/epic/review/review.types"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 import { SharedComments } from "./SharedComments"
@@ -70,7 +70,9 @@ import { SharedComments } from "./SharedComments"
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
  *     - the STAGE BUTTON, `<epic-stage-button>` (epic `epic-engine` P29), Accept Overview or Accept Phases:
  *       `{ action: "accept", stage: "overview" }` under the key `stage` (`STAGE_ID`), while the page is in that stage
- *       - sent at once with whatever else is unsent;  `epic inbox apply` moves the page on a stage
+ *       - a press holds it 5 minutes (`countdown: true`, epic `epic-engine` I181):  dated when it goes (`stamped()`),
+ *         so no Send before then carries it (`heldMarks`);  then the page sends it, with whatever else is unsent
+ *       - `epic inbox apply` moves the page on a stage
  *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
  *       the others, still to do
  *     - a CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30), under its id (`CHANGE_ID`):
@@ -425,7 +427,7 @@ export class ReviewInbox {
    */
   setMark(id: unknown, mark: unknown, at = isoTime()): InboxMark | null {
     const key = ReviewInbox.toItemId(id)
-    const checked = mark === null ? null : { ...ReviewInbox.toMark(mark), at }
+    const checked = mark === null ? null : ReviewInbox.stamped(ReviewInbox.toMark(mark), at)
     if (checked && (checked.action === "new") !== NEW_ID.test(key))
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
@@ -560,7 +562,19 @@ export class ReviewInbox {
    */
   get unsentMarks(): ListedMark[] {
     const sent = this.sent ? Date.parse(this.sent) : -Infinity
-    return this.markList.filter((mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent)
+    const now = Date.now()
+    return this.markList.filter(
+      (mark) => !ReviewInbox.isImmediate(mark) && Date.parse(mark.at) > sent && !isHeld(mark, now)
+    )
+  }
+
+  /**
+   * Marks HELD for their time, not waiting for a send (`isHeld()`, epic `epic-engine` I181):  `[{ id, ...mark }]`.
+   * - a stage button's accept, through its 5-minute countdown:  dated when it goes, so no Send before then carries it
+   */
+  get heldMarks(): ListedMark[] {
+    const now = Date.now()
+    return this.markList.filter((mark) => isHeld(mark, now))
   }
 
   /**
@@ -1087,7 +1101,11 @@ export class ReviewInbox {
       if (stage === undefined || stage === null) return { action }
       if (!(ACCEPT_STAGES as readonly unknown[]).includes(stage))
         throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
-      return { action, stage: stage as PageStage }
+      // the stage button's press (epic `epic-engine` I181):  held for its countdown (`stamped()`)
+      const { countdown } = mark as Record<string, unknown>
+      return countdown === true
+        ? { action, stage: stage as PageStage, countdown }
+        : { action, stage: stage as PageStage }
     }
     // a phase dragged to another place (epic `epic-engine` P34):  its new number
     if (action === "move") {
@@ -1139,6 +1157,15 @@ export class ReviewInbox {
       ...(edited?.length && { edited }),
       ...(removed?.length && { removed })
     }
+  }
+
+  /**
+   * `mark` stamped `at`;  a stage button's accept (`countdown`, epic `epic-engine` I181) `STAGE_COUNTDOWN_MS` later:
+   * HELD until then (`heldMarks`), so a Send before its countdown ends never carries it.
+   */
+  static stamped(mark: CheckedMark, at: string): InboxMark {
+    if (!mark.countdown) return { ...mark, at }
+    return { ...mark, at: isoTime(new Date(Date.parse(at) + STAGE_COUNTDOWN_MS)) }
   }
 
   /** Is `mark` an immediate request (`requestNow()`), not one waiting for a send? */
@@ -1279,6 +1306,8 @@ export type InboxMark = CheckedMark & { at: string }
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4);  `shot` a note box's picture too
  *   (`revisit`, `todo`, `next`, `drop`, `skip`:  epic `epic-engine` P51)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
+ * - `countdown`:  with `stage`, a press of the button, held 5 minutes (`stamped()`, epic `epic-engine` I181):
+ *   its `at` is when it goes, `STAGE_COUNTDOWN_MS` after the press
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
  * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140);
  *   an approve's too, to fold in (I163)
@@ -1289,6 +1318,7 @@ export type CheckedMark = {
   note?: string
   comments?: string[]
   stage?: PageStage
+  countdown?: boolean
   to?: number
 } & PickFields &
   NewItemFields &

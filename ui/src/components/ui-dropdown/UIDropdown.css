@@ -140,6 +140,9 @@
     --_ui-dropdown-item-font-weight-active: var(--ui-dropdown-item-font-weight-active, var(--ui-font-weight-bold));
     --_ui-dropdown-item-divider-color: var(--ui-dropdown-item-divider-color, var(--ui-border-color-internal));
     --_ui-dropdown-item-element-spacing: var(--ui-dropdown-item-element-spacing, var(--ui-space-s));
+    /* 1:  every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's
+       menus are);  0:  only when another row has an icon */
+    --_ui-dropdown-icon-column: var(--ui-dropdown-icon-column, 0);
     --_ui-dropdown-header-color: var(--ui-dropdown-header-color, var(--ui-text-dark));
     --_ui-dropdown-header-font-size: var(--ui-dropdown-header-font-size, 0.8em);
     --_ui-dropdown-description-color: var(--ui-dropdown-description-color, var(--ui-text-light));
@@ -629,10 +632,20 @@
     fill: currentColor;
     vertical-align: -0.125em;
   }
-  /* a row with no icon, in a menu whose other rows have one:  its words start where theirs do (a menu of ticks, a
-     check only on the rows that are on;  Owen, 2026-10-29) */
-  .ui.dropdown .menu:has(> .item > .icon) > .item:not(:has(> :is(.icon, .icons, .flag, .image, img))) {
-    padding-inline-start: calc(var(--_ui-dropdown-item-padding-inline) + 1.18em + var(--_ui-dropdown-item-element-spacing));
+  /*
+   * a row with no icon keeps an icon's room before its words (Owen, 2026-10-29, a menu of ticks:  "Menu should have
+   * space in the left where the check should go, even if nothing checked"):
+   * - in a menu whose other rows have one:  its words start where theirs do
+   * - in every menu that asks, `--ui-dropdown-icon-column: 1`:  even with no row ticked
+   */
+  .ui.dropdown .menu:has(> .item > .icon) {
+    --_ui-dropdown-icon-column: 1;
+  }
+  .ui.dropdown .menu > .item:not(:has(> :is(.icon, .icons, .flag, .image, img))) {
+    padding-inline-start: calc(
+      var(--_ui-dropdown-item-padding-inline) + var(--_ui-dropdown-icon-column) *
+        (1.18em + var(--_ui-dropdown-item-element-spacing))
+    );
   }
   .ui.dropdown > .text :is(img, .image:not(.icon)),
   .ui.dropdown > .text ::slotted(:is(img, .image:not(.icon))),

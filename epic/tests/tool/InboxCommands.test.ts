@@ -509,7 +509,7 @@ function withPhase() {
   writeFileSync(file, plan.toString())
 }
 
-test("apply:  sent new items are made, a phase's and the summary's todos filed;  all leave the inbox;  unsent waits", async () => {
+test("apply:  sent new items are made, a phase's todo a go-ahead (I181), the summary's filed;  all leave the inbox;  unsent waits", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
     inbox.setNew(undefined, { kind: "question", title: "window or aisle?", note: "long flight", near: "p1" }, M1)
@@ -520,15 +520,33 @@ test("apply:  sent new items are made, a phase's and the summary's todos filed; 
   })
   await commands().inbox.run("x", file, ["apply"], {})
   expect(printed.join("\n")).toBe(
-    ["NEW1  made question Q1:  window or aisle?", "P1  to todo T1", "SUMMARY  to todo T2"].join("\n")
+    [
+      "NEW1  made question Q1:  window or aisle?",
+      "P1  go ahead:  build it (his note kept)",
+      "SUMMARY  to todo T1"
+    ].join("\n")
   )
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   // `near` the phase by its old id (`p1`):  linked by its stable one
   expect(after.findItem("q1")!.querySelector('a[href="#p-offline-pages"]')).not.toBeNull()
   expect(after.findItem("q1")!.querySelector('epic-status[state="noted"]')).not.toBeNull()
-  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  P1 · Offline Pages")
-  expect(after.findItem("t2")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("t1")!.getAttribute("title")).toBe("Follow up:  the summary")
+  expect(after.findItem("t2")).toBeNull()
   expect(Object.keys(ReviewInbox.read(inboxFile).marks)).toEqual(["new2"])
+})
+
+// epic `epic-engine` I181:  a pressed Accept Overview counts down 5 minutes, its mark held
+test("print:  a stage accept counting down is held, never unsent;  a Send before its time leaves it", async () => {
+  withPhase()
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("stage", { action: "accept", stage: "overview", countdown: true })
+    inbox.markSent()
+  })
+  await commands().inbox.run("x", file, [], {})
+  const text = printed.join("\n")
+  expect(text).toMatch(/accept \(1\):\n  - STAGE .* · held:  goes at .*, unless Owen calls it off/)
+  expect(text).toContain("0 unsent")
+  expect(ReviewInbox.read(inboxFile).sentMarks).toEqual([])
 })
 
 test("print:  a new item by its kind and title, with its note and what it's about;  a phase's mark by its title", async () => {

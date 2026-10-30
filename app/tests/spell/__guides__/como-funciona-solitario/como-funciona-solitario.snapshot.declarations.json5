@@ -90,7 +90,7 @@
       ],
       "kind": "method",
       "name": "jugar una carta",
-      "defined": "/ComoFuncionaSolitario.es.spell:2519-2799"
+      "defined": "/ComoFuncionaSolitario.es.spell:2527-2807"
     },
     {
       "type": "Pila",
@@ -110,30 +110,30 @@
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/ComoFuncionaSolitario.es.spell:1809-2050"
+      "defined": "/ComoFuncionaSolitario.es.spell:1813-2058"
     },
     {
       "type": "Mesa",
       "superType": "App",
-      "defined": "/ComoFuncionaSolitario.es.spell:2120-2462"
+      "defined": "/ComoFuncionaSolitario.es.spell:2128-2470"
     },
     {
       "property": "columna",
       "of": "Mesa",
       "datatype": "Columna",
-      "defined": "/ComoFuncionaSolitario.es.spell:2153-2186"
+      "defined": "/ComoFuncionaSolitario.es.spell:2161-2194"
     },
     {
       "property": "mano",
       "of": "Mesa",
       "datatype": "Pila",
-      "defined": "/ComoFuncionaSolitario.es.spell:2190-2217"
+      "defined": "/ComoFuncionaSolitario.es.spell:2198-2225"
     },
     {
       "property": "mensaje",
       "of": "Mesa",
       "datatype": "text",
-      "defined": "/ComoFuncionaSolitario.es.spell:2221-2242"
+      "defined": "/ComoFuncionaSolitario.es.spell:2229-2250"
     },
     {
       "syntax": "probar la columna",
@@ -142,7 +142,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la columna",
-      "defined": "/ComoFuncionaSolitario.es.spell:3293-3599"
+      "defined": "/ComoFuncionaSolitario.es.spell:3301-3607"
     }
   ],
   "codeLines": [

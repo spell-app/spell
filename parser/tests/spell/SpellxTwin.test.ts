@@ -404,16 +404,16 @@ describe("spellx:  a third style of spell", () => {
     test("a bare `draggable`, `droppable`, `selectable` is the outline's `- it is draggable` ...", () => {
       const { code, errors } = compiledText(['<spell-view "card" draggable selectable>', "</spell-view>"])
       expect(errors).toEqual([])
-      expect(code).toContain("static canBeDragged = true")
-      expect(code).toContain("static canBeSelected = true")
-      expect(code).not.toContain("canBeDroppedOn")
+      expect(code).toContain("static draggable = true")
+      expect(code).toContain("static selectable = true")
+      expect(code).not.toContain("droppable")
       const pile = compiledText(['<spell-view "pile" droppable>', "</spell-view>"])
       expect(pile.errors).toEqual([])
-      expect(pile.code).toContain("static canBeDroppedOn = true")
+      expect(pile.code).toContain("static droppable = true")
       // Spanish
       const es = compiledText(['<encanto-vista "carta" arrastrable>', "</encanto-vista>"], { path: "Carta.es.spellml" })
       expect(es.errors).toEqual([])
-      expect(es.code).toContain("static canBeDragged = true")
+      expect(es.code).toContain("static draggable = true")
     })
 
     test("a menu:  one line naming its actions, the app's menu bar a line ending its body (P10)", () => {

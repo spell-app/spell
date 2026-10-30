@@ -417,6 +417,11 @@ On an item's line, ONE group, in this order:
 practice, I'm never using the wand";  the inbox still takes an older page's request for now. An item Claude has
 answered or done keeps the three-button group, so Owen can still approve it.
 
+A phase still to do has Do this (thumbs up), green, then Revisit:  "yes, build this phase", the same `todo` mark,
+which `inbox apply` takes as a go-ahead, never a new todo (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a
+phase, you wouldn't make it a todo").  Every button that means "accept this" is a thumbs up:  Accept plan, a plan
+accepted's state, Accept Overview / Accept Phases, Looks good.
+
 The NOTE BOX (every one but a work todo's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
 buttons:  Revisit Later (history), blue, and Skip This (x), grey (Owen, 2026-10-09:  the x replaced the box's Make
 Todo, which he never used there;  the line keeps its Make Todo). The x means "nothing to do here":  a `skip` mark,

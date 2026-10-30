@@ -15,6 +15,7 @@ import {
   SendCountdown,
   ServerLink,
   isAirplane,
+  isHeld,
   isImmediate,
   type AutoSend,
   type InboxListener
@@ -426,7 +427,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     // tracks the client's changes:  every read below follows them
     if (!this.review.reviewing() || !client) return undefined
-    const all = Object.values(client.inbox.marks)
+    // a stage accept counting down (I181) is the stage button's till its time:  neither sent nor unsent here
+    const all = Object.values(client.inbox.marks).filter((mark) => !isHeld(mark))
     const unsent = client.unsentMarkCount
     const comments = client.unsentCommentCount
     return {

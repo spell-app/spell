@@ -1948,6 +1948,13 @@
       }
     },
     {
+      "name": "--ui-dropdown-icon-column",
+      "description": {
+        "kind": "markdown",
+        "value": "1: every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's menus are); 0: only when another row has an icon\n\n`<ui-dropdown>`'s token.  Default:  `0`"
+      }
+    },
+    {
       "name": "--ui-dropdown-header-color",
       "description": {
         "kind": "markdown",
@@ -5994,6 +6001,13 @@
       }
     },
     {
+      "name": "--ui-menu-segmented-pressed-shadow",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)`"
+      }
+    },
+    {
       "name": "--ui-menu-font-family",
       "description": {
         "kind": "markdown",
@@ -6033,13 +6047,6 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-menu>`'s token.  Default:  `var(--ui-font-weight-bold)`"
-      }
-    },
-    {
-      "name": "--ui-menu-segmented-pressed-shadow",
-      "description": {
-        "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)`"
       }
     },
     {

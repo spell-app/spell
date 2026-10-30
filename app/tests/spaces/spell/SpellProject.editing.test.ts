@@ -12,7 +12,7 @@ import { fixtureProjectId } from "spell/app/spaces/test"
  *   disk reader, which spell-parser's tests never import.
  */
 describe("SpellProject editing", () => {
-  const solitaire = fixtureProjectId("Solitaire")
+  const solitaire = fixtureProjectId("@spell/examples/Solitaire")
   const project = new SP.SpellProject(solitaire)
   const game = new SP.SpellFile(`${solitaire}/Solitaire.spellml`)
   let gameText: string

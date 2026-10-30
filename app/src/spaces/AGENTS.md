@@ -49,9 +49,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Among them `counter`, a frozen counter library, which `counter-app` imports:
       for the tests of one project importing another.
       - Those of the runner, the core contract, `spell compile` and `spell explain --in`.
-    - The built-in examples are tested as they are, not as frozen copies (`EXAMPLE_FIXTURES`):
-      their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes.
-    - So is every guide, `@spell/guides`, since epic `debut` P10.
+    - The built-in examples are tested in place, not as frozen copies (`EXAMPLE_PROJECTS`):
+      their snapshots are in `tests/spell/__examples__/<Project>/`, re-blessed when an example changes
+      (`spell content check --bless`).
+    - So is every Spell guide, `@spell/guides`, since epic `debut` P10.
       Its snapshots are in `tests/spell/__guides__/<Project>/`.
 - [test/](test/index.ts), node only:
   the test helpers for the frozen test projects and the tested examples and guides, `spell/app/spaces/test`

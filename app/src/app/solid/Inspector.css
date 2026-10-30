@@ -170,12 +170,6 @@
     color: color-mix(in oklab, var(--ui-blue) 80%, var(--ui-text-color));
     font-size: 0.9em;
   }
-  /* Events' "+":  a bare icon and its caret, the header's grey, spaced as the header's icons */
-  & > ui-dropdown.InspectorAddEvent {
-    margin-inline: calc(var(--spell-bar-icon-gap) / 2);
-    color: var(--spell-bar-icon-color);
-    --ui-dropdown-icon-spacing: 2px;
-  }
   /* Views' switch:  Views | Things | Templates, small, in the title's place */
   & ui-menu.InspectorViewTabs {
     flex: 1 1 auto;
@@ -250,7 +244,20 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* its events:  each a heading, then its code, in a box that grows with it */
+/* the Events and Actions bands, at the properties card's end:  each the editor's full width (epic `debut` P28, P29) */
+.Inspector :is(ui-property-group.InspectorEvents, ui-property-group.InspectorActions) {
+  grid-column: 1 / -1;
+}
+/* their rows too:  a band lays its content out as the editor's two columns */
+.Inspector :is(.InspectorEvent, .InspectorAction) {
+  grid-column: 1 / -1;
+}
+/* Events' "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
+.Inspector ui-dropdown.InspectorAddEvent {
+  color: var(--ui-text-muted);
+  --ui-dropdown-icon-spacing: 2px;
+}
+/* each event and ability:  its icon and words, then its code, in a box that grows with it */
 .InspectorEvent {
   display: flex;
   flex-direction: column;
@@ -258,9 +265,19 @@
   margin-block-end: 12px;
 
   & > h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin: 0;
     font-size: 13px;
     font-weight: var(--ui-font-weight-semibold, 600);
+  }
+  /* the bolt or hand, muted, its glyph's own width */
+  & > h3 > ui-icon {
+    --ui-icon-width: 1.1em;
+    --ui-icon-distance: 0;
+    margin: 0;
+    color: var(--ui-text-muted);
   }
   /* a `<ui-textarea grow>`:  one line, growing with its code (Owen:  "textarea should be one line");  this look on its
      native textarea, its `control` part */
@@ -273,6 +290,8 @@
     max-block-size: 20lh;
     padding: 6px 8px;
     resize: none;
+    /* a nested line one step in, not a tab's eight spaces */
+    tab-size: 2;
     /* an input's well, as the fields above it (the theme's), and their corners */
     border: 1px solid var(--ui-input-border-color, var(--ui-border-color));
     border-radius: 6px;
@@ -288,11 +307,25 @@
     color: color-mix(in oklab, var(--ui-text-light) 55%, transparent);
   }
 }
-.InspectorNone {
-  margin: 0;
-  font-size: 14px;
-  color: var(--ui-text-muted);
-  font-style: italic;
+/* an action:  its button, then a field for what it takes;  with more than one, they go under it */
+.InspectorAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-block-end: 8px;
+
+  & > .InspectorActionField {
+    flex: 1 1 8em;
+    width: 8em;
+    min-width: 0;
+    max-width: 100%;
+    /* a select is 14em at least by default:  here it shares the row with its button, else wraps under it */
+    --ui-select-min-width: 8em;
+  }
+  &.many > .InspectorActionField {
+    flex-basis: 100%;
+  }
 }
 
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon

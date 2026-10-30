@@ -594,8 +594,24 @@ export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "
 /** A spellx block of prose:  a member's long description, or a comment among its lines. */
 export type SpellxNoteKind = "description" | "comment"
 
-/** A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51). */
-export type SpellxHandlerKind = "on" | "when" | "while"
+/**
+ * A spellx handler:  `on` and `when` a moment (Q42), `while` a state lasts (Q51);
+ * or an ability, a tag of its own, `<clickable when it is face down/>` (epic `debut` P27, Q47) --
+ * `items draggable` is a list's `<cards draggable when .../>`.
+ */
+export type SpellxHandlerKind = "on" | "when" | "while" | SpellxAbilityKind
+
+/** An ability's tag:  `<draggable/>`, `<clickable when .../>`, a list's `<cards draggable when .../>`. */
+export type SpellxAbilityKind = "draggable" | "clickable" | "selectable" | "droppable" | "items draggable"
+
+/** The abilities' tag kinds, which need no words after them:  `<draggable/>`. */
+export const SPELLX_ABILITY_KINDS: readonly string[] = [
+  "draggable",
+  "clickable",
+  "selectable",
+  "droppable",
+  "items draggable"
+]
 
 /** A spellx control tag in a drawing:  an if-chain's branches (Q53), or a loop. */
 export type SpellxControlKind = "if" | "otherwise if" | "otherwise" | "for each"

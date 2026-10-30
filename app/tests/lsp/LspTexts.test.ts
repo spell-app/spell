@@ -23,7 +23,7 @@ describe("LSP.LspTexts", () => {
 
   describe("over a Spanish project", () => {
     const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-es-"))
-    cpSync(fixtureFolder("Solitario"), resolve(dir, "Solitario"), { recursive: true })
+    cpSync(fixtureFolder("@spell/examples/Solitario"), resolve(dir, "Solitario"), { recursive: true })
     const mazoUri = pathToFileURL(resolve(dir, "Solitario/Mazo.es.spell")).href
     const workspace = new SpellDiskWorkspace()
     const service = new LSP.SpellLanguageService(workspace)

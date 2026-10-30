@@ -5,7 +5,7 @@ import { core, List, App, TwoSidedView, ViewableList, h, positionOf, spellPositi
 ////////////////////
 // A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 // It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`.
+// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
 export class Card extends TwoSidedView {
   static elementTag = core.defineElement(this, "test-project")
@@ -147,7 +147,7 @@ export class Card extends TwoSidedView {
     return this.play()
   }
 
-  static canBeDragged = true
+  static draggable = true
 
   get pile() {
     return Pile.ownerOf(this)
@@ -157,13 +157,12 @@ export class Card extends TwoSidedView {
 
 // What a person, a test or the console calls it
 
-// A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's
-
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
 export function testCardSetup(...args) {
   return sendCall("test_card_setup", args)
 }
+
 // -----------
 ////////////
 // ## A deck
@@ -195,6 +194,7 @@ export function testANewDeck(...args) {
 /////////////////////
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 // Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 export class Pile extends ViewableList {
   static instanceType = Card
@@ -242,12 +242,10 @@ export class Pile extends ViewableList {
     card.putOnPile(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
-
-// A card dragged over it glows when it would take the card, by its own rules
 
 export function testPiles(...args) {
   return sendCall("test_piles", args)
@@ -304,6 +302,8 @@ export class DiscardPile extends Pile {
   canGiveUp(card) {
     return card === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /** Where a suit is built up, ace to king, one card at a time */
@@ -323,15 +323,17 @@ export class Foundation extends Pile {
     return false
   }
 
+  // A light grey ace of its suit, face up
+  drawItsPlaceholder() {
+    return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
+  }
+
   canTake(card) {
     if (card !== card.pile.lastItem) return false
     return this.suit === card.suit && this.value + 1 === card.value
   }
 
-  // A light grey ace of its suit, face up
-  drawItsPlaceholder() {
-    return h("ui-text", { part: "placeholder" }, () => (new Card({ rank: "ace", suit: this.suit })).picture)
-  }
+  static droppable = true
 }
 
 /** A column, built down from king to ace, red and black in turn */
@@ -346,10 +348,14 @@ export class Tableau extends Pile {
     return card.isFaceDirection("up")
   }
 
+  static itemsDraggable = true
+
   canTake(card) {
     if (this.isEmpty) return card.isARank("king")
     return this.color !== card.color && this.value === card.value + 1
   }
+
+  static droppable = true
 }
 
 export class Solitaire extends App {

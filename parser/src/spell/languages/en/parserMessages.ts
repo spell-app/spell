@@ -40,6 +40,10 @@ export const PARSER_MESSAGES = {
   /** A line under a property, `- its "suit" is ...`, that is neither its rule nor its alias (epic `elemental-spell` P5). */
   "not-a-property-body-line":
     "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
+  /** An ability's old words, `- it can be dragged`:  `{line}` is the new, `it is draggable` (epic `debut` P27). */
+  "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
+  /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */
+  "say-when": 'Say "when:":  "if:" here stops working in a later release',
   /** `tableau T1` when two tableaus are named `T1`. */
   "named-twice": 'More than one {type} is named "{name}":  this finds the first one made',
   /** `the position of x`, with no list, where `x` isn't one of a value kind's values. */
@@ -168,6 +172,8 @@ export const PARSER_MESSAGES = {
   "spellx-mismatched-closer": '"{closer}" can\'t close {open}:  write "</>"',
   /** A tag the file ends inside. */
   "spellx-unclosed-tag": '{tag} is never closed:  end it with "</>"',
+  /** A handler's or ability's one-line tag, `<on drag ... />`, run on past its line (epic `debut` P27, Q47). */
+  "spellx-one-line-tag": '{tag} closes on its own line, "... />":  put longer code between "{open}" and "</>"',
   /** A tag's head the file ends inside, `<property "suit"` with no `>`. */
   "spellx-unclosed-head": '{tag} never ends:  close it with ">", or "/>" when nothing goes inside',
   "spellx-unclosed-comment": '"<!--" is never closed:  end the comment with "-->"',

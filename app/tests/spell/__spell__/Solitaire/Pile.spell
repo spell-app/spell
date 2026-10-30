@@ -1,6 +1,7 @@
 # A pile of cards
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 // Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 a "pile" is a viewable list of cards:
 	// What the game calls it, e.g. stock
@@ -22,10 +23,6 @@ a "pile" is a viewable list of cards:
 			set state to state + " " + the state of the card
 		return state
 
-	// A card dragged over it glows when it would take the card, by its own rules
-	- group "dropping"
-	- it can be dropped on
-
 	- to test piles:
 		set the stock to a new pile with name = "stock"
 		the color of the stock should be "none"
@@ -43,6 +40,7 @@ a "pile" is a viewable list of cards:
 		its pile is the discards should be yes
 		the number of cards in the stock should be 1
 		the state of the discards should be "discards: 7♥↓"
+	- it is droppable
 
 // a card is in one pile at a time:  putting it on another pile takes it off this one
 a card belongs to one pile

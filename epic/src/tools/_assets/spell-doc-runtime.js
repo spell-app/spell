@@ -87,6 +87,7 @@ import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
   addBlockAction,
+  addCodeCopies,
   BLOCK_ROW,
   addHeadTool,
   alignBlockActions,
@@ -292,6 +293,7 @@ async function start() {
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
   highlight()
+  addCodeCopies(main)
   wireImageZoom()
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
@@ -1435,7 +1437,7 @@ function carryEpicState(copy) {
  * - the outline (ids for new entries), counts, item filters
  * - the toolbar, rebuilt only when its entries, icons or counts changed (`railKey()`)
  * - sticky lines, re-tracked when new sections came in
- * - code colors in what's new;  scroll-follow re-read
+ * - code colors and copy buttons (`addCodeCopies()`) in what's new;  scroll-follow re-read
  * - then `spell-doc:updated` on `window`, `detail.changed`
  * - `page`:  what `start()` wired (`{ main, rail, sticky, follow, entries }`);  updated here
  */
@@ -1448,6 +1450,7 @@ async function rewire(page, changed) {
   const counts = countItems(outline)
   wireItemFilters(main)
   highlightIn(changed)
+  addCodeCopies(main)
   const entries = railKey(outline, counts)
   if (entries !== page.entries) page.rail = buildNavigation(main, outline, counts)
   page.entries = entries

@@ -10,6 +10,12 @@
 # Vitest snapshots:  regenerated with `vp test run --update`, then checked against both sides
 **/__snapshots__/*.snap                                       linguist-generated merge=binary
 
+# the @spell space's content snapshots (`spell content check --bless`, epic `content` P2):  the examples' and
+# Spell guides' compiled output, and what every test project prints (the command-line contract)
+tests/spell/__examples__/**                                   linguist-generated merge=binary
+tests/spell/__guides__/**                                     linguist-generated merge=binary
+tests/cli/__snapshots__/contract/**                           linguist-generated merge=binary
+
 # the App UI component set's data (`yarn site:data` in app/);  `pages.json5` is hand-kept
 app/docs/__data/components.json5                              linguist-generated merge=binary
 app/docs/__data/search.json5                                  linguist-generated merge=binary

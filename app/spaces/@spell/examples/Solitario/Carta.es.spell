@@ -65,7 +65,7 @@ una "carta" es una vista donde:
 
 	## dibujarla:  sus dos lados, uno sobre el otro -- styles.css muestra el que mira hacia arriba, y la gira al voltearse
 	// en la página, una carta se puede arrastrar a otra pila:  las reglas de su pila dicen cuáles suelta
-	- se puede arrastrar
+	- es arrastrable
 	// una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
 	- para dibujarla:
 		devolver

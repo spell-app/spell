@@ -15,6 +15,10 @@
       ]
     },
     {
+      "why": "What people may do to a thing on the page, drag, click, select, drop on it (epic debut P27):  a page's, not yet Python's",
+      "names": ["isAble"]
+    },
+    {
       "why": "Pauses and events (P11):  Python's runtime hasn't needed these",
       "names": [
         "forEachSequential",

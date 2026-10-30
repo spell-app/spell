@@ -7,7 +7,7 @@ core.heading("A playing card")
 ////////////////////
 // A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 // It's a two sided view:  face up it shows its picture, face down the back every card shares.
-// On the page each card is its own element, `<solitaire-card>`.
+// On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
 export type Rank = (typeof Card.Ranks)[number]
 export type Suit = (typeof Card.Suits)[number]
@@ -150,7 +150,7 @@ export class Card extends TwoSidedView {
     return this.play()
   }
 
-  static canBeDragged = true
+  static draggable = true
 
   get pile() {
     return Pile.ownerOf(this)!
@@ -210,8 +210,6 @@ core.useElement(Card, CardElement)
 
 // What a person, a test or the console calls it
 
-// A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's
-
 // One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
 export function testCardSetup() {
@@ -250,6 +248,7 @@ export function testCardSetup() {
     core.expect((new Card({ rank: "king", suit: "diamonds" })).picture, `the picture of a new card whose rank is king and suit is diamonds`, "🃎", `"🃎"`)
   })
 }
+
 // -----------
 core.heading("A deck")
 ////////////
@@ -295,6 +294,7 @@ core.heading("A pile of cards")
 /////////////////////
 // A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 // Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+// A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 export type Layout = (typeof Pile.Layouts)[number]
 
@@ -342,7 +342,7 @@ export class Pile extends ViewableList<Card> {
     card.putOnPile(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
@@ -373,8 +373,6 @@ export class PileElement extends SpellElement<Pile> {
   }
 }
 core.useElement(Pile, PileElement)
-
-// A card dragged over it glows when it would take the card, by its own rules
 
 export function testPiles() {
   return core.test("test piles", function testPiles() {
@@ -490,6 +488,8 @@ export class DiscardPile extends Pile {
   canGiveUp(card: Card) {
     return card === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /**
@@ -527,15 +527,17 @@ export class Foundation extends Pile {
     return false
   }
 
+  // A light grey ace of its suit, face up
+  drawItsPlaceholder() {
+    return <ui-text part="placeholder">{(new Card({ rank: "ace", suit: this.suit })).picture}</ui-text>
+  }
+
   canTake(card: Card) {
     if (card !== card.pile.lastItem) return false
     return this.suit === card.suit && this.value + 1 === card.value
   }
 
-  // A light grey ace of its suit, face up
-  drawItsPlaceholder() {
-    return <ui-text part="placeholder">{(new Card({ rank: "ace", suit: this.suit })).picture}</ui-text>
-  }
+  static droppable = true
 }
 
 /**
@@ -553,12 +555,12 @@ export class FoundationElement extends SpellElement<Foundation> {
     return this.currentThing?.canGiveUp(card)
   }
 
-  canTake(card: Card) {
-    return this.currentThing?.canTake(card)
-  }
-
   drawItsPlaceholder() {
     return this.currentThing?.drawItsPlaceholder()
+  }
+
+  canTake(card: Card) {
+    return this.currentThing?.canTake(card)
   }
 }
 core.useElement(Foundation, FoundationElement)
@@ -575,10 +577,14 @@ export class Tableau extends Pile {
     return card.isFaceDirection("up")
   }
 
+  static itemsDraggable = true
+
   canTake(card: Card) {
     if (this.isEmpty) return card.isARank("king")
     return this.color !== card.color && this.value === card.value + 1
   }
+
+  static droppable = true
 }
 
 /**

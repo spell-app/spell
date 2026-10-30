@@ -11,7 +11,7 @@ import { loadFixtureProject } from "spell/app/spaces/test"
  * - Snapshot pins Solitaire's, so a change to what a project declares shows up in review.
  */
 describe("SpellDeclarations, inline", () => {
-  const solitaire = loadFixtureProject("Solitaire")
+  const solitaire = loadFixtureProject("@spell/examples/Solitaire")
   const { marked: compiled, code, declarations } = compiledSpellProject(solitaire, { version: "1.0.0" })
 
   test("Solitaire's declarations", () => {
@@ -90,11 +90,13 @@ describe("SpellDeclarations, inline", () => {
   })
 
   test("`exports` in `project.json` limits what it provides", () => {
-    const limited = compiledSpellProject(loadFixtureProject("Solitaire"), { exports: ["Card"] }).declarations
+    const limited = compiledSpellProject(loadFixtureProject("@spell/examples/Solitaire"), {
+      exports: ["Card"]
+    }).declarations
     expect(limited?.provides).toEqual(["Card"])
-    expect(() => compiledSpellProject(loadFixtureProject("Solitaire"), { exports: ["Wombat"] })).toThrow(
-      /exports 'Wombat', which it doesn't declare/
-    )
+    expect(() =>
+      compiledSpellProject(loadFixtureProject("@spell/examples/Solitaire"), { exports: ["Wombat"] })
+    ).toThrow(/exports 'Wombat', which it doesn't declare/)
   })
 
   /**
@@ -114,7 +116,7 @@ describe("SpellDeclarations, inline", () => {
  * - A method with typed parameters:  `PILES`, a library of its own, as the card library has none.
  */
 describe("SpellDeclarations.importScope()", () => {
-  const all = loadFixtureProject("Solitaire")
+  const all = loadFixtureProject("@spell/examples/Solitaire")
   const library = all.filter(({ path }) => path !== "/Solitaire.spellml")
   const app = all.filter(({ path }) => path === "/Solitaire.spellml")
   // read back out of compiled text, as another project would
@@ -166,7 +168,7 @@ describe("SpellDeclarations.importScope()", () => {
     test("a type, its properties and constants:  `declaredAt` -- in the project's own files", () => {
       const card = imports.types.get("Card", "LOCAL_ONLY")!
       expect(card.declaredAt?.path).toBe(`${projectId}/Card.spellml`)
-      expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view">\n/)
+      expect(sourceAt(card.declaredAt)).toMatch(/^<spell-view "card" template="two sided view" draggable>\n/)
       // its suit, its list of suits and each suit:  all made by one statement, its tag
       const suits = /^<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a \(suit\)"\s*\/?>?$/
       expect(sourceAt(card.variables.get("suit", "LOCAL_ONLY")?.declaredAt)).toMatch(suits)

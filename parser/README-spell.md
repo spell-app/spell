@@ -688,10 +688,10 @@ The snapshots, for a project `<Project>`:
   [README-targets](README-targets.md#typescript--the-same-program-typed-as-solid-developers-write-it).
 - They and their tests are spell-app's, beside its other `@spell` groups:
   so a test project can import another `@spell` project, and Spell's own tests never read a folder above it.
-- `yarn spell:test:fixtures` checks them all, in spell-app
+- `spell content check` checks them all, with the examples and Spell guides, in spell-app
   ([fixtures.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/fixtures.test.ts), [typescript.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/typescript.test.ts),
   [python.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/python.test.ts)).
-- After a deliberate change:  `yarn spell:test:fixtures:bless` there, then read the diff.  The diff is the review.
+- After a deliberate change:  `spell content check --bless`, then read the diff.  The diff is the review.
 - Add a test project by copying a project in:  every folder there with a project file is one.
 - In tests, read them with `loadFixtureProject()`, `fixturePath()` and `fixtureProjectId()`,
   from spell-app's `spell/app/spaces/test`:  by name, a frozen project's or a tested example's (`Solitaire`).

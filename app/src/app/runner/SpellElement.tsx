@@ -109,9 +109,10 @@ const STATES_CSS = `
  *   - The page builds the tag on that class (`core.useElement()`), so both targets draw the same element.
  *   - It reaches compiled code as `@spell/elements`:  see `spellElements.ts`.
  * - Dragging is opt-in, by the program's own words (epic `outline-spell` P28):
- *   - `a card can be dragged`:  a card its list will give up can be dragged, with a mouse or a finger;
+ *   - `- it is draggable` (`<spell-view "card" draggable>`):
+ *     a card its list will give up can be dragged, with a mouse or a finger;
  *     it, and its list's items after it, follow the pointer
- *   - `a pile can be dropped on`:  a pile that will take the card glows as it comes over (`:state(accepting-drop)`)
+ *   - `- it is droppable`:  a pile that will take the card glows as it comes over (`:state(accepting-drop)`)
  *   - The pile hears the drag by its own handlers (`handlerFor()`):
  *     `- when a card is dragged over it:`, `dragged out of it`, `dropped on it`.
  *     - `- while a card is dragged over it:` sets what goes back as the card leaves (`core.startWhile()`).
@@ -123,7 +124,7 @@ const STATES_CSS = `
  *   - The dragged items stay put, dimmed, while a line shows where they'd go;  a wait there moves them.
  *   - `immediately`:  no line, no wait, the items move as the pointer does.
  *   - See "Reordering", below.
- * - Selecting (P29):  `a task can be selected` -- a click selects a task in its list, shift and command select more
+ * - Selecting (P29):  `- it is selectable` -- a click selects a task in its list, shift and command select more
  *   (`onClickToSelect()`);  a selected task drags with the others.
  * - Part of `spell-runtime.js`:  NEVER value-imports `spell/parser/core`.
  *   Each runtime copy hands itself over in `installSpellElements()`.
@@ -308,32 +309,39 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * Can our thing be dragged?  Only when its type says so (`a card can be dragged`),
-   * and its list will give it up, by the list's own rules (`can give up`):
-   * e.g. a tableau's face-up card, the discards' last card -- never a card of a list that never lets go.
+   * Can our thing be dragged now?  The ONE answer, the core's (`core.isAble()`, epic `debut` P27):
+   * - its type says so, `draggable`, or its `- on drag:` implies it, or its list's `its cards are draggable when ...`
+   * - its own condition, `- draggable when it is face up`, says yes
+   * - and its list will give it up, by the list's own rules (`can give up`):
+   *   e.g. a tableau's face-up card, the discards' last card -- never a card of a list that never lets go
    * - Followed:  a card turned face up becomes draggable at once.
    */
   @E.cssState("draggable")
   get isDraggable(): boolean {
     const thing = this.currentThing
     const list = this.ownerList
-    if (!thing || !list || !SpellElement.flag(thing, "canBeDragged")) return false
-    return !!this.entry?.core.canGiveUp(list, thing)
+    if (!thing || !list) return false
+    return !!this.entry?.core.isAble(thing, "draggable", list)
   }
 
   /**
-   * Does a click do something to our thing?  Its type handles a click (`- on click:`, `<on click>`), a double click,
-   * or says it `can be selected`;  it shows the pointer cursor (`STATES_CSS`), and the grab cursor once draggable.
+   * Does a click do something to our thing now?  It's clickable (`- on click:`, `<on click>`, a double click, or
+   * `clickable`, by its condition if it has one), or selectable;  it shows the pointer cursor (`STATES_CSS`), and the
+   * grab cursor once draggable.
    * - A click its thing hands up (`pass event`) to its list isn't counted:  the list's element shows it instead.
    */
   @E.cssState("clickable")
   get isClickable(): boolean {
-    const thing = this.currentThing as Record<string, unknown> | undefined
-    if (!thing) return false
-    return (
-      CLICK_HANDLERS.some((handler) => typeof thing[handler] === "function") ||
-      SpellElement.flag(thing, "canBeSelected")
-    )
+    const thing = this.currentThing
+    const core = this.entry?.core
+    if (!thing || !core) return false
+    return core.isAble(thing, "clickable") || core.isAble(thing, "selectable")
+  }
+
+  /** May things be dropped on our list?  Its type says `droppable`, or its `- on card dropped:` implies it. */
+  get isDroppable(): boolean {
+    const list = this.currentThing
+    return !!list && "items" in list && !!this.entry?.core.isAble(list, "droppable")
   }
 
   /** Is it being dragged now?  Its cursor is grabbing meanwhile. */
@@ -351,15 +359,21 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   protected onPointerDown(event: PointerEvent) {
     if (!this.isDraggable || event.button !== 0 || this.isInAControl(event)) return
     const onDrop = (target: HTMLElement | undefined) => this.dropOn(target)
-    if (!SpellElement.reorders(this.ownerList)) return void new Dragging(this.domElement, event, { onDrop })
-    new Dragging(this.domElement, event, { onDrop, carried: this.carriedElements(), follows: false })
+    const onCancel = () => this.sendToThing("drag-cancelled")
+    if (!SpellElement.reorders(this.ownerList)) return void new Dragging(this.domElement, event, { onDrop, onCancel })
+    new Dragging(this.domElement, event, { onDrop, onCancel, carried: this.carriedElements(), follows: false })
   }
 
+  /**
+   * Our drag starts:  our thing hears `- on drag:` (Q43), as it lifts.
+   * - What's carried with it in a reordered list is dimmed meanwhile.
+   */
   @E.on("dragstart")
   protected onDragStart(event: DragEvent) {
     // ours, not a card's within us:  the events bubble
     if (event.target !== this.domElement) return
     this.isDragging = true
+    this.sendToThing("drag")
     const drag = Dragging.current
     if (drag && !drag.follows) for (const element of drag.carried) SpellElement.componentOf(element)!.isLifted = true
   }
@@ -440,14 +454,14 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   /**
    * The thing being dragged over us (`Dragging.current`), if we're a list it may be dropped on:
-   * our type says `can be dropped on`, and it's not from us.
+   * our type says `droppable` (`isDroppable`), and it's not from us.
    * - Whether we'd TAKE it is our rules' call, after:  see `takesDrag()`.
    */
   private dragOffer(): object | undefined {
     const dragged = Dragging.current?.element
     const thing = dragged && SpellElement.thingOf(dragged)
     const list = this.currentThing
-    if (!thing || !list || !("items" in list) || !SpellElement.flag(list, "canBeDroppedOn")) return undefined
+    if (!thing || !list || !("items" in list) || !this.isDroppable) return undefined
     const component = (dragged as Partial<E.DOMElement>).component
     return component instanceof SpellElement && component.ownerList === list ? undefined : thing
   }
@@ -496,7 +510,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    * Our thing, dropped on `target`, a viewable list's element.
    * - A drop among a reordered list's items (`placeDrop()`):
    *   the list's `when a task is dropped on it:` runs for each item it put in place (`heardPlaced()`), and that's all.
-   * - Only when the list takes it (`takesDrag()`):  else it slides back, and the program hears nothing of it.
+   * - Only when the list takes it (`takesDrag()`):  else it slides back, and our thing hears `- on drag cancelled:`
+   *   (Q47);  the program hears nothing else of it.
    * - The list's `when a card is dropped on it:` runs, if it has one (`handlerFor()`).
    * - Else the program hears `<thing>-drop`, e.g. `card-drop`,
    *   in its own language (core's `drop-event` message):  a Spanish program hears `soltar-carta`.
@@ -511,7 +526,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const list = component instanceof SpellElement && component.takesDrag() ? component.currentThing : undefined
     const thing = this.currentThing
     const { entry } = this
-    if (!list || !thing || !entry) return
+    if (!list) return this.sendToThing("drag-cancelled")
+    if (!thing || !entry) return
     const dropped = (component as SpellElement).handlerFor("when", "DroppedOn", thing)
     if (dropped) return this.runHandler(() => entry.core.runHandler(list, dropped, thing))
     const name = SpellElement.instanceName(thing.constructor)
@@ -763,13 +779,34 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const { core } = this.entry!
     if (event.type === "mouseenter") core.input?.pointAt(thing)
     this.runWhile(event, thing)
-    if (!core.remote && core.send) {
-      this.runHandler(() => core.send(thing, spellEvent))
-      return
-    }
-    const handler = `on${spellEvent.replace(/(^|-)(\w)/g, (_dash, _start, letter: string) => letter.toUpperCase())}`
-    if (typeof thing[handler] !== "function") return
-    this.runHandler(() => core.runHandler(thing, handler, { type: spellEvent }))
+    // a click its thing would take, while it isn't clickable, `- clickable when it is face down`:  nothing happens
+    const isClick = CLICK_HANDLERS.includes(SpellElement.handlerNameFor(spellEvent))
+    if (isClick && SpellElement.handles(thing, spellEvent) && !core.isAble(thing, "clickable")) return
+    this.sendToThing(spellEvent)
+  }
+
+  /**
+   * Send `spellEvent`, e.g. `click`, `drag-cancelled`, to our thing, through the program's core:  its handler takes it
+   * (`onDragCancelled()`), or hands it up its chain (`core.send()`).
+   * - A program running elsewhere (Python, `core.remote`) hears only its own handler.
+   */
+  private sendToThing(spellEvent: string) {
+    const thing = this.currentThing as Record<string, unknown> | undefined
+    const core = this.entry?.core
+    if (!thing || !core) return
+    if (!core.remote && core.send) return this.runHandler(() => core.send(thing, spellEvent))
+    if (!SpellElement.handles(thing, spellEvent)) return
+    this.runHandler(() => core.runHandler(thing, SpellElement.handlerNameFor(spellEvent), { type: spellEvent }))
+  }
+
+  /** The handler method for `spellEvent`:  `onDragCancelled` for `drag-cancelled`. */
+  private static handlerNameFor(spellEvent: string): string {
+    return `on${spellEvent.replace(/(^|-)(\w)/g, (_dash, _start, letter: string) => letter.toUpperCase())}`
+  }
+
+  /** Does `thing` have its own handler for `spellEvent`? */
+  private static handles(thing: Record<string, unknown>, spellEvent: string): boolean {
+    return typeof thing[SpellElement.handlerNameFor(spellEvent)] === "function"
   }
 
   /**
@@ -908,7 +945,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * A click on a thing whose type says `can be selected`:  it selects it in its list.
+   * A click on a thing whose type says `selectable`:  it selects it in its list.
    * - Plain:  only it.
    * - Command (ctrl):  it's added, or taken away if it was selected.
    * - Shift:  everything from the last one clicked to it, in the list's order.
@@ -918,7 +955,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   protected onClickToSelect(event: MouseEvent) {
     const thing = this.currentThing
     const list = this.ownerList as SelectableList | undefined
-    if (!thing || !list?.select || !SpellElement.flag(thing, "canBeSelected")) return
+    if (!thing || !list?.select || !this.entry?.core.isAble(thing, "selectable")) return
     const items = [...(list as unknown as Iterable<object>)]
     const selected = [...list.selection]
     const anchor = SELECTION_ANCHORS.get(list)
@@ -938,11 +975,6 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const component = (element as Partial<E.DOMElement>).component
     const thing = component instanceof SpellElement ? component.currentThing : undefined
     return thing && "items" in thing ? thing : undefined
-  }
-
-  /** Does `thing`'s type say yes to `flag`, e.g. `canBeDragged` for `a card can be dragged`? */
-  private static flag(thing: object, flag: "canBeDragged" | "canBeDroppedOn" | "canBeSelected"): boolean {
-    return (thing.constructor as Partial<Record<typeof flag, boolean>>)[flag] === true
   }
 
   /** What a program calls a thing of `Class`, e.g. `card` for `Card`, `stockPile` for `StockPile`. */
@@ -1402,6 +1434,29 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return (element as Element & { component?: SpellElement }).component?.currentThing
   }
 
+  /**
+   * The events the thing `element` draws handles itself, by spell's names, for the Inspector's Events
+   * (epic `debut` P27):  `click` for `- on click:`, `drag-cancelled` for `- on drag cancelled:`,
+   * `card-dropped` for a pile's `- on card dropped:`.
+   * - Its type's own handlers and its super-types', never the core's.
+   * - None for an element that draws no thing.
+   */
+  static thingEventsOf(element: Element): string[] {
+    const thing = SpellElement.thingOf(element)
+    const events = new Set<string>()
+    for (let proto = thing && Object.getPrototypeOf(thing); proto && !CORE_BASE_NAMES.has(proto.constructor.name);) {
+      for (const [name, member] of Object.entries(Object.getOwnPropertyDescriptors(proto))) {
+        if (typeof member.value !== "function") continue
+        const event = HANDLER_EVENT.exec(name)
+        if (event) events.add(kebabCase(event[1]!))
+        const drag = DRAG_HANDLER_EVENT.exec(name)
+        if (drag) events.add(kebabCase(`${drag[1]}${DRAG_EVENT_ENDINGS[drag[2]!]}`))
+      }
+      proto = Object.getPrototypeOf(proto)
+    }
+    return [...events]
+  }
+
   /** `element`, or its nearest ancestor, that's a view template's tag -- `undefined` if none is. */
   static closestView(element: Element): Element | undefined {
     for (let at: Element | null = element; at; at = at.parentElement) {
@@ -1484,12 +1539,12 @@ const SPELL_ELEMENTS: Map<string, SpellElementEntry> = ((globalThis as SpellElem
 /** `globalThis`, holding `SPELL_ELEMENTS`. */
 type SpellElementsGlobal = typeof globalThis & { [key: symbol]: Map<string, SpellElementEntry> | undefined }
 
-// a drop lands on the element of a viewable list its type says can be dropped on, or reordered:
+// a drop lands on the element of a viewable list its type says is droppable, or reordered:
 // `Dragging` knows only what we tell it
 Dragging.isDropTarget = (element) => {
   const list = SpellElement.listOf(element)
-  const Class = list?.constructor as { canBeDroppedOn?: boolean; reorderItemsAfter?: number } | undefined
-  return !!Class && (Class.canBeDroppedOn === true || Class.reorderItemsAfter !== undefined)
+  const Class = list?.constructor as { reorderItemsAfter?: number } | undefined
+  return !!Class && (!!SpellElement.componentOf(element)?.isDroppable || Class.reorderItemsAfter !== undefined)
 }
 
 // ... and takes it if its rules say so:  `can take a card if: ...`
@@ -1526,6 +1581,22 @@ const THING_EVENTS: Record<string, string> = {
   mouseenter: "mouse-enter",
   mouseleave: "mouse-leave"
 }
+
+/** A thing's own handler's name, and its event:  `onDragCancelled` is `DragCancelled`. */
+const HANDLER_EVENT = /^on([A-Z]\w*)$/
+
+/** A list's drag handler's name:  `whenCardDroppedOn` is a card, dropped. */
+const DRAG_HANDLER_EVENT = /^(?:when|while)(\w+?)(DroppedOn|DraggedOver|DraggedOutOf)$/
+
+/** Each drag handler's event, after its thing:  `card-dropped`, as `- on card dropped:` says it. */
+const DRAG_EVENT_ENDINGS: Record<string, string> = {
+  DroppedOn: "Dropped",
+  DraggedOver: "DraggedOver",
+  DraggedOutOf: "DraggedOut"
+}
+
+/** The core's classes a program's types stand on:  their methods are no program's events. */
+const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSidedView", "App", "Page", "Object"])
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]

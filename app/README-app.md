@@ -462,11 +462,19 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
+- Under its properties, its Events:  what it does when people touch it, in the program's own words,
+  each with its code under it.
+  - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).
+  - The band's `+` adds an event, kept with the project.
+- Then its Actions:  a button for each thing that can be done to it, `play it`, `turn over`.
+  - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
+  - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  picking stops once something's picked,
   and the crosshairs start it again.  Esc stops it.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
-**Not yet:**  a change isn't written back into the code.  Restart, and the app is as the code says.
+**Not yet:**  a change isn't written back into the code, nor an event's code typed there.
+Restart, and the app is as the code says.
 
 ### Themes, and Purple code
 

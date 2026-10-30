@@ -884,6 +884,30 @@ pre code {
   font-size: inherit;
   overflow-wrap: normal;
 }
+/*
+ * A code block's copy button (the runtime's `addCodeCopies()`;  epic `epic-engine` I182):
+ * the pre's first child, at the left of its first line.
+ * - the pre is a row:  the button, then the code, which is what scrolls, so the button stays put
+ * - centred on the first line:  the button's box is one line tall, the button centred in it
+ */
+pre:has(> .spell-code-copy) {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  overflow: hidden;
+  padding-left: 8px;
+}
+pre:has(> .spell-code-copy) > code {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+pre > .spell-code-copy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 1lh;
+}
 
 /*******************************
             Widgets

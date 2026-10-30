@@ -7,6 +7,8 @@ core.heading("A task")
 ////////////
 // Something to do:  its title, its priority, and whether it's done.
 // Each task is its own element on the page, `<task-list-task>`.
+// A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
+// its grip drags it, the selected ones with it (`draggable`).
 
 export type Priority = (typeof Task.Priorities)[number]
 
@@ -56,9 +58,9 @@ export class Task extends View {
     )
   }
 
-  static canBeSelected = true
+  static draggable = true
 
-  static canBeDragged = true
+  static selectable = true
 
   get checklist() {
     return Checklist.ownerOf(this)!
@@ -80,8 +82,6 @@ export class TaskElement extends SpellElement<Task> {
 }
 core.useElement(Task, TaskElement)
 
-// A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it
-
 export function testCheckingOneOff() {
   return core.test("test checking one off", function testCheckingOneOff() {
     const it = new Task()
@@ -93,6 +93,7 @@ export function testCheckingOneOff() {
     core.expect(task.isDone, `the task is done`, true, `yes`)
   })
 }
+
 // -----------
 core.heading("Task List")
 ///////////////

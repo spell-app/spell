@@ -20,13 +20,15 @@ describe("ParseJournal", () => {
       parser,
       parentScope: rootScope
     })
-    const fileScopes = loadCodeSpellTwin("Solitaire").map(
+    const fileScopes = loadCodeSpellTwin("@spell/examples/Solitaire").map(
       ({ path }) => new P.FileScope({ name: path, path, parentScope: projectScope })
     )
 
     const before = describeState(parser, projectScope, fileScopes)
     const mark = parser.journal.mark()
-    loadCodeSpellTwin("Solitaire").forEach(({ contents }, index) => fileScopes[index]!.parse(contents, "block"))
+    loadCodeSpellTwin("@spell/examples/Solitaire").forEach(({ contents }, index) =>
+      fileScopes[index]!.parse(contents, "block")
+    )
     const parsed = describeState(parser, projectScope, fileScopes)
     // Make sure there's something to take back.
     expect(parsed.types.length).toBeGreaterThan(before.types.length)
@@ -49,7 +51,7 @@ describe("ParseJournal", () => {
     const projectScope = new P.ProjectScope({ name: "decl", path: "/decl", parser, parentScope: rootScope })
     const fileScope = new P.FileScope({ name: "/Card.spell", path: "/Card.spell", parentScope: projectScope })
     const mark = parser.journal.mark()
-    fileScope.parse(loadCodeSpellTwin("Solitaire")[0]!.contents, "block")
+    fileScope.parse(loadCodeSpellTwin("@spell/examples/Solitaire")[0]!.contents, "block")
 
     const card = projectScope.types.get("Card")
     expect(card?.declaredBy?.rule.name).toBe("create_type")

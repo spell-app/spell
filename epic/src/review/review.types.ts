@@ -79,6 +79,14 @@ export const COUNTDOWN_MS = 120_000
 export const COUNTDOWN_TICK_MS = 1000
 
 /**
+ * How long a press of Accept Overview / Accept Phases waits before it goes to Claude (`<epic-stage-button>`;
+ * epic `epic-engine` I181):  always 5 minutes, whatever Auto Send says.
+ * - Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown"
+ * - its mark is HELD that long (`isHeld()`):  dated ahead, so no Send carries it early
+ */
+export const STAGE_COUNTDOWN_MS = 300_000
+
+/**
  * AUTO SEND's choices, the page header's gear (epic `epic-engine` P53, J160), in the order its sub-menu lists them:
  * - `now`:  Immediately, each change sent as it's finished (a note when its box loses the focus);  no ring
  * - `2m`, `5m`:  the ring drains over that long after Owen last touched the page
@@ -448,6 +456,16 @@ export function emptyInbox(): Inbox {
 export function isSent(mark: { action: string; when?: string; at: string }, sent: string | null): boolean {
   if (isImmediate(mark)) return true
   return !!sent && Date.parse(mark.at) <= Date.parse(sent)
+}
+
+/**
+ * Is `mark` HELD:  dated after `now` (ms), so it waits for its time, not for a Send (epic `epic-engine` I181)?
+ * As `ReviewInbox.isHeld()`.
+ * - a stage button's accept (`countdown`) is dated `STAGE_COUNTDOWN_MS` after the press
+ * - held, it's neither unsent nor sent:  a Send before its time leaves it, as `sent` is older than it
+ */
+export function isHeld(mark: { at: string }, now = Date.now()): boolean {
+  return Date.parse(mark.at) > now
 }
 
 /** Is `mark` an immediate request (Add Details, revisit now), handed over when made?  As `ReviewInbox`'s. */

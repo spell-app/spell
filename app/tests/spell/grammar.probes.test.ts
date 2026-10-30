@@ -871,7 +871,7 @@ describe("datatypes", () => {
  * - As code spell, their twins:  the example is written in spellx (`loadCodeSpellTwin()`).
  * - NOT frozen:  a change to the example's cards may change a probe's snapshot (epic `spanish` P11, J105).
  */
-const CARDS = loadCodeSpellTwin("Solitaire").filter(({ path }) => path !== "/Solitaire.spell")
+const CARDS = loadCodeSpellTwin("@spell/examples/Solitaire").filter(({ path }) => path !== "/Solitaire.spell")
 
 /**
  * Types the probes use beside Solitaire's cards, in a file of their own before the probe's.

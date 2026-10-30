@@ -50,7 +50,7 @@ describe("SpellLanguageService", () => {
   /** Where Card.spell's type names its card:  `"card"` in `a "card" is a two sided view:`, 0-based. */
   const CARD_NAME = rangeAt(cardText, CARD_TYPE, '"card"')
   /** The card's click handler, in Solitaire.spell's `a card:`:  a call of a method of the card's, `play`, on `it`. */
-  const IT_CALL = "- on click: play it"
+  const IT_CALL = "- on click play it"
   /** Card.spell's line declaring the card's suit, a property whose values it lists. */
   const SUIT = '- its "suit" is one of'
   /** Card.spell's line declaring the card's symbol, which its `state` reads. */
@@ -497,14 +497,14 @@ describe("SpellLanguageService", () => {
   test("hover says what a variable holds:  an argument, a loop's item, `it`", () => {
     const hover = (file: SP.SpellFile, position: Position) =>
       (service.hover(file, position)!.contents as { value: string }).value
-    // a stock pile's `- it can give up a card if: the card is its last card`
-    const givesUp = "- it can give up a card if: the card is its last card"
+    // a discard pile's `- its cards are draggable when the card is its last card`:  `the card`, after `cards`
+    const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
     // `for each card in the cards` / `add it to the stock of the solitaire`:  the loop's item
     expect(hover(solitaire, at(solitaire, "add it to the stock of the solitaire", "it"))).toContain(
       "variable **it**: Card"
     )
-    // `- on click: play it`
+    // `- on click play it`
     expect(hover(solitaire, at(solitaire, IT_CALL, "it"))).toContain("variable **it**: Card")
   })
 
@@ -1120,8 +1120,8 @@ describe("SpellLanguageService", () => {
       const belongs = hoverAt(pile, belongsLine, "belongs")
       expect(belongs).toContain("**belongs_to_one**")
       expect(belongs).toContain("built in:  **(a thing) belongs to one (list)** of thing")
-      // a tableau's `- it can take a card if:`:  the second, after the foundation's
-      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- it can take a card if:", 1), "take")
+      // a tableau's `- droppable when:`, the short form of `can take a card when:`:  the second, after the foundation's
+      const guard = hoverAt(solitaire, lineOf(solitaire.parseText, "- droppable when:", 1), "droppable")
       expect(guard).toContain("**list_guard**")
       expect(guard).toContain("built in:  **(a list) can take (a thing)** of list")
       expect(guard).toContain("Tableau.prototype.canTake = function (card) {")
@@ -1331,7 +1331,7 @@ function copySolitaireAsCodeSpell(dir: string): void {
   mkdirSync(dir, { recursive: true })
   const files = ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
   for (const file of files) copyFileSync(resolve(SOLITAIRE_CODE_SPELL, file), resolve(dir, file))
-  copyFileSync(fixtureFolder("Solitaire", "styles.css"), resolve(dir, "styles.css"))
+  copyFileSync(fixtureFolder("@spell/examples/Solitaire", "styles.css"), resolve(dir, "styles.css"))
   const imports = [...files, "styles.css"].map((file) => ({ path: `/${file}`, active: true }))
   writeFileSync(resolve(dir, SP.PROJECT_FILE), JSON.stringify({ title: "Solitaire", imports }))
 }

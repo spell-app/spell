@@ -1447,8 +1447,8 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
-        - no page-wide git toggle since P53:  the Log lists every commit (P52), and each phase and item its own (a
-          git icon)
+        - no page-wide git toggle since P53:  the Log lists every commit (P52), an item its own (a git icon), a phase
+          its own in its gear ("Show this phase's commits", I183)
       - the toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
@@ -1513,6 +1513,10 @@ In `tools/`:
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
+  - Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
+    every `<pre><code>` gets a `<ui-button appearance="circular basic" size="mini" icon="copy">` first in it, centred
+    on its first line, "Copied" in the page's notices (`addCodeCopies()`, at start and after every body or patch);
+    the code scrolls, the button stays.  Not `<epic-code>` / `<ui-code copy>`:  they draw their own, at the right.
   - Code colors:  highlight.js (`highlight.min.js`, in `_assets/`), committed so pages load offline.
     - Older pages still name cdnjs:  the page servers swap that tag for the local copy, by spell-epic's settings'
       `"localCopies"` (the kit's `withLocalCopies()`;  `HIGHLIGHT_JS` in `server.types.ts` names the same two URLs).
@@ -1804,14 +1808,28 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - a block carrying out Owen's OWN answer (every item it names answered by him, or his comment;  or `updated --for`
       such items) is written seen by the tool, never in `to-see`:  no Seen to press (epic `epic-engine` I179;  Owen,
       2026-10-29:  "I shouldn't have to do that if you are doing what I said");  a change Claude made on its own stays new
-  - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`):
+  - A PHASE's pills by where it stands (`<epic-phase>`'s `<epic-review buttons>`);  every button meaning "accept this" is a
+    THUMBS UP (epic `epic-engine` I181;  Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make
+    this a todo'"):  Looks good, Accept plan, a plan accepted's state, Do this, the stage button
     - while the page's phases are agreed (`stage="phases"`, P29):  Looks good (`approve`, noted) and Defer (`defer`,
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  Make Todo, Revisit, then a green
-      check, drawn as a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing
-    - else Make Todo, Revisit:  notes on the plan, no Approve
+    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  Do this, Revisit, then a green
+      thumbs up, drawn as a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing
+    - else Do this, Revisit (`buttons="phase"`):  no Approve
+      - Do this, the thumbs up, was Make Todo until I181 (Owen:  "it's already a phase, you wouldn't make it a todo"):
+        the same `todo` mark, which `inbox apply` takes on a phase as a GO-AHEAD (a Noted "Go ahead" card, his note
+        kept), never a new todo;  an Overview part's and the summary's stay Make Todo
+  - The STAGE BUTTON (`<epic-stage-button>`, Accept Overview / Accept Phases, epic `epic-engine` I180) COUNTS DOWN FIVE
+    MINUTES once pressed (I181;  Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown"):
+    - its mark goes in at once, `{ action: "accept", stage, countdown: true }`, HELD:  the route dates it
+      `STAGE_COUNTDOWN_MS` ahead (`ReviewInbox.stamped()`), and a held mark (`isHeld()`) is neither unsent nor sent,
+      so no Send (a press, Auto Send, Review Now) carries it early;  `epic inbox` prints it `held`
+    - the button draws Send's ring (`CountdownRing`, the ONE ring), green, filling in from its `at`, so a reload
+      carries on;  its tooltip says how long is left;  a second press removes the mark
+    - nothing typed resets it:  a decision, not idleness;  run out, the button sends (`ReviewClient.send()`), waking
+      the epic when nobody listens;  the page closed through the end, it goes when the page opens again
   - REVISIT ON A PART WITH OWEN'S COMMENTS IN ITS TEXT (an item, a phase, an Overview part;  epic `epic-engine` I140;
     Owen, 2026-10-26:  "The inline mark(s) are my comment"):  nothing typed, it opens no box
     - it marks at once (`ReviewClient.press()`, `commentsIn()`):

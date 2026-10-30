@@ -2720,6 +2720,11 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "doThis",
+          "text": "Do this",
+          "description": "A to-do phase's first review button, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  \"it's already a phase, you wouldn't make it a todo\")."
+        },
+        {
           "key": "looksGood",
           "text": "Looks good",
           "description": "A phase's review button while the phases are agreed."
@@ -4556,7 +4561,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -4609,7 +4614,7 @@
         {
           "name": "commits",
           "kind": "boolean",
-          "description": "Its body lists commits:  its git icon shows."
+          "description": "Its body lists commits:  its gear offers to show them."
         },
         {
           "name": "to-accept",
@@ -4721,10 +4726,6 @@
           "description": "The `Loads from parts/x.html ...` line, when its part can't load."
         },
         {
-          "name": "git",
-          "description": "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own commits;  pressed while they show."
-        },
-        {
           "name": "status",
           "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
@@ -4780,7 +4781,7 @@
         },
         {
           "name": "commits",
-          "description": "Its own commits show:  its git icon pressed."
+          "description": "Its own commits show:  ticked in its gear."
         },
         {
           "name": "movable",
@@ -4835,12 +4836,7 @@
         {
           "key": "showCommits",
           "text": "Show this phase's commits",
-          "description": "The git icon's tooltip (P53, J163)."
-        },
-        {
-          "key": "hideCommits",
-          "text": "Hide this phase's commits",
-          "description": "The git icon's tooltip, its commits shown."
+          "description": "Its gear menu:  its own commits, ticked while they show, while it has any (I183)."
         },
         {
           "key": "showPhaseFiles",
