@@ -147,9 +147,12 @@ export async function choose(
   }
 }
 
-/** A question as `ask()` and `choose()` draw it:  bold yellow, apart from what's typed (Owen, 2026-10-29). */
+/**
+ * A question as `ask()` and `choose()` draw it:  `? ` and the question, bold yellow,
+ * apart from what's typed (Owen, 2026-10-29).
+ */
 function questionText(question: string): string {
-  return chalk.yellow.bold(question)
+  return chalk.yellow.bold(`? ${question}`)
 }
 
 /** One of `choose()`'s choices. */

@@ -2,7 +2,7 @@
 
 ```sh
 git clone git@github.com:ana/my-app.git && cd my-app
-npx spell@next epic init --name Ben
+npx spell@next epic init
 ```
 
 <details>
@@ -10,26 +10,55 @@ npx spell@next epic init --name Ben
 
 ```text
 Initializing Epic for repo ~/www/my-app
-plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
-~/www/my-app/.epic/config.json5:  kept as it is
-joined git@github.com:ana/my-app.epics.git:  the plans cloned into ~/www/my-app.epics
-~/www/my-app/epics:  linked
-~/www/my-app/sagas:  linked
-~/www/my-app/guides:  linked
-~/www/my-app/pages:  linked
-~/www/my-app/.gitignore:  lists the links already
-you:  Ben, kept in ~/.spell-epic/person.json5
-your colour:  red, kept in ~/www/my-app.epics/people/ben.json5, and pushed:  the team sees it
-open:  http://127.0.0.1:4848/
-more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
+? What do you want to be called? (ben) Ben
+cloning the team's plans…
+? Which colour should your words be?
+  1. red
+  2. orange
+  3. yellow
+  4. olive
+❯ 5. teal
+  6. blue
+  7. violet
+  8. purple
+  9. pink
+  10. brown
+  11. grey
+  12. black
+> Your name  :  Ben
+> Your colour:  teal
+> Shared repo:  git@github.com:ana/my-app.epics.git
+
+Checking the epic plugin:
+> installed epic for Claude Code:  /reload-plugins in a running session
+
+Setting up epic files:
+sharing your colour with the team…
+  already present   ~/www/my-app/.epic/config.json5
+  cloned            ~/www/my-app.epics  (from git@github.com:ana/my-app.epics.git)
+  linked            ~/www/my-app/epics
+  linked            ~/www/my-app/sagas
+  linked            ~/www/my-app/guides
+  linked            ~/www/my-app/pages
+  already present   ~/www/my-app/.gitignore
+  kept              ~/.spell-epic/person.json5  (your name)
+  wrote             ~/www/my-app.epics/people/ben.json5  (your colour, pushed)
+starting the epic server…
+
 Epics initialized!
+To see your epics:
+- Web browser:  http://127.0.0.1:4848/
+- VS Code:  open ~/www/my-app in VS Code (code ~/www/my-app), then the Review view in its right side bar;  epic open <epic> --review shows one there
+More on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
 ```
 
 </details>
 
 _Ben joins Ana's repo:  one command, and every plan the team has written is on his machine, and in his browser.
-Real output from this kit's `epic`, on a fresh machine (a scratch home folder), with a stand-in for GitHub (local
-repos at GitHub's addresses), the home folder shortened to `~`._
+Real output from this kit's `epic`, in a terminal, on a fresh machine (a scratch home folder), with a stand-in for
+GitHub (local repos at GitHub's addresses), the home folder shortened to `~`;  the colour list as it ends, and the
+server's lines from a run that started one.
+In a terminal the questions are yellow, the answers bold, the files' table gray, and the address a link._
 
 One config file and a block in `.gitignore` are all `epic init` leaves in your repo.
 The plans live next door, in `my-app.epics`, a git repo of their own, which every agent's turn pulls and pushes.
@@ -133,7 +162,6 @@ From any folder of your repo, a git repo with at least one commit:
 ```sh
 cd ~/www/my-app
 npx spell@next epic init
-git push
 ```
 
 <details>
@@ -141,30 +169,64 @@ git push
 
 ```text
 Initializing Epic for repo ~/www/my-app
-plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
-~/www/my-app/.epic/config.json5:  written
-~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
-shared repo:  made ana/my-app.epics on GitHub, private, and pushed
-  its address, git@github.com:ana/my-app.epics.git, is in .epic/config.json5 (contentRemote)
-~/www/my-app/epics:  linked
-~/www/my-app/sagas:  linked
-~/www/my-app/guides:  linked
-~/www/my-app/pages:  linked
-~/www/my-app/.gitignore:  written
-you:  Ana, kept in ~/.spell-epic/person.json5
-your colour:  green, kept in ~/www/my-app.epics/people/ana.json5, and pushed:  the team sees it
-open:  http://127.0.0.1:4848/
-committed .epic/config.json5 and .gitignore on main
-next:  push main:  then a teammate's epic init clones the plans
-more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
+? What do you want to be called? (ana) Ana
+? Which colour should your words be?
+  1. red
+  2. orange
+  3. yellow
+  4. olive
+❯ 5. green
+  6. teal
+  7. blue
+  8. violet
+  9. purple
+  10. pink
+  11. brown
+  12. grey
+  13. black
+? What should the shared epics repo be called? (my-app.epics)
+? Private or public?
+❯ 1. private  -- only the people you add can see the plans
+  2. public  -- anyone can read every epic page, guide and comment
+> Your name  :  Ana
+> Your colour:  green
+> Shared repo:  ana/my-app.epics, private
+
+Checking the epic plugin:
+> installed epic for Claude Code:  /reload-plugins in a running session
+
+Setting up epic files:
+making ana/my-app.epics on GitHub…
+sharing your colour with the team…
+  wrote          ~/www/my-app/.epic/config.json5
+  made           ~/www/my-app.epics
+  made, pushed   ana/my-app.epics on GitHub, private  (git@github.com:ana/my-app.epics.git)
+  linked         ~/www/my-app/epics
+  linked         ~/www/my-app/sagas
+  linked         ~/www/my-app/guides
+  linked         ~/www/my-app/pages
+  wrote          ~/www/my-app/.gitignore
+  kept           ~/.spell-epic/person.json5  (your name)
+  wrote          ~/www/my-app.epics/people/ana.json5  (your colour, pushed)
+
+We need to make a commit in the main repo to enable epics.
+? Commit and push .epic/config.json5 and .gitignore on main? (y) y
+pushing main…
+> Committed and pushed
+starting the epic server…
+
 Epics initialized!
+To see your epics:
+- Web browser:  http://127.0.0.1:4848/
+- VS Code:  open ~/www/my-app in VS Code (code ~/www/my-app), then the Review view in its right side bar;  epic open <epic> --review shows one there
+More on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
 ```
 
 </details>
 
-_Ana's first `epic init`, against the same stand-in for GitHub as the top of this page, answered with
-`--name Ana --color green`, and yes to its commit.
-The first and last lines are in colour in a terminal;  the settings it wrote are in the file, not printed._
+_Ana's first `epic init`, against the same stand-in for GitHub as the top of this page:  every question first,
+then a summary, then each step;  a gray line before each slow one (GitHub, the push, the server).
+The settings it wrote are in the file, not printed._
 
 - `npx spell@next epic init` fetches Spell's package and runs its `spell epic`, which runs the epic tool:
   the one installed beside it, else `spell-epic` fetched at the same version.
@@ -172,24 +234,27 @@ The first and last lines are in colour in a terminal;  the settings it wrote are
 - 🌱 `spell epic` is new:  until the next `spell@next` is published, run it from a clone of Spell
   ([Setup from zero](README.md#setup-from-zero)):  `node ~/www/spell/bin/spell.mjs epic init`.
 
-In a terminal, it asks five things, each question in yellow.
+In a terminal, it asks every question FIRST but the commit, each `? ` and the question in yellow, then sums up the
+answers (`> Your name  :  Ana`, the values bold) before it does anything.
 A pick-one question is a numbered list:  the arrow keys and Enter, or a number key, pick.
+A teammate joining has the team's plans cloned before the colour question, so the list leaves out the colours taken.
 - **What do you want to be called?**  Your short name on the pages, suggesting the one you keep already,
   else your GitHub login;  asked every time, Enter keeps it.
   `--name Ana` answers it.
 - **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
   A list of Spell UI's colour names nobody on the team has yet, the first marked.
   `--color green` answers it;  any CSS colour works too.
-- **What should the shared repo be called?**  Suggesting `<repo>.epics`, here `my-app.epics`.
+- **What should the shared repo be called?**  Only when it's about to make one on GitHub.  Suggesting `<repo>.epics`, here `my-app.epics`.
   `--content-repo <name>` answers it.
 - **Private or public?**  A list of the two, private marked.
   `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
   A public repo shows everything in the plans to anyone:  epic pages, guides, comments.
   `epic init` says so in a line of its own.
-- **Commit .epic/config.json5 and .gitignore on main?**  Suggesting yes;  with no terminal to ask in, yes.
+- **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files;  suggesting yes,
+  and with no terminal to ask in, yes.  It pushes to the branch's upstream, else `origin`.
   `--no-commit` leaves them for you.
 
-Then, in order, it:
+Then, in order, each step under a bold heading, the files in a gray table, a gray line before each slow step:
 1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
      ([README/agents.md](README/agents.md#the-epic-plugin) says what each step does).
@@ -208,15 +273,16 @@ Then, in order, it:
 6. Lists the links in a block of your `.gitignore`.
    The block starts `# shared:start` and ends `# shared:end`.
 7. Keeps your name, in `~/.spell-epic/person.json5`.
-8. Commits `.epic/config.json5` and `.gitignore` on the base branch, only those two files:  every new worktree
-   branches from there.  On another branch it commits nothing, and says so.
-9. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
+8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
    your teammates see it, and nobody commits anything in the code repo for it.
-10. Starts the epic server, serving your repo, and prints its address:  open it ("One epic server", below).
-    `--no-server` skips it.
+9. Commits `.epic/config.json5` and `.gitignore` on the base branch, only those two files, and pushes them:
+   every new worktree branches from there.  On another branch it commits nothing, and says so.
+10. Starts the epic server, serving your repo, and ends with where to see the epics:  its address, a link in a
+    terminal ("One epic server", below), and how to open them in VS Code (or Cursor).
+    `--no-server` skips the server.
 
-- Then push the base branch:  a teammate's `epic init` reads the shared repo's address from it.
-- Each step is skipped when it's done, so it's safe to run again:  a second run ends `set up already`.
+- Pushed, a teammate's `epic init` reads the shared repo's address from the base branch.
+- Each step is skipped when it's done, so it's safe to run again:  a second run's table says `already` on every row.
 - `--remote <address>` uses a shared repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
 
