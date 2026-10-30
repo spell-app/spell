@@ -3279,6 +3279,11 @@
           "name": "onStateChange",
           "type": "(state: ThingExplorerState) => void",
           "description": "Something changed:  remember `state`."
+        },
+        {
+          "name": "onSelect",
+          "type": "(thing: ThingLike) => void",
+          "description": "A thing was selected, in the tree or by a link in its details:  the Inspector inspects it."
         }
       ],
       "usedIn": [

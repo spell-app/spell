@@ -45,7 +45,15 @@ export function ThingExplorer(props: ThingExplorerProps) {
   const [state, setState] = createSignal<ThingExplorerState>(untrack(() => props.state) ?? {})
   return (
     <Show when={props.things} keyed>
-      {(things) => <ThingExplorerView things={things} words={props.words} state={state()} onChange={update} />}
+      {(things) => (
+        <ThingExplorerView
+          things={things}
+          words={props.words}
+          state={state()}
+          onChange={update}
+          onSelect={props.onSelect}
+        />
+      )}
     </Show>
   )
 
@@ -67,6 +75,8 @@ export type ThingExplorerProps = {
   state?: ThingExplorerState
   /** Something changed:  remember `state`. */
   onStateChange?: (state: ThingExplorerState) => void
+  /** A thing was selected, in the tree or by a link in its details:  the Inspector inspects it. */
+  onSelect?: (thing: ThingLike) => void
 }
 
 /****************
@@ -218,6 +228,7 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
   /** Show `thing`'s details, with its own type open in the tree. */
   function select(thing: ThingLike) {
     props.onChange({ selected: thingKey(props.things, thing), open: [...new Set([...open(), typeKey(thing.type)])] })
+    props.onSelect?.(thing)
   }
 }
 
@@ -231,6 +242,8 @@ type ThingExplorerViewProps = {
   state: ThingExplorerState
   /** Change `changed` in the state. */
   onChange: (changed: ThingExplorerState) => void
+  /** A thing was selected -- see `ThingExplorerProps.onSelect`. */
+  onSelect?: (thing: ThingLike) => void
 }
 
 /****************

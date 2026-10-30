@@ -110,7 +110,8 @@ export function appParts(): () => PartRow[] {
  * (remembered:  `VIEW_PREF`).
  * - Views:  the running app's parts as a tree (`<PartsTree>`);  the header's double chevron folds them all, or
  *   unfolds them all, as the epic page's does.
- * - Things:  what the running program has made, live (`<ThingExplorer>`).
+ * - Things:  what the running program has made, live (`<ThingExplorer>`);  a click on one inspects it at once
+ *   (`Inspector.inspectThing()`), as a click on a View's row picks it.
  * - Templates:  every type the code knows (`<TypeExplorer>`).
  ****************/
 export function InspectorViews(props: {
@@ -180,6 +181,7 @@ export function InspectorViews(props: {
                 words={editor.programWords}
                 state={thingsState}
                 onStateChange={(changed) => (thingsState = changed)}
+                onSelect={(thing) => Inspector.inspectThing(thing)}
               />
             )}
           </Show>

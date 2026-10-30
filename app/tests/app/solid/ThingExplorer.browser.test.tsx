@@ -168,15 +168,17 @@ describe("<ThingExplorer> (Solid, live)", () => {
     expect(reads - settled).toBeLessThanOrEqual(2)
   })
 
-  test("clicking a row selects it, and says so through `onStateChange`", async () => {
-    new Card({ rank: "queen" })
+  test("clicking a row selects it, and says so through `onStateChange`, and `onSelect` with the thing", async () => {
+    const queen = new Card({ rank: "queen" })
     const onStateChange = vi.fn()
-    const host = await mount({}, onStateChange)
+    const onSelect = vi.fn()
+    const host = await mount({}, onStateChange, onSelect)
     expect(host.querySelector(".ScopeDetails.empty")).not.toBeNull()
 
     host.querySelector<HTMLElement>(".ThingTreeNode .body")!.click()
     flush()
     expect(onStateChange).toHaveBeenLastCalledWith({ selected: "#1", open: ["top", "all", "type:Card"] })
+    expect(onSelect).toHaveBeenLastCalledWith(queen)
     expect(host.querySelector(".ThingTreeNode.selected")).not.toBeNull()
     expect(valueOf(host, "rank")).toBe('"queen"')
   })
@@ -206,12 +208,16 @@ describe("<ThingExplorer> (Solid, live)", () => {
 /** Render a `<ThingExplorer>` of the page's things in a fresh `<div>`;  unmounted after the test. */
 async function mount(
   state: ThingExplorerState = {},
-  onStateChange?: (state: ThingExplorerState) => void
+  onStateChange?: (state: ThingExplorerState) => void,
+  onSelect?: (thing: object) => void
 ): Promise<HTMLElement> {
   await uiReady
   const host = document.createElement("div")
   document.body.append(host)
-  const dispose = render(() => <ThingExplorer things={core.things} state={state} onStateChange={onStateChange} />, host)
+  const dispose = render(
+    () => <ThingExplorer things={core.things} state={state} onStateChange={onStateChange} onSelect={onSelect} />,
+    host
+  )
   cleanups.push(() => {
     dispose()
     host.remove()

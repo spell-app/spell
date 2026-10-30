@@ -231,6 +231,32 @@ export class Inspector {
     Inspector.followTrail([...trail(), step])
   }
 
+  /**
+   * Inspect `thing`, one of the program's things, at once (Owen:  "clicking something in the 'views' tab should
+   * inspect it"):  the Things view's clicks.
+   * - Drawn:  its element is picked, as a click in the app would.
+   * - Not drawn (a deck, a list of piles):  the drawn part it's reached from is picked, and the trail followed
+   *   to it (`trailTo()`), so its crumbs say how it's reached.
+   * - Neither:  nothing changes.
+   * - The properties card shows, unfolded.
+   */
+  static inspectThing(thing: object): void {
+    const area = appArea
+    if (!area) return
+    const drawn = Inspector.elementDrawing(thing)
+    const found = drawn
+      ? { element: drawn, trail: [] }
+      : Inspector.partsIn(area)
+          .map(({ element }) => ({ element, base: SpellElement.thingOf(element) }))
+          .filter((row): row is { element: Element; base: object } => !!row.base)
+          .map(({ element, base }) => ({ element, trail: trailTo(base, thing) }))
+          .find((row) => row.trail)
+    if (!found?.trail) return
+    if (!Inspector.isShown("properties")) Inspector.setShown("properties", true)
+    if (Inspector.isFolded("properties")) Inspector.toggleFolded("properties")
+    Inspector.pick(found.element, { trail: found.trail })
+  }
+
   /** Go back along the trail to step `depth` (0:  what's picked). */
   static backTo(depth: number): void {
     Inspector.followTrail(trail().slice(0, depth))
@@ -698,6 +724,35 @@ function stepInto(value: object, step: string): object | undefined {
     : (value as Record<string, unknown>)[step]
   return isThing(next) ? next : undefined
 }
+
+/**
+ * The trail from `from` to `to`, a step each (`stepInto()`'s):  the shortest, its properties and a list's items,
+ * at most `TRAIL_DEPTH` steps;  `undefined` when `to` isn't reached.
+ * - A thing's properties are its class's own (`ClassSchemas`), in their order.
+ */
+function trailTo(from: object, to: object): string[] | undefined {
+  let reached: Array<{ value: object; trail: string[] }> = [{ value: from, trail: [] }]
+  const seen = new Set<object>([from])
+  for (let depth = 0; depth < TRAIL_DEPTH; depth++) {
+    const next: typeof reached = []
+    for (const { value, trail } of reached) {
+      const names = ClassSchemas.fromClass(value.constructor).attributes.map((attribute) => attribute.name)
+      const items = (itemsOf(value) ?? []).map((_item, index) => `${ITEM_STEP}${index}`)
+      for (const step of [...names, ...items]) {
+        const child = stepInto(value, step)
+        if (!child || seen.has(child)) continue
+        if (child === to) return [...trail, step]
+        seen.add(child)
+        next.push({ value: child, trail: [...trail, step] })
+      }
+    }
+    reached = next
+  }
+  return undefined
+}
+
+/** The most steps `trailTo()` looks along. */
+const TRAIL_DEPTH = 3
 
 /**
  * Is `value` one of the program's things:  an instance of a spell class (lists too)?
