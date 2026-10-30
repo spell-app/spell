@@ -787,10 +787,10 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
 
   // epic `epic-engine` I140 (Owen, 2026-10-26:  "Accepted-but-unstarted phases should show checkmark pill green")
   // a thumbs up since I181 (Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make this a todo'")
-  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit, Do this (a waiting plan's slots), a state, never a mark", async () => {
+  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit alone (no second thumbs up, I184), a state, never a mark", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
-    expect(actions(host)).toEqual(["revisit", "todo"])
+    expect(actions(host)).toEqual(["revisit"])
     const check = deep(host).querySelector<HTMLElement>('ui-button[data-state="accepted"]')!
     // first in its group, in a waiting plan's Accept slot (Owen:  "checkmark on the wrong side")
     expect(check.parentElement!.firstElementChild).toBe(check)

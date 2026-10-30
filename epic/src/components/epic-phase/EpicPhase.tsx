@@ -70,8 +70,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
- *   - still to do, its plan accepted (`plan="accepted"`, I140):  Do this, Revisit and a green thumbs up, a state saying
- *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
+ *   - still to do, its plan accepted (`plan="accepted"`, I140):  a green thumbs up, a state saying it's good
+ *     to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go"), then Revisit;  no Do this:
+ *     the accepted plan is the go-ahead (I184;  Owen, 2026-10-29:  "two thumbs up?")
  * - Its GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), last on its title row, with an `id`:
  *   "Show this phase's files" and "Show this phase's checks", ticked while it shows them
  *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom

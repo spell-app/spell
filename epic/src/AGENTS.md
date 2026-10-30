@@ -1823,8 +1823,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  Do this, Revisit, then a green
-      thumbs up, drawn as a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing
+    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  a green thumbs up, drawn as
+      a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing;  then Revisit, and no Do
+      this:  the accepted plan is the go-ahead (I184;  Owen, 2026-10-29:  "two thumbs up?")
     - else Do this, Revisit (`buttons="phase"`):  no Approve
       - Do this, the thumbs up, was Make Todo until I181 (Owen:  "it's already a phase, you wouldn't make it a todo"):
         the same `todo` mark, which `inbox apply` takes on a phase as a GO-AHEAD (a Noted "Go ahead" card, his note
