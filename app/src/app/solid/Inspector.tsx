@@ -853,8 +853,14 @@ class Picker {
       return
     }
     const { left, top, width, height } = drawnBox(element)
-    Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` })
-    box.hidden = false
+    // Only when it moved:  a style written each frame over the pointer makes Chrome flicker its cursor
+    // (Owen:  "Cursor flashes between arrow and drag when I mouse over a face up card")
+    const rect = `${left} ${top} ${width} ${height}`
+    if (box.dataset.rect !== rect) {
+      box.dataset.rect = rect
+      Object.assign(box.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` })
+    }
+    if (box.hidden) box.hidden = false
   }
 
   /** What's picked now, as `select()` follows it. */
