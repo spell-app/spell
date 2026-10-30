@@ -1838,7 +1838,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
           "theme",
           t("theme"),
           <>
-            <ui-property name="name" label={t("name")} description={t("nameTip")}>
+            <ui-property name="name" label={t("name")} description={t("nameTip")} width="1/2">
               <ui-input
                 value={this.theme.name}
                 placeholder={t("defaultName")}
@@ -1848,7 +1848,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 on-ui-typed={(event: CustomEvent<{ value: string }>) => this.choose({ name: event.detail.value })}
               ></ui-input>
             </ui-property>
-            <ui-property name="base" label={t("base")} description={t("baseTip")}>
+            <ui-property name="base" label={t("base")} description={t("baseTip")} width="1/2" default={DEFAULT_BASE}>
               <ui-select
                 value={this.baseTheme}
                 aria-label={t("base")}
@@ -1926,7 +1926,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         on-ui-opened={onFolded}
         on-ui-closed={onFolded}
       >
-        <ui-property-editor class="properties">{fields}</ui-property-editor>
+        <ui-property-editor class="properties" compact="" show-defaults="">
+          {fields}
+        </ui-property-editor>
       </ui-section>
     )
   }
@@ -2016,8 +2018,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         .map((color) => color.hex)
         .join(" / ")
     return (
-      // no `output`:  the dropdown says the choice, as the font rows' selects do
-      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)}>
+      // no `output`:  the dropdown says the choice, as the font rows' selects do;  None (the theme's own) is plain
+      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)} default={HueDropdown.noneValue}>
         {HueDropdown.draw({
           size: HUE_SIZE,
           value: chosen,
@@ -2038,7 +2040,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     const chosen = () => this.theme[key]
     const own = () => this.ownFont(FONT_TOKENS[key])
     return (
-      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)}>
+      // Headings beside Body;  the theme's own is plain
+      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)} width="1/2" default={OWN}>
         <ui-select
           value={chosen() ?? OWN}
           aria-label={t(key)}
@@ -2073,6 +2076,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         name="textSize"
         label={t("textSize")}
         description={t("textSizeTip")}
+        default={String(this.baseTextSize)}
         output={this.theme.textSize !== undefined ? `${size()}px` : this.ownLabel(`${size()}px`)}
       >
         <Show when={this.theme.textSize !== undefined}>
@@ -2113,10 +2117,14 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         name={key}
         label={t(key)}
         description={t(`${key}Tip`)}
+        default={own() ?? OWN}
         output={chosen() ? t(chosen()!) : own() ? this.ownLabel(t(own() as ThemeEditorTextKey)) : undefined}
       >
         <Show when={chosen() !== undefined}>{this.resetButton(() => this.choose({ [key]: undefined }))}</Show>
         <ui-menu
+          // named, so its property reads its choice (`:state(set)`):  the editor around it binds nothing
+          name={key}
+          value={picked()}
           appearance="segmented link"
           align="fluid"
           equal={own() ? "" : undefined}

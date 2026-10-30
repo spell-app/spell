@@ -228,7 +228,7 @@ export class FormFields {
   }
 
   /** A control `<ui-form>` reads:  native value controls, and `ui-*` elements with the form-control API. */
-  private static isControl(element: Element): boolean {
+  static isControl(element: Element): boolean {
     if (element instanceof HTMLInputElement) return !BUTTON_TYPES.has(element.type)
     if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) return true
     if (element instanceof HTMLButtonElement || element instanceof HTMLFieldSetElement) return false

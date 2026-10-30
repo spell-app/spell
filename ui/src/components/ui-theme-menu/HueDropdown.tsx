@@ -23,6 +23,11 @@ export class HueDropdown {
   /** The dots' style sheet, for the owner's `elementSetup.styleSheets`. */
   static readonly css = hueDropdownCSS
 
+  /** The value of its first option, None:  no colour chosen (a property's `default` beside it). */
+  static get noneValue(): string {
+    return NONE_VALUE
+  }
+
   /** The dropdown, its button and its options;  `options`' functions are read where they're drawn, so they follow. */
   static draw(options: HueDropdownOptions): JSX.Element {
     const chosen = () => options.hues().find((hue) => hue === options.value())

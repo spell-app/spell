@@ -1,7 +1,8 @@
 /*
  * The Inspector (`Inspector.tsx`):  a tall column at the page's far right, and its outlines over the app.
  * - Its look and sizes are the brand's Theme Creator inspector (`brand/spell-design-system/Theme Creator.spell.html`):
- *   a 380px column, 16px in, 16px between panels, fields 4px under their labels, segmented tracks tinted to the panel.
+ *   a 380px column, 16px in, 16px between panels, segmented tracks tinted to the panel;  its property editors are
+ *   Spell UI's `compact` ones (epic `debut` P31).
  * - Its colours, fonts and radii are the Spell Brand theme's, re-declared on `.Inspector` (`InspectorColumn`):
  *   this sheet reads only tokens.
  * - On a phone, its pane is a sheet over the page's lower part (below, "The phone's sheet").
@@ -28,79 +29,17 @@
   color: var(--ui-text-color);
   font-family: var(--ui-font-family);
 
-  /* compact, as the Theme Creator's inspector:  15px type, fields 12px apart, the control 4px under its label */
-  /* its controls size their text from the theme's, 16px:  14px, as the rest */
-  & :is(ui-property-editor, ui-dropdown.InspectorAddEvent) {
-    --ui-font-size: 14px;
+  /* its property editors are `compact` (Spell UI's tight look:  13px, two columns, a yes or no on one line, tight
+     bands;  epic `debut` P31):  only the Inspector's own looks are here */
+  & ui-dropdown.InspectorAddEvent {
+    --ui-font-size: 13px;
   }
   & ui-property-editor {
-    font-size: 14px;
-    --ui-form-row-distance: 10px;
-    /* controls about 30px tall, as the Theme Creator's (Owen:  "make fields in the inspector more compact") */
-    --ui-input-padding-block: 0.4em;
-    --ui-input-padding-inline: 0.7em;
-    --ui-select-padding-block: 0.4em;
-    --ui-select-padding-inline: 0.7em;
     /* less round than the brand's pills (Owen) */
     --ui-input-radius: 6px;
     --ui-select-radius: 6px;
     /* a select with nothing chosen reads "none", in italics (Owen) */
     --ui-select-placeholder-style: italic;
-  }
-  & :is(ui-field, ui-property) {
-    --ui-form-label-distance: 4px;
-  }
-  /*
-   * the fields:  two to a row where a field is only a yes or no (`inline`), else the row's full width
-   * (Owen:  "fit a ton of stuff on the screen without being too busy")
-   */
-  & ui-property-editor::part(editor) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
-    row-gap: var(--ui-form-row-distance);
-  }
-  /* a field's own box is its `field` part (its element draws none) */
-  & :is(ui-property-editor, ui-property-group) > ui-property::part(field) {
-    grid-column: 1 / -1;
-    margin: 0;
-  }
-  /* a size or a colour:  half a row, so the two share one */
-  & :is(ui-property-editor, ui-property-group) > ui-property.half::part(field) {
-    grid-column: auto;
-  }
-  & :is(ui-property-editor, ui-property-group) > ui-property[inline]::part(field) {
-    grid-column: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-  }
-  & ui-property[inline]::part(row) {
-    flex: 0 1 auto;
-    width: auto;
-    margin: 0;
-  }
-  /* a yes or no's box keeps no room for text of its own:  its label is the field's, beside it */
-  & ui-property[inline] > ui-checkbox {
-    --ui-checkbox-label-distance: var(--ui-checkbox-size, 1.21428em);
-  }
-  /* the box, then its label:  "[x] Basic" */
-  & ui-property[inline]::part(control) {
-    order: -1;
-    flex: 0 0 auto;
-    width: auto;
-  }
-  /* the sections, a group each:  a full row, their fields on the same two-column grid, their titles small bands */
-  & ui-property-editor > ui-property-group {
-    grid-column: 1 / -1;
-  }
-  & ui-property-group::part(content) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 12px;
-    row-gap: var(--ui-form-row-distance);
   }
   /* ... their titles the theme editor's bands (a group is a panel band:  `UIPropertyGroup`), out to the card's edges
      through its padding (`.InspectorSection`) */

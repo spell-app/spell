@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
+import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
@@ -6,7 +6,6 @@ import { SP } from "spell/parser/spell"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
-import { ValueSets } from "spell/ui/vocabulary"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
@@ -953,32 +952,6 @@ class Picker {
 }
 
 /****************
- * ### `Compact`
- * The Inspector's property editor, laid out as the Theme Creator's inspector is:  compact (Owen).
- * - Its controls the column's full width:  `fluid` on each it makes.
- * - A yes or no (a checkbox) beside its label, one row:  `inline` on its property.
- * - The rest is the column's CSS:  small type, 12px between fields, the label 4px above its control.
- * - The editor makes its properties' controls as it draws, and again for a new schema:  watched, not set once.
- ****************/
-class Compact {
-  /** Keep `propertyEditor`'s fields compact as it makes them;  returns the cleanup. */
-  static keep(propertyEditor: HTMLElement): () => void {
-    const tidy = () => {
-      for (const control of propertyEditor.querySelectorAll(FLUID_CONTROLS)) control.toggleAttribute("fluid", true)
-      for (const checkbox of propertyEditor.querySelectorAll("ui-property > ui-checkbox"))
-        checkbox.parentElement!.toggleAttribute("inline", true)
-    }
-    const watching = new MutationObserver(tidy)
-    watching.observe(propertyEditor, { childList: true, subtree: true })
-    tidy()
-    return () => watching.disconnect()
-  }
-}
-
-/** The controls a property makes that take the column's width. */
-const FLUID_CONTROLS = "ui-property > :is(ui-input, ui-select, ui-dropdown, ui-textarea, ui-calendar, ui-icon-picker)"
-
-/****************
  * ### `<InspectorColumn>`
  * The Inspector, a tall column at the page's far right, while it's open (`Inspector.isOpen`):
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
@@ -1238,11 +1211,8 @@ function PropertiesCard(): JSX.Element {
         }
       >
         {(part) => (
-          <ui-property-editor
-            schema={part.schema}
-            value={part.value}
-            ref={(propertyEditor) => onCleanup(Compact.keep(propertyEditor))}
-          >
+          // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
+          <ui-property-editor schema={part.schema} value={part.value} compact="" show-defaults="">
             <Show when={part.layout}>
               {(layout) => (
                 <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
@@ -1481,19 +1451,18 @@ function ThingLink(props: { thing: object; step: string; label?: string }): JSX.
 /****************
  * ### `<Field>`
  * One of a Spell UI element's attributes, as the Inspector lays it out.
- * - A size or a colour is half a row (`.half`), so the two share one:  each is a short choice.
- * - So is an attribute and the one that places it, side by side:  `icon` and `icon-position`.
- * - A colour's choices are chips (`<HueSelect>`), not words alone.
+ * - Its editor is `compact`, so Spell UI lays it out:  a short choice (a size, a colour) half a row,
+ *   a colour's choices with chips, a yes or no on one line.
+ * - Only an attribute and the one that places it share a row by the Inspector's say:  `icon` and `icon-position`.
  * - Its info icon's tip is the attribute's description, shown after a 2s hover (`chrome.css`).
  ****************/
 function Field(props: { field: FieldSpec; fields: FieldSpec[] }): JSX.Element {
-  const isHalf = HALF_KINDS.has(props.field.kind ?? "") || isPositionPair(props.field, props.fields)
   return (
-    <ui-property name={props.field.name} class={{ half: isHalf }} description={tipFor(props.field)}>
-      <Show when={props.field.kind === "color"}>
-        <HueSelect name={props.field.name} />
-      </Show>
-    </ui-property>
+    <ui-property
+      name={props.field.name}
+      width={isPositionPair(props.field, props.fields) ? HALF_ROW : undefined}
+      description={tipFor(props.field)}
+    />
   )
 }
 
@@ -1512,38 +1481,8 @@ function isPositionPair(field: FieldSpec, fields: FieldSpec[]): boolean {
   )
 }
 
-/** Attribute kinds whose field is half a row. */
-const HALF_KINDS = new Set(["size", "color"])
-
-/****************
- * ### `<HueSelect>`
- * A colour's select:  each hue a round chip of its colour, then its name.
- * - The chip is the option's `image` (a select draws it round, as an avatar):  a circle of the hue's colour,
- *   as the Inspector's theme paints it, worked out on a probe inside the column.
- ****************/
-function HueSelect(props: { name: string }): JSX.Element {
-  return (
-    <ui-select name={props.name} fluid="" placeholder={appTexts.text("inspectorNone")}>
-      <For each={ValueSets.get("hues")}>
-        {(hue) => (
-          <ui-item value={hue} image={chipFor(hue)}>
-            {hue}
-          </ui-item>
-        )}
-      </For>
-    </ui-select>
-  )
-}
-
-/** A round chip of `hue`'s colour, as an SVG `data:` URL;  grey where the colour can't be read. */
-function chipFor(hue: string): string {
-  const probe = (document.querySelector(".Inspector") ?? document.body).appendChild(document.createElement("span"))
-  probe.style.color = `var(--ui-${hue}, gray)`
-  const color = getComputedStyle(probe).color
-  probe.remove()
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="${color}"/></svg>`
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
-}
+/** A field's `width` for half a row. */
+const HALF_ROW = "1/2"
 
 /****************
  * ### `<InspectorToggle>`

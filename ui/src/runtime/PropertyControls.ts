@@ -145,6 +145,9 @@ export type PropertyRule = (change: { things: readonly object[]; property: Attri
 /** The kind a property falls back to. */
 const INPUT = "input"
 
+/** Controls that fill their field:  `fluid`. */
+const FLUID: Readonly<Record<string, string>> = { fluid: "" }
+
 /**
  * The built-in control kinds.
  * - `buttons` is a segmented `<ui-menu>`, which a form reads as it reads a select (epic `debut` P31);
@@ -155,18 +158,18 @@ const INPUT = "input"
  *   not typed (epic `debut` P14).
  */
 const BUILT_IN_KINDS: Record<string, PropertyControl> = {
-  input: { tag: "ui-input", types: ["text", "data"] },
-  text: { tag: "ui-textarea" },
-  number: { tag: "ui-input", attributes: { type: "number" }, types: ["number"], width: "half" },
-  date: { tag: "ui-input", attributes: { type: "date" }, types: ["date"], width: "half" },
-  select: { tag: "ui-select", choices: "items", types: ["choice"], width: "half" },
-  icon: { tag: "ui-icon-picker", types: ["icon"] },
+  input: { tag: "ui-input", attributes: FLUID, types: ["text", "data"] },
+  text: { tag: "ui-textarea", attributes: FLUID },
+  number: { tag: "ui-input", attributes: { ...FLUID, type: "number" }, types: ["number"], width: "half" },
+  date: { tag: "ui-input", attributes: { ...FLUID, type: "date" }, types: ["date"], width: "half" },
+  select: { tag: "ui-select", attributes: FLUID, choices: "items", types: ["choice"], width: "half" },
+  icon: { tag: "ui-icon-picker", attributes: FLUID, types: ["icon"] },
   buttons: { tag: "ui-menu", attributes: { appearance: "segmented", size: "small" }, choices: "items", width: "half" },
   radios: { tag: "ui-radio", choices: "radios" },
   range: { tag: "ui-slider" },
   checkbox: { tag: "ui-checkbox", types: ["boolean"], inline: true },
   toggle: { tag: "ui-checkbox", attributes: { type: "toggle" }, inline: true },
-  color: { tag: "ui-input", attributes: { type: "color" }, width: "half" },
+  color: { tag: "ui-input", attributes: { ...FLUID, type: "color" }, width: "half" },
   sides: { tag: "ui-sides", types: ["sides"], width: "half" },
   editor: { tag: "ui-property-editor", types: ["thing"] }
 }

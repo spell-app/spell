@@ -46,6 +46,12 @@ export class DOMPropertyElement extends DOMFieldElement {
 }
 
 /**
+ * The attributes a control's value shows in, as a page sets them:  `@E.watches` follows them.
+ * - Above the class:  `@E.watches` reads it while the class is defined.
+ */
+const VALUE_ATTRIBUTES = ["value", "selected", "checked"]
+
+/**
  * The same run, property by property (or both none):  a property's `flagRun` doesn't change for an equal one.
  * - Above the class:  `@state({ equals })` reads it while the class is defined.
  */
@@ -425,6 +431,15 @@ export class UIProperty extends UIField {
     this.valueVersion++
   }
 
+  /**
+   * Its controls' values were set as attributes (a page drawing its own control, `value={...}`), or controls came
+   * and went:  read again.
+   */
+  @E.watches({ childList: true, subtree: true, attributes: true, attributeFilter: VALUE_ATTRIBUTES })
+  protected onControlsMutated() {
+    this.noteValueChanged()
+  }
+
   /** A person edited its control. */
   @E.on("ui-changed")
   @E.on("input")
@@ -448,7 +463,7 @@ export class UIProperty extends UIField {
     void this.valueVersion
     if (this.isMixed || this.isReadOnly) return false
     const controls = [...this.domElement.children].filter(
-      (child) => !child.slot && child.getAttribute(MADE_ATTRIBUTE) !== FLAGS
+      (child) => !child.slot && child.getAttribute(MADE_ATTRIBUTE) !== FLAGS && FormFields.isControl(child)
     )
     return UIProperty.differs(FormFields.valueFor(controls), this.defaultValue)
   }
@@ -458,7 +473,8 @@ export class UIProperty extends UIField {
    * - STATIC:  pure.
    */
   static differs(value: E.FieldValue, fallback: string | number | boolean | undefined): boolean {
-    if (fallback === undefined) return !FormFields.isBlank(value)
+    // no default:  any value, but "false" (an off switch a select shows as text, `fixed="false"`) is none
+    if (fallback === undefined) return !FormFields.isBlank(value) && value !== FALSE_TEXT
     if (typeof fallback === "boolean" || fallback === "true" || fallback === "false") {
       return !FormFields.isBlank(value) !== E.Converters.boolean(fallback)
     }
@@ -519,6 +535,7 @@ export class UIProperty extends UIField {
     const select = document.createElement(DROPDOWN_TAG)
     select.setAttribute(MADE_ATTRIBUTE, FLAGS)
     select.setAttribute("multiple", "")
+    select.setAttribute("selection", "")
     select.setAttribute("fluid", "")
     select.setAttribute("aria-label", this.translationForKey(FLAGS_TEXT))
     for (const property of run) {
@@ -693,6 +710,9 @@ class FlagRun {
 
 /** The label of the pills' select:  the property's own text (TypeScript knows only the field's). */
 const FLAGS_TEXT = "flags" as never
+
+/** An off switch, as a select shows it. */
+const FALSE_TEXT = "false"
 
 /** The fewest yes-or-no properties side by side that make a select of pills. */
 const LEAST_FLAGS = 3
