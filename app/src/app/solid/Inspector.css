@@ -133,6 +133,9 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+.SpellPage .InspectorPane.SplitPanel > .SplitPanelPane:has(> .InspectorColumn)::before {
+  content: none;
+}
 
 /* a card (`<InspectorCard>`):  its header (the App pane's, `.AppPaneHeader`, in the editor's theme), then its body */
 .InspectorCard {

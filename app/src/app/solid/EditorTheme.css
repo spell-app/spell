@@ -76,6 +76,9 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane)::before {
+  content: none;
+}
 /* ... its title bar frosted, as every panel is:  the panel's glass, the header's wash over it (Owen:  "the titlebar should
    be frosted") */
 :root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .AppPaneHeader {
@@ -175,12 +178,28 @@
 
   /* a panel:  a rounded box with its own shadow;  no white edge (Owen:  "remove white border in splitpanel") */
   & .SplitPanel > .SplitPanelPane {
-    background: var(--spell-pane-background);
     border: 0;
     border-radius: var(--spell-pane-radius);
     box-shadow: var(--spell-pane-shadow);
+    /* its own layer, for its glass below (a z-index under 0 stays inside it) */
+    isolation: isolate;
+  }
+  /*
+   * ... its glass (fill and blur) on a layer of its own, NEVER on the panel itself:  a blur on the panel would make it
+   * the box every `position: fixed` inside it is placed in and cut to, so a menu (the code editor's right-click
+   * menu) couldn't leave it (Owen:  "This is a problem I've been seeing with menus for a while, we need to use
+   * position:fixed so it's always visible")
+   */
+  & .SplitPanel > .SplitPanelPane::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--spell-pane-background);
     -webkit-backdrop-filter: var(--spell-pane-filter);
     backdrop-filter: var(--spell-pane-filter);
+    pointer-events: none;
   }
 
   /* a panel's menu:  its plain header, over a hairline */
