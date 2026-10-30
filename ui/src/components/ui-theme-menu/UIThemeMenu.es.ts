@@ -52,7 +52,7 @@ export const themeMenuEs = {
     tinted: "{title} - {tint}",
     myThemes: "Mis temas",
     tintName: "Tinte",
-    noTint: "Sin tinte:  el tema tal cual",
+    noTint: "Ninguno",
     red: "Rojo",
     orange: "Naranja",
     yellow: "Amarillo",

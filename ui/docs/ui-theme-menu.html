@@ -119,11 +119,12 @@
                   - A page that restores the remembered theme before any menu shows calls
                     `ThemePreference.restore()`;  a page the page server didn't serve, but whose `/api` reaches it,
                     calls `ThemePreference.keepIn("space")` first, as the Spell editor does.
-                  - Under the themes, a TINT row:  none, then every one of Spell UI's colours by its own name.
+                  - Under the themes, TINT:  a header as Theme's, over ONE dropdown of Spell UI's colours, each a
+                    dot and its own name, None (a slashed circle) first.
                     A tint replaces the theme's primary and tints the page as a soft gradient;  it's remembered with
                     the theme as one name (`glass:pink`), and the menu says both:  "Glass - Pink".
-                    - The row is `<ui-hue-swatches>`, which the theme editor's colour rows use too:  a radio group of
-                      round swatches, `hues` limiting them, `none-label` and `none-colors` naming and drawing the first.
+                    - The theme editor's colour rows (Primary, Secondary, Background) are the same dropdown, their
+                      first option the theme's own colour.
                   - Its `end` slot adds rows of the page's own under the themes:  the editor's "Edit theme...".
                   - `show="menu"` draws the panel alone, in place, as the body of a sub-menu in a menu of your own
                     (an epic page's gear menu).  Its `chosenTheme` names the theme chosen, for the row that opens it

@@ -2,6 +2,7 @@ import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "spell/ui/runtime"
+import { UIT } from "spell/ui/core"
 import { foundationCSS } from "spell/ui/styles"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { expectAccessible } from "spell/test-helpers/A11y"
@@ -40,10 +41,18 @@ function inner<T extends Element = HTMLElement>(host: Element, selector: string)
   return host.shadowRoot!.querySelector<T>(selector)!
 }
 
-/** The swatch `selector` names in colour choice `name`'s row (`<ui-hue-swatches>`, its own shadow root). */
-function swatch(host: Element, name: string, selector: string): HTMLElement {
-  const row = inner(host, `ui-property[name="${name}"] ui-hue-swatches`)
-  return row.shadowRoot!.querySelector<HTMLElement>(`[part~=swatch]${selector}`)!
+/** Colour choice `name`'s dropdown (`HueDropdown`). */
+function hueDropdown(host: Element, name: string): HTMLElement {
+  return inner(host, `ui-property[name="${name}"] ui-dropdown`)
+}
+
+/** Open colour choice `name`'s dropdown, and click its option for `hue` (`"none"`:  the theme's own). */
+async function pickHue(host: Element, name: string, hue: string): Promise<void> {
+  const dropdown = hueDropdown(host, name)
+  dropdown.shadowRoot!.querySelector<HTMLElement>("[part~=trigger]")!.click()
+  await ElementFixture.settle()
+  const index = ["none", ...UIT.ThemeHues].indexOf(hue as UIT.ThemeHue)
+  dropdown.shadowRoot!.querySelectorAll<HTMLElement>("[role=option]")[index]!.click()
 }
 
 /** Press page `id`'s toggle in the bar, and wait for the bench to follow. */
@@ -162,18 +171,19 @@ describe("<ui-theme-editor> starting", () => {
 ////////////////
 
 describe("<ui-theme-editor> Basics", () => {
-  it("a colour swatch changes the page's primary, and sends `ui-changed` with the sheet", async () => {
+  it("a colour option changes the page's primary, and sends `ui-changed` with the sheet", async () => {
     const host = await editor()
     await applied(host)
     const events = changes(host)
-    swatch(host, "primary", '[value="pink"]').click()
+    await pickHue(host, "primary", "pink")
     await applied(host)
     expect(events).toHaveLength(1)
     expect(events[0]!.detail.value.primary).toBe("pink")
     expect(events[0]!.detail.css).toContain("--ui-primary: var(--ui-pink);")
     expect(token("--ui-primary")).toBe(token("--ui-pink"))
     await ElementFixture.settle()
-    expect(swatch(host, "primary", '[value="pink"]').getAttribute("aria-checked")).toBe("true")
+    expect(hueDropdown(host, "primary").getAttribute("value")).toBe("pink")
+    expect(hueDropdown(host, "primary").querySelector('[slot="trigger"]')?.textContent).toBe("Pink")
     expect(host.matches(":state(changed)")).toBe(true)
   })
 
@@ -195,20 +205,22 @@ describe("<ui-theme-editor> Basics", () => {
     const host = await editor(`<ui-theme-editor base="fruity"></ui-theme-editor>`)
     await applied(host)
     const output = (name: string) => inner(host, `ui-property[name="${name}"]`).getAttribute("output") ?? ""
-    expect(output("primary")).toMatch(/^Theme's own · #[0-9a-f]{6}/)
+    expect(hueDropdown(host, "primary").querySelector("[slot=trigger]")?.textContent).toMatch(
+      /^Theme's own · #[0-9a-f]{6}/
+    )
     expect(output("textSize")).toMatch(/^Theme's own · \d+px$/)
     expect(output("corners")).toBe("Theme's own · Round")
     expect(inner(host, `ui-property[name="corners"] ui-item[value="round"]`).hasAttribute("selected")).toBe(true)
     expect(inner(host, `ui-property[name="bodyFont"] ui-item[value="own"]`).textContent).toMatch(/^Theme's own · /)
   })
 
-  it("arrow keys in a swatch row move and choose", async () => {
-    const host = await editor()
-    // from the chosen swatch, the row's tab stop, as a person presses it
-    const chosen = swatch(host, "secondary", '[aria-checked="true"]')
-    chosen.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
-    await ElementFixture.settle()
-    expect(host.theme?.secondary).toBe("red")
+  it("a colour's first option is the theme's own:  its colour in light and dark halves, its hex said", async () => {
+    const host = await editor(`<ui-theme-editor base="fruity"></ui-theme-editor>`)
+    await applied(host)
+    const own = hueDropdown(host, "secondary").querySelector('ui-item[value="none"]')!
+    expect(own.textContent).toMatch(/^Theme's own · #[0-9a-f]{6}/)
+    expect(own.querySelector(".hue-dot.halves")).not.toBeNull()
+    expect(hueDropdown(host, "secondary").getAttribute("value")).toBe("none")
   })
 
   it("its inner elements' events stop at its shadow root", async () => {

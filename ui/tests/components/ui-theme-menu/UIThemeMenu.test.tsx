@@ -85,7 +85,7 @@ function row(host: Element, value: string) {
 
 /** The dropdown's option rows (`show="theme"`):  `[value, text]`. */
 function dropdownRows(host: Element): [string, string][] {
-  return [...part(host, "theme").querySelectorAll("ui-item:not([kind])")].map((item) => [
+  return [...part(host, "theme").querySelectorAll(":scope > ui-item:not([kind])")].map((item) => [
     item.getAttribute("value")!,
     item.textContent!.trim()
   ])
@@ -93,7 +93,7 @@ function dropdownRows(host: Element): [string, string][] {
 
 /** The dropdown's text (its `trigger` slot). */
 function labelOf(host: Element) {
-  return part(host, "theme").querySelector("[slot=trigger]")!.textContent
+  return part(host, "theme").querySelector(":scope > [slot=trigger]")!.textContent
 }
 
 /** Pick `value` in `host`'s dropdown, as the dropdown reports a viewer's choice. */
@@ -611,29 +611,45 @@ describe("<ui-theme-menu> persistence", () => {
 ////////////////
 
 describe("<ui-theme-menu> tints", () => {
-  /** The tint row's swatch for `hue` (`""`:  none), in its own shadow root. */
-  function tint(host: Element, hue: string) {
-    const swatches = part(host, "tints")
-    return swatches.shadowRoot!.querySelector<HTMLElement>(`[part~=swatch][value="${hue}"]`)!
+  /** Tint's dropdown, `<ui-dropdown part="tints">`. */
+  function tints(host: Element) {
+    return part(host, "tints")
   }
 
-  it("draws a tint row under the themes:  none first, then every one of Spell UI's colours, by its own name", async () => {
+  /** Open Tint's dropdown, and click its option for `hue` (`"none"`:  None), a row in its shadow root. */
+  async function tint(host: Element, hue: string) {
+    const dropdown = tints(host)
+    dropdown.shadowRoot!.querySelector<HTMLElement>("[part~=trigger]")!.click()
+    await ElementFixture.settle()
+    const index = ["none", ...UIT.ThemeHues].indexOf(hue as UIT.ThemeHue)
+    dropdown.shadowRoot!.querySelectorAll<HTMLElement>("[role=option]")[index]!.click()
+  }
+
+  it("draws Tint under the themes:  a header as Theme's, over ONE dropdown, None first, then every colour", async () => {
     const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
     await ElementFixture.settle()
-    const swatches = [...part(host, "tints").shadowRoot!.querySelectorAll<HTMLElement>("[part~=swatch]")]
-    expect(swatches.map((swatch) => swatch.getAttribute("value"))).toEqual(["", ...UIT.ThemeHues])
-    expect(tint(host, "pink").getAttribute("title")).toBe("Pink")
-    expect(tint(host, "").getAttribute("aria-checked")).toBe("true")
+    const headings = [...host.shadowRoot!.querySelectorAll(".panel > .heading")].map((it) => it.textContent)
+    expect(headings).toEqual(["Theme", "Tint"])
+    const items = [...tints(host).querySelectorAll("ui-item")]
+    expect(items.map((item) => item.getAttribute("value"))).toEqual(["none", ...UIT.ThemeHues])
+    expect(items.map((item) => item.textContent)).toContain("Pink")
+    expect(items[0]!.textContent).toBe("None")
+    // each a dot in its colour;  None a slashed circle
+    expect(items[10]!.querySelector(".hue-dot.pink")).not.toBeNull()
+    expect(items[0]!.querySelector(".hue-dot.none")).not.toBeNull()
+    // the button:  the chosen one's dot and name
+    expect(tints(host).querySelector('[slot="trigger"]')?.textContent).toBe("None")
+    expect(tints(host).getAttribute("aria-label")).toBe("Tint")
   })
 
-  it("a swatch tints the theme:  remembered with it as one name, the label says both, one ui-changed", async () => {
+  it("an option tints the theme:  remembered with it as one name, the label says both, one ui-changed", async () => {
     const host = await render(`<ui-theme-menu></ui-theme-menu>`)
     const changes: ThemeMenuChange[] = []
     host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
     row(host, "paper").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("paper"))
     await ElementFixture.settle()
-    tint(host, "pink").click()
+    await tint(host, "pink")
     await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.tint)).toBe(true))
     expect(ThemePreference.chosen).toMatchObject({ theme: "paper", tint: "pink" })
     expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper:pink")
@@ -642,8 +658,9 @@ describe("<ui-theme-menu> tints", () => {
     expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Paper - Pink, Auto")
     const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
     expect(token("--ui-primary")).toBe(token("--ui-pink"))
+    expect(tints(host).querySelector('[slot="trigger"]')?.textContent).toBe("Pink")
     // none:  the theme as it is
-    tint(host, "").click()
+    await tint(host, "none")
     await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.tint)).toBe(false))
     expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper")
   })

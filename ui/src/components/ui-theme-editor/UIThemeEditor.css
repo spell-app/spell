@@ -6,7 +6,7 @@
  *   stacked when the element is narrow (a container query on the host, so it fits a side panel as well as a page).
  * - `.side`:  the actions, the Basics, the token tree, the changes;  the Basics' and the tree's heads (`.side-head`)
  *   stick at the column's top as it scrolls, on top of everything, and the section titles stack under them.
- * - `.swatches`:  the colour rows, `<ui-hue-swatches>`, which draws its own swatches.
+ * - The colour rows:  a `<ui-dropdown class="hue-dropdown">` each, its dots `HueDropdown.css`'s.
  * - `.sample`:  the sample app, once per scheme (`ui-light` / `ui-dark` on it), on the page's own background.
  * - Every colour, font and radius here is a token.
  *   With pages, the editor itself wears Fruity, and only the pages change;  without, it wears the theme it edits.
@@ -465,8 +465,6 @@
   .properties ui-item {
     white-space: nowrap;
   }
-
-  /* ### Swatches:  `<ui-hue-swatches>`, the theme menu's tint row too, draws its own */
 
   /*
    * ### The tree:  each group a panel of its own under a title band, as the docs pages' sections;

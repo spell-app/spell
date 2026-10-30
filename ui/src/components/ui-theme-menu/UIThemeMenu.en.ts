@@ -107,7 +107,8 @@ export const themeMenuVocabulary = {
     {
       name: "tints",
       description:
-        "The tint row, under the themes (`<ui-hue-swatches>`):  none first, then every colour the chosen theme takes."
+        "Tint's dropdown, under the themes (`<ui-dropdown>`):  None first, then every colour the chosen theme takes, " +
+        "each a dot and its name."
     }
   ],
   states: [
@@ -170,8 +171,8 @@ export const themeMenuVocabulary = {
       text: "My themes",
       description: "The heading of the themes the person saved, above Spell's (epic `debut` P25)."
     },
-    { key: "tintName", text: "Tint", description: "The tint row's heading and accessible name." },
-    { key: "noTint", text: "No tint:  the theme as it is", description: "The tint row's first swatch." },
+    { key: "tintName", text: "Tint", description: "Tint's heading, and its dropdown's accessible name." },
+    { key: "noTint", text: "None", description: "Tint's first option:  the theme as it is." },
     { key: "red", text: "Red", description: "A tint's name:  the colour's." },
     { key: "orange", text: "Orange", description: "A tint's name:  the colour's." },
     { key: "yellow", text: "Yellow", description: "A tint's name:  the colour's." },

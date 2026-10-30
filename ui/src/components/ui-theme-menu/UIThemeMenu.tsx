@@ -6,6 +6,7 @@ import { E, UI, UIT } from "spell/ui/core"
 import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
+import { HueDropdown } from "./HueDropdown"
 // Import directly:  My themes, without the editor
 import { SavedTheme, type MyTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
@@ -77,7 +78,7 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
 export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   @E.proto static vocabulary = themeMenuVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "theme-menu": themeMenuCSS },
+    styleSheets: { "theme-menu": themeMenuCSS, "hue-dropdown": HueDropdown.css },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -363,6 +364,9 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         >
           <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
         </div>
+        <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
+          <div class={DIVIDER_CLASS} role="separator" />
+        </Show>
         {this.tints()}
         <Show when={this.benchAddress}>
           <div class={DIVIDER_CLASS} role="separator" />
@@ -384,28 +388,29 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   }
 
   /**
-   * The tint row (epic `debut` P23):  `<ui-hue-swatches>`, none first, then each colour the theme chosen takes
-   * (`ThemePreference.tintsFor()`), by its own name;  fourteen wrap to two rows where it's narrow.
-   * - Arrow keys move along it and pick, as the theme editor's colour rows.
+   * Tint (epic `debut` P23):  a header, as the themes' "Theme", over ONE dropdown of the colours the theme chosen
+   * takes (`ThemePreference.tintsFor()`), each a dot and its name, None first (`HueDropdown`).
+   * - Owen (epic `debut` I94):  "Should have section header `Tint` like `Theme`.  Single dropdown menu with colors
+   *   inside options.  (/) is 'None'."  Until then, a row of round swatches (`<ui-hue-swatches>`).
+   * - One of My themes:  its colours are its own, no Tint.
    */
   private tints(): JSX.Element {
-    // one of My themes:  its colours are its own, no row
+    const tints = () => ThemePreference.tintsFor(this.chosenTheme)
     return (
-      <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
-        <ui-hue-swatches
-          part={this.partForName("tints")}
-          class={TINTS_CLASS}
-          wrap=""
-          value={this.chosen.tint ?? ""}
-          hues={ThemePreference.tintsFor(this.chosenTheme).join(" ")}
-          none-label={this.translationForKey("noTint")}
-          aria-label={this.translationForKey("tintName")}
-          title={this.translationForKey("tintName")}
-          on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
-            event.stopPropagation()
-            void this.chooseTint(event.detail.value as UIT.ThemeHue | undefined, event)
-          }}
-        />
+      <Show when={tints().length}>
+        <div class={HEADING_CLASS}>{this.translationForKey("tintName")}</div>
+        <div class={TINTS_CLASS}>
+          {HueDropdown.draw({
+            part: this.partForName("tints"),
+            size: TINT_SIZE,
+            value: () => this.chosen.tint,
+            hues: tints,
+            nameFor: (hue) => this.translationForKey(hue),
+            noneLabel: () => this.translationForKey("noTint"),
+            label: () => this.translationForKey("tintName"),
+            onPick: (tint, event) => void this.chooseTint(tint, event)
+          })}
+        </div>
       </Show>
     )
   }
@@ -604,17 +609,18 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    * and focus the chosen theme once it shows (`toggle`), its tab stop reset to it.
    */
   private wireOverlay(popup: HTMLElement): void {
+    // the overlay's own, never a dropdown's inside it (Tint's) bubbling up
     popup.addEventListener("ui-opening", (event) => {
-      if (event.defaultPrevented) return
+      if (event.defaultPrevented || event.target !== popup) return
       this.isOpen = true
       // a theme saved in the editor since:  listed as it opens
       this.myThemes = SavedTheme.list
     })
     popup.addEventListener("ui-closing", (event) => {
-      if (!event.defaultPrevented) this.isOpen = false
+      if (!event.defaultPrevented && event.target === popup) this.isOpen = false
     })
     popup.addEventListener("toggle", (event) => {
-      if ((event as ToggleEvent).newState === "open") this.focusChosen()
+      if ((event as ToggleEvent).newState === "open" && event.target === popup) this.focusChosen()
     })
   }
 
@@ -686,10 +692,13 @@ const BENCH_ICON = "external alternate"
 /** Class word of the overlay's Theme bench row. */
 const BENCH_CLASS = "bench"
 
-/** The tint row's class word, in the panel. */
+/** The class word of the box round the Tint dropdown, in the panel and the theme dropdown's header. */
 const TINTS_CLASS = "tints"
 
-/** The box round the tint row in the dropdown's header. */
+/** `size` of the Tint dropdown:  the panel's small rows. */
+const TINT_SIZE = "small" as const
+
+/** The box round Tint in the theme dropdown's header. */
 const TINTS_HEADER_CLASS = "tints-header"
 
 /** Icon marking the chosen theme in the overlay's list (`fomantic` pack). */

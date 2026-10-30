@@ -8,6 +8,8 @@ import { E, UI, UIT } from "spell/ui/core"
 import { ThemeFile } from "spell/ui/styles/ThemeFile"
 import type { ThemeData } from "spell/ui/styles/styles.types"
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
+// Import directly:  the theme menu's barrel would define the menu
+import { HueDropdown } from "spell/ui/components/ui-theme-menu/HueDropdown"
 import { BenchAddress, type BenchView } from "./BenchAddress"
 import { PageBridge } from "./PageBridge"
 import { SavedTheme, type MyTheme } from "./SavedTheme"
@@ -117,7 +119,7 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
 export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   @E.proto static vocabulary = themeEditorVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "theme-editor": themeEditorCSS },
+    styleSheets: { "theme-editor": themeEditorCSS, "hue-dropdown": HueDropdown.css },
     DOMElement: DOMThemeEditorElement,
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -2000,8 +2002,10 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   ////////////////
 
   /**
-   * A colour choice:  a row of swatches (`<ui-hue-swatches>`, the theme menu's tint row too), the theme's own first,
-   * its colour shown and said.
+   * A colour choice:  ONE dropdown of Spell UI's colours, each a dot and its name, the theme's own first,
+   * its colour shown and its hex said (`HueDropdown`, the theme menu's Tint too).
+   * - A row of round swatches until epic `debut` I94 (`<ui-hue-swatches>`);  now a dropdown, as the font rows'
+   *   selects beside it.
    */
   private hueProperty(key: HueKey): JSX.Element {
     const t = this.text
@@ -2012,25 +2016,18 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         .map((color) => color.hex)
         .join(" / ")
     return (
-      <ui-property
-        name={key}
-        label={t(key)}
-        description={t(`${key}Tip`)}
-        output={chosen() ? t(chosen()!) : this.ownLabel(ownText())}
-      >
-        <ui-hue-swatches
-          class="swatches"
-          value={chosen() ?? ""}
-          aria-label={t(key)}
-          none-label={this.ownLabel(ownText())}
-          none-colors={own()
-            .map((color) => color.hex)
-            .join(" ")}
-          on-ui-changed={(event: CustomEvent<{ value: string | undefined }>) => {
-            event.stopPropagation()
-            this.choose({ [key]: event.detail.value as UIT.ThemeHue | undefined })
-          }}
-        />
+      // no `output`:  the dropdown says the choice, as the font rows' selects do
+      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)}>
+        {HueDropdown.draw({
+          size: HUE_SIZE,
+          value: chosen,
+          hues: () => UIT.ThemeHues,
+          nameFor: (hue) => t(hue),
+          noneLabel: () => this.ownLabel(ownText()),
+          noneColors: () => own().map((color) => color.hex),
+          label: () => t(key),
+          onPick: (hue) => this.choose({ [key]: hue })
+        })}
       </ui-property>
     )
   }
@@ -2541,7 +2538,7 @@ export interface UIThemeEditor extends E.AttributeValues<ThemeEditorVocabulary> 
 /** A scheme a page or a token can show. */
 type Scheme = "light" | "dark"
 
-/** The choices drawn as swatches. */
+/** The colour choices, each a dropdown of colours (`HueDropdown`). */
 type HueKey = "primary" | "secondary" | "background"
 
 /** The choices drawn as font selects. */
@@ -2699,7 +2696,7 @@ const POINTER_ALONE = /^\{([\w.-]+)\}$/
 /** A `var()` alone:  its token. */
 const VAR_ALONE = /^var\((--[\w-]+)\)$/
 
-/** The token each colour choice sets:  what its "Theme's own" swatch shows. */
+/** The token each colour choice sets:  what its "Theme's own" option shows. */
 const ROLE_TOKENS: Readonly<Record<HueKey, string>> = {
   primary: "--ui-primary",
   secondary: "--ui-secondary",
@@ -2742,8 +2739,11 @@ const FULL = 100
 /** The picker's colour while a value can't be painted. */
 const FALLBACK_HEX = "#000000"
 
-/** The value of the base's-own choice, in a swatch row or a font select;  never stored. */
+/** The value of the base's-own choice, in a font select;  never stored. */
 const OWN = "own"
+
+/** `size` of a colour row's dropdown:  the font rows' selects' size. */
+const HUE_SIZE = "small" as const
 
 /** The text size token, read from the base's file. */
 const TEXT_SIZE_TOKEN = "--ui-font-size"

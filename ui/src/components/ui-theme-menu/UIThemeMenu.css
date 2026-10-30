@@ -12,14 +12,15 @@
  *       - a `.divider`, then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
  *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
- *       - `<ui-hue-swatches class="tints" part="tints">`:  the tint row, none first (epic `debut` P23)
+ *       - a `.divider`, then Tint:  a `.heading` over `.tints`, ONE `<ui-dropdown class="hue-dropdown" part="tints">`
+ *         of the colours, each a dot and its name, None first (epic `debut` P23, I94;  its dots:  `HueDropdown.css`)
  *       - a `.divider`, then `<a class="bench" part="bench">` (Theme bench), unless `bench="none"`
  *       - the `end` slot's rows, the page's own
  *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
  *     Then its tooltip
- *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own, its menu's header the
- *     tint row (`.tints-header`)
+ *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own, its menu's header Tint
+ *     (`.tints-header`:  its heading and dropdown)
  *   - `menu`:  the overlay's `.panel` alone, drawn in place in a host's menu (`:state(menu)`):
  *     no box of its own (the host's menu gives it), the rows in the host's text size
  * - Colours are foundation tokens (`--ui-surface`, `--ui-primary` ...), so every theme restyles it,
@@ -68,14 +69,17 @@
 }
 
 @layer ui.components.theme-menu.content {
-  /* the tint row, under the themes:  a little in from the panel's edge, as the rows are */
+  /* Tint's dropdown, under its heading:  as far in as the theme rows' names */
   .panel > .tints {
-    margin: 6px 10px 4px;
+    margin: 0 0.5em 0.25em;
   }
 
   /* ... and in the theme dropdown's menu, at its top */
   .tints-header {
-    padding: 6px 12px 4px;
+    padding: 0.25em 0.75em 0.5em;
+  }
+  .tints-header > .heading {
+    padding-inline: 0;
   }
 
   /* The dropdown takes what's left on a narrow row. */
