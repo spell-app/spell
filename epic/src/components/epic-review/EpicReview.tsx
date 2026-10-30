@@ -206,10 +206,10 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
               : undefined
           }
         >
-          {/* accepted:  its thumbs up FIRST, then Revisit, then Do this -- each in the slot a waiting plan's Accept, Revisit and
-              Defer take, so the buttons line up row to row (Owen, 2026-10-26:  "checkmark on the wrong side") */}
+          {/* accepted:  its thumbs up FIRST, then Revisit -- in the slots a waiting plan's Accept and Revisit take, so the
+              buttons line up row to row (Owen, 2026-10-26:  "checkmark on the wrong side");  no Do this (I184) */}
           <Show when={this.buttons === "accepted"}>{this.acceptedCheck()}</Show>
-          <For each={this.buttons === "accepted" ? [...group()].reverse() : group()}>{(spec) => this.button(spec)}</For>
+          <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
       </span>
     )
