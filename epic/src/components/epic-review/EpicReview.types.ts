@@ -44,7 +44,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `update`:  a new update block's (`<epic-update id="up3">`, epic `epic-engine` I168):  Seen (`UPDATE_BUTTONS`);
  *   no note box
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
- *   I140):  a phase's buttons, then the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
+ *   I140):  the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`), then Revisit (`ACCEPTED_BUTTONS`)
  */
 export const REVIEW_KINDS = [
   "item",
@@ -175,6 +175,13 @@ export const PHASE_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
+ * A to-do phase whose plan Owen accepted (`buttons="accepted"`):  Revisit alone, after its green thumbs up
+ * (`ACCEPTED_CHECK`).
+ * - no Do this:  the accepted plan IS the go-ahead (epic `epic-engine` I184;  Owen, 2026-10-29:  "two thumbs up?")
+ */
+export const ACCEPTED_BUTTONS: readonly ReviewButtonSpec[] = PHASE_BUTTONS.filter((spec) => spec.action !== "todo")
+
+/**
  * An open phase's review buttons while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
  * P29;  Owen, 2026-10-24:  "when in 'approval' mode like this, these buttons were 'looks good' and 'defer'"):
  * - Looks good (`approve`, green:  decided):  the phase stands as written;  `inbox apply` notes it
@@ -232,7 +239,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   change: CHANGE_BUTTONS,
   update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
-  accepted: PHASE_BUTTONS
+  accepted: ACCEPTED_BUTTONS
 }
 
 /**

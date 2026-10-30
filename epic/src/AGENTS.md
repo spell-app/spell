@@ -458,7 +458,7 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
           `epic-friend` P1)
         - and the SHARED repo, the content repo's remote (epic `epic-friend` P4, Q1):  the first person's makes it
-          on GitHub (`GitHub`), private, named as asked (`<repo>-epics`;  `--content-repo`), pushes, and writes its
+          on GitHub (`GitHub`), private, named as asked (`<repo>.epics`;  `--content-repo`), pushes, and writes its
           address in the config (`contentRemote`);  a later person's clones it where the content folder is missing
           (`Shared.clone()`, plain git);  `--remote <address>`, `--no-remote`;  without `gh`, or logged out, it
           says how to get it and does the rest
@@ -469,10 +469,18 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
           at once, `shareNow()`), last the epic server, serving the repo, its address the last line (`serverStep()`,
           `Hub.addressOf()`;  `--no-server`);  each a failure of one line, init carrying on;  `init()` takes them as
           `plugin`, `server` (off unless asked:  only `run()` asks) and `color`, a test hands in stand-ins
-        - its words (Owen, 2026-10-29):  "Initializing Epic for repo <main>" first and "Epics initialized!" last, in
-          colour (`chalk`);  the settings it wrote stay in the file, not printed;  and it COMMITS the two files it wrote
-          (`commitStep()`:  the config and `.gitignore`, only those, on the base branch, asking first in a terminal,
-          yes suggested;  on another branch it says so and commits nothing;  `--no-commit`)
+        - its words (Owen, 2026-10-29:  "Use color to distinguish fields and values"):  `run()` asks EVERY question
+          first (`questions()`:  name, colour, and the shared repo's name and private or public only when
+          `willMakeRepo()`;  a teammate joining has the plans cloned before the colour question, so the taken ones are
+          known), sums up the answers (`summaryLines()`, `> Your name  :  <bold>`, the colour in its colour), then
+          prints each section as it goes:  the plugin, the files (a gray table, `fileLines()`), notes (problems,
+          `noteLines()`), the commit, and the end (`doneLines()`:  "Epics initialized!", the server's address as a
+          terminal link, how to open them in the editor `Editor` names);  a gray progress line before each slow step
+          (`init()`'s `say`:  a clone, GitHub, the colour's push, the commit's push, the server);  `lines(report)` is
+          every section at once, pure, for the tests;  the settings it wrote stay in the file, not printed
+        - it COMMITS the two files it wrote and PUSHES them (`commitStep()`:  the config and `.gitignore`, only those,
+          on the base branch, asking first in a terminal, `y` suggested;  pushed to the branch's upstream, else
+          `origin`, else nowhere, `pushTarget()`;  on another branch it says so and commits nothing;  `--no-commit`)
       - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
         what the content folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)
@@ -1815,8 +1823,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  Do this, Revisit, then a green
-      thumbs up, drawn as a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing
+    - still to do, its plan accepted (`plan="accepted"`, epic `epic-engine` I140):  a green thumbs up, drawn as
+      a chosen Approve (`buttons="accepted"`):  a STATE, ready to build;  a click does nothing;  then Revisit, and no Do
+      this:  the accepted plan is the go-ahead (I184;  Owen, 2026-10-29:  "two thumbs up?")
     - else Do this, Revisit (`buttons="phase"`):  no Approve
       - Do this, the thumbs up, was Make Todo until I181 (Owen:  "it's already a phase, you wouldn't make it a todo"):
         the same `todo` mark, which `inbox apply` takes on a phase as a GO-AHEAD (a Noted "Go ahead" card, his note

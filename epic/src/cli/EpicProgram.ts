@@ -1077,7 +1077,7 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
   ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
   the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
-                       (<repo>-epics) and "Private or public?" (private), makes it, pushes, and writes its
+                       (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
                        address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
                        it, says how to get it
   the links            each of those folders linked in at the checkout's root
@@ -1103,8 +1103,8 @@ Examples:
   npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
   epic init --name Ana --color green
-  epic init --content-repo my-app-epics
-  epic init --remote git@github.com:my-team/my-app-epics.git
+  epic init --content-repo my-app.epics
+  epic init --remote git@github.com:my-team/my-app.epics.git
   epic init`
 
 const WHOAMI_HELP = `
