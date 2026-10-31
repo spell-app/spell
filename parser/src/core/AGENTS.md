@@ -297,6 +297,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
     - Plain data, one object per page:  so `everyone here` is one list for the program's life, and two windows of one person are two.
     - With no sign-in, who someone says they are:  `personOnThisPage()`.
+    - A place where each person is someone (`Place.signIn`, an atmosphere account;  epic `data` P16) is made as the program starts:
+      whoever's signed in is `core.currentPerson()`, the same object, its `name` and `id` read through a cell, so what shows them follows.
+      [signInBar.ts](signInBar.ts), `showSignIn()`:  who's signed in, and the way in and out, with no line of the program's;  and when it's ended, that it has.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

@@ -32,6 +32,7 @@ describe("priority and precedence", () => {
     }
     expect([...seen.keys()].sort().map((name) => seen.get(name))).toMatchInlineSnapshot(`
       [
+        "account_included:  Priority.declaration",
         "action_detail:  Priority.declaration",
         "add_new_thing:  Priority.overridable",
         "and:  Precedence.and",

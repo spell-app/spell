@@ -932,6 +932,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "checked_every",
       "versions_in",
       "id_column",
+      "account_included",
       "operation_at",
       "saved_in_place",
       "saved_in_place",
@@ -998,6 +999,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
   "rules": [
     "a_things_property · classes · 1",
     "absolute_value · math · 1",
+    "account_included · places · 1",
     "action_detail · methods · 6",
     "add_new_thing · lists · 1",
     "alert · UI · 1",

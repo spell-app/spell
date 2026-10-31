@@ -11,6 +11,7 @@ export type PlaceDetailValue = {
   checkedEvery?: number
   versionsIn?: string
   idColumn?: string
+  accounts?: string[]
 }
 
 /**

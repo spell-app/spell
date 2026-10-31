@@ -22,7 +22,7 @@
  * - The entry lives in the epic repo, which has no `node_modules`:
  *   `spell/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `spell-ui` workspace Node's resolver
  *   finds from here), so the script is built from the checkout that runs this.
- * - It may import the kit's `spell/util/...`, bundled from this checkout's source too (epic `data` P4):
+ * - It may import the kit's `spell/util/...` and `spell/server/test/...`, bundled from this checkout's source too (epic `data` P4):
  *   by its plain name, from the epic repo, it would find the MAIN checkout's, however old that is.
  * - A shared module is read from `SpellUI.packModules` by its import name as written (`spell/ui/core`):
  *   the names the docs bundle offers (`spell-ui.entry.js`;  epic `repo-split` P14).
@@ -77,7 +77,7 @@ async function bundle(entry: string, out: string) {
     resolve: {
       ...base.resolve,
       alias: [
-        { find: /^spell\/util(?=\/|$)/, replacement: join(UI_DIR, "..", "src", "util") },
+        { find: /^spell\/(util|server\/test)(?=\/|$)/, replacement: `${join(UI_DIR, "..", "src")}/$1` },
         {
           find: /^spell\/ui\/(?=docs-components|components\/components\.types)/,
           replacement: `${join(UI_DIR, "src")}/`

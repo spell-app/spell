@@ -15,6 +15,7 @@ import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV, type Handler } from "spell/server"
+import { FakeAtmosphere } from "spell/server/test/fakeAtmosphere"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -242,6 +243,184 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
       }
     )
   }
+
+  describe("on a real browser's atmosphere account, against a fake network", () => {
+    const NSID = "com.example.recipe"
+    const ALICE = "did:plc:alice"
+    const BOB = "did:plc:bob"
+    let network: FakeAtmosphere
+
+    beforeAll(async () => {
+      network = await new FakeAtmosphere().start(["one", "two"])
+      network.addAccount(ALICE, { handle: "alice.test", host: "one" })
+      network.addAccount(BOB, { handle: "bob.test", host: "two" })
+      for (const [index, title] of ["Tomato soup", "Dal", "Tacos", "Margherita"].entries()) {
+        network.putRecord(ALICE, NSID, `a-${index}`, { title, servings: 2 })
+      }
+      network.putRecord(BOB, NSID, "b-1", { title: "Bob's stew", servings: 4 })
+    })
+
+    afterAll(() => network.close())
+
+    /** A page of `program`, signed in as Alice. */
+    function atmospherePage(name: string, program: Program): string {
+      const url = serve(name, program)
+      const script = `<script>${network.pageScript(ALICE)}</script>`
+      programs.set(`/${name}.html`, pageFor(name).replace("<script", `${script}<script`))
+      return url
+    }
+
+    /** Every title held, in anyone's account. */
+    const heldByEveryone = async () =>
+      [ALICE, BOB].flatMap((did) =>
+        [...network.recordsOf(did, NSID).values()].map(({ value }) => `${value.title as string}`)
+      )
+
+    const LINES = `family cookbook is a personal atmosphere account:
+	- recipes live at "${NSID}"`
+
+    test(
+      "English:  only its first lines change, everyone's put together, and it says who's signed in",
+      { timeout: 60_000 },
+      async () => {
+        const { page, problems } = await opened(atmospherePage("atmosphere", withPlace(english(), LINES)))
+        await roundTrip(page, heldByEveryone)
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Bob's stew")
+
+        // who's signed in shows, with a way out
+        const bar = page.locator("ui-message.spell-sign-in")
+        await expect.poll(() => bar.textContent(), WAITING).toContain("Signed in to family cookbook as alice.test")
+        expect(await bar.locator("ui-button").textContent()).toBe("Sign out")
+
+        // someone else's change arrives by itself:  this program has no polling
+        network.putRecord(BOB, NSID, "b-2", { title: "Bob's pie", servings: 8 })
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Bob's pie")
+
+        // changing someone else's is refused, and goes back
+        const bobs = page
+          .locator("ui-form.recipe")
+          .filter({ has: page.locator("input") })
+          .nth((await titlesOn(page)).indexOf("Bob's pie"))
+        await bobs.locator("ui-button.remove").click()
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Bob's pie")
+        expect([...network.recordsOf(BOB, NSID).keys()]).toContain("b-2")
+
+        // signing out says so, with a way back
+        await bar.locator("ui-button").click()
+        await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
+        await bar.locator("input").waitFor(WAITING)
+        // a refused change raises a notice, and a bare <spell-viewer> page has no toasts to show one (epic `data`'s I item)
+        expect(problems.filter((problem) => !/ui-toast not registered/.test(problem))).toEqual([])
+        await page.close()
+      }
+    )
+
+    test("Spanish:  the same", { timeout: 60_000 }, async () => {
+      const lines = `recetario familiar es una cuenta personal de atmosphere:
+	- las recetas están en "com.example.receta"`
+      network.putRecord(ALICE, "com.example.receta", "a-1", { título: "Sopa de tomate", raciones: 2 })
+      const { page } = await opened(atmospherePage("atmosphere-es", withPlace(spanish(), lines)))
+      await expect.poll(() => titlesOn(page), WAITING).toContain("Sopa de tomate")
+      const bar = page.locator("ui-message.spell-sign-in")
+      // the words are the words file's, which a page like this has none of;  the core's own test has them
+      await expect.poll(() => bar.textContent(), WAITING).toContain("recetario familiar")
+      await page.close()
+    })
+
+    test("them, their name, everyone here:  whoever's signed in", { timeout: 60_000 }, async () => {
+      const source = `${LINES}
+
+a "recipe" is a thing:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- its "cook" is text
+
+box is an app:
+	- its "mine" is every recipe where its cook is them
+	- to go:
+		add (a new recipe with title = "From the program", cook = their name) to the recipes
+	- to draw it:
+		<ui-text class="who">{their name}</ui-text>
+		<ui-button class="go" onClick={go}>Go</ui-button>
+		for each recipe in the mine
+			<ui-text class="mine">{the title of the recipe}</ui-text>
+		for each person in everyone here
+			<ui-text class="here">{the name of the person}</ui-text>
+
+start the box
+`
+      const { page, problems } = await opened(
+        atmospherePage("atmosphere-them", { path: "/Them.spell", source, field: "title" })
+      )
+      await expect.poll(() => page.locator("ui-text.who").textContent(), WAITING).toBe("alice.test")
+      await page.locator("ui-button.go").click()
+      await expect.poll(() => page.locator("ui-text.mine").allTextContents(), WAITING).toEqual(["From the program"])
+      await expect.poll(heldByEveryone, WAITING).toContain("From the program")
+      const here = () => page.locator("ui-text.here").allTextContents()
+      await expect.poll(here, WAITING).toEqual(expect.arrayContaining(["alice.test", "bob.test"]))
+      expect(problems).toEqual([])
+      await page.close()
+    })
+
+    test(
+      "a version line:  an old record reads under its new name, and stays as it was",
+      { timeout: 60_000 },
+      async () => {
+        const old = "com.example.oldrecipe"
+        network.putRecord(ALICE, old, "o-1", { name: "An old one" })
+        const source = `family cookbook is a personal atmosphere account:
+	- recipes live at "${old}"
+
+a "recipe" is a thing:
+	- it is saved in the family cookbook
+	- its "title" is text
+
+a recipe version 2 renames name to title
+
+box is an app:
+	- to draw it:
+		for each recipe in the recipes
+			<ui-text class="old">{the title of the recipe}</ui-text>
+
+start the box
+`
+        const { page } = await opened(
+          atmospherePage("atmosphere-version", { path: "/Old.spell", source, field: "title" })
+        )
+        await expect.poll(() => page.locator("ui-text.old").allTextContents(), WAITING).toEqual(["An old one"])
+        expect(network.recordsOf(ALICE, old).get("o-1")?.value).toEqual({ name: "An old one" })
+        await page.close()
+      }
+    )
+
+    test(
+      "signed out, and a place you can't reach:  it reads, offers to sign in, and loads no sign-in library",
+      { timeout: 60_000 },
+      async () => {
+        const url = serve("atmosphere-out", withPlace(english(), LINES))
+        const settings = JSON.stringify(network.network)
+        programs.set(
+          "/atmosphere-out.html",
+          pageFor("atmosphere-out").replace("<script", `<script>window.SPELL_ATMOSPHERE = ${settings}</script><script`)
+        )
+        const page = await browser.newPage()
+        const scripts: Promise<string>[] = []
+        page.on("response", (response) => {
+          if (response.url().endsWith(".js")) scripts.push(response.text().catch(() => ""))
+        })
+        await page.goto(url)
+        await expect.poll(() => titlesOn(page), WAITING).toContain("Bob's stew")
+        const bar = page.locator("ui-message.spell-sign-in")
+        await expect.poll(() => bar.textContent(), WAITING).toContain("You aren't signed in")
+        await bar.locator("input").waitFor(WAITING)
+        // what's only in the sign-in library, and it's a chunk of its own, so a page that only reads never asks for it
+        expect(
+          (await Promise.all(scripts)).filter((text) => text.includes("require_pushed_authorization_requests"))
+        ).toEqual([])
+        await page.close()
+      }
+    )
+  })
 
   test("the place server still refuses another site, and what isn't a page without its token", async () => {
     const asked = (headers: Record<string, string>) =>

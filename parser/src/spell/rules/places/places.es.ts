@@ -8,6 +8,7 @@ import { SpellParser } from "spell/parser/spell/SpellParser"
 import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
 import { DiscardDraft } from "./DiscardDraft"
+import { AccountIncluded } from "./AccountIncluded"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -119,6 +120,7 @@ placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" 
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} (segundo|segundos)?" })
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
+placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
 placesEs.addRule(SavedInPlace, { syntax: "{type:subject_it} (se guarda|vive) en {place:expression}" })

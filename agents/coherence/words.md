@@ -221,7 +221,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
   `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
-  `database on this device`, `in memory database`;  coming:  `airtable`, `atmosphere account`, `personal atmosphere account`.
+  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`;  coming:  `airtable`.
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
   - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.

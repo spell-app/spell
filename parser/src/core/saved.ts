@@ -23,6 +23,8 @@
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
+ * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:  who's signed in there
+ *   is who's at this page, and `showSignIn()` shows who, and offers to sign in and out.
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -46,6 +48,7 @@ import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
+import { showSignIn } from "./signInBar"
 import { standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -84,10 +87,18 @@ export type ReadRiders = {
 const ID_FIELD = "id"
 
 /** The kinds whose mapping says where a collection is, while it keeps its own name for the engine. */
-const KEEP_THEIR_OWN_NAME = new Set(["web server", "graphql server"])
+const KEEP_THEIR_OWN_NAME = new Set([
+  "web server",
+  "graphql server",
+  "atmosphere account",
+  "personal atmosphere account"
+])
 
-/** The kind of place that knows who's here, among those spell knows by itself. */
-const LIVE_ROOM = "room"
+/** The kinds of place that know who's here, among those spell knows by itself. */
+const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
+
+/** The kinds of place where each person is someone, so they sign in:  made as the program starts, to know who's at the page. */
+const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account"])
 
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000
@@ -145,6 +156,39 @@ class ProgramPlaces {
     this.places = new folder.Places({ ...(keepPendingAs !== undefined && { keepPendingAs }) })
     this.things = new PlaceThings({ places: this.places, classNamed: (name) => this.classNamed(name) })
     this.places.onRows((change) => this.rowsChanged(change))
+    for (const [name, { details }] of this.declared) {
+      if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
+      const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
+      if (!this.places.placeFor(name)) this.places.add(name, behind)
+      this.startSignIn(name, behind)
+    }
+  }
+
+  /** The places whose sign-in's being shown. */
+  private readonly signingIn = new Set<PlaceBehind>()
+
+  /** SIDE EFFECT:  `behind`'s sign-in shows, and whoever signs in there is who's at this page. */
+  private startSignIn(name: string, behind: PlaceBehind): void {
+    if (!behind.signIn || this.signingIn.has(behind)) return
+    this.signingIn.add(behind)
+    showSignIn(name, behind)
+    const adopt = () => {
+      const person = behind.currentPerson?.()
+      if (person) this.adoptPerson(person)
+    }
+    behind.onPeopleHere?.(adopt)
+    adopt()
+  }
+
+  /** The place says this is who's at this page:  the same object, so what read it reads again. */
+  private adoptPerson({ id, name, page }: PersonHere): void {
+    if (id === this.personNow.id && name === this.personNow.name && page === this.person.page) return
+    const wasSomeoneElse = id !== this.personNow.id
+    this.personNow = { id, name }
+    this.person.page = page
+    this.personChanged.changed()
+    // `recipes where its cook is them` means someone else's now
+    if (wasSomeoneElse) void this.refresh()
   }
 
   /** The class called `name`:  the program's own, by what's been read or saved, else what the program knows. */
@@ -187,14 +231,32 @@ class ProgramPlaces {
       behind = details.kind ? placeBehind(making) : (thing.makePlace(details, this.folder) as PlaceBehind)
       this.places!.add(name, behind)
     } else if (details.kind) knowCollection(behind, making)
+    this.startSignIn(name, behind)
     return { name, collection, behind }
   }
 
-  /** Who's at this page:  the same object as long as the program runs. */
-  readonly person: PersonHere = inProgramWords({
-    ...personOnThisPage((number) => core.message("guest-person", { number })),
-    page: ""
-  })
+  /** Who's at this page's name and id, which change when they sign in. */
+  private personNow = personOnThisPage((number) => core.message("guest-person", { number }))
+  /** What reads `person` follows. */
+  private readonly personChanged = new Cell()
+
+  /** Who's at this page:  the same object as long as the program runs, so what read their name reads it again when they sign in. */
+  readonly person: PersonHere = this.followedPerson()
+
+  /** See `person`. */
+  private followedPerson(): PersonHere {
+    const followed = (read: () => string) => ({
+      enumerable: true,
+      get: () => {
+        this.personChanged.read()
+        return read()
+      }
+    })
+    const name = followed(() => this.personNow.name)
+    const words = Object.fromEntries(WORDS_FOR_NAME.map((word) => [word, name]))
+    const person = { page: "" } as PersonHere
+    return Object.defineProperties(person, { id: followed(() => this.personNow.id), name, ...words })
+  }
 
   /** Everyone here, this page included:  ONE list, for as long as the program runs. */
   get peopleHere(): List {
@@ -216,11 +278,12 @@ class ProgramPlaces {
   /** Follow who's here in the first place that says, made if it's yet to be read. */
   private followPeople(): void {
     for (const [name, { thing, details }] of this.declared) {
-      const makes = details.kind === LIVE_ROOM || !details.kind
+      const makes = KINDS_WITH_PEOPLE.has(details.kind ?? "") || !details.kind
       const made = this.places!.placeFor(name)
       if (!made && !makes) continue
       const behind =
-        made ?? (details.kind ? this.roomFor(details) : (thing.makePlace(details, this.folder) as PlaceBehind))
+        made ??
+        (details.kind ? this.placeNeedingNoClass(details) : (thing.makePlace(details, this.folder) as PlaceBehind))
       if (!made) this.places!.add(name, behind)
       if (!behind.onPeopleHere || !behind.currentPerson) continue
       const { page } = behind.currentPerson()
@@ -232,16 +295,18 @@ class ProgramPlaces {
     }
   }
 
-  /** The room `details` says, with no class read from it yet:  it needs none. */
-  private roomFor(details: PlaceDetails): PlaceBehind {
+  /** The place `details` says, with no class read from it yet:  a room or an atmosphere account needs none. */
+  private placeNeedingNoClass(details: PlaceDetails): PlaceBehind {
     return placeBehind({ details, folder: this.folder!, collection: "", Class: Object, person: this.person })
   }
 
   /** The list says `people` now, as a read does:  nobody's write. */
   private showPeople(people: readonly PersonHere[]): void {
     const items = people.map((person) => {
+      const kept = this.knownPeople.get(person.page)
+      // one that's still here stays the same object, until what it says changes:  a handle found, say
       const known =
-        this.knownPeople.get(person.page) ?? (person.page === this.person.page ? this.person : inProgramWords(person))
+        person.page === this.person.page ? this.person : kept?.name === person.name ? kept : inProgramWords(person)
       if (person.page) this.knownPeople.set(person.page, known)
       return known
     })

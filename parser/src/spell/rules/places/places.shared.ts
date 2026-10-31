@@ -16,6 +16,7 @@ import { fieldNamed, textIn } from "./PlaceDetail"
  *   - `hasOtherPeople`:  `false`, only you ever change what's in it:  `when someone else changes it` warns.
  *   - `knowsWhoIsHere`:  `everyone here` can list more than you.
  *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
+ *   - `hasNoReferee`:  each person has their own, and can change only that:  what the line warns of.
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
 export const PLACE_KIND_ABILITIES: Readonly<
@@ -28,6 +29,7 @@ export const PLACE_KIND_ABILITIES: Readonly<
       hasOtherPeople?: boolean
       knowsWhoIsHere?: boolean
       takesOperations?: boolean
+      hasNoReferee?: boolean
     }
   >
 > = {
@@ -38,6 +40,8 @@ export const PLACE_KIND_ABILITIES: Readonly<
   room: { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },
   "google sheet": { isReadOnly: true, isAtomic: true },
+  "atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
+  "personal atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
   "database on this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },
   "in memory database": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false }
 }

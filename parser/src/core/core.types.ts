@@ -175,6 +175,13 @@ export type TestCheck = {
  * | `write-restore` | `write-deleted`'s button | |
  * | `write-changed-under-draft` | the notice when someone else changed what a draft is a copy of | `thing` |
  * | `guest-person` | what someone with no name is called | `number` |
+ * | `sign-in-signed-out` | what shows, with nobody signed in to a place where each person is someone | `place` |
+ * | `sign-in-signing` | what shows while they sign in | `place` |
+ * | `sign-in-as` | what shows with someone signed in | `place`, `name` |
+ * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
+ * | `sign-in-failed` | what shows when signing in didn't work | `why` |
+ * | `sign-in-who` | the field for who they are | |
+ * | `sign-in`, `sign-out` | its buttons | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -207,7 +214,17 @@ export const CORE_MESSAGES = {
   "write-restore": "Restore",
   "write-changed-under-draft":
     "Someone else changed {thing} while you were editing it.  What you're editing doesn't show that yet.",
-  "guest-person": "Guest {number}"
+  "guest-person": "Guest {number}",
+  "sign-in-signed-out":
+    "You aren't signed in to {place}, so you can read it, and what you change waits here until you do.",
+  "sign-in-signing": "Signing in to {place}…",
+  "sign-in-as": "Signed in to {place} as {name}.",
+  "sign-in-ended":
+    "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
+  "sign-in-failed": "That didn't sign you in:  {why}",
+  "sign-in-who": "Your handle, e.g. alice.bsky.social",
+  "sign-in": "Sign in",
+  "sign-out": "Sign out"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

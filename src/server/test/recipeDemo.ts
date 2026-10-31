@@ -10,6 +10,7 @@
  *     - `/api/places/recipes`:  behind a `PlaceServer`
  *     - `/api/rooms/recipes`:  a room, whose referee keeps its recipes in that same folder
  *       - it hears the place's every change, through the place's own `watch()`, as a step of the room
+ * - `atmospherePort`:  a fake of AT Protocol's network too (`FakeAtmosphere`, epic `data` P16):  two hosts, Alice's recipes on one and Bob's on the other.
  * - `routes`:  anything else, by a caller:  a test's page.
  * - Node only;  a test helper, as `recipeServers.ts` is.
  */
@@ -20,6 +21,7 @@ import { JsonChunks, type Place } from "spell/util/places"
 import { SRV } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
 
+import { FakeAtmosphere } from "./fakeAtmosphere"
 import { csvHandler, RecipeFile } from "./RecipeFile"
 import { bothHandlers, DemoGuard, FIRST_RECIPES } from "./recipeServers"
 
@@ -53,6 +55,8 @@ export type RecipeServersProps = {
   routes?: (router: SRV.Router) => void
   /** Must it have that port?  A demo says so on its page. */
   fixedPort?: boolean
+  /** Where a fake of AT Protocol's network listens, its hosts on the next two ports:  left out, it isn't started. */
+  atmospherePort?: number
 }
 
 /** What's running. */
@@ -76,8 +80,20 @@ export async function startRecipeServers({
   morePlaces,
   keys = new PlaceKeys({ names: [] }),
   routes,
-  fixedPort = false
+  fixedPort = false,
+  atmospherePort
 }: RecipeServersProps): Promise<RecipeServers> {
+  // only one back-end of the demo's:  a port in use shouldn't stop the others
+  const atmosphere =
+    atmospherePort === undefined
+      ? undefined
+      : await startAtmosphere(atmospherePort).catch((ignored) => {
+          console.error(
+            `The fake atmosphere can't start on ${atmospherePort}, so ?back-end=atmosphere won't work`,
+            ignored
+          )
+          return undefined
+        })
   const format = new JsonChunks({ summaries: { [COLLECTION]: ["title", "cuisine", "servings"] } })
   const folderPlace = new FolderPlace({ storage: new ChunkFiles({ root: folder }), format })
   if (!(await folderPlace.list(COLLECTION, {}, {})).rows.length) {
@@ -122,8 +138,32 @@ export async function startRecipeServers({
     close: () =>
       new Promise((resolve) => {
         referee.close?.()
+        void atmosphere?.close()
         server.closeAllConnections()
         server.close(() => resolve())
       })
   }
 }
+
+/** The demo's fake atmosphere:  Alice and Bob, each with some of the first recipes, on hosts of their own. */
+async function startAtmosphere(port: number): Promise<FakeAtmosphere> {
+  const atmosphere = await new FakeAtmosphere().start(["one", "two"], { port })
+  atmosphere.addAccount(ATMOSPHERE_ALICE, { handle: "alice.test", host: "one" })
+  atmosphere.addAccount(ATMOSPHERE_BOB, { handle: "bob.test", host: "two" })
+  FIRST_RECIPES.forEach(({ id, name, ...fields }, index) => {
+    atmosphere.putRecord(index % 2 ? ATMOSPHERE_BOB : ATMOSPHERE_ALICE, ATMOSPHERE_COLLECTION, id, {
+      title: name,
+      ...fields
+    })
+  })
+  return atmosphere
+}
+
+/** Alice's account, in the demo's fake atmosphere. */
+const ATMOSPHERE_ALICE = "did:plc:alice"
+
+/** Bob's. */
+const ATMOSPHERE_BOB = "did:plc:bob"
+
+/** What the demo's recipes are kept under. */
+const ATMOSPHERE_COLLECTION = "com.example.recipe"

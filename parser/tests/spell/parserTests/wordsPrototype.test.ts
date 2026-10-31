@@ -201,7 +201,7 @@ const LINES: Line[] = [
     en: 'family cookbook is an atmosphere account at "did:plc:abc123"',
     es: 'recetario familiar es una cuenta de atmosphere en "did:plc:abc123"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
     note: "`at` both starts the kind's name and follows it:  it reads, because a type's name is read longest first"
   },
@@ -211,9 +211,9 @@ const LINES: Line[] = [
     es: `recetario familiar es una cuenta personal de atmosphere:
 	- las recetas están en "com.example.recipe"`,
     at: "top",
-    today: "fails",
-    withRule: ["compiles", "fails"],
-    note: "the one that doesn't fit `is a ... at`:  its own rule, an address optional;  until AT Protocol's phase, it says it isn't here yet"
+    today: "compiles",
+    withRule: "compiles",
+    note: "the one that doesn't fit `is a ... at`:  its own rule, an address optional"
   },
   {
     en: `family cookbook is a web server at "https://api.example.com/v1":

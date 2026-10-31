@@ -75,6 +75,19 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
   "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en ..."',
+  "atmosphere-public":
+    "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
+  "atmosphere-your-own":
+    'En esta {kind} cada persona cambia solo sus propios registros:  cambiar los de otra se rechaza, y "todos los presentes" son todos los que tienen registros aquí, no quienes miran ahora',
+  "atmosphere-reads-here":
+    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda solo números enteros, sin decimales',
+  "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "atmosphere-not-a-corner":
+    '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
+  "atmosphere-not-a-collection":
+    '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
+  "version-step-no-rename-there":
+    "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
   "place-kind-later":
     'Un lugar de tipo "{kind}" aún no está:  nombra otro tipo de lugar por ahora, p. ej. "x es un servidor web en ..."',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',

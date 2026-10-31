@@ -4489,7 +4489,7 @@
           "ruleNames": ["version_step"],
           "internal": false,
           "file": "src/spell/rules/classes/VersionStep.ts",
-          "line": 19,
+          "line": 22,
           "purpose": "How a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -5865,7 +5865,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 21,
+          "line": 22,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6074,7 +6074,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 39,
+          "line": 50,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -6255,6 +6255,20 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} id is its? {column:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AccountIncluded",
+          "ruleNames": ["account_included"],
+          "internal": false,
+          "file": "src/spell/rules/places/AccountIncluded.ts",
+          "line": 10,
+          "purpose": "Whose records a shared atmosphere account puts together, one line per account.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} includes the account {account:text}"
             }
           ],
           "aliases": ["statement"]

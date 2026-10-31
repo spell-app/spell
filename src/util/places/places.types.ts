@@ -298,6 +298,31 @@ export type PersonHere = PlacePerson & {
   page: string
 }
 
+/** Every place a sign-in can stand. */
+export const SignInStatuses = ["signed out", "signing in", "signed in", "ended"] as const
+/**
+ * Where a person's sign-in stands:
+ * - `"signed out"`:  nobody is
+ * - `"signing in"`:  on the way
+ * - `"signed in"`
+ * - `"ended"`:  they were, and it ran out or was taken back:  what they changed is still kept, for when they're back
+ */
+export type SignInStatus = (typeof SignInStatuses)[number]
+
+/** A person signing in to a place, and out.  Who they are is the place's:  `Place.currentPerson()`. */
+export type PlaceSignIn = {
+  /** Where it stands. */
+  readonly status: SignInStatus
+  /** Why the last try failed, in words for people. */
+  readonly problem?: string | undefined
+  /** Sign in as `who`, in the place's own way of naming people.  May leave the page, and come back.  - throws if it can't */
+  signIn(who: string): Promise<void>
+  /** Sign out.  NEVER throws. */
+  signOut(): Promise<void>
+  /** Hear `status` changing.  Returns what stops it. */
+  onChange(listener: () => void): () => void
+}
+
 /** What to watch:  a collection, or one thing in it. */
 export type WatchTarget = {
   /** The collection. */
@@ -426,6 +451,8 @@ export type Place = {
   peopleHere?(): readonly PersonHere[]
   /** Hear `peopleHere()` changing.  Returns what stops it. */
   onPeopleHere?(listener: (people: readonly PersonHere[]) => void): () => void
+  /** How a person signs in here, for a place where each person is someone:  what shows says who, and offers it (epic `data` P16). */
+  readonly signIn?: PlaceSignIn
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */
   changesSince?(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer>
   /**

@@ -15,6 +15,8 @@
  *   - only with `GOOGLE_SHEET_ID` and `GOOGLE_SHEETS_KEY` set:  its id, and a service account's key file, as JSON;
  *     the steps are the epic page's manual test
  *   - its tab has to be called `recipes`
+ * - `http://127.0.0.1:4792`:  a fake of AT Protocol's network, its two hosts on 4793 and 4794 (epic `data` P16), for `?back-end=atmosphere`
+ * - `RECIPE_SERVERS_PORT`:  another port than 4791, the rest after it:  the demo's page then says `?servers=http://127.0.0.1:<port>`.
  * - The demo's page can start, stop and restart them, through the page server:  `recipeServersRoutes.ts`.
  *   - What it starts ends when the page server does.
  * - The demo's pages are `recipe-box.html` and `all-back-ends.html`, in `/guides/data/experiments/recipe-box/`, on the page server.
@@ -33,7 +35,7 @@ import {
   RECIPE_SERVERS_READY
 } from "spell/server/test/recipeServersRoutes"
 
-const PORT = RECIPE_SERVERS_PORT
+const PORT = Number(process.env.RECIPE_SERVERS_PORT) || RECIPE_SERVERS_PORT
 
 /** How often it looks whether what started it is still there, in ms. */
 const PARENT_CHECK_MS = 5_000
@@ -60,6 +62,7 @@ await startRecipeServers({
   csvFile,
   ...(existsSync(committedCsv) && { firstCsv: readFileSync(committedCsv, "utf8") }),
   keys,
+  atmospherePort: PORT + 1,
   ...(googleSheet && { morePlaces: { "google-sheet": googleSheet } })
 })
 console.log(`the recipe servers are on http://127.0.0.1:${PORT}.  Ctrl-C stops them.`)

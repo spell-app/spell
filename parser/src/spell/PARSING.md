@@ -1602,6 +1602,9 @@ What a program's lines about where data lives compile to, and what reads the res
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
   - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
   - A sheet is read only at a plain address, and takes writes at a place server's (`isReadOnlyPlace()`):  no word for it, the address says.
+  - An atmosphere account (epic `data` P16) warns at its line of what no referee can promise (`CreatePlace.warnOfNoReferee()`, `hasNoReferee`):  it's public, each person
+    changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
+    `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
 
 ## Projects

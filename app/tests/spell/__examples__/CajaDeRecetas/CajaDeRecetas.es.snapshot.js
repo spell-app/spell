@@ -43,6 +43,14 @@ export const words = {
     "write-use-mine": "Usar lo mío",
     "write-restore": "Restaurar",
     "write-changed-under-draft": "Otra persona cambió {thing} mientras lo editabas.  Lo que estás editando aún no lo muestra.",
-    "guest-person": "Invitado {number}"
+    "guest-person": "Invitado {number}",
+    "sign-in-signed-out": "No has iniciado sesión en {place}, así que puedes leerlo, y lo que cambies espera aquí hasta que lo hagas.",
+    "sign-in-signing": "Iniciando sesión en {place}…",
+    "sign-in-as": "Sesión iniciada en {place} como {name}.",
+    "sign-in-ended": "Tu sesión en {place} ha terminado:  duran dos semanas como mucho.  Vuelve a iniciar sesión, y lo que cambiaste se guardará.",
+    "sign-in-failed": "No se pudo iniciar sesión:  {why}",
+    "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
+    "sign-in": "Iniciar sesión",
+    "sign-out": "Cerrar sesión"
   }
 }

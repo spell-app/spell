@@ -91,21 +91,105 @@ describe("a place's line", () => {
     expect(js).toContain(`kind: "${kind}"`)
   })
 
-  it("an airtable, and an atmosphere account in any case, read, and say they aren't here yet", () => {
-    for (const line of [
-      'x is an airtable at "appX"',
-      'x is an atmosphere account at "did:plc:abc123"',
-      'x is an atmosphere at "did:plc:abc123"',
-      'x is an ATmosphere account from "did:plc:abc123"',
-      "x is a personal atmosphere account",
-      "x is a personal atmosphere",
-      'x is a personal ATmosphere at "com.example.cookbook"'
-    ]) {
-      expect(compiled([line]).errors.join()).toContain("isn't here yet")
-    }
-    expect(compiledEs(["x es una cuenta personal de ATmosphere"]).errors.join()).toContain("aún no está")
+  it("an airtable reads, and says it isn't here yet", () => {
+    expect(compiled(['x is an airtable at "appX"']).errors.join()).toContain("isn't here yet")
+    expect(compiledEs(['x es un airtable en "appX"']).errors.join()).toContain("aún no está")
+  })
+
+  it.each([
+    ['x is an atmosphere account at "did:plc:abc123"', "atmosphere account", "did:plc:abc123"],
+    ['x is an atmosphere at "did:plc:abc123"', "atmosphere account", "did:plc:abc123"],
+    ['x is an ATmosphere account from "did:web:example.com"', "atmosphere account", "did:web:example.com"],
+    ["x is a personal atmosphere account", "personal atmosphere account", undefined],
+    ["x is a personal atmosphere", "personal atmosphere account", undefined],
+    ['x is a personal ATmosphere at "com.example.cookbook"', "personal atmosphere account", "com.example.cookbook"]
+  ])("%s", (line, kind, at) => {
+    const { js, errors, warnings } = compiled([line])
+    expect(errors).toEqual([])
+    expect(js).toContain(`kind: "${kind}"`)
+    if (at) expect(js).toContain(`at: "${at}"`)
+    // what no referee can promise, at this line, plainly
+    expect(warnings.join()).toContain("is public")
+    expect(warnings.join()).toContain("Don't keep anything private here")
+    expect(warnings.join()).toContain("only their own records")
+    expect(warnings.join()).toContain('"everyone here" means everyone with records here')
+    expect(warnings.join()).toContain("whole numbers only")
+    expect(warnings.join()).toContain("load them into the browser")
+    // it announces what changed:  no asking for a check
+    expect(warnings.join()).not.toContain("check it every")
+  })
+
+  it.each([
+    ['x es una cuenta de atmosphere en "did:plc:abc123"', "atmosphere account"],
+    ['x es una cuenta de ATmosphere desde "did:plc:abc123"', "atmosphere account"],
+    ["x es una cuenta personal de ATmosphere", "personal atmosphere account"],
+    ['x es una cuenta personal de atmosphere en "com.example.recetario"', "personal atmosphere account"]
+  ])("%s", (line, kind) => {
+    const { js, errors, warnings } = compiledEs([line])
+    expect(errors).toEqual([])
+    expect(js).toContain(`kind: "${kind}"`)
+    expect(warnings.join()).toContain("es público")
+    expect(warnings.join()).toContain("solo sus propios registros")
+  })
+
+  it("an atmosphere account's lines:  its accounts and where its collections are", () => {
+    const { js, errors } = compiled([
+      'family cookbook is a personal atmosphere account at "com.example.cookbook":',
+      '\t- recipes live at "com.example.recipe"',
+      '\t- it includes the account "did:plc:alice"',
+      '\t- it includes the account "did:web:bob.example"',
+      "a recipe is a thing:",
+      "\t- it lives in the family cookbook"
+    ])
+    expect(errors).toEqual([])
+    expect(js).toContain('accounts: ["did:plc:alice", "did:web:bob.example"]')
+    expect(js).toContain('at: "com.example.recipe"')
+
+    const es = compiledEs(["recetario es una cuenta personal de atmosphere:", '\t- incluye la cuenta "did:plc:ana"'])
+    expect(es.errors).toEqual([])
+    expect(es.js).toContain('accounts: ["did:plc:ana"]')
+  })
+
+  it("an atmosphere account says what the protocol can't read, at the line", () => {
+    expect(compiled(['x is an atmosphere account at "alice.bsky.social"']).errors.join()).toContain("isn't an account")
+    expect(compiled(['x is a personal atmosphere account at "cookbook"']).errors.join()).toContain(
+      "isn't a corner of an account"
+    )
+    expect(
+      compiled(["x is a personal atmosphere account:", '\t- it includes the account "alice"']).errors.join()
+    ).toContain("isn't an account")
+    expect(
+      compiled([
+        "x is a personal atmosphere account:",
+        '\t- recipes live at "com.example.my-recipe"',
+        "a recipe is a thing"
+      ]).errors.join()
+    ).toContain("isn't a collection there")
     // his typo, twice on the page:  no such word
     expect(compiled(['x is an atmoshphere at "did:plc:abc123"']).errors.join()).toContain("Don't understand")
+  })
+
+  it("a `version 2` line says what it can't do on an atmosphere account:  nothing's really renamed", () => {
+    const lines = (place: string) => [
+      place,
+      "a recipe is a thing:",
+      "\t- it lives in the family cookbook",
+      '\t- its "title" is text',
+      "a recipe version 2 renames name to title"
+    ]
+    const there = compiled(lines('family cookbook is an atmosphere account at "did:plc:abc"'))
+    expect(there.errors).toEqual([])
+    expect(there.warnings.join()).toContain("can't rename what's saved")
+    expect(compiled(lines(PLACE)).warnings.join()).not.toContain("can't rename what's saved")
+    expect(compiled(lines(PLACE)).warnings.join()).not.toContain("is public")
+  })
+
+  it("`everyone here` on an atmosphere account can say:  no warning it's only you", () => {
+    const { warnings } = compiled([
+      "family cookbook is a personal atmosphere account",
+      "print the number of everyone here"
+    ])
+    expect(warnings.join()).not.toContain("only ever you")
   })
 
   it("`is saved in`'s two jobs:  a new name and the cloud, or a type and a place", () => {
