@@ -90,6 +90,14 @@ export type ContentCheckOptions = GlobalOptions & {
 }
 
 /**
+ * `spell content compare` flags.
+ * - `against`:  the commit to compare with, `HEAD` unless given
+ */
+export type ContentCompareOptions = GlobalOptions & {
+  against?: string
+}
+
+/**
  * `spell content update` flags.
  * - `json`:  print what's new as JSON, for the session
  * - `done`:  record the update's end instead:  the stop commit moves to now

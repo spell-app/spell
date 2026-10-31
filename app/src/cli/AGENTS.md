@@ -12,7 +12,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
   - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
-    `spell content check [--bless]` and `spell content update [--json] [--done]`
+    `spell content check [--bless]`, `spell content compare [--against <ref>]` and
+    `spell content update [--json] [--done]`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:
     they find projects the app's way, so their work is here until the parser folder can (epic `repo-split` P13)
@@ -73,6 +74,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [speedTest.mts](runner/speedTest.mts):  `spell speedtest`
   - They NEVER import `spell/app/cli`'s values:  they need only spell.
   - `speedTest.mts` is copied into other checkouts (`--against`), so it imports nothing of ours at all.
+  - [compareProjects.mts](runner/compareProjects.mts):  `spell content compare`, one per checkout, each finding ITS
+    OWN spell;  so its temp checkout links each package separately, never the whole `node_modules`.
+- [tempCheckout.ts](tempCheckout.ts):  the temp git worktree `--against` uses, for both.
 - Each command's work is a file in [commands/](commands/), `<name>Command.ts`:
   `(session, args, options) => Promise<exitCode>`.
   - `lintCommand` was `checkCommand`, `speedtestCommand` `speedCommand`, until P13.

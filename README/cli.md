@@ -966,6 +966,7 @@ The editor itself:  [spell-app's README](https://github.com/spell-app/spell/blob
 | `spell app preview serve` | shows that build as a host would, with no page server, and opens it, until `Ctrl-C`;  `--port <n>` (default 4848), `--headless` |
 | `spell projects [group]` | lists the project groups, or one group's projects, by address;  `--json` |
 | `spell content check [--bless]` | runs every check of the examples, notebooks and Spell guides in one go:  their compiled output, what each prints on every target, the spellx round trip, the notebooks, the examples' page;  `--bless` rewrites every snapshot among them, then you read the diff |
+| `spell content compare [--against <ref>]` | compiles every test project and notebook here and at a commit (`HEAD` unless given), then lists each changed line of their code, errors and warnings, and how many files changed |
 | `spell content update [--json]` | lists what the parser and Spell UI learned since the examples were last brought up to date:  the commits under `parser/` and `ui/` by the epic they name, each epic's changelog entry, new components and attributes, new grammar;  `--done [--always <id> ...]` records the update's end, so the next one starts there |
 
 ```sh

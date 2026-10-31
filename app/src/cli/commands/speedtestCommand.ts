@@ -1,10 +1,10 @@
-import { spawn, spawnSync } from "child_process"
-import { existsSync, lstatSync, mkdtempSync, realpathSync, rmSync, symlinkSync, unlinkSync } from "fs"
-import { tmpdir } from "os"
+import { spawn } from "child_process"
+import { existsSync, symlinkSync } from "fs"
 import { dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
 import { CLI } from "spell/app/cli"
+import { addCheckout, git, removeCheckout } from "spell/app/cli/tempCheckout"
 import environment from "spell/app/spaces/server/node/environment"
 
 /** cli's own folder, `src/cli/`. */
@@ -72,7 +72,7 @@ export async function speedtestCommand(
     return CLI.EXIT.ERRORS
   } finally {
     status.finish()
-    if (checkout) removeCheckout(checkout)
+    if (checkout) removeCheckout(spellParserRepo(), checkout)
   }
 
   const totals = sides.map((side) => ({ label: side.label, ...combined(side.results!) }))
@@ -208,17 +208,10 @@ export function speedTable(totals: Pick<SideTotal, "label" | "average" | "min" |
  * - `removeCheckout()` when done.
  */
 function checkoutOf(ref: string): string {
-  const repo = spellParserRepo()
-  const folder = realpathSync(mkdtempSync(resolve(tmpdir(), "spell-speed-")))
-  try {
-    git(["worktree", "add", "--detach", folder, ref], repo)
+  return addCheckout(spellParserRepo(), ref, "spell-speed-", (folder) => {
     symlinkSync(installedModules(), resolve(folder, "node_modules"))
     checkSpellSource(folder, ref)
-  } catch (error) {
-    removeCheckout(folder)
-    throw error
-  }
-  return folder
+  })
 }
 
 /**
@@ -243,24 +236,4 @@ function installedModules(): string {
     if (existsSync(resolve(dir, "node_modules", "spell-parser"))) return resolve(dir, "node_modules")
     if (dirname(dir) === dir) throw new CLI.CliError(`no node_modules above ${environment.srcDir}`)
   }
-}
-
-/**
- * Remove the worktree `checkoutOf()` made.
- * - Unlinks our `node_modules` FIRST, so nothing deleting the folder can reach through them.
- */
-function removeCheckout(folder: string): void {
-  const modules = resolve(folder, "node_modules")
-  if (lstatSync(modules, { throwIfNoEntry: false })?.isSymbolicLink()) unlinkSync(modules)
-  const repo = spellParserRepo()
-  spawnSync("git", ["worktree", "remove", "--force", folder], { cwd: repo })
-  rmSync(folder, { recursive: true, force: true })
-  spawnSync("git", ["worktree", "prune"], { cwd: repo })
-}
-
-/** Run `git ...args` in `cwd`, returning its output -- or throwing `CLI.CliError` with what it said. */
-function git(args: string[], cwd: string): string {
-  const { status, stdout, stderr } = spawnSync("git", args, { cwd, encoding: "utf8" })
-  if (status !== 0) throw new CLI.CliError(`git ${args[0]} failed:  ${stderr.trim()}`)
-  return stdout.trim()
 }
