@@ -21,6 +21,8 @@
  *   pressed, a minute into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
  *   - a minute, not two:  the header's own Auto Send (2 minutes, from the page's load) would send the marked item
  *     first, and the page would change under the step (epic `epic-engine` I186)
+ *   - its tooltip says 4:00 left, give or take a second:  the page's clock is set back to the server's before the
+ *     press, since the server dates the mark (epic `epic-engine` I187)
  * - every step waits for what it measures (the ring part-filled, Accept counting, its tooltip's time), never a fixed
  *   delay;  a page that reloads under a step (a bundle rebuilt by another server) is named as the problem
  * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
@@ -69,6 +71,9 @@ const NAME = "send-header"
 /** The stage button's countdown (I181), and how far into it the check looks:  inside the header's 2-minute Auto Send. */
 const STAGE_COUNTDOWN_MS = 5 * 60_000
 const STAGE_ON_MS = 60_000
+/** What its tooltip says is left then, seconds (4:00), give or take a second (the ring ticks once a second). */
+const STAGE_LEFT_S = (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000
+const STAGE_TOLERANCE_S = 1
 const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
 const problems = []
 const summary = {}
@@ -272,6 +277,11 @@ async function stage(which, width, scheme) {
   })
   // pressed (I181):  its 5-minute countdown, the green ring round its thumbs up, inside the button;  a minute on, inside
   // the header's Auto Send (2 minutes from the page's load), which would send the marked item and change the page
+  // - the page's clock back on the server's first (I187):  the server dates the mark (`ReviewInbox.stamped()`), and the
+  //   page counts down to that date on its own clock;  the 45 seconds jumped for the header's ring put the page that
+  //   far ahead, so the tooltip read 3:17, not 4:00.  A real page and its page server share the machine's one clock.
+  //   This process IS the server (`DemoServer`), so its `Date.now()` is the server's.
+  await page.clock.setSystemTime(Date.now())
   await page.evaluate((which) => stageButton(which).click(), which)
   await page
     .waitForFunction((which) => stageButton(which)?.dataset.state === "counting", which, { timeout: 5000 })
@@ -279,11 +289,11 @@ async function stage(which, width, scheme) {
   await page.clock.fastForward(STAGE_ON_MS)
   await page
     .waitForFunction(
-      ([which, left]) => {
+      ([which, left, tolerance]) => {
         const time = /goes to Claude in (\d):(\d\d)/.exec(stageButton(which)?.title ?? "")
-        return time && Number(time[1]) * 60 + Number(time[2]) <= left
+        return time && Number(time[1]) * 60 + Number(time[2]) <= left + tolerance
       },
-      [which, (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000],
+      [which, STAGE_LEFT_S, STAGE_TOLERANCE_S],
       { timeout: 5000 }
     )
     .catch(() => undefined)
@@ -301,7 +311,10 @@ async function stage(which, width, scheme) {
     counting.ring.left < counting.button.left - 0.5
   )
     problems.push(`${tag}:  the ring leaves the button`)
-  if (!/goes to Claude in \d:\d\d/.test(counting.title ?? "")) problems.push(`${tag}:  no time left in its tooltip`)
+  const left = /goes to Claude in (\d):(\d\d)/.exec(counting.title ?? "")
+  if (!left) problems.push(`${tag}:  no time left in its tooltip`)
+  else if (Math.abs(Number(left[1]) * 60 + Number(left[2]) - STAGE_LEFT_S) > STAGE_TOLERANCE_S)
+    problems.push(`${tag}:  a minute on, its tooltip says ${left[1]}:${left[2]} left, not 4:00`)
   summary[`${tag}-counting`] = { title: counting.title, ring: counting.ring }
   await page.screenshot({
     path: join(out, `stage-${which}-counting-${width}-${scheme}.png`),
