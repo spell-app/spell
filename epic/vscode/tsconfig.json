@@ -4,6 +4,7 @@
   // them AND esbuild bundles them (`build.mjs`).
   // - `customConditions`:  spell-epic's SOURCE for its name (`exports`, `spell-source`), as the root's
   //   `tsconfig.json` reads it;  the kit's built declarations (`dist-types/`).
+  // - `spell/toolchain/types`:  the ambient helper types (`Prettify` ...) the files it bundles use bare, as the root's
   "compilerOptions": {
     "customConditions": ["spell-source"],
     "target": "ES2022",
@@ -18,5 +19,5 @@
     "isolatedModules": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src"]
+  "include": ["src", "../../src/toolchain/types/index.d.ts"]
 }

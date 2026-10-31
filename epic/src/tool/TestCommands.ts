@@ -51,7 +51,7 @@ export class TestCommands {
     if (landing && !tests.some((test) => test.id === landing))
       throw new PlanDocError(`${landing} isn't an open test of ${name}:  \`epic test ${name} --list\``)
     this.owner.print(`${name}:  ${plural(tests.length, "open test")}, in the Review tab`)
-    this.owner.openInVSCode(file, "review", { query: RUN_QUERY, hash: landing?.toLowerCase() })
+    this.owner.openInVSCode(file, { query: RUN_QUERY, hash: landing?.toLowerCase() })
   }
 
   /**
@@ -71,7 +71,7 @@ export class TestCommands {
     this.owner.print(
       `first:  ${first.epic}, in the Review tab;  its Manual tests section links the next once all are answered`
     )
-    this.owner.openInVSCode(this.owner.files.findDoc(first.epic), "review", { query: ALL_QUERY })
+    this.owner.openInVSCode(this.owner.files.findDoc(first.epic), { query: ALL_QUERY })
   }
 
   /** Print `tests`, epic `name`'s open tests, for a reply or (`json`) a script. */

@@ -19,6 +19,9 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
   - That's the checkbox icon;  never the "Epic Docs" tab, the book (Owen's rule, 2026-10-07).
+  - The extension sends every epic page there by itself, whatever the command asked (epic `epic-engine` P59);
+    details, review and choice pages go to the third tab, "Details" (the speech bubble), so a question never
+    replaces the epic page, and one still waiting for an answer is never replaced either.
   - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
     **View: Open View...** › Review finds it;  epic `epic-friend` P16).
 
@@ -57,7 +60,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     `epic split <name>` / `join <name>` switch a doc's shape.
 - Reload the epic page whenever the session moves to a new stage:
   name -> worktree -> plan -> fill -> each phase -> doc review.
-  - `epic open <name> --review` reloads it in the side bar's Review tab.
+  - `epic open <name>` reloads it in the side bar's Review tab.
   - `epic phase` does it for you.
 - Style, in the epic page:  written for the person coming back cold (`plan-doc.md`, "Rules"):
   - a plain lead sentence, then bullets:  never a list run together in a sentence
@@ -837,7 +840,7 @@ Commands, in the order a review uses them:
 ```
 epic list --json                           every epic:  status, checkout, not reviewed / items
 epic items <name> --json                   where reviews stand;  sections, items, states
-epic pages link <ABS doc> --hash <id> --review --show   show the doc in the Review tab, at <id>;  prints its links
+epic pages link <ABS doc> --hash <id> --show   show the doc in its tab (an epic page Review), at <id>;  prints its links
 epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing:  the page says so
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
                                            In Codex:  run it in the foreground;  it returns with the work
@@ -885,7 +888,7 @@ epic inbox <name> [--json]                 what's waiting, sent or not
      (red:  an open question, an unreviewed judgement call or issue)
    - none:  the first `open` (yellow) one
    - none:  the top
-   - `epic pages link <ABS doc> --hash <that id> --review --show`:  the doc opens in the Review tab, at it.
+   - `epic pages link <ABS doc> --hash <that id> --show`:  the doc opens in the Review tab, at it.
 4. `epic inbox watch <name>`.
    - Then `epic inbox wait <name>`, with Bash `run_in_background: true`.
      - In Codex:  run it in the foreground, and take the work it returns;  end the turn only when it times out.
@@ -1543,7 +1546,7 @@ migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify
                                                     --notify:  running epics told (TELL lines), idle ones migrated
 summary <name> [--json]                             phases, next phase, open questions/issues/todos/manual tests
 lint <name> [--no-browser]                          ids, links, phases, then the browser check
-open <name> --review                                show in the side bar's Review tab
+open <name>                                         show in the side bar's Review tab (an epic page's only tab)
 review <name>#<id> ["outcome"]                      mark reviewed today (outcome to the log)
 defer <name>#<id>                                   deferred:  dated, still not reviewed
 queue <name>#<id> "work"  /  unqueue <name>#<id>    work a review decided on, waiting  /  started or dropped

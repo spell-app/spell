@@ -73,9 +73,9 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       return [["bedtime", ...rest]]
     }
     case "open":
-      // the Epic Docs tab, unless `--review` (Owen, 2026-10-12);  the tool's own `open` keeps the Review tab
+      // the Review tab, as an epic page's kind says (epic `epic-engine` P59);  `--review` and `--docs` accepted, ignored
       refused(verb, target)
-      return [["open", ...args.filter((arg) => arg !== "--review"), ...(args.includes("--review") ? [] : ["--docs"])]]
+      return [["open", ...args.filter((arg) => arg !== "--review" && arg !== "--docs")]]
     case "update":
       return updateArgs(args, at, target)
     case "saga":

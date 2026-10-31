@@ -205,8 +205,8 @@ describe("test <epic>", () => {
     await commands().run(["test", "x"])
     await commands().run(["test", "x", "--at", "M3"])
     expect(opened).toEqual([
-      [file, "review", { query: "test=1", hash: undefined }],
-      [file, "review", { query: "test=1", hash: "m3" }]
+      [file, { query: "test=1", hash: undefined }],
+      [file, { query: "test=1", hash: "m3" }]
     ])
     expect(await commands().run(["test", "x", "--at", "M2"])).toBe(1)
     expect(warned).toEqual(["epic:  M2 isn't an open test of x:  `epic test x --list`"])
@@ -260,7 +260,7 @@ describe("test --all, and GET /api/epics/tests' list", () => {
     ])
     expect(opened).toEqual([])
     await commands().run(["test", "--all"])
-    expect(opened).toEqual([[join(root, "epics", "later", "later.plan.html"), "review", { query: "test=1&all=1" }]])
+    expect(opened).toEqual([[join(root, "epics", "later", "later.plan.html"), { query: "test=1&all=1" }]])
     printed = []
     await commands().run(["test", "--all", "--json"])
     expect(JSON.parse(printed.join("\n")).map((each: { epic: string }) => each.epic)).toEqual([

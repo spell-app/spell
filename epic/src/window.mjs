@@ -145,8 +145,9 @@
  *   - needs a window opened from its `.code-workspace` (else the change would restart its extensions,
  *     Claude panel included)
  * - `remove <path>`:  remove that folder again;  never the window's first
- * - `show <file> [--hash <id>] [--review]`:  show an `.html` doc in the window's doc preview, at id `<id>`
- *   - the doc preview:  the right side bar's "Epic Docs" tab;  `--review`:  its "Review" tab
+ * - `show <file> [--hash <id>] [--review]`:  show an `.html` doc in the window's right side bar, at id `<id>`
+ *   - in the tab its kind says (the extension's `docViewFor()`, epic `epic-engine` P59):  an epic page "Review", a
+ *     details or choice page "Details", anything else "Epic Docs";  `--review` asks for "Review" for the rest
  *   - while a `handoff` is pending:  in the window this session is moving to, once it has
  * - `open <name> [--pkg <pkg>] [--color <look>]`:  write worktree `<name>`'s window file and open it in a new window
  *   - `<pkg>` (a package, or any `<windowsFolder>/<pkg>.code-workspace`) defaults to this session's window's package,
@@ -966,8 +967,9 @@ export class Window {
   /**
    * Show `file` (an `.html` doc) in this session's window's doc preview, at id `hash` if given;
    * resolves to `{ window }` (the registry entry it showed in) or `{ later }` (the window file it will show in).
-   * - `view`:  the side bar tab, `"docs"` ("Epic Docs", the default) or `"review"` ("Review");
-   *   sent only when given, so an extension from before the tabs still shows the doc
+   * - `view`:  the side bar tab asked for, `"docs"`, `"review"` or `"details"`;  the page's kind decides first (the
+   *   extension's `docViewFor()`, epic `epic-engine` P59);  sent only when given, so an extension from before the tabs
+   *   still shows the doc
    * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`);
    *   sent only when given, and an extension from before it shows the page without it
    * - a `handoff` pending for `sessionId`:  NOT here, where the session's tab is about to close,
@@ -1175,7 +1177,7 @@ export class Window {
     }
     if (command === "reload") {
       // the bridge's op keeps its name, `reload-view`:  an installed extension answers to it
-      const view = flags.review ? "review" : "docs"
+      const view = flags.details ? "details" : flags.review ? "review" : "docs"
       try {
         const { url } = await Window.request("reload-view", { view }, window)
         console.log(
@@ -1352,11 +1354,14 @@ const USAGE = `usage:  epic window <command>
   add <path> [--name <name>]   add a folder (a worktree) to the window
   remove <path>                remove it again
   show <file> [--hash <id>] [--review]
-                               show an .html doc in the window's doc preview (right side bar's
-                               "Epic Docs" tab;  --review:  its "Review" tab), at id <id>
+                               show an .html doc in the window's right side bar, at id <id>:
+                               the tab its kind says (an epic page Review, a details or choice
+                               page Details, else Epic Docs);  --review asks for Review
                                (moving:  in the window this session moves to)
-  reload [--review]            rebuild the "Epic Docs" view (--review:  "Review") from scratch, a new
-                               frame at the page it shows:  for a view gone wrong (clicks lost ...)
+  reload [--review | --details]
+                               rebuild the "Epic Docs" view (--review:  "Review";  --details:
+                               "Details") from scratch, a new frame at the page it shows:  for a
+                               view gone wrong (clicks lost ...)
   open <name> [--pkg <pkg>] [--color <look>] [--no-open]
                                open worktree <name> in a new window (default package:  this window's;
                                default look:  this window's);  --no-open:  write its window file only

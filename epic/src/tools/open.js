@@ -4,10 +4,10 @@
  *   or just `solid/solid-2.html`;  default:  the home page, `pages/index.html`
  *   - `.html` and a folder's own page may be left off:  `solid/solid-2` ~== `guides/solid/solid-2.html`,
  *     `server` ~== `guides/server.html`
- * - `--vs`:  in VS Code's doc preview instead (the right side bar's "Epic Docs" tab, `openInVSCode()`):
- *   `/spell-docs`.  Not run from VS Code:  Chrome anyway.
- * - `--review`:  in the side bar's "Review" tab (`/epic review`), keeping the "Epic Docs" tab's page.  Implies
- *   `--vs`.
+ * - `--vs`:  in VS Code's right side bar instead (`openInVSCode()`), in the tab the page's kind says (epic
+ *   `epic-engine` P59):  an epic page "Review", a details or choice page "Details", anything else "Epic Docs"
+ *   (`/spell-docs`).  Not run from VS Code:  Chrome anyway.
+ * - `--review`:  asks for the "Review" tab, for a page of no such kind (`/epic review`).  Implies `--vs`.
  * - `--hash=<id>`:  an id on the page to land on;  `--query=<query>`:  the page's query, `test=1` (`epic test`:  a
  *   test run, epic `epic-engine` P4)
  * - `<page>` may be a command run's folder, `pages/runs/<id>` (epic `epic-engine` P23):  its page, `/runs/<id>/`
@@ -31,7 +31,7 @@ if (!file) {
   console.error(`docs:open:  no page ${page}`)
   process.exit(1)
 }
-if (vs) await openInVSCode(file, { hash, query, view: review ? "review" : "docs" })
+if (vs) await openInVSCode(file, { hash, query, ...(review && { view: "review" }) })
 else openInChrome(file, { hash, query })
 
 /** The value of flag `--<name>=<value>`, else `undefined`. */

@@ -139,7 +139,7 @@ flowchart LR
     direction TB
     file["Card.spell:  colours, errors as you type;  TS, JS, PY and ▶ at the top right"]
     run["Run Project, beside it:  the program, running"]
-    bar["the right side bar:  the Review tab and the Epic Docs tab"]
+    bar["the right side bar:  the Review, Details and Epic Docs tabs"]
     claude["the Claude panel:  every session"]
   end
   spell["Spell, built from spell-app"] --> file
@@ -447,15 +447,23 @@ Spell Epic puts the epic page in VS Code's RIGHT side bar instead, beside your c
 live from a page server:  the machine's epic server (`epic hub`, port 4848) when it runs,
 else a checkout's own (4747 for the main checkout).
 
-- **Review** (`spellEpic.reviewView`, the checklist):  the epic page under review (`/epic review <name>`),
-  its details pages, test runs.
+Three tabs, and the page decides which one it opens in, whatever command showed it:
+
+- **Review** (`spellEpic.reviewView`, the checklist):  epic pages and saga pages (`epic open <epic>`,
+  `/epic review <name>`), and test runs.
   You mark items on it, and a listening Claude session acts on your marks
   ([the review loop](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
   "Review:  Open Epic..." picks any registered repo's epic, from any window.
-- **Epic Docs** (`spellEpic.docView`, the hat):  any guide or docs page, reloading as it changes
-  (`epic pages open <page> --vs`, `epic open <epic>`, `/spell-docs`).
+- **Details** (`spellEpic.detailsView`, the speech bubble):  details, review and choice pages, the questions you
+  answer on a page (`epic ask show`, `epic choices show`, `/details`).
+  - One still waiting for your answer is never replaced:  a new one waits its turn, the tab's title says
+    "2 pages waiting", and it shows once you've answered.
+  - Opened with nothing shown, or by its list button:  every details and choice page of the window's epic,
+    newest first, the ones waiting for you in red.
+- **Epic Docs** (`spellEpic.docView`, the hat):  any other guide or docs page, reloading as it changes
+  (`epic pages open <page> --vs`, `/spell-docs`).
   Its one setting, `spellEpic.docPreview.location`, can move it to VS Code's Simple Browser
-  (`beside`;  the default is `sidebar`);  a page for review always opens in Review.
+  (`beside`;  the default is `sidebar`);  an epic page never opens there.
 - A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page.
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.
@@ -553,7 +561,7 @@ A window the session stayed in gets its title and colours back (`epic window sta
 
 - `/airplane` before a flight readies the pages for working with no Claude;
   `/airplane land` afterwards gathers everything you left on them.
-- The Review and Epic Docs tabs keep working offline, against the laptop's page server:
+- The Review, Details and Epic Docs tabs keep working offline, against the laptop's page server:
   "Review:  Open Epic..." reaches any epic page with no terminal.
 - It needs the main checkout's page server running and Spell Epic installed from `main`;
   `epic airplane check --fix` fixes what it can.

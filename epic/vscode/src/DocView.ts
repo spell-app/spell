@@ -3,11 +3,21 @@
  * (VS Code's secondary side bar), beside the editor AND the Claude tab, instead of taking an editor column.
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's:
  * its own view and command ids (`spellEpic.*`), so both extensions run side by side.
- * Two of them, each in its own view container, so the side bar shows them as two tabs, each keeping its own page:
- * - "Epic Docs" (`spellEpic.docView`, a book):  where `DocPreview` shows pages by default
- *   (`spellEpic.docPreview.location`:  `sidebar`):  `/spell-docs`, `epic open`
- * - "Review" (`spellEpic.reviewView`, a checklist):
- *   the page being reviewed (`/epic review`, `epic docs open <page> --review`)
+ * Three of them, each in its own view container, so the side bar shows them as three tabs, each keeping its own page.
+ * Which tab a page goes to is ONE rule, from its path (`docViewFor()`, epic `epic-engine` P59), never the command's:
+ * - "Epic Docs" (`spellEpic.docView`, a book):  guides, the home page, the list pages
+ *   (or Simple Browser, `spellEpic.docPreview.location`:  `beside`):  `/spell-docs`, `epic pages open`
+ * - "Review" (`spellEpic.reviewView`, a checklist):  epic pages and saga pages, whatever the command asked
+ *   (`epic open`, `/epic review`), and a page asked for with `--review`
+ * - "Details" (`spellEpic.detailsView`, a speech bubble):  details, review and choice pages (`epic ask show`,
+ *   `epic choices show`, `/details`), so answering one never moves the epic page
+ *   - a page still WAITING for Owen's answer (`DetailsPages.isWaiting()`) is never replaced by a show:
+ *     the new page waits its turn (`offer()`), the tab's title bar and badge say how many wait,
+ *     and it shows by itself once the page in view is answered (looked at every `QUEUE_CHECK_MS`)
+ *   - opened with nothing asked for, or by its list button (`spellEpic.detailsView.list`):  the LIST of the window's
+ *     epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top
+ *     (`showList()`);  "Other epic..." picks another
+ *   - why (request r50):  a choice page Owen was answering vanished, the epic page shown in both other tabs
  * - Each is a webview holding ONE iframe of the page's loopback URL, as Simple Browser does.
  *   The page's own live reload runs inside it.
  * - The webview's html is built ONCE, when VS Code resolves the view:
@@ -22,7 +32,7 @@
  *   and shown again when VS Code re-makes the view, if its page server still answers (`remembered()`).
  * - Opened by hand, before anything was shown:
  *   "Epic Docs" shows the default repo's home page on the epic server, else the window's first folder's;
- *   "Review" a line saying how to fill it.
+ *   "Review" a line saying how to fill it;  "Details" its list.
  * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
  *   then Inspect (`toggleDevTools()`).
  *   - the Review tab's:  its epic list right of Home (Owen, 2026-10-22)
@@ -63,7 +73,7 @@
 import { spawn } from "child_process"
 import { randomBytes } from "crypto"
 import { existsSync } from "fs"
-import { join } from "path"
+import { basename, join } from "path"
 import * as vscode from "vscode"
 
 // Import directly:  the `spell/util` barrel would bring lodash and the rest of spell's utilities into this bundle
@@ -74,9 +84,20 @@ import { serverAt } from "spell/server/PidFile"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { RepoList } from "spell/epic/server/RepoList"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
+import { DetailsPages, type DetailsPageEntry } from "spell/epic/tools/DetailsPages"
 
 import { ClipboardImage } from "./ClipboardImage"
-import { fileForPath, planDocsOf, samePage, stamped } from "./docUrls"
+import {
+  DOC_VIEWS,
+  type DocViewName,
+  fileForPath,
+  planDocsIn,
+  planDocsOf,
+  samePage,
+  stamped,
+  windowEpic
+} from "./docUrls"
 
 /** The page's iframe's sandbox:  Simple Browser's.  Scripts need the webview's `enableScripts` too. */
 const SANDBOX = "allow-scripts allow-forms allow-same-origin allow-downloads"
@@ -94,8 +115,30 @@ const VIEWS: Record<DocViewName, { id: string; empty: string }> = {
     id: "spellEpic.reviewView",
     empty:
       "Nothing to review yet:  the list button above (<b>Review:  Open Epic...</b>), or <code>/epic review &lt;name&gt;</code>."
+  },
+  details: {
+    id: "spellEpic.detailsView",
+    empty: "No details or choice pages yet:  <code>epic ask show &lt;page&gt;</code>, or <code>/details</code>."
   }
 }
+
+/** The Details tab's list:  in the side bar's own colours, the waiting pages red. */
+const LIST_CSS = `
+  .list { padding: 0.5em 1em; box-sizing: border-box; font: var(--vscode-font-size) var(--vscode-font-family); }
+  .list .head { display: flex; justify-content: space-between; gap: 1em; margin: 0.5em 0; }
+  .list h4 { margin: 1em 0 0.25em; opacity: 0.8; }
+  .list ul { list-style: none; margin: 0; padding: 0; }
+  .list li a { display: block; padding: 0.35em 0.5em; border-left: 3px solid transparent; color: inherit; text-decoration: none; }
+  .list li a:hover { background: var(--vscode-list-hoverBackground); }
+  .list li.waiting a { border-left-color: var(--vscode-errorForeground, #e51400); }
+  .list li.waiting .title { color: var(--vscode-errorForeground, #e51400); }
+  .list .title { display: block; }
+  .list .note { display: block; font-size: 0.9em; opacity: 0.75; }
+  .list a[data-pick-epic] { color: var(--vscode-textLink-foreground); }
+`
+
+/** How often the Details tab looks whether the page in view still waits, while pages wait their turn:  in ms. */
+const QUEUE_CHECK_MS = 5000
 
 /** spell-epic's checkout this extension was built from:  set by `build.mjs`. */
 declare const ENGINE_ROOT: string
@@ -145,6 +188,9 @@ export class DocView implements vscode.WebviewViewProvider {
   /** The home page's URL, for the "Epic Docs" view's home and its empty state;  set by `DocPreview`. */
   static home: (() => Promise<string | undefined>) | undefined
 
+  /** `file`'s URL on the page server that serves it;  set by `DocPreview` (which imports this file). */
+  static urlOf: ((file: string) => Promise<string>) | undefined
+
   /** This window's saved state:  each view's page last in view, so a reload shows it again;  set by `register()`. */
   static memory: vscode.Memento | undefined
 
@@ -163,6 +209,18 @@ export class DocView implements vscode.WebviewViewProvider {
   /** URL of the page now in view, as its live client last reported;  `undefined` until it does. */
   current: string | undefined
 
+  /** The file of the page last shown (`offer()`, a pick from the list), when it was shown by its file. */
+  file: string | undefined
+
+  /** Whether the view shows its list (Details only), not a page. */
+  isListing = false
+
+  /** Pages asked for while the page in view waited for Owen's answer, oldest first (Details only). */
+  readonly queue: QueuedPage[] = []
+
+  /** The look at whether the page in view still waits, while `queue` has pages. */
+  private queueTimer: ReturnType<typeof setInterval> | undefined
+
   constructor(name: DocViewName) {
     this.name = name
     this.id = VIEWS[name].id
@@ -175,7 +233,7 @@ export class DocView implements vscode.WebviewViewProvider {
    */
   static register(context: vscode.ExtensionContext): void {
     DocView.memory = context.workspaceState
-    for (const name of Object.keys(VIEWS) as DocViewName[]) {
+    for (const name of DOC_VIEWS) {
       const docView = new DocView(name)
       DocView.all.set(name, docView)
       context.subscriptions.push(
@@ -191,6 +249,7 @@ export class DocView implements vscode.WebviewViewProvider {
       vscode.commands.registerCommand("spellEpic.docView.home", () => DocView.goHome()),
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
+      vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
       vscode.commands.registerCommand("spellEpic.docView.inspect", () => DocView.toggleDevTools()),
       ...MENU.map((item) =>
         vscode.commands.registerCommand(`spellEpic.docMenu.${item}`, (context?: MenuContext) =>
@@ -266,7 +325,7 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /** Show a docs file in a doc view, from its page server;  set by `DocPreview` (which imports this file). */
-  static showFile: ((file: string, view: DocViewName) => Promise<void>) | undefined
+  static showFile: ((file: string, view: DocViewName) => Promise<unknown>) | undefined
 
   /**
    * An edit command, done IN the page (epic `windows-and-review` I2).
@@ -306,7 +365,10 @@ export class DocView implements vscode.WebviewViewProvider {
     return this.edit({ spell: "edit", command: item })
   }
 
-  /** The doc view whose view id is `id` (`spellEpic.docView`, `spellEpic.reviewView`);  `undefined` for anything else. */
+  /**
+   * The doc view whose view id is `id` (`spellEpic.docView`, `spellEpic.reviewView`, `spellEpic.detailsView`);
+   * `undefined` for anything else.
+   */
   static withId(id: string | undefined): DocView | undefined {
     return [...DocView.all.values()].find((docView) => docView.id === id)
   }
@@ -369,6 +431,7 @@ export class DocView implements vscode.WebviewViewProvider {
    */
   async show(url: string, { reload = false }: { reload?: boolean } = {}): Promise<void> {
     const here = this.here
+    this.isListing = false
     if (!this.view) {
       this.url = url
       this.current = undefined
@@ -396,6 +459,11 @@ export class DocView implements vscode.WebviewViewProvider {
    */
   rebuild(to?: string): string | undefined {
     if (!this.view) return undefined
+    // the list in view:  drawn afresh, no page to rebuild at
+    if (this.isListing && !to) {
+      this.showList()
+      return undefined
+    }
     const url = to ?? (this.here && stamped(this.here))
     this.url = url
     this.current = undefined
@@ -465,7 +533,9 @@ export class DocView implements vscode.WebviewViewProvider {
     view.onDidDispose(() => {
       if (this.view === view) this.view = undefined
     })
-    view.webview.onDidReceiveMessage((message: Place | Ready | OpenLink | EditCommand | Clipboard) => {
+    view.webview.onDidReceiveMessage((message: Place | Ready | OpenLink | EditCommand | Clipboard | ListPick) => {
+      if (message?.spell === "pick") return void this.pick(message.file)
+      if (message?.spell === "pick-epic") return void this.pickListEpic()
       if (message?.spell === "open") return void DocView.open(message)
       if (message?.spell === "edit") return void this.edit(message)
       if (message?.spell === "clipboard") return void vscode.env.clipboard.writeText(message.text ?? "")
@@ -476,8 +546,10 @@ export class DocView implements vscode.WebviewViewProvider {
       void vscode.commands.executeCommand("setContext", `${this.id}.canGoBack`, !!message.canGoBack)
       void vscode.commands.executeCommand("setContext", `${this.id}.canGoForward`, !!message.canGoForward)
     })
-    this.url ??= await this.remembered()
+    if (!this.isListing) this.url ??= await this.remembered()
     if (this.name === "docs") this.url ??= await DocView.home?.()
+    if (this.name === "details" && !this.url) this.isListing = true
+    this.showCount()
     view.webview.html = this.html(this.url)
   }
 
@@ -505,6 +577,7 @@ export class DocView implements vscode.WebviewViewProvider {
    * - the page:  the one last in view (`here`), else the one remembered for this window (`remembered()`)
    */
   async restore(shown: string | null | undefined): Promise<void> {
+    if (this.isListing) return
     const page = this.here ?? (await this.remembered())
     if (!page || !this.view || (shown && samePage(shown, page))) return
     this.url = page
@@ -529,7 +602,9 @@ export class DocView implements vscode.WebviewViewProvider {
     const csp = `default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}'; frame-src http://127.0.0.1:* http://localhost:*`
     const body = url
       ? `<iframe src="${escapeHTML(url)}" sandbox="${SANDBOX}" allow="${ALLOW}"></iframe>`
-      : `<p>${VIEWS[this.name].empty}</p>`
+      : this.name === "details"
+        ? this.listHtml()
+        : `<div class="empty"><p>${VIEWS[this.name].empty}</p></div>`
     return `<!doctype html>
 <html>
   <head>
@@ -540,6 +615,8 @@ export class DocView implements vscode.WebviewViewProvider {
       html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--background); }
       iframe { display: block; border: 0; width: 100%; height: 100%; background: var(--background); }
       p { padding: 0 1em; }
+      .empty { height: 100%; overflow: auto; }
+      ${LIST_CSS}
     </style>
   </head>
   <body data-vscode-context='{"preventDefaultContextMenuItems":true}'>${body}
@@ -566,6 +643,14 @@ export class DocView implements vscode.WebviewViewProvider {
         if (data?.spell === "navigate") return navigate(data.url)
         if (frame && ["history", "go", "edit"].includes(data?.spell)) frame.contentWindow.postMessage(data, "*")
       })
+      // the list's picks (the Details tab):  a page, or another epic
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest?.("[data-file], [data-pick-epic]")
+        if (!target) return
+        event.preventDefault()
+        if (target.dataset.file) vscode.postMessage({ spell: "pick", file: target.dataset.file })
+        else vscode.postMessage({ spell: "pick-epic" })
+      })
       // (re)loaded:  the extension points the frame at the page this view should show, if it isn't (restore())
       vscode.postMessage({ spell: "ready", url: frame ? frame.src : null })
 
@@ -575,7 +660,7 @@ export class DocView implements vscode.WebviewViewProvider {
           frame = document.createElement("iframe")
           frame.setAttribute("sandbox", ${JSON.stringify(SANDBOX)})
           frame.setAttribute("allow", ${JSON.stringify(ALLOW)})
-          document.querySelector("p")?.remove()
+          document.querySelector(".empty")?.remove()
           document.body.prepend(frame)
         }
         frame.src = url
@@ -612,6 +697,177 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   ////////////////
+  // ## The Details tab
+  ////////////////
+
+  /**
+   * A command asks to show details or choice page `url` (its `file`, when shown by file) in this view, the Details tab:
+   * shown at once, unless the page in view still WAITS for Owen's answer and is another page.
+   * - then it waits its turn in `queue` (once per page), the title bar and badge say how many wait (`showCount()`),
+   *   and it shows by itself once the page in view no longer waits (`checkQueue()`)
+   * - why:  a choice page Owen was answering was replaced by later shows, and only the view's back history had it
+   *   (request r50)
+   */
+  async offer(url: string, file?: string): Promise<void> {
+    if (this.view && !this.isListing) {
+      const shown = await this.fileInView()
+      const isSame = file && shown ? shown === file : !!this.here && samePage(this.here, url)
+      if (shown && !isSame && DetailsPages.isWaiting(shown)) return this.enqueue({ url, file })
+    }
+    this.file = file
+    this.dequeue(file)
+    await this.show(url)
+  }
+
+  /**
+   * The file of the page in view:  the one last shown by file, while the page reports that same page;
+   * else as its page server says (`fileForPath()`);  `undefined`:  none, or not a file.
+   */
+  async fileInView(): Promise<string | undefined> {
+    const here = this.here
+    if (!here) return undefined
+    if (this.file && this.url && samePage(here, this.url)) return this.file
+    const page = new URL(here)
+    const info = await serverAt(page.origin)
+    return info ? fileForPath(info, page.pathname) : undefined
+  }
+
+  /** `page` waits its turn:  once per page, the newest ask for it kept. */
+  enqueue(page: QueuedPage): void {
+    this.dequeue(page.file, page.url)
+    this.queue.push(page)
+    this.showCount()
+    this.queueTimer ??= setInterval(() => void this.checkQueue(), QUEUE_CHECK_MS)
+    if (this.isListing) this.showList()
+  }
+
+  /** Take the page with `file` (else `url`) off the queue, if it's there. */
+  dequeue(file?: string, url?: string): void {
+    const at = this.queue.findIndex((each) =>
+      file && each.file ? each.file === file : !!url && samePage(each.url, url)
+    )
+    if (at >= 0) this.queue.splice(at, 1)
+    if (!this.queue.length && this.queueTimer) {
+      clearInterval(this.queueTimer)
+      this.queueTimer = undefined
+    }
+    this.showCount()
+  }
+
+  /**
+   * While pages wait their turn:  once the page in view no longer waits (answered, or the list is showing nothing), the
+   * oldest one shows.
+   * - NEVER throws
+   */
+  async checkQueue(): Promise<void> {
+    try {
+      const next = this.queue[0]
+      if (!next || !this.view) return
+      const shown = this.isListing ? undefined : await this.fileInView()
+      if (shown && DetailsPages.isWaiting(shown)) return
+      await this.offer(next.url, next.file)
+    } catch (error) {
+      console.error("spell-epic:  the Details tab's queue", error)
+    }
+  }
+
+  /** The view's title bar and badge:  how many pages wait their turn, none when none do. */
+  showCount(): void {
+    if (!this.view || this.name !== "details") return
+    const count = this.queue.length
+    const words = `${count} ${count === 1 ? "page" : "pages"} waiting`
+    this.view.description = count ? words : undefined
+    this.view.badge = count ? { value: count, tooltip: `${words}:  the list button shows them` } : undefined
+  }
+
+  /**
+   * Show the list (the Details tab):  the pages waiting their turn, then the window's epic's details and choice pages,
+   * newest first (`listHtml()`).
+   * - not resolved yet:  opens the view, which draws the list
+   */
+  showList(): void {
+    this.isListing = true
+    this.url = undefined
+    this.current = undefined
+    if (!this.view) return void vscode.commands.executeCommand(`${this.id}.focus`)
+    this.view.webview.html = this.html(undefined)
+    this.view.show(true)
+  }
+
+  /** A page picked from the list:  shown at once, whatever waits (Owen picked it). */
+  async pick(file: string | undefined): Promise<void> {
+    if (!file || !existsSync(file)) return void vscode.window.showWarningMessage(`Details:  no file ${file}`)
+    const url = await DocView.urlOf?.(file)
+    if (!url) return
+    this.file = file
+    this.dequeue(file)
+    await this.show(stamped(url))
+  }
+
+  /** "Other epic...":  pick the epic the list shows, remembered for this window. */
+  async pickListEpic(): Promise<void> {
+    const content = this.content()
+    if (!content) return
+    const picked = await vscode.window.showQuickPick(
+      planDocsIn(content).map((doc) => ({ label: doc.title, description: doc.name, name: doc.name })),
+      { title: "Details pages of which epic?", matchOnDescription: true }
+    )
+    if (!picked) return
+    await DocView.memory?.update(`${this.id}.epic`, picked.name)
+    this.showList()
+  }
+
+  /** The epic folder of the window's first folder (the repo root);  `undefined` for a window with none. */
+  content(): string | undefined {
+    const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+    return root && EpicConfig.contentOf(root)
+  }
+
+  /**
+   * The list's html:  what waits its turn, then epic `epic`'s details and choice pages (`SeeAlso`'s, newest first),
+   * the waiting ones red, each a click away.
+   * - the epic:  the one picked for this window, else the window's (`windowEpic()`)
+   * - NEVER throws:  a list that won't read says so
+   */
+  listHtml(): string {
+    const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+    const content = this.content()
+    let entries: DetailsPageEntry[] = []
+    let epic: string | undefined
+    try {
+      epic = (content && DocView.memory?.get<string>(`${this.id}.epic`)) || (content && windowEpic(root, content))
+      if (root && epic) {
+        const seeAlso = new SeeAlso(root)
+        entries = DetailsPages.listed(seeAlso.linksOf(epic), seeAlso.content)
+      }
+    } catch (error) {
+      console.error("spell-epic:  the Details tab's list", error)
+    }
+    const row = (file: string | undefined, title: string, note: string, isWaiting: boolean) =>
+      `<li class="${isWaiting ? "waiting" : ""}"><a href="#" data-file="${escapeHTML(file ?? "")}">` +
+      `<span class="title">${escapeHTML(title)}</span><span class="note">${escapeHTML(note)}</span></a></li>`
+    const queued = this.queue.map((page) =>
+      row(page.file, page.file ? basename(page.file, ".html") : page.url, "waiting its turn", true)
+    )
+    const pages = entries.map((entry) =>
+      row(
+        entry.file,
+        entry.title,
+        `${entry.kind === "choices" ? "choice page" : "details page"} · ${new Date(entry.updated).toLocaleString()}` +
+          (entry.isWaiting ? " · waiting for your answer" : ""),
+        entry.isWaiting
+      )
+    )
+    const heading = epic ? `Details pages · ${escapeHTML(epic)}` : "Details pages"
+    const none = `<p>${epic ? `Epic ${escapeHTML(epic)} has none yet.` : VIEWS.details.empty}</p>`
+    return `<div class="empty list">
+      <div class="head"><b>${heading}</b><a href="#" data-pick-epic="1">Other epic...</a></div>
+      ${queued.length ? `<h4>Waiting their turn</h4><ul>${queued.join("")}</ul>` : ""}
+      ${pages.length ? `<ul>${pages.join("")}</ul>` : none}
+    </div>`
+  }
+
+  ////////////////
   // ## Links
   ////////////////
 
@@ -639,9 +895,6 @@ export class DocView implements vscode.WebviewViewProvider {
     await vscode.window.showTextDocument(file, { preview: true })
   }
 }
-
-/** Which doc view:  the "Epic Docs" tab, or the "Review" tab. */
-export type DocViewName = "docs" | "review"
 
 /**
  * The home page of the window's first folder (the repo root), `undefined` when it has none:  `pages/index.html` in
@@ -672,6 +925,12 @@ function run(command: string, args: string[], cwd: string): Promise<string> {
  * What a page's live client posts:  where it is now, and whether back / forward lead anywhere.
  * - `spell`:  `"place"`;  `"open"` is an `OpenLink`, anything else ignored
  */
+/** A page asked for in the Details tab while the page in view waited:  its stamped URL, and its file when known. */
+type QueuedPage = { url: string; file?: string }
+
+/** The list's picks:  a page (its file), or "Other epic...". */
+type ListPick = { spell: "pick"; file?: string } | { spell: "pick-epic" }
+
 type Place = { spell: "place"; url?: string; canGoBack?: boolean; canGoForward?: boolean }
 
 /** The view's wrapper (re)loaded, its frame at `url` (`null`:  no frame yet):  `DocView.restore()`. */

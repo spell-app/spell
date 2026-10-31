@@ -3,9 +3,12 @@
  * in one of the right side bar's doc views (`DocView`), or in VS Code's Simple Browser beside the editor
  * (setting `spellEpic.docPreview.location`).
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's, which it replaces.
- * - Which view:  `docs` (the "Epic Docs" tab, the default) or `review` (the "Review" tab:  `/epic review`).
- *   `review` is ALWAYS the side bar's "Review" tab:  the setting moves only `docs`.
- * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review]`.
+ * - Which view:  the page's kind decides (`docViewFor()`, epic `epic-engine` P59), the ONE rule:
+ *   - `review` (the "Review" tab):  epic pages and saga pages, whatever was asked
+ *   - `details` (the "Details" tab):  details, review and choice pages
+ *   - `docs` (the "Epic Docs" tab):  anything else, unless the caller asked for `review`
+ *   - the setting moves only `docs`:  `review` and `details` are ALWAYS the side bar's
+ * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details|docs]`.
  *   - what spell-epic's `src/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`)
  * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.
  *   - loopback URLs only
@@ -37,11 +40,12 @@ import { componentSetAddressOf, pageServerRoot } from "spell/server/page/setting
 import { PidFile } from "spell/server/PidFile"
 import { WebServer } from "spell/server/WebServer"
 
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { RepoList } from "spell/epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
-import { DocView, docsIndex, type DocViewName } from "./DocView"
-import { PREVIEW_PATH, isLoopback, stamped } from "./docUrls"
+import { DocView, docsIndex } from "./DocView"
+import { PREVIEW_PATH, type DocViewName, docViewFor, isDocView, isLoopback, stamped } from "./docUrls"
 
 /****************
  * ### `DocPreview`
@@ -59,15 +63,20 @@ export class DocPreview {
     DocView.register(context)
     DocView.home = () => DocPreview.homeUrl()
     DocView.showFile = (file, view) => DocPreview.show(file, undefined, view)
+    DocView.urlOf = (file) => DocPreview.urlOf(file)
     context.subscriptions.push(
       vscode.window.registerUriHandler({
         handleUri: (uri) => {
           if (uri.path !== PREVIEW_PATH) return
           const query = new URLSearchParams(uri.query)
           const url = query.get("url")
-          const view = query.get("view") === "review" ? "review" : "docs"
-          if (url && isLoopback(url)) return void DocPreview.showUrl(url, view)
+          const asked = query.get("view")
+          const view = isDocView(asked) ? asked : undefined
           const file = query.get("file")
+          if (url && isLoopback(url)) {
+            const path = file ? resolve(file) : new URL(url).pathname
+            return void DocPreview.showUrl(url, docViewFor(path, view), file ? resolve(file) : undefined)
+          }
           if (file) void DocPreview.show(resolve(file), undefined, view)
         }
       }),
@@ -87,19 +96,22 @@ export class DocPreview {
   }
 
   /**
-   * Show `file` in doc view `view`, from the server that serves it;  at id `hash` on it, if given.
+   * Show `file` in the doc view its kind says (`docViewFor()`, `view` the one asked for), from the server that serves
+   * it;  at id `hash` on it, if given.  Resolves to the view it went to.
    * - `query`:  the page's query, without its `?` (`test=1`:  a test run, `epic test`);  another query is another page,
    *   so the view loads it (`DocView.show()`)
    */
-  static async show(file: string, hash?: string, view: DocViewName = "docs", query?: string): Promise<void> {
+  static async show(file: string, hash?: string, asked?: DocViewName, query?: string): Promise<DocViewName> {
+    const view = docViewFor(file, asked)
     if (!existsSync(file)) {
       void vscode.window.showErrorMessage(`Spell Epic:  no file '${file}'.`)
-      return
+      return view
     }
     const url = new URL(await DocPreview.urlOf(file))
     if (query) url.search = query
     if (hash) url.hash = hash
-    await DocPreview.showUrl(url.href, view)
+    await DocPreview.showUrl(url.href, view, file)
+    return view
   }
 
   /**
@@ -114,7 +126,8 @@ export class DocPreview {
     if (main) return main
     const root = pageServerRoot(dirname(file))
     // a component set's page at its address, where it finds its `_assets/` (epic `epic-engine` I136)
-    const inRoot = componentSetAddressOf(root, file) ?? file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
+    const inRoot =
+      componentSetAddressOf(root, file) ?? file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
     const running = await new PidFile(root).status()
     const base = running?.base ?? (await DocPreview.serverFor(root)).url
     return `${base}${inRoot}`
@@ -127,7 +140,7 @@ export class DocPreview {
    */
   static async epicServer(): Promise<{ base: string } | undefined> {
     try {
-      return await new PidFile(RepoList.homeFolder(), PID_FILE).status()
+      return await new PidFile(EpicHome.folder(), PID_FILE).status()
     } catch {
       return undefined
     }
@@ -149,11 +162,13 @@ export class DocPreview {
   /**
    * Show `url`, stamped (`?t=`):
    * - in the right side bar's doc view `view`, where the page already in view isn't reloaded (`DocView.show()`)
+   *   - `details`:  unless the page there still waits for Owen's answer (`DocView.offer()`);  `file`, the page's file
    * - or, for `docs`, in Simple Browser beside the editor (`spellEpic.docPreview.location`), afresh
    */
-  static async showUrl(url: string, view: DocViewName = "docs"): Promise<void> {
+  static async showUrl(url: string, view: DocViewName = "docs", file?: string): Promise<void> {
     const fresh = stamped(url)
     const location = vscode.workspace.getConfiguration("spellEpic").get<string>("docPreview.location")
+    if (view === "details") return DocView.of(view).offer(fresh, file)
     if (view === "review" || location !== "beside") return DocView.of(view).show(fresh)
     await vscode.commands.executeCommand("simpleBrowser.api.open", vscode.Uri.parse(fresh), {
       viewColumn: vscode.ViewColumn.Beside,

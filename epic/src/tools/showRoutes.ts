@@ -3,10 +3,12 @@
  * `package.json` `"pageServer": { "routes": [...] }`.
  * - Why:  the Claude panel in VS Code follows only http(s) and file links;  a `vscode://...doc-preview` link does
  *   nothing there.  So the link Claude gives goes through the page server, which asks the VS Code window to show the
- *   page in its "Epic Docs" view (the right side bar).
+ *   page in its right side bar.
  * - `GET /api/docs/show?path=<url path>[&window=<pid>][&hash=<id>][&view=review][&in=browser]` -- what
  *   `epic pages link` prints
- *   - `view=review`:  in the side bar's "Review" tab;  else its "Epic Docs" tab
+ *   - which side bar tab:  the extension decides, by the page's kind (its `docViewFor()`, epic `epic-engine` P59):
+ *     an epic page to "Review", a details or choice page to "Details", anything else to "Epic Docs";
+ *     `view=review` (or `docs`, `details`) only asks, for a page of no such kind
  *   - `path`:  the page's URL path on this server (`/guides/...`, `/worktrees/<w>/...`), mapped to its file
  *     through the server's mounts;  only `.html`
  *   - `window`:  the VS Code window's pid (its registry entry, `src/window.mjs`);  gone (reloaded), or not given:
@@ -31,6 +33,9 @@ import { openUrlInChrome } from "./pages.js"
 /** How long after answering before VS Code is brought forward, in ms:  the tab closes first. */
 const FOCUS_DELAY = 300
 
+/** Each side bar tab's name, by the extension's view name:  what the closing page says. */
+const TAB_NAMES = { docs: "Epic Docs", review: "Review", details: "Details" }
+
 const showRoutes: RouteModule = {
   name: "show",
   setup({ router, web }) {
@@ -47,11 +52,14 @@ const showRoutes: RouteModule = {
       }
       const window = pickWindow(Number(request.query.window), file)
       if (!window) throw new SRV.HttpError(404, "no VS Code window with the spell extension is open")
-      const review = request.query.view === "review"
-      await Window.request("show-doc", { file, ...(hash && { hash }), ...(review && { view: "review" }) }, window)
-      reply
-        .set("Cache-Control", "no-store")
-        .send(closingPage(path, `VS Code's side bar (${review ? "Review" : "Epic Docs"})`))
+      const asked = typeof request.query.view === "string" && request.query.view in TAB_NAMES ? request.query.view : ""
+      const shown = await Window.request(
+        "show-doc",
+        { file, ...(hash && { hash }), ...(asked && { view: asked }) },
+        window
+      )
+      const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES] ?? "Epic Docs"
+      reply.set("Cache-Control", "no-store").send(closingPage(path, `VS Code's side bar (${tab})`))
       if (process.platform === "darwin") setTimeout(focusVSCode, FOCUS_DELAY)
     })
   }

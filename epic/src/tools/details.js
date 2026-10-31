@@ -12,7 +12,8 @@
  *   page rewritten in place (from `--from`, else left for Claude to edit), the round before folded at its bottom, with
  *   what was sent (`newRound()`, epic `epic-engine` P37);  `create` refuses a second page on the same question
  * - `show <page> [--wait]` -- start the page server if needed, and show the page in THIS session's VS Code window
- *   - the right side bar's "Review" view, where Owen answers things (epic `windows-and-review` P6, Owen 2026-10-06)
+ *   - the right side bar's "Details" tab, where Owen answers things (epic `epic-engine` P59;  the "Review" tab from
+ *     epic `windows-and-review` P6 until then):  the extension picks it from the page's path
  *   - Chrome outside VS Code
  *   - `--wait`:  then `wait`
  * - `wait <page> [--timeout 8h]` -- block until Owen sends an answer NEWER than the wait's start
@@ -60,6 +61,7 @@ import {
   questionSection
 } from "./answerPages.js"
 import { AskListeners } from "./AskListeners.ts"
+import { DetailsPages } from "./DetailsPages.ts"
 import { DataFile } from "spell/epic/data/DataFile.ts"
 import { CONTENT, ROOT, fromTemplate, inContent, openInVSCode, serialize } from "./pages.js"
 import {
@@ -114,7 +116,7 @@ async function main(argv) {
     }
     if (command === "show") {
       const file = findPage(CONTENT, target)
-      await openInVSCode(file, { view: "review" })
+      await openInVSCode(file)
       return flags.wait ? await waitAndPrint(file, flags) : 0
     }
     if (command === "wait") return await waitAndPrint(findPage(CONTENT, target), flags)
@@ -524,13 +526,7 @@ export function answerFile(page) {
  * - a file holding only the earlier rounds' (`rounds`, `rounds.js`) is no answer yet
  */
 export function readAnswer(page) {
-  const answer = DataFile.read(answerFile(page))
-  return isAnswer(answer) ? answer : undefined
-}
-
-/** Is answer file data `data` an answer:  anything but the earlier rounds alone (`rounds`, `epic ask round`)? */
-function isAnswer(data) {
-  return !!data && Object.keys(data).some((key) => key !== "rounds")
+  return DetailsPages.answerOf(page)
 }
 
 /**
@@ -590,7 +586,7 @@ export async function waitForAnswer(page, { since = Date.now(), timeout, poll = 
       try {
         const answer = DataFile.parse(readFileSync(found, "utf8"))
         // a new round's file holds only the rounds before:  no answer yet
-        if (isAnswer(answer)) return answer
+        if (DetailsPages.isAnswer(answer)) return answer
       } catch {
         // mid-write (the route renames a whole file in, so this is unlikely):  look again next time
       }
