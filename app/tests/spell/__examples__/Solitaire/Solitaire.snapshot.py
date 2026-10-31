@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Literal
 
-from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element
+from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SpellEvent
 
 
 ###################
@@ -168,15 +168,15 @@ class Card(TwoSidedView):
             return 5
         return 0
 
-    async def on_click(self, event: Any) -> bool | None:
+    async def on_click(self, event: ClickEvent) -> bool | None:
         """a click plays it"""
         return await self.play()
 
-    def on_drag(self, event: Any) -> None:
+    def on_drag(self, event: DragSpellEvent) -> None:
         """a drag starting clears the last hint"""
         solitaire.hint = ""
 
-    def on_drag_cancelled(self, event: Any) -> None:
+    def on_drag_cancelled(self, event: DragCancelledEvent) -> None:
         """dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so"""
         solitaire.hint = " -- Not there"
 
@@ -466,7 +466,7 @@ class StockPile(Pile):
     def draw_its_placeholder(self) -> Element:
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
-    async def on_click(self, event: Any) -> None:
+    async def on_click(self, event: ClickEvent) -> None:
         """Empty:  a click turns the discards back over;  a click on one of its cards is the card's"""
         await solitaire.play_from_the_stock()
 
@@ -554,7 +554,7 @@ class Solitaire(App):
     # - its "hint" is text
     hint = prop(type="text")
 
-    def on_score_change(self, event: Any) -> None:
+    def on_score_change(self, event: ScoreChangeEvent) -> None:
         """a change to a property is an event:  each runs just after the change lands"""
         # every card on a foundation:  the game is won
         home = len(self.clubs) + len(self.diamonds)
@@ -562,7 +562,7 @@ class Solitaire(App):
         if home == 52:
             self.hint = " -- You won!"
 
-    def on_moves_change(self, event: Any) -> None:
+    def on_moves_change(self, event: MovesChangeEvent) -> None:
         """a card played:  the last hint goes"""
         self.hint = ""
 
@@ -1126,3 +1126,20 @@ test_card_setup()
 test_a_new_deck()
 test_piles()
 test_the_moves()
+
+
+# what each event this program hears holds
+ClickEvent = SpellEvent
+DragSpellEvent = SpellEvent
+DragCancelledEvent = SpellEvent
+
+
+class ScoreChangeEvent(SpellEvent):
+    value: float
+    was: float
+
+
+class MovesChangeEvent(SpellEvent):
+    value: float
+    was: float
+

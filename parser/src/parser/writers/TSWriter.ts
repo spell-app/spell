@@ -50,6 +50,7 @@ import { forEachNode, listNamedBy, type TSUndeclared, type WriterProject } from 
  *   - a method written outside its class, from what it returns:
  *     `play(): Promise<boolean | undefined>` (`returnType()`, epic `output-targets`, T24)
  *   - a value kind's parameter, from its values:  `static color(suit: (typeof SUITS)[number])` (`valueKindType()`)
+ *   - a template's handler's `event`, from its name:  `onKeyDown(event: KeyDownEvent)` (`eventType()`, epic `rust` P2)
  * - A view type's element class, after its class -- see `elementClassFor()`:
  *   `class CardElement extends SpellElement<Card>`,
  *   handed to the page with `core.useElement(Card, CardElement)`.
@@ -117,6 +118,8 @@ export class TSWriter extends JSWriter {
    */
   protected writeModule(code: string): string {
     const solid = SOLID_COMPONENTS.filter((name) => new RegExp(`<${name}[\\s>]`).test(code))
+    const events = this.eventDeclarations()
+    if (events) code = `${code.replace(/\n*$/, "")}\n\n${events}\n`
     code = super.writeModule(code)
     if (this.elementTags.size) {
       code = this.withElementsImport(code)
@@ -144,7 +147,8 @@ export class TSWriter extends JSWriter {
   /** As javascript's, after the decorators `code` uses, e.g. `prop`, `drawn`. */
   coreImportNames(code: string): string[] {
     const decorators = DECORATORS.filter((name) => new RegExp(`^\\s*@${name}\\b`, "m").test(code))
-    return [...decorators, ...super.coreImportNames(code)]
+    const events = /= SentEvent\b/.test(code) ? ["type SentEvent"] : []
+    return [...decorators, ...super.coreImportNames(code), ...events]
   }
 
   /**
@@ -514,10 +518,39 @@ export class TSWriter extends JSWriter {
   paramType(arg: P.ASTVariableExpression): string {
     return (
       this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ??
+      this.eventType(arg) ??
       this.slotType(arg) ??
       this.valueKindType(arg) ??
       TSWriter.UNKNOWN
     )
+  }
+
+  /**
+   * A template's handler's `event` parameter:  its event's own type, `KeyDownEvent`, so its name settles what it holds.
+   * - `undefined` for any other, or an event nothing says the shape of:  unknown, said out loud.
+   */
+  eventType(arg: P.ASTVariableExpression): string | undefined {
+    return arg.handles && this.eventShapeOf(arg.handles.event) ? this.eventTypeName(arg.handles.event) : undefined
+  }
+
+  /**
+   * The type of each event the program's templates handle, by its name:
+   * `export type KeyDownEvent = SentEvent & { key: string }`, one a line -- `""` if none.
+   * - Only those it handles, so no pile of types for events it never hears.
+   * - Every event shares `SentEvent`'s `target`, `originalTarget` and `sender`.
+   */
+  eventDeclarations(): string {
+    const types = [...this.project.handledEvents.keys()].flatMap((name) => {
+      const shape = this.eventShapeOf(name)
+      if (!shape) return []
+      const fields = [...shape].map(([field, kind]) => {
+        const type = this.isNameableKind(kind) ? this.typeForKind(kind) : undefined
+        return `${this.nameOf(field)}: ${type ?? TSWriter.UNKNOWN}`
+      })
+      const extra = fields.length ? ` & { ${fields.join("; ")} }` : ""
+      return [`export type ${this.eventTypeName(name)} = SentEvent${extra}`]
+    })
+    return types.length ? `// what each event this program hears holds\n${types.join("\n")}` : ""
   }
 
   /**
@@ -804,7 +837,10 @@ export class TSWriter extends JSWriter {
   /** Parameters for a signature, which can't have defaults:  `(card: Card, message?: string)`. */
   signatureParams(method: P.ASTMethodDefinition): string {
     const params = (method.args ?? []).map((arg) => {
-      const type = this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ?? TSWriter.UNKNOWN
+      const type =
+        this.typeFor(arg.datatype ?? arg.variable?.datatype ?? arg.default?.datatype) ??
+        this.eventType(arg) ??
+        TSWriter.UNKNOWN
       return `${this.variableName(arg)}${arg.default ? "?" : ""}: ${type}`
     })
     return `(${params.join(", ")})`
@@ -949,7 +985,9 @@ export class TSWriter extends JSWriter {
   private forwardedParams(method: P.ASTMethodDefinition): string {
     const destructured = this.destructuredParam(method)
     const params = (method.args ?? []).map((arg) => {
-      const type = destructured?.arg === arg ? destructured.shape.replace(/(\w+): /g, "$1?: ") : this.paramType(arg)
+      // a handler's event has its own type, whatever it takes from it;  anything else taken apart says what it takes
+      const takenApart = destructured?.arg === arg && !this.eventType(arg)
+      const type = takenApart ? destructured.shape.replace(/(\w+): /g, "$1?: ") : this.paramType(arg)
       return `${this.variableName(arg)}${arg.default ? "?" : ""}: ${type}`
     })
     return `(${params.join(", ")})`

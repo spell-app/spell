@@ -101,6 +101,8 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
     if (subject) {
       const method = args[1] instanceof P.ASTMethodDefinition ? args[1] : new P.ASTMethodDefinition(match, {})
       method.inline = false
+      const changedProperty = match.groups.changed && `${match.groups.changed.value}`
+      event.handles = { event: On.eventNameOf(match), ...(changedProperty && { changedProperty }) }
       method.args = [event]
       return new P.ASTPropertyDefinition(match, { type: subject, property: On.handlerName(match), method })
     }

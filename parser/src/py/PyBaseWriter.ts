@@ -4,7 +4,7 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
 
-const { attributeName, isCoreCall, kindFromDatatype, unwrapped } = P.jsShapes
+const { attributeName, isCoreCall, kindFromDatatype, textValue, unwrapped } = P.jsShapes
 
 /****************
  * ### `PyBaseWriter`
@@ -52,7 +52,16 @@ export class PyBaseWriter extends P.ProgramWriter {
   }
 
   /** What `spell_core` gives besides spell's runtime names, imported when the code uses them -- see `module()`. */
-  static CORE_EXTRAS = ["prop", "h", "position", "spell_position", "end_position", "with_spell_positions", "Element"]
+  static CORE_EXTRAS = [
+    "prop",
+    "h",
+    "position",
+    "spell_position",
+    "end_position",
+    "with_spell_positions",
+    "Element",
+    "SpellEvent"
+  ]
 
   /** How Python says nothing:  `None`, for a range with no end -- see `P.ProgramWriter.positionArgs()`. */
   nothing = "None"
@@ -69,6 +78,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    * (`ruff`'s F401, an unused import).
    */
   module(code: string): string {
+    const events = this.eventDeclarations()
+    if (events) code = `${code.replace(/\n*$/, "")}\n\n\n${events}\n`
     const imported = code.replace(/^from spell_core import (.*)$/m, (_line, names: string) => {
       const body = code.slice(code.indexOf("\n"))
       // what the code says that only Python's writer does:  a stored property, an element
@@ -1168,13 +1179,16 @@ export class PyBaseWriter extends P.ProgramWriter {
   /**
    * What parameter `arg` is, as a hint, as `TSWriter.paramType()` works it out:
    * - spell's own datatype for it
+   * - a template's handler's `event`:  its event's own type, `KeyDownEvent`, once anything says what it holds
    * - a method's parameter named for a property of its class:  that property's -- `is_a_rank(self, rank: Rank)`
    * - a value kind's parameter named for it:  one of its values
    * - `undefined` if spell can't tell
    */
   paramHint(arg: P.ASTVariableExpression, memberOf: string | undefined): string | undefined {
     const declared = this.hintOf(kindOfDatatype(arg.datatype ?? arg.variable?.datatype))
-    if (declared || !memberOf) return declared
+    if (declared) return declared
+    if (arg.handles && this.eventShapeOf(arg.handles.event)) return this.eventTypeName(arg.handles.event)
+    if (!memberOf) return undefined
     const property = this.slotProperty(arg)
     if (property) return this.hintOf(this.propertyKind(property))
     const list = this.valueKindList(arg)
@@ -1269,6 +1283,33 @@ export class PyBaseWriter extends P.ProgramWriter {
     const list = this.valueListOfKind(kind)
     if (list) return this.valueListHint(list)
     return kind && this.project.isClass(kind) ? this.typeNameOf(kind) : undefined
+  }
+
+  /**
+   * The type of each event the program's templates handle:  `TSWriter.eventDeclarations()`, as Python says it.
+   * - `ClickEvent = SpellEvent` for one holding only what every event does.
+   * - A class for one holding more, so its fields can be read:  an event is made as a `SpellEvent`, its fields read by
+   *   name, so a class only ever says what it has.
+   * - `""` if none.
+   */
+  eventDeclarations(): string {
+    const basics: string[] = []
+    const classes: string[] = []
+    for (const name of this.project.handledEvents.keys()) {
+      const shape = this.eventShapeOf(name)
+      if (!shape) continue
+      const typeName = this.eventTypeName(name)
+      if (!shape.size) basics.push(`${typeName} = SpellEvent`)
+      else {
+        const fields = [...shape].map(([field, kind]) => {
+          const hint = this.isNameableKind(kind) ? this.hintOf(kind) : undefined
+          return `${this.nameOf(field, "variable")}: ${hint ?? "Any"}`
+        })
+        classes.push(pyText.block(`class ${typeName}(SpellEvent)`, fields.join(pyText.NEWLINE)))
+      }
+    }
+    const written = [...(basics.length ? [basics.join(pyText.NEWLINE)] : []), ...classes]
+    return written.length ? `# what each event this program hears holds\n${written.join("\n\n\n")}` : ""
   }
 
   /**
@@ -1733,16 +1774,6 @@ function isDefinitionStatement(node: P.ASTNode): boolean {
 function textLiteral(node: P.ASTExpression): string | undefined {
   const inner = unwrapped(node)
   return inner instanceof P.ASTStringLiteral && inner.quote ? inner.value : undefined
-}
-
-/** The text `node` says, written out (`"integer"`) -- `undefined` if it isn't text written out. */
-function textValue(node: P.ASTExpression | undefined): string | undefined {
-  const inner = node && unwrapped(node)
-  if (inner instanceof P.ASTStringLiteral) return inner.value
-  if (inner instanceof P.ASTConstantExpression) return String(inner.value)
-  if (!(inner instanceof P.ASTQuotedExpression)) return undefined
-  const quoted = inner.expression
-  return quoted instanceof P.ASTLiteral ? String(quoted.value) : undefined
 }
 
 /**

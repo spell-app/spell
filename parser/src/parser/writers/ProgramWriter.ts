@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { Writer } from "./Writer"
 import {
   alike,
+  eventKey,
   isCoreCall,
   isKnownType,
   kindFromDatatype,
@@ -14,6 +15,33 @@ import {
 } from "./jsShapes"
 import { WriterProject, forEachNode, typeCaseOf, type ProgramPlace } from "./WriterProject"
 import { type Naming, type NameKind } from "./Naming"
+
+/**
+ * The events a thing hears from its page, by name, and what each adds to what every event shares:
+ * `parser/README-spell.md`'s table, "Every event a thing hears".
+ * - Their names are the same in every language.
+ */
+const BUILT_IN_EVENTS: Record<string, Record<string, string>> = {
+  click: {},
+  "double-click": {},
+  "right-click": {},
+  "center-click": {},
+  "mouse-down": {},
+  "mouse-up": {},
+  "mouse-enter": {},
+  "mouse-leave": {},
+  "mouse-still-down": {},
+  "key-down": { key: "text" },
+  drag: {},
+  "drag-cancelled": {}
+}
+
+/** The browser's own types an event's type mustn't hide:  a reader would take `DragEvent` for the browser's. */
+const BROWSER_EVENT_TYPES = new Set(
+  "Animation Clipboard Composition Custom Drag Error Focus Input Keyboard Message Mouse Pointer Progress Storage Submit Toggle Touch Transition UI Wheel"
+    .split(" ")
+    .map((word) => `${word}Event`)
+)
 
 /****************
  * ### `ProgramWriter`
@@ -486,6 +514,74 @@ export abstract class ProgramWriter extends Writer {
       if (found) return this.givenKind(type, name)
     }
     return undefined
+  }
+
+  /**
+   * What event `name` holds, beyond what every event shares, by field:  each one's kind, `undefined` for one that
+   * can't be told -- `undefined` if nothing says what it holds.  From, in order:
+   * - the events a thing hears:  `key down` adds `key`, a click nothing
+   * - what a template's declaration says:  `it sends "flipped" with a side as a direction`
+   * - a property's change:  its new `value`, and what it `was`
+   * - what the program sends with it, each value alike (`trigger card-click with a card`)
+   * - what a handler takes from it:  `on flipped with a side`
+   * - Each writer spells them its own way:  see `TSWriter.eventDeclarations()`.
+   */
+  eventShapeOf(name: string): Map<string, string | undefined> | undefined {
+    const key = eventKey(name)
+    if (this.eventShapes.has(key)) return this.eventShapes.get(key)
+    const { declaredEvents, handledEvents, sentEvents } = this.project
+    const builtIn = BUILT_IN_EVENTS[key]
+    const declared = declaredEvents.get(key)
+    const handled = handledEvents.get(key)
+    const sent = sentEvents.get(key)
+    const isKnown = builtIn || declared || handled?.properties.length || handled?.fields.size || sent
+    const shape = isKnown ? new Map<string, string | undefined>() : undefined
+    if (shape) {
+      for (const [field, type] of Object.entries({ ...builtIn, ...declared })) shape.set(field, kindOfType(type))
+      if (handled?.properties.length) {
+        const kind = alike(new Set(handled.properties.map((it) => this.propertyKindOf(it.typeName, it.name))))
+        shape.set("value", kind).set("was", kind)
+      }
+      for (const [field, given] of sent ?? []) {
+        if (shape.has(field)) continue
+        shape.set(field, alike(new Set(given.map((it) => this.inPlace(it.where, () => this.kindOf(it.value))))))
+      }
+      for (const [field, datatype] of handled?.fields ?? []) {
+        if (!shape.get(field)) shape.set(field, kindOfType(datatype))
+      }
+    }
+    this.eventShapes.set(key, shape)
+    return shape
+  }
+
+  /** Each event worked out so far, by name:  see `eventShapeOf()`. */
+  private eventShapes = new Map<string, Map<string, string | undefined> | undefined>()
+
+  /** The kind of class `typeName`'s property `name`, in that class. */
+  private propertyKindOf(typeName: string, name: string): string | undefined {
+    const property = this.project.propertyOf(typeName, name)
+    return property && this.inPlace({ typeName, methods: [] }, () => this.propertyKind(property))
+  }
+
+  /**
+   * Can a writer name a type for `kind`, a kind `eventShapeOf()` said?
+   * - Spell's own words, a class the project has, a list of values.
+   * - NOT a name a template's declaration says that the project doesn't have:  it's unknown here.
+   */
+  isNameableKind(kind: string | undefined): kind is string {
+    if (!kind) return false
+    return !/^\p{Lu}/u.test(kind) || this.project.isClass(kind) || !!this.valueListOfKind(kind)
+  }
+
+  /**
+   * The type name for event `name`, in every language:  `KeyDownEvent` for `key-down`.
+   * - A name that's taken, by a class the program has or the browser's own (`DragEvent`):  `DragSpellEvent` here.
+   */
+  eventTypeName(name: string): string {
+    const words = eventKey(name).replace(/[^\p{L}\p{M}\d]+/gu, "_")
+    const typeName = `${typeCaseOf(words)}Event`
+    const isTaken = this.project.isClass(typeName) || BROWSER_EVENT_TYPES.has(typeName)
+    return isTaken ? typeName.replace(/Event$/, "SpellEvent") : typeName
   }
 
   /**

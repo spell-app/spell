@@ -2316,10 +2316,10 @@
                   "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event) {\n    return core.console.log(2)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: any ) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: any ) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: any ) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: any ) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: Any) -> Any:\n        return print(2)"
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: DoubleClickEvent) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: DragCancelledEvent) -> Any:\n        return print(2)"
                 }
               }
             },
@@ -2331,10 +2331,10 @@
                   "code": "export class Game extends Thing {\n  static { this.declareProp(\"highScore\", { type: \"number\" }) }\n  get highScore() { return this.getProp(\"highScore\") }\n  set highScore(value) { this.setProp(\"highScore\", value) }\n\n  static { this.declareProp(\"hint\", { type: \"text\" }) }\n  get hint() { return this.getProp(\"hint\") }\n  set hint(value) { this.setProp(\"hint\", value) }\n\n  onHighScoreChange(event) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event) {\n    return core.console.log(this.hint)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Game extends Thing {\n  @prop({ type: \"number\" })\n  accessor highScore!: number\n\n  @prop({ type: \"text\" })\n  accessor hint!: string\n\n  onHighScoreChange(event: any ) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event: any ) {\n    return core.console.log(this.hint)\n  }\n}"
+                  "code": "export class Game extends Thing {\n  @prop({ type: \"number\" })\n  accessor highScore!: number\n\n  @prop({ type: \"text\" })\n  accessor hint!: string\n\n  onHighScoreChange(event: HighScoreChangeEvent) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event: HintChangeEvent) {\n    return core.console.log(this.hint)\n  }\n}"
                 },
                 "py": {
-                  "code": "class Game(Thing):\n    high_score = prop(type=\"number\")\n\n    hint = prop(type=\"text\")\n\n    def on_high_score_change(self, event: Any) -> None:\n        self.hint = \"Best yet!\"\n\n    def on_hint_change(self, event: Any) -> Any:\n        return print(self.hint)"
+                  "code": "class Game(Thing):\n    high_score = prop(type=\"number\")\n\n    hint = prop(type=\"text\")\n\n    def on_high_score_change(self, event: HighScoreChangeEvent) -> None:\n        self.hint = \"Best yet!\"\n\n    def on_hint_change(self, event: HintChangeEvent) -> Any:\n        return print(self.hint)"
                 }
               }
             },

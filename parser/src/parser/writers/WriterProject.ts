@@ -1,5 +1,5 @@
 import { P } from "spell/parser/parser"
-import { isCoreCall, unwrapped } from "./jsShapes"
+import { eventKey, isCoreCall, textValue, unwrapped } from "./jsShapes"
 
 /****************
  * ### `WriterProject`
@@ -106,6 +106,15 @@ export class WriterProject {
    * - Set on one:  `set the name of the pile to ...`.
    */
   readonly givenValues = new Map<string, GivenValue[]>()
+  /**
+   * The events the program's templates handle, by name, each with what its handlers say:
+   * e.g. `score-change`, its property, and `with` fields -- see `ProgramWriter.eventShapeOf()`.
+   */
+  readonly handledEvents = new Map<string, EventHandlers>()
+  /** What each template's declaration says comes with an event, by its name:  `flipped` => `{ side: "Direction" }`. */
+  readonly declaredEvents = new Map<string, Record<string, string>>()
+  /** What the program sends with each event, by its name, then the field:  `trigger` and `send`'s `with` properties. */
+  readonly sentEvents = new Map<string, Map<string, GivenValue[]>>()
   /** The spell names of the functions and methods that wait -- see `findWaiting()`. */
   readonly waitingNames = new Set<string>()
   /** The functions that wait, as the tree holds them. */
@@ -684,6 +693,7 @@ export class WriterProject {
       return
     }
     if (!(node instanceof P.ASTNode)) return
+    this.noteEvent(node, where)
     if (node instanceof P.ASTClassDeclaration) where = { ...where, typeName: node.type.name }
     else if (node instanceof P.ASTClassMember) where = { ...where, typeName: node.typeName }
     else if (node instanceof P.ASTMethodDefinition) where = { ...where, methods: [...where.methods, node] }
@@ -698,6 +708,53 @@ export class WriterProject {
     }
     for (const [key, value] of Object.entries(node)) {
       if (key !== "match") this.noteGivenValues(value, where)
+    }
+  }
+
+  /** SIDE EFFECT:  notes what `node` says of an event:  in `handledEvents`, `declaredEvents` or `sentEvents`. */
+  private noteEvent(node: P.ASTNode, where: ProgramPlace) {
+    if (node instanceof P.ASTTypeDescription && node.describes === "event") {
+      const params = (node.description.params ?? {}) as Record<string, string>
+      this.declaredEvents.set(eventKey(node.name), { ...this.declaredEvents.get(eventKey(node.name)), ...params })
+    } else if (node instanceof P.ASTMethodDefinition && node.args?.[0]?.handles) {
+      this.noteHandler(node, node.args[0].handles, where)
+    } else if (isCoreCall(node)) {
+      const { methodName, args } = node as P.ASTScopedMethodInvocation
+      if (methodName !== "send" && methodName !== "trigger") return
+      const [name, props] = methodName === "send" ? (args.args ?? []).slice(1) : (args.args ?? [])
+      this.noteSent(name, props, where)
+    }
+  }
+
+  /** SIDE EFFECT:  notes handler `method` of the event `handles` says, and what it says comes with it. */
+  private noteHandler(method: P.ASTMethodDefinition, handles: P.HandledEvent, where: ProgramPlace) {
+    const key = eventKey(handles.event)
+    const handlers: EventHandlers = this.handledEvents.get(key) ?? { properties: [], fields: new Map() }
+    this.handledEvents.set(key, handlers)
+    if (handles.changedProperty && where.typeName) {
+      handlers.properties.push({ typeName: where.typeName, name: handles.changedProperty })
+    }
+    const [first] = (method.body.statements ?? []).filter((it) => !(it instanceof P.ASTBlankLine))
+    if (!(first instanceof P.ASTDestructuredAssignment)) return
+    for (const variable of first.variables) {
+      handlers.fields.set(variable.name, variable.datatype ?? variable.variable?.datatype)
+    }
+  }
+
+  /** SIDE EFFECT:  notes what a `send` or `trigger` of event `name` gives each of `props`' fields. */
+  private noteSent(name: P.ASTExpression | undefined, props: P.ASTExpression | undefined, where: ProgramPlace) {
+    const text = textValue(name)
+    if (text === undefined) return
+    const key = eventKey(text)
+    const fields = this.sentEvents.get(key) ?? new Map<string, GivenValue[]>()
+    this.sentEvents.set(key, fields)
+    const literal = props && unwrapped(props)
+    if (!(literal instanceof P.ASTObjectLiteral)) return
+    for (const property of literal.properties) {
+      if (!(property instanceof P.ASTObjectLiteralProperty)) continue
+      const field = property.property.value
+      const value = property.value ?? new P.ASTVariableExpression(property.match, { name: field })
+      fields.set(field, [...(fields.get(field) ?? []), { value, where }])
     }
   }
 
@@ -776,6 +833,14 @@ export type TSUndeclared = {
   method?: P.ASTMethodDefinition
   /** For a method:  each class defining it, with its definition there.  What they all return types it (Q54). */
   definitions?: Array<{ type: string; method: P.ASTMethodDefinition }>
+}
+
+/** What a program's handlers of one event say -- see `WriterProject.handledEvents`. */
+export type EventHandlers = {
+  /** For a property's change, `score-change`:  each class and property it's the change of. */
+  properties: Array<{ typeName: string; name: string }>
+  /** Each field a handler takes, `with a card`, and its datatype, if it says. */
+  fields: Map<string, P.Datatype | RegExpConstructor | undefined>
 }
 
 /**
