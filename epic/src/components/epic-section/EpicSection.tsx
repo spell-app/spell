@@ -868,7 +868,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** A marked note, at the top of its body. */
   private saidNote(): JSX.Element {
     return (
-      <Show when={this.reviewState.reviewing() && this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+      <Show when={this.reviewState.reviewing() && (this.reviewState.noted() || this.reviewState.takenNote())}>
+        {this.reviewControl("said", "said")}
+      </Show>
     )
   }
 

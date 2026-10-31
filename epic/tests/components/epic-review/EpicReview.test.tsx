@@ -36,6 +36,7 @@ class FakeRoutes {
     sent: null,
     now: [],
     working: {},
+    taken: {},
     listening: null,
     lastListener: null,
     unsentComments: [],
@@ -631,6 +632,53 @@ describe("<epic-item> review controls", () => {
       (it) => it.getAttribute("part") ?? `slot:${it.getAttribute("name")}`
     )
     expect(parts.slice(-3)).toEqual(["said", "slot:status", "note-box"])
+  })
+
+  // epic `epic-engine` I190 (Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows
+  // in the comment box")
+  test("a note Claude TOOK:  the box empties, the note shows quiet and read-only above the status card;  typing is a new mark", async () => {
+    const client = await adoptClient()
+    const host = await render(`<epic-item id="q11" title="Panes float?" status="open" open><p>Text</p>
+      <epic-status slot="status" state="underway" at="2026-10-31 10:16">Weighing it.</epic-status></epic-item>`)
+    const field = () =>
+      deep(host).querySelector<HTMLTextAreaElement>(
+        "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
+      )!
+    button(host, "revisit").click()
+    await settle()
+    field().value = "some themes want them attached"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() => expect(routes.inbox.marks.q11?.note).toBe("some themes want them attached"))
+    // sent, then taken:  its agent at work, and the inbox keeps the mark it took
+    routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
+    routes.inbox.working.q11 = { action: "revisit", since: routes.inbox.sent }
+    routes.inbox.taken.q11 = routes.inbox.marks.q11!
+    await client.refresh()
+    await settle()
+    await vi.waitFor(() => expect(field().value).toBe(""))
+    expect(deep(host).querySelector("[part~='said'] >>> [part~='base']")).toBeNull()
+    const taken = deep(host).querySelector("[part~='said'] >>> [part~='taken']")!
+    expect(taken.textContent).toMatch(/^You, \d+:\d\d ·\s*some themes want them attached$/)
+    expect(taken.querySelector("button")).toBeNull()
+    // the order:  the taken note, Claude's status card, the empty box
+    const parts = Array.from(
+      deep(host).querySelector("[part~='details']")!.children,
+      (it) => it.getAttribute("part") ?? `slot:${it.getAttribute("name")}`
+    )
+    expect(parts.slice(-3)).toEqual(["said", "slot:status", "note-box"])
+    // the box's Later doesn't wear the taken mark
+    expect(deep(host).querySelector("[part~='note-box'] >>> [part~='base']")!.hasAttribute("data-mark")).toBe(false)
+    // a new note:  a new revisit waiting for Send, the taken one still shown
+    field().value = "and float for others"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() =>
+      expect(routes.inbox.marks.q11).toMatchObject({ action: "revisit", when: "soon", note: "and float for others" })
+    )
+    expect(deep(host).querySelector("[part~='said'] >>> [part~='taken']")!.textContent).toContain(
+      "some themes want them attached"
+    )
   })
 
   test("the review label goes:  each review button's tooltip says it (`Approve:  Fine as it is · reviewed 10/7/26`)", async () => {

@@ -859,7 +859,8 @@ export class PlanDocCommands {
       if (done.closed) said = "done, closed"
     } else
       throw new PlanDocError(`epic update <name>#${id} underway | done | noted, not '${state ?? ""}'  (${USAGE_HINT})`)
-    this.inbox.setWorking(file, id, state === "underway")
+    // a status card says Claude has the item's mark:  the page shows it taken (I190)
+    this.inbox.setWorking(file, id, state === "underway", { took: true })
     this.print(`${id.toUpperCase()} ${said}:  ${title}`)
   }
 

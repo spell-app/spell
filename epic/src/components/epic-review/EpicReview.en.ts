@@ -106,6 +106,11 @@ export const epicReviewVocabulary = {
       name: "base",
       description:
         "What it draws:  the buttons' group (`shows=buttons`), the note box (`note`), or the marked note (`said`)."
+    },
+    {
+      name: "taken",
+      description:
+        "With `shows=said`:  the note Claude took and is answering, quiet and read-only, above the marked note (I190)."
     }
   ],
   states: [],

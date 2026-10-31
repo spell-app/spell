@@ -456,6 +456,22 @@
     border: none;
     border-radius: 0;
   }
+  /*
+   * The note Claude took (I190):  QUIET and read-only, "You, 10:11 · the note", no box, no ivory:
+   * a record of what Claude is answering, not something to act on
+   */
+  .said.said-taken {
+    margin: 4px 0 2px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--_epic-act-ivory-ink);
+    font-size: 13px;
+  }
+  .said-who {
+    flex: none;
+    font-weight: 600;
+  }
   .said > ui-icon {
     flex: none;
     align-self: center;

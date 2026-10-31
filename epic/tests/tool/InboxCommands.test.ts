@@ -259,6 +259,28 @@ test("done:  a Do Now request done is `review-as=now`;  a revisit talked over, `
   expect(["j1", "j2"].map((id) => plan.findItem(id)!.getAttribute("state"))).not.toContain("recent")
 })
 
+// epic `epic-engine` I190:  a note Claude TOOK, and a new one Owen typed while it was answered
+test("status takes the item's sent mark;  done keeps the taken note in the doc, and the new mark for the next send", async () => {
+  const owner = commands()
+  vi.spyOn(owner, "warn").mockImplementation(() => undefined)
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "revisit", when: "soon", note: "float them" }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await owner.run(["status", "x", "j1", "noted", "Taken:  floating panes."])).toBe(0)
+  // a status card says Claude has it, even with no agent at work
+  expect(ReviewInbox.read(inboxFile).taken.j1?.note).toBe("float them")
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("j1", { action: "revisit", when: "soon", note: "attached for some themes" }, M3)
+  })
+  await owner.inbox.run("x", file, ["done", "j1"], {})
+  const after = ReviewInbox.read(inboxFile)
+  expect([after.marks.j1?.note, after.taken.j1]).toEqual(["attached for some themes", undefined])
+  // the note Claude answered is kept in the item, as Owen's reply
+  const replies = PlanDoc.parse(readFileSync(file, "utf8")).findItem("j1")!.querySelectorAll('epic-reply[from="Owen"]')
+  expect([...replies].map((reply) => reply.textContent)).toEqual(["float them"])
+})
+
 test("done C1 --file:  the answer goes on the comment's thread;  Owen's reply lists it as waiting again", async () => {
   const id = "c1"
   ReviewInbox.update(inboxFile, (inbox) => void inbox.commentList.add({ anchor: "j1", kind: "item" }, "Why?"))

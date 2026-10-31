@@ -293,8 +293,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return {}
   }
 
-  /** Shows Owen's marked note in its details, after the replies (the review's `said` note). */
-  readonly saidShows = createMemo(() => this.reviewState.reviewing() && this.hasDetails() && !!this.reviewState.noted())
+  /** Has it a note to show above its status cards:  marked (`noted()`), or taken by Claude (`takenNote()`, I190)? */
+  readonly hasSaid = createMemo(() => !!this.reviewState.noted() || !!this.reviewState.takenNote())
+
+  /**
+   * Shows Owen's marked note in its details, after the replies (the review's `said` note):
+   * one waiting for Claude, or one Claude took and is answering (I190).
+   */
+  readonly saidShows = createMemo(() => this.reviewState.reviewing() && this.hasDetails() && this.hasSaid())
 
   /**
    * How it draws the talk after its question (epic `epic-engine` P27):  the thread, the status lines, a drive-by's,
@@ -661,12 +667,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * A marked note, its box closed:  just above the note box;  nothing without one.
+   * A marked note, its box closed, or the note Claude took (I190):  just above the status cards;  nothing without one.
    * - in the item's thread, after its replies:  inside the thread's frame (`in-thread`;  `thread-end` when no status
    *   line follows it), hidden while the thread's head is folded (`thread-hidden`)
    */
   private saidNote(): JSX.Element {
-    return <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+    return <Show when={this.hasSaid()}>{this.reviewControl("said", "said")}</Show>
   }
 
   /**

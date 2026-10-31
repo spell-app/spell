@@ -154,11 +154,19 @@ export class InboxCommands {
     return plan.phase(plan.phasePlace(key)).id
   }
 
-  setWorking(file: string, id: string, on: boolean): void {
+  /**
+   * Item (or comment) `id` on epic page `file` worked on (`on`) or not.
+   * - `took`:  its mark was TAKEN (`ReviewInbox.takeMark()`, epic `epic-engine` I190), working or not:
+   *   a status card written for it (`epic update <name>#<id> done`) says Claude has it
+   */
+  setWorking(file: string, id: string, on: boolean, { took = false }: { took?: boolean } = {}): void {
     const key = ReviewInbox.toItemId(id)
     ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
       if (CommentList.isCommentId(key)) box.commentList.setWorking(key, on)
-      else box.setWorking(key, on ? workOf(box.marks[key]) : null)
+      else {
+        if (took) box.takeMark(key)
+        box.setWorking(key, on ? workOf(box.marks[key]) : null)
+      }
       box.touchListening()
     })
   }
@@ -618,6 +626,12 @@ export class InboxCommands {
       notes = had
         .filter((id) => before[id]?.note && before[id]?.action !== "new")
         .map((id) => ({ id, mark: before[id] as KeptNote }))
+      // the note Claude took, where Owen marked the item again meanwhile (I190):  kept in the doc too, as it's answered
+      for (const id of kept) {
+        const taken = box.taken[id]
+        if (taken?.note && taken.at !== box.marks[id]?.at) notes.push({ id, mark: taken as KeptNote })
+        delete box.taken[id]
+      }
       handled = had.flatMap((id): { id: string; as: "now" | "revisit" }[] => {
         const mark = before[id]
         if (mark && ReviewInbox.isImmediate(mark)) return [{ id, as: "now" }]

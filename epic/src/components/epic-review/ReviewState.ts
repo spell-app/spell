@@ -97,6 +97,15 @@ export class ReviewState {
   /** Its mark, if any. */
   readonly mark = (): InboxMark | undefined => this.read((client, id) => client.markOf(id))
 
+  /** Its mark while it's still Owen's to change:  none once Claude took it (`ReviewClient.ownMarkOf()`, I190). */
+  readonly ownMark = (): InboxMark | undefined => this.read((client, id) => client.ownMarkOf(id))
+
+  /**
+   * The note Claude TOOK on it and is answering (`ReviewClient.takenNoteOf()`, epic `epic-engine` I190):
+   * shown read-only above its status card, its note box empty for a new note;  else `undefined`.
+   */
+  readonly takenNote = (): InboxMark | undefined => this.read((client, id) => client.takenNoteOf(id))
+
   /** Its saved draft, if any. */
   readonly draft = (): InboxDraft | undefined => this.read((client, id) => client.draftOf(id))
 
@@ -158,9 +167,10 @@ export class ReviewState {
   /**
    * Its mark, while it shows as a marked note (`<epic-review shows="said">`):
    * a mark with a note or a picture (epic `epic-engine` P51), no draft, the box closed;  else `undefined`.
+   * - not one Claude took (`takenNote()`, I190):  that one shows read-only, without Edit
    */
   readonly noted = (): InboxMark | undefined => {
-    const mark = this.mark()
+    const mark = this.ownMark()
     return (mark?.note || (mark?.shot && mark.action !== "test")) && !this.draft() && !this.boxOpen() ? mark : undefined
   }
 
