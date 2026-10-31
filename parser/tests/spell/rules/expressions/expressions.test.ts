@@ -109,6 +109,7 @@ describe("priority and precedence", () => {
         "menu_bar:  Priority.declaration",
         "min:  Priority.specific",
         "minus:  Precedence.sum",
+        "my_field:  Priority.overridable",
         "on:  Priority.preferred",
         "operation_at:  Priority.declaration",
         "or:  Precedence.or",

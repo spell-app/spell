@@ -868,7 +868,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -5771,7 +5771,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -5930,12 +5930,12 @@
           "ruleNames": ["current_person"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 16,
-          "purpose": "Who's at this page (epic `data` P13).",
+          "line": 18,
+          "purpose": "Who's at this page (epic `data` P13, Owen's `me`, T48).",
           "syntaxes": [
             {
-              "syntax": "the current person",
-              "example": "the current person",
+              "syntax": "me",
+              "example": "me",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson()"
@@ -5952,11 +5952,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "MyField",
+          "ruleNames": ["my_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 47,
+          "purpose": "Something about who's at this page (T48).",
+          "syntaxes": [
+            {
+              "syntax": "my {field:member_words}",
+              "example": "my name",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson().name"
+                },
+                "ts": {
+                  "code": "core.currentPerson().name"
+                },
+                "py": {
+                  "code": "core.current_person().name"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PeopleHere",
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 33,
+          "line": 94,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
@@ -6138,11 +6164,11 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 19,
-          "purpose": "Where an action declared under a place goes (epic `data` Q14, Q17's option A).",
+          "line": 33,
+          "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
-              "syntax": "it is at {path:text}"
+              "syntax": "to {signature:method_signature} is at {path:text}"
             }
           ],
           "aliases": ["statement"]

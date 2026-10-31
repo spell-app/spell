@@ -7,7 +7,7 @@ caja en vivo es una aplicación:
 	- para agregar una:
 		agregar (una nueva receta con título = "Nueva") a las recetas
 	- para dibujarla:
-		<ui-text class="me">{el nombre de la persona actual}</ui-text>
+		<ui-text class="me">{mi nombre}</ui-text>
 		para cada persona en las personas presentes
 			<ui-label class="here">{el nombre de la persona}</ui-label>
 		<ui-text class="news">{sus noticias}</ui-text>

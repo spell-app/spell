@@ -525,6 +525,18 @@ export class WriterProject {
   }
 
   /**
+   * SIDE EFFECT:  `superType` is what `typeName` is made from.
+   * - NEVER one that closes a loop:  `app is an app`, which won't compile, is still written.  Every walk up `superTypes` ends
+   *   only because there's none, so one such type would hang the compiler.
+   */
+  private noteSuperType(typeName: string, superType: string): void {
+    for (let type: string | undefined = superType; type; type = this.superTypes.get(type)) {
+      if (type === typeName) return
+    }
+    this.superTypes.set(typeName, superType)
+  }
+
+  /**
    * SIDE EFFECT:  notes what the types `layer` declares say they have.
    * - Each type NOT in `written` (the classes the files declare), and not noted already, is noted as imported:
    *   its members in `importedMembers`, its super-type in `superTypes`.
@@ -546,7 +558,7 @@ export class WriterProject {
       }
       if (written.has(type.name) || this.importedMembers.has(type.name)) continue
       this.importedMembers.set(type.name, members)
-      if (type.superType) this.superTypes.set(type.name, type.superType)
+      if (type.superType) this.noteSuperType(type.name, type.superType)
     }
   }
 
@@ -583,7 +595,7 @@ export class WriterProject {
 
   /** SIDE EFFECT:  notes `declaration`'s item type, and the lists its properties' values come from. */
   private noteClass(declaration: P.ASTClassDeclaration, classes: Map<string, P.ASTClassDeclaration>) {
-    if (declaration.superType) this.superTypes.set(declaration.type.name, declaration.superType.name)
+    if (declaration.superType) this.noteSuperType(declaration.type.name, declaration.superType.name)
     const members = [...(declaration.members ?? []), ...(this.movedMembers.get(declaration.type.name) ?? [])]
     for (const member of members) {
       if (member instanceof P.ASTStaticDefinition && isListLiteral(member.value)) {

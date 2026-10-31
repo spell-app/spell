@@ -5,7 +5,7 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/LiveRoom.spell", start: 825, end: 844 } })
+  @prop({ type: "text", declaredAt: { path: "/LiveRoom.spell", start: 802, end: 821 } })
   accessor title!: string
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {

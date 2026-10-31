@@ -102,12 +102,71 @@ describe("the words compile", () => {
     expect(compiled('book is a live room at "/x"', "print the people here").warnings.join()).not.toMatch(
       /only ever you/
     )
-    expect(compiled(SAVED, "print the current person").js).toContain("core.currentPerson()")
+    expect(compiled(SAVED, "print me").js).toContain("core.currentPerson()")
+  })
+
+  it("`me` and `my name` are who's at this page", () => {
+    const { js, errors } = compiled(SAVED, "print me", "print my name", "print my id", "print the name of me")
+    expect(errors).toEqual([])
+    expect(js).toContain("core.console.log(core.currentPerson())")
+    expect(js).toContain("core.console.log(core.currentPerson().name)")
+    expect(js).toContain("core.console.log(core.currentPerson().id)")
+  })
+
+  it("`its cook is me` asks by who they are:  what's saved of a person comes back a new object", () => {
+    const { js, errors } = compiled(
+      SAVED,
+      "print every recipe where its cook is me",
+      "print every recipe where its cook isn't me",
+      "add (a new recipe with cook = me) to the recipes"
+    )
+    expect(errors).toEqual([])
+    expect(js).toContain("core.isMe(recipe.cook)")
+    expect(js).toContain("!core.isMe(recipe.cook)")
+    expect(js).toContain("new Recipe({ cook: core.currentPerson() })")
+  })
+
+  it("Spanish says `soy yo`", () => {
+    const { js, errors } = compiledEs(
+      'recetario es una sala en vivo en "/x"',
+      "una receta es una cosa:",
+      "\t- se guarda en el recetario",
+      '\t- su "título" es texto',
+      "imprimir cada receta donde su título soy yo",
+      "imprimir cada receta donde su título no soy yo"
+    )
+    expect(errors).toEqual([])
+    expect(js).toContain("core.isMe(receta.título)")
+    expect(js).toContain("!core.isMe(receta.título)")
+  })
+
+  it("`my` only reads what a person has", () => {
+    expect(compiled("print my recipes").errors.join()).toMatch(/print my recipes/)
+    expect(compiledEs("imprimir mis recetas").errors.join()).toMatch(/mis recetas/)
   })
 
   it("a program's own words win", () => {
-    const { js } = compiled('set current person to "me"', "print the current person")
-    expect(js).not.toContain("core.currentPerson()")
+    const variable = compiled("set me to 3", "print me").js
+    expect(variable).not.toContain("core.currentPerson()")
+
+    const own = compiled(
+      "a card is a thing:",
+      '\t- its "me" is text',
+      '\t- its "my name" is text',
+      "\t- to go:",
+      "\t\tprint me",
+      "\t\tprint my name"
+    ).js
+    expect(own).not.toContain("core.currentPerson()")
+    expect(own).toContain("core.console.log(this.me)")
+    expect(own).toContain("core.console.log(this.myName)")
+
+    const actions = compiled("to show me:", "\tprint 1", "show me", "to draw my hand:", "\tprint 2", "draw my hand").js
+    expect(actions).toContain("showMe()")
+    expect(actions).toContain("drawMyHand()")
+
+    const argument = compiled("to greet (me as text):", "\tprint me").js
+    expect(argument).not.toContain("core.currentPerson()")
   })
 
   it("Spanish:  `lo` or `la`, with its type's gender", () => {
@@ -121,7 +180,8 @@ describe("the words compile", () => {
         "\t\timprimir su título",
         "cuando cambia una receta:",
         "\timprimir 1",
-        "imprimir la persona actual",
+        "imprimir yo",
+        "imprimir mi nombre",
         "imprimir las personas presentes"
       )
     expect(es("la").errors).toEqual([])
@@ -130,6 +190,148 @@ describe("the words compile", () => {
     expect(es("la").js).toContain('on("a-receta-change"')
     expect(es("la").js).toContain("core.currentPerson()")
     expect(es("la").js).toContain("core.peopleHere()")
+    expect(es("la").js).toContain("core.currentPerson().name")
     expect(es("lo").warnings.join()).toMatch(/"la"/)
+  })
+})
+
+describe("an action at a place's address (Q17's C)", () => {
+  const PLACE = [
+    'family cookbook is a web service at "https://example.com":',
+    "\t- it is checked every 5 seconds",
+    '\t- to publish a recipe is at "/recipes/publish"',
+    '\t- to refresh is at "/recipes/refresh"'
+  ]
+  const RECIPE = ["a recipe is a thing:", "\t- it is saved in the family cookbook", '\t- its "title" is text']
+
+  it("a known type's name is what's sent;  with none, nothing is", () => {
+    const { js, errors, warnings } = compiled(...PLACE, ...RECIPE, "to go:", "\tpublish (a new recipe)", "\trefresh")
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+    expect(js).toContain('operations: { publish: "/recipes/publish", refresh: "/recipes/refresh" }')
+    expect(js).toContain('return await core.callPlace("family_cookbook", "publish", this)')
+    expect(js).toContain(
+      'export async function refresh() {\n  return await core.callPlace("family_cookbook", "refresh")'
+    )
+    expect(js).toContain("await (new Recipe()).publish()")
+    expect(js).toContain("await refresh()")
+  })
+
+  it("is known below its line:  a place's lines come first, as a saved type needs them to", () => {
+    const { errors } = compiled("to go:", "\trefresh", ...PLACE)
+    expect(errors.join()).toMatch(/refresh/)
+  })
+
+  it("Spanish", () => {
+    const { js, errors, warnings } = compiledEs(
+      'recetario familiar es un servicio web en "https://example.com":',
+      "\t- se revisa cada 5 segundos",
+      '\t- para publicar una receta está en "/recetas/publicar"',
+      '\t- para recargar está en "/recetas/recargar"',
+      "una receta es una cosa:",
+      "\t- se guarda en el recetario familiar",
+      '\t- su "título" es texto',
+      "para ir:",
+      "\tpublicar (una nueva receta)",
+      "\trecargar"
+    )
+    expect(errors).toEqual([])
+    expect(warnings).toEqual([])
+    expect(js).toContain('return await core.callPlace("recetario_familiar", "publicar", this)')
+    expect(js).toContain('core.callPlace("recetario_familiar", "recargar")')
+  })
+
+  it("only there:  anywhere else it warns, and does nothing", () => {
+    const { js, errors, warnings } = compiled("a recipe is a thing", 'to publish a recipe is at "/x"')
+    expect(errors).toEqual([])
+    expect(warnings.join()).toMatch(/under that place/)
+    expect(js).not.toContain("callPlace")
+    expect(compiledEs("una receta es una cosa", 'para publicar una receta está en "/x"').warnings.join()).toMatch(
+      /debajo de ese lugar/
+    )
+  })
+
+  it("a kind of place that can't take one says so", () => {
+    expect(compiled('book is a folder at "/x":', '\t- to refresh is at "/y"').warnings.join()).toMatch(
+      /takes no action/
+    )
+  })
+
+  it("doesn't change an action, and its body still reads", () => {
+    const { js, errors } = compiled(
+      "a card is a thing",
+      "to deal a card:",
+      "\tprint 1",
+      "to find who is here:",
+      "\tprint 2"
+    )
+    expect(errors).toEqual([])
+    expect(js).not.toContain("callPlace")
+    expect(js).toContain("deal()")
+    expect(js).toContain("findWhoIsHere()")
+  })
+
+  it("what a place sends is read whole, whatever the program reads of it", () => {
+    const { js } = compiled(...PLACE, ...RECIPE, "print every recipe")
+    expect(js).toContain('static savedIn = { place: "family_cookbook", collection: "recipes" }')
+  })
+
+  it("the two-line form is gone", () => {
+    const { errors } = compiled(...PLACE, "\t- to send a recipe:", '\t\t- it is at "/x"', ...RECIPE)
+    expect(errors.join()).toMatch(/Don't understand/)
+  })
+})
+
+describe("a type made from itself (T50)", () => {
+  it("won't compile, and doesn't hang:  each walk up a type's parents ended only at one with none", () => {
+    const hung = "app is an app:\n\t- to go:\n\t\tif it is empty:\n\t\t\tprint 1\nstart the app"
+    const { errors } = compiled(hung)
+    expect(errors.join()).toMatch(/made from itself/)
+    expect(compiledEs("aplicación es una aplicación:", "\t- para ir:", "\t\timprimir 1").errors.join()).toMatch(
+      /de sí mismo/
+    )
+  })
+
+  it("two types made from each other don't hang either", () => {
+    const { errors } = compiled(
+      "a tick is a tock:",
+      "\t- to go:",
+      "\t\tif it is empty:",
+      "\t\t\tprint 1",
+      "a tock is a tick"
+    )
+    expect(errors).toEqual([])
+  })
+})
+
+describe("drawing the items of something with none", () => {
+  it("a thing that isn't a list won't compile, saying so", () => {
+    const lines = [
+      "a recipe is a thing:",
+      '\t- its "title" is text',
+      "\t- to draw its fields:",
+      "\t\t<ui-text>x</ui-text>"
+    ]
+    const { errors } = compiled(
+      ...lines,
+      "a box is a thing:",
+      '\t- its "new recipe" is a new recipe',
+      "\t- to draw it:",
+      "\t\tdraw the fields of its new recipe"
+    )
+    expect(errors.join()).toMatch(/isn't a list/)
+  })
+
+  it("a list still draws its items", () => {
+    const { js, errors } = compiled(
+      "a card is a thing",
+      'a "pile" is a list of cards',
+      "a box is a thing:",
+      '\t- its "pile" is a new pile',
+      "\t- to draw it:",
+      "\t\tdraw the cards of its pile"
+    )
+    expect(errors).toEqual([])
+    expect(js).toContain("core.drawItems(this.pile)")
   })
 })

@@ -71,6 +71,12 @@ export const PARSER_MESSAGES = {
     "A {kind} can't announce what's changed, so this would never run:  add \"- it is checked every 30 seconds\" under it",
   /** `the people here`, with no place that knows. */
   "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a live room",
+  /** `to publish a recipe is at "..."`, with no place above it. */
+  "operation-outside-place":
+    "This action reaches a place only on a line under that place, so here it does nothing:  move it under the place",
+  /** `to publish a recipe is at "..."`, under a kind of place that has no addresses of its own:  `{kind}`. */
+  "operation-not-taken":
+    "A {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web service",
   /** A `where` on a saved type that can't go to its place. */
   "where-looks-through":
     "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
@@ -193,6 +199,12 @@ export const PARSER_MESSAGES = {
   "on-line": "on line {line}",
   "on-line-of-file": "on line {line} of {file}",
   /** `a thing is saved inline`. */
+  /** `app is an app`:  `{name}`, a type made from a type of its own name. */
+  /** `draw the fields of its new recipe`:  `{type}`, which isn't a list. */
+  "draw-items-of-a-thing":
+    "A {type} isn't a list, so it has no items to draw:  a drawing of its own is drawn by it, in its own lines",
+  "type-from-itself":
+    'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",

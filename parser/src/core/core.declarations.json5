@@ -2741,7 +2741,19 @@
       "name": "currentPerson",
       "of": "core",
       "module": "saved",
-      "description": "Who's at this page:  what `the current person` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+      "description": "Who's at this page:  what `me` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+    },
+    {
+      "kind": "method",
+      "name": "isMe",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "description": "Is `value` the person at this page:  what `its cook is me` compiles to."
     },
     {
       "kind": "method",
@@ -2809,7 +2821,7 @@
           "name": "input"
         }
       ],
-      "description": "`run`, through the place named `placeName`, by the operation `name`:  what an action under a place's line compiles to."
+      "description": "Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at \"...\"` compiles to."
     },
     {
       "kind": "method",

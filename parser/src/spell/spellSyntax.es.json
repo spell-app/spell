@@ -884,7 +884,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1285,7 +1285,7 @@
           "purpose": "A word and its negated forms, e.g. `is_or_is_not`: `(is|(negated:is not|isn't|isnt))`.",
           "syntaxes": [
             {
-              "syntax": "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
+              "syntax": "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
             },
             {
               "syntax": "(es un|es una|son unos|son unas|son|(negated:no es un|no es una|no son unos|no son unas|no son))"
@@ -5810,7 +5810,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -5969,12 +5969,12 @@
           "ruleNames": ["current_person"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 16,
-          "purpose": "Who's at this page (epic `data` P13).",
+          "line": 18,
+          "purpose": "Who's at this page (epic `data` P13, Owen's `me`, T48).",
           "syntaxes": [
             {
-              "syntax": "la persona actual",
-              "example": "la persona actual",
+              "syntax": "yo",
+              "example": "yo",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson()"
@@ -5991,11 +5991,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "MyField",
+          "ruleNames": ["my_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 47,
+          "purpose": "Something about who's at this page (T48).",
+          "syntaxes": [
+            {
+              "syntax": "mi {field:member_words}",
+              "example": "mi nombre",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson().name"
+                },
+                "ts": {
+                  "code": "core.currentPerson().name"
+                },
+                "py": {
+                  "code": "core.current_person().name"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PeopleHere",
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 33,
+          "line": 94,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
@@ -6177,11 +6203,11 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 19,
-          "purpose": "Where an action declared under a place goes (epic `data` Q14, Q17's option A).",
+          "line": 33,
+          "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
-              "syntax": "está en {path:text}"
+              "syntax": "para {signature:method_signature} está en {path:text}"
             }
           ],
           "aliases": ["statement"]

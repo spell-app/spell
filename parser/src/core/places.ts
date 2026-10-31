@@ -462,6 +462,15 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     return this.writer.jsonFor(value)
   }
 
+  /**
+   * What a named operation sends of `value`:  a thing as its whole row, with its id, as a server can't look up our references.
+   * - Anything else as a row holds it.
+   */
+  rowSent(value: unknown): unknown {
+    if (!(value instanceof Thing)) return this.rowValue(value)
+    return { id: value.id, ...this.writer.rowFor(value) }
+  }
+
   /** `json`, as `Loader` reads it:  what's kept of a draft, brought back. */
   fieldValue(thing: SpellObject, key: string, json: unknown): unknown {
     return dateIfDeclared(thing.constructor as never, key, this.read(json))

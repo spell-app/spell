@@ -234,21 +234,21 @@ const LINES: Line[] = [
     es: `recetario familiar es un servicio web en "https://api.example.com/v1":
 	- para publicar (una receta) está en "/recetas/publicar"`,
     at: "top",
-    today: "fails",
-    withRule: "fails",
-    note: "Q14's form:  `to ...` takes every word up to the text as the action's name.  See Q17 for what reads instead"
+    today: "compiles",
+    withRule: "compiles",
+    note: "Q14's form, with its parentheses, still reads"
   },
   {
     en: `family cookbook is a web service at "https://api.example.com/v1":
-	- to publish (a recipe):
-		- it is at "/recipes/publish"`,
+	- to publish a recipe is at "/recipes/publish"
+	- to refresh is at "/recipes/refresh"`,
     es: `recetario familiar es un servicio web en "https://api.example.com/v1":
-	- para publicar (una receta):
-		- está en "/recetas/publicar"`,
+	- para publicar una receta está en "/recetas/publicar"
+	- para recargar está en "/recetas/recargar"`,
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
-    note: "the same, as an action with a detail, as `- undone as` is:  Q17's recommended form"
+    note: "Q17's C:  one line, no parentheses;  a known type's name is what's sent, and with none, nothing is.  Only under a place"
   },
   {
     en: "family cookbook is the cloud",
@@ -448,8 +448,8 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: "add (a new recipe with title = the draft, cook = the current person) to the recipes",
-    es: "agregar (una nueva receta con título = el borrador, cocinero = la persona actual) a las recetas",
+    en: "add (a new recipe with title = the draft, cook = me) to the recipes",
+    es: "agregar (una nueva receta con título = el borrador, cocinero = yo) a las recetas",
     at: "action",
     today: "compiles",
     withRule: "compiles",
@@ -531,12 +531,12 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: "the current person",
-    es: "la persona actual",
+    en: "me",
+    es: "yo",
     at: "value",
     today: "compiles",
     withRule: "compiles",
-    note: "real since Live And Presence (P13)"
+    note: "`the current person` until P15 (T48)"
   },
   {
     en: "the people here",
@@ -622,13 +622,11 @@ const LINES: Line[] = [
     withRule: "compiles",
     needs: [
       `family cookbook is a web service at "https://api.example.com/v1":
-	- to publish (a recipe):
-		- it is at "/recipes/publish"`,
+	- to publish a recipe is at "/recipes/publish"`,
       `recetario familiar es un servicio web en "https://api.example.com/v1":
-	- para publicar (una receta):
-		- está en "/recetas/publicar"`
+	- para publicar una receta está en "/recetas/publicar"`
     ],
-    note: "Q14's call:  no verb of its own, an action declared under the place, called from anywhere"
+    note: "Q14's call:  no verb of its own, an action declared under the place, called from anywhere.  Real since P15:  it reaches the place"
   },
   {
     en: "try again",
@@ -722,7 +720,7 @@ recipe box is an app:
 	- its "matches" is every recipe where its title includes the search, sorted by its title
 	- to add the draft:
 		if the draft is "" return
-		add (a new recipe with title = the draft, cook = the current person) to the recipes
+		add (a new recipe with title = the draft, cook = me) to the recipes
 		clear the draft
 	- to draw its shelf:
 		for each recipe in the matches
@@ -770,7 +768,7 @@ caja de recetas es una aplicación:
 	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, ordenada por su título
 	- para agregar el borrador:
 		si el borrador es "" devolver
-		agregar (una nueva receta con título = el borrador, cocinero = la persona actual) a las recetas
+		agregar (una nueva receta con título = el borrador, cocinero = yo) a las recetas
 		limpiar el borrador
 	- para dibujar su estante:
 		para cada receta en las coincidencias

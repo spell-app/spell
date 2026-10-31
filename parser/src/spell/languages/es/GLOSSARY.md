@@ -71,7 +71,7 @@ Names people choose keep their accents.
 | refresh, try again | `recargar` (`actualizar` means a version upgrade), `reintentar` |
 | when a recipe changes | `cuando cambia una receta` |
 | when someone else changes it | `cuando otra persona (lo\|la) cambia`:  agrees with its type, `la` for a `receta` |
-| the current person, the people here | `la persona actual`, `las personas presentes` |
+| me, my name, the people here | `yo`, `mi nombre`, `las personas presentes` |
 | sorted by | `(ordenado\|ordenada\|ordenados\|ordenadas) por`:  agrees with its list, `cada receta, ordenada`, `las recetas, ordenadas` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |

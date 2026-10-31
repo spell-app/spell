@@ -7,7 +7,7 @@ live box is an app:
 	- to add one:
 		add (a new recipe with title = "New") to the recipes
 	- to draw it:
-		<ui-text class="me">{the name of the current person}</ui-text>
+		<ui-text class="me">{my name}</ui-text>
 		for each person in the people here
 			<ui-label class="here">{the name of the person}</ui-label>
 		<ui-text class="news">{its news}</ui-text>
