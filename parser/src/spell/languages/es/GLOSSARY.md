@@ -59,19 +59,24 @@ Names people choose keep their accents.
 | list / thing / type / app | `lista` / `cosa` / `tipo` / `(aplicación|aplicacion)` |
 | a property's kind of values, `card suit` | Spanish's order, `palo de carta` (`{property} de {type}`, the pack's `propertyKindName`);  plural `palos de carta` |
 | a class's list of values, `card suits` | `palos de carta` |
-| a place's kinds | `servicio web`, `servicio de grafos`, `carpeta`, `archivo`, `sala en vivo`, `hoja`, `este dispositivo`, `en memoria`, `la nube` |
-| x is a web service at "..." | `x es un servicio web en "..."` |
-| it is saved in the place | `se guarda en el lugar` (and `su propio archivo` keeps its meaning) |
-| recipes are at "...", a recipe's title is called "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
-| its key is the secret "...", it is checked every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
-| its versions are in "...", its ids are in "..." | `sus versiones están en "..."`, `sus identificadores están en "..."` |
-| while waiting, if there are none, if that fails | `mientras espera`, `si no hay (ninguno\|ninguna)` (agrees with what its loop reads), `si falla` |
-| all or nothing | `todo o nada` |
-| a draft of, save, cancel | `un borrador de`, `guardar`, `cancelar` |
-| refresh, try again | `recargar` (`actualizar` means a version upgrade), `reintentar` |
+| a place's kinds | `servidor web`, `servidor graphql`, `carpeta de datos`, `archivo`, `sala`, `(hoja\|hoja de cálculo)`, `hoja de google`, `base de datos en este dispositivo`, `base de datos en memoria`, `airtable`, `(atmosphere\|cuenta de atmosphere)`, `(atmosphere personal\|cuenta personal de atmosphere)` |
+| x is a web server (at\|from) "..." | `x es un servidor web (en\|desde) "..."` |
+| x is saved in the cloud | `x se guarda en la nube` |
+| it (is saved\|lives) in the place | `(se guarda\|vive) en el lugar` (and `su propio archivo` keeps its meaning) |
+| recipes live at "...", a recipe's title is its? "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
+| its key is the secret "...", check it every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
+| its version is its? "...", its id is its? "..." | `su versión está en "..."`, `su identificador está en "..."` |
+| while (waiting\|loading), if there are none, if that fails | `mientras (espera\|carga)`, `si no hay (ninguno\|ninguna)` (agrees with what its loop reads), `si falla` |
+| in one go | `de una vez` |
+| a draft of, save, discard | `un borrador de`, `guardar`, `descartar` |
+| (stop\|cancel) the? search | `(parar\|cancelar) (el\|la)? búsqueda` |
+| all recipes, recipes where ..., (load\|fetch) the recipes | `todas las recetas`, `recetas donde ...`, `(cargar\|traer) las recetas` |
+| the (total\|sum) of | `(el total\|la suma) de` |
+| there are no recipes, less than 2, more than 2, at least 2, at most 2, one, 2 | `no hay recetas`, `hay menos de 2 recetas`, `hay más de 2`, `hay al menos 2`, `hay como mucho 2`, `hay una receta`, `hay 2 recetas` |
+| reload, try again | `recargar` (`actualizar` means a version upgrade), `reintentar` |
 | when a recipe changes | `cuando cambia una receta` |
 | when someone else changes it | `cuando otra persona (lo\|la) cambia`:  agrees with its type, `la` for a `receta` |
-| me, my name, the people here | `yo`, `mi nombre`, `las personas presentes` |
+| they / them, their name, the person, (everyone\|the people) here | `esa persona`, `el nombre de esa persona`, `la persona`, `(todos los presentes\|las personas presentes)`:  no `su`, which means its |
 | sorted by | `(ordenado\|ordenada\|ordenados\|ordenadas) por`:  agrees with its list, `cada receta, ordenada`, `las recetas, ordenadas` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |

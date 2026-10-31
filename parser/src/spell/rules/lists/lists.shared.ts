@@ -19,6 +19,20 @@ export type GuardOperands = { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
 //    shared by `list_filter`, `list_membership_test` and `list_remove_where`
 ////////////////
 
+/** Every sort key's scope:  where a field needs no `its` -- see `SortKeyField`. */
+const SORT_KEY_SCOPES = new WeakSet<P.Scope>()
+
+/** Is `scope` a sort key's? */
+export function isSortKeyScope(scope: P.Scope): boolean {
+  return SORT_KEY_SCOPES.has(scope)
+}
+
+/** SIDE EFFECT:  `scope` is a sort key's. */
+export function noteSortKeyScope(scope: P.Scope): P.Scope {
+  SORT_KEY_SCOPES.add(scope)
+  return scope
+}
+
 /** Every scope of a predicate or sort key, where `it` is the item -- see `isItemScope()`. */
 const ITEM_SCOPES = new WeakSet<P.Scope>()
 
@@ -48,7 +62,7 @@ export function itemScope(props: ConstructorParameters<typeof P.MethodScope>[0])
 export function getWhereScope(
   match: P.Match,
   arg: P.Match,
-  list: P.Match | undefined,
+  list: { datatype?: P.Datatype } | undefined,
   // `cards` names a `card` too, in a Spanish file naming an English type (epic `spanish` J89)
   name = SP.singularIn(match.scope, arg.value)
 ): P.MethodScope {

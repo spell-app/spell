@@ -4,7 +4,7 @@ import type { ListAnswer, ListAsk, ListQuery, Place, PlaceContext } from "./plac
  * ### `PlaceBatch`
  * Lists asked for in the same moment, from a place that can answer several in one request, go in one request.
  * - What makes a page's first load one trip, where the place's own way of asking allows it (epic `data` P12).
- * - A place with no `listMany()` is asked as ever, at once:  a web service has one address per collection, so it can't.
+ * - A place with no `listMany()` is asked as ever, at once:  a web server has one address per collection, so it can't.
  * - One list asked alone goes through `list()`, as it always did.
  * - Under `PlaceQuery`, which `PlaceReads` runs:  readers of one list still share one ask, and this joins different lists.
  * - Each ask has its own signal:  one leaving ends its own wait, and the request stops only when they've all gone.

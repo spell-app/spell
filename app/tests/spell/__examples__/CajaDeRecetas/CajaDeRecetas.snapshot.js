@@ -10,17 +10,17 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 692, end: 712 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 714, end: 734 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 716, end: 744 } }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 738, end: 766 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
   // sus "notas" es texto
-  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 748, end: 768 } }) }
+  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 770, end: 790 } }) }
   get notas() { return this.getProp("notas") }
   set notas(value) { this.setProp("notas", value) }
 
@@ -57,12 +57,12 @@ export class Receta extends View {
 /**
  * Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
  * Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
- * recetario familiar es una carpeta en "http://127.0.0.1:4791/api/places/recipes"
- * recetario familiar es una sala en vivo en "http://127.0.0.1:4791/api/rooms/recipes"
+ * recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
+ * recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
  */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "this device" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "database on this device" })
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 
@@ -82,7 +82,7 @@ export class CajaDeRecetas extends App {
   set recetaNueva(value) { this.setProp("recetaNueva", value) }
 
   /** las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1750, end: 1880 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1772, end: 1902 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => receta.título.includes(this.búsqueda))
     core.reverse(halladas)
@@ -162,7 +162,7 @@ export class CajaDeRecetas extends App {
           h("p", "No podemos llegar a tus recetas ahora mismo."),
           h("ui-button", {
             class: "again",
-            onClick: core.pressed(this, () => core.refreshSaved()),
+            onClick: core.pressed(this, () => core.reloadSaved()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Reintentar")
         )

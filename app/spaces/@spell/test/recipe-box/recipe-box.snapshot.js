@@ -4,12 +4,12 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 206, end: 225 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 218, end: 237 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 229, end: 255 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 241, end: 267 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
@@ -34,7 +34,7 @@ export class Recipe extends View {
 
 /** The line a different back-end changes:  tests/spell/recipeBox.test.ts changes only this, for each one it runs */
 export class FamilyCookbook extends Place {}
-export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "in memory" })
+export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "in memory database" })
 
 core.describeAction(Recipe, "remove", { title: "remove it", undoneAs: "Remove Recipe" })
 
@@ -51,7 +51,7 @@ export class RecipeBox extends App {
   get draft() { return this.getProp("draft") }
   set draft(value) { this.setProp("draft", value) }
 
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 648, end: 734 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 660, end: 746 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => recipe.title.includes(this.search)), (item) => item.title)
   }, () => [this.search]) }
@@ -80,7 +80,7 @@ export class RecipeBox extends App {
           "Can't reach the cookbook right now.",
           h("ui-button", {
             class: "again",
-            onClick: core.pressed(this, () => core.refreshSaved()),
+            onClick: core.pressed(this, () => core.reloadSaved()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Try again")
         )

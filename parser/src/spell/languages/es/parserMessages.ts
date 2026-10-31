@@ -33,7 +33,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Tras su primera espera, este valor no puede seguir lo que lee de otras cosas:  léelas antes de la espera",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
-    "El {place} es de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
+    "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
   "key-written":
     'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":
@@ -41,7 +41,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
   "place-cant-announce":
-    'Un {kind} no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
   "change-not-saved":
     '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "- se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
   "someone-else-needs-a-type":
@@ -49,13 +49,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "someone-else-alone":
     "Nadie más puede cambiar lo que se guarda aquí:  esto nunca se ejecutaría.  Hace falta un lugar que otras personas compartan",
   "someone-else-not-told":
-    'Un {kind} no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
   "people-here-only-you":
-    "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala en vivo",
+    "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala",
   "operation-outside-place":
     "Esta acción llega a un lugar solo en una línea debajo de ese lugar, así que aquí no hace nada:  muévela debajo del lugar",
   "operation-not-taken":
-    "Un {kind} no acepta una acción en una dirección propia, así que esto fallaría al ejecutarse:  hace falta un servicio web",
+    'Un lugar de tipo "{kind}" no acepta una acción en una dirección propia, así que esto fallaría al ejecutarse:  hace falta un servidor web',
   "draw-items-of-a-thing":
     "Un {type} no es una lista, así que no tiene elementos que dibujar:  un dibujo propio lo dibuja él, en sus propias líneas",
   "type-from-itself":
@@ -66,15 +66,17 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
-  "all-or-nothing-not-atomic":
+  "in-one-go-not-atomic":
     "Un lugar aquí no puede aplicar los cambios todos juntos:  van de uno en uno, así que otros pueden ver algunos por un momento",
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
   "no-such-data-word":
-    'Encanto no tiene "{word}" para datos:  di una vez dónde viven, "x es un servicio web en ...", y "- se guarda en x", y luego "cada receta donde ..." los lee',
+    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
-  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en vivo en ..."',
+  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en ..."',
+  "place-kind-later":
+    'Un lugar de tipo "{kind}" aún no está:  nombra otro tipo de lugar por ahora, p. ej. "x es un servidor web en ..."',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',

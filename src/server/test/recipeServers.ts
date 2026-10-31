@@ -1,13 +1,13 @@
 /**
  * Two small servers over one box of recipes, for trying places against something real (epic `data` P4).
- * - `restHandler()`:  a web service, with its own names (`name`, where we say `title`), and what a real one varies in:
+ * - `restHandler()`:  a web server, with its own names (`name`, where we say `title`), and what a real one varies in:
  *   versions by field, by `ETag` or none;  pages by offset, by cursor in its answer, by `Link` header, or none.
- * - `graphHandler()`:  a GraphQL service, by a small reader of the queries `GraphPlace` writes:  no library.
+ * - `graphHandler()`:  a GraphQL server, by a small reader of the queries `GraphPlace` writes:  no library.
  *   It answers ONLY the fields asked for, and an error for one it hasn't got, as a real one does.
  * - `RecipeBox`:  what they share, so a program can change back-end and find the same recipes.
  *   - The demo's own is a CSV file (`RecipeFile`);  a test's is in memory.
  * - `scripts/recipe-servers.ts` runs them, for the recipe box demo;  `RestPlace`'s and `GraphPlace`'s tests serve them.
- * - `DemoGuard`:  what lets a local page reach the demo's place server and live room (`scripts/recipe-servers.ts`).
+ * - `DemoGuard`:  what lets a local page reach the demo's place server and room (`scripts/recipe-servers.ts`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
  */
 import { SRV, type Handler } from "spell/server"
@@ -34,8 +34,8 @@ export const FIRST_RECIPES: readonly Omit<WireRecipe, "version">[] = [
 /** The operation that sends a recipe, for a program's `to publish a recipe is at "..."`:  it's kept in `box.published`. */
 const PUBLISH_PATH = "/recipes/publish"
 
-/** The operation that takes nothing, for a program's `to refresh is at "..."`:  it says how many there are. */
-const REFRESH_PATH = "/recipes/refresh"
+/** The operation that takes nothing, for a program's `to reload is at "..."`:  it says how many there are. */
+const RELOAD_PATH = "/recipes/reload"
 
 /** How many requests it remembers:  a page left polling mustn't grow it for ever. */
 const ASKS_KEPT = 10_000
@@ -133,7 +133,7 @@ export type RestServerProps = {
 const ONE_RECIPE = /^\/recipes\/([^/]+)$/
 
 /**
- * The web service, at `/recipes`.
+ * The web server, at `/recipes`.
  * - `?name=...`, `?cuisine=...` filter;  `?sort=name,-servings` orders;  `?fields=id,name` selects.
  * - An update with `versions` needs `If-Match`:  428 with none, 412 with an old one.
  * - An `Idempotency-Key` it's seen answers what that change made, and makes nothing.
@@ -161,7 +161,7 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
       box.published.push(body ?? {})
       return void reply.json({ published: box.published.length })
     }
-    if (method === "POST" && path === REFRESH_PATH) return void reply.json({ recipes: box.recipes.size })
+    if (method === "POST" && path === RELOAD_PATH) return void reply.json({ recipes: box.recipes.size })
 
     if (isList && method === "GET") return listRecipes(box, request, reply, { paging, wire })
 
@@ -263,7 +263,7 @@ type Selected = {
 const RECIPE_FIELDS = new Set(["id", "name", "cuisine", "servings", "notes", "version"])
 
 /**
- * The GraphQL service, at `/graphql`:
+ * The GraphQL server, at `/graphql`:
  * - `recipes(filter, first, after) { edges { node } pageInfo { hasNextPage endCursor } }`
  * - `recipe(id)`
  * - `addRecipe(input)`, `changeRecipe(id, input)`, `removeRecipe(id)`

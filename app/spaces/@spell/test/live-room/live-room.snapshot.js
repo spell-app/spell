@@ -4,7 +4,7 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/LiveRoom.spell", start: 802, end: 821 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/LiveRoom.spell", start: 797, end: 816 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
@@ -25,7 +25,7 @@ export class Recipe extends View {
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), {
   name: "family_cookbook",
-  kind: "live room",
+  kind: "room",
   at: "/api/rooms/recipes"
 })
 
@@ -54,7 +54,7 @@ export class LiveBox extends App {
       h("ui-text", { class: "changes" }, () => this.changes),
       h("ui-button", {
         class: "again",
-        onClick: core.pressed(this, () => core.refreshSaved(Recipe)),
+        onClick: core.pressed(this, () => core.reloadSaved(Recipe)),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Check now"),
       h("ui-button", {

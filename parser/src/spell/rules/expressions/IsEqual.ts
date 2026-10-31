@@ -7,7 +7,7 @@ import { Precedence, SuffixLeft, type OperatorOperands } from "./expressions.sha
 
 /**
  * `is_equal` rule:  `{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.
- * - e.g. `its cook is me`:  to `core.isMe()`, as what's saved of a person comes back a new object each time it's read.
+ * - e.g. `its cook is them`:  to `core.isCurrentPerson()`, as what's saved of a person comes back a new object each time it's read.
  */
 export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.equality
@@ -27,9 +27,13 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
 
   /** `thing is clubs` => `thing.suit == "clubs"`, when it compares a thing to a value of its own -- see `parse()`. */
   compileASTExpression(match: P.MatchFor<this>, operands: OperatorOperands): P.ASTNode {
-    const other = isMe(operands.rhs) ? operands.lhs : isMe(operands.lhs) ? operands.rhs : undefined
+    const other = isCurrentPerson(operands.rhs)
+      ? operands.lhs
+      : isCurrentPerson(operands.lhs)
+        ? operands.rhs
+        : undefined
     if (other) {
-      const call = new P.ASTCoreMethodInvocation(match, { methodName: "isMe", args: [other] })
+      const call = new P.ASTCoreMethodInvocation(match, { methodName: "isCurrentPerson", args: [other] })
       return Negatable.isNegated(operands.operator) ? new P.ASTNotExpression(match, { expression: call }) : call
     }
     const { property } = match.data as IsEqualMatchData
@@ -81,8 +85,8 @@ export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   }
 }
 
-/** Is `operand` what `me` compiles to?  Asked of the AST, as this rule's module can't see the `places` rules. */
-function isMe(operand: P.ASTExpression | undefined): boolean {
+/** Is `operand` what `them` compiles to?  Asked of the AST, as this rule's module can't see the `places` rules. */
+function isCurrentPerson(operand: P.ASTExpression | undefined): boolean {
   return operand instanceof P.ASTCoreMethodInvocation && operand.methodName === "currentPerson"
 }
 

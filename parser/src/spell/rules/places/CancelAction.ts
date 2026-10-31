@@ -6,7 +6,7 @@ import { fieldNamed } from "./PlaceDetail"
 
 /**
  * `cancel_action` rule:  stop an action of this thing's that's running (epic `data` P11, language's cancelling).
- * - e.g. `cancel search`
+ * - e.g. `cancel search`, `stop the search`
  * - Beats `cancel <event>` in a handler when the thing DECLARES an action of that name (decision 6 of The Words):
  *   a name a person gave an action means that action, and an event's name is only a word until someone sends it.
  * - Nothing's running:  nothing happens.
@@ -21,7 +21,7 @@ export class CancelAction extends SpellStatement<"action"> {
     if (!match) return undefined
     const words = snakeCase(`${match.groups.action.raw}`.trim())
     const type = P.MethodScope.thingTypeOf(scope)
-    const isAction = !!type?.getMember(words) || !!type?.methods?.get?.(words)
+    const isAction = type?.getMember(words) instanceof P.ScopeMethod || !!type?.methods?.get?.(words)
     return isAction ? match : undefined
   }
 

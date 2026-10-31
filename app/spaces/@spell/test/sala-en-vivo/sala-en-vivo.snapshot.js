@@ -4,7 +4,7 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 891, end: 911 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 898, end: 918 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
@@ -25,7 +25,7 @@ export class Receta extends View {
 export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
   name: "recetario_familiar",
-  kind: "live room",
+  kind: "room",
   at: "/api/rooms/recipes"
 })
 
@@ -54,7 +54,7 @@ export class CajaEnVivo extends App {
       h("ui-text", { class: "changes" }, () => this.cambios),
       h("ui-button", {
         class: "again",
-        onClick: core.pressed(this, () => core.refreshSaved(Receta)),
+        onClick: core.pressed(this, () => core.reloadSaved(Receta)),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Revisar ahora"),
       h("ui-button", {

@@ -1,13 +1,13 @@
 /**
  * The extension's pure parts:
- * page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a Claude tab's label, a window's
- * folder.
+ * page URLs, which side bar tab a page goes to, the epic pages listed for "Open Epic...", the window's epic, where a
+ * served URL's file is, a Claude tab's label, a window's folder.
  * - no `vscode` here, and node built-ins only (`RealPath` and spell-epic's server constants too, each by its file),
  *   so its tests run under plain `node` (`tests/vscode/docUrls.test.ts`)
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
-import { join } from "node:path"
+import { basename, join } from "node:path"
 
 import type { SRV } from "spell/server"
 // By its file, not the barrel:  plain `node` runs this file's tests
@@ -71,6 +71,47 @@ export function isLoopback(url: string): boolean {
 }
 
 ////////////////
+// ## Which tab
+////////////////
+
+/** The side bar's doc views, each its own tab:  "Epic Docs", "Review", "Details". */
+export type DocViewName = "docs" | "review" | "details"
+
+/** Every doc view's name, in the side bar's order. */
+export const DOC_VIEWS: readonly DocViewName[] = ["docs", "review", "details"]
+
+/** An epic page's path:  `epics/<id>/<id>.plan.html`. */
+const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
+
+/** A saga page's path, or a parked goal set's page. */
+const SAGA_PAGE = /\.(?:saga|goal)\.html$/
+
+/** A details, review or choice page's path:  a page right inside a `details/` folder. */
+const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
+
+/**
+ * The tab page `path` goes to (a file path or a URL's path), the ONE rule every show takes (epic `epic-engine` P59):
+ * - an epic page (`epics/<id>/<id>.plan.html`) or a saga page (`.saga.html`, the parked `.goal.html`):  `review`,
+ *   whatever was `asked`
+ * - a details, review or choice page (a page in a `details/` folder, an epic's or `pages/details/`):  `details`
+ * - anything else:  the tab `asked` for, else `docs`
+ * - why:  each command picked its tab by its own flag, so an epic page landed in Epic Docs as well as Review, and a
+ *   choice page still waiting for Owen's answer was replaced (request r50)
+ * - the epic page first:  the epic `details` keeps its page in `epics/details/`
+ */
+export function docViewFor(path: string, asked?: DocViewName): DocViewName {
+  const unix = path.split("\\").join("/")
+  if (EPIC_PAGE.test(unix) || SAGA_PAGE.test(unix)) return "review"
+  if (DETAILS_PAGE.test(unix)) return "details"
+  return asked && asked !== "details" ? asked : "docs"
+}
+
+/** Whether `name` names a doc view:  what the bridge and the `vscode://` URI take. */
+export function isDocView(name: unknown): name is DocViewName {
+  return DOC_VIEWS.includes(name as DocViewName)
+}
+
+////////////////
 // ## Epic pages
 ////////////////
 
@@ -106,6 +147,18 @@ export function planDocsOf(repos: { name: string; content: string }[]): PlanDocE
     .filter((repo) => !seen.has(repo.content) && seen.add(repo.content))
     .flatMap((repo) => planDocsIn(repo.content, repo.name))
     .sort((a, b) => b.changed.getTime() - a.changed.getTime())
+}
+
+/**
+ * The epic a window works on, in epic folder `content`:
+ * - a worktree's window:  its folder's name, when an epic page has that name (`~/www/spell.worktrees/data` => `data`)
+ * - else (the main checkout's window):  the epic whose page changed last
+ * - `undefined`:  no epic pages at all
+ */
+export function windowEpic(folder: string | undefined, content: string): string | undefined {
+  const named = folder && basename(folder)
+  if (named && existsSync(join(content, "epics", named, `${named}.plan.html`))) return named
+  return planDocsIn(content)[0]?.name
 }
 
 ////////////////

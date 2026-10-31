@@ -75,7 +75,7 @@ export function csvRowVersion(cells: readonly string[]): string {
  *     - the engine then merges per field (`PendingChanges`), and a clash gets the usual notice
  *     - changed and changed back is the same version, which is right:  the content is the same
  *   - a field `positionField` names reads as the row's place in the file (`ListPosition`), and writing it moves the row:
- *     so a program moves a row as it would in a live room, and the file's own order is the truth
+ *     so a program moves a row as it would in a room, and the file's own order is the truth
  *     - a move made from an old copy lands by its position, among the rows as they are now:  nothing refuses it
  * - WITH NONE (`idColumn` left out):
  *   - `apply()` only adds:  a change to a row says nothing can tell which row it means, and is refused

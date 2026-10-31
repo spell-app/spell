@@ -4,12 +4,12 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
- * `refresh_things` rule:  ask a place again (epic `data` P11).
- * - e.g. `refresh the recipes`, Spanish's `recargar las recetas`
- * - `Priority.overridable`:  a program's own `to refresh the recipes:` wins.
- * - Compiles to `core.refreshSaved(Recipe)`.
+ * `reload_things` rule:  ask a place again (epic `data` P11).
+ * - e.g. `reload the recipes`, Spanish's `recargar las recetas`
+ * - `Priority.overridable`:  a program's own `to reload the recipes:` wins.
+ * - Compiles to `core.reloadSaved(Recipe)`.
  */
-export class RefreshThings extends SpellStatement<"type"> {
+export class ReloadThings extends SpellStatement<"type"> {
   @proto static alias = "statement"
   @proto static priority = Priority.overridable
 
@@ -22,7 +22,7 @@ export class RefreshThings extends SpellStatement<"type"> {
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "refreshSaved",
+      methodName: "reloadSaved",
       args: [P.matchAST<P.ASTTypeExpression>(match.groups.type)]
     })
   }

@@ -61,7 +61,7 @@ export class ReadRider extends SpellStatement<"body?"> {
   }
 }
 
-/** `while waiting:` -- see `ReadRider`. */
+/** `while waiting:`, `while loading:` -- see `ReadRider`. */
 export class WhileWaiting extends ReadRider {
   @proto static kind: RiderKind = "waiting"
 }

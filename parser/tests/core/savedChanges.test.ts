@@ -13,7 +13,7 @@ import { MemoryPlace, type PersonHere, type PlaceCapabilities, type WatchTarget 
 /** How long to let what's asked be answered. */
 const settled = () => new Promise((resolve) => setTimeout(resolve, 30))
 
-/** One that says nothing of what changes, as a plain web service doesn't:  it has to be asked. */
+/** One that says nothing of what changes, as a plain web server doesn't:  it has to be asked. */
 class SilentPlace extends MemoryPlace {
   describe(): PlaceCapabilities {
     return { ...super.describe(), live: "poll" }
@@ -115,7 +115,7 @@ describe("when someone else changes it", () => {
     ])
     await settled()
     expect(someoneElse).toEqual([])
-    await core.refreshSaved(Recipe)
+    await core.reloadSaved(Recipe)
     await settled()
     expect(recipes.items).toHaveLength(2)
     expect(someoneElse.map(({ kind, fields }) => [kind, fields])).toEqual([
@@ -123,7 +123,7 @@ describe("when someone else changes it", () => {
       ["added", []]
     ])
     await place.apply([{ kind: "delete", collection: "recipes", id: "r1" }])
-    await core.refreshSaved(Recipe)
+    await core.reloadSaved(Recipe)
     await settled()
     expect(recipes.items).toHaveLength(1)
     expect(someoneElse.at(-1)!.kind).toBe("removed")
@@ -134,7 +134,7 @@ describe("when someone else changes it", () => {
     const place = filled(new SilentPlace({ capabilities: WITH_IDS }))
     const { Recipe, someoneElse, anyone } = program(place)
     await core.savedThings(Recipe)
-    await core.refreshSaved(Recipe)
+    await core.reloadSaved(Recipe)
     await settled()
     expect(someoneElse).toEqual([])
     expect(anyone).toEqual([])

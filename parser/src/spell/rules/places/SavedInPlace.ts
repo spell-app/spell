@@ -7,7 +7,8 @@ import { collectionNameFor } from "./places.shared"
 
 /**
  * `saved_in_place` rule:  a type lives in a place (epic `data` P11, Q1).
- * - e.g. `- it is saved in the family cookbook`, `a recipe is saved in the family cookbook`
+ * - e.g. `- it is saved in the family cookbook`, `- it lives in the family cookbook`, `a recipe is saved in the family cookbook`
+ * - The cloud's `is saved in` is `saved_in_the_cloud`'s, which says how they're told apart.
  * - Only a place's name may follow:  `is saved in its own file` keeps its meaning, how a thing is split.
  * - After this, the words people know reach the place:  `every recipe`, `add`, `remove`, `set`.
  * - A read above this line means the place too:  each reads the type's record as the project compiles.

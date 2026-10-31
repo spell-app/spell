@@ -2719,7 +2719,7 @@
     },
     {
       "kind": "method",
-      "name": "cancelDraft",
+      "name": "discardDraft",
       "of": "core",
       "module": "saved",
       "params": [
@@ -2727,11 +2727,11 @@
           "name": "copy"
         }
       ],
-      "description": "Forget what's changed in `copy`, a draft:  nothing had left.  What `cancel the draft` compiles to.  - throws for anything else"
+      "description": "Forget what's changed in `copy`, a draft:  nothing had left.  What `discard the draft` compiles to.  - throws for anything else"
     },
     {
       "kind": "method",
-      "name": "allOrNothing",
+      "name": "inOneGo",
       "of": "core",
       "module": "saved",
       "waits": true,
@@ -2740,18 +2740,18 @@
           "name": "run"
         }
       ],
-      "description": "Run `run`, its changes to each place one group:  what `all or nothing:` compiles to."
+      "description": "Run `run`, its changes to each place one group:  what `in one go:` compiles to."
     },
     {
       "kind": "method",
       "name": "currentPerson",
       "of": "core",
       "module": "saved",
-      "description": "Who's at this page:  what `me` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+      "description": "The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest."
     },
     {
       "kind": "method",
-      "name": "isMe",
+      "name": "isCurrentPerson",
       "of": "core",
       "module": "saved",
       "params": [
@@ -2759,7 +2759,7 @@
           "name": "value"
         }
       ],
-      "description": "Is `value` the person at this page:  what `its cook is me` compiles to."
+      "description": "Is `value` the person using the program:  what `its cook is them` compiles to."
     },
     {
       "kind": "method",
@@ -2770,7 +2770,7 @@
     },
     {
       "kind": "method",
-      "name": "refreshSaved",
+      "name": "reloadSaved",
       "of": "core",
       "module": "saved",
       "params": [
@@ -2778,7 +2778,7 @@
           "name": "Class"
         }
       ],
-      "description": "Ask the place again:  every read of `Class`, or of them all.  What `refresh the recipes` and `try again` compile to.  - NEVER throws"
+      "description": "Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws"
     },
     {
       "kind": "method",

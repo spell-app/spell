@@ -2245,7 +2245,7 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "prompt",
   "savedThings",
   "savedThingAt",
-  "allOrNothing",
+  "inOneGo",
   "callPlace"
 ])
 

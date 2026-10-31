@@ -19,13 +19,16 @@ const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\
  */
 const WORDS_READ = new Map<string, boolean>()
 
-/** After the seven back-ends (Q3):  the words are ready for it, and nothing's behind them. */
-const THE_CLOUD = "the cloud"
+/** The kinds whose words are settled, with nothing behind them until their phase:  each refuses, saying so. */
+const KINDS_LATER = new Set(["airtable", "atmosphere account", "personal atmosphere account"])
 
 /**
  * `create_place` rule:  a program's data lives here (epic `data` P11, Q2).
- * - e.g. `family cookbook is a web service at "https://api.example.com/v1"`:  the ONE line a different back-end changes.
- * - e.g. `family cookbook is this device`, `family cookbook is in memory`, with no kind or no address:  a kind that needs none.
+ * - e.g. `family cookbook is a web server at "https://api.example.com/v1"`:  the ONE line a different back-end changes.
+ * - e.g. `family cookbook is a database on this device`, `family cookbook is an in memory database`:  a kind with no address.
+ * - e.g. `family cookbook is a personal atmosphere account`:  each person brings their own, so an address is optional:
+ *   given, it's the corner of each account the program's records go in (`at "com.example.cookbook"`).
+ * - `at` and `from` mean the same:  never read only.
  * - e.g. `family cookbook is a supabase project at "..."`:  a kind a library adds, a type made from `place`.
  * - The lines under it say the rest (`PlaceDetail`), and name its operations.
  * - Declares a type and its one instance, the variable `family_cookbook`, as `solitaire is an app` does.
@@ -73,21 +76,23 @@ export class CreatePlace extends TypeDeclaration<
       return SpellStatement.refuse(match, language.parserMessage("key-written"))
     }
     match.data.placeKind = kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
-    if (match.data.placeKind === THE_CLOUD)
-      return SpellStatement.refuse(match, language.parserMessage("place-cloud-later"))
+    if (KINDS_LATER.has(match.data.placeKind ?? "")) {
+      const kind = language.placeKindWord(match.data.placeKind!)
+      return SpellStatement.refuse(match, language.parserMessage("place-kind-later", { kind }))
+    }
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
     this.warnIfItCantSay(match)
     return match
   }
 
-  /** SIDE EFFECT:  a plain web service can't announce what changed:  say so, unless a line under it says how often to ask. */
+  /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */
   private warnIfItCantSay(match: P.MatchFor<this>): void {
     const { placeKind } = match.data
     if (!placeKind || PLACE_KIND_ABILITIES[placeKind]?.saysWhatChanged) return
     if (PLACE_KIND_ABILITIES[placeKind]?.isReadOnly) return
     const language = SP.Language.of(match.scope)
-    const message = language.parserMessage("place-cant-announce", { kind: placeKind })
+    const message = language.parserMessage("place-cant-announce", { kind: language.placeKindWord(placeKind) })
     SP.SpellWarnings.noteIf(match, message, () => CreatePlace.detailsOf(match).checkedEvery === undefined)
   }
 

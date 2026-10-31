@@ -2,17 +2,19 @@ import { isPlaceServerAddress } from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
-import { textIn } from "./PlaceDetail"
+// Import directly to avoid circular import
+import { DrawIt } from "spell/parser/spell/rules/classes/DrawIt"
+import { fieldNamed, textIn } from "./PlaceDetail"
 
 /**
  * What the compiler can say about each kind of place, with no place in hand (epic `data` P11).
  * - The same words as `core.place()`'s kinds, and as `PlaceCapabilities.kind` (J55).
  * - A hint for what to refuse or warn about, at a program's line:  a place still answers for itself when it runs.
  *   - `isReadOnly`:  a write won't compile, unless its address is a place server, which takes writes (`isReadOnlyPlace()`).
- *   - `isAtomic`:  `all or nothing:` is really that.
+ *   - `isAtomic`:  `in one go:` is really that.
  *   - `saysWhatChanged`:  it tells us;  a kind that doesn't warns unless its line says how often to ask.
  *   - `hasOtherPeople`:  `false`, only you ever change what's in it:  `when someone else changes it` warns.
- *   - `knowsWhoIsHere`:  `the people here` can list more than you.
+ *   - `knowsWhoIsHere`:  `everyone here` can list more than you.
  *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
@@ -29,17 +31,18 @@ export const PLACE_KIND_ABILITIES: Readonly<
     }
   >
 > = {
-  "web service": { takesOperations: true },
-  "graph service": {},
-  folder: {},
+  "web server": { takesOperations: true },
+  "graphql server": {},
+  "data folder": {},
   file: { hasOtherPeople: false },
-  "live room": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
+  room: { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },
-  "this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },
-  "in memory": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false }
+  "google sheet": { isReadOnly: true, isAtomic: true },
+  "database on this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },
+  "in memory database": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false }
 }
 
-/** What a kind's word, as `place_kind` names its meaning (`web_service`), is in `core.place()`'s words. */
+/** What a kind's word, as `place_kind` names its meaning (`web_server`), is in `core.place()`'s words. */
 export function placeKindWords(meaning: string): string {
   return meaning.replace(/_/g, " ")
 }
@@ -84,7 +87,7 @@ export function abilitiesOf(saved: P.SavedPlace | undefined) {
 /**
  * Is what's saved in `saved` read only:  a kind that is, at a plain address?
  * - A sheet at a place server isn't:  `family cookbook is a sheet at "/api/places/recipes"` (epic `data` P14).
- *   No new word:  the address says it, as a folder's and a file's do.
+ *   No new word:  the address says it, as a data folder's and a file's do.
  */
 export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
   if (!abilitiesOf(saved)?.isReadOnly) return false
@@ -128,10 +131,77 @@ export function refuseWriteIfReadOnly(match: P.Match, type: P.TypeScope | undefi
     const saved = type.savedPlace()
     return SP.Language.of(match.scope).parserMessage("place-read-only", {
       place: `${saved?.place ?? ""}`.replace(/_/g, " "),
-      kind: `${saved?.placeType.placeKind ?? ""}`
+      kind: SP.Language.of(match.scope).placeKindWord(`${saved?.placeType.placeKind ?? ""}`)
     })
   }
   SP.SpellWarnings.refuseIf(match, message, () => isReadOnlyPlace(type.savedPlace()))
+}
+
+/** What the program already has by a name, as `ownListOf()` finds it. */
+export type OwnList = {
+  /** The variable or argument it is;  none:  a property or method of what the action runs on. */
+  variable?: P.ScopeVariable
+  /** Its name, as words. */
+  words: string
+  /** What it holds, if that's known:  `list of recipes`. */
+  datatype?: P.Datatype
+  /** It's an action, so a call reads it, and nothing here. */
+  isAction?: boolean
+}
+
+/**
+ * The variable, argument, property or method called `words`, at `scope`:  what a program's own wins over a type's plural with.
+ * - A lookup:  call it WHILE PARSING.
+ */
+export function ownListOf(scope: P.Scope, words: string): OwnList | undefined {
+  const variable = scope.variables?.get(words) as P.ScopeVariable | undefined
+  if (variable) return { variable, words, datatype: variable.datatype }
+  const member = P.MethodScope.thingTypeOf(scope)?.getMember(words)
+  if (!member) return undefined
+  if (member instanceof P.ScopeVariable) return { words, datatype: member.datatype }
+  return { words, isAction: true }
+}
+
+/** Reads what `ownListOf()` found. */
+export function ownListAST(match: P.Match, { variable, words }: OwnList): P.ASTExpression {
+  if (variable) return new P.ASTVariableExpression(match, { name: variable.name, variable })
+  return new P.ASTPropertyExpression(match, { object: new P.ASTSelfLiteral(match), property: fieldNamed(words) })
+}
+
+/**
+ * `read`, an expression that waits for a place, as a drawing can read it:  a drawing never waits, so it's a waited value,
+ * which draws "…", or holds the whole thing, until its answer.
+ * - `read` itself, anywhere but a drawing.
+ * - A lookup of the scope, so ask `inDrawing` WHILE PARSING.
+ * - Keyed by its words:  ONE value per thing, and per thing it asks.
+ */
+export function readableInDrawing(
+  match: P.Match,
+  read: P.ASTExpression,
+  inDrawing: boolean | undefined
+): P.ASTExpression {
+  if (!inDrawing || !mentionsSavedRead(read)) return read
+  const value = new P.ASTMethodDefinition(match, { inline: true, body: read })
+  const name = new P.ASTStringLiteral(match, { value: JSON.stringify(`${match.inputText}`.trim()) })
+  return new P.ASTCoreMethodInvocation(match, {
+    methodName: "waitedValue",
+    args: [new P.ASTSelfLiteral(match), name, value]
+  })
+}
+
+/** Is `scope` in a drawing's lines, a line of markup's value too? */
+export function isInDrawing(scope: P.Scope): boolean {
+  for (let each: P.Scope | undefined = scope; each; each = each.parentScope) if (DrawIt.drawingIn(each)) return true
+  return false
+}
+
+/** Does `read` ask a place? */
+function mentionsSavedRead(read: P.ASTExpression): boolean {
+  let found = false
+  P.forEachNode([read], (each) => {
+    if (each instanceof P.ASTCoreMethodInvocation && each.methodName === "savedThings") found = true
+  })
+  return found
 }
 
 /** The name a collection goes by, from a type's name as written in its language:  `recipe` => `recipes`. */

@@ -6,7 +6,7 @@ import { idOfRow, isLongText, type Place, type PlaceEvent, type PlaceRow, type R
  * ### `PlaceHeal`
  * The ONE way anything gets back in step with a place:  fetch the latest, replay what's pending (epic `data` P3).
  * - It runs on opening (`PendingChanges.open()`), on a refusal or a cancel, and on demand (`heal()`).
- * - A place that says what changed (`watch()`), a live room above all, is followed (`follow()`):  what it hears goes the same way,
+ * - A place that says what changed (`watch()`), a room above all, is followed (`follow()`):  what it hears goes the same way,
  *   the place's row with what's pending on top, so what a room heals shows without any more to it.
  * - It needs nothing else to have gone right, so a bug heals the same way as a lost message.
  * - A heal that can't reach the place changes nothing, and says so by answering false:  what's showing stays.

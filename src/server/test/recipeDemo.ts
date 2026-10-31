@@ -8,7 +8,7 @@
  *     - `/api/places/recipes-csv`:  the file behind a `PlaceServer`, for a sheet that writes (`CsvPlace`, epic `data` P14)
  *   - one folder of files (`FolderPlace`):
  *     - `/api/places/recipes`:  behind a `PlaceServer`
- *     - `/api/rooms/recipes`:  a live room, whose referee keeps its recipes in that same folder
+ *     - `/api/rooms/recipes`:  a room, whose referee keeps its recipes in that same folder
  *       - it hears the place's every change, through the place's own `watch()`, as a step of the room
  * - `routes`:  anything else, by a caller:  a test's page.
  * - Node only;  a test helper, as `recipeServers.ts` is.
@@ -29,7 +29,7 @@ const COLLECTION = "recipes"
 /** The name the CSV file's place server goes by. */
 const CSV_PLACE = "recipes-csv"
 
-/** Where its live room listens. */
+/** Where its room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
 
 /** What a room's recipe holds. */
@@ -39,7 +39,7 @@ const ROOM_FIELDS = ["title", "cuisine", "servings", "notes", "place"]
 export type RecipeServersProps = {
   /** Where to listen:  `0`, any free port. */
   port: number
-  /** Where the folder place, and the live room, keep their files. */
+  /** Where the folder place, and the room, keep their files. */
   folder: string
   /** The CSV file behind REST, GraphQL and the sheet:  left out, `recipes.csv` in `folder`, which the folder place doesn't read. */
   csvFile?: string
@@ -61,7 +61,7 @@ export type RecipeServers = {
   url: string
   /** The recipes of the REST and GraphQL servers:  the CSV file. */
   box: RecipeFile
-  /** The folder place:  the live room's store too. */
+  /** The folder place:  the room's store too. */
   folderPlace: FolderPlace
   /** Stops it. */
   close(): Promise<void>

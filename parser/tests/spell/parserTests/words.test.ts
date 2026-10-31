@@ -20,7 +20,7 @@ function compiled(...lines: string[]) {
 /** Lets a write through, and an answer back. */
 const settled = () => new Promise((resolve) => setTimeout(resolve, 60))
 
-const PLACE = "family cookbook is in memory"
+const PLACE = "family cookbook is an in memory database"
 const RECIPE = `a recipe is a thing:
 	- it is saved in the family cookbook
 	- its "title" is text
@@ -55,7 +55,7 @@ recipe box is an app:
 	- to add toast:
 		add (a new recipe with title = "Toast", minutes = 5) to the recipes
 	- to add two:
-		all or nothing:
+		in one go:
 			add (a new recipe with title = "one", minutes = 1) to the recipes
 			add (a new recipe with title = "two", minutes = 2) to the recipes
 	- to add one:
@@ -74,12 +74,12 @@ function runBox() {
 describe("what compiles", () => {
   it("a place is its own name plus a kind, whichever way it's written", () => {
     const { compiled: code, errors } = compiled(
-      'family cookbook is a web service at "https://x.example/v1":',
-      "\t- it is checked every 30 seconds"
+      'family cookbook is a web server at "https://x.example/v1":',
+      "\t- check it every 30 seconds"
     )
     expect(errors).toEqual([])
     expect(code.replace(/\s+/g, " ")).toContain(
-      'export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "web service", at: "https://x.example/v1", checkedEvery: 30 })'
+      'export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "web server", at: "https://x.example/v1", checkedEvery: 30 })'
     )
   })
 
@@ -130,20 +130,16 @@ describe("what compiles", () => {
     expect(other.warnings.join()).toContain("looks through them here")
   })
 
-  it("a key written won't compile;  a key named warns, and a plain web service does", () => {
-    const place = 'family cookbook is a web service at "https://x.example/v1"'
+  it("a key written won't compile;  a key named warns, and a plain web server does", () => {
+    const place = 'family cookbook is a web server at "https://x.example/v1"'
     expect(compiled(`${place}:`, '\t- its key is "sk_live_abc"').errors.join()).toContain("named".slice(0, 0))
     expect(compiled(`${place}:`, '\t- its key is "sk_live_abc"').errors).toHaveLength(1)
     expect(compiled(`${place}:`, '\t- its key is the secret "sk_live_abc"').errors).toHaveLength(1)
-    expect(compiled('family cookbook is a web service at "https://x.example/v1?key=abc"').errors).toHaveLength(1)
-    const named = compiled(
-      `${place}:`,
-      '\t- its key is the secret "COOKBOOK_KEY"',
-      "\t- it is checked every 30 seconds"
-    )
+    expect(compiled('family cookbook is a web server at "https://x.example/v1?key=abc"').errors).toHaveLength(1)
+    const named = compiled(`${place}:`, '\t- its key is the secret "COOKBOOK_KEY"', "\t- check it every 30 seconds")
     expect(named.errors).toEqual([])
     expect(named.warnings.join()).toContain("server side")
-    expect(compiled(place).warnings.join()).toContain("checked every 30 seconds")
+    expect(compiled(place).warnings.join()).toContain("check it every 30 seconds")
   })
 
   it("a write to a read-only place won't compile, wherever the lines are", () => {
@@ -157,7 +153,7 @@ describe("what compiles", () => {
     expect(compiled(sheet, plain).errors).toEqual([])
     for (const fronted of [
       'family cookbook is a sheet at "/api/places/recipes"',
-      'family cookbook is a sheet at "http://127.0.0.1:4791/api/places/recipes":\n\t- its ids are in "id"'
+      'family cookbook is a sheet at "http://127.0.0.1:4791/api/places/recipes":\n\t- its id is its "id"'
     ]) {
       expect(compiled(fronted, plain, ...set).errors).toEqual([])
     }
@@ -174,7 +170,7 @@ describe("what compiles", () => {
 
   it("helpful errors name what to write, and a program's own words stay free", () => {
     for (const line of ["fetch the recipes", "query the cookbook", "connect to the database", "join recipes"]) {
-      expect(compiled(line).errors.join()).toContain("no")
+      expect(compiled(line).errors.join()).toContain("say where the data lives")
     }
     const own = compiled(
       "recipe box is an app:",
@@ -344,16 +340,16 @@ set the_box to recipe_box
     onion.name = "shallot"
     await new Promise((resolve) => setTimeout(resolve, 1200))
     // what's read from the place again is what it was told:  the list, whole, with the new name in it
-    await core.refreshSaved()
+    await core.reloadSaved()
     expect(stew.ingredients.items.map(({ name }: { name: string }) => name)).toEqual(["shallot"])
   })
 
-  it("all or nothing:  they go together, or none do", async () => {
+  it("in one go:  they go together, or none do", async () => {
     const { box, titlesOf } = runBox()
     await box.addTwo()
     await settled()
     expect(await titlesOf("matches")).toEqual(["one", "two"])
-    const failing = core.allOrNothing(() => {
+    const failing = core.inOneGo(() => {
       box.addOne()
       throw new Error("no")
     })
@@ -368,7 +364,7 @@ describe("in Spanish", () => {
   const inSpanish = (...lines: string[]) =>
     parseSpellProject([{ path: "/Test.es.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
 
-  const CASA = `recetario familiar está en memoria
+  const CASA = `recetario familiar es una base de datos en memoria
 una receta es una vista:
 	- se guarda en el recetario familiar
 	- su "título" es texto`

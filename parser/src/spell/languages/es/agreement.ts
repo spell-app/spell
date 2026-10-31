@@ -95,6 +95,7 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   lista: "feminine",
   arreglo: "masculine",
   cosa: "feminine",
+  lugar: "masculine",
   aplicación: "feminine",
   aplicacion: "feminine",
   vista: "feminine",

@@ -1571,7 +1571,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 
 What a program's lines about where data lives compile to, and what reads the rest (the `places` rule module, epic `data` P11).
 
-- `family cookbook is a web service at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
+- `family cookbook is a web server at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
   - Its kind is a word (`place_kind`), or a type made from `place`, which is how a library adds one.
   - Compiled:  its class, then `core.place(new FamilyCookbook(), { name, kind, at, ...what the lines under it say })`.
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
@@ -1584,6 +1584,12 @@ What a program's lines about where data lives compile to, and what reads the res
     Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
   - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
+  - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):
+    - its variable reads as a variable;  a property, the word alone reads it, as no other rule does
+    - `caja de recetas` stays a name of several words:  `property_expression` takes no bare plural, `isBare`
+  - `there are less than 2 recipes where ...` (`there_are_things`):  a count of that same read, or of the program's own list, with no type needed.
+    - The rider `if there are none:` is a statement with no noun, under a read:  `none` is never a type, so one never reads as the other.
+  - A drawing can't wait, so a question about a read in one is a waited value (`readableInDrawing()`):  it holds the whole thing, or draws "…", until its answer.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
 - What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
   into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.

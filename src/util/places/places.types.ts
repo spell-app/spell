@@ -98,7 +98,7 @@ export type RateLimit = {
  */
 export type PlaceCapabilities = {
   /**
-   * What sort of place it is, in words for people, e.g. `"web service"`:  what the side bar says beside its name.
+   * What sort of place it is, in words for people, e.g. `"web server"`:  what the side bar says beside its name.
    * - Words only, never a thing to branch on:  branch on what it can do.
    * - Left out:  nobody said.
    */
@@ -131,7 +131,7 @@ export type PlaceCapabilities = {
   versionCheck?: boolean
   /**
    * Does it take a change that says what happened, not only the value after it:  an addition (`PlaceChange.adds`), and items
-   * added to or moved in a list (`PlaceChange.list`)?  A live room does, so two at once both count.
+   * added to or moved in a list (`PlaceChange.list`)?  A room does, so two at once both count.
    * - Left out:  `PendingChanges` works out the whole value, and sends that, so the last save wins.
    */
   edits?: boolean
@@ -251,7 +251,7 @@ export type PlaceChange = {
   list?: Record<string, ListEdit[]>
   /**
    * The version this change was made from (`Place.versionOf()`):  a place with `versionCheck` refuses it, `"out of date"`,
-   * if the thing has moved on;  a live room lets it win, and says who it overwrote.
+   * if the thing has moved on;  a room lets it win, and says who it overwrote.
    * Only an update carries one:  a delete wins over what someone's editing.
    */
   version?: string
@@ -316,9 +316,9 @@ export type PlaceEvent = {
   row?: PlaceRow
   /** The thing was removed:  the row as it was, for putting back. */
   was?: PlaceRow
-  /** What of mine this change replaced, without having seen it:  mine lost.  A live room says. */
+  /** What of mine this change replaced, without having seen it:  mine lost.  A room says. */
   lost?: ReplacedValue[]
-  /** What I replaced with a change made while I was offline:  theirs lost.  A live room says. */
+  /** What I replaced with a change made while I was offline:  theirs lost.  A room says. */
   overwrote?: ReplacedValue[]
   /** This page made it, and it's only coming back:  a place that can tell says.  Left out:  someone else did, as far as anyone knows. */
   isMine?: boolean
@@ -414,7 +414,7 @@ export type Place = {
   /** Tell `onEvent` of each change to `target`.  Returns what stops it. */
   watch?(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void
   /**
-   * The row as this place holds it right now, if it can say at once:  a live room's copy.
+   * The row as this place holds it right now, if it can say at once:  a room's copy.
    * - What a list's changes are worked out from, as they have to be made straight away.
    */
   rowKnown?(collection: string, id: string): PlaceRow | undefined

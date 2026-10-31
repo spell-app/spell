@@ -5,11 +5,11 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 206, end: 225 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 218, end: 237 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.spell", start: 229, end: 255 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.spell", start: 241, end: 267 } })
   accessor servings!: number
 
   @drawn draw() {
@@ -50,7 +50,7 @@ core.useElement(Recipe, RecipeElement)
 
 /** The line a different back-end changes:  tests/spell/recipeBox.test.ts changes only this, for each one it runs */
 export class FamilyCookbook extends Place {}
-export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "in memory" })
+export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "in memory database" })
 
 core.describeAction(Recipe, "remove", { title: "remove it", undoneAs: "Remove Recipe" })
 
@@ -65,7 +65,7 @@ export class RecipeBox extends App {
   @prop({ type: "text" })
   accessor draft!: string
 
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 648, end: 734 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 660, end: 746 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search)), (item: Recipe) => item.title)
   }, () => [this.search]) }
@@ -90,7 +90,7 @@ export class RecipeBox extends App {
         none: () => <ui-text class="none">No recipes yet. Add the first one.</ui-text>,
         failed: () => <ui-message class="failed" color="red">
           Can't reach the cookbook right now.
-          <ui-button class="again" onClick={core.pressed(this, () => core.refreshSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Try again
           </ui-button>
         </ui-message>

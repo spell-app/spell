@@ -52,8 +52,8 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("a sheet wit
 
   test("a program's add, edit and remove each change their own line of the file", { timeout: 60_000 }, async () => {
     const lines = `family cookbook is a sheet at "${demo.servers.url}/api/places/recipes-csv":
-	- its ids are in "id"
-	- it is checked every 5 seconds`
+	- its id is its "id"
+	- check it every 5 seconds`
     const program = readFileSync(fixturePath("recipe-box", "RecipeBox.spell"), "utf8").replace(
       PLACE_LINES,
       `${lines}\n\n`

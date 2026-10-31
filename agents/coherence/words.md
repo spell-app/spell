@@ -220,9 +220,54 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### place
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
-  `PlaceCapabilities.kind` and a program's line:  `web service`, `graph service`, `folder`, `file`, `live room`, `sheet`, `this device`, `in memory`.
-- **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads.
-- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up.
+  `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
+  `database on this device`, `in memory database`;  coming:  `airtable`, `atmosphere account`, `personal atmosphere account`.
+  - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
+  - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
+  - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
+- **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads;
+  web service, graph service, folder (of a place), live room, airtable base, at protocol, this device, in memory (as a kind), the cloud (as a kind).
+- **Score:**  `\b(web service|graph service|live room|airtable base|at protocol account)\b` · in `parser/src/spell/rules/`
+- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up;  Owen's picks, 2026-10-31, its P15.
+
+### the details under a place
+
+- **Say:**  `recipes live at "/dishes"`, `a recipe's title is its? "dish_name"`, `its version is its? "version"`, `its id is its? "id"`,
+  `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`.
+- **Not:**  `are at`, `is called`, `versions are in`, `ids are in`, `is checked every`.
+- **Score:**  `\b(are at "|is called "|versions are in|ids are in|is checked every)` · in `parser/src/spell/rules/`
+- **Decided:**  Owen, 2026-10-31, epic `data` P15.
+
+### saved in, lives in
+
+- **Say:**  `it (is saved|lives) in the family cookbook`.
+  `family cookbook is saved in the cloud` is the same words' other job:  a new name on its left, and only `the cloud` on its right.
+- **Decided:**  Owen, 2026-10-31, epic `data` P15.
+
+### reading
+
+- **Say:**  `every recipe`, `all recipes`, `recipes`;  `recipes where it is quick`;  `sorted by title`, `, sorted by its title`;
+  `the (total|sum) of its prices`;  `(get|load|fetch) the recipes`;  `there are (no|less than 2|fewer than 2|more than 2|at least 2|at most 2|2) recipes`, `there is one recipe`.
+- **Not:**  `if the number of (every recipe) is 0`, where the words above say it.
+- What the program has by that name wins, each time:  its `recipes` property, variable or argument, its `to load the recipes` action.
+- **Decided:**  Owen, 2026-10-31, epic `data` P15.
+
+### showing and changing
+
+- **Say:**  `while (waiting|loading):`, `in one go:`, `discard the draft`, `reload the recipes`, `(stop|cancel) the? search`.
+- **Not:**  `all or nothing:`, `cancel the draft`, `refresh the recipes`.
+  - "All or nothing" stays as plain words for what a place promises:  `PlaceCapabilities.atomic`'s docs.
+- **Decided:**  Owen, 2026-10-31, epic `data` P15.
+
+### the person using the program
+
+- **Say:**  `they`, `them`, `their name`, and `the person` when things are ambiguous:  the person using the program, who may not be whoever wrote it.
+  - `(everyone|the people) here`, for all of them.
+  - In code:  `core.currentPerson()`, `core.isCurrentPerson()`.
+  - Spanish:  `esa persona`, `la persona`, `el nombre de esa persona`:  no `su`, which already means its.
+- **Not:**  me, my, the current person, the user.
+- A program's own wins:  in `for each person in everyone here`, `the person` is the loop's, and `them` still the one using it.
+- **Decided:**  Owen, 2026-10-31, epic `data` P15:  "you are speaking about the person using the program, which may not be 'you'".
 
 ### waits
 

@@ -248,14 +248,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
       never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
     - Each becomes a pending change (`PendingChanges`), shown at once.
-      A list's change is a write of that field, the whole list;  on a place that takes `edits`, a live room, only the items
+      A list's change is a write of that field, the whole list;  on a place that takes `edits`, a room, only the items
       that changed (epic `data` P8).
     - An action's changes are one group, sent when it ends:  through `core.runAction()`, or `declareAction()`.
       Cancelling (`core.cancelActions()`) drops them, and they go back.
     - Undo's put-back is a write like any other:  before it's sent it drops the change, after it reverses it.
     - A refused write raises one notice, through `core.notify`'s `actions`:  Retry, or Show me.
     - A write merged over someone else's raises one too (`Places.onConflict()`), holding what was lost:  Use theirs.
-    - On a live room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
+    - On a room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
       deleting what you're changing raises one (Restore).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
@@ -268,7 +268,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `rowsMadeFrom()`:  a sample's records from what a class declares.
       By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
 - WHAT COMPILED SPELL CALLS, for a type saved in a place ([saved.ts](saved.ts), epic `data` P11):  `core.place()`, `core.savedThings()`,
-  `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.allOrNothing()`, `core.drawRead()` ...
+  `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.inOneGo()`, `core.drawRead()` ...
   - In the barrel, with `places.ts`;  `spell/util/places` itself is a chunk loaded when a program first names a place,
     so a program with no place pays for `places.ts` and this, and no more.
     That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
@@ -289,13 +289,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - What changed, told to the program (epic `data` P13):  `PlaceThings.noteChanged()`, each thing once in a moment, with its fields.
     - `a-recipe-change`, `when a recipe changes:`:  to the thing, up its chain (`core.send()`), for anyone's change, this page's too.
     - `someone-else-change`, `- when someone else changes it:`:  only when it wasn't this page.
-      Heard from a place that says (`PlaceEvent.isMine`, `PlaceRowsChange.isElsewhere`), or found by asking again:  a poll, `refresh the recipes`.
+      Heard from a place that says (`PlaceEvent.isMine`, `PlaceRowsChange.isElsewhere`), or found by asking again:  a poll, `reload the recipes`.
     - Only what really differs:  a row read again, or an answer to my own write, is no change;
       nor is what a read asking for what it first left out brings.
     - Nobody takes `someone-else-change`, and a draft of that thing is open:  a plain notice.  A form on the thing itself shows the change by itself.
     - A place with no announcements is asked again as often as its line says:  `pollWhileVisible()`.
   - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
-    - Plain data, one object per page:  so `the people here` is one list for the program's life, and two windows of one person are two.
+    - Plain data, one object per page:  so `everyone here` is one list for the program's life, and two windows of one person are two.
     - With no sign-in, who someone says they are:  `personOnThisPage()`.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.

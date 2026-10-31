@@ -267,7 +267,7 @@ ${lines}
   })
 
   test("what its where reads is followed too:  it runs after the wait, in a function of its own", () => {
-    const code = compiled(`family cookbook is this device
+    const code = compiled(`family cookbook is a database on this device
 
 a "recipe" is a view:
 	- it is saved in the family cookbook

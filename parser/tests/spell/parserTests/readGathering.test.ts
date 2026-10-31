@@ -10,7 +10,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 
-const PLACE = 'family cookbook is a graph service at "https://x.example/graphql"'
+const PLACE = 'family cookbook is a graphql server at "https://x.example/graphql"'
 
 /** A recipe with fields no part reads, and a tag, saved beside it. */
 const TYPES = `a recipe is a thing:

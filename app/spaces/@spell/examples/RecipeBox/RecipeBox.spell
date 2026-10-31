@@ -1,10 +1,10 @@
 ## Recipe Box
 // Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
 // Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
-//   family cookbook is a folder at "http://127.0.0.1:4791/api/places/recipes"
-//   family cookbook is a live room at "http://127.0.0.1:4791/api/rooms/recipes"
+//   family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"
+//   family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"
 // (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)
-family cookbook is this device
+family cookbook is a database on this device
 
 
 ## A recipe:  a card you can read and change

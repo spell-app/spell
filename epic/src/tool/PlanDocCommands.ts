@@ -387,7 +387,7 @@ export class PlanDocCommands {
       case "lint":
         return this.lint(file, flags)
       case "open":
-        return this.open(file, flags)
+        return this.open(file)
       case "inbox":
         return this.inbox.run(name, file, rest, flags)
       case "details":
@@ -1045,28 +1045,27 @@ export class PlanDocCommands {
   }
 
   /**
-   * `open <name> [--docs]`:  show the doc in VS Code's side bar, reusing it (`openInVSCode()`):
-   * the Review tab (Owen's rule, 2026-10-07), or with `--docs` the Epic Docs tab
-   * - `epic open seo` passes `--docs`, and `epic open seo --review` doesn't (Owen, 2026-10-12)
+   * `open <name>`:  show the doc in VS Code's side bar's Review tab, reusing it (`openInVSCode()`)
+   * - an epic page always goes there, by its kind (epic `epic-engine` P59):  never the Epic Docs tab, whatever was
+   *   asked;  `--docs`, Owen's 2026-10-12 rule until then, is accepted and does nothing
    */
-  private open(file: string, { docs }: Flags): void {
+  private open(file: string): void {
     this.read(file)
-    this.openInVSCode(file, docs ? "docs" : "review")
+    this.openInVSCode(file)
   }
 
   /**
-   * Show `file` in VS Code's doc preview, in the right side bar's Review tab
-   * (an epic page's place, Owen's rule 2026-10-07), or its Epic Docs tab (`view` `docs`),
-   * or Chrome when not run from VS Code.
-   * - It runs `src/tools/open.js --review <file>` (`--vs` for Epic Docs),
+   * Show `file` (an epic page) in VS Code's right side bar, in its Review tab, or Chrome when not run from VS Code.
+   * - the tab:  the page's kind says (the extension's `docViewFor()`, epic `epic-engine` P59);  `--review` asks too
+   * - It runs `src/tools/open.js --review <file>`,
    *   which starts the page server and asks the session's window (`pages.js` `openInVSCode()`).
    * - `hash`:  an id to land on;  `query`:  the page's query, `test=1` (a test run:  `epic test`)
    * - a child `node`, not an import:  `open.js` with this terminal attached, as its command line runs it
    * - NEVER throws, nor fails the command:  as before, a doc not shown is no error
    */
-  openInVSCode(file: string, view: "review" | "docs" = "review", { hash, query }: OpenOptions = {}): void {
+  openInVSCode(file: string, { hash, query }: OpenOptions = {}): void {
     const { files } = this
-    const flag = view === "docs" ? "--vs" : "--review"
+    const flag = "--review"
     const extra = [...(hash ? [`--hash=${hash}`] : []), ...(query ? [`--query=${query}`] : [])]
     spawnSync(process.execPath, [join(files.docsTools, "open.js"), flag, resolve(file), ...extra], {
       cwd: files.docsPackage,
@@ -1436,8 +1435,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    links (doc-links, SAGA:/ and <epic-link>), failing
                                                    only with --links;  then
                                                    check-spell.js
-  open <name> [--docs]                             show in VS Code's side bar:  the Review tab, or --docs the
-                                                   Epic Docs tab (epic open seo ~== open seo --docs)
+  open <name>                                      show in VS Code's side bar's Review tab, where an epic page
+                                                   always goes (--docs, --review accepted, ignored)
   migrate [<kind>] [<epic>... | --all] [--file <page>] [--step <name>] [--dry-run] [--notify] [--list]
                                                    bring pages up to today's markup:  every step of their kind,
                                                    oldest first, each page under its lock;  safe to run again.
