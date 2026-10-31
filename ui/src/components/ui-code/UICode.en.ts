@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const codeVocabulary = {
   tag: "ui-code",
+  icon: "code",
   topics: ["text", "typography", "data display"],
   aka: ["code block", "syntax highlighting", "highlighter", "pre", "snippet", "source code", "listing"],
   skeleton: "5 line paragraph",

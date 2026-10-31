@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const stackVocabulary = {
   tag: "ui-stack",
+  icon: "layer group",
   topics: ["layout", "basic"],
   aka: ["stack", "cluster", "flex box", "row", "column", "hbox", "vbox", "spacer"],
   noun: "stack",

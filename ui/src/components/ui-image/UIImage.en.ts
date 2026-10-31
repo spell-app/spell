@@ -22,6 +22,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const imageVocabulary = {
   tag: "ui-image",
+  icon: "image outline",
   topics: ["images", "media", "basic", "elements"],
   aka: ["picture", "img", "photo", "avatar", "thumbnail"],
   skeleton: "10 wide: square image",

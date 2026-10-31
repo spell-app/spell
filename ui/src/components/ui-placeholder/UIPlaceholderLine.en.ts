@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const placeholderLineVocabulary = {
   tag: "ui-placeholder-line",
+  icon: "minus",
   topics: ["loading", "content parts", "elements"],
   aka: ["skeleton line"],
   noun: "line",

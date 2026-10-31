@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const authorVocabulary = {
   tag: "ui-author",
+  icon: "user",
   topics: ["content parts", "social"],
   aka: ["user name", "byline", "poster"],
   noun: "author",

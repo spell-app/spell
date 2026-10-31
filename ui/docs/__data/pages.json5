@@ -582,6 +582,11 @@
       "summary": "A transition is an animation used to show or hide content, or to draw attention to it.",
       "status": "done"
     },
+    "ui-tree": {
+      "title": "Tree",
+      "summary": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "status": "done"
+    },
     "ui-tree-diagram": {
       "title": "Tree diagram",
       "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",

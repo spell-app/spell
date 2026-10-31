@@ -312,7 +312,7 @@ describe("<SpellAppRunner>", () => {
     const host = await mount(source(COUNTER), { debug: "things" })
     const button = await waitFor(() => host.querySelector<HTMLButtonElement>("button.count"))
     // its one top-level thing, selected
-    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode .body"))).click()
+    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode"))).click()
     flush()
     expect(await waitFor(() => valueOf(host, "count"))).toBe("1")
 
@@ -325,7 +325,7 @@ describe("<SpellAppRunner>", () => {
     const words = `export const words = { lang: "en", types: { Counter: { count: "the count" } } }`
     const wordsUrl = `data:text/javascript,${encodeURIComponent(words)}`
     const host = await mount({ ...source(COUNTER), wordsUrl }, { debug: "things" })
-    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode .body"))).click()
+    ;(await waitFor(() => host.querySelector<HTMLElement>(".ThingTreeNode"))).click()
     flush()
     expect(await waitFor(() => valueOf(host, "the count"))).toBe("1")
   })

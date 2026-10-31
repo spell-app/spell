@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const iconVocabulary = {
   tag: "ui-icon",
+  icon: "star outline",
   topics: ["icons", "basic", "images", "elements"],
   aka: ["glyph", "symbol", "font awesome", "svg icon"],
   skeleton: "inline 1 x 1",

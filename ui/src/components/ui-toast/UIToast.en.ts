@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const toastVocabulary = {
   tag: "ui-toast",
+  icon: "bell",
   topics: ["notifications", "messages", "feedback", "overlays", "modules"],
   aka: ["snackbar", "notification", "growl", "flash message", "toaster"],
   noun: "toast",

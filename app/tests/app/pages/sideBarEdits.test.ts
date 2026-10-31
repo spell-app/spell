@@ -529,7 +529,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         labels: Inspector.allSelected.map((part) => part.label),
         rings: document.querySelectorAll("[data-inspect-selected]").length,
         boxes: document.querySelectorAll(".InspectorSelected:not([hidden])").length,
-        treeRows: document.querySelectorAll(".InspectorTree li.selected").length,
+        treeRows: document.querySelectorAll(".InspectorTree ui-tree-item[selected]").length,
         isInspecting: Inspector.isInspecting
       }
     })
@@ -596,8 +596,10 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
 
       // the views tree takes the same clicks
       await page
-        .locator(".InspectorTree li")
+        .locator(".InspectorTree ui-tree-item")
         .nth(3)
+        .locator('[part~="row"]')
+        .first()
         .click({ modifiers: ["Meta"] })
       await page.waitForTimeout(300)
       expect((await selection(page)).count).toBe(5)

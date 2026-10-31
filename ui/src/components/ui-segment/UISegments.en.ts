@@ -13,6 +13,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const segmentsVocabulary = {
   tag: "ui-segments",
+  icon: "clone outline",
   topics: ["containers", "layout", "elements"],
   aka: ["panel group", "stacked panels"],
   noun: "segments",

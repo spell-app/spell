@@ -26,6 +26,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const tabsVocabulary = {
   tag: "ui-tabs",
+  icon: "folder open outline",
   topics: ["navigation", "menus", "containers", "modules"],
   aka: ["tab bar", "tab strip", "tabbed panel", "tab view"],
   skeleton: "medium line, 3 line paragraph",

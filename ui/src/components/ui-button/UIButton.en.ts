@@ -21,6 +21,7 @@ import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
  ****************/
 export const buttonVocabulary = {
   tag: "ui-button",
+  icon: "hand point up outline",
   formControl: true,
   topics: ["buttons", "basic", "controls", "forms", "elements"],
   aka: ["btn", "action", "submit", "link button"],

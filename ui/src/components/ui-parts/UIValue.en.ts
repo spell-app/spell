@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const valueVocabulary = {
   tag: "ui-value",
+  icon: "hashtag",
   topics: ["content parts", "data display"],
   aka: ["statistic value", "number", "metric value"],
   noun: "value",

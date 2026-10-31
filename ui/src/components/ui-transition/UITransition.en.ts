@@ -19,6 +19,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const transitionVocabulary = {
   tag: "ui-transition",
+  icon: "magic",
   topics: ["animation", "modules"],
   aka: ["animate", "fade", "slide", "motion", "effect"],
   noun: "transition",

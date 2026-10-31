@@ -19,6 +19,7 @@ import type { ComponentVocabulary } from "spell/ui/vocabulary"
  ****************/
 export const adVocabulary = {
   tag: "ui-ad",
+  icon: "bullhorn",
   topics: ["media", "layout", "views"],
   aka: ["advertisement", "banner ad", "ad slot"],
   skeleton: "18 x 15",

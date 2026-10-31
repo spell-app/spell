@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const dividerVocabulary = {
   tag: "ui-divider",
+  icon: "minus",
   topics: ["layout", "basic", "typography", "elements"],
   aka: ["separator", "hr", "horizontal rule", "rule", "line"],
   skeleton: "0.25 tall",

@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const listVocabulary = {
   tag: "ui-list",
+  icon: "list",
   topics: ["lists", "data display", "typography", "basic", "elements"],
   aka: ["ul", "ol", "bullet list", "list view"],
   skeleton: "3 line paragraph",

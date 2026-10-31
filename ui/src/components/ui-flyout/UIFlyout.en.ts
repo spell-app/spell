@@ -21,6 +21,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const flyoutVocabulary = {
   tag: "ui-flyout",
+  icon: "window maximize outline",
   topics: ["overlays", "dialogs", "containers", "modules"],
   aka: ["drawer", "sheet", "side panel", "off canvas", "slide over"],
   noun: "flyout",

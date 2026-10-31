@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const commentVocabulary = {
   tag: "ui-comment",
+  icon: "comment outline",
   topics: ["social", "content parts", "views"],
   aka: ["reply", "post", "message"],
   skeleton: "header with image, 2 line paragraph",

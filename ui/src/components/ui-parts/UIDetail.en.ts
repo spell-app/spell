@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const detailVocabulary = {
   tag: "ui-detail",
+  icon: "info circle",
   topics: ["content parts", "text"],
   aka: ["secondary text", "note"],
   noun: "detail",

@@ -20,6 +20,7 @@ import { OnlyDevices } from "./UIGrid.types"
  ****************/
 export const columnVocabulary = {
   tag: "ui-column",
+  icon: "columns",
   topics: ["layout", "collections"],
   aka: ["grid column", "col", "cell"],
   noun: "column",

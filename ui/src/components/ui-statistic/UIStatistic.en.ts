@@ -23,6 +23,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const statisticVocabulary = {
   tag: "ui-statistic",
+  icon: "chart bar outline",
   topics: ["data display", "text", "views"],
   aka: ["stat", "kpi", "metric", "counter", "number display"],
   skeleton: "inline 6 x 4",

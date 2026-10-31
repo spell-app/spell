@@ -17,6 +17,7 @@ import type { ComponentVocabulary } from "spell/ui/vocabulary"
  ****************/
 export const treeDiagramVocabulary = {
   tag: "ui-tree-diagram",
+  icon: "project diagram",
   topics: ["data display", "images", "views"],
   aka: [
     "tree",

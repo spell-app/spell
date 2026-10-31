@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const progressVocabulary = {
   tag: "ui-progress",
+  icon: "tasks",
   topics: ["progress", "loading", "feedback", "status", "modules"],
   aka: ["progress bar", "meter", "percent bar", "upload progress"],
   skeleton: "2 tall",

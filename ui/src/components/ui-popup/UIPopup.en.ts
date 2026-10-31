@@ -24,6 +24,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const popupVocabulary = {
   tag: "ui-popup",
+  icon: "comment outline",
   topics: ["popups", "overlays", "feedback", "modules"],
   aka: ["tooltip", "popover", "hint", "hover card", "info bubble"],
   noun: "popup",

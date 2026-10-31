@@ -94,6 +94,10 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   "ui-theme-editor/UIThemeToken.css": {
     "--ui-icon-width": "the readers' icons take their glyph's own width, in a 22px square"
   },
+  "ui-tree/UITree.css": {
+    "--ui-icon-width": "a row's icon takes its glyph's own width, close by its label",
+    "--ui-icon-distance": "the same"
+  },
   "ui-toolbar/UIToolbar.css": {
     "--ui-icon-width": "a header's actions are bare icons:  it sets the nested icons' box",
     "--ui-icon-distance": "the same",

@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const summaryVocabulary = {
   tag: "ui-summary",
+  icon: "align justify",
   topics: ["content parts", "social"],
   aka: ["event summary", "headline"],
   noun: "summary",

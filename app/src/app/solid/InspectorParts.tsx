@@ -1,15 +1,14 @@
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal } from "solid-js"
+import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
-import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
+import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { Inspector, addressKey, isThing, type InspectorBand, type InspectorPanel, type PartRow } from "./Inspector"
 import { InspectorActions, type ActionParameter, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, type WrittenEvent } from "./InspectorSource"
-import { ThingExplorer } from "./ThingExplorer"
-import { TypeExplorer } from "./TypeExplorer"
+import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
 /****************
@@ -48,8 +47,13 @@ export function InspectorCard(props: {
       fold-icon="start"
       open={isFolded() ? "false" : undefined}
       ref={(panel: HTMLElement) => {
-        on("ui-closing", () => setFolded(true))(panel)
-        on("ui-opening", () => setFolded(false))(panel)
+        // its own:  a row of a tree inside it sends these too
+        on("ui-closing", (event) => {
+          if (event.target === panel) setFolded(true)
+        })(panel)
+        on("ui-opening", (event) => {
+          if (event.target === panel) setFolded(false)
+        })(panel)
       }}
     >
       <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
@@ -111,199 +115,205 @@ export function appParts(): () => PartRow[] {
 
 /****************
  * ### `<InspectorViews>`
- * The Inspector's bottom card:  the app as Views, Things or Templates, which its header switches between
- * (remembered:  `VIEW_PREF`).
- * - It's an `<InspectorCard>`:  the chevron, the views, then its actions.
- *   Closed, the bar is left, still saying which view is chosen;  choosing one opens the card.
- * - Views:  the running app's parts as a tree (`<PartsTree>`);  the header's double chevron folds them all, or
- *   unfolds them all, as the epic page's does.
- * - Things:  what the running program has made, live (`<ThingExplorer>`);  a click on one inspects it at once
- *   (`Inspector.inspectThing()`), as a click on a View's row selects it.
- * - Templates:  every type the code knows (`<TypeExplorer>`).
+ * The Inspector's bottom card:  the running app as ONE tree (`<ui-tree>`), with what it draws and what it doesn't.
+ * - It's an `<InspectorCard>`:  the chevron, its name, then its actions.
+ * - The header's magnifying glass opens a filter in that same row:  no new row until you ask for it.
+ *   Esc or the glass again closes it, and the tree is as it was (`filter`).
+ * - The header's double chevron closes every row, or opens them all.
+ * - Things and Templates, for developers, are in the Program panel.
  ****************/
 export function InspectorViews(props: {
   /** The app's parts (`appParts()`). */
   rows: readonly PartRow[]
 }): JSX.Element {
-  const [view, setView] = createSignal((editorPrefs.get(VIEW_PREF) as ViewId | undefined) ?? "views")
-  // choosing a view while closed shows it
-  const show = (id: ViewId) => {
-    setView(id)
-    editorPrefs.set(VIEW_PREF, id)
-    if (Inspector.isFolded("views")) Inspector.toggleFolded("views")
+  const [filter, setFilter] = createSignal<string>()
+  const nodes = createMemo(() => nodesFor(props.rows))
+  const parents = () => {
+    const walk = (list: readonly PartNode[]): PartNode[] =>
+      list.flatMap((node) => (node.children.length ? [node, ...walk(node.children)] : []))
+    return walk(nodes())
   }
-  const parents = () => shownRows(props.rows, new Set()).filter((row) => row.hasChildren)
   const isAllFolded = () => {
     const folded = foldedKeys()
-    return parents().length > 0 && parents().every((row) => folded.has(row.key))
+    return parents().length > 0 && parents().every((node) => folded.has(node.key))
   }
-  // the Things view's state, kept here so it outlives switching views
-  let thingsState: ThingExplorerState = {}
+  const toggleFilter = () => setFilter((text) => (text === undefined ? "" : undefined))
   return (
     <InspectorCard
       panel="views"
-      label={appTexts.text(VIEW_TEXTS.views)}
+      label={appTexts.text("inspectorParts")}
       class="InspectorViews"
       bar={
-        <For each={VIEWS}>
-          {(id) => (
-            <ui-item selected={view() === id} onClick={() => show(id)}>
-              <ui-icon name={VIEW_ICONS[id]} />
-              {appTexts.text(VIEW_TEXTS[id])}
-            </ui-item>
-          )}
-        </For>
-      }
-      actions={
-        <Show when={view() === "views" && parents().length}>
-          <ui-icon
-            slot="right"
-            name={isAllFolded() ? "angle double down" : "angle double up"}
-            link=""
-            label={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
-            title={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
-            onClick={() => setFolds(isAllFolded() ? [] : parents().map((row) => row.key))}
+        <Show when={filter() !== undefined} fallback={<span slot="title">{appTexts.text("inspectorParts")}</span>}>
+          <ui-input
+            slot="title"
+            class="InspectorFilter"
+            size="small"
+            aria-label={appTexts.text("inspectorFilter")}
+            placeholder={appTexts.text("inspectorFilter")}
+            ref={(input: HTMLElement) => {
+              on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))(input)
+              input.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") setFilter(undefined)
+              })
+              queueMicrotask(() => input.focus())
+            }}
           />
         </Show>
       }
-    >
-      <Switch>
-        <Match when={view() === "views"}>
-          <PartsTree rows={props.rows} />
-        </Match>
-        <Match when={view() === "things"}>
-          <Show
-            when={runtimeCore()?.things}
-            keyed
-            fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}
-          >
-            {(things) => (
-              <ThingExplorer
-                things={things}
-                words={editor.programWords}
-                state={thingsState}
-                onStateChange={(changed) => (thingsState = changed)}
-                onSelect={(thing) => Inspector.inspectThing(thing)}
-              />
-            )}
-          </Show>
-        </Match>
-        <Match when={view() === "templates"}>
-          <TypeExplorer
-            tree={editor.scopeTree}
-            onOpen={editor.openScopeLink}
-            loadDetails={editor.scopeDetails}
-            onRefresh={() => void editor.refreshScopes()}
+      actions={
+        <>
+          <ui-icon
+            slot="right"
+            name="search"
+            link=""
+            label={appTexts.text("inspectorFilter")}
+            title={appTexts.text("inspectorFilter")}
+            onClick={toggleFilter}
           />
-        </Match>
-      </Switch>
+          <Show when={parents().length}>
+            <ui-icon
+              slot="right"
+              name={isAllFolded() ? "angle double down" : "angle double up"}
+              link=""
+              label={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
+              title={appTexts.text(isAllFolded() ? "inspectorExpandAll" : "inspectorCollapseAll")}
+              onClick={() => setFolds(isAllFolded() ? [] : parents().map((node) => node.key))}
+            />
+          </Show>
+        </>
+      }
+    >
+      <PartsTree rows={props.rows} nodes={nodes()} filter={filter()} />
     </InspectorCard>
   )
 }
 
-/** What the Views card shows. */
-const VIEWS = ["views", "things", "templates"] as const
-/** One of them. */
-type ViewId = (typeof VIEWS)[number]
-/** Each one's name, in the card's header. */
-const VIEW_TEXTS: Record<ViewId, AppTextKey> = {
-  views: "inspectorParts",
-  things: "inspectorThings",
-  templates: "inspectorTemplates"
-}
-/** Each one's icon:  Things' and Templates' are the Program panel's tabs' (Templates is its Types). */
-const VIEW_ICONS: Record<ViewId, string> = { views: "layer group", things: "cubes", templates: "sitemap" }
-/** The pref remembering which shows. */
-const VIEW_PREF = "inspector:view"
-
 /****************
  * ### `<PartsTree>`
- * The running app's parts as a tree (epic `debut` P13, C22):  a row each, its icon and title, nested as they are
- * in the app.
+ * The running app as a tree (`<ui-tree>`):  its parts, nested as they are in the app, then what it made but doesn't draw.
  * - A part is a drawn thing or a Spell UI element (`Inspector.isPart()`);  the elements between them are skipped.
- * - Each row's title in the text's colour, which one it is (`· discards`) and its icons muted.
- * - Clicking a row selects that part, and Shift, Command or Control several, as in the app;  they're highlighted.
- * - A part with parts inside folds:  its caret;  what's folded is remembered with the project.
- * - Its icons are stubs (`Inspector.iconFor()`):  one for drawn things, one for Spell UI elements.
+ * - A row says what a person would (`Inspector.rowWordsFor()`), how it's written in its tooltip.
+ * - Clicking a row selects that part, and Shift, Command or Control several, as in the app.
+ * - A part with parts inside closes;  what's closed is remembered with the project.
+ * - What's not drawn:  a group of its own, closed to start.  A click inspects the thing (`Inspector.inspectThing()`).
  ****************/
-function PartsTree(props: { rows: readonly PartRow[] }): JSX.Element {
-  const shown = createMemo(() => shownRows(props.rows, foldedKeys()))
+function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
+  const shown = () => shownRows(props.rows, foldedKeys()).map((row) => row.element)
+  const notDrawn = createMemo(() => {
+    const drawn = new Set(props.rows.map((row) => SpellElement.thingOf(row.element)))
+    return (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
+  })
   return (
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
-      <ul role="tree" aria-multiselectable="true" class="InspectorTree">
-        <For each={shown()}>
-          {(row) => (
-            <li
-              role="treeitem"
-              class={{ selected: Inspector.isSelected(row.element) }}
-              style={{ "--depth": row.depth }}
-              aria-selected={Inspector.isSelected(row.element) ? "true" : "false"}
-              aria-expanded={row.hasChildren ? (row.isFolded ? "false" : "true") : undefined}
-              onClick={(event: MouseEvent) =>
-                Inspector.clicked(
-                  row.element,
-                  shown().map((each) => each.element),
-                  event
-                )
-              }
-            >
-              <Show when={row.hasChildren} fallback={<span class="InspectorFold" />}>
-                <ui-icon
-                  name={row.isFolded ? "caret right" : "caret down"}
-                  class="InspectorFold"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    toggleFold(row.key)
-                  }}
-                />
-              </Show>
-              <ui-icon name={Inspector.iconFor(row.element)} />
-              <span class="InspectorTreeTitle">{Inspector.labelPartsFor(row.element).title}</span>
-              <Show when={Inspector.labelPartsFor(row.element).which}>
-                {(which) => <span class="InspectorTreeWhich">{which()}</span>}
-              </Show>
-            </li>
-          )}
+      <ui-tree
+        class="InspectorTree"
+        choose="many"
+        label={appTexts.text("inspectorParts")}
+        filter={props.filter ?? ""}
+        ref={treeChoosesRows}
+      >
+        <For each={props.nodes} keyed={(node) => node.element}>
+          {(node) => <PartItem node={node()} shown={shown} />}
         </For>
-      </ul>
+        <Show when={notDrawn().length}>
+          <ui-tree-item
+            group=""
+            icon="eye slash outline"
+            label={appTexts.text("inspectorNotDrawn")}
+            which={String(notDrawn().length)}
+            open={isFolded(NOT_DRAWN_KEY) ? undefined : ""}
+            ref={whenRowToggled(() => toggleFold(NOT_DRAWN_KEY))}
+          >
+            <For each={notDrawn()}>
+              {(thing) => (
+                <ui-tree-item
+                  icon="cube"
+                  label={Inspector.thingLabel(thing)}
+                  selected={Inspector.inspected?.value === thing}
+                  ref={chooseRow(() => Inspector.inspectThing(thing))}
+                />
+              )}
+            </For>
+          </ui-tree-item>
+        </Show>
+      </ui-tree>
     </Show>
   )
 }
 
-/** A row of the tree as shown:  its part, its key, and whether it has parts inside, folded away. */
-type ShownRow = PartRow & { key: string; hasChildren: boolean; isFolded: boolean }
+/** One part's row, with the parts inside it. */
+function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Element {
+  const words = () => Inspector.rowWordsFor(props.node.element)
+  return (
+    <ui-tree-item
+      icon={Inspector.iconFor(props.node.element)}
+      label={words().label}
+      which={words().which}
+      title={words().tag}
+      selected={Inspector.isSelected(props.node.element)}
+      open={isFolded(props.node.key) ? undefined : ""}
+      ref={(row: Element) => {
+        whenRowToggled(() => toggleFold(props.node.key))(row)
+        chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
+      }}
+    >
+      <For each={props.node.children} keyed={(child) => child.element}>
+        {(child) => <PartItem node={child()} shown={props.shown} />}
+      </For>
+    </ui-tree-item>
+  )
+}
 
-/** `rows` as the tree shows them:  each with its key, the parts inside a folded one left out. */
-function shownRows(rows: readonly PartRow[], folded: ReadonlySet<string>): ShownRow[] {
-  const shown: ShownRow[] = []
-  // rows deeper than this are inside a folded part
+/** A row of the tree:  its part, its key, and the parts inside it. */
+type PartNode = { element: Element; key: string; children: PartNode[] }
+
+/** `rows` nested, as the tree shows them. */
+function nodesFor(rows: readonly PartRow[]): PartNode[] {
+  const top: PartNode[] = []
+  const around: PartNode[] = []
+  rows.forEach((row, index) => {
+    const node = { element: row.element, key: addressKey({ index, tag: row.element.localName }), children: [] }
+    around.length = row.depth
+    ;(around.at(-1)?.children ?? top).push(node)
+    around.push(node)
+  })
+  return top
+}
+
+/** A row of the tree as shown:  its part, and whether parts inside it are on screen. */
+function shownRows(rows: readonly PartRow[], folded: ReadonlySet<string>): PartRow[] {
+  const shown: PartRow[] = []
+  // rows deeper than this are inside a closed part
   let hiddenBelow = Infinity
   rows.forEach((row, index) => {
     if (row.depth > hiddenBelow) return
     hiddenBelow = Infinity
-    const key = addressKey({ index, tag: row.element.localName })
-    const hasChildren = (rows[index + 1]?.depth ?? -1) > row.depth
-    const isFolded = hasChildren && folded.has(key)
-    if (isFolded) hiddenBelow = row.depth
-    shown.push({ ...row, key, hasChildren, isFolded })
+    if (folded.has(addressKey({ index, tag: row.element.localName }))) hiddenBelow = row.depth
+    shown.push(row)
   })
   return shown
 }
 
-/** The parts folded in the tree, by key (reactive):  this project's, remembered. */
+/** The parts closed in the tree, by key (reactive):  this project's, remembered. */
 function foldedKeys(): ReadonlySet<string> {
   foldsChanged()
   return new Set((editorPrefs.get(Inspector.projectPref(FOLDED_PREF)) as string[] | undefined) ?? [])
 }
 
-/** Fold the part at `key`, or unfold it;  remember which. */
+/** Is the row at `key` closed (reactive)?  What's not drawn starts closed. */
+function isFolded(key: string): boolean {
+  return foldedKeys().has(key) !== (key === NOT_DRAWN_KEY)
+}
+
+/** Close the part at `key`, or open it;  remember which. */
 function toggleFold(key: string): void {
   const folded = new Set(foldedKeys())
   if (!folded.delete(key)) folded.add(key)
   setFolds([...folded])
 }
 
-/** Fold exactly the parts at `keys`;  remember which. */
+/** Close exactly the parts at `keys`;  remember which. */
 function setFolds(keys: readonly string[]): void {
   editorPrefs.set(Inspector.projectPref(FOLDED_PREF), keys)
   setFoldsChanged((count) => count + 1)
@@ -311,6 +321,9 @@ function setFolds(keys: readonly string[]): void {
 
 /** Counts the folds, so the tree reads them again. */
 const [foldsChanged, setFoldsChanged] = createSignal(0)
+
+/** The key of the "Not drawn" group, among the parts' (theirs are `<place>|<tag>`). */
+const NOT_DRAWN_KEY = "not-drawn"
 
 /** The start of the pref remembering what's folded, a project's each. */
 const FOLDED_PREF = "inspector:folded"

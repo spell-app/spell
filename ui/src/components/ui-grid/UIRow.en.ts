@@ -26,6 +26,7 @@ const ROW_REVERSALS = ["mobile", "tablet", "computer"] as const
  ****************/
 export const rowVocabulary = {
   tag: "ui-row",
+  icon: "grip lines",
   topics: ["layout", "collections"],
   aka: ["grid row", "table row", "tr"],
   noun: "row",

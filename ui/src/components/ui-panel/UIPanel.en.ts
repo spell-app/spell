@@ -46,6 +46,7 @@ const APPEARANCE_DESCRIPTION =
 export const panelVocabulary = {
   ...sectionVocabulary,
   tag: "ui-panel",
+  icon: "window maximize outline",
   topics: ["layout", "containers"],
   aka: ["inspector", "property panel", "properties", "settings panel", "fieldset", "property sheet"],
   description:

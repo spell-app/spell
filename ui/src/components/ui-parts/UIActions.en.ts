@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const actionsVocabulary = {
   tag: "ui-actions",
+  icon: "hand point up outline",
   topics: ["content parts", "buttons", "dialogs"],
   aka: ["footer buttons", "button bar", "dialog actions"],
   noun: "actions",

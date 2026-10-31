@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const ratingVocabulary = {
   tag: "ui-rating",
+  icon: "star",
   formControl: true,
   topics: ["inputs", "controls", "forms", "feedback", "modules"],
   aka: ["stars", "star rating", "score", "review stars", "hearts"],

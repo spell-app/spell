@@ -477,6 +477,11 @@
       "types": "./ui/dist-types/src/components/ui-panel/index.d.ts",
       "default": "./ui/src/components/ui-panel/index.ts"
     },
+    "./ui/components/ui-tree": {
+      "spell-source": "./ui/src/components/ui-tree/index.ts",
+      "types": "./ui/dist-types/src/components/ui-tree/index.d.ts",
+      "default": "./ui/src/components/ui-tree/index.ts"
+    },
     "./ui/components/ui-split-panel": {
       "spell-source": "./ui/src/components/ui-split-panel/index.ts",
       "types": "./ui/dist-types/src/components/ui-split-panel/index.d.ts",

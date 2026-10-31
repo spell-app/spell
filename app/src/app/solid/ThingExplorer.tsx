@@ -1,4 +1,5 @@
-import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js"
+import { For, Match, Show, Switch, createMemo, createSignal, untrack } from "solid-js"
+import type { JSX } from "@solidjs/web"
 
 import type { ThingAction, ThingLike, ThingRegistry } from "spell/parser/core/things"
 import type { SP } from "spell/parser/spell"
@@ -7,7 +8,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { tracked } from "./tracked"
 import { SCOPE_ICONS, SectionMarker, sectionStartsAt } from "./ScopeDetailsPane"
 import { ThingMembers } from "./ThingMembers"
-import { TreeRow } from "./TypeExplorer"
+import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 
 import "./TypeExplorer.css"
 import "./ThingExplorer.css"
@@ -135,7 +136,7 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
               </For>
             </ui-menu>
           </div>
-          <div class="PaneBody">
+          <ui-tree class="PaneBody" label={appTexts.text("things")} ref={treeChoosesRows}>
             <Show when={topLevel().length}>
               <GroupRow
                 groupKey={TOP_LEVEL}
@@ -143,59 +144,52 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
                 count={topLevel().length}
                 isOpen={open().has(TOP_LEVEL)}
                 onToggle={toggle}
-              />
-              <Show when={open().has(TOP_LEVEL)}>
+              >
                 <For each={topLevel()}>{(thing) => row(thing)}</For>
-              </Show>
+              </GroupRow>
             </Show>
             <Show
               when={byType()}
               fallback={
-                <>
-                  <GroupRow
-                    groupKey={ALL}
-                    label={appTexts.text("allThings")}
-                    count={all().length}
-                    isOpen={open().has(ALL)}
-                    onToggle={toggle}
-                  />
-                  <Show when={open().has(ALL)}>
-                    <For each={all()}>
-                      {(thing, index) => (
-                        <>
-                          <Show when={sectionStartsAt(sections(), index())}>
-                            <SectionMarker
-                              section={sections()[index()]?.section}
-                              style={{ "padding-left": `${MARKER_INDENT}px` }}
-                            />
-                          </Show>
-                          {row(thing)}
-                        </>
-                      )}
-                    </For>
-                  </Show>
-                </>
+                <GroupRow
+                  groupKey={ALL}
+                  label={appTexts.text("allThings")}
+                  count={all().length}
+                  isOpen={open().has(ALL)}
+                  onToggle={toggle}
+                >
+                  <For each={all()}>
+                    {(thing, index) => (
+                      <>
+                        <Show when={sectionStartsAt(sections(), index())}>
+                          <SectionMarker
+                            section={sections()[index()]?.section}
+                            style={{ "padding-left": `${MARKER_INDENT}px` }}
+                          />
+                        </Show>
+                        {row(thing)}
+                      </>
+                    )}
+                  </For>
+                </GroupRow>
               }
             >
               <For each={typeGroups()} keyed={(group) => group.type}>
                 {(group) => (
-                  <>
-                    <GroupRow
-                      groupKey={typeKey(group().type)}
-                      icon={SCOPE_ICONS.type}
-                      label={group().type}
-                      count={group().things.length}
-                      isOpen={open().has(typeKey(group().type))}
-                      onToggle={toggle}
-                    />
-                    <Show when={open().has(typeKey(group().type))}>
-                      <For each={group().things}>{(thing) => row(thing)}</For>
-                    </Show>
-                  </>
+                  <GroupRow
+                    groupKey={typeKey(group().type)}
+                    icon={SCOPE_ICONS.type}
+                    label={group().type}
+                    count={group().things.length}
+                    isOpen={open().has(typeKey(group().type))}
+                    onToggle={toggle}
+                  >
+                    <For each={group().things}>{(thing) => row(thing)}</For>
+                  </GroupRow>
                 )}
               </For>
             </Show>
-          </div>
+          </ui-tree>
         </div>
         <div class="DetailsPane">
           <div class="PaneHeader">{appTexts.text("details")}</div>
@@ -253,18 +247,19 @@ type ThingExplorerViewProps = {
  ****************/
 function GroupRow(props: GroupRowProps) {
   return (
-    <TreeRow
+    <ui-tree-item
+      group=""
+      expandable=""
       class="ThingTreeGroup"
-      depth={0}
-      isOpen={props.isOpen}
-      onToggle={() => props.onToggle(props.groupKey)}
-      onClick={() => props.onToggle(props.groupKey)}
+      icon={props.icon}
+      label={props.label}
+      which={String(props.count)}
+      open={props.isOpen ? "" : undefined}
+      ref={whenRowToggled(() => props.onToggle(props.groupKey))}
     >
-      <span class="label">
-        <Show when={props.icon}>{(icon) => <ui-icon name={icon()} />}</Show>
-        {props.label} <span class="detail">{props.count}</span>
-      </span>
-    </TreeRow>
+      {/* drawn only while open:  a program can make thousands */}
+      <Show when={props.isOpen}>{props.children}</Show>
+    </ui-tree-item>
   )
 }
 
@@ -282,6 +277,8 @@ type GroupRowProps = {
   isOpen: boolean
   /** Open / close row `key`. */
   onToggle: (key: string) => void
+  /** The rows inside it. */
+  children?: JSX.Element
 }
 
 /****************
@@ -291,34 +288,17 @@ type GroupRowProps = {
  * - Scrolls itself into view when selected, e.g. from a link in `<ThingDetails>`.
  ****************/
 function ThingRow(props: ThingRowProps) {
-  let element: HTMLDivElement | undefined
   const label = tracked(() => props.things.labelOf(props.thing))
   const isList = createMemo(() => untrack(() => isListThing(props.things, props.thing)))
   const key = createMemo(() => thingKey(props.things, props.thing))
-  const isSelected = () => key() !== undefined && key() === props.selected
-
-  createEffect(
-    () => isSelected(),
-    (selected) => {
-      if (selected) element?.scrollIntoView({ block: "nearest" })
-    }
-  )
-
   return (
-    <TreeRow
-      onElement={(row) => {
-        element = row
-      }}
-      class={["ThingTreeNode", { selected: isSelected() }]}
-      depth={1}
-      onToggle={() => props.onSelect(props.thing)}
-      onClick={() => props.onSelect(props.thing)}
-    >
-      <span class="label">
-        <ThingIcon isList={isList()} />
-        {label()}
-      </span>
-    </TreeRow>
+    <ui-tree-item
+      class="ThingTreeNode"
+      icon={isList() ? LIST_ICON : THING_ICON}
+      label={label()}
+      selected={key() !== undefined && key() === props.selected}
+      ref={chooseRow(() => props.onSelect(props.thing))}
+    />
   )
 }
 

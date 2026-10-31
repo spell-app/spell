@@ -23,6 +23,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const pusherVocabulary = {
   tag: "ui-pusher",
+  icon: "arrows alternate horizontal",
   topics: ["layout", "navigation", "modules"],
   aka: ["page content", "pushed content"],
   noun: "pusher",

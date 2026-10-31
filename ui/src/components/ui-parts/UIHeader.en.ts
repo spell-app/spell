@@ -19,6 +19,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const headerVocabulary = {
   tag: "ui-header",
+  icon: "heading",
   topics: ["content parts", "typography", "text", "basic", "elements"],
   aka: ["heading", "title", "h1", "headline"],
   skeleton: "medium line",

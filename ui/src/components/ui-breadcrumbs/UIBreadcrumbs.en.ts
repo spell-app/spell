@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const breadcrumbsVocabulary = {
   tag: "ui-breadcrumbs",
+  icon: "angle double right",
   topics: ["navigation", "basic", "collections"],
   aka: ["crumbs", "path", "trail", "location"],
   skeleton: "medium line",

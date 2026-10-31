@@ -386,8 +386,8 @@ each explorer reads something the program or its compile left behind.
   - With no words file, each goes by its name:  `move to pile`.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
-  - In the editor, its Types tab has the parser at hand, so it asks the language service in the page instead
-    ([the Inspector's Views card](#run-and-edit--the-app-and-the-program-panel)).
+  - In the editor, its Templates tab has the parser at hand, so it asks the language service in the page instead
+    ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -595,7 +595,7 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
     (`SpellProject.codeFor()`, in spell-parser)
   - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
   - Sentence Tree:  the Spell tree of the cursor's line
-  - Things and Types are the Inspector's, in its Views card.
+  - Things and Templates, for developers.  The Inspector's Views card is one tree of what's drawn and what isn't, with a filter.
 - At the panel's right:  Clear Console, on Program Output only, and Close, which hides it.
 - It's the same pane VS Code's Run Project panel and `<spell-viewer>` use, `RunnerPane`:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.
