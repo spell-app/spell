@@ -6,7 +6,7 @@
 /spell-*/
 # the page server's projects beside the kit, each checkout's own (page/settings.ts LOCAL_SETTINGS)
 /page-server.local.json5
-# the content repo (epic repo-split J5):  its own git repo, local only;  your projects, spell.spaces, are beside the kit
+# the epic repo (epic repo-split J5):  its own git repo, local only;  your projects, spell.spaces, are beside the kit
 /spell.epics
 
 node_modules

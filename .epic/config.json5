@@ -31,7 +31,7 @@
     "oldClones": "../spell.old"
   },
 
-  // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
+  // The epic repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
   // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main
   //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
@@ -62,9 +62,9 @@
     "default": "spell",
     // The repo root's folder name in every window:  folder 1, so the Claude panel lists every repo's sessions.
     "repoName": "spell",
-    // The content repo's folder name in every window.
+    // The epic repo's folder name in every window.
     "contentName": "spell.epics",
-    // A worktree's window holds the worktree, then the content repo:  no main checkout (Owen, 2026-10-22).  Quick
+    // A worktree's window holds the worktree, then the epic repo:  no main checkout (Owen, 2026-10-22).  Quick
     // Open listed every file twice with it there, the main checkout's beside the worktree's.  The Claude panel still
     // lists every session:  each worktree's saved-session folder links to the main one's ("linkSessionFolders").
     "worktreeOnly": true
@@ -74,10 +74,10 @@
   // so every window's Claude panel lists every session.
   "linkSessionFolders": true,
 
-  // The content folder's folders every checkout links in at its root (`epic shared link`):
+  // The epic folder's folders every checkout links in at its root (`epic shared link`):
   // none here (epic-engine P10).
   // - WWOD and the logs:  the kit TRACKS `agents/` (epic `repo-split` P9):
-  //   `agents/wwod/`, and links for the three logs into the content repo's `agents/`.
+  //   `agents/wwod/`, and links for the three logs into the epic repo's `agents/`.
   "sharedFolders": [],
 
   // The kit's old GitHub address, to its new one:  renamed in epic `repo-split` P17 (GitHub redirects the old one).
@@ -88,7 +88,7 @@
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
   "engineFolder": "",
 
-  // The VS Code window files, each machine's own:  the content repo's `windows/`, git-ignored there.
+  // The VS Code window files, each machine's own:  the epic repo's `windows/`, git-ignored there.
   "windowsFolder": "spell.epics/windows",
 
   // The app's editor, served by the page server at its own address (spell-app's own settings until epic `repo-split`

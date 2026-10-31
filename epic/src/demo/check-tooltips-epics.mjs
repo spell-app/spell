@@ -26,7 +26,7 @@
  * - `--list`:  print every control and its tooltip (the audit's table), not just the ones without
  * - fails (exit 1) on a page error, or a control with no tooltip
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
- *   serving `src/demo/shots/` as its content folder;  it wakes nobody;  stopped at the end
+ *   serving `src/demo/shots/` as its epic folder;  it wakes nobody;  stopped at the end
  * - re-runs itself under `tsx` (the page server and the tool are TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -38,7 +38,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
-/** the epic pages' folder:  the repo's content folder's (`EpicConfig.contentOf()`) */
+/** the epic pages' folder:  the repo's epic folder's (`EpicConfig.contentOf()`) */
 const EPICS = join(EpicConfig.contentOf(ROOT), "epics")
 const SHOTS = join(HERE, "shots")
 

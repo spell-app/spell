@@ -32,7 +32,7 @@
  * - `fold [--dry-run]` -- once:  every epic's near-copies made before `round` (`event-names-2`, `-3` ...) folded into
  *   their first page as its rounds (`foldCopies()`)
  * - `<page>`:  a slug (`pick-layout`), `<epic>/<slug>`, or a path
- *   (absolute, or from the content folder, its `pages/`, or the checkout's root)
+ *   (absolute, or from the epic folder, its `pages/`, or the checkout's root)
  * - paths print absolute:  they mean the same in whichever checkout Claude reads them
  * - The answer itself is written by the page server's route module (`tools/detailsRoutes.ts`) into
  *   `<slug>.answer.json5` beside the page.
@@ -169,7 +169,7 @@ const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [-
 ////////////////
 
 /**
- * Write a new details page `slug` in content folder `docs` (`pages/details/`, `epics/`:  `CONTENT`) from the tool's
+ * Write a new details page `slug` in epic folder `docs` (`pages/details/`, `epics/`:  `CONTENT`) from the tool's
  * template (`answerPages.js` `TOOL_TEMPLATES`);  its absolute path.
  * - `--epic <name>`:  in that epic's `details/` (the epic must exist);  else the scratch `details/`
  * - sets `<title>`, the h1, the breadcrumb, the description and the "Asked" date;  refuses to overwrite
@@ -191,7 +191,7 @@ export function createPage(docs, slug, { title, epic, description, spec } = {}) 
 }
 
 /**
- * A details page for `folder` (in content folder `docs`), parsed, from the tool's template:  its head filled
+ * A details page for `folder` (in epic folder `docs`), parsed, from the tool's template:  its head filled
  * (`title`, `description`, today's date), and the whole page from `spec` when given.
  */
 function pageDocument(docs, folder, { title, description, spec }) {
@@ -299,7 +299,7 @@ function findFile(path) {
  */
 export function findPage(docs, target) {
   if (!target) throw new Error("which page?  a slug, a path or <epic>/<slug>")
-  // a path is from the content folder, its `pages/`, or the checkout's root
+  // a path is from the epic folder, its `pages/`, or the checkout's root
   const path = [docs, join(docs, "pages"), ROOT].map((base) => resolve(base, target)).find((each) => existsSync(each))
   if (target.endsWith(".html") && path) return inContent(path)
   const slug = target.replace(/\.html$/, "")
@@ -314,7 +314,7 @@ export function findPage(docs, target) {
   return found
 }
 
-/** Is `file` one of epic `epic`'s own pages (under `epics/<epic>/` in content folder `docs`)? */
+/** Is `file` one of epic `epic`'s own pages (under `epics/<epic>/` in epic folder `docs`)? */
 export function isEpicsPage(file, epic, docs = CONTENT) {
   return relative(join(docs, "epics", epic), file).split("/")[0] !== ".."
 }
@@ -479,7 +479,7 @@ function copyFiles(folder, copies) {
 }
 
 /**
- * Point epic folder `epicFolder`'s own pages' links at `copies` (`details/event-names-2.html`, and a link's
+ * Point epic's folder `epicFolder`'s own pages' links at `copies` (`details/event-names-2.html`, and a link's
  * `target`, `...-details-event-names-2-html`) at page `base`;  the files changed (or, `dryRun`, that would be).
  * - its epic page, its parts, its other details pages
  * - SIDE EFFECT:  rewrites those files, unless `dryRun`

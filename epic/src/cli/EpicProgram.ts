@@ -308,7 +308,7 @@ export class EpicProgram {
       .usage("<epic> --backfill [--merged <sha,...>]  |  remap <map> [<map> ...] --repo <old repo> [--dry-run]")
       .addHelpText(
         "after",
-        "\n  remap:  every epic page's commits of an old repo, over the whole content folder, pointed at their new" +
+        "\n  remap:  every epic page's commits of an old repo, over the whole epic folder, pointed at their new" +
           "\n    ids in the repo it was merged into (repo-split's P20 · One Repo;  epic-engine's P49)" +
           "\n    epic commits remap tools/one-repo/commit-map-parser.txt --repo spell-parser,spell-lang --dry-run"
       )
@@ -469,7 +469,7 @@ export class EpicProgram {
   }
 
   ////////////////
-  // ## Worktrees, sessions, parked work, shared content
+  // ## Worktrees, sessions, parked work, the epic repo
   ////////////////
 
   /** `worktree`, `session`, `park`, `status`, `shared`:  the `command/` folder's classes (epic `epic-eject` P5). */
@@ -498,11 +498,11 @@ export class EpicProgram {
       .usage("[--json]")
       .addHelpText("after", example("epic status --json"))
 
-    epic.commandsGroup("Shared content:")
+    epic.commandsGroup("The epic repo:")
 
     this.group(
       epic.command("shared"),
-      "shared content:  docs pages, sagas and logs in the content folder, a repo beside the checkout, read from there;  " +
+      "the epic repo:  docs pages, sagas and logs in the epic folder, a repo beside the checkout, read from there;  " +
         "a checkout links in only the folders its config names (sharedFolders)",
       (args) => new Shared().run(args)
     )
@@ -630,7 +630,7 @@ export class EpicProgram {
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
-          ".epic/config.json5, the content repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub, the " +
           "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
       .usage(
@@ -1023,7 +1023,7 @@ const LOC_HELP = `
   --print    the by-repo table only, in the terminal;  the page is left as it is
   --json     the numbers, every column, per repo and per row
 
-What counts:  guides/loc/loc.json5 in the content folder (written with the defaults when missing):
+What counts:  guides/loc/loc.json5 in the epic folder (written with the defaults when missing):
 which folders are rows, which files are tests, the code and doc extensions, what's left out.
 
 Examples:
@@ -1033,7 +1033,7 @@ Examples:
 /** After `epic config --help`. */
 const CONFIG_HELP = `
 The keys (folders print absolute;  the file's are relative to the main checkout):
-  contentFolder        the shared content repo:  epics, guides, sagas, the logs
+  contentFolder        the epic repo:  epics, guides, sagas, the logs
   contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
   baseBranch          the branch worktrees start from and merge into
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
@@ -1043,11 +1043,11 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   installTimeout       the seconds that install may take
   windows.default      the window a worktree's window is opened from, by default
   windows.repoName     the repo root's folder name in every window
-  windows.contentName  the content repo's folder name in every window
-  windows.worktreeOnly whether every worktree's window holds only the worktree and the content folder
+  windows.contentName  the epic repo's folder name in every window
+  windows.worktreeOnly whether every worktree's window holds only the worktree and the epic folder
                        (a worktree beside the repo gets that window anyway)
   linkSessionFolders   whether the worktree hook links new worktrees' saved-session folders to main's
-  sharedFolders        the content repo's folders every checkout links in, comma-separated
+  sharedFolders        the epic repo's folders every checkout links in, comma-separated
   repos                a MULTI-REPO top's child repos, comma-separated (its "repos":  "repos.json5", or the
                        names):  an epic's worktree is then <worktreesFolder>/<epic>, a worktree of the top with
                        one of every child repo inside it, all on branch <epic>;  empty:  a single repo
@@ -1083,12 +1083,12 @@ const INIT_HELP = `
 From any folder of the repo (a worktree's too), each step skipped when it's done:
   the plugin           epic, installed for Claude Code when it isn't yet (epic plugin install):  the machine's,
                        once;  --no-plugin skips it
-  .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
+  .epic/config.json5   written for this repo:  epic folder ../<repo>.epics, worktrees ../<repo>.worktrees,
                        the base branch from git, the install command its lock file names (none without one),
                        window names from the repo's;  a file already there is kept
-  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
+  ../<repo>.epics      the epic repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
-  the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
+  the epic repo        the epic repo on GitHub, so the team shares the plans:  asks what to call it
                        (<repo>.epics) and "Private or public?" (private), makes it, pushes, and writes its
                        address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
                        it, says how to get it
@@ -1096,15 +1096,15 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
   .gitignore           the links listed between # shared:start and # shared:end
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
   your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
-                       with the plans, in the content repo's people/
+                       with the plans, in the epic repo's people/
   the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
                        yes suggested);  on another branch it says so;  --no-commit skips it
   the epic server      started, serving this repo:  its address printed;  --no-server skips it
 Then push the base branch:  a teammate's epic init then clones the plans.
 
---content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
+--content-repo <name> names the epic repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.
---public makes the shared repo public without asking;  with no terminal to ask in, it's private unless --public.
+--public makes the epic repo public without asking;  with no terminal to ask in, it's private unless --public.
 A public one shows everything in the plans (epic pages, guides, comments) to anyone.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);

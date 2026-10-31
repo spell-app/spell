@@ -34,7 +34,7 @@ import {
  *   and `write()` leaves them there.
  * - Sources:  `docs/__data/components.json5` (`yarn site:data`:  every vocabulary), the element examples, the theme
  *   sheets, and the brand book's "CONTENT FUNDAMENTALS" (`brandBook`:  Claude Design's export,
- *   `brand/spell-design-system/readme.md` in the shared content).
+ *   `brand/spell-design-system/readme.md` in the epic repo).
  * - Plus the brand's `<brand-*>` cards, a "Brand" group (`DesignBrand`, epic `claude-design` P11):  read as data,
  *   from the brand's folder (`brand`).
  * - The brand's folder and its book are SETTINGS (`DesignExportOptions`;  `yarn design:build --brand <folder>
@@ -358,7 +358,7 @@ export type DesignExportOptions = {
   sources?: DesignSource[]
   /** the brand's package folder, absolute:  its `<brand-*>` cards;  default none */
   brand?: string
-  /** the brand book (Claude Design's export, `brand/spell-design-system/readme.md` in the shared content), absolute;
+  /** the brand book (Claude Design's export, `brand/spell-design-system/readme.md` in the epic repo), absolute;
    * default none */
   brandBook?: string
 }

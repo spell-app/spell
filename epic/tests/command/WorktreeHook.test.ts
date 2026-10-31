@@ -93,7 +93,7 @@ describe("worktree hook", () => {
     expect(made.stdout).toBe(join(BESIDE, "seo-agent-a1b2"))
   })
 
-  test("a content folder beside the repo:  the worktrees' folder gets ONE link to it (T31), its folders in the worktree", () => {
+  test("an epic folder beside the repo:  the worktrees' folder gets ONE link to it (T31), its folders in the worktree", () => {
     const content = join(TEMP, "repo.epics")
     mkdirSync(join(content, "agents"), { recursive: true })
     git(content, "init", "-q", "-b", "main")
@@ -103,7 +103,7 @@ describe("worktree hook", () => {
     const link = join(BESIDE, "repo.epics")
     expect(lstatSync(link).isSymbolicLink()).toBe(true)
     expect(readlinkSync(link)).toBe("../repo.epics")
-    // the text docs write from the main checkout's root reaches the content folder from the worktree's too
+    // the text docs write from the main checkout's root reaches the epic folder from the worktree's too
     expect(realpathSync(join(made.stdout, "../repo.epics"))).toBe(content)
     expect(realpathSync(join(made.stdout, "agents"))).toBe(join(content, "agents"))
     // a second worktree:  the same link, left as it is

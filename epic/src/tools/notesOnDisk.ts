@@ -28,7 +28,7 @@ export async function editNotes<T>(file: string, change: (notes: PageNotes) => T
 
 /**
  * The page notes on every page under `folders`, page by page:  each note with its page, from folder `root` (the
- * content folder:  a page path;  epic `airplane`:  `epic notes list`, and `/airplane land`'s `AirplaneInbox`).
+ * epic folder:  a page path;  epic `airplane`:  `epic notes list`, and `/airplane land`'s `AirplaneInbox`).
  * - `all`:  answered and done notes too;  default:  the `new` ones
  * - reads only the pages that hold one (a text check first);  skips `SKIPPED` folders
  */
@@ -49,7 +49,7 @@ export type PageNote = { page: string } & ReturnType<PageNotes["notes"]>[number]
 /** Folders under the areas that hold no pages of their own:  a split epic page's bodies, experiments' output. */
 const SKIPPED = /(^|\/)(parts|experiments|node_modules)(\/|$)/
 
-/** Every `.html` file under `folder` (a link into the shared repo is followed), sorted;  none when it's missing. */
+/** Every `.html` file under `folder` (a link into the epic repo is followed), sorted;  none when it's missing. */
 function htmlFiles(folder: string): string[] {
   let names: string[]
   try {

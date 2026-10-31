@@ -19,7 +19,7 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { Shared } from "spell/epic/command/Shared"
 
 /**
- * A throwaway repo `spell-app` with a shared repo beside it, `spell-app-dev`.
+ * A throwaway repo `spell-app` with an epic repo beside it, `spell-app-dev`.
  * - the main checkout's content folders start as real (ignored) folders, as right after the cutover
  * - worktree `wt` starts with none
  */
@@ -31,12 +31,12 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 
 mkdirSync(MAIN)
 git(MAIN, "init", "-q", "-b", "main")
-// the shared repo beside it, by the repo's config:  spell-app's old layout, written out (a key left out would be the
+// the epic repo beside it, by the repo's config:  spell-app's old layout, written out (a key left out would be the
 // repo's own:  epic `epic-friend` P6)
 put("package.json", "{}")
 put(
   ".epic/config.json5",
-  '// where the shared repo is\n{ "contentFolder": "../spell-app-dev", "worktreesFolder": ".claude/worktrees",\n' +
+  '// where the epic repo is\n{ "contentFolder": "../spell-app-dev", "worktreesFolder": ".claude/worktrees",\n' +
     '  "sharedFolders": ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"] }\n'
 )
 put(".gitignore", "/epics\n/guides\n/pages\n/templates\n/brand\n/sagas\n/goals\n/agents\n/.claude/worktrees\n")
@@ -55,7 +55,7 @@ git(MAIN, "worktree", "add", "-q", "-b", "wt", WT)
 const config = Shared.configOf(MAIN)
 
 describe("sharedConfig()", () => {
-  test("the shared repo beside the main checkout, from any checkout;  the default links", () => {
+  test("the epic repo beside the main checkout, from any checkout;  the default links", () => {
     expect(config).toEqual({
       main: MAIN,
       dir: PEER,
@@ -77,7 +77,7 @@ describe("sharedConfig()", () => {
 })
 
 describe("before init", () => {
-  test("status:  no shared repo;  main's folders are real, the worktree has none", () => {
+  test("status:  no epic repo;  main's folders are real, the worktree has none", () => {
     const status = new Shared({ config }).status()
     expect(status).toMatchObject({ exists: false, isRepo: false })
     expect(status.checkouts.map(({ checkout, links }) => [checkout, links.map((link) => link.state)])).toEqual([
@@ -132,7 +132,7 @@ describe("init --import, then link", () => {
 })
 
 describe("unlinkDropped()", () => {
-  // epic-eject T11:  the templates left the content folder for spell-epic, and the manifest dropped `templates`
+  // epic-eject T11:  the templates left the epic folder for spell-epic, and the manifest dropped `templates`
   test("a link to a shared folder the manifest no longer names goes, dangling or not;  real folders and other links stay", () => {
     mkdirSync(join(PEER, "templates"), { recursive: true })
     execFileSync("ln", ["-s", "../../../../spell-app-dev/templates", join(WT, "templates")])
@@ -276,7 +276,7 @@ describe("linkEngine()", () => {
 })
 
 describe("linkContentBeside()", () => {
-  // a repo whose worktrees and content folder are both beside it (epic `epic-eject` T31)
+  // a repo whose worktrees and epic folder are both beside it (epic `epic-eject` T31)
   const top = join(TEMP, "beside")
   const repo = join(top, "spell-app")
   const content = join(top, "spell-app.epics")
@@ -296,7 +296,7 @@ describe("linkContentBeside()", () => {
     expect(shared.linkContentBeside()).toBeUndefined()
   })
 
-  test("linked, by a relative path:  ../spell-app.epics from a worktree's root reaches the content folder;  again:  ok", () => {
+  test("linked, by a relative path:  ../spell-app.epics from a worktree's root reaches the epic folder;  again:  ok", () => {
     mkdirSync(join(trees, "seo"), { recursive: true })
     const path = "../spell-app.worktrees/spell-app.epics"
     expect(shared.linkContentBeside()).toEqual({ path, state: "missing", action: "linked" })
@@ -328,7 +328,7 @@ describe("linkContentBeside()", () => {
   })
 })
 
-/** The shared repo's last `count` commits, oldest first:  `[subject, files changed]`. */
+/** The epic repo's last `count` commits, oldest first:  `[subject, files changed]`. */
 function commits(count: number): string[][] {
   return git(PEER, "log", `-${count}`, "--reverse", "--format=%H")
     .split("\n")

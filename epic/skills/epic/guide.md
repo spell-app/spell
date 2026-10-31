@@ -3,11 +3,11 @@
 The epic workflow in plain steps, for any agent:  Codex, Claude Code, or another one.
 `epic guide` prints it;  `epic guide <topic>` prints one topic.
 - An EPIC is a piece of work and its plan.
-  Its live record is the EPIC PAGE, `epics/<epic>/<epic>.plan.html` in the content folder (`epic config contentFolder`):
+  Its live record is the EPIC PAGE, `epics/<epic>/<epic>.plan.html` in the epic folder (`epic config contentFolder`):
   the person reads it, and marks it up, while you work.
 - Every change to the page goes through an `epic` command, never by hand,
   except the prose of a part (`epics/<epic>/parts/<id>.html`).
-- The content folder is a git repo of its own.
+- The epic folder is a git repo of its own.
   Never `git add`, commit or restore its files:  `epic turn end` commits and syncs them.
 - Claude Code has a skill for each step (`/epic`, `/epic review` ...):  this guide is the same workflow without it.
   The skill links here, and where a step needs a tool only Claude Code has, the last topic says what to do instead.
@@ -94,8 +94,9 @@ Then, for what it printed:
 epic turn end
 ```
 
-- It commits the content folder's changes, one commit per epic, guide or folder, then syncs them with the team's
-  content repo when the repo's config names one (`contentRemote`):  pull, renumber ids two people both made, push.
+- It commits the epic folder's changes, one commit per epic, guide or folder, then syncs them
+  with the team's epic repo when the repo's config names one (`contentRemote`):
+  pull, renumber ids two people both made, push.
 - Quiet when there's nothing to commit;  safe to run twice.
 - Claude Code and Codex run it for you, from their end-of-turn hooks, once the hooks are installed and trusted
   (`epic plugin install`, `epic plugin install --codex`).

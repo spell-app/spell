@@ -449,7 +449,7 @@ the versions and counts will have moved on by the time you run it.
 ~/www/spell/app/                the Spell app
 ~/www/spell/node_modules/       the ONE install:  node_modules/spell links to the repo, each folder is a workspace
 ~/www/spell/dist-types/         built declarations, for the type checks (git-ignored)
-~/www/spell/spell.epics/        the content folder:  guides, epic pages, sagas, the logs (yours, local only)
+~/www/spell/spell.epics/        the epic folder:  guides, epic pages, sagas, the logs (yours, local only)
 ~/www/spell.worktrees/<epic>/   an epic's worktree of the repo, every folder on the epic's branch
 ~/www/spell.spaces/             your own Spell projects:  a plain folder, beside the repo
 ```
@@ -692,7 +692,7 @@ You'll type three commands, and the job tells you which.
 | Command | What it's for | For example |
 | --- | --- | --- |
 | `spell` | writing, running and explaining programs, and the tools for working on Spell | `spell run`, `spell lint`, `spell server`, `spell app serve` |
-| `epic` | the epic pages, their worktrees and their reviews:  the epic folder's | `epic --help`, `epic summary <epic>` |
+| `epic` | the epic pages, their worktrees and their reviews:  the `epic/` folder's | `epic --help`, `epic summary <epic>` |
 | `yarn` | the checks over everything at the root;  each folder's own scripts in its folder | `yarn test`;  `yarn dev` in `ui/` |
 
 `spell` is one command over every folder.
@@ -775,7 +775,7 @@ The shared code's topic pages are in [README/](README/), beside this one.
 | [README/development.md](README/development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with two differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>an epic's worktree, one branch for every folder;  CI over every folder</li><li>where to change what;  the papercuts;  every script</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk</li><li>two extensions you build, the rest from the Marketplace</li><li>what it does for a `.spell` file;  the settings the repo ships</li><li>Spell Epic, the pages beside your code;  windows and worktrees</li><li>working on the extensions</li></ul> |
 | [README/agents.md](README/agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
-| [README-epics.md](README-epics.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it, shared through GitHub</li><li>setting it up, in four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the content folder, the config file, the worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
+| [README-epics.md](README-epics.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it, shared through GitHub</li><li>setting it up, in four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the epic folder, the config file, the worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [parser/README.md](https://github.com/spell-app/spell/blob/main/parser/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>Spell in Spanish;  🌱 a third language, more targets, any program read back as Spell</li></ul> |
 | [parser/README-parser.md](https://github.com/spell-app/spell/blob/main/parser/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
 | [parser/README-rulex.md](https://github.com/spell-app/spell/blob/main/parser/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |

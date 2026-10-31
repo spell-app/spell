@@ -1,6 +1,6 @@
 /**
  * Tests of `EpicOwners` (`epic owns`):  its pure rules, then a scratch checkout with git, a child repo inside it,
- * a worktree of both for one epic, a shared content repo its config names, and four epics' pages.
+ * a worktree of both for one epic, an epic repo its config names, and four epics' pages.
  */
 import { spawnSync } from "node:child_process"
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"

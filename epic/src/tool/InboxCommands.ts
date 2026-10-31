@@ -699,7 +699,7 @@ export class GuideSends {
   /** the docs pages' inbox files:  where page paths' inboxes are (Epic UI's too), and the unowned pages */
   private readonly inboxes: PageInboxes
   /**
-   * the pages it owns, as page paths (from the content folder, or Epic UI's as served, `components/epics/...`), as
+   * the pages it owns, as page paths (from the epic folder, or Epic UI's as served, `components/epics/...`), as
    * last found
    */
   private pages: string[] = []
@@ -767,7 +767,7 @@ export class GuideSends {
     return this.pages
   }
 
-  /** Page `page`'s inbox file:  in the content folder, or Epic UI's (`PageInboxes.fileOf()`). */
+  /** Page `page`'s inbox file:  in the epic folder, or Epic UI's (`PageInboxes.fileOf()`). */
   private inboxOf(page: string): string {
     return GuideInbox.fileFor(this.inboxes.fileOf(page))
   }

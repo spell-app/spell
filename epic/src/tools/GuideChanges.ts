@@ -19,7 +19,7 @@ import { htmlOf } from "./PageNotes.js"
 /** The standing epic Owen's comments on pages no epic owns go to, one phase per page (epic `epic-engine` T9). */
 export { FEEDBACK }
 
-/** The folders, from the content folder, whose pages may hold page notes (written before P11). */
+/** The folders, from the epic folder, whose pages may hold page notes (written before P11). */
 const NOTE_FOLDERS = ["guides", "pages", "epics"]
 
 /** The kickoff prompt of the epic, when the first gather makes it (the real one's is written by hand). */
@@ -58,7 +58,7 @@ const PROMPT =
 export class GuideChanges {
   /** the checkout's root:  its epic pages' tool (`PlanDocFiles`) and owners (`SeeAlso`) */
   readonly root: string
-  /** its repo's content folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
+  /** its repo's epic folder (`EpicConfig.contentOf()`):  its `guides/`, `pages/`, `epics/` */
   readonly content: string
   /** the epic gathered into:  `feedback` (asked as its old name, `guide-changes`, too), or another (a test's) */
   readonly epic: string
@@ -253,7 +253,7 @@ export class GuideChanges {
 
 /** A page with comments or notes waiting. */
 export type PageWaiting = {
-  /** the page, a page path (from the content folder):  `guides/x.html` */
+  /** the page, a page path (from the epic folder):  `guides/x.html` */
   page: string
   /** its `<title>`, short:  the phase's name */
   title: string

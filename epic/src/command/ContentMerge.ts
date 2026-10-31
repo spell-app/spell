@@ -1,6 +1,6 @@
 /****************
  * ### `ContentMerge`
- * The small merge rules the content repo's sync settles a conflict with (`SharedSync`, epic `epic-friend` P5):
+ * The small merge rules the epic repo's sync settles a conflict with (`SharedSync`, epic `epic-friend` P5):
  * what two people's edits to one epic page leave that git can't merge by itself, but whose answer is plain.
  * - `resolve()`:  a file with git's conflict marks (diff3 style), settled hunk by hunk, or `undefined` when any hunk
  *   isn't one of these:
@@ -8,7 +8,7 @@
  *     (`bothInserted()`)
  *   - only a date changed on both (`<epic-page updated="...">`, `recent-since`):  the LATER one
  *   - one side left a line as it was:  the other's
- * - `sortLog()`:  a log part's events in time order, as a union merge (`merge=union`, the content repo's
+ * - `sortLog()`:  a log part's events in time order, as a union merge (`merge=union`, the epic repo's
  *   `.gitattributes`) leaves them two runs side by side
  * - pure, all `static`:  text in, text out;  no git, no files (WWOD §8 › "Singleton services are classes")
  * - NOT a whole-file add on both sides (`AA`) or a delete against an edit:  the sync never calls it for those

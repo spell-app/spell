@@ -24,7 +24,7 @@ READ [the commands guide](spell.epics/guides/dev/commands/commands.md) FIRST,**
 and suggest where it belongs before building it (below, "Commands").
 
 **Working an epic without Claude Code's skills (Codex, or any other agent):  run `epic guide`, and follow it;**
-end every turn with `epic turn end` ([the epic folder's AGENTS.md](epic/AGENTS.md);  epic `epic-friend` P11).
+end every turn with `epic turn end` ([the `epic/` folder's AGENTS.md](epic/AGENTS.md);  epic `epic-friend` P11).
 
 ## The kit
 
@@ -181,7 +181,7 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - Then SUGGEST, before building:  where it belongs, its name, what it replaces,
     which roadmap move it advances.
 - MUST keep the commands page true in the same change:  `commands.json5`, then `spell commands check`.
-  - `commands.json5` and `commands.md` are shared content (below), but the check reads each branch's CLI.
+  - `commands.json5` and `commands.md` are in the epic repo (below), but the check reads each branch's CLI.
   - So a branch adding a command can make main's check fail until it merges
     ([the code-debt log](agents/CODE-DEBT.md), "docs").
 - Tools are TypeScript (or node JS in [the docs tools](epic/src/tools/)), never python:  one language.
@@ -272,7 +272,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   (`"spell": "portal:../spell"`), at `~/www/spell-brand` (`repos.json5`, a peer).
   - Brand work is its own `/isolate`, in its own repo.
   - The kit's page server serves its part of the settings from that peer entry;  a kit worktree uses main's.
-- Data, not code:  `spell.epics/` (the content repo), inside the kit, and `spell.spaces/` (your projects), beside it
+- Data, not code:  `spell.epics/` (the epic repo), inside the kit, and `spell.spaces/` (your projects), beside it
   (`~/www/spell.spaces`).
 
 ## Imports across repos
@@ -282,7 +282,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   `spell/app/spaces/...`.
   - Inside a folder too:  no `$/`, no `#`, no `../`.
   - Spell UI's short names:  `spell/ui/ui-button`;  the `spell-ui` bundle's (`spell-ui/ui-button`) are for outside.
-  - The epic folder's old name, `spell-epic/...`, is gone since epic `epic-engine` P49:  write `spell/epic/...`.
+  - The `epic/` folder's old name, `spell-epic/...`, is gone since epic `epic-engine` P49:  write `spell/epic/...`.
 - The kit's `package.json` `exports`:  one wildcard entry per folder (`./ui/*` => `./ui/src/*`), in three conditions:
   - `spell-source`:  TypeScript reads the SOURCE (every program's `customConditions`)
   - `types`:  built declarations (`dist-types/`, `spell-types`), for the app's node program and for spell-brand
@@ -302,8 +302,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 - ONE page server, the KIT's, started from the kit's root only:  `spell server start | status | stop`.
 - Each big folder declares ITS OWN part of its settings in its folder manifest, `"pageServer"`, paths from its folder.
-- The CONTENT repo's part is its `page-server.json5`:  the site's tabs, the writable folders, what's `gone`.
-- Merged:  the kit's, the content repo's, each folder's (`workspaces` order), each peer `repos.json5` names
+- The Epic repo's part is its `page-server.json5`:  the site's tabs, the writable folders, what's `gone`.
+- Merged:  the kit's, the epic repo's, each folder's (`workspaces` order), each peer `repos.json5` names
   (spell-brand), then each project a checkout's own git-ignored `page-server.local.json5` names
   (`{ projects: ["../x"] }`, someone's project trying the epic framework).
 - How:  [the server's AGENTS.md](src/server/AGENTS.md), "The page server's settings".
@@ -350,9 +350,14 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - "durable doc" -- the epic's guide;  "syntax-choices page" -- a choice page;
     "analysis page" -- a review page;  "docs index", "docs home" -- the home page;
     "goal", "goals page" -- a saga (an epic of epics), a saga page
+  - "shared content repo", "content repo", "shared repo", "shared content" -- the epic repo, `spell.epics`
+    (Owen, 2026-10-29, epic `epic-engine` r47);  "content folder" -- the epic folder, that repo's folder on disk (r48)
+    - `epic repos ...` and the code name `EpicRepo` are about CODE repos, not the epic repo (Q63 of epic `epic-engine`)
 - Names only code reads keep the old words:
   - `<epic-id>.plan.html`, `PlanDoc`, `plan-doc.md`
   - spell-epic's `yarn plan-doc` (the `epic` tool in its own order)
+  - the epic repo's:  the `contentFolder` setting, `contentOf()`, `contentFolderOf()`, `serveContent()`,
+    `contentRemote`, `--content-repo`, the `epic shared ...` verbs
   - So does the record:  log entries, quotes, commit messages.
 - Pointing at a saga, an epic or an item (epic `epic-workflow` P15, J32):
   - In Owen's prompts, "saga drawable-spell" names a saga, and a SHORT ADDRESS names a saga, an epic or an item:
@@ -377,7 +382,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 ### Windows
 
 - Owen works in VS Code windows opened from their WINDOW FILES, `<name>.code-workspace`.
-  - They live in the content repo's `windows/` folder, not in a code repo (epic `epic-eject` P13):
+  - They live in the epic repo's `windows/` folder, not in a code repo (epic `epic-eject` P13):
     `spell.epics/windows/`, each machine's own, git-ignored there.
     - Where:  `windowsFolder` in [the kit's epic settings](.epic/config.json5);  `epic config windowsFolder` prints it.
     - A worktree's window file is in its `ongoing/` folder.
@@ -386,8 +391,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - `epic window init` writes missing ones, and brings the rest up to date.
   - Each has its own theme.
 - Each window shows the WHOLE branch:
-  - folder 1 is the KIT's root, `~/www/spell` (since epic `repo-split` P9), then the shared content repo
-    - a worktree's window:  the worktree (`⎇ <name>`), then the content repo, and NOT the kit's root
+  - folder 1 is the KIT's root, `~/www/spell` (since epic `repo-split` P9), then the epic repo
+    - a worktree's window:  the worktree (`⎇ <name>`), then the epic repo, and NOT the kit's root
       (`windows.worktreeOnly` in [the kit's epic settings](.epic/config.json5);  Owen, 2026-10-22)
       - with the kit's root there too, Quick Open listed every file twice
       - its Claude panel still lists every session:  the worktree's saved-session folder links to the kit's
@@ -456,14 +461,14 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - Its look:  that of the window it's opened from, or the one asked for.
   - `/epic <name> -purple`:  Tomorrow Night Blue's look in one of 12 hues (`epic window color`).
   - `/epic color <look>` recolours the window you're in, live.
-  - Its folders:  the worktree's root (`⎇ <name>`), then the shared content repo (above, "Windows").
+  - Its folders:  the worktree's root (`⎇ <name>`), then the epic repo (above, "Windows").
 - Why:  Owen reviews in VS Code;  edits a window doesn't show are invisible there.
 - `epic window` works in a fresh worktree, before its `yarn install`.
   - The `spell` link runs the MAIN checkout's CLI, which has its packages.
   - `yarn` couldn't run it:  yarn runs no script there before `yarn install`.
 - A doc shown while the move is pending waits, then shows beside the session in the window it moved to.
   - That's `epic open <name> --review` or `epic window show`.
-- A running epic's epic page is shared (below, "Shared content"):  ONE file, the same in every checkout.
+- A running epic's epic page is shared (below, "The epic repo"):  ONE file, the same in every checkout.
   - So the MAIN checkout's page server shows it too,
     listed on the Epics list page with the merged ones.
   - `spell server url` gives that URL ([the page server guide](spell.epics/guides/server.html), "Running epics").
@@ -504,7 +509,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - The branch's files:  what the merged branch differs from `main` in;  `main`'s own were renamed on `main`.
     - Each repo's run is the WORKTREE's kit (`node bin/spell.mjs`), never main's.
     - Committed on its own in each repo:  "merge-main:  old Spell UI names renamed (spell ui rename)".
-    - Never generated files, never the content folder.
+    - Never generated files, never the epic folder.
     - Listed under "renamed old names in N file(s)";  a kit with no `ui rename`, or a failure, is one line,
       and the merge stands.
   - NOT `merge=ours`:  it drops the other side's changes silently,
@@ -517,9 +522,9 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   "isolated in worktree <name> (branch <name>), open in its own window, ⎇ <name>",
   or "..., staying in this window".
 
-## Shared content
+## The epic repo
 
-- The content repo, `spell.epics`, holds these folders.
+- The epic repo, `spell.epics`, holds these folders.
   No code repo tracks them, and page URLs follow them (`/epics/seo/seo.plan.html`).
   - Epic `shared-content` made them, live since 2026-10-04.
   - Epic `claude-design` P4 split them into root folders, 2026-10-05.
@@ -551,7 +556,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 ### How they're found
 
-- They're ONE shared content repo, the same for main and every worktree.
+- They're ONE epic repo, the same for main and every worktree.
   - It's `spell.epics`, inside the kit and git-ignored here (epic `repo-split` J5):  an ordinary git repo, local only.
     - `~/www/spell-app/spell-app.epics` before.
     - An epic's worktree has a link to it, `spell.epics`.
@@ -559,7 +564,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     spell-brand's names the kit's (`{ top: "../spell" }`).
     `epic config contentFolder` prints it.
   - So every worktree sees every edit at once:  no per-branch copy, and these files never conflict on merge.
-- Found in the content folder itself, never linked in at a checkout's root (epic `epic-eject` P12):
+- Found in the epic folder itself, never linked in at a checkout's root (epic `epic-eject` P12):
   - the page server serves it at `/`, after the checkout's own files, and under every worktree's address
     (`serveContent()`, [the kit's server AGENTS.md](src/server/AGENTS.md))
   - the tools read it from the epic settings (spell-epic's `EpicConfig`, the kit server's `contentFolderOf()`)
@@ -580,9 +585,9 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     (`[]` in the kit and spell-app);  and the `.gitignore`'s `# shared:start` ... `# shared:end` block.
   - spell-app's listed `agents` until epic `repo-split` I64:  `agents` is the kit's link now (above).
   - A checkout's links are its OWN branch's manifest's:  `epic shared link` after merging a manifest change,
-    which also removes a link into the content repo the manifest no longer names.
+    which also removes a link into the epic repo the manifest no longer names.
 - Old paths last until every checkout has merged the reorg (claude-design T1).
-  - The shared repo's old docs folder holds a link per old entry into the root folders,
+  - The epic repo's old docs folder holds a link per old entry into the root folders,
     so older code still finds its files there:
 
     ```text
@@ -598,7 +603,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 ### Commits
 
-- The shared repo is committed by itself after every Claude turn.
+- The epic repo is committed by itself after every Claude turn.
   - The `Stop` hook, [shared-commit.mjs](epic/hooks/shared-commit.mjs), runs `epic shared commit`.
   - A repo whose `.epic/config.json5` names `contentRemote` also syncs it then, pulling and pushing (epic `epic-friend`
     P5):  the kit's names `spell-app/spell-app.epics` (J18), so `spell.epics` is pulled and pushed every turn too.
@@ -617,7 +622,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - `git add`
   - `git checkout --`
   - `git restore`
-- NEVER run git inside the content repo's folders (`epics/`, `guides/` ...):  it's the shared repo there.
+- NEVER run git inside the epic repo's folders (`epics/`, `guides/` ...):  it's the epic repo there.
   Run it in the code repo you mean.
 
 ### Commands and tips
@@ -648,16 +653,16 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 - WWOD (`agents/wwod/`) is TRACKED in the kit (epic `repo-split` P9):  a real `agents/` folder at its root.
   - Edit it here.
-- The three logs stay in the content repo (Q31):
+- The three logs stay in the epic repo (Q31):
   `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md` and `CODE-DEBT.md` are links into `../spell.epics/agents/`.
-  - Edit them at their REAL path, `spell.epics/agents/<log>`, never through the link (above, "Shared content").
+  - Edit them at their REAL path, `spell.epics/agents/<log>`, never through the link (above, "The epic repo").
 - Every big folder has an `agents` link at its root (git-ignored there), to the kit's `../agents`;
   spell-brand's comes from its own `postinstall`, to `node_modules/spell/agents`:
   so its instructions name `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
   - Every `yarn install` here makes them:  so an epic's worktree and CI have them too.
     - The install's step:  the `postinstall`, `tools/repos.ts links` (epic `repo-split` P12).
     - It replaces an `agents` LINK that points anywhere else (epic `repo-split` I64):
-      a checkout from before the split linked the content repo's old WWOD, which teaches `$/` aliases.
+      a checkout from before the split linked the epic repo's old WWOD, which teaches `$/` aliases.
     - A real `agents/` folder is left alone.
   - Except `epic/`'s:  a root `agents/` there makes Claude Code load WWOD and the logs as plugin agents
     (epic `epic-engine`'s move check).
@@ -665,7 +670,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 ## Long-term debt
 
 - [The code-debt log](agents/CODE-DEBT.md) tracks structural debt we have knowingly chosen NOT to fix yet.
-- It and the other two logs live in `agents/`, shared (above, "Shared content"):
+- It and the other two logs live in `agents/`, shared (above, "The epic repo"):
   - [the suspected-bugs log](agents/SUSPECTED-BUGS.md)
   - [the papercuts log](agents/PAPERCUTS.md)
   - One file each for every repo and package, with a `## <package>` section per package.
@@ -692,7 +697,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     When it merges into `main`, move it under its month in "3. Merged into main".
   - `/isolate done`:  before merging into `main`, add an entry for what the branch shipped.
     Skip a branch with nothing worth a reader's time:  typo fixes, a papercut.
-- It's shared (above, "Shared content"):  write an entry straight into it, from any checkout.
+- It's shared (above, "The epic repo"):  write an entry straight into it, from any checkout.
   - No branch commit, no merge conflicts:  the `Stop` hook commits it.
 - An entry is one nested `<ui-section>` under its month, newest first.
   - Its markup:  `<ui-section id="<epic or worktree name>" header="YYYY-MM-DD · Title">`.

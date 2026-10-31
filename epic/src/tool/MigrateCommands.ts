@@ -28,7 +28,7 @@ import { Renumber } from "./Renumber"
  * - the epic page's steps:  `Migrations` (`PlanDocFiles.migrate()`)
  * - the other kinds':  the docs tools' `src/tools/migrate.js`
  *   - run as a child `node` as its command line runs it, its output passed on
- * - and the CONTENT FOLDER's pass of `root-links` (`RootLinks.run()`, epic `epic-engine` P46), after the pages:
+ * - and the EPIC FOLDER's pass of `root-links` (`RootLinks.run()`, epic `epic-engine` P46), after the pages:
  *   every HTML and Markdown file, parts and details pages included, as plain text;  its census printed
  *   - on `migrate`, `migrate --all`, `migrate <epic>...` (their folders only), `--step root-links`;  never for one
  *     `--file` or another kind alone (their own steps do those)
@@ -204,7 +204,7 @@ export class MigrateCommands {
   }
 
   /**
-   * The content folder's `root-links` pass (`RootLinks.run()`):  `names`' epic folders, else every area;  an epic
+   * The epic folder's `root-links` pass (`RootLinks.run()`):  `names`' epics' folders, else every area;  an epic
    * `--notify` left to its session skipped.  Prints its census (`RootLinks.report()`).
    */
   private rootContent(names: string[], { dryRun }: { dryRun: boolean }): void {
@@ -276,7 +276,7 @@ export class MigrateCommands {
     return existsSync(here) ? here : page
   }
 
-  /** An epic page given as `--file`:  from here, else a page path (from the content folder). */
+  /** An epic page given as `--file`:  from here, else a page path (from the epic folder). */
   private pagePath(page: string): string {
     const here = resolve(page)
     if (existsSync(here)) return here
@@ -292,7 +292,7 @@ export type SessionFinder = (epic: string) => Promise<{ name: string; sessionId:
 /** The step whose inbox-only fixes count as a change:  comments moved. */
 const LINKS = "links-agree"
 
-/** The step whose content folder's pass runs after the pages (`RootLinks.run()`). */
+/** The step whose epic folder's pass runs after the pages (`RootLinks.run()`). */
 const ROOT_LINKS = "root-links"
 
 /** The step that renumbers items:  the links on other pages follow it, and every inbox's comments (`ContentRelink`). */

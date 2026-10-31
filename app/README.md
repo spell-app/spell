@@ -347,7 +347,7 @@ from the app folder's settings._
 
 - The app is the kit's top folder:  it uses the parser, Spell UI and the kit's shared code, and nothing uses it
   ([the map of the kit](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts)).
-- It names the epic engine nowhere:  the epic folder declares its own part of the kit's page server, as this one does.
+- It names the epic engine nowhere:  the `epic/` folder declares its own part of the kit's page server, as this one does.
 - Each folder's `AGENTS.md` holds the rules for working in it:
   [app](src/app/AGENTS.md), [spaces](src/spaces/AGENTS.md), [lsp](src/lsp/AGENTS.md), [cli](src/cli/AGENTS.md);
   the app folder's own, [AGENTS.md](AGENTS.md).
@@ -499,7 +499,7 @@ Where a page says more, the row links it.
 <summary>More in the docs site</summary>
 
 These guides are pages of the docs site, at `http://127.0.0.1:4747/`.
-It needs a checkout with the content folder beside it, and the page server running:
+It needs a checkout with the epic folder beside it, and the page server running:
 `yarn start`, or `spell server start`.
 
 - "The `spell` Command Line":  `/guides/cli.html`

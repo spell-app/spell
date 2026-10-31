@@ -45,7 +45,7 @@ export class Offline {
   }
 
   /**
-   * `text`, the page at `file` served from folder `root` (at `/`:  the content folder), with its cdnjs highlight.js tag
+   * `text`, the page at `file` served from folder `root` (at `/`:  the epic folder), with its cdnjs highlight.js tag
    * pointing at the engine's copy.
    * - the path is relative to the page, as its `spell-ui.js` tag is, so it works from `file://` too
    */
@@ -97,12 +97,12 @@ export type RemoteLoad = { file: string; line: number; kind: string; url: string
 
 /**
  * highlight.js, the one remote file docs pages loaded (epic `airplane` P1).
- * - the engine's `HIGHLIGHT_JS` (`server.types.ts`), its `local` from the served root (the content folder) rather
+ * - the engine's `HIGHLIGHT_JS` (`server.types.ts`), its `local` from the served root (the epic folder) rather
  *   than from `/`
  */
 export const HIGHLIGHT = { cdn: HIGHLIGHT_JS.cdn, local: HIGHLIGHT_JS.local.slice(1) } as const
 
-/** The folders `epic pages offline` checks by default, from the content folder (`EpicConfig.contentOf()`). */
+/** The folders `epic pages offline` checks by default, from the epic folder (`EpicConfig.contentOf()`). */
 export const DOCS_FOLDERS = ["epics", "guides", "pages", "templates", "goals"]
 
 /** Files it reads. */
@@ -150,7 +150,7 @@ export function run(args: string[], { cwd = process.cwd() } = {}): number {
     if (unknown) throw new OfflineError(`unknown flag ${unknown}:  ${FLAGS.join(", ")}`)
     const checkout = checkoutOf(cwd)?.root
     if (!checkout) throw new OfflineError("not in a checkout")
-    // pages are served from their repo's content folder, at `/`:  the highlight.js fix is relative to it
+    // pages are served from their repo's epic folder, at `/`:  the highlight.js fix is relative to it
     const root = EpicConfig.contentOf(checkout)
     const named = args.filter((arg) => !arg.startsWith("--"))
     const paths = named.length ? named : DOCS_FOLDERS.filter((folder) => existsSync(join(root, folder)))

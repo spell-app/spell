@@ -27,7 +27,7 @@ cloning the team's plans…
   12. black
 > Your name  :  Ben
 > Your colour:  teal
-> Shared repo:  git@github.com:ana/my-app.epics.git
+> Epic repo:  git@github.com:ana/my-app.epics.git
 
 Checking the epic plugin:
 > installed epic for Claude Code:  /reload-plugins in a running session
@@ -73,7 +73,7 @@ What that's like, and why:  [the epic engine's front page](epic/README.md).
 
 Three things to know before you start:
 - **Sharing works only with GitHub, for now.**
-  `epic init` makes the team's shared repo with GitHub's command, `gh`.
+  `epic init` makes the team's epic repo with GitHub's command, `gh`.
   GitLab, Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
@@ -125,7 +125,7 @@ _Once per machine, `epic init` does the plugin, the command and the server;  the
 Once per repo:  one small file in it, two folders beside it, and the team's copy of the plans on GitHub._
 
 The plans are NOT in your repo.
-An epic page is shared content:  ONE copy, in the content folder, which every checkout links in.
+An epic page is in the epic repo:  ONE copy, in the epic folder, which every checkout links in.
 
 So the session in a worktree and you on the main checkout read the same page,
 and it never conflicts on a code merge or turns up in a pull request.
@@ -141,7 +141,7 @@ These steps are for the FIRST person on a team;  everyone after them:  "A teamma
 
 ### 1. GitHub's command, logged in
 
-`epic init` uses it to make the team's shared repo, so install it first.
+`epic init` uses it to make the team's epic repo, so install it first.
 On macOS, with Homebrew:
 
 ```sh
@@ -151,9 +151,9 @@ gh auth login
 
 - Other systems:  https://cli.github.com.
 - `gh auth login` asks a few questions and opens your browser;  SSH or HTTPS, as you like:
-  the shared repo's address follows your choice.
+  the epic repo's address follows your choice.
 - Without it, `epic init` still sets everything else up, and says how to get it.
-  Run `epic init` again once you're logged in:  it makes the shared repo then.
+  Run `epic init` again once you're logged in:  it makes the epic repo then.
 
 ### 2. `epic init`, in your repo
 
@@ -190,7 +190,7 @@ Initializing Epic for repo ~/www/my-app
   2. public  -- anyone can read every epic page, guide and comment
 > Your name  :  Ana
 > Your colour:  green
-> Shared repo:  ana/my-app.epics, private
+> Epic repo:  ana/my-app.epics, private
 
 Checking the epic plugin:
 > installed epic for Claude Code:  /reload-plugins in a running session
@@ -244,7 +244,7 @@ A teammate joining has the team's plans cloned before the colour question, so th
 - **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
   A list of Spell UI's colour names nobody on the team has yet, the first marked.
   `--color green` answers it;  any CSS colour works too.
-- **What should the shared repo be called?**  Only when it's about to make one on GitHub.  Suggesting `<repo>.epics`, here `my-app.epics`.
+- **What should the epic repo be called?**  Only when it's about to make one on GitHub.  Suggesting `<repo>.epics`, here `my-app.epics`.
   `--content-repo <name>` answers it.
 - **Private or public?**  A list of the two, private marked.
   `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
@@ -264,16 +264,16 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
 2. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ("The config file", below).
    A file already there is kept as it is.
-3. Makes the content folder, `../<repo>.epics`, a git repo of its own.
+3. Makes the epic folder, `../<repo>.epics`, a git repo of its own.
    It holds the four folders, a README, and a `.gitignore` for what's never committed.
-4. Makes the shared repo on GitHub:  private unless you said public, under your account,
+4. Makes the epic repo on GitHub:  private unless you said public, under your account,
    or under the organization your code repo is on.
-   It pushes the content repo there, and writes its address in the config, `contentRemote`.
+   It pushes the epic repo there, and writes its address in the config, `contentRemote`.
 5. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
 6. Lists the links in a block of your `.gitignore`.
    The block starts `# shared:start` and ends `# shared:end`.
 7. Keeps your name, in `~/.spell-epic/person.json5`.
-8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
+8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the epic repo, and pushes it:
    your teammates see it, and nobody commits anything in the code repo for it.
 9. Commits `.epic/config.json5` and `.gitignore` on the base branch, only those two files, and pushes them:
    every new worktree branches from there.  On another branch it commits nothing, and says so.
@@ -281,9 +281,9 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
     terminal ("One epic server", below), and how to open them in VS Code (or Cursor).
     `--no-server` skips the server.
 
-- Pushed, a teammate's `epic init` reads the shared repo's address from the base branch.
+- Pushed, a teammate's `epic init` reads the epic repo's address from the base branch.
 - Each step is skipped when it's done, so it's safe to run again:  a second run's table says `already` on every row.
-- `--remote <address>` uses a shared repo you made already (on GitHub or anywhere else git reaches).
+- `--remote <address>` uses an epic repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
 
 Try it first in a throwaway repo:  `--dry-run` says what it would do, and writes nothing.
@@ -301,7 +301,7 @@ epic init --dry-run --no-remote --no-plugin
 .../my-app/.epic/config.json5:  would be written
 ...
 .../my-app.epics:  would make it, a git repo with epics, sagas, guides, pages
-shared repo:  none (--no-remote):  the plans stay on this machine
+epic repo:  none (--no-remote):  the plans stay on this machine
 .../my-app/epics:  would link (missing)
 .../my-app/sagas:  would link (missing)
 .../my-app/guides:  would link (missing)
@@ -382,11 +382,11 @@ What happens from there:  [the epic engine's front page](epic/README.md).
 ## <a id="working-with-others"></a>Working with others
 
 Everyone runs their own Claude Code, their own epic server and their own worktrees.
-What they share is the content repo:  every turn pulls the others' changes in, and pushes yours out.
+What they share is the epic repo:  every turn pulls the others' changes in, and pushes yours out.
 
 ### A teammate joins
 
-The same one command:  `epic init` finds the shared repo's address in the config the first person committed,
+The same one command:  `epic init` finds the epic repo's address in the config the first person committed,
 and CLONES it, beside the code repo:
 
 ```sh
@@ -397,9 +397,9 @@ npx spell@next epic init
 - What it printed:  the top of this page.
 - It asks your name and your colour, as it asked the first person, from any folder of the code repo:
   it finds the repo's main checkout from wherever it runs.
-- The shared repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
+- The epic repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
   with write access, since every turn pushes.
-- Joining needs no `gh`:  plain git clones the shared repo.
+- Joining needs no `gh`:  plain git clones the epic repo.
   With `gh` logged in, though, your short name defaults to your GitHub login.
 - The plugin step and the extension are once per machine, so a teammate does those too.
 
@@ -442,8 +442,8 @@ so you can tell your Claude at work from his.
 
 ### Every turn syncs
 
-At the end of every turn, Claude Code's or Codex's, a hook commits the content repo, one commit per epic, guide or folder.
-With a shared repo named in the config (`contentRemote`), the same hook then syncs it:
+At the end of every turn, Claude Code's or Codex's, a hook commits the epic repo, one commit per epic, guide or folder.
+With an epic repo named in the config (`contentRemote`), the same hook then syncs it:
 1. pulls, rebasing this machine's commits on top of the others'
 2. renumbers any id both sides made (below)
 3. pushes
@@ -469,7 +469,7 @@ _Ben's sync, after Ana and he each added a todo to the same epic page:  hers kep
 
 - Offline, the commits stay here, and the next sync pushes them.
 - A repo whose config names no `contentRemote` only commits, every turn, and never pulls or pushes,
-  even when its content repo has a remote of its own.
+  even when its epic repo has a remote of its own.
 
 ### When two people edit one page
 
@@ -486,7 +486,7 @@ Most of it merges by itself, because a page is many small files:
 Anything else, the same words changed two ways, is a real conflict:
 - the sync undoes its rebase, keeps your commits here unpushed, and stops
 - your next session starts by saying which files clash, and how to settle them
-- to settle it:  in the content repo, `git pull --rebase`, keep both people's words in each file, `git add` it,
+- to settle it:  in the epic repo, `git pull --rebase`, keep both people's words in each file, `git add` it,
   `git rebase --continue`, then `epic shared sync`
 
 ### Everyone sees every comment;  your agent answers yours
@@ -586,7 +586,7 @@ Type `$` and the skill's name, as `/` in Claude Code:
   - Codex never picks them by itself (each has an `agents/openai.yaml` saying so)
   - called by name, `$bg`, each says in its first line what to do in Codex instead
 - `epic skills check` keeps the one copy honest:  it fails a skill naming a Claude-only tool with no "In Codex:" line
-  beside it, and the epic folder's tests run it
+  beside it, and the `epic/` folder's tests run it
 
 **What the agent runs**, in the workflow `epic guide` prints:
 - `epic turn end`, as its turn's last step, when no hook runs it:  safe to run twice, quiet with nothing to do.
@@ -606,7 +606,7 @@ Type `$` and the skill's name, as `/` in Claude Code:
 Untried so far with a real Codex:  the steps above are tested against stand-ins for Codex's files, hooks, skills and
 agents.
 
-## The content folder:  your plans, in a repo of their own
+## The epic folder:  your plans, in a repo of their own
 
 Every page the agent writes lands in one of four folders, each linked into your checkout:
 
@@ -618,9 +618,9 @@ Every page the agent writes lands in one of four folders, each linked into your 
 | `pages/` | the docs' home page, `pages/index.html` (`epic pages index` writes a card per area), and scratch details pages, `pages/details/` |
 
 - **Committed by itself.**
-  A hook commits the content folder at the end of every turn (`epic turn end`),
+  A hook commits the epic folder at the end of every turn (`epic turn end`),
   one commit per epic, guide or folder:  the plans keep a history of their own, off your branches.
-  With a shared repo, the same hook syncs it ("Every turn syncs", above).
+  With an epic repo, the same hook syncs it ("Every turn syncs", above).
 - **Never committed:**  review and comment inboxes, locks, the running-agents lists, scratch details pages,
   and the VS Code window files, each machine's own (`windows/`).
   The comments beside the inboxes ARE committed, a file per person.
@@ -634,7 +634,7 @@ Every page the agent writes lands in one of four folders, each linked into your 
 
 `epic init` wrote this file, and most repos never touch it again.
 You'd open it for one of five things:
-- a shared repo made by hand (`contentRemote`)
+- an epic repo made by hand (`contentRemote`)
 - a different install command
 - a second project in the repo that installs on its own (`extraInstalls`)
 - an app for the epic server to start (`app`)
@@ -652,8 +652,8 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 
 | Key | `epic init` writes | What it sets |
 | --- | --- | --- |
-| `contentFolder` | `"../<repo>.epics"` | the content repo:  epics, sagas, guides, pages |
-| `contentRemote` | the shared repo's address, once it's made (or `--remote`);  `""` until then | where every turn pulls the content repo from and pushes it to, and what a teammate's `epic init` clones;  `""`:  the plans stay on this machine |
+| `contentFolder` | `"../<repo>.epics"` | the epic repo:  epics, sagas, guides, pages |
+| `contentRemote` | the epic repo's address, once it's made (or `--remote`);  `""` until then | where every turn pulls the epic repo from and pushes it to, and what a teammate's `epic init` clones;  `""`:  the plans stay on this machine |
 | `baseBranch` | from git:  the remote's default branch, else `main` or `master`, else the branch the main checkout is on | the branch worktrees start from and merge into |
 | `worktreesFolder` | `"../<repo>.worktrees"` | where new worktrees go, one folder each, `<worktreesFolder>/<name>` |
 | `installCommand` | from the lock file;  `""` with none | what makes a new worktree ready to run, from its root;  `""`:  nothing to install |
@@ -662,8 +662,8 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `extraInstalls` | `[]` | folders of a worktree that are projects of their OWN, outside the install at its root (a `vscode/` extension):  the install runs in each too;  one missing or failing is a warning |
 | `windows.default` | the repo's name | the window file a worktree's window is opened from, by default |
 | `windows.repoName` | the repo's name | the repo root's folder name in every window |
-| `windows.contentName` | `"<repo>.epics"` | the content folder's name in every window |
-| `windows.worktreeOnly` | `true` | whether every worktree's window holds only the worktree and the content folder |
+| `windows.contentName` | `"<repo>.epics"` | the epic folder's name in every window |
+| `windows.worktreeOnly` | `true` | whether every worktree's window holds only the worktree and the epic folder |
 | `windows.settings` | not written:  `{}` | VS Code settings every window file gets:  the WINDOW settings a folder's `.vscode/settings.json` can't give in a window of several folders (which TypeScript the editor runs, say;  none of Spell's repos names any today);  `epic window init` writes them into the files that exist |
 | `windowsFolder` | `"../<repo>.epics/windows"` | where the VS Code window files go;  worktree windows in its `ongoing/` |
 | `linkSessionFolders` | `true` | whether each worktree's saved Claude sessions show in every window's Claude panel |
@@ -714,7 +714,7 @@ An epic's worktree is `../my-app.worktrees/<name>`, on branch `<name>`,
 cut from your LOCAL base branch, unpushed work included.
 
 Before it hands the worktree over, the hook:
-- links the content folders in, and the worktrees folder's one link to the content folder,
+- links the content folders in, and the worktrees folder's one link to the epic folder,
   `my-app.worktrees/my-app.epics`, so a page's `../my-app.epics/...` links work from a worktree too
 - links the worktree's saved Claude sessions to the main checkout's (`linkSessionFolders`)
 - runs `installCommand` in it, when `installOnCreate` is on
@@ -747,7 +747,7 @@ For an agent without the skills (Codex reads `AGENTS.md` by itself), one more li
 What they look for:
 - the checks to run before a phase is done
 - its changelog, if it keeps one:
-  `epic docs` looks for an epic's entry in the content folder's guides, in `changelog.html`
+  `epic docs` looks for an epic's entry in the epic folder's guides, in `changelog.html`
 - its house style, and a skill that rewrites text to it, if it has one
 - NOT the pages' formatting:  that's the engine's own
 
@@ -755,7 +755,7 @@ What they look for:
 
 A dev server runs one per project;  the epic server runs ONE per machine, for every repo that uses epics.
 
-It serves each registered repo's content folder, the engine's scripts and styles,
+It serves each registered repo's epic folder, the engine's scripts and styles,
 Epic UI (the `<epic-*>` elements' own docs), and the routes the review controls call.
 It's what the Review tab shows.
 
@@ -792,8 +792,8 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 | `/_epic/pack/...` | the `<epic-*>` pack, `epics.pack.js` |
 | `/components/epics/` | Epic UI, the elements' docs |
 | `/components/<set>/` | the default repo's other component sets;  each repo's at `/r/<repo>/components/<set>/` |
-| `/r/<repo>/...` | a registered repo's content folder |
-| `/...` | the default repo's content folder too |
+| `/r/<repo>/...` | a registered repo's epic folder |
+| `/...` | the default repo's epic folder too |
 | `/editor/` | the default repo's APP (each repo's at `/r/<repo>/editor/`):  a redirect when it answers;  else started in the background behind a "Starting ..." page;  with none declared, a page saying so |
 | `/api/app/<repo>` | how a repo's app stands:  up, starting, or failed and why |
 | `/api/server` | what it serves:  its port, its repos, the default one |
@@ -809,7 +809,7 @@ What you'd trip on today, roughly in the order you'd meet it.
    `npx spell@next epic init` sets up everything else from npm, but the VS Code extension is built and installed by
    hand, in a clone's `epic/vscode/`.
 2. **Sharing needs GitHub.**
-   `epic init` makes the shared repo only through GitHub's `gh`;
+   `epic init` makes the epic repo only through GitHub's `gh`;
    anywhere else, make it by hand and pass `--remote <address>`.
 3. **The review controls reach the DEFAULT repo only.**
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
@@ -863,7 +863,7 @@ every comment seen by the team and answered by its writer's own agent, Claude Co
 - the VS Code extension without a clone
 - Cursor tried by a person:  its windows, the Review tab's place, a move between windows
 - Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
-- a host other than GitHub, without making the shared repo by hand
+- a host other than GitHub, without making the epic repo by hand
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:
   - `app`
@@ -878,7 +878,7 @@ and Send waking Codex and other agents
 ## See also
 
 - [epic/README.md](epic/README.md):  the method, if you came here first:  what an epic is, and why the plan is a page
-- [epic/README-pages.md](epic/README-pages.md):  what your content folder will fill with, and how a review round works
+- [epic/README-pages.md](epic/README-pages.md):  what your epic folder will fill with, and how a review round works
 - [epic/README-skills.md](epic/README-skills.md):  the skills and hooks you just installed, and what each hook does to a repo
 - [epic/README-cli.md](epic/README-cli.md):  every `epic` verb, `init`, `whoami`, `shared` and `server` among them
 - [epic/README-vscode.md](epic/README-vscode.md):  the extension's two views, and the window bridge
@@ -886,7 +886,7 @@ and Send waking Codex and other agents
 <details>
 <summary>More in the docs site</summary>
 
-In Spell's own content folder, so only in a Spell checkout with `spell.epics` beside the repos,
+In Spell's own epic folder, so only in a Spell checkout with `spell.epics` beside the repos,
 served by `spell server start`:
 
 - "spell-epic:  the epic engine, outside spell-app":  `/guides/spell-epic/spell-epic.html`

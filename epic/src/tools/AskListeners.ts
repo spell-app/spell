@@ -19,7 +19,7 @@ import { DataFile } from "spell/epic/data/DataFile.ts"
  *     process is gone, so a wait killed outright never leaves the page claiming it's there
  * - Kept in spell-epic's home folder (`~/.spell-epic/asks/`, `SPELL_EPIC_HOME` for tests and the demo server), one
  *   file per page, named by a hash of its real path:
- *   - NOT beside the page:  the content folder is a git repo committed after every turn, and a file rewritten every
+ *   - NOT beside the page:  the epic folder is a git repo committed after every turn, and a file rewritten every
  *     30s there would be a commit each time
  *   - one machine:  the wait and the page server that serves the page are on it
  * - node only;  plain `node` loads it (`details.js`, under tsx without the tsconfig's paths):  relative imports only

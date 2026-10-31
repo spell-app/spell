@@ -31,7 +31,7 @@
  *   - `remove` and `/isolate done` know its work is safe once it's in `<owner>`'s branch
  * - REFUSES `<name>` when it's an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):
  *   the hook fails with one line saying where it's worked, and how to get there (`epic window launch <name>`).
- *   - Why:  repos share one content folder, so `/epic resume epic-engine` in spell-app's window found spell-epic's
+ *   - Why:  repos share one epic folder, so `/epic resume epic-engine` in spell-app's window found spell-epic's
  *     epic page, and `EnterWorktree` made `spell-app.worktrees/epic-engine`, whose `spell-epic` link then took its
  *     edits into spell-epic's MAIN checkout.
  *   - before reusing one:  a stray worktree of that name made before is refused too
@@ -47,9 +47,9 @@
  *      - in a multi-repo top's epic worktree each repo's siblings are its siblings there too, so it finds nothing
  *        to make
  *      - nothing in the worktree changes, so git sees nothing;  a link it can't make is a warning
- *   1. links the shared content in (this plugin's `epic shared link`, epic `shared-content`),
- *      when the shared repo exists:  a failure there is a warning, never a failed hook
- *      - worktrees beside the repo:  that also makes the worktrees' folder's ONE link to the content folder,
+ *   1. links the epic repo in (this plugin's `epic shared link`, epic `shared-content`),
+ *      when the epic repo exists:  a failure there is a warning, never a failed hook
+ *      - worktrees beside the repo:  that also makes the worktrees' folder's ONE link to the epic folder,
  *        `spell-app.worktrees/spell-app.epics` (`Shared.linkContentBeside()`, epic `epic-eject` T31), so the docs'
  *        `../spell-app.epics/...` links resolve from a worktree as from the main checkout
  *   2. `linkSessionFolders` on:  links the worktree's saved-session folder to the main checkout's (`SessionFolders`),
@@ -85,7 +85,7 @@
  * - ONE repo:  its `repos` file lists only PEERS (`"peer": true`, spell-brand), so an epic's worktree is the kit's
  *   alone, made as a single repo's;  a peer is never part of it (Q50 D).
  * - Run in a PEER (spell-brand, whose settings say `{ "top": "../spell" }`):  its lone worktree, in its own
- *   `../spell-brand.worktrees/<name>/`, then its own install;  the content folder and windows are the kit's.
+ *   `../spell-brand.worktrees/<name>/`, then its own install;  the epic folder and windows are the kit's.
  * - `create` copies the main checkout's `page-server.local.json5` (the outside projects the page server serves,
  *   spell-brand's Brand tab) into a new worktree, its paths made absolute:  it's git-ignored, so a worktree lacks it.
  * - `create` reusing a branch cut BEFORE P20:  the kit's worktree only;  an old clone (`oldLayout.oldClones`,
@@ -404,9 +404,9 @@ class Worktree {
   }
 
   /**
-   * Link the shared content into worktree `path`:  this plugin's `epic shared link`, run in the worktree.
-   * - and the worktrees' folder's link to the content folder, when it's beside the repo (`linkContentBeside()`)
-   * - only when the shared repo exists (`contentFolder` in `.epic/config.json5`):
+   * Link the epic repo into worktree `path`:  this plugin's `epic shared link`, run in the worktree.
+   * - and the worktrees' folder's link to the epic folder, when it's beside the repo (`linkContentBeside()`)
+   * - only when the epic repo exists (`contentFolder` in `.epic/config.json5`):
    *   before the cutover (epic `shared-content`) there's nothing to link
    * - its output goes to stderr (stdout is the worktree's path);  a failure is a warning
    */
@@ -419,7 +419,7 @@ class Worktree {
       })
     } catch (error) {
       console.error(
-        `worktree hook:  shared content not linked (${error.message.split("\n")[0]});  run \`epic shared link\``
+        `worktree hook:  the epic repo not linked (${error.message.split("\n")[0]});  run \`epic shared link\``
       )
     }
   }

@@ -476,7 +476,7 @@ In plain VS Code you open a folder.
 With epics, every window opens from a WINDOW FILE, `<name>.code-workspace`,
 because the order of a window's folders decides which sessions its Claude panel lists.
 
-- They live in the content folder's `windows/`, each machine's own and git-ignored there;
+- They live in the epic folder's `windows/`, each machine's own and git-ignored there;
   an epic's goes in `windows/ongoing/`.
   The folder is `windowsFolder`, in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
 - `epic window init` writes the missing ones, and brings the rest up to date.
@@ -499,9 +499,9 @@ Here's the window this page was written in, the `readme` epic's, as `epic window
 ```
 
 _`ongoing/readme.code-workspace`, its colours trimmed:
-the paths are relative to the file, in the content folder's `windows/`._
+the paths are relative to the file, in the epic folder's `windows/`._
 
-The worktree, then the content folder:  no main checkout (`windows.worktreeOnly`, in the kit's epic settings).
+The worktree, then the epic folder:  no main checkout (`windows.worktreeOnly`, in the kit's epic settings).
 The kit's own window, `spell.code-workspace`, has just the last two:
 `spell`, the main checkout at `~/www/spell`, and `spell.epics`.
 
@@ -610,7 +610,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder:
+These guides live in the epic folder:
 they need a checkout with `spell.epics` beside the repos,
 and the page server running (`spell server start`, then the URL it prints):
 

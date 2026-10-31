@@ -668,7 +668,7 @@ export class PlanDocCommands {
 
   /**
    * `commits remap <map...> --repo <old repo>[,<old name>...] [--to <repo>] [--dry-run]`:  every `<epic-commit>` of
-   * the old repo, over the WHOLE content folder, pointed at its new id in the merged repo (`CommitRemap`;
+   * the old repo, over the WHOLE epic folder, pointed at its new id in the merged repo (`CommitRemap`;
    * epic-engine's P49, after repo-split's P20 · One Repo).
    * - several maps:  one lookup, the first map's id winning (`tools/one-repo/commit-map-ui.txt` and
    *   `commit-map-ui-elemental-spell.txt` together)

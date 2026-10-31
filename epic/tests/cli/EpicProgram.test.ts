@@ -48,7 +48,7 @@ function epic(args: string[], cwd = SPELL_APP!) {
   return { status, stdout, stderr }
 }
 
-// its epic pages are in its content folder (epic `epic-eject` P12), not behind an `epics/` link at its root
+// its epic pages are in its epic folder (epic `epic-eject` P12), not behind an `epics/` link at its root
 describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP), "epics", "unified-server")))(
   "epic",
   () => {

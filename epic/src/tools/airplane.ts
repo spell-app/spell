@@ -87,7 +87,7 @@ async function serverCheck(checkout: string, fix: boolean): Promise<FlightCheck>
 }
 
 /**
- * No docs page of checkout `checkout`'s content folder loads anything from the internet;
+ * No docs page of checkout `checkout`'s epic folder loads anything from the internet;
  * `fix`:  highlight.js pointed at the engine's copy first.
  */
 function offlineCheck(checkout: string, fix: boolean): FlightCheck {

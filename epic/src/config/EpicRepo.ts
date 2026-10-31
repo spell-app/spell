@@ -10,6 +10,8 @@ import { EpicConfig } from "./EpicConfig.ts"
 /****************
  * ### `EpicRepo`
  * Which REPO an epic is worked in, seen from a checkout of some repo (epic `epic-engine` I47).
+ * - a CODE repo (the kit, spell-brand, an adopter's app), never the epic repo, `spell.epics`, which holds the
+ *   pages:  the name only code reads keeps its spelling (the kit's `AGENTS.md`, "Words";  epic `epic-engine` P56)
  *
  * ```ts
  * EpicRepo.elsewhere("epic-engine", "/Users/owen/www/spell-app/spell-app")
@@ -17,7 +19,7 @@ import { EpicConfig } from "./EpicConfig.ts"
  * EpicRepo.elsewhere("seo", "/Users/owen/www/spell-app/spell-app")   // => undefined:  spell-app's own
  * ```
  *
- * Why:  two repos share one content folder (spell-epic's epics are spell-app's pages), so an epic's page is found
+ * Why:  two repos share one epic folder (spell-epic's epics are spell-app's pages), so an epic's page is found
  * from either repo's checkout, and nothing stopped a session in spell-app's window making worktree `epic-engine` in
  * spell-app, whose edits then went through its `spell-epic` link into spell-epic's MAIN checkout.
  * - What reads it:
@@ -27,7 +29,7 @@ import { EpicConfig } from "./EpicConfig.ts"
  *   - `epic worktree path <name>`, `epic window launch|open|close <name>`:  the epic's own repo's
  *   - `epic list --json`:  `repo`, and `checkout` in that repo
  *
- * How it knows, from the epic page's `<epic-page>` (`epics/<name>/<name>.plan.html` in this repo's content folder):
+ * How it knows, from the epic page's `<epic-page>` (`epics/<name>/<name>.plan.html` in this repo's epic folder):
  * 1. `worktree`, the checkout `epic create` ran in:  its MAIN checkout is the epic's repo (`mainOfPath()`)
  *    - a folder gone since:  `<main>/.claude/worktrees/<w>`, or `<main>.worktrees/<w>` beside the repo
  * 2. else `repo`, its GitHub page:  compared with this checkout's `origin` (`sameUrl()`);  the repo's checkout then
@@ -146,7 +148,7 @@ export class EpicRepo {
     }
   }
 
-  /** Epic `name`'s page in main checkout `here`'s content folder:  `<name>.plan.html`, or an old `<name>.html`. */
+  /** Epic `name`'s page in main checkout `here`'s epic folder:  `<name>.plan.html`, or an old `<name>.html`. */
   static pageOf(name: string, here: string): string | undefined {
     const dir = join(EpicConfig.contentOf(here), "epics", name)
     return [`${name}.plan.html`, `${name}.html`].map((file) => join(dir, file)).find((file) => existsSync(file))

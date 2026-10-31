@@ -3,7 +3,7 @@
  * `epic window <command>`:  the VS Code windows Owen works in, one per package.
  *
  * ## Window files
- * - Where:  the windows folder, by default the content folder's `windows/`, `../spell-app.epics/windows`:
+ * - Where:  the windows folder, by default the epic folder's `windows/`, `../spell-app.epics/windows`:
  *   each machine's own, git-ignored there.
  *   - set by `windowsFolder` in the repo's `.epic/config.json5` (epic `epic-eject` P13)
  *   - Before P13 they were in spell-app, `workspaces/`, tracked and marked `skip-worktree`:
@@ -11,7 +11,7 @@
  *   - Their folder paths are relative to the FILE:  every writer computes them from the windows folder.
  * - `<windowsFolder>/<pkg>.code-workspace`:
  *   open a package's window from it (`code <windowsFolder>/ui.code-workspace`).
- * - Its FIRST folder is the repo root, the whole branch;  then the shared content repo.
+ * - Its FIRST folder is the repo root, the whole branch;  then the epic repo.
  *   - Why the root first:  the Claude Code panel lists only the sessions saved under a window's first folder,
  *     so every window lists every session.
  *   - No package folder since 2026-10-06 (Owen:  "just check out the full branch").
@@ -21,7 +21,7 @@
  *   - generated files, icons and screenshots stay out of Quick Open and Find
  *     through the root's `.vscode/settings.json` (`search.exclude`)
  * - The folders and names come from the repo's `.epic/config.json5` (`EpicConfig`, `CONFIG`):
- *   - the content repo (`contentFolder`)
+ *   - the epic repo (`contentFolder`)
  *   - the worktrees' folder (`worktreesFolder`)
  *   - the window files' folder (`windowsFolder`)
  *   - the window names (`windows`)
@@ -91,10 +91,10 @@
  *   the TOP's config throughout, from any child repo or worktree.
  *   - Folder 1 of every window:  the main top checkout, its files hidden in an epic's window.
  *   - Then `⎇ <name>`, the epic's worktree of the top (each child repo's inside it).
- *   - Then the content folder.
+ *   - Then the epic folder.
  *   - `windows.worktreeOnly` in the top's config drops folder 1.
  * - A worktree BESIDE the repo (`worktreesFolder` outside it, or `windows.worktreeOnly`;  epic `epic-eject` P8):
- *   a worktree-only window, `⎇ <name>` then the content folder.
+ *   a worktree-only window, `⎇ <name>` then the epic folder.
  *   - no main checkout, no `.spell-main` marker, no hiding
  *   - its Claude panel lists every session through the worktree's linked session folder (`linkSessionFolders`)
  * - The old layout, while worktrees nested in the checkout are left (`.claude/worktrees`):
@@ -224,7 +224,7 @@ const ROOT = envCheckout() ?? checkoutAround(process.cwd())
  * as their root), resolved;  `undefined` when it isn't set, or names no folder.
  * - No folder:  a STALE one, inherited (epic `epic-engine` P9:  repo-split's window carried the long-gone
  *   `spell-app.worktrees/epic-eject`, which `code` had handed it, so `check-spell.js` there served pages from a
- *   content folder that didn't exist).  Said on stderr, once, and left out.
+ *   epic folder that didn't exist).  Said on stderr, once, and left out.
  * - Why it leaked:  VS Code gives a window the environment of the `code` command that opened it, so every Claude
  *   session in it had it;  `codeEnv()` now leaves it out.
  */
@@ -266,7 +266,7 @@ function checkoutAround(dir) {
  * The repo's `.epic/config.json5`, the MAIN checkout's:  its folders and window names.
  * - a MULTI-REPO top's child repo (`EpicConfig.top`, epic `epic-engine` P10):  the TOP's.  Folder 1 of every window
  *   is the main TOP checkout (`~/www/spell`), every session saved under it;  an epic's window is that, its files
- *   hidden, then the epic's worktree of the top (every repo's inside it), then the content folder
+ *   hidden, then the epic's worktree of the top (every repo's inside it), then the epic folder
  */
 const CONFIG = topConfig(EpicConfig.of(ROOT))
 
@@ -343,7 +343,7 @@ export class Window {
   }
 
   /**
-   * The window file's contents for `pkg`:  the WHOLE branch (the repo root), then the shared content repo.
+   * The window file's contents for `pkg`:  the WHOLE branch (the repo root), then the epic repo.
    * - one file per package still, each with its own theme;
    *   no package folder any more (Owen, 2026-10-06:  "just check out the full branch")
    */
@@ -360,7 +360,7 @@ export class Window {
   }
 
   /**
-   * A package window's folders, relative to the windows folder:  the MAIN repo root, then the shared content repo.
+   * A package window's folders, relative to the windows folder:  the MAIN repo root, then the epic repo.
    * - the main checkout's, whichever checkout runs this:  one windows folder for the repo (before epic `epic-eject`
    *   P13, a worktree's `init` wrote its branch's own copies, pointing at the worktree)
    */
@@ -379,7 +379,7 @@ export class Window {
    *     the old place included while worktrees are left there
    * - the shared links (`epics`, `guides` ...) in a CHECKOUT:
    *   their files show once, under the `spell-app-dev` folder (`windows.contentName`), at the real path edits need
-   *   (root `AGENTS.md`, "Shared content")
+   *   (root `AGENTS.md`, "The epic repo")
    *   - a checkout:  beside its `package.json`;  in a repo without one, beside its `.epic` folder,
    *     which every checkout of a repo `epic init` set up has (`checkoutMarker()`)
    * - `worktree`:  also everything in the MAIN checkout's folder,
@@ -413,8 +413,8 @@ export class Window {
    * - the whole repo's window, `windows.default` (`spell-app`), when it isn't a package's:
    *   written when missing (`ensureRepoWindow()`)
    * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude` and the repo's own settings,
-   *   and the content folder when it lacks it,
-   *   a folder that's gone (an old content folder) dropped (`withContentFolder()`)
+   *   and the epic folder when it lacks it,
+   *   a folder that's gone (an old epic folder) dropped (`withContentFolder()`)
    *   - a worktree-only window (`windows.worktreeOnly`):  the main checkout's folder dropped too, as a new one never has
    *     it (Owen, 2026-10-22:  Quick Open listed every file twice, the main checkout's beside the worktree's:  the
    *     `.spell-main` hiding works in the Explorer only)
@@ -473,7 +473,7 @@ export class Window {
    * isn't a package's;  returns its path when written, else `null`.
    * - so a repo with no `packages/` (spell-epic, one `epic init` set up) has a window for `open` and `launch` to
    *   start from, without an `epic window init` first (epic `epic-engine` I15)
-   * - its folders:  the MAIN repo root, then the content folder (`packageFolders()`)
+   * - its folders:  the MAIN repo root, then the epic folder (`packageFolders()`)
    */
   static ensureRepoWindow() {
     const file = Window.file(DEFAULT_WINDOW)
@@ -485,13 +485,13 @@ export class Window {
   }
 
   /**
-   * A worktree window's `folders` with the content folder in them:  right after the worktree's own (`⎇ <name>`),
+   * A worktree window's `folders` with the epic folder in them:  right after the worktree's own (`⎇ <name>`),
    * when it isn't there yet (`fromDir`:  where the window file is, its paths relative to it).
-   * - for a window file written while the content folder was missing, or by older code:  `init` puts it back
-   * - unchanged when it's there (wherever, any spelling of it), or when there's no content folder
+   * - for a window file written while the epic folder was missing, or by older code:  `init` puts it back
+   * - unchanged when it's there (wherever, any spelling of it), or when there's no epic folder
    * - a folder that ISN'T there is dropped first, unless it's the worktree's own (`⎇ <name>`) or the repo root
-   *   (`windows.repoName`):  an old content folder (epic `epic-engine` I59), e.g. `../../../spell-app.epics` after
-   *   spell-epic moved to `~/www/spell/` and its content folder to `spell.epics`
+   *   (`windows.repoName`):  an old epic folder (epic `epic-engine` I59), e.g. `../../../spell-app.epics` after
+   *   spell-epic moved to `~/www/spell/` and its epic folder to `spell.epics`
    */
   static withContentFolder(folders, fromDir) {
     const kept = folders.filter(
@@ -508,7 +508,7 @@ export class Window {
   }
 
   /**
-   * The shared content repo (epic `shared-content`) as a window folder,
+   * The epic repo (epic `shared-content`) as a window folder,
    * `[{ path, name }]` with `path` relative to `fromDir` (where the window file is);  `[]` when it doesn't exist.
    * - its own Source Control entry (the auto commits) and search
    * - permanent, so unlike a worktree it belongs in every window
@@ -568,13 +568,13 @@ export class Window {
    * - folder paths are relative to `<windowsFolder>/ongoing/`, where the file goes
    * - `spell.package`:  `pkg`, for `handoff --back`;  VS Code ignores a top-level key it doesn't know
    * - its folders, by `EpicConfig.worktreeOnlyWindow()` (epic `epic-eject` P8, O3):
-   *   - a worktree beside the repo (or `windows.worktreeOnly`):  `⎇ <name>` then the content folder, nothing else
+   *   - a worktree beside the repo (or `windows.worktreeOnly`):  `⎇ <name>` then the epic folder, nothing else
    *     - each file once, one repo in Source Control
    *     - its Claude panel lists every session through the worktree's linked session folder (`linkSessionFolders`)
    *     - a new tab's session starts IN the worktree:
    *       the session-start guard (`hooks/worktree-guard.mjs`) records it there, so a reopen finds its way back (I3)
    *   - a multi-repo top's epic worktree (`~/www/spell.worktrees/<name>`, `windows.worktreeOnly` off):
-   *     `⎇ <name>` first, then the main top checkout, then the content folder (epic `epic-engine` P12)
+   *     `⎇ <name>` first, then the main top checkout, then the epic folder (epic `epic-engine` P12)
    *     - the worktree first, so a new tab's session starts in it, never asked to `EnterWorktree`
    *       (which Claude Code asks Owen about outside `.claude/worktrees/`:  r11)
    *     - the Claude panel still lists every session, through the worktree's linked session folder
@@ -583,7 +583,7 @@ export class Window {
    *       (`init` never reorders an open window's folders:
    *       a new first folder restarts its extensions, the Claude panel's sessions with them)
    *   - the old layout, a worktree nested in the checkout:
-   *     the main root first (for the Claude panel), then `⎇ <name>`, then the content folder;  entering it asks nothing
+   *     the main root first (for the Claude panel), then `⎇ <name>`, then the epic folder;  entering it asks nothing
    *   - either way, the main root's files hidden (`filesExclude({ worktree: true })`):  the worktree has the same ones
    * - the repo's own settings (`windows.settings`;  epic `intellisense` P4)
    * - its look (epic `windows-and-review` P5, Q1):  `color`, a look's name (`LOOKS`);  else `from`'s,

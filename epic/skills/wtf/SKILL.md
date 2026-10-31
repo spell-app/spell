@@ -45,7 +45,7 @@ The person has lost the thread:  hand it back in one screen.
   - `git log --oneline main..HEAD` (a worktree), or the session's own commits (`main`)
 - Epic page, if any:  the session's `/epic <name>`.
   Else the worktree's name, if `epic list` has it;  else one the session wrote to.
-  - ONE shared doc, in `epics/<name>/` of every checkout (a link into the content folder).
+  - ONE shared doc, in `epics/<name>/` of every checkout (a link into the epic folder).
   - A branch from before 2026-10-02 still has it under `plans/<name>/`.
   - `epic summary <name> --json`:
     phases with status, next phase, open questions / issues / todos / manual tests
@@ -73,7 +73,7 @@ Plain words, no jargon;  coined names defined in a few words.
 1. **Goal** -- one or two sentences:  what the person asked for, in their words.
    If the work has drifted from their most recently stated intent, say how, in **bold**.
 2. **Where** -- worktree and branch (or `main`), and what's uncommitted or staged.
-   - Never the epic page, logs or docs pages:  shared content, committed for you.
+   - Never the epic page, logs or docs pages:  the epic repo, committed for you.
    - The epic page, linked.
 3. **Plan** -- the phases as one line each, linked, with status:  done, ACTIVE, to do.
 4. **Done** -- numbered, in the order it happened, each a few words.

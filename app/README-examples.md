@@ -796,7 +796,7 @@ Both keep learning, so now and then the examples catch up:
      `--always component` every new component, `--always epic:debut` everything epic `debut` adds.
 
 - `--json` prints the same as JSON, for a script or a session.
-- It remembers the stop commit and the always rules in the content epic's folder of the shared content
+- It remembers the stop commit and the always rules in the content epic's folder of the epic repo
   (`epics/content/content-updates.json5`), never beside the examples.
 
 ## The frozen test projects

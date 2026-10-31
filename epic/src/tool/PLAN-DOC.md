@@ -122,7 +122,7 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 ## Ids
 
 As `plan-doc.md`, "Ids":
-- A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
+- A new id is the next number of its letter, so two people can both make `T22`:  the epic repo's sync gives THIS
   machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
   following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
   Change marks (`ch12`) and requests (`r3`) too;  and comments (`c4`), each person's in their own comments file
@@ -878,8 +878,8 @@ text itself, where an `<epic-update>` only said a block changed.
     "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
     - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
       word with the same block in the doc as it was, and what lay between the words around the mark
-    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic folder's last 3
-      commits in the content repo (a mark written by hand into a part file);  git only reads there
+    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic's folder's last 3
+      commits in the epic repo (a mark written by hand into a part file);  git only reads there
     - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
     - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
@@ -1079,8 +1079,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       with it
     - ONE log line:  `The item letters moved, every number kept:  Caveats are Todo (C3 -> T3), Tests are Manual tests
       (T3 -> M3), ...`
-    - then the content folder's pass, in the same run (`ContentRelink`):  links on OTHER pages (`#caveats` -> `#todos`
-      too), and the comment keys of EVERY inbox in the content folder, guides' included, open and closed
+    - then the epic folder's pass, in the same run (`ContentRelink`):  links on OTHER pages (`#caveats` -> `#todos`
+      too), and the comment keys of EVERY inbox in the epic folder, guides' included, open and closed
       (`ContentRelink.respellComments()`)
     - test screenshots keep their file names:  pages name them by path
     - idempotent:  a migrated page has no Caveats section and no `t` ids in its Manual tests
@@ -1088,7 +1088,7 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     serves it (`RootLinks`;  the rules:  spell-epic's `src/AGENTS.md`, "Links")
     - the page's step only finds what's left (its `context.rootLinks`, the page's linker);  the write it triggers makes
       them root paths (`SRV.Linker.link()`), a broken one at its one new home
-    - then the CONTENT FOLDER's pass, in the same run (`RootLinks.run()`):  every HTML and Markdown file of `epics`,
+    - then the EPIC FOLDER's pass, in the same run (`RootLinks.run()`):  every HTML and Markdown file of `epics`,
       `guides`, `pages`, `sagas`, `goals` and `brand` (never `ui`), parts and details pages included, as plain text,
       every other byte kept;  each under its page's lock;  the census printed (by folder, by target, every link mended
       or still broken)

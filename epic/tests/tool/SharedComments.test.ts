@@ -1,7 +1,7 @@
 /**
- * Tests of comments shared through the content repo (`SharedComments`, epic `epic-friend` P9):  the files one
+ * Tests of comments shared through the epic repo (`SharedComments`, epic `epic-friend` P9):  the files one
  * machine reads and writes, then two people, Ana and Ben, each with an epic home of their own and a clone of ONE bare
- * remote, all in a temp folder;  no network, never Spell's own content repo.
+ * remote, all in a temp folder;  no network, never Spell's own epic repo.
  */
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
@@ -147,7 +147,7 @@ describe("SharedComments, on one machine", () => {
 // ## Two people
 ////////////////
 
-/** One person's machine:  their epic home (their name), and a checkout whose content repo clones the remote. */
+/** One person's machine:  their epic home (their name), and a checkout whose epic repo clones the remote. */
 function machine(name: string) {
   const main = join(TEMP, name.toLowerCase())
   const home = join(main, ".home")
@@ -187,7 +187,7 @@ function pageComments(who: Machine) {
   return at(who, () => commentsOf(who.doc).all)
 }
 
-describe("two people, one content repo", () => {
+describe("two people, one epic repo", () => {
   const ana = machine("Ana")
   const ben = machine("Ben")
 

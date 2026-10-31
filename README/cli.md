@@ -177,7 +177,7 @@ flowchart BT
 ```
 
 _Each folder hands its commands to the base.
-The epic folder adds none:  its tools are `epic`'s._
+The `epic/` folder adds none:  its tools are `epic`'s._
 
 - The base looks at the root's own `package.json`, then each folder's, lowest first (`spellRepos()`):
   `parser/`, `ui/`, `epic/`, `app/`, the root's `workspaces`, the same list in a clone or installed from npm.
@@ -244,7 +244,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell server stop` | stops the page server, waiting for its process to end;  its editor stops with it |
 | `spell server stop all` | the page server, then the app's editor too, even one left running |
 | `spell server status` | the running page server's details (JSON);  exit 1 when it isn't running |
-| `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the shared content folder |
+| `spell server url <file>` | starts the page server if needed, then prints the address that serves `<file>`, of this checkout or the epic folder |
 | `spell server prune [--dry-run]` | stops the page and Vite servers whose checkout is gone, on any checkout;  `--dry-run` only lists them |
 
 - The page server's own flags pass through, as typed:
@@ -278,7 +278,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 - `spell bundle check` ends with the fix:
   `ui-site:  STALE (built from older sources)`, then `fix:  spell bundle ui-site`.
 - `spell commands` checks the nearest kit from the current folder up, so a worktree checks its own.
-  The commands page's data is `guides/dev/commands/commands.json5`, in the shared content folder.
+  The commands page's data is `guides/dev/commands/commands.json5`, in the epic folder.
 - `spell wwod`:  run it after editing WWOD or an `AGENTS.md`.
   - It checks that every `WWOD §N › "title"` citation names a real section and rule,
     and that every backticked repo path exists.
@@ -412,7 +412,7 @@ After them, 9 places still do;  46 files use the shared `Git` instead.
 - **Code only:**  each repo's `src/`.  Tests, their helpers, bundles and generated files never count,
   and neither do comment lines.
   - Tests are counted instead:  each repo's `it()` and `test()` calls, on the last line.
-- **Snapshots** are saved in the shared content folder, `epics/coherence/details/scores/`, named by when the code was.
+- **Snapshots** are saved in the epic folder, `epics/coherence/details/scores/`, named by when the code was.
 - A change reads as an improvement:  "55% better (fewer copies)", or "12% worse";
   a table's Improvement column holds the bare percent, a worse one `−12%`.
 
@@ -1307,7 +1307,7 @@ They're named in the command line's goals and the commands page's roadmap.
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder, so they need a checkout with `spell.epics` in it and the page
+These guides live in the epic folder, so they need a checkout with `spell.epics` in it and the page
 server running (`spell server start`, then the address it prints):
 
 - "Commands", the map of every command, skill and yarn script, and its roadmap:  `/guides/dev/commands/commands.html`;

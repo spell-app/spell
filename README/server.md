@@ -109,7 +109,7 @@ the site header's pencil opens an element's HTML, and the server splices the edi
 - The pencil is the site header's, but the call behind it is on every page the server sends.
   On a plain page with no header, `SPELL_SERVER.editPage({ id: "hello", html })` saved its `<h1>`,
   and a third of a second later the page had reloaded itself to show the edit.
-- But only inside the folders the settings call writable (the content folder's epics, guides and pages),
+- But only inside the folders the settings call writable (the epic folder's epics, guides and pages),
   only with this run's token, and only from the server's own origin.
 
 ### One server, every checkout
@@ -137,7 +137,7 @@ one port, one tab, one live reload, however many epics are open.
 ## One port, every address
 
 A request meets the route modules first, in the order the settings list them;
-whatever they don't answer is a file, from the kit, the content folder or a folder the settings name.
+whatever they don't answer is a file, from the kit, the epic folder or a folder the settings name.
 Try it on a running server:
 
 ```sh
@@ -151,20 +151,20 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:4747/_epic/assets/high
 
 ```text
 {"message":"Hello from the API!"}
-/ui/ moved out of the shared content
+/ui/ moved out of the epic repo
 200
 ```
 
 </details>
 
-Three answers, from three repos' parts of the settings:  spell-app's route module, the content repo's `gone`, and a
+Three answers, from three repos' parts of the settings:  spell-app's route module, the epic repo's `gone`, and a
 folder of spell-epic's.
 Read the right-hand column first:  when an address misbehaves, it says where to look.
 
 | Address | What it serves | Who answers |
 | --- | --- | --- |
 | `/` | a redirect to the docs home, `/pages/index.html` | the kit |
-| `/epics/`, `/guides/`, `/sagas/`, `/pages/`, `/goals/` ... | the content folder, `spell.epics/` (named in the kit's [epic settings](../.epic/config.json5)), after the kit's own files;  the Epics list gets each running epic's card as it's served | spell-epic's `runningRoutes` |
+| `/epics/`, `/guides/`, `/sagas/`, `/pages/`, `/goals/` ... | the epic folder, `spell.epics/` (named in the kit's [epic settings](../.epic/config.json5)), after the kit's own files;  the Epics list gets each running epic's card as it's served | spell-epic's `runningRoutes` |
 | `/worktrees/<w>/...` | an epic's worktree, with the same addresses inside;  on the main checkout's server only | `runningRoutes` |
 | `/components/<set>/` | a component set's docs, with Spell UI's site bundle laid over them at `_assets/`:  `/components/ui/`, `/components/epics/`, `/components/app/` | the settings' `componentSets`, one set from each of spell-ui, spell-epic and spell-app |
 | `/_epic/assets/`, `/_epic/pack/`, `/templates/` | spell-epic's page scripts and styles, its elements' pack, its templates;  the same copy under every worktree's address | spell-epic's `engineRoutes` |
@@ -173,7 +173,7 @@ Read the right-hand column first:  when an address misbehaves, it says where to 
 | `/element/...` | the editor's element bundles, from spell-app's `app/dist-element/` | `appRoutes` |
 | `/editor` | a redirect to the running editor;  while it isn't up, a 503 page that says so | `appRoutes` |
 | `/hello` | `{"message":"Hello from the API!"}`:  is the API up? | `appRoutes` |
-| `/ui/...` | a 404, never a redirect:  the content folder still holds Spell UI's old docs there, for older checkouts | the content repo's `gone` |
+| `/ui/...` | a 404, never a redirect:  the epic folder still holds Spell UI's old docs there, for older checkouts | the epic repo's `gone` |
 | `/api/server` | the server's facts:  what `spell server status` printed, above | the kit |
 | `/api/...` | every other call (below) | the kit, and the route modules |
 | anything else | the kit's own files, and every repo's inside it:  `/app/app/docs/index.html` | the kit |
@@ -187,7 +187,7 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
 
 | Address | What it does | Who answers |
 | --- | --- | --- |
-| `/api/server` | the server's facts:  pid, port, branch, worktrees, content folder | the kit |
+| `/api/server` | the server's facts:  pid, port, branch, worktrees, epic folder | the kit |
 | `/api/files`, `/api/pages` | saving, making, moving and deleting files;  a page's source, and saving one section of it:  only in the writable folders | the kit |
 | `/api/epics/running` | every running epic, as JSON | `runningRoutes` |
 | `/api/epics/review/...` | an epic page's review inbox:  its marks, notes, test results and screenshots, and its Send | `reviewRoutes` |
@@ -214,12 +214,12 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
 - The editor spell-app's module starts records its address in `.spell-server.editor.json`, at the kit's root too;
   its output goes to `.spell-server.editor.log`.
 - Old addresses get no redirect:  they answer "not found".
-- The docs home comes from the content folder, which someone new hasn't got:
+- The docs home comes from the epic folder, which someone new hasn't got:
   start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.
 
 Each folder brings its own part:
 - the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
-- the epic folder's:  the content folder itself, so the epic pages and the guides come from one of its modules
+- the `epic/` folder's:  the epic folder itself, so the epic pages and the guides come from one of its modules
 
 ## Five flows, a picture each
 
@@ -234,7 +234,7 @@ flowchart LR
   request([a request]) --> host["1 · host check"]
   host --> live["2 · the live<br/>client's script"]
   live --> routes["3 · routes:<br/>the server's /api,<br/>then the route modules'"]
-  routes --> files["4 · static files:<br/>the kit, content folder,<br/>worktrees, component sets"]
+  routes --> files["4 · static files:<br/>the kit, epic folder,<br/>worktrees, component sets"]
   files --> favicon["5 · Spell's favicon"]
   favicon --> fallback["6 · the fallback"]
   fallback --> notfound["7 · 404"]
@@ -346,7 +346,7 @@ _What a change means is the page's call:  a guide patches itself, a stylesheet s
 - It never reports dot files, `node_modules`, lock files or an editor's temp files.
 - Only watched folders report:
   the settings' `watch` list (none named:  the docs folders, `epics`, `guides`, `pages` ...),
-  each component set's folder and bundle, the engine routes' folders and the content folder.
+  each component set's folder and bundle, the engine routes' folders and the epic folder.
   A file anywhere else can change all day, and no page hears of it.
 
 ### 4. Editing a section in place
@@ -400,7 +400,7 @@ This page, in an epic's worktree, is at `http://127.0.0.1:4747/worktrees/<epic>/
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  config[".epic/config.json5<br/>the worktrees, the content folder"]
+  config[".epic/config.json5<br/>the worktrees, the epic folder"]
   module["spell-epic's running-epics<br/>route module"]
   config --> module
   module -- "serveWorktrees()" --> server["the main checkout's<br/>page server"]
@@ -412,10 +412,10 @@ flowchart LR
   class config data
 ```
 
-_The server knows nothing of epics:  a route module tells it where the worktrees and the content folder are._
+_The server knows nothing of epics:  a route module tells it where the worktrees and the epic folder are._
 
 - A page served from a worktree is told its own branch and worktree name, for the site header's badge.
-- The content folder is served after each worktree's own files, at its address:
+- The epic folder is served after each worktree's own files, at its address:
   `/worktrees/<w>/epics/...` works, from one shared copy.
 - A folder's file in an epic's worktree is the worktree's, since that's whose server it is:
   `spell server url app/README.md`, in an epic's worktree named `readme`, printed
@@ -491,7 +491,7 @@ _Real output, with the kit's root as the checkout:  `link()` said `{"linked":2,"
 - A missing file git ignores is fine:  `.spell-server.json` exists only while a server runs.
 - It works on text, with regular expressions, never a parsed DOM:  an edit touches only what it links.
 - It knows the checkout's layout as folder names, never as imports:
-  every repo's folders, `tests/`, and the shared content folder laid under the checkout.
+  every repo's folders, `tests/`, and the epic folder laid under the checkout.
 
 ### Formatting
 
@@ -592,7 +592,7 @@ else for (const [id, { outcome, value, ticked }] of Object.entries(answers.rows)
 run.finish()
 ```
 
-- A run is a folder of the content folder, `pages/runs/<id>/`, with three files:
+- A run is a folder of the epic folder, `pages/runs/<id>/`, with three files:
   - `run.json5`:  what the command asks (its rows, its progress lines);  only the command writes it
   - `answers.json5`:  the answers, per row id, saved as they're given;  only the page writes it
   - `waiting.json5`:  a heartbeat while `wait()` runs, so the page says the command is waiting;  gone after
@@ -629,9 +629,9 @@ run.finish()                                                         // or "stop
 - `updatePass()` is throttled, and `endPass()` always writes the last state.
 - `answersAsTheyCome()` gives a row again when its answer changes, and keeps the heartbeat while it runs.
 
-### The content folder
+### The epic folder
 
-`contentFolderOf(root)` finds the shared content folder:  the guides, epic pages, sagas and the logs.
+`contentFolderOf(root)` finds the epic folder:  the guides, epic pages, sagas and the logs.
 It reads the `contentFolder` in the main checkout's epic settings, `.epic/config.json5`,
 unless `SPELL_SHARED_DIR` says otherwise, and it never throws:  a checkout with none simply has none.
 It's an entry of its own too (`spell/server/contentFolder`), so a command that needs only this loads no linkedom.
@@ -674,7 +674,7 @@ its site bundle, built on demand, and its component set, at `/components/ui/`._
 
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
 1. the kit's own:  none today
-2. the content repo's, a file of its own at the content folder's root, `page-server.json5`
+2. the epic repo's, a file of its own at the epic folder's root, `page-server.json5`
 3. each folder's, lowest first, in the order of the root's `workspaces`
 4. each repo beside the repo that [repos.json5](../repos.json5) lists as a peer
 
@@ -686,18 +686,18 @@ A peer repo that isn't there brings nothing, and the server runs with whatever i
 
 | Whose part | What it adds |
 | --- | --- |
-| the content repo's | the folders pages may save into (`writable`:  `epics`, `guides`, `pages`);  `gone`, the old `/ui` address;  `siteTabs`, the header's tabs |
+| the epic repo's | the folders pages may save into (`writable`:  `epics`, `guides`, `pages`);  `gone`, the old `/ui` address;  `siteTabs`, the header's tabs |
 | [spell-ui's](https://github.com/spell-app/spell/blob/main/ui/package.json) | its site bundle (`bundles`), and the Spell UI set at `/components/ui/` |
 | [spell-epic's](https://github.com/spell-app/spell/blob/main/epic/package.json) | its ten route modules;  the folders live reload watches;  the Epic UI set at `/components/epics/`;  `/_epic/assets/`, `/_epic/pack/` and `/templates/`;  the local copy of highlight.js |
 | [spell-app's](https://github.com/spell-app/spell/blob/main/app/package.json) | its route module, `appRoutes`;  the `spell-language.js` page script;  `/element/`, its element bundles (`engineRoutes`);  the App UI set at `/components/app/` ([what it serves](https://github.com/spell-app/spell/blob/main/app/README-page-server.md)) |
 
-- The content repo isn't public, so its file is named here, not linked.
+- The epic repo isn't public, so its file is named here, not linked.
 - `localCopies` is how pages load offline.
   Older pages load highlight.js from cdnjs with a plain, blocking `<script>`;
   on a plane, the wifi's "pay first" page held that tag, and every script behind it, for tens of seconds.
   spell-epic's entry points that one URL, exactly, at its copy, `/_epic/assets/highlight.min.js` (11.9.0, the same
   file):  a page loading highlight.js from anywhere else is left alone.
-- `gone` answers an address "not found" though the content folder still holds it:
+- `gone` answers an address "not found" though the epic folder still holds it:
   `/ui/...` is Spell UI's old docs, kept for older checkouts, so nobody reads the stale copy.
   No old address redirects, by decision:  every link to one was rewritten when its pages moved.
 
@@ -719,7 +719,7 @@ export default helloRoutes
   - `router`:  routes here run before static files
   - `guard`:  `guard.writeCheck` on every route that changes something
   - `live`:  `live.watch(dir)` reloads pages when files under `dir` change
-  - `serveWorktrees(...dirs)`, `serveContent(dir)`:  mount the worktrees and the shared content folder
+  - `serveWorktrees(...dirs)`, `serveContent(dir)`:  mount the worktrees and the epic folder
   - `addPageConfig(fn)`:  more fields on every page's `window.SPELL_SERVER`
   - `onListening(fn)`, `onStop(fn)`:  start or stop a child process with the server
   - `root`, `info`, `web`:  the checkout, the server's facts, the whole server
@@ -739,9 +739,9 @@ export default helloRoutes
 | Key | What | Paths from |
 | --- | --- | --- |
 | `routes` | route modules, loaded in order;  each one's `setup()` runs once, before the server listens | its repo |
-| `watch` | the folders live reload watches, besides the sets', the engine routes' and the content folder;  none named:  `epics`, `guides`, `pages` ...;  one that isn't there is skipped | its repo |
-| `writable` | the content folders pages may be saved into (`/api/files`, `/api/pages`);  none by default, so every write is a 403 | the content folder |
-| `gone` | URL prefixes answered "not found", though the content folder still holds them | URLs |
+| `watch` | the folders live reload watches, besides the sets', the engine routes' and the epic folder;  none named:  `epics`, `guides`, `pages` ...;  one that isn't there is skipped | its repo |
+| `writable` | the content folders pages may be saved into (`/api/files`, `/api/pages`);  none by default, so every write is a 403 | the epic folder |
+| `gone` | URL prefixes answered "not found", though the epic folder still holds them | URLs |
 | `bundles` | the bundles built on demand, by output folder (above, "Bundles built on demand");  `spell bundle` reads the same list | its repo |
 | `pageScripts` | module scripts added before every page's `</body>`:  `src`, `file` (added only while it exists), `skip` (URL prefixes) | its repo, for `file` |
 | `localCopies` | CDN URLs, each with the URL of the same file on this server, which every page loads instead | URLs |
@@ -777,7 +777,7 @@ export default helloRoutes
 <details>
 <summary>The tabs</summary>
 
-They're the content repo's, since they describe its areas and the sets beside them.
+They're the epic repo's, since they describe its areas and the sets beside them.
 
 | Tab | Its home | Lit on |
 | --- | --- | --- |
@@ -796,7 +796,7 @@ They're the content repo's, since they describe its areas and the sets beside th
 - A component set or a path pattern lights a tab first;  a page's folder (`guides/` ...) only when none does.
 - The header's code names no tab:  they're data.
   The kit's [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts) pins the order, and which tab lights for 59 page
-  paths;  it skips itself where there's no content repo, as in the kit's CI.
+  paths;  it skips itself where there's no epic repo, as in the kit's CI.
 
 </details>
 
@@ -832,10 +832,10 @@ Most of what the server serves is a setting, not code:  one entry in a repo's pa
 | To add | Where | And |
 | --- | --- | --- |
 | a component set | one entry in `componentSets`:  its id, name, pages' folder and site bundle | usually a tab in `siteTabs` too |
-| a tab | one entry in the content repo's `siteTabs`, in the order the header shows it | update [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts), which pins the order |
+| a tab | one entry in the epic repo's `siteTabs`, in the order the header shows it | update [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts), which pins the order |
 | a folder served under a fixed prefix | one entry in `engineRoutes`:  the prefix, then the folder | the same copy is served under every worktree's address |
 | a script on every page | one entry in `pageScripts`:  its URL, its file, the prefixes to skip | it's added only while its file exists |
-| a folder pages may save into | one entry in the content repo's `writable` | a folder of the content folder |
+| a folder pages may save into | one entry in the epic repo's `writable` | a folder of the epic folder |
 | a bundle built on demand | its output folder in `bundles` | and its build in [the bundle list](../src/server/server.types.ts):  a folder no bundle builds into is an error |
 
 </details>
@@ -955,7 +955,7 @@ What's left is a handful of facts the reference doesn't explain:
 
 | Route | What |
 | --- | --- |
-| `GET /api/server` | the server's facts (`ServerInfo`):  pid, port, root, when it started, branch, worktrees, content folder |
+| `GET /api/server` | the server's facts (`ServerInfo`):  pid, port, root, when it started, branch, worktrees, epic folder |
 | `GET /api/server/live.js` | the live reload client |
 | `/api/server/live` | the live reload websocket |
 | `GET /api/pages?path=[&id=]` | a page's source, or one element's, with the file's ETag |
@@ -1026,10 +1026,10 @@ Tests (node), at the same paths under [tests/server/](../tests/server/):
 <details>
 <summary>More in the docs site</summary>
 
-The docs site needs a checkout with the content folder beside it, and this page server running.
+The docs site needs a checkout with the epic folder beside it, and this page server running.
 
 - The Page Server:  `/guides/server.html` (its endpoint names predate the `/api/` prefix:  this page's are current)
-- Shared Content, where the docs and epic pages live:  `/guides/shared-content.html`
+- The Epic Repo, where the docs and epic pages live:  `/guides/shared-content.html`
 - The Python target:  `/guides/python-target.html`
 
 </details>

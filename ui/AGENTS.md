@@ -42,7 +42,7 @@ with live elements to click.
     the kit's `exports` and the `spell-source` condition do it ([tsconfig.json](tsconfig.json)).
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/`, git-ignored here.
   - Made by every `yarn install` at the kit's root (its `postinstall`).
-- Its design notes are in the content repo since epic `repo-split` P9 (Q34):
+- Its design notes are in the epic repo since epic `repo-split` P9 (Q34):
   [its ui notes folder](../spell.epics/guides/ui/notes/).
 
 ## Overview
@@ -263,7 +263,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - their code beside it (`spell/ui/cli/...`), their tests in [`tests/cli/`](./tests/cli/)
 - The docs site, modelled on Fomantic's docs:  "The docs site", below.
 - Design notes, and the generated `report.md`:
-  in the content repo (Q34, above), [its ui notes folder](../spell.epics/guides/ui/notes/).
+  in the epic repo (Q34, above), [its ui notes folder](../spell.epics/guides/ui/notes/).
   - `plan.md`, `grammar.md`, `theming.md`, `translation.md`, `icons.md`, `fallback.md`, `runtime.md`
 - [`scripts/`](scripts/):  one file per yarn script, named for it (WWOD §8 › "File naming").
   - `<group>:<verb>` runs `<group>-<verb>.ts` here:  `site:data` -> `site-data.ts`, `gen:root` -> `gen-root.ts`.
@@ -1291,7 +1291,7 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
     - `spell/ui/components/ui-toc/TocIndex`, `.../HashLanding`, `.../PageOutline`:  a family's LEAVES, on purpose
       (epic `ui-gaps` P14).
       - Plain DOM, no element:  a page's sections, the one in view, landing on a link's target.
-      - The docs site's sections and search, the docs widgets, the site's node scripts and the epic folder's
+      - The docs site's sections and search, the docs widgets, the site's node scripts and the `epic/` folder's
         docs runtime read a page with them, without defining `<ui-toc>`;  what they keep page-wide is on `globalThis`.
     - `spell/ui/components/ui-example/ExampleSource`:  the examples' markup, kept before they upgrade (the site's
       first import), without defining `<ui-example>`.

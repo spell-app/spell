@@ -24,7 +24,7 @@ import { Shared } from "./Shared"
 
 /****************
  * ### `SharedMigration`
- * Move a worktree cut before the cutover (epic `shared-content`, P5) onto the shared content:
+ * Move a worktree cut before the cutover (epic `shared-content`, P5) onto the epic repo:
  * `epic shared migrate <worktree> [--dry-run]`.
  * - `run()` returns what it did, or would do.
  *
@@ -33,14 +33,14 @@ import { Shared } from "./Shared"
  *      it must have merged `main` after P2
  *    - a merge or rebase is under way
  *    - a session is busy in the worktree
- * 2. Folds the worktree's shared files into the shared repo, file by file, 3-way:
+ * 2. Folds the worktree's shared files into the epic repo, file by file, 3-way:
  *    - base = the branch's merge base with the cutover's import commit
- *    - ours = the shared repo
+ *    - ours = the epic repo
  *    - theirs = the worktree's file (committed, staged, dirty or untracked)
  *    - Changed only in the worktree:  taken.
  *    - Changed on both sides:  logs (`agents/`) are union-merged;
  *      anything else is a CONFLICT, and nothing at all is written.
- * 3. Commits the shared repo (`Migrate <w>`), then makes ONE commit on the branch:
+ * 3. Commits the epic repo (`Migrate <w>`), then makes ONE commit on the branch:
  *    it stops tracking the shared folders and adds main's `.gitignore` block.
  *    - It touches none of the index's or the working tree's other changes (a temp index, `commit-tree`, `update-ref`).
  *    - So the branch merges `main` later without conflicts in them.
@@ -48,7 +48,7 @@ import { Shared } from "./Shared"
  *
  * - Always in the CUTOVER's layout (`CUTOVER_LINKS`), whatever the manifest says now:
  *   a branch that old tracks `packages/docs/content/`, and its code looks there.
- *   - Since the reorg (claude-design P4) that folder of the shared repo is old-path links into the root folders,
+ *   - Since the reorg (claude-design P4) that folder of the epic repo is old-path links into the root folders,
  *     so its files still land in the right place.
  *   - A new top-level page lands in it as a real file,
  *     and the next `epic shared commit` moves it on (`relocate.js reorg`).
@@ -123,7 +123,7 @@ export class SharedMigration {
     const found = /# shared:start[\s\S]*?# shared:end\n?/.exec(main)?.[0]
     if (found) return found.endsWith("\n") ? found : `${found}\n`
     const paths = config.links.map((path) => `/${path}`).join("\n")
-    return `# shared:start  (epic shared-content:  links into the shared content repo, never tracked)\n${paths}\n# shared:end\n`
+    return `# shared:start  (epic shared-content:  links into the epic repo, never tracked)\n${paths}\n# shared:end\n`
   }
 }
 
@@ -137,8 +137,8 @@ const CUTOVER_LINKS = ["packages/docs/content", "goals", "agents"]
 /**
  * What to do with shared file `file` (repo-relative) of `worktree`:
  * - `skip`
- * - `take`:  write the worktree's into the shared repo
- * - `delete`:  from the shared repo
+ * - `take`:  write the worktree's into the epic repo
+ * - `delete`:  from the epic repo
  * - `union`:  logs changed on both sides, merged
  * - `conflict`
  */
@@ -166,7 +166,7 @@ const BUILT = new Set(["packages/docs/content/index.html"])
 const DOCS_INDEX = fileURLToPath(new URL("../tools/index.js", import.meta.url))
 
 /**
- * `epic pages index` on the main checkout:  the home page lists every epic now in the shared repo.
+ * `epic pages index` on the main checkout:  the home page lists every epic now in the epic repo.
  * - THIS code's docs index (`src/tools/index.js`), on the main checkout's data (`EPIC_CHECKOUT`)
  */
 function rebuildDocsIndex(config: SharedConfig): void {
@@ -178,7 +178,7 @@ function rebuildDocsIndex(config: SharedConfig): void {
   if (run.status !== 0) throw new EpicCommandError(`docs:index failed:  ${(run.stderr ?? "").trim()}`)
 }
 
-/** Do `each` in the shared repo. */
+/** Do `each` in the epic repo. */
 function apply(each: FoldReport, worktree: string, config: SharedConfig): void {
   const target = join(config.dir, each.file)
   if (each.action === "take" || each.action === "union") {
@@ -230,7 +230,7 @@ function untrackOnBranch(worktree: string, branch: string, config: SharedConfig)
     )
     EpicCheckout.mustGit(["update-ref", `refs/heads/${branch}`, commit, head], worktree)
     // the worktree's own index and .gitignore follow the new HEAD;
-    // `-f`:  its entries no longer match HEAD, and their content is in the shared repo already
+    // `-f`:  its entries no longer match HEAD, and their content is in the epic repo already
     EpicCheckout.mustGit(["rm", "-r", "--cached", "-f", "-q", "--ignore-unmatch", "--", ...config.links], worktree)
     EpicCheckout.mustGit(["update-index", "--add", "--cacheinfo", `100644,${blob},.gitignore`], worktree)
     if (readOrNull(join(worktree, ".gitignore")) === oldIgnore) writeFileSync(join(worktree, ".gitignore"), newIgnore)
@@ -254,7 +254,7 @@ function withSharedBlock(text: string, config: SharedConfig): string {
 /** Throws unless `worktree` is migratable:  on a branch, not mid-merge or rebase, no session busy in it. */
 function refuseUnless(worktree: string, branch: string, config: SharedConfig): void {
   if (!existsSync(join(config.dir, ".git")))
-    throw new EpicCommandError(`no shared repo at ${config.dir}:  cut over first`)
+    throw new EpicCommandError(`no epic repo at ${config.dir}:  cut over first`)
   if (!branch) throw new EpicCommandError(`${worktree} isn't on a branch`)
   for (const marker of ["MERGE_HEAD", "rebase-merge", "rebase-apply", "CHERRY_PICK_HEAD"]) {
     if (existsSync(EpicCheckout.mustGit(["rev-parse", "--path-format=absolute", "--git-path", marker], worktree))) {
@@ -267,12 +267,12 @@ function refuseUnless(worktree: string, branch: string, config: SharedConfig): v
   if (busy) throw new EpicCommandError(`session "${busy.name}" is busy in ${worktree}:  wait until it's idle`)
 }
 
-/** The spell-app commit the shared repo was imported from:  its first commit is `Import from spell-app <sha>`. */
+/** The spell-app commit the epic repo was imported from:  its first commit is `Import from spell-app <sha>`. */
 function importCommit(config: SharedConfig): string {
   const first =
     EpicCheckout.mustGit(["log", "--reverse", "--format=%s", "--max-parents=0"], config.dir).split("\n")[0] ?? ""
   const sha = /^Import from spell-app ([0-9a-f]+)/.exec(first)?.[1]
-  if (!sha) throw new EpicCommandError(`the shared repo's first commit isn't an import ("${first}")`)
+  if (!sha) throw new EpicCommandError(`the epic repo's first commit isn't an import ("${first}")`)
   return sha
 }
 

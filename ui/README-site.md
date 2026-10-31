@@ -473,7 +473,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [HostApp.ts](src/tools/HostApp.ts) | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
 | [SmokeRunner.ts](src/tools/SmokeRunner.ts), [StaticServer.ts](src/tools/StaticServer.ts) | serve `dist/`, `vendor/` and `src/` from ONE static server (a thin wrapper over the kit's web server), inject the import map, drive each page in headless Chromium |
 | [LocCount.ts](src/tools/LocCount.ts) | lines and code lines per file, by group |
-| [ReportTables.ts](src/tools/ReportTables.ts) | rewrites the generated tables of the status report, in the content folder's Spell UI notes |
+| [ReportTables.ts](src/tools/ReportTables.ts) | rewrites the generated tables of the status report, in the epic folder's Spell UI notes |
 | [peers.ts](src/tools/peers.ts) | the peer specifiers `dist/` imports |
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
 | [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale.  Another component set's data too (`set`, `forSet()`):  Epic UI's, App UI's and any other set's |
@@ -598,8 +598,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 <details>
 <summary>More in the docs site</summary>
 
-These guides are served by the page server from the content folder,
-so they need a checkout with the content folder and the page server running (above).
+These guides are served by the page server from the epic folder,
+so they need a checkout with the epic folder and the page server running (above).
 
 - The Spell UI docs site, how it was built:  `/guides/spell-ui-site.html`
 - The commands guide, for adding a `spell` command:  `/guides/dev/commands/commands.md`

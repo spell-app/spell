@@ -78,15 +78,15 @@ describe("epic init", () => {
     })
     expect(config.linkSessionFolders).toBe(true)
     expect(config.sharedFolders).toEqual(["epics", "sagas", "guides", "pages"])
-    // the window files in the content repo (epic-eject P13)
+    // the window files in the epic repo (epic-eject P13)
     expect(config.newWindowsFolder).toBe(join(CONTENT, "windows"))
     // every key, each with its comment
     const text = readFileSync(config.file, "utf8")
     expect(text).toMatch(/\/\/ the branch worktrees start from and merge into\n {2}"baseBranch": "trunk",/)
   })
 
-  test("the content repo, its own git repo with a kept folder each, linked in and ignored", () => {
-    expect(Git.run(["log", "--format=%s"], CONTENT).out).toBe("Shared content:  empty")
+  test("the epic repo, its own git repo with a kept folder each, linked in and ignored", () => {
+    expect(Git.run(["log", "--format=%s"], CONTENT).out).toBe("The epic repo:  empty")
     for (const folder of ["epics", "sagas", "guides", "pages"]) {
       expect(existsSync(join(CONTENT, folder, ".gitkeep"))).toBe(true)
       expect(lstatSync(join(MAIN, folder)).isSymbolicLink()).toBe(true)
@@ -95,7 +95,7 @@ describe("epic init", () => {
     expect(readFileSync(join(MAIN, ".gitignore"), "utf8")).toMatch(
       /^# shared:start .*\n\/epics\n\/sagas\n\/guides\n\/pages\n# shared:end\n$/
     )
-    // the window files:  in the content repo, ignored there (epic-eject P13)
+    // the window files:  in the epic repo, ignored there (epic-eject P13)
     expect(readFileSync(join(CONTENT, ".gitignore"), "utf8")).toMatch(/^\/windows\/$/m)
     // nothing but the two files to commit:  the links are ignored
     expect(Git.run(["status", "--porcelain"], MAIN).out.split("\n").sort()).toEqual(["?? .epic/", "?? .gitignore"])
@@ -119,7 +119,7 @@ describe("epic init", () => {
     expect(rows.every((line) => /^ {2}already /.test(line))).toBe(true)
   })
 
-  test("a content folder missing one of its folders:  added, and linked", async () => {
+  test("an epic folder missing one of its folders:  added, and linked", async () => {
     rmSync(join(CONTENT, "guides"), { recursive: true })
     const report = await new RepoInit({ main: MAIN }).init()
     expect(report.content).toEqual({ folder: CONTENT, action: "added", made: ["guides"] })
@@ -372,7 +372,7 @@ describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
 describe("epic init:  its sections (Owen, 2026-10-29:  colour for fields and values)", () => {
   test("the summary:  a label, then the value;  only what there's something to say for", () => {
     expect(RepoInit.summaryLines({ name: "Bo", color: "teal", sharedRepo: "ana/x.epics, private" }).map(plain)).toEqual(
-      ["> Your name  :  Bo", "> Your colour:  teal", "> Shared repo:  ana/x.epics, private"]
+      ["> Your name  :  Bo", "> Your colour:  teal", "> Epic repo:  ana/x.epics, private"]
     )
     expect(RepoInit.summaryLines({ name: "Bo" }).map(plain)).toEqual(["> Your name  :  Bo"])
   })
@@ -414,7 +414,7 @@ describe("epic init:  its sections (Owen, 2026-10-29:  colour for fields and val
   })
 })
 
-describe("epic init:  the shared repo (epic-friend P4)", () => {
+describe("epic init:  the epic repo (epic-friend P4)", () => {
   test("gh missing:  nothing made;  says how to get gh, and the README;  the rest of init done", async () => {
     const app = codeRepo("no-gh")
     const report = await new RepoInit({ main: app }).init()
@@ -423,7 +423,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     expect(new EpicConfig(app).contentRemote).toBe("")
     const lines = said(report)
     expect(lines).toContain(
-      "no shared repo made:  GitHub's command, gh, isn't installed.  Sharing the epics works only with GitHub for now:"
+      "no epic repo made:  GitHub's command, gh, isn't installed.  Sharing the epics works only with GitHub for now:"
     )
     expect(lines).toContain("  brew install gh        (other systems:  https://cli.github.com)")
     expect(lines).toContain("  gh auth login")
@@ -446,11 +446,11 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const bare = join(gh.repos, "ana", "first.epics.git")
     expect(report.remote).toEqual({ action: "made", repo: "ana/first.epics", address: bare, visibility: "private" })
     expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/first.epics --private --description /m)
-    // the content repo's commit is there
-    expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+    // the epic repo's commit is there
+    expect(git(bare, "log", "--format=%s").trim()).toBe("The epic repo:  empty")
     expect(new EpicConfig(app).contentRemote).toBe(bare)
     expect(said(report).some((line) => /^ {2}made, pushed +ana\/first\.epics on GitHub, private/.test(line))).toBe(true)
-    expect(said(report)).toContain("> Shared repo:  ana/first.epics, private")
+    expect(said(report)).toContain("> Epic repo:  ana/first.epics, private")
     expect(RepoInit.changedFiles(report)).toEqual([".epic/config.json5", ".gitignore"])
     // run again:  there already, nothing made
     const again = await withGh(gh, () => new RepoInit({ main: app }).init())
@@ -458,7 +458,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     expect(said(again).some((line) => /^ {2}shared with +/.test(line))).toBe(true)
   })
 
-  test("a later person:  epic init in a clone of the code repo CLONES the shared repo, and links it;  no gh", async () => {
+  test("a later person:  epic init in a clone of the code repo CLONES the epic repo, and links it;  no gh", async () => {
     const app = join(TEMP, "first", "first")
     git(app, "add", "-A")
     git(app, "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "epics")
@@ -472,7 +472,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const content = join(TEMP, "friend", "first.epics")
     expect(report.content).toEqual({ folder: content, action: "cloned", made: [] })
     expect(report.remote.action).toBe("cloned")
-    expect(git(content, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+    expect(git(content, "log", "--format=%s").trim()).toBe("The epic repo:  empty")
     expect(realpathSync(join(friend, "epics"))).toBe(join(content, "epics"))
     const lines = said(report)
     expect(
@@ -483,7 +483,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     expect(lines).toContain("- Web browser:  epic server start, then the address it prints")
   })
 
-  test("the code repo an organization's:  the shared repo goes there too", async () => {
+  test("the code repo an organization's:  the epic repo goes there too", async () => {
     const app = codeRepo("team")
     git(app, "remote", "add", "origin", "git@github.com:acme/team.git")
     const gh = stubGh(app)
@@ -502,13 +502,13 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
       out.mockRestore()
     }
     expect(new EpicConfig(app).contentRemote).toBe(bare)
-    expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
+    expect(git(bare, "log", "--format=%s").trim()).toBe("The epic repo:  empty")
 
     const alone = codeRepo("alone")
     const report = await withGh(stubGh(alone), () => new RepoInit({ main: alone }).init({ noRemote: true }))
     expect(report.remote).toEqual({ action: "skipped" })
     expect(new EpicConfig(alone).contentRemote).toBe("")
-    expect(said(report)).toContain("no shared repo (--no-remote):  the plans stay on this machine")
+    expect(said(report)).toContain("no epic repo (--no-remote):  the plans stay on this machine")
   })
 
   test("--dry-run:  says what it would make, makes nothing", async () => {

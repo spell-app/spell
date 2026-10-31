@@ -29,7 +29,7 @@ import { PlanDocFiles } from "./PlanDocFiles"
  * - Node only (`node:fs`, linkedom):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class SagaEpics {
-  /** the content folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  its `epics/` */
+  /** the epic folder of checkout `root`'s repo (`EpicConfig.contentOf()`):  its `epics/` */
   readonly content: string
 
   /** The sagas' epics of the repo checkout `root` is in. */

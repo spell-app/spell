@@ -124,7 +124,7 @@ describe("RepoList", () => {
   test("linkRootOf():  the registered repo whose content another checkout shares (I22);  else the checkout", () => {
     const list = new RepoList({ home: scratch("epic-home-") })
     const app = repo("app")
-    // the engine's own epics are the app's content:  its config names the app's content folder
+    // the engine's own epics are the app's content:  its config names the app's epic folder
     const engine = join(scratch("epic-engine-"), "engine")
     mkdirSync(join(engine, ".epic"), { recursive: true })
     writeFileSync(join(engine, ".epic", "config.json5"), `{ "contentFolder": "${join(app, "docs")}" }\n`)
@@ -136,7 +136,7 @@ describe("RepoList", () => {
     expect(list.linkRootOf(app)).toBe(app)
     // a checkout holding its own pages
     expect(list.linkRootOf(own)).toBe(own)
-    // a content folder of its own (a demo check's scratch copies):  no repo's
+    // an epic folder of its own (a demo check's scratch copies):  no repo's
     expect(list.linkRootOf(engine, join(own, "docs"))).toBe(engine)
   })
 

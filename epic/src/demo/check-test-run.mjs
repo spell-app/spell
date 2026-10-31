@@ -5,7 +5,7 @@
  * - P4's separate test run (`<epic-test-run>`) is gone:  this script checked it before P51, and now checks what took
  *   its place.
  *
- * Usage (from the epic folder):
+ * Usage (from the `epic/` folder):
  *   node src/demo/check-test-run.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
  * - `--bundle`:  a scratch build of the docs bundle, served in place of `spell-ui.js`
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox or details,

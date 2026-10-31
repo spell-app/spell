@@ -125,7 +125,7 @@ Everything else stands:
   - its VS Code extension rebuilt after each stage
   - the parser speed test, on parser changes
   - the three logs:
-    `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the content folder (`epic config contentFolder`)
+    `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md`, `CODE-DEBT.md`, in the epic folder (`epic config contentFolder`)
 - the epic page's rules
 
 ## 5. Each phase, in plan order
@@ -171,7 +171,7 @@ Everything else stands:
    with the ids of its judgement calls.
 7. Commit:  `P<n>:  <Name> -- <one-line summary>`.
    - `WIP P<n>:  ...` for WIP;  an item fix:  `<name> I3:  ...`.
-   - The epic page is never in it:  it's shared content (`epics/`, a link into the content folder),
+   - The epic page is never in it:  it's in the epic repo (`epics/`, a link into the epic folder),
      committed for you at the turn's end.
 8. `epic commit <name>#P<N> <sha> "<what was built>"`:  the commit, under the phase's Commits.
 
@@ -185,7 +185,7 @@ Everything else stands:
 
 - `epic lint <name>`, then `epic open <name> --review`.
   - The person wakes to the doc, the night's calls and issues red.
-  - Nothing to commit for the doc (shared content, committed for you).
+  - Nothing to commit for the doc (in the epic repo, committed for you).
 - Final reply:  the summary, the judgement calls by phase (in words, ids after), and the problems.
   - Then ONE AskUserQuestion (the person answers in the morning):  "Go through the night?".
   - "Review it now (Recommended)":  runs `/epic review <name>`, judgement calls first.

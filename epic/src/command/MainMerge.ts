@@ -392,7 +392,7 @@ export class MainMerge {
   /**
    * The files the rename step reads:  what the merged branch differs from the base branch in (`HEAD^2..HEAD`).
    * - left out:  deleted files, generated ones (the generators' outputs, snapshots), and anything reached through a
-   *   link out of the checkout:  the shared content folder is NEVER touched
+   *   link out of the checkout:  the epic folder is NEVER touched
    */
   private renameFiles(): string[] {
     const { root, generators } = this

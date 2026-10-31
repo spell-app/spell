@@ -5,7 +5,7 @@
  * paper plane, with its ring, and the stage's Accept on the title row of what it accepts:  Accept Overview on the
  * Overview's, Accept Phases on the Phases section's, before its gear.
  *
- * Usage (from the epic folder):
+ * Usage (from the `epic/` folder):
  *   node src/demo/check-send-header.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox, as
  *   `src/demo/shots/send-header/epics/send-header/` (git-ignored);  its inbox written here:  a session listening and

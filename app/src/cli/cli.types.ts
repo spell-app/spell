@@ -242,7 +242,7 @@ export type StatusRow = {
 ////////////////
 
 /**
- * What `spell content update` remembers between updates, in the content epic's folder of the shared content
+ * What `spell content update` remembers between updates, in the content epic's folder of the epic repo
  * (`epics/content/content-updates.json5`;  `ContentUpdate`).
  * - `last`:  the commit the last update stopped at, and its commit time;  none before the first `--done`
  * - `always`:  the "always upgrade" rules, oldest first

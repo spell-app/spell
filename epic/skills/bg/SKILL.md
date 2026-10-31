@@ -101,7 +101,7 @@ The task, word for word:
   <n> is 1:  start none.
 - House rules:  the repo's `AGENTS.md`, the house style it names, and the package's `AGENTS.md`, for code;
   stage your changes, NEVER commit unless the task says to;
-  shared content (`epics/`, `guides/`, `agents/` ...) edited at its REAL path,
+  the epic repo (`epics/`, `guides/`, `agents/` ...) edited at its REAL path,
   `<content>/<path>` (`<content>`:  what `epic config contentFolder` prints), never git-added;  in a worktree, plain separate shell commands
   (no `$(...)`, no `&&` chains, no `cd`).
 - You can't ask the person anything:  no AskUserQuestion.  A choice they might make differently:  take the default the code

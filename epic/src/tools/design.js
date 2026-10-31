@@ -3,7 +3,7 @@
  * the local half of Spell's claude.ai design system.
  * Claude's `/design` skill (`.claude/skills/design/`) does the claude.ai half with its Artifact tool.
  * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]`:
- *   a Claude Design artboard (read from a Design with the Artifact tool) as a page in the content folder
+ *   a Claude Design artboard (read from a Design with the Artifact tool) as a page in the epic folder
  *   - its `<ui-*>` markup kept, Claude Design's runtime dropped
  *   - the one-file bundle and the site header added
  *   - prints what it couldn't carry
@@ -12,7 +12,7 @@
  *     Spell UI's `build/design-system/project/` (`BUILT`)
  * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
  * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
- * - The record is SHARED content, `brand/design-system.json` in the content folder (`spell.epics`),
+ * - The record is in the epic repo, `brand/design-system.json` in the epic folder (`spell.epics`),
  *   so every checkout knows what claude.ai holds:  `{ url, pushedAt, by, files: { "project/<path>": "<sha256>" } }`.
  */
 import { createHash } from "node:crypto"
@@ -51,7 +51,7 @@ async function main(argv) {
   if (verb === "pull") {
     const [board, page] = positional
     if (!board || !page) return usage("pull <board.dc.html> <page.html> [--title ...] [--from <design link>]")
-    // a page path (`brand/pony.html`) is the content folder's:  `pageFile()`
+    // a page path (`brand/pony.html`) is the epic folder's:  `pageFile()`
     const file = pageFile(page)
     const result = pullBoard(readFileSync(board, "utf8"), file, {
       title: flags.title,
@@ -202,12 +202,12 @@ function fillHoles(text, defaults, notes) {
 // ## Push record
 ////////////////
 
-/** The shared content repo (`spell.epics`):  the repo's content folder (`pages.js` `CONTENT`). */
+/** The epic repo (`spell.epics`):  the repo's epic folder (`pages.js` `CONTENT`). */
 export function sharedDir() {
   return CONTENT
 }
 
-/** `brand/design-system.json` in the shared repo:  what was pushed to claude.ai. */
+/** `brand/design-system.json` in the epic repo:  what was pushed to claude.ai. */
 export function stateFile() {
   return join(sharedDir(), "brand/design-system.json")
 }

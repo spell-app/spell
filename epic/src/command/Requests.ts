@@ -64,7 +64,7 @@ export class Requests {
   /** the checkout it runs for:  STATIC for the object's life */
   readonly root: string
 
-  /** `epics/` in the repo's content folder (`EpicConfig.contentOf()`), which every checkout shares */
+  /** `epics/` in the repo's epic folder (`EpicConfig.contentOf()`), which every checkout shares */
   readonly epics: string
 
   /** the sessions:  senders' transcripts, receivers */
@@ -380,7 +380,7 @@ export class Requests {
    * `null` when none is set (or its file won't read).
    * - Dev tooling:  how Owen works, not what a session builds (the rule:  the root `CLAUDE.md`).
    *   - the epic page, comments, the Review tab, every skill and hook, windows, worktrees, `epic` itself
-   * - Kept in `epics/home.json5`, shared content:
+   * - Kept in `epics/home.json5`, the epic repo:
    *   every checkout reads the same one, and the turn-end hook commits it.
    * - A data file (`DataFile`):  JSON5, a comment added by hand kept,
    *   its old `home.json` read while there's no `.json5`.

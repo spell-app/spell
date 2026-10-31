@@ -587,7 +587,7 @@ yarn core:gen:declarations               # rewrite the method list, after adding
 <details>
 <summary>More in the docs site</summary>
 
-These guides need a checkout with the content folder beside it, and the page server running.
+These guides need a checkout with the epic folder beside it, and the page server running.
 
 | Guide | Served at |
 | --- | --- |

@@ -206,12 +206,12 @@ export class EpicConfig {
   }
 
   /**
-   * Where checkout `root`'s pages are:  its repo's content folder (`contentFolder`), the ONE place the tools read and
+   * Where checkout `root`'s pages are:  its repo's epic folder (`contentFolder`), the ONE place the tools read and
    * write epics, guides, pages, sagas, brand and goals (epic `epic-eject` P12), never a link at the checkout's root.
    * - `root` itself, a checkout that holds its own pages, when
-   *   - its repo has no config file (a test's made-up checkout;  the content folder itself, so `contentOf()` of a
-   *     content folder is that folder)
-   *   - the folder it names isn't there (a repo with no content repo yet), or the file won't read
+   *   - its repo has no config file (a test's made-up checkout;  the epic folder itself, so `contentOf()` of a
+   *     epic folder is that folder)
+   *   - the folder it names isn't there (a repo with no epic repo yet), or the file won't read
    * - the folders inside it, and the page paths from it (`epics/seo/seo.plan.html`), are as they were from the root:
    *   the page servers serve it at `/`
    */
@@ -221,7 +221,7 @@ export class EpicConfig {
       if (config.isSetUp) {
         const content = config.contentFolder
         if (existsSync(content)) return content
-        // named, but not there:  said, never silent (epic `epic-engine` I59);  a repo with no content repo yet names none
+        // named, but not there:  said, never silent (epic `epic-engine` I59);  a repo with no epic repo yet names none
         if (config.named.has("contentFolder"))
           warnOnce(
             `contentFolder ${config.settings.contentFolder} is missing:  ${content};  using the checkout itself,` +
@@ -239,15 +239,15 @@ export class EpicConfig {
   ////////////////
 
   /**
-   * the shared content repo's address (`contentRemote`, epic `epic-friend` P4):  where everyone pulls the plans from
+   * the epic repo's address (`contentRemote`, epic `epic-friend` P4):  where everyone pulls the plans from
    * and pushes them to, as git takes it (`git@github.com:o/x-epics.git`);  `""` when it has none
-   * - `epic init` writes it as it makes the shared repo, and clones it where the content folder is missing
+   * - `epic init` writes it as it makes the epic repo, and clones it where the epic folder is missing
    */
   get contentRemote(): string {
     return this.settings.contentRemote
   }
 
-  /** the shared content repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
+  /** the epic repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
   get contentFolder(): string {
     const kit = this.kitFor("contentFolder")
     return kit ? kit.contentFolder : this.folderFor("contentFolder", this.settings.contentFolder)
@@ -385,7 +385,7 @@ export class EpicConfig {
   /**
    * The KIT this repo is a peer of (epic-engine's P49, Q51 A):  the config of the folder its own file names as
    * `"top"` (`{ "top": "../spell" }`, spell-brand's), from its main checkout;  `undefined` without one.
-   * - a peer takes its kit's content folder, windows, window names, shared folders, session-folder links, engine and
+   * - a peer takes its kit's epic folder, windows, window names, shared folders, session-folder links, engine and
    *   voices, for each key its own file leaves out (`kitFor()`);  its worktrees stay its OWN, `../<repo>.worktrees`
    *   beside it, and so do its install, base branch and app
    * - when the kit's repos file doesn't list this repo as a peer:  said once on stderr, and still used
@@ -661,7 +661,7 @@ export class EpicConfig {
   /**
    * a colour for each person and each agent on the epic pages (`colors`, epic `epic-friend` P10, Q16):
    * `{ people: { ana: "green" }, agents: { codex: "#0f8b8d" } }`;  anyone left out keeps the shared voice
-   * - the config's own, then the colour each person picked as `epic init` set them up, kept in the content folder's
+   * - the config's own, then the colour each person picked as `epic init` set them up, kept in the epic folder's
    *   `people/` (`PeopleColors`, epic `epic-friend` P13):  a name the config gives a colour keeps the config's
    * - the page server tells every page (`SPELL_SERVER.colors`, `personRoutes`), which draws a reply, a thread message
    *   in it (`ThreadFacts.voiceOf()`)
@@ -673,7 +673,7 @@ export class EpicConfig {
     return { people: { ...own.people, ...Object.fromEntries(picked) }, agents: own.agents }
   }
 
-  /** The colours people picked, in the content folder's `people/` (`PeopleColors`);  none when it won't read. */
+  /** The colours people picked, in the epic folder's `people/` (`PeopleColors`);  none when it won't read. */
   private peopleColors(): Record<string, string> {
     try {
       return PeopleColors.read(this.contentFolder)
@@ -693,7 +693,7 @@ export class EpicConfig {
   }
 
   /**
-   * the content folder's folders every checkout links in at its root (`epics`, `sagas` ...):  `epic shared link`
+   * the epic folder's folders every checkout links in at its root (`epics`, `sagas` ...):  `epic shared link`
    * - a checkout's `package.json` `"shared": { "links" }` still wins, for a branch of spell-app cut before the file
    *   existed (`Shared.configOf()`)
    */
@@ -739,8 +739,8 @@ export class EpicConfig {
 
   /**
    * where the window files go:  `windowsFolder` as written, from the main checkout;
-   * left out (`""`), the content folder's `windows/` (`<contentFolder>/windows`, git-ignored there)
-   * - repos sharing a content folder each need their own:  spell-epic's config keeps its `workspaces/`
+   * left out (`""`), the epic folder's `windows/` (`<contentFolder>/windows`, git-ignored there)
+   * - repos sharing an epic folder each need their own:  spell-epic's config keeps its `workspaces/`
    */
   get newWindowsFolder(): string {
     const kit = this.kitFor("windowsFolder")
@@ -851,13 +851,13 @@ export class EpicConfig {
   }
 
   /**
-   * Whether worktree `name`'s window holds only `⎇ <name>` and the content folder, no main checkout
+   * Whether worktree `name`'s window holds only `⎇ <name>` and the epic folder, no main checkout
    * (epic `epic-eject` O3):  `windows.worktreeOnly`, or its folder is beside the repo.
    * - a worktree still nested in the checkout keeps the old layout, the main root first (`src/window.mjs`)
    * - a MULTI-REPO top's epic worktree (`top`;  epic `epic-engine` P10, repo-split's Q9 A):
    *   the top's `windows.worktreeOnly` alone, off by default
    *   - off:  the main top checkout first (`~/www/spell`, its files hidden), so its Claude panel lists every session,
-   *     then the epic's worktree, then the content folder
+   *     then the epic's worktree, then the epic folder
    */
   worktreeOnlyWindow(name: string): boolean {
     const top = this.top
@@ -1021,8 +1021,8 @@ export class EpicConfig {
    * - `baseBranch`:  the remote's default branch, else `main` or `master`, else the main checkout's (`baseBranchOf()`)
    * - `installCommand`:  what the repo's lock file names (`installCommandOf()`), `""` with none
    * - `installOnCreate`:  on when there is an install command, so a worktree's window never opens without its packages
-   * - `windows`:  named for the repo (`default`, `repoName`) and its content folder (`contentName`)
-   * - `windowsFolder`:  the content folder's `windows/` (epic `epic-eject` P13)
+   * - `windows`:  named for the repo (`default`, `repoName`) and its epic folder (`contentName`)
+   * - `windowsFolder`:  the epic folder's `windows/` (epic `epic-eject` P13)
    * - every other key:  `DEFAULTS`, the same for any repo
    * - `written`:  what a file names already, so the values that follow another key follow it:
    *   `contentName` and `windowsFolder` its `contentFolder`, `installOnCreate` its `installCommand`;
@@ -1205,12 +1205,12 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  * What `.epic/config.json5` holds:  where a repo keeps its epic things.
  * - Every key is optional in the file:  one left out reads as `epic init` would write it for the repo
  *   (`EpicConfig.defaultsFor()`);  the defaults below are a repo `my-app`'s.
- * - `contentFolder`:  the shared content repo, relative to the main checkout (`../my-app.epics`):
+ * - `contentFolder`:  the epic repo, relative to the main checkout (`../my-app.epics`):
  *   the epics, guides, sagas and logs every checkout links in (`epic shared`, the turn-end commit hook)
- * - `contentRemote`:  the shared content repo's address, as git takes it (`git@github.com:o/my-app.epics.git`;
+ * - `contentRemote`:  the epic repo's address, as git takes it (`git@github.com:o/my-app.epics.git`;
  *   epic `epic-friend` P4);  `""` (the default):  none, the plans stay on this machine
  *   - the FIRST person's `epic init` makes the repo on GitHub and writes it;  a later person's clones it, where the
- *     content folder is missing
+ *     epic folder is missing
  * - `baseBranch`:  the branch worktrees start from and merge into (the remote's default branch, from git):
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
  * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`../my-app.worktrees`), one folder each:
@@ -1233,8 +1233,8 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
  *     (`my-app`:  `<windowsFolder>/my-app.code-workspace`)
  *   - `repoName`:  the repo root's folder name in every window (`my-app`)
- *   - `contentName`:  the content repo's folder name in every window (`my-app.epics`, the content folder's name)
- *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (on);
+ *   - `contentName`:  the epic repo's folder name in every window (`my-app.epics`, the epic folder's name)
+ *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the epic folder (on);
  *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
  *   - `settings`:  VS Code settings every window file gets, the repo's own, e.g. which TypeScript the editor runs
  *     (`{}`, none:  the default)
@@ -1244,18 +1244,18 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (on;
  *   `SessionFolders`, epic `epic-eject` Q4)
- * - `sharedFolders`:  the content folder's folders each checkout links in at its root (`epics`, `sagas`, `guides`,
+ * - `sharedFolders`:  the epic folder's folders each checkout links in at its root (`epics`, `sagas`, `guides`,
  *   `pages`;  the kit's:  none):
  *   `epic shared link`, the turn-end commit hook
- *   - for people and other tools only:  the engine reads pages from the content folder itself (`contentOf()`)
+ *   - for people and other tools only:  the engine reads pages from the epic folder itself (`contentOf()`)
  * - `engineFolder`:  the spell-epic checkout, relative to the main checkout, which `epic shared link` links in at each
  *   checkout's root as `spell-epic`, for a repo whose code imports the engine (spell-app's once did, epic `epic-eject`
  *   I5);  `""` (the default):  no link, a repo that only runs `epic`
  * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
  *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
  * - `windowsFolder`:  the VS Code window files' folder, relative to the main checkout (`epic window`, epic `epic-eject`
- *   P13);  the content folder's `windows/` (`../my-app.epics/windows`);  `""` means it too
- *   - each machine's own, never tracked:  the content repo git-ignores `windows/`
+ *   P13);  the epic folder's `windows/` (`../my-app.epics/windows`);  `""` means it too
+ *   - each machine's own, never tracked:  the epic repo git-ignores `windows/`
  *   - before P13:  `workspaces/` in the main checkout, tracked by spell-app and marked `skip-worktree`
  * - `app`:  the repo's app, which the top bar's App tab opens through the epic server (epic `epic-engine` I49;
  *   `EpicApp`);  left out:  none, and the tab says so
@@ -1290,7 +1290,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - `epic init` doesn't write it;  `epic config colors` prints it
  * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
  *   epic-engine's P49, Q51 A);  `""` (the default):  none
- *   - each key this file leaves out that a peer shares (the content folder, windows ...) is the kit's (`kit`);
+ *   - each key this file leaves out that a peer shares (the epic folder, windows ...) is the kit's (`kit`);
  *     its worktrees are its own, `../<repo>.worktrees` unless it says otherwise
  *   - the kit's repos file lists it with `"peer": true` (`peers`);  `epic config` warns when it doesn't
  * - `oldLayout`:  carrying an old-layout epic worktree across (`EpicOldLayout`), `{ carryOn, commitMaps, oldClones }`

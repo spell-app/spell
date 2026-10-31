@@ -69,7 +69,7 @@ export default function kitCommands(spell: Command): void {
 
   passThrough(server.command("url"))
     .description("start the page server if needed, then print the web address that serves <file>")
-    .argument("<file>", "a file of this checkout, or of the shared content folder")
+    .argument("<file>", "a file of this checkout, or of the epic folder")
     .action(() => pageServer("url"))
 
   passThrough(server.command("prune"))
@@ -225,7 +225,7 @@ export default function kitCommands(spell: Command): void {
     .command("score")
     .description("score the code:  copies, users and score per mechanism, the words' counts, each repo's tests")
     .option("--json", "print the snapshot, or the comparison, as JSON")
-    .option("--save", "save a snapshot in the coherence epic's details/scores/ (the shared content)")
+    .option("--save", "save a snapshot in the coherence epic's details/scores/ (the epic repo)")
     .option("--compare <snapshot>", "compare with a saved snapshot:  its name, or last")
     .option("--at <revision>", 'the code as it was:  "main@{2026-10-25 14:00}" (each repo\'s), a kit commit, a time')
     .action((options: CLI.CoherenceOptions) =>

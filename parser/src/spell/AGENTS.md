@@ -196,7 +196,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     - After a deliberate change, `spell content check --bless`, and read the diff.
 - [README-spell.md](../../README-spell.md), at the parser folder's root, is this folder's page for people;
   [the parser folder's README](../../README.md) is its front page.
-  - Other docs live in the content repo, their tooling in [the epic folder's tools](../../../epic/src/tools/)
+  - Other docs live in the epic repo, their tooling in [the `epic/` folder's tools](../../../epic/src/tools/)
     (see "Creating docs").
 - [The barrel](index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
   - It imports `spell/parser/core`'s TYPES only, never its code.
@@ -217,10 +217,10 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
 
 ## Creating docs
 
-- Docs for people (design notes, research, references), for every package, live in the content repo, `spell.epics/`:
+- Docs for people (design notes, research, references), for every package, live in the epic repo, `spell.epics/`:
   `guides/` mostly.
-  - Their tooling is [the epic folder's tools](../../../epic/src/tools/), in the kit's `epic/`.
-- How to write one:  [the epic folder's AGENTS.md](../../../epic/src/AGENTS.md), "Writing a page".
+  - Their tooling is [the `epic/` folder's tools](../../../epic/src/tools/), in the kit's `epic/`.
+- How to write one:  [the `epic/` folder's AGENTS.md](../../../epic/src/AGENTS.md), "Writing a page".
 
 ## Parser rules
 

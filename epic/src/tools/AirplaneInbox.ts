@@ -13,7 +13,7 @@ import { answerFile, readAnswer, listPages } from "./details.js"
 import { GuideChanges } from "./GuideChanges"
 import { notesIn, type PageNote } from "./notesOnDisk"
 
-/** Where page notes can be (`notesRoutes.ts` takes them on pages there), from the content folder. */
+/** Where page notes can be (`notesRoutes.ts` takes them on pages there), from the epic folder. */
 const NOTE_FOLDERS = ["pages", "guides", "epics"]
 
 /****************
@@ -37,7 +37,7 @@ const NOTE_FOLDERS = ["pages", "guides", "epics"]
  ****************/
 export class AirplaneInbox {
   /**
-   * What's waiting for checkout `root`:  in its repo's content folder (`EpicConfig.contentOf()`).
+   * What's waiting for checkout `root`:  in its repo's epic folder (`EpicConfig.contentOf()`).
    * - `since`:  when the flight began (ISO time;  `AirplaneMode`'s `since`):
    *   details answers older than it were answered before, and are left out
    *   - none:  every details answer is left out (no way to tell new from handled)
@@ -128,7 +128,7 @@ export class AirplaneInbox {
 /** An epic made from the Epics page (`epicRoutes.ts`), not started:  `/airplane land` asks whether to start it. */
 export type NewEpic = { name: string; title: string; doc: string }
 
-/** Each future epic in content folder `content` whose log says the Epics page made it (`FROM_PAGE`), by name. */
+/** Each future epic in epic folder `content` whose log says the Epics page made it (`FROM_PAGE`), by name. */
 function newEpicsWaiting(content: string): NewEpic[] {
   const epics = join(content, "epics")
   if (!existsSync(epics)) return []
@@ -149,7 +149,7 @@ function newEpicsWaiting(content: string): NewEpic[] {
 /** An epic's inbox, as `/airplane land` takes it. */
 export type EpicWaiting = {
   name: string
-  /** the epic page, a page path (from the content folder) */
+  /** the epic page, a page path (from the epic folder) */
   doc: string
   /** every mark, sent or not:  `{ id, action, at, note?, pick?, ... , sent }` */
   marks: (Record<string, unknown> & { id: string; action: string; sent: boolean })[]
@@ -162,14 +162,14 @@ export type EpicWaiting = {
 }
 
 /**
- * A comment on a docs page still waiting, with its page (a page path, from the content folder).
+ * A comment on a docs page still waiting, with its page (a page path, from the epic folder).
  * - `epic`:  the epic the page belongs to (`SeeAlso.ownerOf()`, epic `epic-workflow` P13):  that epic's session
  *   answers it;  none:  the standing `feedback`'s, which `epic comments gather` takes it into
  */
 export type GuideCommentWaiting = IdentifiedComment & { page: string; epic?: string }
 
 /**
- * The comments still waiting on every docs page of checkout `root`'s content folder, and Epic UI's, page by page, each
+ * The comments still waiting on every docs page of checkout `root`'s epic folder, and Epic UI's, page by page, each
  * with the epic its page belongs to.
  */
 function guideCommentsWaiting(root: string): GuideCommentWaiting[] {

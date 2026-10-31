@@ -11,7 +11,7 @@ import { CLI } from "spell/cli"
 /**
  * `spell commands [list|check]`:  every command the repos have, against the commands page.
  * - the commands:  yarn scripts, `spell` commands, `epic` verbs, skills
- * - the page's data:  `commands.json5` (`guides/dev/commands/`, in the shared content folder), which maps each command
+ * - the page's data:  `commands.json5` (`guides/dev/commands/`, in the epic folder), which maps each command
  *   to the operations it does
  * - `list` (default):  every command, with whether the page names it (`✓` / `✗`)
  * - `check`:  just the problems:  commands the page never names, and names on the page no command has
@@ -19,7 +19,7 @@ import { CLI } from "spell/cli"
  *   - run it after adding, renaming or removing a command
  * - `--json`:  `{ commands: [{ name, surface, named }], missing, stale }`
  * - Which checkout:  the nearest kit from the current folder up (`findCheckout(KIT_MARKER)`), so a worktree checks
- *   its own.  Its page's data:  in the kit's content folder (`contentFolderOf()`).
+ *   its own.  Its page's data:  in the kit's epic folder (`contentFolderOf()`).
  * - What counts:  `commandSources()`;  what the page names:  `pageNames()`.
  * - Throws `CliError` for another verb, or no page.
  */

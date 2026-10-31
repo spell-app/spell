@@ -15,7 +15,7 @@
  *     Claude answers them as a revisit's note (`/epic review`, `/airplane land`)
  *   - a SAGA page's (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15):  the same, in its own inbox,
  *     `<id>.inbox.json5`;  its Send is `<epic-page>`'s, for the session running `/epic review SAGA:/<id>`
- *   - both git-ignored in the shared repo:  waiting work, per machine, never the record
+ *   - both git-ignored in the epic repo:  waiting work, per machine, never the record
  *   - EXCEPT the comments themselves (epic `epic-friend` P9):  one file per person beside the inbox,
  *     `<page>.comments.<person>.json5`, committed and synced with the plans (`SharedComments`), so everyone sees every
  *     thread;  each person's Send hands their own agent only their own threads (`CommentList.ownWaiting`)
@@ -212,7 +212,7 @@ export default commentsRoutes
 /**
  * A docs page's Send, as the page header draws it (`PageSend`):  `{ send }`;  an epic page's:  `{}` (its own Send is
  * `<epic-page>`'s, on the review inbox).
- * - `root`:  the server's checkout:  its repo's content folder's `epics/` (`EpicConfig.contentOf()`) says who owns
+ * - `root`:  the server's checkout:  its repo's epic folder's `epics/` (`EpicConfig.contentOf()`) says who owns
  *   the page
  * - `page`:  the page's URL path (`/worktrees/<w>/guides/x.html` too);  `file`:  its file
  */
@@ -259,7 +259,7 @@ export type PageSend = {
   waiting: string[]
 }
 
-/** Epic `epic`'s epic page, in checkout `root`'s repo's content folder (there or not). */
+/** Epic `epic`'s epic page, in checkout `root`'s repo's epic folder (there or not). */
 function planDocOf(root: string, epic: string): string {
   return join(EpicConfig.contentOf(root), "epics", epic, `${epic}.plan.html`)
 }

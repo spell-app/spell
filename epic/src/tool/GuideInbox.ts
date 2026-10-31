@@ -16,8 +16,8 @@ const INBOX_VERSION = 1
  * on selected text (`src/tools/_assets/spell-doc-runtime.js`, "Comments"), waiting for Claude in the
  * page's INBOX FILE.
  * - the file:  `<page>.inbox.json5` beside `<page>.html` (`fileFor()`);  absent until the first comment, deleted
- *   once the last is deleted;  git-ignored in the shared repo, as the epics' review inboxes
- *   - its COMMENTS shared through the content repo (epic `epic-friend` P9):  one file per person beside it,
+ *   once the last is deleted;  git-ignored in the epic repo, as the epics' review inboxes
+ *   - its COMMENTS shared through the epic repo (epic `epic-friend` P9):  one file per person beside it,
  *     `<page>.comments.<person>.json5` (`SharedComments`);  the inbox file keeps only this machine's Send
  *     (`sent`, `handedOver`).  One from before P9 still holds its comments:  read as this machine's, moved by the next
  *     write

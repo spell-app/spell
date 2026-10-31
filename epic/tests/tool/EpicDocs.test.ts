@@ -1,6 +1,6 @@
 /**
  * Tests of `EpicDocs` (`epic docs | decisions`):  its pure rules, then a scratch checkout with git,
- * a shared content repo its config names (no links), and two epics' pages.
+ * an epic repo its config names (no links), and two epics' pages.
  */
 import { spawnSync } from "node:child_process"
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
@@ -88,7 +88,7 @@ describe("EpicDocs on a scratch checkout", () => {
   const scratch = mkdtempSync(join(tmpdir(), "epic-docs-"))
   const root = join(scratch, "checkout")
   const shared = join(scratch, "shared")
-  // the checkout names its content folder in its config, and has NO links to it (epic `epic-eject` P12)
+  // the checkout names its epic folder in its config, and has NO links to it (epic `epic-eject` P12)
   for (const dir of ["epics", "guides"]) mkdirSync(join(shared, dir), { recursive: true })
   write(root, ".epic/config.json5", JSON.stringify({ contentFolder: "../shared" }))
   const files = new PlanDocFiles({ root })
@@ -104,7 +104,7 @@ describe("EpicDocs on a scratch checkout", () => {
     const ys = commit(root, "P1:  One -- y's, named like x's", { "y-notes.md": "y" })
     const listed = commit(root, "a subject naming nobody", { "listed.md": "l" })
     commit(root, "z P1:  someone else", { "z.md": "z" })
-    // the shared repo's pages, and its turn commits
+    // the epic repo's pages, and its turn commits
     write(shared, "guides/changelog.html", '<ui-section id="x" label="2026-10-01 · X"></ui-section>')
     write(shared, "guides/index.html", "epic `x`")
     write(shared, "guides/x/x.html", "durable")

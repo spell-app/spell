@@ -130,7 +130,7 @@ describe("the commands page's data (epic `epic-workflow` P21)", () => {
   })
 
   // epic `epic-eject` P12:  no `guides` link at the checkout's root
-  test("read from the shared content folder, not the checkout", async () => {
+  test("read from the epic folder, not the checkout", async () => {
     const content = mkdtempSync(join(tmpdir(), "commands-content-"))
     const page = { families: [{ rows: [{ cli: { names: "spell compile" } }] }] }
     write(content, "guides/dev/commands/commands.json5", page)

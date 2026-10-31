@@ -22,8 +22,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
     **View: Open View...** › Review finds it;  epic `epic-friend` P16).
 
-- Shared content:  the epic page lives in `epics/`, which the repo doesn't track (epic `shared-content`, 2026-10-04).
-  - In every checkout, `epics/` is a link into ONE shared repo, the content folder (`epic config contentFolder`).
+- The epic repo:  the epic page lives in `epics/`, which the repo doesn't track (epic `shared-content`, 2026-10-04).
+  - In every checkout, `epics/` is a link into ONE epic repo, the epic folder (`epic config contentFolder`).
   - So there is ONE epic page:  `main` and every worktree see each edit at once;  it never conflicts on merge.
   - Committed for you after every turn
     (the `Stop` hook, [shared-commit.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/shared-commit.mjs)).
@@ -578,7 +578,7 @@ than just being able to move on").
        `epic lint` fails one not stamped, or naming no item.
      - The words a mark replaced (`was`, the popup's "Originally") are found by the tool as it stamps, from the page
        as it was (on disk, else its last commits):  write nothing more (I160).  Run `epic change` in the same turn
-       you wrote the marks:  the content repo's turn-end commit is what it compares with.
+       you wrote the marks:  the epic repo's turn-end commit is what it compares with.
      - No approval:  orange for 3 days, then quiet, the `Q16` chip for good.  The person reopens its question if they
        disagree;  `inbox apply` reopens it.  Rules:  `plan-doc.md`, "Change marks".
      - In a PHASE's text, the mark marks its item handled in that phase (P31):  grey, out of the lists.
@@ -630,7 +630,7 @@ than just being able to move on").
      - `epic merge <name>` lists every commit it just brought onto `main`
      - by hand, any time:  `epic commits <name> --backfill`;  none is listed twice
      - The epic page is never in that commit:
-       it's shared content, committed for you (see "Shared content" at the top).
+       it's in the epic repo, committed for you (see "The epic repo" at the top).
    - A STANDING epic:  the phase goes onto `main` AT ONCE (Q8 of `epic-workflow`),
      once its commit is made and its checks pass.
      - Standing:  `<epic-page standing>`, and `epic summary --json`'s `standing` (epic `epic-workflow`).
@@ -723,13 +723,13 @@ than just being able to move on").
   3. Then the READMEs (below):  every README the epic made untrue, rewritten in the same voice.
   4. Last, the checkers:
      - `epic pages fuss --branch`
-     - `epic pages fuss <the epic's guide>`:  it's shared content, not in the branch's diff
+     - `epic pages fuss <the epic's guide>`:  it's in the epic repo, not in the branch's diff
      - the repo's README checker, if it has one (Spell's:  `yarn readme:check` at the kit's root)
      - Their misses fixed, or listed for the person in the reply.
 - Turn it into the epic's guide:  `epic pages create durable <page> --title "..."` (fixes asset paths for the depth).
   - One page:  `guides/<name>.html`.
   - Several files (pages, experiments):  `guides/<name>/<name>.html`.
-    Shared content too:  committed for you, like the epic page.
+    The epic repo too:  committed for you, like the epic page.
   - From the epic page, in the voice's guide shape:
     - Overview and the phases' Done lists -> the hook, what it is, how to use it, how it works
     - decisions -> "Why it's built this way", each with the option it beat
@@ -754,7 +754,7 @@ than just being able to move on").
   - Tracked files:  the diff joins the phase's commit, in each repo.
 - The epic page stays in `epics/` as the record:  every phase done.
 - Changelog, if the repo keeps one (its `AGENTS.md` says):  write the epic's entry straight into it.
-  - The shared changelog is the content folder's `guides/changelog.html`:  `epic docs <name>` looks for the entry there.
+  - The shared changelog is the epic folder's `guides/changelog.html`:  `epic docs <name>` looks for the entry there.
   - It links the epic page and the guide.
   - Under "3. Merged into main" if "Finish" below merges it, else "2. In worktrees".
   - Nothing to commit on the branch for it, and no merge conflict:  every checkout sees the one file.
@@ -802,7 +802,7 @@ This session LISTENS:  it waits on the doc's review inbox, and acts on what arri
 - "Revisit soon":  answered one at a time.
 - EVERY answer goes INTO its item, on the page;  the chat only links them (Q3 of `windows-and-review`).
 - No modal walk through items any more (epic `review-review`, 2026-10-04;  its epic page, 1.1-1.2:
-  `epics/review-review/review-review.plan.html` in the content folder).
+  `epics/review-review/review-review.plan.html` in the epic folder).
 
 - Runs from ANY window, `main` or a worktree.
   - The prompt hook lets `/epic review` through, and never renames the session.
@@ -1064,7 +1064,7 @@ want you to just do it").
      A quick yes / no:  a modal.
      - In Codex:  in the chat.
    - A call made name by name (they want each name's context before a rule's renames go in):
-     a CHOICE page (the Choice Pages guide, the content folder's `guides/syntax-choices.html`).
+     a CHOICE page (the Choice Pages guide, the epic folder's `guides/syntax-choices.html`).
      - `epic choices create <slug> --epic <name> --rows <rows.json5>`.
      - Then `show <slug> --wait`, in the background.
    - "picks B · <card>, asks:  <note>" (a pick with a revisit, "B, but ..."):  `apply` leaves it.
@@ -1145,7 +1145,7 @@ When the person says they're done ("stop reviewing", "that's it"), or the sessio
 - `epic log <name> "Review:  <n> approved, <n> answered, <n> to todos, <n> details added"`
 - reply:  what was decided and done (in words, ids after), and what's still waiting on them;  the link pair
 - the doc's changes:  nothing to commit, from any checkout.
-  It's shared content, committed for you at the turn's end.
+  It's in the epic repo, committed for you at the turn's end.
 
 ### 7.5 A saga page:  `/epic review SAGA:/<id>` (or "saga <id>")
 
@@ -1488,7 +1488,7 @@ Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by 
     - now, if idle or between phases
     - else at the end of the phase under way, when running it now would disrupt that work
   - it may commit what changed WITHOUT asking (Owen's standing OK, 2026-10-11), as `<epic> migrate <step>:  ...`
-    - epic pages are shared content, committed by the turn-end hook:  usually nothing is left for the branch
+    - epic pages are in the epic repo, committed by the turn-end hook:  usually nothing is left for the branch
     - "commit" means the branch's own changes, when a step touched tracked files
   - what the report leaves for a person ("left for you":  a link to a gone id, a comment whose words changed):
     fix it in the doc, or bring it up at the next review
@@ -1550,4 +1550,4 @@ items <name> [--section s] [--filter unreviewed|open|reviewed|queued|all] [--jso
 list [--json]                                       every epic once:  status, where it runs, not reviewed / all
 backfill <name> | --all [--apply]                   one-off:  mark what past sessions show the person went through
 ```
-- Every command edits the epic's ONE shared doc, wherever it's called from ("Shared content" at the top).
+- Every command edits the epic's ONE shared doc, wherever it's called from ("The epic repo" at the top).

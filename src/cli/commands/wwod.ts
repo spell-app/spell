@@ -12,7 +12,7 @@ import type { AgentRulesProblem, AgentRulesReport } from "spell/cli"
  * - ported from the epic's `cites.py`
  */
 
-/** WWOD's folder, from a checkout's root:  the `agents` link into the shared content folder, which stays. */
+/** WWOD's folder, from a checkout's root:  the `agents` link into the epic folder, which stays. */
 const WWOD_FOLDER = "agents/wwod"
 
 /**
@@ -22,7 +22,7 @@ const WWOD_FOLDER = "agents/wwod"
 const CITERS = ["AGENTS.md", "CLAUDE.md", "*/AGENTS.md", "*/CLAUDE.md"]
 
 /**
- * The files in the shared content folder that cite WWOD:  paths in it (`contentFolderOf()`, epic `epic-eject` P12),
+ * The files in the epic folder that cite WWOD:  paths in it (`contentFolderOf()`, epic `epic-eject` P12),
  * with no link at the checkout's root.
  */
 const CONTENT_CITERS = ["goals/AGENTS.md", "guides/solid/solid-2.md"]
@@ -69,7 +69,7 @@ const LINE_SUFFIX = /:\d+(-\d+)?$/
  *   in `CITATIONS_ONLY`
  * - a bare `NAME.md` resolves from the repo root, the citing file's folder, any package (`PARSING.md`) or any
  *   dependency (`CHEATSHEET.md`, `solid-js`'s)
- * - a content folder's file (`CONTENT_CITERS`) is named by its path there, `guides/solid/solid-2.md`
+ * - an epic folder's file (`CONTENT_CITERS`) is named by its path there, `guides/solid/solid-2.md`
  * - NEVER throws on a missing citer:  `CITERS` lists what MAY cite
  */
 export function checkAgentRules(checkout: string, files: string[] = []): AgentRulesReport {

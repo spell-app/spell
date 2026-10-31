@@ -19,7 +19,7 @@
  *     bundled from this checkout's source;  any other `spell/ui/...` module, or Solid's, fails
  * - Why not in `spell-ui.js`:  that bundle is built from `ui`'s `dist/`, which has no docs families;
  *   and only the page that needs these pays for them.
- * - The entry lives in SHARED content, which has no `node_modules`:
+ * - The entry lives in the epic repo, which has no `node_modules`:
  *   `spell/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `spell-ui` workspace Node's resolver
  *   finds from here), so the script is built from the checkout that runs this.
  * - A shared module is read from `SpellUI.packModules` by its import name as written (`spell/ui/core`):
@@ -118,7 +118,7 @@ async function bundle(entry: string, out: string) {
 
 /**
  * A Vite plugin:  every file in the guide's `folder` keeps its side effects (`UICounter.define()`).
- * - The content folder has no `package.json`, so the nearest one is the kit's (the content repo sits inside it):
+ * - The epic folder has no `package.json`, so the nearest one is the kit's (the epic repo sits inside it):
  *   its `sideEffects` list doesn't name the guide's files, and the build dropped them, `<ui-counter>` undefined.
  * - On the resolved module, since that beats Rolldown's `treeshake.moduleSideEffects`.
  */

@@ -5,28 +5,28 @@ import { DataFile } from "spell/server/DataFile"
 
 /****************
  * ### `SyncState`
- * How the content repo's last sync went (`SharedSync`, epic `epic-friend` P5), kept in its git folder:
- * `<content repo>/.git/spell-shared-sync.json5`, never committed, each machine's own.
+ * How the epic repo's last sync went (`SharedSync`, epic `epic-friend` P5), kept in its git folder:
+ * `<epic repo>/.git/spell-shared-sync.json5`, never committed, each machine's own.
  * - written at the end of every sync;  read by the `SessionStart` hook ([sync-notice.mjs](../../hooks/sync-notice.mjs)),
  *   which says a conflict to the person and to Claude, the way the behind-main notice does
  * - `notice()`:  that notice, or `undefined` when the last sync went through (or was offline:  the next one pushes)
  * - node's own modules and the kit's `DataFile` only:  plain `node` loads it by path, in the hook
- * - all `static`:  one file per content repo, read and written whole
+ * - all `static`:  one file per epic repo, read and written whole
  ****************/
 export class SyncState {
-  /** The state file of the content repo at `dir`. */
+  /** The state file of the epic repo at `dir`. */
   static fileOf(dir: string): string {
     return join(dir, ".git", FILE_NAME)
   }
 
-  /** The content repo at `dir`'s last sync, `undefined` when none was kept. */
+  /** The epic repo at `dir`'s last sync, `undefined` when none was kept. */
   static read(dir: string): SyncRecord | undefined {
     const file = SyncState.fileOf(dir)
     return existsSync(file) ? DataFile.read<SyncRecord>(file) : undefined
   }
 
   /**
-   * Keep `record` as the content repo at `dir`'s last sync.
+   * Keep `record` as the epic repo at `dir`'s last sync.
    * - NEVER throws:  a sync that can't write its state still synced
    */
   static write(dir: string, record: SyncRecord): void {
@@ -37,13 +37,13 @@ export class SyncState {
     }
   }
 
-  /** Forget the content repo at `dir`'s last sync (tests, a person clearing it). */
+  /** Forget the epic repo at `dir`'s last sync (tests, a person clearing it). */
   static clear(dir: string): void {
     rmSync(SyncState.fileOf(dir), { force: true })
   }
 
   /**
-   * What a new session is told about the content repo at `dir`, when its last sync stopped on a conflict:
+   * What a new session is told about the epic repo at `dir`, when its last sync stopped on a conflict:
    * `person`, the line for the person (`systemMessage`);  `claude`, Claude's (`additionalContext`).
    * - `undefined` when it went through, was offline, or never ran
    */
@@ -56,7 +56,7 @@ export class SyncState {
         `The shared plans couldn't sync at ${record.at}:  your changes and someone else's clash in ${files}.  ` +
         "Your changes are kept here, not shared yet.",
       claude:
-        `The content repo (${dir}) stopped syncing at ${record.at}:  pulling someone else's changes clashed with ` +
+        `The epic repo (${dir}) stopped syncing at ${record.at}:  pulling someone else's changes clashed with ` +
         `this machine's in ${files}, so the rebase was undone and nothing was pushed.  Tell the person in one line.  ` +
         `To settle it:  in ${dir}, \`git pull --rebase\`, fix each file (keep both people's words), \`git add\` it, ` +
         "`git rebase --continue`, then `epic shared sync`.  Ask before choosing one person's words over another's."
@@ -70,7 +70,7 @@ export type SyncRecord = {
   at: string
   /** what came of it */
   result: SyncResult
-  /** a conflict's files, from the content repo's root */
+  /** a conflict's files, from the epic repo's root */
   files?: string[]
   /** git's words, when it failed (offline, a push refused) */
   error?: string
@@ -84,5 +84,5 @@ export type SyncResult = (typeof SyncResults)[number]
 /** `SyncState.notice()`:  the person's line, and Claude's. */
 export type SyncNotice = { person: string; claude: string }
 
-/** The state file's name, in the content repo's git folder. */
+/** The state file's name, in the epic repo's git folder. */
 const FILE_NAME = "spell-shared-sync.json5"

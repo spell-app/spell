@@ -34,7 +34,7 @@ export class LocPage {
   /** the checkout `epic pages create` runs in, for a missing page */
   readonly root: string
 
-  /** the content folder the page is in */
+  /** the epic folder the page is in */
   readonly content: string
 
   /** how a missing page is made:  default `epic pages create durable` */

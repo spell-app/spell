@@ -20,7 +20,7 @@
             TEMPLATE:  a RUN PAGE, a command's review page (epic `epic-engine` P23), the tool's own (tracked with each
             branch, as its elements are).  NEVER copied:  spell-epic's route module serves it at `/runs/<id>/`
             (`src/tools/runRoutes.ts`), its title and `<epic-run run>` set from the run's `run.json5`.
-            - The command writes the run (the kit's `SRV.CommandRun`):  `pages/runs/<id>/` in the content folder.
+            - The command writes the run (the kit's `SRV.CommandRun`):  `pages/runs/<id>/` in the epic folder.
             - `<epic-run>` draws the rest from `/api/runs/<id>`:  who is waiting, the progress, a row per thing to
               answer (`<epic-run-row>`), and Send.
           -->

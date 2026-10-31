@@ -85,7 +85,7 @@ epic/          FAILED  (1s)
 app/           passed  (2s)
 ```
 
-The epic folder failed on a checkout that hadn't run its VS Code extension's own install (`epic/vscode`):
+The `epic/` folder failed on a checkout that hadn't run its VS Code extension's own install (`epic/vscode`):
 its lint reads that project's TypeScript settings, and found no types for node or VS Code.
 Lint fails on a warning here too, and `yarn lint` exits 1 when any folder fails.
 
@@ -100,10 +100,10 @@ Every folder answers to the same script names, so `yarn test` means the same thi
 | `lint` | oxlint, strict:  a warning fails, and so does an unused disable comment;  plus ruff, for Python |
 | `lint:fix` | the same, fixing what it can |
 | `format` | oxfmt, and ruff's formatter for Python, over the folder's own files and its own ignore list;  it rewrites files |
-| `test` | Vitest, every project in the folder;  then pytest for its Python, and the epic folder's `node --test` scripts |
+| `test` | Vitest, every project in the folder;  then pytest for its Python, and the `epic/` folder's `node --test` scripts |
 | `review` | `ts`, `lint:fix`, `format`, `test`, in that order, stopping at the first that fails;  then "REVIEW PASSED" |
 
-- The epic folder's `review` is `ts`, `lint` and `test`:  it fixes nothing and formats nothing,
+- The `epic/` folder's `review` is `ts`, `lint` and `test`:  it fixes nothing and formats nothing,
   so run its `lint:fix` and `format` yourself.
 - There's no `format` over every folder:  `yarn review` formats them all, or run `yarn format` in each.
 - Run TypeScript as `yarn tsc`, never `npx tsc`:  yarn picks the install's TypeScript 7.
@@ -129,7 +129,7 @@ Run them as wide or as narrow as the change:
 <summary>Every folder's test projects, for <code>--project</code></summary>
 
 One Vitest config at the root and one per folder, `vitest.config.ts`, with a project per folder of its `src/`;
-Spell UI and the epic folder split theirs by where the tests run instead.
+Spell UI and the `epic/` folder split theirs by where the tests run instead.
 
 | Folder | Projects |
 | --- | --- |
@@ -172,7 +172,7 @@ The tests have TypeScript settings of their own, `tests/tsconfig.json`, and `ts`
 
 Where a test runs is decided by its folder and its name, so a new file needs no registering:
 - Anything that draws runs in a real Chromium, headless (Vitest's browser mode, with Playwright):
-  the shared `util` and `element`, Spell UI's elements, the epic folder's `<epic-*>` elements, the app's `app:browser`.
+  the shared `util` and `element`, Spell UI's elements, the `epic/` folder's `<epic-*>` elements, the app's `app:browser`.
 - Everything else runs in node.
   A name can say which:  `*.ssr.test.tsx` runs in node in Spell UI, `*.browser.test.tsx` in Chromium in the app.
 - Spell UI's `yarn test:all` adds Firefox and WebKit;  `yarn test:browsers` installs them.
@@ -181,7 +181,7 @@ Where a test runs is decided by its folder and its name, so a new file needs no 
 - Shared helpers:
   - the shared ones under `src/`, for every set of elements:  `spell/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
     ([README/element.md](element.md))
-  - Spell UI's setup, `spell/ui/test-helpers/setup.ts`, which the app's and the epic folder's browser tests run first
+  - Spell UI's setup, `spell/ui/test-helpers/setup.ts`, which the app's and the `epic/` folder's browser tests run first
 
 Tests reach DOWN only, as code does:
 - A higher folder's tests may use a lower folder's helpers and test data:
@@ -288,8 +288,8 @@ While you're in it:
   So to try your change to a command, or to the compiler under one, run `yarn spell <command>`:  the worktree's own.
 - It opens in its own VS Code window, `⎇ <name>`, where `git.detectWorktrees` shows the worktree in Source Control.
   Never `code --add`, never `code -r`:  [README-vscode.md](../README-vscode.md), "Windows and worktrees", says why.
-- `epic` is the epic folder's command, on every Claude Code session's `PATH` while the plugin is on:
-  every verb in [the epic folder's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md);
+- `epic` is the `epic/` folder's command, on every Claude Code session's `PATH` while the plugin is on:
+  every verb in [the `epic/` folder's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md);
   epic pages, the review loop and the skills in [its README](https://github.com/spell-app/spell/blob/main/epic/README.md).
 
 <details>
@@ -379,7 +379,7 @@ Find the row for what you want to change, then read the page beside it before yo
 | the example projects | spell-app's [`spaces/@spell/examples/`](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples) and `library/`:  [README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
 | Python web apps | spell-app's [`spell_quart`](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/py) |
 | a `spell` command | its folder's `src/cli/`:  [README/cli.md](cli.md) |
-| the page server | the shared [server](../src/server/page/) ([README/server.md](server.md));  what a folder adds to it, in that folder's own `package.json` (`"pageServer"`):  the app's, [its README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
+| the page server | the shared [server](../src/server/page/) ([README/server.md](server.md));  what a folder adds to it, in that folder's own `package.json` (`"pageServer"`):  the app's, [its README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md);  the header's tabs and the writable folders, in the epic repo's `page-server.json5` |
 | a Spell UI element | [spell-ui](https://github.com/spell-app/spell/blob/main/ui/README.md) |
 | the element framework under every set | the shared [element](../src/element/):  [README/element.md](element.md) |
 | epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
@@ -472,7 +472,7 @@ The root (`~/www/spell`)
 ## See also
 
 - [README/toolchain.md](toolchain.md):  what the checks run on, and how a type check reads another folder
-- [the epic folder's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
+- [the `epic/` folder's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
   `/isolate`
 - [README-vscode.md](../README-vscode.md):  the extensions, and how windows and worktrees are laid out
 - [README/agents.md](agents.md):  how a coding agent finds the rules, and the three logs
@@ -481,12 +481,12 @@ The root (`~/www/spell`)
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder, so they need a checkout with `spell.epics` inside it and the page
+These guides live in the epic folder, so they need a checkout with `spell.epics` inside it and the page
 server running (`spell server start`, which prints where it is):
 
 - "Vite+":  `/guides/vite-plus.html`
 - "Windows and Review":  `/guides/windows-and-review.html`
-- "Shared Content":  `/guides/shared-content.html`
+- "The Epic Repo":  `/guides/shared-content.html`
 - "Commands":  `/guides/dev/commands/commands.html`
 
 </details>

@@ -29,7 +29,7 @@ import { DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage, type
  * - The ONE marketplace file is the repo's root, `.claude-plugin/marketplace.json` (`spell`, epic `epic-engine` Q42):
  *   its `epic` entry's source is `./epic`, the checkout's folder, until the first publish;  publishing turns it to
  *   this package (`sourceToNpm()`), for `/plugin marketplace add spell-app/spell`.
- * - From the epic folder's `package.json`:  its `"spellPublish": { "files" }`, and the agents its plugin manifest names.
+ * - From the `epic/` folder's `package.json`:  its `"spellPublish": { "files" }`, and the agents its plugin manifest names.
  ****************/
 export class PluginPackage extends PublishedPackage {
   /** Copy the plugin's parts into the staging folder, then write `bin/epic` and the published `package.json`. */

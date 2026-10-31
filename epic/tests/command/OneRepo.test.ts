@@ -107,7 +107,7 @@ describe("EpicConfig:  the kit and its peer", () => {
     expect(kit.repoCheckouts("e1").map(({ repo }) => repo)).toEqual(["spell"])
   })
 
-  test("the peer takes the kit's content folder and windows, and keeps its own worktrees", () => {
+  test("the peer takes the kit's epic folder and windows, and keeps its own worktrees", () => {
     const brand = new EpicConfig(BRAND)
     expect(brand.kit?.main).toBe(KIT)
     expect(brand.contentFolder).toBe(CONTENT)

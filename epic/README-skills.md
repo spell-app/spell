@@ -237,7 +237,7 @@ The costs, before you rely on them:
 ## <a id="hooks"></a>Hooks:  what happens without being asked
 
 You never call a hook, so you meet one by what it left behind:
-a session renamed `🚧 seo`, a worktree that won't be removed, a commit in the content folder nobody made.
+a session renamed `🚧 seo`, a worktree that won't be removed, a commit in the epic folder nobody made.
 Each of those is a row here, by when it happens.
 
 | When | Script, event, time limit | What it does |
@@ -250,7 +250,7 @@ Each of those is a row here, by when it happens.
 | a session leaves a worktree | [left-worktree.mjs](hooks/left-worktree.mjs);  `PostToolUse` on `ExitWorktree`, 10 seconds | reminds the reply to end with its closing line, "*You can close this tab*", only when nothing is left:  no unmerged work, no agent running, no question waiting |
 | you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened |
 | a turn ends | [handoff.mjs](hooks/handoff.mjs);  `Stop`, Claude Code's default | moves the session to another window, when a move was armed (`epic window handoff <name>`, which refuses when this hook won't run) |
-| a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the content folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
+| a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the epic folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
 - Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):
@@ -333,7 +333,7 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
   - Called by name, its first line says what to do in Codex instead.
 - The designer and coherence reviewers are Codex custom agents too, `~/.codex/agents/epic-designer.toml` and
   `epic-coherence.toml`, generated from their Claude Code agent files at install.
-- `epic skills check` keeps the one copy honest, and the epic folder's tests run it:
+- `epic skills check` keeps the one copy honest, and the `epic/` folder's tests run it:
   - a step naming a Claude-only tool with no "In Codex:" line within 10 lines of it fails
   - so does a Claude-only skill without its `agents/openai.yaml`, or descriptions past Codex's 8,000-character list
 
@@ -348,7 +348,7 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
 <details>
 <summary>More in the docs site</summary>
 
-In the content folder, so only where a checkout has `spell.epics`, served by `spell server start`:
+In the epic folder, so only where a checkout has `spell.epics`, served by `spell server start`:
 
 - "Background agents:  /bg":  `/guides/background-agents.html`
 - "Airplane Mode":  `/guides/airplane.html`

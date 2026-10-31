@@ -4,7 +4,7 @@ The house style is WWOD, "What Would Owen Do?";  your group is owen@spell.
 A link that works:  [the other page](README-other.md#the-other-page), [this page's heading](#-coming--npm), and
 [a heading with code](#ui-root-and-packs).
 A link that doesn't:  [missing](README-missing.md), and [a heading that isn't there](README-other.md#nowhere).
-A guide:  [into the content folder](../spell.epics/guides/cli.html).
+A guide:  [into the epic folder](../spell.epics/guides/cli.html).
 
 ```mermaid
 %%{init: {"theme":"base"}}%%

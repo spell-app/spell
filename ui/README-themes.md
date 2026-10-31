@@ -425,7 +425,7 @@ and mixes looks through component tokens, or by copying a theme's rules for one 
 
 These pages are served by the page server, so they need a checkout and the page server running
 ([README-site.md](README-site.md)).
-The second lives in the content folder, which a new checkout doesn't have.
+The second lives in the epic folder, which a new checkout doesn't have.
 
 - Theming, with a live theme gallery and every foundation token:  `/components/ui/theming.html`
 - Spell UI's theming notes (the sheet table, component tokens, utilities, stacking):  `/guides/ui/notes/theming.md`

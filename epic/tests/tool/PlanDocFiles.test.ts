@@ -3,7 +3,17 @@
  * and parts (`EpicParts`) or one file, and refusing what an edit mustn't touch.
  */
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -180,7 +190,7 @@ describe("PlanDocFiles links written as from a part", () => {
     '<a href="../../../ui/src/gone.ts">missing</a>, <a href="../../../ui/src/x.ts#L3">a line</a></p>'
 
   beforeAll(async () => {
-    // the kit, with its content folder inside it (git-ignored) and a child repo's file;  an epic's worktree beside it
+    // the kit, with its epic folder inside it (git-ignored) and a child repo's file;  an epic's worktree beside it
     write(main, ".epic/config.json5", JSON.stringify({ contentFolder: "spell.epics" }))
     git(main, "init", "-q", "-b", "main")
     commit(main, "kit", { ".gitignore": "spell.epics\n", "yarn.lock": "", "ui/src/x.ts": "x" })

@@ -171,7 +171,7 @@ function secondsOf(flag: string | true | undefined, fallback: string): number {
 
 /**
  * The folder names directly in `dir`, or none when it doesn't exist.
- * - not a LINK to a folder:  the content folder's, beside the worktrees (`Shared.linkContentBeside()`), is no worktree
+ * - not a LINK to a folder:  the epic folder's, beside the worktrees (`Shared.linkContentBeside()`), is no worktree
  */
 function folders(dir: string): string[] {
   if (!existsSync(dir)) return []

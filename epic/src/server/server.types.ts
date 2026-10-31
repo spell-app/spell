@@ -44,9 +44,9 @@ export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
  * - `/_epic/assets/...`:  the docs pages' assets (spell-epic's `src/tools/_assets/`):
  *   `spell-ui.js`, `spell-doc.css`, the runtime, `highlight.min.js`, the emoji chunks
  * - `/_epic/pack/...`:  the epics component pack (spell-epic's `src/components/__pack/`), `epics.pack.js`
- * - one prefix, starting `_`, so no content folder's own folder can take it
+ * - one prefix, starting `_`, so no epic folder's own folder can take it
  * - and the templates, `/templates/...` (spell-epic's `templates/`, epic `epic-eject` T11):  NOT under `/_epic/`,
- *   since every page links the Templates page as a content folder, `../templates/index.html` (the top bar's tab)
+ *   since every page links the Templates page as an epic folder, `../templates/index.html` (the top bar's tab)
  *   - so the content folders can't hold a `templates/` of their own:  a repo's own templates are `repoTemplates`
  *     (`EpicConfig`), elsewhere
  *   - served for each repo too, at `/r/<repo>/templates/` (`EpicServer`)
@@ -94,7 +94,7 @@ export const HIGHLIGHT_JS = {
 export const PACK_URL = `${ENGINE_ROUTES.pack.prefix}epics.pack.js`
 
 /**
- * Where a registered repo's content folder is served:
+ * Where a registered repo's epic folder is served:
  * `/r/<repo>/...`, with the same paths inside (`/r/spell-app/epics/seo/seo.plan.html`).
  * - the DEFAULT repo is served at `/` too, so today's URLs keep working (`/epics/seo/seo.plan.html`)
  */
@@ -188,7 +188,7 @@ export type RepoEntry = {
 
 /**
  * A registered repo, as the server serves it:  its entry, and where its `.epic/config.json5` says its content is.
- * - `content`:  the content folder, absolute (`EpicConfig.contentFolder`)
+ * - `content`:  the epic folder, absolute (`EpicConfig.contentFolder`)
  * - `prefix`:  its URL prefix, `/r/<name>/`
  * - `isDefault`:  served at `/` too
  */

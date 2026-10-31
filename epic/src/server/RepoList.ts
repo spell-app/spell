@@ -24,12 +24,12 @@ import {
  * ```ts
  * const list = new RepoList()
  * list.add("/Users/owen/www/spell-app/spell-app")   // => { name: "spell-app", content: ".../spell-app-dev", ... }
- * list.repos()                                       // every repo, its content folder read from its config
+ * list.repos()                                       // every repo, its epic folder read from its config
  * list.urlPathFor(".../spell-app-dev/epics/seo/seo.plan.html")   // => "/epics/seo/seo.plan.html"
  * ```
  *
  * - Each repo is kept as its NAME and MAIN checkout only.
- *   Where its content folder is comes from its own `.epic/config.json5` each time (`EpicConfig`),
+ *   Where its epic folder is comes from its own `.epic/config.json5` each time (`EpicConfig`),
  *   so a move there needs no second edit here.
  * - The DEFAULT repo is served at `/` as well as `/r/<name>/`:  the one named `default`, else the first added.
  * - `epic repos add | list | remove | default` edit it (`Repos`);  nothing else writes it.
@@ -60,7 +60,7 @@ export class RepoList {
   }
 
   /**
-   * Every repo, in the order added, each with its content folder (its config's) and URL prefix.
+   * Every repo, in the order added, each with its epic folder (its config's) and URL prefix.
    * - the default one marked
    * - a repo whose config won't read is left out, and said on stderr:  the rest are still served
    */
@@ -89,9 +89,9 @@ export class RepoList {
 
   /**
    * The repo whose content `file` is (or whose checkout holds it),
-   * and its path inside the content folder, `epics/seo/seo.plan.html`.
+   * and its path inside the epic folder, `epics/seo/seo.plan.html`.
    * - `undefined` outside every repo's content
-   * - by real paths:  a checkout's `epics/` link and a worktree's lead to the same file in the content folder
+   * - by real paths:  a checkout's `epics/` link and a worktree's lead to the same file in the epic folder
    */
   repoOf(file: string, repos = this.repos()): { repo: Repo; path: string } | undefined {
     const real = RealPath.of(file)
@@ -117,7 +117,7 @@ export class RepoList {
   /**
    * The checkout the pages of checkout `root` are LAID UNDER when served:  where their links to code resolve, so the
    * linker's root (`SRV.Linker`;  epic `epic-engine` I22).
-   * - FIRST, a multi-repo top, or a child repo of one, that shares the top's content folder:  the TOP's checkout
+   * - FIRST, a multi-repo top, or a child repo of one, that shares the top's epic folder:  the TOP's checkout
    *   (`root` itself, for the top;  for a child, the folder above it, the epic's worktree of the top for a child's
    *   worktree, else the top's main)
    *   - since epic `repo-split` P16 the top's page server serves that content, from the top's root
@@ -126,7 +126,7 @@ export class RepoList {
    * - `root` itself:
    *   - when it holds its own pages (`content` is `root`), or its repo is registered (spell-app, a worktree of it)
    *   - when no registered repo has `content` (another machine's list, a test's made-up checkout)
-   * - ELSE the registered repo whose content folder `content` is:  spell-epic's epic pages are spell-app's content,
+   * - ELSE the registered repo whose epic folder `content` is:  spell-epic's epic pages are spell-app's content,
    *   served by spell-app's page server under spell-app's checkout, where the engine's files are `spell/epic/...`
    *   (its `engineFolder` link), not this checkout's `src/...`
    * - `content`:  default `root`'s (`EpicConfig.contentOf()`)
@@ -215,7 +215,7 @@ export class RepoList {
   }
 
   /**
-   * `entry` as it's served:  its content folder from its config (`EpicConfig`), its URL prefix.
+   * `entry` as it's served:  its epic folder from its config (`EpicConfig`), its URL prefix.
    * - throws when its config won't read
    */
   static resolved(entry: RepoEntry, isDefault: boolean): Repo {
@@ -226,10 +226,10 @@ export class RepoList {
 
 /**
  * The top's checkout that serves child repo `root`'s pages (`RepoList.linkRootOf()`), when `root` is a child repo of a
- * multi-repo top whose content folder is `content`;  else `undefined`.
+ * multi-repo top whose epic folder is `content`;  else `undefined`.
  * - the folder above `root` when it is a checkout of the top (a child's worktree sits in the top's), else the top's main
  * - `root` is the top itself:  `root`
- * - a single repo, another content folder, or a config that won't read:  `undefined`
+ * - a single repo, another epic folder, or a config that won't read:  `undefined`
  */
 function topCheckoutOf(root: string, content: string): string | undefined {
   try {

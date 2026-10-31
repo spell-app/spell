@@ -65,14 +65,14 @@ import { ServedFolders } from "./ServedFolders"
  ****************/
 export class PlanDocFiles {
   /**
-   * the checkout's root:  its repo's content folder (`content`) and docs tools
+   * the checkout's root:  its repo's epic folder (`content`) and docs tools
    * - STATIC for the object's life
    * - the command line makes one for the checkout it runs in (a worktree's, while the code may be main's)
    */
   readonly root: string
 
   /**
-   * the repo's content folder (`EpicConfig.contentOf()`):  its `epics/`, `pages/`, `sagas/` (epic `epic-eject` P12),
+   * the repo's epic folder (`EpicConfig.contentOf()`):  its `epics/`, `pages/`, `sagas/` (epic `epic-eject` P12),
    * never through a link at the checkout's root
    */
   readonly content: string
@@ -107,7 +107,7 @@ export class PlanDocFiles {
   readonly linker: SRV.Linker
 
   /**
-   * - `content`:  the content folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
+   * - `content`:  the epic folder, when it isn't the checkout's (`EpicConfig.contentOf()`):  a demo check's scratch
    *   copies (`src/demo/shots/`), which sit inside a checkout whose config names the real one
    */
   constructor({
@@ -485,7 +485,7 @@ export class PlanDocFiles {
    * Rewrite the docs index:  a plan's status badge follows its phases.
    * - by running the docs index's script, `src/tools/index.js`, as a child `node`,
    *   as `epic pages index` runs it
-   * - shared content (a content folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
+   * - the epic repo (an epic folder of its own, `content`):  ONE `pages/index.html` for every checkout, not
    *   tracked by spell-app, so a worktree rewrites it too:  nothing to conflict on merge
    * - a checkout holding its own pages (its own tracked home) in a worktree:
    *   left alone, or two epics' worktrees would conflict on merge
@@ -519,7 +519,7 @@ export class PlanDocFiles {
    * replaced words are looked for (`PlanDoc.updateChanges()`, `ChangeOriginals`;  epic `epic-engine` I160).
    * - first the files on disk, before this edit writes them:  a command handed new markup (`--changes`) changes only
    *   the doc in memory
-   * - then its last `EARLIER_COMMITS` commits in the git repo holding it (the shared content repo:  its turn-end commits),
+   * - then its last `EARLIER_COMMITS` commits in the git repo holding it (the epic repo:  its turn-end commits),
    *   for marks written by hand into a part file, which the disk already holds
    * - git only READS there (`log`, `ls-tree`, `cat-file`):  never a commit, never the index
    * - STATIC;  NEVER throws:  a version that can't be read is left out
@@ -599,8 +599,8 @@ export class PlanDocFiles {
 
   /**
    * `git <args>` in this checkout, trimmed stdout ("" on failure).
-   * - NEVER in a content folder (`epics/` ...):
-   *   each is a link into the shared content repo, and git run there sees THAT repo, not spell-app
+   * - NEVER in an epic folder (`epics/` ...):
+   *   each is a link into the epic repo, and git run there sees THAT repo, not spell-app
    */
   git(...args: string[]): string {
     return PlanDocFiles.gitIn(this.root, ...args)
@@ -642,7 +642,7 @@ export class PlanDocFiles {
   static readonly MAIN_CHECKOUT = "main"
 
   /**
-   * The spell-app checkout a doc belongs to:  this one for a doc in the content folder (a repo of its own);  else its
+   * The spell-app checkout a doc belongs to:  this one for a doc in the epic folder (a repo of its own);  else its
    * path up to `/epics/<name>/`, else this one.
    * - another worktree's, maybe;  or an old one's `/epics/`
    * - git for a doc runs there, never in the doc's folder (`git()`)
@@ -689,7 +689,7 @@ export class PlanDocFiles {
    * - a doc spell-app tracks:  `git log --follow` (every phase commit touches the epic page), on the doc as HEAD has it
    *   - a rename to `<name>.plan.html` not committed yet has no history of its own, so follow the old name
    *   - once committed, `--follow` goes through the rename
-   * - a SHARED doc (`epics` a link into the shared content repo):  spell-app has no history of it
+   * - a SHARED doc (`epics` a link into the epic repo):  spell-app has no history of it
    * - each with its commit time (`time`);  merge commits left out (epic `epic-engine` P52, J145)
    */
   docLog(file: string): CommitLogEntry[] {
@@ -916,7 +916,7 @@ function assembleEpic(document: Document, file: string): PlanDocParts {
   return { split: hosts.length > 0, hosts: ids, missing, inline }
 }
 
-/** How many of an epic folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
+/** How many of an epic's folder's last commits are looked through for a change mark's replaced words (`earlierVersions()`). */
 const EARLIER_COMMITS = 3
 
 /** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */

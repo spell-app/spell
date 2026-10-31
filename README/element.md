@@ -486,7 +486,7 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   `spell/element` on the page is Spell UI's core, which carries all of this framework.
 - A pack that fails or times out is logged, and the root still gets ready.
 
-The check, run in the epic folder, when the pack is current:
+The check, run in the `epic/` folder, when the pack is current:
 
 ```sh
 cd epic                # from the kit's root
@@ -799,7 +799,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 <details>
 <summary>More in the docs site</summary>
 
-The docs site needs a checkout with the content folder beside it,
+The docs site needs a checkout with the epic folder beside it,
 and the page server running ([README/server.md](server.md)).
 
 - Custom Elements in Spell (two objects per tag, `<ui-counter>` built step by step, every decorator):

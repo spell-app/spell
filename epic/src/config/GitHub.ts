@@ -13,7 +13,7 @@ import { spawnSync } from "node:child_process"
  * GitHub.addressOf("analima/my-app.epics")     // => "git@github.com:analima/my-app.epics.git", as gh's settings say
  * ```
  *
- * - Who runs it:  `EpicHome.refreshGithub()` (the person's login), `epic init` (the shared content repo).
+ * - Who runs it:  `EpicHome.refreshGithub()` (the person's login), `epic init` (the epic repo).
  *   Serving a page or running a hook never does:  `gh` may take seconds, or be offline.
  * - `$SPELL_EPIC_GH` names another `gh` (`command()`):  the tests' stand-ins, or a path to none.
  * - Git itself is the kit's `Git`, never this.

@@ -640,7 +640,7 @@ Where it stands:  planned, with the move's costs still to weigh.
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder, so they need a checkout with `spell.epics` beside the repos and the page
+These guides live in the epic folder, so they need a checkout with `spell.epics` beside the repos and the page
 server running (`spell server start`, then the URL it prints):
 
 - "Spell on Solid 2", the rules for any Solid code, cells included, and the measurements behind them:

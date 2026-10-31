@@ -46,7 +46,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   with its own barrel (epic `coherence` P15):
   - it reads the catalog's **Score:** lines (`agents/coherence/`), counts each mechanism's copies with `git grep`
     over every repo's `src/`, and its users from the code map (`CoherenceScore`)
-  - its snapshots go to the shared content folder (`ScoreSnapshots`)
+  - its snapshots go to the epic folder (`ScoreSnapshots`)
   - [README/cli.md](../../README/cli.md), "Scoring coherence", says how to use it
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
   - Every folder's command list imports it, and `spell help` loads them all.
@@ -65,7 +65,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   (`findCheckout(marker)`), else the kit `spell` runs from.
   - Why:  `spell` is linked to the MAIN checkout, but in an epic's worktree the files are the worktree's.
   - `spell server <verb>` inside a kit:  the KIT's page server, from any folder of it,
-    a big folder's and the content folder's too (`pageServerRoot()`, epic `repo-split` P16).
+    a big folder's and the epic folder's too (`pageServerRoot()`, epic `repo-split` P16).
 - `spell commands` reads each folder's command list as TEXT ([commandsCommand.ts](commands/commandsCommand.ts)).
   - A command:  `spell.command("name")`.
   - A group:  `const server = spell.command("server")`, then `server.command("start")`.
@@ -101,6 +101,6 @@ As WWOD §20, plus:
 - [coherence/](../../tests/cli/coherence/):  the catalog's Score lines read, the counts over a made-up checkout of
   two git repos, the score's sums, a compare's words.
 - [map/](../../tests/cli/map/):  imports read and resolved, a made-up checkout's maps merged and linked,
-  and a made-up content folder's docs map;  never graphify itself (`spell map build` runs it).
+  and a made-up epic folder's docs map;  never graphify itself (`spell map build` runs it).
 - The big folders' commands are tested in their folders' `tests/`:  the parser's, Spell UI's, the app's.
   - The app's run every language command end to end, through the kit's bin.

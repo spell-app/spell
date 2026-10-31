@@ -81,12 +81,12 @@ export class RunningEpics {
     this.claudeHome = claudeHome
   }
 
-  /** the repo's epic pages:  `epics/` in its content folder (`EpicConfig.contentOf()`), shared by every checkout */
+  /** the repo's epic pages:  `epics/` in its epic folder (`EpicConfig.contentOf()`), shared by every checkout */
   readonly epics: string
 
   /**
    * every running epic, by worktree then name
-   * - shared content (a worktree's epics are the content folder's, as the main checkout's are):
+   * - the epic repo (a worktree's epics are the epic folder's, as the main checkout's are):
    *   the card links the page's own URL, `/epics/...`, so edit mode and live reload work there
    * - a worktree on older code with epic pages of its own (a real `epics/` folder, or an old place:  `EPICS_DIRS`):
    *   at `/worktrees/<w>/...`
@@ -115,7 +115,7 @@ export class RunningEpics {
 
   /**
    * Whether `file`, a file the page server serves, is the Epics list page (`index`):  named there, or through a
-   * checkout's link into the content folder (an older checkout's `epics` link).
+   * checkout's link into the epic folder (an older checkout's `epics` link).
    */
   isIndex(file: string): boolean {
     return RealPath.same(file, this.index)
@@ -417,10 +417,10 @@ export const MARKER = EPIC_CARDS_START
 
 /**
  * Where a worktree on older code keeps its epic pages, relative to its root, newest layout first;  a checkout with
- * none of them reads the content folder's (`RunningEpics.epics`, epic `epic-eject` P12).
- * - `epics`:  since 2026-10-05 (epic `claude-design`, P4):  a link into the content folder (shared), or a real folder
+ * none of them reads the epic folder's (`RunningEpics.epics`, epic `epic-eject` P12).
+ * - `epics`:  since 2026-10-05 (epic `claude-design`, P4):  a link into the epic folder (shared), or a real folder
  * - `packages/docs/content/epics`:  since 2026-10-04 (epic `shared-content`, P2)
- *   - a link into the shared repo's old-path links, so the same folder as `epics`
+ *   - a link into the epic repo's old-path links, so the same folder as `epics`
  * - `packages/docs/epics`:  a worktree cut before that, until it merges `main`
  */
 const EPICS_DIRS = ["epics", "packages/docs/content/epics", "packages/docs/epics"]

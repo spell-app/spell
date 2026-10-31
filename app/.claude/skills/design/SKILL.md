@@ -94,7 +94,7 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
      - `vp fmt`
      - `check-spell`, and LOOK at the screenshots
    - Then show it:  `epic pages link <page> --show`.
-   - It's shared content:  committed for you.
+   - It's in the epic repo:  committed for you.
 
 ## `/design new "<title>"`:  a Design on the Spell system
 

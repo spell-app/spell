@@ -10,7 +10,7 @@ import { PeopleColors } from "spell/epic/config/PeopleColors"
 
 /**
  * `epic whoami` and `epic whois`, on a scratch epic home (`$SPELL_EPIC_HOME`), a scratch git config
- * (`$GIT_CONFIG_GLOBAL`) and a small content folder:  two epics and a guide's comments.
+ * (`$GIT_CONFIG_GLOBAL`) and a small epic folder:  two epics and a guide's comments.
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "person-commands-")))
 const CONTENT = join(TEMP, "content")
@@ -26,7 +26,7 @@ afterAll(() => {
   rmSync(TEMP, { recursive: true, force: true })
 })
 
-/** Write `text` at `path` in the content folder. */
+/** Write `text` at `path` in the epic folder. */
 function page(path: string, text: string): void {
   mkdirSync(dirname(join(CONTENT, path)), { recursive: true })
   writeFileSync(join(CONTENT, path), text)
@@ -176,7 +176,7 @@ describe("epic whoami", () => {
 // ## The rename sweep
 ////////////////
 
-/** A content folder of its own for the sweep, made fresh:  Ana's page, its part and log, an inbox. */
+/** An epic folder of its own for the sweep, made fresh:  Ana's page, its part and log, an inbox. */
 const SWEPT = join(TEMP, "swept")
 
 /** The files `sweptFolder()` writes, by path. */
@@ -196,7 +196,7 @@ const SWEPT_FILES: Record<string, string> = {
     '  { by: "Anabel" }] } } }'
 }
 
-/** Write the sweep's content folder afresh. */
+/** Write the sweep's epic folder afresh. */
 function sweptFolder(): void {
   rmSync(SWEPT, { recursive: true, force: true })
   for (const [path, text] of Object.entries(SWEPT_FILES)) {

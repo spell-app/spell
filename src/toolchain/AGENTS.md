@@ -67,7 +67,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Who reads them, through the `types` condition of the kit's `exports`
     (the kit's [AGENTS.md](../../AGENTS.md), "Imports across repos"):
     - the app's node program (`app/tsconfig.node.json`, React's JSX for the Ink screens), which has no
-      `spell-source` condition:  the epic folder's among them, for `spell content update` (epic `content` P3)
+      `spell-source` condition:  the `epic/` folder's among them, for `spell content update` (epic `content` P3)
     - spell-brand, a project beside the kit
   - Every other program reads every folder's SOURCE (`"customConditions": ["spell-source"]`), not these.
   - Not built yet (a fresh clone):  TS2307 in the readers.  Their `yarn ts` builds them first (`--below`).

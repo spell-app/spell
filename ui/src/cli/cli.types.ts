@@ -138,7 +138,7 @@ export type PackBuildReport = { pack: string; files: string[]; tags: string[]; h
 export type PackCheckReport = { pack: string; hash: string; stale: string[] }
 
 /**
- * The commands page's data, in the shared content folder (`spell pack create` adds a new pack's scripts to it):
+ * The commands page's data, in the epic folder (`spell pack create` adds a new pack's scripts to it):
  * the kit's `CLI.COMMANDS_JSON`.
  */
 export const COMMANDS_JSON = "guides/dev/commands/commands.json5"

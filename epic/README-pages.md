@@ -19,8 +19,8 @@ Here the plan, the questions the agent couldn't settle, the calls it made withou
 built are ONE page, and the agent keeps it true as it works.
 You review on the page, item by item, when you have time;  the answers come back INTO the items, not into a chat.
 
-- The page is plain HTML in the content folder, a git repo of its own beside the code
-  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-content-folder--your-plans-in-a-repo-of-their-own) says what it holds).
+- The page is plain HTML in the epic folder, a git repo of its own beside the code
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-epic-folder--your-plans-in-a-repo-of-their-own) says what it holds).
   The page server serves it live:  an edit the agent makes shows in place,
   and your scroll, your folds and your half-typed notes stay where they were.
 - You read it in VS Code's side bar, the Review tab ([README-vscode.md](README-vscode.md)), or in any browser.
@@ -640,7 +640,7 @@ Adding a new element:
 <details>
 <summary>More in the docs site</summary>
 
-In the content folder, so only where `spell.epics` sits beside the repos
+In the epic folder, so only where `spell.epics` sits beside the repos
 ([the kit's setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says where), served by `spell server start`:
 
 - "Epic Pages":  `/guides/plan-docs/plan-docs.html`, every part of the page, every colour and button

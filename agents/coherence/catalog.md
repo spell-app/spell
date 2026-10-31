@@ -244,7 +244,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - spell-app's VS Code extension asks `checkoutOf()` whether a window's checkout is a worktree since epic
     `coherence` P24 (its `.git` FILE alone took a submodule for one)
 
-### The shared content folder
+### The epic folder
 
 - **It is:**  `contentFolderOf(root)` (`spell/server/contentFolder`)
 - **Use it when:**  finding the epic pages, guides or logs from any checkout.
@@ -282,7 +282,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - and its tools read their command lines ONE way:  `parseVerbArgs()`, `stringFlag()`, a wait's `duration()`
     (`epic/src/command/command.types.ts`, which plain `node` loads)
 - **Use it when:**  any new tool a person or a skill runs.
-  Where it goes and what it's called:  the commands guide, in the shared content folder's guides.
+  Where it goes and what it's called:  the commands guide, in the epic folder's guides.
 - **Flag:**  `function parseArgs\(|argv\.indexOf\(["']--`
 - **Score:**  `function parseArgs\(|argv\.indexOf\(["']--`
   · home `src/cli/`, `epic/src/cli/`

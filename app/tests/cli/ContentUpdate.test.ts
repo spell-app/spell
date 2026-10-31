@@ -8,7 +8,7 @@ import { Git } from "spell/server/Git"
 import { ContentUpdate } from "spell/app/cli/ContentUpdate"
 import type { ContentUpdateReport } from "spell/app/cli/cli.types"
 
-/** A throwaway repo and content folder:  a few commits under parser/ and ui/, two epic folders, a changelog. */
+/** A throwaway repo and epic folder:  a few commits under parser/ and ui/, two epics' folders, a changelog. */
 let scratch: string
 let root: string
 let content: string

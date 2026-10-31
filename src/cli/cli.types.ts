@@ -120,7 +120,7 @@ export type MapOptions = GlobalOptions & {
 /**
  * `spell coherence score` flags (epic `coherence` P15).
  * - `json`:  print the snapshot, or the comparison, as JSON
- * - `save`:  write a snapshot to the shared content's `epics/coherence/details/scores/`
+ * - `save`:  write a snapshot to the epic repo's `epics/coherence/details/scores/`
  * - `compare`:  a snapshot to compare with:  its file name, or `last`
  * - `at`:  count the code as it was:  a revision each repo reads (`main@{2026-10-25 14:00}`), a commit of the kit,
  *   or a time (`2026-10-25 14:00`)
@@ -212,8 +212,8 @@ export type AgentRulesReport = { sections: number; rules: number; files: number;
 ////////////////
 
 /**
- * The commands page's data, from the shared content folder (`spell commands`).
- * - the content folder:  `contentFolderOf()` (`spell/server/contentFolder`)
+ * The commands page's data, from the epic folder (`spell commands`).
+ * - the epic folder:  `contentFolderOf()` (`spell/server/contentFolder`)
  * - a data file (`DataFile`, epic `epic-workflow` P21), JSON5
  */
 export const COMMANDS_JSON = "guides/dev/commands/commands.json5"

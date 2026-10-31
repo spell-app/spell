@@ -12,7 +12,7 @@ import { PersonCommands } from "./PersonCommands"
 
 /****************
  * ### `NameSweep`
- * A person's old name rewritten as their new one wherever it says who WROTE something, across the content folder
+ * A person's old name rewritten as their new one wherever it says who WROTE something, across the epic folder
  * (epic `epic-friend` P2, Q10:  the name is the identity, so a rename is a rewrite):  `epic whoami --rename <new>`.
  *
  * ```ts
@@ -31,15 +31,15 @@ import { PersonCommands } from "./PersonCommands"
  *   (`RootLinks.lockOf()`:  a part locks its page);  `dryRun` writes nothing and counts the same.
  * - Then each of their COMMENTS FILES moves to the new name (`SharedComments.rename()`, epic `epic-friend` P9):
  *   `seo.comments.ana.json5` => `seo.comments.ana-lima.json5`;  and their colour's, `people/ana.json5` =>
- *   `people/ana-lima.json5`, the name in it too (`PeopleColors.rename()`, epic `epic-friend` P13);  and when the content folder is a repo of its own,
+ *   `people/ana-lima.json5`, the name in it too (`PeopleColors.rename()`, epic `epic-friend` P13);  and when the epic folder is a repo of its own,
  *   all of it is ONE commit there (`commit()`), so a teammate's sync sees a move, not a new person.
- * - Its position:  the command layer's;  knows the content folder's files, never a page's elements.
+ * - Its position:  the command layer's;  knows the epic folder's files, never a page's elements.
  ****************/
 export class NameSweep {
-  /** the content folder it sweeps */
+  /** the epic folder it sweeps */
   readonly content: string
 
-  /** - `content`:  the content folder (`PersonCommands`' own) */
+  /** - `content`:  the epic folder (`PersonCommands`' own) */
   constructor({ content }: { content: string }) {
     this.content = content
   }
@@ -65,11 +65,11 @@ export class NameSweep {
   }
 
   /**
-   * Commit what `result` (`run()`'s) changed in the content folder, as ONE commit, when the folder is a git repo of
-   * its own (the content repo):  its short hash, else `undefined` (not a repo, a dry run, nothing changed).
+   * Commit what `result` (`run()`'s) changed in the epic folder, as ONE commit, when the folder is a git repo of
+   * its own (the epic repo):  its short hash, else `undefined` (not a repo, a dry run, nothing changed).
    * - only those files:  anything else waiting stays for the turn's commit (`epic shared commit`)
    * - NEVER throws:  a git failure leaves the files for the turn's commit
-   * - SIDE EFFECT:  `git add` and `git commit` in the content repo
+   * - SIDE EFFECT:  `git add` and `git commit` in the epic repo
    */
   commit(result: SweepResult): string | undefined {
     if (result.dryRun) return undefined
@@ -148,15 +148,15 @@ export type SweepResult = {
   dryRun: boolean
   /** names changed, in all */
   count: number
-  /** each file that names them, its path from the content folder */
+  /** each file that names them, its path from the epic folder */
   files: SweptFile[]
-  /** each comments file moved to the new name, `[from, to]` from the content folder (`SharedComments.rename()`) */
+  /** each comments file moved to the new name, `[from, to]` from the epic folder (`SharedComments.rename()`) */
   moved: [string, string][]
 }
 
 /** One file's part of a `SweepResult`. */
 export type SweptFile = {
-  /** its path from the content folder, `epics/seo/parts/q3.html` */
+  /** its path from the epic folder, `epics/seo/parts/q3.html` */
   path: string
   /** names changed in it */
   count: number

@@ -220,7 +220,7 @@ That's what reloads the page when it changes, and what your review marks are sen
 For a page file, the extension takes the first of these that answers:
 
 1. **the epic server**, spell-epic's one per machine (`epic hub`, on port 4848),
-   for a page in a registered repo's content folder:  every repo's pages on one port, from any window
+   for a page in a registered repo's epic folder:  every repo's pages on one port, from any window
 2. **the main checkout's page server**, for a worktree's page, when it serves worktrees (at `/worktrees/<name>/`)
 3. **the page's own page server**, when one runs:  in a Spell kit, the kit's, for a page of any repo in it;
    else its checkout's
@@ -423,7 +423,7 @@ Where the bridge can let you down:
 
 ## Working on it
 
-The pages in the views are never the extension's:  they come from the content folder and spell-epic's own routes.
+The pages in the views are never the extension's:  they come from the epic folder and spell-epic's own routes.
 So a change to how a page looks is spell-epic's code ([README-pages.md](README-pages.md)), live with no reinstall.
 A new `.vsix` is for a change to the views, the buttons, the bridge or the commands,
 or to the code it bundles:  the kit's page server, which the fallback runs, and spell-epic's repo list.
@@ -483,7 +483,7 @@ yarn test:vscode
 <details>
 <summary>More in the docs site</summary>
 
-In the content folder, so only where a checkout has `spell.epics`, served by `spell server start`:
+In the epic folder, so only where a checkout has `spell.epics`, served by `spell server start`:
 
 - "Windows and Review":  `/guides/windows-and-review.html`
 

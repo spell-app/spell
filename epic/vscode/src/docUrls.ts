@@ -98,7 +98,7 @@ export function planDocsIn(content: string, repo?: string): PlanDocEntry[] {
 
 /**
  * Every epic page of every repo in `repos` (`{ name, content }`), most recently changed first.
- * - a content folder listed twice counts once
+ * - an epic folder listed twice counts once
  */
 export function planDocsOf(repos: { name: string; content: string }[]): PlanDocEntry[] {
   const seen = new Set<string>()

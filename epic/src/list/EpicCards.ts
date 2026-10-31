@@ -45,7 +45,7 @@ export const EPIC_GROUPS = ["favorites", "active", "planning", "urgent", "done"]
 /** One of `EPIC_GROUPS`. */
 export type EpicGroupName = (typeof EPIC_GROUPS)[number]
 
-/** Where the favourites are kept, from a checkout's root:  a JSON list of epic ids (shared content). */
+/** Where the favourites are kept, from a checkout's root:  a JSON list of epic ids (in the epic repo). */
 export const FAVORITES_FILE = "epics/favorites.json5"
 
 /**

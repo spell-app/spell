@@ -197,17 +197,23 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 - **Not:**  a bare "guide" for a `@spell/guides` project, where a docs page could be meant.
 - **Decided:**  epic `content` P2 (T3).
 
-### content / epic repo
+### content / epic repo / epic folder
 
 - **Say:**
   - content:  the `@spell` space's examples, notebooks and Spell guides:  what `spell content check | update`
     and the epic `content` work on
-  - epic repo:  `spell.epics`, the repo of epic pages, guides and logs every checkout shares
-- **Not:**  "the shared content", "the content repo" for `spell.epics`.
-  - Its setting, `contentFolder`, and `epic shared ...` keep their names until they're renamed:
-    epic `epic-engine`'s r47.
+  - the epic repo:  `spell.epics`, the repo of epic pages, guides, sagas and logs every checkout shares
+  - the epic folder:  that repo's folder on disk, the one the `contentFolder` setting names
+    (edit a shared file at its real path, in the epic folder)
+- **Not:**  "the shared content", "the content repo", "the shared repo" for `spell.epics`;
+  "the content folder" for its folder.
+  - Names only code reads keep their spelling:  the `contentFolder` setting, `contentOf()`, `contentFolderOf()`,
+    `serveContent()`, `contentRemote`, `--content-repo`, the `epic shared ...` verbs.
+  - `epic repos ...` and the code name `EpicRepo` are about CODE repos (the ones the epic server serves, the one an
+    epic is worked in), not the epic repo (Q63 of epic `epic-engine`).
 - **Decided:**  Owen, 2026-10-29, epic `content` Q7 (B:  keep `spell content`;  "the shared content repo is the
-  epic repo from now on").
+  epic repo from now on");  "change spell.epics folder to epic folder not content folder" (epic `epic-engine` r48);
+  built in epic `epic-engine` P56.
 
 ## Open
 

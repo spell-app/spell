@@ -2,7 +2,7 @@
  * A repo MOVED behind compat links, as repo-split's move to `~/www/spell/` leaves spell-epic (epic `epic-engine` I59;
  * the read-only check:  `epics/epic-engine/details/move-check.md`):
  * - `www/spell-app/spell-epic` (a git repo, `contentFolder: "../spell-app.epics"`) and its worktrees moved to
- *   `www/spell/`, the content folder renamed `spell.epics`, a link at each old path
+ *   `www/spell/`, the epic folder renamed `spell.epics`, a link at each old path
  * - the worktrees NOT repaired:  git lists them by their old paths, and each one's `.git` file names the old main
  * - a session started before the move:  its `cwd` the old spelling
  * - on a throwaway layout and temp Claude Code folders;  nothing real touched
@@ -35,7 +35,7 @@ const OLD_MAIN = join(OLD_WWW, "spell-epic")
 const MAIN = join(NEW_WWW, "spell-epic")
 const OLD_WORKTREES = join(OLD_WWW, "spell-epic.worktrees")
 const WORKTREES = join(NEW_WWW, "spell-epic.worktrees")
-/** the content folder, moved and renamed:  only the old name, through its link, finds it */
+/** the epic folder, moved and renamed:  only the old name, through its link, finds it */
 const CONTENT = join(NEW_WWW, "spell.epics")
 const CLAUDE = join(TOP, "claude")
 const saved = process.env.CLAUDE_CONFIG_DIR
@@ -92,7 +92,7 @@ describe("a repo moved behind compat links, its worktrees unrepaired", () => {
     ])
   })
 
-  test("EpicConfig:  main is the REAL path from any spelling;  the content folder found by its old name, with a warning", () => {
+  test("EpicConfig:  main is the REAL path from any spelling;  the epic folder found by its old name, with a warning", () => {
     const write = vi.spyOn(process.stderr, "write").mockImplementation(() => true)
     try {
       for (const from of [MAIN, OLD_MAIN, join(WORKTREES, "wt"), join(OLD_WORKTREES, "wt", "src")]) {

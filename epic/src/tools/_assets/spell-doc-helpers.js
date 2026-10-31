@@ -312,7 +312,7 @@ export function sectionNumber(section) {
   return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("label") ?? "")?.[1] ?? ""
 }
 
-/** This page's path from the content folder's root (`guides/...`):  what `epic pages open` takes. */
+/** This page's path from the epic folder's root (`guides/...`):  what `epic pages open` takes. */
 export function pagePath() {
   return decodeURIComponent(location.pathname).replace(/^.*\/(?=(?:guides|epics|templates|pages)\/)/, "")
 }

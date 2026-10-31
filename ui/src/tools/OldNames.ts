@@ -269,7 +269,7 @@ export class OldNames {
    * its start and end tags written as markup, `<ui-docs-example ...>` and `</ui-docs-example>`.
    * - Left as written:  escaped markup (`&lt;ui-docs-example&gt;`), a tag quoted in an attribute's value, a Markdown
    *   code span or fence, and every other mention (a selector, a token, a path):  a page's record of what was decided.
-   * - Why (epic `ui-gaps` P14):  the content folder's epic pages and details pages draw live examples
+   * - Why (epic `ui-gaps` P14):  the epic folder's epic pages and details pages draw live examples
    *   among the record, and an old tag draws nothing.
    */
   private static renameDrawnTags(text: string, renames: string[]): string {

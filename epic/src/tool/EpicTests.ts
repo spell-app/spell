@@ -23,10 +23,10 @@ import { Sagas } from "./Sagas"
  * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class EpicTests {
-  /** the repo's content folder (`EpicConfig.contentOf()`):  its `epics/`, `sagas/` */
+  /** the repo's epic folder (`EpicConfig.contentOf()`):  its `epics/`, `sagas/` */
   readonly content: string
 
-  /** The tests of the repo whose content folder is `content` (`EpicConfig.contentOf(<checkout>)`). */
+  /** The tests of the repo whose epic folder is `content` (`EpicConfig.contentOf(<checkout>)`). */
   constructor(content: string) {
     this.content = content
   }

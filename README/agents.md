@@ -71,7 +71,7 @@ _Seven of the plugin's eight hooks run before the agent has read a line of code.
    Then it opens the new window, arms the move (`epic window handoff seo --prompt continue`), and ends its turn.
 6. **The turn ends**, and two `Stop` hooks run.
    - `handoff.mjs` moves the session into the `⎇ seo` window, and types `continue` there for you to send.
-   - `shared-commit.mjs` commits the content folder (`epic shared commit`), the new page with it:
+   - `shared-commit.mjs` commits the epic folder (`epic shared commit`), the new page with it:
      nobody commits an epic page by hand.
 
 The next turn, in the new window, the agent plans:  it explores, read-only, and drafts the phases.
@@ -115,7 +115,7 @@ the kit, then the repo and folder it's working in, then the rules for the task a
 
 Only the first three load by themselves;  the agent opens the rest when they tell it to.
 The Solid 2 rules are kept out of the `@` imports on purpose:  they're long, and only Solid work needs them.
-Both 7 and 8 live in the content folder (below, "More in the docs site").
+Both 7 and 8 live in the epic folder (below, "More in the docs site").
 
 Codex reads every `AGENTS.md` from the root down to the folder it starts in;
 Claude Code loads the root's through `CLAUDE.md`, and a folder's when it works there.
@@ -182,7 +182,7 @@ _A bold title to cite it by, `WWOD §6 › "User-facing strings stay inline"`, a
 - A rule lives in exactly ONE place:  the hub or one spoke, never both.
 - A rule chosen AGAINST is kept, as a `NOT:` line under the winner, so nobody proposes it again.
 - ONE copy, in the kit's [`agents/wwod/`](../agents/wwod/), serves every repo:  edit it there.
-  The content folder's older copy, `spell.epics/agents/wwod/`, is for checkouts from before the repos split,
+  The epic folder's older copy, `spell.epics/agents/wwod/`, is for checkouts from before the repos split,
   until it's deleted.
 
 The hub holds what every task needs.
@@ -239,7 +239,7 @@ In the checkout:
 | enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [README-epics.md](../README-epics.md) |
 | merge `main` in with `epic worktree merge-main` | a bare `git merge main`:  it line-merges the generated files the command rebuilds from the merged source | [README/development.md](development.md#working-on-a-branch--one-epic-one-worktree) |
 | remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](https://github.com/spell-app/spell/blob/main/epic/AGENTS.md) |
-| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](../AGENTS.md#shared-content), "Shared content" |
+| leave the epic folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](../AGENTS.md#the-epic-repo), "The epic repo" |
 | open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | [the kit's AGENTS.md](../AGENTS.md#worktrees), "Worktrees" |
 
 In the code:
@@ -276,12 +276,12 @@ Agents write to the logs as they go;  people read them when something's wrong.
 - NOT in them:  a local cleanup.
   That's an inline `REFACTOR:` marker, at the code.
 - The papercuts log runs to over 400 entries:  read it before you debug the toolchain.
-- They live in the content folder, ONE copy for every repo and branch,
+- They live in the epic folder, ONE copy for every repo and branch,
   linked into the kit's [`agents/`](../agents/) folder under the same names.
   - Edit them at their real path, `spell.epics/agents/<log>`:
     Claude's Edit tool refuses to write through a link to a file.
   - The turn-end hook commits them, with the epic pages.
-- **Not yet for someone new:**  the content folder isn't cloned with the repo,
+- **Not yet for someone new:**  the epic folder isn't cloned with the repo,
   so in a fresh checkout these links point at nothing until it's there.
 
 ## Epics:  planning together on a page
@@ -323,7 +323,7 @@ ONE copy on the machine serves every repo and every window.
 - It adds 19 skills and 8 hooks, and puts `epic` on every session's `PATH`.
 - An edit to it is live at once for `epic` and the hooks (once `epic plugin install` links them);
   a skill's new text after `/reload-plugins`;  its inbox monitor in sessions started after.
-- A repo opts in with `.epic/config.json5`:  where its content folder, worktrees and windows are.
+- A repo opts in with `.epic/config.json5`:  where its epic folder, worktrees and windows are.
   The kit's [.epic/config.json5](../.epic/config.json5) turns on MULTI-REPO mode, so an epic's worktree holds every repo.
 - Every `epic` verb:  [README/cli.md](cli.md).
 
@@ -376,12 +376,12 @@ The kit's [.epic/config.json5](../.epic/config.json5), key by key:
 
 | Key | The kit's | What it does |
 | --- | --- | --- |
-| `contentFolder` | `"spell.epics"` | the content folder:  epics, guides, sagas, pages, the logs |
+| `contentFolder` | `"spell.epics"` | the epic folder:  epics, guides, sagas, pages, the logs |
 | `baseBranch` | `"main"` | the branch worktrees start from and merge into |
 | `worktreesFolder` | `"../spell.worktrees"` | where an epic's worktree goes:  `~/www/spell.worktrees/<name>/` |
 | `installCommand`, `installOnCreate` | `"yarn install"`, `true` | the one install, run by the worktree hook before the window opens |
 | `extraInstalls` | `["epic/vscode", "app/vscode"]` | the two VS Code extensions, yarn projects of their own |
-| `windows` | `default` and `repoName` `"spell"`, `contentName` `"spell.epics"` | the window a worktree's window is opened from, and the names a window gives the kit's main checkout and the content folder |
+| `windows` | `default` and `repoName` `"spell"`, `contentName` `"spell.epics"` | the window a worktree's window is opened from, and the names a window gives the kit's main checkout and the epic folder |
 | `linkSessionFolders` | `true` | each new worktree's saved-session folder is a link to the main checkout's, so every window's Claude panel lists every session, whichever folder comes first |
 | `sharedFolders` | `[]` | no content folders linked in at the root:  the kit tracks `agents/` itself |
 | `engineFolder` | `""` | none:  the epic engine is already a folder of the repo, `epic/` |
@@ -473,7 +473,7 @@ Waking a session from the page, the worktree hook and window moves are still Cla
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder:
+These guides live in the epic folder:
 they need a checkout with `spell.epics` beside the repos,
 and the page server running (`spell server start`, then the URL it prints).
 

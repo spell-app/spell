@@ -21,7 +21,7 @@
  *   answers `{ favorites }`, every starred epic's name, sorted
  *   - 400:  no name, or not an epic's name (lower-kebab-case);  `favorite` not a boolean
  * - stored in ONE shared file, `epics/favorites.json5` (`spell/epic/list/EpicCards` `FAVORITES_FILE`), a list:
- *   every checkout reads the same one, and the shared repo commits it after the turn
+ *   every checkout reads the same one, and the epic repo commits it after the turn
  * - each card goes in its group by it as the page server serves the Epics page (`spell/epic/list/RunningEpics`);
  *   `epic pages index` writes the stars and groups it says into the page
  * - no Claude needed:  it works on a plane
@@ -52,7 +52,7 @@
  *   - `page`, its URL path (`/epics/x/x.plan.html`);  `href`, from another epic page's folder (`../x/x.plan.html`)
  *   - the run's summary card asks it for the next epic (`epic test --all`);  `epic test --all` lists the same
  *   - gathered when asked, from the epic pages' skeletons;  a read, so no token
- *   - from the content folder the server serves (`ContentRouteContext`'s `content`, the epic server's), else `root`'s:
+ *   - from the epic folder the server serves (`ContentRouteContext`'s `content`, the epic server's), else `root`'s:
  *     so a demo server (`DemoServer`) answers from its copies (epic `epic-engine` I45)
  */
 import { existsSync, readFileSync } from "node:fs"
@@ -155,7 +155,7 @@ export function epicName(title: string): string {
 const RESERVED = new Set(["review", "resume", "color", "future", "phase", "start"])
 
 /**
- * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its content folder);
+ * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its epic folder);
  * resolves to every starred epic's name after, sorted.
  * - SIDE EFFECT:  writes the file through the page server's one safe write (`SRV.FileOperations.save()`:
  *   read and written under its lock, all at once), keeping a comment added to it by hand (`DataFile.edited()`);

@@ -215,7 +215,7 @@ and in the app's build folder, `app/` at the app folder's root.
 - `components/`:  `<spell-viewer>` and `<spell-editor>` (epic `spell-element`, P4);
   `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2).
   - They're Spell UI components, written as a component pack's families are
-    ([the epic folder's AGENTS.md](../../../epic/src/AGENTS.md)).
+    ([the `epic/` folder's AGENTS.md](../../../epic/src/AGENTS.md)).
   - `components/<tag>/` holds:
     - `<Name>.en.ts`:  the vocabulary
     - `<Name>.tsx`:  two classes

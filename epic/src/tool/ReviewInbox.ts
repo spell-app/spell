@@ -24,7 +24,7 @@ import { SharedComments } from "./SharedComments"
  *     `<id>.saga.html`, its marks and comments in this same shape
  * - per machine, NOT committed (`.gitignore`):  pending notes and session state, not the record;
  *   what Claude makes of a mark lands in the epic page itself
- *   - EXCEPT its comments (epic `epic-friend` P9):  shared through the content repo, one file per person beside it,
+ *   - EXCEPT its comments (epic `epic-friend` P9):  shared through the epic repo, one file per person beside it,
  *     `<name>.comments.<person>.json5` (`SharedComments`).  `comments` here is every person's, put together as it's
  *     read;  a write puts this machine's person's part back in their file, and keeps none in the inbox file.
  *     An inbox file from before P9 still holds its comments:  read as this machine's, moved by the next write
@@ -1017,7 +1017,7 @@ export class ReviewInbox {
   }
 
   /**
-   * Comments renumbered by `renames` (`c3` => `c5`:  two people both made `c3`, and the content repo's sync gives this
+   * Comments renumbered by `renames` (`c3` => `c5`:  two people both made `c3`, and the epic repo's sync gives this
    * machine's the next free number;  `Renumber.comments()`, epic `epic-friend` P9):  each under its new id, every
    * revisit naming one following, its note's last line too;  how many comments moved.
    */

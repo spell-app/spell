@@ -17,12 +17,12 @@ import { VoiceColor } from "./VoiceColor.ts"
  * - Plain `node` loads it (the hooks load `EpicConfig`):  node's own modules, the kit's `DataFile` and `VoiceColor`.
  ****************/
 export class PeopleColors {
-  /** The folder of everyone's files, in content folder `content`:  `<content>/people`. */
+  /** The folder of everyone's files, in epic folder `content`:  `<content>/people`. */
   static folderOf(content: string): string {
     return join(content, FOLDER)
   }
 
-  /** Person `person`'s file in content folder `content`:  `people/<name>.json5`, the name as `slugOf()` writes it. */
+  /** Person `person`'s file in epic folder `content`:  `people/<name>.json5`, the name as `slugOf()` writes it. */
   static fileFor(content: string, person: string): string {
     return join(PeopleColors.folderOf(content), `${PeopleColors.slugOf(person)}${DataFile.SUFFIX}`)
   }
@@ -43,7 +43,7 @@ export class PeopleColors {
   }
 
   /**
-   * Everyone's colour in content folder `content`, by the name each file holds:  `{ "Ana Lima": "green" }`.
+   * Everyone's colour in epic folder `content`, by the name each file holds:  `{ "Ana Lima": "green" }`.
    * - a file that won't read, or names no colour the settings may give (`VoiceColor.isColor()`):  left out
    * - NEVER throws:  no folder, nobody
    */
@@ -51,7 +51,9 @@ export class PeopleColors {
     const folder = PeopleColors.folderOf(content)
     if (!existsSync(folder)) return {}
     const colors: Record<string, string> = {}
-    for (const file of readdirSync(folder).filter((name) => name.endsWith(DataFile.SUFFIX)).sort()) {
+    for (const file of readdirSync(folder)
+      .filter((name) => name.endsWith(DataFile.SUFFIX))
+      .sort()) {
       try {
         const kept = DataFile.read<PersonColor>(join(folder, file))
         if (kept?.name?.trim() && VoiceColor.isColor(kept.color)) colors[kept.name.trim()] = kept.color.trim()
@@ -63,7 +65,7 @@ export class PeopleColors {
   }
 
   /**
-   * Keep `color` as person `person`'s, in content folder `content`;  the file written.
+   * Keep `color` as person `person`'s, in epic folder `content`;  the file written.
    * - SIDE EFFECT:  writes `people/<name>.json5`, making the folder
    */
   static write(content: string, person: string, color: string): string {
@@ -101,7 +103,7 @@ export type PersonColor = {
   color: string
 }
 
-/** The content folder's folder of people's files. */
+/** The epic folder's folder of people's files. */
 const FOLDER = "people"
 
 /** What a name with nothing left in it is written as. */

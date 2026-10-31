@@ -1,5 +1,5 @@
 /**
- * `tools/content-links.ts`:  re-points the content repo's epic-page links that lead nowhere since epic `repo-split`
+ * `tools/content-links.ts`:  re-points the epic repo's epic-page links that lead nowhere since epic `repo-split`
  * moved everything (P9-P14), at today's layout.  Only LINKS change:  an `<a href>` and its `target`, a path `title`
  * or `file`;  never a word of the page (epic `repo-split` I61).
  * - What it fixes, in every epic's pages (the epic page, its parts, its details pages):
@@ -34,17 +34,17 @@ import { slug } from "spell/util/string.ts"
 
 /**
  * The kit's layout on disk:  what exists, and where a file of a given name is, kit-relative.
- * - the content repo's folders are laid under the kit, as the page server serves them:  `epics/x` is
+ * - the epic repo's folders are laid under the kit, as the page server serves them:  `epics/x` is
  *   `<content>/epics/x` when the kit has no `epics/` of its own
  */
 export class Layout {
   /** the kit's root */
   readonly kit: string
 
-  /** the content repo's root */
+  /** the epic repo's root */
   readonly content: string
 
-  /** the content repo's folders the kit serves at its root:  `epics`, `guides` ... */
+  /** the epic repo's folders the kit serves at its root:  `epics`, `guides` ... */
   readonly contentAreas: ReadonlySet<string>
 
   constructor(kit: string, content: string) {
@@ -75,7 +75,7 @@ export class Layout {
     return hit
   }
 
-  /** Kit-relative `rel` on disk:  in the content repo for its areas. */
+  /** Kit-relative `rel` on disk:  in the epic repo for its areas. */
   diskPath(rel: string): string {
     return this.contentAreas.has(rel.split("/")[0]!) ? join(this.content, rel) : join(this.kit, rel)
   }
@@ -498,7 +498,7 @@ function fixTag(
 /** One page to fix:  its file, the kit-relative folder its links resolve from, and (a part) its page's folder. */
 type Page = { file: string; dir: string; partOf?: string }
 
-/** Every page of the content repo's epics (`only`:  epics whose name matches):  epic pages, parts, details pages. */
+/** Every page of the epic repo's epics (`only`:  epics whose name matches):  epic pages, parts, details pages. */
 function epicPages(layout: Layout, only?: RegExp): Page[] {
   const epics = join(layout.content, "epics")
   const pages: Page[] = []

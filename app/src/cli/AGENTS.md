@@ -20,7 +20,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The program itself is NOT here any more:  arguments, help, finding commands, `spell dev` and its pass-throughs
   are the kit's, or gone (epic `repo-split` P13).
   - Spell UI's commands (`spell icon`, `ssr`, `pack`, `design`) are ui's `src/cli/`.
-  - The `epic` command is the epic folder's (its `bin/epic`), since epic `epic-eject` I5.
+  - The `epic` command is the `epic/` folder's (its `bin/epic`), since epic `epic-eject` I5.
 - How the kit finds this folder:  the app folder's `package.json` names its two files.
 
   ```json
@@ -44,8 +44,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell app vscode`, `spell content check` and `spell content update` load no spell:
     [vscodeCommand.ts](commands/vscodeCommand.ts), [contentCheckCommand.ts](commands/contentCheckCommand.ts) and
     [contentUpdateCommand.ts](commands/contentUpdateCommand.ts), imported directly.
-    - `spell content update`'s work is [ContentUpdate.ts](ContentUpdate.ts):  git, the content folder, and the epic
-      tool's node files (`PlanCommits`, `EpicDocs`, `PlanDocFiles`), the only app code that imports the epic folder.
+    - `spell content update`'s work is [ContentUpdate.ts](ContentUpdate.ts):  git, the epic folder, and the epic
+      tool's node files (`PlanCommits`, `EpicDocs`, `PlanDocFiles`), the only app code that imports the `epic/` folder.
 - Spell itself is NOT here.
   - It's the folders beside this one (lsp, spaces) and the folders below (the parser folder's spell, parser and
     core;  the kit's util).
@@ -125,7 +125,7 @@ As WWOD §20, plus:
   - Every folder's command list loads, so it runs the parser folder's commands through our hook, end to end.
   - It checks the old spellings are gone:  `spell dev`, `spell epic`, `check`, `new`, `serve`, `explore` ...
 - The kit's own commands' tests are the kit's (its `tests/cli/`);  Spell UI's are ui's.
-- The epic command's own tests are the epic folder's:
+- The epic command's own tests are the `epic/` folder's:
   - [EpicProgram.test.ts](../../../epic/tests/cli/EpicProgram.test.ts)
   - [tests/command/](../../../epic/tests/command/)
 - Screens render through `ink-testing-library`, at a fixed `size`.

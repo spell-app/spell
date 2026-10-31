@@ -645,7 +645,7 @@ export type DocViewName = "docs" | "review"
 
 /**
  * The home page of the window's first folder (the repo root), `undefined` when it has none:  `pages/index.html` in
- * its repo's content folder (`EpicConfig.contentOf()`, epic `epic-eject` P12), not through a link at its root.
+ * its repo's epic folder (`EpicConfig.contentOf()`, epic `epic-eject` P12), not through a link at its root.
  * - the epic server's own home comes first (`DocPreview`'s `home`):  this is for a window with no epic server
  */
 export function docsIndex(): string | undefined {

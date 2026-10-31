@@ -15,7 +15,7 @@ A DETAILS PAGE:  a small page that explains one decision.
 - The person picks on the page, and clicks Send.
 - The page server writes their answer beside the page,
   and a waiter running in the background exits with it, which wakes this session.
-- Docs:  the details guide, the content folder's `guides/details.html`.
+- Docs:  the details guide, the epic folder's `guides/details.html`.
 
 - Explain as [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Explaining a question or issue", says:
   - plain words, coined words defined
@@ -67,10 +67,10 @@ the page is the same for both agents.
    - A question asked before (a page for it is there already):  NOT a new page, `epic ask round` ("Asking the same
      question again", below).
      - The page goes in `epics/<name>/details/`, beside the epic page
-       (shared content, committed for you at the turn's end).
+       (in the epic repo, committed for you at the turn's end).
      - The decision it leads to links it.
    - Else scratch:  `pages/details/`.
-     - Ignored by the shared repo too.
+     - Ignored by the epic repo too.
      - Swept after 14 days (`new` sweeps).
    - `<slug>`:  lower-kebab-case, about the decision (`answer-path`, `card-layout`), unique.
 2. Edit the page (the template's placeholders show where):

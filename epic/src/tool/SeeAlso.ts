@@ -53,7 +53,7 @@ export function epicNamed(name: string): string {
  ****************/
 export class SeeAlso {
   /**
-   * the content folder its pages are in:  its `epics/`, `guides/`
+   * the epic folder its pages are in:  its `epics/`, `guides/`
    * - checkout `root`'s repo's (`EpicConfig.contentOf()`), never through a link at the checkout's root
    */
   readonly content: string
@@ -105,7 +105,7 @@ export class SeeAlso {
   ////////////////
 
   /**
-   * The epic page `page` (a page path, from the content folder:  `guides/python-target.html`) belongs to;
+   * The epic page `page` (a page path, from the epic folder:  `guides/python-target.html`) belongs to;
    * `undefined` for none.
    * - the rules:  this class's banner
    */
@@ -125,7 +125,7 @@ export class SeeAlso {
   }
 
   /**
-   * Every page epic `name` owns that may take comments, as page paths (from the content folder):
+   * Every page epic `name` owns that may take comments, as page paths (from the epic folder):
    * its `details/` pages, and every page whose owner it is (`ownerOf()`).
    * - `feedback`'s:  only its own `details/` pages here;  the pages no epic owns that hold comments are
    *   `PageInboxes.unowned()`'s, which finds the inbox files
@@ -200,7 +200,7 @@ type EpicFacts = {
 // ## Constants
 ////////////////
 
-/** The epics' folder, from the content folder. */
+/** The epics' folder, from the epic folder. */
 const EPICS = "epics"
 
 /** A page in an epic's own folder (not its epic page, nor its parts):  `epics/<name>/details/x.html`. */
@@ -221,7 +221,7 @@ const NEVER_CLAIMED = /^guides\/(?:changelog|(?:[^/]+\/)*index)\.html$/
 /** How long the claims are kept, at most, ms:  a part edited in place leaves its folder's time as it was. */
 const CLAIMS_MAX_AGE_MS = 30_000
 
-/** Every content folder's claims, as last gathered:  by folder. */
+/** Every epic folder's claims, as last gathered:  by folder. */
 const CLAIMS = new Map<string, { stamp: string; at: number; claims: Map<string, Claim[]> }>()
 
 ////////////////
@@ -238,7 +238,7 @@ function byClaim(a: Claim, b: Claim): number {
   )
 }
 
-/** Every epic's folder name in content folder `root`, sorted;  none without `epics/`. */
+/** Every epic's folder name in epic folder `root`, sorted;  none without `epics/`. */
 function epicNames(root: string): string[] {
   const folder = join(root, EPICS)
   if (!existsSync(folder)) return []
@@ -334,7 +334,7 @@ function pathOf(root: string, file: string, href: string): string | undefined {
   return path.startsWith("..") ? undefined : path
 }
 
-/** Epic `name`'s own pages, from the content folder:  every `.html` in its `details/` folder, sorted. */
+/** Epic `name`'s own pages, from the epic folder:  every `.html` in its `details/` folder, sorted. */
 function detailsPages(root: string, name: string): string[] {
   const folder = join(root, EPICS, name, "details")
   if (!existsSync(folder)) return []

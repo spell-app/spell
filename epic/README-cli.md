@@ -135,7 +135,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
   (its main checkout has `.epic/config.json5`), so any folder of the repo will do.
   Outside every such repo, it works on spell-epic's own checkout, the one its code is in.
 - Pages are the exception, and the point.
-  They live in the content folder, which every checkout reads where it is ([below](#shared-content)),
+  They live in the epic folder, which every checkout reads where it is ([below](#the-epic-repo)),
   so no worktree has a copy to fall out of step.
 - It works in a worktree made a moment ago, before its install:
   the code that runs is main's, with its packages already installed.
@@ -152,7 +152,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
 - [src/cli/](src/cli/), the command itself:  [EpicProgram.ts](src/cli/EpicProgram.ts) holds every verb, its help
   and its group, and [epicGroups.ts](src/cli/epicGroups.ts) the verbs inside each group.
 - What the verbs run stays beside them:
-  - [src/command/](src/command/):  worktrees, sessions, requests, parked work, the shared content
+  - [src/command/](src/command/):  worktrees, sessions, requests, parked work, the epic repo
   - [src/server/](src/server/):  the epic server
   - [src/tool/](src/tool/):  the epic pages and their inbox
   - [src/tools/](src/tools/):  the docs pages, answer pages, comments, agents and airplane mode
@@ -241,7 +241,7 @@ Each group is named for what it works on, so start from the thing you want to ch
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   epic(["epic"])
-  subgraph content ["the content folder, a git repo"]
+  subgraph content ["the epic folder, a git repo"]
     page["an epic page<br/>epics/seo/seo.plan.html"]
     beside["beside it:  its inbox, requests,<br/>agents list and details pages"]
     docs["saga pages, guides,<br/>and the comments on them"]
@@ -444,7 +444,7 @@ A saga is an epic of epics:  the larger aim several epics serve.
 Its page is addressed `SAGA:/<id>`, and every page verb above works on it.
 
 - e.g. `epic add SAGA:/epics#Q "Title"`
-- the page:  `<id>.saga.html`, in the content folder's `sagas/<id>/`
+- the page:  `<id>.saga.html`, in the epic folder's `sagas/<id>/`
 - the sagas' order:  `sagas/sagas.json5`
 - each epic page names its own saga (`<epic-page saga="<id>">`)
 
@@ -507,7 +507,7 @@ Lost track?  `epic status`.
     (`spell ui rename --write`, from the kit's root), commits them on their own in each repo, and lists them
     under `renamed old names in N file(s)`.
     - The branch's files:  what the merged branch differs from `main` in.
-    - Never generated files, never the content folder.
+    - Never generated files, never the epic folder.
     - A kit with no `ui rename`, or a failure:  one line, `spell ui rename skipped:  ...`;  the merge stands.
 
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
@@ -518,24 +518,24 @@ Lost track?  `epic status`.
   - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
     the tracked one;  from then on the patch does nothing there.
 
-### Shared content
+### The epic repo
 
 The epic pages aren't in your repo.
-They live in the content folder, a git repo of its own beside the checkout, which every checkout reads where it is
+They live in the epic folder, a git repo of its own beside the checkout, which every checkout reads where it is
 (a repo whose config names `sharedFolders` links those in too):
 that's why `main` and each worktree edit ONE page.
 
 You'll rarely type these:  the turn-end hook runs `epic turn end` after every turn.
-That's `epic shared commit`, or `epic shared sync` with a shared repo.
+That's `epic shared commit`, or `epic shared sync` with an epic repo.
 
 | Verb | What it does |
 | --- | --- |
-| `epic shared status [--json]` | prints each checkout's links, and the content folder's uncommitted files and last commit |
-| `epic shared init` | creates the content folder's repo;  `--import` copies this checkout's folders in |
+| `epic shared status [--json]` | prints each checkout's links, and the epic folder's uncommitted files and last commit |
+| `epic shared init` | creates the epic folder's repo;  `--import` copies this checkout's folders in |
 | `epic shared link` | links this checkout's shared folders in, the ones its config names (`sharedFolders`);  `--all`:  every checkout's |
-| `epic shared commit` | commits whatever changed in the content folder, one commit per epic, guide or folder;  `--quiet`, `--session <id>` |
-| `epic shared sync` | the same commit, then, when `.epic/config.json5` names the team's shared repo (`contentRemote`), a pull (rebasing), ids both sides made given the next free number on this side, and a push:  what every turn does, by hand;  `--quiet`, `--session <id>` |
-| `epic shared migrate <worktree>` | moves a worktree cut before the content folder existed onto it;  `--dry-run` |
+| `epic shared commit` | commits whatever changed in the epic folder, one commit per epic, guide or folder;  `--quiet`, `--session <id>` |
+| `epic shared sync` | the same commit, then, when `.epic/config.json5` names the team's epic repo (`contentRemote`), a pull (rebasing), ids both sides made given the next free number on this side, and a push:  what every turn does, by hand;  `--quiet`, `--session <id>` |
+| `epic shared migrate <worktree>` | moves a worktree cut before the epic folder existed onto it;  `--dry-run` |
 
 ### Any agent:  the workflow, and each turn's end
 
@@ -544,7 +544,7 @@ Codex, or any agent without the skills, works an epic from these;  `skills check
 | Verb | What it does |
 | --- | --- |
 | `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
-| `epic turn end` | ends an agent's turn:  the content folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
+| `epic turn end` | ends an agent's turn:  the epic folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
 | `epic skills check` | checks the plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool (the question modal, background agents, the worktree tools ...) has an "In Codex:" line beside it, each Claude-only skill its `agents/openai.yaml`, and the descriptions fit Codex's list;  exits 1 on a problem;  `--json` |
 
 ### Windows and the page server
@@ -588,7 +588,7 @@ which serves every repo that uses spell-epic (its address and routes:  [README-e
 | `epic server prune` | stops the page and Vite servers whose checkout is gone;  every session's start runs it, at most once an hour;  `--dry-run` |
 | `epic hub serve \| start \| ensure \| stop \| status \| url <file>` | the same six for the machine's epic server:  every registered repo's pages, the engine's scripts and styles, the routes the review buttons call;  `ensure` restarts it when its code or the repo list changed |
 | `epic repos add [<checkout>]` | registers a repo for the epic server (default:  this one);  `--default`:  served at `/`, as well as `/r/<name>/` |
-| `epic repos list [--json]` | lists every registered repo:  its URL prefix, checkout and content folder |
+| `epic repos list [--json]` | lists every registered repo:  its URL prefix, checkout and epic folder |
 | `epic repos remove <name>` | unregisters a repo |
 | `epic repos default <name>` | serves that repo at `/` |
 
@@ -618,7 +618,7 @@ Every key of the config file, and what `epic init` writes:  [README-epics.md](ht
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
-| `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the team's shared repo on GitHub (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, and your name;  `--name <name>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`;  `--dry-run` first;  safe to run again |
+| `epic init` | sets a repo up for epics:  its config file, the epic folder beside it, the team's epic repo on GitHub (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, and your name;  `--name <name>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`;  `--dry-run` first;  safe to run again |
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer and coherence as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
@@ -679,10 +679,10 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   `epic list` took 4.8 s here, over 50 epics.
 - **No undo verb.**
   Each verb writes at once.
-  The undo is git:  the content folder commits after every turn,
+  The undo is git:  the epic folder commits after every turn,
   and `epic restore` puts an item's old text back from a file you took from it.
 - **Shared plans and comments, local marks.**
-  A team shares the epic pages and every comment on them through the content repo, every turn, each under its
+  A team shares the epic pages and every comment on them through the epic repo, every turn, each under its
   writer's name, and each person's Claude answers that person's comments;
   but the marks you press on items, and your Send, stay on your own machine.
   [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.

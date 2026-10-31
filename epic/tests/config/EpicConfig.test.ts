@@ -106,7 +106,7 @@ describe("EpicConfig", () => {
     configFile(main, '{ "contentFolder": "../plans" }')
     const config = new EpicConfig(main)
     expect(config.contentFolder).toBe(join(TOP, "plans"))
-    // what follows another key follows it:  the content folder's name in a window, its windows/
+    // what follows another key follows it:  the epic folder's name in a window, its windows/
     expect(config.windows).toEqual({
       default: "my-app",
       repoName: "my-app",
@@ -270,7 +270,7 @@ describe("EpicConfig", () => {
     expect(() => EpicConfig.settingsFrom('{ "baseBranch": "" }', "x.json5")).toThrow(/"baseBranch" must be a string/)
   })
 
-  test("the window files (epic-eject P13):  the content folder's windows/;  the old workspaces/ until they move", () => {
+  test("the window files (epic-eject P13):  the epic folder's windows/;  the old workspaces/ until they move", () => {
     const main = fakeMainCheckout(join(TOP, "windows"))
     configFile(main, '{ "contentFolder": "../windows.epics" }')
     const config = new EpicConfig(main)
@@ -296,7 +296,7 @@ describe("EpicConfig", () => {
       main,
       `// a comment
 {
-  /* the content repo */ "contentFolder": "../content//with-slashes",
+  /* the epic repo */ "contentFolder": "../content//with-slashes",
   "windows": { "default": "whole", },
   "linkSessionFolders": true,
   "later": "a key from a newer checkout",
@@ -418,9 +418,9 @@ describe("EpicConfig voices", () => {
   })
 })
 
-// epic `epic-eject` P12:  the tools read pages from the content folder itself, never through a link at the root
+// epic `epic-eject` P12:  the tools read pages from the epic folder itself, never through a link at the root
 describe("EpicConfig.contentOf()", () => {
-  test("the content folder the config names, from the main checkout or a worktree;  no links needed", () => {
+  test("the epic folder the config names, from the main checkout or a worktree;  no links needed", () => {
     const main = fakeMainCheckout(join(TOP, "named"))
     const worktree = fakeWorktree(main, join(TOP, "named.worktrees", "seo"))
     const content = join(TOP, "named.epics")
@@ -450,7 +450,7 @@ describe("EpicConfig.contentOf()", () => {
     }
   })
 
-  test("a content folder is its own:  it holds no config", () => {
+  test("an epic folder is its own:  it holds no config", () => {
     const content = join(TOP, "own.epics")
     mkdirSync(join(content, "epics"), { recursive: true })
     expect(EpicConfig.contentOf(content)).toBe(content)

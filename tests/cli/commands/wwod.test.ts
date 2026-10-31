@@ -72,7 +72,7 @@ describe("checkAgentRules()", () => {
   })
 
   // epic `epic-eject` P12:  no `guides` or `goals` link at the checkout's root
-  test("the shared content folder's citers, named by their path there", () => {
+  test("the epic folder's citers, named by their path there", () => {
     const content = realpathSync(mkdtempSync(join(tmpdir(), "agents-content-")))
     mkdirSync(join(content, "guides", "solid"), { recursive: true })
     writeFileSync(join(content, "guides", "solid", "solid-2.md"), "See WWOD §4.\n")

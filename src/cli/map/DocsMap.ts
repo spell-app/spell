@@ -12,7 +12,7 @@ import { MAP_FOLDER, MAP_ORIGIN, type MapGraph, type MapLink, type MapNode, type
  * The docs map:  every page people read, in ONE graph, read by STRUCTURE, with no model and no graphify:
  * so it's free, and rebuilt in seconds.
  * - Its pages:
- *   - the content folder's epic pages (with their part files), guides, saga pages and the docs' home pages
+ *   - the epic folder's epic pages (with their part files), guides, saga pages and the docs' home pages
  *   - each repo's READMEs, `AGENTS.md` files, skills and `docs/` pages
  * - What it knows of each page:  its title, its headings (an epic page's sections, phases and items too), the pages it
  *   links to, and every code name it mentions (`<code>PrefStore</code>`, `` `readJSON5File()` ``).
@@ -34,7 +34,7 @@ export class DocsMap {
 
   /**
    * Every page it maps:  absolute paths, each with the name it goes by in the map.
-   * - The content folder's pages go by `spell.epics/...`;  a repo's by its path from the checkout's root.
+   * - The epic folder's pages go by `spell.epics/...`;  a repo's by its path from the checkout's root.
    */
   get pages(): Array<{ path: string; source: string }> {
     const pages: Array<{ path: string; source: string }> = []
@@ -101,11 +101,11 @@ export class DocsMap {
 /** The docs map's file name, in the checkout's `graphify-out/`. */
 const DOCS_FILE = "docs.json"
 
-/** What the content folder's pages go by in the map:  the folder's name in every checkout. */
+/** What the epic folder's pages go by in the map:  the folder's name in every checkout. */
 const CONTENT_NAME = "spell.epics"
 
 /**
- * The content folder's pages the map reads, by path in it.
+ * The epic folder's pages the map reads, by path in it.
  * - NOT `windows/`, nor the folders other checkouts still read (`ui/`, `goals/`, `packages/`):  they repeat pages.
  */
 const CONTENT_PAGE = /^(epics|guides|sagas|pages|brand|agents)\/.*\.(html|md)$|^README\.md$/

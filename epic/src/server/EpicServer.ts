@@ -39,7 +39,7 @@ import {
 /****************
  * ### `EpicServer`
  * spell-epic's ONE page server per machine (epic `epic-eject` P7):
- * every registered repo's content folder, the engine's assets and pack, and the epic route modules, on one port.
+ * every registered repo's epic folder, the engine's assets and pack, and the epic route modules, on one port.
  *
  * ```text
  * /_epic/assets/...       spell-epic's src/tools/_assets/   (spell-ui.js, spell-doc.css, the runtime ...)
@@ -49,9 +49,9 @@ import {
  * /components/<set>/...   every OTHER component set the default repo's checkout names (its package.json's
  *                         "pageServer" "componentSets"):  Spell UI, App UI, the brand's;  its site bundle at _assets/,
  *                         from that checkout (`componentSetMounts()`)
- * /r/<repo>/...           that repo's content folder (its .epic/config.json5's contentFolder), then its main checkout
+ * /r/<repo>/...           that repo's epic folder (its .epic/config.json5's contentFolder), then its main checkout
  * /r/<repo>/components/<set>/...   that repo's component sets, the same way
- * /...                    the DEFAULT repo's content folder and checkout too, so today's URLs keep working
+ * /...                    the DEFAULT repo's epic folder and checkout too, so today's URLs keep working
  * /editor/                the default repo's APP (the top bar's App tab):  started if it isn't up, then redirected to
  * /r/<repo>/editor/       each repo's (`RepoApp`;  the path is its config's `app.path`)
  * /api/server             what it serves (EpicServerInfo)
@@ -70,7 +70,7 @@ import {
  *     several route modules read the checkout once, as they load (`pages.js` `ROOT`),
  *     so one process serves one repo's calls.
  *     TODO:  a call per repo (`/r/<repo>/api/...`), with the test repo (P9).
- *   - Page edits (`/api/pages`, `/api/files`):  the default repo's content folder,
+ *   - Page edits (`/api/pages`, `/api/files`):  the default repo's epic folder,
  *     only inside its `writable` folders (its `package.json`'s `"pageServer"`, else `WRITABLE`).
  * - Epic UI, the engine's own component set, at `/components/epics/` as spell-app's page server serves it
  *   (`epicUiMounts()`, epic `epic-eject` I21:  it answered 404 here)
@@ -552,11 +552,11 @@ export class EpicServer {
    * What a route module's `setup()` gets:  the page server's `RouteContext`, for the default repo.
    * - `root`:  the default repo's main checkout
    * - `serveWorktrees()`:  only noted (`info.worktrees`), since there is nothing per worktree to serve:
-   *   a repo's pages are its shared content, the same in every worktree, and the engine's assets are this checkout's
-   * - `serveContent()`:  nothing to do:  each repo's content folder is served already, at its prefix (`mounts()`);  the
+   *   a repo's pages are its the epic repo, the same in every worktree, and the engine's assets are this checkout's
+   * - `serveContent()`:  nothing to do:  each repo's epic folder is served already, at its prefix (`mounts()`);  the
    *   route modules read and write it there too, from `root`'s config (`EpicConfig.contentOf()`, `pages.js` `CONTENT`:
    *   epic `epic-eject` P12), never through the main checkout's links
-   * - `content`:  the default repo's content folder, as served:  a route reading the epic pages reads these
+   * - `content`:  the default repo's epic folder, as served:  a route reading the epic pages reads these
    *   (`GET /api/epics/tests`), so a demo server (`DemoServer`) answers from its copies
    * - tests set a route module up by hand with it, on a server started with `routes: false`
    */
@@ -633,10 +633,10 @@ const PAGE_SERVER = "spell/server/page"
 /** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
 
-/** A repo's home page, in its content folder:  where its address (`/`, `/r/<repo>/`) leads. */
+/** A repo's home page, in its epic folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"
 
-/** Folders page edits may write when a repo's `package.json` names none:  the shared content areas. */
+/** Folders page edits may write when a repo's `package.json` names none:  the epic repo areas. */
 const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
 
 /** What the epic server uses of a checkout's `BundleBuild` (`spell/server/page`'s, loaded at run time). */

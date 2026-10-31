@@ -1,6 +1,6 @@
 /**
- * Tests of the content repo's sync (`Shared.sync()`, `SharedSync`;  epic `epic-friend` P5):  two people, Ana and Ben,
- * each a checkout with a clone of ONE bare remote, all in a temp folder;  no network, never Spell's own content repo.
+ * Tests of the epic repo's sync (`Shared.sync()`, `SharedSync`;  epic `epic-friend` P5):  two people, Ana and Ben,
+ * each a checkout with a clone of ONE bare remote, all in a temp folder;  no network, never Spell's own epic repo.
  */
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
@@ -30,7 +30,7 @@ afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 
 git(TEMP, "init", "-q", "--bare", "-b", "main", REMOTE)
 
-/** One person's checkout:  a repo whose config names the content folder and its remote, the content repo in it. */
+/** One person's checkout:  a repo whose config names the epic folder and its remote, the epic repo in it. */
 function person(name: string, { remote = REMOTE }: { remote?: string } = {}) {
   const main = join(TEMP, name)
   mkdirSync(join(main, ".epic"), { recursive: true })
@@ -64,7 +64,7 @@ function itemIds(who: typeof ana): string[] {
 ////////////////
 
 describe("Shared.sync()", () => {
-  test("the first person:  the content repo made, its own files written, the epic page pushed", async () => {
+  test("the first person:  the epic repo made, its own files written, the epic page pushed", async () => {
     ana.shared.init()
     expect(ana.shared.publish(REMOTE)).toBeUndefined()
     // the remote's own branch is the first person's (`git init`'s default, whatever this machine's is)

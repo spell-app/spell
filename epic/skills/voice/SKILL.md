@@ -41,7 +41,7 @@ Rewrite guides in a voice (epic `readme` P14):  how they READ, never what they S
      those list Claude Code's agents.
    - `epic agents add voice-<n> "<its guides, short>"`:  prints its full name
    - an `Agent` call, type `general-purpose`, `run_in_background: true`, its `description` starting with that name
-   - its prompt:  "The agent's brief", below, word for word, with its guides (their REAL paths in the content folder:
+   - its prompt:  "The agent's brief", below, word for word, with its guides (their REAL paths in the epic folder:
      `epic config contentFolder`), the voice's file and the code voice's file
 5. Each agent's notice, as it arrives:  `epic agents done voice-<n>`, then a short reply, its first line bold, by
    itself:  `**Agent <full name> came back with:**`, and its report's lines.
@@ -68,7 +68,7 @@ Change, where the voice says to:
 - run-together sentences, dense paragraphs, filler, unexplained shorthand, claims with no edge
 - "Spell" capitalised in prose (lowercase only in code)
 
-Edit each guide at its real path (given below).  Never run git in the content folder:  its commits are automatic.
+Edit each guide at its real path (given below).  Never run git in the epic folder:  its commits are automatic.
 Then, for each guide, from the plugin's folder (`epic/` in the kit):
   1. yarn tsx src/tools/doc-links.js <page>
   2. yarn vp fmt <page>
@@ -86,5 +86,5 @@ then anything you left, with why.
 Short:
 1. `<n> guides gone over in the <voice> voice (<words before> -> <words after> words);  <m> left`, and why each.
 2. Per agent:  its guides, one line each, as its report said.
-3. Where to review:  the content folder's `auto: guides/...` commits, one per folder, each reverted whole if the person
+3. Where to review:  the epic folder's `auto: guides/...` commits, one per folder, each reverted whole if the person
    doesn't like it;  the guides themselves (`epic pages link <page> --show`).

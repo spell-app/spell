@@ -109,7 +109,7 @@ const USAGE = `usage:  epic choices create <slug> --rows <rows.json5> [--title "
 ////////////////
 
 /**
- * Write a new choice page `slug` in content folder `docs` (`CONTENT`) from the template, and its rows beside it;
+ * Write a new choice page `slug` in epic folder `docs` (`CONTENT`) from the template, and its rows beside it;
  * the page's absolute path.
  * - `data`:  `ChoicesData`, checked (`checkData()`);  `title` / `description` flags beat its own
  * - `epic`:  in that epic's `details/` (the epic must exist);  else the scratch `pages/details/`
@@ -165,7 +165,7 @@ export function newRound(docs, target, { title, description, data } = {}) {
   return file
 }
 
-/** Choice page `file` (in content folder `docs`), parsed, from the template:  its head, words and rows. */
+/** Choice page `file` (in epic folder `docs`), parsed, from the template:  its head, words and rows. */
 function pageDocument(docs, file, { title, description, checked }) {
   title ??= checked.title ?? "Syntax choices"
   const template = readFileSync(join(TOOL_TEMPLATES, "syntax-choices.html"), "utf8")

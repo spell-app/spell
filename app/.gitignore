@@ -6,7 +6,7 @@ node_modules
 # was its name until epic output-targets T6, renamed on first read
 /.recent-projects.json
 /.recent-targets.json
-# the VS Code window files' old folder:  they live in the content folder's windows/ since epic epic-eject P13
+# the VS Code window files' old folder:  they live in the epic folder's windows/ since epic epic-eject P13
 # (`windowsFolder`, .epic/config.json5);  the main checkout's leftovers stay out of git until they're deleted
 /workspaces/
 __pycache__/
@@ -37,17 +37,17 @@ PARKED-*.md
 # the component sets' waiting comments (`<page>.inbox.json5` beside a page, and its lock;  the comment route, epic
 # epic-workflow P10 / P11):  per machine, never the record, as the shared pages' are
 /app/docs/**/*.inbox.json*
-# and their comments files (`<page>.comments.<person>.json5`, epic epic-friend P9):  shared only in the content repo
+# and their comments files (`<page>.comments.<person>.json5`, epic epic-friend P9):  shared only in the epic repo
 /app/docs/**/*.comments.*.json5
 
 # `/details` scratch pages and review inboxes (`pages/details/`, `epics/*/*.inbox.json5`):  ignored by the shared
-# content repo's own `.gitignore` (`../spell.epics`);  here the whole folders are ignored (below)
+# epic repo's own `.gitignore` (`../spell.epics`);  here the whole folders are ignored (below)
 
 # `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install` (epic repo-split P9, P12, I64)
 /agents
 
-# the shared content folders a checkout linked in at its root until epic epic-eject P12:  the page server and the tools
-# find them in the content folder itself now (`contentFolder` in .epic/config.json5), and `epic shared link` removes the
+# the epic repo folders a checkout linked in at its root until epic epic-eject P12:  the page server and the tools
+# find them in the epic folder itself now (`contentFolder` in .epic/config.json5), and `epic shared link` removes the
 # links;  ignored still, for a link left behind
 /epics
 /guides

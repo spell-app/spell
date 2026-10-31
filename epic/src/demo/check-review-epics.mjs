@@ -12,9 +12,9 @@
  *   - or of `--from <folder>` (a converted copy:  `epic convert <name> --out <folder>`)
  *   - copied to `src/demo/shots/epics/<name>/<name>.plan.html` (git-ignored), as deep as a real one, so its links
  *     lead where a real page's do:  the review routes take epic pages only (`epics/<name>/<name>.plan.html`),
- *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root, content }`, both `src/demo/shots`:  never the real content folder)
+ *     its inbox file lands beside it, and the tool finds it there (`PlanDocFiles({ root, content }`, both `src/demo/shots`:  never the real epic folder)
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
- *   serving `src/demo/shots/` as its content folder, so the routes are this branch's code as it is now;
+ *   serving `src/demo/shots/` as its epic folder, so the routes are this branch's code as it is now;
  *   stopped at the end
  *   - it WAKES NOBODY (epic `epic-engine` I11):  a Send with nobody listening reaches `DemoServer`'s
  *     stubbed wake, never a window or a session on this machine;  the check asserts the wake was asked for
@@ -70,7 +70,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
-/** the epic pages' folder:  the repo's content folder's (`EpicConfig.contentOf()`) */
+/** the epic pages' folder:  the repo's epic folder's (`EpicConfig.contentOf()`) */
 const EPICS = join(EpicConfig.contentOf(ROOT), "epics")
 const SHOTS = join(HERE, "shots")
 const TSCONFIG = join(ROOT, "tsconfig.json")
@@ -671,7 +671,7 @@ function measure(width) {
 ////////////////
 
 /**
- * Copy the doc (and its parts) to `folder`, as they are:  the copy is as deep in the demo server's content folder
+ * Copy the doc (and its parts) to `folder`, as they are:  the copy is as deep in the demo server's epic folder
  * (`shots/epics/<name>/`) as a real doc is in the real one, so its links need no change.
  * - the sample:  `review-sample.html`, beside this script, which loads the engine from its routes (`/_epic/...`)
  */

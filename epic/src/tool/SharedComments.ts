@@ -9,7 +9,7 @@ import { CommentList, type Comment, type CommentClaim, type CommentReply } from 
 
 /****************
  * ### `SharedComments`
- * A page's comments SHARED through the content repo (epic `epic-friend` P9, Q4 B):  ONE FILE PER PERSON beside the
+ * A page's comments SHARED through the epic repo (epic `epic-friend` P9, Q4 B):  ONE FILE PER PERSON beside the
  * page, committed and synced with the plans, while the page's inbox file keeps only what's this machine's own.
  *
  * ```text
@@ -35,7 +35,7 @@ import { CommentList, type Comment, type CommentClaim, type CommentReply } from 
  * - WRITTEN (`write()`):  the list split again by WHO SAID IT, by what each other file already holds:  whatever
  *   none of them holds is this machine's, into its own person's file;  never another person's file
  * - IDS:  one number series for the page, across every file (`c3`:  `CommentList`'s next free one).  Two people
- *   writing at once may both make `c3`:  the content repo's sync renumbers this machine's before it rebases
+ *   writing at once may both make `c3`:  the epic repo's sync renumbers this machine's before it rebases
  *   (`Renumber.comments()`, as it does items);  read before that, the second one shows under the next free id
  * - Node only (`node:fs`):  imported by path, as the inboxes are.  Pure files and data:  the inboxes take the lock.
  ****************/

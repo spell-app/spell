@@ -54,7 +54,7 @@ export class ContentUpdate {
   /** the kit checkout it reads:  its git, its parser's and Spell UI's data files */
   readonly root: string
 
-  /** the shared content folder:  the epic page, the changelog, the memory file */
+  /** the epic folder:  the epic page, the changelog, the memory file */
   readonly content: string
 
   constructor({ root, content }: { root: string; content: string }) {
@@ -63,12 +63,12 @@ export class ContentUpdate {
   }
 
   /**
-   * The update of the checkout at `checkout`, with its shared content folder.
-   * - throws `CliError` when the checkout names no content folder
+   * The update of the checkout at `checkout`, with its epic folder.
+   * - throws `CliError` when the checkout names no epic folder
    */
   static of(checkout: string): ContentUpdate {
     const content = contentFolderOf(checkout)
-    if (!content) throw new CLI.CliError("no shared content folder:  .epic/config.json5 names none (contentFolder)")
+    if (!content) throw new CLI.CliError("no epic folder:  .epic/config.json5 names none (contentFolder)")
     return new ContentUpdate({ root: checkout, content })
   }
 
@@ -76,7 +76,7 @@ export class ContentUpdate {
   // ## Remembering
   ////////////////
 
-  /** The memory file:  `epics/content/content-updates.json5` in the shared content. */
+  /** The memory file:  `epics/content/content-updates.json5` in the epic repo. */
   get file(): string {
     return join(this.content, "epics", CONTENT_EPIC, MEMORY_FILE)
   }
@@ -89,7 +89,7 @@ export class ContentUpdate {
   /**
    * Record an update's end:  the stop commit moves to `HEAD`, and `always` joins the always rules (each id once).
    * - returns the memory as written
-   * - SIDE EFFECT:  writes the memory file (its folder too);  the shared content's turn hook commits it
+   * - SIDE EFFECT:  writes the memory file (its folder too);  the epic repo's turn hook commits it
    * - throws `CliError` when git can't read `HEAD`
    */
   done({ always = [], today = new Date() }: { always?: string[]; today?: Date } = {}): ContentUpdateMemory {
@@ -145,7 +145,7 @@ export class ContentUpdate {
    * - reachable from `HEAD` and not from `since`, and made after its time:  without the time, the merged-in
    *   histories of both folders would all count as new
    * - an epic:  the one `PlanCommits.parseCommitSubject()` reads (`debut I89:`), else a bare `<name>:` naming an epic
-   *   folder of the shared content (`debut:  ...`);  else `other`
+   *   folder of the epic repo (`debut:  ...`);  else `other`
    */
   epicChanges(since: { commit: string; date: string }): EpicChanges[] {
     const raw = Git.out(

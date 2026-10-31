@@ -24,7 +24,7 @@ import { NameSweep, type SweepResult } from "./NameSweep"
  * ```
  *
  * - The person and where their name is kept:  `EpicHome`.
- * - `whois` reads the content folder as it is today (`activityOf()`):
+ * - `whois` reads the epic folder as it is today (`activityOf()`):
  *   - an element's `from="<name>"` in its pages (`<epic-reply from="Owen" at="...">`), escaped markup (`&lt;`) left
  *     out:  that's a page SHOWING the markup
  *   - a reply's `"by": "<name>"` in its data files (a guide's comments)
@@ -32,10 +32,10 @@ import { NameSweep, type SweepResult } from "./NameSweep"
  * - `--json` on both:  what it prints, as JSON.
  ****************/
 export class PersonCommands {
-  /** the content folder `whois` reads */
+  /** the epic folder `whois` reads */
   readonly content: string
 
-  /** - `content`:  default the content folder of the checkout the command runs in (`EpicConfig.contentOf()`) */
+  /** - `content`:  default the epic folder of the checkout the command runs in (`EpicConfig.contentOf()`) */
   constructor({ content }: { content?: string } = {}) {
     this.content = content ?? EpicConfig.contentOf(EpicCheckout.nearest({ marker: ".git" }))
   }
@@ -68,8 +68,8 @@ export class PersonCommands {
 
   /**
    * `epic whoami --rename <name> [--dry-run] [--json]`:  keep `name`, and write it over the old one wherever the old
-   * one says who wrote something, in every page, part, inbox and data file of the content folder (`NameSweep`);
-   * their comments files move to the new name, all of it one commit in the content repo (epic `epic-friend` P9)
+   * one says who wrote something, in every page, part, inbox and data file of the epic folder (`NameSweep`);
+   * their comments files move to the new name, all of it one commit in the epic repo (epic `epic-friend` P9)
    * - the old name:  the person's before, kept or git's
    * - `dryRun`:  keeps nothing, writes nothing;  says what it would change
    * - the same name, or no old name:  says so, changes nothing
@@ -113,8 +113,8 @@ export class PersonCommands {
   }
 
   /**
-   * Every reply and comment naming `name` in the content folder, by place:  an epic by its id (its page, parts,
-   * details pages and inbox together), any other page by its path from the content folder, no extension.
+   * Every reply and comment naming `name` in the epic folder, by place:  an epic by its id (its page, parts,
+   * details pages and inbox together), any other page by its path from the epic folder, no extension.
    * - places with the newest activity first
    * - NEVER throws:  a file that won't read is skipped
    */
@@ -147,11 +147,11 @@ export class PersonCommands {
   }
 
   ////////////////
-  // ## Statics:  reading the content folder, and the lines printed
+  // ## Statics:  reading the epic folder, and the lines printed
   ////////////////
 
   /**
-   * The content folder's pages and data files (`.html`, `.json5`) in the folders people write in (`PLACES`).
+   * The epic folder's pages and data files (`.html`, `.json5`) in the folders people write in (`PLACES`).
    * - skips dot folders and `node_modules`
    */
   static filesIn(content: string): string[] {
@@ -197,7 +197,7 @@ export class PersonCommands {
     return times
   }
 
-  /** The place a file at `path` (from the content folder) belongs to:  `epics/<id>/...` is `<id>`;  else its page. */
+  /** The place a file at `path` (from the epic folder) belongs to:  `epics/<id>/...` is `<id>`;  else its page. */
   static placeOf(path: string): string {
     const parts = path.split(sep)
     if (parts[0] === "epics" && parts.length > 2) return parts[1]!
@@ -283,7 +283,7 @@ export class PersonCommands {
       head + kept,
       ...files.map((file) => `  ${file.path.padEnd(width)}  ${String(file.count).padStart(4)}`),
       ...moved.map(([old, now]) => `  ${dryRun ? "would move" : "moved"} ${old} -> ${now}`),
-      ...(commit ? [`committed in the content repo:  ${commit}`] : [])
+      ...(commit ? [`committed in the epic repo:  ${commit}`] : [])
     ]
   }
 
@@ -323,7 +323,7 @@ export type PersonActivity = {
 
 /** One place's part of a `PersonActivity`. */
 export type PlaceActivity = {
-  /** an epic's id, or a page's path from the content folder without its extension (`guides/python-target`) */
+  /** an epic's id, or a page's path from the epic folder without its extension (`guides/python-target`) */
   place: string
   /** replies and comments naming them there */
   count: number
@@ -334,7 +334,7 @@ export type PlaceActivity = {
 /** `whoami`'s switches:  flags that never take a value (the name is its words). */
 const WHOAMI_SWITCHES = ["json", "rename", "dryRun"]
 
-/** The content folder's folders people write replies and comments in. */
+/** The epic folder's folders people write replies and comments in. */
 const PLACES = ["epics", "sagas", "guides", "pages"]
 
 /** An element's opening tag with a `from` attribute, written in a page (not escaped as `&lt;`). */

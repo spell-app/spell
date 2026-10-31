@@ -141,8 +141,8 @@ describe("POST /api/epics/favorite", () => {
     ])
   })
 
-  // epic `epic-engine` I45:  a server that says which content folder it serves (the epic server, a demo's) is read
-  test("GET tests:  from the content folder the server says it serves, not the checkout's", async () => {
+  // epic `epic-engine` I45:  a server that says which epic folder it serves (the epic server, a demo's) is read
+  test("GET tests:  from the epic folder the server says it serves, not the checkout's", async () => {
     const other = join(root, "other-content")
     mkdirSync(join(other, "epics", "copy"), { recursive: true })
     writeFileSync(

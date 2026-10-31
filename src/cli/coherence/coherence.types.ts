@@ -123,7 +123,7 @@ export const TEST_CALL = "^\\s*(it|test)(\\.\\w+)*\\("
 // ## Snapshots
 ////////////////
 
-/** The snapshots' folder, in the shared content folder (epic `coherence` Q11):  committed by the turn's hook. */
+/** The snapshots' folder, in the epic folder (epic `coherence` Q11):  committed by the turn's hook. */
 export const SCORES_FOLDER = "epics/coherence/details/scores"
 
 /** `--compare last`:  the newest snapshot. */

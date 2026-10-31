@@ -23,7 +23,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  *
  * - A Claude-only skill's own steps aren't checked one by one:  its first line says it all.
  * - SEE:  https://learn.chatgpt.com/docs/build-skills (the skill format, `agents/openai.yaml`, the list's budget)
- * - The epic folder's tests run it over the real skills (`SkillsCheck.test.ts`):  `yarn review` fails on a problem.
+ * - The `epic/` folder's tests run it over the real skills (`SkillsCheck.test.ts`):  `yarn review` fails on a problem.
  * - Throws `EpicCommandError` for an unknown verb.
  ****************/
 export class SkillsCheck {

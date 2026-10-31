@@ -10,7 +10,7 @@ The person runs several epics at once:  one screen saying where each stands.
 - Read-only:  it lists, the person acts.
 - Their next steps:  `/wtf <name>`, `/epic <name>`, `/unpark <name>`, `/worktrees` to clean up.
 
-- Every epic page is shared content:  ONE copy, in the content folder (`epic config contentFolder`),
+- Every epic page is in the epic repo:  ONE copy, in the epic folder (`epic config contentFolder`),
   read from there by every checkout (epic `epic-eject` P12), never through a link.
   - In spell-app, on code from before 2026-10-05, the link is `packages/docs/content/epics`.
   - So any checkout lists every epic, and there's no "worktree copy" to prefer.

@@ -1,5 +1,5 @@
 /**
- * Tests of `CommitRemap` (`epic commits remap`, epic-engine's P49) on a scratch content folder:  an epic page and its
+ * Tests of `CommitRemap` (`epic commits remap`, epic-engine's P49) on a scratch epic folder:  an epic page and its
  * parts listing commits of repos repo-split's P20 · One Repo merged, rewritten to their new ids in the merged repo.
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
@@ -138,7 +138,7 @@ describe("epic commits remap", () => {
 
   afterEach(() => vi.restoreAllMocks())
 
-  /** The command, on a checkout whose content folder is the scratch one. */
+  /** The command, on a checkout whose epic folder is the scratch one. */
   function commands() {
     const owner = new PlanDocCommands({ files: new PlanDocFiles({ root, content }) })
     printed = []

@@ -16,7 +16,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   "updated" date consistent, checks the markup before writing, and locks the file against parallel agents.
   Hand-edit only prose: the summary, Overview, phase bodies, item details.
   - in a SPLIT doc (see "Parts"; every new doc), a body's prose is in its part file, `parts/<id>.html`: edit it
-    there, at its real path (`<content folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
+    there, at its real path (`<epic folder>/epics/<name>/parts/<id>.html`;  `epic config contentFolder`)
 - Write for Owen coming back COLD (2026-10-04; the details skill's "Writing for Owen" is the same rule): he runs
   5+ epics, and reads an item weeks later, from another session. Enough that he can pick up ONE phase or item on
   its own. NOT caveman:
@@ -64,7 +64,7 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   - `details <name>#<id> --file` and `decide` (answering again) do it for you
   - rewriting by hand: write the new text through `details --file`, or put the old text in with `restore <name>#<id>
 --file <old.html>`; never just overwrite it
-  - text already lost: recover it from the shared content repo's git history, then `restore ... --as-of
+  - text already lost: recover it from the epic repo's git history, then `restore ... --as-of
 "YYYY-MM-DD HH:MM"` (when it was replaced)
 - Keep the doc current as you go: a todo, issue or decision found mid-phase goes in NOW, not at the end.
 
@@ -503,7 +503,7 @@ pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and li
 - A part file: a one-line comment saying whose body it is, then the body's markup. Its links are ROOT PATHS, as the
   skeleton's are (`/guides/x.html`, `/ui/src/x.ts`;  epic `epic-engine` P46): the same text in a part and in
   its page, from any folder. Only a part's own `parts/` siblings go by name.
-- Edit a body's prose in its part file, at its real path (shared content). Structured edits stay commands.
+- Edit a body's prose in its part file, at its real path (in the epic repo). Structured edits stay commands.
 - Where each body goes is decided by rule on EVERY write: an item that gains details gets a part; a new Overview
   sub-section written whole into the skeleton has its body moved into a part by the next command. Content a host
   holds beside its part (a hand edit) is kept, after the part's: `check` notes it, the next edit moves it in.

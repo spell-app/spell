@@ -481,7 +481,7 @@ Its numbers are digits only:  `1.1` is `1`, `.` and `1`.
 <details>
 <summary>More in the docs site</summary>
 
-These guides need a checkout with the content folder beside it, and the page server running.
+These guides need a checkout with the epic folder beside it, and the page server running.
 
 | Guide | Served at |
 | --- | --- |
