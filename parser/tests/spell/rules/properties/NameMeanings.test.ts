@@ -32,11 +32,12 @@ type NameRow = {
   /** a piece of the warning it should give;  no `warns`:  it should give none */
   warns?: string
   /** the phase that makes this row true */
-  notYet?: "P2" | "P3" | "P4"
+  notYet?: "P5" | "P6" | "P7"
 }
 
 const ERROR = Symbol("does not compile")
 const HIDES = "hides"
+const OCULTA = "oculta"
 
 ////////////////
 // ## English
@@ -91,8 +92,7 @@ const ENGLISH: NameRow[] = [
     title: "own property:  set X makes a local, and warns",
     spell: "set score to 1",
     js: "score = 1",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   { title: "own property:  the X is V writes it", spell: "the score is 1", js: "this.score = 1" },
   { title: "own property:  the X = V writes it", spell: "the score = 1", js: "this.score = 1" },
@@ -112,8 +112,7 @@ const ENGLISH: NameRow[] = [
     title: "own property:  a local's block ended, set the X writes it",
     spell: "if 1 is 1\n\tset score to 3\nset the score to 4",
     js: "this.score = 4",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   { title: "outside an action:  set the X makes a local", spell: "set the score to 1", js: "score = 1", outside: true },
   { title: "enum property:  set the X writes it", spell: 'set the color to "red"', js: 'this.color = "red"' },
@@ -148,8 +147,7 @@ const ENGLISH: NameRow[] = [
     title: "several words:  a local of the whole name beats the property",
     spell: "set short rank to 1\nset v to the short rank",
     js: "v = shortRank",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   { title: "several words:  the X reads it", spell: "set v to the short rank", js: "v = this.shortRank" },
   {
@@ -182,44 +180,46 @@ const ENGLISH: NameRow[] = [
     title: "local hiding a property:  the X reads the local, and warns",
     spell: "set score to 3\nset v to the score",
     js: "v = score",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "local hiding a property:  its X still reads the property",
     spell: "set score to 3\nset v to its score",
     js: "v = this.score",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "local hiding a property:  set the X writes the local",
     spell: "set score to 3\nset the score to 4",
     js: "score = 4",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "local made later:  the X above it reads the property",
     spell: "set v to the score\nset score to 3",
     js: "v = this.score",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "local in a block:  the X after the block reads the property",
     spell: "if yes\n\tset score to 1\nset v to the score",
     js: "v = this.score",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
 
   {
     title: "local hiding a property:  [the X] in a text reads the local, and warns",
     spell: 'set score to 3\nset v to "x [the score]"',
     js: "${score}",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
+  },
+
+  {
+    title: "argument hiding a property:  [the X] in a text warns, about the text",
+    action: "to play (a game) on (a pile):",
+    spell: 'set v to "x [the pile]"',
+    js: "${pile}",
+    warns: HIDES
   },
 
   // an argument
@@ -228,8 +228,7 @@ const ENGLISH: NameRow[] = [
     action: "to play (a game) on (a pile):",
     spell: "set v to the pile",
     js: "v = pile",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "argument hiding a property:  its X reads the property",
@@ -249,8 +248,7 @@ const ENGLISH: NameRow[] = [
     title: "loop variable hiding a property:  the X reads it, and warns",
     spell: "for each pile in the piles\n\tset v to the pile",
     js: "v = pile",
-    warns: HIDES,
-    notYet: "P4"
+    warns: HIDES
   },
   {
     title: "in a loop:  the X is the action's thing",
@@ -370,8 +368,7 @@ const SPANISH: NameRow[] = [
     title: "propiedad propia:  poner X hace una local, y avisa",
     spell: "poner puntuación a 1",
     js: "puntuación = 1",
-    warns: HIDES,
-    notYet: "P4"
+    warns: OCULTA
   },
   { title: "declarada debajo:  el X la lee", spell: "poner v a el resto", js: "v = this.resto" },
   { title: "heredada:  la X la lee", spell: "poner v a la etiqueta", js: "v = this.etiqueta" },
@@ -379,8 +376,7 @@ const SPANISH: NameRow[] = [
     title: "local que oculta:  la X lee la local, y avisa",
     spell: "poner puntuación a 3\nponer v a la puntuación",
     js: "v = puntuación",
-    warns: HIDES,
-    notYet: "P4"
+    warns: OCULTA
   },
   {
     title: "en un bucle:  la X es la de la acción",
@@ -419,7 +415,7 @@ function checkRow(row: NameRow, path: string, project: typeof ENGLISH_PROJECT, a
   }
   expect(errors).toEqual([])
   expect(compiled).toContain(row.js)
-  const hiding = warnings.filter((warning) => warning.includes(HIDES))
+  const hiding = warnings.filter((warning) => warning.includes(HIDES) || warning.includes(OCULTA))
   if (row.warns) expect(hiding).not.toEqual([])
   else expect(hiding).toEqual([])
 }

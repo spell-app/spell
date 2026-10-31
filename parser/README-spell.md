@@ -130,6 +130,8 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
   - A bare `stock` never reads a property.
   - `set the score to 1` writes the property, unless a local has that name;
     `set score to 1` makes a local.
+  - A local hiding a property is allowed, but warned:  where it's made, and where `the X` reads it.
+    An argument or loop variable warns only on that read.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:

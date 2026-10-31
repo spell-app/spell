@@ -1,5 +1,6 @@
 import { assert, proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * `text` rule:  literal `text` string.
@@ -27,6 +28,8 @@ export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts }> {
     const fillIns = parseFillIns(scope, token.innerText)
     if (fillIns === null) return undefined
     if (fillIns) match.data.fillIns = fillIns
+    // A fill-in's tokens aren't the file's:  its warnings go on the text
+    for (const part of fillIns ?? []) if (typeof part !== "string") SP.SpellWarnings.noteAgain(match, part)
     return match
   }
 

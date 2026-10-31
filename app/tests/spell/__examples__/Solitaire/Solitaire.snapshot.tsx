@@ -71,9 +71,9 @@ export class Card extends TwoSidedView {
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
   get state() {
-    const rank = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
-    const direction = this.isFaceDirection("up") ? "↑" : "↓"
-    return rank + this.symbol + direction
+    const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return letter + this.symbol + arrow
   }
 
   /** Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns */
@@ -366,9 +366,9 @@ export class Pile extends ViewableList<Card> {
 
   /** Its name, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   @derived get state() {
-    let state = `${this.name || "pile"}:`
-    this.forEach((card) => (state = `${state} ${card.state}`))
-    return state
+    let summary = `${this.name || "pile"}:`
+    this.forEach((card) => (summary = `${summary} ${card.state}`))
+    return summary
   }
 
   /** while a card it would take is over it, the score shows what the move would add -- gone as the card leaves */

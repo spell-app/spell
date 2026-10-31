@@ -1,5 +1,6 @@
 import { NONE } from "spell/util"
 import { P } from "spell/parser/parser"
+import { MemberReadExpression } from "spell/parser/spell/rules/properties"
 import { SpellIdentifier } from "./SpellIdentifier"
 import { type IdentifierMatchData } from "./variables.shared"
 
@@ -16,6 +17,7 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
     // Remember scope variable for the identifier, if there is one.
     match.data.scopeVar = (match.groups.identifier.data as IdentifierMatchData).scopeVar ?? NONE
     if (Variable.namesOwnProperty(scope, match)) return undefined
+    Variable.warnIfHidesProperty(match)
     return match
   }
 
@@ -30,6 +32,14 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
     if (match.data.scopeVar !== NONE || match.length === identifier.length) return false
     return !!P.MethodScope.thingTypeOf(scope)?.hasProperty(`${identifier.raw}`)
   }
+  /** `the X` naming a real variable (not an alias, `it` or the action's thing) may be hiding a property. */
+  private static warnIfHidesProperty(match: P.MatchFor<Variable>): void {
+    const { identifier } = match.groups
+    const { scopeVar } = match.data
+    if (scopeVar === NONE || !scopeVar || scopeVar.isAlias || match.length === identifier.length) return
+    MemberReadExpression.warnIfHidesProperty(match, identifier)
+  }
+
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
     const { scopeVar } = match.data

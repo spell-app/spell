@@ -27,9 +27,9 @@ On the page each card is its own element, `<solitaire-card>`:  people may drag i
 	<property "name">its rank + " of " + its suit</>
 	<alias "is the (rank) of (suit)"/>
 	<property "state" description="Its short name:  Q♠↓ is the queen of spades, face down">
-		rank is 10 if its value is 10 otherwise the first letter of its rank as uppercase
-		direction is "↑" if it is face up otherwise "↓"
-		return rank + its symbol + direction
+		letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
+		arrow is "↑" if it is face up otherwise "↓"
+		return letter + its symbol + arrow
 	</property>
 
 	<group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>

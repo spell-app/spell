@@ -139,6 +139,22 @@ export class SpellWarnings {
   static in(match: P.Match): SP.SpellWarning[] {
     const tokens = new Set<P.Token>()
     P.Tokenizer.forEachToken(match.tokens, (token) => tokens.add(token))
+    return [...SpellWarnings.notedUnder(match)]
+      .filter(({ at, stillHolds }) => tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
+      .sort((one, other) => (one.at.start ?? 0) - (other.at.start ?? 0))
+      .map(({ message, at }) => ({ message, at }))
+  }
+
+  /**
+   * Note again, about `match` itself, what's noted under `parsed`, a match parsed from a string:
+   * `in()` keeps only warnings about a file's own tokens, and a string's aren't, e.g. a text's `[the score]`.
+   */
+  static noteAgain(match: P.Match, parsed: P.Match): void {
+    for (const warning of SpellWarnings.notedUnder(parsed)) SpellWarnings.add(match, { ...warning, at: match })
+  }
+
+  /** Every warning noted on `match` and the matches below:  what it `matched`, and the matches in its `data`. */
+  private static notedUnder(match: P.Match): Set<NotedWarning> {
     const found = new Set<NotedWarning>()
     const seen = new Set<P.Match>()
     const visit = (each: P.Match) => {
@@ -152,10 +168,7 @@ export class SpellWarnings {
       }
     }
     visit(match)
-    return [...found]
-      .filter(({ at, stillHolds }) => tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
-      .sort((one, other) => (one.at.start ?? 0) - (other.at.start ?? 0))
-      .map(({ message, at }) => ({ message, at }))
+    return found
   }
 
   /**

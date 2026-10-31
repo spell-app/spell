@@ -722,6 +722,12 @@ A kind that says so is saved in a file of its own.
     - a parameter with no type (`var_method_arg`)
     - a new variable set to a list of nothing said (`set state to []`),
       or a property a set declares from a value that doesn't say (`assignment`)
+    - a local, argument or loop variable hiding a property of the action's thing (epic `language`, Q2)
+      - e.g. `set score to 3` in a game => `Here "score" hides the property "score" ...`
+      - Noted where a local is made (`assignment`), and where `the X` reads one (`variable`), never on a bare read:
+        `MemberReadExpression.warnIfHidesProperty()`, `noteIf()`, so a property declared further down counts.
+      - In a text's `[the score]`, whose tokens aren't the file's, the text notes it again:
+        `SP.SpellWarnings.noteAgain()`.
     - a LOOSE member read its type never declares (Q45)
       - its rules:  `property_expression`, `its_property`
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`

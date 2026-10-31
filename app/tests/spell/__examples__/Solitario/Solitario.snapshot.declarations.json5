@@ -25,7 +25,7 @@
       "type": "Carta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/Carta.es.spell:289-3723"
+      "defined": "/Carta.es.spell:289-3721"
     },
     {
       "property": "rango",
@@ -292,7 +292,7 @@
       "of": "Carta",
       "group": "el \"estado\" de la carta, para depurar",
       "datatype": "text",
-      "defined": "/Carta.es.spell:3499-3723"
+      "defined": "/Carta.es.spell:3499-3721"
     },
     {
       "syntax": "jugar {thisArg:expression}",
@@ -328,7 +328,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:8269-9180"
+      "defined": "/Solitario.es.spell:8269-9168"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -349,13 +349,13 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:9280-9446"
+      "defined": "/Solitario.es.spell:9268-9431"
     },
     {
       "type": "Comodín",
       "superType": "Carta",
       "gender": "masculine",
-      "defined": "/Carta.es.spell:5159-5603"
+      "defined": "/Carta.es.spell:5157-5595"
     },
     {
       "property": "color",
@@ -365,7 +365,7 @@
         "rojo",
         "negro"
       ],
-      "defined": "/Carta.es.spell:5195-5228"
+      "defined": "/Carta.es.spell:5193-5226"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} comodín (expression:rojo|rojos|negro|negros)",
@@ -381,31 +381,31 @@
         ]
       },
       "staticOf": "Comodín",
-      "defined": "/Carta.es.spell:5232-5255"
+      "defined": "/Carta.es.spell:5230-5253"
     },
     {
       "property": "valor",
       "of": "Comodín",
       "datatype": "number",
-      "defined": "/Carta.es.spell:5298-5358"
+      "defined": "/Carta.es.spell:5296-5356"
     },
     {
       "property": "imagen",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5363-5393"
+      "defined": "/Carta.es.spell:5361-5391"
     },
     {
       "property": "nombre",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5398-5432"
+      "defined": "/Carta.es.spell:5396-5430"
     },
     {
       "property": "estado",
       "of": "Comodín",
       "datatype": "text",
-      "defined": "/Carta.es.spell:5436-5603"
+      "defined": "/Carta.es.spell:5434-5595"
     },
     {
       "syntax": "probar la preparación de la carta",
@@ -414,7 +414,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la preparación de la carta",
-      "defined": "/Carta.es.spell:3737-5076"
+      "defined": "/Carta.es.spell:3735-5074"
     },
     {
       "syntax": "probar los comodines",
@@ -423,7 +423,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los comodines",
-      "defined": "/Carta.es.spell:5605-6379"
+      "defined": "/Carta.es.spell:5597-6371"
     },
     {
       "type": "Mazo",
@@ -480,7 +480,7 @@
       "superType": "ViewableList",
       "gender": "feminine",
       "itemType": "Carta",
-      "defined": "/Pila.es.spell:297-1211"
+      "defined": "/Pila.es.spell:297-1215"
     },
     {
       "property": "name",
@@ -517,7 +517,7 @@
       "of": "Pila",
       "group": "estado de la pila, para depurar",
       "datatype": "text",
-      "defined": "/Pila.es.spell:1050-1211"
+      "defined": "/Pila.es.spell:1050-1215"
     },
     {
       "property": "pila",
@@ -525,7 +525,7 @@
       "group": "Una pila de cartas, p. ej. el mazo de reserva de un juego o sus descartes",
       "datatype": "Pila",
       "exclusive": true,
-      "defined": "/Pila.es.spell:1297-1327"
+      "defined": "/Pila.es.spell:1301-1331"
     },
     {
       "syntax": "probar las pilas",
@@ -534,57 +534,57 @@
       "alias": "statement",
       "kind": "function",
       "name": "las pilas",
-      "defined": "/Pila.es.spell:1341-2248"
+      "defined": "/Pila.es.spell:1345-2252"
     },
     {
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10968-11376"
+      "defined": "/Solitario.es.spell:10953-11361"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:11012-11037"
+      "defined": "/Solitario.es.spell:10997-11022"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11446-11660"
+      "defined": "/Solitario.es.spell:11431-11645"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:11492-11517"
+      "defined": "/Solitario.es.spell:11477-11502"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11718-12294"
+      "defined": "/Solitario.es.spell:11703-12279"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:11756-11781"
+      "defined": "/Solitario.es.spell:11741-11766"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:11785-11814"
+      "defined": "/Solitario.es.spell:11770-11799"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:12373-12788"
+      "defined": "/Solitario.es.spell:12358-12773"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:12409-12435"
+      "defined": "/Solitario.es.spell:12394-12420"
     },
     {
       "type": "Solitario",
@@ -809,7 +809,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:12802-14385"
+      "defined": "/Solitario.es.spell:12787-14370"
     }
   ],
   "codeLines": [

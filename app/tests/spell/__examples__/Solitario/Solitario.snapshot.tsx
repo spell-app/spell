@@ -144,10 +144,10 @@ export class Carta extends View {
 
   /** el "estado" de la carta, para depurar */
   get estado() {
-    const rango = this.valor === 10 ? 10 : `${core.getItemAt(this.rango, 0) ?? ""}`.toLocaleUpperCase()
-    const palo = this.símbolo
-    const dirección = this.estáBocaDirección("arriba") ? "↑" : "↓"
-    return rango + palo + dirección
+    const letra = this.valor === 10 ? 10 : `${core.getItemAt(this.rango, 0) ?? ""}`.toLocaleUpperCase()
+    const figura = this.símbolo
+    const flecha = this.estáBocaDirección("arriba") ? "↑" : "↓"
+    return letra + figura + flecha
   }
 
   //////////////////////////////////////////////////////
@@ -335,9 +335,9 @@ export class Comodín extends Carta {
   }
 
   get estado(): string {
-    const color = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
-    const dirección = this.estáBocaDirección("arriba") ? "↑" : "↓"
-    return `*${color}${dirección}`
+    const letra = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
+    const flecha = this.estáBocaDirección("arriba") ? "↑" : "↓"
+    return `*${letra}${flecha}`
   }
 }
 
@@ -562,9 +562,9 @@ export class Pila extends ViewableList<Carta> {
 
   /** estado de la pila, para depurar */
   @derived get estado() {
-    let estado = `${this.name || "pila"}:`
-    this.forEach((carta) => (estado = `${estado} ${carta.estado}`))
-    return estado
+    let resumen = `${this.name || "pila"}:`
+    this.forEach((carta) => (resumen = `${resumen} ${carta.estado}`))
+    return resumen
   }
 
   /** mientras una carta que tomaría está sobre ella, la puntuación muestra lo que sumaría -- se va al irse la carta */

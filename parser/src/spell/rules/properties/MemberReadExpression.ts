@@ -109,6 +109,22 @@ export class MemberReadExpression<
   }
 
   /**
+   * Warn where a local, argument or loop variable hides a property of the thing the action runs on, e.g.
+   * `set score to 3` in a game:  `Here "score" hides the property "score" ...` (epic `language`, Q2).
+   * - Allowed, but the same words then mean two things in one action:
+   *   called where a local is made, and where `the X` reads one, never for a bare read, which has one meaning.
+   * - Checked when the warnings are gathered (`SP.SpellWarnings.noteIf()`):  the property may be declared further down.
+   * - SIDE EFFECT:  notes it on `match`, under `at`.  Call it WHILE PARSING:  it keeps the type it finds now.
+   */
+  static warnIfHidesProperty(match: P.Match, at: P.Match): void {
+    const ownerType = P.MethodScope.thingTypeOf(match.scope)
+    if (!ownerType) return
+    const name = `${at.raw}`
+    const message = SP.Language.of(match.scope).parserMessage("hides-property", { name })
+    SP.SpellWarnings.noteIf(match, message, () => ownerType.hasProperty(name), at)
+  }
+
+  /**
    * Does spell know every member `type` has?  Only when the project declares it (no `stub` left),
    * and each of its super-types is the project's too, or spell's own (`Thing`, `List` ...), never an import.
    * - Reads the records as they are now:  a stub may be claimed after a read of it.

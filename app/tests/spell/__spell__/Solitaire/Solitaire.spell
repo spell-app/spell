@@ -173,10 +173,10 @@ to play a card
 to put a card on a pile
 	set start pile to the pile of the card
 	if start pile cannot give up the card return no
-	if the pile cannot take the card return no
-	set points to count the points for the card on the pile
+	if pile cannot take the card return no
+	set points to count the points for the card on pile
 	for each card in (cards in start pile starting with the card)
-		move it to the pile
+		move it to pile
 	if the start pile is a tableau and the start pile is not empty
 		pause for 200 msec
 		turn the last card of the start pile face up
@@ -186,7 +186,7 @@ to put a card on a pile
 
 // what the move scores:  10 on a foundation, 5 from the discards, else nothing
 to count the points for a card on a pile
-	if the pile is a foundation return 10
+	if pile is a foundation return 10
 	if the pile of the card is the discards of the solitaire return 5
 	return 0
 

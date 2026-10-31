@@ -120,6 +120,7 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       else if (scopeVar.isAlias) variables.replace({ name: scopeVar.name, datatype, declaredBy: match })
       // Remember the original scopeVar for `getAST()` below
       match.data.originalVar = scopeVar
+      if (match.data.isNewVariable) MemberReadExpression.warnIfHidesProperty(match, identifier)
       if (match.data.isNewVariable && datatype === "list") AssignmentStatement.warnListOfNothing(match, identifier)
     } else {
       this.declareProperty(match)

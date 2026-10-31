@@ -18,10 +18,10 @@ a "pile" is a viewable list of cards:
 		the value of its last card otherwise
 	// Its name, then its cards' short names:  stock: Q♠↑ 7♥↓
 	- its "state" is:
-		set state to (its name or "pile") + ":"
+		set summary to (its name or "pile") + ":"
 		for each card in the pile
-			set state to state + " " + the state of the card
-		return state
+			set summary to summary + " " + the state of the card
+		return summary
 
 	- to test piles:
 		set the stock to a new pile with name = "stock"

@@ -193,7 +193,7 @@
           "ruleNames": ["text"],
           "internal": false,
           "file": "src/spell/rules/core/TextLiteral.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Literal `text` string.",
           "syntaxes": [
             {
@@ -437,7 +437,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
           "syntaxes": [
             {
