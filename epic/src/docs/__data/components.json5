@@ -5147,7 +5147,7 @@
         {
           "name": "run",
           "kind": "string",
-          "description": "The run's id:  its folder's name in the content folder's `pages/runs/` (`spell-translate-20261023-1912`)."
+          "description": "The run's id:  its folder's name in the epic folder's `pages/runs/` (`spell-translate-20261023-1912`)."
         }
       ],
       "slots": [],
