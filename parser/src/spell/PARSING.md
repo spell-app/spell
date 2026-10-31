@@ -721,6 +721,11 @@ A kind that says so is saved in a file of its own.
   - What a LATER line or file may settle:  `SP.SpellWarnings.noteIf(match, message, stillHolds, at?)`.
     - `in()` reports it only while `stillHolds()`.
     - It's asked then, with what the whole project declares by then.
+  - What only a whole-project pass can say, while compiling (epic `data` P12):  `P.WriterOptions.noteForAuthor`, which
+    `SP.SpellProject.combineCompiled()` hands every writer.
+    - A writer words nothing:  it knows no language.  `SP.SpellWarnings.noteRead()` words it, and notes it on the line it's about,
+      so it joins the same list.
+    - It's there once a compile has run, not after a parse alone.
   - So far:
     - a property with no type, or a list of nothing said (`define_property_has`)
     - a parameter with no type (`var_method_arg`)
@@ -1580,6 +1585,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
+- What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
+  into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
+  A project with no saved type compiles as it did.
 - A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
   - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
     a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.

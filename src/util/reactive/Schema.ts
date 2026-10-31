@@ -32,6 +32,9 @@ const METADATA = (Symbol as unknown as { metadata: symbol }).metadata
 // ## Schema
 ////////////////
 
+/** What says only where a prop is and what it reads:  see `Schema.located`. */
+const LOCATION_KEYS = new Set(["declaredAt", "readsFrom"])
+
 /** Key of a class's OWN schema, on the class itself -- see `schemaOf()`. */
 const SCHEMA = Symbol("schema")
 
@@ -44,6 +47,12 @@ export class Schema {
   declared = new Map<string, PropInfo>()
   /** Types seen in each undeclared prop of this class:  type names, or classes for objects. */
   observed = new Map<string, Array<string | Function>>()
+  /**
+   * What's said only of where a prop is and what it reads, by name:  a worked-out value, usually.
+   * - Beside `declared`, so nothing that lists what a class stores counts it:  it declares nothing to store.
+   * - See `declareProp()`.
+   */
+  located = new Map<string, Pick<PropInfo, "declaredAt" | "readsFrom">>()
 
   /** - `parent` is the schema of the class this one's class extends, if that's an `Observable` too. */
   constructor(public parent?: Schema) {}
@@ -51,6 +60,11 @@ export class Schema {
   /** What `name` is declared as, here or up the chain -- `undefined` if it's undeclared. */
   info(name: string): PropInfo | undefined {
     return this.declared.get(name) ?? this.parent?.info(name)
+  }
+
+  /** What's said of where `name` is and what it reads, here or up the chain:  stored or worked out. */
+  locationOf(name: string): Pick<PropInfo, "declaredAt" | "readsFrom"> | undefined {
+    return this.located.get(name) ?? this.declared.get(name) ?? this.parent?.locationOf(name)
   }
 
   /**
@@ -113,8 +127,14 @@ export function schemaOf(Class: Function): Schema {
  * Declare prop `name` of `Class`:  its type, default, legal values -- see `PropInfo`.
  * - What compiled spell calls, as `static { this.declareProp(...) }` in its class, or `Card.declareProp(...)` after it.
  * - Same runtime shape as `@prop(info)`:  both end up in `schemaOf(Class)`.
+ * - Saying only where it is, and what it reads (`declaredAt`, `readsFrom`):  it stores nothing, so it's noted beside
+ *   what's declared (`Schema.located`), and what lists a class's fields never sees it.
  */
 export function declareProp(Class: Function, name: string, info: PropInfo): void {
+  if (Object.keys(info).every((key) => LOCATION_KEYS.has(key))) {
+    schemaOf(Class).located.set(name, info)
+    return
+  }
   const { declared } = schemaOf(Class)
   // keep rules declared before it, from a line of their own:  see `declareRules()`
   const rules = declared.get(name)?.rules
@@ -221,14 +241,28 @@ export type PropInfo = {
    */
   undoable?: boolean
   /**
-   * The line that declares it, for the editor's side bar (`Places.originOf()`).
-   * - Nothing writes it yet:  epic `data`'s Gathering Reads phase has the compiler write it into each saved property's
-   *   declaration, and settles this shape.
+   * The line that declares it, for the editor's side bar (`Places.originOf()`), on a saved property or a worked-out value that reads a place.
+   * - The compiler writes it (epic `data` P12):  one small value per such property, in every build (J3).
+   * - A worked-out getter may declare only this and `readsFrom`, and still counts as worked out.
    */
   declaredAt?: PropDeclaredAt
+  /**
+   * The places a worked-out value reads, as the compiler found them (epic `data` P12):
+   * what one run can't say, a branch not taken, a list with nothing in it, a read through a memo.
+   */
+  readsFrom?: readonly string[]
+  /**
+   * Called when it's read and unset, with what it's read from:  a place's read may have left it out (`spell/parser/core/saved`).
+   * - Only on that path:  a set value's read costs nothing.
+   */
+  whenUnset?: (target: object) => void
 }
 
-/** Where a property is declared:  a file, and where its statement starts and ends in it. */
+/**
+ * Where a property is declared:  a file, and where its statement starts and ends in it.
+ * - The same shape as the parser's `P.DeclaredAt`, which an editor already goes to.
+ *   The command line's `CLI.DeclaredAt` (`uri`, `line`) is what it prints, worked out from this one.
+ */
 export type PropDeclaredAt = {
   /** Full path of its file, e.g. `@spell/examples/Solitaire/Card.spell`. */
   path: string

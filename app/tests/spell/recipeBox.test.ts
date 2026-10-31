@@ -264,6 +264,149 @@ start the recipe box
     await page.close()
   })
 
+  /** A graph service's first lines. */
+  const onGraph = (url: string) => `family cookbook is a graph service at "${url}/graphql":
+	- a recipe's title is called "name"
+	- it is checked every 500 seconds`
+
+  /** A recipe:  what its draw reads, and two fields nothing does. */
+  const RECIPE_TYPE = `a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- its "servings" is a number
+	- its "cuisine" is text
+	- its "notes" is text
+	- to draw it:
+		<ui-text class="title">{its title}</ui-text>
+		<ui-text class="servings">{its servings}</ui-text>`
+
+  /** A page whose second read is in what its first read draws:  it only shows up once the first has answered. */
+  const twoParts = (url: string): Program => ({
+    path: "/TwoParts.spell",
+    field: "title",
+    source: `${onGraph(url)}
+
+${RECIPE_TYPE}
+		<ui-text class="shelf">{the number of items in its indian}</ui-text>
+	- its "indian" is every recipe where its cuisine is "Indian"
+
+recipe box is an app:
+	- its "recipes shown" is every recipe
+	- to draw it:
+		for each recipe in the recipes shown
+			draw the recipe
+
+start the recipe box
+`
+  })
+
+  /** A page with one read, and fields it never reads. */
+  const oneRead = (url: string): Program => ({
+    path: "/OneRead.spell",
+    field: "title",
+    source: `${onGraph(url)}
+
+${RECIPE_TYPE}
+
+recipe box is an app:
+	- its "recipes shown" is every recipe
+	- to draw it:
+		for each recipe in the recipes shown
+			draw the recipe
+
+start the recipe box
+`
+  })
+
+  /** What the page asked the GraphQL service, from `from` on. */
+  const graphAsks = (from: number) => servers.box.asks.slice(from).filter(({ path }) => path === "/graphql")
+
+  /** `program`, compiled, then changed as `edit` says, and opened:  its page, with the first load settled. */
+  async function openedEdited(name: string, program: Program, edit: (code: string) => string) {
+    programs.set(`/programs/${name}.js`, edit(compiledProgram(program.path, program.source)))
+    programs.set(`/${name}.html`, pageFor(name))
+    const { page, problems } = await opened(`${servers.url}/${name}.html`)
+    await page.locator("ui-text.servings").first().waitFor(WAITING)
+    await page.waitForTimeout(300)
+    return { page, problems }
+  }
+
+  test("a first load:  ONE request where there were two", { timeout: 60_000 }, async () => {
+    const program = twoParts(servers.url)
+    expect(compiledProgram(program.path, program.source)).toContain("firstReads: () => [")
+
+    // what it did before:  what the compiler gathered taken out
+    let from = servers.box.asks.length
+    const before = await openedEdited("two-before", program, (code) =>
+      code.replace(/,\s*firstReads: \(\) => \[.*\] \}\)/, " })")
+    )
+    await expect.poll(() => before.page.locator("ui-text.shelf").first().textContent(), WAITING).toBe("2")
+    const asksBefore = graphAsks(from)
+    expect(before.problems).toEqual([])
+    await before.page.close()
+
+    from = servers.box.asks.length
+    const after = await openedEdited("two-after", program, (code) => code)
+    await expect.poll(() => after.page.locator("ui-text.shelf").first().textContent(), WAITING).toBe("2")
+    const asksAfter = graphAsks(from)
+    expect(await after.page.locator("ui-text.title").allTextContents()).toContain("Dal")
+    expect(after.problems).toEqual([])
+    await after.page.close()
+
+    expect(asksBefore).toHaveLength(2)
+    expect(asksAfter).toHaveLength(1)
+  })
+
+  test(
+    "it asks only for what's read:  a view's element mirroring the rest doesn't count",
+    { timeout: 60_000 },
+    async () => {
+      const from = servers.box.asks.length
+      const { page, problems } = await openedEdited("selected", oneRead(servers.url), (code) => code)
+      expect(await page.locator("ui-text.title").allTextContents()).toContain("Dal")
+      const asks = graphAsks(from)
+      expect(asks).toHaveLength(1)
+      const asked = `${asks[0]!.body!.query as string}`
+      expect(asked).not.toContain("notes")
+      expect(asked).toContain("servings")
+      expect(problems).toEqual([])
+      await page.close()
+    }
+  )
+
+  test(
+    "a field the compiler missed still appears:  one more request, and it's there",
+    { timeout: 60_000 },
+    async () => {
+      const from = servers.box.asks.length
+      const { page, problems } = await openedEdited("missed", oneRead(servers.url), (code) => {
+        expect(code).toContain('select: ["title", "servings"]')
+        return code.replace('select: ["title", "servings"]', 'select: ["servings"]')
+      })
+      await expect.poll(() => page.locator("ui-text.title").allTextContents(), WAITING).toContain("Dal")
+      const asks = graphAsks(from)
+      expect(asks).toHaveLength(2)
+      expect(`${asks[0]!.body!.query as string}`).not.toContain("name")
+      expect(`${asks[1]!.body!.query as string}`).toContain("notes")
+      expect(problems).toEqual([])
+      await page.close()
+    }
+  )
+
+  test(
+    "the recipe box's own first load:  one read, so one request, before and after",
+    { timeout: 60_000 },
+    async () => {
+      const from = servers.box.asks.length
+      const { page, problems } = await opened(serve("one-read", withPlace(english(), BACK_ENDS.REST!(servers.url))))
+      await page.locator("ui-form.recipe").first().waitFor(WAITING)
+      const reads = servers.box.asks.slice(from).filter(({ path, method }) => method === "GET" && path === "/recipes")
+      expect(reads).toHaveLength(1)
+      expect(problems).toEqual([])
+      await page.close()
+    }
+  )
+
   test("riders:  if that fails shows, and Try again reads again", { timeout: 60_000 }, async () => {
     const down = `family cookbook is a web service at "${servers.url}/flaky":
 	- it is checked every 500 seconds`

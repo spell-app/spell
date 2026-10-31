@@ -1,3 +1,4 @@
+import type { PlaceBatch } from "./PlaceBatch"
 import {
   PlaceError,
   canDoAll,
@@ -40,8 +41,11 @@ export class PlaceQuery {
   private readonly query: ListQuery
   /** What the place is asked for:  `query`, less what can't be left to it. */
   private readonly ask: ListQuery
+  /** Joins what's asked in the same moment into one request, if the place can. */
+  private readonly batch: PlaceBatch | undefined
 
-  constructor({ placeName, place, collection, query }: PlaceQueryProps) {
+  constructor({ placeName, place, collection, query, batch }: PlaceQueryProps) {
+    this.batch = batch
     this.placeName = placeName
     this.place = place
     this.collection = collection
@@ -108,7 +112,9 @@ export class PlaceQuery {
 
   /** One `list()` of the place.  - throws once `signal` has aborted, even if the place answered */
   private async list(query: ListQuery, signal: AbortSignal): Promise<ListAnswer> {
-    const answer = await this.place.list(this.collection, query, { signal })
+    const answer = this.batch
+      ? await this.batch.list(this.place, this.collection, query, { signal })
+      : await this.place.list(this.collection, query, { signal })
     signal.throwIfAborted()
     return answer
   }
@@ -163,6 +169,8 @@ export type PlaceQueryProps = {
   collection: string
   /** What's wanted. */
   query: ListQuery
+  /** Joins what's asked in the same moment into one request, if the place can.  Left out:  each asks alone. */
+  batch?: PlaceBatch
 }
 
 ////////////////

@@ -436,7 +436,7 @@ export type SavedOrigin = {
   whyNot?: WhyNotWritable
   /** Is a sample behind the name now, so the real place can't be touched? */
   isSample: boolean
-  /** The line that declares this property.  Absent until the compiler writes it (epic `data`, Gathering Reads). */
+  /** The line that declares this property, from what the compiler wrote into its declaration (epic `data` P12). */
   declaredAt?: PropDeclaredAt
 }
 
@@ -448,7 +448,7 @@ export type WorkedOutOrigin = {
   canWrite: false
   /** The name of each place it read this time. */
   readsFrom: string[]
-  /** The line that works it out.  Absent until the compiler writes it (epic `data`, Gathering Reads). */
+  /** The line that works it out, from what the compiler wrote into its declaration (epic `data` P12). */
   declaredAt?: PropDeclaredAt
 }
 

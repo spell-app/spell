@@ -114,6 +114,7 @@ export function getProp<T>(target: any, property: string, initializer?: () => T)
   let info: PropInfo | undefined
   if (!initializer) {
     info = declared(target, property)
+    info?.whenUnset?.(target)
     initializer = info?.init as (() => T) | undefined
     if (!initializer) return defaultFor(info)
   }

@@ -277,6 +277,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
     a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
     the last one letting go aborts its request.  It still hears rows, so its list stays true.
+  - What the compiler gathered (`P.ReadGathering`, epic `data` P12), and the running page's half:
+    - `firstReads`, on the place's line:  what a first draw reads, asked for together when the place is first read, each
+      held a while for the draw that wants it.  Two or more only:  a read alone asks for itself.
+    - `select`, on a type's `savedIn`:  the fields anything reads, only for a place that can leave the rest out.
+    - A left-out field read anyway (`PropInfo.whenUnset`, which costs only a read that finds nothing set):  every read of
+      that type asks once more, for all of it, and whoever read the field sees it appear, by its cell.
+    - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
+    - A type a program removes is read whole:  undo writes the whole row back.
   - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.

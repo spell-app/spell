@@ -23,7 +23,7 @@
 ////////////////
 
 /** Shape version of `CellsContext` -- see the header. */
-const CONTEXT_VERSION = 1
+const CONTEXT_VERSION = 2
 
 /** Key of the page's `CellsContext` on `globalThis`. */
 const CONTEXT_KEY = Symbol.for("spell:cells")
@@ -81,6 +81,27 @@ export function untrackCells<T>(fn: () => T): T {
   } finally {
     cellsContext.collector = outer
   }
+}
+
+/**
+ * Run `show` for what only SHOWS a value and needs nothing from it, e.g. an element mirroring its thing's properties
+ * as attributes for the browser's inspector.
+ * - A reader still follows what it reads:  so what's shown stays true.
+ * - But it doesn't count as needing the value:  see `PropInfo.whenUnset`, `isOnlyShowing()`.
+ */
+export function whileOnlyShowing<T>(show: () => T): T {
+  const outer = cellsContext.isOnlyShowing
+  cellsContext.isOnlyShowing = true
+  try {
+    return show()
+  } finally {
+    cellsContext.isOnlyShowing = outer
+  }
+}
+
+/** Is what's reading now only showing it?  See `whileOnlyShowing()`. */
+export function isOnlyShowing(): boolean {
+  return cellsContext.isOnlyShowing
 }
 
 /**
@@ -221,6 +242,8 @@ export type CellsContext = {
   checkScheduled: boolean
   /** Each host's own flush, e.g. Solid's -- see `flushCells()`. */
   hostFlushes: Set<() => void>
+  /** Is what's reading now only showing it?  See `whileOnlyShowing()`. */
+  isOnlyShowing: boolean
   /** Each Solid's `enableExternalSource` we've bridged, so we bridge each once -- see `bridgeSolid()`. */
   bridged: WeakSet<Function>
 }
@@ -251,6 +274,7 @@ function sharedContext(): CellsContext {
     pending: new Set(),
     checkScheduled: false,
     hostFlushes: new Set(),
+    isOnlyShowing: false,
     bridged: new WeakSet()
   }
   Object.defineProperty(holder, CONTEXT_KEY, { value: context })

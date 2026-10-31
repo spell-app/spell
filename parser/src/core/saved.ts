@@ -13,6 +13,11 @@
  *   place never loads it.  `places.ts`, which does know `core`, is in the runtime itself.
  * - What drives the things is the read's own `changes` cell:  a memo reading `core.savedThings()` follows it, so a new
  *   answer, a write or a heal runs the memo again.  `PlaceThings.thingsFrom()` runs inside that, never by itself (J).
+ * - What the compiler gathered (epic `data` P12), and what it couldn't see:
+ *   - `firstReads`, on the place's line:  everything a first draw reads from it, asked for together when it's first read.
+ *   - `select`, on a type's `savedIn`:  the fields anything reads, for a place that can leave the rest out.
+ *   - A field it left out and something read anyway (`PropInfo.whenUnset`):  the place is asked once more, for all of them.
+ *     Whoever read it follows the field, so it appears.
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
@@ -22,7 +27,7 @@ import h from "@solidjs/h"
 import { createComponent } from "@solidjs/web"
 import { Errored, For, Loading, createMemo, getOwner, onCleanup } from "solid-js"
 
-import { Cell, untrackCells } from "spell/util/reactive"
+import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/util/places"
 import type { Places } from "spell/util/places/Places"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
@@ -30,10 +35,10 @@ import type { ListQuery, Place as PlaceBehind, PlaceRow } from "spell/util/place
 import type { PlaceRowsChange } from "spell/util/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
-import { core, whileReading } from "./core"
+import { core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
-import { placeBehind, type PlaceDetails } from "./placeKinds"
+import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
 import { standInFor } from "./waiting"
 // Import directly to avoid circular import
@@ -55,6 +60,8 @@ export type SavedIn = {
   place: string
   /** The collection its things are in. */
   collection: string
+  /** The fields anything reads, as the compiler found them:  a place that can leave the rest out does.  Left out:  every field. */
+  select?: readonly string[]
 }
 
 /** What a rider says to draw:  see `core.drawRead()`. */
@@ -67,8 +74,14 @@ export type ReadRiders = {
   failed?: () => Drawing
 }
 
+/** A row's id, always asked for:  it's what makes it one row. */
+const ID_FIELD = "id"
+
 /** The kinds whose mapping says where a collection is, while it keeps its own name for the engine. */
 const KEEP_THEIR_OWN_NAME = new Set(["web service", "graph service"])
+
+/** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
+const FIRST_READ_WAITS = 5_000
 
 /** Each run's places:  a new run has its own. */
 const PROGRAMS = new WeakMap<object, ProgramPlaces>()
@@ -162,7 +175,7 @@ class ProgramPlaces {
         ? placeBehind({ details, folder: this.folder!, collection, Class })
         : (thing.makePlace(details, this.folder) as PlaceBehind)
       this.places!.add(name, behind)
-    }
+    } else if (details.kind) knowCollection(behind, { details, folder: this.folder!, collection, Class })
     return { name, collection, behind }
   }
 
@@ -174,10 +187,82 @@ class ProgramPlaces {
     return read
   }
 
+  /** What a first draw reads from the place `Class` is saved in, asked for now:  once per place. */
+  askFirstReads(Class: SavedClass): void {
+    const { place } = savedInOf(Class)
+    if (this.askedFirst.has(place)) return
+    this.askedFirst.add(place)
+    try {
+      for (const [ReadClass, query = {}] of this.declared.get(place)?.details.firstReads?.() ?? []) {
+        this.readOf(ReadClass as SavedClass, query).askAhead()
+      }
+    } catch (ignored) {
+      // only a head start:  each read still asks for itself
+      console.error("core.savedThings():  couldn't ask for what a first draw reads", ignored)
+    }
+  }
+
+  /** Each place whose first reads have gone. */
+  private readonly askedFirst = new Set<string>()
+
   /** Make what `start()` needs of a read:  a result, read by nobody yet. */
   newResult(Class: SavedClass, query: ListQuery): PlaceResult {
-    const { name, collection } = this.placeFor(Class)
-    return this.places!.read({ placeName: name, collection, type: Class.name, query })
+    const { name, collection, behind } = this.placeFor(Class)
+    const select = this.selectionFor(Class, behind)
+    return this.places!.read({
+      placeName: name,
+      collection,
+      type: Class.name,
+      query: select ? { ...query, select } : query
+    })
+  }
+
+  /** The fields to ask `behind` for, of `Class`:  only when it can leave the rest out, and nothing's been missed. */
+  private selectionFor(Class: SavedClass, behind: PlaceBehind): readonly string[] | undefined {
+    const { select } = savedInOf(Class)
+    if (!select || this.askedWhole.has(Class)) return undefined
+    const { select: canSelect, idOf = ID_FIELD } = behind.describe()
+    if (!this.folder!.canDoAll(canSelect, select)) return undefined
+    this.heedFieldsLeftOut(Class, select)
+    // its id too:  it's what makes it one thing
+    return select.includes(idOf) ? select : [...select, idOf]
+  }
+
+  /** The classes something read a left-out field of:  read whole from now on. */
+  private readonly askedWhole = new Set<SavedClass>()
+  /** The classes whose left-out fields are being listened for. */
+  private readonly heeded = new Set<SavedClass>()
+
+  /**
+   * SIDE EFFECT:  a read of a field `select` leaves out, on a thing from a place, asks the place again:  see the header.
+   * - Costs only a read that finds nothing set.
+   * - Not what's being read in, or what only shows it (`whileOnlyShowing()`).
+   */
+  private heedFieldsLeftOut(Class: SavedClass, select: readonly string[]): void {
+    if (this.heeded.has(Class)) return
+    this.heeded.add(Class)
+    const selected = new Set([...select, ID_FIELD])
+    const schema = schemaOf(Class)
+    const seen = new Set<string>()
+    for (let each: typeof schema | undefined = schema; each; each = each.parent) {
+      for (const [name, info] of each.declared) {
+        if (seen.has(name)) continue
+        seen.add(name)
+        if (selected.has(name)) continue
+        const whenUnset = (target: object) => {
+          if (isOnlyShowing() || isWhileReading()) return
+          if (this.things?.placeOf(target as Thing)) this.askWhole(Class)
+        }
+        schema.declared.set(name, { ...info, whenUnset })
+      }
+    }
+  }
+
+  /** Something read a field `Class`'s reads left out:  every one of them asks again, once, for the whole thing. */
+  private askWhole(Class: SavedClass): void {
+    if (this.askedWhole.has(Class)) return
+    this.askedWhole.add(Class)
+    for (const read of this.reads.values()) if (read.Class === Class) void read.askWhole()
   }
 
   /** Each thing `result` holds, made or changed in place. */
@@ -289,6 +374,31 @@ class SavedRead {
     }
     this.holders++
     onCleanup(() => this.letGo())
+  }
+
+  /**
+   * Ask for it now, before anything draws it:  what a first draw reads, together (`PlaceDetails.firstReads`).
+   * - Held a while after its answer, so the draw that wants it finds it there, with no second request.
+   */
+  askAhead(): void {
+    this.holders++
+    const letGo = () => void setTimeout(() => this.letGo(), FIRST_READ_WAITS)
+    void this.answer().then(letGo, letGo)
+  }
+
+  /** It was asked with some fields left out, and something read another:  ask again for the whole thing.  NEVER throws. */
+  async askWhole(): Promise<void> {
+    const old = this.result
+    this.stopPolling?.()
+    this.result = undefined
+    this.answered = undefined
+    try {
+      await this.answer()
+    } catch (ignored) {
+      // what's showing stays, and the next read says what's wrong
+    } finally {
+      old?.leave()
+    }
   }
 
   /** One less is holding it:  with none, soon, it leaves, so a computation running again keeps it. */
@@ -469,7 +579,9 @@ export const savedMethods = defineCoreModule({
     query: ListQuery = {},
     how?: "looks through"
   ): Promise<List<InstanceType<Class>>> {
-    const read = programPlaces().readOf(Class as unknown as SavedClass, query)
+    const program = programPlaces()
+    program.askFirstReads(Class as unknown as SavedClass)
+    const read = program.readOf(Class as unknown as SavedClass, query)
     read.changes.read()
     read.hold()
     const list = await read.answer()

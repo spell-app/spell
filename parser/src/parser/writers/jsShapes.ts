@@ -34,6 +34,17 @@ export function isCoreCall(node: P.ASTNode): boolean {
   return node instanceof P.ASTScopedMethodInvocation && node.thing instanceof P.ASTCoreExpression
 }
 
+/** The text object literal `object` holds under `name`:  `{ name: "x" }`, a string it wrote out or one written as code. */
+export function objectText(object: P.ASTObjectLiteral, name: string): string | undefined {
+  for (const property of object.properties ?? []) {
+    if (!(property instanceof P.ASTObjectLiteralProperty) || property.property.value !== name) continue
+    if (!(property.value instanceof P.ASTStringLiteral)) return undefined
+    const { value, quote } = property.value
+    return quote ? value : (JSON.parse(value) as string)
+  }
+  return undefined
+}
+
 /** Is `node` the number `value` written out, e.g. `-1`? */
 export function isNumber(node: P.ASTExpression | undefined, value: number): boolean {
   const inner = node && unwrapped(node)

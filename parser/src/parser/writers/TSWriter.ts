@@ -645,7 +645,8 @@ export class TSWriter extends JSWriter {
       const getter = this.methodNamed(node.get, `get ${name}`)
       // never remembered over a value that waits:  it'd stay wrong for good (epic `language` P8)
       const remembered = loopsOverAList(node.get) && !this.project.waitingValues.has(node.property.value)
-      return remembered ? `@derived ${getter}` : getter
+      const declared = this.workedOutDeclaration(node, "this")
+      return [declared, remembered ? `@derived ${getter}` : getter].filter(Boolean).join(jsText.NEWLINE)
     }
     if (name === "draw") {
       const drawing = `@drawn ${this.drawMethod(node.method!)}`
@@ -681,6 +682,8 @@ export class TSWriter extends JSWriter {
     })
     if (node.initializer) parts.push(`init: () => ${this.bare(node.initializer)}`)
     if (this.madeEarly(node)) parts.push("early: true")
+    const declaredAt = this.declaredAtOf(node)
+    if (declaredAt) parts.push(declaredAt)
     return parts.length ? `{ ${parts.join(", ")} }` : undefined
   }
 
