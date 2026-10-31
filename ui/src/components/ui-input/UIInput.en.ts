@@ -43,6 +43,7 @@ const INPUT_TYPES = [
 export const inputVocabulary = {
   tag: "ui-input",
   icon: "i cursor",
+  snippet: '<ui-input placeholder="Type here"></ui-input>',
   formControl: true,
   topics: ["forms", "inputs", "controls", "text", "basic", "elements"],
   aka: ["text field", "text box", "textbox", "input field", "search box"],

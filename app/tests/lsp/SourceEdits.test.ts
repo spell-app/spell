@@ -200,3 +200,131 @@ describe("SourceHomes", () => {
     expect(SourceHomes.ofAttribute(text, 0, "basic")?.kind).toBe("notWritten")
   })
 })
+
+describe("SourceEdits, on whole elements", () => {
+  const APP = [
+    "<draw>",
+    "\t<ui-container>",
+    "\t\t// a comment stays where it is",
+    "\t\t<ui-button>One</ui-button>",
+    '\t\t<ui-card heading="Two">',
+    "\t\t\t<ui-text>Inside</ui-text>",
+    "\t\t</ui-card>",
+    "\t\t<ui-divider/>",
+    "\t</ui-container>",
+    "</draw>",
+    ""
+  ].join("\n")
+  const at = (text: string, tag: string) => text.indexOf(`<${tag}`)
+
+  test("an element runs to its own closing tag, through what's inside it", () => {
+    const card = SourceEdits.elementAt(APP, at(APP, "ui-card"))!
+    expect(APP.slice(card.start, card.end)).toBe(
+      '<ui-card heading="Two">\n\t\t\t<ui-text>Inside</ui-text>\n\t\t</ui-card>'
+    )
+    const divider = SourceEdits.elementAt(APP, at(APP, "ui-divider"))!
+    expect(APP.slice(divider.start, divider.end)).toBe("<ui-divider/>")
+    expect(divider.bodyStart).toBeUndefined()
+  })
+
+  test("Spell's own closer closes what's open", () => {
+    const text = '<property "x">a thing</> <after/>'
+    const element = SourceEdits.elementAt(text, 0)!
+    expect(text.slice(element.start, element.end)).toBe('<property "x">a thing</>')
+  })
+
+  test("written beside an element, it takes that element's indent, on its own line", () => {
+    const { text, start } = SourceEdits.written(
+      APP,
+      { opening: at(APP, "ui-button"), where: "after" },
+      "<ui-label>New</ui-label>"
+    )
+    expect(text).toContain("\t\t<ui-button>One</ui-button>\n\t\t<ui-label>New</ui-label>\n\t\t<ui-card")
+    expect(text.startsWith("<ui-label", start)).toBe(true)
+    const before = SourceEdits.written(
+      APP,
+      { opening: at(APP, "ui-button"), where: "before" },
+      "<ui-label>New</ui-label>"
+    )
+    expect(before.text).toContain("\t\t<ui-label>New</ui-label>\n\t\t<ui-button>One</ui-button>")
+    expect(before.text.startsWith("<ui-label", before.start)).toBe(true)
+  })
+
+  test("written inside, it goes last, a step further in", () => {
+    const { text, start } = SourceEdits.written(
+      APP,
+      { opening: at(APP, "ui-card"), where: "inside" },
+      "<ui-label>New</ui-label>"
+    )
+    expect(text).toContain("<ui-text>Inside</ui-text>\n\t\t\t<ui-label>New</ui-label>\n\t\t</ui-card>")
+    expect(text.startsWith("<ui-label", start)).toBe(true)
+  })
+
+  test("inside a tag closed with />, it opens to hold it", () => {
+    const { text, start } = SourceEdits.written(
+      APP,
+      { opening: at(APP, "ui-divider"), where: "inside" },
+      "<ui-label>New</ui-label>"
+    )
+    expect(text).toContain("\t\t<ui-divider>\n\t\t\t<ui-label>New</ui-label>\n\t\t</ui-divider>")
+    expect(text.startsWith("<ui-label", start)).toBe(true)
+  })
+
+  test("a file indented with spaces gets spaces", () => {
+    const spaced = "<draw>\n  <ui-card></ui-card>\n</draw>\n"
+    const { text } = SourceEdits.written(spaced, { opening: at(spaced, "ui-card"), where: "inside" }, "<ui-label/>")
+    expect(text).toBe("<draw>\n  <ui-card>\n    <ui-label/>\n  </ui-card>\n</draw>\n")
+  })
+
+  test("moved down and in:  each keeps its words, only those lines change", () => {
+    const button = SourceEdits.elementAt(APP, at(APP, "ui-button"))!
+    const { text, starts } = SourceEdits.moved(APP, [button], { opening: at(APP, "ui-card"), where: "inside" })
+    expect(text).toContain("\t\t// a comment stays where it is\n\t\t<ui-card")
+    expect(text).toContain("<ui-text>Inside</ui-text>\n\t\t\t<ui-button>One</ui-button>\n\t\t</ui-card>")
+    expect(text.startsWith("<ui-button", starts[0]!)).toBe(true)
+  })
+
+  test("moved up:  a block keeps its shape, with its new indent", () => {
+    const card = SourceEdits.elementAt(APP, at(APP, "ui-card"))!
+    const { text } = SourceEdits.moved(APP, [card], { opening: at(APP, "ui-container"), where: "before" })
+    expect(text).toContain(
+      '<draw>\n\t<ui-card heading="Two">\n\t\t<ui-text>Inside</ui-text>\n\t</ui-card>\n\t<ui-container>'
+    )
+  })
+
+  test("several move together, in the order they're written", () => {
+    const button = SourceEdits.elementAt(APP, at(APP, "ui-button"))!
+    const divider = SourceEdits.elementAt(APP, at(APP, "ui-divider"))!
+    const { text, starts } = SourceEdits.moved(APP, [divider, button], { opening: at(APP, "ui-card"), where: "before" })
+    expect(text).toContain("\t\t<ui-button>One</ui-button>\n\t\t<ui-divider/>\n\t\t<ui-card")
+    expect(text.startsWith("<ui-button", starts[0]!)).toBe(true)
+    expect(text.startsWith("<ui-divider", starts[1]!)).toBe(true)
+  })
+
+  test("nothing goes inside itself", () => {
+    const card = SourceEdits.elementAt(APP, at(APP, "ui-card"))!
+    expect(() => SourceEdits.moved(APP, [card], { opening: at(APP, "ui-text"), where: "after" })).toThrow(TypeError)
+  })
+
+  test("without an element, its line goes;  sharing a line, only it does", () => {
+    const button = SourceEdits.elementAt(APP, at(APP, "ui-button"))!
+    expect(SourceEdits.without(APP, [button])).not.toContain("One")
+    expect(SourceEdits.without(APP, [button]).split("\n")).toHaveLength(APP.split("\n").length - 1)
+    const shared = "<a/> <b/>\n"
+    expect(SourceEdits.without(shared, [{ start: 5, end: 9 }])).toBe("<a/>\n")
+  })
+
+  test("the edit between two texts is whole lines, enough to find again, and makes the same text", () => {
+    const button = SourceEdits.elementAt(APP, at(APP, "ui-button"))!
+    for (const after of [
+      SourceEdits.without(APP, [button]),
+      SourceEdits.written(APP, { opening: button.start, where: "after" }, "<ui-label/>").text,
+      SourceEdits.moved(APP, [button], { opening: at(APP, "ui-divider"), where: "after" }).text
+    ]) {
+      const { edit, span, newText } = SourceEdits.editBetween(APP, after)
+      expect(SourceEdits.applied(APP, [edit])).toBe(after)
+      expect(newText.length).toBeGreaterThan(0)
+      expect(span.end).toBeGreaterThan(span.start)
+    }
+  })
+})

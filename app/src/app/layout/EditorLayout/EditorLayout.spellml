@@ -7,6 +7,7 @@ The code's column stays where it is when it isn't showing, hidden:  so nothing m
 	<property "code" description="The file tabs and the code">a thing</>
 	<property "program panel" description="The program's output and compiled code, under the code">a thing</>
 	<property "app" description="The running program">a thing</>
+	<property "palette" description="What can be added, while it's kept open">a thing</>
 	<property "inspector" description="The Inspector, while it's open">a thing</>
 	<property "columns" description="The sizes across, as they were last dragged">text</>
 	<property "code rows" description="The sizes of the code and the Program panel">text</>
@@ -19,6 +20,7 @@ The code's column stays where it is when it isn't showing, hidden:  so nothing m
 				{draw its program panel}
 			</ui-split-panel>
 			{draw its app}
+			{draw its palette}
 			{draw its inspector}
 		</ui-split-panel>
 	</draw>

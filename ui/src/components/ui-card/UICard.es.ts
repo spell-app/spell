@@ -10,6 +10,7 @@ export const cardEs = {
   lang: "es",
   tag: "ui-card",
   name: "tarjeta",
+  snippet: '<es-tarjeta encabezado="Una tarjeta" descripcion="Lo que dice"></es-tarjeta>',
   aka: ["tarjeta", "ficha", "panel", "tarjeta de perfil"],
   attributes: { dashed: "discontinuo", meta: "meta", extra: "extra" },
   parts: { card: "tarjeta" },

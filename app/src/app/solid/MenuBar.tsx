@@ -16,6 +16,7 @@ import {
   LineNumbers,
   PANEL_TEXTS,
   PROJECT_ICON,
+  PartMenuItems,
   ProgramPanelShown,
   followTabTitle,
   on,
@@ -297,6 +298,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
       <BarMenu id="EditBarMenu" label={appTexts.text("menuEdit")} name={appTexts.text("menuEdit")}>
         <Actions.undo menu />
         <Actions.redo menu />
+        <Divider />
+        <PartMenuItems />
         <Divider />
         <Actions.find menu />
         <Divider />

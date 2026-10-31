@@ -10,6 +10,7 @@ export const checkboxEs = {
   lang: "es",
   tag: "ui-checkbox",
   name: "casilla",
+  snippet: '<es-casilla etiqueta="Sí, por favor"></es-casilla>',
   aka: ["casilla de verificación", "casilla", "interruptor", "conmutador"],
   attributes: { type: "tipo", "off-value": "valor-apagado" }
 } as const satisfies E.TagDictionary

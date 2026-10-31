@@ -10,6 +10,7 @@ export const containerEs = {
   lang: "es",
   tag: "ui-container",
   name: "contenedor",
+  snippet: "<es-contenedor></es-contenedor>",
   aka: ["contenedor", "envoltorio", "ancho de página", "ancho de contenido"],
   attributes: { grid: "cuadricula" },
   parts: { container: "contenedor" }

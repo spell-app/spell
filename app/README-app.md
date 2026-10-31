@@ -538,6 +538,23 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 
 **Not yet:**  an event's code typed there isn't written back into the code.
 
+### Adding and moving what's on the page
+
+The `+` in the top bar opens a palette of what can be added:  click adds it beside what's selected, drag places it.
+- What it offers is every component whose vocabulary has a `snippet`, the tag it writes, with its Spanish in its dictionary.
+- The pin in its header keeps it open as a pane, remembered.
+
+Dragging a selected part, or a row of the Views tree, moves it.
+A line shows where it would land between its neighbours, or a ring round what it would go in:
+moving goes by the flow, never by x and y, so what's written stays readable.
+
+Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+Each gesture is one undo step, and only its own lines of the program change.
+
+**Its edge:**  only what has a tag of its own in the source can change.
+A card a deck makes in a loop says why it can't, and offers nothing else yet.
+A program written in outline style with no `<draw>` has nowhere to add to, and says so.
+
 ### Themes, and their code colours
 
 The palette button at the top bar's right picks light, dark or auto, and one of Spell's four themes:

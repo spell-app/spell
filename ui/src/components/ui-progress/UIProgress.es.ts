@@ -10,6 +10,7 @@ export const progressEs = {
   lang: "es",
   tag: "ui-progress",
   name: "progreso",
+  snippet: "<es-progreso></es-progreso>",
   aka: ["progreso", "barra de progreso", "medidor", "porcentaje", "progreso de subida"],
   attributes: {
     indicating: "indicador",

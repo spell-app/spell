@@ -331,6 +331,11 @@ export type ComponentVocabulary = {
    * - None:  the list's own default.
    */
   icon?: string
+  /**
+   * What the editor's palette adds to a program, as Spell's tag-shaped form writes it:  `<ui-button>Click me</ui-button>`.
+   * - None:  it isn't offered there:  a part of another tag, or a tool for people writing code.
+   */
+  snippet?: string
   /** Class-grammar noun, emitted last by `ClassBuilder`, e.g. `card` (`ui red card`). */
   noun: string
   /** Group noun, e.g. `cards` for `<ui-cards>`. */
@@ -591,6 +596,8 @@ export type ComponentDictionary = {
  *   Spell UI's `components.es.ts`.
  */
 export type TagDictionary = ComponentDictionary & {
+  /** The palette's snippet in this language:  `ComponentVocabulary.snippet`, as a program in it writes it. */
+  snippet?: string
   /** BCP 47 language tag, e.g. `es`. */
   lang: string
   /** The canonical tag it translates, e.g. `ui-button`. */

@@ -10,6 +10,7 @@ export const dividerEs = {
   lang: "es",
   tag: "ui-divider",
   name: "divisor",
+  snippet: "<es-divisor></es-divisor>",
   aka: ["divisor", "separador", "línea horizontal", "regla", "línea"],
   attributes: { spacer: "espaciador", section: "seccion" }
 } as const satisfies E.TagDictionary

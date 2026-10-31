@@ -13,7 +13,11 @@ import {
   Inspector,
   InspectorPane,
   InspectHelp,
+  AddPartButton,
   InspectAppButton,
+  Palette,
+  PalettePane,
+  PartMenu,
   InspectorToggle,
   ModeButtons,
   OutputEditor,
@@ -66,6 +70,7 @@ import "./SpellEditor.css"
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
+ * - The palette, while it's kept open (`Palette.isPinned`), is a pane left of the Inspector.
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
@@ -78,7 +83,7 @@ export function SpellEditor(props: { mode: Mode }) {
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen))
+  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen, Palette.isPinned))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
@@ -109,6 +114,15 @@ export function SpellEditor(props: { mode: Mode }) {
         </div>
       )
     },
+    palette: {
+      draw: () => (
+        <Show when={!isRunning() && Palette.isPinned}>
+          <div class="SplitPane">
+            <PalettePane />
+          </div>
+        </Show>
+      )
+    },
     inspector: {
       draw: () => (
         <Show when={Inspector.isOpen}>
@@ -132,6 +146,7 @@ export function SpellEditor(props: { mode: Mode }) {
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
+      <PartMenu />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
@@ -142,6 +157,7 @@ export function SpellEditor(props: { mode: Mode }) {
               {parts.programPanel.draw()}
             </ui-split-panel>
             {parts.app.draw()}
+            {parts.palette.draw()}
             {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
@@ -349,10 +365,12 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; sizes: string } {
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting) return { id, sizes: "" }
-  return { id, sizes: isRunning ? "*,380px" : "*,*,380px" }
+function columnsFor(isRunning: boolean, isInspecting: boolean, isPinned: boolean): { id: string; sizes: string } {
+  const hasPalette = isPinned && !isRunning
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${hasPalette ? "-palette" : ""}${isInspecting ? "-inspector" : ""}`
+  if (!isInspecting && !hasPalette) return { id, sizes: "" }
+  const panes = [...(isRunning ? [] : ["*"]), "*", ...(hasPalette ? ["240px"] : []), ...(isInspecting ? ["380px"] : [])]
+  return { id, sizes: panes.join(",") }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
@@ -406,6 +424,7 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
+            <AddPartButton />
             <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
             <InspectorToggle />

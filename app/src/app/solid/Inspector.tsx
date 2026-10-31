@@ -17,12 +17,13 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
-import { DRAG_START_PX } from "spell/app/app/runner/Dragging"
+import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
 import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -388,6 +389,14 @@ export class Inspector {
    */
   static restoreSelection(rows: readonly PartRow[]): void {
     const parts = selectedParts()
+    if (placesToSelect) {
+      const wanted = placesToSelect
+      const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
+      if (found.length) {
+        placesToSelect = undefined
+        return Inspector.selectAll(found)
+      }
+    }
     // still there:  only their outlines, on what the trail leads to now (a redraw replaces a drawn thing's element)
     if (parts.length && parts.every((part) => part.element.isConnected)) {
       const elements = parts.map((part) => part.element)
@@ -402,6 +411,14 @@ export class Inspector {
     if (found.length > 1) Inspector.selectAll(found)
     else if (found.length) Inspector.select(found[0], { trail: steps })
     else if (parts.length) Inspector.select(undefined)
+  }
+
+  /**
+   * Select what's written at `places` once it's drawn:  what was just added or moved, which the next compile draws.
+   * - Each place is `path:line:column`, as a part's written key is.
+   */
+  static selectWhenDrawn(places: readonly string[]): void {
+    placesToSelect = new Set(places)
   }
 
   /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
@@ -474,7 +491,9 @@ export class Inspector {
   static watch(area: HTMLElement): () => void {
     setArea(area)
     if (isInspecting()) PartSelector.listen(area)
+    const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
     return () => {
+      stopEditing()
       if (appArea !== area) return
       setArea(undefined)
       PartSelector.stop()
@@ -882,7 +901,7 @@ function writtenKeyOf(element: Element): string | undefined {
 
 /** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
 function isSelectablePart(element: Element): boolean {
-  return !!SpellElement.thingOf(element) || CONTROL_TAGS.has(element.localName) || hasOwnHandler(element)
+  return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
 }
 
 /** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */
@@ -1025,6 +1044,30 @@ const CONTROL_TAGS = new Set([
   "ui-progress"
 ])
 
+/**
+ * What else a click selects, in the app's own drawing:  what the palette adds, so a click finds it again.
+ * - Not in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
+ */
+const ADDED_TAGS = new Set([
+  "ui-card",
+  "ui-text",
+  "ui-label",
+  "ui-message",
+  "ui-segment",
+  "ui-divider",
+  "ui-list",
+  "ui-menu",
+  "ui-image"
+])
+
+/** Does a click on `element` mean it, by its tag? */
+function isClickableTag(element: Element): boolean {
+  return (
+    CONTROL_TAGS.has(element.localName) ||
+    (ADDED_TAGS.has(element.localName) && !(element.getRootNode() instanceof ShadowRoot))
+  )
+}
+
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
 const [isOpen, setOpen] = createSignal(editorPrefs.get(OPEN_PREF) as boolean)
 editorPrefs.declare(HELP_SEEN_PREF, { type: "choice" })
@@ -1077,6 +1120,9 @@ const [isInspecting, setInspecting] = createSignal(false)
 const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>([])
 /** Clicks in the app and the views tree:  the last one clicked, where a shift-click's range starts. */
 const clicks = new ListSelection<Element>()
+
+/** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
+let placesToSelect: Set<string> | undefined
 /** On a phone, is the sheet up (`Inspector.isSheetUp`)?  Down as the page opens:  the app its full size until a selection. */
 const [isSheetUp, setSheetUp] = createSignal(false)
 /** The phone's sheet's height as dragged, px (remembered:  `SHEET_HEIGHT_PREF`). */
@@ -1268,6 +1314,7 @@ class PartSelector {
         const part = PartSelector.partAt(event, area)
         // the app itself is its own background:  a press there may be a band, and still a click on it if it never moves
         if (part) event.stopPropagation()
+        if (part && PartEdits.startDrag(part, event)) return
         if (!part || part === Inspector.partsIn(area)[0]?.element) PartSelector.startBand(event, area)
       },
       options
@@ -1477,15 +1524,14 @@ class PartSelector {
    * - with Alt held, any Spell UI element:  the text or label inside a card too
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
    */
-  private static partAt(event: Event, area: HTMLElement): Element | undefined {
+  static partAt(event: Event, area: HTMLElement): Element | undefined {
     const anyElement = (event as MouseEvent).altKey
     for (const target of event.composedPath()) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
-      const isPart =
-        SpellElement.thingOf(target) || anyElement || CONTROL_TAGS.has(target.localName) || hasOwnHandler(target)
+      const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
       if (isPart && Inspector.partFor(target)) return target
     }
     return undefined

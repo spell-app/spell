@@ -977,6 +977,10 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "PartMenuItems",
+          "file": "src/app/solid/Palette.tsx"
+        },
+        {
           "name": "ThemeSubMenu",
           "file": "src/app/solid/MenuBar.tsx"
         },
