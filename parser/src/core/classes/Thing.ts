@@ -1,7 +1,7 @@
 /**
  * Base classes for spell.
  */
-import { Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
+import { isLastToConstruct, Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
 import { registerThing, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { Drawing } from "spell/parser/core/drawing"
 import { Eventful } from "spell/parser/core/SpellEvent"
@@ -68,8 +68,8 @@ export class Thing extends Eventful(Observable) {
     // make its early starting values now (`PropInfo.early`), e.g. a solitaire's piles -- unless `props` gave them
     for (const name of schemaOf(new.target).earlyProps()) this.getProp(name)
     if (runsCreate(Thing, new.target)) this.create(props)
-    // its starting values are set:  a change from now on is heard (`when its score changes`)
-    noteMade(this)
+    // its starting values are set:  a change from now on is heard (`when its score changes`);  `@thing`'s say so later
+    if (isLastToConstruct(Thing, new.target)) noteMade(this)
   }
 
   /**

@@ -314,6 +314,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "alert",
       "at_the_same_time",
       "meanwhile",
+      "without_waiting",
     ],
     "belongs_to_one": [
       "belongs_to_one",
@@ -914,6 +915,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "pause",
       "at_the_same_time",
       "meanwhile",
+      "without_waiting",
       "start_process",
       "stop_process",
       "expect_test",
@@ -1353,6 +1355,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "will_or_will_not · expressions · 1",
     "with_nested_statements · classes · 2",
     "with_props_arg · methods · 1",
+    "without_waiting · async · 1",
     "words_assignment · assignment · 1",
     "words_identifier · variables · 1",
     "words_variable · variables · 1",

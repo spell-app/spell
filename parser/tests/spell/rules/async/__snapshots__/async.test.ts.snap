@@ -9,5 +9,6 @@ exports[`testing spell module async > rule group specs > match snapshot -- if th
   "pause": "number|units",
   "start_process": "operator?|name",
   "stop_process": "name",
+  "without_waiting": "call",
 }
 `;

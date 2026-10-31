@@ -105,7 +105,7 @@ UIEs.addRule(Notify, {
     " (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}?" +
     " ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))?" +
     " {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)?" +
-    " (con {okButton:text})? (y esperar)?",
+    " (con {okButton:text})? (wait:y esperar)?",
   tests: [
     {
       compileAs: "statement",
@@ -118,7 +118,8 @@ UIEs.addRule(Notify, {
         [`notificar error "Ups" en negro`, `core.notify("Ups", { class: "error black" })`],
         [`notificar "¡Aquí!" arriba a la izquierda`, `core.notify("¡Aquí!", { position: "top left" })`],
         [`notificar "¡Aquí!" en el centro`, `core.notify("¡Aquí!", { position: "centered" })`],
-        [`notificar "Adiós" durante 5 segundos`, `await core.notify("Adiós", { time: 5, units: "seconds" })`],
+        [`notificar "Adiós" durante 5 segundos`, `core.notify("Adiós", { time: 5, units: "seconds" })`],
+        [`notificar "Adiós" durante 5 segundos y esperar`, `await core.notify("Adiós", { time: 5, units: "seconds" })`],
         [`notificar "Me quedo" hasta un clic`, `core.notify("Me quedo", { time: 0 })`],
         [`notificar "Mira" con una barra de progreso`, `core.notify("Mira", { showProgress: "bottom" })`],
         {

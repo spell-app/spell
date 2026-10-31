@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Literal
 
-from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SpellEvent
+from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SentEvent
 
 
 ###################
@@ -1129,17 +1129,17 @@ test_the_moves()
 
 
 # what each event this program hears holds
-ClickEvent = SpellEvent
-DragSpellEvent = SpellEvent
-DragCancelledEvent = SpellEvent
+ClickEvent = SentEvent
+DragSpellEvent = SentEvent
+DragCancelledEvent = SentEvent
 
 
-class ScoreChangeEvent(SpellEvent):
+class ScoreChangeEvent(SentEvent):
     value: float
     was: float
 
 
-class MovesChangeEvent(SpellEvent):
+class MovesChangeEvent(SentEvent):
     value: float
     was: float
 

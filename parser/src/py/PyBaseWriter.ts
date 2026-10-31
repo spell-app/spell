@@ -60,7 +60,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     "end_position",
     "with_spell_positions",
     "Element",
-    "SpellEvent"
+    "SentEvent"
   ]
 
   /** How Python says nothing:  `None`, for a range with no end -- see `P.ProgramWriter.positionArgs()`. */
@@ -1287,8 +1287,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /**
    * The type of each event the program's templates handle:  `TSWriter.eventDeclarations()`, as Python says it.
-   * - `ClickEvent = SpellEvent` for one holding only what every event does.
-   * - A class for one holding more, so its fields can be read:  an event is made as a `SpellEvent`, its fields read by
+   * - `ClickEvent = SentEvent` for one holding only what every event does.
+   * - A class for one holding more, so its fields can be read:  an event is made as a `SentEvent`, its fields read by
    *   name, so a class only ever says what it has.
    * - `""` if none.
    */
@@ -1299,13 +1299,13 @@ export class PyBaseWriter extends P.ProgramWriter {
       const shape = this.eventShapeOf(name)
       if (!shape) continue
       const typeName = this.eventTypeName(name)
-      if (!shape.size) basics.push(`${typeName} = SpellEvent`)
+      if (!shape.size) basics.push(`${typeName} = SentEvent`)
       else {
         const fields = [...shape].map(([field, kind]) => {
           const hint = this.isNameableKind(kind) ? this.hintOf(kind) : undefined
           return `${this.nameOf(field, "variable")}: ${hint ?? "Any"}`
         })
-        classes.push(pyText.block(`class ${typeName}(SpellEvent)`, fields.join(pyText.NEWLINE)))
+        classes.push(pyText.block(`class ${typeName}(SentEvent)`, fields.join(pyText.NEWLINE)))
       }
     }
     const written = [...(basics.length ? [basics.join(pyText.NEWLINE)] : []), ...classes]
