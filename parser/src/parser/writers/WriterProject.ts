@@ -51,6 +51,8 @@ export class WriterProject {
   readonly staticLists = new Set<string>()
   /** Each class's own getters, by spell's name:  see `getterOf()`. */
   readonly getterMethods = new Map<string, Map<string, P.ASTMethodDefinition>>()
+  /** Each class's own methods, by spell's name:  see `methodOf()`. */
+  readonly ownMethods = new Map<string, Map<string, P.ASTMethodDefinition>>()
   /** Each class's own properties, by name:  see `propertyOf()`. */
   readonly properties = new Map<string, Map<string, P.ASTReactiveProperty>>()
   /**
@@ -474,6 +476,15 @@ export class WriterProject {
     return undefined
   }
 
+  /** Class `typeName`'s method `name`, its own or a super-type's -- `undefined` if it has none. */
+  methodOf(typeName: string | undefined, name: string): P.ASTMethodDefinition | undefined {
+    for (let type = typeName; type; type = this.superTypes.get(type)) {
+      const method = this.ownMethods.get(type)?.get(name)
+      if (method) return method
+    }
+    return undefined
+  }
+
   /** Is `typeName` a class the project declares or imports, e.g. `Tableau`? */
   isClass(typeName: string): boolean {
     return this.members.has(typeName) || this.importedMembers.has(typeName)
@@ -598,6 +609,10 @@ export class WriterProject {
       if (member instanceof P.ASTPropertyDefinition && member.get) {
         const getters = this.getterMethods.get(declaration.type.name) ?? new Map()
         this.getterMethods.set(declaration.type.name, getters.set(member.property.value, member.get))
+      }
+      if (member instanceof P.ASTPropertyDefinition && member.method) {
+        const methods = this.ownMethods.get(declaration.type.name) ?? new Map()
+        this.ownMethods.set(declaration.type.name, methods.set(member.property.value, member.method))
       }
       if (!(member instanceof P.ASTReactiveProperty)) continue
       const own = this.properties.get(declaration.type.name) ?? new Map()

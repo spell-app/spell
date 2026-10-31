@@ -12,7 +12,7 @@ import {
   readsMember,
   unwrapped
 } from "./jsShapes"
-import { WriterProject, forEachNode, type ProgramPlace } from "./WriterProject"
+import { WriterProject, forEachNode, typeCaseOf, type ProgramPlace } from "./WriterProject"
 import { type Naming, type NameKind } from "./Naming"
 
 /****************
@@ -489,6 +489,36 @@ export abstract class ProgramWriter extends Writer {
   }
 
   /**
+   * The list of values a value of `kind` comes from, e.g. `Card.Ranks`'s for `Rank` or `CardRank`:
+   * a language spells a value of it its own way -- `undefined` for any other kind, or a list another project holds.
+   */
+  valueListOfKind(kind: string | undefined): P.TSList | undefined {
+    if (!kind) return undefined
+    const constant = this.project.propertyKinds.get(kind)
+    if (constant) return this.project.lists.get(constant)
+    return [...this.project.lists.values()].find((list) => list.type === kind)
+  }
+
+  /**
+   * The property of the class we're writing that method parameter `arg` is named for:
+   * e.g. `suit` in `a card "is a (suit)" for its suits`, the slot ranging over a card's suits.
+   * - `undefined` if there's none.
+   */
+  slotProperty(arg: P.ASTVariableExpression): P.ASTReactiveProperty | undefined {
+    return this.project.propertyOf(this.currentClass, arg.name)
+  }
+
+  /**
+   * The list of values of the value kind we're writing, when parameter `arg` is named for it,
+   * e.g. `Deck.Suits`'s for `suit` in `static color(suit)` on `Suit` -- see `WriterProject.valueKinds`.
+   * - `undefined` for any other.
+   */
+  valueKindList(arg: P.ASTVariableExpression): P.TSList | undefined {
+    const list = this.currentClass ? this.project.valueKinds.get(this.currentClass) : undefined
+    return list && typeCaseOf(arg.name) === this.currentClass ? list : undefined
+  }
+
+  /**
    * What the program gives member `name` of class `typeName` (or of a class below it),
    * when every value given is alike, e.g. `"text"` for a pile's `name`, given `"stock"`, `"discards"` ... (Q54)
    * - `undefined` when they differ, when any can't be told, or when nothing is given.
@@ -567,8 +597,13 @@ export abstract class ProgramWriter extends Writer {
     }
     return this.inBlock(() => {
       visit(method.body.statements)
-      return new Set(returns.map((it) => (it.value ? this.kindOf(it.value) : "nothing")))
+      return new Set(returns.flatMap((it) => (it.value ? this.returnKindsOf(it.value) : ["nothing"])))
     })
+  }
+
+  /** What returning `value` gives, as `returnedKinds()` counts it:  `kindOf()`, one kind -- see `PyBaseWriter`. */
+  protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
+    return [this.kindOf(value)]
   }
 
   /**

@@ -5016,7 +5016,7 @@
                   "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [\n    { name: \"dirección\", kind: \"string\", description: \"Its dirección.\" }\n  ])\n}\ncore.useElement(Carta, CartaElement)"
                 },
                 "py": {
-                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
+                  "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
                 }
               }
             }
@@ -7373,7 +7373,7 @@
                   "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
                 },
                 "py": {
-                  "code": "class Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                  "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
                 }
               }
             },

@@ -14,7 +14,7 @@ import {
   PRESS_ATTRIBUTES,
   unwrapped
 } from "./jsShapes"
-import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterProject } from "./WriterProject"
+import { forEachNode, listNamedBy, type TSUndeclared, type WriterProject } from "./WriterProject"
 
 /****************
  * ### `TSWriter`
@@ -170,7 +170,7 @@ export class TSWriter extends JSWriter {
   propertyKindType(kind: string): string | undefined {
     const constant = this.project.propertyKinds.get(kind)
     if (!constant) return undefined
-    const list = this.project.lists.get(constant)
+    const list = this.valueListOfKind(kind)
     if (list) return list.type ?? `(typeof ${this.listRef(list)})[number]`
     const [owner = "", name = ""] = constant.split(".")
     return `(typeof ${this.typeNameOf(owner)}.${this.nameOf(name)})[number]`
@@ -526,7 +526,7 @@ export class TSWriter extends JSWriter {
    * - `undefined` if there's none
    */
   slotType(arg: P.ASTVariableExpression): string | undefined {
-    const property = this.project.propertyOf(this.currentClass, arg.name)
+    const property = this.slotProperty(arg)
     return property && this.propertyType(property)
   }
 
@@ -536,9 +536,8 @@ export class TSWriter extends JSWriter {
    * - `undefined` for any other.
    */
   valueKindType(arg: P.ASTVariableExpression): string | undefined {
-    const list = this.currentClass ? this.project.valueKinds.get(this.currentClass) : undefined
-    if (!list || typeCaseOf(arg.name) !== this.currentClass) return undefined
-    return `(typeof ${this.listRef(list)})[number]`
+    const list = this.valueKindList(arg)
+    return list && `(typeof ${this.listRef(list)})[number]`
   }
 
   thisParam(thisType?: string): string {

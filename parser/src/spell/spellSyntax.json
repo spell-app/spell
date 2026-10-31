@@ -4963,7 +4963,7 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
                 }
               }
             }
@@ -7228,7 +7228,7 @@
                   "code": "export class Card extends Thing {\n  @prop({ type: \"number\" })\n  accessor rank!: number\n}\nexport function testCardSetup() {\n  return core.test(\"test card setup\", function testCardSetup() {\n    const it = new Card()\n    core.expect(it.rank, `its rank`, undefined, `nothing`)\n    core.echoTestAction(`get a new card whose rank is 3`)\n    const it2 = new Card({ rank: 3 })\n    core.expect(it2.rank, `its rank`, 3, `3`)\n  })\n}"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> Any:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
+                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> None:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
                 }
               }
             }
@@ -7338,7 +7338,7 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
                 }
               }
             },
