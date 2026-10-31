@@ -481,7 +481,8 @@ describe("SpellElement", () => {
       await drag(element, target, () => expect(covers()).toHaveLength(1), "mouse")
       // the cover hid nothing from the drop:  it landed
       expect([...trays[1]!.items]).toEqual([token])
-      expect(covers()).toEqual([])
+      // gone before the next paint (`Dragging.settle()`), which a run under load may not have reached yet
+      await vi.waitFor(() => expect(covers()).toEqual([]))
       const moved = root.querySelector("game-token") as HTMLElement
       await drag(moved, root.querySelectorAll<HTMLElement>("game-tray")[0]!, () => expect(covers()).toEqual([]))
       expect([...trays[0]!.items]).toEqual([token])

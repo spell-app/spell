@@ -58,6 +58,8 @@ describe("EpicBodies.loadText()", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(
       (_input, init) =>
         new Promise((_resolve, reject) => {
+          // As the real `fetch()`:  a signal already aborted rejects at once, and no "abort" event will come
+          if (init?.signal?.aborted) reject(init.signal.reason)
           init?.signal?.addEventListener("abort", () => reject(init.signal!.reason))
         })
     )

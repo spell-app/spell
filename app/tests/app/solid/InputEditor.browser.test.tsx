@@ -175,7 +175,7 @@ describe("<InputRoot>", () => {
     setEditor("file", file)
     const host = await mount(() => <InputRoot />)
     const root = host.querySelector(".InputRoot")!
-    expect(root.querySelector(":scope > .FileTabs > ui-toolbar.FileTabsRow")).not.toBeNull()
+    expect(root.querySelector(":scope > .FileTabs")).not.toBeNull()
     expect(root.querySelector(":scope > .InputEditor")).not.toBeNull()
     await waitForInputEditor(host)
 
@@ -190,20 +190,33 @@ describe("<InputRoot>", () => {
 })
 
 describe("<FileTabs>", () => {
+  /** The tabs, once the bar's Spell has loaded and drawn:  in the view's shadow root, the toolbar's own children. */
+  async function tabsIn(host: HTMLElement): Promise<HTMLElement[]> {
+    await vi.waitFor(
+      () => {
+        const row = host.querySelector(".FileTabs > :not(ui-menu)")?.shadowRoot?.querySelector("ui-toolbar")
+        expect(row?.querySelectorAll(":scope > ui-item").length).toBeGreaterThan(0)
+      },
+      { timeout: 15000 }
+    )
+    const row = host.querySelector(".FileTabs > :not(ui-menu)")!.shadowRoot!.querySelector("ui-toolbar")!
+    return [...row.querySelectorAll<HTMLElement>(":scope > ui-item")]
+  }
+
   test("every file a tab, `editor.file` chosen;  a dot on one not saved;  a click shows its file", async () => {
     const showEditor = spyOnEditor("showEditor")
     const file = fakeFile("test-project/one.js", "")
     setEditor("project", file.project as unknown as EditorStore["project"])
     setEditor("file", file)
     const host = await mount(() => <FileTabs />)
-    const tabs = [...host.querySelectorAll<HTMLElement>("ui-toolbar.FileTabsRow > ui-item")]
+    const tabs = await tabsIn(host)
     expect(tabs.map(text)).toEqual(["one.js", "two.js"])
     expect(tabs.map((tab) => tab.hasAttribute("selected"))).toEqual([true, false])
-    expect(host.querySelector(".NotSaved")).toBeNull()
+    expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(true)
 
     file.isDirty = true
     flush()
-    expect(tabs[0]!.querySelector(".NotSaved")).not.toBeNull()
+    await vi.waitFor(() => expect(tabs[0]!.querySelector(".NotSaved")!.hasAttribute("hidden")).toBe(false))
 
     tabs[1]!.click()
     expect(showEditor).toHaveBeenCalledWith("test-project/two.js")

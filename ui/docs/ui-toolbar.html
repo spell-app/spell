@@ -130,6 +130,21 @@
                   </div>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-fitting-titles-scroll-first" label="Scroll first" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`scroll-first`, with `shrinkable` and a `segmented` look:  a row of many scrolls with its `‹` / `›` while it has `--ui-toolbar-scroll-min` (200px) to show them in;  only then is it the dropdown.  `tabs` says they are tabs, to a screen reader."
+                >
+                  <div style="max-width: 300px">
+                    <ui-toolbar appearance="segmented link header" tabs shrinkable scroll-first aria-label="Files">
+                      <ui-item selected>Card.spellml</ui-item>
+                      <ui-item>Deck.spellml</ui-item>
+                      <ui-item>Pile.spellml</ui-item>
+                      <ui-item>Solitaire.spellml</ui-item>
+                      <ui-item>styles.css</ui-item>
+                    </ui-toolbar>
+                  </div>
+                </ui-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 

@@ -38,6 +38,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
  * - `shrinkable` (the menu's):  it never scrolls with `‹` / `›`;  its titles fit the row instead, down to the menu's
  *   overflow button (epic `epic-engine` Q38).  Only a row too narrow for even that button scrolls, with no keys.
+ *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
+ *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -66,8 +68,13 @@ export class UIToolbar extends UIMenu {
     return this.canScrollStart || this.canScrollEnd
   }
 
+  /** `scroll-first`:  the row scrolls before it's a dropdown. */
+  protected get scrollsFirst(): boolean {
+    return !!this.scrollFirst
+  }
+
   /** SIDE EFFECT:  follows the box's scroll and the sizes of it and its items, once drawn;  the cleanup stops. */
-  @E.onChange("isReady", "shrinkable")
+  @E.onChange("isReady", "shrinkable", "scrollFirst", "fitAnswer")
   protected onReadyToScroll(isReady: boolean) {
     const box = this.box
     if (!isReady || !box) return
@@ -92,8 +99,8 @@ export class UIToolbar extends UIMenu {
   private measure() {
     const box = this.box
     if (!box) return
-    // a shrinkable one fits its titles instead:  no keys, no fades
-    const canScroll = !this.shrinkable
+    // a shrinkable one fits its titles instead:  no keys, no fades;  unless it scrolls first, and is still whole
+    const canScroll = !this.shrinkable || (!!this.scrollFirst && !this.isDropdown)
     const { start, end } = E.scrollEnds(box)
     this.canScrollStart = canScroll && start
     this.canScrollEnd = canScroll && end
@@ -169,7 +176,7 @@ export class UIToolbar extends UIMenu {
   }
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
-export interface UIToolbar extends E.AttributeValues<typeof menuVocabulary> {}
+export interface UIToolbar extends E.AttributeValues<typeof toolbarVocabulary> {}
 
 ////////////////
 // ## Constants

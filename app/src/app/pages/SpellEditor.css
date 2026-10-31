@@ -100,3 +100,9 @@
     display: none;
   }
 }
+
+/* where the top bar draws:  its height while its Spell loads, so what's below stays where it'll be */
+.EditorBarPlace {
+  flex: 0 0 auto;
+  min-height: var(--ui-menu-header-bar-height, 38px);
+}

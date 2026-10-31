@@ -1334,7 +1334,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return (
       <ui-menu
         class="schemes-group"
-        appearance="segmented link"
+        appearance="segmented link header"
         size="small"
         aria-label={t("schemes")}
         on-ui-choosing={onChoosing}
@@ -1370,7 +1370,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return (
       <ui-menu
         class="page-toggles"
-        appearance="segmented link"
+        appearance="segmented link header"
         choose="many"
         size="small"
         aria-label={t("pages")}

@@ -758,6 +758,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "equal",
       "items",
       "shrinkable",
+      "ticks",
+      "tabs",
       "interactive"
     ],
     formControl: true
@@ -1539,7 +1541,10 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "equal",
       "items",
       "shrinkable",
-      "interactive"
+      "ticks",
+      "tabs",
+      "interactive",
+      "scroll-first"
     ],
     formControl: true
   },

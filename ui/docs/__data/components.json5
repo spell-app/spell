@@ -755,6 +755,10 @@
           "description": "Menu:  the box around the `badge` slot."
         },
         {
+          "name": "tick",
+          "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+        },
+        {
           "name": "shortcut",
           "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
         }
@@ -14611,6 +14615,10 @@
         {
           "name": "badge",
           "description": "Menu:  the box around the `badge` slot."
+        },
+        {
+          "name": "tick",
+          "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
         }
       ],
       "states": [
@@ -17240,6 +17248,16 @@
           "name": "shrinkable",
           "kind": "boolean",
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
+        },
+        {
+          "name": "ticks",
+          "kind": "boolean",
+          "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+        },
+        {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
         },
         {
           "name": "interactive",
@@ -36700,9 +36718,24 @@
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
         },
         {
+          "name": "ticks",
+          "kind": "boolean",
+          "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+        },
+        {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+        },
+        {
           "name": "interactive",
           "kind": "boolean",
           "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
+        },
+        {
+          "name": "scroll-first",
+          "kind": "boolean",
+          "description": "With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
         },
         {
           "name": "disabled",
@@ -36926,7 +36959,7 @@
         },
         {
           "name": "overflowing",
-          "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
+          "description": "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
         },
         {
           "name": "disabled",
@@ -44024,7 +44057,18 @@
       "tags": [
         "ui-item"
       ],
-      "tokens": []
+      "tokens": [
+        {
+          "name": "--ui-item-tick-width",
+          "default": "1em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-item-tick-distance",
+          "default": "0.5em",
+          "type": "length"
+        }
+      ]
     },
     "ui-items": {
       "folder": "ui-items",
@@ -45568,7 +45612,7 @@
         },
         {
           "name": "--ui-menu-segmented-header-item-padding",
-          "default": "0.5em 0.85em",
+          "default": "0.42em 0.7em",
           "type": "length"
         },
         {
@@ -46169,12 +46213,12 @@
         },
         {
           "name": "--ui-panel-pane-bar-height",
-          "default": "40px",
+          "default": "max(40px, calc(var(--ui-control-height, 0px) + 12px))",
           "type": "length"
         },
         {
           "name": "--ui-panel-pane-bar-padding",
-          "default": "8px",
+          "default": "6px 8px",
           "type": "length"
         },
         {

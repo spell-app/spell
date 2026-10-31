@@ -1,4 +1,4 @@
-import { Loading, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { Loading, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -8,6 +8,7 @@ import { addCodeEditorKeys } from "spell/app/app/pages/editorHotkeys"
 import { CodeSettings, CodeSettingsPanel } from "./CodeSettings"
 import { FileTabs } from "./FileTabs"
 import { LazyMonaco } from "./LazyMonaco"
+import { PageLoading } from "./PageLoading"
 
 import "./InputEditor.css"
 
@@ -108,11 +109,17 @@ function FileInputEditor() {
   const file = tracked(() => editor.file)
   /** Remakes the editor when it changes:  the file's path, or `"loading"` before there's a file. */
   const key = createMemo(() => file()?.path || "loading")
+  const release = PageLoading.hold()
+  onCleanup(release)
+  const mounted: typeof didMount = (inputEditor, api) => {
+    didMount(inputEditor, api)
+    release()
+  }
   followInitialSelection()
   return (
     <Loading fallback={<LazyMonaco.Loading />}>
       <Show when={key()} keyed>
-        {(_key) => <LazyMonaco.FileEditor file={file()} onMount={didMount} onUnmount={editor.onInputWillUnmount} />}
+        {(_key) => <LazyMonaco.FileEditor file={file()} onMount={mounted} onUnmount={editor.onInputWillUnmount} />}
       </Show>
     </Loading>
   )

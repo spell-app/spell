@@ -240,3 +240,27 @@ describe("GraphPlace.call()", () => {
     await expect(place.call("nothing", {}, {})).rejects.toMatchObject({ kind: "not found" })
   })
 })
+
+describe("GraphPlace.listMany()", () => {
+  test("several lists in ONE query, each its own answer", async () => {
+    const { box, place } = await served()
+    const asks = box.asks?.length ?? 0
+    const [all, some] = await place.listMany(
+      [
+        { collection: "recipes", query: { select: ["title"] } },
+        { collection: "recipes", query: { filter: { cuisine: "Thai" } } }
+      ],
+      {}
+    )
+    expect((box.asks?.length ?? 0) - asks).toBeLessThanOrEqual(1)
+    expect(all!.rows.length).toBeGreaterThan(some!.rows.length)
+    expect(Object.keys(all!.rows[0]!).sort()).toEqual(["id", "title"])
+    expect(some!.handled.filter).toBe(true)
+  })
+
+  test("addCollection():  another collection, made known later;  one it has stays as it is", () => {
+    const place = answering({ data: {} })
+    place.addCollection("tags", { list: "tags", fields: ["id"] })
+    expect(() => place.addCollection("recipes", { list: "other", fields: ["id"] })).not.toThrow()
+  })
+})

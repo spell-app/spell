@@ -48,6 +48,65 @@ export class SpellWarnings {
   }
 
   /**
+   * Note that `match` won't compile while `stillHolds()` says so:  `noteIf()`, for what a person must change.
+   * - e.g. a write to a read-only place:  the line that says it's read only may be anywhere in the project.
+   * - `SP.Block.getParseErrors()` reports it among the parse errors, never as a warning.
+   * - `stillHolds()` as for `noteIf()`.
+   */
+  static refuseIf(
+    match: P.Match,
+    message: string | (() => string),
+    stillHolds: () => boolean,
+    at: P.Match = match
+  ): void {
+    const data = match.data as WarningsData
+    if (data.warnings?.some((noted) => noted.at === at && noted.refused)) return
+    ;(data.warnings ??= []).push({
+      message: "",
+      wording: typeof message === "string" ? () => message : message,
+      at,
+      stillHolds,
+      refused: true
+    })
+  }
+
+  /** Every line under `match` that `refuseIf()` still refuses, as a parse error says it. */
+  static refusalsIn(match: P.Match): P.Match[] {
+    const tokens = new Set<P.Token>()
+    P.Tokenizer.forEachToken(match.tokens, (token) => tokens.add(token))
+    return [...SpellWarnings.notedUnder(match)]
+      .filter(({ refused, at, stillHolds }) => refused && tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
+      .map(({ wording, message, at }) => {
+        const { scope, tokens: itsTokens } = at
+        return new P.Match({
+          scope,
+          rule: scope.getRuleOrDie("parse_error"),
+          matched: itsTokens,
+          tokens: [...itsTokens],
+          message: wording?.() ?? message
+        })
+      })
+  }
+
+  /**
+   * Note what a writer's whole-project pass has to tell the author (`P.WriterOptions.noteForAuthor`):
+   * here `P.ReadGathering` reads a saved type whole, and says why.
+   * - The route a writer has onto these warnings:  it words nothing, knowing no language, and this does.
+   * - Noted on the line it's about, while compiling:  `note()`'s once-only keeps a recompile from saying it twice.
+   * - Nothing for a type read whole for a reason nobody can change, one that undo puts back.
+   */
+  static noteRead = ({ match, kind, typeName }: P.ReadNote): void => {
+    const key = READ_WHOLE_MESSAGES[kind]
+    if (!key) return
+    const { scope } = match
+    const type = typeName ? scope.getType(typeName) : undefined
+    const what = type
+      ? SpellWarnings.exampleNoun(scope, type, "definite")
+      : SP.Language.of(scope).parserMessage("read-whole-everything")
+    SpellWarnings.note(match as P.Match, SP.Language.of(scope).parserMessage(key, { what }))
+  }
+
+  /**
    * Note a warning on `statement` for each article which doesn't agree with its noun (epic `spanish` P8).
    * - e.g. English's `a apple`:  "Did you mean "an apple"?";  Spanish's `el carta`:  "¿Querías decir "la carta"?".
    * - Under the article.  The language's pack says what agrees (`SP.Language.agreement()`),
@@ -140,7 +199,7 @@ export class SpellWarnings {
     const tokens = new Set<P.Token>()
     P.Tokenizer.forEachToken(match.tokens, (token) => tokens.add(token))
     return [...SpellWarnings.notedUnder(match)]
-      .filter(({ at, stillHolds }) => tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
+      .filter(({ refused, at, stillHolds }) => !refused && tokens.has(at.tokens[0]!) && (stillHolds?.() ?? true))
       .sort((one, other) => (one.at.start ?? 0) - (other.at.start ?? 0))
       .map(({ message, at }) => ({ message, at }))
   }
@@ -224,6 +283,13 @@ export class SpellWarnings {
   }
 }
 
+/** What to say of a type read whole, by why:  a reason left out isn't worth saying. */
+const READ_WHOLE_MESSAGES: Partial<Record<P.ReadNote["kind"], SP.ParserMessageKey>> = {
+  "field named by a value": "read-whole-field-named-by-a-value",
+  "element reads it": "read-whole-element-reads-it",
+  "library reads it": "read-whole-library-reads-it"
+}
+
 /** The word rules whose forms are articles, which must agree with their noun -- see `SpellWarnings.noteArticles()`. */
 const ARTICLE_RULES = ["indefinite_article", "definite_article"]
 
@@ -237,4 +303,11 @@ type WarningsData = {
 }
 
 /** A warning as noted on a match:  `in()` reports it while `stillHolds()`, if given -- see `SpellWarnings.noteIf()`. */
-type NotedWarning = SP.SpellWarning & { stillHolds?: () => boolean }
+type NotedWarning = SP.SpellWarning & {
+  /** Is it still so?  Asked when they're gathered. */
+  stillHolds?: () => boolean
+  /** Words it when it's asked for:  so a line that's never refused pays nothing. */
+  wording?: () => string
+  /** It's no warning:  the line won't compile, `refuseIf()`. */
+  refused?: boolean
+}

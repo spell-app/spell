@@ -454,6 +454,27 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
   - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
+### The editor in Spell
+
+The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
+The file tabs and the top bar's arrangement are the first pieces:
+
+```text
+app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
+app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
+app/src/app/pages/SpellEditor.tsx                what's in each section, each a thing that draws itself
+```
+
+- A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
+- It runs on the layout's own copy of the runtime, so a program's run never touches it.
+  A program's things stay the only ones in the Things tab, and its console stays its own.
+- It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
+  The tabs show no later:  they already wait for the project's files.
+  The top bar does:  about 170 to 300 ms on a local server.
+  So a hero covers the whole page until the bar and the code are ready, and nothing appears piecemeal.
+- What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
+
 ### The Inspector:  look inside the running app
 
 The sliders button in the app's header opens the Inspector, a column at the window's far right.
@@ -474,6 +495,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  picking stops once something's picked,
   and the crosshairs start it again.  Esc stops it.
+- Hold the mouse over what you selected to see where it is written:
+  `Written in Deck.spellml, line 8:  52 of these come from this one place`.
 - The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
@@ -496,6 +519,8 @@ Each one dresses the whole editor:
 - The top bar joins the top of the window, 38px high, and the code, the Program panel and the app sit in rounded panels
   under it, with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
   - Merlot's panels meet edge to edge, and Spell's bar has no fill or line of its own.
+  - A theme floats its panels or attaches their window-edge sides:  `--ui-panel-pane-window-room` and `-window-radius`,
+    `0` and `0` to attach.  Glass and Fruity float.
 - The bars' and panels' colours, corners and shadows are the theme's own, as the docs pages' bars are.
 - The theme is ONE choice for every Spell place:  pick Merlot dark in the editor, and the epic pages and Spell UI's
   pages draw in it too, open tabs at once;  and the other way round.

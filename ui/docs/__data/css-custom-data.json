@@ -3943,6 +3943,20 @@
       }
     },
     {
+      "name": "--ui-item-tick-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `1em`"
+      }
+    },
+    {
+      "name": "--ui-item-tick-distance",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `0.5em`"
+      }
+    },
+    {
       "name": "--ui-items-margin",
       "description": {
         "kind": "markdown",
@@ -5962,7 +5976,7 @@
       "name": "--ui-menu-segmented-header-item-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-menu>`'s token.  Default:  `0.5em 0.85em`"
+        "value": "`<ui-menu>`'s token.  Default:  `0.42em 0.7em`"
       }
     },
     {
@@ -6690,14 +6704,14 @@
       "name": "--ui-panel-pane-bar-height",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-panel>`'s token.  Default:  `40px`"
+        "value": "`<ui-panel>`'s token.  Default:  `max(40px, calc(var(--ui-control-height, 0px) + 12px))`"
       }
     },
     {
       "name": "--ui-panel-pane-bar-padding",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-panel>`'s token.  Default:  `8px`"
+        "value": "`<ui-panel>`'s token.  Default:  `6px 8px`"
       }
     },
     {
@@ -11351,6 +11365,13 @@
       }
     },
     {
+      "name": "::part(tick)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-action>`:  A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`.\n- `<ui-item>`:  A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+      }
+    },
+    {
       "name": "::part(tints)",
       "description": {
         "kind": "markdown",
@@ -12231,7 +12252,7 @@
       "name": ":state(overflowing)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
+        "value": "Custom state of:\n\n- `<ui-toolbar>`:  Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
       }
     },
     {

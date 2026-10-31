@@ -145,7 +145,11 @@ export const itemVocabulary = {
       description:
         "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
     },
-    { name: "badge", description: "Menu:  the box around the `badge` slot." }
+    { name: "badge", description: "Menu:  the box around the `badge` slot." },
+    {
+      name: "tick",
+      description: "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+    }
   ],
   states: [
     { name: "selected", description: "Chosen (`selected` or `active`)." },

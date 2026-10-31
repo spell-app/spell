@@ -29,6 +29,7 @@ import {
   View,
   ViewableList,
   Page,
+  Place,
   TwoSidedView,
   Notebook,
   h,
@@ -44,7 +45,7 @@ import {
   withSpellPositions,
   type TestResult
 } from "spell/parser/core"
-import { runCompiled, appIsMounted, unmountApp, type RunCompiledOptions } from "./runCompiled"
+import { runCompiled, appIsMounted, linkModule, unmountApp, type RunCompiledOptions } from "./runCompiled"
 import { installSpellElements } from "./SpellElement"
 import { E as UIElements, SpellElement } from "./spellElements"
 
@@ -76,6 +77,7 @@ export {
   View,
   ViewableList,
   Page,
+  Place,
   TwoSidedView,
   Notebook,
   h,
@@ -152,4 +154,19 @@ export type RunAppOptions = RunCompiledOptions & {
   appRoot?: HTMLElement
   /** Is the app's page laid out in markup, e.g. inside its `<spell-viewer>`?  Then its `to draw` isn't drawn. */
   layout?: boolean
+}
+
+/**
+ * Import compiled spell `compiled` as a module on this copy of the runtime, known to compiled spell as `coreUrl`:
+ * what the editor runs its own layout pieces with (`layoutSpell.ts`).
+ * - Not a program's run:  nothing's reset or mounted, and it stays until the page goes.
+ * - throws if it doesn't load
+ */
+export async function importCompiled(compiled: string, coreUrl: string): Promise<Record<string, unknown>> {
+  const url = URL.createObjectURL(new Blob([linkModule(compiled, coreUrl)], { type: "text/javascript" }))
+  try {
+    return (await import(/* @vite-ignore */ url)) as Record<string, unknown>
+  } finally {
+    URL.revokeObjectURL(url)
+  }
 }

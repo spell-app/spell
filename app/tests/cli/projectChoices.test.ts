@@ -31,6 +31,8 @@ describe("projectChoices()", () => {
       "@spell/test/fizzbuzz/",
       "@spell/test/lists-from-zero/",
       "@spell/test/people/",
+      "@spell/test/recetario/",
+      "@spell/test/recipe-box/",
       "@spell/test/thing-references/",
       "@spell/test/todos-form-based/"
     ])

@@ -59,6 +59,17 @@ Names people choose keep their accents.
 | list / thing / type / app | `lista` / `cosa` / `tipo` / `(aplicación|aplicacion)` |
 | a property's kind of values, `card suit` | Spanish's order, `palo de carta` (`{property} de {type}`, the pack's `propertyKindName`);  plural `palos de carta` |
 | a class's list of values, `card suits` | `palos de carta` |
+| a place's kinds | `servicio web`, `servicio de grafos`, `carpeta`, `archivo`, `sala en vivo`, `hoja`, `este dispositivo`, `en memoria`, `la nube` |
+| x is a web service at "..." | `x es un servicio web en "..."` |
+| it is saved in the place | `se guarda en el lugar` (and `su propio archivo` keeps its meaning) |
+| recipes are at "...", a recipe's title is called "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
+| its key is the secret "...", it is checked every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
+| its versions are in "...", its ids are in "..." | `sus versiones están en "..."`, `sus identificadores están en "..."` |
+| while waiting, if there are none, if that fails | `mientras espera`, `si no hay (ninguno\|ninguna)` (agrees with what its loop reads), `si falla` |
+| all or nothing | `todo o nada` |
+| a draft of, save, cancel | `un borrador de`, `guardar`, `cancelar` |
+| refresh, try again | `recargar` (`actualizar` means a version upgrade), `reintentar` |
+| sorted by | `(ordenado\|ordenada\|ordenados\|ordenadas) por`:  agrees with its list, `cada receta, ordenada`, `las recetas, ordenadas` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |
 | ordinals | `(primer|primero|primera)`, `(segundo|segunda)`, `(tercer|tercero|tercera)`, `(cuarto|cuarta)`, `(quinto|quinta)`, `(sexto|sexta)`, `(séptimo|septimo|séptima|septima)`, `(octavo|octava)`, `(noveno|novena)`, `(décimo|decimo|décima|decima)`, `(penúltimo|penultimo|penúltima|penultima)`, `(último|ultimo|última|ultima)`, `final`;  top `arriba`, bottom `abajo` |

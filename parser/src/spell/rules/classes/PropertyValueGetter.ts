@@ -90,8 +90,9 @@ export class PropertyValueGetter extends SpellStatement<
     let found = false
     P.forEachNode(match.AST, (node) => {
       if (node instanceof P.ASTAwaitExpression) hasWaited = true
+      // a read of a place runs again whenever its rows change, so what's read off them is followed
       else if (node instanceof P.ASTScopedMethodInvocation && P.CORE_CALLS_THAT_WAIT.has(node.methodName))
-        hasWaited = true
+        hasWaited = node.methodName !== "savedThings" || hasWaited
       else if (hasWaited && node instanceof P.ASTPropertyExpression && !(node.object instanceof P.ASTSelfLiteral)) {
         found = true
       }

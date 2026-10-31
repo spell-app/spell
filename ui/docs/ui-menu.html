@@ -169,7 +169,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-bar" label="Window Bar" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-window-bar" label="Window Bar" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu can be a whole bar across the top of a window or a page:  flat and short, over a hairline, in the theme's bar.  An app's top bar is this.  With `segmented` too, `header` is instead the row of a pane's bar:  SEE ui-panel."
                 >
@@ -193,6 +193,20 @@
                         <ui-item link="#two" icon="redo" aria-label="Restart"></ui-item>
                       </ui-menu>
                     </ui-menu>
+                  </ui-menu>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-types-ticks" label="Ticks" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A menu of things that are on or off:  `ticks` keeps a gutter before every row's words, with a tick there while `selected`, in plain text.  The row under the pointer or keyboard takes the fill."
+                >
+                  <ui-menu direction="vertical" ticks aria-label="View" style="max-width: 240px">
+                    <ui-action>Run</ui-action>
+                    <ui-action selected>Edit</ui-action>
+                    <ui-action kind="divider"></ui-action>
+                    <ui-action selected>Inspector</ui-action>
+                    <ui-action>Line Numbers</ui-action>
                   </ui-menu>
                 </ui-example>
               </ui-section>

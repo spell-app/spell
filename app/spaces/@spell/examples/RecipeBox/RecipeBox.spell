@@ -1,0 +1,44 @@
+// The ONE line a different back-end changes:  try "a live room at ...", "a web service at ...", "a sheet at ..."
+family cookbook is this device
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- its "servings" is a number
+	- to draw it:
+		<ui-form value={it} class="recipe">
+			<ui-input name="title" aria-label="Recipe"/>
+			<ui-text class="servings">serves {its servings}</ui-text>
+			<ui-button class="remove" onClick={remove it}>Remove</ui-button>
+		</ui-form>
+	- to remove it:
+		- undone as "Remove Recipe"
+		remove it from the recipes
+
+recipe box is an app:
+	- its "search" is text
+	- its "draft" is text
+	- its "matches" is every recipe where its title includes the search, sorted by its title
+	- to add the draft:
+		if the draft is "" return
+		add (a new recipe with title = the draft, servings = 2) to the recipes
+		clear the draft
+	- to draw it:
+		<ui-form value={it} class="box">
+			<ui-input name="search" class="search" aria-label="Search"/>
+			<ui-input name="draft" class="draft" aria-label="New recipe"/>
+			<ui-button class="add" onClick={add the draft}>Add</ui-button>
+		</ui-form>
+		for each recipe in the matches
+			draw the recipe
+		while waiting:
+			<ui-loader class="waiting"/>
+		if there are none:
+			<ui-text class="none">No recipes yet. Add the first one.</ui-text>
+		if that fails:
+			<ui-message class="failed" color="red">
+				Can't reach the cookbook right now.
+				<ui-button class="again" onClick={try again}>Try again</ui-button>
+			</ui-message>
+
+start the recipe box

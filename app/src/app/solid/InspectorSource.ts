@@ -1,78 +1,44 @@
+import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
+
 /**
- * Where a part of the running app is written in its program:  the Inspector's way back from an element to its
- * spell, while the compiler marks nothing on what it draws.
- * - Plain text work:  no parser, no DOM beyond reading the element.
- * - A best guess:  the tag in the source with the same name, the same words and the most attributes in common.
+ * What a program's source says of what the Inspector shows:  its text read, with no parser and no DOM.
+ * - A drawn element's tag:  at the place the compiler marked on it (`SourceMarks.placeOfDrawn()`), never a guess.
  *   A list's rows are one tag in the source, so each row finds the same one, as it should.
+ * - A type's events, abilities and property editor:  by its words, in the type's tag or its outline header.
  */
 
 /**
  * The handlers `element` was written with, by event:  `{ click: "add someone" }` for
  * `<ui-button icon="plus" onClick={add someone}>Add someone</ui-button>`.
- * - `sources`:  the program's spell files' text.
- * - Nothing found:  `{}`.
+ * - `sources`:  the program's spell files' text, each by its name in the project, as the marks name them.
+ * - Nothing found, or an element with no mark:  `{}`.
  */
-export function handlersInSource(element: Element, sources: readonly string[]): Record<string, string> {
-  const written = writtenTagFor(element, sources)
-  if (!written) return {}
+export function handlersInSource(element: Element, sources: ReadonlyMap<string, string>): Record<string, string> {
+  const place = SourceMarks.placeOfDrawn(element)
+  const source = place && sources.get(place.path)
+  if (!place || source === undefined) return {}
+  const opening = offsetOf(source, place.line, place.column)
+  if (source[opening] !== "<") return {}
+  const end = endOfTag(source, opening + 1)
+  if (end < 0) return {}
+  // past its name:  `<ui-button`
+  const inside = source.slice(opening + 1, end).replace(/^[^\s/>]+/, "")
   const handlers: Record<string, string> = {}
-  for (const [name, code] of written.handlers) handlers[name.slice(2).toLowerCase()] = code
+  for (const [name, code] of readAttributes(inside).handlers) handlers[name.slice(2).toLowerCase()] = code
   return handlers
 }
 
-/** The tag in `sources` that best matches `element`, if any. */
-function writtenTagFor(element: Element, sources: readonly string[]): WrittenTag | undefined {
-  const tag = element.localName
-  const words = ownText(element)
-  const candidates = sources.flatMap((source) => tagsIn(source, tag))
-  let best: WrittenTag | undefined
-  let bestScore = -Infinity
-  for (const candidate of candidates) {
-    let score = 0
-    if (words && candidate.words === words) score += 4
-    else if (words && candidate.words && candidate.words !== words) score -= 4
-    for (const [name, value] of candidate.attributes) {
-      if (!element.hasAttribute(name)) score -= 1
-      else if (element.getAttribute(name) === value || value === "") score += 1
-    }
-    if (score > bestScore) {
-      best = candidate
-      bestScore = score
-    }
-  }
-  // one tag of that name is it;  among several, it must match on something
-  return candidates.length === 1 || bestScore > 0 ? best : undefined
+/** The offset in `source` of `line`, `column`, both from 0. */
+function offsetOf(source: string, line: number, column: number): number {
+  let offset = 0
+  for (let at = 0; at < line; at++) offset = source.indexOf("\n", offset) + 1
+  return offset + column
 }
 
-/** A tag as written in spell:  its plain attributes, its handlers (`onClick={...}`) and its own words. */
+/** A tag as written in spell:  its plain attributes, and its handlers (`onClick={...}`). */
 type WrittenTag = {
   attributes: [name: string, value: string][]
   handlers: [name: string, code: string][]
-  words: string
-}
-
-/** Every `<tag ...>` in `source`, read. */
-function tagsIn(source: string, tag: string): WrittenTag[] {
-  const found: WrittenTag[] = []
-  const opening = new RegExp(`<${tag}(?=[\\s/>])`, "g")
-  let match: RegExpExecArray | null
-  while ((match = opening.exec(source))) {
-    const end = endOfTag(source, match.index + match[0].length)
-    if (end < 0) continue
-    const inside = source.slice(match.index + match[0].length, end)
-    const isEmpty = inside.trimEnd().endsWith("/")
-    const close = isEmpty ? -1 : source.indexOf(`</${tag}>`, end)
-    const words =
-      close < 0
-        ? ""
-        : source
-            .slice(end + 1, close)
-            .replace(/<[^>]*>|\{[^}]*\}/g, " ")
-            .replace(/\s+/g, " ")
-            .trim()
-    found.push({ ...readAttributes(inside), words })
-  }
-  return found
 }
 
 /** The index of the `>` closing a tag opened before `from`, past any `{...}` and quoted values;  -1 if none. */
@@ -112,16 +78,6 @@ function readAttributes(inside: string): Pick<WrittenTag, "attributes" | "handle
     } else attributes.push([name, value ? value.slice(1, -1) : ""])
   }
   return { attributes, handlers }
-}
-
-/** `element`'s own words, its text children's, in one line. */
-function ownText(element: Element): string {
-  return [...element.childNodes]
-    .filter((node) => node.nodeType === Node.TEXT_NODE)
-    .map((node) => node.textContent)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim()
 }
 
 ////////////////

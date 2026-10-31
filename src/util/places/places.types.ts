@@ -199,6 +199,14 @@ export type ListQuery = {
   page?: PageAsk
 }
 
+/** One list of `Place.listMany()`. */
+export type ListAsk = {
+  /** The collection. */
+  collection: string
+  /** What to list. */
+  query: ListQuery
+}
+
 /** Which parts of a `ListQuery` the place did itself:  each one left out is the engine's to do. */
 export type ListHandled = {
   /** It filtered. */
@@ -367,6 +375,12 @@ export type Place = {
   describe(): PlaceCapabilities
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
+  /**
+   * Several lists in ONE request, each answer at its ask's place:  for a place whose way of asking allows it (`PlaceBatch`).
+   * - Left out:  each list is a request of its own.
+   * - All or nothing:  one failing throws for them all.
+   */
+  listMany?(asks: readonly ListAsk[], context: PlaceContext): Promise<ListAnswer[]>
   /** The rows of `collection` with these ids, in no promised order;  an id it doesn't hold is left out. */
   getMany?(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]>
   /** Make these changes.  All or none, if it's `atomic`. */

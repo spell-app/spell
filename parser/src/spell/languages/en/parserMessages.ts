@@ -21,6 +21,11 @@ export const PARSER_MESSAGES = {
 
   /** An article that doesn't agree with its noun, `a apple`:  `{phrase}` is the right one, `an apple`. */
   "did-you-mean": 'Did you mean "{phrase}"?',
+  "read-whole-everything": "everything this program saves",
+  "read-whole-field-named-by-a-value":
+    "Spell can't tell which field this names, so {what} is read whole:  name the field in words if you can",
+  "read-whole-element-reads-it": "Spell can't see what this element reads of it, so {what} is read whole",
+  "read-whole-library-reads-it": "Spell can't see what this library reads, so {what} is read whole",
   /** A method's parameter with no type, `(digit)`:  `{type}` is a guess, e.g. `text`, `a card`. */
   "untyped-parameter": 'Say what "{name}" is, e.g. "({name} as {type})"',
   /** A property declared with no type:  `{line}` is the line as written, `a calculator has an input`. */
@@ -37,6 +42,47 @@ export const PARSER_MESSAGES = {
   "reads-after-wait":
     "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
   "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
+  /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
+  "place-read-only":
+    "The {place} is a {kind}, which is read only here:  this can't change it.  Keep what changes somewhere else, or read it from a place that takes writes",
+  /** A key written into a program:  won't compile. */
+  "key-written":
+    'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',
+  /** A secret's name that looks like the key itself. */
+  "key-not-a-name":
+    '"{name}" looks like a key, not its name:  a key is never written here.  Name it in capitals, e.g. "its key is the secret "COOKBOOK_KEY""',
+  /** A place named a key:  a browser program has no way to read one. */
+  "key-needs-server-side":
+    'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
+  /** A place that can't announce what changed:  `{kind}`. */
+  "place-cant-announce":
+    "A {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- it is checked every 30 seconds\" under it",
+  /** A `where` on a saved type that can't go to its place. */
+  "where-looks-through":
+    "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
+  /** A sort key that waits:  won't compile. */
+  "sort-key-waits":
+    "A sort can't wait for its key:  it would sort in no order.  Sort by a field of its own, or work the key out first",
+  /** A rider outside a drawing:  won't compile. */
+  "rider-only-in-a-drawing":
+    "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
+  /** `all or nothing:` where a place can't make it so. */
+  "all-or-nothing-not-atomic":
+    "A place here can't apply changes all together:  they go one by one, so others may see some of them for a moment",
+  /** `save` of something that's no draft:  `{text}`. */
+  "no-save-step":
+    '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
+  /** A word people bring from elsewhere:  `{word}`. */
+  "no-such-data-word":
+    'Spell has no "{word}" for data:  say where it lives once, "x is a web service at ...", and "- it is saved in x", then "every recipe where ..." reads it',
+  /** `belongs to one` a saved owner with no list of them. */
+  "belongs-to-saved-needs-list":
+    'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
+  /** The cloud, before it's built. */
+  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a live room at ..."',
+  /** Words that can never both be true. */
+  "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
+  /** A rider's word that doesn't agree. */
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
   /** A property's rule (`must ...`) above the property it's about. */

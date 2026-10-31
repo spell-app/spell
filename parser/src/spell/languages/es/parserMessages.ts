@@ -16,6 +16,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   ////////////////
 
   "did-you-mean": '¿Querías decir "{phrase}"?',
+  "read-whole-everything": "todo lo que este programa guarda",
+  "read-whole-field-named-by-a-value":
+    "Encanto no sabe qué campo nombra esto, así que {what} se lee entero:  nombra el campo con palabras si puedes",
+  "read-whole-element-reads-it": "Encanto no ve qué lee de ello este elemento, así que {what} se lee entero",
+  "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
   "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',
@@ -27,6 +32,32 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "reads-after-wait":
     "Tras su primera espera, este valor no puede seguir lo que lee de otras cosas:  léelas antes de la espera",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
+  "place-read-only":
+    "El {place} es de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
+  "key-written":
+    'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
+  "key-not-a-name":
+    '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "su clave es el secreto "CLAVE_RECETARIO""',
+  "key-needs-server-side":
+    'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
+  "place-cant-announce":
+    'Un {kind} no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+  "where-looks-through":
+    "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
+  "sort-key-waits":
+    "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
+  "rider-only-in-a-drawing":
+    "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
+  "all-or-nothing-not-atomic":
+    "Un lugar aquí no puede aplicar los cambios todos juntos:  van de uno en uno, así que otros pueden ver algunos por un momento",
+  "no-save-step":
+    '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
+  "no-such-data-word":
+    'Encanto no tiene "{word}" para datos:  di una vez dónde viven, "x es un servicio web en ...", y "- se guarda en x", y luego "cada receta donde ..." los lee',
+  "belongs-to-saved-needs-list":
+    'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
+  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en vivo en ..."',
+  "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',

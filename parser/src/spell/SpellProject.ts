@@ -335,7 +335,20 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   static sourcePlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
     if (!(node instanceof P.ASTStatement) || node instanceof P.ASTStatementGroup) return undefined
-    const { match } = node
+    return SpellProject.placeOfMatch(node.match)
+  }
+
+  /**
+   * Where `node` came from, if it's a drawn tag or a made thing:  its file, line and column -- see `P.SourceMarks`.
+   * - A drawn tag spell made itself, a branch's `<span>`:  the place of the words it holds.
+   */
+  static partPlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
+    if (!(node instanceof P.ASTJSXElement || node instanceof P.ASTNewInstanceExpression)) return undefined
+    return SpellProject.placeOfMatch(node.match)
+  }
+
+  /** Where `match` is:  its file, line and column. */
+  private static placeOfMatch(match: P.AnyMatch | undefined): P.SourcePlace | undefined {
     const path = match?.getScopeOfType(P.FileScope)?.path
     const line = match?.line
     const column = match?.char
@@ -556,12 +569,19 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       params: { target: target.name }
                     })
                   }
+                  if (target.can.places === false && SpellProject.keepsThingsInPlaces(parts)) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}' keeps things in a place, which target '${target.name}' can't yet:  it's browser work first (epic data, J10).`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name }
+                    })
+                  }
                   const header = this.importHeader(target.writer)
                   // a source map as it's written, for a javascript-family target that runs -- see `P.SourceMarks`
                   // - never a library's (`ts/lib`):  its `.lib.ts` is source the repo commits and imports, not output
                   const sourceMarks =
                     target.writer instanceof P.JSWriter && target.can.run !== false
-                      ? new P.SourceMarks(SpellProject.sourcePlaceOf)
+                      ? new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
                       : undefined
                   const combine = () =>
                     SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
@@ -718,7 +738,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     options?: P.WriterOptions
   ): string {
     const hoisted = SP.hoistClassMembers(parts.map((part) => (typeof part === "object" ? (part.statements ?? []) : [])))
-    const projectWriter = writer.forProject(hoisted, scope, options)
+    const projectWriter = writer.forProject(hoisted, scope, { ...options, noteForAuthor: SP.SpellWarnings.noteRead })
     const code = parts
       .map((part, index) => {
         if (typeof part !== "object") return projectWriter.codePart(part ?? "")
@@ -870,6 +890,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     let [first] = body instanceof P.ASTStatementBlock ? (body.statements ?? []) : [body]
     if (first instanceof P.ASTReturnStatement) first = first.value
     return first instanceof P.ASTCoreMethodInvocation && first.methodName === "test"
+  }
+
+  /** Does a program made of `parts` name a place?  A target that says `places: false` can't write one. */
+  static keepsThingsInPlaces(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
+    let found = false
+    P.forEachNode(
+      parts.filter((part) => typeof part === "object"),
+      (node) => {
+        if (node instanceof P.ASTCoreMethodInvocation && node.methodName === "place") found = true
+      }
+    )
+    return found
   }
 
   /**

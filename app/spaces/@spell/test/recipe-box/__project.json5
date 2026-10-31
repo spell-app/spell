@@ -1,0 +1,10 @@
+{
+  "description": "The recipe box:  recipes kept in a place, read and changed with the words every thing has.  Its first lines are all a different back-end changes (epic data P11)",
+  "version": "1.0.0",
+  "imports": [
+    {
+      "path": "/RecipeBox.spell",
+      "active": true
+    }
+  ]
+}

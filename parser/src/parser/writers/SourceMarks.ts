@@ -20,6 +20,8 @@ export type SourceMapV3 = {
   names: string[]
   /** the mappings, base-64 VLQ:  one `;`-separated group per generated line */
   mappings: string
+  /** where what's drawn and made is written:  `SourceMarks.stamped()` reads it.  Debuggers skip an `x_` field. */
+  x_spellPlaces?: SpellPlaceEntry[]
 }
 
 /****************
@@ -34,6 +36,13 @@ export type SourceMapV3 = {
  * - A line without a mark of its own maps to nothing:  a debugger shows the statement lines.
  * - Knows nothing of spell's projects:  the caller says each node's file (`placeOf`).
  * - NEVER on while a writer runs outside `during()`:  a mark left in code would ship.
+ * - What's drawn and made has marks too (epic `editor` P7), so the editor can say where a part of a running app is
+ *   written:
+ *   - `markDrawn()`:  a drawn tag's `h("ui-button"`;  `markMade()`:  a `new Card(...)`
+ *   - `extract()` takes them out with the rest, and lists them in the map's `x_spellPlaces`:  the code is the same
+ *   - `stamped()` writes them into the code the editor runs, and only that
+ *   - `placeOfDrawn()`, `placeOfThing()` read them back
+ *   - ONE map:  they're places in the statements' files, kept in the statements' source map
  ****************/
 export class SourceMarks {
   /** the marks being made now, if any */
@@ -42,8 +51,14 @@ export class SourceMarks {
   /** each mark's place, by its number */
   private readonly places: SourcePlace[] = []
 
-  /** `placeOf(node)`:  where `node` came from, or `undefined` for a node not to mark */
-  constructor(private readonly placeOf: (node: P.ASTNode) => SourcePlace | undefined) {}
+  /**
+   * - `placeOf(node)`:  where statement `node` came from, or `undefined` for a node not to mark
+   * - `placeOfPart(node)`:  the same for a drawn tag or a made thing;  none, no such marks
+   */
+  constructor(
+    private readonly placeOf: (node: P.ASTNode) => SourcePlace | undefined,
+    private readonly placeOfPart?: (node: P.ASTNode) => SourcePlace | undefined
+  ) {}
 
   /**
    * Run `write()` with marks made:  what it returns, its marks still in it.
@@ -89,6 +104,63 @@ export class SourceMarks {
     return output
   }
 
+  /** The mark to put after a drawn tag's name, `h("ui-button"`, for `node`:  `""` when none is being made. */
+  static markDrawn(node: P.ASTNode): string {
+    return SourceMarks.partMark(node, "h")
+  }
+
+  /** `written`, the `new Card(...)` for `node`, between its marks;  as it is when none are being made. */
+  static markMade(written: string, node: P.ASTNode): string {
+    const open = SourceMarks.partMark(node, "new")
+    return open ? `${open}${written}${SourceMarks.partMark(node, "end")}` : written
+  }
+
+  /** The next mark of `kind` for `node`:  `""` unless marks of parts are being made, and it has a place. */
+  private static partMark(node: P.ASTNode, kind: PartKind): string {
+    const marks = SourceMarks.current
+    const place = marks?.placeOfPart?.(node)
+    if (!marks || !place) return ""
+    marks.places.push(place)
+    return `${PART_OPEN}${kind}${PART_NUMBER}${marks.places.length - 1}${MARK_CLOSE}`
+  }
+
+  /**
+   * `code`, a compiled file, with what's drawn and made saying where it's written:
+   * what the editor runs, never what ships.
+   * - `map`:  its source map, as `extract()` made it.  None, or one listing no parts:  `code` as it is.
+   * - A drawn tag:  `h("ui-button", { "data-spell-at": "Card.spellml:12:4" }`, read back by `placeOfDrawn()`.
+   * - A made thing:  `Object.defineProperty(new Card(), Symbol.for("spell.madeAt"), ...)`, read back by `placeOfThing()`.
+   * - Lines stay where they are, and a statement's mapping is at its line's start:  the map still holds.
+   */
+  static stamped(code: string, map: string | undefined): string {
+    const parsed = map ? (JSON.parse(map) as SourceMapV3) : undefined
+    const parts = parsed?.x_spellPlaces
+    if (!parsed || !parts?.length) return code
+    const lines = code.split("\n")
+    // last first, so what's left to do keeps its column
+    for (const [line, column, kind, source, sourceLine, sourceColumn] of [...parts].reverse()) {
+      const text = lines[line]
+      if (text === undefined) continue
+      const before = text.slice(0, column)
+      const after = text.slice(column)
+      const at = JSON.stringify(`${parsed.sources[source]}:${sourceLine}:${sourceColumn}`)
+      if (kind === "h") lines[line] = `${before}${withDrawnPlace(after, at)}`
+      else if (kind === "new") lines[line] = `${before}Object.defineProperty(${after}`
+      else lines[line] = `${before}, Symbol.for(${JSON.stringify(MADE_AT)}), { value: ${at} })${after}`
+    }
+    return lines.join("\n")
+  }
+
+  /** Where a drawn `element` is written, as `stamped()` said:  `undefined` in code not stamped. */
+  static placeOfDrawn(element: Element): SourcePlace | undefined {
+    return placeFrom(element.getAttribute(DRAWN_AT))
+  }
+
+  /** Where `thing` was made (`a new card`), as `stamped()` said:  `undefined` in code not stamped. */
+  static placeOfThing(thing: object): SourcePlace | undefined {
+    return placeFrom((thing as Record<symbol, unknown>)[Symbol.for(MADE_AT)])
+  }
+
   /**
    * `code`, a compiled file, carrying source map `map` inline (a `data:` URL), for code run from somewhere the map file
    * beside it can't be reached:  a temp file, a `blob:` URL.  No `map`:  pointing at none.
@@ -127,11 +199,13 @@ export class SourceMarks {
     const paths = [...new Set([...sources.keys(), ...this.places.map((place) => place.path)])]
     const lines: string[] = []
     const mappings: string[] = []
+    const parts: SpellPlaceEntry[] = []
     // the VLQ fields are deltas from the last segment written:  source, its line, its column
     let lastSource = 0
     let lastLine = 0
     let lastColumn = 0
-    for (const marked of code.split("\n")) {
+    for (const line of code.split("\n")) {
+      const marked = line.includes(PART_OPEN) ? this.withoutPartMarks(line, lines.length, paths, parts) : line
       let text = ""
       let segments: string[] = []
       let from = 0
@@ -163,11 +237,68 @@ export class SourceMarks {
         sources: paths.map(nameOf),
         sourcesContent: paths.map((path) => sources.get(path) ?? null),
         names: [],
-        mappings: mappings.join(";")
+        mappings: mappings.join(";"),
+        ...(parts.length ? { x_spellPlaces: parts } : {})
       }
     }
   }
+
+  /**
+   * `line` of the code without its parts' marks, each listed in `parts`, at its column once EVERY mark is out.
+   * - A statement's mark stays in, for `extract()`.
+   */
+  private withoutPartMarks(line: string, lineNumber: number, paths: string[], parts: SpellPlaceEntry[]): string {
+    let kept = ""
+    let column = 0
+    let from = 0
+    for (const found of line.matchAll(ANY_MARK)) {
+      const between = line.slice(from, found.index)
+      kept += between
+      column += between.length
+      from = found.index + found[0].length
+      const place = this.places[Number(found[2])]
+      if (found[1] === STATEMENT_MARK) kept += found[0]
+      else if (place) {
+        parts.push([lineNumber, column, found[1] as PartKind, paths.indexOf(place.path), place.line, place.column])
+      }
+    }
+    return kept + line.slice(from)
+  }
 }
+
+/** What a mark of a part is:  a drawn tag's name, the start of a made thing, its end. */
+type PartKind = "h" | "new" | "end"
+
+/** A part in a map's `x_spellPlaces`:  its line and column in the code, its kind, and its source, line and column. */
+export type SpellPlaceEntry = [
+  line: number,
+  column: number,
+  kind: PartKind,
+  source: number,
+  sourceLine: number,
+  sourceColumn: number
+]
+
+/** `after`, the code after a drawn tag's name, with its place first in the tag's props:  it makes them when it has none. */
+function withDrawnPlace(after: string, at: string): string {
+  const prop = `${JSON.stringify(DRAWN_AT)}: ${at}`
+  return after.startsWith(", {") ? `, { ${prop},${after.slice(", {".length)}` : `, { ${prop} }${after}`
+}
+
+/** `at`, a stamped place, `Card.spellml:12:4`, read:  `undefined` if it isn't one. */
+function placeFrom(at: unknown): SourcePlace | undefined {
+  const found = typeof at === "string" ? STAMPED_PLACE.exec(at) : null
+  return found ? { path: found[1]!, line: Number(found[2]), column: Number(found[3]) } : undefined
+}
+
+/** The attribute that says where a drawn element is written, in the code the editor runs. */
+const DRAWN_AT = "data-spell-at"
+
+/** The key of the symbol that says where a thing was made, in the code the editor runs. */
+const MADE_AT = "spell.madeAt"
+
+/** A stamped place's text. */
+const STAMPED_PLACE = /^(.+):(\d+):(\d+)$/
 
 /** A mark's opening and closing:  an inline comment no writer writes itself. */
 const MARK_OPEN = "/*@@sm"
@@ -176,8 +307,18 @@ const MARK_CLOSE = "@@*/"
 /** A compile's `//# sourceMappingURL=...` line, at its end. */
 const SOURCE_MAP_LINE = /\n\/\/# sourceMappingURL=[^\n]*\n?$/
 
+/** A part's mark's opening, then its kind and number:  `/*@@part:h:3@@*\/`. */
+const PART_OPEN = "/*@@part:"
+const PART_NUMBER = ":"
+
+/** What `ANY_MARK` calls a statement's mark. */
+const STATEMENT_MARK = "sm"
+
+/** Any mark on a line:  its kind, then its number. */
+const ANY_MARK = /\/\*@@(?:part:(?=[a-z]+:)|(?=sm))([a-z]+):?(\d+)@@\*\//g
+
 /** Every mark in a text. */
-const MARKS = /\/\*@@sm\d+@@\*\//g
+const MARKS = /\/\*@@(?:sm|part:[a-z]+:)\d+@@\*\//g
 
 /** Base-64 digits, as source maps use them. */
 const BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"

@@ -11,6 +11,47 @@ import { compiledSpellProject, registerTestComponentPack } from "spell/parser/sp
  *   the code must be EXACTLY what it is with no map.
  * - Every mapped line points at its statement's line, in `.spell` and `.spellml` files alike.
  */
+describe("P.SourceMarks.stamped()", () => {
+  const map = (parts: P.SpellPlaceEntry[]) =>
+    JSON.stringify({ version: 3, sources: ["Card.spellml"], names: [], mappings: "", x_spellPlaces: parts })
+
+  test("a tag with props:  its place first among them", () => {
+    expect(P.SourceMarks.stamped('h("b", { a: 1 })', map([[0, 5, "h", 0, 12, 4]]))).toBe(
+      'h("b", { "data-spell-at": "Card.spellml:12:4", a: 1 })'
+    )
+  })
+
+  test("a tag with none:  props of its own, before its children", () => {
+    expect(P.SourceMarks.stamped('h("b", "words")', map([[0, 5, "h", 0, 1, 2]]))).toBe(
+      'h("b", { "data-spell-at": "Card.spellml:1:2" }, "words")'
+    )
+    expect(P.SourceMarks.stamped('h("b")', map([[0, 5, "h", 0, 1, 2]]))).toBe(
+      'h("b", { "data-spell-at": "Card.spellml:1:2" })'
+    )
+  })
+
+  test("a made thing, over several lines:  it reads back, and nothing shows", () => {
+    const code = "const a = new Set(\n  []\n)"
+    const stamped = P.SourceMarks.stamped(
+      code,
+      map([
+        [0, 10, "new", 0, 3, 1],
+        [2, 1, "end", 0, 3, 1]
+      ])
+    )
+    // oxlint-disable-next-line typescript/no-implied-eval -- the stamped code, run:  that is the test
+    const made = new Function(`${stamped};  return a`)() as Set<unknown>
+    expect(made).toBeInstanceOf(Set)
+    expect(Object.keys(made)).toEqual([])
+    expect(P.SourceMarks.placeOfThing(made)).toEqual({ path: "Card.spellml", line: 3, column: 1 })
+  })
+
+  test("no map, or one with no parts:  the code as it is", () => {
+    expect(P.SourceMarks.stamped('h("b")', undefined)).toBe('h("b")')
+    expect(P.SourceMarks.stamped('h("b")', map([]))).toBe('h("b")')
+  })
+})
+
 describe("source maps", () => {
   beforeAll(registerTestComponentPack)
 

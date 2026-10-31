@@ -1,0 +1,10 @@
+{
+  "title": "Recipe Box",
+  "description": "Recipes kept in a place, read and changed with the words every thing has.  Its first line is all a different back-end changes",
+  "imports": [
+    {
+      "path": "/RecipeBox.spell",
+      "active": true
+    }
+  ]
+}

@@ -31,6 +31,9 @@ export abstract class ProgramWriter extends Writer {
   /** What we know of the project we're writing -- see `WriterProject`. */
   readonly project: WriterProject
 
+  /** What the project reads from what it saves in places:  none, with nothing saved -- see `P.ReadGathering`. */
+  reads: P.ReadGathering | undefined
+
   /**
    * How we write each kind of name, e.g. a type in PascalCase.
    * - Each language's writer sets its own -- see `Naming`.
@@ -97,6 +100,8 @@ export abstract class ProgramWriter extends Writer {
       coreCallWaits: (call) => writer.coreCallWaits(call),
       readsThroughSolid: writer.readsThroughSolid
     })
+    writer.reads = P.ReadGathering.of(files, writer.project, { scope })
+    for (const note of writer.reads?.notes ?? []) options?.noteForAuthor?.(note)
     return writer
   }
 

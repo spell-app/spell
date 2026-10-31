@@ -721,6 +721,11 @@ A kind that says so is saved in a file of its own.
   - What a LATER line or file may settle:  `SP.SpellWarnings.noteIf(match, message, stillHolds, at?)`.
     - `in()` reports it only while `stillHolds()`.
     - It's asked then, with what the whole project declares by then.
+  - What only a whole-project pass can say, while compiling (epic `data` P12):  `P.WriterOptions.noteForAuthor`, which
+    `SP.SpellProject.combineCompiled()` hands every writer.
+    - A writer words nothing:  it knows no language.  `SP.SpellWarnings.noteRead()` words it, and notes it on the line it's about,
+      so it joins the same list.
+    - It's there once a compile has run, not after a parse alone.
   - So far:
     - a property with no type, or a list of nothing said (`define_property_has`)
     - a parameter with no type (`var_method_arg`)
@@ -1562,6 +1567,36 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.
 
+## Places
+
+What a program's lines about where data lives compile to, and what reads the rest (the `places` rule module, epic `data` P11).
+
+- `family cookbook is a web service at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
+  - Its kind is a word (`place_kind`), or a type made from `place`, which is how a library adds one.
+  - Compiled:  its class, then `core.place(new FamilyCookbook(), { name, kind, at, ...what the lines under it say })`.
+  - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
+- `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
+  - Compiled:  `static savedIn = { place, collection }`.
+- The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
+  while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
+  - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
+  - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
+    Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
+  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
+  - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
+- `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
+- What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
+  into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
+  A project with no saved type compiles as it did.
+- A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
+  - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
+    a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
+- What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
+  `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
+  - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
+- A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
+
 ## Projects
 
 - Projects come in GROUPS (project roots), and the groups are spaces', not spell's:
@@ -1944,6 +1979,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
     carries it inline:  `P.SourceMarks.inline()`.
   - A `.spellml` file's positions are its own (Q69), so its map points at its `.spellml` lines.
+  - What's drawn and made has marks too (epic `editor` P7):  each drawn tag and each `a new card`, its place
+    (`SP.SpellProject.partPlaceOf()`) listed in the map's `x_spellPlaces`.
+    - The code stays EXACTLY the same.
+    - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
+      where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
+    - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
   - Not the Python target, yet.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:

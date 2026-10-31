@@ -127,7 +127,6 @@ const APP_TEXTS_ES: AppTextPack = {
   stopInspecting: "Dejar de inspeccionar",
   inspectHelp: "Haz clic en una parte de la app para inspeccionarla.  Alt y clic, en una parte de dentro.  Esc para.",
   inspectHelpClose: "Cerrar",
-  fileTabs: "Archivos",
   notSaved: "Sin guardar",
 
   ////////////////
@@ -179,8 +178,6 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorProperties: "Propiedades",
   inspectorThings: "Cosas",
   inspectorTemplates: "Plantillas",
-  inspectorFold: "Cerrar",
-  inspectorUnfold: "Abrir",
   inspectorHide: "Ocultar esta tarjeta",
   inspectorLetGo: "Soltar {part} (Esc)",
   inspectorExpandAll: "Desplegar todo",
@@ -215,6 +212,8 @@ const APP_TEXTS_ES: AppTextPack = {
   consoleCompiledTo: "Compilado a JavaScript:",
   consoleExecuting: "Ejecutando {theType}",
   consoleFailed: "{Type}:  falló con un error:",
+  inspectorWrittenAt: "Escrito en {file}, línea {line}",
+  inspectorWrittenAtShared: "Escrito en {file}, línea {line}:  {count} de estos salen de este único lugar",
   consoleExecuted: "{Type}:  se ejecutó sin errores.",
   testResults: "Pruebas:  {passed} pasaron, {failed} fallaron",
   noTests: "No hay pruebas:  escribe una como `para probar <algo>:`",

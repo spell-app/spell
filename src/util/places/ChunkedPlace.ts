@@ -66,7 +66,7 @@ export class ChunkedPlace implements Place {
     const { store, format } = this
     const canWrite = !!(store.write && store.remove && format.listText && format.bodyText)
     return {
-      kind: "files",
+      kind: "folder",
       idOf: this.idField,
       filter: "none",
       sort: "none",

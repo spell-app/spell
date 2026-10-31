@@ -893,6 +893,35 @@
     },
     {
       "kind": "method",
+      "name": "firstFew",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "section": "iteration",
+      "description": "The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`."
+    },
+    {
+      "kind": "method",
+      "name": "totalOf",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        }
+      ],
+      "section": "iteration",
+      "description": "The sum of `collection`'s items:  `the total of its prices`.  What isn't a number counts as nothing."
+    },
+    {
+      "kind": "method",
       "name": "filterInTurn",
       "of": "core",
       "module": "collection-other",
@@ -2568,6 +2597,223 @@
         }
       ],
       "description": "The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits."
+    },
+    {
+      "kind": "method",
+      "name": "place",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "details"
+        }
+      ],
+      "description": "The place's name, as its line writes it."
+    },
+    {
+      "kind": "method",
+      "name": "savedThings",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "query"
+        },
+        {
+          "name": "how"
+        }
+      ],
+      "description": "Every thing of `Class`, as a list, from the place it's saved in:  what `every recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingAt",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "place"
+        }
+      ],
+      "description": "The thing at `place` in `Class`'s place's order, counting from 1, `-1` the last:  what `the first recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "readRider",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "_kind"
+        },
+        {
+          "name": "_draw"
+        }
+      ],
+      "description": "A rider with no read above it to go on:  nothing to do, and it says nothing."
+    },
+    {
+      "kind": "method",
+      "name": "saveThing",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "`thing`, made here, is now kept where its class says:  what `add (a new recipe ...) to the recipes` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "removeSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "`thing` is gone from its place, and so is what belongs to it, which is kept inside it: what `remove it from the recipes` compiles to, for a saved type (epic `data`, Q10)."
+    },
+    {
+      "kind": "method",
+      "name": "draftOf",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "A copy of `thing` to change, sending nothing until `core.saveDraft()`:  what `a draft of the recipe` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "saveDraft",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "copy"
+        }
+      ],
+      "description": "Send what's changed in `copy`, a draft:  one group, shown at once.  What `save the draft` compiles to.  - throws for anything else"
+    },
+    {
+      "kind": "method",
+      "name": "cancelDraft",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "copy"
+        }
+      ],
+      "description": "Forget what's changed in `copy`, a draft:  nothing had left.  What `cancel the draft` compiles to.  - throws for anything else"
+    },
+    {
+      "kind": "method",
+      "name": "allOrNothing",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run`, its changes to each place one group:  what `all or nothing:` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "refreshSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Ask the place again:  every read of `Class`, or of them all.  What `refresh the recipes` and `try again` compile to.  - NEVER throws"
+    },
+    {
+      "kind": "method",
+      "name": "ownerOfSaved",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        }
+      ],
+      "description": "Who holds `thing`, kept inside its owner's row:  what `the recipe of an ingredient` compiles to, for a saved owner."
+    },
+    {
+      "kind": "method",
+      "name": "savedWithOwner",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "Item"
+        },
+        {
+          "name": "Owner"
+        },
+        {
+          "name": "field"
+        }
+      ],
+      "description": "Things of `Item` are saved inside `Owner`'s row, in its list `field`:  what `an ingredient belongs to one recipe` compiles to, for a saved owner."
+    },
+    {
+      "kind": "method",
+      "name": "callPlace",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "placeName"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "input"
+        }
+      ],
+      "description": "`run`, through the place named `placeName`, by the operation `name`:  what an action under a place's line compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "drawRead",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "read"
+        },
+        {
+          "name": "drawEach"
+        },
+        {
+          "name": "riders"
+        }
+      ],
+      "description": "What a read of a list draws:  each item by `drawEach`, kept by identity, with what its riders say around it."
     },
     {
       "kind": "method",

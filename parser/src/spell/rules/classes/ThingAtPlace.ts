@@ -1,6 +1,7 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
+import { savedPlaceOfMatch } from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `thing_at_place` rule:  one thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).
@@ -11,6 +12,7 @@ import { SpellExpression } from "spell/parser/spell/rules/expressions"
  *   - Only that type's own things count, not a sub-type's (T10).
  * - Compiles to core's `core.thingAtPlace(Tableau, 1)`:  the reference `Tableau#1`.
  *   Nothing (`undefined`) when the program hasn't made that many.
+ * - A type saved in a place:  by the place's order, `core.savedThingAt(Recipe, 1)`, which waits (epic `data` P11).
  * - NOT `the first card of the deck`:  that's an item of a list, `ordinal_position_expression`.
  */
 export class ThingAtPlace extends SpellExpression<"ordinal|type"> {
@@ -22,7 +24,7 @@ export class ThingAtPlace extends SpellExpression<"ordinal|type"> {
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { ordinal, type } = match.groups
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "thingAtPlace",
+      methodName: savedPlaceOfMatch(type) ? "savedThingAt" : "thingAtPlace",
       args: [P.matchAST<P.ASTTypeExpression>(type), P.matchAST(ordinal)]
     })
   }

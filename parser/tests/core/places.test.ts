@@ -1212,12 +1212,29 @@ describe("Places.originOf(), a worked-out value", () => {
     expect(places.originOf(new Box(), "searchLength")).toBeUndefined()
   })
 
-  test("LIMIT:  only what this reading read, so a list with nothing in it has no origin yet", async () => {
+  test("hand-written:  only what this reading read, so a list with nothing in it has no origin yet", async () => {
     const { places } = await aDish()
     expect(places.originOf(new Box(), "matches")).toBeUndefined()
   })
 
-  test("LIMIT:  what a Solid memo read is the memo's:  a value read through one has no origin", async () => {
+  test("what the compiler found:  a list with nothing in it says where it reads, and a memo's reads, and a branch not taken", async () => {
+    const { places, dish } = await aDish()
+    class Compiled extends Box {
+      static {
+        this.declareProp("matches", { readsFrom: ["family cookbook"] })
+        this.declareProp("throughMemo", { readsFrom: ["family cookbook"] })
+      }
+    }
+    const box = new Compiled()
+    expect(places.originOf(box, "matches")).toMatchObject({ workedOut: true, readsFrom: ["family cookbook"] })
+    createRoot(() => {
+      box.titleMemo = createMemo(() => dish.title)
+    })
+    flush()
+    expect(places.originOf(box, "throughMemo")).toMatchObject({ readsFrom: ["family cookbook"] })
+  })
+
+  test("hand-written:  what a Solid memo read is the memo's:  a value read through one has no origin", async () => {
     const { places, dish } = await aDish()
     const box = new Box()
     createRoot(() => {

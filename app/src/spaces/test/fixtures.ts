@@ -275,12 +275,16 @@ function compileFixture(
   const writer = typeof target === "string" ? SP.targetFor(target).writer : target
   const importLines = SP.SpellProject.importHeaderFor(scope, writer)
   // a source map as it's written, as `SpellProject.compile()` makes one -- see `P.SourceMarks`
-  const sourceMarks = sourceMap ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf) : undefined
+  const sourceMarks = sourceMap
+    ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
+    : undefined
   const combine = () =>
     scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope, { listsStartAt }))
   const marked = errors.join("") + (sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()) + "\n"
   const split = SP.SpellDeclarations.split(marked, scope, { version, exports, languages })
-  const mapped = sourceMarks?.extract(split.code)
+  const mapped = sourceMarks?.extract(split.code, {
+    sources: new Map(sources.map(({ path, contents }) => [path, contents] as const))
+  })
   return { ...split, ...(mapped ?? {}), draws: SP.SpellProject.draws(parts) }
 }
 
