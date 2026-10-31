@@ -33,6 +33,20 @@ describe("StateFilter.nextShown()", () => {
     expect(StateFilter.nextShown(PRESENT, PRESENT, "recent", "only")).toEqual(["recent"])
   })
 
+  // epic `epic-engine` I188:  what Claude is on has no chip (the blue badge), so no click hides it
+  test("`progress` has no chip:  it always shows, whatever the click", () => {
+    const withBlue = ["progress", ...PRESENT]
+    expect(StateFilter.nextShown(withBlue, withBlue, "open")).toEqual(["progress", "open"])
+    expect(StateFilter.nextShown(withBlue, ["attention"], "open", "only")).toEqual(["progress", "open"])
+    expect(StateFilter.nextShown(withBlue, ["attention", "open"], "open")).toEqual(["progress", "attention"])
+    expect(StateFilter.nextShown(withBlue, ["open"], "open")).toEqual(withBlue)
+    expect(StateFilter.clickDoes(withBlue, withBlue, "open")).toBe("only")
+    expect(StateFilter.clickDoes(withBlue, ["progress", "open"], "open")).toBe("all")
+    expect(StateFilter.hides("progress", [])).toBe(false)
+    expect(StateFilter.hides("open", ["attention"])).toBe(true)
+    expect(StateFilter.hides("open", ["open"])).toBe(false)
+  })
+
   test("states no longer there are left out", () => {
     expect(StateFilter.nextShown(["open", "recent"], ["old", "open"], "recent")).toEqual(["open", "recent"])
   })

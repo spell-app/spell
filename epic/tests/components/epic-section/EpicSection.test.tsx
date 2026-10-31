@@ -468,6 +468,31 @@ describe("<epic-section> counts and state filter", () => {
     await ElementFixture.tick()
   })
 
+  // epic `epic-engine` I188:  the blue badge counted them, yet a chip's click hid them
+  test("an item Claude is on (blue, `progress`) has no chip, and NO click hides it:  the blue badge and the list agree", async () => {
+    const host = await render(questions(["open:progress", "open:open", "decided:recent", "open:attention"]))
+    const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!
+    expect(filter.shadowRoot!.querySelector(".marked")!.textContent).toBe("1")
+    expect(Object.keys(chips(host))).toEqual(["attention", "open", "recent"])
+    // the shoot script's way:  the first chip ⌥-clicked, the next ones clicked
+    altClick(chip(host, "attention"))
+    await ElementFixture.tick()
+    expect(shownIds(host)).toEqual(["q1", "q4"])
+    chip(host, "open").click()
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ attention: true, open: true, recent: false })
+    expect(shownIds(host)).toEqual(["q1", "q2", "q4"])
+    expect(hiddenNote(host).textContent).toBe("1 hidden · show all")
+    // everything on, a click:  only that state, and the blue one still
+    hiddenNote(host).click()
+    await ElementFixture.tick()
+    chip(host, "recent").click()
+    await ElementFixture.tick()
+    expect(shownIds(host)).toEqual(["q1", "q3"])
+    hiddenNote(host).click()
+    await ElementFixture.tick()
+  })
+
   test("remembered per page;  a choice its states have left hides the list, and says so", async () => {
     const host = await render(questions(["open:attention", "open:open"]))
     chip(host, "attention").click()
