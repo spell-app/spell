@@ -57,17 +57,17 @@ export class TodosApp extends App {
             h("ui-item", {
               onClick: core.pressed(this, () => (app.filter = "all")),
               selected: () => app.filter === "all",
-              style: "cursor:pointer;user-select:none"
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
             }, "All"),
             h("ui-item", {
               onClick: core.pressed(this, () => (app.filter = "active")),
               selected: () => app.filter === "active",
-              style: "cursor:pointer;user-select:none"
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
             }, "Active"),
             h("ui-item", {
               onClick: core.pressed(this, () => (app.filter = "completed")),
               selected: () => app.filter === "completed",
-              style: "cursor:pointer;user-select:none"
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
             }, "Completed")
           )
         ),
@@ -86,7 +86,7 @@ export class TodosApp extends App {
               h("ui-button", {
                 disabled: () => app.newTaskName === "",
                 onClick: core.pressed(this, () => createANewTask()),
-                style: "cursor:pointer;user-select:none"
+                style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
               }, "Add Task")
             )
           )
@@ -97,19 +97,19 @@ export class TodosApp extends App {
           h("ui-item", { kind: "header" }, "Test:"),
           h("ui-item", {
             onClick: core.pressed(this, () => createANewTask({ title: "Moar" })),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add Item"),
           h("ui-item", {
             onClick: core.pressed(this, () => core.removeItemAt(app.tasks, 0)),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Remove Item"),
           h("ui-item", {
             onClick: core.pressed(this, () => (core.getItemAt(app.tasks, 0).title = "New title")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Change name"),
           h("ui-item", {
             onClick: core.pressed(this, () => core.removeWhere(app.tasks, (item) => item.isComplete)),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Remove Completed")
         )
       )

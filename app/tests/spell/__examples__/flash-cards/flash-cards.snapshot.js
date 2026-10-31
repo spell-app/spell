@@ -49,7 +49,7 @@ export class FlashCard extends View {
     return h("div", {
       part: "card",
       onClick: core.pressed(this, () => this.turnOver()),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
       h("div", { part: "hint" }, () => this.side === "back" ? "What it means" : "Spanish"),
       h("div", { part: "word" }, () => this.isTurnedOver ? this.back : this.front)
@@ -126,7 +126,10 @@ export class Quiz extends App {
         h("ui-item", { kind: "header" }, "Flash Cards"),
         h("ui-item", () => this.score),
         h("ui-menu", { position: "right" },
-          h("ui-item", { onClick: core.pressed(this, () => this.startOver()), style: "cursor:pointer;user-select:none" },
+          h("ui-item", {
+            onClick: core.pressed(this, () => this.startOver()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+          },
             h("ui-icon", { name: "redo" }),
             "Start over"
           )
@@ -137,20 +140,20 @@ export class Quiz extends App {
         () => !this.card.isTurnedOver ? h("ui-button", {
           color: "primary",
           onClick: core.pressed(this, () => this.card.turnOver()),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Show the answer") : [
           h("ui-button", {
             color: "positive",
             icon: "check",
             onClick: core.pressed(this, () => this.sayIKnew()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "I knew it"),
           h("ui-button", {
             color: "negative",
             appearance: "basic",
             icon: "close",
             onClick: core.pressed(this, () => this.sayIMissed()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "I missed it")
         ]
       )

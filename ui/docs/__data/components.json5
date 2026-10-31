@@ -8901,7 +8901,7 @@
           "values": [
             "link"
           ],
-          "description": "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
+          "description": "The look:  `link` (clickable look:  the cursor controls have;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag."
         },
         {
           "name": "disabled",
@@ -12361,7 +12361,7 @@
             "circular",
             "bordered"
           ],
-          "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes."
+          "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, the cursor controls have), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes."
         },
         {
           "name": "flipped",
@@ -18950,6 +18950,11 @@
           "description": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
         },
         {
+          "name": "app",
+          "kind": "boolean",
+          "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`)."
+        },
+        {
           "name": "width",
           "kind": "string",
           "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several)."
@@ -19192,6 +19197,10 @@
         {
           "name": "fixed",
           "description": "Pinned to the viewport."
+        },
+        {
+          "name": "app",
+          "description": "`app`:  this page is an app."
         },
         {
           "name": "disabled",
@@ -25351,6 +25360,11 @@
           "description": "What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins."
         },
         {
+          "name": "app",
+          "kind": "boolean",
+          "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`)."
+        },
+        {
           "name": "width",
           "kind": "string",
           "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several)."
@@ -25549,6 +25563,10 @@
         {
           "name": "fixed",
           "description": "Pinned to the viewport."
+        },
+        {
+          "name": "app",
+          "description": "`app`:  this page is an app."
         },
         {
           "name": "disabled",
@@ -51844,6 +51862,12 @@
           "default": "800ms",
           "description": "How long a hover popup waits before it shows.",
           "type": "time"
+        },
+        {
+          "name": "--ui-control-cursor",
+          "default": "pointer",
+          "description": "The cursor over a control:  a button, a menu item, a tab.",
+          "type": "other"
         },
         {
           "name": "--ui-duration-fast",

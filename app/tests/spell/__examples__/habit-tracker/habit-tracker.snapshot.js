@@ -154,7 +154,7 @@ export class HabitTracker extends App {
             color: "primary",
             disabled: () => this.draft === "",
             onClick: core.pressed(this, () => this.addTheDraft()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add")
         )
       ),

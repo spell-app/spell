@@ -231,7 +231,7 @@ class TaskList(App):
                             "color": "primary",
                             "disabled": self.draft == "",
                             "onClick": lambda event: self.add_the_draft(),
-                            "style": "cursor:pointer;user-select:none",
+                            "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
                         },
                         "Add",
                     ),

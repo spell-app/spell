@@ -234,7 +234,7 @@
     /* One line, unless `wrapped` */
     white-space: nowrap;
     vertical-align: baseline;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     user-select: none;
     appearance: none;
     -webkit-tap-highlight-color: transparent;

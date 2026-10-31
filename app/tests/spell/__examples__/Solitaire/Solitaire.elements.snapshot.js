@@ -551,19 +551,19 @@ export class Solitaire extends App {
             "aria-label": "Auto play",
             title: "Auto play",
             onClick: async () => sendCall("auto_play", [], this),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
             onClick: async () => sendCall("cheat", [], this),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
             onClick: async () => sendCall("start_a_new_game", [], this),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
       ),

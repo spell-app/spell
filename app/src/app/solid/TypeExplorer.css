@@ -95,7 +95,7 @@
     display: flex;
     padding: 1px 8px 1px 0;
     white-space: nowrap;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
 
     .opener {
       flex: 0 0 auto;
@@ -151,7 +151,7 @@
 
     .crumb {
       white-space: nowrap;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
       color: var(--ui-link);
 
       &:hover {
@@ -234,7 +234,7 @@
     .DetailsSectionTitle {
       display: flex;
       font-weight: bold;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
 
       /* e.g. where it's defined, at the right */
       .aside {
@@ -285,11 +285,11 @@
         display: inline-block;
         width: 14px;
         font-size: 9px;
-        cursor: pointer;
+        cursor: var(--ui-control-cursor);
       }
 
       .label.selectable {
-        cursor: pointer;
+        cursor: var(--ui-control-cursor);
 
         &:hover {
           text-decoration: underline;

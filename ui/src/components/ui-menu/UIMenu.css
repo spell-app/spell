@@ -1379,7 +1379,7 @@
   .ui.link.menu .item:hover {
     color: var(--_ui-menu-hover-color);
     background: var(--_ui-menu-hover-background);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-menu)) > :is(a, button).item:active,
   .ui.menu :is(a.item, button.item, .link.item):active,
@@ -1521,7 +1521,7 @@
     font-family: inherit;
     letter-spacing: inherit;
     appearance: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   @container style(--_menu-fit: overflow) {
     .ui.menu > .overflow.item {
@@ -1607,7 +1607,7 @@
     background: none;
     border: 0;
     appearance: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .overflow-menu > .row:hover,
   .overflow-menu > .row:focus-visible {

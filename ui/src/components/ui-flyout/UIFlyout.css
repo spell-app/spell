@@ -180,7 +180,7 @@
     color: var(--ui-text-dark);
     font-size: var(--_ui-flyout-close-size);
     opacity: var(--_ui-flyout-close-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   /* Static markup's close is an icon glyph in a hitbox:  pin its top right. */
   .ui.flyout > .close.icon:not(button) {

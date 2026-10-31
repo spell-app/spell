@@ -79,29 +79,29 @@ export class AddingMachine extends App {
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("1")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "1"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("2")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "2"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.pressDigitOnAddingMachine("5")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "5"),
           h("ui-button", {
             fluid: true,
             color: "primary",
             onClick: core.pressed(this, () => this.addTheInputToAddingMachine()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "+"),
           h("ui-button", {
             fluid: true,
             color: "negative",
             onClick: core.pressed(this, () => this.clear()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "C")
         )
       )

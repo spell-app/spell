@@ -149,7 +149,7 @@
     line-height: var(--_ui-select-line-height);
     text-align: start;
     text-overflow: ellipsis;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     transition-property: border-color, box-shadow, background-color;
@@ -319,7 +319,7 @@
       line-height: 1em;
       text-transform: none;
       white-space: normal;
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
     }
     .ui.select:not(.multiple) option:first-of-type {
       border-top: none;

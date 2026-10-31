@@ -182,7 +182,7 @@ export class ListaDeTareas extends App {
             "aria-label": "Todas",
             seleccionado: () => this.tareas.mostrando === "todas",
             onClick: core.pressed(this, () => (this.tareas.mostrando = "todas")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "list" }),
             h("es-emergente", { etiqueta: "Todas", invertido: true, tamano: "pequeño" })
@@ -191,7 +191,7 @@ export class ListaDeTareas extends App {
             "aria-label": "Pendientes",
             seleccionado: () => this.tareas.mostrando === "pendientes",
             onClick: core.pressed(this, () => (this.tareas.mostrando = "pendientes")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "square outline" }),
             h("es-emergente", { etiqueta: "Pendientes", invertido: true, tamano: "pequeño" })
@@ -200,7 +200,7 @@ export class ListaDeTareas extends App {
             "aria-label": "Hechas",
             seleccionado: () => this.tareas.mostrando === "hechas",
             onClick: core.pressed(this, () => (this.tareas.mostrando = "hechas")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "check square outline" }),
             h("es-emergente", { etiqueta: "Hechas", invertido: true, tamano: "pequeño" })
@@ -208,7 +208,7 @@ export class ListaDeTareas extends App {
           h("es-elemento", {
             "aria-label": "Quitar las hechas",
             onClick: core.pressed(this, () => this.quitarLasTareasHechas()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "trash alternate outline" }),
             h("es-emergente", { etiqueta: "Quitar las tareas hechas", invertido: true, tamano: "pequeño" })
@@ -222,7 +222,7 @@ export class ListaDeTareas extends App {
             color: "primario",
             disabled: () => this.borrador === "",
             onClick: core.pressed(this, () => this.agregarElBorrador()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Agregar")
         )
       ),

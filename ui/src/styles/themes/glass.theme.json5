@@ -146,6 +146,8 @@
       "out": "cubic-bezier(0.25, 1, 0.5, 1)"
     }
   },
+  // An arrow over controls, as a Mac app has;  only real links keep the hand (epic `editor` P1)
+  "cursors": { "control": "default" },
   "components": {
     "button": {
       "radius": "{radii.s}",

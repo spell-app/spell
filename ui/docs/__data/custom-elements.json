@@ -7197,7 +7197,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag.",
+              "description": "The look:  `link` (clickable look:  the cursor controls have;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag.",
               "type": {
                 "text": "string"
               },
@@ -10917,7 +10917,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes.",
+              "description": "The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, the cursor controls have), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance=\"link\"`, as `link` is where a click goes.",
               "type": {
                 "text": "string"
               },
@@ -18451,6 +18451,14 @@
               "fieldName": "stackWith"
             },
             {
+              "name": "app",
+              "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "app"
+            },
+            {
               "name": "width",
               "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).",
               "type": {
@@ -18676,6 +18684,10 @@
             {
               "name": "fixed",
               "description": "Pinned to the viewport."
+            },
+            {
+              "name": "app",
+              "description": "`app`:  this page is an app."
             },
             {
               "name": "disabled",
@@ -26493,6 +26505,14 @@
               "fieldName": "stackWith"
             },
             {
+              "name": "app",
+              "description": "This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "app"
+            },
+            {
               "name": "width",
               "description": "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).",
               "type": {
@@ -26674,6 +26694,10 @@
             {
               "name": "fixed",
               "description": "Pinned to the viewport."
+            },
+            {
+              "name": "app",
+              "description": "`app`:  this page is an app."
             },
             {
               "name": "disabled",

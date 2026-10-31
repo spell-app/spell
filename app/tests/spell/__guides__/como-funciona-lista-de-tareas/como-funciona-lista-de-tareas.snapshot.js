@@ -99,17 +99,17 @@ export class ListaDeTareas extends App {
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "todas",
           onClick: core.pressed(this, () => (this.tareas.mostrando = "todas")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Todas"),
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "pendientes",
           onClick: core.pressed(this, () => (this.tareas.mostrando = "pendientes")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Pendientes"),
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "hechas",
           onClick: core.pressed(this, () => (this.tareas.mostrando = "hechas")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Hechas")
       ),
       () => core.drawThing(this.tareas)

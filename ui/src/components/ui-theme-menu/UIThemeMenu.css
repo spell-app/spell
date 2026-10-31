@@ -110,7 +110,7 @@
     color: var(--ui-text-muted);
     font: inherit;
     line-height: 1;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     -webkit-tap-highlight-color: transparent;
   }
   .button:hover {
@@ -214,7 +214,7 @@
     color: inherit;
     font: inherit;
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   /* the divider above the first, as `.divider` draws one:  inset 0.5em, 0.375em from what's above and below */
   .panel:not(:has(> .bench)) > slot::slotted(:first-child) {
@@ -265,7 +265,7 @@
     color: var(--ui-text-muted);
     font: inherit;
     font-weight: 500;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .choice:hover {
     color: var(--ui-text-color);
@@ -292,7 +292,7 @@
     color: inherit;
     font: inherit;
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .option {
     display: grid;
