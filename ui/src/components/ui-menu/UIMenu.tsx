@@ -89,6 +89,8 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     styleSheets: { menu: menuCSS },
     // a sub-menu is a part of its menu:  an item's header looks past it to the menu
     isAPart: true,
+    // a native form sees a segmented menu's `value` (`FormData`, `form.elements`);  any other menu sends nothing
+    isAFormControl: true,
     // nothing to delegate to:  the items are the focus targets
     delegatesFocus: false
   }
@@ -235,6 +237,23 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   @E.onChange("isAFormValue", "isReady", { defer: true })
   protected onFormValueChanged(isAFormValue: boolean, isReady: boolean) {
     if (isAFormValue && isReady) E.afterSolidUpdate(() => this.send("ui-form-value", {}))
+  }
+
+  /**
+   * What a native form submits:  the chosen item's `value` while it's a form value, else nothing.
+   * - `null`:  the platform's "submit nothing".
+   */
+  @E.onChange("isAFormValue", "valueText")
+  protected onSubmissionChanged(isAFormValue: boolean, value: string | undefined) {
+    this.domElement.internals.setFormValue(isAFormValue && value != null ? value : null)
+  }
+
+  /** The value it started with:  a form's reset chooses it again. */
+  private readonly startingValue = this.attributes.value ?? undefined
+
+  /** DOM API `formResetCallback()`:  back to the value it started with. */
+  override onFormReset() {
+    if (this.isAFormValue && this.startingValue !== undefined) this.value = this.startingValue
   }
 
   /** A person chose the item of `value`:  its `value` follows, then `ui-changed` with `{ value }`. */
