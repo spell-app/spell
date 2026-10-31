@@ -6,7 +6,8 @@ import { reactiveObject } from "spell/util"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SPACES } from "spell/app/spaces"
 import { editor, type EditorStore } from "spell/app/app/editor"
-import { ProjectDropdown, ProjectMenu, SpellPage, uiReady } from "spell/app/app/solid"
+import { ProjectDropdown, ProjectMenu, SpellPage, rememberedSizes, uiReady } from "spell/app/app/solid"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 
 /**
  * The pages' shell in the browser (P8):  `<SpellPage>`,
@@ -18,6 +19,41 @@ const cleanups: (() => void)[] = []
 
 afterEach(() => {
   for (const cleanup of cleanups.splice(0).reverse()) cleanup()
+})
+
+describe("rememberedSizes()", () => {
+  test("starts as it's told, keeps what its panel says, and forgets on asking;  a control's `ui-changed` is no size", async () => {
+    const id = "rememberedSizes.browser.test"
+    editorPrefs.forget(id)
+    cleanups.push(() => editorPrefs.forget(id))
+    let sizes!: ReturnType<typeof rememberedSizes>
+    const host = await mount(() => {
+      sizes = rememberedSizes(() => ({ id, sizes: "20%,*" }))
+      return (
+        <ui-split-panel columns={sizes.sizes()} on-ui-changed={sizes.keep}>
+          <div>
+            <button class="control" />
+          </div>
+          <div>b</div>
+        </ui-split-panel>
+      )
+    })
+    const panel = host.querySelector("ui-split-panel")!
+    expect(sizes.sizes()).toBe("20%,*")
+    host
+      .querySelector(".control")!
+      .dispatchEvent(new CustomEvent("ui-changed", { bubbles: true, detail: { sizes: "1%,99%" } }))
+    flush()
+    expect(sizes.sizes()).toBe("20%,*")
+    panel.dispatchEvent(new CustomEvent("ui-changed", { detail: { sizes: "70%,30%" } }))
+    flush()
+    expect(sizes.sizes()).toBe("70%,30%")
+    expect(panel.getAttribute("columns")).toBe("70%,30%")
+    expect(editorPrefs.get(id)).toBe("70%,30%")
+    sizes.forget()
+    flush()
+    expect(sizes.sizes()).toBe("20%,*")
+  })
 })
 
 describe("<SpellPage>", () => {

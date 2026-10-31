@@ -53,13 +53,13 @@
  *   button and its menu of cards don't
  */
 @media (--ui-mobile) {
-  #SpellEditor > .EditorColumns {
+  #SpellEditor .EditorColumns {
     flex-direction: column;
   }
-  #SpellEditor > .EditorColumns::part(bar) {
+  #SpellEditor .EditorColumns::part(bar) {
     pointer-events: none;
   }
-  #SpellEditor > .EditorColumns:has(> .InspectorPane)::part(last-bar) {
+  #SpellEditor .EditorColumns:has(> .InspectorPane)::part(last-bar) {
     display: none;
   }
 }

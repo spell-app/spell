@@ -13,6 +13,18 @@
   padding: var(--spell-tight-padding);
 }
 
+/* where the panes draw:  the room under the top bar;  the thing that draws them adds no box of its own */
+.EditorLayoutPlace {
+  flex: 1 1 0;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+
+  & > :not(ui-split-panel) {
+    display: contents;
+  }
+}
+
 .SplitPane {
   position: relative;
   overflow: hidden;

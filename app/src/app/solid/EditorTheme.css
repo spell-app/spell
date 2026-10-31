@@ -122,7 +122,7 @@
     /* the gap between panels is the panel's own spacing, so its sizers and spacers are the gap too */
     --spell-tight-padding: var(--spell-gap);
   }
-  & .SpellPage > .EditorColumns {
+  & .SpellPage .EditorColumns {
     padding: var(--spell-page-padding);
   }
 
