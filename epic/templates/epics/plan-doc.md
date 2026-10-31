@@ -617,8 +617,9 @@ START TESTING, the Manual tests section's button (on its title, while reviewed a
   come together, stamps each `prepared="<n>"` (`details <name>#M3 --prepared <n>`), then `inbox done <name>#tests`.
   Nobody listening: the page server wakes the epic, as for Add Details.
 - "Preparing tests" while it's worked;  a click calls it off.
-- Done: the page opens the first open test. Then "Next test · 3 left" opens the next one he hasn't marked;  none
-  left: "Go through the tests · N". With every test prepared it never asks Claude again.
+- Done: the page opens Focus mode on its Tests tab, on the first open test, in that order (epic `epic-engine` P57,
+  Q65);  its Back and Next step through them. Then "Focus on the tests · 3 left" opens it there again;  none left:
+  "Focus on the tests · N". With every test prepared it never asks Claude again.
 - `epic test <name>` opens the page in the Review tab with Start testing pressed (`?test=1`);  `epic test --all` every
   epic's, the section's last line linking the next epic with open tests.
 - His order, on the page and in `epic test --list`: prepared tests by place, then page order, deferred last.

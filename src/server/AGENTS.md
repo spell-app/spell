@@ -266,7 +266,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - e.g. epics' airplane mode ([airplaneRoutes.ts](../../epic/src/tools/airplaneRoutes.ts)),
         whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4;
         and who is at the keyboard, `person` ([personRoutes.ts](../../epic/src/tools/personRoutes.ts), epic
-        `epic-friend` P1)
+        `epic-friend` P1);  and that the person's prefs are answered at `/api/prefs`, `prefs` (the app's
+        [appRoutes.ts](../../app/src/spaces/server/node/routes/appRoutes.ts)):  a server without it never gets asked
+        (Spell UI's `ThemePreference`, epic `epic-engine` I186)
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
       The old paths answer "not found" (no redirects, Q30 of `people-and-orgs`).

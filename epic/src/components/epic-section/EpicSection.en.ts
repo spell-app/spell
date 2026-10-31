@@ -195,8 +195,9 @@ export const epicSectionVocabulary = {
       description:
         "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
         'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
-        'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
-        "test you haven't answered.  The address's `?test=1` presses it as the page loads."
+        'can, writes out the rest), "Preparing tests" while it does, then "Focus on the tests · 3 left", which opens ' +
+        "Focus mode on its Tests tab, on the first test you haven't answered (epic `epic-engine` P57, Q65).  The " +
+        "address's `?test=1` presses it as the page loads."
     },
     {
       name: "next-epic",
@@ -265,24 +266,25 @@ export const epicSectionVocabulary = {
       description: "Preparing tests' tooltip while nobody has taken it yet."
     },
     {
-      key: "nextTest",
-      text: "Next test · {count} left",
+      key: "focusTests",
+      text: "Focus on the tests · {count} left",
       description:
-        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+        "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered;  " +
+        "it opens Focus mode on them (P57, Q65)."
     },
     {
-      key: "firstTest",
-      text: "Go through the tests · {count}",
-      description: "The same, every open test answered already:  it opens the first again."
+      key: "focusAllTests",
+      text: "Focus on the tests · {count}",
+      description: "The same, every open test answered already:  Focus mode on the first again."
     },
     {
-      key: "nextTestTip",
-      text: "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
-      description: "Next test's tooltip."
+      key: "focusTestsTip",
+      text: "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+      description: "The button's tooltip once the tests are prepared."
     },
     {
       key: "testsReady",
-      text: "Tests ready:  Next test opens the first",
+      text: "Tests ready:  Focus on the tests opens the first",
       description: "The notice when the tests are prepared while you type:  the first test doesn't open under you."
     },
     {

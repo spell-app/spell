@@ -61,6 +61,22 @@ describe("ThemePreference.reset()", () => {
   })
 })
 
+describe("ThemePreference.keptIn", () => {
+  test("the space only on a page whose server keeps prefs (`SPELL_SERVER.prefs`);  a served page without, the browser", () => {
+    // the test runs in a frame, which keeps it in the browser whatever the server says:  stand in for a top page
+    vi.spyOn(window, "frameElement", "get").mockReturnValue(null)
+    vi.stubGlobal("SPELL_SERVER", { token: "t" })
+    ThemePreference.reset()
+    expect(ThemePreference.keptIn).toBe("browser")
+    vi.stubGlobal("SPELL_SERVER", { token: "t", prefs: true })
+    ThemePreference.reset()
+    expect(ThemePreference.keptIn).toBe("space")
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    ThemePreference.reset()
+  })
+})
+
 describe("ThemePreference.restore()", () => {
   test("with nothing stored, restore() applies Glass, every place's default (Q39)", async () => {
     expect(DEFAULT_THEME).toBe("glass")

@@ -942,10 +942,17 @@ describe("<epic-section kind=tests> Start testing", () => {
   /** The section's button. */
   const testButton = (host: Element) => deep(host).querySelector<HTMLElement>("ui-button.start-testing")!
 
-  test("Start testing · 2 asks Claude to prepare them;  Preparing tests while it does;  then the first opens", async () => {
+  /** What the section asks Focus mode for (`epic-focus-asked`:  its page opens it, P57, Q65 A), as it asks. */
+  function focusAsks(host: Element) {
+    const asks: unknown[] = []
+    host.addEventListener("epic-focus-asked", (event) => asks.push((event as CustomEvent).detail))
+    return asks
+  }
+
+  test("Start testing · 2 asks Claude to prepare them;  Preparing tests while it does;  then Focus mode opens on the first", async () => {
     const client = await adoptClient()
-    history.replaceState(null, "", location.pathname)
     const host = await render(TESTS)
+    const asks = focusAsks(host)
     expect(testButton(host).textContent).toContain("Start testing · 2")
     testButton(host).click()
     await settle()
@@ -958,28 +965,27 @@ describe("<epic-section kind=tests> Start testing", () => {
     routes.inbox.now = []
     delete routes.inbox.marks.tests
     await client.refresh()
-    await vi.waitFor(() => expect(location.hash).toBe("#m2"))
-    expect(testButton(host).textContent).toContain("Next test · 2 left")
+    // Q65 A:  Focus mode, on the Tests tab, at the first in Claude's order
+    await vi.waitFor(() => expect(asks).toEqual([{ tab: "tests", item: "m2" }]))
+    expect(testButton(host).textContent).toContain("Focus on the tests · 2 left")
     testButton(host).click()
-    expect(location.hash).toBe("#m1")
-    history.replaceState(null, "", location.pathname)
+    expect(asks.at(-1)).toEqual({ tab: "tests", item: "m2" })
   })
 
-  test("every open test prepared:  Next test counts the ones not answered, and skips them", async () => {
+  test("every open test prepared:  its button counts the ones not answered, and Focus mode opens on the first of them", async () => {
     await adoptClient()
-    history.replaceState(null, "", location.pathname)
     const host = await render(TESTS.replace(/(id="m[12]")/g, '$1 prepared="1"'))
+    const asks = focusAsks(host)
     await routes.fetch("/api/epics/review/mark", {
       method: "POST",
       body: JSON.stringify({ page: PAGE, id: "m1", mark: { action: "approve" } })
     })
     await ReviewClient.forPage().refresh()
     await ElementFixture.tick()
-    expect(testButton(host).textContent).toContain("Next test · 1 left")
+    expect(testButton(host).textContent).toContain("Focus on the tests · 1 left")
     testButton(host).click()
-    expect(location.hash).toBe("#m2")
+    expect(asks).toEqual([{ tab: "tests", item: "m2" }])
     expect(routes.posts.some(([route]) => route === "now")).toBe(false)
-    history.replaceState(null, "", location.pathname)
   })
 })
 

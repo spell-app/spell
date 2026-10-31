@@ -1,0 +1,222 @@
+/*
+ * `<epic-focus>` (`EpicFocus.tsx`):  Focus mode, a full-screen overlay over an epic page.
+ * - Inside Spell UI's `<ui-modal fullscreen overlay>`:  one column, the whole window high --
+ *   the tabs (and Send, and ×) on top, the chips and where you are under them, the item scrolling, Back / its buttons /
+ *   Next at the bottom.
+ * - Colours are the page's (`--epic-*`, declared by `<epic-page>` above it):  the id chip by the item's state, as
+ *   the item's own chip on the page;  Spell UI's own colours without a page (Epic UI's live example).
+ * - Public tokens (`--epic-focus-*`) are never declared here:  read through private aliases.
+ *   - `--epic-focus-measure` (52em):  the item's reading width
+ *   - `--epic-focus-gutter` (16px):  the space at the window's edges
+ */
+
+@layer ui.components.epic-focus.types, ui.components.epic-focus.content;
+
+@layer ui.components.epic-focus.types {
+  :host {
+    display: contents;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-focus.content {
+  .focus-modal {
+    --ui-modal-padding: 0;
+  }
+
+  .focus {
+    --_epic-focus-measure: var(--epic-focus-measure, 52em);
+    --_epic-focus-gutter: var(--epic-focus-gutter, 16px);
+
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
+    height: 100dvh;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--epic-bg, var(--ui-background, Canvas));
+    color: var(--epic-ink, CanvasText);
+    font-family: var(--epic-sans, inherit);
+  }
+
+  /* each bar:  its contents in the reading column, the band edge to edge */
+  .bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    padding-inline: max(var(--_epic-focus-gutter), (100% - var(--_epic-focus-measure)) / 2);
+    min-width: 0;
+  }
+
+  /* the tabs, Send, ×:  the tabs scroll sideways inside their own box when they don't fit, never the page */
+  .bar.top {
+    padding-block: 8px 0;
+    border-bottom: 1px solid var(--epic-rule, var(--ui-border-color));
+    background: var(--epic-head-fill, transparent);
+  }
+  .tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs ui-item {
+    white-space: nowrap;
+  }
+  /* the count a little apart from its name */
+  .tabs .tab-name {
+    margin-inline-end: 6px;
+  }
+  .send {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+  }
+  .send:empty {
+    display: none;
+  }
+  .close {
+    flex: none;
+  }
+
+  /* the chips, and where you are at the right */
+  .bar.chips {
+    flex-wrap: wrap;
+    padding-block: 8px;
+    min-height: 40px;
+  }
+  .where {
+    margin-inline-start: auto;
+    color: var(--epic-muted, GrayText);
+    font-size: 0.9em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* the item:  scrolls by itself between the bars */
+  .scroller {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-height: 0;
+    padding: 12px max(var(--_epic-focus-gutter), (100% - var(--_epic-focus-measure)) / 2) 24px;
+    overflow: auto;
+    overflow-wrap: anywhere;
+  }
+  .head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 1.25em;
+    line-height: 1.35;
+  }
+  .title {
+    min-width: 0;
+  }
+
+  /* the id chip, in the item's state colour (the page's `--epic-state-*`);  a phase's orange and dotted blue too */
+  .chip {
+    --_chip-background: var(--epic-accent-soft, var(--ui-primary-background));
+    --_chip-color: var(--epic-accent, var(--ui-link));
+
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 2.6em;
+    height: 1.6em;
+    padding: 0 6px;
+    border: 2px solid transparent;
+    border-radius: var(--epic-chip-radius, 999px);
+    background: var(--_chip-background);
+    color: var(--_chip-color);
+    font: 600 0.7em / 1 var(--epic-mono, var(--ui-font-family-mono));
+    transform: translateY(-0.15em);
+  }
+  .chip[data-state="attention"] {
+    --_chip-background: var(--epic-state-attention, light-dark(var(--ui-red), var(--ui-red-on-light)));
+    --_chip-color: var(--epic-state-attention-on, light-dark(var(--ui-red-on), var(--ui-ink-on-dark)));
+  }
+  .chip:is([data-state="replied"], [data-state="updated"]) {
+    --_chip-background: var(--epic-state-replied, var(--ui-orange));
+    --_chip-color: var(--epic-state-replied-on, var(--ui-orange-on));
+  }
+  .chip[data-state="open"] {
+    --_chip-background: var(--epic-state-open, var(--ui-yellow));
+    --_chip-color: var(--epic-state-open-on, var(--ui-yellow-on));
+  }
+  .chip[data-state="progress"] {
+    --_chip-background: var(--epic-state-progress, var(--ui-blue));
+    --_chip-color: var(--epic-state-progress-on, var(--ui-blue-on));
+  }
+  .chip[data-state="scheduled"] {
+    --_chip-background: transparent;
+    --_chip-color: var(--epic-state-progress, var(--ui-blue));
+    border: 2px dotted var(--epic-state-progress, var(--ui-blue));
+  }
+
+  /* its text:  prose, as the page draws it */
+  .body {
+    line-height: 1.55;
+  }
+  .body[hidden] {
+    display: none;
+  }
+  .body > :first-child {
+    margin-top: 0;
+  }
+  .body :is(p, ul, ol) {
+    margin-block: 0 0.8em;
+  }
+  .body :is(ul, ol) {
+    padding-inline-start: 1.4em;
+  }
+  .body code {
+    font-family: var(--epic-mono, var(--ui-font-family-mono));
+    font-size: 0.9em;
+  }
+  .body pre {
+    max-width: 100%;
+    overflow: auto;
+  }
+  .body img {
+    max-width: 100%;
+    height: auto;
+  }
+  .body table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .body a {
+    color: var(--epic-accent, var(--ui-link));
+  }
+  .body-note,
+  .nothing {
+    color: var(--epic-muted, GrayText);
+  }
+  .scroller > epic-review {
+    display: block;
+    margin-top: 16px;
+  }
+
+  /* Back, the item's buttons, Next:  a band at the bottom */
+  .bar.actions {
+    justify-content: space-between;
+    padding-block: 10px;
+    border-top: 1px solid var(--epic-rule, var(--ui-border-color));
+    background: var(--epic-head-fill, transparent);
+  }
+  .actions .back,
+  .actions .next {
+    flex: none;
+  }
+}

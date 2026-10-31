@@ -18,7 +18,11 @@
  *   - nothing wider than the window, the gear's menu and its sub-menus included
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
  *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`, and each stage's Accept
- *   pressed, 2 minutes into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
+ *   pressed, a minute into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
+ *   - a minute, not two:  the header's own Auto Send (2 minutes, from the page's load) would send the marked item
+ *     first, and the page would change under the step (epic `epic-engine` I186)
+ * - every step waits for what it measures (the ring part-filled, Accept counting, its tooltip's time), never a fixed
+ *   delay;  a page that reloads under a step (a bundle rebuilt by another server) is named as the problem
  * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
  *   turns round the plane, centred on it (1px), the element's height, no spinner beside it;  then idle:  neither ring;
  *   `working-<w>-<scheme>.png`
@@ -62,6 +66,9 @@ const flagged = new Set(["--doc", "--bundle"].flatMap((name) => (args.includes(n
 const CONTENT = join(HERE, "shots", "send-header")
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? CONTENT
 const NAME = "send-header"
+/** The stage button's countdown (I181), and how far into it the check looks:  inside the header's 2-minute Auto Send. */
+const STAGE_COUNTDOWN_MS = 5 * 60_000
+const STAGE_ON_MS = 60_000
 const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
 const problems = []
 const summary = {}
@@ -111,7 +118,8 @@ async function header(width, scheme) {
     .waitForFunction(() => spinner(), null, { timeout: 8000 })
     .catch(() => problems.push(`${tag}:  no spinner beside Send`))
   await page.clock.fastForward(45_000)
-  await page.waitForTimeout(1300)
+  // the ring drains a tick at a time:  wait for it to show the 45 seconds gone
+  await page.waitForFunction(() => (measure().done ?? 0) > 0.15, null, { timeout: 5000 }).catch(() => undefined)
   const measured = await page.evaluate(() => measure())
   summary[tag] = measured
   if (width > 600 && Math.abs(measured.plane.middle - measured.header.middle) > 1)
@@ -145,11 +153,11 @@ async function header(width, scheme) {
   await page.waitForFunction(() => gearMenu()?.matches(":popover-open"), null, { timeout: 4000 })
   await page.waitForTimeout(400)
   await shotMenu(page, `gear-${tag}`, width)
-  await page.evaluate(() => gearRows()[0].click())
+  await page.evaluate(() => gearRow("Auto Send").click())
   await page.waitForTimeout(300)
   await shotMenu(page, `auto-send-${tag}`, width)
   await page.keyboard.press("ArrowLeft")
-  await page.evaluate(() => gearRows()[1].click())
+  await page.evaluate(() => gearRow("Theme").click())
   await page.waitForFunction(() => page_().querySelector('[part~="theme-menu"]:not([hidden])'), null, { timeout: 4000 })
   await page.waitForTimeout(400)
   summary[tag].rows = await page.evaluate(() => gearRows().map((row) => row.textContent.replace(/\s+/g, " ").trim()))
@@ -220,7 +228,9 @@ async function stage(which, width, scheme) {
     .waitForFunction((which) => stageButton(which), which, { timeout: 8000 })
     .catch(() => problems.push(`${tag}:  no Accept on its block's title row`))
   await page.clock.fastForward(45_000)
-  await page.waitForTimeout(1300)
+  await page
+    .waitForFunction(() => sendRoot()?.querySelector('[part~="ring"]'), null, { timeout: 5000 })
+    .catch(() => undefined)
   const found = await page.evaluate((which) => {
     const button = stageButton(which)
     const block = stageBlock(which)
@@ -256,12 +266,27 @@ async function stage(which, width, scheme) {
   if (found.wide) problems.push(`${tag}:  wider than the window:  ${found.wide}`)
   summary[tag] = { words: found.words, folded: found.folded, button: found.button }
   const bottom = Math.max(found.header.bottom, found.row?.bottom ?? 0)
-  await page.screenshot({ path: join(out, `stage-${tag}.png`), clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) } })
-  // pressed (I181):  its 5-minute countdown, the green ring round its thumbs up, inside the button;  2 minutes on
+  await page.screenshot({
+    path: join(out, `stage-${tag}.png`),
+    clip: { x: 0, y: 0, width, height: Math.ceil(bottom + 24) }
+  })
+  // pressed (I181):  its 5-minute countdown, the green ring round its thumbs up, inside the button;  a minute on, inside
+  // the header's Auto Send (2 minutes from the page's load), which would send the marked item and change the page
   await page.evaluate((which) => stageButton(which).click(), which)
-  await page.waitForTimeout(600)
-  await page.clock.fastForward(120_000)
-  await page.waitForTimeout(1300)
+  await page
+    .waitForFunction((which) => stageButton(which)?.dataset.state === "counting", which, { timeout: 5000 })
+    .catch(() => undefined)
+  await page.clock.fastForward(STAGE_ON_MS)
+  await page
+    .waitForFunction(
+      ([which, left]) => {
+        const time = /goes to Claude in (\d):(\d\d)/.exec(stageButton(which)?.title ?? "")
+        return time && Number(time[1]) * 60 + Number(time[2]) <= left
+      },
+      [which, (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000],
+      { timeout: 5000 }
+    )
+    .catch(() => undefined)
   const counting = await page.evaluate((which) => {
     const button = stageButton(which)
     const ring = button?.querySelector('[part~="ring"]')
@@ -322,8 +347,16 @@ async function openPage(name, width, scheme) {
   await page
     .waitForFunction(() => document.querySelector("epic-page")?.hasAttribute("reviewing"), null, { timeout: 15_000 })
     .catch(() => problems.push(`${name}:  never reviewed`))
-  await page.waitForTimeout(800)
+  // the review controls drawn:  the page has read its inbox
+  await page
+    .waitForFunction(() => page_()?.querySelector('[part~="send"]')?.shadowRoot, null, { timeout: 8000 })
+    .catch(() => problems.push(`${name}:  no Send in the header`))
   page.on("close", () => logs.length && problems.push(`${name} ${width} ${scheme}:  ${logs.join(" | ")}`))
+  // a reload under a step resets what it measures:  say so, rather than a puzzling measure
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame())
+      problems.push(`${name} ${width} ${scheme}:  the page reloaded mid-check (a bundle rebuilt?)`)
+  })
   return page
 }
 
@@ -335,13 +368,17 @@ function HELPERS() {
     page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ?? null
   window.gearButton = () => page_().querySelector('[part~="gear"]')
   window.stageBlock = (which) =>
-    document.querySelector(which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]')
+    document.querySelector(
+      which === "overview" ? "epic-page > epic-overview" : 'epic-page > epic-section[kind="phases"]'
+    )
   window.stageButton = (which) =>
     stageBlock(which)
       ?.shadowRoot?.querySelector('[part~="stage-button"]')
       ?.shadowRoot?.querySelector('[part~="base"]') ?? null
   window.gearMenu = () => page_().querySelector('[part~="gear-menu"]')
   window.gearRows = () => Array.from(page_().querySelectorAll('[part~="gear-row"]'))
+  // by its words, not its place:  the menu grows rows (Focus mode, P57)
+  window.gearRow = (words) => gearRows().find((row) => row.textContent.includes(words))
   window.measure = () => {
     const box = (element) => {
       const rect = element.getBoundingClientRect()

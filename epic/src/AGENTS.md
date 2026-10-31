@@ -1460,6 +1460,20 @@ In `tools/`:
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
           - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
             move through them
+          - while reviewed, FOCUS MODE first (epic `epic-engine` P57;  Owen, 2026-10-30:  "a mode where I can quickly
+            walk through the open issues/questions/etc in a plan"):  `<epic-focus>`, drawn in the page's shadow root,
+            never written in a page;  [its Epic UI page](docs/epic-focus.html)
+            - Spell UI's `<ui-modal fullscreen overlay>`, Escape and its × close it
+            - the open items by the page's own colour rule (`DrawnState`, `PhaseState`:  red, orange, blue, yellow;  a
+              phase's dotted blue), a tab per kind by the id's letter (P, Q, T, J, I, M), the Tests tab in the
+              person's order (`inTestOrder()`);  `FocusList`
+            - each tab's chips the section's own `<epic-state-filter>`, its choice its own;  the item's text COPIED from
+              the page (its part through `UI.sources`);  its `<epic-review>` buttons and note box, the page's kind,
+              on the ONE review client;  Back / Next and ← / →;  the item showing stays while Claude closes it
+            - its place (open, tab, item, chips) kept in this browser, `spell-focus:<path>` (`FocusPlace`)
+            - it sits in the browser's top layer, over the header:  while it's open, Send (and its countdown) rides in
+              its top bar (`slot="send"`), and comes back as it closes (`epic-focus-toggled`)
+            - Start testing opens it on the Tests tab (decision Q65, A):  "Review inbox", START TESTING
         - no page-wide git toggle since P53:  the Log lists every commit (P52), an item its own (a git icon), a phase
           its own in its gear ("Show this phase's commits", I183)
       - the toolbar's tools
@@ -1908,11 +1922,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
       `prepare`, and it takes nothing else
     - nobody listening:  the page server wakes the epic, as for Add Details
     - "Preparing tests" while queued or worked;  a click calls it off (nevermind)
-    - `epic inbox done <name>#tests` ends it:  the page opens the first open test (`#m3` in the address, then a
-      `hashchange`:  the docs runtime unfolds and opens it), unless the person is typing in a field
-      ("Tests ready:  Next test opens the first")
-    - every open test `prepared`:  "Next test · 3 left" (open tests with no mark of his yet), the next one after the
-      one it opened last, round to the start;  none left:  "Go through the tests · N";  it never asks Claude again
+    - `epic inbox done <name>#tests` ends it:  FOCUS MODE opens on its Tests tab, in the person's order, on the first
+      test with no mark of his yet (epic `epic-engine` P57, decision Q65 A:  the section sends `epic-focus-asked`,
+      `<epic-page>` opens `<epic-focus>`), unless the person is typing in a field
+      ("Tests ready:  Focus on the tests opens the first")
+    - every open test `prepared`:  "Focus on the tests · 3 left" (open tests with no mark of his yet), opening Focus
+      mode there again;  none left:  "Focus on the tests · N";  it never asks Claude again
+      - Focus mode's Back and Next step through them:  the section's own "Next test", landing on each in the page
+        (`TestQueue.open()`, P51), went with Q65
     - `prepared="2"` on a test (format `place`):  its place in the person's order, written by
       `epic details <name>#M3 --prepared <n>`
     - the person's ORDER, on the page and in `epic test --list` (`inTestOrder()`, review.types.ts):  prepared tests by

@@ -518,6 +518,12 @@
   .gear-row .name {
     flex: none;
   }
+  /* Focus mode's row (P57):  its icon before its name, in the ticks' column */
+  .gear-row .lead {
+    flex: none;
+    width: 1em;
+    color: var(--epic-muted);
+  }
   /* the row's choice, quieter, cut short when it must be */
   .gear-row .value {
     flex: 1 1 auto;

@@ -230,14 +230,24 @@ export class EpicServer {
    * - `pidFile`:  write `server.json` (default `true`)
    * - `bundles`:  build the default repo's stale bundles in the background (default `true`;  tests turn it off:
    *   `buildBundles()`)
+   * - `watchCode`:  live-reload pages when the engine's code changes (its assets, pack and templates) and the
+   *   component sets' bundles (default `true`);  a demo check's server turns it off (`DemoServer`):  a bundle rebuilt
+   *   by another server in the checkout must never reload a page under a check (epic `epic-engine` I186)
    */
   async start({
     port = DEFAULT_EPIC_PORT,
     routes = true,
     pidFile = true,
-    bundles = true
-  }: { port?: number; routes?: boolean; pidFile?: boolean; bundles?: boolean } = {}): Promise<this> {
-    this.watch()
+    bundles = true,
+    watchCode = true
+  }: {
+    port?: number
+    routes?: boolean
+    pidFile?: boolean
+    bundles?: boolean
+    watchCode?: boolean
+  } = {}): Promise<this> {
+    this.watch({ watchCode })
     if (bundles) await this.buildBundles()
     if (routes && this.defaultRepo) await this.loadRoutes()
     let actual: number
@@ -507,13 +517,15 @@ export class EpicServer {
    * - each repo's content at its prefix (the default's at `/` too)
    * - the engine's assets and pack at their routes (and at their old paths, for pages not migrated yet)
    * - the component sets' pages and their site bundles, at their addresses (`epicUiMounts()`, `componentSetMounts()`)
+   * - `watchCode` off:  the content only (`start()`'s option)
    */
-  private watch(): void {
+  private watch({ watchCode }: { watchCode: boolean }): void {
     const live = this.web.live!
     for (const repo of this.repos) {
       if (repo.isDefault) live.watch(repo.content, { ignore: UNWATCHED })
       live.watch(repo.content, { ignore: UNWATCHED, servedAt: repo.prefix })
     }
+    if (!watchCode) return
     for (const route of Object.values(ENGINE_ROUTES)) {
       const dir = join(this.engine, route.dir)
       live.watch(dir, { servedAt: route.prefix })

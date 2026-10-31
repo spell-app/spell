@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  9f498750edb1e55c
+// sources:  ea268088299a1d95
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -22,6 +22,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-commit": {"folder":"epic-commit","attributes":["sha","repo","at","refs"]},
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
+  "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
   "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},

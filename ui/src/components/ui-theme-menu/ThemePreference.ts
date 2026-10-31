@@ -39,9 +39,10 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  * - Kept in the person's SPACE (Owen:  "Take from user preference in space"):  the store `spell-site`
  *   (`THEME_STORE`), a file beside their other preferences, `@spell/owen@/__prefs/spell-site.json5`:
  *   `{ theme: "glass", scheme: "dark" }`, through the page server (`ServerPlace`, `/api/prefs`).
- *   - `keptIn`:  `space` on a page the page server served (`SPELL_SERVER`), or one that says so (`keepIn()`:  the
- *     editor, whose dev server passes `/api` on);  else `browser`, the read-only public build's, where the
- *     browser's copy (below) is all there is.
+ *   - `keptIn`:  `space` on a page served by a page server that keeps them (`SPELL_SERVER.prefs`:  the kit's, with the
+ *     app's routes), or one that says so (`keepIn()`:  the editor, whose dev server passes `/api` on);  else
+ *     `browser`, where the browser's copy (below) is all there is:  the read-only public build, and a server with no
+ *     prefs (spell-epic's own, a demo check's), whose pages never ask it
  *   - A change reaches open pages at once:  the page server tells every page over its live channel
  *     (`PREF_SAVED_EVENT`), and each asks again when it comes back into view.
  *   - A same-origin FRAME of another page (the theme editor's previews, the brand index's thumbnails) keeps it in the
@@ -91,11 +92,11 @@ export class ThemePreference {
 
   /**
    * Where the person's choice is kept:  their `space` (and this browser's copy), or this `browser` alone.
-   * - Until `keepIn()` says:  `space` on a page the page server served (`SPELL_SERVER`), else `browser`;
+   * - Until `keepIn()` says:  `space` on a page served by a server that keeps them (`SPELL_SERVER.prefs`), else `browser`;
    *   and `browser` in a same-origin frame of another page (the class doc), whose framer dresses it.
    */
   static get keptIn(): ThemeKeptIn {
-    return (ThemePreference.kept ??= ThemePreference.servedPage && !isSameOriginFrame() ? "space" : "browser")
+    return (ThemePreference.kept ??= ThemePreference.serverKeepsPrefs && !isSameOriginFrame() ? "space" : "browser")
   }
 
   /**
@@ -348,6 +349,14 @@ export class ThemePreference {
   /** Did the page server serve this page?  It says so in `window.SPELL_SERVER`. */
   private static get servedPage(): boolean {
     return typeof window !== "undefined" && !!(window as { SPELL_SERVER?: unknown }).SPELL_SERVER
+  }
+
+  /**
+   * Does the server that served this page keep the person's prefs (`/api/prefs`)?  It says so in
+   * `window.SPELL_SERVER.prefs` (the app's route module);  a server without them never gets asked.
+   */
+  private static get serverKeepsPrefs(): boolean {
+    return typeof window !== "undefined" && !!(window as { SPELL_SERVER?: { prefs?: boolean } }).SPELL_SERVER?.prefs
   }
 
   /** The person's `spell-site` store in their space (`ServerPlace`), or `undefined`:  kept in the browser. */

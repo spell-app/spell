@@ -719,6 +719,53 @@
       ]
     },
     {
+      "path": "epic-focus.html",
+      "title": "<epic-focus>",
+      "summary": "The <epic-focus> element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time.",
+      "tag": "epic-focus",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-what-it-walks",
+          "title": "3. What it walks"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "epic-focus-script",
+          "title": "Script API",
+          "parent": 3
+        },
+        {
+          "id": "epic-focus-events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "epic-focus-slots",
+          "title": "Slots",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-hidden-note.html",
       "title": "<epic-hidden-note>",
       "summary": "The <epic-hidden-note> element: the line under a filtered list, 3 hidden · show all.",

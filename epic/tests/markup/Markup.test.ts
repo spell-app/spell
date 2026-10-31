@@ -150,6 +150,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-sort": {},
   "epic-state-filter": { counts: "attention:1 open:4", shown: "open" },
   "epic-hidden-note": { count: 3 },
+  "epic-focus": { for: "focus-sample" },
   "epic-threads": {},
   "epic-thread": {
     comment: '{"id":"c3","text":"Why?"}',

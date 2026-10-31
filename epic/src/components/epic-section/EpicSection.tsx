@@ -11,6 +11,7 @@ import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEnt
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
+import { FOCUS_ASKED, type FocusAsk } from "spell/epic/components/epic-focus/EpicFocus.types"
 import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 import {
   SHOW_ALL,
@@ -183,8 +184,11 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   (`testButton()`):
  *   - "Start testing · 9":  Claude prepares the tests first, a request for now (`ReviewClient.prepareTests()`):  it
  *     checks what it can itself, writes out the rest step by step with a screenshot, and stamps each `prepared`
- *   - "Preparing tests", turning, while it does (a click calls it off);  once done, the first test opens (`TestQueue`)
- *   - every open test prepared:  "Next test · 3 left", which opens the next one he hasn't answered
+ *   - "Preparing tests", turning, while it does (a click calls it off);  once done, FOCUS MODE opens on its Tests tab,
+ *     in that order, on the first test he hasn't answered (epic `epic-engine` P57, decision Q65 A:  `epic-focus-asked`,
+ *     which `<epic-page>` hears)
+ *   - every open test prepared:  "Focus on the tests · 3 left", which opens Focus mode there again;  Focus mode's
+ *     Back and Next step through them (the section's own "Next test", landing on each in the page, went with Q65)
  *   - the address's `?test=1` presses it as the page loads (`epic test <epic>`);  with `all`, its last line links the
  *     next epic with open tests once every test here is answered
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
@@ -617,9 +621,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Start testing was pressed on this visit, and its request hasn't finished:  the first test opens when it does. */
   private pressedStart = false
 
-  /** The test it opened last:  Next test goes on from it (the address may have followed the scroll since). */
-  private lastOpened: string | undefined
-
   /** The address asked for a run across every epic (`?test=1&all=1`, `epic test --all`):  read as it connects. */
   readonly runsAll = !isServer && EpicSection.testQuery() === TEST_ALL
 
@@ -631,7 +632,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * could just do the grunt work for fleshing out what exactly I need to do for the test, screenshots, etc."):
    * - "Start testing · 9" (blue):  Claude prepares them (`startTesting()`)
    * - "Preparing tests" (its icon turning) while that runs;  a click calls it off
-   * - every open test prepared:  "Next test · 3 left" ("Go through the tests" with none left), opening the next
+   * - every open test prepared:  "Focus on the tests · 3 left" ("Focus on the tests · 9" with none left), opening Focus
+   *   mode on them (Q65 A)
    */
   private testButton(state: () => TestingState): JSX.Element {
     const words = () => {
@@ -639,7 +641,9 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       return testing.preparing
         ? this.translationForKey("preparingTests")
         : testing.prepared
-          ? this.translationForKey(testing.left ? "nextTest" : "firstTest", { count: testing.left || testing.open })
+          ? this.translationForKey(testing.left ? "focusTests" : "focusAllTests", {
+              count: testing.left || testing.open
+            })
           : this.translationForKey("startTesting", { count: testing.open })
     }
     const tip = () => {
@@ -648,7 +652,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         ? testing.queued
           ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
           : this.translationForKey("preparingTip")
-        : this.translationForKey(testing.prepared ? "nextTestTip" : "startTestingTip")
+        : this.translationForKey(testing.prepared ? "focusTestsTip" : "startTestingTip")
     }
     return (
       <ui-button
@@ -657,7 +661,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         color="blue"
         appearance={state().prepared && !state().preparing ? undefined : "basic"}
         size="mini"
-        icon={state().preparing ? "circle notch" : state().prepared ? "arrow right" : "flask"}
+        icon={state().preparing ? "circle notch" : state().prepared ? "bullseye" : "flask"}
         data-busy={state().preparing ? "" : undefined}
         title={tip()}
         onClick={(event: MouseEvent) => {
@@ -674,7 +678,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * Press the button:
    * - while preparing:  call it off ("nevermind")
-   * - every open test prepared, nothing new since:  straight to the next test (`openNext()`)
+   * - every open test prepared, nothing new since:  straight to Focus mode (`openNext()`)
    * - else Start testing's request for now;  the first test opens when it's done (`onPrepared()`)
    */
   @E.untracked
@@ -692,19 +696,22 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     void client.prepareTests()
   }
 
-  /** Open the next test Owen hasn't answered, after the one it opened last (`TestQueue.nextId()`). */
+  /**
+   * Open Focus mode on the Tests tab, on the first test Owen hasn't answered (`TestQueue.nextId()`), in his order
+   * (decision Q65, A):  `epic-focus-asked`, which `<epic-page>` hears.
+   * - SIDE EFFECT:  dispatches on its DOM element
+   */
   @E.untracked
   private openNext() {
-    const current = this.lastOpened ?? decodeURIComponent(location.hash.slice(1))
-    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked, current)
+    const id = TestQueue.nextId(this.domElement, this.reviewState.isMarked)
     if (!id) return
-    this.lastOpened = id
-    TestQueue.open(id)
+    const ask: FocusAsk = { tab: "tests", item: id }
+    this.domElement.dispatchEvent(new CustomEvent(FOCUS_ASKED, { detail: ask, bubbles: true, composed: true }))
   }
 
   /**
-   * Start testing's request finished:  the first test opens (Owen, Q53:  then the page "opens the first test");
-   * while he's typing, a notice says the tests are ready instead, and Next test opens it.
+   * Start testing's request finished:  Focus mode opens on the first test (Owen, Q53:  then the page "opens the first
+   * test";  Q65 A:  in Focus mode);  while he's typing, a notice says the tests are ready instead, and the button opens it.
    * - only for a press on this visit:  a request another window asked for, or one called off, opens nothing
    */
   @E.onChange("isPreparing")
@@ -713,7 +720,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     this.pressedStart = false
     if (!TestQueue.openIds(this.domElement).length) return
     if (TestQueue.isTyping()) return this.reviewState.client?.notify(this.translationForKey("testsReady"))
-    this.lastOpened = undefined
     this.openNext()
   }
 

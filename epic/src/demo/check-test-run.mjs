@@ -1,7 +1,8 @@
 /**
  * Check TESTING ON THE PAGE (epic `epic-engine` P51, Q53) in a real browser, as Owen walks it:  the Manual tests
- * section's Start testing, Claude preparing the tests, the first test opening, Next test, a screenshot pasted in a
- * test's note, Approve closing one;  every step read back from the copy's review inbox.
+ * section's Start testing, Claude preparing the tests, Focus mode opening on the first (epic `epic-engine` P57, Q65 A),
+ * its Next, a screenshot pasted in a test's note, Approve closing one;  every step read back from the copy's review
+ * inbox.
  * - P4's separate test run (`<epic-test-run>`) is gone:  this script checked it before P51, and now checks what took
  *   its place.
  *
@@ -21,11 +22,12 @@
  *     button "Preparing tests"
  *   - Claude's agent, played by the epic tool:  closes `m4` (checked itself), writes `m3` out with an Example
  *     screenshot, stamps the order (`m3` `m1` `m2`), `inbox done <copy>#tests`
- *   - the page opens `m3` (`#m3`, its details open), the button "Next test · 3 left"
- *   - a screenshot PASTED in `m3`'s note box:  its thumbnail, the file in the copy's `tests/`, a revisit carrying it
- *   - Next test:  `m1`;  Approve on it;  "Next test · 1 left"
+ *   - Focus mode opens on its Tests tab, on `m3`, the button "Focus on the tests · 3 left"
+ *   - a screenshot PASTED in `m3`'s note box, in Focus mode:  its thumbnail, the file in the copy's `tests/`, a revisit
+ *     carrying it
+ *   - Focus mode's Next:  `m1`;  Approve on it;  "Focus on the tests · 1 left"
  *   - `epic inbox apply --all`:  `m1` closed (passed), `m3` left open for the session (his note)
- *   - `?test=1&all=1` on the next copy:  every test prepared, so no request, its first test opens;  both approved,
+ *   - `?test=1&all=1` on the next copy:  every test prepared, so no request, Focus mode opens on its first;  both approved,
  *     the section's last line names no next epic (none left)
  * - and at 1200 and 420px, light and dark:  nothing wider than the window;  screenshots (outDir, default
  *   `src/demo/shots/test-run/`):  `tests-before-<w>-<scheme>.png`, `tests-preparing.png`, `test-open-<w>-<scheme>.png`,
@@ -151,30 +153,26 @@ async function walk() {
   // Claude's agent:  m4 checked and closed, m3 written out with an Example, the order stamped, the request done
   await claudePrepares(SAMPLE, sampleFolder)
   await page
-    .waitForFunction(() => location.hash === "#m3", null, { timeout: 15_000 })
-    .catch(() => problems.push(`the first test never opened:  ${page.url()}`))
+    .waitForFunction(() => focusHead() === "M3", null, { timeout: 15_000 })
+    .catch(async () => problems.push(`Focus mode never opened on m3:  ${await page.evaluate(() => focusHead())}`))
   await page
-    .waitForFunction(() => document.getElementById("m3")?.hasAttribute("open"), null, { timeout: 6000 })
-    .catch(() => problems.push("m3 opened in the address, but not on the page"))
-  await page
-    .waitForFunction(() => buttonText() === "Next test · 3 left", null, { timeout: 6000 })
+    .waitForFunction(() => buttonText() === "Focus on the tests · 3 left", null, { timeout: 6000 })
     .catch(async () => problems.push(`the button after preparing:  ${await page.evaluate(() => buttonText())}`))
   expect("m4, checked by Claude, is closed", await page.evaluate(() => document.getElementById("m4")?.getAttribute("status")), "done")
   await page.waitForTimeout(600)
   await page.screenshot({ path: join(out, "test-open-390-light.png") })
 
-  // a screenshot pasted in m3's note box:  a revisit carrying it, its thumbnail
-  await pasteImage(page, "m3")
+  // a screenshot pasted in m3's note box, in Focus mode:  a revisit carrying it, its thumbnail
+  await pasteImage(page, "focus")
   await page
-    .waitForFunction(() => noteRoot("m3")?.querySelector(".note-picture img[src^='tests/']"), null, { timeout: 8000 })
+    .waitForFunction(() => noteRoot("focus")?.querySelector(".note-picture img[src^='tests/']"), null, { timeout: 8000 })
     .catch(() => problems.push("the pasted screenshot never showed as a thumbnail in m3's note"))
-  await page.evaluate(() => noteRoot("m3").querySelector(".note-box").scrollIntoView({ block: "center" }))
   await page.waitForTimeout(300)
   await page.screenshot({ path: join(out, "note-picture-in-box.png") })
-  await page.evaluate(() => noteField("m3").focus())
+  await page.evaluate(() => noteField("focus").focus())
   await page.keyboard.type(NOTE)
   // leaving the box saves it at once
-  await page.evaluate(() => noteField("m3").blur())
+  await page.evaluate(() => noteField("focus").blur())
   const m3 = await waitForMark("m3", (mark) => mark?.shot && mark?.note === NOTE)
   expect(
     "m3's mark:  a revisit, his words, the screenshot",
@@ -182,21 +180,19 @@ async function walk() {
     { action: "revisit", note: NOTE, shot: true }
   )
   if (m3?.shot && !existsSync(join(sampleFolder, m3.shot))) problems.push(`the screenshot isn't in the copy:  ${m3.shot}`)
-  await page.evaluate(() => noteRoot("m3").querySelector(".note-box").scrollIntoView({ block: "center" }))
   await page.waitForTimeout(300)
   await page.screenshot({ path: join(out, "note-picture-390-light.png") })
 
-  // Next test:  m1;  Approve on it
-  await page.evaluate(() => testButton().click())
+  // Focus mode's Next:  m1;  Approve on it
+  await page.evaluate(() => focusRoot().querySelector("ui-button.next").click())
   await page
-    .waitForFunction(() => location.hash === "#m1", null, { timeout: 6000 })
-    .catch(() => problems.push(`Next test didn't open m1:  ${page.url()}`))
-  await page.evaluate(() => reviewButton("m1", "approve").click())
+    .waitForFunction(() => focusHead() === "M1", null, { timeout: 6000 })
+    .catch(async () => problems.push(`Next didn't show m1:  ${await page.evaluate(() => focusHead())}`))
+  await page.evaluate(() => reviewButton("focus", "approve").click())
   await waitForMark("m1", (mark) => mark?.action === "approve")
   await page
-    .waitForFunction(() => buttonText() === "Next test · 1 left", null, { timeout: 6000 })
+    .waitForFunction(() => buttonText() === "Focus on the tests · 1 left", null, { timeout: 6000 })
     .catch(async () => problems.push(`after Approve:  ${await page.evaluate(() => buttonText())}`))
-  await page.evaluate(() => document.getElementById("m1").scrollIntoView({ block: "start" }))
   await page.waitForTimeout(300)
   await page.screenshot({ path: join(out, "test-approved.png") })
 
@@ -237,14 +233,18 @@ async function acrossEpics() {
   const page = await newPage({ width: 390, height: 844 })
   await open(page, `${server.base}${nextPath}?test=1&all=1`)
   await page
-    .waitForFunction(() => location.hash === "#m1", null, { timeout: 8000 })
-    .catch(() => problems.push(`?test=1 on a prepared page didn't open its first test:  ${page.url()}`))
+    .waitForFunction(() => focusHead() === "M1", null, { timeout: 8000 })
+    .catch(() => problems.push(`?test=1 on a prepared page didn't open Focus mode on its first test:  ${page.url()}`))
   expect("?test= leaves the address, all=1 stays", new URL(page.url()).search, "?all=1")
   expect("no request for a page already prepared", (await readInbox(nextPath)).now ?? [], [])
   for (const id of ["m1", "m2"]) {
-    await page.evaluate((id) => reviewButton(id, "approve").click(), id)
+    await page.waitForFunction((id) => focusHead() === id.toUpperCase(), id, { timeout: 6000 }).catch(() => undefined)
+    await page.evaluate(() => reviewButton("focus", "approve").click())
     await waitForMark(id, (mark) => mark?.action === "approve", nextPath)
+    await page.evaluate(() => focusRoot().querySelector("ui-button.next").click())
   }
+  // Focus mode closed, to see the section's last line
+  await page.evaluate(() => focusEl().close())
   await page
     .waitForFunction(() => testsSection().shadowRoot.querySelector(".next-epic")?.textContent.trim(), null, { timeout: 6000 })
     .catch(() => problems.push("the section's last line never showed, every test answered"))
@@ -314,15 +314,20 @@ function HELPERS() {
   window.testsSection = () => document.getElementById("tests")
   window.testButton = () => testsSection()?.shadowRoot?.querySelector("ui-button.start-testing") ?? null
   window.buttonText = () => (testButton()?.textContent ?? "").replace(/\s+/g, " ").trim()
+  window.focusEl = () => document.querySelector("epic-page")?.shadowRoot?.querySelector("epic-focus") ?? null
+  window.focusRoot = () => focusEl()?.shadowRoot ?? null
+  window.focusHead = () => (focusEl()?.open ? (focusRoot()?.querySelector(".head .chip")?.textContent ?? "") : "")
+  // `id` "focus":  Focus mode's own review controls
   window.reviewRoots = (id) => {
-    const root = document.getElementById(id)?.shadowRoot
+    const root = id === "focus" ? focusRoot() : document.getElementById(id)?.shadowRoot
     if (!root) return []
     return [root, ...Array.from(root.querySelectorAll("epic-review"), (review) => review.shadowRoot).filter(Boolean)]
   }
   window.reviewButton = (id, action) =>
     reviewRoots(id).map((root) => root.querySelector(`ui-button[data-action="${action}"]`)).find(Boolean) ?? null
   window.noteRoot = (id) =>
-    document.getElementById(id)?.shadowRoot?.querySelector('epic-review[shows="note"]')?.shadowRoot ?? null
+    (id === "focus" ? focusRoot() : document.getElementById(id)?.shadowRoot)?.querySelector('epic-review[shows="note"]')
+      ?.shadowRoot ?? null
   window.widest = () => {
     const out = []
     const walk = (root) => {
