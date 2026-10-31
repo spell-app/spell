@@ -1252,6 +1252,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--html": "the title is HTML",
     "--calm": "an item not urgent (yellow)",
     "--loud": "an item urgent (red) again",
+    "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
     "--filed <what>": "a card:  done --filed is noted's older spelling"

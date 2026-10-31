@@ -49,7 +49,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `option`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -302,6 +302,13 @@ export class PlanDocCommands {
         if (!rest.length) need(undefined, "an item id")
         const lines = await this.edit(file, (plan) => rest.map((id) => calmItem(plan, id, !flags.loud)))
         return this.print(lines.join("\n"))
+      }
+      case "failed": {
+        // a manual test that failed, filed as an issue by the session (epic `epic-engine` I174);  `off` takes it off
+        const test = need(rest[0], "a manual test's id")
+        const issue = need(rest[1], "the issue it was filed as (I12), or off")
+        const line = await this.edit(file, (plan) => failTest(plan, test, issue === "off" ? undefined : issue))
+        return this.print(line)
       }
       case "decide": {
         const question = need(rest[0], "a question id")
@@ -1363,6 +1370,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    first opened in test mode (?test=1&all=1)
   calm <name> <id>... [--loud]                     calls / issues not urgent (yellow, open), as the page's
                                                    id chip does;  --loud (last):  urgent (red) again
+  failed <name> <M id> <I id> | off                a manual test failed, filed as that issue:  "failed -> I12"
+                                                   on its line, a Noted card linking it, the test left open;
+                                                   off takes the mark off (closing the test does too)
   decide <name> <Q id> "answer" [--details html] [--option A]
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
@@ -1545,6 +1555,26 @@ function calmItem(plan: PlanDoc, id: string, calm: boolean): string {
   const state = did ?? `${calm ? "not urgent" : "urgent"} already`
   const line = `${id.toUpperCase()} ${state}:  ${PlanItem.titleOf(plan.item(id))}`
   if (did) plan.log(line)
+  return line
+}
+
+/**
+ * Test `id` marked failed, filed as `issue` (`PlanDoc.markFailed()`), with a Noted card linking the issue, logged;
+ * `issue` `undefined`:  the mark taken off.
+ * - returns the line to print:  `M3 failed -> I12:  <title>`, `M3 no longer marked failed:  <title>`
+ */
+function failTest(plan: PlanDoc, id: string, issue: string | undefined): string {
+  const filed = plan.markFailed(id, issue)
+  const label = id.toUpperCase()
+  const title = PlanItem.titleOf(plan.item(id))
+  if (!filed) {
+    const line = `${label} no longer marked failed:  ${title}`
+    plan.log(line)
+    return line
+  }
+  plan.noteStatus(id, `Failed:  filed as <a href="#${filed}">${filed.toUpperCase()}</a>.`)
+  const line = `${label} failed -> ${filed.toUpperCase()}:  ${title}`
+  plan.log(line)
   return line
 }
 

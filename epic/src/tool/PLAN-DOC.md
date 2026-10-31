@@ -406,6 +406,9 @@ As `plan-doc.md`, "Ids":
     - `add <name>#T` writes work;  `--limit` (or `#limit`, the old `#caveat`) a limit
   - `failed`:  a test that failed, the issue it was filed as (`i42`;  epic `epic-engine` P4).
     - written by `inbox apply` for an old `test` mark (below), the test left open;  gone once it passes
+    - and by the session that filed the failure itself (epic `epic-engine` I174):
+      `epic update <name>#M3 --failed I12`, a Noted card linking the issue;  `--failed off` takes it off
+    - closing the test (passed) takes it off too (`PlanDoc.setItem()`)
   - `prepared`:  a manual test Start testing wrote out for Owen, its place in his order (`prepared="2"`, 1 first;
     format `place`;  epic `epic-engine` P51).
     - written by `epic details <name>#M3 --prepared <n>`
@@ -435,7 +438,8 @@ As `plan-doc.md`, "Ids":
     - Approve:  passed;  `inbox apply` closes it.
     - A Revisit note, or a comment in its Step or Should (which presses Revisit itself, I158):  what he saw, often with
       a picture.  Left for the session, which closes the test when his note says it passed, else files an issue,
-      "M3 failed:  <title>", holding his note and picture, linked both ways, the test left open.
+      "M3 failed:  <title>", holding his note and picture, linked both ways (`update <name>#M3 --failed I12`), the
+      test left open.
     - The note box's x (`skip`):  `inbox apply` CANCELS it, "no longer applies";  a note says why.
     - Left alone:  still open.
   - A test Claude checked itself and saw pass, Claude MAY close (Q58):  with a Done card saying how it was checked,

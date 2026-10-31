@@ -1153,6 +1153,9 @@ A phase (seo#P3):
 An item (seo#J3):
   --title "New title" [--html]                            retitle it
   --calm  /  --loud                                       not urgent (yellow)  /  urgent (red)
+  --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
+                                                          on its line, a Noted card linking it, left open)  /  not;
+                                                          closing it takes the mark off too
 The page (seo):
   --standing [on | off],  --no-standing                   a standing epic:  open for good, never done
 Claude's status card on an item (seo#J3;  an Overview sub-section seo#o3, a phase seo#P3, seo#summary), a state
@@ -1166,6 +1169,7 @@ word after the target, never with fields:
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
   epic update seo#J3 --title "Clearer title"
+  epic update seo#M3 --failed I12
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"

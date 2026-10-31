@@ -997,7 +997,8 @@ want you to just do it").
             epic close <name>#M3
             ```
 
-          - failed:  file an issue, as for the person's note ("Tests" below);  the test stays open
+          - failed:  file an issue and mark the test (`--failed I12`), as for the person's note ("Tests" below);
+            the test stays open
        3. rewrites the Step of each one left in the explicit form ("5. Each phase":  the app, the window, the menu or
           keys, every command in a code block, `cd` included, a wait as its own step):
 
@@ -1033,12 +1034,14 @@ want you to just do it").
          ```text
          epic add <name>#I "M3 failed:  <test's title>" --details "<p>From <a href=\"#m3\">M3</a>:  <their note></p>
            <img src=\"tests/m3-20261029-1432.png\">"
-         epic update <name>#M3 noted "Failed:  filed as I12"
+         epic update <name>#M3 --failed I12
          ```
 
-         - the test's Noted card links the issue;  tell the person one line, with the issue's link
+         - `--failed` puts the red "failed → I12" on the test's line, and a Noted card linking the issue;
+           tell the person one line, with the issue's link
            (`epic pages link <doc> --hash i12 --review`), e.g. "M3 failed:  the pill stayed grey -> I12"
-         - fix it as any issue;  don't reopen the test by hand:  they try it again once it's fixed
+         - fix it as any issue;  don't reopen the test by hand:  they try it again once it's fixed,
+           and closing it as passed takes the "failed" off
        - then `inbox clear <name>#m3`
      - Left alone:  still open;  there's nothing to press for "not now".
      - An OLD `test` mark (`{ action: "test", result }`, sent before P51) still applies as it did:  `apply` closes a
