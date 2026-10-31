@@ -5,6 +5,7 @@
  * - `graphHandler()`:  a GraphQL service, by a small reader of the queries `GraphPlace` writes:  no library.
  *   It answers ONLY the fields asked for, and an error for one it hasn't got, as a real one does.
  * - `RecipeBox`:  what they share, so a program can change back-end and find the same recipes.
+ *   - The demo's own is a CSV file (`RecipeFile`);  a test's is in memory.
  * - `scripts/recipe-servers.ts` runs them, for the recipe box demo;  `RestPlace`'s and `GraphPlace`'s tests serve them.
  * - `DemoGuard`:  what lets a local page reach the demo's place server and live room (`scripts/recipe-servers.ts`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
@@ -29,6 +30,9 @@ export const FIRST_RECIPES: readonly Omit<WireRecipe, "version">[] = [
   { id: "r-4", name: "Margherita", cuisine: "Italian", servings: 2, notes: "A very hot oven." },
   { id: "r-5", name: "Chana masala", cuisine: "Indian", servings: 4, notes: "Better the next day." }
 ]
+
+/** How many requests it remembers:  a page left polling mustn't grow it for ever. */
+const ASKS_KEPT = 10_000
 
 /** What it's asked for one request:  for a test to look at. */
 export type RecipeAsk = {
@@ -70,7 +74,8 @@ export class RecipeBox {
 
   /** Add a recipe:  the id it came with, or a new one. */
   add(fields: Partial<WireRecipe>): WireRecipe {
-    const id = fields.id ?? `made-${++this.idsMade}`
+    let id = fields.id
+    while (id === undefined || (fields.id === undefined && this.recipes.has(id))) id = `made-${++this.idsMade}`
     const recipe: WireRecipe = {
       name: "",
       cuisine: "",
@@ -90,6 +95,14 @@ export class RecipeBox {
     this.recipes.set(id, recipe)
     return recipe
   }
+
+  /** Take a recipe out. */
+  remove(id: string): void {
+    this.recipes.delete(id)
+  }
+
+  /** Called before each request is answered:  a box with its recipes somewhere else looks there. */
+  readOutsideChanges(): void {}
 }
 
 /** How a `restHandler()` behaves. */
@@ -101,9 +114,6 @@ export type RestServerProps = {
   /** Does its `POST` make the id? */
   makesIds?: boolean
 }
-
-/** The address a demo's "someone else" uses:  not a real API's. */
-const SOMEONE_ELSE = /^\/someone-else\/recipes\/([^/]+)$/
 
 /** A recipe's address. */
 const ONE_RECIPE = /^\/recipes\/([^/]+)$/
@@ -128,12 +138,9 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
     const { path, method } = request
     const isList = path === "/recipes"
     const one = ONE_RECIPE.exec(path)
-    const elsewhere = SOMEONE_ELSE.exec(path)
-    if (!isList && !one && !elsewhere) return next()
+    if (!isList && !one) return next()
     const body = await bodyOf(request)
     await noteAsk(box, request, reply, body)
-
-    if (elsewhere) return void reply.json(box.change(elsewhere[1]!, body ?? {}))
 
     if (isList && method === "GET") return listRecipes(box, request, reply, { paging, wire })
 
@@ -158,7 +165,7 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
       return void reply.json(wire(recipe))
     }
     if (method === "DELETE") {
-      box.recipes.delete(id)
+      box.remove(id)
       return void reply.status(204).end()
     }
     if (method === "PATCH" || method === "PUT") {
@@ -239,12 +246,11 @@ const RECIPE_FIELDS = new Set(["id", "name", "cuisine", "servings", "notes", "ve
  * - `recipes(filter, first, after) { edges { node } pageInfo { hasNextPage endCursor } }`
  * - `recipe(id)`
  * - `addRecipe(input)`, `changeRecipe(id, input)`, `removeRecipe(id)`
- * - `path`:  another address, for a service with a box of its own beside this one
  */
-export function graphHandler(box: RecipeBox, path = "/graphql"): Handler {
+export function graphHandler(box: RecipeBox): Handler {
   return async (request, reply, next) => {
     if (answeredAcrossOrigins(request, reply)) return
-    if (request.path !== path || request.method !== "POST") return next()
+    if (request.path !== "/graphql" || request.method !== "POST") return next()
     const body = (await bodyOf(request)) as { query: string; variables?: Record<string, unknown> }
     await noteAsk(box, request, reply, body)
     const { query, variables = {} } = body
@@ -308,7 +314,7 @@ function answerTo(box: RecipeBox, { name, args, inside }: Selected, variables: R
     }
     case "removeRecipe":
       known()
-      box.recipes.delete(id)
+      box.remove(id)
       return true
     default:
       throw new GraphFailure(`no field "${name}"`, "GRAPHQL_VALIDATION_FAILED")
@@ -397,10 +403,12 @@ async function noteAsk(
   body: Record<string, unknown> | undefined
 ): Promise<void> {
   box.asks.push({ method, path, query, headers, ...(body && { body }) })
+  if (box.asks.length > ASKS_KEPT) box.asks.shift()
   reply.raw.once("close", () => {
     if (!reply.raw.writableEnded) box.cutOff++
   })
   await box.holdAnswers
+  box.readOutsideChanges()
 }
 
 /** The token the demo's place server wants:  the demo's page knows it. */

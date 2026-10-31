@@ -181,13 +181,8 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     "a folder": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
     "a live room": async () =>
-      (await servers.roomPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
+      (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
   }
-
-  /** The servers' GraphQL service with recipes of its own, as a program says it. */
-  const apartLines = (url: string) => `family cookbook is a graph service at "${url}/apart/graphql":
-	- a recipe's title is called "name"
-	- it is checked every 5 seconds`
 
   /** Reads, adds, changes and removes through the page, each reaching the server. */
   async function roundTrip(page: Page, held: () => Promise<string[]>): Promise<void> {
@@ -261,14 +256,13 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     expect((await asked({ Origin: elsewhereUrl })).status).toBe(200)
   })
 
-  test("GraphQL with its own recipes shares nothing with the other one", { timeout: 60_000 }, async () => {
-    const { page, problems } = await opened(serve("apart", withPlace(english(), apartLines(servers.url))))
-    const apart = async () => [...servers.apartBox.recipes.values()].map(({ name }) => name)
+  test("what a program adds over GraphQL is in the CSV file REST reads", { timeout: 60_000 }, async () => {
+    const { page, problems } = await opened(serve("shared", withPlace(english(), BACK_ENDS.GraphQL!(servers.url))))
     await page.locator("ui-form.recipe").first().waitFor(WAITING)
-    await page.locator("ui-input.draft input").fill("Only over here")
+    await page.locator("ui-input.draft input").fill("Over GraphQL")
     await page.locator("ui-button.add").click()
-    await expect.poll(apart, WAITING).toContain("Only over here")
-    expect(await heldBy.REST!()).not.toContain("Only over here")
+    await expect.poll(() => readFileSync(servers.box.file, "utf8"), WAITING).toContain("Over GraphQL")
+    expect(await heldBy.REST!()).toContain("Over GraphQL")
     expect(problems).toEqual([])
     await page.close()
   })

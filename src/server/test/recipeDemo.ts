@@ -1,28 +1,32 @@
 /**
  * The recipe box demo's servers, on one port:  what `scripts/recipe-servers.ts` runs, and the recipe box test (epic `data` P11).
- * - `/recipes`, with versions in a field;  `/graphql`:  one box of recipes behind both
- * - `/apart/graphql`:  GraphQL with a box of its own, for showing back-ends that share nothing
- * - `/api/places/recipes`:  a folder of files, as a place, behind a `PlaceServer`
- * - `/api/rooms/recipes`:  a live room, its referee keeping a folder of its own (`<folder>-room`)
- * - `routes`:  anything else, by a caller:  a test's page, someone else's button.
+ * - TWO sources of recipes, each with several ways in, so a change made one way shows the others:
+ *   - one CSV file (`RecipeFile`):
+ *     - `/recipes`, with versions in a field
+ *     - `/graphql`
+ *     - `/recipes.csv`:  the file as it is, for a sheet to read
+ *   - one folder of files (`FolderPlace`):
+ *     - `/api/places/recipes`:  behind a `PlaceServer`
+ *     - `/api/rooms/recipes`:  a live room, whose referee keeps its recipes in that same folder
+ *       - it hears the place's every change, through the place's own `watch()`, as a step of the room
+ * - `routes`:  anything else, by a caller:  a test's page.
  * - Node only;  a test helper, as `recipeServers.ts` is.
  */
 import { createServer, type Server } from "node:http"
+import { join } from "node:path"
 
 import { JsonChunks, type Place } from "spell/util/places"
 import { SRV } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
 
-import { bothHandlers, DemoGuard, FIRST_RECIPES, graphHandler, RecipeBox } from "./recipeServers"
+import { csvHandler, RecipeFile } from "./RecipeFile"
+import { bothHandlers, DemoGuard, FIRST_RECIPES } from "./recipeServers"
 
 /** The one collection. */
 const COLLECTION = "recipes"
 
 /** Where its live room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
-
-/** Where the GraphQL server with its own recipes listens. */
-const APART_GRAPH_PATH = "/apart/graphql"
 
 /** What a room's recipe holds. */
 const ROOM_FIELDS = ["title", "cuisine", "servings", "notes", "place"]
@@ -31,8 +35,12 @@ const ROOM_FIELDS = ["title", "cuisine", "servings", "notes", "place"]
 export type RecipeServersProps = {
   /** Where to listen:  `0`, any free port. */
   port: number
-  /** Where the folder place keeps its files. */
+  /** Where the folder place, and the live room, keep their files. */
   folder: string
+  /** The CSV file behind REST, GraphQL and the sheet:  left out, `recipes.csv` in `folder`, which the folder place doesn't read. */
+  csvFile?: string
+  /** What to make the CSV file with, if it isn't there:  left out, the first recipes. */
+  firstCsv?: string
   /** More places behind its place server, by name:  a Google Sheet. */
   morePlaces?: Record<string, Place>
   /** The keys its place server holds. */
@@ -47,68 +55,45 @@ export type RecipeServersProps = {
 export type RecipeServers = {
   /** Where it's listening. */
   url: string
-  /** The REST and GraphQL servers' recipes. */
-  box: RecipeBox
-  /** The recipes of the GraphQL server at `/apart/graphql`. */
-  apartBox: RecipeBox
-  /** The folder place. */
+  /** The recipes of the REST and GraphQL servers:  the CSV file. */
+  box: RecipeFile
+  /** The folder place:  the live room's store too. */
   folderPlace: FolderPlace
-  /** The room's folder place. */
-  roomPlace: FolderPlace
   /** Stops it. */
   close(): Promise<void>
 }
 
-/** The recipe servers, each with the first recipes.  The folder and the room's folder keep theirs between runs. */
+/** The recipe servers, each source with the first recipes, unless it has some:  both keep theirs between runs. */
 export async function startRecipeServers({
   port,
   folder,
+  csvFile = join(folder, `${COLLECTION}.csv`),
+  firstCsv,
   morePlaces,
   keys = new PlaceKeys({ names: [] }),
   routes,
   fixedPort = false
 }: RecipeServersProps): Promise<RecipeServers> {
   const format = new JsonChunks({ summaries: { [COLLECTION]: ["title", "cuisine", "servings"] } })
-  const files = new ChunkFiles({ root: folder })
-  const folderPlace = new FolderPlace({ storage: files, format })
+  const folderPlace = new FolderPlace({ storage: new ChunkFiles({ root: folder }), format })
   if (!(await folderPlace.list(COLLECTION, {}, {})).rows.length) {
-    const changes = FIRST_RECIPES.map(({ id, name, ...fields }) => ({
-      kind: "insert" as const,
-      collection: COLLECTION,
-      id,
-      fields: { title: name, ...fields }
-    }))
-    await folderPlace.apply(changes, {})
-  }
-
-  const box = new RecipeBox()
-  const router = new SRV.Router()
-  routes?.(router)
-  const apartBox = new RecipeBox()
-  router.use(graphHandler(apartBox, APART_GRAPH_PATH))
-  router.use(bothHandlers(box))
-  // Someone else, in another program:  the file saved behind the page's back, as VS Code would
-  router.post("/someone-else/folder/:id", SRV.parseBodies(), async (request, reply) => {
-    const address = format.bodyAddress(COLLECTION, request.params.id!)
-    const thing = JSON.parse((await files.read(address)) ?? "{}") as object
-    const { name } = request.body as { name?: string }
-    await files.write(address, format.bodyText({ ...thing, title: name }))
-    reply.json({ ok: true })
-  })
-  const guardFor = (at: number) => new DemoGuard().allowPort(at)
-  const server: Server = createServer()
-  const places = { [COLLECTION]: folderPlace, ...morePlaces }
-  const roomFormat = new JsonChunks({ summaries: { [COLLECTION]: ROOM_FIELDS } })
-  const roomPlace = new FolderPlace({ storage: new ChunkFiles({ root: `${folder}-room` }), format: roomFormat })
-  if (!(await roomPlace.list(COLLECTION, {}, {})).rows.length) {
     const changes = FIRST_RECIPES.map(({ id, name, ...fields }, index) => ({
       kind: "insert" as const,
       collection: COLLECTION,
       id,
       fields: { title: name, ...fields, place: { parent: "box", at: `${index + 1}1` } }
     }))
-    await roomPlace.apply(changes, {})
+    await folderPlace.apply(changes, {})
   }
+
+  const box = new RecipeFile({ file: csvFile, ...(firstCsv !== undefined && { firstText: firstCsv }) })
+  const router = new SRV.Router()
+  routes?.(router)
+  router.use(csvHandler(box))
+  router.use(bothHandlers(box))
+  const guardFor = (at: number) => new DemoGuard().allowPort(at)
+  const server: Server = createServer()
+  const places = { [COLLECTION]: folderPlace, ...morePlaces }
   server.on("request", SRV.toListener(router.handle))
   await (fixedPort
     ? SRV.listenPreferred(server, { port, fallback: false })
@@ -117,7 +102,7 @@ export async function startRecipeServers({
   new PlaceServer({ places, keys }).route(router, guardFor(at))
   const referee = new Referee({
     path: ROOM_PATH,
-    place: roomPlace,
+    place: folderPlace,
     collections: { [COLLECTION]: { select: ROOM_FIELDS } },
     guard: guardFor(at)
   })
@@ -129,9 +114,7 @@ export async function startRecipeServers({
   return {
     url: `http://127.0.0.1:${at}`,
     box,
-    apartBox,
     folderPlace,
-    roomPlace,
     close: () =>
       new Promise((resolve) => {
         referee.close?.()
