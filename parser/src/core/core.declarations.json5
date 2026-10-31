@@ -2506,6 +2506,55 @@
     },
     {
       "kind": "method",
+      "name": "waitedValue",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "compute"
+        },
+        {
+          "name": "follows"
+        }
+      ],
+      "description": "The value of `thing`'s getter `name`, worked out by `compute`, which waits:  what a getter that waits compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "whileWaiting",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "read"
+        }
+      ],
+      "description": "`read`'s drawing, or a \"…\" until its first answer:  a value in a drawing that waits, `{the total}`."
+    },
+    {
+      "kind": "method",
+      "name": "answerOf",
+      "of": "core",
+      "module": "waiting",
+      "waits": true,
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits."
+    },
+    {
+      "kind": "method",
       "name": "isAble",
       "of": "core",
       "module": "abilities",

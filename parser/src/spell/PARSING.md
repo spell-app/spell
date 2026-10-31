@@ -1534,6 +1534,18 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
     when its function turns out to wait.
   - It stops at a program's top level, a function inside a function, and what a writer's `canWait()` refuses.
+  - A getter that waits is a value on Solid, `core.waitedValue()`, and each read of one, by name, follows it
+    (`waitingValues`):
+    - In a function that waits it's `await core.answerOf(thing, "total")`, the answer after any writes (`project.awaited`).
+    - A plain getter over one stays plain on Solid, since "not yet" passes through it, and is never `@derived`, which
+      would stay wrong for good.
+      Python's and a library's wait too (`readsThroughSolid`).
+    - In a drawing:  a child value alone, `core.whileWaiting()` (`spotsThatWait`);  anywhere else, the class says
+      `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
+    - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
+      runs unread.
+    - `pause` and `wait for` in a drawing are parse errors (`refuseWaitInDraw()`);
+      a getter reading another thing's member after a wait warns (`reads-after-wait`).
   - Two rules say not to wait, each by running functions of its own:
     - `meanwhile`, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
     - `at the same time:`, `core.together(() => ..., () => ...)`:  waits if a line does (`togetherWaits()`);

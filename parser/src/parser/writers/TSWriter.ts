@@ -1,7 +1,7 @@
 import { elementTagFor, viewAttributeFor } from "spell/util"
 import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { JSWriter } from "./JSWriter"
+import { DRAWS_WAITING, JSWriter } from "./JSWriter"
 import * as jsText from "./jsText"
 import {
   attributeName,
@@ -643,9 +643,14 @@ export class TSWriter extends JSWriter {
     const name = this.nameOf(node.property.value)
     if (node.get) {
       const getter = this.methodNamed(node.get, `get ${name}`)
-      return loopsOverAList(node.get) ? `@derived ${getter}` : getter
+      // never remembered over a value that waits:  it'd stay wrong for good (epic `language` P8)
+      const remembered = loopsOverAList(node.get) && !this.project.waitingValues.has(node.property.value)
+      return remembered ? `@derived ${getter}` : getter
     }
-    if (name === "draw") return `@drawn ${this.drawMethod(node.method!)}`
+    if (name === "draw") {
+      const drawing = `@drawn ${this.drawMethod(node.method!)}`
+      return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${drawing}` : drawing
+    }
     return this.methodNamed(node.method!, name)
   }
 
@@ -769,7 +774,12 @@ export class TSWriter extends JSWriter {
   returnType(typeName: string, method: P.ASTMethodDefinition): string | undefined {
     const returned = this.typeFor(method.datatype) ?? this.returnedType(typeName, method)
     if (!returned) return undefined
-    return method.isAsync ? `Promise<${returned}>` : returned
+    return method.isAsync && !this.answersAtOnce(method) ? `Promise<${returned}>` : returned
+  }
+
+  /** Does `method`, which waits, answer with its value?  A getter that waits does, through `core.waitedValue()`. */
+  protected answersAtOnce(method: P.ASTMethodDefinition): boolean {
+    return this.project.waitedGetters.has(method)
   }
 
   /** What method `method` of class `typeName` returns, from its `return`s:  see `returnType()`. */
@@ -1314,6 +1324,7 @@ export class TSWriter extends JSWriter {
 
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
+    if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
     return this.bare(node.expression)
   }
 
@@ -1333,6 +1344,7 @@ export class TSWriter extends JSWriter {
     if (!expression) return ""
     // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.bare(expression)
+    if (this.project.spotsThatWait.has(expression)) return `{core.whileWaiting(() => ${text})}`
     return text.startsWith("<") ? text : `{${text}}`
   }
 

@@ -21,6 +21,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
 | `test-threw` | a test that threw | `test` |
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+| `waiting` | the stand-in on the page for a value that hasn't answered yet | |
 | `confirm-default` | `confirm` with no page:  the JavaScript core's only, so far | `question` |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
@@ -37,6 +38,7 @@ MESSAGES: dict[str, str] = {
     "test-step": "▶️ Executing   {step}",
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
+    "waiting": "…",
     "confirm-default": "{question} (yes)",
     "drop-event": "{thing}-drop",
     "undo": "Undo",

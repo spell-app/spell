@@ -204,6 +204,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItM
     if (typeof itemType === "string") match.data.itemType = itemType
     const scope = new P.MethodScope({
       parentScope: match.scope,
+      name: DrawIt.drawingOf(match),
       args: isEachItem ? [new P.ScopeVariable({ name: ITEM, datatype: itemType })] : [],
       thisVar: type.instanceName,
       mapItTo: "this",

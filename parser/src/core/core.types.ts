@@ -19,6 +19,7 @@ import type { messageMethods } from "./messages"
 import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
+import type { waitingMethods } from "./waiting"
 import type { abilityMethods } from "./abilities"
 import type { PropRule } from "spell/util"
 
@@ -93,6 +94,7 @@ export type Core = typeof coreMethods &
   typeof describedMethods &
   typeof sendingMethods &
   typeof actingMethods &
+  typeof waitingMethods &
   typeof abilityMethods &
   typeof deprecatedMethods
 
@@ -146,6 +148,7 @@ export type TestCheck = {
  * | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
  * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+ * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
@@ -160,6 +163,7 @@ export const CORE_MESSAGES = {
   "test-step": "▶️ Executing   {step}",
   "test-threw": "Error in test {test}:",
   "cant-draw": "⚠ {type} can't draw",
+  waiting: "…",
   "confirm-default": "{question} (yes)",
   "drop-event": "{thing}-drop",
   undo: "Undo",

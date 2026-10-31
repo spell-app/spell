@@ -34,6 +34,9 @@ export const PARSER_MESSAGES = {
   /** A read of a member its type never declares, `the name of the pile`. */
   "undeclared-member": '{AType} never says it has {aName}:  declare it, e.g. "{aType} has {aName} as {type}"',
   /** A local, argument or loop variable with the name of a property of the action's thing. */
+  "reads-after-wait":
+    "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
+  "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
   /** A property's rule (`must ...`) above the property it's about. */
