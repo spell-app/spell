@@ -1315,6 +1315,11 @@
     "node": ">=24.11"
   },
   "packageManager": "yarn@4.18.0",
+  "pageServer": {
+    "routes": [
+      "src/server/test/recipeServersRoutes.ts"
+    ]
+  },
   "spell": {
     "commands": "./src/cli/commands.ts"
   },

@@ -14,17 +14,28 @@
  *   - only with `GOOGLE_SHEET_ID` and `GOOGLE_SHEETS_KEY` set:  its id, and a service account's key file, as JSON;
  *     the steps are the epic page's manual test
  *   - its tab has to be called `recipes`
+ * - The demo's page can start, stop and restart them, through the page server:  `recipeServersRoutes.ts`.
+ *   - What it starts ends when the page server does.
  * - The demo's pages are `recipe-box.html` and `all-back-ends.html`, in `/guides/data/experiments/recipe-box/`, on the page server.
  */
 import { existsSync, readFileSync } from "node:fs"
-import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { contentFolderOf } from "spell/server/contentFolder"
 import { GoogleSheetPlace, PlaceKeys } from "spell/server/places"
+import { SRV } from "spell/server"
 import { startRecipeServers } from "spell/server/test/recipeDemo"
+import {
+  RECIPE_SERVERS_FOLDER,
+  RECIPE_SERVERS_PARENT,
+  RECIPE_SERVERS_PORT,
+  RECIPE_SERVERS_READY
+} from "spell/server/test/recipeServersRoutes"
 
-const PORT = 4791
+const PORT = RECIPE_SERVERS_PORT
+
+/** How often it looks whether what started it is still there, in ms. */
+const PARENT_CHECK_MS = 5_000
 
 /** Where its live room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
@@ -32,7 +43,7 @@ const ROOM_PATH = "/api/rooms/recipes"
 /** Where the demo's committed CSV file is, in the epic repo. */
 const COMMITTED_CSV = "guides/data/experiments/recipe-box/recipes.csv"
 
-const folder = process.argv[2] ?? join(tmpdir(), "spell-recipe-box")
+const folder = process.argv[2] ?? RECIPE_SERVERS_FOLDER
 const csvFile = `${folder}.csv`
 const committedCsv = join(contentFolderOf(process.cwd()) ?? "", COMMITTED_CSV)
 
@@ -54,3 +65,8 @@ console.log(`the recipe servers are on http://127.0.0.1:${PORT}.  Ctrl-C stops t
 console.log(`the CSV file, behind /recipes, /graphql and /recipes.csv, is ${csvFile}`)
 console.log(`the folder, behind /api/places/recipes and the live room, ${ROOM_PATH}, is ${folder}`)
 if (googleSheet) console.log(`your Google Sheet ${spreadsheet} is on /api/places/google-sheet, its key held here.`)
+console.log(RECIPE_SERVERS_READY)
+
+// Started by the demo's page, through the page server:  never outlive it
+const parent = Number(process.env[RECIPE_SERVERS_PARENT])
+if (parent) setInterval(() => SRV.isProcessAlive(parent) || process.exit(), PARENT_CHECK_MS)

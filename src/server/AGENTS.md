@@ -210,7 +210,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         spell-brand, its set, engine routes, watched folders, bundle.
       - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
-      - The kit's own part (its `package.json`'s `"pageServer"`):  none today.
+      - The kit's own part (its `package.json`'s `"pageServer"`):  one route module, the recipe box demo's servers' start and stop
+        (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
