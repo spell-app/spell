@@ -96,7 +96,7 @@ import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
-import { dateIfDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
+import { valueAsDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, setField } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -473,7 +473,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
 
   /** `json`, as `Loader` reads it:  what's kept of a draft, brought back. */
   fieldValue(thing: SpellObject, key: string, json: unknown): unknown {
-    return dateIfDeclared(thing.constructor as never, key, this.read(json))
+    return valueAsDeclared(thing.constructor as never, key, this.read(json))
   }
 
   ////////////////
@@ -919,7 +919,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (key === "id" || key.startsWith("$")) continue
       const current = fields[key]
       if (!this.holdsTheSame(current, json)) changed.push(key)
-      const value = dateIfDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
+      const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
       } else if (!isSameDate(current, value)) {

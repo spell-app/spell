@@ -6,6 +6,7 @@ import {
   claudeApiRunner,
   claudeRunnerFor,
   inClaudeTerms,
+  requestFor,
   runClaude,
   SPEED_UP,
   type ApiRequest
@@ -215,3 +216,15 @@ function reply(text: string, rest: Record<string, unknown> = {}): Response {
 function failure(status: number, type: string, message: string, headers: Record<string, string> = {}): Response {
   return Response.json({ type: "error", error: { type, message } }, { status, headers })
 }
+
+describe("a pass that isn't translating", () => {
+  test("says what Claude is, in place of a translator", () => {
+    const request = requestFor("hello", { system: "You read samples." }, { model: "claude-opus-5-5" })
+    expect(request.system[0]!.text).toBe("You read samples.")
+    expect(requestFor("hello", {}, { model: "claude-opus-5-5" }).system[0]!.text).toMatch(/translate/)
+  })
+
+  test("has its tiers", () => {
+    expect(inClaudeTerms({ pass: "describePlace", tier: "best" })).toMatchObject({ model: "opus", effort: "medium" })
+  })
+})

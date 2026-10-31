@@ -203,6 +203,8 @@ export type ClaudeOptions = {
    * - Every object in it lists its properties, all required, with `additionalProperties: false`.
    */
   schema?: JsonSchema
+  /** What Claude is told it is, for a pass that isn't translating:  default, a translator. */
+  system?: string
   /**
    * What every call of a pass shares, e.g. the language pack's glossary:  in the system prompt, after its first line.
    * - The API caches it, so the calls after the first read it for less, and sooner.
@@ -223,7 +225,11 @@ export type JsonSchema = { [key: string]: unknown }
 export type EffortTier = "fast" | "balanced" | "best"
 
 /** A pass that asks:  the names (`NamesPass`), or the fix-ups (`FixUps`). */
-export type AskingPass = "names" | "fixUps"
+/** A pass of translating. */
+export type TranslatingPass = "names" | "fixUps"
+
+/** Whatever asks a runner:  a pass of translating, or `spell place ingest` reading a source. */
+export type AskingPass = TranslatingPass | "describePlace"
 
 /** How hard Claude thinks, as `claude --effort` takes it:  less is faster. */
 export type ClaudeEffort = "low" | "medium" | "high" | "xhigh" | "max"

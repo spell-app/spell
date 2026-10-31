@@ -267,6 +267,7 @@ const RECIPE_FIELDS = new Set(["id", "name", "cuisine", "servings", "notes", "ve
  * - `recipes(filter, first, after) { edges { node } pageInfo { hasNextPage endCursor } }`
  * - `recipe(id)`
  * - `addRecipe(input)`, `changeRecipe(id, input)`, `removeRecipe(id)`
+ * - `__schema`, `__typename`:  what it says of itself
  */
 export function graphHandler(box: RecipeBox): Handler {
   return async (request, reply, next) => {
@@ -284,6 +285,33 @@ export function graphHandler(box: RecipeBox): Handler {
       reply.json({ errors: [{ message, extensions: { code } }] })
     }
   }
+}
+
+/** What the server says of itself when a client asks, whatever was selected:  its schema, as a real GraphQL server's reads. */
+const RECIPE_SCHEMA = {
+  queryType: {
+    fields: [
+      { name: "recipes", type: { kind: "OBJECT", name: "RecipeConnection" } },
+      { name: "recipe", type: { kind: "OBJECT", name: "Recipe" } }
+    ]
+  },
+  mutationType: { fields: [{ name: "addRecipe" }, { name: "changeRecipe" }, { name: "removeRecipe" }] },
+  types: [
+    {
+      name: "RecipeConnection",
+      kind: "OBJECT",
+      fields: [{ name: "edges", type: { kind: "LIST", ofType: { kind: "OBJECT", name: "RecipeEdge" } } }]
+    },
+    { name: "RecipeEdge", kind: "OBJECT", fields: [{ name: "node", type: { kind: "OBJECT", name: "Recipe" } }] },
+    {
+      name: "Recipe",
+      kind: "OBJECT",
+      fields: [...RECIPE_FIELDS].map((name) => ({
+        name,
+        type: { kind: "SCALAR", name: name === "servings" || name === "version" ? "Int" : "String" }
+      }))
+    }
+  ]
 }
 
 /** What a query's asked for went wrong. */
@@ -322,6 +350,10 @@ function answerTo(box: RecipeBox, { name, args, inside }: Selected, variables: R
         pageInfo: { hasNextPage: end < rows.length, endCursor: String(end) }
       }
     }
+    case "__typename":
+      return "Query"
+    case "__schema":
+      return RECIPE_SCHEMA
     case "recipe":
       return row(box.recipes.get(id)) ?? null
     case "addRecipe": {

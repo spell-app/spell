@@ -78,6 +78,8 @@ export class RestPlace extends WebPlace implements Place {
   private readonly capabilities: PlaceCapabilities
   /** Each collection's mapping. */
   private readonly collections: Readonly<Record<string, RestCollection>>
+  /** What's the same of every collection. */
+  private readonly everyCollection: RestCollection | undefined
   /** How it knows versions. */
   private readonly versions: RestVersions | undefined
   /** How it updates. */
@@ -93,6 +95,7 @@ export class RestPlace extends WebPlace implements Place {
 
   constructor({
     collections = {},
+    everyCollection,
     can,
     versions,
     update = "PATCH",
@@ -104,6 +107,7 @@ export class RestPlace extends WebPlace implements Place {
     super(rest)
     this.operations = operations ?? {}
     this.collections = collections
+    this.everyCollection = everyCollection
     this.versions = versions
     this.updateMethod = update
     this.params = { ...REST_PARAMS, ...params }
@@ -209,8 +213,7 @@ export class RestPlace extends WebPlace implements Place {
   private async makeChange(change: PlaceChange, context: PlaceContext): Promise<PlaceRow | undefined> {
     const { kind, collection, id, changeId } = change
     if (kind === "delete") {
-      const url = this.pathOf(collection)
-      await this.answerTo({ url, urlData: { id: id! }, method: "DELETE" }, context, changeId)
+      await this.answerTo({ ...this.thingAddress(collection, id!), method: "DELETE" }, context, changeId)
       this.seenVersions.delete(versionKey(collection, id!))
       return undefined
     }
@@ -242,13 +245,12 @@ export class RestPlace extends WebPlace implements Place {
         cause: { kind: "out of date" }
       })
     }
-    const url = this.pathOf(collection)
     const wire = this.onTheWire(collection, fields)
     const isWhole = this.updateMethod === "PUT"
     const data = isWhole ? { ...(await this.wholeRowOnTheWire(collection, id!, context)), ...wire } : wire
     const headers = this.versions && version !== undefined ? { "If-Match": version } : undefined
     return this.answerTo(
-      { url, urlData: { id: id! }, method: this.updateMethod, data, ...(headers && { headers }) },
+      { ...this.thingAddress(collection, id!), method: this.updateMethod, data, ...(headers && { headers }) },
       context,
       changeId
     )
@@ -256,8 +258,7 @@ export class RestPlace extends WebPlace implements Place {
 
   /** The record as the server keeps it now, for a `PUT`.  Its version field is the server's to set. */
   private async wholeRowOnTheWire(collection: string, id: string, context: PlaceContext): Promise<PlaceRow> {
-    const url = this.pathOf(collection)
-    const response = await this.answerTo({ url, urlData: { id } }, context)
+    const response = await this.answerTo(this.thingAddress(collection, id), context)
     const whole = valueAt(await jsonIn(response), this.mappingOf(collection).rowAt) as PlaceRow
     const field = this.versions && "field" in this.versions ? this.wireName(collection, this.versions.field) : undefined
     if (field === undefined) return whole
@@ -272,7 +273,7 @@ export class RestPlace extends WebPlace implements Place {
   /** The row of `collection` with this id;  `undefined` if there's none. */
   private async rowOrNothing(collection: string, id: string, context: PlaceContext): Promise<PlaceRow | undefined> {
     try {
-      const response = await this.answerTo({ url: this.pathOf(collection), urlData: { id } }, context)
+      const response = await this.answerTo(this.thingAddress(collection, id), context)
       return this.noted(
         collection,
         valueAt(await jsonIn(response), this.mappingOf(collection).rowAt) as PlaceRow,
@@ -337,9 +338,17 @@ export class RestPlace extends WebPlace implements Place {
     return NEXT_LINK.exec(response.headers.get("Link") ?? "")?.[1]
   }
 
-  /** `collection`'s mapping:  all defaults if it's not named. */
+  /** `collection`'s mapping:  what it says, over what's said of every collection;  all defaults if neither says. */
   private mappingOf(collection: string): RestCollection {
-    return this.collections[collection] ?? {}
+    const own = this.collections[collection]
+    if (!this.everyCollection) return own ?? {}
+    const fields = { ...this.everyCollection.fields, ...own?.fields }
+    return { ...this.everyCollection, ...own, fields }
+  }
+
+  /** Where the thing with this id is:  an id that's a whole address is where it is, as on a server whose rows name themselves. */
+  private thingAddress(collection: string, id: string): { url: string; urlData: { id?: string } } {
+    return IS_ADDRESS.test(id) ? { url: id, urlData: {} } : { url: this.pathOf(collection), urlData: { id } }
   }
 
   /** `collection`'s address template. */
@@ -384,6 +393,8 @@ export class RestPlace extends WebPlace implements Place {
 export type RestPlaceProps = WebPlaceProps & {
   /** Each collection's mapping, by the name we call it.  One not named:  `/<name>{/id}`, and the same field names. */
   collections?: Readonly<Record<string, RestCollection>>
+  /** What's the same of every collection:  each one's own mapping wins, field by field. */
+  everyCollection?: RestCollection
   /** What this API does for itself, over a plain one that does nothing.  Declared per API:  they vary. */
   can?: Partial<Omit<PlaceCapabilities, "page">> & { page?: Exclude<PageKind, "range"> }
   /** Each named operation's address under `url`, by its name:  `{ publish: "/recipes/publish" }`, for `call()`. */
