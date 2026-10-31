@@ -12,7 +12,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - This folder is the app's part of `spell`, the kit's command line (the kit's `src/cli/`).
   Two things:
   - the app's OWN commands:  `spell app create | serve | vscode [build|install]`, `spell projects`,
-    `spell content check [--bless]`, `spell content compare [--against <ref>]` and
+    `spell content check [--bless]`, `spell content compare [--against <ref>] [--target <name>]` and
     `spell content update [--json] [--done]`
   - the WORK behind the parser folder's commands (`spell compile`, `lint`, `run`, `test` ...),
     through the app's `"language"` hook:

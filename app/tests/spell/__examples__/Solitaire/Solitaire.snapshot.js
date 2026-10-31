@@ -108,14 +108,14 @@ export class Card extends TwoSidedView {
    * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
    * - the stock's card turns over onto the discards instead
    */
-  play() {
+  async play() {
     if (this.pile === solitaire.stock) {
-      solitaire.playFromTheStock()
+      await solitaire.playFromTheStock()
       return
     }
     const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
-    return this.putOnPile(endPile)
+    return await this.putOnPile(endPile)
   }
 
   /**
@@ -145,8 +145,8 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  onClick(event) {
-    return this.play()
+  async onClick(event) {
+    return await this.play()
   }
 
   /** a drag starting clears the last hint */
@@ -316,8 +316,8 @@ export class Pile extends ViewableList {
     if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
-  whenCardDroppedOn(card) {
-    card.putOnPile(this)
+  async whenCardDroppedOn(card) {
+    await card.putOnPile(this)
   }
 
   static droppable = true
@@ -392,8 +392,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event) {
-    solitaire.playFromTheStock()
+  async onClick(event) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -643,19 +643,19 @@ export class Solitaire extends App {
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: () => this.autoPlay(),
+            onClick: async () => await this.autoPlay(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: () => this.cheat(),
+            onClick: async () => await this.cheat(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: () => this.startANewGame(),
+            onClick: async () => await this.startANewGame(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
@@ -679,11 +679,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {

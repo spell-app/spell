@@ -297,9 +297,31 @@ export class JSWriter extends ProgramWriter {
     return node.type === "global" ? node.name : this.nameOf(node.name, "variable")
   }
 
-  /** `await x`, or a loop whose body waits written as a plain loop -- see `loop()`. */
+  /** `await x`:  what the program said to wait for.  Anything else that waits, its call says:  see `writesAwait()`. */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
-    return (this.statements.has(node) && this.loop(node.expression)) || `await ${this.tight(node.expression)}`
+    return `await ${this.tight(node.expression)}`
+  }
+
+  /**
+   * Is `node`, a call, written `await`?
+   * - As the project's pass says (`P.WriterProject.findWaiting()`).
+   * - With no project, e.g. this writer alone on one node:  when it's `core`'s, which always waits.
+   */
+  protected writesAwait(node: P.ASTNode): boolean {
+    if (this.project.hasFoundWaiting) return this.project.awaited.has(node)
+    return isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)
+  }
+
+  /** May a function of `name` wait?  Not one that must answer at once:  a getter, a drawing, `create()`, a `to test`. */
+  protected canWait(name: string | undefined, isGetter: boolean): boolean {
+    return !isGetter && !/^(?:create$|draw(?:_|$)|test_)/.test(name ?? "")
+  }
+
+  /** As `ProgramWriter`'s;  a `send` waits only if a handler of its event does (epic `language`, J4). */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    if (call.methodName !== "send") return super.coreCallWaits(call)
+    const eventName = call.args.args?.map(P.quotedText).find(Boolean)
+    return !!eventName && this.project.eventWaits(eventName)
   }
 
   ////////////////
@@ -477,6 +499,7 @@ export class JSWriter extends ProgramWriter {
     const inner = unwrapped(node)
     if (!this.bindsTightly(inner)) return `(${this.write(inner)})`
     const text = String(this.write(inner))
+    if (text.startsWith("await ")) return `(${text})`
     // a `core` helper said with an operator:  `x !== undefined`, `x instanceof Tableau`, `!x`
     return isCoreCall(inner) && LOOSE_CORE_CALL.test(topLevelOf(text)) ? `(${text})` : text
   }
@@ -496,7 +519,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `name(args)`, by our name:  `playFromTheStockPile()`. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
-    return `${this.nameOf(node.methodName)}${this.argsOf(node)}`
+    return `${this.writesAwait(node) ? "await " : ""}${this.nameOf(node.methodName)}${this.argsOf(node)}`
   }
 
   /** A call's `(args)`, for a method or function of the program's own. */
@@ -510,6 +533,27 @@ export class JSWriter extends ProgramWriter {
    * - A `core` helper is written as javascript says it where it can:  see `coreCall()`.
    */
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
+    const waits = this.writesAwait(node)
+    if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
+    const written = this.call(node)
+    return waits ? `await ${written}` : written
+  }
+
+  /**
+   * `node`, a loop or a `where` whose function waits, one by one:
+   * - a loop alone on its line, as a plain loop:  see `loop()`
+   * - else `core`'s own:  `await core.forEachSequential(...)`, `await core.filterInTurn(...)`
+   */
+  protected inTurn(node: P.ASTScopedMethodInvocation): string {
+    const loop = this.statements.has(node) ? this.loop(node) : undefined
+    if (loop) return loop
+    const methodName = node.methodName === "filter" ? "filterInTurn" : "forEachSequential"
+    const args = node.args.args ?? []
+    return `await ${this.call(new P.ASTCoreMethodInvocation(node.match, { methodName, args }))}`
+  }
+
+  /** `ASTScopedMethodInvocation()`'s call, before any `await`. */
+  protected call(node: P.ASTScopedMethodInvocation): string {
     if (node.thing instanceof P.ASTCoreExpression) {
       const written = this.coreCall(node)
       if (written !== undefined) return written
@@ -746,14 +790,14 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * A loop whose body waits, `await core.forEachSequential(cards, async (card) => {...})`, as a plain loop:
+   * A loop whose body waits, as a plain loop:
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
    */
   loop(node: P.ASTExpression): string | undefined {
     const call = unwrapped(node)
-    if (!isCoreCall(call) || (call as P.ASTScopedMethodInvocation).methodName !== "forEachSequential") return undefined
+    if (!isCoreCall(call) || !P.CORE_LOOPS.has((call as P.ASTScopedMethodInvocation).methodName)) return undefined
     const [collection, callback] = (call as P.ASTScopedMethodInvocation).args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition) || method.args?.length !== 1) return undefined

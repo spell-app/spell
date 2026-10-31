@@ -80,20 +80,15 @@ export class Carta extends View {
     return this.dirección === dirección
   }
 
-  //////////////////////
-  // ## voltear la carta
-  //////////////////////
-  /** cada vuelta tarda lo que su giro en la página (styles.css), así `esperar a: voltear la carta` espera a que muestre su otro lado */
-  async voltearBocaArriba() {
+  /** voltear la carta */
+  voltearBocaArriba() {
     if (this.estáBocaDirección("arriba")) return
     this.dirección = "arriba"
-    await core.pauseFor(300, "msec")
   }
 
-  async voltearBocaAbajo() {
+  voltearBocaAbajo() {
     if (this.estáBocaDirección("abajo")) return
     this.dirección = "abajo"
-    await core.pauseFor(300, "msec")
   }
 
   async voltear() {
@@ -157,15 +152,15 @@ export class Carta extends View {
    * la carta, y cada carta sobre ella, a la primera pila que pueda tomarla;  dice si se movió
    * - la carta de la reserva se voltea sobre los descartes en su lugar
    */
-  jugar() {
+  async jugar() {
     if (this.pila === solitario.reserva) {
-      solitario.robarDeLaReserva()
+      await solitario.robarDeLaReserva()
       return
     }
 
     const pilaFinal = core.filter(core.everyThing(Pila), (pila: Pila) => core.canTake(pila, this)).firstItem
     if (pilaFinal === undefined) return false
-    return this.ponerEnPila(pilaFinal)
+    return await this.ponerEnPila(pilaFinal)
   }
 
   /**
@@ -204,8 +199,8 @@ export class Carta extends View {
   }
 
   /** un clic la juega */
-  onClick(event: any /* spell: type unknown */) {
-    return this.jugar()
+  async onClick(event: any /* spell: type unknown */) {
+    return await this.jugar()
   }
 
   /** al empezar un arrastre, la última pista se va */
@@ -573,8 +568,8 @@ export class Pila extends ViewableList<Carta> {
     if (core.canTake(this, carta) && puntos > 0) solitario.pista = ` (+${puntos})`
   }
 
-  whenCartaDroppedOn(carta: Carta) {
-    carta.ponerEnPila(this)
+  async whenCartaDroppedOn(carta: Carta) {
+    await carta.ponerEnPila(this)
   }
 
   static droppable = true
@@ -688,7 +683,7 @@ export class PilaDeReserva extends Pila {
   // vacía:  una carta gris claro, boca abajo -- un clic vuelve a voltear los descartes
   drawItsPlaceholder() {
     return (
-      <div part="marcador" onClick={() => solitario.robarDeLaReserva()} style="cursor:pointer;user-select:none">
+      <div part="marcador" onClick={async () => await solitario.robarDeLaReserva()} style="cursor:pointer;user-select:none">
         🂠
       </div>
     )
@@ -980,7 +975,9 @@ export class Solitario extends App {
       if (this.reserva.isEmpty) await this.rehacerLaReserva()
 
       const it = this.reserva.lastItem
-      await it?.voltearBocaArriba()
+      it?.voltearBocaArriba()
+      // lo que tarda su giro (styles.css), así se voltea antes de moverse
+      await core.pauseFor(300, "msec")
       this.descartes.append(it!)
     }
     finally {
@@ -1019,11 +1016,11 @@ export class Solitario extends App {
     }
   }
 
-  empezarElJuego() {
+  async empezarElJuego() {
     this.puntuación = 0
     this.movimientos = 0
     this.pista = ""
-    this.repartirLasCartas()
+    await this.repartirLasCartas()
   }
 
   /** voltea una carta boca abajo de una columna, al azar, sobre los descartes */
@@ -1087,15 +1084,15 @@ export class Solitario extends App {
           <es-elemento>{`Movimientos: ${this.movimientos}`}</es-elemento>
           <es-elemento>{`Puntos: ${this.puntuación}${this.pista}`}</es-elemento>
           <es-menu posicion="derecha">
-            <es-elemento aria-label="Jugar solo" onClick={() => this.jugarSolo()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Jugar solo" onClick={async () => await this.jugarSolo()} style="cursor:pointer;user-select:none">
               <es-icono name="fast forward" />
               <es-emergente etiqueta="Jugar solo" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Trampa" onClick={() => this.hacerTrampa()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Trampa" onClick={async () => await this.hacerTrampa()} style="cursor:pointer;user-select:none">
               <es-icono name="eye" />
               <es-emergente etiqueta="Trampa" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Reiniciar" onClick={() => this.empezarElJuego()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Reiniciar" onClick={async () => await this.empezarElJuego()} style="cursor:pointer;user-select:none">
               <es-icono name="redo" />
               <es-emergente etiqueta="Reiniciar" invertido={true} tamano="pequeño" />
             </es-elemento>

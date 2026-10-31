@@ -78,20 +78,15 @@ export class Carta extends View {
     return this.dirección === dirección
   }
 
-  //////////////////////
-  // ## voltear la carta
-  //////////////////////
-  /** cada vuelta tarda lo que su giro en la página (styles.css), así `esperar a: voltear la carta` espera a que muestre su otro lado */
-  async voltearBocaArriba() {
+  /** voltear la carta */
+  voltearBocaArriba() {
     if (this.estáBocaDirección("arriba")) return
     this.dirección = "arriba"
-    await core.pauseFor(300, "msec")
   }
 
-  async voltearBocaAbajo() {
+  voltearBocaAbajo() {
     if (this.estáBocaDirección("abajo")) return
     this.dirección = "abajo"
-    await core.pauseFor(300, "msec")
   }
 
   async voltear() {
@@ -157,15 +152,15 @@ export class Carta extends View {
    * la carta, y cada carta sobre ella, a la primera pila que pueda tomarla;  dice si se movió
    * - la carta de la reserva se voltea sobre los descartes en su lugar
    */
-  jugar() {
+  async jugar() {
     if (this.pila === solitario.reserva) {
-      solitario.robarDeLaReserva()
+      await solitario.robarDeLaReserva()
       return
     }
 
     const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
     if (pilaFinal === undefined) return false
-    return this.ponerEnPila(pilaFinal)
+    return await this.ponerEnPila(pilaFinal)
   }
 
   /**
@@ -204,8 +199,8 @@ export class Carta extends View {
   }
 
   /** un clic la juega */
-  onClick(event) {
-    return this.jugar()
+  async onClick(event) {
+    return await this.jugar()
   }
 
   /** al empezar un arrastre, la última pista se va */
@@ -491,8 +486,8 @@ export class Pila extends ViewableList {
     if (core.canTake(this, carta) && puntos > 0) solitario.pista = ` (+${puntos})`
   }
 
-  whenCartaDroppedOn(carta) {
-    carta.ponerEnPila(this)
+  async whenCartaDroppedOn(carta) {
+    await carta.ponerEnPila(this)
   }
 
   static droppable = true
@@ -580,7 +575,7 @@ export class PilaDeReserva extends Pila {
   drawItsPlaceholder() {
     return h("div", {
       part: "marcador",
-      onClick: () => solitario.robarDeLaReserva(),
+      onClick: async () => await solitario.robarDeLaReserva(),
       style: "cursor:pointer;user-select:none"
     }, "🂠")
   }
@@ -800,7 +795,9 @@ export class Solitario extends App {
       if (this.reserva.isEmpty) await this.rehacerLaReserva()
 
       const it = this.reserva.lastItem
-      await it?.voltearBocaArriba()
+      it?.voltearBocaArriba()
+      // lo que tarda su giro (styles.css), así se voltea antes de moverse
+      await core.pauseFor(300, "msec")
       this.descartes.append(it)
     }
     finally {
@@ -839,11 +836,11 @@ export class Solitario extends App {
     }
   }
 
-  empezarElJuego() {
+  async empezarElJuego() {
     this.puntuación = 0
     this.movimientos = 0
     this.pista = ""
-    this.repartirLasCartas()
+    await this.repartirLasCartas()
   }
 
   /** voltea una carta boca abajo de una columna, al azar, sobre los descartes */
@@ -908,19 +905,23 @@ export class Solitario extends App {
         h("es-menu", { posicion: "derecha" },
           h("es-elemento", {
             "aria-label": "Jugar solo",
-            onClick: () => this.jugarSolo(),
+            onClick: async () => await this.jugarSolo(),
             style: "cursor:pointer;user-select:none"
           },
             h("es-icono", { name: "fast forward" }),
             h("es-emergente", { etiqueta: "Jugar solo", invertido: true, tamano: "pequeño" })
           ),
-          h("es-elemento", { "aria-label": "Trampa", onClick: () => this.hacerTrampa(), style: "cursor:pointer;user-select:none" },
+          h("es-elemento", {
+            "aria-label": "Trampa",
+            onClick: async () => await this.hacerTrampa(),
+            style: "cursor:pointer;user-select:none"
+          },
             h("es-icono", { name: "eye" }),
             h("es-emergente", { etiqueta: "Trampa", invertido: true, tamano: "pequeño" })
           ),
           h("es-elemento", {
             "aria-label": "Reiniciar",
-            onClick: () => this.empezarElJuego(),
+            onClick: async () => await this.empezarElJuego(),
             style: "cursor:pointer;user-select:none"
           },
             h("es-icono", { name: "redo" }),

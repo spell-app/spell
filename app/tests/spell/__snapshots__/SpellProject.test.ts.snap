@@ -476,8 +476,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event) {
-    solitaire.playFromTheStock()
+  async onClick(event) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -857,19 +857,19 @@ export class Solitaire extends App {
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: () => this.autoPlay(),
+            onClick: async () => await this.autoPlay(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: () => this.cheat(),
+            onClick: async () => await this.cheat(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: () => this.startANewGame(),
+            onClick: async () => await this.startANewGame(),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
@@ -893,11 +893,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {
@@ -955,7 +955,7 @@ export const solitaire = new Solitaire()
   syntax: "start a new game (of {thisArg:expression})?", output: "start_a_new_game",
   rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "game",
   groupDescription: "Its moves:  the menu's buttons, its keys, and the board's right click",
-  kind: "method", name: "start a new game",
+  kind: "method", name: "start a new game", waits: true,
   defined: "/Solitaire.spellml:3594-3704",
 } */
 core.describeAction(Solitaire, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
@@ -994,16 +994,17 @@ core.heading("Playing a card")
 /*! SPELL: DECLARES {
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Playing a card", kind: "method", name: "play a card",
+  waits: true,
   defined: "/Solitaire.spellml:6764-7015",
 } */
-Card.prototype.play = function () {
+Card.prototype.play = async function () {
   if (this.pile === solitaire.stock) {
-    solitaire.playFromTheStock()
+    await solitaire.playFromTheStock()
     return
   }
   const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
   if (endPile === undefined) return false
-  return this.putOnPile(endPile)
+  return await this.putOnPile(endPile)
 }
 
 /**
@@ -1057,8 +1058,8 @@ Object.defineProperty(Card.prototype, "clickableWhen", {
 })
 Card.clickable = true
 /** a click plays it */
-Card.prototype.onClick = function (event) {
-  return this.play()
+Card.prototype.onClick = async function (event) {
+  return await this.play()
 }
 /** a drag starting clears the last hint */
 Card.prototype.onDrag = function (event) {
@@ -1074,8 +1075,8 @@ Pile.prototype.whileCardDraggedOver = function (card) {
   const points = card.countThePointsForCardOnPile(this)
   if (core.canTake(this, card) && points > 0) solitaire.hint = \` (+\${points})\`
 }
-Pile.prototype.whenCardDroppedOn = function (card) {
-  card.putOnPile(this)
+Pile.prototype.whenCardDroppedOn = async function (card) {
+  await card.putOnPile(this)
 }
 
 core.heading("The piles")

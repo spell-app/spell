@@ -6,6 +6,7 @@
 - Each test uses its own `core` (`conftest.py`), except where a spell list asks the program's.
 """
 
+import asyncio
 import json
 from collections.abc import Iterator
 from pathlib import Path
@@ -264,3 +265,16 @@ def test_random_items_each_at_most_once(core: Core) -> None:
     assert set(picked) <= {1, 2, 3, 4}
     assert core.random_items_of([1, 2], 0) == []
     assert sorted(core.random_items_of({"a": 1, "b": 2})) == ["a", "b"]
+
+
+def test_filter_in_turn_waits_for_each_answer(core: Core) -> None:
+    """A `where` whose condition waits:  each item asked in turn, its answer waited for."""
+    asked: list[int] = []
+
+    async def condition(value: int, _position: object, _collection: object) -> bool:
+        asked.append(value)
+        await asyncio.sleep(0)
+        return value > 1
+
+    assert asyncio.run(core.filter_in_turn([1, 2, 3], condition)) == [2, 3]
+    assert asked == [1, 2, 3]

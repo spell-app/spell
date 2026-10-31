@@ -831,6 +831,7 @@
       "name": "forEachSequential",
       "of": "core",
       "module": "collection-other",
+      "waits": true,
       "params": [
         {
           "name": "collection"
@@ -873,6 +874,23 @@
       ],
       "section": "iteration",
       "description": "Return new `collection` of only things which match `condition` filter."
+    },
+    {
+      "kind": "method",
+      "name": "filterInTurn",
+      "of": "core",
+      "module": "collection-other",
+      "waits": true,
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "condition"
+        }
+      ],
+      "section": "iteration",
+      "description": "As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for."
     },
     {
       "kind": "method",
@@ -1142,6 +1160,7 @@
       "name": "pauseFor",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "number"
@@ -1158,6 +1177,7 @@
       "name": "notify",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1174,6 +1194,7 @@
       "name": "alert",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1190,6 +1211,7 @@
       "name": "confirm",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1209,6 +1231,7 @@
       "name": "prompt",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1879,6 +1902,7 @@
       "name": "remember",
       "of": "core",
       "module": "runtime",
+      "waits": true,
       "params": [
         {
           "name": "name"
@@ -2148,6 +2172,7 @@
       "name": "send",
       "of": "core",
       "module": "sending",
+      "waits": true,
       "params": [
         {
           "name": "target"

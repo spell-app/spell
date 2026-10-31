@@ -367,6 +367,26 @@ export const collectionOtherMethods = defineCoreModule({
   },
 
   /**
+   * As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for.
+   * - Compiled spell writes it for a `where` whose condition waits.
+   */
+  async filterInTurn<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection?: C & CollectionOf<T>,
+    condition?: CollectionIterationCallback<NoInfer<T>>
+  ): Promise<C> {
+    if (!assert.isDefined(collection, "core.filterInTurn(collection)")) return undefined as C
+    if (!condition) condition = (it) => it
+    const results = core.newThingLike(collection)
+    const isList = core.isArrayLike(collection)
+    await core.forEachSequential(collection, async (value: T, position, _collection) => {
+      if (!(await condition!(value, position, _collection))) return
+      if (isList) core.append(results, value)
+      else core.setItemAt(results, position, value)
+    })
+    return results as C
+  },
+
+  /**
    * Return `true` if all items in collection match `condition`,
    * called as `condition(value, position, collection)`.
    */

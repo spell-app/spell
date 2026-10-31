@@ -16,14 +16,12 @@ export class Pause extends SpellStatement<"number|units"> {
 
   getAST(match: P.MatchFor<this>) {
     const { number, units } = match.groups
-    return new P.ASTAwaitExpression(match, {
-      expression: new P.ASTCoreMethodInvocation(match, {
-        methodName: "pauseFor",
-        args: [
-          P.asAST<P.ASTExpression>(number.AST),
-          new P.ASTQuotedExpression(units, Wording.meaningOf(units) ?? DEFAULT_UNITS)
-        ]
-      })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "pauseFor",
+      args: [
+        P.asAST<P.ASTExpression>(number.AST),
+        new P.ASTQuotedExpression(units, Wording.meaningOf(units) ?? DEFAULT_UNITS)
+      ]
     })
   }
 }

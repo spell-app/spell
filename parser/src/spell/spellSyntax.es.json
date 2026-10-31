@@ -6573,10 +6573,10 @@
               "example": "advertir \"Yo!\"",
               "outputs": {
                 "js": {
-                  "code": "await core.warn(\"Yo!\")"
+                  "code": "core.warn(\"Yo!\")"
                 },
                 "ts": {
-                  "code": "await core.warn(\"Yo!\")"
+                  "code": "core.warn(\"Yo!\")"
                 },
                 "py": {
                   "code": "core.warn(\"Yo!\")"

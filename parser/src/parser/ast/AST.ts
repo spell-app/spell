@@ -1199,11 +1199,27 @@ export class ASTMethodDefinition extends ASTExpression {
     this.body.wrap = true
   }
   /**
-   * Explicit `async` prop wins;  otherwise `true` if our `body` contains an `await`.
-   * - Not counting awaits inside a method nested in our body:  that one's async, not us.
+   * The project's answer:  does it call something that waits?
+   * - Set on every compile -- see `WriterProject.findWaiting()`:
+   *   a file can keep its tree while a file it calls changes.
+   */
+  waiting?: boolean
+
+  /**
+   * Explicit `async` prop wins;  otherwise `true` if the project's pass says it waits (`waiting`),
+   * or our own `body` waits (`waitsItself`).
    */
   get isAsync(): boolean {
     if (typeof this.async === "boolean") return this.async
+    return !!this.waiting || this.waitsItself
+  }
+
+  /**
+   * Does our own `body` wait, whatever it calls of the program's?  An `await`, or a call of `core`'s that waits.
+   * - Not counting a method nested in our body:  that one's its own.
+   * - But counting a loop's body, which runs right here.
+   */
+  get waitsItself(): boolean {
     return containsAwait(this.body)
   }
 }
@@ -2198,13 +2214,28 @@ function isFixedJSXValue(expression: ASTExpression): boolean {
   )
 }
 
+/** `core`'s calls that always wait, by name:  where the pass starts (`WriterProject.findWaiting()`). */
+export const CORE_CALLS_THAT_WAIT = new Set(["pauseFor", "alert", "confirm", "prompt"])
+
+/** `core`'s loops, which call their function for each item right there. */
+export const CORE_LOOPS = new Set(["map", "forEach", "forEachSequential"])
+
 /**
- * Does AST `node` contain an `ASTAwaitExpression`, not counting any inside a nested `ASTMethodDefinition`?
+ * Does AST `node` wait by itself, not counting a nested `ASTMethodDefinition`:
+ * an `ASTAwaitExpression`, or a call in `CORE_CALLS_THAT_WAIT`?
+ * - A loop's function runs right here, so it's looked in.
  * - Walks every AST node found in `node`'s own fields, and in arrays of them.  Skips `match`, which isn't AST.
  */
 function containsAwait(node: unknown): boolean {
   if (node instanceof ASTAwaitExpression) return true
   if (!(node instanceof ASTNode) || node instanceof ASTMethodDefinition) return false
+  if (node instanceof ASTScopedMethodInvocation && node.thing instanceof ASTCoreExpression) {
+    if (CORE_CALLS_THAT_WAIT.has(node.methodName)) return true
+    if (CORE_LOOPS.has(node.methodName)) {
+      const callback = node.args.args?.[1]
+      if (callback instanceof ASTMethodDefinition && callback.waitsItself) return true
+    }
+  }
   return Object.entries(node).some(([key, value]) => {
     if (key === "match") return false
     if (Array.isArray(value)) return value.some(containsAwait)

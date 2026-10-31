@@ -95,6 +95,8 @@ export type ContentCheckOptions = GlobalOptions & {
  */
 export type ContentCompareOptions = GlobalOptions & {
   against?: string
+  /** The target whose compiled code to compare, e.g. `py`:  the running one, javascript, by default. */
+  target?: string
 }
 
 /**

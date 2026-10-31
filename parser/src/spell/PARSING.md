@@ -1526,7 +1526,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `its_*` => `itVar`
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
-- `await` makes its method `async`, because the method's body contains it.
+- What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
+  - It starts from what waits by itself (`wait for`, and `core`'s calls in `P.CORE_CALLS_THAT_WAIT`),
+    then adds every function that calls one, by name, until nothing changes.
+  - It sets `method.waiting` on every compile, and the calls to write `await` in `project.awaited`:
+    `method.isAsync` then says `async`, and the project's declarations carry the same answer.
+  - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
+    when its function turns out to wait.
+  - It stops at a program's top level, a function inside a function, and what a writer's `canWait()` refuses.
   See `ASTMethodDefinition.isAsync`.
 
 ## Projects

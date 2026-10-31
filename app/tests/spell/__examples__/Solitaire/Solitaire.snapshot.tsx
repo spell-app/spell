@@ -110,14 +110,14 @@ export class Card extends TwoSidedView {
    * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
    * - the stock's card turns over onto the discards instead
    */
-  play() {
+  async play() {
     if (this.pile === solitaire.stock) {
-      solitaire.playFromTheStock()
+      await solitaire.playFromTheStock()
       return
     }
     const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
-    return this.putOnPile(endPile)
+    return await this.putOnPile(endPile)
   }
 
   /**
@@ -147,8 +147,8 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  onClick(event: any /* spell: type unknown */) {
-    return this.play()
+  async onClick(event: any /* spell: type unknown */) {
+    return await this.play()
   }
 
   /** a drag starting clears the last hint */
@@ -377,8 +377,8 @@ export class Pile extends ViewableList<Card> {
     if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
-  whenCardDroppedOn(card: Card) {
-    card.putOnPile(this)
+  async whenCardDroppedOn(card: Card) {
+    await card.putOnPile(this)
   }
 
   static droppable = true
@@ -480,8 +480,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event: any /* spell: type unknown */) {
-    solitaire.playFromTheStock()
+  async onClick(event: any /* spell: type unknown */) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -802,13 +802,13 @@ export class Solitaire extends App {
           <ui-item>Moves: {this.moves}</ui-item>
           <ui-item>Score: {this.score}{this.hint}</ui-item>
           <ui-menu position="right">
-            <ui-item aria-label="Auto play" title="Auto play" onClick={() => this.autoPlay()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Auto play" title="Auto play" onClick={async () => await this.autoPlay()} style="cursor:pointer;user-select:none">
               <ui-icon name="fast forward" />
             </ui-item>
-            <ui-item aria-label="Cheat" title="Cheat" onClick={() => this.cheat()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Cheat" title="Cheat" onClick={async () => await this.cheat()} style="cursor:pointer;user-select:none">
               <ui-icon name="eye" />
             </ui-item>
-            <ui-item aria-label="Restart" title="Restart" onClick={() => this.startANewGame()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Restart" title="Restart" onClick={async () => await this.startANewGame()} style="cursor:pointer;user-select:none">
               <ui-icon name="redo" />
             </ui-item>
           </ui-menu>
@@ -833,11 +833,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {
