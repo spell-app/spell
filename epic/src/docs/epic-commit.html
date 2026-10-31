@@ -119,6 +119,20 @@
               The second commit's Plan changes box sat above the phases then; since 2026-10-11 (epic
               <code>epic-workflow</code> P6) each phase has its own, atop its body.
             </p>
+            <p>
+              A long sentence (epic <code>epic-engine</code> J184): clamped to two lines, ending in "…". A click on its
+              text, or Enter on it, unfolds it; another folds it. The sha and the chips stay links.
+            </p>
+            <div style="--epic-commits-display: block; max-width: 420px">
+              <epic-commit
+                sha="9f402c0941c0ffee000000000000000000000000"
+                at="2026-10-31T00:12-04:00"
+                refs="p-commit-log"
+                >the Log draws every commit of the epic newest first, each with its time, its short sha and a chip for
+                each phase and item its subject names, and a sentence this long folds to two lines, so the side bar
+                shows the run of entries, not one entry's paragraph</epic-commit
+              >
+            </div>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -283,6 +297,10 @@
                       <td>Its line: the time (with <code>at</code>), the sha, its sentence, the chips.</td>
                     </tr>
                     <tr>
+                      <td><code>sentence</code></td>
+                      <td>Its sentence (its children): a long one is a button that unfolds it, or folds it to two lines.</td>
+                    </tr>
+                    <tr>
                       <td><code>time</code></td>
                       <td>With <code>at</code>: its time, to the minute.</td>
                     </tr>
@@ -321,7 +339,14 @@
                 time muted in mono, then the sha, its sentence and the chips; no heading, a hairline between entries.
               </li>
               <li>A chip: a rounded outline in the link colour; one the page no longer has, muted.</li>
-              <li>No state colour, and it doesn't fold.</li>
+              <li>
+                A sentence longer than two lines (measured as its box changes size): clamped to two, ending in "…",
+                the pointer over its text. A click on its text (not the sha or a chip, nor the end of a text selection)
+                unfolds it, another folds it; the sentence is a button, so Enter or Space does the same. Unfolded ones
+                are remembered per page in this browser, by sha (<code>spell-commit-folds:&lt;path&gt;</code>), so the
+                same commit in the Log and under its phase folds as one (epic <code>epic-engine</code> J184).
+              </li>
+              <li>No state colour; a short sentence doesn't fold.</li>
             </ul>
           </ui-section>
 
@@ -357,7 +382,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-10-29 against branch <code>epic-engine</code>.</p>
+            <p class="meta">Last checked 2026-10-31 against branch <code>epic-engine</code>.</p>
           </footer>
         </article>
       </ui-container>

@@ -21,7 +21,8 @@ export const epicCommitVocabulary = {
     'in the Log (`<epic-section kind="log">`), one entry of the epic\'s change log, always shown, newest first.  ' +
     "Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  " +
     "with `at`, its time first, and with `refs`, a chip after its sentence for each phase and item it names.  " +
-    "Its sentence is its children.",
+    "Its sentence is its children;  one longer than two lines is clamped to two, ending in an ellipsis, and a " +
+    "click on it (or Enter) unfolds it, remembered per page.",
   attributes: [
     {
       name: "sha",
@@ -61,6 +62,10 @@ export const epicCommitVocabulary = {
   parts: [
     { name: "base", description: "The commit:  its heading (the first commit only), then its line." },
     { name: "line", description: "Its line:  the time (with `at`), the sha, its sentence, the chips (with `refs`)." },
+    {
+      name: "sentence",
+      description: "Its sentence (its children):  a long one is a button that folds it to two lines or unfolds it."
+    },
     { name: "time", description: "With `at`:  its time, to the minute, before the sha." },
     { name: "ref", description: "With `refs`:  a chip per phase or item it names, after its sentence." },
     { name: "heading", description: "`Commits:` with its icon, over the first of a run of commits." },
@@ -70,6 +75,8 @@ export const epicCommitVocabulary = {
   texts: [
     { key: "heading", text: "Commits:", description: "Over the first commit of a run." },
     { key: "open", text: "Open {sha} on GitHub", description: "The sha link's tooltip." },
+    { key: "unfoldTip", text: "Show all of it", description: "A long sentence's tooltip, folded to two lines." },
+    { key: "foldTip", text: "Fold to two lines", description: "A long sentence's tooltip, unfolded." },
     { key: "refTip", text: "Go to {ref}:  {title}", description: "A chip's tooltip:  where it lands, and its title." },
     { key: "refGone", text: "{ref} isn't on this page any more", description: "A chip whose phase or item is gone." }
   ],

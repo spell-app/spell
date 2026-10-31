@@ -151,3 +151,28 @@
     color: var(--epic-muted, var(--ui-text-muted));
   }
 }
+
+/*
+ * ## A long sentence (epic `epic-engine` J184, Owen's pick B):  two lines, then "…";  a click unfolds it
+ * - the text is a box either way, so its whole height is measurable (`scrollHeight`), clamped or not
+ * - `-webkit-line-clamp` draws the "…";  only a long one (`.long`) takes the pointer, and its sentence the focus ring
+ */
+@layer ui.components.epic-commit.content {
+  .text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+  .text.clamped {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .text.long {
+    cursor: pointer;
+  }
+  .sentence:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
+    outline-offset: -1px;
+    border-radius: 2px;
+  }
+}

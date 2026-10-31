@@ -87,4 +87,95 @@ describe("<epic-commit>", () => {
     expect(plain!.shadowRoot!.querySelector('[part~="time"]')).toBeNull()
     expect(plain!.shadowRoot!.querySelector('[part~="ref"]')).toBeNull()
   })
+
+  // epic `epic-engine` J184:  a long sentence clamped to two lines, a click unfolds it
+  describe("a long sentence", () => {
+    const LONG =
+      "the Log reads every commit of the kit and its child repos, newest first, with its time and a chip for each " +
+      "phase and item its subject names, so a reader sees what went in and when without opening git at all"
+
+    /** A Log entry `sentence` long, in a box `width` px wide. */
+    async function entry(sentence: string, width = 320) {
+      localStorage.removeItem(`spell-commit-folds:${location.pathname}`)
+      const root = await ElementFixture.render(
+        `<epic-page epic="demo" title="Demo" repo="https://github.com/spell-app/spell">` +
+          `<div style="--epic-commits-display: block; width: ${width}px"><epic-commit sha="0123456789abcdef" ` +
+          `at="2026-10-29T11:46-04:00">${sentence}</epic-commit></div></epic-page>`
+      )
+      const commit = root.querySelector("epic-commit")!
+      await ElementFixture.settle()
+      const shadow = commit.shadowRoot!
+      const text = shadow.querySelector<HTMLElement>(".text")!
+      const sentencePart = shadow.querySelector<HTMLElement>('[part~="sentence"]')!
+      const lines = () =>
+        Math.round(text.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(text).lineHeight))
+      return { commit, shadow, text, sentence: sentencePart, lines }
+    }
+
+    test("clamped to two lines, a button;  a click on its text unfolds it, another folds it, remembered", async () => {
+      const { text, sentence, lines } = await entry(LONG)
+      expect([lines(), sentence.getAttribute("role"), sentence.getAttribute("aria-expanded")]).toEqual([
+        2,
+        "button",
+        "false"
+      ])
+      expect(getComputedStyle(text).cursor).toBe("pointer")
+      text.click()
+      await ElementFixture.settle()
+      expect(lines()).toBeGreaterThan(2)
+      expect(sentence.getAttribute("aria-expanded")).toBe("true")
+      expect(JSON.parse(localStorage.getItem(`spell-commit-folds:${location.pathname}`)!)).toEqual({
+        "0123456789abcdef": true
+      })
+      sentence.click()
+      await ElementFixture.settle()
+      expect(lines()).toBe(2)
+      expect(localStorage.getItem(`spell-commit-folds:${location.pathname}`)).toBeNull()
+    })
+
+    test("Enter on its sentence unfolds it;  a click on its sha doesn't", async () => {
+      const { shadow, sentence, lines } = await entry(LONG)
+      const sha = shadow.querySelector<HTMLAnchorElement>('[part~="sha"]')!
+      sha.addEventListener("click", (event) => event.preventDefault())
+      sha.click()
+      await ElementFixture.settle()
+      expect(lines()).toBe(2)
+      sentence.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+      await ElementFixture.settle()
+      expect(lines()).toBeGreaterThan(2)
+    })
+
+    test("a short one:  no button, no pointer, and a click changes nothing", async () => {
+      const { text, sentence, lines, commit } = await entry("fixed a typo", 480)
+      expect([lines(), sentence.getAttribute("role"), sentence.getAttribute("tabindex")]).toEqual([1, null, null])
+      expect(getComputedStyle(text).cursor).not.toBe("pointer")
+      text.click()
+      await ElementFixture.settle()
+      expect(localStorage.getItem(`spell-commit-folds:${location.pathname}`)).toBeNull()
+      await expectAccessible(commit)
+    })
+
+    test("unfolded on an earlier load:  drawn whole", async () => {
+      localStorage.setItem(`spell-commit-folds:${location.pathname}`, JSON.stringify({ "0123456789abcdef": true }))
+      const root = await ElementFixture.render(
+        `<div style="--epic-commits-display: block; width: 320px"><epic-commit sha="0123456789abcdef" ` +
+          `at="2026-10-29T11:46-04:00">${LONG}</epic-commit></div>`
+      )
+      await ElementFixture.settle()
+      const sentence = root.querySelector("epic-commit")!.shadowRoot!.querySelector('[part~="sentence"]')!
+      expect(sentence.getAttribute("aria-expanded")).toBe("true")
+      localStorage.removeItem(`spell-commit-folds:${location.pathname}`)
+    })
+
+    test("a long one under a phase (no `at`) clamps the same, and is accessible", async () => {
+      const root = await ElementFixture.render(
+        `<div style="--epic-commits-display: block; width: 320px"><epic-commit sha="0123456789abcdef">${LONG}</epic-commit></div>`
+      )
+      await ElementFixture.settle()
+      const commit = root.querySelector("epic-commit")!
+      const sentence = commit.shadowRoot!.querySelector('[part~="sentence"]')!
+      expect(sentence.getAttribute("role")).toBe("button")
+      await expectAccessible(commit)
+    })
+  })
 })
