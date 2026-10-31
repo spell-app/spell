@@ -5,8 +5,9 @@
  * - `graphHandler()`:  a GraphQL service, by a small reader of the queries `GraphPlace` writes:  no library.
  *   It answers ONLY the fields asked for, and an error for one it hasn't got, as a real one does.
  * - `RecipeBox`:  what they share, so a program can change back-end and find the same recipes.
+ *   - The demo's own is a CSV file (`RecipeFile`);  a test's is in memory.
  * - `scripts/recipe-servers.ts` runs them, for the recipe box demo;  `RestPlace`'s and `GraphPlace`'s tests serve them.
- * - `DemoGuard`:  what lets the demo's page reach its place server (`scripts/recipe-servers.ts`).
+ * - `DemoGuard`:  what lets a local page reach the demo's place server and live room (`scripts/recipe-servers.ts`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
  */
 import { SRV, type Handler } from "spell/server"
@@ -29,6 +30,9 @@ export const FIRST_RECIPES: readonly Omit<WireRecipe, "version">[] = [
   { id: "r-4", name: "Margherita", cuisine: "Italian", servings: 2, notes: "A very hot oven." },
   { id: "r-5", name: "Chana masala", cuisine: "Indian", servings: 4, notes: "Better the next day." }
 ]
+
+/** How many requests it remembers:  a page left polling mustn't grow it for ever. */
+const ASKS_KEPT = 10_000
 
 /** What it's asked for one request:  for a test to look at. */
 export type RecipeAsk = {
@@ -70,7 +74,7 @@ export class RecipeBox {
 
   /** Add a recipe:  the id it came with, or a new one. */
   add(fields: Partial<WireRecipe>): WireRecipe {
-    const id = fields.id ?? `made-${++this.idsMade}`
+    const id = this.idFor(fields)
     const recipe: WireRecipe = {
       name: "",
       cuisine: "",
@@ -84,12 +88,27 @@ export class RecipeBox {
     return recipe
   }
 
+  /** The id a new recipe has:  the one it came with, or a new one. */
+  protected idFor(fields: Partial<WireRecipe>): string {
+    let id = fields.id
+    while (id === undefined || (fields.id === undefined && this.recipes.has(id))) id = `made-${++this.idsMade}`
+    return id
+  }
+
   /** Change a recipe:  its version moves on.  This is also how a test is someone else. */
   change(id: string, fields: Partial<WireRecipe>): WireRecipe {
     const recipe = { ...this.recipes.get(id)!, ...fields, id, version: ++this.lastVersion }
     this.recipes.set(id, recipe)
     return recipe
   }
+
+  /** Take a recipe out. */
+  remove(id: string): void {
+    this.recipes.delete(id)
+  }
+
+  /** Called before each request is answered:  a box with its recipes somewhere else looks there. */
+  readOutsideChanges(): void {}
 }
 
 /** How a `restHandler()` behaves. */
@@ -101,9 +120,6 @@ export type RestServerProps = {
   /** Does its `POST` make the id? */
   makesIds?: boolean
 }
-
-/** The address a demo's "someone else" uses:  not a real API's. */
-const SOMEONE_ELSE = /^\/someone-else\/recipes\/([^/]+)$/
 
 /** A recipe's address. */
 const ONE_RECIPE = /^\/recipes\/([^/]+)$/
@@ -128,12 +144,9 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
     const { path, method } = request
     const isList = path === "/recipes"
     const one = ONE_RECIPE.exec(path)
-    const elsewhere = SOMEONE_ELSE.exec(path)
-    if (!isList && !one && !elsewhere) return next()
+    if (!isList && !one) return next()
     const body = await bodyOf(request)
     await noteAsk(box, request, reply, body)
-
-    if (elsewhere) return void reply.json(box.change(elsewhere[1]!, body ?? {}))
 
     if (isList && method === "GET") return listRecipes(box, request, reply, { paging, wire })
 
@@ -158,7 +171,7 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
       return void reply.json(wire(recipe))
     }
     if (method === "DELETE") {
-      box.recipes.delete(id)
+      box.remove(id)
       return void reply.status(204).end()
     }
     if (method === "PATCH" || method === "PUT") {
@@ -307,7 +320,7 @@ function answerTo(box: RecipeBox, { name, args, inside }: Selected, variables: R
     }
     case "removeRecipe":
       known()
-      box.recipes.delete(id)
+      box.remove(id)
       return true
     default:
       throw new GraphFailure(`no field "${name}"`, "GRAPHQL_VALIDATION_FAILED")
@@ -396,10 +409,12 @@ async function noteAsk(
   body: Record<string, unknown> | undefined
 ): Promise<void> {
   box.asks.push({ method, path, query, headers, ...(body && { body }) })
+  if (box.asks.length > ASKS_KEPT) box.asks.shift()
   reply.raw.once("close", () => {
     if (!reply.raw.writableEnded) box.cutOff++
   })
   await box.holdAnswers
+  box.readOutsideChanges()
 }
 
 /** The token the demo's place server wants:  the demo's page knows it. */
@@ -409,20 +424,28 @@ export const DEMO_TOKEN = "recipe-box-demo"
 const LOCAL_ORIGIN = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/
 
 /**
- * The demo's guard:  its page is served by the page server, on another port, so it can't know this run's token,
- * and it isn't this server's own origin.
- * - A fixed token, and any local page.  Fine ONLY because this server holds no keys, and only a throwaway folder.
+ * The demo's guard:  its pages are served from elsewhere (the page server, the editor), on other ports,
+ * so they can't know this run's token, and aren't this server's own origin.
+ * - Any page on this machine may write, token or no token:  the editor's running program has no way to say a token.
+ *   - A browser sets `Origin` itself, so a page can't lie about it.
+ * - With no `Origin`, not a page:  the fixed token.
+ * - Fine ONLY for a demo on your own machine:  a page on it can change this folder,
+ *   and spend a Google Sheet's key, if the servers were started with one.
+ *   The fixed token, written in the demo's own page, never stopped that either.
  */
 export class DemoGuard extends SRV.Guard {
   constructor() {
     super({ token: DEMO_TOKEN })
   }
 
-  /** The token, from a local page. */
+  /** Any local page;  anything else that isn't a page, with the token. */
   checkWrite(request: SRV.Request): void {
-    if (request.get("x-server-token") !== DEMO_TOKEN) throw new SRV.HttpError(403, "bad token")
     const origin = request.get("origin")
-    if (origin && !LOCAL_ORIGIN.test(origin)) throw new SRV.HttpError(403, "wrong origin")
+    if (origin) {
+      if (!LOCAL_ORIGIN.test(origin)) throw new SRV.HttpError(403, "wrong origin")
+      return
+    }
+    if (request.get("x-server-token") !== DEMO_TOKEN) throw new SRV.HttpError(403, "bad token")
   }
 }
 

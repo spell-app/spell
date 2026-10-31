@@ -57,6 +57,20 @@ export const PARSER_MESSAGES = {
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "A {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- it is checked every 30 seconds\" under it",
+  /** `when a recipe changes`, on a type in no place:  won't compile.  `{what}` is the type, with its article. */
+  "change-not-saved":
+    '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "- it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
+  /** `when someone else changes it` at a file's top:  won't compile. */
+  "someone-else-needs-a-type":
+    'Say what changes:  this goes under a saved type, e.g. "- when someone else changes it:" under a recipe',
+  /** `when someone else changes it`, on a kind of place only you use. */
+  "someone-else-alone":
+    "Nobody else can change what's kept here:  this would never run.  It takes a place other people share",
+  /** `when someone else changes it`, on a place nothing tells about:  `{kind}`. */
+  "someone-else-not-told":
+    "A {kind} can't announce what's changed, so this would never run:  add \"- it is checked every 30 seconds\" under it",
+  /** `the people here`, with no place that knows. */
+  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a live room",
   /** A `where` on a saved type that can't go to its place. */
   "where-looks-through":
     "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",

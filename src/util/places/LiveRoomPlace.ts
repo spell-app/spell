@@ -12,6 +12,7 @@ import {
   type RoomOverwrite,
   type RoomSnapshot
 } from "./RoomCopy"
+import { personOnThisPage } from "./people"
 import {
   PlaceError,
   type ApplyAnswer,
@@ -22,7 +23,9 @@ import {
   type PlaceChange,
   type PlaceContext,
   type PlaceEvent,
+  type PlacePerson,
   type PlaceRow,
+  type PersonHere,
   type ReplacedValue,
   type SelectingContext,
   type WatchTarget
@@ -110,6 +113,9 @@ export type RoomSocketListeners = {
  * - A change's `version` says what this page had seen (`versionOf()`).  It never refuses a change:  it's how the referee can
  *   say what was overwritten, so the loser is told (`lost`), and a change made while offline can say so too (`overwrote`).
  * - TRUSTS everyone in the room:  there are no per-person rules yet.  Whoever's in can change anything.
+ * - WHO'S HERE (epic `data` P13):  it says who it is as the connection opens, and the referee tells everyone who's in.
+ *   - One for each page, so two windows side by side see each other, whoever they say they are.
+ *   - With no connection it knows only this page:  `peopleHere()` is just me.
  * - `can`:  nothing it does needs saying, but tests and programs may override.
  * - Connects at its first use.  `close()` stops it, and what's changed meanwhile stays pending until `connect()`.
  ****************/
@@ -143,7 +149,7 @@ export class LiveRoomPlace implements Place {
   private hasCopy = false
   /** Reads waiting for the first copy. */
   private readonly waitingForCopy = new Set<{ resolve: () => void; reject: (error: Error) => void }>()
-  /** Batches sent and not yet answered, by each `changeId` in them:  a batch sent again may be answered by any. */
+  /** Batches sent and not yet answered, by each `changeId` in them:  answered once each is heard of, in however many steps. */
   private readonly waiting = new Map<string, WaitingAnswer>()
   /** A catch-up on its way:  noticing again doesn't ask again. */
   private healing: { why: RoomHealReason; since: number } | undefined
@@ -161,17 +167,25 @@ export class LiveRoomPlace implements Place {
   private wasClosed = false
   /** It has opened before:  the next opening is a reconnect. */
   private hasOpened = false
+  /** Who's at this page. */
+  private readonly person: PlacePerson
+  /** Who the referee last said is here. */
+  private people: readonly PersonHere[] | undefined
+  /** Who wants to know who's here. */
+  private readonly peopleListeners = new Set<(people: readonly PersonHere[]) => void>()
 
   constructor({
     url,
     token,
     can,
+    person,
     socket,
     answerSeconds = ANSWER_SECONDS,
     checkSeconds = CHECK_SECONDS
   }: LiveRoomPlaceProps) {
     this.capabilities = { ...ROOM_CAPABILITIES, ...can }
     this.address = addressWithToken(url, token ?? pageToken())
+    this.person = person ?? personOnThisPage((number) => `Guest ${number}`)
     this.connectTo = socket
     this.answerSeconds = answerSeconds
     this.checkSeconds = checkSeconds
@@ -242,14 +256,16 @@ export class LiveRoomPlace implements Place {
     const why = this.hasOpened ? "reconnecting" : "opening"
     this.hasOpened = true
     this.healing = undefined
+    this.send({ kind: "here", from: this.clientId, person: this.person })
     this.heal(why)
     this.tellConnection()
     this.backListeners.forEach((listener) => listener())
   }
 
-  /** Say where the connection stands. */
+  /** Say where the connection stands.  Gone, and it no longer knows who else is here. */
   private tellConnection(): void {
     const { isConnected } = this
+    if (!isConnected && this.people) this.tookPeople(undefined)
     this.connectionListeners.forEach((listener) => listener(isConnected))
   }
 
@@ -340,6 +356,7 @@ export class LiveRoomPlace implements Place {
     return new Promise<T>((resolve, reject) => {
       const waiting: WaitingAnswer = {
         text: JSON.stringify(message),
+        unheard: new Set(keys),
         resolve: (result) => this.finish(keys, waiting, () => resolve(answerWith(result))),
         reject: (error) => this.finish(keys, waiting, () => reject(error)),
         timer: after(this.answerSeconds, () => waiting.reject(this.noAnswer()))
@@ -387,6 +404,34 @@ export class LiveRoomPlace implements Place {
   }
 
   ////////////////
+  // ## Who's here
+  ////////////////
+
+  /** Who's at this page, as this room knows them. */
+  currentPerson(): PersonHere {
+    return { ...this.person, page: this.clientId }
+  }
+
+  /** Everyone here now, this page included, in the order they came.  With no connection:  just this page. */
+  peopleHere(): readonly PersonHere[] {
+    return this.people ?? [this.currentPerson()]
+  }
+
+  /** Hear who's here changing, connecting if it isn't.  Returns what stops it. */
+  onPeopleHere(listener: (people: readonly PersonHere[]) => void): () => void {
+    this.startIfNew()
+    this.peopleListeners.add(listener)
+    return () => this.peopleListeners.delete(listener)
+  }
+
+  /** The referee said who's here;  `undefined`:  nobody can say. */
+  private tookPeople(people: readonly PersonHere[] | undefined): void {
+    this.people = people
+    const here = this.peopleHere()
+    this.peopleListeners.forEach((listener) => listener(here))
+  }
+
+  ////////////////
   // ## Hearing the referee
   ////////////////
 
@@ -413,6 +458,8 @@ export class LiveRoomPlace implements Place {
         return this.tookRefusal(answer)
       case "no answer":
         return this.tookNoAnswer(answer)
+      case "people":
+        return this.tookPeople(answer.people)
       default:
         /* "at" */ return this.tookWhereItStands(answer)
     }
@@ -460,15 +507,17 @@ export class LiveRoomPlace implements Place {
       told.add(key)
       const said = replaced.get(key)
       // what's being answered shows through its answer;  but not what an action of mine made on the referee, with no id of
-      // mine, nor a change of mine whose answer was given up on before this came
-      if (isMine && wasAwaited && changeId !== undefined && !said) continue
+      // mine, nor a change of mine whose answer was given up on before this came;  nor a removal of mine, which may have to
+      // take back a row of mine told a moment before, its answer given up on
       const row = this.copy.rowFor(collection, id!)
+      if (isMine && wasAwaited && changeId !== undefined && !said && row) continue
       const was = before.get(key)
       this.tell({
         collection,
         id: id!,
         ...(row && { row }),
         ...(!row && was && { was }),
+        ...(isMine && { isMine }),
         ...said
       })
     }
@@ -502,17 +551,27 @@ export class LiveRoomPlace implements Place {
     if (from !== this.clientId) return false
     let wasAwaited = false
     for (const { changeId } of changes) {
-      const waiting = changeId === undefined ? undefined : this.waiting.get(changeId)
-      if (!waiting) continue
-      wasAwaited = true
-      waiting.resolve(undefined)
+      if (changeId !== undefined && this.heardOf(changeId)) wasAwaited = true
     }
     return wasAwaited
   }
 
+  /**
+   * `changeId` is made.  The batch waiting for it is answered once all of it is:  a batch sent again may hold more than the one
+   * that went before, whose step can still come, so one change heard of says nothing of the rest.
+   * - Answers whether anything was waiting for it.
+   */
+  private heardOf(changeId: string, result?: unknown): boolean {
+    const waiting = this.waiting.get(changeId)
+    if (!waiting) return false
+    waiting.unheard.delete(changeId)
+    if (!waiting.unheard.size) waiting.resolve(result)
+    return true
+  }
+
   /** It's all here already:  the answer's yes.  What's missing of it comes as a gap would. */
   private tookSeen({ changeIds, seq, result }: Extract<RoomAnswer, { kind: "seen" }>): void {
-    for (const changeId of changeIds) this.waiting.get(changeId)?.resolve(result)
+    for (const changeId of changeIds) this.heardOf(changeId, result)
     if (seq > this.seq) this.heal("a gap in the numbers")
   }
 
@@ -628,6 +687,8 @@ export type LiveRoomPlaceProps = {
   token?: string
   /** What it does, over a plain room's. */
   can?: Partial<PlaceCapabilities>
+  /** Who's at this page.  Left out:  `personOnThisPage()`. */
+  person?: PlacePerson
   /** Makes its socket, for a test:  default a `ReconnectingSocket`. */
   socket?: (listeners: RoomSocketListeners) => RoomSocket
   /** How long it waits for an answer, in seconds. */
@@ -640,6 +701,8 @@ export type LiveRoomPlaceProps = {
 type WaitingAnswer = {
   /** What was sent. */
   text: string
+  /** The changes in it not yet heard of. */
+  unheard: Set<string>
   /** Its answer's yes. */
   resolve: (result: unknown) => void
   /** Its answer's no, or there's none. */

@@ -9,6 +9,8 @@ exports[`testing spell module events > rule group specs > match snapshot -- if t
   "pass_event": "eventName?",
   "send": "eventName|target?|props?",
   "trigger": "eventName|props?",
+  "when_someone_else_changes": "body?",
+  "when_thing_changes": "type|body?",
   "while_handler": "body?",
 }
 `;

@@ -478,3 +478,89 @@ describe("Referee, over a real socket", () => {
     stop()
   })
 })
+
+describe("who's here (epic `data` P13)", () => {
+  /** A place named `name`, in `room`, and its list of who's here as it hears it. */
+  function pageIn(room: Referee, name: string) {
+    const heard: string[][] = []
+    const place = new LiveRoomPlace({
+      url: "/room",
+      person: { id: name.toLowerCase(), name },
+      socket: (listeners) => {
+        const member = room.join((text) => listeners.onMessage(text))
+        const socket = {
+          isOpen: true,
+          send(text: string) {
+            if (socket.isOpen) member.receive(text)
+            return socket.isOpen
+          },
+          close() {
+            socket.isOpen = false
+            member.leave()
+            listeners.onClose()
+          }
+        }
+        queueMicrotask(() => listeners.onOpen())
+        return socket
+      }
+    })
+    place.onPeopleHere((people) => heard.push(people.map((person) => person.name)))
+    return { place, heard }
+  }
+
+  test("each page says who it is;  everyone hears who's in, in the order they came, and who's left", async () => {
+    const room = await newRoom()
+    roomsToClose.push(room)
+    const ana = pageIn(room, "Ana")
+    expect(ana.place.peopleHere().map(({ name }) => name)).toEqual(["Ana"])
+    await vi.waitFor(() => expect(ana.heard.at(-1)).toEqual(["Ana"]))
+    const bo = pageIn(room, "Bo")
+    await vi.waitFor(() => expect(ana.heard.at(-1)).toEqual(["Ana", "Bo"]))
+    await vi.waitFor(() => expect(bo.heard.at(-1)).toEqual(["Ana", "Bo"]))
+    expect(room.peopleHere.map(({ id }) => id)).toEqual(["ana", "bo"])
+    bo.place.close()
+    expect(ana.heard.at(-1)).toEqual(["Ana"])
+    expect(room.peopleHere.map(({ id }) => id)).toEqual(["ana"])
+    ana.place.close()
+  })
+
+  test("two windows of one person are two here;  with no connection a page knows only itself", async () => {
+    const room = await newRoom()
+    roomsToClose.push(room)
+    const one = pageIn(room, "Ana")
+    const two = pageIn(room, "Ana")
+    await vi.waitFor(() => expect(one.place.peopleHere()).toHaveLength(2))
+    expect(new Set(one.place.peopleHere().map(({ page }) => page)).size).toBe(2)
+    expect(one.place.currentPerson().page).toBe(one.place.clientId)
+    two.place.close()
+    one.place.close()
+    expect(one.place.peopleHere().map(({ page }) => page)).toEqual([one.place.clientId])
+  })
+})
+
+describe("a batch sent again, holding more than the one before it", () => {
+  test("a step for only part of it answers nothing:  what the referee hasn't made isn't dropped as if it had", async () => {
+    const sent: string[] = []
+    let listeners!: Parameters<NonNullable<ConstructorParameters<typeof LiveRoomPlace>[0]["socket"]>>[0]
+    const place = new LiveRoomPlace({
+      url: "/room",
+      socket: (given) => {
+        listeners = given
+        return { isOpen: true, send: (text) => Boolean(sent.push(text)), close() {} }
+      }
+    })
+    const change = (changeId: string) => ({ kind: "insert" as const, collection: "recipes", id: changeId, fields: {}, changeId })
+    let isAnswered = false
+    const answer = place.apply([change("c1"), change("c2")], {}).then(() => (isAnswered = true))
+    const step = (seq: number, changeId: string) =>
+      JSON.stringify({ kind: "entry", run: "r", entry: { seq, from: place.clientId, changes: [change(changeId)] } })
+    listeners.onMessage(JSON.stringify({ kind: "snapshot", run: "r", seq: 0, rows: {} }))
+    listeners.onMessage(step(1, "c1"))
+    await new Promise((done) => setTimeout(done, 5))
+    expect(isAnswered).toBe(false)
+    listeners.onMessage(step(2, "c2"))
+    await answer
+    expect(isAnswered).toBe(true)
+    place.close()
+  })
+})

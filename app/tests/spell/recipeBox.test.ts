@@ -2,17 +2,19 @@
  * The recipe box, compiled from spell, run in a real browser, reading and writing the demo's servers (epic `data` P11).
  * - The program is the frozen test project, `@spell/test/recipe-box`, and its Spanish twin, `recetario`.
  * - Each back-end changes only the lines that say where it lives (`BACK_ENDS`), with nothing else in the program touched.
+ * - And the built-in examples as they ship:  what a person does in them, and the same one-line swap to each back-end.
  * - Headless Chromium through Playwright, on the page's real `<spell-viewer>` and Spell UI, from `yarn build:element`:
  *   skips itself when that's not built.
  */
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "fs"
+import { createServer, type Server } from "http"
 import { tmpdir } from "os"
 import { join, resolve } from "path"
 
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell/server"
+import { SRV, type Handler } from "spell/server"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -37,6 +39,9 @@ type Program = {
   /** The classes its elements carry. */
   field: string
 }
+
+/** The built-in examples:  what people run, in the editor. */
+const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
 /** The lines a program starts with, up to its first type. */
 const PLACE_LINES = /^[\s\S]*?(?=^(?:a|una) ")/m
@@ -68,6 +73,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let flakyIsUp = false
   /** What the page server hands out, by its name. */
   const programs = new Map<string, string>()
+  /** Another server of pages, on another port, as the editor is. */
+  let elsewhere: Server
+  /** Where it's listening. */
+  let elsewhereUrl: string
 
   /** Compile `program`, and say where its page is. */
   function serve(name: string, { path, source }: Program): string {
@@ -76,10 +85,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
     return `${servers.url}/${name}.html`
   }
 
-  /** A page:  `<spell-viewer>`, and nothing else. */
-  function pageFor(name: string): string {
+  /** A page:  `<spell-viewer>`, and nothing else.  `token`:  what its server hands it, as the demo's own does. */
+  function pageFor(name: string, token: string | undefined = DEMO_TOKEN): string {
     return `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<script>window.SPELL_SERVER = { token: "${DEMO_TOKEN}" }</script>
+${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 <script type="module" src="/element/spell-viewer.js"></script>
 </head><body><spell-viewer src="/programs/${name}.js"></spell-viewer></body></html>`
   }
@@ -100,16 +109,22 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   beforeAll(async () => {
     folder = mkdtempSync(join(tmpdir(), "spell-recipe-box-test-"))
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
+    /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
+    const pages: Handler = (request, reply, next) => {
+      const text = programs.get(request.path)
+      if (text !== undefined) {
+        const type = request.path.endsWith(".js") ? "text/javascript" : "text/html; charset=utf-8"
+        return reply.type(type).send(text)
+      }
+      const found = element(request.path)
+      if (found && "file" in found && found.file) return reply.sendFile(found.file)
+      return next()
+    }
     servers = await startRecipeServers({
       port: 0,
       folder,
       routes: (router) => {
         router.use((request, reply, next) => {
-          const text = programs.get(request.path)
-          if (text !== undefined) {
-            const type = request.path.endsWith(".js") ? "text/javascript" : "text/html; charset=utf-8"
-            return reply.type(type).send(text)
-          }
           if (request.path === "/flaky/recipes") {
             if (!flakyIsUp) return reply.status(404).send("not yet")
             return reply.json([{ id: "r-1", title: "Back again", servings: 1 }])
@@ -117,18 +132,22 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
           if (request.path === "/recipes.csv") {
             return reply.type("text/csv").send("id,title,servings\nr-1,Tomato soup,4\nr-2,Dal,6\n")
           }
-          const found = element(request.path)
-          if (found && "file" in found && found.file) return reply.sendFile(found.file)
-          return next()
+          return pages(request, reply, next)
         })
       }
     })
+    const pagesRouter = new SRV.Router()
+    pagesRouter.use(pages)
+    elsewhere = createServer(SRV.toListener(pagesRouter.handle))
+    await new Promise<void>((done) => elsewhere.listen(0, "127.0.0.1", done))
+    elsewhereUrl = `http://127.0.0.1:${(elsewhere.address() as { port: number }).port}`
     browser = await chromium.launch()
   }, 60_000)
 
   afterAll(async () => {
     await browser?.close()
     await servers?.close()
+    elsewhere?.close()
     if (folder) {
       rmSync(folder, { recursive: true, force: true })
       rmSync(`${folder}-room`, { recursive: true, force: true })
@@ -162,7 +181,7 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
     "a folder": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
     "a live room": async () =>
-      (await servers.roomPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
+      (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
   }
 
   /** Reads, adds, changes and removes through the page, each reaching the server. */
@@ -206,6 +225,183 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
       await page.close()
     })
   }
+
+  // What the editor's page is to these servers:  another port, and no token it could know
+  for (const backEnd of ["a folder", "a live room"]) {
+    test(
+      `a page on another port, with no token, on ${backEnd}:  as the editor runs it`,
+      { timeout: 60_000 },
+      async () => {
+        const name = `editor-${backEnd.replace(/\W/g, "")}`
+        serve(name, withPlace(english(), BACK_ENDS[backEnd]!(servers.url)))
+        programs.set(`/${name}.html`, pageFor(name, ""))
+        const { page, problems } = await opened(`${elsewhereUrl}/${name}.html`)
+        await roundTrip(page, heldBy[backEnd]!)
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+  }
+
+  test("the place server still refuses another site, and what isn't a page without its token", async () => {
+    const asked = (headers: Record<string, string>) =>
+      fetch(`${servers.url}/api/places/recipes/list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ collection: "recipes", query: {} })
+      })
+    expect((await asked({ Origin: "https://example.com", "x-server-token": DEMO_TOKEN })).status).toBe(403)
+    expect((await asked({})).status).toBe(403)
+    expect((await asked({ "x-server-token": DEMO_TOKEN })).status).toBe(200)
+    expect((await asked({ Origin: elsewhereUrl })).status).toBe(200)
+  })
+
+  test("what a program adds over GraphQL is in the CSV file REST reads", { timeout: 60_000 }, async () => {
+    const { page, problems } = await opened(serve("shared", withPlace(english(), BACK_ENDS.GraphQL!(servers.url))))
+    await page.locator("ui-form.recipe").first().waitFor(WAITING)
+    await page.locator("ui-input.draft input").fill("Over GraphQL")
+    await page.locator("ui-button.add").click()
+    await expect.poll(() => readFileSync(servers.box.file, "utf8"), WAITING).toContain("Over GraphQL")
+    expect(await heldBy.REST!()).toContain("Over GraphQL")
+    expect(problems).toEqual([])
+    await page.close()
+  })
+
+  /** Each built-in example, and what it should say:  the words differ, the classes don't. */
+  const SHIPPED = [
+    {
+      path: "RecipeBox/RecipeBox.spell",
+      examples: ["Pizza Margherita", "Dal", "Tomato soup"],
+      noRecipes: "No recipes yet. Add your first one.",
+      noMatches: "No recipes match your search."
+    },
+    {
+      path: "CajaDeRecetas/CajaDeRecetas.es.spell",
+      examples: ["Pizza Margarita", "Dal", "Sopa de tomate"],
+      noRecipes: "Todavía no hay recetas. Agrega la primera.",
+      noMatches: "Ninguna receta coincide con tu búsqueda."
+    }
+  ]
+
+  /** An example as it ships. */
+  const shipped = (path: string): Program => ({
+    path: `/${path.split("/")[1]}`,
+    source: readFileSync(join(EXAMPLES, path), "utf8"),
+    field: ""
+  })
+
+  /** The titles an example's cards show. */
+  const cardsOn = (page: Page) =>
+    page
+      .locator("ui-form.recipe ui-input.title input")
+      .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value))
+
+  /** Undo:  the one item of the box's own toolbar. */
+  const undoOn = (page: Page) =>
+    page
+      .locator("ui-toolbar.undo")
+      .getByText(/Undo|Deshacer/)
+      .first()
+
+  for (const { path, examples, noRecipes, noMatches } of SHIPPED) {
+    test(
+      `the example ${path}, the first time:  a few to start from, then what a person does`,
+      { timeout: 60_000 },
+      async () => {
+        const name = `example-${path.replace(/\W/g, "")}`
+        const { page, problems } = await opened(serve(name, shipped(path)))
+        const none = page.locator("ui-text.none")
+        const add = page.locator("ui-button.add")
+        const isAddOff = () => add.evaluate((button) => (button as HTMLButtonElement).disabled)
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        expect(await isAddOff()).toBe(true)
+
+        // every field shown, and labelled
+        const firstCard = page.locator("ui-form.recipe").first()
+        expect(await firstCard.locator("ui-field").count()).toBe(3)
+        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("2")
+        expect(await firstCard.locator("textarea").inputValue()).not.toBe("")
+
+        // a search follows every letter typed, and says when it finds nothing
+        await page.locator("ui-input.search input").fill("Dal")
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["Dal"])
+        await page.locator("ui-input.search input").fill("birria")
+        await expect.poll(() => none.textContent(), WAITING).toBe(noMatches)
+        await page.locator("ui-input.search input").fill("")
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+
+        // a new one:  first of all, with what was typed, and the new card is empty again
+        await page.locator("ui-input.draft input").fill("birria")
+        await page.locator("ui-card.new textarea").pressSequentially("Slowly")
+        await expect.poll(isAddOff, WAITING).toBe(false)
+        await add.click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria", ...examples])
+        expect(await page.locator("ui-input.draft input").inputValue()).toBe("")
+
+        // typing in a card stays in that card, whatever it now says
+        const card = page.locator("ui-form.recipe ui-input.title input").first()
+        await card.click()
+        await card.press("End")
+        await page.keyboard.type(" again")
+        await expect.poll(() => cardsOn(page), WAITING).toContain("birria again")
+
+        // remove, and undo:  back where it was, with what it said
+        await page.locator("ui-button.remove").first().click()
+        await expect.poll(() => cardsOn(page), WAITING).not.toContain("birria again")
+        await undoOn(page).click()
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria again", ...examples])
+        expect(await firstCard.locator("textarea").inputValue()).toBe("Slowly")
+
+        // with none left, it says so
+        while (await page.locator("ui-button.remove").count()) await page.locator("ui-button.remove").first().click()
+        await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+  }
+
+  // Changing its first lines is all a different back-end takes:  the example as it ships, not a copy
+  for (const backEnd of Object.keys(BACK_ENDS)) {
+    test(`the example RecipeBox, on ${backEnd}:  only its first lines change`, { timeout: 60_000 }, async () => {
+      const name = `shipped-${backEnd.replace(/\W/g, "")}`
+      const url = serve(name, withPlace(shipped("RecipeBox/RecipeBox.spell"), BACK_ENDS[backEnd]!(servers.url)))
+      const { page, problems } = await opened(url)
+      const held = heldBy[backEnd]!
+      await page.locator("ui-form.recipe").first().waitFor(WAITING)
+      expect(await cardsOn(page)).not.toContain("Pizza Margherita")
+
+      await page.locator("ui-input.draft input").fill("A shipped stew")
+      await page.locator("ui-button.add").click()
+      await expect.poll(held, WAITING).toContain("A shipped stew")
+      expect((await cardsOn(page))[0]).toBe("A shipped stew")
+
+      await page.locator("ui-button.remove").first().click()
+      await expect.poll(held, WAITING).not.toContain("A shipped stew")
+      await undoOn(page).click()
+      await expect.poll(held, WAITING).toContain("A shipped stew")
+      await expect.poll(() => cardsOn(page), WAITING).toContain("A shipped stew")
+
+      await page.locator("ui-button.remove").first().click()
+      await expect.poll(held, WAITING).not.toContain("A shipped stew")
+      expect(problems).toEqual([])
+      await page.close()
+    })
+  }
+
+  test(
+    "the example, when its place can't be reached:  it says so, in words, with Try again",
+    { timeout: 60_000 },
+    async () => {
+      const down = `family cookbook is a web service at "${servers.url}/nowhere":\n\t- it is checked every 500 seconds`
+      const { page } = await opened(serve("shipped-down", withPlace(shipped("RecipeBox/RecipeBox.spell"), down)))
+      const failed = page.locator("ui-message.failed")
+      await failed.waitFor(WAITING)
+      expect(await failed.textContent()).toContain("We can't reach your recipes right now.")
+      expect(await page.locator("ui-button.again").count()).toBe(1)
+      await page.close()
+    }
+  )
 
   test("Spanish, on REST:  the same servers, in its own words", { timeout: 60_000 }, async () => {
     const lines = `recetario familiar es un servicio web en "${servers.url}":

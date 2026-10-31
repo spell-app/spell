@@ -44,6 +44,13 @@
  * - A live room is followed as its first read's things are made (`PlaceHeal.follow()`):  what others do shows here too.
  *   Someone deleting what you're editing raises a notice with Restore;  your long text replaced, one with Use mine.
  * - `saveNew()`:  a thing made here goes to a place, under its own id (`Thing.id`, made in the browser).
+ * - Telling the program what changed (epic `data` P13), each thing once, soon after, with the fields:
+ *   - `a-recipe-change`, to the thing, up its chain (`core.send()`):  `when a recipe changes:`, whoever changed it.
+ *   - `someone-else-change` too, when it wasn't this page:  `- when someone else changes it:`.
+ *   - Only what really differs:  a row read again, or an answer to my own write, is no change;
+ *     nor is what a read asking for fields it first left out brings (`quietly`).
+ *   - Nobody takes `someone-else-change`, and a draft of that thing is open:  a plain notice, as what's on the draft's form
+ *     doesn't show it.  A form on the thing itself shows it by itself, so it needs none.
  *
  * For the editor's side bar (epic `data` P9, request r1 of epic `editor`):
  *
@@ -58,7 +65,17 @@
  * - A sample (`spell/util/places/SamplePlace`) isn't known here, so a program doesn't carry it.
  *   This only makes sure nothing done for one reaches the real place:  `swapped()`.
  */
-import { cellsOf, ITEMS_KEY, keysOf, schemaOf, sourcesReadBy, TYPE_KEY, untrackCells, type Schema } from "spell/util"
+import {
+  CanceledError,
+  cellsOf,
+  ITEMS_KEY,
+  keysOf,
+  schemaOf,
+  sourcesReadBy,
+  TYPE_KEY,
+  untrackCells,
+  type Schema
+} from "spell/util"
 import type { UndoRecord } from "spell/util/persist/persist.types"
 import type { UndoStack } from "spell/util/persist/UndoStack"
 import type {
@@ -120,6 +137,9 @@ const HOMES = new WeakMap<object, ThingHome>()
 
 /** Each plain list held by a thing in a place or a draft, and which field of what. */
 const LIST_FIELDS = new WeakMap<object, { owner: SpellObject; field: string }>()
+
+/** How a thing changed, as an event says it. */
+export type SavedChangeKind = "changed" | "added" | "removed"
 
 /** Each draft's copy, and its draft. */
 const DRAFT_COPIES = new WeakMap<object, PlaceDraft>()
@@ -263,9 +283,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   /**
    * The thing for each row of `result`, in order:  each made, or changed in place -- see the file's docs.
    * - Follows `result`'s rows and nothing else, so a computation re-runs when they change.
+   * - What differs from a thing known already is someone else's change, and told, unless it's `quietly`:
+   *   a read asking for what it first left out.
    * - throws `TypeError` if `result` has no `type`, or nothing is known by its type's name
    */
-  thingsFrom(result: PlaceResult): SpellObject[] {
+  thingsFrom(result: PlaceResult, { quietly = false }: { quietly?: boolean } = {}): SpellObject[] {
     const { type, contents = [] } = result
     if (type === undefined) {
       throw new TypeError(
@@ -278,7 +300,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     return untrackCells(() =>
       whileReading(() =>
         contents.map((row) => {
-          const thing = this.thingFrom(type, row, idOf)
+          const thing = this.thingFrom(type, row, idOf, { tellsChanges: !quietly })
           const id = idOfRow(row, idOf)
           if (this.places && id !== undefined) this.remember(thing, { things: this, placeName, collection, type, id })
           return thing
@@ -313,6 +335,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const pending = this.placesOrDie("saveNew").pendingFor(placeName)
     this.remember(thing, { things: this, placeName, collection, type, id })
     this.loaded.set(`${type}#${id}`, thing)
+    this.noteChanged(thing, { kind: "added" })
     const group = this.groupNumberFor(pending)
     this.writing(() =>
       pending.insert({
@@ -333,6 +356,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const group = this.groupNumberFor(pending)
     const { collection, type, id } = home
     pending.delete({ collection, type, id, ...(group !== undefined && { group }) })
+    this.noteChanged(thing, { kind: "removed" })
   }
 
   /**
@@ -386,6 +410,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     })
     const write = { collection, type, id, field, ...(group !== undefined && { group }) }
     this.writing(() => pending.setField({ ...write, value: json, was: undefined }))
+    this.noteWrote(home, field)
   }
 
   /** Where `thing` is kept:  `undefined` for one in no place. */
@@ -594,6 +619,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
       else pending.setField({ ...thing, value: asJson, was: wasJson })
     })
+    this.noteWrote(home, field)
   }
 
   /** Each thing in `value`, a list's items, that's saved inside its owner is known by its id from now on. */
@@ -658,17 +684,114 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     return group.number
   }
 
-  /** Rows changed under what's showing:  each thing we made from one is changed in place. */
-  private rowsChanged({ type, idField, rows, renamed = [] }: PlaceRowsChange): void {
+  /**
+   * Rows changed under what's showing:  each thing we made from one is changed in place.
+   * - Someone else's:  a thing we hadn't seen is made now, so whoever's listening hears of it, whichever reads it;  each is told.
+   */
+  private rowsChanged({
+    placeName,
+    collection,
+    type,
+    idField,
+    rows,
+    renamed = [],
+    removed = [],
+    isElsewhere = false
+  }: PlaceRowsChange): void {
     if (this.isWriting || type === undefined) return
     whileReading(() => {
       for (const { from, to } of renamed) this.renameThing(type, from, to)
       for (const row of rows) {
         const id = idOfRow(row, idField)
         const known = id === undefined ? undefined : this.loaded.get(`${type}#${id}`)
-        if (known) this.changeInPlace(known, row)
+        if (known) {
+          const fields = this.changeInPlace(known, row)
+          if (isElsewhere && fields.length) this.noteChanged(known, { fields, isElsewhere })
+        } else if (isElsewhere && id !== undefined && this.classNamed(type)) {
+          const thing = this.thingForRow({ placeName, collection, type, row, idField })
+          this.noteChanged(thing, { kind: "added", isElsewhere })
+        }
       }
     })
+    if (!isElsewhere) return
+    for (const id of removed) {
+      const thing = this.loaded.get(`${type}#${id}`)
+      if (thing) this.noteChanged(thing, { kind: "removed", isElsewhere })
+    }
+  }
+
+  ////////////////
+  // ## Telling the program what changed
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  the program hears of `thing`'s change soon after:  together with any more in this moment, so one person's
+   * step is one event.  See the file's docs.
+   */
+  noteChanged(
+    thing: SpellObject,
+    {
+      kind = "changed",
+      fields = [],
+      isElsewhere = false
+    }: {
+      kind?: SavedChangeKind
+      fields?: readonly string[]
+      isElsewhere?: boolean
+    }
+  ): void {
+    const noted = this.changesToTell.get(thing)
+    if (noted) {
+      fields.forEach((field) => noted.fields.add(field))
+      noted.isElsewhere ||= isElsewhere
+      if (kind !== "changed") noted.kind = kind
+      return
+    }
+    if (!this.changesToTell.size) queueMicrotask(() => this.tellChanges())
+    this.changesToTell.set(thing, { kind, fields: new Set(fields), isElsewhere })
+  }
+
+  /** This page wrote `field` of the thing kept at `home`. */
+  private noteWrote({ type, id }: ThingHome, field: string): void {
+    const thing = this.loaded.get(`${type}#${id}`)
+    if (thing) this.noteChanged(thing, { fields: [field] })
+  }
+
+  /** What's changed and not yet told. */
+  private readonly changesToTell = new Map<
+    SpellObject,
+    { kind: SavedChangeKind; fields: Set<string>; isElsewhere: boolean }
+  >()
+
+  /** Tell the program:  see the file's docs.  NEVER throws:  a handler that fails is said by `core.send()`. */
+  private tellChanges(): void {
+    const changes = [...this.changesToTell]
+    this.changesToTell.clear()
+    const { send } = core as Partial<Pick<typeof core, "send">>
+    if (!send) return
+    for (const [thing, { kind, fields, isElsewhere }] of changes) {
+      const params = { thing, kind, fields: [...fields] }
+      for (const Class of savedClassesOf(thing)) {
+        const named = { ...params, [lowerFirst(Class.name)]: thing }
+        void send(thing, savedChangeEvent(Class.name), named).catch(ignoredCancel)
+      }
+      if (!isElsewhere) continue
+      void send(thing, SOMEONE_ELSE_EVENT, params)
+        .then(({ handled }) => {
+          if (!handled && this.drafts.get(thing)?.isStillGood) this.changedUnderDraft(thing)
+        })
+        .catch(ignoredCancel)
+    }
+  }
+
+  /** Someone else changed what a draft is a copy of, and the program says nothing of it:  the plain notice -- Show me. */
+  private changedUnderDraft(thing: SpellObject): void {
+    const home = HOMES.get(thing)
+    const message = core.message("write-changed-under-draft", {
+      thing: `${home?.type ?? thing.constructor.name} ${home?.id ?? thing.id}`
+    })
+    const actions = [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }]
+    void core.notify(message, { class: "warning", actions })
   }
 
   /** A place named the thing we knew as `from`:  it goes by `to` now. */
@@ -733,7 +856,12 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    * - A row with no id shares no identity:  a new thing each time, belonging to its list alone.
    * - throws `TypeError` if nothing is known by the name `type`
    */
-  thingFrom(type: string, row: PlaceRow, idField: string | undefined): SpellObject {
+  thingFrom(
+    type: string,
+    row: PlaceRow,
+    idField: string | undefined,
+    { tellsChanges = false }: { tellsChanges?: boolean } = {}
+  ): SpellObject {
     if (!this.classNamed(type)) {
       throw new TypeError(`PlaceThings.thingFrom():  no class is named "${type}";  check the read's \`type\``)
     }
@@ -742,7 +870,8 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const ref = `${type}#${id ?? `row ${++this.rowsWithNoId}`}`
     const known = this.loaded.get(ref)
     if (known) {
-      this.changeInPlace(known, row)
+      const fields = this.changeInPlace(known, row)
+      if (tellsChanges && fields.length) this.noteChanged(known, { fields, isElsewhere: true })
       return known
     }
     const { [POSITIONS_KEY]: _positions, ...fields } = row
@@ -770,13 +899,18 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     })
   }
 
-  /** Set each field `row` has on `thing`, read back as an entry's are;  what's the same changes nothing. */
-  private changeInPlace(thing: SpellObject, row: PlaceRow): void {
+  /**
+   * Set each field `row` has on `thing`, read back as an entry's are;  what's the same changes nothing.
+   * - Returns the fields that really changed.
+   */
+  private changeInPlace(thing: SpellObject, row: PlaceRow): string[] {
     const fields = thing as unknown as Record<string, unknown>
+    const changed: string[] = []
     for (const [key, json] of Object.entries(row)) {
       if (key === "id" || key.startsWith("$")) continue
-      const value = dateIfDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
       const current = fields[key]
+      if (!this.holdsTheSame(current, json)) changed.push(key)
+      const value = dateIfDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
       } else if (!isSameDate(current, value)) {
@@ -786,8 +920,18 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     const items = row[ITEMS_KEY]
     if (thing instanceof List && Array.isArray(items)) {
       const value = this.read(items) as unknown[]
-      if (!isSameItems(thing.items, value)) thing.items = value
+      if (!isSameItems(thing.items, value)) {
+        changed.push(ITEMS_KEY)
+        thing.items = value
+      }
     }
+    return changed
+  }
+
+  /** Does `current`, a field's value, say the same as `json`, what a row holds for it? */
+  private holdsTheSame(current: unknown, json: unknown): boolean {
+    if (current === json || (current == null && json == null)) return true
+    return JSON.stringify(this.writer.jsonFor(current)) === JSON.stringify(json)
   }
 }
 
@@ -889,6 +1033,40 @@ type PlaceEditProps = Omit<PlaceEditOptions, "history"> & {
   property: string
   /** Where the step goes:  none, with no history and no program running. */
   history: UndoStack | undefined
+}
+
+/** The event `- when someone else changes it:` is the handler of. */
+const SOMEONE_ELSE_EVENT = "someone-else-change"
+
+/**
+ * The event `when a recipe changes:` listens for, by a type's class name:  `a-recipe-change`.
+ * - The compiler's `Changes` rule writes the same:  NOT `recipe-change`, a property called `recipe`'s.
+ */
+function savedChangeEvent(className: string): string {
+  return `a-${className.replace(/(\p{Ll}|\d)(\p{Lu})/gu, "$1-$2").toLowerCase()}-change`
+}
+
+/** What a class's thing goes by in its `when a recipe changes:` handler:  `recipe`, `recipeNote`. */
+function lowerFirst(name: string): string {
+  return name.charAt(0).toLowerCase() + name.slice(1)
+}
+
+/** `thing`'s class, and each above it still saved in a place:  `when a recipe changes:` hears a soup too. */
+function savedClassesOf(thing: SpellObject): Function[] {
+  const classes: Function[] = [thing.constructor]
+  for (
+    let Class = Object.getPrototypeOf(thing.constructor) as Function & { savedIn?: unknown };
+    Class?.savedIn;
+    Class = Object.getPrototypeOf(Class) as Function & { savedIn?: unknown }
+  ) {
+    classes.push(Class)
+  }
+  return classes
+}
+
+/** A handler stopped by canceling its action:  nothing more to say. */
+function ignoredCancel(error: unknown): void {
+  if (!(error instanceof CanceledError)) console.error("PlaceThings:  couldn't tell the program what changed", error)
 }
 
 /** What `value` holds now, that a later change won't change:  a list's items, not the list. */

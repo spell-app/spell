@@ -8,7 +8,7 @@
  */
 import { schemaOf } from "spell/util"
 import type * as PlacesFolder from "spell/util/places"
-import type { ListQuery, Place as PlaceBehind } from "spell/util/places/places.types"
+import type { ListQuery, Place as PlaceBehind, PlacePerson } from "spell/util/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -48,6 +48,8 @@ export type PlaceMaking = {
   collection: string
   /** The class first read from this place:  what a sheet's numbers and a graph service's fields are read from. */
   Class: Function
+  /** Who's at this page, for a place that has people. */
+  person: PlacePerson
 }
 
 /** A row's id, in a place that isn't told otherwise. */
@@ -108,14 +110,22 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       `core.place():  "${details.name}" is a file, and a browser can't write one by itself:  give it a server side, at its address`
     )
   },
-  "live room": ({ details }, { LiveRoomPlace }) => new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http") }),
-  sheet: ({ details, collection, Class }, { SheetPlace }) =>
-    new SheetPlace({
-      url: new URL(details.at!, globalThis.location?.href).href,
+  "live room": ({ details, person }, { LiveRoomPlace }) =>
+    new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
+  sheet: ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress }) => {
+    const at = details.at!
+    const { idColumn } = details
+    // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
+    if (isPlaceServerAddress(at)) {
+      return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })
+    }
+    return new SheetPlace({
+      url: new URL(at, globalThis.location?.href).href,
       collection,
       numbers: fieldsOfKind(Class, "number"),
-      ...(details.idColumn !== undefined && { idColumn: details.idColumn })
-    }),
+      ...(idColumn !== undefined && { idColumn })
+    })
+  },
   "this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory": (_making, { MemoryPlace }) => new MemoryPlace()
 }

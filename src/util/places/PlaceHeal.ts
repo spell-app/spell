@@ -87,11 +87,18 @@ export class PlaceHeal {
     if (this.places.placeFor(placeName) !== place) return
     const { idOf } = place.describe()
     if (idOf === undefined) return
-    const { id, row, was, lost = [], overwrote = [] } = event
-    if (!row) return this.thingWentAway(ask, idOf, pending, id, was)
+    const { id, row, lost = [], overwrote = [], isMine } = event
+    if (!row) return this.thingWentAway(ask, idOf, pending, event)
     const rows = pending.replayOn(collection, [row])
     this.keep(placeName, type, rows, idOf)
-    this.places.tellRows({ placeName, collection, ...(type !== undefined && { type }), idField: idOf, rows })
+    this.places.tellRows({
+      placeName,
+      collection,
+      ...(type !== undefined && { type }),
+      idField: idOf,
+      rows,
+      ...(!isMine && { isElsewhere: true })
+    })
     const thing = { placeName, collection, ...(type !== undefined && { type }), id }
     for (const { field, mine, theirs } of lost.filter(({ mine }: ReplacedValue) => isLongText(mine))) {
       this.places.tellLost({
@@ -121,12 +128,14 @@ export class PlaceHeal {
     { placeName, collection, type }: Omit<HealAsk, "ids">,
     idField: string,
     pending: PendingChanges,
-    id: string,
-    was: PlaceRow | undefined
+    { id, was, isMine }: PlaceEvent
   ): void {
-    const wasEditing =
-      pending.wasEditing(collection, id) ||
-      pending.changes.some((change) => change.id === id && change.collection === collection && change.kind !== "delete")
+    // my own removal, coming back:  a newer change of mine (undo) stands, and there's nobody to tell
+    const hasNewerChange = pending.changes.some(
+      (change) => change.id === id && change.collection === collection && change.kind !== "delete"
+    )
+    if (isMine && hasNewerChange) return
+    const wasEditing = !isMine && (pending.wasEditing(collection, id) || hasNewerChange)
     const [row] = pending.replayOn(collection, [was ?? { [idField]: id }])
     pending.dropThing(collection, id)
     if (type !== undefined) this.places.cache.forget(type, id)
@@ -136,7 +145,8 @@ export class PlaceHeal {
       ...(type !== undefined && { type }),
       idField,
       rows: [],
-      removed: [id]
+      removed: [id],
+      ...(!isMine && { isElsewhere: true })
     })
     if (!wasEditing || !row) return
     this.places.tellThingDeleted({

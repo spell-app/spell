@@ -1,0 +1,10 @@
+{
+  "description": "A recipe box two people share:  who's here, and what the other one changed (epic data P13).  It's run in two pages by tests/spell/liveRoom.test.ts",
+  "version": "1.0.0",
+  "imports": [
+    {
+      "path": "/LiveRoom.spell",
+      "active": true
+    }
+  ]
+}

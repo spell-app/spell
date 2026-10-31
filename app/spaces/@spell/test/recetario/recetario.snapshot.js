@@ -54,7 +54,7 @@ export class CajaDeRecetas extends App {
   static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 693, end: 787 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => receta.título.includes(this.búsqueda)), (item) => item.título)
-  }) }
+  }, () => [this.búsqueda]) }
 
   agregarElBorrador() {
     if (this.borrador === "") return

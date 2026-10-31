@@ -227,3 +227,47 @@ start the box`
     expect(code).toMatch(/@prop\(\{ type: "text", declaredAt: \{ path: "\/Test\.spell"/)
   })
 })
+
+describe("what's listened to counts as read (epic `data` P13)", () => {
+  const SELECT = /static savedIn = \{ place: "family_cookbook", collection: "recipes", select: \[([^\]]*)\]/
+
+  test("`when its notes changes` reads notes, with nothing else that does, or it would be left out", () => {
+    const read = compile(
+      PLACE,
+      TYPES,
+      "recipe box is an app:",
+      "\t- to draw it:",
+      "\t\tfor each recipe in every recipe",
+      "\t\t\t<ui-text>{the title of the recipe}</ui-text>"
+    )
+    expect(SELECT.exec(read.code)?.[1]).not.toContain("notes")
+    const heard = compile(
+      PLACE,
+      TYPES.replace('\t- its "notes" is text', '\t- its "notes" is text\n\t- when its notes changes:\n\t\tprint 1'),
+      "recipe box is an app:",
+      "\t- to draw it:",
+      "\t\tfor each recipe in every recipe",
+      "\t\t\t<ui-text>{the title of the recipe}</ui-text>"
+    )
+    expect(SELECT.exec(heard.code)?.[1]).toContain('"notes"')
+  })
+
+  test("`when someone else changes it` and `when a recipe changes` hear every field:  it's read whole", () => {
+    const app = [
+      "recipe box is an app:",
+      "\t- to draw it:",
+      "\t\tfor each recipe in every recipe",
+      "\t\t\t<ui-text>{the title of the recipe}</ui-text>"
+    ]
+    const someone = compile(
+      PLACE,
+      TYPES.replace(
+        '\t- its "notes" is text',
+        '\t- its "notes" is text\n\t- when someone else changes it:\n\t\tprint 1'
+      ),
+      ...app
+    )
+    expect(SELECT.exec(someone.code)).toBeNull()
+    expect(SELECT.exec(compile(PLACE, TYPES, "when a recipe changes:", "\tprint 1", ...app).code)).toBeNull()
+  })
+})

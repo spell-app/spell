@@ -20,18 +20,24 @@
  *     Whoever read it follows the field, so it appears.
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
+ * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
+ *   plain data, one object per page, so `the person is the current person` means what it says.
+ *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 import h from "@solidjs/h"
 import { createComponent } from "@solidjs/web"
-import { Errored, For, Loading, createMemo, getOwner, onCleanup } from "solid-js"
+import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
+
+import { pollWhileVisible } from "spell/util/polling"
 
 import { Cell, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import type * as PlacesFolder from "spell/util/places"
 import type { Places } from "spell/util/places/Places"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
-import type { ListQuery, Place as PlaceBehind, PlaceRow } from "spell/util/places/places.types"
+import { personOnThisPage } from "spell/util/places/people"
+import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spell/util/places/places.types"
 import type { PlaceRowsChange } from "spell/util/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
@@ -80,8 +86,14 @@ const ID_FIELD = "id"
 /** The kinds whose mapping says where a collection is, while it keeps its own name for the engine. */
 const KEEP_THEIR_OWN_NAME = new Set(["web service", "graph service"])
 
+/** The kind of place that knows who's here, among those spell knows by itself. */
+const LIVE_ROOM = "live room"
+
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000
+
+/** What a function written `async` says it is. */
+const ASYNC_FUNCTION = "AsyncFunction"
 
 /** Each run's places:  a new run has its own. */
 const PROGRAMS = new WeakMap<object, ProgramPlaces>()
@@ -168,15 +180,76 @@ class ProgramPlaces {
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =
       mapped && !KEEP_THEIR_OWN_NAME.has(details.kind ?? "") ? mapped.replace(/^\//, "") : savedIn.collection
+    const making = { details, folder: this.folder!, collection, Class, person: this.me }
     let behind = this.places!.placeFor(name)
     if (!behind) {
       const { thing } = declared
-      behind = details.kind
-        ? placeBehind({ details, folder: this.folder!, collection, Class })
-        : (thing.makePlace(details, this.folder) as PlaceBehind)
+      behind = details.kind ? placeBehind(making) : (thing.makePlace(details, this.folder) as PlaceBehind)
       this.places!.add(name, behind)
-    } else if (details.kind) knowCollection(behind, { details, folder: this.folder!, collection, Class })
+    } else if (details.kind) knowCollection(behind, making)
     return { name, collection, behind }
+  }
+
+  /** Who's at this page:  the same object as long as the program runs. */
+  readonly me: PersonHere = inProgramWords({
+    ...personOnThisPage((number) => core.message("guest-person", { number })),
+    page: ""
+  })
+
+  /** Everyone here, this page included:  ONE list, for as long as the program runs. */
+  get peopleHere(): List {
+    if (!this.peopleList) {
+      this.peopleList = core.newScratch(List) as List
+      this.showPeople([this.me])
+      this.load()
+        .then(() => this.followPeople())
+        .catch((ignored) => console.error("core.peopleHere():  couldn't load the places folder", ignored))
+    }
+    return this.peopleList
+  }
+
+  /** See `peopleHere`. */
+  private peopleList: List | undefined
+  /** Each person here, by page:  so one that's still here stays the same object. */
+  private readonly knownPeople = new Map<string, PersonHere>()
+
+  /** Follow who's here in the first place that says, made if it's yet to be read. */
+  private followPeople(): void {
+    for (const [name, { thing, details }] of this.declared) {
+      const makes = details.kind === LIVE_ROOM || !details.kind
+      const made = this.places!.placeFor(name)
+      if (!made && !makes) continue
+      const behind =
+        made ?? (details.kind ? this.roomFor(details) : (thing.makePlace(details, this.folder) as PlaceBehind))
+      if (!made) this.places!.add(name, behind)
+      if (!behind.onPeopleHere || !behind.currentPerson) continue
+      const { page } = behind.currentPerson()
+      this.me.page = page
+      this.knownPeople.set(page, this.me)
+      behind.onPeopleHere((people) => this.showPeople(people))
+      this.showPeople(behind.peopleHere?.() ?? [this.me])
+      return
+    }
+  }
+
+  /** The room `details` says, with no class read from it yet:  it needs none. */
+  private roomFor(details: PlaceDetails): PlaceBehind {
+    return placeBehind({ details, folder: this.folder!, collection: "", Class: Object, person: this.me })
+  }
+
+  /** The list says `people` now, as a read does:  nobody's write. */
+  private showPeople(people: readonly PersonHere[]): void {
+    const items = people.map((person) => {
+      const known =
+        this.knownPeople.get(person.page) ?? (person.page === this.me.page ? this.me : inProgramWords(person))
+      if (person.page) this.knownPeople.set(person.page, known)
+      return known
+    })
+    untrackCells(() => {
+      whileReading(() => {
+        this.peopleList!.items = items
+      })
+    })
   }
 
   /** The read of `Class` for `query`:  one per type and query. */
@@ -265,9 +338,14 @@ class ProgramPlaces {
     for (const read of this.reads.values()) if (read.Class === Class) void read.askWhole()
   }
 
-  /** Each thing `result` holds, made or changed in place. */
-  thingsOf(result: PlaceResult): Thing[] {
-    return this.things!.thingsFrom(result) as Thing[]
+  /** Each thing `result` holds, made or changed in place:  `quietly`, see `PlaceThings.thingsFrom()`. */
+  thingsOf(result: PlaceResult, options?: { quietly?: boolean }): Thing[] {
+    return this.things!.thingsFrom(result, options) as Thing[]
+  }
+
+  /** Someone else added or removed `thing`, as a read found out by asking again. */
+  noteChangedElsewhere(thing: Thing, kind: "added" | "removed"): void {
+    this.things!.noteChanged(thing, { kind, isElsewhere: true })
   }
 
   /** The thing for `row` of `Class`, kept in its place:  for a row told after the read. */
@@ -324,6 +402,18 @@ class ProgramPlaces {
   }
 }
 
+/**
+ * `person`, read by each language's word for its name:  Spanish's `el nombre de la persona` compiles to `persona.nombre`.
+ * - A person is plain data with no type a compiler knows, so nothing turns the word back into `name`:  a new language adds its word
+ *   (its pack's `builtInMembers.name`) to `WORDS_FOR_NAME`.
+ */
+function inProgramWords<Person extends PersonHere>(person: Person): Person {
+  return { ...person, ...Object.fromEntries(WORDS_FOR_NAME.map((word) => [word, person.name])) }
+}
+
+/** Each language's word for a person's name, other than English's. */
+const WORDS_FOR_NAME = ["nombre"]
+
 /** Where `Class` says it's saved:  its own line, or a parent's. */
 function savedInOf(Class: SavedClass): SavedIn {
   const { savedIn } = Class
@@ -357,6 +447,8 @@ class SavedRead {
   private stopPolling: (() => void) | undefined
   /** Nothing's holding it:  no request runs, and the next reader asks again.  It still hears rows, so its list stays true. */
   private isIdle = false
+  /** It's asking again for what it left out:  what that brings is nobody's change. */
+  private isAskingWhole = false
 
   constructor(
     private readonly program: ProgramPlaces,
@@ -392,11 +484,13 @@ class SavedRead {
     this.stopPolling?.()
     this.result = undefined
     this.answered = undefined
+    this.isAskingWhole = true
     try {
       await this.answer()
     } catch (ignored) {
       // what's showing stays, and the next read says what's wrong
     } finally {
+      this.isAskingWhole = false
       old?.leave()
     }
   }
@@ -438,12 +532,13 @@ class SavedRead {
 
   /** `result`'s rows, and its later pages':  `every recipe` means every one of them, unless the query says how many. */
   private async withOtherPages(result: PlaceResult): Promise<Thing[]> {
-    const things = this.program.thingsOf(result)
+    const quietly = { quietly: this.isAskingWhole }
+    const things = this.program.thingsOf(result, quietly)
     if (this.query.page?.size !== undefined) return things
     for (let at = result.nextPage; at !== undefined;) {
       const more = this.program.newResult(this.Class, { ...this.query, page: { at } })
       await more.load()
-      things.push(...this.program.thingsOf(more))
+      things.push(...this.program.thingsOf(more, quietly))
       at = more.nextPage
       more.leave()
     }
@@ -453,11 +548,10 @@ class SavedRead {
   /** Ask the place what changed, as often as its line says. */
   private startPolling(): void {
     const { checkedEvery } = this.program.detailsOf(this.Class)
+    // under node, asking again would keep the program running
     if (!checkedEvery || typeof document === "undefined") return
-    const timer = setInterval(() => void this.refresh(), checkedEvery * 1000)
-    // under node, asking again keeps nothing running
-    ;(timer as { unref?: () => void }).unref?.()
-    this.stopPolling = () => clearInterval(timer)
+    this.stopPolling?.()
+    this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh())
   }
 
   /** The list is now `things`, and whoever follows it looks again. */
@@ -481,12 +575,27 @@ class SavedRead {
     }
     try {
       await (this.answered = result.reload().then(() => undefined))
-      this.fill(this.program.thingsOf(result))
+      const before = new Set(this.list.items as Thing[])
+      const things = this.inOrder(await this.withOtherPages(result))
+      this.noteJoinedAndLeft(before, things)
+      this.fill(things)
     } catch (ignored) {
       // what's showing stays, on a read that had an answer;  with none, the next read says what's wrong
       if (!this.list.items.length) this.changes.changed()
       else this.answered = Promise.resolve()
     }
+  }
+
+  /**
+   * Asking again found these came or went, so someone else added or removed them.
+   * - Only a read of all of them:  a filtered one's things come and go as their fields do.
+   */
+  private noteJoinedAndLeft(before: ReadonlySet<Thing>, things: readonly Thing[]): void {
+    const { filter, page } = this.query
+    if (filter || page) return
+    const after = new Set(things)
+    for (const thing of things) if (!before.has(thing)) this.program.noteChangedElsewhere(thing, "added")
+    for (const thing of before) if (!after.has(thing)) this.program.noteChangedElsewhere(thing, "removed")
   }
 
   /**
@@ -506,22 +615,34 @@ class SavedRead {
     )
   }
 
-  /** Does `row` belong in this read?  Only its filter says:  a filter it can't see goes on the list after it. */
-  private takes(fields: PlaceRow): boolean {
-    return Object.entries(this.query.filter ?? {}).every(([field, value]) => fields[field] === value)
+  /**
+   * Does `fields` belong in this read?  Only its filter says:  a filter it can't see goes on the list after it.
+   * - A field a row doesn't name can't say no:  a thing known already stays, until a row says it no longer fits.
+   */
+  private takes(fields: PlaceRow, { isKnown = false }: { isKnown?: boolean } = {}): boolean {
+    return Object.entries(this.query.filter ?? {}).every(
+      ([field, value]) => fields[field] === value || (isKnown && !(field in fields))
+    )
   }
 
-  /** Rows changed under it:  new ones join, removed ones go, and whoever follows looks again. */
+  /** Rows changed under it:  new ones join, removed ones go, one that no longer fits its filter goes, and whoever follows looks again. */
   rowsChanged({ type, rows, removed = [], idField }: PlaceRowsChange): void {
     if (type !== this.Class.name) return
     const kept = this.list.items.filter((thing) => !removed.includes((thing as Thing).id)) as Thing[]
     const known = new Set(kept)
+    const left = new Set<Thing>()
     for (const row of rows) {
-      if (row[idField] === undefined || !this.takes(row)) continue
+      if (row[idField] === undefined) continue
+      const isKnown = kept.some((thing) => thing.id === row[idField])
+      if (!this.takes(row, { isKnown })) {
+        const thing = kept.find((each) => each.id === row[idField])
+        if (thing) left.add(thing)
+        continue
+      }
       const thing = this.program.thingForRow(this.Class, row, idField)
       if (!known.has(thing)) kept.push(thing)
     }
-    this.fill(this.inOrder(kept))
+    this.fill(this.inOrder(kept.filter((thing) => !left.has(thing))))
   }
 
   /** `thing` left its place. */
@@ -682,6 +803,20 @@ export const savedMethods = defineCoreModule({
     await things.inOneGroup(run)
   },
 
+  /** Who's at this page:  what `the current person` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
+  currentPerson(): PersonHere {
+    return programPlaces().me
+  },
+
+  /**
+   * Everyone here, this page included:  what `the people here` compiles to.
+   * - The same list each time, its items changing as people come and go:  what draws it follows them.
+   * - Asking starts following the program's first place that has people, connecting to it.  With none:  only you.
+   */
+  peopleHere(): List<PersonHere> {
+    return programPlaces().peopleHere as List<PersonHere>
+  },
+
   /** Ask the place again:  every read of `Class`, or of them all.  What `refresh the recipes` and `try again` compile to.  - NEVER throws */
   refreshSaved(Class?: Function): Promise<void> {
     return programPlaces().refresh(Class as SavedClass | undefined)
@@ -731,9 +866,11 @@ export const savedMethods = defineCoreModule({
     drawEach: ((item: Item, position: number) => Drawing) | null,
     riders: ReadRiders = {}
   ): Drawing {
-    const items = () => ((read() as { items?: readonly Item[] } | undefined)?.items ?? []) as readonly Item[]
+    // a read written straight in the drawing is a function that waits:  what it read shows until a new answer lands
+    const current = read.constructor.name === ASYNC_FUNCTION ? (createDeferred(read as never) as typeof read) : read
+    const items = () => ((current() as { items?: readonly Item[] } | undefined)?.items ?? []) as readonly Item[]
     const drawn = () => {
-      if (!drawEach) return read() as Drawing
+      if (!drawEach) return current() as Drawing
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
       const list = createComponent(
         For as never,
