@@ -60,6 +60,7 @@ import { describedMethods } from "./described"
 import { sendingMethods, send } from "./sending"
 import { actingMethods } from "./acting"
 import { waitingMethods } from "./waiting"
+import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
 import { deprecatedMethods } from "./deprecated"
 
@@ -89,6 +90,7 @@ const CORE_MODULES: Record<string, object> = {
   sending: sendingMethods,
   acting: actingMethods,
   waiting: waitingMethods,
+  saved: savedMethods,
   abilities: abilityMethods
 }
 

@@ -43,6 +43,8 @@ describe("<ProjectPrompt>", () => {
       "fizzbuzz",
       "lists-from-zero",
       "people",
+      "recetario",
+      "recipe-box",
       "thing-references",
       "todos-form-based"
     ]

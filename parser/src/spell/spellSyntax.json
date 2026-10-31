@@ -1373,6 +1373,8 @@
             "create_method",
             "create_hook_words",
             "pause_units",
+            "place_kind",
+            "place_kind_here",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1452,6 +1454,12 @@
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
+            },
+            {
+              "syntax": "((web_service:web service)|(graph_service:graph service)|(folder:folder)|(file:file)|(live_room:live room)|(sheet:sheet))"
+            },
+            {
+              "syntax": "((this_device:this device)|(in_memory:in memory)|(the_cloud:the cloud))"
             },
             {
               "syntax": "((slot:children)|slot)"
@@ -2943,7 +2951,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3139,7 +3147,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 19,
+          "line": 21,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -3191,7 +3199,7 @@
           "ruleNames": ["list_add"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAdd.ts",
-          "line": 12,
+          "line": 20,
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
@@ -3243,7 +3251,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 7,
+          "line": 14,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -3425,7 +3433,7 @@
           "ruleNames": ["list_remove"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemove.ts",
-          "line": 11,
+          "line": 19,
           "purpose": "Remove all instances of something from a list.",
           "syntaxes": [
             {
@@ -3791,7 +3799,7 @@
           "ruleNames": ["thing_at_place"],
           "internal": false,
           "file": "src/spell/rules/classes/ThingAtPlace.ts",
-          "line": 16,
+          "line": 18,
           "purpose": "One thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).",
           "syntaxes": [
             {
@@ -3817,7 +3825,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 15,
+          "line": 18,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -3843,7 +3851,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -4190,7 +4198,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 30,
+          "line": 33,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -5761,6 +5769,430 @@
       ]
     },
     {
+      "module": "places",
+      "rules": [
+        {
+          "className": "PlaceDetail",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/places/PlaceDetail.ts",
+          "line": 21,
+          "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
+          "syntaxes": [],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ReadRider",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 31,
+          "purpose": "What a read in a drawing shows while it has no list to show (epic `data` P11).",
+          "syntaxes": [],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DraftOf",
+          "ruleNames": ["draft_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/DraftOf.ts",
+          "line": 14,
+          "purpose": "A copy of a saved thing, whose changes wait to be saved (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "a draft of {thing:operand}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TryAgain",
+          "ruleNames": ["try_again"],
+          "internal": false,
+          "file": "src/spell/rules/places/TryAgain.ts",
+          "line": 12,
+          "purpose": "Every read asks its place again: what a failed read's button does (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "try again",
+              "example": "try again",
+              "outputs": {
+                "js": {
+                  "code": "core.refreshSaved()"
+                },
+                "ts": {
+                  "code": "core.refreshSaved()"
+                },
+                "py": {
+                  "code": "core.refresh_saved()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "FirstFewWhere",
+          "ruleNames": ["first_few_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/FirstFewWhere.ts",
+          "line": 14,
+          "purpose": "A few of a type, by its plural (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the first {number} {type:plural_type} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "NumberOfThingsWhere",
+          "ruleNames": ["number_of_things_where"],
+          "internal": false,
+          "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
+          "line": 14,
+          "purpose": "How many of a type fit (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the number of {type:plural_type} where {inline_expression}?"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TotalOf",
+          "ruleNames": ["total_of"],
+          "internal": false,
+          "file": "src/spell/rules/places/TotalOf.ts",
+          "line": 11,
+          "purpose": "The sum of a list (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "the total of {list:operand}",
+              "example": "the total of [1, 2]",
+              "outputs": {
+                "js": {
+                  "code": "[1, 2].total"
+                },
+                "ts": {
+                  "code": "[1, 2].total"
+                },
+                "py": {
+                  "code": "[1, 2].total"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "CreatePlace",
+          "ruleNames": ["create_place"],
+          "internal": false,
+          "file": "src/spell/rules/places/CreatePlace.ts",
+          "line": 36,
+          "purpose": "A program's data lives here (epic `data` P11, Q2).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} at {address:text} {with_nested_statements}?",
+              "example": "family cookbook is a web service at \"https://api.example.com/v1\"",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"web service\",\n  at: \"https://api.example.com/v1\"\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"web service\",\n  at: \"https://api.example.com/v1\"\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"web service\", \"at\": \"https://api.example.com/v1\"},\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} at {address:text} {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:type_words} is {kind:place_kind_here} {with_nested_statements}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "AllOrNothing",
+          "ruleNames": ["all_or_nothing"],
+          "internal": false,
+          "file": "src/spell/rules/places/AllOrNothing.ts",
+          "line": 13,
+          "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "all or nothing :? {statement_body}?",
+              "example": "all or nothing: print 1",
+              "outputs": {
+                "js": {
+                  "code": "await core.allOrNothing(() => core.console.log(1))"
+                },
+                "ts": {
+                  "code": "await core.allOrNothing(() => core.console.log(1))"
+                },
+                "py": {
+                  "code": "core.all_or_nothing(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CollectionAt",
+          "ruleNames": ["collection_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/CollectionAt.ts",
+          "line": 10,
+          "purpose": "Where a place keeps a type's things, when it's not where anyone would look.",
+          "syntaxes": [
+            {
+              "syntax": "{collection:plural_type} are at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "FieldCalled",
+          "ruleNames": ["field_called"],
+          "internal": false,
+          "file": "src/spell/rules/places/FieldCalled.ts",
+          "line": 9,
+          "purpose": "What a place calls a property of a type, when its name differs.",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} is called {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyIsSecret",
+          "ruleNames": ["key_is_secret"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyIsSecret.ts",
+          "line": 18,
+          "purpose": "The NAME of the key a place needs, never the key (epic `data` Q11).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is the secret {name:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "KeyWritten",
+          "ruleNames": ["key_written"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyWritten.ts",
+          "line": 12,
+          "purpose": "A key written into a program, which won't compile (epic `data` Q11).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is {key:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CheckedEvery",
+          "ruleNames": ["checked_every"],
+          "internal": false,
+          "file": "src/spell/rules/places/CheckedEvery.ts",
+          "line": 8,
+          "purpose": "How often to ask a place that can't announce what changed.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is checked every {number} seconds?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "VersionsIn",
+          "ruleNames": ["versions_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/VersionsIn.ts",
+          "line": 9,
+          "purpose": "The field that says a row's version, on a web service that keeps one.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} versions are in {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IdColumn",
+          "ruleNames": ["id_column"],
+          "internal": false,
+          "file": "src/spell/rules/places/IdColumn.ts",
+          "line": 9,
+          "purpose": "The column that says which row is which, on a sheet.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} ids are in {column:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "OperationAt",
+          "ruleNames": ["operation_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/OperationAt.ts",
+          "line": 19,
+          "purpose": "Where an action declared under a place goes (epic `data` Q14, Q17's option A).",
+          "syntaxes": [
+            {
+              "syntax": "it is at {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SavedInPlace",
+          "ruleNames": ["saved_in_place"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInPlace.ts",
+          "line": 16,
+          "purpose": "A type lives in a place (epic `data` P11, Q1).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is saved in {place:expression}"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} is saved in {place:expression}"
+            },
+            {
+              "syntax": "{type:subject_implied} is saved in {place:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileWaiting",
+          "ruleNames": ["while_waiting"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 65,
+          "purpose": "`while waiting:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "while waiting :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IfThereAreNone",
+          "ruleNames": ["if_there_are_none"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 73,
+          "purpose": "`if there are none:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "if there are none :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "IfThatFails",
+          "ruleNames": ["if_that_fails"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 88,
+          "purpose": "`if that fails:` -- see `ReadRider`.",
+          "syntaxes": [
+            {
+              "syntax": "if that fails :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SaveDraft",
+          "ruleNames": ["save_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/SaveDraft.ts",
+          "line": 13,
+          "purpose": "A draft's changes go out, together (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "save {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelDraft",
+          "ruleNames": ["cancel_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/CancelDraft.ts",
+          "line": 12,
+          "purpose": "A draft's changes are forgotten: what a Cancel button does (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "cancel {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelAction",
+          "ruleNames": ["cancel_action"],
+          "internal": false,
+          "file": "src/spell/rules/places/CancelAction.ts",
+          "line": 15,
+          "purpose": "Stop an action of this thing's that's running (epic `data` P11, language's cancelling).",
+          "syntaxes": [
+            {
+              "syntax": "cancel {action:identifier}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RefreshThings",
+          "ruleNames": ["refresh_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/RefreshThings.ts",
+          "line": 12,
+          "purpose": "Ask a place again (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "refresh the {type:plural_type}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "HelpfulWord",
+          "ruleNames": ["helpful_word"],
+          "internal": false,
+          "file": "src/spell/rules/places/HelpfulWord.ts",
+          "line": 15,
+          "purpose": "A line starting with a word people bring from elsewhere, which Spell doesn't use for data: it says what to write instead (epic `data` P11).",
+          "syntaxes": [
+            {
+              "syntax": "(fetch|query|join)"
+            },
+            {
+              "syntax": "connect to"
+            }
+          ],
+          "aliases": ["statement"]
+        }
+      ]
+    },
+    {
       "module": "JSX",
       "rules": [
         {
@@ -6171,7 +6603,7 @@
           "ruleNames": ["assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/AssignmentStatement.ts",
-          "line": 34,
+          "line": 35,
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {

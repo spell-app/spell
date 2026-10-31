@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`testing spell module places > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
+{
+  "all_or_nothing": "body?",
+  "cancel_action": "action",
+  "cancel_draft": "draft",
+  "checked_every": "type|number",
+  "collection_at": "collection|path",
+  "create_place": "type|kind?|address?|with_nested_statements?|body?|superType?",
+  "draft_of": "thing",
+  "field_called": "owner|property|name",
+  "first_few_where": "number|type|body?",
+  "id_column": "type|column",
+  "if_that_fails": "body?",
+  "if_there_are_none": "body?",
+  "key_is_secret": "type|name",
+  "key_written": "type|key",
+  "number_of_things_where": "type|body?",
+  "operation_at": "path",
+  "refresh_things": "type",
+  "save_draft": "draft",
+  "saved_in_place": "type|place",
+  "total_of": "list",
+  "versions_in": "type|field",
+  "while_waiting": "body?",
+}
+`;

@@ -195,11 +195,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
+    - `wholeRows`:  each key's value is a whole row, as JSON, for things:  `family cookbook is this device`.
   - `RestPlace` and `GraphPlace`, on `WebPlace`:  a server, from a mapping of its paths and field names, on `Api`.
     - `WebPlace` turns an answer into what the engine needs:  not found, refused, or no answer (a 5xx, a 429:  it resends).
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
-    - `RestPlace`:  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
+    - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
     - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).

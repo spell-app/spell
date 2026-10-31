@@ -67,6 +67,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   "viewable list": "list",
   // a view people reach by its own address -- `a home is a page`
   page: "view",
+  // where a program's data lives:  `family cookbook is a web service at "..."` (epic `data` P11)
+  place: "thing",
   nothing: undefined
 }
 
@@ -83,6 +85,7 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   view: "View",
   "viewable list": "ViewableList",
   page: "Page",
+  place: "Place",
   // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView",
   notebook: "Notebook"

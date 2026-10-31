@@ -58,7 +58,7 @@
  * - A sample (`spell/util/places/SamplePlace`) isn't known here, so a program doesn't carry it.
  *   This only makes sure nothing done for one reaches the real place:  `swapped()`.
  */
-import { cellsOf, ITEMS_KEY, keysOf, schemaOf, sourcesReadBy, TYPE_KEY, untrackCells } from "spell/util"
+import { cellsOf, ITEMS_KEY, keysOf, schemaOf, sourcesReadBy, TYPE_KEY, untrackCells, type Schema } from "spell/util"
 import type { UndoRecord } from "spell/util/persist/persist.types"
 import type { UndoStack } from "spell/util/persist/UndoStack"
 import type {
@@ -138,11 +138,14 @@ const PLACE_WRITES: PlaceWriteListener = {
     const draft = DRAFT_COPIES.get(target)
     if (draft) return draft.noteField(property, value)
     const home = HOMES.get(target)
-    home?.things.noteWrite(home, property, was, value)
+    if (home) return home.things.noteWrite(home, property, was, value)
+    const holder = HELD_BY.get(target)
+    if (holder) noteWriteToHeld(target as SpellObject, holder, property, value)
   },
   items(list, before, after) {
     const held = LIST_FIELDS.get(list)
     if (held) {
+      noteHeldItems(after, held.owner, held.field)
       const draft = DRAFT_COPIES.get(held.owner)
       if (draft) return draft.noteField(held.field, after)
       const home = HOMES.get(held.owner)
@@ -155,7 +158,43 @@ const PLACE_WRITES: PlaceWriteListener = {
 
 /** Note that `list`, a plain one, is `owner`'s `field`, so a change to it is a write to that field. */
 function rememberListField(list: List, owner: SpellObject, field: string): void {
-  if (list.constructor === List) LIST_FIELDS.set(list, { owner, field })
+  if (list.constructor !== List) return
+  LIST_FIELDS.set(list, { owner, field })
+  noteHeldItems(list.items, owner, field)
+}
+
+/** Who holds each thing saved inside its owner's row, and in which of its fields:  `the recipe of an ingredient`. */
+const HELD_BY = new WeakMap<object, { owner: SpellObject; field: string }>()
+
+/** A thing saved inside its owner's row, as its class says:  `an ingredient belongs to one recipe`. */
+function isSavedWithOwner(thing: object | undefined): boolean {
+  return !!(thing?.constructor as { savedWith?: unknown } | undefined)?.savedWith
+}
+
+/** Note that each of `items` saved inside its owner's row is now `owner`'s. */
+function noteHeldItems(items: readonly unknown[], owner: SpellObject, field: string): void {
+  for (const item of items) if (isSavedWithOwner(item as object)) HELD_BY.set(item as object, { owner, field })
+}
+
+/** Who holds `thing`, saved inside its owner's row:  `core.ownerOfSaved()`. */
+export function heldBy(thing: object): SpellObject | undefined {
+  return HELD_BY.get(thing)?.owner
+}
+
+/**
+ * A field of `thing`, saved inside its owner's row, is about to be `value`:  the owner's list is what's written.
+ * - About to:  `noteSetting()` says so before the value lands, so the row written says the new value itself.
+ */
+function noteWriteToHeld(
+  thing: SpellObject,
+  { owner, field }: { owner: SpellObject; field: string },
+  property: string,
+  value: unknown
+): void {
+  const home = HOMES.get(owner)
+  if (!home) return
+  const list = (owner as unknown as Record<string, unknown>)[field] as List
+  home.things.noteHeldChange(home, field, list.items, thing, property, value)
 }
 
 /**
@@ -165,7 +204,11 @@ function rememberListField(list: List, owner: SpellObject, field: string): void 
 class RowWriter extends Saver {
   /** `value` as a row holds it. */
   jsonFor(value: unknown): unknown {
-    return this.write(value, (thing) => ({ [REF_KEY]: `${thing.constructor.name}#${thing.id}` }))
+    return this.write(value, (thing) =>
+      isSavedWithOwner(thing)
+        ? { [TYPE_KEY]: thing.constructor.name, id: thing.id, ...this.rowFor(thing) }
+        : { [REF_KEY]: `${thing.constructor.name}#${thing.id}` }
+    )
   }
 
   /** Every field `thing` holds, but its id. */
@@ -322,6 +365,73 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     }
   }
 
+  /**
+   * A thing saved inside `home`'s thing is about to change:  the list it's in is written, with that change in it.
+   * - `was`:  nothing:  it's a new list, even when it's the same things.
+   */
+  noteHeldChange(
+    home: ThingHome,
+    field: string,
+    items: readonly unknown[],
+    thing: SpellObject,
+    property: string,
+    value: unknown
+  ): void {
+    const pending = this.placesOrDie("noteWrite").pendingFor(home.placeName)
+    const group = this.groupNumberFor(pending)
+    const { collection, type, id } = home
+    const json = items.map((item) => {
+      const row = this.writer.jsonFor(item) as PlaceRow
+      return item === thing ? { ...row, [property]: this.writer.jsonFor(value) } : row
+    })
+    const write = { collection, type, id, field, ...(group !== undefined && { group }) }
+    this.writing(() => pending.setField({ ...write, value: json, was: undefined }))
+  }
+
+  /** Where `thing` is kept:  `undefined` for one in no place. */
+  placeOf(thing: SpellObject): { placeName: string; collection: string } | undefined {
+    const home = HOMES.get(thing)
+    return home && { placeName: home.placeName, collection: home.collection }
+  }
+
+  /** The draft `copy` is the copy of:  `undefined` for anything else. */
+  draftWithCopy(copy: SpellObject): PlaceDraft | undefined {
+    return DRAFT_COPIES.get(copy)
+  }
+
+  /**
+   * The thing for `row`, made or changed in place, and kept where the read says:  for a row told after a read.
+   * - throws `TypeError` if nothing is known by the name `type`
+   */
+  thingForRow({ placeName, collection, type, row, idField }: PlaceRowOf): SpellObject {
+    const thing = untrackCells(() => whileReading(() => this.thingFrom(type, row, idField)))
+    const id = idOfRow(row, idField)
+    if (id !== undefined) this.remember(thing, { things: this, placeName, collection, type, id })
+    return thing
+  }
+
+  /**
+   * Run `run`, what it changes in each place one group, held until it ends:  `all or nothing:`.
+   * - It throws, and they're dropped, and put back.
+   * - throws what `run` threw
+   */
+  async inOneGroup(run: () => unknown): Promise<void> {
+    const outer = this.groupsTogether
+    const groups = (this.groupsTogether = new Map<PendingChanges, PendingGroup & { number: number }>())
+    try {
+      await run()
+    } catch (error) {
+      for (const group of groups.values()) group.cancel()
+      throw error
+    } finally {
+      this.groupsTogether = outer
+    }
+    for (const group of groups.values()) group.end()
+  }
+
+  /** The groups an `all or nothing:` holds its changes in, for each place, while one runs. */
+  private groupsTogether: Map<PendingChanges, PendingGroup & { number: number }> | undefined
+
   /** A value as a row holds it:  what's kept of a draft. */
   rowValue(value: unknown): unknown {
     return this.writer.jsonFor(value)
@@ -451,6 +561,16 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       const value = (thing as unknown as Record<string, unknown>)[key]
       if (value instanceof List) rememberListField(value, thing, key)
     }
+    // a list property is made the first time it's read, which may be after this:  it's made now, so a change to it is heard
+    whileReading(() => {
+      for (let schema = schemaOf(thing.constructor) as Schema | undefined; schema; schema = schema.parent) {
+        for (const [key, info] of schema.declared) {
+          if (!info.itemType) continue
+          const value = (thing as unknown as Record<string, unknown>)[key]
+          if (value instanceof List) rememberListField(value, thing, key)
+        }
+      }
+    })
   }
 
   /**
@@ -460,6 +580,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   noteWrite(home: ThingHome, field: string, was: unknown, value: unknown): void {
     const { placeName, collection, type, id } = home
     const places = this.placesOrDie("noteWrite")
+    this.noteKnownHeld(value)
     const pending = places.pendingFor(placeName)
     if (places.placeFor(placeName) !== places.declaredPlaceFor(placeName))
       this.noteWrittenInstead(`${type}#${id}`, field)
@@ -471,6 +592,14 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
       else pending.setField({ ...thing, value: asJson, was: wasJson })
     })
+  }
+
+  /** Each thing in `value`, a list's items, that's saved inside its owner is known by its id from now on. */
+  private noteKnownHeld(value: unknown): void {
+    if (!Array.isArray(value)) return
+    for (const item of value) {
+      if (isSavedWithOwner(item as object)) this.loaded.set(`${item.constructor.name}#${item.id}`, item as SpellObject)
+    }
   }
 
   /** `field` of the thing `ref` was written while another place is in for its own. */
@@ -499,6 +628,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    */
   private groupNumberFor(pending: PendingChanges): number | undefined {
     if (this.savingInGroup !== undefined) return this.savingInGroup
+    if (this.groupsTogether) {
+      let group = this.groupsTogether.get(pending)
+      if (!group) this.groupsTogether.set(pending, (group = pending.startGroup()))
+      return group.number
+    }
     const runtime = core.RUNTIME
     const running = runtime?.actions.current
     if (!running && !runtime?.history.isActing) return undefined
@@ -618,12 +752,28 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   /** How many rows with no id it's seen:  a name for each, while it's made. */
   private rowsWithNoId = 0
 
+  /**
+   * `json`, with each thing saved inside its owner that's already known here changed in place, and said by reference:
+   * so a row read again leaves the things it holds the same things.
+   */
+  private withKnownHeld(json: unknown): unknown {
+    if (!Array.isArray(json)) return json
+    return json.map((item) => {
+      const { [TYPE_KEY]: type, id } = (item ?? {}) as { [TYPE_KEY]?: string; id?: string }
+      const ref = `${type}#${id}`
+      const known = type && this.loaded.get(ref)
+      if (!known) return item as unknown
+      this.changeInPlace(known, item as PlaceRow)
+      return { [REF_KEY]: ref }
+    })
+  }
+
   /** Set each field `row` has on `thing`, read back as an entry's are;  what's the same changes nothing. */
   private changeInPlace(thing: SpellObject, row: PlaceRow): void {
     const fields = thing as unknown as Record<string, unknown>
     for (const [key, json] of Object.entries(row)) {
       if (key === "id" || key.startsWith("$")) continue
-      const value = dateIfDeclared(thing.constructor as never, key, this.read(json))
+      const value = dateIfDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
       const current = fields[key]
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
@@ -711,6 +861,20 @@ export type PlaceEditOptions = {
   title: string
   /** Where the step goes, e.g. the editor's own history.  Left out:  the running program's. */
   history?: UndoStack
+}
+
+/** What `PlaceThings.thingForRow()` is told. */
+type PlaceRowOf = {
+  /** The place's name. */
+  placeName: string
+  /** Its collection. */
+  collection: string
+  /** Its class's name. */
+  type: string
+  /** The row. */
+  row: PlaceRow
+  /** The field holding its id. */
+  idField: string
 }
 
 /** Constructor props of a `PlaceEdit`. */

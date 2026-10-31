@@ -28,6 +28,10 @@ type WaitedValue = {
   read: () => unknown
   /** The promise its last run started:  what an action waits for. */
   latest?: Promise<unknown>
+  /** Works it out afresh. */
+  compute: () => Promise<unknown>
+  /** Has a drawing or a memo read it?  Then Solid runs it again when what it read changes;  until then, nothing does. */
+  isFollowed?: boolean
 }
 
 /** One `answerOf()` reading:  the answers it has, and the values it found it still needs. */
@@ -68,7 +72,10 @@ export const waitingMethods = defineCoreModule({
       value = newWaitedValue(compute, follows)
       values.set(name, value)
     }
-    if (!answering) return value.read() as Value
+    if (!answering) {
+      if (getObserver()) value.isFollowed = true
+      return value.read() as Value
+    }
     if (answering.answers.has(value)) return answering.answers.get(value) as Value
     answering.needed.push(value)
     throw NOT_ANSWERED
@@ -110,7 +117,7 @@ export function standInFor(read: () => Drawing): Drawing {
 
 /** A new value, owned for good:  see `WAITING_OWNER`. */
 function newWaitedValue<Value>(compute: () => Promise<Value>, follows?: () => unknown): WaitedValue {
-  const value: WaitedValue = { read: () => undefined }
+  const value: WaitedValue = { read: () => undefined, compute }
   value.read = runWithOwner(WAITING_OWNER, () =>
     createRoot(() =>
       createDeferred(
@@ -146,6 +153,8 @@ function readWith(answers: Map<WaitedValue, unknown>, thing: unknown, name: stri
 
 /** `value`'s newest answer:  started by a read, if nothing has run it yet, and again if a change starts another. */
 async function latestAnswer(value: WaitedValue): Promise<unknown> {
+  // `lazy`:  nothing draws it, so nothing runs it again, and its old answer stays:  an action asks for itself (epic `data` P11)
+  if (!value.isFollowed) return value.compute()
   try {
     value.read()
   } catch (ignored) {

@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { noteLoopItem } from "spell/parser/spell/rules/places/places.shared"
 import { KindName } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -38,6 +39,12 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     // for `getAST()`, which can't look it up
     ;(match.data as ItemVariableData).itemVariable = variable
+    // for `DrawnLines`:  a saved type's loop draws as a read
+    const itemType = typeof datatype === "string" ? match.scope.getType(datatype) : undefined
+    if (itemType) {
+      ;(match.data as { itemType?: P.TypeScope }).itemType = itemType
+      noteLoopItem(match.scope, itemType)
+    }
     const args: P.ScopeVariable[] = [variable]
     if (position) args.push(new P.ScopeVariable({ name: position.value, datatype: "number", declaredBy: position }))
     return new P.MethodScope({

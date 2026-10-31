@@ -88,9 +88,21 @@ export class RestPlace extends WebPlace implements Place {
   private readonly pageSize: number
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
+  /** Each named operation's address. */
+  private readonly operations: Readonly<Record<string, string>>
 
-  constructor({ collections = {}, can, versions, update = "PATCH", params, pageSize, ...rest }: RestPlaceProps) {
+  constructor({
+    collections = {},
+    can,
+    versions,
+    update = "PATCH",
+    params,
+    pageSize,
+    operations,
+    ...rest
+  }: RestPlaceProps) {
     super(rest)
+    this.operations = operations ?? {}
     this.collections = collections
     this.versions = versions
     this.updateMethod = update
@@ -102,6 +114,19 @@ export class RestPlace extends WebPlace implements Place {
   /** What it can do. */
   describe(): PlaceCapabilities {
     return this.capabilities
+  }
+
+  /**
+   * `POST` to a named operation's address:  what the server answers.
+   * - throws `TypeError` for an operation it wasn't told of;  `PlaceError` for an answer that means something
+   */
+  async call(name: string, input: unknown, context: SelectingContext): Promise<unknown> {
+    const path = this.operations[name]
+    if (path === undefined) {
+      throw new TypeError(`RestPlace.call():  nobody says where "${name}" is;  name it in \`operations\``)
+    }
+    const response = await this.answerTo({ url: path, urlData: {}, method: "POST", data: input as never }, context)
+    return jsonIn(response)
   }
 
   ////////////////
@@ -359,6 +384,8 @@ export type RestPlaceProps = WebPlaceProps & {
   collections?: Readonly<Record<string, RestCollection>>
   /** What this API does for itself, over a plain one that does nothing.  Declared per API:  they vary. */
   can?: Partial<Omit<PlaceCapabilities, "page">> & { page?: Exclude<PageKind, "range"> }
+  /** Each named operation's address under `url`, by its name:  `{ publish: "/recipes/publish" }`, for `call()`. */
+  operations?: Readonly<Record<string, string>>
   /** How it knows what version a thing is at.  Left out:  it doesn't, so the last save wins the whole record. */
   versions?: RestVersions
   /** How it updates:  `PATCH`, the fields changed (the default), or `PUT`, the whole record. */

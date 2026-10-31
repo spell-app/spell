@@ -20,7 +20,7 @@ const GRAPH_PAGE_SIZE = 100
 
 /** What it can do, unless it's told otherwise:  it always asks for only the fields wanted. */
 const GRAPH_CAPABILITIES: PlaceCapabilities = {
-  kind: "web service",
+  kind: "graph service",
   idOf: "id",
   filter: "none",
   sort: "none",

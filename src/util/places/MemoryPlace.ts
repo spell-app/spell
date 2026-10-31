@@ -337,7 +337,7 @@ export class MemoryPlace implements Place {
   /** The version of the last write to this thing, of the first `writes`:  0 if it hasn't changed since it was handed in. */
   private lastWriteOf(collection: string, id: string, writes: number): number {
     const earlier = this.history.slice(0, writes)
-    return earlier.findLastIndex((event) => event.collection === collection && event.id === id) + 1
+    return earlier.map((event) => event.collection === collection && event.id === id).lastIndexOf(true) + 1
   }
 
   ////////////////

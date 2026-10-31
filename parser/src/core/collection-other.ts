@@ -39,18 +39,26 @@ export type CollectionIterationCallback<T = unknown> = (
 
 /**
  * Which of two sort keys goes first -- see `core.sortedBy()`.
- * - Nothing goes last;  text ignores case;  anything else compares as javascript's `<` does.
- * - Python's core sorts the same:  `_sort_key()`.
+ * - Nothing goes last;  text in the language's own order, ignoring case;  anything else compares as javascript's `<` does.
+ * - Python's core sorts the same, but for accents, which it reads as their plain letter:  `_sort_key()`.
  */
-function compareSortKeys(one: unknown, other: unknown): number {
+export function compareSortKeys(one: unknown, other: unknown): number {
   if (one === undefined || one === null) return other === undefined || other === null ? 0 : 1
   if (other === undefined || other === null) return -1
-  const [first, second] = [one, other].map((key) => (typeof key === "string" ? key.toLowerCase() : key)) as [
-    number,
-    number
-  ]
-  if (first < second) return -1
-  return first > second ? 1 : 0
+  if (typeof one === "string" && typeof other === "string") return textOrder().compare(one, other)
+  if ((one as number) < (other as number)) return -1
+  return (one as number) > (other as number) ? 1 : 0
+}
+
+/** The order text sorts in, in each language, kept:  making one is slow. */
+const TEXT_ORDERS = new Map<string, Intl.Collator>()
+
+/** The order text sorts in, in the program's own language:  `ñ` after `n` in Spanish, case ignored. */
+function textOrder(): Intl.Collator {
+  const lang = core.message("language")
+  let order = TEXT_ORDERS.get(lang)
+  if (!order) TEXT_ORDERS.set(lang, (order = new Intl.Collator(lang, { sensitivity: "base" })))
+  return order
 }
 
 /** A list with guards, e.g. a `List` -- see `core.move()`, `List.moveHere()`. */
@@ -398,12 +406,37 @@ export const collectionOtherMethods = defineCoreModule({
     if (!assert.isDefined(collection, "core.sortedBy(collection)")) return undefined as C
     const keyed: Array<{ value: T; sortKey: unknown }> = []
     core.forEach(collection, (value, position, _collection) => {
-      keyed.push({ value, sortKey: key ? key(value, position, _collection) : value })
+      const sortKey = key ? key(value, position, _collection) : value
+      if (sortKey instanceof Promise)
+        throw new TypeError("core.sortedBy():  a sort key can't wait:  it would sort by promises, in no order")
+      keyed.push({ value, sortKey })
     })
     keyed.sort((one, other) => compareSortKeys(one.sortKey, other.sortKey))
     const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
     for (const { value } of keyed) core.append(results, value)
     return results as C
+  },
+
+  /** The first `count` items of `collection`, as a list that owns none of them:  `the first 20 recipes where ...`. */
+  firstFew<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection: (C & CollectionOf<T>) | undefined,
+    count: number
+  ): C {
+    const results = core.isArrayLike(collection) ? core.newThingLike(collection!) : []
+    let taken = 0
+    core.forEach(collection as C & CollectionOf<T>, (value) => {
+      if (taken++ < count) core.append(results, value)
+    })
+    return results as C
+  },
+
+  /** The sum of `collection`'s items:  `the total of its prices`.  What isn't a number counts as nothing. */
+  totalOf(collection?: unknown): number {
+    let total = 0
+    core.forEach(collection as CollectionOf<unknown>, (value) => {
+      if (typeof value === "number") total += value
+    })
+    return total
   },
 
   /**

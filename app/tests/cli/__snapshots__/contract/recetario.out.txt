@@ -1,0 +1,2 @@
+
+<div id="spell-app-root"><test-project-app><ui-form class="box" value="[object Object]"><ui-input aria-label="Búsqueda" class="search" name="búsqueda"></ui-input><ui-input aria-label="Receta nueva" class="draft" name="borrador"></ui-input><ui-button class="add" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Agregar</ui-button></ui-form><ui-text class="none">Todavía no hay recetas.</ui-text></test-project-app></div>
