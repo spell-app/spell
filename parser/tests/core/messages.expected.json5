@@ -12,6 +12,9 @@
     "undo": "Undo",
     "undo-step": "Undo {step}",
     "redo": "Redo",
-    "redo-step": "Redo {step}"
+    "redo-step": "Redo {step}",
+    "write-refused": "Couldn't save your change to {thing}",
+    "write-retry": "Retry",
+    "write-show-me": "Show me"
   }
 }

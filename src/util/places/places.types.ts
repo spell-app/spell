@@ -133,6 +133,8 @@ export type PlaceContext = {
   signal?: AbortSignal
   /** Who's asking, as the place knows them:  it decides what they own. */
   identity?: string
+  /** The page is going away:  the request has to outlive it, as `fetch`'s `keepalive` does. */
+  keepalive?: boolean
 }
 
 /** `PlaceContext`, plus which fields the answer needs. */
@@ -205,6 +207,12 @@ export type PlaceChange = {
   fields?: PlaceRow
   /** The version this change was made from:  a place with `versionCheck` refuses it if the thing has moved on. */
   version?: string
+  /**
+   * Names this one change:  sent again with no answer, it has the same one, so a place that remembers them makes it once.
+   * - A place that doesn't remember:  writing the same field again is harmless, and an insert with its id replaces
+   *   what the first made;  an insert into a place that `makesIds` is the one that can double.
+   */
+  changeId?: string
 }
 
 /** A place's answer to `apply()`. */

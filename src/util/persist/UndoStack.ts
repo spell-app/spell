@@ -114,6 +114,16 @@ export class UndoStack {
     return result
   }
 
+  /**
+   * Run `callback` when the open transaction closes:  at once, if none is open.
+   * - After its step is on the stack, however it ended.
+   * - What groups an action's writes to a place (`spell/parser/core/places`).
+   */
+  afterTransaction(callback: () => void): void {
+    if (this.open) this.afterClose.push(callback)
+    else callback()
+  }
+
   /** Forget every step, to undo and to redo, e.g. when the app opens another document. */
   clear(): void {
     this.undoSteps = []
@@ -185,6 +195,9 @@ export class UndoStack {
   /** The transaction open now:  `transaction()`'s step. */
   private open: UndoStep | undefined
 
+  /** What's waiting for the open transaction to close:  `afterTransaction()`. */
+  private afterClose: (() => void)[] = []
+
   /** True while `undo()` or `redo()` runs records. */
   private applying = false
 
@@ -195,6 +208,7 @@ export class UndoStack {
   private close(step: UndoStep): void {
     if (this.open === step) this.open = undefined
     if (step.records.length) this.push(step)
+    if (!this.open) this.afterClose.splice(0).forEach((callback) => callback())
   }
 
   /** Put `step` on top, folding it into the newest when it can (`fold()`);  the redo stack is emptied. */

@@ -7,6 +7,7 @@
  *   `choicesRoutes.ts`):  `epics` never imports `docs` (the root's dependency rule).
  * - Data, types and the one-line answer box's rule (`keepOneLine()`):  nothing here runs at import.
  */
+import type { SaveState } from "spell/util/places/SaveQueue"
 
 ////////////////
 // ## Routes
@@ -134,14 +135,7 @@ export function stopNewLine(event: KeyboardEvent) {
  * - `failed`:  didn't go through, `why`;  tried again every 3s
  * - `off server`:  the page isn't on the page server:  only the browser's copy keeps it
  */
-export type DraftState =
-  | { kind: "idle" }
-  | { kind: "unsaved" }
-  | { kind: "saving" }
-  | { kind: "saved"; at: string }
-  | { kind: "told"; text: string; isError?: boolean }
-  | { kind: "failed"; why: string }
-  | { kind: "off server" }
+export type DraftState = SaveState
 
 ////////////////
 // ## A details page's answer

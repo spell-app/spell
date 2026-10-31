@@ -80,6 +80,18 @@ export class UndoHistory extends UndoStack {
     return this.isInTransaction && !this.isApplying && this.cantBeUndoneRunning === 0
   }
 
+  /** Is an action declared with `declareAction()` running, of either kind? */
+  get isActing(): boolean {
+    return this.isInTransaction || this.cantBeUndoneRunning > 0
+  }
+
+  /** Run `callback` once no declared action is running:  at once, if none is. */
+  afterAction(callback: () => void): void {
+    if (!this.isActing) return callback()
+    if (this.isInTransaction) return this.afterTransaction(() => this.afterAction(callback))
+    this.afterCantBeUndone.push(() => this.afterAction(callback))
+  }
+
   /**
    * Run `act`, an action, as `info` declares it -- see `ActionInfo`.  Returns what `act` returns.
    * - `undoneAs`:  ONE step, open until `act` returns, or until its promise settles (`transaction()`).
@@ -94,6 +106,7 @@ export class UndoHistory extends UndoStack {
     const done = () => {
       this.cantBeUndoneRunning--
       if (info.cantBeUndone === "clears history") this.clear()
+      if (!this.cantBeUndoneRunning) this.afterCantBeUndone.splice(0).forEach((callback) => callback())
     }
     let result: T
     try {
@@ -184,6 +197,9 @@ export class UndoHistory extends UndoStack {
 
   /** How many `cantBeUndone` actions are running now:  nothing records while one is. */
   private cantBeUndoneRunning = 0
+
+  /** What's waiting for the `cantBeUndone` actions to end:  `afterAction()`. */
+  private afterCantBeUndone: (() => void)[] = []
 }
 
 ////////////////

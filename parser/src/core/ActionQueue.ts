@@ -47,6 +47,7 @@ type Entry = QueuedAction & {
  * - One that fails is said on the program's console, and the next one runs.
  * - Canceling (`cancel()`) stops an action at its next wait, with a `CanceledError`, which nothing reports:
  *   - what it wrote to properties stays;  its `signal` tells who started it, to drop what's theirs
+ *   - except a thing kept in a place:  its writes hadn't left, and go back (`spell/parser/core/places`, epic `data` P3)
  *   - the next action waits until it has really ended, so two never overlap:
  *     a wait outside `core` (a fetch) should pass `core.runningAction()?.signal` along, to end sooner
  * - NOTE:  javascript can't say whose wait is whose, so a `core` wait made while an action is being canceled counts
@@ -68,10 +69,17 @@ export class ActionQueue {
     return !!this.running || this.holds > 0
   }
 
-  /** The action running now:  what it's on, its name and its `signal`, told if it's canceled. */
-  get current(): { thing: unknown; name: string; signal: AbortSignal } | undefined {
+  /** The action running now:  what it's on, its name, its `signal`, told if it's canceled, and when it's `finished`. */
+  get current(): { thing: unknown; name: string; signal: AbortSignal; finished: Promise<void> } | undefined {
     const { running } = this
-    return running && { thing: running.thing, name: running.name, signal: running.controller.signal }
+    return (
+      running && {
+        thing: running.thing,
+        name: running.name,
+        signal: running.controller.signal,
+        finished: running.finished
+      }
+    )
   }
 
   /**

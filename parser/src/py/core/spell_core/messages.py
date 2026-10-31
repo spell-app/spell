@@ -25,6 +25,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
+| `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
+| `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 """
 
 import re
@@ -43,6 +45,9 @@ MESSAGES: dict[str, str] = {
     "undo-step": "Undo {step}",
     "redo": "Redo",
     "redo-step": "Redo {step}",
+    "write-refused": "Couldn't save your change to {thing}",
+    "write-retry": "Retry",
+    "write-show-me": "Show me",
 }
 
 # A named placeholder in a message, `{type}`.

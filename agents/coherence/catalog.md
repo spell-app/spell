@@ -820,9 +820,18 @@ What a component, or a page built on Spell UI, reaches for first.
   - the syntax page's boxes (`syntax-choices.css`):  native on purpose, 750 of them, each a `<ui-textarea>` would draw
     a shadow root
 
+### Saving in the background
+
+- **It is:**  `SaveQueue` (`src/util/places/SaveQueue.ts`), handed the save call and the wait:
+  saves in order, one at a time, retries every 3s, sends as the page goes away, keeps a browser copy (`BrowserCopy`),
+  and words where it stands
+- **Flag:**  `retry.*save|save.*retry|keepalive`
+- **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/util/places/SaveQueue.ts`
+- **Copies:**  `--` since epic `data` P3:  `DraftSaver` and `PendingChanges` are both on it
+
 ### A draft that saves itself
 
-- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), handed the save call, the wait and the key:
+- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), on `SaveQueue`, handed the save call, the wait and the key:
   saves as you type, says "saved 14:04", retries a failed save every 3s
 - **Flag:**  `draft saved|saveDraft`
 - **Score:**  `\bdraftTimer\b|setTimeout\(\(\) => (this\.)?saveDraft` · home `epic/src/answers/DraftSaver.ts`

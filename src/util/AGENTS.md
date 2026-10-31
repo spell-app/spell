@@ -174,6 +174,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
+  - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
+    - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
+    - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
+      (`Places.onWriteFailed()`).
+    - It sits on top of what's read (`replayOn()`), so you read your own writes.
+    - A write back to what it `was`, not yet sent, drops the change:  that's undo before sending.
+    - A group is an action's:  held until `end()`, never kept on the device, dropped by `cancel()`.
+  - [SaveQueue](places/SaveQueue.ts):  saving in the background, in order, until it goes through;
+    `PendingChanges` and spell-epic's `DraftSaver` are both on it.
+    - Taken by file, `spell/util/places/SaveQueue`:  a page that only types pays for no place.
+    - `BrowserCopy` beside it:  one value kept in the browser, under one key.
+  - `PlaceHeal` (`Places.heal`):  fetch the latest, replay what's pending;  on opening, on a refusal and on demand.
+    What changed is told through `Places.onRows()`.
   - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
     - Imports nothing:  spell's core takes it by file, `spell/util/places/refs`.
     - A program's mirrored state keeps its counted `"$id"`:  it's what the Python page speaks.
@@ -183,7 +196,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage.
   - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
-    which keep the interface honest until those two are built.
+    which keep the interface honest until those two are built;
+    and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.
 
 ## Decorators
 

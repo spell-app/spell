@@ -253,20 +253,35 @@ export type NotifyOptions = {
   pauseOnHover?: boolean
   /** a button that closes it:  `with "Got it"`;  it stays until it's closed */
   button?: string
+  /** buttons that DO something, e.g. Retry and Show me:  each closes it;  it stays until it's closed */
+  actions?: readonly NotifyAction[]
+}
+
+/** One button of `NotifyOptions.actions`. */
+export type NotifyAction = {
+  /** what it says */
+  text: string
+  /** pressed */
+  click: () => void
 }
 
 /** What core hands Spell UI's `UI.toast()`:  a copy of the part of its `ToastOptions` that `notify` uses. */
-type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button"> & {
+type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button" | "actions"> & {
   message: string
   displayTime?: number | "auto"
-  actions?: { text: string }[]
+  actions?: { text: string; click?: () => void }[]
 }
 
 /** `notify`'s message and options as Spell UI's toast options:  its time in milliseconds, its button an action. */
 function toastOptionsFor(message: string, options: NotifyOptions): PageToastOptions {
-  const { time, units = "seconds", button, ...toastOptions } = options
-  const displayTime = button ? 0 : time === undefined ? "auto" : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
-  return { ...toastOptions, message, displayTime, ...(button ? { actions: [{ text: button }] } : {}) }
+  const { time, units = "seconds", button, actions: pressed = [], ...toastOptions } = options
+  const actions = [...pressed, ...(button ? [{ text: button }] : [])]
+  const displayTime = actions.length
+    ? 0
+    : time === undefined
+      ? "auto"
+      : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
+  return { ...toastOptions, message, displayTime, ...(actions.length ? { actions } : {}) }
 }
 
 /**

@@ -29,7 +29,7 @@ export type ResultStatus = (typeof ResultStatuses)[number]
  * - `leave()` when nothing shows it any more:  the last reader leaving aborts the read.
  *   - Inside a Solid memo:  `onCleanup(() => result.leave())`, as Solid hands a memo no abort signal.
  * - A refresh that fails leaves the rows there, and says so:  `"couldn't update"`.
- * - NEVER saves:  changes go to the place, not through a result.
+ * - NEVER saves:  changes go through `Places.pendingFor()`, not through a result.
  ****************/
 export class PlaceResult extends Loadable<PlaceRow[]> {
   /** The name of the place it reads. */
@@ -115,7 +115,7 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
    * - `answer`:  what the place said with those rows, if that was kept too.
    */
   showFromEarlierVisit(rows: PlaceRow[], answer?: Omit<ListAnswer, "rows">): this {
-    this.contents = this.rowsKept(rows, this.place, "write them")
+    this.contents = this.rowsKept(rows, this.place, "write them", this.query)
     this.setState("isFromEarlierVisit", true)
     if (answer) this.setState("answer", answer)
     return this
@@ -197,25 +197,32 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     const { rows, ...rest } = await answer
     if (signal.aborted) return []
     this.setState("answer", rest)
-    const kept = this.rowsKept(rows, place, wasAlreadyAnswered ? "only new ones" : "write them")
+    const kept = this.rowsKept(rows, place, wasAlreadyAnswered ? "only new ones" : "write them", query ?? this.query)
     this.places.reads.noteRows(this, kept)
     return kept
   }
 
   /** NEVER saves.  - throws `TypeError`, always */
   getSaver(): Promise<never> {
-    throw new TypeError(`PlaceResult.save():  a result can't be saved;  apply() changes on the place instead`)
+    throw new TypeError(`PlaceResult.save():  a result can't be saved;  Places.pendingFor() takes changes instead`)
   }
 
   /**
    * `rows`, each the cache's ONE row for its id:  as they are when they share no identity.
    * - `"only new ones"`:  the answer may be old, as when joining a read that finished a while ago.
    *   A row we already hold keeps its fields:  another read may have brought fresher ones.
+   * - What's pending sits on top of what's read (`PendingChanges.replayOn()`), so you read your own writes.
    */
-  private rowsKept(rows: PlaceRow[], place: Place, writing: "write them" | "only new ones"): PlaceRow[] {
+  private rowsKept(
+    answered: PlaceRow[],
+    place: Place,
+    writing: "write them" | "only new ones",
+    query: ListQuery
+  ): PlaceRow[] {
     const { type } = this
     const { cache } = this.places
     const { idOf } = place.describe()
+    const rows = this.places.pendingIfAny(this.placeName)?.replayOn(this.collection, answered, query) ?? answered
     if (type === undefined || idOf === undefined) return [...rows]
     return rows.map((row) => {
       const id = idOfRow(row, idOf)

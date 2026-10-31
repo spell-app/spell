@@ -236,7 +236,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
-    - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
+    - `DraftSaver` (epic `coherence` C10;  on the kit's `SaveQueue` since epic `data` P3):  a draft that saves itself, the ONE way every page Owen types into keeps
       what's typed and not sent:  the three forms, `<epic-review>`'s note, the docs pages' comments
       and the syntax page
       - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,

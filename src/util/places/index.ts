@@ -7,6 +7,9 @@
  * - `PlaceQuery` does what a place can't, up to a ceiling.
  * - `MemoryPlace` and `DevicePlace` (this device, over preferences' `PrefPlace`) are the first two places.
  * - `refs` names anything saved in text, `Recipe#r-12`.
+ * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
+ * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
+ * - `PlaceHeal`:  fetch the latest, replay what's pending.
  * - NOTE:  NOT flattened into `spell/util`, so no page pays for it until it uses it.
  * - GENERIC:  nothing about Things or Spell's words.
  *   Everything that needs a server is `spell/server/places`.
@@ -21,5 +24,8 @@ export * from "./PlaceQuery"
 export * from "./PlaceReads"
 export * from "./PlaceResult"
 export * from "./Places"
+export * from "./SaveQueue"
+export * from "./PendingChanges"
+export * from "./PlaceHeal"
 export * from "./MemoryPlace"
 export * from "./DevicePlace"

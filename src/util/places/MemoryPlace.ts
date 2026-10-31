@@ -54,6 +54,8 @@ export class MemoryPlace implements Place {
   private readonly watchers = new Set<{ target: WatchTarget; onEvent: (event: PlaceEvent) => void }>()
   /** Each write so far, oldest first:  each one's place in this list is the version it made, counting from 1. */
   private readonly history: PlaceEvent[] = []
+  /** What each change with a `changeId` made, so one sent again is made only once. */
+  private readonly changesMade = new Map<string, PlaceRow | undefined>()
 
   constructor({ capabilities, collections = {}, operations = {} }: MemoryPlaceProps = {}) {
     this.capabilities = { ...MEMORY_CAPABILITIES, ...capabilities }
@@ -153,15 +155,21 @@ export class MemoryPlace implements Place {
    * Make these changes.
    * - `atomic`:  each is checked before any is made, so a refused one means nothing changed.
    * - Not `atomic`:  each is checked as it's reached, so the ones before a refused one stay made.
+   * - A `changeId` it has seen:  already made, so it only answers with that row.
    * - throws `PlaceError`:  refused, not found or out of date
    */
   async apply(changes: readonly PlaceChange[], { signal, identity }: PlaceContext = {}): Promise<ApplyAnswer> {
     signal?.throwIfAborted()
-    if (this.capabilities.atomic) changes.forEach((change) => this.checkChange(change, identity))
+    const isNew = ({ changeId }: PlaceChange) => changeId === undefined || !this.changesMade.has(changeId)
+    if (this.capabilities.atomic) changes.filter(isNew).forEach((change) => this.checkChange(change, identity))
     const rows: PlaceRow[] = []
     for (const change of changes) {
-      this.checkChange(change, identity)
-      const row = this.makeChange(change)
+      if (isNew(change)) {
+        this.checkChange(change, identity)
+        const made = this.makeChange(change)
+        if (change.changeId !== undefined) this.changesMade.set(change.changeId, made)
+      }
+      const row = change.changeId === undefined ? this.lastMade : this.changesMade.get(change.changeId)
       if (row) rows.push(structuredClone(row))
     }
     return { rows, version: this.version }
@@ -220,8 +228,16 @@ export class MemoryPlace implements Place {
     }
   }
 
+  /** The row `makeChange()` last made, for a change with no `changeId`. */
+  private lastMade: PlaceRow | undefined
+
   /** Make one checked `change`:  returns its row, unless it deleted one. */
-  private makeChange({ kind, collection, id, fields }: PlaceChange): PlaceRow | undefined {
+  private makeChange(change: PlaceChange): PlaceRow | undefined {
+    return (this.lastMade = this.rowChangedBy(change))
+  }
+
+  /** `makeChange()`'s work. */
+  private rowChangedBy({ kind, collection, id, fields }: PlaceChange): PlaceRow | undefined {
     const rows = this.rowsOf(collection, "make it")
     const idField = this.capabilities.idOf
     if (kind === "delete") {

@@ -150,6 +150,8 @@ export type TestCheck = {
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
+ * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-retry`, `write-show-me` | that notice's buttons | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -165,7 +167,10 @@ export const CORE_MESSAGES = {
   undo: "Undo",
   "undo-step": "Undo {step}",
   redo: "Redo",
-  "redo-step": "Redo {step}"
+  "redo-step": "Redo {step}",
+  "write-refused": "Couldn't save your change to {thing}",
+  "write-retry": "Retry",
+  "write-show-me": "Show me"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */
