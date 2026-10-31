@@ -114,6 +114,7 @@
         "splitPath",
         "notify",
         "alert",
+        "warn",
         "confirm",
         "prompt"
       ]

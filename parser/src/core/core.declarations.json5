@@ -1208,6 +1208,23 @@
     },
     {
       "kind": "method",
+      "name": "warn",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "message"
+        },
+        {
+          "name": "okText"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Warn the person in a dialog, and wait until it's closed -- compiled from `warn \"Careful!\"` (`await`ed)."
+    },
+    {
+      "kind": "method",
       "name": "confirm",
       "of": "core",
       "module": "ui",

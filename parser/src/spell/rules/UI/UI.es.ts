@@ -158,8 +158,8 @@ UIEs.addRule(Warn, {
     {
       compileAs: "statement",
       tests: [
-        [`advertir "Yo!"`, 'core.warn("Yo!")'],
-        [`advertir "Yo!" con "vale"`, 'core.warn("Yo!", "vale")']
+        [`advertir "Yo!"`, 'await core.warn("Yo!")'],
+        [`advertir "Yo!" con "vale"`, 'await core.warn("Yo!", "vale")']
       ]
     }
   ]

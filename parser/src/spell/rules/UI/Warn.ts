@@ -6,9 +6,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 /**
  * `warn` rule:  warning message -- like alert but more dire.
  * - e.g. `warn "Yo!"`
- * - Returns a promise which resolves when they click `ok`.
- * - NOTE: we'll `await` the promise!
- * - TODO: `the result = await ...` ?
+ * - Waits until they click `ok`:  `await core.warn("Yo!")`, as `alert` does.
  */
 export class Warn extends SpellStatement<"message|okButton?"> {
   @proto static alias = "statement"

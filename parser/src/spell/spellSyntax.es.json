@@ -6565,7 +6565,7 @@
           "ruleNames": ["warn"],
           "internal": false,
           "file": "src/spell/rules/UI/Warn.ts",
-          "line": 13,
+          "line": 11,
           "purpose": "Warning message -- like alert but more dire.",
           "syntaxes": [
             {
@@ -6573,10 +6573,10 @@
               "example": "advertir \"Yo!\"",
               "outputs": {
                 "js": {
-                  "code": "core.warn(\"Yo!\")"
+                  "code": "await core.warn(\"Yo!\")"
                 },
                 "ts": {
-                  "code": "core.warn(\"Yo!\")"
+                  "code": "await core.warn(\"Yo!\")"
                 },
                 "py": {
                   "code": "core.warn(\"Yo!\")"

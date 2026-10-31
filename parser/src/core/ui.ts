@@ -84,6 +84,17 @@ export const uiMethods = defineCoreModule({
   },
 
   /**
+   * Warn the person in a dialog, and wait until it's closed -- compiled from `warn "Careful!"` (`await`ed).
+   * - No Spell UI:  printed as a warning on the console.
+   */
+  async warn(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
+    const ui = pageUI()
+    if (!ui) return core.console.warn(String(message))
+    await (await ui.load()).modals.alert({ message: String(message), okText })
+  },
+
+  /**
    * Ask a yes / no question in a dialog:  `true` for ok -- compiled from `confirm "Delete?"` (`await`ed).
    * - No Spell UI:  `true`, printed with the question.
    */

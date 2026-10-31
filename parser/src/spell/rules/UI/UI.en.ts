@@ -145,8 +145,8 @@ UI.addRule(Warn, {
     {
       compileAs: "statement",
       tests: [
-        [`warn "Yo!"`, 'core.warn("Yo!")'],
-        [`warn "Yo!" with "yep"`, 'core.warn("Yo!", "yep")']
+        [`warn "Yo!"`, 'await core.warn("Yo!")'],
+        [`warn "Yo!" with "yep"`, 'await core.warn("Yo!", "yep")']
       ]
     }
   ]

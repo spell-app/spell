@@ -2216,7 +2216,7 @@ function isFixedJSXValue(expression: ASTExpression): boolean {
 }
 
 /** `core`'s calls that always wait, by name:  where the pass starts (`WriterProject.findWaiting()`). */
-export const CORE_CALLS_THAT_WAIT = new Set(["pauseFor", "alert", "confirm", "prompt"])
+export const CORE_CALLS_THAT_WAIT = new Set(["pauseFor", "alert", "warn", "confirm", "prompt"])
 
 /** `core`'s loops, which call their function for each item right there. */
 export const CORE_LOOPS = new Set(["map", "forEach", "forEachSequential"])
