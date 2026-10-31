@@ -73,3 +73,8 @@
   width: 0;
   height: 0;
 }
+
+/* The palette's rows never open:  no room for a triangle */
+.PaletteTree ui-tree-item::part(toggle) {
+  display: none;
+}

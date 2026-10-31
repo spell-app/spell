@@ -713,6 +713,11 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 
 ## The public preview:  the editor as plain files
 
+Someone can make an app here from nothing, with no server behind the page and no code read:
+the home page offers a blank app with the palette open, a few tiny starters ([starterProjects.ts](src/spaces/models/starterProjects.ts)),
+and Solitaire to change something in.
+A new project everywhere starts as that blank app, with a drawing to drop things into.
+
 ```sh
 spell app preview build
 ```
@@ -766,11 +771,14 @@ How a page with no server reads and saves files:
   - a save:  kept in the browser's database (IndexedDB) as the visitor types, until "Reset Example" asks and forgets it
     - a save the browser refuses, its storage full, still holds until the page closes
     - edits an older preview kept in `localStorage` move into the database once, before the first read or save
-  - creating, renaming or deleting anything:  refused, with an error that says why
+  - a visitor's own projects, in the group `you@spell`:  their list, files and order in that same database,
+    so New, Duplicate, Rename, Delete and every file action work with no server
+    - a copy of an example is theirs to change;  the example itself can't be renamed, deleted or given files
+    - Export and Import move a project out and back as one file (`.spell.json`, text files only)
+    - the first thing they make says once that it lives in this browser, and that clearing the site's data loses it
 - ONE flag hides what needs a server:  `isStaticBuild` in code, `:root.spell-static` in CSS
   ([staticBuild.ts](src/app/static/staticBuild.ts)).
-  Gone in the preview:  the Projects column, the You avatar, Settings, the project's "..." menu,
-  New File and the file's actions (its "..." menu keeps only "Show line numbers"), and the debug globals.
+  Gone in the preview:  the You avatar, Settings, New Example, New Guide, Help, and the debug globals.
 - The build is Vite's, in its `static` mode, so no other build carries any of this.
 - Every unknown page goes to the editor, for the hosts that read these:
   `404.html` (GitHub Pages) and `_redirects` (Netlify, Cloudflare Pages).

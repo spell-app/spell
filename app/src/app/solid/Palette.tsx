@@ -26,6 +26,19 @@ export class Palette {
     return isPinned()
   }
 
+  /** Open it by itself, the next time the top bar's `+` is drawn:  a blank app shows what it can hold. */
+  static openOnArrival(): void {
+    opensOnArrival = true
+    Palette.load()
+  }
+
+  /** Was it told to open on arrival?  Says so once. */
+  static takeOpenOnArrival(): boolean {
+    const opens = opensOnArrival
+    opensOnArrival = false
+    return opens
+  }
+
   /** Keep it open, or stop;  remembered. */
   static togglePinned(): void {
     const pinned = !isPinned()
@@ -46,6 +59,7 @@ export class Palette {
   /** Add `definition` beside what's selected, else at the end of the drawing. */
   static add(definition: ComponentDefinition): void {
     const place = PartEdits.placeForNew()
+    Inspector.readyWordsNext()
     PartEdits.add([snippetFor(definition, place?.file)], stepTitle(definition), place)
   }
 }
@@ -55,6 +69,9 @@ let definitions: typeof import("spell/ui/components/ComponentDefinitions").Compo
 
 /** Its loading, once it's asked for. */
 let loading: Promise<void> | undefined
+
+/** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
+let opensOnArrival = false
 
 /** What `definition` adds to `file`, in its language. */
 function snippetFor(definition: ComponentDefinition, file: SP.AnySpellFile | undefined): string {
@@ -84,6 +101,7 @@ export function AddPartButton(): JSX.Element {
     PartEdits.onPaletteDrag = () => {
       if (popup) popup.visible = false
     }
+    if (Palette.takeOpenOnArrival() && popup) popup.visible = true
   })
   return (
     <>
@@ -171,7 +189,10 @@ function PaletteRow(props: { definition: ComponentDefinition }): JSX.Element {
           PartEdits.startPaletteDrag(
             event as PointerEvent,
             props.definition.name,
-            (file) => [snippetFor(props.definition, file)],
+            (file) => {
+              Inspector.readyWordsNext()
+              return [snippetFor(props.definition, file)]
+            },
             stepTitle(props.definition)
           )
         )

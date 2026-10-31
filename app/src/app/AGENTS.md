@@ -87,6 +87,8 @@ and in the app's build folder, `app/` at the app folder's root.
       ([static/](static/));  the actions it leaves out are `HIDDEN_IN_STATIC_BUILD` (`Actions.tsx`)
     - Files load through `LoadableFile.fetch`, answered by `StaticFiles`:
       - the build's copies
+      - a visitor's own projects, in the group `you@spell` (`LOCAL_PERSON`, in this build):
+        the store `spell-static-projects`, their files' text with the edits
       - a visitor's edits, kept in their browser's database (`DatabasePlace`, the store `spell-static`):
         "Reset Example" forgets them
         - edits kept in `localStorage` before epic `prefs-and-undo` P3 move over once;  every read waits for that

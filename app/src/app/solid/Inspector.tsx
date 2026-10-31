@@ -126,6 +126,16 @@ export class Inspector {
     Inspector.startInspecting()
   }
 
+  /**
+   * Open the column, inspecting, with no help popup:  for a page that says what to do itself.
+   * - SIDE EFFECT:  the help counts as seen.
+   */
+  static openQuietly(): void {
+    Inspector.dismissHelp()
+    if (isOpen()) Inspector.startInspecting()
+    else Inspector.toggle()
+  }
+
   /** Is card `panel` showing in the column (reactive)? */
   static isShown(panel: InspectorPanel): boolean {
     return shownPanels().includes(panel)
@@ -394,7 +404,10 @@ export class Inspector {
       const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
       if (found.length) {
         placesToSelect = undefined
-        return Inspector.selectAll(found)
+        Inspector.selectAll(found)
+        if (wordsReadyNext) requestAnimationFrame(() => setTimeout(makeWordsReady, WORDS_READY_DELAY))
+        wordsReadyNext = false
+        return
       }
     }
     // still there:  only their outlines, on what the trail leads to now (a redraw replaces a drawn thing's element)
@@ -419,6 +432,11 @@ export class Inspector {
    */
   static selectWhenDrawn(places: readonly string[]): void {
     placesToSelect = new Set(places)
+  }
+
+  /** What's selected next is new from the palette:  its words, ready to type over in the properties card. */
+  static readyWordsNext(): void {
+    wordsReadyNext = true
   }
 
   /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
@@ -1123,6 +1141,22 @@ const clicks = new ListSelection<Element>()
 
 /** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
 let placesToSelect: Set<string> | undefined
+/** Are the words of what's selected next ready to type over?  `Inspector.readyWordsNext()`. */
+let wordsReadyNext = false
+
+/** How long the properties card takes to draw what's just been selected, ms. */
+const WORDS_READY_DELAY = 150
+
+/** The fields that hold a part's words, first found first. */
+const WORDS_FIELDS = 'ui-property[name="textContent"], ui-property[name="heading"]'
+
+/** Focus the words of what's selected, all selected:  what a person changes first about anything new. */
+function makeWordsReady(): void {
+  const field = document.querySelector<HTMLElement>(`.InspectorColumn ${WORDS_FIELDS}`)
+  const input = field?.querySelector<HTMLElement & { select?: () => void }>("ui-input, ui-textarea")
+  input?.focus()
+  input?.select?.()
+}
 /** On a phone, is the sheet up (`Inspector.isSheetUp`)?  Down as the page opens:  the app its full size until a selection. */
 const [isSheetUp, setSheetUp] = createSignal(false)
 /** The phone's sheet's height as dragged, px (remembered:  `SHEET_HEIGHT_PREF`). */
@@ -1857,8 +1891,9 @@ function PropertiesCard(): JSX.Element {
             origins={Inspector.originsOf(part)}
             compact=""
             show-defaults=""
-            on-ui-changed={(event: CustomEvent<{ name: string; value: unknown }>) =>
-              Inspector.fieldWritten(part, event.detail.name, event.detail.value)
+            on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
+              // a field's own input says it changed too, with no name:  the field's own event follows
+              event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
             }
             on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
             on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}

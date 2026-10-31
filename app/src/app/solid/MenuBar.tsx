@@ -243,6 +243,8 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
       <Actions.resetApp menu />
       <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
       <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
+      <Actions.exportApp menu />
+      <Actions.importApp menu />
       <Divider />
       <Actions.showProjectSettings menu title={appTexts.text("menuProjectSettings")} />
       <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
