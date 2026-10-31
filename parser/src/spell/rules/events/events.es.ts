@@ -14,6 +14,7 @@ import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
+import { WhenSomeoneElseChanges, WhenThingChanges } from "./WhenChanges"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
 import { EventPart } from "./EventPart"
@@ -302,6 +303,27 @@ eventsEs.addRule(ON_CHANGE, {
 eventsEs.addRule(ON_CHANGE, {
   syntax: "al cambiar (su|sus|el|la)? {changed:changed_property} :? {statement_body}?"
 })
+
+// una cosa guardada cambia (épica `data` P13):  por encima de un evento de las mismas palabras, que nadie enviaría
+eventsEs.addRule(WhenThingChanges, {
+  syntax: "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("receta")
+      },
+      tests: [
+        {
+          input: ["cuando cambia una receta:", "\timprimir el título de la receta"],
+          js: ['on("a-receta-change", (event) => {', "  const { receta } = event", "  core.console.log(receta.título)", "})"],
+          ts: 'on<{ receta: Receta }>("a-receta-change", ({ receta }) => core.console.log(receta.título))'
+        }
+      ]
+    }
+  ]
+})
+eventsEs.addRule(WhenSomeoneElseChanges, { syntax: "cuando otra persona (lo|la) cambia :? {statement_body}?" })
 
 // `cuando volteada:`, lo mismo que `al volteada:` (Q42)
 eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })

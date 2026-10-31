@@ -6,19 +6,11 @@ import { reactiveObject } from "spell/util"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { SPACES } from "spell/app/spaces"
 import { editor, type EditorStore } from "spell/app/app/editor"
+import { ProjectDropdown, ProjectMenu, SpellPage, rememberedSizes, uiReady } from "spell/app/app/solid"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import {
-  ProjectDropdown,
-  ProjectMenu,
-  SpellPage,
-  SplitPane,
-  SplitPanel,
-  normalizeSizes,
-  uiReady
-} from "spell/app/app/solid"
 
 /**
- * The pages' shell in the browser (P8):  `<SplitPanel>` (sizes, dragging a sizer), `<SpellPage>`,
+ * The pages' shell in the browser (P8):  `<SpellPage>`,
  * `<ProjectMenu>` / `<ProjectDropdown>` on a fake project root.
  */
 
@@ -29,118 +21,38 @@ afterEach(() => {
   for (const cleanup of cleanups.splice(0).reverse()) cleanup()
 })
 
-describe("<SplitPanel>", () => {
-  test("sizes:  `%` shares, fixed sizes, `*` for the rest", () => {
-    expect(normalizeSizes("30%", 2)).toEqual([
-      { value: 30, units: "%" },
-      { value: 70, units: "%" }
-    ])
-    expect(normalizeSizes(["*", "*", 200], 3)).toEqual([
-      { value: 50, units: "%" },
-      { value: 50, units: "%" },
-      { value: 200, units: "px" }
-    ])
-    expect(normalizeSizes(true, 4).map((size) => size.value)).toEqual([25, 25, 25, 25])
-    expect(normalizeSizes("10%,2em,90%", 2)).toEqual([
-      { value: 10, units: "%" },
-      { value: 2, units: "em" }
-    ])
-  })
-
-  test("wraps each child in a pane, sized, with a sizer between;  a `<SplitPane>` or panel stays as it is", async () => {
-    const host = await mount(() => (
-      <SplitPanel columns="25%,*,100px" resizable rounded style={{ width: "800px", height: "200px" }}>
-        <div class="one">one</div>
-        <SplitPane class="two" bordered>
-          two
-        </SplitPane>
-        <SplitPanel rows>
-          <div>a</div>
-          <div>b</div>
-        </SplitPanel>
-      </SplitPanel>
-    ))
-    const panel = host.querySelector<HTMLElement>(".SplitPanel")!
-    expect(panel.classList.contains("horizontal")).toBe(true)
-    const children = [...panel.children] as HTMLElement[]
-    expect(children.map((child) => child.className)).toEqual([
-      "SplitPanelPane rounded",
-      "SplitPanelSizer",
-      "SplitPanelPane bordered two",
-      "SplitPanelSizer",
-      "SplitPanel vertical"
-    ])
-    expect(children[0].firstElementChild!.className).toBe("one")
-    expect([children[0], children[2], children[4]].map((pane) => pane.style.flex)).toEqual([
-      "25 25 0px",
-      "75 75 0px",
-      "0 0 100px"
-    ])
-    // nested:  its own two panes, half each, and no sizer (not `resizable`)
-    const nested = [...children[4].children] as HTMLElement[]
-    expect(nested.map((pane) => pane.style.flex)).toEqual(["50 50 0px", "50 50 0px"])
-  })
-
-  test("dragging a sizer resizes the panes beside it, and remembers the sizes under `id`", async () => {
-    const id = "SplitPanel.browser.test"
+describe("rememberedSizes()", () => {
+  test("starts as it's told, keeps what its panel says, and forgets on asking;  a control's `ui-changed` is no size", async () => {
+    const id = "rememberedSizes.browser.test"
     editorPrefs.forget(id)
     cleanups.push(() => editorPrefs.forget(id))
-    const host = await mount(() => (
-      <SplitPanel id={id} columns resizable style={{ width: "600px", height: "100px" }}>
-        <div>left</div>
-        <div>right</div>
-      </SplitPanel>
-    ))
-    const [left, sizer, right] = [...host.querySelector(".SplitPanel")!.children] as HTMLElement[]
-    expect([left.style.flex, right.style.flex]).toEqual(["50 50 0px", "50 50 0px"])
-
-    const start = sizer.getBoundingClientRect()
-    const x = start.left + start.width / 2
-    const y = start.top + start.height / 2
-    sizer.dispatchEvent(mouse("mousedown", x, y))
-    document.dispatchEvent(mouse("mousemove", x - 150, y))
-    document.dispatchEvent(mouse("mouseup", x - 150, y))
-    const leftShare = parseFloat(left.style.flex)
-    expect(leftShare).toBeGreaterThan(20)
-    expect(leftShare).toBeLessThan(30)
-    expect(parseFloat(right.style.flex)).toBeCloseTo(100 - leftShare, 1)
-    expect(editorPrefs.get(id)).toBe(`${leftShare}%,${100 - leftShare}%`)
-    // let go:  moving on does nothing
-    document.dispatchEvent(mouse("mousemove", x + 100, y))
-    expect(parseFloat(left.style.flex)).toBe(leftShare)
-
-    // never smaller than `minSize`
-    sizer.dispatchEvent(mouse("mousedown", x, y))
-    document.dispatchEvent(mouse("mousemove", 0, y))
-    document.dispatchEvent(mouse("mouseup", 0, y))
-    expect(parseFloat(left.style.flex)).toBe(5)
-  })
-
-  test("a remembered size wins over `columns` / `rows`", async () => {
-    const id = "SplitPanel.browser.test.remembered"
-    editorPrefs.set(id, "70%,30%")
-    cleanups.push(() => editorPrefs.forget(id))
-    const host = await mount(() => (
-      <SplitPanel id={id} rows="20%" resizable>
-        <div>top</div>
-        <div>bottom</div>
-      </SplitPanel>
-    ))
-    const panes = host.querySelectorAll<HTMLElement>(".SplitPanelPane")
-    expect([...panes].map((pane) => pane.style.flex)).toEqual(["70 70 0px", "30 30 0px"])
-  })
-
-  test("`spaced`, not `resizable`:  a spacer between the panes", async () => {
-    const host = await mount(() => (
-      <SplitPanel rows spaced="tightly">
-        <div>top</div>
-        <div>bottom</div>
-      </SplitPanel>
-    ))
-    const panel = host.querySelector(".SplitPanel")!
-    expect(panel.classList.contains("spaced")).toBe(true)
-    expect(panel.classList.contains("tightly")).toBe(true)
-    expect([...panel.children].map((child) => child.className)).toEqual(["SplitPanelPane", "Spacer", "SplitPanelPane"])
+    let sizes!: ReturnType<typeof rememberedSizes>
+    const host = await mount(() => {
+      sizes = rememberedSizes(() => ({ id, sizes: "20%,*" }))
+      return (
+        <ui-split-panel columns={sizes.sizes()} on-ui-changed={sizes.keep}>
+          <div>
+            <button class="control" />
+          </div>
+          <div>b</div>
+        </ui-split-panel>
+      )
+    })
+    const panel = host.querySelector("ui-split-panel")!
+    expect(sizes.sizes()).toBe("20%,*")
+    host
+      .querySelector(".control")!
+      .dispatchEvent(new CustomEvent("ui-changed", { bubbles: true, detail: { sizes: "1%,99%" } }))
+    flush()
+    expect(sizes.sizes()).toBe("20%,*")
+    panel.dispatchEvent(new CustomEvent("ui-changed", { detail: { sizes: "70%,30%" } }))
+    flush()
+    expect(sizes.sizes()).toBe("70%,30%")
+    expect(panel.getAttribute("columns")).toBe("70%,30%")
+    expect(editorPrefs.get(id)).toBe("70%,30%")
+    sizes.forget()
+    flush()
+    expect(sizes.sizes()).toBe("20%,*")
   })
 })
 
@@ -262,11 +174,6 @@ async function mount(component: () => unknown): Promise<HTMLElement> {
   flush()
   await ElementFixture.settle(host)
   return host
-}
-
-/** A left-button mouse event at `x`, `y`, bubbling. */
-function mouse(type: string, x: number, y: number): MouseEvent {
-  return new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 })
 }
 
 /** Text of `element`, trimmed. */

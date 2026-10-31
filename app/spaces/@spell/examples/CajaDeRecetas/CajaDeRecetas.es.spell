@@ -1,44 +1,102 @@
-// La ÚNICA línea que cambia otro servidor:  prueba "una sala en vivo en ...", "un servicio web en ...", "una hoja en ..."
+## Caja de recetas
+// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+// Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
+//   recetario familiar es una carpeta en "http://127.0.0.1:4791/api/places/recipes"
+//   recetario familiar es una sala en vivo en "http://127.0.0.1:4791/api/rooms/recipes"
+// (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
 recetario familiar es este dispositivo
 
+
+## Una receta:  una tarjeta que puedes leer y cambiar
 una "receta" es una vista:
 	- se guarda en el recetario familiar
 	- su "título" es texto
 	- sus "porciones" es un número
+	- sus "notas" es texto
 	- para dibujarla:
-		<ui-form value={eso} class="recipe">
-			<ui-input name="título" aria-label="Receta"/>
-			<ui-text class="servings">para {sus porciones}</ui-text>
-			<ui-button class="remove" onClick={quitar eso}>Quitar</ui-button>
-		</ui-form>
-	- para quitar eso:
-		- se deshace como "Quitar receta"
-		quitar eso de las recetas
+		<ui-card fluid>
+			<ui-content>
+				<ui-form value={eso} class="recipe">
+					<ui-field label="Nombre de la receta">
+						<ui-button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Quitar" title="Quitar" onClick={quitar eso de las recetas}/>
+						<ui-input name="título" class="title" size="large"/>
+					</ui-field>
+					<ui-field label="Para" inline>
+						<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
+					</ui-field>
+					<ui-field label="Notas">
+						<ui-textarea name="notas" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+		</ui-card>
 
+
+## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
 caja de recetas es una aplicación:
 	- su "búsqueda" es texto
-	- su "borrador" es texto
-	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, ordenada por su título
-	- para agregar el borrador:
-		si el borrador es "" devolver
-		agregar (una nueva receta con título = el borrador, porciones = 2) a las recetas
-		limpiar el borrador
+	- su "receta nueva" es una nueva receta con porciones = 4
+	// las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés
+	- sus "coincidencias" es:
+		fijar halladas a cada receta donde su título incluye la búsqueda
+		invertir halladas
+		devolver halladas
+	- su "menú de la caja" es un menú de "deshacer"
+
+	// Si todavía no hay nada guardado, unas cuantas para empezar
+	- para crearla:
+		si el número de (cada receta) es 0
+			agregar (una nueva receta con título = "Sopa de tomate", porciones = 4, notas = "Asa los tomates primero.") a las recetas
+			agregar (una nueva receta con título = "Dal", porciones = 6, notas = "Agrega las especias al final.") a las recetas
+			agregar (una nueva receta con título = "Pizza Margarita", porciones = 2, notas = "El horno bien caliente.") a las recetas
+
+	- para agregar la receta nueva:
+		agregar su receta nueva a las recetas
+		fijar su receta nueva a una nueva receta con porciones = 4
+
 	- para dibujarla:
-		<ui-form value={eso} class="box">
-			<ui-input name="búsqueda" class="search" aria-label="Búsqueda"/>
-			<ui-input name="borrador" class="draft" aria-label="Receta nueva"/>
-			<ui-button class="add" onClick={agregar el borrador}>Agregar</ui-button>
-		</ui-form>
+		<header class="top">
+			<div class="heading">
+				<h1>Caja de recetas</h1>
+				<p>Todo lo que escribes se guarda al instante.</p>
+			</div>
+			<ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas"/>
+			<ui-form value={eso}>
+				<ui-field label="Buscar">
+					<ui-input name="búsqueda" class="search" icon="search"/>
+				</ui-field>
+			</ui-form>
+		</header>
+		<ui-card fluid class="new">
+			<ui-content>
+				<ui-form value={su receta nueva}>
+					<h2>Agrega una receta</h2>
+					<ui-field label="Nombre de la receta">
+						<ui-input name="título" class="draft" size="large"/>
+					</ui-field>
+					<ui-field label="Para" inline>
+						<ui-input class="serves" name="porciones" type="number" min="1" labeled="right" label="personas"/>
+					</ui-field>
+					<ui-field label="Notas">
+						<ui-textarea name="notas" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+			<ui-extra>
+				<ui-button class="add" size="small" color="primary" disabled={el título de su receta nueva es ""} onClick={agregar la receta nueva}>Agregar receta</ui-button>
+			</ui-extra>
+		</ui-card>
 		para cada receta en las coincidencias
 			dibujar la receta
 		mientras espera:
-			<ui-loader class="waiting"/>
+			<ui-loader class="waiting" visible inline text>Buscando tus recetas</ui-loader>
 		si no hay ninguna:
-			<ui-text class="none">Todavía no hay recetas.</ui-text>
+			<ui-text class="none">{"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."}</ui-text>
 		si falla:
 			<ui-message class="failed" color="red">
-				No se puede llegar al recetario.
+				<p>No podemos llegar a tus recetas ahora mismo.</p>
 				<ui-button class="again" onClick={reintentar}>Reintentar</ui-button>
 			</ui-message>
+
 
 iniciar la caja de recetas

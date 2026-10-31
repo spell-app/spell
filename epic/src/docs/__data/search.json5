@@ -321,7 +321,7 @@
     {
       "path": "epic-choice-row.html",
       "title": "<epic-choice-row>",
-      "summary": "One row of a choice page: a use site, and the box holding Claude's recommendation.",
+      "summary": "One row of a choice page: a use site, the box holding Claude's recommendation, and a comment box.",
       "tag": "epic-choice-row",
       "sections": [
         {

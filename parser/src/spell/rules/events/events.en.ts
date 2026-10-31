@@ -14,6 +14,7 @@ import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
+import { WhenSomeoneElseChanges, WhenThingChanges } from "./WhenChanges"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
 import { EventPart } from "./EventPart"
@@ -378,6 +379,32 @@ events.addRule(ON_CHANGE, {
     }
   ]
 })
+
+// a saved thing changing (epic `data` P13):  above an event of the same words, which nobody would send
+events.addRule(WhenThingChanges, {
+  syntax: "when (a|an) {type:known_type} changes :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("recipe")
+      },
+      tests: [
+        {
+          input: ["when a recipe changes:", "\tprint the title of the recipe"],
+          js: [
+            'on("a-recipe-change", (event) => {',
+            "  const { recipe } = event",
+            "  core.console.log(recipe.title)",
+            "})"
+          ],
+          ts: 'on<{ recipe: Recipe }>("a-recipe-change", ({ recipe }) => core.console.log(recipe.title))'
+        }
+      ]
+    }
+  ]
+})
+events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it :? {statement_body}?" })
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
 // `when created` stays the creation hook, which wins on the same words (`priority`)

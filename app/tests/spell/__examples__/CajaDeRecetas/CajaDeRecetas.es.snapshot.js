@@ -5,13 +5,14 @@ export const words = {
     Receta: {
       título: "título",
       porciones: "porciones",
-      quitarEso: "quitar eso"
+      notas: "notas"
     },
     CajaDeRecetas: {
       búsqueda: "búsqueda",
-      borrador: "borrador",
+      recetaNueva: "receta nueva",
       coincidencias: "coincidencias",
-      agregarElBorrador: "agregar el borrador"
+      create: "crearla",
+      agregarLaRecetaNueva: "agregar la receta nueva"
     }
   },
   messages: {
@@ -40,6 +41,8 @@ export const words = {
     "write-lost": "Otra persona cambió {field} de {thing} a la vez, y queda lo suyo.  Lo tuyo era:  {mine}",
     "write-deleted": "Otra persona borró {thing} mientras lo cambiabas.",
     "write-use-mine": "Usar lo mío",
-    "write-restore": "Restaurar"
+    "write-restore": "Restaurar",
+    "write-changed-under-draft": "Otra persona cambió {thing} mientras lo editabas.  Lo que estás editando aún no lo muestra.",
+    "guest-person": "Invitado {number}"
   }
 }

@@ -17,7 +17,7 @@ import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
 import { on } from "./on"
-import { SplitPanel } from "./SplitPanel"
+import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
 
 import "./Inspector.css"
@@ -1096,6 +1096,7 @@ export function InspectorColumn(): JSX.Element {
   void loadBrandTokens()
   const rows = appParts()
   const layout = createMemo(() => cardsLayout(INSPECTOR_PANELS.filter((panel) => Inspector.isShown(panel))))
+  const cardSizes = rememberedSizes(layout)
   // on a phone, Esc puts the sheet away while it's up
   createEffect(
     () => Inspector.isSheetUp,
@@ -1128,20 +1129,27 @@ export function InspectorColumn(): JSX.Element {
       <aside class="InspectorColumn" aria-label={appTexts.text("inspector")}>
         <style>{brandTokens()}</style>
         <InspectorSheetBar />
-        <SplitPanel
-          id={layout().id}
-          rows={layout().rows}
+        <ui-split-panel
+          rows={cardSizes.sizes()}
           resizable
           class="InspectorSplit"
-          onDragged={(panes) => foldSmallCards(panes, layout().id)}
+          on-ui-changed={(event: Event) => {
+            cardSizes.keep(event)
+            if (event.target === event.currentTarget)
+              foldSmallCards((event as CustomEvent).detail.panes, cardSizes.forget)
+          }}
         >
           <Show when={Inspector.isShown("properties")}>
-            <PropertiesCard />
+            <div class="SplitPane">
+              <PropertiesCard />
+            </div>
           </Show>
           <Show when={Inspector.isShown("views")}>
-            <InspectorViews rows={rows()} />
+            <div class="SplitPane">
+              <InspectorViews rows={rows()} />
+            </div>
           </Show>
-        </SplitPanel>
+        </ui-split-panel>
       </aside>
     </Show>
   )
@@ -1158,14 +1166,11 @@ export function InspectorColumn(): JSX.Element {
 export function InspectorPane(): JSX.Element {
   const height = () => (Inspector.sheetHeight ? `${Inspector.sheetHeight}px` : undefined)
   return (
-    <SplitPanel
-      rows
-      rounded
-      class={["InspectorPane", { up: Inspector.isSheetUp }]}
-      style={{ "--InspectorPane-sheet-height": height() }}
-    >
-      <InspectorColumn />
-    </SplitPanel>
+    <div class={["InspectorPane", { up: Inspector.isSheetUp }]} style={{ "--InspectorPane-sheet-height": height() }}>
+      <div class="SplitPane">
+        <InspectorColumn />
+      </div>
+    </div>
   )
 }
 
@@ -1237,14 +1242,14 @@ const TALLEST_SHEET = 0.9
 /**
  * The column's sizes for the cards `shown`:  a folded card its header's height,
  * the others their usual shares of the rest.
- * - `id`:  the sizes remembered for this set of cards, as dragged (`<SplitPanel id>`).
+ * - `id`:  the sizes remembered for this set of cards, as dragged (`rememberedSizes()`).
  */
-function cardsLayout(shown: readonly InspectorPanel[]): { id: string; rows: string } {
+function cardsLayout(shown: readonly InspectorPanel[]): { id: string; sizes: string } {
   const open = shown.filter((panel) => !Inspector.isFolded(panel))
   const total = open.reduce((sum, panel) => sum + CARD_SHARES[panel], 0)
   return {
     id: `spellEditor-inspectorCards-${shown.map((panel) => (Inspector.isFolded(panel) ? `${panel}-folded` : panel)).join(",")}`,
-    rows: shown
+    sizes: shown
       .map((panel) =>
         Inspector.isFolded(panel) ? `${FOLDED_CARD_HEIGHT}px` : `${Math.round((CARD_SHARES[panel] / total) * 100)}%`
       )
@@ -1255,14 +1260,14 @@ function cardsLayout(shown: readonly InspectorPanel[]): { id: string; rows: stri
 /**
  * Fold each card dragged too small to show anything (Owen, of the old Events card:  "should auto-collapse when it
  * gets small"),
- * and forget the drag (`id`'s sizes), so unfolding it brings back its usual size.
+ * and forget the drag (`forgetSizes`), so unfolding it brings back its usual size.
  */
-function foldSmallCards(panes: HTMLElement[], id: string): void {
+function foldSmallCards(panes: HTMLElement[], forgetSizes: () => void): void {
   for (const pane of panes) {
     const panel = pane.querySelector<HTMLElement>(".InspectorCard")?.dataset.panel as InspectorPanel | undefined
     if (!panel || Inspector.isFolded(panel)) continue
     if (pane.getBoundingClientRect().height >= FOLDED_CARD_HEIGHT + SMALLEST_CARD_BODY) continue
-    editorPrefs.forget(id)
+    forgetSizes()
     Inspector.toggleFolded(panel)
   }
 }

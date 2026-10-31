@@ -28,6 +28,7 @@ import { WebPlace, type WebPlaceProps } from "./WebPlace"
  *   the same origin, or one that answers CORS, as a Google Sheet does when it's shared with "anyone with the link".
  *   - That sheet's address is `https://docs.google.com/spreadsheets/d/<id>/export?format=csv&gid=<tab>`.
  *   - A sheet needing a key, or to be written:  `GoogleSheetPlace`, in `spell/server/places`.
+ *   - A CSV file to be written:  `CsvPlace`, there too, with a server in front.
  * - The ceiling holds while it READS:  the engine only counts rows a place has already handed it, by when a 2 GB file is
  *   already in the browser.
  * - Live is polling, through whoever asks again (`pollWhileVisible()`):  each read asks the server whether the browser's

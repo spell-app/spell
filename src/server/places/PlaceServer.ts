@@ -1,4 +1,5 @@
 import {
+  PLACES_PREFIX,
   PlaceError,
   idOfRow,
   type ListQuery,
@@ -11,9 +12,6 @@ import {
 import { SRV } from "spell/server"
 
 import { PlaceKeys } from "./PlaceKeys"
-
-/** Where it listens, unless it's told otherwise. */
-const PLACES_PREFIX = "/api/places"
 
 /** The biggest request:  a big batch of changes. */
 const BODY_LIMIT = 10 * 1024 * 1024

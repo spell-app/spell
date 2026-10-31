@@ -266,6 +266,20 @@ ${lines}
     }
   })
 
+  test("what its where reads is followed too:  it runs after the wait, in a function of its own", () => {
+    const code = compiled(`family cookbook is this device
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+
+recipe box is an app:
+	- its "search" is text
+	- its "matches" is every recipe where its title includes the search
+`)
+    expect(code).toContain("() => [this.search]")
+  })
+
   test('a getter over one stays plain on Solid:  "not yet" passes through it', () => {
     expect(compiled(GAME(""))).toMatch(/get doubled\(\) \{\s+return this\.total \* 2/)
   })

@@ -292,14 +292,16 @@ export class WriterProject {
   }
 
   /**
-   * `this`'s members `method`, a getter that waits, reads, by name, not in a function inside it:
+   * `this`'s members `method`, a getter that waits, reads, by name:
    * so the value follows them, even read after its first wait (`core.waitedValue()`'s `follows`).
+   * - An inline function's too:  a `where`'s runs after the wait, `every recipe where its title includes the search`.
+   * - Not a function of its own:  nothing says it runs.
    */
   ownReadsOf(method: P.ASTMethodDefinition): P.ASTPropertyExpression[] {
     const found = new Map<string, P.ASTPropertyExpression>()
     const visit = (node: unknown): void => {
       if (Array.isArray(node)) return node.forEach(visit)
-      if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
+      if (!(node instanceof P.ASTNode) || (node instanceof P.ASTMethodDefinition && !node.inline)) return
       if (node instanceof P.ASTPropertyExpression && !this.readsWaitingValue(node)) {
         if (unwrapped(node.object) instanceof P.ASTSelfLiteral) found.set(node.property.value, node)
       }

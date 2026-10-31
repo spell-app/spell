@@ -55,6 +55,7 @@ describe("priority and precedence", () => {
         "create_type:  Priority.declaration",
         "create_viewable_list_type:  Priority.declaration",
         "css_block:  Priority.declaration",
+        "current_person:  Priority.overridable",
         "declare_event:  Priority.declaration",
         "define_group:  Priority.declaration",
         "define_menu:  Priority.declaration",
@@ -138,6 +139,8 @@ describe("priority and precedence", () => {
         "value_otherwise:  Priority.overridable",
         "version_step:  Priority.declaration",
         "versions_in:  Priority.declaration",
+        "when_someone_else_changes:  Priority.specific",
+        "when_thing_changes:  Priority.specific",
         "while_waiting:  Priority.declaration",
       ]
     `)

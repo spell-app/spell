@@ -266,6 +266,8 @@ export type ChoiceRowPart = {
   readonly value: string
   /** the box differs from the recommendation (trimmed);  a `blank` row:  holds something other than today's text */
   readonly isChanged: boolean
+  /** what its comment box holds now, free text, line breaks kept (epic `epic-engine` P58);  `""` for none */
+  readonly comment: string
   /** its table types into blank boxes (`<epic-choice-rows blank>`, epic `epic-engine` P13):  no recommendation */
   readonly blank?: boolean
   /**
@@ -277,14 +279,23 @@ export type ChoiceRowPart = {
   readonly orderIndex: number
   /** put `value` in its box:  a draft or an answer coming back */
   showValue(value: string): void
+  /** put `comment` in its comment box:  a draft or an answer coming back */
+  showComment(comment: string): void
 }
 
 /**
  * What a choice page sends:  the changed boxes by row id, and the feedback.
+ * - `comments`:  each row's comment box, by row id, ONLY the rows whose comment isn't empty (epic `epic-engine` P58);
+ *   none when no row has one, and an old draft without them reads as none
  * - `order`:  each table Owen can put in order (`<epic-choice-rows reorder>`), by its section's id:  its row ids in
  *   the order he left them;  none without such a table
  */
-export type ChoicesValues = { values: Record<string, string>; feedback: string; order?: ChoicesOrder }
+export type ChoicesValues = {
+  values: Record<string, string>
+  comments?: Record<string, string>
+  feedback: string
+  order?: ChoicesOrder
+}
 
 /** Each reorderable table's row ids, in the order Owen left them, by its section's id. */
 export type ChoicesOrder = Record<string, string[]>

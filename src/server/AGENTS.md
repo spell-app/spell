@@ -210,7 +210,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         spell-brand, its set, engine routes, watched folders, bundle.
       - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
-      - The kit's own part (its `package.json`'s `"pageServer"`):  none today.
+      - The kit's own part (its `package.json`'s `"pageServer"`):  one route module, the recipe box demo's servers' start and stop
+        (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
@@ -390,13 +391,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
       - each batch is written to the store before it's numbered, so a store's "no" is a "no"
       - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
-      - named actions re-run on it (`actions`);  which ones is the compiler's choice, with the words
+      - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
+      - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
       - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
       - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race
       - `GoogleToken`:  a service account's key file makes a token, an hour at a time;  both go in `PlaceKeys`, to be scrubbed
       - read only, from a browser, with no key:  `SheetPlace`, on the sheet's CSV address
       - its tests run against `spell/server/test/sheetsStub`, a fair stub checked against Google's docs
+    - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
+      - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
+      - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
+      - a row's version is a hash of its cells, so only a change to that row is refused, and the engine merges it per field
+      - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
+      - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
+      - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says;  Airtable's next
     - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
@@ -513,8 +522,10 @@ The steps between a page's content and its file on disk, for every tool that wri
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
 - `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
 - `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
-  places' tests and the recipe box demo (`scripts/recipe-servers.ts`, which also serves a folder;  epic `data` P4, P5).
+  places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
+  - `spell/server/test/RecipeFile`:  that box as a CSV file, on `CsvPlace`;  `spell/server/test/recipeDemo`:  the demo's two sources, a CSV file
+    and a folder, each with several ways in.
 
 ## Types / Exports
 

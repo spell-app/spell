@@ -451,9 +451,9 @@ const LINES: Line[] = [
     en: "add (a new recipe with title = the draft, cook = the current person) to the recipes",
     es: "agregar (una nueva receta con título = el borrador, cocinero = la persona actual) a las recetas",
     at: "action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
-    note: "only for want of `the current person`"
+    note: "real since Live And Presence (P13)"
   },
   {
     en: "remove the recipe from the recipes",
@@ -519,10 +519,9 @@ const LINES: Line[] = [
     es: `cuando cambia una receta:
 	imprimir 1`,
     at: "top",
-    today: ["wrong", "fails"],
+    today: "fails",
     withRule: "compiles",
-    means: "a-recipe-changes",
-    note: "today, in English, an event nobody sends:  silently never runs.  In Spanish, an error"
+    note: "an event nobody sent, until Live And Presence (P13).  Here a recipe's in no place, so it's refused:  it would never run"
   },
   {
     en: "refresh the recipes",
@@ -535,15 +534,17 @@ const LINES: Line[] = [
     en: "the current person",
     es: "la persona actual",
     at: "value",
-    today: "fails",
-    withRule: "compiles"
+    today: "compiles",
+    withRule: "compiles",
+    note: "real since Live And Presence (P13)"
   },
   {
     en: "the people here",
     es: "las personas presentes",
     at: "value",
-    today: "fails",
-    withRule: "compiles"
+    today: "compiles",
+    withRule: "compiles",
+    note: "real since Live And Presence (P13)"
   },
   {
     en: `- when someone else changes it:
@@ -551,10 +552,9 @@ const LINES: Line[] = [
     es: `- cuando otra persona lo cambia:
 		imprimir 1`,
     at: "recipe bullet",
-    today: "wrong",
+    today: "fails",
     withRule: "compiles",
-    means: "nSomeoneElseChangesIt|nOtraPersonaLoCambia",
-    note: "not a property called `someone else`, as o3 feared:  worse, an event of that name, which never comes"
+    note: "an event of that name, which never came, until Live And Presence (P13).  Here a recipe's in no place, so it's refused"
   },
   {
     en: `- when its title changes:
@@ -835,9 +835,9 @@ describe("the recipe box, whole", () => {
     expect(compile(`${KINDS[1]}${RECIPE_BOX[1]}`, 1, true).errors).toEqual([])
   })
 
-  it("names what's still missing, without the rules", () => {
+  it("needs none of them any more:  every word in it is real (P13)", () => {
     const { errors } = compile(RECIPE_BOX[0], 0, false)
-    expect(errors.length).toBeGreaterThan(0)
+    expect(errors).toEqual([])
   })
 })
 

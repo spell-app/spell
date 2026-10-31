@@ -21,6 +21,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - Or a property's CHANGE (epic `debut` P30):  `- when its score changes:`, `- on score change:`, the event
  *   `score-change`, its handler `onScoreChange()` -- the core sends it each time the property changes
  *   (`noteSetting()`), with the new `value` and the one it `was`.  The property:  `changed_property`.
+ * - A saved thing changing is `WhenChanges`'s, on this one:  `when a recipe changes:`, `- when someone else changes it:`.
  * - `eventName` is a bare `keyword`, so its `raw` form (with dashes) is used directly as the event name.
  * - SIDE EFFECT: `getNestedScopeForMatch()` builds a `MethodScope` named for `eventName`, with `event`
  *   as its first arg plus one arg per `with`-listed prop (see `with_props_arg` in methods).
@@ -41,7 +42,7 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
   getDeclaration(match: P.MatchFor<this>): P.Declaration | undefined {
     const { eventName, passive, changed } = match.groups
     if (eventName) return super.getDeclaration(match)
-    return { kind: "event", name: On.eventNameOf(match), nameMatch: (passive ?? changed)! }
+    return { kind: "event", name: On.eventNameOf(match), nameMatch: passive ?? changed ?? (match as P.Match) }
   }
 
   /**
@@ -58,6 +59,7 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
         args.push({ name, datatype: typeof datatype === "string" ? datatype : undefined })
       }
     }
+    args.push(...this.eventProps(match))
     // a template's handler:  `it` / `its` are the thing, as in its other methods
     const subject = P.SubjectScope.of(match.scope)?.subjectType
     const methodScopeProps: P.MethodScopeProps = {
@@ -65,7 +67,9 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
       name: On.eventNameOf(match),
       args,
       declaredBy: match,
-      ...(subject && { thisVar: subject.instanceName, mapItTo: "this", itDatatype: SP.typeName(subject.name) })
+      ...(subject
+        ? { thisVar: subject.instanceName, mapItTo: "this", itDatatype: SP.typeName(subject.name) }
+        : this.itWithNoSubject(match))
     }
     return new P.MethodScope(methodScopeProps)
   }
@@ -94,6 +98,18 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
           })
         )
       }
+      const own = this.eventProps(match)
+      if (own.length) {
+        method.body.statements!.unshift(
+          new P.ASTDestructuredAssignment(match, {
+            thing: event,
+            variables: own.map(
+              ({ name, datatype }) => new P.ASTVariableExpression(match, { name, datatype: datatype as string })
+            ),
+            isNewVariable: true
+          })
+        )
+      }
       args.push(method)
     }
     // a template's handler:  a method of each of its things, `onMouseDown(event)`
@@ -112,6 +128,21 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
     })
   }
 
+  /** What a rule on this one names its event:  `undefined`, as its words say. */
+  ownEventName(_match: P.MatchFor<On>): string | undefined {
+    return undefined
+  }
+
+  /** What a rule on this one reads off its event, as if it said `with` them. */
+  eventProps(_match: P.MatchFor<On>): P.ScopeVariableProps[] {
+    return []
+  }
+
+  /** What `it` is at a file's top, for a rule on this one that says. */
+  itWithNoSubject(_match: P.MatchFor<On>): Pick<P.MethodScopeProps, "mapItTo" | "itDatatype"> {
+    return {}
+  }
+
   /** A template's handler's method name, by spell's names:  `on_mouse_down` for `on mouse down`. */
   static handlerName(match: P.MatchFor<On>): string {
     return `on_${On.eventNameOf(match).replace(/-/g, "_")}`
@@ -123,6 +154,8 @@ export class On extends SpellStatement<"eventName?|passive?|changed?|props?|body
    * a property's change, `high-score-change` for `when its high score changes` (`changed_property`).
    */
   static eventNameOf(match: P.MatchFor<On>): string {
+    const own = (match.rule as On).ownEventName(match)
+    if (own) return own
     const { eventName, passive, changed } = match.groups
     if (passive) return `${Wording.meaningOf(passive)}`.replace(/_/g, "-")
     if (changed) return `${`${changed.value}`.replace(/_/g, "-")}-change`

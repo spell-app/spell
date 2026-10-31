@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-choice-row>`
- * One row of a choice page:  a use site, and the box holding Claude's recommendation for it.
+ * One row of a choice page:  a use site, the box holding Claude's recommendation for it, and a comment box.
  ****************/
 export const epicChoiceRowVocabulary = {
   tag: "epic-choice-row",
@@ -19,8 +19,9 @@ export const epicChoiceRowVocabulary = {
   description:
     "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site " +
     "(File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's " +
-    "recommendation.  You type over it, or leaves it;  a changed box is orange, with a round button putting " +
-    "the recommendation back.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, " +
+    "recommendation.  You type over it, or leave it;  a changed box is orange, with a round button putting " +
+    "the recommendation back.  Under it, a comment box for your choice or notes on that row alone (epic " +
+    "`epic-engine` P58).  The row's note is a column of its own, last.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, " +
     "with move up / move down.",
   attributes: [
     {
@@ -39,7 +40,9 @@ export const epicChoiceRowVocabulary = {
     {
       name: "note",
       kind: "string",
-      description: "A short why, small, under the purpose;  `` `code` `` in it shows as code."
+      description:
+        "A short why, small, in the Explanation column, last (epic `epic-engine` P58, r51);  its line breaks show, " +
+        "and `` `code` `` in it shows as code."
     },
     { name: "current", kind: "string", description: "How the use site reads today (`this.isOpen()`)." },
     {
@@ -62,7 +65,11 @@ export const epicChoiceRowVocabulary = {
       name: "file",
       description: "The File cell:  the file's name and line, a link into VS Code;  its folder under it."
     },
-    { name: "purpose", description: "The Purpose cell:  the purpose, `stays` when it stays, the note." },
+    { name: "purpose", description: "The Purpose cell:  the purpose, and `stays` when it stays." },
+    {
+      name: "note",
+      description: "The Explanation cell, last:  the note;  empty for a row without one, in a table where others have one."
+    },
     { name: "current", description: "The Current cell:  today's text, as code." },
     { name: "copy", description: "With `blank`:  today's text over the box, a button that copies it into the box." },
     { name: "pick", description: "The Recommended cell:  the box, and the reset button once it differs." },
@@ -72,7 +79,13 @@ export const epicChoiceRowVocabulary = {
         "The `<ui-textarea grow>`:  one line of text, wrapping and growing;  Enter adds no line.  Its own `control` " +
         "part is the native `<textarea>`."
     },
-    { name: "reset", description: "The round button putting the recommendation back." }
+    { name: "reset", description: "The round button putting the recommendation back." },
+    {
+      name: "comment",
+      description:
+        "The comment box under the box, a `<ui-textarea grow>`:  your choice or notes on this row, free text;  Enter " +
+        "adds a line.  Saved and sent with the box."
+    }
   ],
   states: [
     { name: "changed", description: "Its box differs from the recommendation:  orange." },
@@ -86,6 +99,12 @@ export const epicChoiceRowVocabulary = {
     { key: "blankLabel", text: "Yours for {current}:  blank keeps it", description: "With `blank`:  the box's name." },
     { key: "copyTip", text: "Copy into the box", description: "With `blank`:  today's text's tooltip." },
     { key: "clear", text: "Clear the box", description: "With `blank`:  the reset button's name and tooltip." },
+    {
+      key: "commentPlaceholder",
+      text: "Your choice, notes ...",
+      description: "The comment box's placeholder, until you type."
+    },
+    { key: "commentLabel", text: "Your notes on {current}", description: "The comment box's name, for a screen reader." },
     { key: "openTip", text: "Open {file}:{line} in VS Code", description: "The file link's tooltip." },
     { key: "up", text: "Move up", description: "The move up button's name and tooltip." },
     { key: "down", text: "Move down", description: "The move down button's name and tooltip." }

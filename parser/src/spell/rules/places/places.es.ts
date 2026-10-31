@@ -20,6 +20,7 @@ import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
+import { CurrentPerson, PeopleHere } from "./PeopleWords"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
 import { RefreshThings } from "./RefreshThings"
 import { SaveDraft } from "./SaveDraft"
@@ -128,6 +129,15 @@ placesEs.addRule(NumberOfThingsWhere, { syntax: "el número de {type:plural_type
 placesEs.addRule(TotalOf, {
   syntax: "el total de {list:operand}",
   tests: [{ compileAs: "expression", tests: [["el total de [1, 2]", "[1, 2].total"]] }]
+})
+
+placesEs.addRule(CurrentPerson, {
+  syntax: "la persona actual",
+  tests: [{ compileAs: "expression", tests: [["la persona actual", "core.currentPerson()"]] }]
+})
+placesEs.addRule(PeopleHere, {
+  syntax: "las personas presentes",
+  tests: [{ compileAs: "expression", tests: [["las personas presentes", "core.peopleHere()"]] }]
 })
 
 placesEs.addRule(HelpfulWord, { syntax: "(traer|consultar|unir)" })

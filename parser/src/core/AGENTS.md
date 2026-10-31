@@ -286,6 +286,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A drawn view's element reads every property, to mirror them as attributes:  `whileOnlyShowing()`, so that isn't needing them.
     - A type a program removes is read whole:  undo writes the whole row back.
   - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
+  - What changed, told to the program (epic `data` P13):  `PlaceThings.noteChanged()`, each thing once in a moment, with its fields.
+    - `a-recipe-change`, `when a recipe changes:`:  to the thing, up its chain (`core.send()`), for anyone's change, this page's too.
+    - `someone-else-change`, `- when someone else changes it:`:  only when it wasn't this page.
+      Heard from a place that says (`PlaceEvent.isMine`, `PlaceRowsChange.isElsewhere`), or found by asking again:  a poll, `refresh the recipes`.
+    - Only what really differs:  a row read again, or an answer to my own write, is no change;
+      nor is what a read asking for what it first left out brings.
+    - Nobody takes `someone-else-change`, and a draft of that thing is open:  a plain notice.  A form on the thing itself shows the change by itself.
+    - A place with no announcements is asked again as often as its line says:  `pollWhileVisible()`.
+  - Who's here (epic `data` P13):  `core.currentPerson()`, `core.peopleHere()`, from the first place that has people.
+    - Plain data, one object per page:  so `the people here` is one list for the program's life, and two windows of one person are two.
+    - With no sign-in, who someone says they are:  `personOnThisPage()`.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

@@ -173,6 +173,8 @@ export type TestCheck = {
  * | `write-use-theirs` | that notice's button | |
  * | `write-use-mine` | `write-lost`'s button | |
  * | `write-restore` | `write-deleted`'s button | |
+ * | `write-changed-under-draft` | the notice when someone else changed what a draft is a copy of | `thing` |
+ * | `guest-person` | what someone with no name is called | `number` |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -202,7 +204,10 @@ export const CORE_MESSAGES = {
   "write-deleted": "Someone else deleted {thing} while you were changing it.",
   "write-use-theirs": "Use theirs",
   "write-use-mine": "Use mine",
-  "write-restore": "Restore"
+  "write-restore": "Restore",
+  "write-changed-under-draft":
+    "Someone else changed {thing} while you were editing it.  What you're editing doesn't show that yet.",
+  "guest-person": "Guest {number}"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

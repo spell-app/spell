@@ -150,6 +150,22 @@ test("bad values are refused:  not an object, not text, a row the page doesn't h
   expect(stale.text).toContain("reload")
 })
 
+test("each row's comment (epic-engine P58):  kept in the draft and the answer;  bad ones refused, as values are", async () => {
+  const path = "/pages/details/names.html"
+  const body = { values: {}, comments: { a: "B, but shorter\nand plainer" }, feedback: "" }
+  expect((await post("draft", path, body)).status).toBe(200)
+  expect(written<ChoicesDraft>(CHOICES[0]!, "draft").comments).toEqual(body.comments)
+  expect((await post("answer", path, body)).status).toBe(200)
+  expect(written<ChoicesAnswer>(CHOICES[0]!, "answer")).toMatchObject({ values: {}, comments: body.comments })
+  // none sent:  none kept
+  await post("draft", path)
+  expect(written<ChoicesDraft>(CHOICES[0]!, "draft")).not.toHaveProperty("comments")
+  expect((await post("draft", path, { values: {}, comments: ["a"] })).status).toBe(400)
+  expect((await post("draft", path, { values: {}, comments: { a: 1 } })).status).toBe(400)
+  const stale = await post("draft", path, { values: {}, comments: { gone: "x" } })
+  expect([stale.status, stale.text.includes("reload")]).toEqual([400, true])
+})
+
 test("the order of a section Owen puts in order:  kept in the draft and the answer;  a row the page doesn't have refused", async () => {
   const path = "/pages/details/names.html"
   const body = { values: {}, feedback: "", order: { q1: ["b", "a"] } }

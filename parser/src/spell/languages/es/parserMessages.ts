@@ -42,6 +42,16 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
   "place-cant-announce":
     'Un {kind} no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+  "change-not-saved":
+    '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "- se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
+  "someone-else-needs-a-type":
+    'Di qué cambia:  esto va debajo de un tipo guardado, p. ej. "- cuando otra persona la cambia:" debajo de una receta',
+  "someone-else-alone":
+    "Nadie más puede cambiar lo que se guarda aquí:  esto nunca se ejecutaría.  Hace falta un lugar que otras personas compartan",
+  "someone-else-not-told":
+    'Un {kind} no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
+  "people-here-only-you":
+    "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala en vivo",
   "where-looks-through":
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "sort-key-waits":

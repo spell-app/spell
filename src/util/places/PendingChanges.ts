@@ -68,6 +68,8 @@ export type PlaceRowsChange = {
   removed?: string[]
   /** A place that makes its own ids named a new thing:  the id we knew it by, and the one it has now. */
   renamed?: { from: string; to: string }[]
+  /** Someone other than this page did it:  a place said so.  Left out:  this page's own, a heal, or an answer. */
+  isElsewhere?: boolean
 }
 
 /** A write a place said no to:  the one event every failed write raises (`Places.onWriteFailed()`). */

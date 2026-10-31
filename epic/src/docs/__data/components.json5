@@ -848,7 +848,7 @@
         "name choice",
         "row"
       ],
-      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  You type over it, or leaves it;  a changed box is orange, with a round button putting the recommendation back.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
+      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  You type over it, or leave it;  a changed box is orange, with a round button putting the recommendation back.  Under it, a comment box for your choice or notes on that row alone (epic `epic-engine` P58).  The row's note is a column of its own, last.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
       "noun": "choice row",
       "attributes": [
         {
@@ -874,7 +874,7 @@
         {
           "name": "note",
           "kind": "string",
-          "description": "A short why, small, under the purpose;  `` `code` `` in it shows as code."
+          "description": "A short why, small, in the Explanation column, last (epic `epic-engine` P58, r51);  its line breaks show, and `` `code` `` in it shows as code."
         },
         {
           "name": "current",
@@ -912,7 +912,11 @@
         },
         {
           "name": "purpose",
-          "description": "The Purpose cell:  the purpose, `stays` when it stays, the note."
+          "description": "The Purpose cell:  the purpose, and `stays` when it stays."
+        },
+        {
+          "name": "note",
+          "description": "The Explanation cell, last:  the note;  empty for a row without one, in a table where others have one."
         },
         {
           "name": "current",
@@ -933,6 +937,10 @@
         {
           "name": "reset",
           "description": "The round button putting the recommendation back."
+        },
+        {
+          "name": "comment",
+          "description": "The comment box under the box, a `<ui-textarea grow>`:  your choice or notes on this row, free text;  Enter adds a line.  Saved and sent with the box."
         }
       ],
       "states": [
@@ -982,6 +990,16 @@
           "description": "With `blank`:  the reset button's name and tooltip."
         },
         {
+          "key": "commentPlaceholder",
+          "text": "Your choice, notes ...",
+          "description": "The comment box's placeholder, until you type."
+        },
+        {
+          "key": "commentLabel",
+          "text": "Your notes on {current}",
+          "description": "The comment box's name, for a screen reader."
+        },
+        {
           "key": "openTip",
           "text": "Open {file}:{line} in VS Code",
           "description": "The file link's tooltip."
@@ -1015,7 +1033,7 @@
         "rename table",
         "choices table"
       ],
-      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box you type over.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
+      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended | Explanation, then its rows, each an `<epic-choice-row>` whose Recommended box you type over, with a comment box under it.  Explanation, the rows' notes, only when a row has one.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
       "noun": "choice rows",
       "attributes": [
         {
@@ -1096,6 +1114,11 @@
           "key": "order",
           "text": "Order",
           "description": "The Order column's head, with `reorder`."
+        },
+        {
+          "key": "notes",
+          "text": "Explanation",
+          "description": "The last column's head, when any row has a `note` (epic `epic-engine` P58)."
         },
         {
           "key": "blankHead",
@@ -1463,7 +1486,7 @@
         "send bar",
         "feedback"
       ],
-      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
+      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box, every comment and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
       "noun": "choices bar",
       "attributes": [],
       "slots": [],
@@ -1518,6 +1541,11 @@
           "key": "sendTip",
           "text": "Send {changed} changed of {rows}, and the feedback, to Claude",
           "description": "The button's tooltip:  the count."
+        },
+        {
+          "key": "sendTipCommented",
+          "text": "Send {changed} changed of {rows}, {commented} commented, and the feedback, to Claude",
+          "description": "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
         },
         {
           "key": "copyAnswers",
@@ -7633,7 +7661,7 @@
       "folder": "epic-choice-row",
       "mainTag": "epic-choice-row",
       "title": "<epic-choice-row>",
-      "summary": "One row of a choice page: a use site, and the box holding Claude's recommendation.",
+      "summary": "One row of a choice page: a use site, the box holding Claude's recommendation, and a comment box.",
       "status": "done",
       "docs": false,
       "tags": [

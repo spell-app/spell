@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Split Panel | Spell UI</title>
+    <meta
+      name="description"
+      content="A split panel lays its children out side by side or one above the other, with bars to resize them."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Split Panel">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-split-panel%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Split Panel
+            <ui-header>A split panel lays its children out side by side or one above the other, with bars to resize them.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-columns" label="Columns" sticky="stack" collapsible dividing>
+                <ui-example description="Panes side by side, sized by `columns`.  `resizable` puts a bar between them:  drag it, or give it the focus and use the arrow keys.">
+                  <ui-split-panel columns="30%,*" resizable style="height: 8em">
+                    <ui-segment>Tree</ui-segment>
+                    <ui-segment>Code</ui-segment>
+                  </ui-split-panel>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-rows" label="Rows" sticky="stack" collapsible dividing>
+                <ui-example description="Panes one above the other, sized by `rows`:  here a fixed height, with the rest above it.">
+                  <ui-split-panel rows="*,3em" resizable style="height: 10em">
+                    <ui-segment>Code</ui-segment>
+                    <ui-segment>Output</ui-segment>
+                  </ui-split-panel>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-nested" label="Nested" sticky="stack" collapsible dividing>
+                <ui-example description="A split panel is a pane too.">
+                  <ui-split-panel columns="*,*" resizable style="height: 10em">
+                    <ui-split-panel rows="*,*" resizable>
+                      <ui-segment>Code</ui-segment>
+                      <ui-segment>Output</ui-segment>
+                    </ui-split-panel>
+                    <ui-segment>App</ui-segment>
+                  </ui-split-panel>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-parent" label="Panes written anywhere" sticky="stack" collapsible dividing>
+                <ui-example description="A `<ui-panel>` written anywhere joins the split panel it names with `parent`, as a section joins a section.  So the page can stay flat.">
+                  <ui-split-panel id="split-panel-joined" columns="40%,*" resizable style="height: 8em"></ui-split-panel>
+                  <ui-panel parent="split-panel-joined" appearance="pane" label="Views">The tree</ui-panel>
+                  <ui-panel parent="split-panel-joined" appearance="pane" label="Properties">The fields</ui-panel>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-hidden" label="Hidden panes" sticky="stack" collapsible dividing>
+                <ui-example description="A child with `hidden` isn't a pane:  the others share its room.  Showing it again moves nothing, so a running program in a pane keeps running.">
+                  <ui-split-panel columns="*,*,*" resizable style="height: 6em">
+                    <ui-segment>One</ui-segment>
+                    <ui-segment hidden>Not shown</ui-segment>
+                    <ui-segment>Three</ui-segment>
+                  </ui-split-panel>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Write your panes as children, and say how big each is in `columns` or `rows`.
+                  - Sizes:  a comma list, `20%,*,380px`.  A number, `px` or `em` is fixed;  `%` is a share of what the fixed panes leave;  `*` shares what's left;  `auto` is as big as its content.
+                  - `resizable` puts a bar between each two.  The panel doesn't remember what's dragged:  `ui-changed` hands you `sizes`, in the same form, to keep and give back.
+                  - `hidden` on a child takes it out of the panes.  Nothing is moved or redrawn as panes come and go, so what's running in one keeps running.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  document.querySelector("ui-split-panel").addEventListener("ui-changed", (event) => localStorage.setItem("panes", event.detail.sizes))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A bar takes the focus with Tab, after every pane.  The arrow keys along it move it 16px, or 160px with Shift.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Each bar of a `resizable` panel is a named `separator`, saying its place as a percent of the two panes beside it.  Tab reaches the bars after every pane, not between them:  each pane is placed by CSS `order`, so nothing has to move.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-split-panel" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-split-panel" playground></ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

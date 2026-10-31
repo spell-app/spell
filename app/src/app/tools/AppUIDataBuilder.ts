@@ -31,7 +31,7 @@ import { ComponentSource } from "./ComponentSource.ts"
  *     vocabularies, by Spell UI's own builder
  *     (`SiteDataBuilder`), as Epic UI's elements and the brand elements are
  *   - the view's element (`spell-element`):  its vocabulary too, read from `src/app/runner/`
- *   - a Solid component FILE (`src/app/solid/SplitPanel.tsx`):  its exported components with a banner, their props
+ *   - a Solid component FILE (`src/app/solid/Inspector.tsx`):  its exported components with a banner, their props
  *     and where the app draws them, read from the source (`ComponentSource`)
  * - The groups (`pages.json5`'s `groups`) are the data's topics:  the side column's Topics view.
  *   Its own links (`nav`:  the set's home) are `pages.json5`'s too.

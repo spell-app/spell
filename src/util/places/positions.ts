@@ -82,7 +82,7 @@ function jitter(random: () => number): string {
 }
 
 /** The position an item at `index` of a list has until one's given it:  the same on every machine. */
-function positionAtIndex(index: number): string {
+export function positionAtIndex(index: number): string {
   return `${index.toString(36).padStart(3, "0")}1`
 }
 
