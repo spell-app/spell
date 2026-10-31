@@ -26,6 +26,12 @@ const NEEDS_WHOLE_ROW = new Set(["removeSaved", "saveThing", "draftOf"])
 /** A thing's own name:  `core` reads it for a reference to it, `Foundation#clubs`, whatever a program does. */
 const THINGS_NAME = "name"
 
+/** A handler for a property's change, by its spell name:  `on_title_change`. */
+const CHANGE_HANDLER = /^(?:on|when)_(.+)_change$/
+
+/** The handler for someone else's change to a thing, by its spell name. */
+const SOMEONE_ELSE_HANDLER = "on_someone_else_change"
+
 /** What a list that draws its own way calls for each item. */
 const DRAW_EACH_ITEM = "draw_each_item"
 
@@ -331,6 +337,7 @@ export class ReadGathering {
     if (!(node instanceof P.ASTNode)) return
 
     if (node instanceof P.ASTClassMember && node.typeName) at = { ...at, self: node.typeName }
+    if (node instanceof P.ASTPropertyDefinition) this.noteChangeHandler(node, facts)
     if (node instanceof P.ASTJSXElement) {
       this.visitElement(node, facts, at)
       return
@@ -349,6 +356,19 @@ export class ReadGathering {
         continue
       }
       this.visit(value, facts, at)
+    }
+  }
+
+  /**
+   * SIDE EFFECT:  `- when its title changes:` has to see it change, so it reads `title`, even with nothing else that does.
+   * - `- when someone else changes it:` has to see any of them change:  its type is read whole.
+   */
+  private noteChangeHandler(node: P.ASTPropertyDefinition, facts: BodyFacts): void {
+    const name = node.property.value
+    const field = CHANGE_HANDLER.exec(name)?.[1]
+    if (field) facts.names.add(field)
+    if (name === SOMEONE_ELSE_HANDLER && node.typeName && !this.wholeTypes.has(node.typeName)) {
+      this.wholeTypes.set(node.typeName, { kind: "hears every change", match: node.match })
     }
   }
 
@@ -377,10 +397,24 @@ export class ReadGathering {
       return
     }
     const args = (node as P.ASTScopedMethodInvocation).args?.args ?? []
+    if (methodName === "on") this.noteListener(args[0], node)
     if (SAVED_READS.has(methodName)) this.noteSavedRead(node, args, facts)
     else if (NEEDS_WHOLE_ROW.has(methodName)) this.noteWholeRow(node, args, at)
     else if (methodName === "drawThing") this.noteDraw(args[0], facts, at)
     this.noteCallbacks(args, at)
+  }
+
+  /** SIDE EFFECT:  `when a recipe changes:` at a file's top has to see any of a recipe's fields change:  it's read whole. */
+  private noteListener(event: P.ASTNode | undefined, node: P.ASTNode): void {
+    const said = event instanceof P.ASTQuotedExpression ? event.expression : undefined
+    const words = said instanceof P.ASTStringLiteral ? said.value : ""
+    const named = /^a-(.+)-change$/.exec(words)?.[1]?.replace(/-/g, "").toLowerCase()
+    if (!named) return
+    for (const type of this.savedTypes.keys()) {
+      if (type.toLowerCase() === named && !this.wholeTypes.has(type)) {
+        this.wholeTypes.set(type, { kind: "hears every change", match: node.match })
+      }
+    }
   }
 
   /** SIDE EFFECT:  notes a read of a saved type:  `core.savedThings(Recipe, { filter })`. */
@@ -600,7 +634,7 @@ export type GatheredRead = {
 /** Why a type is read whole. */
 export type WholeReason = {
   /** Which reason. */
-  kind: "field named by a value" | "element reads it" | "put back whole" | "library reads it"
+  kind: "field named by a value" | "element reads it" | "put back whole" | "library reads it" | "hears every change"
   /** The line that made it so. */
   match: P.AnyMatch
 }

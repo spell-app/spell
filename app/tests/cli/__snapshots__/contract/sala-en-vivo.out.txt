@@ -1,0 +1,2 @@
+
+<div id="spell-app-root"><test-project-app><ui-text class="me">Invitado 1</ui-text><ui-label class="here">Invitado 1</ui-label><ui-text class="news"></ui-text><ui-text class="changes">0</ui-text><ui-button class="again" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Revisar ahora</ui-button><ui-button class="add" style="cursor:var(--ui-control-cursor,pointer);user-select:none">Agregar una</ui-button><ui-message color="red">No se puede leer ahora:  function () { [native code] }<ui-button>Reintentar</ui-button></ui-message></test-project-app></div>

@@ -13,64 +13,58 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/CajaDeRecetas.es.spell:163-616"
+      "defined": "/CajaDeRecetas.es.spell:624-1450"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:231-251"
+      "defined": "/CajaDeRecetas.es.spell:692-712"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.es.spell:255-283"
+      "defined": "/CajaDeRecetas.es.spell:716-744"
+    },
+    {
+      "property": "notas",
+      "of": "Receta",
+      "datatype": "text",
+      "defined": "/CajaDeRecetas.es.spell:748-768"
     },
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
-      "defined": "/CajaDeRecetas.es.spell:123-161"
-    },
-    {
-      "syntax": "quitar eso ((de|del) {thisArg:expression})?",
-      "output": "quitar_eso",
-      "rule": "method_call",
-      "of": "Receta",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "quitar eso",
-      "defined": "/CajaDeRecetas.es.spell:536-616"
+      "defined": "/CajaDeRecetas.es.spell:529-567"
     },
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:618-1625"
+      "defined": "/CajaDeRecetas.es.spell:1534-4208"
     },
     {
       "property": "búsqueda",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:656-678"
+      "defined": "/CajaDeRecetas.es.spell:1572-1594"
     },
     {
-      "property": "borrador",
+      "property": "receta_nueva",
+      "asWritten": "receta nueva",
       "of": "CajaDeRecetas",
-      "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:682-704"
+      "datatype": "Receta",
+      "defined": "/CajaDeRecetas.es.spell:1598-1653"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:708-802"
+      "defined": "/CajaDeRecetas.es.spell:1750-1880"
     },
     {
-      "syntax": "agregar el borrador ((de|del) {thisArg:expression})?",
-      "output": "agregar_el_borrador",
+      "syntax": "crear {thisArg:expression}?",
+      "output": "create",
       "rule": "method_call",
       "of": "CajaDeRecetas",
       "alias": [
@@ -78,21 +72,35 @@
         "expression"
       ],
       "kind": "method",
-      "name": "agregar el borrador",
-      "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:806-968"
+      "name": "crearla",
+      "waits": true,
+      "defined": "/CajaDeRecetas.es.spell:1997-2416"
+    },
+    {
+      "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
+      "output": "agregar_la_receta_nueva",
+      "rule": "method_call",
+      "of": "CajaDeRecetas",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "agregar la receta nueva",
+      "defined": "/CajaDeRecetas.es.spell:2421-2551"
     }
   ],
   "codeLines": [
-    2,
-    5,
-    10,
-    35,
-    38,
-    40,
-    43,
-    48,
-    53,
-    58
+    8,
+    11,
+    16,
+    21,
+    63,
+    70,
+    73,
+    78,
+    84,
+    92,
+    112
   ]
 }

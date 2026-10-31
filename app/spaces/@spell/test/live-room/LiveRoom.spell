@@ -1,0 +1,33 @@
+// A recipe box two people share:  who's here, and what the other one changed (epic data P13)
+family cookbook is a live room at "/api/rooms/recipes"
+
+live box is an app:
+	- its "news" is text
+	- its "changes" is a number
+	- to add one:
+		add (a new recipe with title = "New") to the recipes
+	- to draw it:
+		<ui-text class="me">{the name of the current person}</ui-text>
+		for each person in the people here
+			<ui-label class="here">{the name of the person}</ui-label>
+		<ui-text class="news">{its news}</ui-text>
+		<ui-text class="changes">{its changes}</ui-text>
+		<ui-button class="again" onClick={refresh the recipes}>Check now</ui-button>
+		<ui-button class="add" onClick={add one}>Add one</ui-button>
+		for each recipe in every recipe
+			draw the recipe
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- when someone else changes it:
+		set the news of the live box to "Someone else changed [its title]"
+	- to draw it:
+		<ui-form value={it} class="recipe">
+			<ui-input name="title" aria-label="Recipe"/>
+		</ui-form>
+
+when a recipe changes:
+	set the changes of the live box to the changes of the live box + 1
+
+start the live box

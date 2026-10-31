@@ -2285,7 +2285,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 33,
+          "line": 34,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -2361,6 +2361,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "WhenThingChanges",
+          "ruleNames": ["when_thing_changes"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhenChanges.ts",
+          "line": 31,
+          "purpose": "Run this when any thing of a saved type changes, whoever changed it, this page included (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
+              "example": "cuando cambia una receta:\n\timprimir el título de la receta",
+              "outputs": {
+                "js": {
+                  "code": "on(\"a-receta-change\", (event) => {\n  const { receta } = event\n  core.console.log(receta.título)\n})"
+                },
+                "ts": {
+                  "code": "on<{ receta: Receta }>(\"a-receta-change\", ({ receta }) => core.console.log(receta.título))"
+                },
+                "py": {
+                  "code": "@core.on(\"a-receta-change\")\ndef on_a_receta_change(event: Any) -> None:\n    receta = event.receta\n    core.console.log(receta.título)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DeclareEvent",
           "ruleNames": ["declare_event"],
           "internal": false,
@@ -2428,6 +2454,20 @@
           "syntaxes": [
             {
               "syntax": "cancelar (el? evento|{eventName:keyword}|{eventName:event_words})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhenSomeoneElseChanges",
+          "ruleNames": ["when_someone_else_changes"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhenChanges.ts",
+          "line": 75,
+          "purpose": "Run this when someone other than this page changes this thing (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "cuando otra persona (lo|la) cambia :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5918,6 +5958,58 @@
                 },
                 "py": {
                   "code": "[1, 2].total"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "CurrentPerson",
+          "ruleNames": ["current_person"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 16,
+          "purpose": "Who's at this page (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "la persona actual",
+              "example": "la persona actual",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson()"
+                },
+                "ts": {
+                  "code": "core.currentPerson()"
+                },
+                "py": {
+                  "code": "core.current_person()"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PeopleHere",
+          "ruleNames": ["people_here"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 33,
+          "purpose": "Everyone here now, this page included (epic `data` P13).",
+          "syntaxes": [
+            {
+              "syntax": "las personas presentes",
+              "example": "las personas presentes",
+              "outputs": {
+                "js": {
+                  "code": "core.peopleHere()"
+                },
+                "ts": {
+                  "code": "core.peopleHere()"
+                },
+                "py": {
+                  "code": "core.people_here()"
                 }
               }
             }

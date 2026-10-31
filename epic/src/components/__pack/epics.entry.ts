@@ -21,7 +21,7 @@ SpellUI.registerPack({
     "epic-ask": "e13ce8ad364e5b90",
     "epic-cards": "961d0514cfd3fab2",
     "epic-change": "e2e7c02a3460fa78",
-    "epic-choice-rows": "9d5cc0b9f9163fb1",
+    "epic-choice-rows": "48a2fea37607dfc3",
     "epic-choices": "0583ea9f82174967",
     "epic-choices-bar": "8827c160cbaef844",
     "epic-code": "3549c1008449c904",

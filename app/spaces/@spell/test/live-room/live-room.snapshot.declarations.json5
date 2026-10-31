@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "spellVersion": "0.8.0",
+  "provides": [
+    "LiveBox",
+    "Recipe",
+    "FamilyCookbook"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "View",
+      "defined": "/LiveRoom.spell:762-1060"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/LiveRoom.spell:825-844"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/LiveRoom.spell:950-1060"
+    },
+    {
+      "type": "FamilyCookbook",
+      "superType": "Place",
+      "defined": "/LiveRoom.spell:94-148"
+    },
+    {
+      "type": "LiveBox",
+      "superType": "App",
+      "defined": "/LiveRoom.spell:150-760"
+    },
+    {
+      "property": "news",
+      "of": "LiveBox",
+      "datatype": "text",
+      "defined": "/LiveRoom.spell:173-191"
+    },
+    {
+      "property": "changes",
+      "of": "LiveBox",
+      "datatype": "number",
+      "defined": "/LiveRoom.spell:195-220"
+    },
+    {
+      "syntax": "add one (of {thisArg:expression})?",
+      "output": "add_one",
+      "rule": "method_call",
+      "of": "LiveBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add one",
+      "defined": "/LiveRoom.spell:224-290"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "LiveBox",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/LiveRoom.spell:294-760"
+    }
+  ],
+  "codeLines": [
+    2,
+    5,
+    14,
+    24,
+    31,
+    34,
+    39,
+    44,
+    48
+  ]
+}

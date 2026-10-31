@@ -2738,6 +2738,20 @@
     },
     {
       "kind": "method",
+      "name": "currentPerson",
+      "of": "core",
+      "module": "saved",
+      "description": "Who's at this page:  what `the current person` compiles to.  With no sign-in, the name its server knows them by, else a guest."
+    },
+    {
+      "kind": "method",
+      "name": "peopleHere",
+      "of": "core",
+      "module": "saved",
+      "description": "Everyone here, this page included:  ONE list, for as long as the program runs."
+    },
+    {
+      "kind": "method",
       "name": "refreshSaved",
       "of": "core",
       "module": "saved",

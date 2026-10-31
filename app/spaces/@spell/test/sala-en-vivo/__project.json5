@@ -1,0 +1,10 @@
+{
+  "description": "Una caja de recetas que comparten dos personas:  quién está, y qué cambió la otra (épica data P13).  La ejecuta en dos páginas tests/spell/liveRoom.test.ts",
+  "version": "1.0.0",
+  "imports": [
+    {
+      "path": "/SalaEnVivo.es.spell",
+      "active": true
+    }
+  ]
+}

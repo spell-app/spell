@@ -120,7 +120,7 @@ export class DrawnLines {
   }
 
   /**
-   * `unit`, with its riders, or a loop of things saved in a place, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
+   * `unit`, with its riders, or a loop of things saved in a place or of `the people here`, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
    * - So it has its own "…", its own Try again, and its items are kept by identity:  typing in one doesn't draw them all again.
    * - A drawn line with riders:  `core.drawRead(() => value, null, { riders })`.
    * - Its function is named as a drawing is:  a drawing never waits, it shows what it has (`P.DRAWING_NAME`).
@@ -137,9 +137,10 @@ export class DrawnLines {
     if (unit.kind === "loop") {
       const loop = statement as P.ASTCoreMethodInvocation
       const { itemType } = (loop.match?.data ?? {}) as { itemType?: P.TypeScope }
-      if (!riders?.length && !itemType?.savedPlace()) return
-      DrawnLines.gatherLoop(loop)
       const [list, each] = loop.args!.args!
+      const isPeopleHere = list instanceof P.ASTCoreMethodInvocation && list.methodName === "peopleHere"
+      if (!riders?.length && !itemType?.savedPlace() && !isPeopleHere) return
+      DrawnLines.gatherLoop(loop)
       unit.lines = [DrawnLines.drawRead(loop.match, list as P.ASTExpression, each as P.ASTExpression, riders)]
       unit.kind = "drawn value"
     } else if (unit.kind === "drawn" && riders?.length) {

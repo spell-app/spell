@@ -1,9 +1,13 @@
 {
   "title": "Recipe Box",
-  "description": "Recipes kept in a place, read and changed with the words every thing has.  Its first line is all a different back-end changes",
+  "description": "Your recipes on cards:  find, add, change as you type, remove and undo.  One line says where they're kept",
   "imports": [
     {
       "path": "/RecipeBox.spell",
+      "active": true
+    },
+    {
+      "path": "/styles.css",
       "active": true
     }
   ]

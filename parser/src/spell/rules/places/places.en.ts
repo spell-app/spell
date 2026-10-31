@@ -19,6 +19,7 @@ import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
+import { CurrentPerson, PeopleHere } from "./PeopleWords"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
 import { RefreshThings } from "./RefreshThings"
 import { SaveDraft } from "./SaveDraft"
@@ -134,6 +135,15 @@ places.addRule(NumberOfThingsWhere, { syntax: "the number of {type:plural_type} 
 places.addRule(TotalOf, {
   syntax: "the total of {list:operand}",
   tests: [{ compileAs: "expression", tests: [["the total of [1, 2]", "[1, 2].total"]] }]
+})
+
+places.addRule(CurrentPerson, {
+  syntax: "the current person",
+  tests: [{ compileAs: "expression", tests: [["the current person", "core.currentPerson()"]] }]
+})
+places.addRule(PeopleHere, {
+  syntax: "the people here",
+  tests: [{ compileAs: "expression", tests: [["the people here", "core.peopleHere()"]] }]
 })
 
 places.addRule(HelpfulWord, { syntax: "(fetch|query|join)" })

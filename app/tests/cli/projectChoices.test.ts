@@ -30,13 +30,15 @@ describe("projectChoices()", () => {
       "@spell/test/counter-app/",
       "@spell/test/fizzbuzz/",
       "@spell/test/lists-from-zero/",
+      "@spell/test/live-room/",
       "@spell/test/people/",
       "@spell/test/recetario/",
       "@spell/test/recipe-box/",
+      "@spell/test/sala-en-vivo/",
       "@spell/test/thing-references/",
       "@spell/test/todos-form-based/"
     ])
-    expect(await values("@spell/test/li")).toEqual(["@spell/test/lists-from-zero/"])
+    expect(await values("@spell/test/li")).toEqual(["@spell/test/lists-from-zero/", "@spell/test/live-room/"])
   })
 
   test("a project:  the entire project first, then its spell files", async () => {
