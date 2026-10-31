@@ -231,6 +231,7 @@ export function phaseRanges(text: string): string {
  *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
  *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
  * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`)
+ *   - a manual test:  `--failed I12`, filed as that issue, `off` the mark taken off (`failed`;  epic `epic-engine` I174)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
  * - Claude's status CARD on an item (or an Overview sub-section, a phase, the summary), a state word after the
  *   target (Owen, epic `repo-split` J140:  "can we use `epic update` for the card bit?"):
@@ -278,6 +279,7 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     if (flags.calm && flags.loud) throw new EpicCommandError("update:  --calm or --loud, not both")
     if (flags.calm) runs.push(["calm", epic, ref])
     if (flags.loud) runs.push(["calm", epic, ref, "--loud"])
+    if ("failed" in flags) runs.push(["failed", epic, ref, value("failed")])
     rename(ref)
   }
   if (flags.html && !("title" in flags)) throw new EpicCommandError("update:  --html goes with --title")
@@ -520,7 +522,7 @@ const CARD_EXAMPLES: Record<string, string> = {
 const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
 
 /** What `update` sets on an item. */
-const ITEM_FIELDS = ["title", "html", "calm", "loud"]
+const ITEM_FIELDS = ["title", "html", "calm", "loud", "failed"]
 
 /** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
 const PAGE_FIELDS = ["standing", "noStanding"]

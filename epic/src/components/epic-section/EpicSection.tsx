@@ -347,8 +347,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return new Set(this.chosen ? this.chosen.filter((state) => present.includes(state)) : present)
   })
 
-  /** The items the filter hides:  never a marked one. */
-  readonly hidden = createMemo(() => this.unmarked().filter((it) => !this.showing().has(it.state)))
+  /** The items the filter hides (`StateFilter.hides()`):  never a marked one, nor one Claude is on (blue). */
+  readonly hidden = createMemo(() => this.unmarked().filter((it) => StateFilter.hides(it.state, this.showing())))
 
   /** The items the filter hides, as elements:  each marked `data-epic-filtered` (`onFiltered()`). */
   get filteredItems(): readonly Element[] {

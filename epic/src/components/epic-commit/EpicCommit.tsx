@@ -3,6 +3,9 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
+
 import { EpicAddress, PageTargets } from "spell/epic/links"
 
 import { epicCommitVocabulary } from "./EpicCommit.en"
@@ -21,9 +24,18 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - The repo is read as it connects:  a commit moved under another page takes that page's.
  * - An entry of the LOG (epic `epic-engine` P52, Owen's comment C5:  the Log is the epic's change log):
  *   - with `at`, its time first, the git icon in the icon column, and no `Commits:` heading
- *   - with `refs`, a chip after its sentence per phase and item it names, each a `#id` link the docs runtime lands
+ *   - with `refs`, a chip per phase and item it names, after the sha and BEFORE its sentence (J184, Owen's "chips
+ *     first"), so a long sentence folded to two lines never hides one, each a `#id` link the docs runtime lands
  *     on;  a phase's chip says its number today (`P52`), read from the page;  one the page no longer has, plain text
  *   - always shown, newest first:  the Log's section says so (`EpicSection.css`), never this element
+ * - A LONG sentence is clamped to two lines, ending in "…" (epic `epic-engine` J184, Owen's pick B):
+ *   - the clamp is the whole line's, chips first, so the "…" only ever cuts the sentence
+ *   - only one that runs past two lines (`isLong`, measured as its box changes size) gets the "…", the pointer and
+ *     the click;  a short one is drawn as before
+ *   - a click on its text (never its sha or a chip, nor the end of a text selection) unfolds it, another folds it;
+ *     the sentence is a button too, Enter or Space on it doing the same
+ *   - unfolded ones remembered per page, in this browser (`CommitFolds`:  `spell-commit-folds:<path>`, by sha), so
+ *     the same commit in the Log and under its phase folds as one
  ****************/
 export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
   @E.proto static vocabulary = epicCommitVocabulary
@@ -32,6 +44,20 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
     // a container:  a click on its text must not jump to the sha's link
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
+
+  /** Its sentence runs past two lines (measured):  clamped, with the "…", the pointer and the click. */
+  @E.state accessor isLong = false
+
+  /** Unfolded on this load, once the reader clicked it;  `undefined`:  as remembered (`CommitFolds`). */
+  @E.state accessor isUnfoldedNow: boolean | undefined = undefined
+
+  /** Showing its whole sentence:  the reader unfolded it, now or on an earlier load. */
+  get isUnfolded(): boolean {
+    return this.isUnfoldedNow ?? CommitFolds.isUnfolded(this.sha ?? "")
+  }
+
+  /** The box of its text (the time, the sha, the chips, the sentence), measured for `isLong`. */
+  private textBox: HTMLElement | undefined
 
   /** The heading's icon. */
   readonly glyph = new E.IconGlyph({ owner: this, name: () => "code branch" })
@@ -92,7 +118,11 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
               {this.glyph.svg}
             </span>
           </Show>
-          <span class={TEXT}>
+          <span
+            class={[TEXT, { [CLAMPED]: !this.isUnfolded, [LONG]: this.isLong }]}
+            ref={(box: HTMLElement) => (this.textBox = box)}
+            onClick={(event: MouseEvent) => this.onTextClick(event)}
+          >
             <Show when={this.at}>
               <time class={TIME} part={this.partForName("time")} datetime={this.at}>
                 {this.shownTime}
@@ -115,8 +145,7 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
               >
                 {this.shortSha}
               </a>
-            </Show>{" "}
-            <slot />
+            </Show>
             <For each={this.refChips}>
               {(chip) => (
                 <>
@@ -135,11 +164,74 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
                   </Show>
                 </>
               )}
-            </For>
+            </For>{" "}
+            <span
+              class={SENTENCE}
+              part={this.partForName("sentence")}
+              role={this.isLong ? "button" : undefined}
+              tabindex={this.isLong ? "0" : undefined}
+              aria-expanded={this.isLong ? (this.isUnfolded ? "true" : "false") : undefined}
+              title={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
+              onKeyDown={(event: KeyboardEvent) => this.onSentenceKey(event)}
+            >
+              <slot />
+            </span>
           </span>
         </div>
       </div>
     )
+  }
+
+  ////////////////
+  // ## Folding a long sentence
+  ////////////////
+
+  /** Fold it to two lines, or unfold it;  remembered (`CommitFolds`). */
+  @E.untracked
+  toggle() {
+    const isUnfolded = !this.isUnfolded
+    this.isUnfoldedNow = isUnfolded
+    CommitFolds.remember(this.sha ?? "", isUnfolded)
+  }
+
+  /** SIDE EFFECT:  while connected and drawn, measures its text as its box changes size;  the cleanup stops. */
+  @E.onChange("isConnected", "isReady")
+  protected watchTextSize(isConnected: boolean, isReady: boolean) {
+    const box = this.textBox
+    if (!isConnected || !isReady || !box) return undefined
+    const resizes = new ResizeObserver(() => this.measure())
+    resizes.observe(box)
+    this.measure()
+    return () => resizes.disconnect()
+  }
+
+  /**
+   * Is its text longer than two lines?  Its whole height (`scrollHeight`, clamped or not) against the line height.
+   * - half a line spare:  the chips stand a little taller than a line of text
+   * - hidden (a phase's commits not shown), it measures 0:  not long, until it shows and its box changes size
+   */
+  private measure() {
+    const box = this.textBox
+    if (!box) return
+    const lineHeight = Number.parseFloat(getComputedStyle(box).lineHeight)
+    this.isLong = lineHeight > 0 && box.scrollHeight > lineHeight * (CLAMP_LINES + 0.5)
+  }
+
+  /** A click on a long one's text folds or unfolds it:  not on a link (the sha, a chip), nor ending a selection. */
+  @E.untracked
+  private onTextClick(event: MouseEvent) {
+    if (!this.isLong) return
+    if ((event.target as Element | null)?.closest?.("a")) return
+    if (getSelection()?.toString()) return
+    this.toggle()
+  }
+
+  /** Enter or Space on a long one's sentence:  as a click. */
+  @E.untracked
+  private onSentenceKey(event: KeyboardEvent) {
+    if (!this.isLong || (event.key !== "Enter" && event.key !== " ")) return
+    event.preventDefault()
+    this.toggle()
   }
 }
 
@@ -154,6 +246,46 @@ const PHASE_REF = /^p-/
 
 /** An `at` time as shown:  `2026-10-29T11:46-04:00` => `2026-10-29 11:46` (`<epic-event>`'s rule). */
 const SHOWN_TIME = /^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?/
+
+/****************
+ * ### `CommitFolds`
+ * The long commits this page's reader unfolded, in this browser:  `spell-commit-folds:<path>`, `{ "<sha>": true }`.
+ * - only the unfolded ones:  a long one starts folded
+ * - by sha, so a commit drawn twice (the Log, its phase) folds as one
+ * - read afresh each time:  another tab's folds, and no stale copy
+ ****************/
+class CommitFolds {
+  /** Did the reader unfold the commit `sha`? */
+  static isUnfolded(sha: string): boolean {
+    return !!sha && CommitFolds.saved()[sha] === true
+  }
+
+  /** Remember the commit `sha` unfolded, or forget it (folded, the default). */
+  static remember(sha: string, isUnfolded: boolean) {
+    if (!sha) return
+    const saved = CommitFolds.saved()
+    if (isUnfolded) saved[sha] = true
+    else delete saved[sha]
+    PrefStore.setAt(CommitFolds.key, Object.keys(saved).length ? saved : undefined)
+  }
+
+  /** This page's unfolded commits. */
+  private static saved(): Record<string, boolean> {
+    const saved = PrefStore.getAt(CommitFolds.key)
+    return saved && typeof saved === "object" ? { ...(saved as Record<string, boolean>) } : {}
+  }
+
+  /** This page's key. */
+  private static get key(): string {
+    return `${COMMIT_FOLDS_KEY_PREFIX}${location.pathname}`
+  }
+}
+
+/** `localStorage` key prefix of a page's unfolded commits (`{ [sha]: true }`), then the page's path. */
+const COMMIT_FOLDS_KEY_PREFIX = "spell-commit-folds:"
+
+/** How many lines a long sentence shows, folded (the sheet's `-webkit-line-clamp` says the same). */
+const CLAMP_LINES = 2
 
 /** How many of the sha's digits show. */
 const SHORT_SHA = 7
@@ -172,5 +304,8 @@ const ICON = "icon"
 const ENTRY_ICON = "entry-icon"
 const TIME = "time"
 const TEXT = "text"
+const SENTENCE = "sentence"
+const CLAMPED = "clamped"
+const LONG = "long"
 const REF = "ref"
 const REF_GONE = "gone"

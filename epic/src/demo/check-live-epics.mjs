@@ -11,7 +11,8 @@
  *   listening, so the items draw their review controls and nothing reaches the copy's inbox
  * - the reader's state:
  *   - item `--item` (default `q2`:  one with a part, not approved) opened by a link to it (its part loads)
- *   - a half-typed note in its note box (`<epic-item>`'s, in its shadow root) with the focus
+ *   - a half-typed note in its note box (`<epic-item>`'s, in its shadow root, a `<ui-textarea>` in
+ *     `<epic-review>`'s) with the focus, clicked into first, as a reader would:  input ends the link's landing
  *   - the page scrolled to put the item a third of the way down
  * - three edits, each announced as the page server's watcher would (`announce()`), waited for on the page,
  *   then checked:
@@ -30,7 +31,8 @@
  *      skipped on a page without one
  * - then the CODE changes (`spell-ui.js`, announced the same way):  see `codeReload()`
  *   - first a section and two of its items opened by hand, the page scrolled into them
- *   - no reload while the reader types in the note box;  one once the focus leaves it (epic `epic-engine` I172)
+ *   - no reload while the reader types in the note box (the focus back in it, and typed on);  one once the focus
+ *     leaves it (epic `epic-engine` I172)
  *   - after it:  the scroll (2px), every block and item open before (the one a link opened too), the note's text
  *     (from the inbox's drafts, which the faked routes keep)
  * - `--bundle`:  serve this file in place of the checkout's `spell-ui.js` (a runtime not yet built into it)
@@ -67,6 +69,9 @@ const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"
+
+/** What the reader types on with, once the focus is back in the note box (`openByHand()`). */
+const TYPED_ON = " and more"
 
 /** How long an edit may take to show on the page. */
 const EDIT_TIMEOUT_MS = 10_000
@@ -131,6 +136,9 @@ try {
   const note = page.locator(`#${itemId} textarea`).first()
   try {
     await note.waitFor({ timeout: EDIT_TIMEOUT_MS })
+    // a click into the box, as a reader's:  their input tells the link's landing they've moved on,
+    // so its last re-scroll (`HashLanding`'s, `settleSeconds` after it lands) won't undo the scroll set below
+    await note.click()
     await note.fill(NOTE)
   } catch {
     problems.push(`#${itemId} drew no note box (is the page reviewed?  is epic-review in the pack?)`)
@@ -286,12 +294,18 @@ function watchBlinks(id) {
   const root = document.getElementById(id).shadowRoot
   // the note box is an `<epic-review>` in the item's shadow root, its textarea in its own
   const box = root.querySelector("[part~='note-box']")
-  const note = box?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")
+  const field = box?.shadowRoot?.querySelector("ui-textarea")
+  const note = field?.shadowRoot?.querySelector("textarea")
   const look = (when) => {
     const details = root.getElementById("details")
     if (!details || details.hasAttribute("hidden")) blinks.add(`details hidden (${when})`)
     if (!note?.isConnected) blinks.add(`note box gone (${when})`)
-    else if (root.activeElement !== box || box.shadowRoot.activeElement !== note)
+    // the focus, one shadow root at a time:  the item's, `<epic-review>`'s, `<ui-textarea>`'s
+    else if (
+      root.activeElement !== box ||
+      box.shadowRoot.activeElement !== field ||
+      field.shadowRoot.activeElement !== note
+    )
       blinks.add(`note box unfocused (${when})`)
   }
   new MutationObserver(() => look("on a change")).observe(root, { attributes: true, childList: true, subtree: true })
@@ -357,7 +371,8 @@ function noteOf(id) {
 function stateNow(id) {
   const item = document.getElementById(id)
   const box = item?.shadowRoot?.querySelector("[part~='note-box']")
-  const note = box?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")
+  const field = box?.shadowRoot?.querySelector("ui-textarea")
+  const note = field?.shadowRoot?.querySelector("textarea")
   return {
     marker: window.__checkLive === true,
     same: {
@@ -372,7 +387,8 @@ function stateNow(id) {
       !!note &&
       document.activeElement === item &&
       item.shadowRoot.activeElement === box &&
-      box.shadowRoot.activeElement === note,
+      box.shadowRoot.activeElement === field &&
+      field.shadowRoot.activeElement === note,
     y: scrollY
   }
 }
@@ -408,8 +424,8 @@ function listener() {
 
 /**
  * Open a folded section by a click on its title, then two of its items by clicks on their lines;
- * scroll the second a third of the way down, and give the note box of item `noteId` the focus back (it lost it to
- * the clicks), without scrolling.
+ * give the note box of item `noteId` the focus back (it lost it to the clicks), without scrolling, and type on in it
+ * (`TYPED_ON`);  then scroll the second item a third of the way down.
  * - the section:  the first folded `<epic-section>` with items, not holding `noteId`
  * - returns `{ section, items }`:  their ids;  `items` empty when no section had two that open
  */
@@ -437,15 +453,17 @@ async function openByHand(page, noteId) {
     if (await page.evaluate((id) => document.getElementById(id).hasAttribute("open"), id)) items.push(id)
   }
   if (items.length < 2) return { section, items: [] }
-  await page.evaluate(
-    ({ last, noteId }) => {
-      const top = document.getElementById(last).getBoundingClientRect().top
-      scrollTo({ top: scrollY + top - innerHeight / 3, behavior: "instant" })
-      const box = document.getElementById(noteId).shadowRoot.querySelector("[part~='note-box']")
-      box.shadowRoot.querySelector("ui-textarea").shadowRoot.querySelector("textarea").focus({ preventScroll: true })
-    },
-    { last: items[1], noteId }
-  )
+  await page.evaluate((noteId) => {
+    const box = document.getElementById(noteId).shadowRoot.querySelector("[part~='note-box']")
+    box.shadowRoot.querySelector("ui-textarea").shadowRoot.querySelector("textarea").focus({ preventScroll: true })
+  }, noteId)
+  // typed on, BEFORE the scroll:  a field merely given the focus back holds no reload (`typing()`, I172), and
+  // typing scrolls the caret into view
+  await page.keyboard.type(TYPED_ON)
+  await page.evaluate((last) => {
+    const top = document.getElementById(last).getBoundingClientRect().top
+    scrollTo({ top: scrollY + top - innerHeight / 3, behavior: "instant" })
+  }, items[1])
   return { section, items }
 }
 

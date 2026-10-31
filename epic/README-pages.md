@@ -1,17 +1,17 @@
 # The pages you review on
 
-![The top of an epic page, every section folded.  The header:  REPO-SPLIT, "1 min read", the paper plane and the wand
-in blue, the step pill P13, the git toggle.  The toolbar:  nine section icons, the Issues icon with a red 1;  at its
-right, counts of 1 red, 173 yellow, 138 green and 24 grey.  The meta lines, with an orange "No Claude session is
-reviewing" pill;  a See Also box of four details and choice pages;  then the nine sections, Overview to Log, each with
-its counts, To test with a "Start testing · 7" button.](docs/images/epic-page.png)
+![An epic page, scrolled down to its sections.  The header:  EPIC-ENGINE, the paper plane (Send) in the middle, then
+at the right the step pill P57 with 4 agents running, and the gear.  The toolbar:  eight section icons;  at its right,
+counts of 5 blue, 252 yellow, 1 green and 307 grey.  Then the eight sections, Overview to Log, each with its counts;
+Issues is open, filtered to its coloured items:  six yellow open issues and one green one just
+done.](docs/images/epic-page.png)
 
-_A real epic page, mid-build:  the repo-split epic, two of its 15 phases under way, every section folded._
+_A real epic page, mid-build:  this repo's epic-engine epic at P57, its Issues section open and showing only what
+isn't settled._
 
-Count the chips at the toolbar's right:  336 items, 173 yellow, 138 green, 24 grey, and ONE red,
-the 1 on the Issues icon.
-Red means a person is needed.
-So the whole review, the evening this was taken, came down to one issue.
+Count the chips at the toolbar's right:  565 items, 5 blue, 252 yellow, 1 green, 307 grey, and no red.
+Red means a person is needed, so nothing here is waiting on you:
+blue is what Claude is working on right now, yellow is open, and you get to it when you have time.
 
 If you've run a project from an issue tracker and a pull-request thread, you know where the time goes:
 grooming the list, and scrolling the conversation for whatever is still open.
@@ -61,13 +61,15 @@ where the build stands and where you're needed are one glance up.
    - In the header's middle:  Send (the paper plane), while the page is being reviewed.
      A press sends at once;  left alone, a ring round it drains, and it sends by itself (2 minutes by default).
      Beside it, a spinner while Claude is at work.
-   - The epic's name, at the left, copies `/epic resume <name>` when you click it;
-     the chip after it says how long what's open takes to read.
+   - The epic's name, at the left, copies `/epic resume <name>` when you click it.
+   - While agents the epic started are running, the step pill counts them (`4` and a robot):
+     click it for their rows, each with a box that redirects it.
 2. **The toolbar says where you're needed.**
    An icon per section jumps there;  a red badge on it counts what needs you,
    an orange one the answers waiting on your pick.
    - At its right, a chip per item state with its count:  click one to show only those.
-   - Then unfold-all, fold-all, and `+` for a new todo or question.
+   - Then one button that unfolds every section, or folds them all again.
+   - No new item button here:  each item section has its own (New todo, New issue ...).
 3. **The meta lines say how to start, and where the work lives:**
    the review command (`/epic review <name>`), the branch and worktree, the dates, the saga,
    and once Doc Review has written it, the epic's guide.
@@ -76,8 +78,6 @@ where the build stands and where you're needed are one glance up.
    links), gathered by the page server each time it serves the page, never written by hand.
 5. **The eight sections** follow, folded, each with its counts.
 
-While an agent the epic started is still running, an "Agents running" panel sits above the sections,
-with a box for each agent that redirects it.
 While the plan is still being written, a folded "Plan hung?" notice says how to restart it.
 
 ## Eight sections, and their ids never change

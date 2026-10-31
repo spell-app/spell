@@ -1790,7 +1790,7 @@
         "change",
         "git"
       ],
-      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sentence for each phase and item it names.  Its sentence is its children.",
+      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sha for each phase and item it names, before its sentence.  Its sentence is its children;  one longer than two lines is clamped to two, ending in an ellipsis, and a click on it (or Enter) unfolds it, remembered per page.",
       "noun": "commit",
       "attributes": [
         {
@@ -1828,7 +1828,11 @@
         },
         {
           "name": "line",
-          "description": "Its line:  the time (with `at`), the sha, its sentence, the chips (with `refs`)."
+          "description": "Its line:  the time (with `at`), the sha, the chips (with `refs`), its sentence."
+        },
+        {
+          "name": "sentence",
+          "description": "Its sentence (its children):  a long one is a button that folds it to two lines or unfolds it."
         },
         {
           "name": "time",
@@ -1836,7 +1840,7 @@
         },
         {
           "name": "ref",
-          "description": "With `refs`:  a chip per phase or item it names, after its sentence."
+          "description": "With `refs`:  a chip per phase or item it names, after the sha, before its sentence."
         },
         {
           "name": "heading",
@@ -1858,6 +1862,16 @@
           "key": "open",
           "text": "Open {sha} on GitHub",
           "description": "The sha link's tooltip."
+        },
+        {
+          "key": "unfoldTip",
+          "text": "Show all of it",
+          "description": "A long sentence's tooltip, folded to two lines."
+        },
+        {
+          "key": "foldTip",
+          "text": "Fold to two lines",
+          "description": "A long sentence's tooltip, unfolded."
         },
         {
           "key": "refTip",

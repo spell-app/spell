@@ -987,6 +987,8 @@ export class PlanDoc extends PlanReader {
       Object.values(KINDS).find((spec) => new RegExp(`^${spec.prefix}\\d+$`).test(item.id))?.live ?? "open"
     if (question) live = item.hasAttribute("answered") ? "decided" : "open"
     Markup.set<"epic-item">(item, { status: status === "open" ? live : (status as "done" | "canceled") })
+    // a test closed has passed:  its "failed → I12" goes (epic `epic-engine` I174)
+    if (status === "done") Markup.set<"epic-item">(item, { failed: undefined })
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -1064,6 +1066,32 @@ export class PlanDoc extends PlanReader {
     Markup.set(item, { prepared: String(place) })
     this.stamp(item)
     this.log(`${item.id.toUpperCase()} prepared for Owen's testing, number ${place}`)
+  }
+
+  /**
+   * Mark test `id` FAILED, filed as issue `issue` (`i12`):  the red "failed → I12" on its line, `failed="i12"`
+   * (epic `epic-engine` I174);  `issue` `undefined` takes the mark off.
+   * - the test stays open:  a closed one reopens;  its `changed` stamped
+   * - the same attribute an old test run's Failed wrote (`applyTest()`);  closing the test takes it off (`setItem()`)
+   * - throws for an item that isn't a manual test, or an issue the doc doesn't have
+   * - returns the issue's id, lowercase, or `undefined` when the mark went
+   */
+  markFailed(id: string, issue: string | undefined): string | undefined {
+    const item = this.item(id)
+    if (PlanItem.kindOfItem(item) !== "test")
+      throw new PlanDocError(`${item.id.toUpperCase()} isn't a manual test:  only a test is marked failed`)
+    if (issue === undefined) {
+      Markup.set(item, { failed: undefined })
+      this.stamp(item)
+      return undefined
+    }
+    const filed = this.item(issue)
+    if (PlanItem.kindOfItem(filed) !== "issue")
+      throw new PlanDocError(`${filed.id.toUpperCase()} isn't an issue:  a failed test is filed as one (I12)`)
+    if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
+    Markup.set(item, { failed: filed.id })
+    this.stamp(item)
+    return filed.id
   }
 
   /** Put item `id` off (`deferred`, today):  still outstanding, shown as such next review;  returns its title. */
@@ -1345,9 +1373,7 @@ export class PlanDoc extends PlanReader {
         this.review(item.id)
         return { applied: true, did: `passed (${AuthorWords.run(this.person)})` }
       case "failed": {
-        const issue = this.fileFailure(item, { note, shot, at })
-        if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
-        Markup.set(item, { failed: issue })
+        const issue = this.markFailed(item.id, this.fileFailure(item, { note, shot, at }))!
         this.review(item.id)
         const link = `<a href="#${issue}">${issue.toUpperCase()}</a>`
         this.noteStatus(item.id, `Failed in ${AuthorWords.testRun(PlanMarkup.text(this.person))}:  filed as ${link}.`)

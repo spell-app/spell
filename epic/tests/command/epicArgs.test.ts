@@ -258,6 +258,14 @@ describe("planDocArgs():  update", () => {
     expect(planDocArgs("update", ["seo#J3", "--loud"])).toEqual([["calm", "seo", "J3", "--loud"]])
   })
 
+  // epic `epic-engine` I174:  a manual test the session filed as failed
+  test("a manual test:  --failed I12 marks it failed, --failed off takes it off;  a value it needs", () => {
+    expect(planDocArgs("update", ["seo#M3", "--failed", "I12"])).toEqual([["failed", "seo", "M3", "I12"]])
+    expect(planDocArgs("update", ["seo#M3", "--failed", "off"])).toEqual([["failed", "seo", "M3", "off"]])
+    expect(() => planDocArgs("update", ["seo#M3", "--failed"])).toThrow("--failed needs a value")
+    expect(() => planDocArgs("update", ["seo#P3", "--failed", "I12"])).toThrow("phase P3 has no --failed")
+  })
+
   test("the page:  standing on or off", () => {
     expect(planDocArgs("update", ["seo", "--standing", "off"])).toEqual([["standing", "seo", "off"]])
     expect(planDocArgs("update", ["seo", "--no-standing"])).toEqual([["standing", "seo", "off"]])

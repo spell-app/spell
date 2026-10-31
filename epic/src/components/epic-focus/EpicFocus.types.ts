@@ -50,9 +50,6 @@ export const OPEN_STATES: ReadonlySet<string> = new Set([
   "scheduled"
 ])
 
-/** The state that has no chip of its own, but counts in the blue badge (`<epic-state-filter>`):  never hidden. */
-export const WITH_CLAUDE = "progress"
-
 /** One item (or phase) Focus mode walks. */
 export type FocusEntry = {
   /** its id, as on the page:  `q7`, `p-focus-mode` */
