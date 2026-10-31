@@ -17,7 +17,8 @@ import {
   MADE_FROM,
   PROPERTY_SELECTOR,
   PROPERTY_TAG,
-  VALUE_FROM_ATTRIBUTE
+  VALUE_FROM_ATTRIBUTE,
+  type PropertyOrigin
 } from "./UIPropertyEditor.types"
 
 import editorCSS from "./UIPropertyEditor.css?inline"
@@ -52,6 +53,11 @@ export class DOMPropertyEditorElement extends DOMFormElement {
   /** A value other than its default shows bold (`show-defaults`). */
   get showsDefaults(): boolean {
     return !!(this.component as UIPropertyEditor | undefined)?.showsDefaults
+  }
+
+  /** Where each property's value comes from (`origins`);  each `<ui-property>` reads its own here. */
+  get currentOrigins(): Readonly<Record<string, PropertyOrigin>> | undefined {
+    return (this.component as UIPropertyEditor | undefined)?.currentOrigins
   }
 }
 
@@ -93,6 +99,8 @@ export class DOMPropertyEditorElement extends DOMFormElement {
  *   - Its properties lay out on `columns` (2 when compact):  a short one (a number, a select) one column, the rest
  *     a row;  a group's own `columns` wins in it.
  *   - `show-defaults`:  a value other than its property's default shows bold.
+ * - `origins`:  where each property's value comes from, handed in by whoever knows (`PropertyOrigin`):
+ *   each property shows it, and a button it offers only says it was pressed.
  ****************/
 export class UIPropertyEditor extends UIForm {
   // the form's names under the editor's tag, the section's and its own:  TypeScript only knows the form's literals
@@ -170,6 +178,12 @@ export class UIPropertyEditor extends UIForm {
   @E.untracked
   private removeMadeProperties(from: string) {
     for (const child of [...this.domElement.children]) if (child.getAttribute(MADE_ATTRIBUTE) === from) child.remove()
+  }
+
+  /** Where each property's value comes from:  `origins`, as given. */
+  get currentOrigins(): Readonly<Record<string, PropertyOrigin>> | undefined {
+    const given = E.Reactive.attributeValue(this, "origins")
+    return given && typeof given === "object" ? (given as Record<string, PropertyOrigin>) : undefined
   }
 
   ////////////////

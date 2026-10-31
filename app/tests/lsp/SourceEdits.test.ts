@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { parseSpellProject } from "spell/parser/spell/test"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
-import { SourceHomes, type FileHome } from "spell/app/lsp/SourceHomes"
+import { SourceHomes, type FileHome, type MakingHome } from "spell/app/lsp/SourceHomes"
 
 describe("SourceEdits", () => {
   const TAG = `<draw>\n\t<ui-button color="red" appearance="basic" onClick={play it}>Go</ui-button>\n</draw>`
@@ -66,11 +66,10 @@ describe("SourceEdits", () => {
 function edited(path: string, contents: string, type: string, name: string, value: unknown, made?: string) {
   const parsed = parseSpellProject([{ path, contents }])
   const offset = made === undefined ? undefined : contents.indexOf(made)
-  const home = SourceHomes.ofProperty(parsed.files, {
-    made: offset === undefined ? undefined : { path, offset },
-    typeNames: [type],
-    name
-  }) as FileHome | { kind: "running" }
+  const file = parsed.files.find((each) => each.path === path)!
+  const home = (offset === undefined
+    ? SourceHomes.ofDefault(parsed.files, [type], name)
+    : SourceHomes.ofMaking(file, offset, name)) ?? { kind: "running" as const }
   if (home.kind !== "written" && home.kind !== "default") return { home, text: contents }
   if (!("style" in home)) throw new TypeError("not a literal")
   const literal = SourceHomes.literalFor(value, home.style)
@@ -124,8 +123,38 @@ describe("SourceHomes", () => {
     expect(text).toBe(CARD.replace(`title = "x"`, `title = "y"`))
   })
 
-  test("a value that line doesn't give falls back to the default", () => {
-    expect(edited("/Card.spellml", CARD, "Card", "suit", "hearts", "a new card with").home.kind).toBe("default")
+  test("a value that line doesn't give can be added to it, joined to what it says", () => {
+    const { home } = edited("/Card.spellml", CARD, "Card", "suit", "hearts", "a new card with")
+    expect(home).toMatchObject({ kind: "notWritten", place: "making", hasWith: true })
+    expect(CARD.slice(0, (home as MakingHome).at).endsWith(`count = 1`)).toBe(true)
+  })
+
+  test("a making that says nothing yet is told so", () => {
+    const code = CARD.replace(` with title = "x", count = 1`, "")
+    const { home } = edited("/Card.spellml", code, "Card", "suit", "hearts", "a new card")
+    expect(home).toMatchObject({ kind: "notWritten", place: "making", hasWith: false })
+  })
+
+  test("a value on a making comes off with its comma, or with its `with` when it's the only one", () => {
+    const removed = (contents: string, name: string) => {
+      const parsed = parseSpellProject([{ path: "/Card.spellml", contents }])
+      const home = SourceHomes.ofMaking(parsed.files[0]!, contents.indexOf("a new card"), name) as FileHome
+      return SourceEdits.applied(contents, [SourceEdits.replacing(contents, home.removal!, "")])
+    }
+    expect(removed(CARD, "count")).toContain(`a new card with title = "x"</>`)
+    expect(removed(CARD, "title")).toContain(`a new card with count = 1</>`)
+    const one = CARD.replace(`title = "x", count = 1`, `count = 1`)
+    expect(removed(one, "count")).toContain(`a new card</>`)
+  })
+
+  test("yes and no are literals, in the file's language", () => {
+    const code = [`a "card" is a thing where:`, `\t- to create it:`, `\t\tset its shown to yes`, ``].join("\n")
+    const { home } = edited("/Card.spell", code, "Card", "shown", false)
+    expect(home).toMatchObject({ kind: "default", style: "boolean" })
+    expect(SourceHomes.literalFor(false, "boolean")).toBe("no")
+    expect(SourceHomes.literalFor(true, "boolean", "es")).toBe("sí")
+    expect(SourceHomes.valueOfLiteral("yes", "boolean")).toBe(true)
+    expect(SourceHomes.valueOfLiteral("no", "boolean")).toBe(false)
   })
 
   test("nothing in the source says:  set while running", () => {

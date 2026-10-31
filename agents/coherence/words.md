@@ -37,6 +37,27 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   writes `aria-expanded`, its methods `open()`, `close()`, `toggle()`;  each element maps its own public names onto it
   (`collapsed`, `visible`), so P9's renames change one mapping each.
 
+## Selecting and parts
+
+### select
+
+- **Say:**  select, selected, selection, for what people choose on a page or in a list:  `select()`, `selection`,
+  `Inspector.selected`, `ui-menu`'s `selected`, "selected" in what people read.
+- **Not:**  pick, picked, picker, in what we name.
+  - `pick` stays as the plain English verb in prose ("Owen's pick", a pick on an epic page), and in TypeScript's `Pick<>`.
+- **Score:**  `\b(Picked|PartPicker|isPicking|startPicking)\b` · in `app/src/app/solid/`
+- **Decided:**  epic `editor` Q14:  the code had `select()` and `selection`, and Owen says "select";  P11 made the renames.
+
+### part, view
+
+- **Say:**  part, for one piece of a running app the Inspector can select:  a drawn thing or a Spell UI element
+  (`SelectedPart`, `partsIn()`).
+  - **Views** stays the name people read on the card and its tab, the app as a tree of its views.
+    A row of it is a part.
+- **Not:**  a second word for the piece in code.
+  A `view` in code is spell's own type, what `a card is a view` means, so a part may be one and may not.
+- **Decided:**  epic `editor` T2, P11 (a calm call:  it renames nothing people see).
+
 ## People and things
 
 ### people

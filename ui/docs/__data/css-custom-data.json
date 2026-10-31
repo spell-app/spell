@@ -10966,6 +10966,13 @@
       }
     },
     {
+      "name": "::part(origin)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-property>`:  The small button its value's origin offers."
+      }
+    },
+    {
       "name": "::part(output)",
       "description": {
         "kind": "markdown",
@@ -11895,7 +11902,7 @@
       "name": ":state(here)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-theme-token>`:  The theme sets the token (●)."
+        "value": "Custom state of:\n\n- `<ui-property>`:  Its value is set on this thing (its editor's `origins`):  a dot by its label.\n- `<ui-theme-token>`:  The theme sets the token (●)."
       }
     },
     {
@@ -12134,6 +12141,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-field>`:  In the info state.\n- `<ui-fields>`:  In the info state.\n- `<ui-form>`:  In the info state.\n- `<ui-property>`:  In the info state.\n- `<ui-property-editor>`:  In the info state."
+      }
+    },
+    {
+      "name": ":state(inherited)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-property>`:  Its value comes from somewhere else (its editor's `origins`):  a quieter label."
       }
     },
     {

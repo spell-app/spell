@@ -11,7 +11,7 @@ import "spell/ui"
 ////////////////
 
 /** A `<ui-property-editor>`, as the tests set it. */
-type Editor = HTMLElement & { schema: unknown; value: unknown }
+type Editor = HTMLElement & { schema: unknown; value: unknown; origins?: unknown }
 
 /** A schema of a routine:  text, choices, numbers, an icon row, a hue, yes-or-no fields (epic `debut` P31). */
 const ROUTINE: PropertySchema = {
@@ -335,5 +335,63 @@ describe("<ui-property> choices with icons", () => {
     const host = await editor("compact")
     const violet = property(host, "color").querySelector("ui-item[value=violet]")!
     expect(violet.getAttribute("image")).toMatch(/^data:image\/svg\+xml,/)
+  })
+})
+
+describe("<ui-property-editor origins>", () => {
+  /** An editor of a routine, told where its values come from. */
+  async function withOrigins() {
+    const editor = await ElementFixture.render<Editor>(
+      `<ui-property-editor compact show-defaults></ui-property-editor>`
+    )
+    editor.schema = ROUTINE
+    editor.value = { name: "Bell", kind: "gate", steps: 3 }
+    editor.origins = {
+      name: { kind: "here", from: "Set here", action: "reset" },
+      kind: { kind: "inherited", from: "From Routine" },
+      steps: { kind: "worked out", from: "Worked out", action: "show code" }
+    }
+    await ElementFixture.settle()
+    const field = (name: string) => editor.querySelector(`ui-property[name=${name}]`)!
+    return { editor, field }
+  }
+
+  it("shows each one's look, and the label's tooltip says where", async () => {
+    const { field } = await withOrigins()
+    expect(field("name").matches(":state(here)")).toBe(true)
+    expect(field("name").matches(":state(set)")).toBe(true)
+    expect(field("kind").matches(":state(inherited)")).toBe(true)
+    expect(field("kind").matches(":state(set)")).toBe(false)
+    expect(field("steps").matches(":state(readonly)")).toBe(true)
+    expect(field("kind").shadowRoot!.querySelector(".label")!.getAttribute("title")).toBe("From Routine")
+  })
+
+  it("a property it doesn't name looks as it did", async () => {
+    const { field } = await withOrigins()
+    expect(field("align").matches(":state(here)")).toBe(false)
+    expect(field("align").shadowRoot!.querySelector(".origin")).toBeNull()
+  })
+
+  it("worked out, a row of buttons takes no press", async () => {
+    const editor = await ElementFixture.render<Editor>(
+      `<ui-property-editor compact><ui-property name="kind" as="buttons"></ui-property></ui-property-editor>`
+    )
+    editor.schema = ROUTINE
+    editor.value = { kind: "gate" }
+    editor.origins = { kind: { kind: "worked out" } }
+    await ElementFixture.settle()
+    const row = editor.querySelector("ui-property[name=kind] > [data-ui-made]") as HTMLElement
+    expect(row.inert).toBe(true)
+  })
+
+  it("a button only says it was pressed", async () => {
+    const { editor, field } = await withOrigins()
+    const heard: string[] = []
+    editor.addEventListener("ui-reset", (event) => heard.push(`reset ${(event as CustomEvent).detail.name}`))
+    editor.addEventListener("ui-show-code", (event) => heard.push(`code ${(event as CustomEvent).detail.name}`))
+    field("name").shadowRoot!.querySelector<HTMLElement>(".origin")!.click()
+    field("steps").shadowRoot!.querySelector<HTMLElement>(".origin")!.click()
+    expect(heard).toEqual(["reset name", "code steps"])
+    expect(field("kind").shadowRoot!.querySelector(".origin")).toBeNull()
   })
 })

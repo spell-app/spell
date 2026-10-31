@@ -529,6 +529,14 @@ What a component, or a page built on Spell UI, reaches for first.
   - Taking it since epic `coherence` P21:  the brand's `BrandColorSet` (Enter / Space stay its own).
   - Not swept yet:  the docs' search (`UIDocsSearch`).
 
+
+### Selecting by clicks in a list
+
+Plain, Command or Control, and Shift, one rule.
+- **It is:**  `ListSelection` (`src/util/ListSelection.ts`):
+  a plain class holding the anchor, handed the list and what's selected.
+- **Used by:**  a program's viewable lists (`SpellElement`), the Inspector's selection and its Views tree.
+- **Instead of:**  a click handler that works out a range itself.
 ### The highlighted option of a list
 
 - **It is:**  `F.HighlightedOption` (`ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a

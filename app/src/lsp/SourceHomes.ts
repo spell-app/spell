@@ -4,13 +4,12 @@ import { SourceEdits, type TextSpan } from "./SourceEdits"
 /**
  * Where a value in the side bar lives in a program's source:  its HOME (epic `editor`, "Every field has a home").
  * - A drawn element's attribute or text:  on its tag, at the place the compiler marked on it.
- * - A thing's property:
- *   - on the line that made it, `a new foundation with suit = clubs`
- *   - else its type's default, the `set its count to 0` of its `to create it`
- *   - else, nowhere:  the program set it while running
+ * - A thing's property, asked for one of two places:
+ *   - the line that made it, `a new foundation with suit = clubs` (`ofMaking()`)
+ *   - its type's default, the `set its count to 0` of its `to create it` (`ofDefault()`)
  * - It reads the parse, not the words, so it works the same in `.spell`, `.spellml` and every language.
  * - It loads no language service and no code editor, and changes nothing:  `SourceEdits` makes the edit.
- * - A `yes` or `no` reads as code for now:  only numbers, text and one word of an enumeration are literals.
+ * - Literals are numbers, text, `yes` / `no` and one word of an enumeration;  anything else is code.
  * - Static and instance-free on purpose.
  */
 export class SourceHomes {
@@ -47,41 +46,78 @@ export class SourceHomes {
   }
 
   /**
-   * Where property `name` of a thing lives, among `files`.
-   * - `made`:  where it was made, as the compiler marked it.
-   * - `typeNames`:  its class's name and those it inherits, its own first.
-   * - Never `undefined`:  `running` when the source doesn't say.
+   * Where property `name` lives on the line that made a thing, for "This one".
+   * - `written` or `expression`:  that line says it
+   * - `notWritten`:  the line doesn't say it yet:  an edit adds it, and `addTo` says where and how
+   * - `undefined`:  no making there, e.g. the compiler's mark is behind the text
    */
-  static ofProperty(
-    files: readonly HomeFile[],
-    { made, typeNames, name }: { made: MadeAt | undefined; typeNames: readonly string[]; name: string }
-  ): FileHome | { kind: "running" } {
-    const madeFile = made && files.find((file) => file.path === made.path)
-    if (made && madeFile?.match) {
-      const value = SourceHomes.valueOnMaking(madeFile, made.offset, name)
-      if (value) return { ...SourceHomes.homeOfValue(value, madeFile.contents), file: madeFile.path }
+  static ofMaking(file: HomeFile, offset: number, name: string): OnMaking | undefined {
+    if (!file.match) return undefined
+    const making = findMatch(file.match, (match) => match.rule?.name === NEW_THING && match.start === offset)
+    if (!making) return undefined
+    const value = SourceHomes.valueOnMaking(file, offset, name)
+    if (value) {
+      const property = findMatch(making, (match) => match.rule?.name === MADE_WITH && match.matched.includes(value))
+      return {
+        ...SourceHomes.homeOfValue(value, file.contents),
+        file: file.path,
+        removal: removalOf(file.contents, making, property)
+      } as OnMaking
     }
+    const end = making.start! + making.inputText.trimEnd().length
+    const hasWith = !!findMatch(making, (match) => match.rule?.name === MADE_WITH)
+    return {
+      kind: "notWritten",
+      place: "making",
+      file: file.path,
+      anchor: lineOf(making, file.contents),
+      at: end,
+      hasWith
+    }
+  }
+
+  /**
+   * What "All of them" edits for property `name`:  its type's default.
+   * - `undefined`:  no type here starts it, so there's nothing to change.
+   */
+  static ofDefault(
+    files: readonly HomeFile[],
+    typeNames: readonly string[],
+    name: string
+  ): (FileHome & { typeName: string }) | undefined {
     for (const typeName of typeNames) {
       for (const file of files) {
-        const value = file.match && SourceHomes.valueInCreate(file.match, typeName, name)
-        if (value) {
-          const home = SourceHomes.homeOfValue(value, file.contents)
-          return { ...home, kind: home.kind === "written" ? "default" : home.kind, file: file.path } as FileHome
-        }
+        const value =
+          file.match &&
+          (SourceHomes.valueInCreate(file.match, typeName, name) ??
+            SourceHomes.valueDeclared(file.match, typeName, name))
+        if (!value) continue
+        const home = SourceHomes.homeOfValue(value, file.contents)
+        return {
+          ...home,
+          kind: home.kind === "written" ? "default" : home.kind,
+          file: file.path,
+          typeName
+        } as FileHome & { typeName: string }
       }
     }
-    return { kind: "running" }
+    return undefined
   }
 
   /** What a literal in the source says, as a value:  what a thing still holding its default holds. */
   static valueOfLiteral(text: string, style: LiteralStyle): unknown {
+    if (style === "boolean") return BOOLEAN_TRUE.test(text)
     if (style === "number") return Number(text)
     if (style === "text") return text.slice(1, -1)
     return text
   }
 
-  /** `value` as `style` writes it in spell:  `5`, `"five"`, `clubs`. */
-  static literalFor(value: unknown, style: LiteralStyle): string {
+  /**
+   * `value` as `style` writes it in spell:  `5`, `"five"`, `clubs`, `yes`.
+   * - `language`:  the file's, for the words of a yes or no.
+   */
+  static literalFor(value: unknown, style: LiteralStyle, language = "en"): string {
+    if (style === "boolean") return value ? (language === "es" ? "sí" : "yes") : "no"
     if (style === "text") return JSON.stringify(String(value))
     return String(value)
   }
@@ -118,6 +154,25 @@ export class SourceHomes {
     return (assignment?.groups as { value?: P.Match } | undefined)?.value
   }
 
+  /** The value `type` declares for property `name`, as `its "layout" is stacked`, if it does. */
+  private static valueDeclared(root: P.Match, type: string, name: string): P.Match | undefined {
+    const declared = findMatch(
+      root,
+      (match) =>
+        match.rule?.name === CREATE_TYPE &&
+        wordsMean((match.groups as { type?: P.Match }).type?.raw?.replace(/["\s]/g, ""), type)
+    )
+    const property =
+      declared &&
+      findMatch(
+        declared,
+        (match) =>
+          match.rule?.name === DECLARED_VALUE &&
+          wordsMean((match.groups as { property?: P.Match }).property?.raw?.replace(/"/g, ""), name)
+      )
+    return (property?.groups as { body?: P.Match } | undefined)?.body
+  }
+
   /**
    * The home of a value in the source:  a literal, `written`;  anything else, `expression`.
    * - throws when the parse is behind the text, which a re-parse can be for a moment:  never edit by old offsets.
@@ -140,7 +195,7 @@ export class SourceHomes {
 ////////////////
 
 /** How a literal is written in spell:  see `SourceHomes.literalFor()`. */
-export type LiteralStyle = "number" | "text" | "word"
+export type LiteralStyle = "number" | "text" | "word" | "boolean"
 
 /** Where a thing was made, as an offset in its file. */
 export type MadeAt = { path: string; offset: number }
@@ -169,7 +224,29 @@ export type FieldHome =
   | { kind: "expression"; anchor: TextSpan; span: TextSpan }
 
 /** A `FieldHome`, and the file it's in. */
-export type FileHome = FieldHome & { file: string }
+export type FileHome = FieldHome & {
+  /** the file it's in */
+  file: string
+  /** On a making's line:  the span to remove to take it off that line. */
+  removal?: TextSpan
+}
+
+/** Where a property lives on a making's line:  said there, or not yet. */
+export type OnMaking = MakingHome | Extract<FileHome, { place: "literal" }> | Extract<FileHome, { kind: "expression" }>
+
+/** A property a thing's making doesn't say yet:  an edit adds it there. */
+export type MakingHome = {
+  kind: "notWritten"
+  place: "making"
+  /** the file it's in */
+  file: string
+  /** what finds it again:  its line */
+  anchor: TextSpan
+  /** where the words go:  the making's end */
+  at: number
+  /** it says something already, so this joins with a comma */
+  hasWith: boolean
+}
 
 ////////////////
 // ## Helpers
@@ -180,9 +257,14 @@ const NEW_THING = "new_thing"
 const MADE_WITH = "object_literal_property"
 const ASSIGNMENT = "assignment"
 const CREATE = "create"
+const CREATE_TYPE = "create_type"
+const DECLARED_VALUE = "property_value_getter"
 
 /** A literal's rule, and how it's written. */
-const LITERAL_STYLES: Record<string, LiteralStyle> = { number: "number", text: "text" }
+const LITERAL_STYLES: Record<string, LiteralStyle> = { number: "number", text: "text", boolean: "boolean" }
+
+/** A `yes` in any language, as a boolean literal's words. */
+const BOOLEAN_TRUE = /^(yes|true|ok|always|verdadero|sí|si)$/i
 
 /** The first match under `root`, depth first, that `test` says yes to. */
 function findMatch(root: P.Match, test: (match: P.Match) => boolean): P.Match | undefined {
@@ -213,6 +295,23 @@ function literalStyleOf(value: P.Match): LiteralStyle | undefined {
 
 /** The rules a bare value of an enumeration reads as. */
 const ENUM_VALUE_RULES: ReadonlySet<string> = new Set(["constant", "known_constant", "enum_value"])
+
+/**
+ * The span taking `property` off `making`:  `, suit = clubs`, or ` with suit = clubs` when it's the only one.
+ * - The first of several:  it and the comma after it.
+ */
+function removalOf(text: string, making: P.Match, property: P.Match | undefined): TextSpan | undefined {
+  if (!property) return undefined
+  const start = property.start!
+  const end = start + property.inputText.trimEnd().length
+  const before = text.slice(making.start!, start)
+  const comma = /,\s*$/.exec(before)
+  if (comma) return { start: start - comma[0].length, end }
+  const after = /^\s*,\s*/.exec(text.slice(end))
+  if (after) return { start, end: end + after[0].length }
+  const joined = /\s+\S+\s+$/.exec(before)
+  return { start: start - (joined?.[0].length ?? 0), end }
+}
 
 /** The whole line holding `value`, without its indent:  what finds it again. */
 function lineOf(value: P.Match, text: string): TextSpan {

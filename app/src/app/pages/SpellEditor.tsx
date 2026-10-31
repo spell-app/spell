@@ -13,7 +13,7 @@ import {
   Inspector,
   InspectorPane,
   InspectHelp,
-  InspectorPick,
+  InspectAppButton,
   InspectorToggle,
   ModeButtons,
   OutputEditor,
@@ -374,7 +374,7 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
-            <InspectorPick id={INSPECT_APP_ID} />
+            <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
             <InspectorToggle />
             <span class="BarToolsLine" role="separator" />

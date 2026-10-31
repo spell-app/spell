@@ -26018,7 +26018,7 @@
       "name": "ui-property",
       "description": {
         "kind": "markdown",
-        "value": "A property is one field of a property editor:  its label, tip, choices and rules come from the editor's schema.\n\nAlso known as:  property, inspector row, setting, schema field.\n\n**Slots:**  default, `label`, `description`, `hint`, `output`, `actions`\n\n**Events:**  `ui-changed`"
+        "value": "A property is one field of a property editor:  its label, tip, choices and rules come from the editor's schema.\n\nAlso known as:  property, inspector row, setting, schema field.\n\n**Slots:**  default, `label`, `description`, `hint`, `output`, `actions`\n\n**Events:**  `ui-changed`, `ui-reset`, `ui-show-code`"
       },
       "attributes": [
         {
@@ -26413,7 +26413,7 @@
       "name": "ui-property-editor",
       "description": {
         "kind": "markdown",
-        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
+        "value": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.\n\nAlso known as:  inspector, property sheet, properties panel, settings form, object editor.\n\n**Slots:**  default, `output`, `label`, `hint`, `icon`, `badge`, `actions`, `description`\n\n**Events:**  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`"
       },
       "attributes": [
         {

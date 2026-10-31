@@ -21792,9 +21792,23 @@
           "name": "ui-changed",
           "detail": "{ name: string, value: unknown }",
           "description": "Its property was written (on Save, with `apply=\"on save\"`)."
+        },
+        {
+          "name": "ui-reset",
+          "detail": "{ name: string }",
+          "description": "Its reset button was pressed (its editor's `origins`)."
+        },
+        {
+          "name": "ui-show-code",
+          "detail": "{ name: string }",
+          "description": "Its code button was pressed (its editor's `origins`)."
         }
       ],
       "parts": [
+        {
+          "name": "origin",
+          "description": "The small button its value's origin offers."
+        },
         {
           "name": "field",
           "description": "The field box."
@@ -21860,6 +21874,14 @@
         {
           "name": "inline-check",
           "description": "A yes or no in a compact editor:  the box, then its label, on one line."
+        },
+        {
+          "name": "here",
+          "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+        },
+        {
+          "name": "inherited",
+          "description": "Its value comes from somewhere else (its editor's `origins`):  a quieter label."
         },
         {
           "name": "set",
@@ -21939,6 +21961,16 @@
         }
       ],
       "texts": [
+        {
+          "key": "reset",
+          "text": "Reset {label}",
+          "description": "The reset button's name."
+        },
+        {
+          "key": "showCode",
+          "text": "Show the code for {label}",
+          "description": "The code button's name."
+        },
         {
           "key": "flags",
           "text": "Options",
@@ -22020,6 +22052,12 @@
           "name": "columns",
           "kind": "number",
           "description": "How many columns its properties lay out on:  a short one (a number, a select) takes one, the rest a whole row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it."
+        },
+        {
+          "name": "origins",
+          "kind": "json",
+          "reflect": false,
+          "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did."
         },
         {
           "name": "show-defaults",
@@ -22441,6 +22479,16 @@
           "name": "ui-changed",
           "detail": "{ name: string, value: unknown, things: object[] }",
           "description": "A property was written to the thing (or things)."
+        },
+        {
+          "name": "ui-reset",
+          "detail": "{ name: string }",
+          "description": "A property's reset button was pressed (`origins`):  the page does what that means."
+        },
+        {
+          "name": "ui-show-code",
+          "detail": "{ name: string }",
+          "description": "A property's code button was pressed (`origins`):  the page shows it."
         },
         {
           "name": "ui-loading",

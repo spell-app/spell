@@ -349,15 +349,15 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         <Action
           menu
           title={appTexts.text("inspectApp")}
-          disabled={Inspector.isPicking}
+          disabled={Inspector.isInspecting}
           onClick={() => startInspecting()}
         />
         <Action
           menu
           title={appTexts.text("stopInspecting")}
           shortcut={EDITOR_HOTKEYS.stopInspecting.shortcut}
-          disabled={!Inspector.isPicking}
-          onClick={() => Inspector.stopPicking()}
+          disabled={!Inspector.isInspecting}
+          onClick={() => Inspector.stopInspecting()}
         />
         <Divider />
         <Actions.clearConsole menu />
@@ -388,7 +388,7 @@ function toggleProgramPanel(mode: Mode) {
 /** Run › Inspect App:  start inspecting, opening the Inspector if it's closed (which starts it). */
 export function startInspecting() {
   if (!Inspector.isOpen) Inspector.toggle()
-  else Inspector.startPicking()
+  else Inspector.startInspecting()
 }
 
 /** The tag of a menu's items. */
