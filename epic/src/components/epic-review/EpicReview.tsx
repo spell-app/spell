@@ -33,7 +33,9 @@ import {
   SAID_EDIT,
   SAID_NOTE,
   SAID_PICTURE,
+  SAID_TAKEN,
   SAID_WHAT,
+  SAID_WHO,
   SHOW_NOTE,
   TEST_ITEM_ID,
   THREAD_ANSWER,
@@ -57,7 +59,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - It shows one of three things (`shows`):
  *   - `buttons`:  the controls at the end of a line or title (`controls()`)
  *   - `note`:  the note box (`noteBox()`)
- *   - `said`:  a marked note, its box closed (`said()`)
+ *   - `said`:  a marked note, its box closed (`said()`);  and the note Claude took, read-only (`takenSaid()`)
  * - Each family draws it in its own shadow root:
  *   - `<epic-item>`:  on its line, in its details, or under its line
  *   - an Overview `<epic-section>` and an `<epic-phase>`:  on their title and in their body
@@ -423,7 +425,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   dashed until sent, outlined once sent;  the rest a grey outline
    */
   private noteBox(): JSX.Element {
-    const mark = () => markButton(this.review.mark())
+    // a mark Claude took is no button of the box's (I190):  the box is for the next note
+    const mark = () => markButton(this.review.ownMark())
     return (
       <div
         class={NOTE_BOX}
@@ -497,11 +500,17 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     return this.review.typed()
   }
 
-  /** What's typed changed elsewhere (a request called off, Edit):  put back in the box, unless it's being typed in. */
+  /**
+   * What's typed changed elsewhere (a request called off, Edit):  put back in the box, unless it's being typed in.
+   * - emptied as Claude took the note it held (I190):  emptied even while it has the focus, its floppy gone
+   */
   @E.onChange("typed")
   protected onTypedElsewhere(text: string) {
     const note = this.noteInput
-    if (note && note.value !== text && (!note.value || !note.matches(":focus"))) note.value = text
+    if (!note || note.value === text) return
+    const taken = !text && note.value.trim() === (this.review.takenNote()?.note ?? "").trim()
+    if (!note.value || !note.matches(":focus") || taken) note.value = text
+    if (taken) this.saved = undefined
   }
 
   /**
@@ -520,7 +529,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /**
    * A key typed:  kept and backed up at once, saved to the inbox once typing stops.
-   * - the first words on an item with no note mark yet are saved AT ONCE:  Revisit turns on as he types (P20)
+   * - the first words on an item with no note mark yet are saved AT ONCE:  Revisit turns on as he types (P20);
+   *   so are the first over a note Claude took (I190), a new mark for the next send
    */
   @E.untracked
   private onInput() {
@@ -530,7 +540,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     client?.type(id, text)
     this.drafts.changed()
     const made = client?.typedMark(id, text)
-    if (made && made !== "draft" && made.action !== client?.markOf(id)?.action) this.flush()
+    // a new note over one Claude took is a new mark too (I190)
+    if (made && made !== "draft" && (made.action !== client?.markOf(id)?.action || client?.isTaken(id))) this.flush()
   }
 
   /** Escape:  leave the box, the draft saved. */
@@ -622,7 +633,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * it (`said()`), nor a test answer's (an older run's).
    */
   readonly picture = (): string | undefined => {
-    const mark = this.review.mark()
+    const mark = this.review.ownMark()
     if (this.pastedPicture) return this.pastedPicture
     return mark?.action === "test" || this.review.noted() ? undefined : mark?.shot
   }
@@ -754,6 +765,51 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *   (`ReviewState.noted()`, which the family reads too, to draw it at all)
    */
   private said(): JSX.Element {
+    return (
+      <>
+        {this.takenSaid()}
+        {this.markedSaid()}
+      </>
+    )
+  }
+
+  /**
+   * The note Claude TOOK and is answering (epic `epic-engine` I190):  quiet and read-only, "You, 10:11 · the note",
+   * just above Claude's status card, so Owen sees what's being answered while the box below is free for a new note.
+   * - no Edit:  it's Claude's now;  a change is a new note
+   * - Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows in the comment box"
+   */
+  private takenSaid(): JSX.Element {
+    return (
+      <Show when={this.review.takenNote()}>
+        {(mark) => (
+          <div
+            class={[SAID, SAID_TAKEN]}
+            part={this.partForName("taken")}
+            title={this.translationForKey("saidTakenTip")}
+            aria-label={this.translationForKey("you")}
+          >
+            <span class={SAID_WHO}>{this.translationForKey("saidTaken", { time: clockOf(mark().at) })} ·</span>
+            <p class={SAID_NOTE}>{mark().note}</p>
+            <Show when={mark().shot}>
+              {(shot) => (
+                <img
+                  class={SAID_PICTURE}
+                  src={shot()}
+                  alt={this.translationForKey("pictureZoom")}
+                  title={this.translationForKey("pictureZoom")}
+                  onClick={(event: MouseEvent) => EpicReview.zoom(event)}
+                />
+              )}
+            </Show>
+          </div>
+        )}
+      </Show>
+    )
+  }
+
+  /** A marked note, its box closed, still Owen's to change:  the note, how far it got, Edit. */
+  private markedSaid(): JSX.Element {
     return (
       <Show when={this.review.noted()}>
         {(mark) => (

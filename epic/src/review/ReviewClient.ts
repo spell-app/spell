@@ -70,6 +70,9 @@ import { ServerLink } from "./ServerLink"
  *     so a half-typed note survives the switch
  *   - a backup the inbox lacks is handed to it on start (`adoptBackups()`)
  *   - what's being typed also stays in memory (`typed`), for an element drawn anew
+ * - a note Claude TOOK (`inbox.taken`, epic `epic-engine` I190) is no longer a draft:
+ *   the box lets go of its words (`changed()`), the page shows them read-only (`takenNoteOf()`),
+ *   and what's typed next is a NEW mark, for the next send (`typedMark()`)
  * - who listens:  `inbox.listening` (`null` once a session's heartbeat stopped:  the routes say so)
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   the browser's services come in through `ReviewClientOptions`, so tests stub `fetch` and storage
@@ -292,6 +295,42 @@ export class ReviewClient extends PageStore {
     return own || "details"
   }
 
+  /**
+   * The mark Claude TOOK on item `id` (epic `epic-engine` I190), while it has a note or a picture to show:
+   * what Claude is answering, shown read-only above its status card;  else `undefined`.
+   * - `inbox.taken`:  its agent started on it, or a status card was written for it
+   * - kept when Owen marks the item again meanwhile:  his new mark is `markOf()`, this the one being answered
+   */
+  takenNoteOf(id: string): InboxMark | undefined {
+    const mark = this.takenOf(id)
+    return mark && (mark.note || (mark.shot && mark.action !== "test")) ? mark : undefined
+  }
+
+  /**
+   * Is item `id`'s mark the one Claude TOOK (`takenNoteOf()`)?  Then it's Claude's to answer, not Owen's to edit:
+   * the note box doesn't hold it, and a note typed there is a new mark.
+   */
+  isTaken(id: string): boolean {
+    const mark = this.inbox.marks[id]
+    return !!mark && this.takenOf(id)?.at === mark.at
+  }
+
+  /** Item `id`'s mark while it's still Owen's to change:  `undefined` once Claude took it (`isTaken()`). */
+  ownMarkOf(id: string): InboxMark | undefined {
+    return this.isTaken(id) ? undefined : this.inbox.marks[id]
+  }
+
+  /**
+   * The mark Claude took on item `id`, by the inbox's `taken`;
+   * from a page server older than it (none sent):  its sent mark while Claude works on it.
+   */
+  private takenOf(id: string): InboxMark | undefined {
+    const taken = this.inbox.taken[id]
+    if (taken) return taken
+    const mark = this.inbox.marks[id]
+    return mark && this.inbox.working[id] && this.isSent(mark) ? mark : undefined
+  }
+
   /** Has Claude taken item `id`'s request (`working`), rather than it waiting to be taken? */
   isWorkedOn(id: string): boolean {
     return !!this.inbox.working[id]
@@ -375,6 +414,8 @@ export class ReviewClient extends PageStore {
   press(id: string, action: ReviewAction): "open-box" | "chosen" | undefined {
     const mark = this.inbox.marks[id]
     if (this.busyButtonOf(id) === action) return void this.cancel(id)
+    // Claude has his last note:  Revisit is for a new one, never a click taking that one back (I190)
+    if (action === "revisit" && this.isTaken(id)) return "open-box"
     if (action === "details") {
       const note = this.typedOf(id).trim()
       void (note ? this.useNote(id, "now", note) : this.askNow(id, "details"))
@@ -508,7 +549,8 @@ export class ReviewClient extends PageStore {
    * - taken away from a revisit with no words, pick or comments left:  the mark goes
    */
   attachShot(id: string, shot: string | undefined): Promise<boolean> {
-    const mark = this.inbox.marks[id]
+    // a mark Claude took isn't the box's any more:  the picture starts a new note (I190)
+    const mark = this.ownMarkOf(id)
     const typed = this.typedOf(id)
     const made = mark && NOTE_MARKS.has(mark.action) && !isImmediate(mark) ? stripped(mark) : this.typedMark(id, typed)
     const base: MarkInput =
@@ -593,7 +635,8 @@ export class ReviewClient extends PageStore {
     this.forgetTyped(id)
     this.boxes.delete(id)
     if (how === "now") return this.askNow(id, "revisit", note)
-    const mark = this.inbox.marks[id]
+    // a mark Claude took lends the new one nothing:  its pick and comments went with it (I190)
+    const mark = this.ownMarkOf(id)
     // the box's picture goes with the button pressed (epic `epic-engine` P51)
     const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
     if (how !== "soon") return this.save(id, { action: how, note, ...shot })
@@ -610,6 +653,12 @@ export class ReviewClient extends PageStore {
    *   isn't drawn above it as well
    */
   async saveTyped(id: string, text: string, options: WriteOptions = {}): Promise<boolean> {
+    // the words Claude took, still in a box that had the focus as he took them:  nothing new to save (I190)
+    if (this.isTaken(id) && text.trim() === (this.inbox.marks[id]?.note ?? "").trim()) {
+      this.forgetTyped(id)
+      this.changed()
+      return true
+    }
     const mark = this.typedMark(id, text)
     if (mark === "draft") return this.saveDraft(id, text, options)
     this.boxes.add(id)
@@ -626,12 +675,16 @@ export class ReviewClient extends PageStore {
    *   the same mark, its words changed
    * - emptied:  a revisit goes again (its pick stays, a plain pick);
    *   any other mark stays as it is, and the empty box is a draft
+   * - a mark Claude TOOK (`isTaken()`, epic `epic-engine` I190):  words make a NEW revisit, waiting for the next
+   *   send, which replaces it in the inbox (the inbox keeps the taken one, `taken`);  nothing typed, a draft
    * - `"draft"`:  saved as the box's draft instead, as before P20:
-   *   a request at work (Do Now, a revisit now), or an empty box with no revisit
+   *   a request at work (Do Now, a revisit now) not taken yet, or an empty box with no revisit
    */
   typedMark(id: string, text: string): MarkInput | null | "draft" {
     const mark = this.inbox.marks[id]
     const note = text.trim()
+    if (this.isTaken(id))
+      return note && note !== (mark?.note ?? "").trim() ? { action: "revisit", when: "soon", note } : "draft"
     if (mark && isImmediate(mark)) return "draft"
     // a picture in the box stays with whatever its words make (epic `epic-engine` P51)
     const shot = mark?.shot && mark.action !== "test" ? { shot: mark.shot } : {}
@@ -829,6 +882,22 @@ export class ReviewClient extends PageStore {
     const read = await this.load()
     if (read) this.changed()
     return read
+  }
+
+  /**
+   * Something changed:  first, a note box still holding the words of a mark Claude has now TAKEN lets go of them
+   * (`isTaken()`, epic `epic-engine` I190), its backup and its open box too, so it's empty for a new note.
+   * - Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows in the comment box"
+   * - words typed since (not the taken note) stay:  they're his next note
+   */
+  protected changed() {
+    for (const [id, text] of this.typed) {
+      if (!this.isTaken(id) || text.trim() !== (this.inbox.marks[id]?.note ?? "").trim()) continue
+      this.typed.delete(id)
+      this.backup(id, "")
+      this.boxes.delete(id)
+    }
+    super.changed()
   }
 
   ////////////////

@@ -259,6 +259,7 @@ export type Inbox = Pick<
   | "sent"
   | "now"
   | "working"
+  | "taken"
   | "listening"
   | "lastListener"
   | "unsentComments"
@@ -414,6 +415,8 @@ export function inboxOf(reply: unknown): Inbox {
     sent: typeof record.sent === "string" ? record.sent : null,
     now: Array.isArray(record.now) ? (record.now as NowRequest[]) : [],
     working: isObject(record.working) ? (record.working as Inbox["working"]) : {},
+    // a page server from before epic `epic-engine` I190 sends none
+    taken: isObject(record.taken) ? (record.taken as Inbox["taken"]) : {},
     listening: isObject(record.listening) ? (record.listening as InboxListener) : null,
     lastListener: isObject(record.lastListener) ? (record.lastListener as InboxListener) : null,
     unsentComments: Array.isArray(record.unsentComments)

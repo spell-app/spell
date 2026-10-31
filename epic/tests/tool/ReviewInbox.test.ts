@@ -475,6 +475,58 @@ describe("ReviewInbox, Claude's side", () => {
   })
 })
 
+// epic `epic-engine` I190 (Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows")
+describe("ReviewInbox.takeMark():  the mark Claude TOOK", () => {
+  test("only a mark handed over:  sent, or asked now;  kept whole, in the file's record", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("j11", { action: "revisit", when: "soon", note: "float them" }, M1)
+    // not sent yet:  still Owen's to change
+    expect(inbox.takeMark("J11")).toBeNull()
+    inbox.markSent(M2)
+    const taken = inbox.takeMark("j11")
+    expect(taken).toEqual({ action: "revisit", when: "soon", note: "float them", at: M1 })
+    expect(inbox.toRecord().taken).toEqual({ j11: taken })
+    expect(inbox.forPage().taken).toEqual({ j11: taken })
+    // an immediate request is handed over as it's made
+    inbox.requestNow("q2", "revisit", "why?", M3)
+    expect(inbox.takeMark("q2")?.note).toBe("why?")
+    expect(inbox.takeMark("x9")).toBeNull()
+  })
+
+  test("its agent starting takes it (setWorking, takeWork);  a new mark replaces marks[id], never taken", () => {
+    const inbox = new ReviewInbox()
+    inbox.requestNow("j11", "revisit", "float them", M1)
+    inbox.takeWork(M2)
+    expect(inbox.taken.j11?.note).toBe("float them")
+    // Owen types a new note while Claude works:  a revisit waiting for the next send
+    inbox.setMark("j11", { action: "revisit", when: "soon", note: "attached for some themes" }, M3)
+    expect(inbox.taken.j11?.note).toBe("float them")
+    expect(inbox.unsentMarks.map((mark) => mark.note)).toEqual(["attached for some themes"])
+    // Claude done with the taken one:  the new mark stays for the next send, the taken record goes
+    expect(inbox.finishMarks(["j11"])).toEqual({ had: [], kept: ["j11"] })
+  })
+
+  test("gone with the mark it took:  clearMarks, clearApplied (only while the same);  renamed with its item", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("j1", { action: "approve" }, M1)
+    inbox.setMark("j2", { action: "revisit", when: "soon", note: "hm" }, M1)
+    inbox.markSent(M2)
+    inbox.setWorking("j1", "details", M2)
+    inbox.setWorking("j2", "revisit", M2)
+    expect(Object.keys(inbox.taken)).toEqual(["j1", "j2"])
+    expect(inbox.clearApplied([{ id: "j1", at: M1 }])).toEqual(["j1"])
+    expect(Object.keys(inbox.taken)).toEqual(["j2"])
+    inbox.renameIds({ j2: "j7" })
+    expect(Object.keys(inbox.taken)).toEqual(["j7"])
+    inbox.setWorking("j7", null)
+    inbox.clearMarks(["j7"])
+    expect(inbox.taken).toEqual({})
+    // a taken record alone still keeps the file
+    const kept = new ReviewInbox({ taken: { j3: { action: "revisit", note: "x", at: M1 } } })
+    expect(kept.isEmpty).toBe(false)
+  })
+})
+
 describe("ReviewInbox.takeWork()", () => {
   // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
   test("a stage button's accept (`countdown`) is dated 5 minutes ahead, HELD:  no send before then carries it", () => {

@@ -419,6 +419,9 @@ export const SAID = "said"
 export const SAID_WHAT = "said-what"
 export const SAID_EDIT = "said-edit"
 export const SAID_NOTE = "said-note"
+/** The note Claude took (I190):  quiet, read-only, its who-and-when first. */
+export const SAID_TAKEN = "said-taken"
+export const SAID_WHO = "said-who"
 
 /** The tag of the page the review controls mark as being reviewed (its `reviewing` attribute). */
 export const PAGE_TAG = "epic-page"
@@ -665,6 +668,12 @@ export const REVIEW_TEXTS = [
   { key: "saidSent", text: "{how} · sent {time}", description: "A marked note:  sent." },
   { key: "saidUnsent", text: "{how} · not sent yet", description: "A marked note:  not sent." },
   { key: "edit", text: "Edit", description: "A marked note's button:  back into the note box." },
+  { key: "saidTaken", text: "You, {time}", description: "The note Claude took:  who wrote it, and when." },
+  {
+    key: "saidTakenTip",
+    text: "Claude has this note, and is answering it.  Type in the box below for a new one.",
+    description: "The note Claude took:  its tooltip."
+  },
   { key: "threadAnswer", text: "Your answer", description: "A thread's answer buttons, for a screen reader." },
   { key: "threadGood", text: "That's good", description: "A thread's check:  its name." },
   { key: "threadGoodTitle", text: "That's good:  done", description: "A thread's check:  its tooltip." },

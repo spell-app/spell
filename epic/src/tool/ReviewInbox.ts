@@ -11,7 +11,7 @@ import { DataFile } from "spell/epic/data/DataFile"
 import { isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
-import { STAGE_COUNTDOWN_MS, isHeld, partOf, withInlineComments } from "spell/epic/review/review.types"
+import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 import { EpicPageFormat } from "./EpicPageFormat"
@@ -97,6 +97,11 @@ import { SharedComments } from "./SharedComments"
  *   - `now`, `[{ id, action, at, note?, pick?, choices? }]`:
  *     immediate requests (Add Details, revisit now) for Claude to take
  *   - `working`:  `{ [id]: { action, since } }`, Claude's agents at work on an item (the page shows a spinner)
+ *   - `taken`:  `{ [id]: mark }`, the mark Claude TOOK on an item, whole (`takeMark()`;  epic `epic-engine` I190):
+ *     its agent started on it, or a status card was written for it
+ *     - the page shows its note read-only, above Claude's status card, and its note box empties for a new note
+ *     - a new mark Owen makes meanwhile replaces `marks[id]`, never this:  `done` keeps both notes in the doc
+ *     - gone with the mark it took (`clearMarks()`, `clearApplied()`)
  *   - `canceled`:  `{ [id]: { action, at, told } }`, a request Owen called off ("nevermind", `cancelNow()`):
  *     the waiting session stops its agent (`told` once handed over), and a late write into the item is refused
  *   - `listening`:  `{ session, since, seen, pid? }` while a Claude session waits on this inbox, else `null`
@@ -148,6 +153,8 @@ export class ReviewInbox {
   now: NowRequest[] = []
   /** Claude's agents at work, per item (the page's spinner) */
   working: Record<string, WorkingEntry> = {}
+  /** the mark Claude took, per item, whole (`takeMark()`):  what the page shows it's answering */
+  taken: Record<string, InboxMark> = {}
   /** requests Owen called off ("nevermind"), per item */
   canceled: Record<string, InboxCancel> = {}
   /** the session waiting on this inbox (Claude's, Codex's ...), else `null` */
@@ -325,6 +332,7 @@ export class ReviewInbox {
       !Object.keys(this.urgency).length &&
       !this.now.length &&
       !Object.keys(this.working).length &&
+      !Object.keys(this.taken).length &&
       !Object.keys(this.canceled).length &&
       !Object.keys(this.comments).length &&
       !this.listening &&
@@ -627,6 +635,7 @@ export class ReviewInbox {
     const had = keys.filter((key) => key in this.marks)
     for (const key of keys) {
       delete this.marks[key]
+      delete this.taken[key]
       // the session is through with the item:  a "nevermind" on it has done its job
       delete this.canceled[key]
     }
@@ -661,6 +670,7 @@ export class ReviewInbox {
 
   /**
    * Claude's agent started (`action`) or finished (`null`) work on item `id`:  the page's spinner follows.
+   * - started:  its mark is TAKEN too (`takeMark()`)
    * - returns the entry set, or `null`
    */
   setWorking(id: unknown, action: NowAction | null, at = isoTime()): WorkingEntry | null {
@@ -669,8 +679,26 @@ export class ReviewInbox {
       delete this.working[key]
       return null
     }
+    this.takeMark(key)
     this.working[key] = { action, since: at }
     return this.working[key]
+  }
+
+  /**
+   * Claude TOOK item `id`'s mark (epic `epic-engine` I190):  its agent started on it (`setWorking()`), or a status card
+   * was written for it (`epic update <name>#<id> underway | done | noted`).  Returns the mark kept, or `null`.
+   * - kept whole in `taken`, so the page shows the note Claude is answering, read-only, and its note box empties:
+   *   what Owen types there next is a NEW mark, for the next send (Owen, 2026-10-31:  "I typed the comment in at a
+   *   previous send, but the text still shows in the comment box")
+   * - only a mark handed over (sent, or asked now):  one Owen hasn't sent yet is still his to change
+   * - no such mark:  nothing;  a newer mark taken in a later round replaces the one before
+   */
+  takeMark(id: unknown): InboxMark | null {
+    const key = ReviewInbox.toItemId(id)
+    const mark = this.marks[key]
+    if (!mark || !isSent(mark, this.sent)) return null
+    this.taken[key] = mark
+    return mark
   }
 
   /**
@@ -920,6 +948,7 @@ export class ReviewInbox {
       const key = ReviewInbox.toItemId(id)
       if (this.marks[key]?.at !== at) continue
       delete this.marks[key]
+      if (this.taken[key]?.at === at) delete this.taken[key]
       cleared.push(key)
     }
     return cleared
@@ -1000,7 +1029,14 @@ export class ReviewInbox {
         moved++
       }
     }
-    const keyed: Record<string, unknown>[] = [this.marks, this.drafts, this.urgency, this.working, this.canceled]
+    const keyed: Record<string, unknown>[] = [
+      this.marks,
+      this.drafts,
+      this.urgency,
+      this.working,
+      this.taken,
+      this.canceled
+    ]
     for (const entries of keyed) rename(entries)
     for (const request of this.now) {
       if (!(request.id in renames)) continue
@@ -1268,6 +1304,7 @@ export type InboxRecord = {
   sent: string | null
   now: NowRequest[]
   working: Record<string, WorkingEntry>
+  taken: Record<string, InboxMark>
   canceled: Record<string, InboxCancel>
   listening: InboxListener | null
   handedOver: string | null
