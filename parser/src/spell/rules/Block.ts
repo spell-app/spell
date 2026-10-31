@@ -14,7 +14,11 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
    * - Static, for a match you can't narrow with `match.is()`, e.g. `Block` can't import `BlockLine` without a cycle.
    */
   static getParseErrors(match: P.Match): P.Match[] | undefined {
-    return (match as P.Match<P.MatchGroups, BlockMatchData>).data.errors
+    const { errors } = (match as P.Match<P.MatchGroups, BlockMatchData>).data
+    // what `SP.SpellWarnings.refuseIf()` refuses is worked out when asked:  a line elsewhere may settle it
+    if (!(match.rule instanceof Block)) return errors
+    const refused = SP.SpellWarnings.refusalsIn(match)
+    return refused.length ? [...(errors ?? []), ...refused] : errors
   }
 
   /**

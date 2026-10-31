@@ -3,7 +3,8 @@ import { SP } from "spell/parser/spell"
 import { getWhereMethod, getWhereScope } from "spell/parser/spell/rules/lists/lists.shared"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
-import { EveryThing } from "./EveryThing"
+import { savedPlaceOfMatch } from "spell/parser/spell/rules/places/places.shared"
+import { canNeverBeTrue, EveryThing, handedFilterOf } from "./EveryThing"
 
 /**
  * `every_thing_where` rule:  every thing of a type that fits (epic `data` P10, a short form of `list_filter`).
@@ -24,8 +25,25 @@ export class EveryThingWhere extends SpellExpression<"type|body?"> {
     return getWhereScope(match, type, match, P.instanceCase(SP.typeName(`${type.value}`)))
   }
 
-  getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
+  /** SIDE EFFECT:  a warning, for a `where` on a saved type that can't go to its place:  it's done here, up to a ceiling. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
     const { type } = match.groups
+    const message = SP.Language.of(scope).parserMessage("where-looks-through", { type: `${type.raw}`.trim() })
+    SP.SpellWarnings.noteIf(match, message, () => {
+      if (!savedPlaceOfMatch(type)) return false
+      return !handedFilterOf(getWhereMethod(match, type, this.getBody(match)))
+    })
+    const never = SP.Language.of(scope).parserMessage("never-both")
+    SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(P.matchAST(this.getBody(match))))
+    return match
+  }
+
+  getAST(match: P.MatchFor<this>): P.ASTExpression {
+    const { type } = match.groups
+    const handed = EveryThing.savedAST(match, type, { predicate: getWhereMethod(match, type, this.getBody(match)) })
+    if (handed) return handed
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",
       args: [EveryThing.listAST(match, type), getWhereMethod(match, type, this.getBody(match))]

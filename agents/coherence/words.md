@@ -217,6 +217,13 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 ## Running
 
+### place
+
+- **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
+  `PlaceCapabilities.kind` and a program's line:  `web service`, `graph service`, `folder`, `file`, `live room`, `sheet`, `this device`, `in memory`.
+- **Not:**  source, store, record, sync, backend, for the idea, in anything a person reads.
+- **Decided:**  epic `data` Q1, Q2 and J55;  its P11 lined the words up.
+
 ### waits
 
 - **Say:**  waits, for what takes a while and whatever calls or reads it:  `waiting`, `waitingValues`, `waits` in a

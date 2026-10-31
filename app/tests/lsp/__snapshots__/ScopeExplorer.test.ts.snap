@@ -108,6 +108,7 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
   type Date
     property year (number)
     property day (number)
+  type Place (is a Thing)
   type Notebook (is a Page)
     property lock
     enumeration Locks
@@ -181,6 +182,7 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
   type Date
     property year (number)
     property day (number)
+  type Place (is a Thing)
   type Notebook (is a Page)
     property lock
     enumeration Locks

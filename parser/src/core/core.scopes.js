@@ -285,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -364,17 +364,21 @@
       description: "Its day of the month, from 1 to 31."
     },
     {
+      path: "type:Place",
+      super: "type:Thing"
+    },
+    {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/debut/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
     }
   ]
 }

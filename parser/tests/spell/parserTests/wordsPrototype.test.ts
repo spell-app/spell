@@ -141,35 +141,35 @@ const LINES: Line[] = [
     en: 'family cookbook is a web service at "https://api.example.com/v1"',
     es: 'recetario familiar es un servicio web en "https://api.example.com/v1"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: 'family cookbook is a graph service at "https://api.example.com/gql"',
     es: 'recetario familiar es un servicio de grafos en "https://api.example.com/gql"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: 'family cookbook is a folder at "recipes"',
     es: 'recetario familiar es una carpeta en "recetas"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: 'family cookbook is a file at "recipes.json5"',
     es: 'recetario familiar es un archivo en "recetas.json5"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: "family cookbook is this device",
     es: "recetario familiar es este dispositivo",
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
     note: "no kind and no address:  its own rule, so a library can't add one of this shape"
   },
@@ -177,14 +177,14 @@ const LINES: Line[] = [
     en: 'family cookbook is a live room at "wss://rooms.example.com/family"',
     es: 'recetario familiar es una sala en vivo en "wss://rooms.example.com/family"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: 'family cookbook is a sheet at "recipes.csv"',
     es: 'recetario familiar es una hoja en "recetas.csv"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
@@ -224,7 +224,7 @@ const LINES: Line[] = [
 	- su clave es el secreto "CLAVE_RECETARIO"
 	- se revisa cada 30 segundos`,
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
     note: "a place's details:  each its own rule, in the place's outline body"
   },
@@ -336,14 +336,14 @@ const LINES: Line[] = [
     en: "the first 20 recipes where it is quick",
     es: "las primeras 20 recetas donde es rápida",
     at: "value",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: "the number of recipes where it is quick",
     es: "el número de recetas donde es rápida",
     at: "value",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
@@ -381,19 +381,17 @@ const LINES: Line[] = [
     en: 'every recipe where its title is "Ana" or "Bo"',
     es: 'cada receta donde su título es "Ana" o "Bo"',
     at: "value",
-    today: "wrong",
+    today: "compiles",
     withRule: "compiles",
-    means: '\\|\\| "Bo"',
-    note: 'the Overview says this already works.  It doesn\'t:  `title === "Ana" || "Bo"`, always true, so every recipe.  Ran'
+    note: "fixed in The Words (I13):  either of them.  Ran"
   },
   {
     en: 'every recipe where its title is either "Ana" or "Bo"',
     es: 'cada receta donde su título es o bien "Ana" o "Bo"',
     at: "value",
-    today: "wrong",
+    today: "compiles",
     withRule: "compiles",
-    means: '\\|\\| "Bo"',
-    note: "`either` lists only declared values, not text:  also always true.  Ran"
+    note: "fixed in The Words (I13):  either of them.  Ran"
   },
   {
     en: 'every recipe where its title is "Ana" or its title is "Bo"',
@@ -477,14 +475,14 @@ const LINES: Line[] = [
     es: `todo o nada:
 			imprimir 1`,
     at: "action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
     en: "set d to a draft of the recipe",
     es: "poner d a un borrador de la receta",
     at: "recipe action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
@@ -530,7 +528,7 @@ const LINES: Line[] = [
     en: "refresh the recipes",
     es: "recargar las recetas",
     at: "action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
@@ -572,7 +570,7 @@ const LINES: Line[] = [
     en: "cancel search",
     es: "cancelar búsqueda",
     at: "action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles",
     note: "inside a handler, today's `cancel <event>` still takes it:  below, `the collisions`"
   },
@@ -636,7 +634,7 @@ const LINES: Line[] = [
     en: "try again",
     es: "reintentar",
     at: "action",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {
@@ -826,12 +824,11 @@ describe("every line the Overview proposes", () => {
 })
 
 describe("the recipe box, whole", () => {
-  it("compiles in English with the rules, and draws nothing from its loop", () => {
+  it("compiles in English with the rules, and draws from its loop (I14)", () => {
     const { errors, code } = compile(`${KINDS[0]}${RECIPE_BOX[0]}`, 0, true)
     expect(errors).toEqual([])
-    // `draw the recipe` is no drawn line:  the loop's drawings go nowhere, so nothing shows (epic `data`, an I item)
     expect(code).toContain("core.map(this.matches, (recipe) => core.drawThing(recipe))")
-    expect(code).not.toContain("return core.map(this.matches")
+    expect(code).toContain("return core.map(this.matches")
   })
 
   it("compiles in Spanish with the rules", () => {
@@ -921,7 +918,7 @@ describe("the collisions", () => {
     expect(code).toContain("this.findTheScores()")
   })
 
-  it("cancel search: outside a handler a proposed word, inside one today's `cancel <event>`", () => {
+  it("cancel search: an action's name, inside a handler too", () => {
     const box = [
       "recipe box is an app:",
       "\t- to search:",
@@ -932,8 +929,8 @@ describe("the collisions", () => {
       "\t\t\tcancel search"
     ]
     const code = codeOf(...box)
-    expect(code).toContain('core.proposed("cancel search")')
-    expect(code).toContain("event.cancel()")
+    // an action's name beats an event's, in a handler too:  The Words' decision
+    expect(code.match(/core\.cancelActions\(this, "search"\)/g)).toHaveLength(2)
   })
 
   it("save: of a draft only, and of anything else it says there's no save step", () => {
@@ -1005,9 +1002,9 @@ set many to the number of every recipe
     expect(titlesOf(result.quick)).toEqual(["Soup", "Toast"])
     expect(titlesOf(result.sorted)).toEqual(["Toast", "Soup", "stew"])
     expect(titlesOf(result.either)).toEqual(["Soup", "Toast"])
-    // the Overview's `is "Ana" or "Bo"`, and with `either`:  always true, so all of them
-    expect(titlesOf(result.always)).toEqual(["stew", "Soup", "Toast"])
-    expect(titlesOf(result.alwaysToo)).toEqual(["stew", "Soup", "Toast"])
+    // the Overview's `is "Ana" or "Bo"`, and with `either`:  either of them, since The Words (I13)
+    expect(titlesOf(result.always)).toEqual(["Soup", "Toast"])
+    expect(titlesOf(result.alwaysToo)).toEqual(["Soup", "Toast"])
     expect(titlesOf(result.never)).toEqual([])
     expect(result.many).toBe(3)
   })

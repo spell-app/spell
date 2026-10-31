@@ -1562,6 +1562,33 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.
 
+## Places
+
+What a program's lines about where data lives compile to, and what reads the rest (the `places` rule module, epic `data` P11).
+
+- `family cookbook is a web service at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
+  - Its kind is a word (`place_kind`), or a type made from `place`, which is how a library adds one.
+  - Compiled:  its class, then `core.place(new FamilyCookbook(), { name, kind, at, ...what the lines under it say })`.
+  - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
+- `- it is saved in the family cookbook` (`saved_in_place`) marks the type's RECORD (`P.TypeScope.declareSaved()`, journaled).
+  - Compiled:  `static savedIn = { place, collection }`.
+- The words people already know read the record when the project compiles, in `getAST()`, off the record a type match found
+  while parsing (`data.scopeType`), as a kind's list is read:  so a line above the type's line means the place too.
+  - `every recipe`, `the recipes`:  `core.savedThings(Recipe)`, `EveryThing.savedAST()`.
+  - `where`:  each part that says `its X is <a value>`, joined by `and`, goes to the place as a filter (`handedFilterOf()`).
+    Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
+  - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
+  - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
+- `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
+- A loop in a drawing over a saved type, or with a rider under it, is `core.drawRead(() => list, (item) => ..., { riders })` (`DrawnLines.asRead()`).
+  - A rider (`while waiting:`, `if there are none:`, `if that fails:`) compiles alone to `core.readRider()`, and the gathering of
+    a drawing's lines takes each into the read above it, as an `otherwise` follows its `if`.
+  - Its read function is named `drawRead`, which `P.DRAWING_NAME` knows:  a drawing never waits, it shows what it has.
+- What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
+  `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
+  - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
+- A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
+
 ## Projects
 
 - Projects come in GROUPS (project roots), and the groups are spaces', not spell's:

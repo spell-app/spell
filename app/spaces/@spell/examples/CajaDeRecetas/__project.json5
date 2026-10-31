@@ -1,0 +1,10 @@
+{
+  "title": "Caja de recetas",
+  "description": "Recipe Box's Spanish twin:  recetas guardadas en un lugar, leídas y cambiadas con las palabras de siempre.  Su primera línea es todo lo que cambia otro servidor",
+  "imports": [
+    {
+      "path": "/CajaDeRecetas.es.spell",
+      "active": true
+    }
+  ]
+}

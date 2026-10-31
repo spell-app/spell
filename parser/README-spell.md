@@ -991,6 +991,40 @@ These guides need a checkout with the epic folder beside it, and the page server
 
 </details>
 
+## Where data lives
+
+A program says once where its data lives, and which types live there, then writes what it writes for things in memory.
+
+```spell
+family cookbook is a web service at "https://api.example.com/v1":
+	- it is checked every 30 seconds
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+
+recipe box is an app:
+	- its "search" is text
+	- its "matches" is every recipe where its title includes the search, sorted by its title
+	- to draw it:
+		for each recipe in the matches
+			draw the recipe
+		while waiting:
+			<ui-loader/>
+		if there are none:
+			<ui-text>No recipes yet.</ui-text>
+		if that fails:
+			<ui-message color="red">Can't reach the cookbook.</ui-message>
+```
+
+- Moving the data changes the first line:  `a graph service at`, `a folder at`, `a file at`, `a live room at`, `a sheet at`, `this device`, `in memory`.
+- A place can't do what it can't do, and the compiler says so at that line:
+  - a write to a sheet won't compile
+  - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
+  - a web service can't announce what changed, so it warns until a line says how often to ask
+- There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
+- A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
+
 ## See also
 
 - [README-parser](README-parser.md):  what a rule is underneath, how a choice is settled, and how scope lets

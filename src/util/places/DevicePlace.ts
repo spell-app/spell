@@ -47,9 +47,13 @@ export class DevicePlace implements Place {
   readonly prefPlace: PrefPlace
 
   /** Over `prefPlace`;  left out, the browser's own storage, the one `new PrefStore(name)` uses. */
-  constructor({ prefPlace = new PrefStore(DEFAULT_STORE).place }: DevicePlaceProps = {}) {
+  constructor({ prefPlace = new PrefStore(DEFAULT_STORE).place, wholeRows = false }: DevicePlaceProps = {}) {
     this.prefPlace = prefPlace
+    this.wholeRows = wholeRows
   }
+
+  /** Is each key's value a whole row, as JSON?  See `DevicePlaceProps`. */
+  private readonly wholeRows: boolean
 
   /** What it can do. */
   describe(): PlaceCapabilities {
@@ -82,6 +86,13 @@ export class DevicePlace implements Place {
         await this.prefPlace.save(collection, id, undefined)
         continue
       }
+      if (this.wholeRows) {
+        const held = JSON.parse(((await this.prefPlace.load(collection, id)) as string | undefined) ?? "{}") as PlaceRow
+        const row = { ...held, ...fields }
+        await this.prefPlace.save(collection, id, JSON.stringify(row))
+        rows.push({ ...row, [ID_FIELD]: id })
+        continue
+      }
       const value = fields?.[VALUE_FIELD]
       if (value === undefined) {
         throw new TypeError(`DevicePlace.apply():  a ${kind} of "${id}" needs a \`value\`;  delete it to forget it`)
@@ -96,7 +107,12 @@ export class DevicePlace implements Place {
   private async rowsFor(store: string, keys: readonly string[]): Promise<PlaceRow[]> {
     const values = await Promise.all(keys.map((key) => this.prefPlace.load(store, key)))
     const rows = keys.map((key, index) => ({ [ID_FIELD]: key, [VALUE_FIELD]: values[index] }))
-    return rows.filter((row) => row[VALUE_FIELD] !== undefined)
+    const kept = rows.filter((row) => row[VALUE_FIELD] !== undefined)
+    if (!this.wholeRows) return kept
+    return kept.map((row) => ({
+      ...(JSON.parse(`${row[VALUE_FIELD] as string}`) as PlaceRow),
+      [ID_FIELD]: row[ID_FIELD]
+    }))
   }
 }
 
@@ -104,4 +120,9 @@ export class DevicePlace implements Place {
 export type DevicePlaceProps = {
   /** Where the values are kept. */
   prefPlace?: PrefPlace
+  /**
+   * Each key's value is a whole row, as JSON, for things kept on this device:  `family cookbook is this device`.
+   * - Left out:  each row is one key and its `value`, a preference.
+   */
+  wholeRows?: boolean
 }

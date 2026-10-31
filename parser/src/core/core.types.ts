@@ -20,6 +20,7 @@ import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
 import type { waitingMethods } from "./waiting"
+import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { PropRule } from "spell/util"
 
@@ -48,7 +49,17 @@ export const SPELL_ELEMENTS_MODULE = "@spell/elements"
  * Spell's own classes, from `core/classes`:  what a project's types are made from, e.g. `a card is a thing`.
  * - What a Type Explorer lists as built in -- see `LSP.ScopeExplorer`.
  */
-export const SPELL_CLASSES = ["Thing", "List", "App", "View", "Page", "TwoSidedView", "Notebook", "ViewableList"]
+export const SPELL_CLASSES = [
+  "Thing",
+  "List",
+  "App",
+  "View",
+  "Page",
+  "TwoSidedView",
+  "Notebook",
+  "ViewableList",
+  "Place"
+]
 
 /** Names every compiled project imports from `SPELL_CORE_MODULE`:  `core`, and spell's classes. */
 export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]
@@ -91,6 +102,7 @@ export type Core = typeof coreMethods &
   typeof carryMethods &
   typeof classesMethods &
   typeof messageMethods &
+  typeof savedMethods &
   typeof describedMethods &
   typeof sendingMethods &
   typeof actingMethods &
@@ -179,7 +191,11 @@ export const CORE_MESSAGES = {
   redo: "Redo",
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
+  language: "en",
   "write-retry": "Retry",
+  "read-failed": "Can't read this right now:  {why}",
+  "saved-added": "Add",
+  "saved-removed": "Remove",
   "write-show-me": "Show me",
   "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
   "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",

@@ -24,6 +24,7 @@ core.filter(words, lambda word: len(word) > 3)
 import functools
 import inspect
 import math
+import unicodedata
 from collections.abc import Callable, Iterator, Mapping, MutableMapping, MutableSequence, Sequence, Sized
 from typing import TYPE_CHECKING, Any
 
@@ -701,12 +702,21 @@ class CollectionMethods:
         def shuffled(self, items: Sequence[Any]) -> list[Any]: ...
 
 
+def _plain_text(text: str) -> str:
+    """`text` with no accents, and in lower case:  how text compares in a sort."""
+    decomposed = unicodedata.normalize("NFD", text)
+    return "".join(letter for letter in decomposed if not unicodedata.combining(letter)).lower()
+
+
 def _compare_sort_keys(one: Any, other: Any) -> int:
-    """Which of two sort keys goes first:  nothing goes last, and text ignores case.  As the JavaScript core's."""
+    """Which of two sort keys goes first:  nothing goes last, and text ignores case and accents.
+
+    As the JavaScript core's, but for `ñ`, read as its plain letter:  Python has no language's own order to hand.
+    """
     if one is None or other is None:
         return (one is None) - (other is None)
-    first = one.lower() if isinstance(one, str) else one
-    second = other.lower() if isinstance(other, str) else other
+    first = _plain_text(one) if isinstance(one, str) else one
+    second = _plain_text(other) if isinstance(other, str) else other
     try:
         return (first > second) - (first < second)
     except TypeError:

@@ -556,6 +556,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       params: { target: target.name }
                     })
                   }
+                  if (target.can.places === false && SpellProject.keepsThingsInPlaces(parts)) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}' keeps things in a place, which target '${target.name}' can't yet:  it's browser work first (epic data, J10).`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name }
+                    })
+                  }
                   const header = this.importHeader(target.writer)
                   // a source map as it's written, for a javascript-family target that runs -- see `P.SourceMarks`
                   // - never a library's (`ts/lib`):  its `.lib.ts` is source the repo commits and imports, not output
@@ -870,6 +877,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     let [first] = body instanceof P.ASTStatementBlock ? (body.statements ?? []) : [body]
     if (first instanceof P.ASTReturnStatement) first = first.value
     return first instanceof P.ASTCoreMethodInvocation && first.methodName === "test"
+  }
+
+  /** Does a program made of `parts` name a place?  A target that says `places: false` can't write one. */
+  static keepsThingsInPlaces(parts: Array<P.ASTStatementGroup | string | undefined>): boolean {
+    let found = false
+    P.forEachNode(
+      parts.filter((part) => typeof part === "object"),
+      (node) => {
+        if (node instanceof P.ASTCoreMethodInvocation && node.methodName === "place") found = true
+      }
+    )
+    return found
   }
 
   /**

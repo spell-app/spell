@@ -768,6 +768,13 @@ export class ASTInfixExpression extends ASTExpression {
   }
 }
 
+/** `node`, with any parentheses around it taken off. */
+export function unparenthesized<Node extends ASTNode>(node: Node): ASTNode {
+  let inner: ASTNode = node
+  while (inner instanceof ASTParenthesizedExpression) inner = inner.expression
+  return inner
+}
+
 /**
  * Given an array of Expressions, join them all together with same `operator`.
  * - Right-associates: repeatedly pops off the right end and nests it as `rhs` of a new
@@ -2216,7 +2223,17 @@ function isFixedJSXValue(expression: ASTExpression): boolean {
 }
 
 /** `core`'s calls that always wait, by name:  where the pass starts (`WriterProject.findWaiting()`). */
-export const CORE_CALLS_THAT_WAIT = new Set(["pauseFor", "alert", "warn", "confirm", "prompt"])
+export const CORE_CALLS_THAT_WAIT = new Set([
+  "pauseFor",
+  "alert",
+  "warn",
+  "confirm",
+  "prompt",
+  "savedThings",
+  "savedThingAt",
+  "allOrNothing",
+  "callPlace"
+])
 
 /** `core`'s loops, which call their function for each item right there. */
 export const CORE_LOOPS = new Set(["map", "forEach", "forEachSequential"])

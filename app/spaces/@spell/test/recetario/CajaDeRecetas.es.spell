@@ -1,0 +1,44 @@
+// La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba
+recetario familiar está en memoria
+
+una "receta" es una vista:
+	- se guarda en el recetario familiar
+	- su "título" es texto
+	- sus "porciones" es un número
+	- para dibujarla:
+		<ui-form value={eso} class="recipe">
+			<ui-input name="título" aria-label="Receta"/>
+			<ui-text class="servings">para {sus porciones}</ui-text>
+			<ui-button class="remove" onClick={quitar eso}>Quitar</ui-button>
+		</ui-form>
+	- para quitar eso:
+		- se deshace como "Quitar receta"
+		quitar eso de las recetas
+
+caja de recetas es una aplicación:
+	- su "búsqueda" es texto
+	- su "borrador" es texto
+	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, ordenada por su título
+	- para agregar el borrador:
+		si el borrador es "" devolver
+		agregar (una nueva receta con título = el borrador, porciones = 2) a las recetas
+		limpiar el borrador
+	- para dibujarla:
+		<ui-form value={eso} class="box">
+			<ui-input name="búsqueda" class="search" aria-label="Búsqueda"/>
+			<ui-input name="borrador" class="draft" aria-label="Receta nueva"/>
+			<ui-button class="add" onClick={agregar el borrador}>Agregar</ui-button>
+		</ui-form>
+		para cada receta en las coincidencias
+			dibujar la receta
+		mientras espera:
+			<ui-loader class="waiting"/>
+		si no hay ninguna:
+			<ui-text class="none">Todavía no hay recetas.</ui-text>
+		si falla:
+			<ui-message class="failed" color="red">
+				No se puede llegar al recetario.
+				<ui-button class="again" onClick={reintentar}>Reintentar</ui-button>
+			</ui-message>
+
+iniciar la caja de recetas

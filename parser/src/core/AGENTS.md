@@ -267,6 +267,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so nothing done to a sample reaches the real place.
     - `rowsMadeFrom()`:  a sample's records from what a class declares.
       By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
+- WHAT COMPILED SPELL CALLS, for a type saved in a place ([saved.ts](saved.ts), epic `data` P11):  `core.place()`, `core.savedThings()`,
+  `core.saveThing()`, `core.removeSaved()`, `core.draftOf()`, `core.allOrNothing()`, `core.drawRead()` ...
+  - In the barrel, with `places.ts`;  `spell/util/places` itself is a chunk loaded when a program first names a place,
+    so a program with no place pays for `places.ts` and this, and no more.
+    That folder knows nothing of `core`, so ONE chunk serves every runtime copy on a page (`loadRuntime()` makes `import.meta.url` true for a copy).
+  - [placeKinds.ts](placeKinds.ts):  what's behind each kind of place spell knows, from what its lines say.
+    A kind a library adds is a class on [Place](classes/Place.ts), with its own `makePlace()`.
+  - One `SavedRead` per type and query:  its things are ONE scratch list, and a `changes` cell is what a memo follows:  so a new answer,
+    a write or a heal runs it again.  Each computation reading one holds it until it's disposed, and a read from an action until its answer;
+    the last one letting go aborts its request.  It still hears rows, so its list stays true.
+  - What `belongs to` a saved owner is kept INSIDE the owner's row, in its list of them:  `HELD_BY`, `core.ownerOfSaved()`.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
