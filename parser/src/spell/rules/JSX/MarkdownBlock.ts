@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { type FillInParts, parseFillIn } from "spell/parser/spell/rules/core"
+import { type FillInParts, noteFillInWarnings, parseFillIn } from "spell/parser/spell/rules/core"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
 
@@ -57,6 +57,7 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
       return error
     })
     if (errors.length) match.data.errors = errors
+    noteFillInWarnings(match, match.data.parts)
     return match
   }
 

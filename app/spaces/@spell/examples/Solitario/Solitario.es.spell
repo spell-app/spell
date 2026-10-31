@@ -199,15 +199,15 @@ para jugar una carta
 para poner una carta en una pila
 	poner pila inicial a la pila de la carta
 	si pila inicial no puede soltar la carta devolver no
-	si la pila no puede tomar la carta devolver no
-	poner puntos a contar los puntos de la carta en la pila
+	si pila no puede tomar la carta devolver no
+	poner puntos a contar los puntos de la carta en pila
 
 	poner cartas movidas a las cartas en pila inicial empezando con la carta
 	poner el nombre de cartas movidas al nombre de pila inicial
-	imprimir "moviendo (" + el estado de cartas movidas + ") a (" + el estado de la pila + ")"
+	imprimir "moviendo (" + el estado de cartas movidas + ") a (" + el estado de pila + ")"
 
 	para cada carta en cartas movidas
-		mover la carta a la pila
+		mover la carta a pila
 
 	si pila inicial es una columna y pila inicial no está vacía
 		pausar 200 mseg
@@ -221,7 +221,7 @@ para poner una carta en una pila
 
 // lo que suma poner la carta en la pila:  10 en una fundación, 5 desde los descartes, si no nada
 para contar los puntos de una carta en una pila
-	si la pila es una fundación devolver 10
+	si pila es una fundación devolver 10
 	si la pila de la carta es los descartes del solitario devolver 5
 	devolver 0
 

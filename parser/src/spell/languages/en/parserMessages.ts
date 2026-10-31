@@ -33,6 +33,9 @@ export const PARSER_MESSAGES = {
   "untyped-set-property": 'Say what "{name}" is:  declare it, e.g. "{aType} has a {name} as {type}"',
   /** A read of a member its type never declares, `the name of the pile`. */
   "undeclared-member": '{AType} never says it has {aName}:  declare it, e.g. "{aType} has {aName} as {type}"',
+  /** A local, argument or loop variable with the name of a property of the action's thing. */
+  "hides-property":
+    'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */

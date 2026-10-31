@@ -83,10 +83,10 @@ una "carta" es una vista donde:
 
 	## el "estado" de la carta, para depurar
 	- su "estado" es:
-		rango es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
-		palo es su símbolo
-		dirección es "↑" si está boca arriba de lo contrario "↓"
-		devolver rango + palo + dirección
+		letra es 10 si su valor es 10 de lo contrario la primera letra de su rango como mayúsculas
+		figura es su símbolo
+		flecha es "↑" si está boca arriba de lo contrario "↓"
+		devolver letra + figura + flecha
 
 
 ## Pruebas
@@ -146,9 +146,9 @@ un "comodín" es una carta donde:
 
 	- su nombre es "comodín " + su color
 	- su "estado" es:
-		color es (la primera letra de su color) como mayúsculas
-		dirección es "↑" si está boca arriba de lo contrario "↓"
-		devolver "*" + color + dirección
+		letra es (la primera letra de su color) como mayúsculas
+		flecha es "↑" si está boca arriba de lo contrario "↓"
+		devolver "*" + letra + flecha
 
 para probar los comodines
 	obtener un nuevo comodín cuyo color es rojo y dirección es arriba

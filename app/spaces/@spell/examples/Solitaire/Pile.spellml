@@ -17,10 +17,10 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 		the value of its last card otherwise
 	</property>
 	<property "state" description="Its name, then its cards' short names:  stock: Q♠↑ 7♥↓">
-		set state to (its name or "pile") + ":"
+		set summary to (its name or "pile") + ":"
 		for each card in the pile
-			set state to state + " " + the state of the card
-		return state
+			set summary to summary + " " + the state of the card
+		return summary
 	</property>
 
 	<test "piles">

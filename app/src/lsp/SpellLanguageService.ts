@@ -1215,7 +1215,7 @@ export class SpellLanguageService {
 
   /**
    * Range and current name of what `position` would rename, or `null` if it can't be renamed.
-   * - Only variables, types and constants -- NOT `it`, nor an alias like `its` for `this`.
+   * - Only variables, types, constants and properties -- NOT `it`, nor an alias like `its` for `this`.
    * - Only if every use of it is that one word, e.g. NOT a type written as both `card` and `cards`.
    */
   prepareRename(file: SP.SpellFile, position: Position): { range: Range; placeholder: string } | null {
@@ -1234,9 +1234,19 @@ export class SpellLanguageService {
     const changes: Record<string, TextEdit[]> = {}
     for (const { file: at, match } of occurrences) {
       const range = this.rangeOf(at, match)
-      if (range) (changes[this.addresses.uriFor(at)] ??= []).push({ range, newText: newName })
+      if (range) {
+        // a declaration's quotes stay:  `its "score" is ...`
+        const newText = match.tokens[0] instanceof P.TextToken ? `"${newName}"` : newName
+        ;(changes[this.addresses.uriFor(at)] ??= []).push({ range, newText })
+      }
     }
     return { changes }
+  }
+
+  /** Does `property` list its values, so its type holds them as an enumeration, e.g. `suits` for a card's `suit`? */
+  private static hasValuesListed({ name, scope }: P.ScopeVariable): boolean {
+    const plural = scope instanceof P.TypeScope ? scope.variables.get(P.pluralize(name)) : undefined
+    return !!plural && "enumeration" in plural
   }
 
   /** A word a rename can produce:  what `identifier` / `type` / `constant` rules match. */
@@ -1244,12 +1254,17 @@ export class SpellLanguageService {
 
   /** Every occurrence of `subject`, declaration included, if they can ALL be renamed -- see `prepareRename()`. */
   private renamable(subject: LSP.SpellSubject): LSP.FileMatch[] | undefined {
-    if (subject.kind === "method" || subject.kind === "property") return undefined
+    if (subject.kind === "method") return undefined
+    // a property we can't place on its type, or a use we can't:  it might be some other type's, so NOT a guess
+    if (subject.kind === "property" && !subject.record) return undefined
+    // its values' phrases name it in their own words, e.g. `is a (suit)`:  those would be left behind
+    if (subject.kind === "property" && SpellLanguageService.hasValuesListed(subject.record!)) return undefined
     if (subject.kind === "variable" && (subject.record.isAlias || subject.record.name === "it")) return undefined
     const word = subject.nameMatch.raw
     const occurrences = this.occurrencesOf(subject, true)
+    const isSure = occurrences.every(({ unsure }) => !unsure)
     const allSame = occurrences.every(({ match }) => match.tokens.length === 1 && match.raw === word)
-    return allSame ? occurrences : undefined
+    return isSure && allSame ? occurrences : undefined
   }
 
   /**
@@ -1334,12 +1349,14 @@ export class SpellLanguageService {
   /** Subject for property `nameMatch`, used on `owner` if known -- with its record, if `owner` has one. */
   private propertySubject(nameMatch: P.Match, owner: P.TypeScope | undefined): LSP.SpellSubject {
     const name = `${nameMatch.value}`
-    const record = owner && SpellLanguageService.propertyOf(owner, name)
+    const record = SP.MemberReadExpression.propertyOf(owner, name)
     return { kind: "property", name, nameMatch, owner, record }
   }
 
   /**
    * Type the property `property` is used on, from the matches around it (`ancestors`, innermost first):
+   * - any member read:  the type it noted while parsing (`SP.MemberReadExpression.memberRead()`),
+   *   e.g. `the stock` in an action, which no `it` stands beside
    * - `its suit` in a method or getter:  the type its `it` stands for
    * - `the color of a card`:  the type named beside it
    * - `the suit of the card`:  the type of the variable beside it, if that's known
@@ -1348,6 +1365,8 @@ export class SpellLanguageService {
   private ownerOf(property: P.Match, ancestors: Array<P.Match | undefined>): P.TypeScope | undefined {
     for (const ancestor of ancestors) {
       if (!ancestor) continue
+      const read = SP.MemberReadExpression.memberRead(ancestor)
+      if (read?.property === property && read.type) return read.type
       const { itVar } = ancestor.data as { itVar?: unknown }
       if (itVar instanceof P.ScopeVariable) return this.typeOfVariable(itVar, property.scope)
       for (const child of ancestor.matched) {
@@ -1425,7 +1444,8 @@ export class SpellLanguageService {
             : isOccurrence(match)
         if (!isUse) return
         seen.add(match)
-        occurrences.push({ file, match })
+        const unsure = subject.kind === "property" && !this.ownerOf(match, [parent, parent && parents.get(parent)])
+        occurrences.push({ file, match, ...(unsure ? { unsure } : {}) })
       })
     }
     return occurrences
@@ -1712,7 +1732,12 @@ export class SpellLanguageService {
               : kind === "property"
                 ? this.propertyItems(scope)
                 : this.methodItems(file, scope, offset, "expression")
-      for (const name of names) items.push([1, name])
+      // in an action, its thing's properties first:  they're what `the ` reads there (epic `language`, P5)
+      const thing = kind === "property" ? P.MethodScope.thingTypeOf(scope) : undefined
+      const own = thing && SpellLanguageService.propertiesOf(thing, { inherited: true })
+      const isOwn = (name: CompletionItem) =>
+        own?.some((property) => SpellLanguageService.memberWords(property.name, property) === name.label)
+      for (const name of names) items.push([isOwn(name) ? 0 : 1, name])
     }
     // Words from categories too, e.g. `{expression}` => `the`, `a`, `its`... -- NOT `Card` when there's `card`
     const words = new Set(SpellLanguageService.firstWords(rule, { parser, followGroups: true }))
@@ -2536,17 +2561,12 @@ export class SpellLanguageService {
   }
 
   /**
-   * Record of property `name` on `type`, or on the nearest super-type declaring it -- see `P.TypeScope.getMember()`.
-   * - A property only:  `undefined` if the member is a method.
+   * Properties declared on `type` itself -- NOT the enumerations `define_property_has` also files there.
+   * - `inherited`:  its super-types' too, nearest first.
    */
-  static propertyOf(type: P.TypeScope, name: string): P.ScopeVariable | undefined {
-    const member = type.getMember(name)
-    return member instanceof P.ScopeVariable ? member : undefined
-  }
-
-  /** Properties declared on `type` itself -- NOT the enumerations `define_property_has` also files there. */
-  static propertiesOf(type: P.TypeScope): P.ScopeVariable[] {
-    return type.variables.get().filter((variable) => !("enumeration" in variable))
+  static propertiesOf(type: P.TypeScope, { inherited = false } = {}): P.ScopeVariable[] {
+    const types = inherited ? type.chain() : [type]
+    return types.flatMap((each) => each.variables.get().filter((variable) => !("enumeration" in variable)))
   }
 
   /** Is `token` one an editor should colour:  a word, symbol, number, string or comment -- NOT whitespace? */

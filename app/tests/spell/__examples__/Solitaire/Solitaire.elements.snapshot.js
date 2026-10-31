@@ -68,9 +68,9 @@ export class Card extends TwoSidedView {
 
   /** Its short name:  Q♠↓ is the queen of spades, face down */
   get state() {
-    const rank = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
-    const direction = this.isFaceDirection("up") ? "↑" : "↓"
-    return rank + this.symbol + direction
+    const letter = this.value === 10 ? 10 : `${core.getItemAt(this.rank, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return letter + this.symbol + arrow
   }
 
   /** Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns */
@@ -258,9 +258,9 @@ export class Pile extends ViewableList {
 
   /** Its name, then its cards' short names:  stock: Q♠↑ 7♥↓ */
   get state() {
-    let state = `${this.name || "pile"}:`
-    this.forEach((card) => (state = `${state} ${card.state}`))
-    return state
+    let summary = `${this.name || "pile"}:`
+    this.forEach((card) => (summary = `${summary} ${card.state}`))
+    return summary
   }
 
   /** while a card it would take is over it, the score shows what the move would add -- gone as the card leaves */
@@ -492,7 +492,7 @@ export class Solitaire extends App {
   get T7() { return this.getProp("T7") }
   set T7(value) { this.setProp("T7", value) }
 
-  /** Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's */
+  /** Every card of the deck into the stock */
   create() {
     this.deck.forEach((card) => this.stock.append(card))
   }

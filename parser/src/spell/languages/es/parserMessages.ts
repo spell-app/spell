@@ -24,6 +24,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "untyped-list-variable": 'Di qué contiene "{name}", p. ej. "poner {name} a una nueva lista de {items}"',
   "untyped-set-property": 'Di qué es "{name}":  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
+  "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":

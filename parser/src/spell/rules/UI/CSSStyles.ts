@@ -5,11 +5,12 @@ import { P } from "spell/parser/parser"
  * `css` rule:  parse CSS from a `TextToken` WITHOUT quotes.
  * - Compiles to `core.installStyles(file, css)`; newlines in `css` are escaped to `¬` so the
  *   value survives being embedded in a backtick template literal.
+ * - Only ever asked for by name (`SpellCSSFile`), never an `expression`:
+ *   as one, any text whose fill-in didn't parse quietly became a stylesheet (epic `language`, I1).
  * - Class named `CSSStyles`, not `CSS`, which would hide the DOM's `CSS`.
  */
 export class CSSStyles extends P.TokenType<never, CSSMatchData> {
   static ruleName = "css"
-  @proto static alias = "expression"
   @proto static tokenType = P.TextToken
 
   getAST(match: P.MatchFor<this>) {

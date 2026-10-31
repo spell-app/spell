@@ -313,11 +313,11 @@ A capability goes into the server's reply to `initialize` only once it works;  t
 | --- | --- | --- |
 | errors as you type | `publishDiagnostics` | parse errors, then warnings (a property nobody declared ...), then CSS mistakes in a `<css>` block;  a file the project leaves out gets one note at the top saying so |
 | hover | `hover` | the rule that matched, with the first example from its tests;  for an outline line, the sentence it reads as;  what the word is, its docs, where it was declared;  the JavaScript its statement compiles to, up to 20 lines |
-| completion | `completion`, on a space | mid-statement, what the parser says can come next;  else the names in scope there;  at a statement's start, the first words of every kind of statement and the project's own methods, as snippets;  in a `<css>` block, CSS |
+| completion | `completion`, on a space | mid-statement, what the parser says can come next, an action's own properties first after `the `;  else the names in scope there;  at a statement's start, the first words of every kind of statement and the project's own methods, as snippets;  in a `<css>` block, CSS |
 | signature help | `signatureHelp`, on a space | the call to one of the project's methods being typed, and which argument you're on |
 | go to definition | `definition`, `typeDefinition` | where it was declared, or where its type was;  several places, for a property declared on several types |
-| find references | `references`, `documentHighlight` | variables, types and constants by the record each word resolved to, exactly;  methods by the rule a call matched;  properties by NAME, so a `suit` of another type is found too |
-| rename | `prepareRename`, `rename` | variables, types and constants, in every file;  not properties or methods, not `it` or `its`, and not a type written two ways, like `card` and `cards` |
+| find references | `references`, `documentHighlight` | variables, types and constants by the record each word resolved to, exactly;  methods by the rule a call matched;  properties by the type each use is read from, inherited ones too, and by name where nothing says which type |
+| rename | `prepareRename`, `rename` | variables, types, constants and properties, in every file;  not methods, not `it` or `its`, not a type written two ways, like `card` and `cards`, and not a property with a use whose type nothing says |
 | outline | `documentSymbol`, `workspaceSymbol` | the types, properties, methods, event handlers and variables a file declares, each type's members under it;  type names as the compiled classes have them, `Card` |
 | folding | `foldingRange`, `selectionRange` | a statement with an indented body, a JSX element over several lines, two or more comment lines, a `<css>` block;  expand selection, from the innermost match out to the whole file |
 | colours | `semanticTokens`, whole, range or delta | each rule's `highlightAs`, refined by the parse:  a call to the project's own method is a function, an argument a parameter, a name where it's declared a declaration |
@@ -436,8 +436,8 @@ its `path` saying where it sits in the tree._
 
 ## Where it stops
 
-- **Rename is narrow:**  variables, types and constants only.
-  A property or a method can't be renamed yet, though Find references finds them.
+- **Rename is narrow:**  a method can't be renamed yet, though Find references finds it.
+  Renaming a property leaves its word in an action's name alone, e.g. `stock` in `to reset the stock`.
 - **Hover is written for parser developers:**  its first section is the rule that matched, with an example from
   that rule's tests, which is how hovering `suit` comes to say `e.g. rank`.
   A plainer hover for people writing Spell is a note in the source, not a setting yet.

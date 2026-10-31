@@ -589,7 +589,6 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "repeat_n_times",
       "list_iteration",
       "list_iteration",
-      "css",
       "new_thing",
       "new_list",
       "create_thing",

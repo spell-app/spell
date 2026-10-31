@@ -2,7 +2,7 @@ import { decodeHTMLStrict } from "entities"
 
 import { dedent, proto } from "spell/util"
 import { P } from "spell/parser/parser"
-import { type FillInParts, fillInsAST, parseFillIns } from "spell/parser/spell/rules/core"
+import { type FillInParts, fillInsAST, noteFillInWarnings, parseFillIns } from "spell/parser/spell/rules/core"
 
 /**
  * `jsxText` rule:  match literal text between JSX tags (`jsxChild`).  Blank text yields no AST node -- see below.
@@ -29,7 +29,10 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     if (token instanceof P.JSXRawTextToken) return match
     const fillIns = parseFillIns(scope, token.value.trim())
     if (fillIns === null) return undefined
-    if (fillIns) match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? decodeHTMLStrict(part) : part))
+    if (fillIns) {
+      match.data.fillIns = fillIns.map((part) => (typeof part === "string" ? decodeHTMLStrict(part) : part))
+      noteFillInWarnings(match, fillIns)
+    }
     return match
   }
 

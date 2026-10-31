@@ -56,7 +56,7 @@ describe("SpellLanguageService", () => {
   /** Card.spell's line declaring the card's symbol, which its `state` reads. */
   const SYMBOL = '- its "symbol" is'
   /** The last line of `- its "state" is:`'s body, reading its symbol. */
-  const READ_SYMBOL = "return rank + its symbol + direction"
+  const READ_SYMBOL = "return letter + its symbol + arrow"
   /** Solitaire.spell's declaration of a method of the solitaire's own. */
   const OWN_METHOD = "- to reset the stock:"
   /** ...and a call to it, in `- animation play from the stock:`. */
@@ -431,7 +431,7 @@ describe("SpellLanguageService", () => {
       // a pile's state reads `its name`, which is a pile's, not a card's
       const pileUri = pathToFileURL(resolve(dir, "Solitaire/Pile.spell")).href
       const pileText = readFileSync(resolve(dir, "Solitaire/Pile.spell"), "utf8")
-      expect(lines(pileUri)).not.toContain(lineOf(pileText, 'set state to (its name or "pile")'))
+      expect(lines(pileUri)).not.toContain(lineOf(pileText, 'set summary to (its name or "pile")'))
     })
 
     test("references to a property, across files", () => {
@@ -467,15 +467,14 @@ describe("SpellLanguageService", () => {
         RESET_CARDS.map((line) => lineOf(solitaire.parseText, line))
       )
       const renamed = applyEdits(solitaire.parseText, edits)
-      expect(renamed).toContain("\t\tset stack to a copy of list (its discards) as a pile\n\t\treverse the stack\n")
+      expect(renamed).toContain("\t\tset stack to a copy of list (the discards) as a pile\n\t\treverse the stack\n")
       await withText(solitaireUri, solitaire.parseText, renamed, () => {
         expect(errorsIn(service, solitaire)).toEqual([])
       })
     })
 
-    test("won't rename `it`, a property, or a type written in more than one way", () => {
+    test("won't rename `it`, or a type written in more than one way", () => {
       expect(service.prepareRename(solitaire, at(solitaire, IT_CALL, "it"))).toBeNull()
-      expect(service.prepareRename(card, at(card, READ_SYMBOL, "symbol"))).toBeNull()
       expect(service.prepareRename(card, at(card, CARD_TYPE, "card"))).toBeNull()
       expect(service.rename(solitaire, at(solitaire, RESET_CARDS[0], "cards"), "not a word")).toBeNull()
     })
@@ -500,8 +499,8 @@ describe("SpellLanguageService", () => {
     // a discard pile's `- its cards are draggable when the card is its last card`:  `the card`, after `cards`
     const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
-    // `for each card in the cards` / `add it to the stock of the solitaire`:  the loop's item
-    expect(hover(solitaire, at(solitaire, "add it to the stock of the solitaire", "it"))).toContain(
+    // `for each card in the cards` / `add it to the stock`:  the loop's item
+    expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain(
       "variable **it**: Card"
     )
     // `- on click play it`
@@ -688,8 +687,8 @@ describe("SpellLanguageService", () => {
     })
 
     test("mid-statement:  names, but no statement starts", () => {
-      // in `to put a card on a pile`'s `set points to count the points for the card on the pile`
-      const position = at(solitaire, "set points to count the points for the card on the pile", "count")
+      // in `to put a card on a pile`'s `set points to count the points for the card on pile`
+      const position = at(solitaire, "set points to count the points for the card on pile", "count")
       const labels = service.completion(solitaire, position).items.map(({ label }) => label)
       expect(labels).toEqual(expect.arrayContaining(["solitaire", "start-pile", "card"]))
       expect(labels).not.toContain("to")
@@ -900,7 +899,7 @@ describe("SpellLanguageService", () => {
       const untidy = `${tidy.slice(0, blank)}\t${tidy.slice(blank)}`
         .replace("\t- to draw its front:\n", "\t- to draw its front:  \n")
         .replace("\t- to draw its back:\n", "\t- to draw its back: \n")
-        .replace(`\t\t${READ_SYMBOL}\n`, `\t\treturn rank\t+ its symbol + direction\n`)
+        .replace(`\t\t${READ_SYMBOL}\n`, `\t\treturn letter\t+ its symbol + arrow\n`)
       /** 1-based line of `start` in the tidy card -- see `lineOf()`. */
       const tidyLine = (start: string) => lineOf(tidy, start)
       return { untidy, blankLine: tidy.slice(0, blank).split("\n").length, tidyLine }
@@ -928,7 +927,7 @@ describe("SpellLanguageService", () => {
     test("a range formats only the lines it touches", async () => {
       const { untidy, tidyLine } = untidyCard()
       await withCardText(untidy, () => {
-        // the state's `return rank + ...`, 0-based:  not the untidy lines below it
+        // the state's `return letter + ...`, 0-based:  not the untidy lines below it
         const line = tidyLine(READ_SYMBOL) - 1
         const range = { start: { line, character: 0 }, end: { line, character: 5 } }
         expect(service.formatting(card, tabs, range).map(({ range }) => range.start.line)).toEqual([line])
@@ -938,7 +937,7 @@ describe("SpellLanguageService", () => {
     test("tabs, even if the editor says spaces", () => {
       // the whole body of `- its "state" is:`, indented with spaces
       const body = cardText.slice(
-        cardText.indexOf("\t\trank is 10"),
+        cardText.indexOf("\t\tletter is 10"),
         cardText.indexOf(READ_SYMBOL) + READ_SYMBOL.length
       )
       const spaced = card.contents!.replace(body, body.replaceAll("\t\t", "    "))

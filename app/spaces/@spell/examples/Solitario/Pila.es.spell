@@ -19,10 +19,10 @@ una "pila" es una lista visible de cartas donde:
 
 	## estado de la pila, para depurar
 	- su "estado" es:
-		poner estado a (su nombre o "pila") + ":"
+		poner resumen a (su nombre o "pila") + ":"
 		para cada carta en la pila
-			poner estado a estado + " " + el estado de la carta
-		devolver estado
+			poner resumen a resumen + " " + el estado de la carta
+		devolver resumen
 
 // una carta está en una sola pila a la vez:  ponerla en otra pila la quita de esta
 una carta pertenece a una pila

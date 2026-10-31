@@ -30,9 +30,9 @@ a "card" is a two sided view:
 	- it "is the (rank) of (suit)"
 	// Its short name:  Q♠↓ is the queen of spades, face down
 	- its "state" is:
-		rank is 10 if its value is 10 otherwise the first letter of its rank as uppercase
-		direction is "↑" if it is face up otherwise "↓"
-		return rank + its symbol + direction
+		letter is 10 if its value is 10 otherwise the first letter of its rank as uppercase
+		arrow is "↑" if it is face up otherwise "↓"
+		return letter + its symbol + arrow
 
 	// One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 	- group "drawing"

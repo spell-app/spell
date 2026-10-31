@@ -12,11 +12,11 @@ solitaire is an app:
 	// a change to a property is an event:  each runs just after the change lands
 	- when its score changes:
 		// every card on a foundation:  the game is won
-		set home to the number of cards in its clubs + the number of cards in its diamonds
-		set home to home + the number of cards in its hearts + the number of cards in its spades
-		if home is 52: set its hint to " -- You won!"
+		set home to the number of cards in the clubs + the number of cards in the diamonds
+		set home to home + the number of cards in the hearts + the number of cards in the spades
+		if home is 52: set the hint to " -- You won!"
 	// a card played:  the last hint goes
-	- when its moves change: clear its hint
+	- when its moves change: clear the hint
 	- its "deck" is a new deck
 
 	// One of each, made with the solitaire
@@ -34,42 +34,42 @@ solitaire is an app:
 	- its "T5" is a new tableau with name = "T5"
 	- its "T6" is a new tableau with name = "T6"
 	- its "T7" is a new tableau with name = "T7"
-	// Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's
+	// Every card of the deck into the stock
 	- to create it:
-		for each card in its deck
-			add it to the stock of solitaire
+		for each card in the deck
+			add it to the stock
 
 	// Each pauses a moment, so a deal animates
 	- group "dealing"
 	// The discards, turned over, back into the stock
 	- to reset the stock:
-		set cards to a copy of list (its discards) as a pile
+		set cards to a copy of list (the discards) as a pile
 		reverse the cards
 		for each card in the cards
-			add it to the stock of the solitaire
+			add it to the stock
 			turn the card face down
 	// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
 	- animation play from the stock:
-		if its stock is empty
+		if the stock is empty
 			wait for: reset the stock
-		get the last card of its stock
+		get the last card of the stock
 		turn it face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
-		add it to the discards of the solitaire
+		add it to the discards
 	// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
 	- animation deal the cards:
-		for each card in its deck
+		for each card in the deck
 			set start pile to the pile of the card
 			turn the card face down
-			if start pile is not the stock of the solitaire
-				add the card to the stock of the solitaire
+			if start pile is not the stock
+				add the card to the stock
 				pause for 50 msec
-		shuffle its stock
+		shuffle the stock
 		// each row's first card lands face down, then turns up where it lies
 		for row from 1 to 7
 			for column from row to 7
-				add the last card of its stock to item column of the tableaus
+				add the last card of the stock to item column of the tableaus
 				if column is row
 					turn the last card of (item column of the tableaus) face up
 				pause for 50 msec
@@ -80,16 +80,16 @@ solitaire is an app:
 	- group "game"
 	- to start a new game:
 		- shortcut N
-		clear its score
-		clear its moves
-		clear its hint
+		clear the score
+		clear the moves
+		clear the hint
 		deal the cards
 	// Play every card that can go somewhere, until none can
 	- to auto play:
 		- shortcut A
 		set anything changed to no
-		if its discards is not empty
-			set test card to the last card of its discards
+		if the discards is not empty
+			set test card to the last card of the discards
 			if await play test card
 				set anything changed to yes
 				pause for 500 msec
@@ -121,7 +121,7 @@ solitaire is an app:
 		set the card to a random card in (the cards in the pile where the card is face down)
 		turn the card face up
 		pause for 30 ticks
-		add the card to the discards of the solitaire
+		add the card to the discards
 	- its "game menu" is a menu of "start a new game" , "-" , "auto play" and "cheat"
 
 	// Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu
@@ -129,8 +129,8 @@ solitaire is an app:
 		<ui-container>
 			<ui-menu>
 				<ui-item kind="header">Klondike Solitaire</ui-item>
-				<ui-item>Moves: {its moves}</ui-item>
-				<ui-item>Score: {its score}{its hint}</ui-item>
+				<ui-item>Moves: {the moves}</ui-item>
+				<ui-item>Score: {the score}{the hint}</ui-item>
 				<ui-menu position="right">
 					<ui-item aria-label="Auto play" title="Auto play" onClick={auto play}><ui-icon name="fast forward"/></ui-item>
 					<ui-item aria-label="Cheat" title="Cheat" onClick={cheat}><ui-icon name="eye"/></ui-item>
@@ -138,20 +138,20 @@ solitaire is an app:
 				</ui-menu>
 			</ui-menu>
 			<ui-grid class="Board" columns="7" context-menu="game menu">
-				{draw its stock}
-				{draw its discards}
+				{draw the stock}
+				{draw the discards}
 				<ui-column/>
-				{draw its clubs}
-				{draw its diamonds}
-				{draw its hearts}
-				{draw its spades}
-				{draw its T1}
-				{draw its T2}
-				{draw its T3}
-				{draw its T4}
-				{draw its T5}
-				{draw its T6}
-				{draw its T7}
+				{draw the clubs}
+				{draw the diamonds}
+				{draw the hearts}
+				{draw the spades}
+				{draw the T1}
+				{draw the T2}
+				{draw the T3}
+				{draw the T4}
+				{draw the T5}
+				{draw the T6}
+				{draw the T7}
 			</ui-grid>
 		</ui-container>
 
@@ -173,10 +173,10 @@ to play a card
 to put a card on a pile
 	set start pile to the pile of the card
 	if start pile cannot give up the card return no
-	if the pile cannot take the card return no
-	set points to count the points for the card on the pile
+	if pile cannot take the card return no
+	set points to count the points for the card on pile
 	for each card in (cards in start pile starting with the card)
-		move it to the pile
+		move it to pile
 	if the start pile is a tableau and the start pile is not empty
 		pause for 200 msec
 		turn the last card of the start pile face up
@@ -186,7 +186,7 @@ to put a card on a pile
 
 // what the move scores:  10 on a foundation, 5 from the discards, else nothing
 to count the points for a card on a pile
-	if the pile is a foundation return 10
+	if pile is a foundation return 10
 	if the pile of the card is the discards of the solitaire return 5
 	return 0
 

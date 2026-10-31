@@ -30,7 +30,7 @@ import { _if_ } from "./if"
 import { JSX, SPELL_TAG_NAMES, isBareComponentName, type JSXMatchData, MarkdownBlock } from "./JSX"
 import { lists } from "./lists"
 import { math } from "./math"
-import { properties } from "./properties"
+import { properties, MemberReadExpression } from "./properties"
 import { events } from "./events"
 import { UI } from "./UI"
 import { classes, MarkdownDescription } from "./classes"
@@ -110,6 +110,9 @@ export { MarkdownDescription }
  * -- see `MarkdownBlock.partsOf()`.
  */
 export { MarkdownBlock }
+
+// The language server asks what a member read found, as noted while parsing
+export { MemberReadExpression }
 
 // Structural rules.  `SpellBlankLine` and `BlockLine` set `static ruleName`:  their class names don't give them.
 spellParser.addRule(SpellBlankLine)

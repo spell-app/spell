@@ -76,9 +76,9 @@ class Card(TwoSidedView):
     @property
     def state(self) -> str:
         """Its short name:  Q♠↓ is the queen of spades, face down"""
-        rank = 10 if self.value == 10 else core.upper_case(core.get_item_at(self.rank, 0))
-        direction = "↑" if self.is_face_direction("up") else "↓"
-        return f"{rank}{self.symbol}{direction}"
+        letter = 10 if self.value == 10 else core.upper_case(core.get_item_at(self.rank, 0))
+        arrow = "↑" if self.is_face_direction("up") else "↓"
+        return f"{letter}{self.symbol}{arrow}"
 
     def draw(self) -> list:
         """Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns"""
@@ -361,10 +361,10 @@ class Pile(ViewableList):
     @property
     def state(self) -> str:
         """Its name, then its cards' short names:  stock: Q♠↑ 7♥↓"""
-        state = f"{self.name or "pile"}:"
+        summary = f"{self.name or "pile"}:"
         for card in self:
-            state = f"{state} {card.state}"
-        return state
+            summary = f"{summary} {card.state}"
+        return summary
 
     def while_card_dragged_over(self, card: Card) -> None:
         """while a card it would take is over it, the score shows what the move would add -- gone as the card leaves"""
@@ -602,7 +602,7 @@ class Solitaire(App):
     t7 = prop(init=lambda: Tableau(name="T7"), early=True)
 
     def create(self) -> None:
-        """Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's"""
+        """Every card of the deck into the stock"""
         for card in self.deck:
             self.stock.append(card)
 

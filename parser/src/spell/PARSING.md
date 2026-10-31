@@ -722,6 +722,12 @@ A kind that says so is saved in a file of its own.
     - a parameter with no type (`var_method_arg`)
     - a new variable set to a list of nothing said (`set state to []`),
       or a property a set declares from a value that doesn't say (`assignment`)
+    - a local, argument or loop variable hiding a property of the action's thing (epic `language`, Q2)
+      - e.g. `set score to 3` in a game => `Here "score" hides the property "score" ...`
+      - Noted where a local is made (`assignment`), and where `the X` reads one (`variable`), never on a bare read:
+        `MemberReadExpression.warnIfHidesProperty()`, `noteIf()`, so a property declared further down counts.
+      - In a text's `[the score]`, whose tokens aren't the file's, the text notes it again:
+        `SP.SpellWarnings.noteAgain()`.
     - a LOOSE member read its type never declares (Q45)
       - its rules:  `property_expression`, `its_property`
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
@@ -1275,8 +1281,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - `[x]` inside text ALWAYS fills in (epic page Q2).
   - [`parseFillIns()`](rules/core/TextLiteral.ts) splits the text into plain pieces and fill-ins.
   - Each fill-in is parsed as an expression, where the text is.
-  - It reads `its x` when `x` is a property of `it`'s type.
-    So `[rank]` in a card's getter is the card's.
+  - It reads `the x`, in the file's language, when `x` is a property of the thing the action runs on.
+    So `[rank]` in a card's getter is the card's, and in a loop it's still the card's, never the item's;
+    `[its rank]` is the item's.
+  - A local, argument or loop variable called `x` comes first, with no warning on the read.
   - A real bracket:  `[[` or `\[`, and `]]` (Q15).
 - Three places use it:
   - the `text` rule
@@ -1286,6 +1294,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Each compiles them to a javascript template string, `P.ASTTemplateString`:
     `` `images/${this.rank}-of-${this.suit}.png` ``.
 - A fill-in that doesn't parse:  the text doesn't match ("Don't understand"), or the attribute is a parse error.
+- A fill-in's warnings go on the text or markup it's in (`noteFillInWarnings()`).
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
 

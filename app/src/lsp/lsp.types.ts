@@ -35,6 +35,8 @@ export type FileMatch = {
   file: SP.SpellFile
   /** Match itself. */
   match: P.Match
+  /** A property's use we can't place on a type, so it may be another type's:  it's found, but never renamed. */
+  unsure?: boolean
 }
 
 // ## Symbols

@@ -52,12 +52,12 @@ exports[`SpellLanguageService > highlighting > semantic tokens 1`] = `
   "16:48 "or" keyword",
   "16:51 "spades" enumMember",
   "35:2 "return" keyword",
-  "35:9 "rank" variable",
-  "35:14 "+" operator",
-  "35:16 "its" keyword",
-  "35:20 "symbol" property",
-  "35:27 "+" operator",
-  "35:29 "direction" variable",
+  "35:9 "letter" variable",
+  "35:16 "+" operator",
+  "35:18 "its" keyword",
+  "35:22 "symbol" property",
+  "35:29 "+" operator",
+  "35:31 "arrow" variable",
   "53:3 "to" keyword",
   "53:6 "draw" keyword",
   "53:11 "its" keyword",
@@ -88,8 +88,8 @@ exports[`SpellLanguageService > structure > document symbols:  properties and me
   name (Property)
   "is the (rank) of (suit)" (Method)
   state (Property)
-    rank (Variable)
-    direction (Variable)
+    letter (Variable)
+    arrow (Variable)
   draw it (Method)
   picture (Property)
     column (Variable)
