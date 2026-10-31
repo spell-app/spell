@@ -141,6 +141,27 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(spellx).toContain('\t<propiedad "palo" uno-de="tréboles, corazones" />')
     expect(spellx).toContain('\t<acción "voltearla">')
   })
+
+  // epic `debut` I97
+  test.each([
+    {
+      path: "/Game.spell",
+      lines: ["game is an app where:", "\t// deals, slowly", "\t- animation deal the cards:", "\t\tpause for 50 msec"],
+      tag: '\t<action "deal the cards" animated description="deals, slowly">'
+    },
+    {
+      path: "/Juego.es.spell",
+      lines: ["juego es una aplicación donde:", "\t- animación repartir las cartas:", "\t\tpausar 50 milisegundos"],
+      tag: '\t<acción "repartir las cartas" animada>'
+    }
+  ])("an animation is an action that may wait, `animated`:  $path, and back", ({ path, lines, tag }) => {
+    const spellx = converted(path, lines)
+    expect(spellx).toContain(tag)
+    const spell = compiled(path, lines.join("\n"))
+    const back = compiled(path.replace(/\.spell$/, ".spellml"), spellx)
+    expect(spell.errors).toEqual([])
+    expect([back.errors, back.code]).toEqual([[], spell.code])
+  })
 })
 
 /** `text` (a `.spell` file at `path`) written as spellx. */

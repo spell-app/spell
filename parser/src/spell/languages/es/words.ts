@@ -197,6 +197,8 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
+      // una acción que puede esperar:  una animación (épica `debut` I97)
+      animada: "animated",
       arrastrable: "draggable",
       soltable: "droppable",
       seleccionable: "selectable",
@@ -230,6 +232,8 @@ export const spanishWords: SP.LanguageWords = {
       alias: "{name}",
       aliasBlock: "{name} :",
       action: "para {words} :",
+      // una acción que puede esperar, `<acción "repartir las cartas" animada>` (épica `debut` I97)
+      animation: "animación {words} :",
       actionDetails: {
         shortcut: "atajo {shortcut}",
         "enabled-when": "activa cuando {enabled-when}",

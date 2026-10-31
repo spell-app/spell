@@ -543,7 +543,7 @@ describe("SpellLanguageService", () => {
           "- the stock's card turns over onto the discards instead"
       )
       expect(docs("deal the cards")).toBe(
-        "gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"
+        "Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"
       )
     })
 

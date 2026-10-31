@@ -507,7 +507,7 @@ export class Solitaire extends App {
     })
   }
 
-  /** turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
+  /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
     if (core.processIsRunning("play_from_the_stock")) return
     core.startProcess("play_from_the_stock", "EXCLUSIVE")
@@ -524,7 +524,7 @@ export class Solitaire extends App {
     }
   }
 
-  /** gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
+  /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
   async dealTheCards() {
     if (core.processIsRunning("deal_the_cards")) return
     core.startProcess("deal_the_cards", "EXCLUSIVE")

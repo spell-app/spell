@@ -228,7 +228,7 @@
       "group": "Playing a card",
       "kind": "method",
       "name": "play a card",
-      "defined": "/Solitaire.spellml:6919-7170"
+      "defined": "/Solitaire.spellml:6930-7181"
     },
     {
       "syntax": "put {thisArg:expression} on {callArgs:expression}",
@@ -250,7 +250,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitaire.spellml:7373-7964"
+      "defined": "/Solitaire.spellml:7384-7975"
     },
     {
       "syntax": "count the points for {thisArg:expression} on {callArgs:expression}",
@@ -271,7 +271,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitaire.spellml:8048-8207"
+      "defined": "/Solitaire.spellml:8059-8218"
     },
     {
       "syntax": "test card setup",
@@ -377,53 +377,53 @@
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9266-9791"
+      "defined": "/Solitaire.spellml:9277-9802"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spellml:9425-9451"
+      "defined": "/Solitaire.spellml:9436-9462"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9807-10083"
+      "defined": "/Solitaire.spellml:9818-10094"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spellml:9916-9942"
+      "defined": "/Solitaire.spellml:9927-9953"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:10099-10758"
+      "defined": "/Solitaire.spellml:10110-10769"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spellml:10214-10240"
+      "defined": "/Solitaire.spellml:10225-10251"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spellml:10245-10273"
+      "defined": "/Solitaire.spellml:10256-10284"
     },
     {
       "type": "Tableau",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:10774-12772"
+      "defined": "/Solitaire.spellml:10785-12783"
     },
     {
       "property": "layout",
       "of": "Tableau",
-      "defined": "/Solitaire.spellml:10889-10916"
+      "defined": "/Solitaire.spellml:10900-10927"
     },
     {
       "type": "Solitaire",
       "superType": "App",
-      "defined": "/Solitaire.spellml:306-6626"
+      "defined": "/Solitaire.spellml:306-6637"
     },
     {
       "property": "score",
@@ -583,7 +583,7 @@
       "kind": "method",
       "name": "play from the stock",
       "waits": true,
-      "defined": "/Solitaire.spellml:2613-2895"
+      "defined": "/Solitaire.spellml:2494-2894"
     },
     {
       "syntax": "deal the cards (of {thisArg:expression})?",
@@ -598,7 +598,7 @@
       "kind": "method",
       "name": "deal the cards",
       "waits": true,
-      "defined": "/Solitaire.spellml:3012-3617"
+      "defined": "/Solitaire.spellml:2907-3627"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -612,7 +612,7 @@
       "group": "game",
       "kind": "method",
       "name": "draw it",
-      "defined": "/Solitaire.spellml:5610-6617"
+      "defined": "/Solitaire.spellml:5621-6628"
     },
     {
       "syntax": "start a new game (of {thisArg:expression})?",
@@ -627,7 +627,7 @@
       "groupDescription": "Its moves:  the menu's buttons, its keys, and the board's right click",
       "kind": "method",
       "name": "start a new game",
-      "defined": "/Solitaire.spellml:3732-3842"
+      "defined": "/Solitaire.spellml:3743-3853"
     },
     {
       "syntax": "auto play (of {thisArg:expression})?",
@@ -642,7 +642,7 @@
       "kind": "method",
       "name": "auto play",
       "waits": true,
-      "defined": "/Solitaire.spellml:3855-4981"
+      "defined": "/Solitaire.spellml:3866-4992"
     },
     {
       "syntax": "cheat {thisArg:expression}?",
@@ -658,7 +658,7 @@
       "name": "cheat",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitaire.spellml:4994-5476"
+      "defined": "/Solitaire.spellml:5005-5487"
     },
     {
       "syntax": "test the moves",
@@ -667,7 +667,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spellml:11257-12763"
+      "defined": "/Solitaire.spellml:11268-12774"
     }
   ],
   "codeLines": [

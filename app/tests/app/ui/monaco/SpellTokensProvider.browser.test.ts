@@ -113,6 +113,13 @@ describe("SpellTokensProvider.forSpellx()", () => {
     ])
   })
 
+  // epic `debut` I97
+  test("an animation's `animated` colours as an attribute's name, as `description` does", () => {
+    const [, action] = colour(['<spell-app "game">', '\t<action "deal" animated description="Deals">'], spellx)
+    expect(action).toContain('"animated" attribute.name')
+    expect(action).toContain('"description" attribute.name')
+  })
+
   test("a tag with its body on its line, and a comment after its closer", () => {
     const [, alias] = colour(
       ['<spell-view "card">', '\t<alias "is a face card">if its rank is jack</>\t// a face card'],

@@ -533,6 +533,8 @@ export type SpellxTwinWords = {
   aliasBlock: string
   /** An action:  `to {words} :`. */
   action: string
+  /** An action that may wait, `animated`:  `animation {words} :` (epic `debut` I97). */
+  animation: string
   /** An action's details, by attribute:  `{ shortcut: "shortcut {shortcut}" }`. */
   actionDetails: Record<string, string>
   /** A test:  `to test {words} :`. */

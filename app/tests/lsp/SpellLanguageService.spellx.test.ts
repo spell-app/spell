@@ -114,6 +114,34 @@ describe("SpellLanguageService, spellx", () => {
     ])
   })
 
+  // epic `debut` I97
+  test("an animation's `animated` colours as an attribute's name, as `description` does", async () => {
+    const animatedFolder = resolve(dir, "AnimatedTiles")
+    mkdirSync(animatedFolder)
+    const animatedText = tileText.replace(
+      "</spell-view>",
+      [
+        '\t<action "spin" animated description="Spins it">',
+        "\t\tpause for 50 msec",
+        "\t</action>",
+        "</spell-view>"
+      ].join("\n")
+    )
+    writeFileSync(resolve(animatedFolder, "FlipTile.spellml"), animatedText)
+    writeFileSync(
+      resolve(animatedFolder, SP.PROJECT_FILE),
+      `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`
+    )
+    const animatedUri = pathToFileURL(resolve(animatedFolder, "FlipTile.spellml")).href
+    await workspace.update(animatedUri, animatedText)
+    const animated = workspace.fileFor(animatedUri)!
+    expect(service.diagnostics(animated).map((it) => it.message)).toEqual([])
+    const tokens = describeTokens(animated).filter((token) => token.startsWith("31:"))
+    expect(tokens).toContain(`31:1 "<action" keyword`)
+    expect(tokens).toContain(`31:16 "animated" property`)
+    expect(tokens).toContain(`31:25 "description" property`)
+  })
+
   test("hover on a tag is its statement's, as its twin reads", () => {
     const hover = service.hover(tile, positionOf(tileText, '<property "side"', "<property"))
     const text = JSON.stringify(hover?.contents)
