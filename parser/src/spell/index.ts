@@ -57,7 +57,8 @@ export {
   isBareComponentName,
   type JSXMatchData,
   MarkdownDescription,
-  MarkdownBlock
+  MarkdownBlock,
+  MemberReadExpression
 } from "./rules"
 
 export * from "./SpellDeclarations"

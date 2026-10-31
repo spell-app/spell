@@ -473,9 +473,8 @@ describe("SpellLanguageService", () => {
       })
     })
 
-    test("won't rename `it`, a property, or a type written in more than one way", () => {
+    test("won't rename `it`, or a type written in more than one way", () => {
       expect(service.prepareRename(solitaire, at(solitaire, IT_CALL, "it"))).toBeNull()
-      expect(service.prepareRename(card, at(card, READ_SYMBOL, "symbol"))).toBeNull()
       expect(service.prepareRename(card, at(card, CARD_TYPE, "card"))).toBeNull()
       expect(service.rename(solitaire, at(solitaire, RESET_CARDS[0], "cards"), "not a word")).toBeNull()
     })
