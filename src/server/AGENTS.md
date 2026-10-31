@@ -59,7 +59,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `LiveReload` + [liveClient.ts](liveClient.ts) -- live reload over a websocket, and the page-side client.
     - The client:  `/api/server/live.js` (`editPage()`).
     - Its websocket:  `/api/server/live`.
-    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins).
+    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins):  accept, send, ping;  and read what a page sends
+      (`onText`, for a `Referee`), which live reload doesn't ask for, so its pages stay as they were.
     - NEVER an `EventSource`, or any other request held open:
       each takes one of Chrome's 6 connections per host, and every VS Code window shares them.
     - A PAGE's change comes WITH the page, as a navigation gets it (`StaticHandler.render()`), and its `ETag`
@@ -370,6 +371,34 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `WebServer` imports the leaf, never the browser-only barrel.
     - An epic's state and the Epics page's cards left for `spell/epic/list/` (epic `people-and-orgs` P16).
       - `EpicState`, `EpicCards`
+  - `spell/server/places` -- the places that need node (epic `data` P5), for what a browser can't do:
+    - `ChunkFiles`:  a folder of files as a place's chunks:  the file half of `ChunkedPlace`, the app's `SpaceStorage` shape
+      - versions through `FileOperations`' own conflict check, changes through `LiveReload`'s watching (no raw watcher)
+      - its statics (`writeListAndBodies()` ...) are for a tool writing files straight off, in its own lock:  the epic page
+        tool's every write, since epic `data` P6 (`PlanDocFiles.writeDoc()`)
+    - `FolderPlace`:  a folder as a place, a list file and one file per thing, on any `FolderStorage` (`ChunkFiles`, or the
+      app's `DiskStorage` as it stands)
+      - the files are the truth:  each read checks each file's version against the list file, and reads only what differs
+      - a file that isn't JSON yet answers as it last read
+    - `FilePlace`:  one JSON5 file as a place, its comments kept
+    - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
+      - holds keys (`PlaceKeys`), and scrubs them from every answer
+      - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
+        to answer
+    - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
+      - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
+      - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
+      - each batch is written to the store before it's numbered, so a store's "no" is a "no"
+      - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
+      - named actions re-run on it (`actions`);  which ones is the compiler's choice, with the words
+    - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
+      - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
+      - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race
+      - `GoogleToken`:  a service account's key file makes a token, an hour at a time;  both go in `PlaceKeys`, to be scrubbed
+      - read only, from a browser, with no key:  `SheetPlace`, on the sheet's CSV address
+      - its tests run against `spell/server/test/sheetsStub`, a fair stub checked against Google's docs
+    - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says;  Airtable's next
+    - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):
@@ -482,6 +511,9 @@ The steps between a page's content and its file on disk, for every tool that wri
 
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
+- `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
+- `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
+  places' tests and the recipe box demo (`scripts/recipe-servers.ts`, which also serves a folder;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
 
 ## Types / Exports

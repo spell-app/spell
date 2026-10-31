@@ -1,19 +1,22 @@
-import { after } from "spell/ui/util"
-
 import {
   answerOf,
   ApiError,
   fetchOk,
   type ApiRequest,
   type ApiResponseType,
-  type FetchFailure,
-  type ApiUrlData
-} from "./runtime.types"
+  type ApiUrlData,
+  type FetchFailure
+} from "./fetching"
+import { after } from "./timing"
 
 /****************
  * ### `Api`
- * `fetch()` with Fomantic's API-behaviour conveniences, as `UI.api`:  URL templates, throttling, abort.
- * - In the runtime's lazy chunk;  imports only `./runtime.types`.
+ * `fetch()` with Fomantic's API-behaviour conveniences:  URL templates, throttling, abort.
+ * - Spell UI's `UI.api`, and what the places that reach a server stand on (`RestPlace`, `GraphPlace`).
+ * - GENERIC, and taken by file (`spell/util/Api`), so a page that makes no request pays for none:
+ *   in Spell UI, the runtime's lazy chunk.  Imports only `./fetching` and `./timing`.
+ * - A second request helper beside `$fetch()`, until that can sit on this one:
+ *   this one has no lodash, and aborts with real signals (epic `data` P4).
  * - URL templates (`url()`):
  *   - `{name}` is REQUIRED -- a missing value throws, so a half-built URL never goes out
  *   - `{/name}` is an OPTIONAL path segment (RFC 6570 style):  `/value` when present, nothing when missing.
@@ -66,7 +69,9 @@ export class Api {
     signal: callerSignal,
     timeout,
     headers,
-    responseType = "auto"
+    responseType = "auto",
+    keepalive,
+    cache
   }: ApiRequest): Promise<T> {
     let url = this.url(template, urlData)
     const controller = new AbortController()
@@ -78,7 +83,13 @@ export class Api {
     const signal = AbortSignal.any(signals.filter((it): it is AbortSignal => !!it))
     try {
       if (throttle > 0) await this.delay(throttle, signal)
-      const init: RequestInit = { method, headers: new Headers(headers), signal }
+      const init: RequestInit = {
+        method,
+        headers: new Headers(headers),
+        signal,
+        ...(keepalive && { keepalive }),
+        ...(cache && { cache })
+      }
       if (method === "GET" || method === "HEAD") url = this.withQuery(url, data)
       else this.setBody(init, data)
       const response = await fetchOk(url, (failure) => Api.failed(method, failure), init)

@@ -84,6 +84,31 @@ export function untrackCells<T>(fn: () => T): T {
 }
 
 /**
+ * Every source `read()` read, all the way down:  a derived value it read, and what that read.
+ * - For a question about what a value depends on (`Places.originOf()`), never for reacting:  nothing stays linked.
+ * - It sees only what this run read:  a branch not taken isn't there.
+ * - A Solid memo's value isn't a source:  what the memo read stays its own.
+ * - throws what `read()` throws
+ */
+export function sourcesReadBy(read: () => unknown): Set<CellSource> {
+  const reader: CellReader = { srcs: new Map(), mark() {} }
+  const sources = new Set<CellSource>()
+  try {
+    trackCells(reader, read)
+    const toVisit = [...reader.srcs.keys()]
+    for (let source = toVisit.pop(); source; source = toVisit.pop()) {
+      if (sources.has(source)) continue
+      sources.add(source)
+      const inner = (source as Partial<CellReader>).srcs
+      if (inner) toVisit.push(...inner.keys())
+    }
+    return sources
+  } finally {
+    unlinkCells(reader)
+  }
+}
+
+/**
  * Did any source `reader` read change since?  Brings derived sources up to date first (the "pull").
  * - Stops at the first change:  `reader` re-runs anyway, and re-reads the rest.
  */

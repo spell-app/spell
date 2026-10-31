@@ -34,9 +34,18 @@ const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
 /**
  * util's node-only tests:  `src/util/spell/`, `reactive/` and `node/`;
- * and `time.ts`'s, which set the time zone (`process.env.TZ`):  only node lets a test do that.
+ * `time.ts`'s, which set the time zone (`process.env.TZ`):  only node lets a test do that;
+ * and the web places', against a real local server.
  */
-const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.test.ts", "time.test.ts"]
+const UTIL_NODE = [
+  "spell/**/*.test.ts",
+  "reactive/**/*.test.ts",
+  "node/**/*.test.ts",
+  "time.test.ts",
+  "places/RestPlace.test.ts",
+  "places/GraphPlace.test.ts",
+  "places/SheetPlace.test.ts"
+]
 
 export default defineConfig({
   test: {

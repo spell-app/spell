@@ -3,6 +3,7 @@ import { readdir, readFile } from "fs/promises"
 import { relative, sep } from "path"
 
 import { SRV } from "spell/server"
+import { ChunkFiles } from "spell/server/places"
 import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 
 /****************
@@ -13,6 +14,7 @@ import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
  *   made on the first `list()`, and rebuilt when anything in the folder changes, by anyone.
  *   - A watcher on the root (`fs.watch`, recursive) drops a changed folder's.
  * - Every path stays inside its root:  `..`, an absolute path or a dot file is refused (`SRV.fileInside()`).
+ * - A version is a file's `ETag`, so a place on it gets the file operations' conflict check (`writeIfVersion()`;  epic `data` P5).
  * - `close()` stops its watcher.
  ****************/
 export class DiskStorage implements SpaceStorage {
@@ -67,6 +69,18 @@ export class DiskStorage implements SpaceStorage {
     const watcher = { folder: trimSlashes(folder), onChange }
     this.watchers.add(watcher)
     return () => void this.watchers.delete(watcher)
+  }
+
+  /** File `path`'s version now:  its `ETag`.  `undefined` if it isn't there. */
+  versionOf(path: string): string | undefined {
+    return SRV.FileOperations.etagFor(this.fileFor(path))
+  }
+
+  /** Write file `path` whole, only if it's still at `version`:  its new version.  - throws `PlaceError` `"out of date"` */
+  async writeIfVersion(path: string, text: string, version: string): Promise<string> {
+    const made = await ChunkFiles.saveIfVersion(this.fileFor(path), text, version)
+    this.changed(path)
+    return made
   }
 
   /** Stop watching the disk:  lists are read afresh each time after. */

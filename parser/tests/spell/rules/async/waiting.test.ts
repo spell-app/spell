@@ -57,12 +57,6 @@ describe("what waits", () => {
     expect(js).not.toMatch(/await await/)
   })
 
-  test("`wait for` says once what the pass would say", () => {
-    const js = compiled(PROJECT(`	- to go it:\n		wait for: bump it`))
-    expect(js).toContain("await this.bump()")
-    expect(js).not.toMatch(/await await/)
-  })
-
   test("a loop calling what waits goes one by one, in every target", () => {
     const spell = PROJECT(`	- to go it:\n		set deck to a new list\n		for each card in deck\n			bump the card`)
     const js = compiled(spell)
@@ -106,9 +100,9 @@ describe("places that can't simply wait", () => {
     expect(js).toMatch(/async \(?\w*\)? => (\{\s*)?await this\.bump\(\)/)
   })
 
-  test("`create()` and a getter answer at once", () => {
-    const js = compiled(PROJECT(`	- to create it:\n		bump it\n	- its "total" is bump it`))
-    expect(js).not.toMatch(/async (get )?(create|total)/)
+  test("`create()` answers at once", () => {
+    const js = compiled(PROJECT(`	- to create it:\n		bump it`))
+    expect(js).not.toMatch(/async create/)
     expect(js).not.toContain("await this.bump()")
   })
 
@@ -158,8 +152,8 @@ describe("what a person presses", () => {
     expect(compiled(DRAWN, "ts/solid")).toContain("onClick={core.pressed(this, async () => await this.deal())}")
   })
 
-  test("an animation holds no guard of its own:  that's the queue's job", () => {
-    const js = compiled("a card is a thing:\n\t- animation deal it:\n\t\tpause for 1 sec\n")
+  test("an action that waits holds no guard of its own:  that's the queue's job", () => {
+    const js = compiled("a card is a thing:\n\t- to deal it:\n\t\tpause for 1 sec\n")
     expect(js).toContain("async deal()")
     expect(js).not.toContain("processIsRunning")
   })
@@ -250,5 +244,211 @@ to carry on:
     expect(js).toContain('await core.notify("A while"')
     expect(js).toContain("export async function showIt()")
     expect(js).toContain("export function carryOn()")
+  })
+})
+
+describe("a getter that waits", () => {
+  const GAME = (lines: string) => `a game is a thing:
+	- it has a score as a number
+	- its "total" is:
+		pause for 1 sec
+		return the score + 1
+	- its "doubled" is the total * 2
+${lines}
+`
+
+  test("it's a value that waits, following what it reads, in javascript and TypeScript", () => {
+    for (const target of ["js/solid", "ts/solid"]) {
+      const code = compiled(GAME(""), target)
+      expect(code).toContain('get total() { return core.waitedValue(this, "total", async () => {')
+      expect(code).toContain("() => [this.score]")
+      expect(code).not.toContain("async get")
+    }
+  })
+
+  test('a getter over one stays plain on Solid:  "not yet" passes through it', () => {
+    expect(compiled(GAME(""))).toMatch(/get doubled\(\) \{\s+return this\.total \* 2/)
+  })
+
+  test("it's never remembered in TypeScript, nor is a getter over one", () => {
+    const spell = GAME(`	- its "tally" is:
+		set sum to 0
+		for each n in [1, 2]
+			set sum to sum + the total
+		return sum`)
+    expect(compiled(spell, "ts/solid")).not.toContain("@derived")
+  })
+
+  test("an action waits for its answer, a getter over one's too", () => {
+    const js = compiled(GAME(`	- to go it:\n		set x to the doubled\n		print the total\n		return x`))
+    expect(js).toContain("async go()")
+    expect(js).toContain('const x = await core.answerOf(this, "doubled")')
+    expect(js).toContain('core.console.log(await core.answerOf(this, "total"))')
+  })
+
+  test("what isn't a value that waits is read as it is", () => {
+    const js = compiled(GAME(`	- to go it:\n		return the score`))
+    expect(js).toContain("  go() {")
+    expect(js).toContain("return this.score")
+  })
+
+  test("in Python it's an async property;  a getter over one is too, and an action waits for the answer", () => {
+    const py = compiled(GAME(`	- to go it:\n		return the total`), "py")
+    expect(py).toMatch(/@property\s+async def total\(self\)/)
+    expect(py).toMatch(/@property\s+async def doubled\(self\)/)
+    expect(py).toContain('await core.answer_of(self, "total")')
+  })
+
+  test("Python's drawing has its values before the page is sent", () => {
+    const py = compiled(GAME(`	- to draw it:\n		<div>{the total}</div>`), "py")
+    expect(py).toMatch(/\n    def draw\(self\)/)
+    expect(py).toContain('core.answer_now(self, "total")')
+  })
+
+  test("a library's is a plain async getter, on no core of its own", () => {
+    const lib = compiled(GAME(`	- to go it:\n		return the doubled`), "ts/lib")
+    expect(lib).toMatch(/get total\(\)[^{]*\{ return \(async \(\) => \{/)
+    expect(lib).toMatch(/get doubled\(\)[^{]*\{ return \(async \(\) => \{/)
+    expect(lib).toContain("await this.doubled")
+    expect(lib).not.toContain("waitedValue")
+    expect(lib).not.toContain("answerOf")
+  })
+})
+
+describe("a drawing that reads what waits", () => {
+  const GAME = (drawing: string) => `a game is a thing:
+	- its "total" is:
+		pause for 1 sec
+		return 1
+	- it has a score as a number
+	- to draw it:
+${drawing}
+`
+
+  test("a value alone has its own stand-in", () => {
+    const js = compiled(GAME(`		<div>{the score}{the total}</div>`))
+    expect(js).toContain("() => core.whileWaiting(() => this.total)")
+    expect(js).toContain("() => this.score,")
+    expect(js).not.toContain("drawsWaiting")
+    expect(compiled(GAME(`		<div>{the total}</div>`), "ts/solid")).toContain("{core.whileWaiting(() => this.total)}")
+  })
+
+  test("an `if` or an attribute has no spot for one, so the whole thing is held", () => {
+    for (const drawing of [`		if the total is 1\n			<div>x</div>`, `		<div class={the total}>x</div>`]) {
+      expect(compiled(GAME(drawing))).toContain("static drawsWaiting = true")
+    }
+    expect(compiled(GAME(`		<div class={the total}>x</div>`), "ts/solid")).toContain("static drawsWaiting = true")
+  })
+
+  test("a drawing that reads nothing that waits is as it was", () => {
+    const js = compiled(GAME(`		<div class={the score}>{the score}</div>`))
+    expect(js).not.toContain("whileWaiting")
+    expect(js).not.toContain("drawsWaiting")
+  })
+
+  test("a handler in a drawing is its own function:  it may wait", () => {
+    const spell = `a game is a thing:
+	- to draw it:
+		<div onClick={pause for 1 sec}>x</div>`
+    const { files } = parseSpellProject([{ path: "/Test.spell", contents: spell }])
+    expect(files[0]!.errors).toEqual([])
+  })
+
+  test.for([
+    ["a pause", "pause for 1 sec"],
+    ["a wait", "wait for: 1"]
+  ])("%s in a drawing is a clear error", ([, line]) => {
+    const { files } = parseSpellProject([
+      { path: "/Test.spell", contents: `a game is a thing:\n	- to draw it:\n		${line}\n		<div>x</div>` }
+    ])
+    expect(JSON.stringify(files[0]!.errors)).toContain("A drawing can't wait")
+  })
+
+  test("in Spanish too", () => {
+    const { files } = parseSpellProject([
+      {
+        path: "/Test.es.spell",
+        contents: `un juego es una cosa:\n	- para dibujarlo:\n		pausar 1 segundo\n		<div>x</div>`
+      }
+    ])
+    expect(JSON.stringify(files[0]!.errors)).toContain("Un dibujo no puede esperar")
+  })
+})
+
+describe("reads after a wait", () => {
+  const warningsOf = (body: string) => {
+    const contents = `a room is a thing:\n	- it has a size as a number\na game is a thing:\n	- it has a room as a room\n	- it has a score as a number\n	- its "total" is:\n${body}`
+    return JSON.stringify(parseSpellProject([{ path: "/Test.spell", contents }]).files[0]!.warnings)
+  }
+
+  test("a member of something else, after a wait, warns", () => {
+    expect(warningsOf(`		pause for 1 sec\n		return the size of the room`)).toContain("follow what it reads")
+  })
+
+  test("above the wait, or its own member, it doesn't", () => {
+    expect(warningsOf(`		set size to the size of the room\n		pause for 1 sec\n		return size`)).not.toContain(
+      "follow"
+    )
+    expect(warningsOf(`		pause for 1 sec\n		return the score`)).not.toContain("follow")
+  })
+})
+
+// epic `language` P13, Q9
+describe("the old words for waiting, retired", () => {
+  /** `lines`, a file of its own project:  each error's words and what replaces them, and its code. */
+  function parsed(path: string, lines: string[]) {
+    const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
+    const errors = (SP.Block.getParseErrors(file!.match!) ?? []).map((error) => [
+      error.inputText.trim(),
+      error.data.replacement
+    ])
+    return { errors, messages: file!.errors.map((error) => `${error}`), code: file!.compiled }
+  }
+
+  test.each([
+    ["- animation deal it:", "animation", "to"],
+    ["- create animation deal it:", "create animation", "to"],
+    ["wait for: slow it", "wait for", ""],
+    ["await slow it", "await", ""],
+    ["start animation dealing", "animation", "process"],
+    ["stop animation dealing", "animation", "process"],
+    ["if animation dealing is running then print 1", "animation", "process"],
+    ['notify "Bye" for 1 second and wait', "and wait", ""]
+  ])("English:  %s", (line, words, replacement) => {
+    const body = line.startsWith("-") ? [`\t${line}`, "\t\tpause for 1 sec"] : ["\t- to go it:", `\t\t${line}`]
+    const { errors, messages } = parsed("/Test.spell", [
+      "a card is a thing:",
+      "\t- to slow it:",
+      "\t\tpause for 1 sec",
+      ...body
+    ])
+    expect(errors).toEqual([[words, replacement]])
+    expect(messages[0]).toContain("spell lint --fix")
+  })
+
+  test.each([
+    ["- animación repartirla:", "animación", "para"],
+    ["- crear animacion repartirla:", "crear animacion", "para"],
+    ["esperar a: frenar", "esperar a", ""],
+    ["esperar frenar", "esperar", ""],
+    ["iniciar animación repartir", "animación", "proceso"],
+    ["detener animación repartir", "animación", "proceso"],
+    ['notificar "Adiós" durante 1 segundo y esperar', "y esperar", ""]
+  ])("Spanish:  %s", (line, words, replacement) => {
+    const body = line.startsWith("-") ? [`\t${line}`, "\t\tpausar 1 segundo"] : ["\t- para ir:", `\t\t${line}`]
+    const lines = ["una carta es una cosa donde:", "\t- para frenar:", "\t\tpausar 1 segundo", ...body]
+    const { errors, messages } = parsed("/Prueba.es.spell", lines)
+    expect(errors).toEqual([[words, replacement]])
+    expect(messages[0]).toContain("spell lint --fix")
+  })
+
+  test("what stays:  `start process`, `process x is running`", () => {
+    const { errors } = parsed("/Test.spell", ["start process dealing", "if process dealing is running then print 1"])
+    expect(errors).toEqual([])
+  })
+
+  test("a word in a comment or a text is left alone", () => {
+    const { errors } = parsed("/Test.spell", ["// wait for: an animation", 'print "wait for: an animation"'])
+    expect(errors).toEqual([])
   })
 })

@@ -140,6 +140,23 @@ class RuntimeMethods:
             "core.run_at_once():  it waited for something other than a pause;  wait for that once the thing is made"
         )
 
+    async def answer_of(self, thing: object, name: str) -> Any:
+        """The answer of `thing`'s member `name`:  what a function that waits writes for reading a value that waits.
+
+        - By name, so it may be a plain value on this thing:  then that's the answer.
+        """
+        value = getattr(thing, name, None)
+        return await value if inspect.isawaitable(value) else value
+
+    def answer_now(self, thing: object, name: str) -> Any:
+        """The answer of `thing`'s member `name`, where nothing can wait:  a drawing, a thing's `create()`.
+
+        - As `run_at_once()`:  its pauses don't wait.  A page is sent with its values, so no "…" shows here.
+        - throws `RuntimeError` if it waits for something other than a pause.
+        """
+        value = getattr(thing, name, None)
+        return self.run_at_once(value) if inspect.iscoroutine(value) else value
+
     def _milliseconds(self, number: float, units: str) -> float:
         """`number` `units` in milliseconds, rounded;  0 for not a number, or less than 0."""
         return max(round(number * self.TIME_UNITS_MAP.get(units, 1000)), 0) if number == number else 0

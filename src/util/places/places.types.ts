@@ -10,6 +10,14 @@
 // ## Rows
 ////////////////
 
+/** How long a text is before losing it is worth a notice, in characters:  a title just flips once, a paragraph is kept (J1). */
+const LONG_TEXT_CHARS = 40
+
+/** Is `value` long text:  several words someone would miss, or several lines? */
+export function isLongText(value: unknown): boolean {
+  return typeof value === "string" && (value.length >= LONG_TEXT_CHARS || value.includes("\n"))
+}
+
 /** One saved thing, as a place holds it:  plain fields by name. */
 export type PlaceRow = Record<string, unknown>
 
@@ -89,6 +97,14 @@ export type RateLimit = {
  * - What's missing, the engine does instead, the same way for every place.
  */
 export type PlaceCapabilities = {
+  /**
+   * What sort of place it is, in words for people, e.g. `"web service"`:  what the side bar says beside its name.
+   * - Words only, never a thing to branch on:  branch on what it can do.
+   * - Left out:  nobody said.
+   */
+  kind?: string
+  /** Is it a sample, standing in while designing (`SamplePlace`)?  Left out:  no. */
+  isSample?: boolean
   /** The field holding a row's id.  Left out:  rows share no identity, and stay inside their list. */
   idOf?: string
   /** Is the id made by the place, as Airtable's are?  Left out:  whoever inserts a row names its id. */
@@ -113,6 +129,12 @@ export type PlaceCapabilities = {
   atomic: boolean
   /** Does it refuse a change whose `version` is out of date?  Airtable doesn't. */
   versionCheck?: boolean
+  /**
+   * Does it take a change that says what happened, not only the value after it:  an addition (`PlaceChange.adds`), and items
+   * added to or moved in a list (`PlaceChange.list`)?  A live room does, so two at once both count.
+   * - Left out:  `PendingChanges` works out the whole value, and sends that, so the last save wins.
+   */
+  edits?: boolean
   /** How it tells us that something changed. */
   live: LiveKind
   /** The limit it lives under, if it has one. */
@@ -133,6 +155,8 @@ export type PlaceContext = {
   signal?: AbortSignal
   /** Who's asking, as the place knows them:  it decides what they own. */
   identity?: string
+  /** The page is going away:  the request has to outlive it, as `fetch`'s `keepalive` does. */
+  keepalive?: boolean
 }
 
 /** `PlaceContext`, plus which fields the answer needs. */
@@ -155,7 +179,11 @@ export type SortField = {
 export type PageAsk = {
   /** How many rows, at most. */
   size?: number
-  /** Where to start:  a `nextPage` the place answered with.  Left out:  the first page. */
+  /**
+   * Where to start:  the last answer's `nextPage`.  Left out:  the first page.
+   * - It means what that answer meant:  the place's own cursor, or a place in the list when the engine did the filtering
+   *   (`PlaceQuery`).  Hand it back as it is, and it comes out right either way.
+   */
   at?: string
 }
 
@@ -185,12 +213,18 @@ export type ListHandled = {
 export type ListAnswer = {
   /** The rows. */
   rows: PlaceRow[]
-  /** What to ask for next, as `PageAsk.at`.  Left out:  this is the last page. */
+  /** What to ask for next, as `PageAsk.at`:  to a reader, it means nothing else.  Left out:  this is the last page. */
   nextPage?: string
   /** Where the place stood when it answered:  for `changesSince()`, and a change's `version`. */
   version?: string
   /** Which parts of the query it did itself. */
   handled: ListHandled
+  /**
+   * What it wants known about these rows, in words for whoever keeps the data:  a row left out, and why.
+   * - The answer still stands:  what's wrong with ONE row of a sheet someone keeps by hand shouldn't blank the page.
+   * - `PlaceResult.notes` shows them;  `PlaceQuery` adds one of its own for rows that share no identity.
+   */
+  notes?: string[]
 }
 
 /** One change to one thing. */
@@ -203,8 +237,35 @@ export type PlaceChange = {
   id?: string
   /** The fields written. */
   fields?: PlaceRow
-  /** The version this change was made from:  a place with `versionCheck` refuses it if the thing has moved on. */
+  /** An update's additions, by field:  `{ servings: 1 }` adds 1 to what's there, whoever else is adding.  See `edits`. */
+  adds?: Record<string, number>
+  /** An update's changes to list fields, one item at a time, by field.  See `edits`. */
+  list?: Record<string, ListEdit[]>
+  /**
+   * The version this change was made from (`Place.versionOf()`):  a place with `versionCheck` refuses it, `"out of date"`,
+   * if the thing has moved on;  a live room lets it win, and says who it overwrote.
+   * Only an update carries one:  a delete wins over what someone's editing.
+   */
   version?: string
+  /**
+   * Names this one change:  sent again with no answer, it has the same one, so a place that remembers them makes it once.
+   * - A place that doesn't remember:  writing the same field again is harmless, and an insert with its id replaces
+   *   what the first made;  an insert into a place that `makesIds` is the one that can double.
+   */
+  changeId?: string
+}
+
+/**
+ * One item of a list field added, moved or gone, without saying anything about the others:  what `PlaceChange.list` holds.
+ * - So two people adding at once both stay, and a move can't double or lose an item.
+ */
+export type ListEdit = {
+  /** Names the item in its list:  `listItemKeys()`. */
+  key: string
+  /** Its position:  `positionBetween()`.  Left out:  it's gone. */
+  at?: string
+  /** The item, as JSON, when it's added. */
+  item?: unknown
 }
 
 /** A place's answer to `apply()`. */
@@ -231,6 +292,22 @@ export type PlaceEvent = {
   id: string
   /** The row as it's now kept.  Left out:  the thing was removed. */
   row?: PlaceRow
+  /** The thing was removed:  the row as it was, for putting back. */
+  was?: PlaceRow
+  /** What of mine this change replaced, without having seen it:  mine lost.  A live room says. */
+  lost?: ReplacedValue[]
+  /** What I replaced with a change made while I was offline:  theirs lost.  A live room says. */
+  overwrote?: ReplacedValue[]
+}
+
+/** A field's value replaced by someone who hadn't seen it:  last wins, and the other value is kept here. */
+export type ReplacedValue = {
+  /** The field. */
+  field: string
+  /** The value from this person. */
+  mine: unknown
+  /** The value from the other person. */
+  theirs: unknown
 }
 
 /** A place's answer to `changesSince()`. */
@@ -296,8 +373,20 @@ export type Place = {
   apply?(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer>
   /** Run the operation it calls `name`, e.g. a GraphQL mutation. */
   call?(name: string, input: unknown, context: SelectingContext): Promise<unknown>
+  /**
+   * The version of this thing as this place last showed it:  what a change made now is made from.
+   * - Left out, or `undefined` for a thing it hasn't shown:  the change says nothing, and the last write wins.
+   */
+  versionOf?(collection: string, id: string): string | undefined
   /** Tell `onEvent` of each change to `target`.  Returns what stops it. */
   watch?(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void
+  /**
+   * The row as this place holds it right now, if it can say at once:  a live room's copy.
+   * - What a list's changes are worked out from, as they have to be made straight away.
+   */
+  rowKnown?(collection: string, id: string): PlaceRow | undefined
+  /** Hear each time the connection comes back:  what's waiting can go now.  Returns what stops it. */
+  onBack?(listener: () => void): () => void
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */
   changesSince?(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer>
   /**
@@ -306,6 +395,27 @@ export type Place = {
    * - Ask through `writeAnswerFor()`, which checks that first.
    */
   canWrite?(question: WriteQuestion): WriteAnswer
+}
+
+/**
+ * Versions moving on inside one `apply()`:  each change after the first to a thing was made from the version the batch
+ * started at, so it follows on from what the batch just wrote.
+ * - So one edit to two fields is one conflict at most.
+ */
+export class MovedVersions {
+  /** Where each thing's version went, by collection and id. */
+  private readonly moved = new Map<string, { from: string | undefined; to: string | undefined }>()
+
+  /** The version `change` should say. */
+  versionFor(change: PlaceChange): string | undefined {
+    const before = this.moved.get(`${change.collection}\n${change.id}`)
+    return before && before.from === change.version ? before.to : change.version
+  }
+
+  /** `change` was sent as `from`, and its thing is now at `to`. */
+  note(change: PlaceChange, from: string | undefined, to: string | undefined): void {
+    if (change.id !== undefined) this.moved.set(`${change.collection}\n${change.id}`, { from, to })
+  }
 }
 
 /**

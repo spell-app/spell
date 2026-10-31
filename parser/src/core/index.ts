@@ -6,7 +6,7 @@
  *   each sibling module here does `Object.assign(core, <module>Methods)`
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
  *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `messages`, `tests`,
- *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`,
+ *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
  *     `abilities`, `sending`,
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
@@ -39,6 +39,7 @@ import "./elements"
 import "./references"
 import "./described"
 import "./acting"
+import "./waiting"
 import "./abilities"
 import { send } from "./sending"
 

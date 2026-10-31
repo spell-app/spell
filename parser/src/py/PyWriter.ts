@@ -76,6 +76,17 @@ export class PyWriter extends PyBaseWriter {
     return name
   }
 
+  /**
+   * A read of a value that waits, by name:
+   * - in a function that waits:  `await core.answer_of(self, "total")`
+   * - where nothing can wait, a drawing, `create()`:  `core.answer_now(self, "total")`, its pauses not waiting
+   */
+  ASTPropertyExpression(node: P.ASTPropertyExpression): string {
+    if (!this.project.readsWaitingValue(node) || this.isSettingNow(node)) return super.ASTPropertyExpression(node)
+    const args = `${this.tight(node.object)}, ${this.quoted(this.nameOf(node.property.value, "property"))}`
+    return this.project.awaited.has(node) ? `await core.answer_of(${args})` : `core.answer_now(${args})`
+  }
+
   /** `await name(args)` for a function that waits. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
     const written = super.ASTMethodInvocation(node)

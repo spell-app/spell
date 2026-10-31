@@ -171,6 +171,47 @@ if (!core.isCarryingOver) table.start()
 `
 
 /**
+ * A getter that waits, as spell compiles it (epic `language` P12):  drawn as a value, in the app, with its own "…";
+ * and in a view's `if`, with no spot for one, so that view's element is held whole.
+ * - Each answers when the page says, `window.answerSlow("total", 10)`.
+ */
+const SLOW_VALUES = `
+import { core, App, View, h } from "@spell/core"
+const answers = {}
+window.answerSlow = (name, value) => answers[name]?.(value)
+const answered = (name) => new Promise((answer) => { answers[name] = answer })
+export class Tile extends View {
+  static elementTag = core.defineElement(this, "test-project")
+  get slowFace() { return core.waitedValue(this, "slowFace", async () => await answered("face")) }
+  static drawsWaiting = true
+  draw() {
+    if (this.slowFace === "a") return h("b", { class: "tile" }, "A")
+    return h("b", { class: "tile" }, "other")
+  }
+}
+export class Table extends App {
+  get moves() { return this.getProp('moves') }
+  set moves(value) { this.setProp('moves', value) }
+  get rank() { return this.getProp('rank') }
+  set rank(value) { this.setProp('rank', value) }
+  get slowTotal() { return core.waitedValue(this, "slowTotal", async () => (await answered("total")) + this.rank, () => [this.rank]) }
+  draw() {
+    return h("div", { class: "table" },
+      h("span", { class: "moves" }, () => this.moves),
+      h("span", { class: "total" }, () => core.whileWaiting(() => this.slowTotal)),
+      () => core.drawThing(tile)
+    )
+  }
+}
+export const tile = new Tile()
+export const table = new Table()
+table.moves = 0
+table.rank = 1
+window.slowTable = table
+if (!core.isCarryingOver) table.start()
+`
+
+/**
  * A card game, as compiled spell draws it:
  * - a card's `draw()` chooses its face by an `if` (read OUTSIDE its live values)
  * - its rank is a live value
@@ -438,6 +479,34 @@ describe("compiled spell draws with Solid", () => {
     expect(standIn.title).toBe("no face")
     expect((errors[0] as Error).message).toBe("no face")
     expect(cardsIn(host)[0]!.textContent).toBe("A")
+  })
+
+  test('a getter that waits:  a "…" in its spot, its view held whole, the rest drawn;  later changes fill in (epic `language` P12)', async () => {
+    const host = await mount(source(SLOW_VALUES, "Table"))
+    const page = window as unknown as {
+      slowTable: { moves: number; rank: number }
+      answerSlow(name: string, value: unknown): void
+    }
+    const total = () => host.querySelector(".total")?.textContent
+    const tileElement = () => host.querySelector("test-project-tile")
+    await waitFor(() => total() === "…" && !!tileElement())
+    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    expect(host.querySelector(".moves")!.textContent).toBe("0")
+
+    // each fills in when its own answer lands
+    page.answerSlow("total", 10)
+    await waitFor(() => total() === "11")
+    expect(tileElement()!.shadowRoot!.textContent).toContain("…")
+    page.answerSlow("face", "a")
+    await waitFor(() => tileElement()!.shadowRoot!.querySelector(".tile")?.textContent === "A")
+
+    // a later change:  the rest moves on, the old value staying until the new one lands
+    page.slowTable.rank = 5
+    page.slowTable.moves = 1
+    await waitFor(() => host.querySelector(".moves")!.textContent === "1")
+    expect(total()).toBe("11")
+    page.answerSlow("total", 10)
+    await waitFor(() => total() === "15")
   })
 
   test("`notify` shows a toast, on the page's Spell UI", async () => {

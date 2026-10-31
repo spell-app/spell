@@ -30,6 +30,7 @@ import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 import { ViewableList } from "./classes/ViewableList"
 import { listenForUndoKeys } from "./ui"
+import { standInFor } from "./waiting"
 
 /**
  * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
@@ -223,12 +224,18 @@ export function drawn<This extends object, Draw extends (this: This) => Drawing>
  *   - a small stand-in, unless that event was cancelled:  made once, even as the drawing around it changes
  *     (`<Errored>` builds its fallback once since Solid rc.15;  `drawing.test.ts` pins it)
  *   - The rest of the drawing keeps working;  the boundary heals when the thing draws again.
+ * - A thing whose class `drawsWaiting` holds its whole drawing in a "…" until a value it reads answers:
+ *   an `if` or an attribute has no spot of its own for one, and with no `<Loading>` at all the program stays blank.
+ *   Inside the boundary:  a `<Loading>` outside a view's element doesn't cover what's inside it (epic `language` P8).
  */
 function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
   return createComponent(Errored, {
     fallback: (error: () => unknown) => drawingFailed(thing, error()),
     get children() {
-      return createMemo(() => madeOnce(draw())) as unknown as Drawing
+      const drawing = () => createMemo(() => madeOnce(draw())) as unknown as Drawing
+      if (!drawsWaiting(thing)) return drawing()
+      if (drawsInItsChildren(thing)) warnOfWholeAppHeld(thing)
+      return standInFor(drawing)
     }
   })
 }
@@ -239,6 +246,19 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
  */
 function drawsInItsChildren(thing: object): boolean {
   return (thing.constructor as { drawsInItsChildren?: boolean }).drawsInItsChildren === true
+}
+
+/** Does `thing`'s class say its drawing reads what waits, somewhere with no spot of its own for a "…"? */
+function drawsWaiting(thing: object): boolean {
+  return (thing.constructor as { drawsWaiting?: boolean }).drawsWaiting === true
+}
+
+/** SIDE EFFECT:  says on the program's console that `app`'s whole board stays hidden until the first answer. */
+function warnOfWholeAppHeld(app: object): void {
+  const type = (app as { type?: string }).type ?? app.constructor?.name ?? "app"
+  core.console.warn(
+    `${type}:  its draw() reads a value that waits, so nothing shows until it answers:  read it in a small part instead`
+  )
 }
 
 /** Is `draw` a method `@drawn` made, which draws in its own boundary? */

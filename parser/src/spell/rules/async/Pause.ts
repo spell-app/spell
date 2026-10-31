@@ -14,6 +14,11 @@ import { Wording } from "spell/parser/spell/rules/expressions"
 export class Pause extends SpellStatement<"number|units"> {
   @proto static alias = "statement"
 
+  /** Not in a drawing, which must answer at once. */
+  parse(scope: P.Scope, tokens: P.Token[]) {
+    return SpellStatement.refuseWaitInDraw(super.parse(scope, tokens))
+  }
+
   getAST(match: P.MatchFor<this>) {
     const { number, units } = match.groups
     return new P.ASTCoreMethodInvocation(match, {

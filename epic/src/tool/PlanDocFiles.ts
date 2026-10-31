@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { RealPath } from "spell/server/RealPath"
+// By file:  the barrel brings every place and their server, which an `epic` command doesn't need
+import { ChunkFiles } from "spell/server/places/ChunkFiles"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -53,7 +55,8 @@ import { ServedFolders } from "./ServedFolders"
  *   - parses it, and changes it through `PlanDoc`
  *   - recolours every item (`updateStates()`), and stamps "updated"
  *   - checks it against the definitions:  an edit that breaks the markup is refused
- *   - tidies it in memory (link targets, oxfmt), and writes each file once, atomically (`writeDoc()`)
+ *   - tidies it in memory (link targets, oxfmt), and writes each file once, atomically (`writeDoc()`, through the kit's
+ *     `ChunkFiles`, epic `data` P6;  still a whole page per edit, on purpose:  J13)
  * - a doc may be SPLIT:  a skeleton plus part files, `parts/<id>.html` (`EpicParts`).
  *   - reading assembles it into one document;  `writeDoc()` splits it again
  *   - so every command works on either shape
@@ -420,7 +423,7 @@ export class PlanDocFiles {
    * - links and formatting happen in memory (`SRV.Linker.link()`, `PlanParts.formatHTML()`)
    * - `split`:  a skeleton plus part files (`EpicParts.split()`)
    *   - parts first, then the skeleton, so a page that sees the new skeleton finds its new parts
-   *   - only files whose text changed are written (`PlanParts.writeChanged()`)
+   *   - only files whose text changed are written (`ChunkFiles.writeListAndBodies()`, under `edit()`'s lock)
    *   - so an edit to one item rewrites its part (if its details changed) and the skeleton,
    *     and the page re-fetches that part alone
    * - a part file the doc was read from and no longer writes goes (a phase's, once its id became stable)
@@ -435,7 +438,7 @@ export class PlanDocFiles {
     if (split) this.rootPartLinks(plan, file)
     const linked = this.linker.link(plan.toString(), dirname(file)).text
     if (!split) {
-      PlanParts.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
+      ChunkFiles.writeChanged([[file, await PlanParts.formatHTML(file, linked)]])
       if (plan.parts?.split) rmSync(join(dirname(file), PARTS_DIR), { recursive: true, force: true })
       return
     }
@@ -445,17 +448,17 @@ export class PlanDocFiles {
     PlanMarkup.escapeAttributes(document as unknown as Document)
     const folder = this.linker.rootPathFor("./", dirname(file))
     const parts = new EpicParts(document as unknown as Document).split({ docName: basename(file), folder })
-    const outputs = await Promise.all(
+    const bodies = await Promise.all(
       [...parts].map(async ([id, html]): Promise<[string, string]> => {
         const part = PlanParts.partFile(file, id)
         return [part, await PlanParts.formatHTML(part, html)]
       })
     )
-    outputs.push([file, await PlanParts.formatHTML(file, PlanMarkup.serialize(document as unknown as Document))])
-    PlanParts.writeChanged(outputs)
+    const skeleton = await PlanParts.formatHTML(file, PlanMarkup.serialize(document as unknown as Document))
     // a part the doc was read from but no longer writes:  nothing loads it any more
     // (its host's id changed, `stable-phase-ids`;  or its body emptied)
-    for (const id of plan.parts?.hosts ?? []) if (!parts.has(id)) rmSync(PlanParts.partFile(file, id), { force: true })
+    const gone = (plan.parts?.hosts ?? []).filter((id) => !parts.has(id)).map((id) => PlanParts.partFile(file, id))
+    ChunkFiles.writeListAndBodies({ list: [file, skeleton], bodies, gone })
   }
 
   /**

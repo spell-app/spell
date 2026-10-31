@@ -63,9 +63,9 @@ solitario es una aplicación donde:
 			voltear la carta boca abajo
 
 	// voltea la siguiente carta de la reserva, sobre los descartes
-	- animación robar de la reserva:
+	- para robar de la reserva:
 		si su reserva está vacía
-			esperar a: rehacer la reserva
+			rehacer la reserva
 
 		obtener la última carta de su reserva
 		voltear eso boca arriba
@@ -74,7 +74,7 @@ solitario es una aplicación donde:
 		agregar eso a los descartes del solitario
 
 	// junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
-	- animación repartir las cartas:
+	- para repartir las cartas:
 		para cada carta en su mazo
 			poner pila inicial a la pila de la carta
 			voltear la carta boca abajo
@@ -91,7 +91,7 @@ solitario es una aplicación donde:
 					voltear la última carta de (el elemento lugar de las columnas) boca arriba
 				pausar 50 mseg
 
-		esperar a: robar de la reserva
+		robar de la reserva
 
 	- para empezar el juego:
 		limpiar su puntuación
@@ -106,7 +106,7 @@ solitario es una aplicación donde:
 		poner la pila a una pila al azar de pilas restantes
 		poner cartas ocultas a las cartas en la pila donde la carta está boca abajo
 		poner la carta a una carta al azar de cartas ocultas
-		esperar a: voltear la carta boca arriba
+		voltear la carta boca arriba
 		pausar 30 tics
 		agregar la carta a los descartes del solitario
 
@@ -115,7 +115,7 @@ solitario es una aplicación donde:
 		poner hubo cambios a no
 		si sus descartes no está vacía
 			poner candidata a la última carta de sus descartes
-			si esperar a jugar candidata
+			si jugar candidata
 				poner hubo cambios a sí
 				pausar 500 mseg
 
@@ -126,7 +126,7 @@ solitario es una aplicación donde:
 			poner fundación a la primera pila en las fundaciones donde su palo es el palo de candidata
 			si la fundación puede tomar candidata
 				poner hubo cambios a sí
-				esperar a jugar candidata
+				jugar candidata
 				pausar 100 mseg
 
 		// las cartas boca arriba de cada columna, todas juntas, a otra columna
@@ -135,11 +135,11 @@ solitario es una aplicación donde:
 			si cartas visibles está vacía devolver
 			poner candidata a la primera carta de cartas visibles
 			si candidata es un rey y candidata es la primera carta de la pila devolver
-			si esperar a jugar candidata
+			si jugar candidata
 				poner hubo cambios a sí
 				pausar 500 mseg
 
-		si hubo cambios esperar a jugar solo
+		si hubo cambios jugar solo
 
 	// su menú, luego sus pilas:  siete por línea, cada una en su propia celda, la tercera vacía
 	// - sus botones son iconos, cada uno con su ayuda:  la ventana emergente justo después de su icono se muestra

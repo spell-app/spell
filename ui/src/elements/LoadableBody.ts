@@ -8,7 +8,8 @@ import { state, untracked } from "spell/element"
  * so a long page can ship as a SKELETON (every title) and load each body on demand.
  * - One per owning element, which says WHEN (`load()` once it opens) and WHERE (`target()`).
  * - This does the rest, in the owner's LIGHT DOM, so the page's CSS reaches it.
- * - Fetched through `UI.sources` (same origin only, cached per URL:  the path `<ui-include>` takes).
+ * - Fetched through `UI.sources` (same origin only, cached per URL:  the path `<ui-include>` takes),
+ *   unless the owner has its own way (`loadText()`:  an `<epic-*>` fold's chunked place, epic `data` P6).
  * - Parsed by `SourceMarkup`:  `<body>` or the `select` match, scripts inert, relative URLs rewritten against `source`.
  * - Insert:  replaces the target's PLACEHOLDER,
  *   every child but an element with a `slot` attribute (a section's header, icon, badge ... stay);
@@ -53,6 +54,9 @@ export class LoadableBody {
 
   /** Counts loads:  a newer one makes an older one's result moot. */
   private generation = 0
+
+  /** Stops the current load, where the owner's own way can. */
+  private aborter?: AbortController
 
   /** Nodes the last insert put in the target, removed by the next one. */
   private inserted: ChildNode[] = []
@@ -135,17 +139,26 @@ export class LoadableBody {
     const { domElement } = this.owner
     try {
       E.SourceMarkup.checkNesting(domElement, source, (node) => node.hasAttribute(E.SOURCE_ATTRIBUTE))
-      const ui = await UI.load()
-      const loaded = await ui.sources.load(source, { fresh })
+      const text = await this.textOf(source, fresh)
       if (generation !== this.generation) return
-      this.insert(E.SourceMarkup.parse(loaded.text, { page: domElement.ownerDocument, source, select }))
+      this.insert(E.SourceMarkup.parse(text, { page: domElement.ownerDocument, source, select }))
       this.loadStatus = E.SourceStatus.loaded
-      this.owner.send(E.SourceEvent.loaded, { source, content: loaded.text })
+      this.owner.send(E.SourceEvent.loaded, { source, content: text })
     } catch (error) {
       if (generation !== this.generation) return
       this.fail(source, error)
       throw error
     }
+  }
+
+  /** The text of `source`:  by the owner's own way if it has one for it, else through `UI.sources`. */
+  private async textOf(source: string, fresh: boolean): Promise<string> {
+    this.aborter?.abort()
+    this.aborter = new AbortController()
+    const own = this.owner.loadText?.(source, { fresh, signal: this.aborter.signal })
+    if (own) return own
+    const ui = await UI.load()
+    return (await ui.sources.load(source, { fresh })).text
   }
 
   /** Put `fragment` in the target, in place of the placeholder (and the body inserted before). */

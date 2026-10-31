@@ -45,16 +45,16 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 			add it to the stock
 			turn the card face down
 	</action>
-	<action "play from the stock" animated description="Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty">
+	<action "play from the stock" description="Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty">
 		if the stock is empty
-			wait for: reset the stock
+			reset the stock
 		get the last card of the stock
 		turn it face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
 		add it to the discards
 	</action>
-	<action "deal the cards" animated description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
+	<action "deal the cards" description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
 		for each card in the deck
 			set start pile to the pile of the card
 			turn the card face down
@@ -69,7 +69,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				if column is row
 					turn the last card of (item column of the tableaus) face up
 				pause for 50 msec
-		wait for: play from the stock
+		play from the stock
 	</action>
 
 
@@ -84,7 +84,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
-			if await play test card
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
 		// each tableau's last card onto its foundation
@@ -94,7 +94,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 			set foundation to the first pile in the foundations where its suit is the suit of test card
 			if the foundation can take test card
 				set anything changed to yes
-				await play test card
+				play test card
 				pause for 100 msec
 		// each tableau's face-up cards, all together, onto another tableau
 		for each pile in the tableaus
@@ -102,10 +102,10 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 			if face up cards is empty return
 			set test card to the first card of face up cards
 			if test card is a king and test card is the first card of the pile return
-			if await play test card
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
-		if anything changed await auto play
+		if anything changed auto play
 	</action>
 	<action "cheat" shortcut="C" description="Turn up a face-down card from a tableau, at random, onto the discards">
 		set remaining piles to piles in the tableaus where it is not empty and its first card is face down

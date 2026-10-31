@@ -142,19 +142,19 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(spellx).toContain('\t<acción "voltearla">')
   })
 
-  // epic `debut` I97
+  // epic `debut` I97, epic `language` P13
   test.each([
     {
       path: "/Game.spell",
-      lines: ["game is an app where:", "\t// deals, slowly", "\t- animation deal the cards:", "\t\tpause for 50 msec"],
-      tag: '\t<action "deal the cards" animated description="deals, slowly">'
+      lines: ["game is an app where:", "\t// deals, slowly", "\t- to deal the cards:", "\t\tpause for 50 msec"],
+      tag: '\t<action "deal the cards" description="deals, slowly">'
     },
     {
       path: "/Juego.es.spell",
-      lines: ["juego es una aplicación donde:", "\t- animación repartir las cartas:", "\t\tpausar 50 milisegundos"],
-      tag: '\t<acción "repartir las cartas" animada>'
+      lines: ["juego es una aplicación donde:", "\t- para repartir las cartas:", "\t\tpausar 50 milisegundos"],
+      tag: '\t<acción "repartir las cartas">'
     }
-  ])("an animation is an action that may wait, `animated`:  $path, and back", ({ path, lines, tag }) => {
+  ])("an action that waits needs no word of its own:  $path, and back", ({ path, lines, tag }) => {
     const spellx = converted(path, lines)
     expect(spellx).toContain(tag)
     const spell = compiled(path, lines.join("\n"))

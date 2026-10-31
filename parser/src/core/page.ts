@@ -24,7 +24,7 @@
  * - The app the state holds starts, drawn into the page as `App.start()` draws it.
  * - ONE page at a time:  the messages go to the last one started.
  */
-import { core } from "./core"
+import { core, whileReading } from "./core"
 import type { RemoteProgram } from "./elements"
 import { App } from "./classes/App"
 import { List } from "./classes/List"
@@ -53,19 +53,6 @@ export type StartedPage = {
   mirror: StateMirror
 }
 
-/** Is the page taking in the program's state, or a patch, now?  Its writes are the program's own:  never sent back. */
-let isReading = false
-
-/** Run `read`, the page taking in the program's state:  `isReading` meanwhile. */
-function reading<T>(read: () => T): T {
-  isReading = true
-  try {
-    return read()
-  } finally {
-    isReading = false
-  }
-}
-
 /** The page messages go to, the last one started. */
 let current: { mirror: StateMirror; send: (message: PageMessage) => void } | undefined
 
@@ -75,11 +62,11 @@ export function startPage({ modules, state, send }: PageSpec): StartedPage {
   current = { mirror, send }
   core.remote = REMOTE
   for (const module of modules) core.things.addClasses(module)
-  const things = reading(() => mirror.read(state)) as Record<string, unknown>
+  const things = whileReading(() => mirror.read(state)) as Record<string, unknown>
   for (const module of modules) (module.adopt as ((state: unknown) => void) | undefined)?.(things)
   const app = Object.values(things).find((value) => value instanceof App) as App | undefined
   app?.start()
-  return { mirror, receive: (next: unknown) => void reading(() => mirror.read(next)) }
+  return { mirror, receive: (next: unknown) => void whileReading(() => mirror.read(next)) }
 }
 
 /**
@@ -95,9 +82,10 @@ const REMOTE: RemoteProgram = {
   run: (owner, method, args) => sendCall(snakeCase(method), args, owner as Thing),
   startWhile: (owner, method, args) => sendCall("start_while", [snakeCase(method), ...args], owner as Thing),
   endWhile: (owner, method) => sendCall("end_while", [snakeCase(method)], owner as Thing),
-  // one of the program's things, changed by the page:  not as it takes in the program's own state (`isReading`)
+  // one of the program's things, changed by the page;  what it takes in of the program's own state is never heard
+  // here (`whileReading()`)
   set: (owner, property, value) => {
-    if (isReading || !current?.mirror.idOf(owner as Thing)) return
+    if (!current?.mirror.idOf(owner as Thing)) return
     sendCall("set_prop", [snakeCase(property), value], owner as Thing)
   },
   trigger: (name, details) => sendTrigger(name, details)

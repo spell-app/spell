@@ -129,6 +129,17 @@ export class SpellStatement<
   }
 
   /**
+   * `match`, a `pause` or a `wait for` -- or, in a thing's drawing, a parse error saying it can't wait there.
+   * - A drawing must answer at once.  A value that waits is fine, as a getter:  it shows a "…", then fills in.
+   */
+  static refuseWaitInDraw<M extends P.Match | undefined>(match: M): M | P.Match {
+    if (!match) return match
+    const method = P.MethodScope.withThing(match.scope)
+    if (!/^draw(?:$|_its_slot$|_each_item$|_its_placeholder$)/.test(method?.name ?? "")) return match
+    return SpellStatement.refuse(match, SP.Language.of(match.scope).parserMessage("cant-wait-in-draw"))
+  }
+
+  /**
    * `match`, a statement declaring `property` on `type` -- or, when `type` is one of spell's BUILT-IN types,
    * e.g. `text` or `thing`, a parse error saying it can't be (epic page caveat C9).
    * - e.g. `the length of a text is: ...`

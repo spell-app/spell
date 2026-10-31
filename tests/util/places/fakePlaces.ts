@@ -5,6 +5,7 @@
  */
 import {
   MemoryPlace,
+  PlaceError,
   type ApplyAnswer,
   type ListAnswer,
   type ListQuery,
@@ -211,5 +212,36 @@ export class HostsPlace implements Place {
   /** The same rule as every host's. */
   canWrite(question: WriteQuestion): WriteAnswer {
     return [...this.hosts.values()][0]!.canWrite(question)
+  }
+}
+
+/** What a `TroubledPlace` does with its next write:  see `TroubledPlace.nextWrites`. */
+export type WriteTrouble = "fails" | "loses its answer" | "refuses"
+
+/****************
+ * ### `TroubledPlace`
+ * A `MemoryPlace` that fails, refuses and swallows answers when the test says so.
+ * - `"fails"`:  no change made, no answer, as with the network down
+ * - `"loses its answer"`:  the change IS made, and no answer comes
+ * - `"refuses"`:  the place says no
+ ****************/
+export class TroubledPlace extends MemoryPlace {
+  /** What each write ahead does:  used up one by one, and then they go through. */
+  nextWrites: WriteTrouble[] = []
+  /** Each write it was sent, oldest first. */
+  sent: PlaceChange[][] = []
+  /** The context of each write. */
+  contexts: PlaceContext[] = []
+
+  /** Its write, unless the test said otherwise. */
+  override async apply(changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+    this.sent.push([...changes])
+    this.contexts.push(context)
+    const trouble = this.nextWrites.shift()
+    if (trouble === "fails") throw new TypeError("Failed to fetch")
+    if (trouble === "refuses") throw new PlaceError("TroubledPlace:  no", { cause: { kind: "refused" } })
+    const answer = await super.apply(changes, context)
+    if (trouble === "loses its answer") throw new TypeError("Failed to fetch")
+    return answer
   }
 }

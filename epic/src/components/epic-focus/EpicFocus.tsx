@@ -7,6 +7,7 @@ import { PhaseIds } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the page's colour rules and the chips' event:  their files, not their families' barrels
+import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
 import { DrawnState, isTodo } from "spell/epic/components/epic-item/EpicItem.types"
 import { PhaseState } from "spell/epic/components/epic-section/PhaseState"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
@@ -60,8 +61,8 @@ export class DOMEpicFocusElement extends E.DOMElement<EpicFocus> {
  *   Todos, Calls, Issues, Tests), each with its count
  * - THE CHIPS:  the section's own `<epic-state-filter>` per tab, the same click rule (`StateFilter.nextShown()`,
  *   ⌥-click for only that colour);  each tab's choice its own, apart from the sections'
- * - THE ITEM:  its id chip, title and whole text, COPIED from the page (its part file through the same fetch the page's
- *   bodies load by, `UI.sources`):  the page's item never moves
+ * - THE ITEM:  its id chip, title and whole text, COPIED from the page (its part file through the same read the page's
+ *   bodies load by, `EpicBodies`):  the page's item never moves
  *   - a link in it closes the overlay and lands on the page (`onBodyClick()`)
  * - ITS BUTTONS:  an `<epic-review>` for it, the buttons kind the page draws it with, and its note box, on the page's
  *   one review client:  the same marks, the same Send
@@ -335,8 +336,9 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
   ////////////////
 
   /**
-   * The item showing changed:  its text copied into the body box, from its part file when it has one (the fetch the
-   * page's bodies load through, `UI.sources`, cached), else from its children on the page.
+   * The item showing changed:  its text copied into the body box, from its part file when it has one (the read the
+   * page's bodies load through, `EpicBodies`, uncached, so it's the part as it is now;  any other `source`,
+   * `UI.sources`), else from its children on the page.
    * - NEVER throws:  a part that won't load says so in the box
    */
   @E.onChange("shownId", "isOpen", "isReady")
@@ -353,11 +355,15 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
       return
     }
     this.bodyNote = this.translationForKey("loading")
-    void UI.load()
-      .then((ui) => ui.sources.load(source))
+    const text =
+      EpicBodies.loadText(source, {}) ??
+      UI.load()
+        .then((ui) => ui.sources.load(source))
+        .then((loaded) => loaded.text)
+    void text
       .then((loaded) => {
         if (generation !== this.bodyGeneration) return
-        box.replaceChildren(E.SourceMarkup.parse(loaded.text, { page: document, source }))
+        box.replaceChildren(E.SourceMarkup.parse(loaded, { page: document, source }))
         this.bodyNote = ""
       })
       .catch((failure: unknown) => {

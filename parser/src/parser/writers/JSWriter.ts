@@ -19,6 +19,9 @@ import {
 } from "./jsShapes"
 import { Naming } from "./Naming"
 
+/** In a class whose drawing reads what waits with no spot for a "…":  see `core`'s `drawInBoundary()`. */
+export const DRAWS_WAITING = "static drawsWaiting = true"
+
 /****************
  * ### `JSWriter`
  * Writes a spell tree as JavaScript:  the `js/solid` target's writer, what `ASTNode.compile()` calls.
@@ -277,8 +280,14 @@ export class JSWriter extends ProgramWriter {
     const object = this.memberObject(node.object)
     const dot = this.memberDot(node)
     const name = this.propertyName(node.property)
+    if (this.project.awaited.has(node) && !this.isSetting(node)) return this.answerOf(node, object, name)
     if (node.property.isLegalIdentifier) return `${object}${dot}${name}`
     return `${object}${dot === "." ? "" : dot}[${this.quoted(name)}]`
+  }
+
+  /** `object`'s member `name`, which waits, read in a function that waits. */
+  protected answerOf(_node: P.ASTPropertyExpression, object: string, name: string): string {
+    return `await core.answerOf(${object}, ${this.quoted(name)})`
   }
 
   /** What `node`'s property is read off with:  `?.` off what may be nothing, never when it's being set. */
@@ -313,10 +322,13 @@ export class JSWriter extends ProgramWriter {
     return isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)
   }
 
-  /** May a function of `name` wait?  Not one that must answer at once:  a getter, a drawing, `create()`, a `to test`. */
-  protected canWait(name: string | undefined, isGetter: boolean): boolean {
-    return !isGetter && !/^(?:create$|draw(?:_|$)|test_)/.test(name ?? "")
+  /** May a function of `name` wait?  Not one that must answer at once:  a drawing, `create()`, a `to test`. */
+  protected canWait(name: string | undefined, _isGetter: boolean): boolean {
+    return !P.DRAWING_NAME.test(name ?? "") && !/^(?:create$|test_)/.test(name ?? "")
   }
+
+  /** On Solid:  see `P.ProgramWriter`'s. */
+  protected readsThroughSolid = true
 
   /** As `ProgramWriter`'s;  a `send` waits only if a handler of its event does (epic `language`, J4). */
   protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
@@ -960,9 +972,23 @@ export class JSWriter extends ProgramWriter {
    * - `name` is ready to print:  quoted if need be, and may lead with `get `, e.g. `get title` => `get title() {...}`.
    */
   methodNamed(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    if (this.project.waitedGetters.has(method)) return this.waitedGetter(method, name, thisType)
     const async = method.isAsync ? "async " : ""
     const error = method.error ? ` ${this.write(method.error)}` : ""
     return `${async}${name}${this.params(method, thisType)} ${this.write(method.body)}${error}`
+  }
+
+  /**
+   * `method`, a getter that waits, as `name`:
+   * `get total() { return core.waitedValue(this, "total", async () => {...}, () => [this.score]) }`
+   */
+  waitedGetter(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    const key = this.nameOf(this.project.waitedGetters.get(method)!)
+    const reads = this.project.ownReadsOf(method).map((read) => this.write(read))
+    const follows = reads.length ? `, () => [${reads.join(", ")}]` : ""
+    const compute = `async () => ${this.write(method.body)}`
+    const value = `core.waitedValue(this, ${this.quoted(key)}, ${compute}${follows})`
+    return `${name}${this.params(method, thisType)} ${jsText.Block({ children: `return ${value}` })}`
   }
 
   /** `method` as an anonymous `function (args) {...}` -- NOT an arrow, so `this` is whatever it's called on. */
@@ -1206,7 +1232,8 @@ export class JSWriter extends ProgramWriter {
   ASTPropertyDefinitionAsMember(node: P.ASTPropertyDefinition): string {
     const name = this.memberKey(node.property)
     if (node.get) return this.methodNamed(node.get, `get ${name}`)
-    return this.methodNamed(node.method!, name)
+    const method = this.methodNamed(node.method!, name)
+    return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${method}` : method
   }
 
   /**
@@ -1524,6 +1551,7 @@ export class JSWriter extends ProgramWriter {
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
     const value = this.bare(node.expression)
+    if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }
 

@@ -119,7 +119,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - Components call `UI.load()` on connect, which dynamic-imports this chunk once.
   - Services are classes:
     - `Browser`:  sniffing, and the `UI.browser.supports` flags
-    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`
+    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`
+    - `Api` (`UI.api`):  the kit's, `spell/util/Api`, moved down for the places by epic `data` P4
     - `IconPacks` (`UI.icons`), `Sources` (`UI.sources`), `Themes` (`UI.themes`)
 - [`src/icons/`](src/icons/):  the icon PACK format, and the built-in packs.
   - the format:  `IconPackIndex`, `IconName`, `BuiltInPacks`
@@ -143,6 +144,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
       (`source`, inline text, loading / error look, `save()`)
     - `LoadableBody` + `DOMLoadableBodyElement`:  a section's body, loaded from `source` the first time it opens
+      - through `UI.sources`, unless its owner hands in what loads it (`loadText()`:  `<epic-*>` folds, epic `data` P6)
   - [SpellUISettings](src/elements/SpellUISettings.ts):  what Spell UI hands the kit's element as `spell/ui/core` loads
     (`SpellSolid.install()`), a side effect
   - The DOM element bases keep their own files (`DOMElement.ts`, `DOMFormControl.ts` ...).

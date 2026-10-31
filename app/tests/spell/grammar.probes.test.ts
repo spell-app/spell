@@ -301,14 +301,16 @@ describe("grammar probes", () => {
     `)
   })
 
-  test("T6  `wait for`:  a statement waits for everything, an expression for an operand", () => {
+  test("T6  the retired `wait for`:  a statement waits for everything, an expression for an operand, each an error", () => {
     expect(probe("to check: wait for x is 1", "to check again: if wait for x is 1: print 1")).toMatchInlineSnapshot(`
       "export async function check() {
         return await (x === 1)
       }
       export async function checkAgain() {
         if (await x === 1) core.console.log(1)
-      }"
+      }
+      ERROR 8:10 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`
+      ERROR 9:19 "wait for" isn't needed any more, as spell waits by itself:  take it out, or run \`spell lint --fix\`"
     `)
   })
 

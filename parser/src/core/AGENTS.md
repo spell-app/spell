@@ -244,6 +244,29 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - All of it `whileReading()` (`core.ts`):  what it changes joins no undo step and goes to no program elsewhere,
     so a refresh never comes back as a write.
   - Places themselves are `spell/util/places`, which knows nothing of things.
+  - Handed `places`, what's done to those things goes back (epic `data` P3):
+    - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
+      never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
+    - Each becomes a pending change (`PendingChanges`), shown at once.
+      A list's change is a write of that field, the whole list;  on a place that takes `edits`, a live room, only the items
+      that changed (epic `data` P8).
+    - An action's changes are one group, sent when it ends:  through `core.runAction()`, or `declareAction()`.
+      Cancelling (`core.cancelActions()`) drops them, and they go back.
+    - Undo's put-back is a write like any other:  before it's sent it drops the change, after it reverses it.
+    - A refused write raises one notice, through `core.notify`'s `actions`:  Retry, or Show me.
+    - A write merged over someone else's raises one too (`Places.onConflict()`), holding what was lost:  Use theirs.
+    - On a live room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
+      deleting what you're changing raises one (Restore).
+    - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
+    - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
+    - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
+      history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
+    - `describeValue()` is what `Places.originOf()` asks about a thing.
+    - A sample going in or out (`spell/util/places/SamplePlace`), through `Places.onSwapped()`:
+      the program's undo steps go, as when saved state loads, and a `PlaceEdit`'s step or a draft from before does nothing,
+      so nothing done to a sample reaches the real place.
+    - `rowsMadeFrom()`:  a sample's records from what a class declares.
+      By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.
@@ -314,9 +337,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Undo and redo set them back through the setters:  nothing runs again.
 - Each change is noted in ONE place:
   - every property write:  `noteSetting()` (`core.ts`)
-    - for the history, a `while` handler's put-back, and a program running elsewhere (`core.remote`)
+    - for the history, a `while` handler's put-back, a program running elsewhere (`core.remote`), and a place
   - every list change:  `noteItems()`, from `List.writeItems()`
-    - for the history only
+    - for the history, and a place
 - `App` shows the history to people:
   - `undo()`, `redo()`
   - `canUndo`, `canRedo`:  live

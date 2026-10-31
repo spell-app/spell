@@ -1184,6 +1184,8 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
 - A host's body is every child but its slotted ones:  the title stays in the skeleton.
 - In the skeleton, a host carries `source="parts/<id>.html"`, `part-ids` and `commits`.
 - No placeholder line:  the element loads its own body.
+- To the kit's chunked files, a page's list is its skeleton and a body its part file (`EpicPageFormat`, epic `data` P6):
+  they read and write these same files;  what the format can't say (hosts, marks, links, formatting) stays here.
 - Every link in a part is a ROOT PATH, as in the page (epic `epic-engine` P46):  `/spell-ui/x.ts`, `/guides/x.html`,
   `/epics/seo/details/q.html`, the same text in the skeleton and its parts, from any checkout.
   - The tool writes them so on every write (`SRV.Linker.link()`, in `PlanDocFiles.writeDoc()`):  a relative link

@@ -21,10 +21,17 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
 | `test-threw` | a test that threw | `test` |
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+| `waiting` | the stand-in on the page for a value that hasn't answered yet | |
 | `confirm-default` | `confirm` with no page:  the JavaScript core's only, so far | `question` |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo:  the JavaScript core's, so far | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
+| `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
+| `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
+| `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
+| `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
+| `write-lost`, `write-use-mine` | your long text replaced:  the JavaScript core's | `thing`, `field`, `mine` |
+| `write-deleted`, `write-restore` | what you were changing deleted:  the JavaScript core's | `thing` |
 """
 
 import re
@@ -37,12 +44,22 @@ MESSAGES: dict[str, str] = {
     "test-step": "▶️ Executing   {step}",
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
+    "waiting": "…",
     "confirm-default": "{question} (yes)",
     "drop-event": "{thing}-drop",
     "undo": "Undo",
     "undo-step": "Undo {step}",
     "redo": "Redo",
     "redo-step": "Redo {step}",
+    "write-refused": "Couldn't save your change to {thing}",
+    "write-retry": "Retry",
+    "write-show-me": "Show me",
+    "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
+    "write-use-theirs": "Use theirs",
+    "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
+    "write-deleted": "Someone else deleted {thing} while you were changing it.",
+    "write-use-mine": "Use mine",
+    "write-restore": "Restore",
 }
 
 # A named placeholder in a message, `{type}`.

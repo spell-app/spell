@@ -19,6 +19,7 @@ import type { messageMethods } from "./messages"
 import type { describedMethods } from "./described"
 import type { sendingMethods } from "./sending"
 import type { actingMethods } from "./acting"
+import type { waitingMethods } from "./waiting"
 import type { abilityMethods } from "./abilities"
 import type { PropRule } from "spell/util"
 
@@ -93,6 +94,7 @@ export type Core = typeof coreMethods &
   typeof describedMethods &
   typeof sendingMethods &
   typeof actingMethods &
+  typeof waitingMethods &
   typeof abilityMethods &
   typeof deprecatedMethods
 
@@ -146,10 +148,19 @@ export type TestCheck = {
  * | `test-step` | a `to test ...` method's ▶️ line, each statement | `step` |
  * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
+ * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
+ * | `write-refused` | the notice when a place refuses a change | `thing` |
+ * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
+ * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
+ * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
+ * | `write-use-theirs` | that notice's button | |
+ * | `write-use-mine` | `write-lost`'s button | |
+ * | `write-restore` | `write-deleted`'s button | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -160,12 +171,22 @@ export const CORE_MESSAGES = {
   "test-step": "▶️ Executing   {step}",
   "test-threw": "Error in test {test}:",
   "cant-draw": "⚠ {type} can't draw",
+  waiting: "…",
   "confirm-default": "{question} (yes)",
   "drop-event": "{thing}-drop",
   undo: "Undo",
   "undo-step": "Undo {step}",
   redo: "Redo",
-  "redo-step": "Redo {step}"
+  "redo-step": "Redo {step}",
+  "write-refused": "Couldn't save your change to {thing}",
+  "write-retry": "Retry",
+  "write-show-me": "Show me",
+  "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
+  "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
+  "write-deleted": "Someone else deleted {thing} while you were changing it.",
+  "write-use-theirs": "Use theirs",
+  "write-use-mine": "Use mine",
+  "write-restore": "Restore"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

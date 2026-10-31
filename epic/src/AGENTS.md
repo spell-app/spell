@@ -236,7 +236,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
-    - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
+    - `DraftSaver` (epic `coherence` C10;  on the kit's `SaveQueue` since epic `data` P3):  a draft that saves itself, the ONE way every page Owen types into keeps
       what's typed and not sent:  the three forms, `<epic-review>`'s note, the docs pages' comments
       and the syntax page
       - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
@@ -614,7 +614,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - node only, NOT in the `spell/epic` barrel
       - it loads in plain `node` too (the docs tools' `details.js` ...):
         it imports spaces' editor by its relative path
-  - `tool/` -- the `epic` tool (`epic`), node only, never bundled into the pack.
+  - `tool/` -- the `epic` tool (`epic`), node only, never bundled into the pack, but for `EpicPageFormat`, types and text only
+  (epic `data` P6;  "Epic pages", SPLIT docs).
     - It reads and writes `<epic-*>` markup only (through `Markup`),
       and refuses a doc still in the old markup.
       - Every live doc was converted at the switch (P12 of epic `epic-components`);
@@ -1757,6 +1758,15 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `PlanParts`, `spell/epic/tool/PlanParts`
     - `EpicParts`, `spell/epic/tool/EpicParts`, splits and assembles an `<epic-*>` doc
     - the rules:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Parts"
+  - On the kit's chunked files (epic `data` P6;  the disk byte for byte as it was, the page's markup and addresses too):
+    - `EpicPageFormat` says what an epic page is to a `ChunkedPlace`:  its list the skeleton, a thing's body a part file.
+    - `PlanParts.placeOf(file)`:  the page as a place, read only (`ReviewInbox.itemIdsOf()`:  what takes a mark, no body read).
+    - Writes:  still a whole page per edit, under its lock (Owen, J13);  `PlanDocFiles.writeDoc()`'s last step is
+      `ChunkFiles.writeListAndBodies()`.  One place change per edit is later, epic `data`'s T16.
+    - In the browser:  `<epic-*>` folds hand their `LoadableBody` `EpicBodies.loadText()`, the same place on `WebChunks`:
+      a fold opening and a live re-fetch;  `<epic-focus>` too.  Every other section keeps `UI.sources`.
+    - The docs index's cards do NOT ask it:  they run in plain `node`, which can't load `ChunkFiles`, and read
+      `parts/log.html` for the day last worked (epic `data`'s P6, recorded there).
   - The tool reads either shape whole, and writes it back split:  each file once, atomically, only when changed.
     - `split <name>` / `split --done` / `join <name>`
   - A reader of the skeleton alone sees every section, phase status and item line.

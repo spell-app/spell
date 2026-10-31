@@ -730,6 +730,23 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     return projectWriter.module(header + code + testCode)
   }
 
+  /**
+   * The spell names of what waits in this project, as last parsed:  the pass every target compiles with,
+   * for what asks with no compile in hand, e.g. the language server's hover (`P.WriterProject.findWaiting()`).
+   * - An empty set if its files can't be read yet.
+   * - NEVER throws.
+   */
+  waitingNames(): ReadonlySet<string> {
+    try {
+      const parts = this.spellFiles.map(({ match }) => match?.AST as P.ASTStatementGroup | undefined)
+      const hoisted = SP.hoistClassMembers(parts.map((part) => part?.statements ?? []))
+      return P.JSWriter.instance.forProject(hoisted, this.scope).project.waitingNames
+    } catch (error) {
+      console.error(error)
+      return new Set()
+    }
+  }
+
   ////////////////
   // ## One chunk
   ////////////////

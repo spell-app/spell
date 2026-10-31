@@ -1,3 +1,6 @@
+import { basename } from "node:path"
+
+import type { PlaceRow } from "spell/util/places/places.types"
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
@@ -11,6 +14,8 @@ import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { STAGE_COUNTDOWN_MS, isHeld, partOf, withInlineComments } from "spell/epic/review/review.types"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
+import { EpicPageFormat } from "./EpicPageFormat"
+import { PlanParts } from "./PlanParts"
 import { SharedComments } from "./SharedComments"
 
 /****************
@@ -1189,48 +1194,57 @@ export class ReviewInbox {
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
+    return ReviewInbox.itemIdsIn(new EpicPageFormat().listIn(html).rows)
+  }
+
+  /**
+   * `itemIds()` of the epic page at `file`, as it is now:  its place's list, which reads no body (`PlanParts.placeOf()`).
+   * - a page that isn't there has none
+   */
+  static async itemIdsOf(file: string): Promise<Set<string>> {
+    const { rows } = await PlanParts.placeOf(file).list(basename(file), {})
+    return ReviewInbox.itemIdsIn(rows)
+  }
+
+  /** What takes a mark among the rows of an epic page's list (`EpicPageFormat.listIn()`). */
+  private static itemIdsIn(rows: readonly PlaceRow[]): Set<string> {
     const ids = new Set<string>()
-    const tags =
-      /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change|epic-update|epic-choices)\b[^>]*>/g
-    for (const [tag, name] of html.matchAll(tags)) {
-      for (const change of /\sto-accept="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? []) if (change) ids.add(change)
-      for (const update of /\sto-see="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? [])
-        if (update) ids.add(update.split("@")[0].toLowerCase())
+    for (const row of rows) {
+      const name = EpicPageFormat.tagOf(row)
+      const id = row.id as string | undefined
+      for (const change of (row["to-accept"] as string | undefined)?.split(/\s+/) ?? []) if (change) ids.add(change)
+      for (const update of (row["to-see"] as string | undefined)?.split(/\s+/) ?? [])
+        if (update) ids.add(update.split("@")[0]!.toLowerCase())
       // a standing option set, open (epic `epic-engine` P50):  its own marks, by its id (`s-upgrades`)
       if (name === "epic-choices") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]?.toLowerCase()
-        const open = /\sstanding[\s=>]/.test(tag) && !/\sclosed[\s=>]/.test(tag)
-        if (id && STANDING_ID.test(id) && open) ids.add(id)
+        const standing = id?.toLowerCase()
+        if (standing && STANDING_ID.test(standing) && "standing" in row && !("closed" in row)) ids.add(standing)
         continue
       }
       if (name === "epic-update") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
-        if (id && UPDATE_ID.test(id.toLowerCase()) && !/\sseen[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        if (id && UPDATE_ID.test(id.toLowerCase()) && !("seen" in row)) ids.add(id.toLowerCase())
         continue
       }
       if (name === "epic-change") {
-        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
-        if (id && !/\saccepted[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        if (id && !("accepted" in row)) ids.add(id.toLowerCase())
         continue
       }
       if (name === "epic-page") {
-        const stage = /\sstage="([^"]*)"/.exec(tag)?.[1]
-        if ((ACCEPT_STAGES as readonly string[]).includes(stage ?? "")) ids.add(STAGE_ID)
+        if ((ACCEPT_STAGES as readonly string[]).includes((row.stage as string | undefined) ?? "")) ids.add(STAGE_ID)
         continue
       }
       if (name === "epic-summary") {
         ids.add(SUMMARY_ID)
         continue
       }
-      const id = /\sid="([^"]+)"/.exec(tag)?.[1]
       if (!id) continue
       // the Manual tests section:  its Start testing (epic `epic-engine` P51)
-      if (name === "epic-section" && /\skind="tests"/.test(tag)) {
+      if (name === "epic-section" && row.kind === "tests") {
         ids.add(TESTS_ID)
         continue
       }
       const markable =
-        name === "epic-item" || name === "epic-phase" || (name === "epic-section" && /\skind="overview-part"/.test(tag))
+        name === "epic-item" || name === "epic-phase" || (name === "epic-section" && row.kind === "overview-part")
       if (markable) ids.add(id.toLowerCase())
     }
     return ids

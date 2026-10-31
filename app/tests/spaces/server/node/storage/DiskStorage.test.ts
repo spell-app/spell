@@ -3,6 +3,9 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { afterAll, describe, test, expect, vi } from "vite-plus/test"
 
+import { JsonChunks } from "spell/util/places"
+import { FolderPlace } from "spell/server/places"
+import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { editJSON5, json5Edited, readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 
@@ -99,5 +102,39 @@ describe("JSON5, its comments kept", () => {
     expect(await storage.read("me.json5")).toContain("// years")
     await writeJSON5(storage, "fresh.json5", { a: 1 })
     expect(await storage.read("fresh.json5")).toBe('{\n  "a": 1\n}\n')
+  })
+})
+
+describe("DiskStorage under a place (epic `data` P5)", () => {
+  /** The app's storage as it stands, on a folder of its own. */
+  const folderPlace = () => {
+    const folder = mkdtempSync(resolve(tmpdir(), "spell-storage-place-"))
+    const disk: SpaceStorage = new DiskStorage(folder)
+    const place = new FolderPlace({ storage: disk, format: new JsonChunks({ summaries: { recipes: ["title"] } }) })
+    return { folder, place }
+  }
+
+  test("a folder place fits it:  no body read for a list, and an edit on the disk is followed", async () => {
+    const { folder, place } = folderPlace()
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal", notes: "x" } }], {})
+    expect((await place.list("recipes", {}, {})).rows).toEqual([{ id: "r-1", title: "Dal" }])
+
+    writeFileSync(resolve(folder, "recipes/r-1.json"), `{ "title": "Edited, and longer" }`)
+    await vi.waitFor(async () => {
+      expect((await place.list("recipes", {}, {})).rows[0]!.title).toBe("Edited, and longer")
+    })
+    rmSync(folder, { recursive: true, force: true })
+  })
+
+  test("a change from an old version is out of date, by the file operations' own check", async () => {
+    const { folder, place } = folderPlace()
+    await place.apply([{ kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } }], {})
+    await place.list("recipes", {}, {})
+    const version = place.versionOf("recipes", "r-1")!
+    writeFileSync(resolve(folder, "recipes/r-1.json"), `{ "title": "Theirs, and longer" }`)
+    await expect(
+      place.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Mine" }, version }], {})
+    ).rejects.toMatchObject({ kind: "out of date" })
+    rmSync(folder, { recursive: true, force: true })
   })
 })

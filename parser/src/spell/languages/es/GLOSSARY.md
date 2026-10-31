@@ -96,7 +96,7 @@ Names people choose keep their accents.
 | repeat N times | `repetir N veces` |
 | for each X in L | `para cada X en L` |
 | a random X (a kind's value) | `(un|una) X (al azar|aleatorio|aleatoria)`:  `un palo de carta al azar` |
-| wait for / pause for N seconds | `esperar (a)?` / `pausar N segundos` |
+| pause for N seconds | `pausar N segundos` (`esperar (a)?`, retired with `wait for`) |
 | start / stop / end / finish / cancel | `iniciar` / `detener` / `terminar` / `terminar` / `cancelar` |
 | test / expect that / should be | `probar` (`para probar ...`) / `esperar que` / `(debería|deberia) ser` |
 | on (an event) / trigger / fire | `al` / `(disparar|lanzar)`;  an event's name may hold `en`, `de`, `del`, `sobre` between its words, ending at `con`:  `al clic en carta con una carta`, `disparar evento clic en carta con carta = eso` |

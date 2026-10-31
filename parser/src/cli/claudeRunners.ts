@@ -12,6 +12,7 @@
 import { spawn } from "node:child_process"
 import { tmpdir } from "node:os"
 
+import { backoffFor, retryAfter } from "spell/util/retrying"
 import { CLI } from "spell/cli"
 import type {
   AskingPass,
@@ -135,7 +136,7 @@ export function claudeApiRunner({
       if (response.ok) return textOf((await response.json()) as ApiMessage, model)
       const { type, message } = await errorOf(response)
       if (RETRIED_STATUSES.has(response.status) && attempt < MAX_ATTEMPTS) {
-        await sleep(retryAfter(response) ?? backoffFor(attempt))
+        await sleep(retryAfter(response, MAX_WAIT_MS) ?? backoffFor(attempt))
         continue
       }
       if (response.status === 400 && request.fallbacks && /fallback|anthropic-beta/i.test(message)) {
@@ -212,17 +213,6 @@ async function errorOf(response: Response): Promise<{ type: string; message: str
   } catch {
     return { type: "error", message: text || response.statusText }
   }
-}
-
-/** How long a reply's `retry-after` says to wait, in milliseconds, at most `MAX_WAIT_MS`. */
-function retryAfter(response: Response): number | undefined {
-  const seconds = Number(response.headers.get("retry-after"))
-  return seconds > 0 ? Math.min(seconds * 1000, MAX_WAIT_MS) : undefined
-}
-
-/** How long to wait before attempt `attempt + 1`:  1, 2, then 4 s. */
-function backoffFor(attempt: number): number {
-  return 1000 * 2 ** (attempt - 1)
 }
 
 /** The model's id:  `opus`, `sonnet` and `haiku` as the newest of each;  default `DEFAULT_MODEL`. */

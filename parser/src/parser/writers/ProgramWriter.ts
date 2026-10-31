@@ -94,10 +94,17 @@ export abstract class ProgramWriter extends Writer {
     writer.listsStartAt = options?.listsStartAt ?? 1
     writer.project.findWaiting(files, scope, {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
-      coreCallWaits: (call) => writer.coreCallWaits(call)
+      coreCallWaits: (call) => writer.coreCallWaits(call),
+      readsThroughSolid: writer.readsThroughSolid
     })
     return writer
   }
+
+  /**
+   * Does a value that waits draw on Solid, so "not yet" passes through a plain getter over it?
+   * - Else, as in Python and a library, a getter over it waits too:  see `P.WriterProject.findWaiting()`.
+   */
+  protected readsThroughSolid = false
 
   /** May a function of `name` wait?  Any can, as in Python;  see `JSWriter`'s. */
   protected canWait(_name: string | undefined, _isGetter: boolean): boolean {

@@ -436,11 +436,18 @@ export type LanguageWords = {
   /**
    * Spell's own words, outside its type words, the language no longer takes, each with the word that replaced it:
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
+   * - Two words at most:  `wait for`.
+   * - A replacement of nothing, `""`:  the word is simply gone, e.g. `wait for: deal` is now `deal` (epic `language` P13).
    * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
    *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
    * - None:  nothing retired.
    */
   retiredWords?: Record<string, string>
+  /**
+   * `retiredWords` true of one rule only, by its name, where the same word has a different replacement elsewhere:
+   * English's `{ start_process: { animation: "process" } }`, as `animation` alone is now `to`.
+   */
+  retiredRuleWords?: Record<string, Record<string, string>>
   /**
    * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
    * - None:  a spellx file in this language reads English's.
@@ -533,8 +540,6 @@ export type SpellxTwinWords = {
   aliasBlock: string
   /** An action:  `to {words} :`. */
   action: string
-  /** An action that may wait, `animated`:  `animation {words} :` (epic `debut` I97). */
-  animation: string
   /** An action's details, by attribute:  `{ shortcut: "shortcut {shortcut}" }`. */
   actionDetails: Record<string, string>
   /** A test:  `to test {words} :`. */

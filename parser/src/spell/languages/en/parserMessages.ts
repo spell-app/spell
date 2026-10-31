@@ -34,6 +34,9 @@ export const PARSER_MESSAGES = {
   /** A read of a member its type never declares, `the name of the pile`. */
   "undeclared-member": '{AType} never says it has {aName}:  declare it, e.g. "{aType} has {aName} as {type}"',
   /** A local, argument or loop variable with the name of a property of the action's thing. */
+  "reads-after-wait":
+    "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
+  "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
   /** A property's rule (`must ...`) above the property it's about. */
@@ -143,7 +146,9 @@ export const PARSER_MESSAGES = {
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
   /** An old word for a built-in type, `a card is a drawable thing`:  `{replacement}` is its new word. */
-  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead',
+  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
+  "retired-word-gone":
+    '"{words}" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`',
   /** A `<css>` block in a type that doesn't draw. */
   "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */

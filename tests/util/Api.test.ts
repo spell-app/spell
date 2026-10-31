@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { ApiError } from "spell/ui/runtime"
-
-import { Api } from "spell/ui/runtime/Api"
+import { Api } from "spell/util/Api"
+import { ApiError } from "spell/util/fetching"
 
 describe("Api.url()", () => {
   const api = new Api()
@@ -40,6 +39,18 @@ describe("Api.request()", () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it("asks for a request that outlives the page, when told", async () => {
+    await api.request({ url: "/save", method: "POST", data: {}, keepalive: true })
+    expect(fetchMock.mock.calls[0]![1]).toMatchObject({ keepalive: true })
+  })
+
+  it("says how it treats the browser's cache, when told", async () => {
+    await api.request({ url: "/part", cache: "no-cache" })
+    expect(fetchMock.mock.calls[0]![1]).toMatchObject({ cache: "no-cache" })
+    await api.request({ url: "/part" })
+    expect(fetchMock.mock.calls[1]![1]).not.toHaveProperty("cache")
   })
 
   it("GETs a templated URL with data as query parameters and parses JSON", async () => {

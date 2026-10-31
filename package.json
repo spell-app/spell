@@ -163,6 +163,11 @@
       "types": "./dist-types/src/server/page/index.d.ts",
       "default": "./src/server/page/index.ts"
     },
+    "./server/places": {
+      "spell-source": "./src/server/places/index.ts",
+      "types": "./dist-types/src/server/places/index.d.ts",
+      "default": "./src/server/places/index.ts"
+    },
     "./server/site": {
       "spell-source": "./src/server/site/index.ts",
       "types": "./dist-types/src/server/site/index.d.ts",

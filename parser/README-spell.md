@@ -284,9 +284,38 @@ Its first line is how you call it, with each blank's type in brackets:
   - A `where` whose condition waits asks each item in turn.
   - The edges:
     - A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
-    - In JavaScript and TypeScript, a getter, a drawing, a `create` and a `to test` must answer at once:
+    - In JavaScript and TypeScript, a drawing, a `create` and a `to test` must answer at once:
       they start what they call without waiting for it.
+    - `pause` in a drawing is an error:  make it a getter that waits, and draw that.
     - A `send` waits only if a handler of that event does.
+- Nothing says it, so nothing needs saying:  `animation`, `wait for` and `await` are retired, in English and Spanish.
+  - Old source still reads, each one an error, and `spell lint --fix` rewrites it:
+    `- animation deal:` is `- to deal:`, `wait for: deal` is `deal`, and `<action "deal" animated>` is `<action "deal">`.
+  - `start process` and `process x is running` stay;  `start animation` is now `start process`.
+  - The editor says which calls wait:  hover one.
+- A getter may wait too, with no new words:
+
+  ```spell
+  a game is an app:
+  	- it has a score as a number
+  	- its "total" is:
+  		pause for 1 sec
+  		return the score + 1
+  	- to go it:
+  		print the total
+  	- to draw it:
+  		<div>Total: {the total}</div>
+  ```
+
+  - A drawing shows `…` where the value goes, then fills it in, and the rest of the page keeps moving.
+    A later change keeps the old value until the new one lands.
+  - An `if` or an attribute has no spot for a `…`, so that whole thing shows one first.
+    An app's whole drawing doing that hides the board until the first answer, so it warns on the program's console.
+  - An action reading it waits for the answer, the newest:  a write just before it counts.
+  - A getter follows its own members, however late it reads them.
+    A member of something else, read after its first wait, isn't followed, and warns:  read it above the wait.
+  - Python sends its page with its values, so no `…` shows there.
+    A library's is a plain async getter, which code that imports it awaits.
 - To not wait, say so, in JavaScript, TypeScript and Python alike:
 
   ```spell
