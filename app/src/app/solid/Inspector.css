@@ -80,6 +80,20 @@
 .InspectorCard {
   display: flex;
   flex-direction: column;
+  /* the Views card is a pane (`<ui-panel appearance="pane">`):  its bar wears the headers' fill */
+  --ui-panel-pane-bar-background: var(--spell-header-background);
+}
+/* ... its body filling what's left under the bar */
+ui-panel.InspectorCard > .InspectorSection {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* its eye at the far edge, in line with the Views card's (`<ui-panel appearance="pane">`, 8px in) */
+.InspectorCard > .InspectorCardHead {
+  padding-inline-end: 8px;
+  & ui-icon.IconAction.InspectorHideCard {
+    margin-inline-end: 0;
+  }
 }
 .InspectorCardHead {
   /* its icons the text's size:  the top bar's 1.15em read too big on a card (Owen:  "x and upward chevron are too
@@ -110,17 +124,6 @@
     background: color-mix(in oklab, var(--ui-blue) 14%, transparent);
     color: color-mix(in oklab, var(--ui-blue) 80%, var(--ui-text-color));
     font-size: 0.9em;
-  }
-  /* Views' switch:  Views | Things | Templates, small, in the title's place */
-  & ui-menu.InspectorViewTabs {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-weight: normal;
-  }
-  & ui-menu.InspectorViewTabs::part(menu) {
-    width: 100%;
-    /* centred in the header:  a menu keeps a top margin for the text above it, and here there's none */
-    margin: 0;
   }
 }
 

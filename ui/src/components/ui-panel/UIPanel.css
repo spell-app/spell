@@ -11,6 +11,8 @@
  * - `.sub` (a panel inside a panel):  no box;  its title is a full-width SUB-HEAD BAND (bold 12px capitals,
  *   a hairline above), its content the fields under it.  Bands sit `--ui-panel-band-space` (20px) under what's above
  *   them, flush under a folded band.
+ * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, no box.  `--ui-panel-pane-bar-height`,
+ *   `--ui-panel-pane-bar-background`, `--ui-panel-pane-bar-padding`.
  * - Layers:  `ui.components.panel.*` are declared after the section's, so these rules win without
  *   `!important`.
  * - Public tokens (`--ui-panel-*`) are never declared here:  read through private aliases, so a value set on
@@ -250,6 +252,103 @@
   /* NOTE:  no compounding of the 14px:  every section root resets to `--ui-font-size` */
   .ui.section.panel.sub > .content:not([hidden]) {
     padding: 0.75em var(--_ui-panel-padding) 0.25em;
+  }
+}
+
+/*
+ * ## A pane (`appearance="pane"`):  one flat bar over the rest of the box
+ * - The chevron, whatever's in `slot="actions"` and any toolbar's actions share the bar's one centre line.
+ * - The bar is the same height closed as open:  only its hairline goes.
+ */
+@layer ui.components.panel.content {
+  :host(:state(pane)) {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+  }
+  .ui.pane.section.panel:not(.sub) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  /* a pane's bar never sticks:  the sticky title's marker would pull the bar up a pixel out of its row */
+  .ui.pane.section.panel > .sentinel {
+    display: none;
+  }
+  .ui.pane.section.panel:not(.sub) > .title {
+    flex: none;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 0;
+    height: var(--ui-panel-pane-bar-height, 40px);
+    margin: 0;
+    padding: 0 var(--ui-panel-pane-bar-padding, 8px);
+    border-bottom: 1px solid var(--ui-border-color);
+    border-radius: 0;
+    background: var(--ui-panel-pane-bar-background, none);
+    color: var(--ui-text-color);
+  }
+  .ui.pane.section.panel > .title > .heading {
+    flex: none;
+    margin: 0;
+    font-size: 13px;
+  }
+  /* the chevron's button:  room to press, as round as what's beside it */
+  .ui.pane.section.panel > .title > .heading > .toggle {
+    display: inline-grid;
+    place-items: center;
+    justify-content: center;
+    grid-auto-flow: column;
+    gap: 0;
+    min-width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: var(--ui-radius-pill, 9999px);
+    color: var(--ui-text-muted);
+  }
+  .ui.pane.section.panel > .title > .heading > .toggle:hover {
+    background: oklch(from var(--ui-ink) l c h / 0.08);
+    color: var(--ui-text-color);
+  }
+  .ui.pane.section.panel > .title > .heading > .toggle > .fold.icon {
+    width: 10px;
+    height: 10px;
+    margin: 0;
+    opacity: 1;
+  }
+  /* what's in the actions slot takes the rest of the bar */
+  .ui.pane.section.panel > .title > .actions {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    margin-inline-start: 2px;
+  }
+  .ui.pane.section.panel > .title > .actions ::slotted(*) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .ui.pane.section.panel > .content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    font-size: 1em;
+  }
+  .ui.pane.section.panel > .content:not([hidden]) {
+    padding: 0;
+  }
+  :host(:state(pane):state(collapsed)) > .ui.pane.section.panel:not(.sub) > .title {
+    border-bottom: 0;
+    border-radius: 0;
   }
 }
 

@@ -67,6 +67,25 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-types-pane" label="Pane" sticky="stack" collapsible dividing>
+                <ui-example
+                  description='`appearance="pane"` is a whole pane under one flat bar, with no box of its own.  Put a toolbar in its `slot="actions"`, and the chevron, the toolbar\'s items and its actions read as one row.  Closed, only the bar is left, still saying which is chosen.  Give it a hidden `slot="label"`:  the fold button needs a name.'
+                >
+                  <div style="max-width: 380px; height: 160px; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+                    <ui-panel appearance="pane" collapsible fold-icon="start">
+                      <span slot="label" class="ui-visually-hidden">Views</span>
+                      <ui-toolbar slot="actions" appearance="segmented link header" shrinkable aria-label="Views">
+                        <ui-item selected>Views</ui-item>
+                        <ui-item>Things</ui-item>
+                        <ui-item>Templates</ui-item>
+                        <ui-icon slot="right" name="eye slash" link label="Hide"></ui-icon>
+                      </ui-toolbar>
+                      <p style="margin: 12px">The pane's content fills what's left, and can scroll by itself.</p>
+                    </ui-panel>
+                  </div>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-types-sub-panels" label="Sub-panels" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A panel inside a panel is a SUB-HEAD BAND:  small capitals, a hairline above, reaching the box's edges.  Group a panel's fields under them."

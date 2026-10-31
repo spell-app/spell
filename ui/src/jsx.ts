@@ -17134,8 +17134,8 @@ export interface UIMenuAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
-   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless`
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless` · `header`
    */
   appearance?: string
   /**
@@ -19602,8 +19602,8 @@ export interface UIPanelAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
+   * The look:  `pane`, a whole pane under one flat bar, with no box or padding of its own:  its title is the bar and its content fills what's left, so it can scroll by itself.  Put a toolbar in its `slot="actions"`, and the bar's chevron, the toolbar's items and its actions read as one row.  Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer` · `pane`
    */
   appearance?: string
   /**
@@ -35355,8 +35355,8 @@ export interface UIToolbarAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
-   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless`
+   * The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.
+   * - takes:  space-separated:  `tabular` · `pointing` · `secondary` · `text` · `segmented` · `link` · `borderless` · `header`
    */
   appearance?: string
   /**
