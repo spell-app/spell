@@ -5,7 +5,7 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { SourceHomes, type FileHome } from "spell/app/lsp/SourceHomes"
 
 describe("SourceEdits", () => {
-  const TAG = `<draw>\n\t<ui-button color="red" basic onClick={play it}>Go</ui-button>\n</draw>`
+  const TAG = `<draw>\n\t<ui-button color="red" appearance="basic" onClick={play it}>Go</ui-button>\n</draw>`
   const opening = TAG.indexOf("<ui-button")
 
   test("an attribute's value changes, and nothing else", () => {
