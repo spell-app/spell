@@ -119,6 +119,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the decorators, [decorators.ts](reactive/decorators.ts):  `@prop`, `@state`, `@derived`
     - `{ equals }` on the last two
     - the same names and options as Spell UI's `Reactive.ts`
+  - `whileOnlyShowing()`, in `cells.ts`:  a read that follows a value without needing it, an element mirroring its thing.
   - `bridges.ts`:
     - `bridgeSolid()`:  every Solid computation reads cells
       - The host (the app, a runner, `<spell-viewer>`) calls it once with its Solid:  util never imports Solid.
@@ -176,7 +177,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `originOf(thing, property)`:  where a value came from, for the editor's side bar (epic `data` P9):
       its place, its kind, its collection and id, whether it can be written and why not, whether it's a sample;
       a worked-out value says it's read only, and the places it read (`sourcesReadBy()`, the cells).
-      `declaredAt` is the declaration's (`PropInfo.declaredAt`), which nothing writes until Gathering Reads.
+      `declaredAt` is the declaration's (`PropInfo.declaredAt`, or `Schema.located` for a worked-out value), which the compiler writes
+      into each saved property's and each worked-out value's (epic `data` P12);  `readsFrom` joins the places the compiler found:
+      a branch not taken, a list with nothing in it, a read through a memo.
     - `useInstead()` / `backToDeclared()`:  another place behind a name for now, whole:  its own rows and its own changes,
       with what's pending for the real one set aside (`PendingChanges.setAside()`), and every reader reading again.
       `swap()` only changes where the next read goes.
@@ -191,6 +194,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `PlaceReads`:  readers of one collection and query share one request.
     - On `LoadOnce`.  The last reader leaving aborts the read, and about ten released ones are kept for a quick return.
     - `newestWins`:  a name for reads where a newer one aborts the older, e.g. a search as you type.
+  - `PlaceBatch`:  lists asked in the same moment go in one request, for a place with `listMany()`:  `GraphPlace`'s aliases.
+    A web service has one address per collection, so it can't:  its lists go one each, together.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.

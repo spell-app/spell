@@ -571,6 +571,18 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Copies:**  `--`
 - **Fine:**  `StateMirror` (`parser/src/core/state.ts`):  counted ids and whole things, one way, for a program that runs elsewhere.
 
+### What a program reads from its places
+
+- **It is:**  `P.ReadGathering` (`parser/src/parser/writers/ReadGathering.ts`, epic `data` P12), and on it `core`'s `firstReads` and `select`
+- **Use it when:**  anything needs to know, before a program runs, which fields or places its code reaches.
+- **Flag:**  a second walk of a project's tree by property name
+
+### Lists asked in the same moment, in one request
+
+- **It is:**  `PlaceBatch` (`src/util/places/PlaceBatch.ts`, epic `data` P12), and `Place.listMany()`
+- **Use it when:**  a place whose way of asking can hold several lists.
+- **Fine:**  `PlaceReads`, one request for readers of the SAME list:  the two stack.
+
 ### Something else behind a place's name, for now
 
 - **It is:**  `Places.useInstead()` / `backToDeclared()` (`spell/util/places`), and on them `useSample()` (`spell/util/places/SamplePlace`);  epic `data` P9

@@ -11,6 +11,7 @@ import {
   TEMPLATE_TAGS,
   attributeName,
   isCoreCall,
+  objectText,
   isTight,
   PRESS_ATTRIBUTES,
   topLevelOf,
@@ -49,6 +50,12 @@ export const DRAWS_WAITING = "static drawsWaiting = true"
  * - `JSWriter.instance` is the one `ASTNode.compile()` uses:  it knows no project.
  ****************/
 /** Core's method for each kind of `P.ASTTypeDescription`. */
+/** The static saying where a type is saved. */
+const SAVED_IN = "savedIn"
+
+/** `core`'s call a place's line compiles to. */
+const PLACE_CALL = "place"
+
 const DESCRIBERS = { action: "describeAction", event: "describeEvent", menu: "describeMenu" } as const
 
 export class JSWriter extends ProgramWriter {
@@ -548,7 +555,8 @@ export class JSWriter extends ProgramWriter {
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
     const waits = this.writesAwait(node)
     if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
-    const written = this.call(node)
+    const made = this.call(node)
+    const written = isCoreCall(node) && node.methodName === PLACE_CALL ? this.placeCall(node, made) : made
     return waits ? `await ${written}` : written
   }
 
@@ -1231,7 +1239,10 @@ export class JSWriter extends ProgramWriter {
   /** In its class's body, by our name:  `turnFaceUp(args) {...}` or `get isFaceUp() {...}`. */
   ASTPropertyDefinitionAsMember(node: P.ASTPropertyDefinition): string {
     const name = this.memberKey(node.property)
-    if (node.get) return this.methodNamed(node.get, `get ${name}`)
+    if (node.get)
+      return [this.workedOutDeclaration(node, "this"), this.methodNamed(node.get, `get ${name}`)]
+        .filter(Boolean)
+        .join(jsText.NEWLINE)
     const method = this.methodNamed(node.method!, name)
     return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${method}` : method
   }
@@ -1248,7 +1259,10 @@ export class JSWriter extends ProgramWriter {
         const descriptor = [`${this.methodNamed(node.get, "get", node.typeName)},`, "configurable: true"].join(
           jsText.NEWLINE
         )
-        return `Object.defineProperty(${prototype}, ${this.quoted(name)}, ${jsText.Block({ wrap: true, children: descriptor })})`
+        const defined = `Object.defineProperty(${prototype}, ${this.quoted(name)}, ${jsText.Block({ wrap: true, children: descriptor })})`
+        return [this.workedOutDeclaration(node, this.write(node.type) as string), defined]
+          .filter(Boolean)
+          .join(jsText.NEWLINE)
       }
       return `${prototype}${propertyAccess(name)} = ${this.anonymousFunction(node.method!, node.typeName)}`
     })
@@ -1345,7 +1359,47 @@ export class JSWriter extends ProgramWriter {
     const parts = (node.check?.properties ?? []).map((property) => this.write(property))
     if (node.initializer) parts.push(`init: () => ${this.bare(node.initializer)}`)
     if (this.madeEarly(node)) parts.push("early: true")
+    const declaredAt = this.declaredAtOf(node)
+    if (declaredAt) parts.push(declaredAt)
     return parts.length ? `{ ${parts.join(", ")} }` : undefined
+  }
+
+  /**
+   * `declaredAt: {...}`, where `node`, a saved type's property, is declared:  for the editor's side bar (epic `data` P12, J3).
+   * - Worked out each time it's written:  a memoized tree keeps a line's old offsets when an edit above it moves it.
+   * - `undefined` for a type that isn't saved, or a line from no file.
+   */
+  declaredAtOf(node: P.ASTClassMember): string | undefined {
+    if (!this.reads?.savedTypeFor(node.typeName)) return undefined
+    return this.lineOf(node)
+  }
+
+  /** `declaredAt: {...}` for `node`'s line:  `undefined` for one from no file. */
+  private lineOf(node: P.ASTNode): string | undefined {
+    const { match } = node
+    const path = match?.getScopeOfType(P.FileScope)?.path
+    const { start, end } = match ?? {}
+    if (!path || start === undefined || end === undefined) return undefined
+    return `declaredAt: { path: ${this.quoted(path)}, start: ${start}, end: ${end} }`
+  }
+
+  /**
+   * `declareProp("name", { declaredAt, readsFrom })` for a getter a saved type has, or one that reads a place:
+   * it still counts as worked out (`PlaceThings.describeValue()`).
+   * - `readsFrom`:  every place it can read, which one run of it can't say.
+   * - `undefined` for any other getter, so a program with no place compiles as it did.
+   */
+  workedOutDeclaration(node: P.ASTPropertyDefinition, owner: string): string | undefined {
+    if (!this.reads || !node.typeName) return undefined
+    const places = this.reads.placesReadBy(node.typeName, node.property.value)
+    if (!places.length && !this.reads.savedTypeFor(node.typeName)) return undefined
+    const parts = [
+      this.lineOf(node),
+      places.length ? `readsFrom: [${places.map((place) => this.quoted(place)).join(", ")}]` : undefined
+    ].filter(Boolean)
+    if (!parts.length) return undefined
+    const call = `${owner}.declareProp(${this.quoted(this.propertyName(node.property))}, { ${parts.join(", ")} })`
+    return owner === "this" ? `static { ${call} }` : call
   }
 
   /** `declareProp("name", {...})` with `declaration()`, called on `owner`, e.g. `this` in its class's body. */
@@ -1376,11 +1430,42 @@ export class JSWriter extends ProgramWriter {
 
   /** `static Name = value`, by our name;  a list of values below the spell that made it (`spellOf()`). */
   ASTStaticDefinitionAsMember(node: P.ASTStaticDefinition): string {
-    return this.withSpell(node, `static ${this.nameOf(node.name)} = ${this.bare(node.value)}`)
+    return this.withSpell(node, `static ${this.nameOf(node.name)} = ${this.staticValue(node)}`)
   }
 
   ASTStaticDefinition(node: P.ASTStaticDefinition): string {
-    return this.withSpell(node, `${this.write(node.type)}.${this.nameOf(node.name)} = ${this.bare(node.value)}`)
+    return this.withSpell(node, `${this.write(node.type)}.${this.nameOf(node.name)} = ${this.staticValue(node)}`)
+  }
+
+  /**
+   * What a `static` holds:  for a saved type's `savedIn`, the fields anything reads, too (`P.ReadGathering.selectFor()`).
+   * - Only when some are left out, so a type that reads all of them says what it said.
+   */
+  private staticValue(node: P.ASTStaticDefinition): string {
+    const written = this.bare(node.value)
+    if (node.name !== SAVED_IN) return written
+    const select = this.reads?.selectFor(node.typeName)
+    const closing = /\s*\}$/.exec(written)
+    if (!select || !closing) return written
+    return `${written.slice(0, closing.index)}, select: [${select.map((field) => this.quoted(this.nameOf(field))).join(", ")}] }`
+  }
+
+  /**
+   * `core.place(thing, {...})`, with what a first draw reads from it:  see `P.ReadGathering.firstReadsOf()`.
+   * - Only two or more:  one read alone is a read that asks for itself.
+   * - In a function:  read when the place is first read, when every class is declared.
+   */
+  private placeCall(node: P.ASTScopedMethodInvocation, written: string): string {
+    const name = node.args?.args?.[1]
+    const placeName = name instanceof P.ASTObjectLiteral ? objectText(name, "name") : undefined
+    const reads = placeName ? this.reads?.firstReadsOf(placeName) : undefined
+    const closing = /\s*\}\)$/.exec(written)
+    if (!reads || reads.length < 2 || !closing) return written
+    const asks = reads.map(({ typeName, query }) => {
+      const type = this.nameOf(typeName)
+      return query ? `[${type}, ${this.bare(query)}]` : `[${type}]`
+    })
+    return `${written.slice(0, closing.index)}, firstReads: () => [${asks.join(", ")}] })`
   }
 
   /** `code`, below the spell that made `node`, if any (`spellComment()`). */

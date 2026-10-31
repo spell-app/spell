@@ -8,7 +8,7 @@
  */
 import { schemaOf } from "spell/util"
 import type * as PlacesFolder from "spell/util/places"
-import type { Place as PlaceBehind } from "spell/util/places/places.types"
+import type { ListQuery, Place as PlaceBehind } from "spell/util/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -30,6 +30,12 @@ export type PlaceDetails = {
   idColumn?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
+  /**
+   * What a first draw reads from it, as the compiler found them (epic `data` P12):  each a class and what's asked.
+   * - Read when the place is first read:  each class is declared by then.
+   * - Asked for together:  one trip, not one per part of the page.
+   */
+  firstReads?: () => Array<[Function, ListQuery?]>
 }
 
 /** What a kind needs to make its place. */
@@ -61,6 +67,17 @@ export function placeBehind(making: PlaceMaking): PlaceBehind {
     throw new TypeError(`core.place():  there's no kind of place called "${details.kind}";  a library can add one`)
   }
   return make(making, folder)
+}
+
+/**
+ * SIDE EFFECT:  `behind`, made for the first class read from it, knows the collection `making` is about too:
+ * a graph service's mapping is worked out per class, and a program may save several in one place.
+ */
+export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
+  const { GraphPlace } = making.folder
+  if (!(behind instanceof GraphPlace)) return
+  const { collection } = making
+  behind.addCollection(collection, graphCollections(making)[collection]!)
 }
 
 /** Each kind's word, and how its place is made. */

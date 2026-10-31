@@ -16,6 +16,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   ////////////////
 
   "did-you-mean": '¿Querías decir "{phrase}"?',
+  "read-whole-everything": "todo lo que este programa guarda",
+  "read-whole-field-named-by-a-value":
+    "Encanto no sabe qué campo nombra esto, así que {what} se lee entero:  nombra el campo con palabras si puedes",
+  "read-whole-element-reads-it": "Encanto no ve qué lee de ello este elemento, así que {what} se lee entero",
+  "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
   "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',

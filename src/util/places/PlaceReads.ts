@@ -1,5 +1,6 @@
 import { LoadOnce } from "spell/util/LoadOnce"
 
+import { PlaceBatch } from "./PlaceBatch"
 import type { PlaceResult } from "./PlaceResult"
 import { PlaceQuery, type PlaceQueryProps } from "./PlaceQuery"
 import type { ListAnswer, ListQuery, PlaceRow } from "./places.types"
@@ -16,9 +17,12 @@ import type { ListAnswer, ListQuery, PlaceRow } from "./places.types"
  * - The answer per read is `LoadOnce`'s:  in flight or done, every reader the same promise;  a failure is forgotten.
  * - `newestWins` (`PlaceResultProps`):  a newer read by that name aborts the older.
  * - Knows nothing of how a query is done (`PlaceQuery`), or of the cache:  each reader keeps its own rows.
+ * - Different reads asked in the same moment go in one request, where the place allows it (`PlaceBatch`).
  * - One per `Places`.
  ****************/
 export class PlaceReads {
+  /** Joins different lists asked in the same moment into one request, if the place can. */
+  private readonly batch = new PlaceBatch()
   /** Each read's answer, by what it asks. */
   private readonly answers = new LoadOnce<string, ListAnswer>({ failures: "forgotten" })
   /** Each read with readers, by what it asks. */
@@ -105,7 +109,7 @@ export class PlaceReads {
 
   /** Start `read`'s request:  a controller of its own, cleared when it settles, so it never aborts a finished one. */
   private start(read: SharedRead, query: PlaceQueryProps): Promise<ListAnswer> {
-    const placeQuery = new PlaceQuery(query)
+    const placeQuery = new PlaceQuery({ ...query, batch: this.batch })
     const controller = new AbortController()
     read.controller = controller
     const answer = placeQuery.answer(controller.signal)

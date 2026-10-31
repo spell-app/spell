@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js"
 import { insert, type JSX } from "@solidjs/web"
 
-import { readsAsImpliedDefault, viewAttributeFor, kebabCase } from "spell/util"
+import { readsAsImpliedDefault, viewAttributeFor, kebabCase, whileOnlyShowing } from "spell/util"
 import { E, UI } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
 import type { ElementApi, Core } from "spell/parser/core"
@@ -1182,7 +1182,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   - Except a getter with no setter (`isReadOnly()`):  the program's own value shows, whatever it equals.
    */
   private shownValueOf(property: TypeProperty, thing: object): unknown {
-    const value = (thing as Record<string, unknown>)[property.name]
+    // only shown:  a field a place's read left out isn't needed because the inspector would show it (epic `data` P12)
+    const value = whileOnlyShowing(() => (thing as Record<string, unknown>)[property.name])
     // unset, it reads as its type's default, but shows no attribute, as HTML's don't (epic `prefs-and-undo` P7);
     // a getter its type always gives (`- its layout is stacked`) is the program's own value, whatever it equals
     if (!SpellElement.isReadOnly(thing, property.name) && readsAsImpliedDefault(thing, property.name, value))

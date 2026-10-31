@@ -5,11 +5,11 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  @prop({ type: "text" })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 209, end: 228 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number" })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.spell", start: 232, end: 258 } })
   accessor servings!: number
 
   @drawn draw() {
@@ -65,6 +65,7 @@ export class RecipeBox extends App {
   @prop({ type: "text" })
   accessor draft!: string
 
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 651, end: 737 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search)), (item: Recipe) => item.title)
   }) }

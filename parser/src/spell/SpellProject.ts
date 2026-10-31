@@ -725,7 +725,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     options?: P.WriterOptions
   ): string {
     const hoisted = SP.hoistClassMembers(parts.map((part) => (typeof part === "object" ? (part.statements ?? []) : [])))
-    const projectWriter = writer.forProject(hoisted, scope, options)
+    const projectWriter = writer.forProject(hoisted, scope, { ...options, noteForAuthor: SP.SpellWarnings.noteRead })
     const code = parts
       .map((part, index) => {
         if (typeof part !== "object") return projectWriter.codePart(part ?? "")

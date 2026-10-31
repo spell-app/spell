@@ -4,12 +4,12 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text" }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 206, end: 225 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number" }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 229, end: 255 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
@@ -51,6 +51,7 @@ export class RecipeBox extends App {
   get draft() { return this.getProp("draft") }
   set draft(value) { this.setProp("draft", value) }
 
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 648, end: 734 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => recipe.title.includes(this.search)), (item) => item.title)
   }) }

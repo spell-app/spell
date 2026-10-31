@@ -4,12 +4,12 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  static { this.declareProp("título", { type: "text" }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 216, end: 236 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number" }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 240, end: 268 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
@@ -51,6 +51,7 @@ export class CajaDeRecetas extends App {
   get borrador() { return this.getProp("borrador") }
   set borrador(value) { this.setProp("borrador", value) }
 
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 693, end: 787 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => receta.título.includes(this.búsqueda)), (item) => item.título)
   }) }

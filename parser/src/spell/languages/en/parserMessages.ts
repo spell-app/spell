@@ -21,6 +21,11 @@ export const PARSER_MESSAGES = {
 
   /** An article that doesn't agree with its noun, `a apple`:  `{phrase}` is the right one, `an apple`. */
   "did-you-mean": 'Did you mean "{phrase}"?',
+  "read-whole-everything": "everything this program saves",
+  "read-whole-field-named-by-a-value":
+    "Spell can't tell which field this names, so {what} is read whole:  name the field in words if you can",
+  "read-whole-element-reads-it": "Spell can't see what this element reads of it, so {what} is read whole",
+  "read-whole-library-reads-it": "Spell can't see what this library reads, so {what} is read whole",
   /** A method's parameter with no type, `(digit)`:  `{type}` is a guess, e.g. `text`, `a card`. */
   "untyped-parameter": 'Say what "{name}" is, e.g. "({name} as {type})"',
   /** A property declared with no type:  `{line}` is the line as written, `a calculator has an input`. */

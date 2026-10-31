@@ -5,11 +5,11 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  @prop({ type: "text" })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 231, end: 251 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number" })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 255, end: 283 } })
   accessor porciones!: number
 
   @drawn draw() {
@@ -66,6 +66,7 @@ export class CajaDeRecetas extends App {
   @prop({ type: "text" })
   accessor borrador!: string
 
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 708, end: 802 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda)), (item: Receta) => item.título)
   }) }

@@ -124,6 +124,11 @@ let placeWrites: PlaceWriteListener | undefined
 /** Is `whileReading()` running? */
 let isReadingIn = false
 
+/** Is what's being done now read in from where it's kept?  See `whileReading()`. */
+export function isWhileReading(): boolean {
+  return isReadingIn
+}
+
 /**
  * Run `read`, marking what it changes as READ from where it's kept (epic `data` J11), so it never comes back as a write:
  * it isn't put back after a `while` handler, joins no undo step, and goes to no program running elsewhere.

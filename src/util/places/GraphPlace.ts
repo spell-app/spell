@@ -4,6 +4,7 @@ import {
   PlaceError,
   type ApplyAnswer,
   type ListAnswer,
+  type ListAsk,
   type ListHandled,
   type ListQuery,
   type Place,
@@ -80,7 +81,7 @@ export class GraphPlace extends WebPlace implements Place {
   /** What it says it can do. */
   private readonly capabilities: PlaceCapabilities
   /** Each collection's mapping. */
-  private readonly collections: Readonly<Record<string, GraphCollection>>
+  private collections: Readonly<Record<string, GraphCollection>>
   /** Other queries and mutations, by name. */
   private readonly operations: Readonly<Record<string, string>>
   /** How many rows it asks for at a time. */
@@ -110,17 +111,28 @@ export class GraphPlace extends WebPlace implements Place {
   /** One page of `collection`, with only the fields asked for.  - throws `PlaceError`;  `TypeError` for a name it doesn't know */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     const mapping = this.mappingOf(collection)
-    const { paging } = mapping
-    const handled: ListHandled = { ...(query.select && { select: true }) }
-    const { argumentTexts, typeTexts, variables } = this.listArguments(mapping, query, handled)
-    const selection = this.selectionFor(collection, mapping, query.select)
-    const inner =
-      paging === "connection" ? `edges { node { ${selection} } } pageInfo { hasNextPage endCursor }` : selection
+    const { argumentTexts, typeTexts, variables } = this.listArguments(mapping, query, {})
+    const inner = this.selectionInside(collection, mapping, query.select)
     const declared = typeTexts.length ? `(${typeTexts.join(", ")})` : ""
     const called = argumentTexts.length ? `(${argumentTexts.join(", ")})` : ""
     const text = `query List${declared} { ${mapping.list}${called} { ${inner} } }`
     const data = (await this.ask(text, variables, context)) as Record<string, unknown>
-    const answered = data[mapping.list]
+    return this.answerOf(mapping, query, data[mapping.list])
+  }
+
+  /** What's selected inside a list, as it pages. */
+  private selectionInside(collection: string, mapping: GraphCollection, select?: readonly string[]): string {
+    const selection = this.selectionFor(collection, mapping, select)
+    return mapping.paging === "connection"
+      ? `edges { node { ${selection} } } pageInfo { hasNextPage endCursor }`
+      : selection
+  }
+
+  /** `answered`, what the service said to one list, as a place answers. */
+  private answerOf(mapping: GraphCollection, query: ListQuery, answered: unknown): ListAnswer {
+    const { paging } = mapping
+    const handled: ListHandled = { ...(query.select && { select: true }) }
+    this.listArguments(mapping, query, handled)
     if (paging === "connection") {
       const { edges, pageInfo } = answered as GraphConnection
       const nextPage = pageInfo.hasNextPage ? pageInfo.endCursor : undefined
@@ -135,6 +147,38 @@ export class GraphPlace extends WebPlace implements Place {
     if (paging !== "offset") return { rows, handled }
     const { size, start } = this.offsetPage(query)
     return { rows, ...(rows.length === size && { nextPage: String(start + size) }), handled }
+  }
+
+  /**
+   * Several lists in ONE query, each under a name of its own, its variables too.
+   * - throws `PlaceError`, for them all;  `TypeError` for a name it doesn't know
+   */
+  async listMany(asks: readonly ListAsk[], context: PlaceContext): Promise<ListAnswer[]> {
+    const typeTexts: string[] = []
+    const variables: Record<string, unknown> = {}
+    const lines = asks.map(({ collection, query }, index) => {
+      const mapping = this.mappingOf(collection)
+      const asked = this.listArguments(mapping, query, {})
+      const named = (text: string) => text.replace(/\$(\w+)/g, `$list${index}_$1`)
+      typeTexts.push(...asked.typeTexts.map(named))
+      for (const [name, value] of Object.entries(asked.variables)) variables[`list${index}_${name}`] = value
+      const called = asked.argumentTexts.length ? `(${asked.argumentTexts.map(named).join(", ")})` : ""
+      return `list${index}: ${mapping.list}${called} { ${this.selectionInside(collection, mapping, query.select)} }`
+    })
+    const declared = typeTexts.length ? `(${typeTexts.join(", ")})` : ""
+    const data = (await this.ask(`query List${declared} { ${lines.join(" ")} }`, variables, context)) as Record<
+      string,
+      unknown
+    >
+    return asks.map(({ collection, query }, index) =>
+      this.answerOf(this.mappingOf(collection), query, data[`list${index}`])
+    )
+  }
+
+  /** Add `collection`'s mapping:  a program's second saved type, made known when it's first read.  One it has stays as it is. */
+  addCollection(collection: string, mapping: GraphCollection): void {
+    if (this.collections[collection]) return
+    this.collections = { ...this.collections, [collection]: mapping }
   }
 
   /** The rows of `collection` with these ids:  one query, if the mapping names `one`;  else it lists and looks. */

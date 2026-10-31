@@ -89,6 +89,24 @@ export class SpellWarnings {
   }
 
   /**
+   * Note what a writer's whole-project pass has to tell the author (`P.WriterOptions.noteForAuthor`):
+   * here `P.ReadGathering` reads a saved type whole, and says why.
+   * - The route a writer has onto these warnings:  it words nothing, knowing no language, and this does.
+   * - Noted on the line it's about, while compiling:  `note()`'s once-only keeps a recompile from saying it twice.
+   * - Nothing for a type read whole for a reason nobody can change, one that undo puts back.
+   */
+  static noteRead = ({ match, kind, typeName }: P.ReadNote): void => {
+    const key = READ_WHOLE_MESSAGES[kind]
+    if (!key) return
+    const { scope } = match
+    const type = typeName ? scope.getType(typeName) : undefined
+    const what = type
+      ? SpellWarnings.exampleNoun(scope, type, "definite")
+      : SP.Language.of(scope).parserMessage("read-whole-everything")
+    SpellWarnings.note(match as P.Match, SP.Language.of(scope).parserMessage(key, { what }))
+  }
+
+  /**
    * Note a warning on `statement` for each article which doesn't agree with its noun (epic `spanish` P8).
    * - e.g. English's `a apple`:  "Did you mean "an apple"?";  Spanish's `el carta`:  "¿Querías decir "la carta"?".
    * - Under the article.  The language's pack says what agrees (`SP.Language.agreement()`),
@@ -263,6 +281,13 @@ export class SpellWarnings {
       aType: SpellWarnings.exampleNoun(scope, listedBy)
     })
   }
+}
+
+/** What to say of a type read whole, by why:  a reason left out isn't worth saying. */
+const READ_WHOLE_MESSAGES: Partial<Record<P.ReadNote["kind"], SP.ParserMessageKey>> = {
+  "field named by a value": "read-whole-field-named-by-a-value",
+  "element reads it": "read-whole-element-reads-it",
+  "library reads it": "read-whole-library-reads-it"
 }
 
 /** The word rules whose forms are articles, which must agree with their noun -- see `SpellWarnings.noteArticles()`. */

@@ -456,14 +456,16 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    */
   describeValue(thing: object, property: string): SavedValue | WorkedOutValue | undefined {
     if (!(thing instanceof Thing || thing instanceof List)) return undefined
-    const info = schemaOf(thing.constructor).info(property)
-    const declaredAt = info?.declaredAt
+    const location = schemaOf(thing.constructor).locationOf(property)
+    const declaredAt = location?.declaredAt
     const declared = declaredAt && { declaredAt }
     if (isWorkedOut(thing, property)) {
       try {
         const read = () => whileReading(() => (thing as unknown as Record<string, unknown>)[property])
         const workedOutFrom = sourcesReadBy(read)
-        return { workedOutFrom, readsFrom: this.placesHolding(workedOutFrom), ...declared }
+        // what one run read, and what the compiler found:  a branch not taken, a list with nothing in it, a memo
+        const readsFrom = new Set([...this.placesHolding(workedOutFrom), ...(location?.readsFrom ?? [])])
+        return { workedOutFrom, readsFrom: [...readsFrom], ...declared }
       } catch (error) {
         console.error(`PlaceThings.describeValue():  reading \`${property}\` threw, so it has no origin`, error)
         return undefined
@@ -903,7 +905,7 @@ function isSameHeld(one: unknown, other: unknown): boolean {
 /** Is `property` worked out:  read with a getter, with no setter, and declared as nothing to store? */
 function isWorkedOut(thing: object, property: string): boolean {
   const info = schemaOf(thing.constructor).info(property)
-  if (info && Object.keys(info).some((key) => key !== "declaredAt")) return false
+  if (info) return false
   for (
     let proto = Object.getPrototypeOf(thing) as object | null;
     proto;

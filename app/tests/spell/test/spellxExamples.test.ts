@@ -136,9 +136,13 @@ function fixtureCompilesTheSame(name: string) {
 
 /** `compiled` without its `DECLARES` header, comment lines and blank lines:  they carry line numbers. */
 function codeOf(compiled: string): string {
-  return compiled
-    .replace(/\/\*! SPELL: DECLARES[^]*?\*\//g, "")
-    .split("\n")
-    .filter((line) => line.trim() && !line.trim().startsWith("//"))
-    .join("\n")
+  return (
+    compiled
+      .replace(/\/\*! SPELL: DECLARES[^]*?\*\//g, "")
+      // where a saved property's line is:  each form's own
+      .replace(/,? ?declaredAt: \{[^}]*\}/g, "")
+      .split("\n")
+      .filter((line) => line.trim() && !line.trim().startsWith("//"))
+      .join("\n")
+  )
 }
