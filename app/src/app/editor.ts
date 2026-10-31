@@ -101,7 +101,8 @@ export class EditorStore extends Observable {
     if (!path) path = editor.file?.path
     try {
       navigate(new SP.SpellLocation(path!).runnerUrl)
-      void editor.compileApp()
+      // what's running is this program as it is now:  a game in progress goes on
+      if (!editor.isRunningLatest) void editor.compileApp()
     } catch {
       editor.showError(appTexts.text("pathInvalid", { path: String(path) }))
     }
@@ -398,6 +399,21 @@ export class EditorStore extends Observable {
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
 
+  /** The compiled program run last:  `isRunningLatest` compares it. */
+  lastExecutedProgram: string | undefined = undefined
+
+  /** Is the running app the project as it is now, so there's nothing to run again? */
+  get isRunningLatest(): boolean {
+    const { project } = editor
+    const compiled = project?.outputFile.contents ?? project?.compiled
+    return (
+      !!compiled &&
+      !project?.isDirty &&
+      editor.lastExecutedPath === project?.path &&
+      editor.lastExecutedProgram === compiled
+    )
+  }
+
   /**
    * Run current `project`, already `compiled`, on the runtime programs run on.
    * - Logs how it went to `runtimeConsole()`.  See `runCompiled()`.
@@ -421,6 +437,7 @@ export class EditorStore extends Observable {
     const keepThings = !editor.startAfresh && editor.lastExecutedPath === project.path
     editor.startAfresh = false
     editor.lastExecutedPath = project.path
+    editor.lastExecutedProgram = compiled
     // a program in another language draws with that language's tags (`<es-texto>`) and says its tests' lines in it,
     // as `<SpellAppRunner>` runs it:  Spell UI defines the tags first (epic `spanish` P21)
     const lang = project.wordsLanguages[0]

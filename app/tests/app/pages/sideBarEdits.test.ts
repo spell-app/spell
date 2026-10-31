@@ -123,6 +123,13 @@ type DebugGlobals = {
   Inspector: { inspectThing(thing: object): void }
 }
 
+/** How many steps the side bar's history holds. */
+function historyLength(page: Page): Promise<number> {
+  return page.evaluate(
+    () => (window as unknown as { editor: { history: { undoSteps: unknown[] } } }).editor.history.undoSteps.length
+  )
+}
+
 /** Press ⌘Z, or ⇧⌘Z, with the focus off the code. */
 async function press(page: Page, keys: string): Promise<void> {
   await page.keyboard.press(keys)
@@ -214,16 +221,58 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   )
 
   test(
-    "a card made in a loop has no line of its own:  it says so, and writes nothing",
+    "a card made in a loop:  this one's to play with, and all of them can't change what each is given",
     { timeout: 90_000 },
     async () => {
       const page = await context.newPage()
-      await open(page, "Solitaire", { codeEditor: false })
+      await open(page, "Solitaire", { codeEditor: true })
       const { text: before } = await fileState(page, "Deck.spellml")
       await select(page, "solitaire-card")
-      await change(page, "suit", "hearts")
+
+      // it starts on "This card", as nothing can change for all of them, and says so before any change
+      const scopes = page.locator(".InspectorScope")
+      expect(await scopes.allTextContents()).toEqual(["This card", "All cards"])
+      expect(await scopes.first().getAttribute("selected")).not.toBeNull()
+      expect(await page.locator(".InspectorNotSaved").textContent()).toBe("Changes to this card can't be saved.")
+
+      // it plays:  the running card changes, and no file does
+      const suit = () =>
+        page.evaluate(
+          () => (document.querySelector("ui-property-editor") as unknown as { value: { suit: string } }).value.suit
+        )
+      const was = await suit()
+      const other = was === "clubs" ? "hearts" : "clubs"
+      await change(page, "suit", other)
+      expect(await suit()).toBe(other)
       expect((await fileState(page, "Deck.spellml")).text).toBe(before)
-      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/won't be saved/)
+      expect(await historyLength(page)).toBe(0)
+
+      // all cards:  its rank and suit come from the line that makes each, so they're read only, with a way to it
+      await scopes.nth(1).click({ force: true })
+      await page.waitForTimeout(400)
+      expect(await page.locator(".InspectorNotSaved").textContent()).toBe(
+        "Each card gets these from the code that makes it."
+      )
+      const rank = page.locator("ui-property[name=rank]")
+      expect(await rank.evaluate((field) => field.matches(":state(readonly)"))).toBe(true)
+      expect(await page.locator("ui-property[name=suit]").evaluate((field) => field.matches(":state(readonly)"))).toBe(
+        true
+      )
+      // read only means it: a press on another suit changes nothing
+      const shown = await suit()
+      await page
+        .locator("ui-property[name=suit] ui-item", { hasNotText: shown })
+        .first()
+        .click({ force: true })
+        .catch(() => undefined)
+      await page.waitForTimeout(200)
+      expect(await suit()).toBe(shown)
+      await rank.locator("button.origin").click({ force: true })
+      await page.waitForTimeout(1500)
+      expect(
+        await page.evaluate(() => (window as unknown as { editor: { file: { path: string } } }).editor.file.path)
+      ).toMatch(/Deck\.spellml$/)
+      expect((await fileState(page, "Deck.spellml")).text).toBe(before)
       await page.close()
     }
   )
@@ -305,6 +354,9 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         moved.count = 3
         Object.assign(window, { made, moved })
       })
+      // all counters:  it has a line of its own, so it starts on "This counter"
+      await page.locator(".InspectorScope").nth(1).click({ force: true })
+      await page.waitForTimeout(300)
       await change(page, "count", 5)
       const { text } = await fileState(page, "Counter.spell")
       expect(text).toBe(before.replace("set its count to 0", "set its count to 5"))
@@ -322,4 +374,125 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.close()
     }
   )
+
+  test(
+    "this one:  typed in a real field, added to the line that made it, and reset takes it off",
+    { timeout: 150_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", { codeEditor: true })
+      const { text: before } = await fileState(page, "Solitaire.spellml")
+      await select(page, "solitaire-foundation")
+      const name = page.locator("ui-property[name=name]")
+
+      // set here:  a dot and a reset, and its tooltip says so
+      expect(await name.evaluate((field) => field.matches(":state(here)"))).toBe(true)
+      expect(await name.locator(".label").getAttribute("title")).toBe("Set here")
+
+      // a real field, typed in
+      const input = name.locator("input")
+      await input.fill("mine")
+      await input.press("Tab")
+      await page.waitForTimeout(400)
+      const named = before.replace(`name = "clubs"`, `name = "mine"`)
+      expect((await fileState(page, "Solitaire.spellml")).text).toBe(named)
+
+      // the reset takes it off the line, comma and all, as a step of its own
+      const suit = page.locator("ui-property[name=suit]")
+      await suit.locator("button.origin").click({ force: true })
+      await page.waitForTimeout(400)
+      const noSuit = named.replace(`name = "mine", suit = clubs`, `name = "mine"`)
+      expect((await fileState(page, "Solitaire.spellml")).text).toBe(noSuit)
+
+      // not on its line now:  quieter, and a change adds it back
+      await page.waitForFunction(() => document.querySelector("ui-property[name=suit]")?.matches(":state(inherited)"))
+      await change(page, "suit", "hearts")
+      const added = noSuit.replace(`name = "mine"`, `name = "mine", suit = hearts`)
+      expect((await fileState(page, "Solitaire.spellml")).text).toBe(added)
+
+      // what it wrote is what the program does:  started afresh, that foundation is hearts
+      const suits = await page.evaluate(async () => {
+        const { editor } = window as unknown as DebugGlobals & { editor: { restartApp(): Promise<void> } }
+        await (editor as unknown as { restartApp(): Promise<void> }).restartApp()
+        await new Promise((resolve) => setTimeout(resolve, 2500))
+        const { core } = await editor.loadRuntime()
+        const all = core.things.all() as unknown as { name?: string; suit?: string }[]
+        return all.filter((thing) => thing.name === "mine").map((thing) => thing.suit)
+      })
+      expect(suits.at(-1)).toBe("hearts")
+      await page.close()
+    }
+  )
+
+  test(
+    "all of them:  a value the type declares changes there, for every one of them",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", { codeEditor: false })
+      const { text: before } = await fileState(page, "Solitaire.spellml")
+      await select(page, "solitaire-foundation")
+      const layout = page.locator("ui-property[name=layout]")
+      expect(await layout.locator(".label").getAttribute("title")).toBe("From Foundation")
+
+      // this one can't:  its type sets it after the line
+      await change(page, "layout", "vertical")
+      expect((await fileState(page, "Solitaire.spellml")).text).toBe(before)
+      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All foundations start with this/)
+
+      // "This foundation | All foundations" is too long for the row:  the switch is its dropdown, whose rows are these items
+      await page
+        .locator(".InspectorScope")
+        .nth(1)
+        .evaluate((item) => (item as HTMLElement).click())
+      await page.waitForTimeout(300)
+      await change(page, "layout", "horizontal")
+      const declared = `<spell-view "foundation" template="pile"`
+      const text = (await fileState(page, "Solitaire.spellml")).text
+      expect(text.slice(text.indexOf(declared))).toContain(`<property "layout">horizontal</>`)
+      expect(text.length).toBe(before.length + "horizontal".length - "stacked".length)
+      await page.close()
+    }
+  )
+
+  test(
+    "a type's `to create it` sets it after the line:  this one says only all of them can",
+    { timeout: 90_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Counter", { codeEditor: false })
+      const { text: before } = await fileState(page, "Counter.spell")
+      await page.evaluate(async () => {
+        const { editor, Inspector } = window as unknown as DebugGlobals
+        const { core } = await editor.loadRuntime()
+        Inspector.inspectThing(core.things.all().find((thing) => thing.constructor.name === "Counter")!)
+      })
+      await page.waitForSelector("ui-property-editor", { timeout: 8000 })
+      await page.waitForTimeout(800)
+      const count = page.locator("ui-property[name=count]")
+      expect(await count.locator(".label").getAttribute("title")).toBe("From Counter")
+      await change(page, "count", 5)
+      expect((await fileState(page, "Counter.spell")).text).toBe(before)
+      expect(await page.locator(".InspectorNotSaved").textContent()).toMatch(/All counters start with this/)
+      await page.close()
+    }
+  )
+
+  test("pressing Run keeps a game in progress", { timeout: 120_000 }, async () => {
+    const page = await context.newPage()
+    await open(page, "Solitaire", { codeEditor: true })
+    const mark = () =>
+      page.evaluate(() => {
+        const app = document.querySelector(".AppRoot")?.querySelector("*") as (Element & { kept?: boolean }) | null
+        const wasKept = !!app?.kept
+        if (app) app.kept = true
+        return wasKept
+      })
+    expect(await mark()).toBe(false)
+    await page.locator(".ModeTabs ui-item").first().click({ force: true })
+    await page.waitForTimeout(2500)
+    expect(page.url()).toMatch(/\/run\//)
+    expect(await mark()).toBe(true)
+    await page.close()
+  })
 })

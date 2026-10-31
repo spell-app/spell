@@ -62,6 +62,15 @@ const OWN_ATTRIBUTES = [
       "row.  None:  2 when `compact`, else 1.  A group's own `columns` wins in it."
   },
   {
+    name: "origins",
+    kind: "json",
+    reflect: false,
+    description:
+      "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  " +
+      "`here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  " +
+      "`action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did."
+  },
+  {
     name: "show-defaults",
     kind: "boolean",
     description:
@@ -95,6 +104,16 @@ export const propertyEditorVocabulary = {
         name: "ui-changed",
         detail: "{ name: string, value: unknown, things: object[] }",
         description: "A property was written to the thing (or things)."
+      },
+      {
+        name: "ui-reset",
+        detail: "{ name: string }",
+        description: "A property's reset button was pressed (`origins`):  the page does what that means."
+      },
+      {
+        name: "ui-show-code",
+        detail: "{ name: string }",
+        description: "A property's code button was pressed (`origins`):  the page shows it."
       },
       { name: "ui-loading", detail: "{ source: string }", description: "Its `source` page is about to load (P6)." },
       { name: "ui-loaded", detail: "{ source: string, content: string }", description: "It arrived (P6)." }

@@ -492,13 +492,16 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
 - It also goes into the program's text, touching only those characters, so the file's tab shows its unsaved dot and Save saves it.
-  Where it goes depends on where the value lives:
+  Where it goes depends on where the value lives, and for a thing on the switch beside its name,
+  `This foundation | All foundations`:
 
   | Where the value comes from | What a change does |
   | --- | --- |
   | Written on the drawn tag | Changes it there |
   | Not on the tag yet | Adds it to the tag |
-  | The line that made the thing, `a new foundation with suit = clubs` | Changes it there |
+  | The line that made the thing, `a new foundation with suit = clubs` | This one:  changes it there;  All:  read only, with a link to that line |
+  | Not on that line yet | This one:  adds it there;  All:  read only, the code gives it no starting value |
+  | The type sets it, `its "layout" is stacked` | This one:  writes nothing, it says to use All;  All:  changes it there |
   | The type's default, `set its count to 0` in `to create it` | Changes it there, and every thing still holding the old one |
   | Code:  an expression, or `suit = the suit` in a loop | Writes nothing, and the card says so, with a link to the code |
   | Nothing in the source says:  the program set it | Writes nothing, and the card says so |
@@ -507,8 +510,12 @@ Point at the app and a part of it is outlined;  click, and its properties are th
     In the code, ⌘Z is the code editor's;  in Run, the program's.
   - It works with the code editor not loaded:  a file owns its text, and the code editor only shows it.
   - Save also saves what the side bar changed in files not showing.
-  - Most of a program's values come from code or a loop today, and only `Counter` has a literal default among the built-in examples:
-    so choosing between this one and all of them is still to come.
+  - A thing made in a loop has no line of its own, as a card a deck makes:  "This card" is there to play with,
+    and says "Changes to this card can't be saved."
+    It starts there when nothing can change for all of them, and on "All" otherwise;  a thing with its own line starts on "This".
+  - A type's `to create it` runs after the line that made the thing, so a value it sets can't be given by that line.
+  - Each field shows where its value comes from, in `<ui-property-editor origins>`:  a dot and a reset when it's set here,
+    a quieter label when it comes from somewhere else, read only and a link when it's code;  its label's tooltip says where.
 - Under its properties, its Events:  what it does when people touch it, in the program's own words,
   each with its code under it.
   - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).
@@ -523,8 +530,7 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
-**Not yet:**  a change isn't written back into the code, nor an event's code typed there.
-Restart, and the app is as the code says.
+**Not yet:**  an event's code typed there isn't written back into the code.
 
 ### Themes, and their code colours
 

@@ -36,6 +36,24 @@ function nameOf(item: { name?: string; key?: string }): string {
 /** A vocabulary item list, as the vocabularies here build them. */
 export type Names<K extends keyof E.ComponentVocabulary> = E.ComponentVocabulary[K]
 
+/**
+ * Where a property's value comes from, as whoever holds the thing knows it:  `<ui-property-editor origins>`.
+ * - `kind`:
+ *   - `"here"`:  set on this thing:  a dot by its label, its value bold under `show-defaults`
+ *   - `"inherited"`:  it comes from somewhere else, e.g. its type:  a quieter label
+ *   - `"worked out"`:  read only
+ * - `from`:  the label's tooltip, saying where in words:  "From Card"
+ * - `action`:  a small button at the row's end, which only says it was pressed (`ui-reset`, `ui-show-code`)
+ */
+export type PropertyOrigin = {
+  /** Where it comes from. */
+  kind: "here" | "inherited" | "worked out"
+  /** Where, in words. */
+  from?: string
+  /** The button it offers. */
+  action?: "reset" | "show code"
+}
+
 /** The tags of the family, for making one:  `document.createElement(PROPERTY_TAG)`. */
 export const EDITOR_TAG = "ui-property-editor"
 export const GROUP_TAG = "ui-property-group"

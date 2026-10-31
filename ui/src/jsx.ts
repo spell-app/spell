@@ -21625,6 +21625,16 @@ export interface UIPropertyEventMap {
    * - `event.detail`:  `{ name: string, value: unknown }`
    */
   "ui-changed": CustomEvent<{ name: string; value: unknown }>
+  /**
+   * `ui-reset`:  Its reset button was pressed (its editor's `origins`).
+   * - `event.detail`:  `{ name: string }`
+   */
+  "ui-reset": CustomEvent<{ name: string }>
+  /**
+   * `ui-show-code`:  Its code button was pressed (its editor's `origins`).
+   * - `event.detail`:  `{ name: string }`
+   */
+  "ui-show-code": CustomEvent<{ name: string }>
 }
 
 /** `<ui-property>`'s own attributes, from its vocabulary. */
@@ -21990,6 +22000,16 @@ export interface UIPropertyAttributes {
    * - `event.detail`:  `{ name: string, value: unknown }`
    */
   "on-ui-changed"?: (event: UIPropertyEventMap["ui-changed"]) => void
+  /**
+   * `ui-reset`:  Its reset button was pressed (its editor's `origins`).
+   * - `event.detail`:  `{ name: string }`
+   */
+  "on-ui-reset"?: (event: UIPropertyEventMap["ui-reset"]) => void
+  /**
+   * `ui-show-code`:  Its code button was pressed (its editor's `origins`).
+   * - `event.detail`:  `{ name: string }`
+   */
+  "on-ui-show-code"?: (event: UIPropertyEventMap["ui-show-code"]) => void
 }
 
 /** `<ui-property>` in JSX:  its own attributes, and HTML's global ones. */
@@ -22005,6 +22025,16 @@ export interface UIPropertyEditorEventMap {
    * - `event.detail`:  `{ name: string, value: unknown, things: object[] }`
    */
   "ui-changed": CustomEvent<{ name: string; value: unknown; things: object[] }>
+  /**
+   * `ui-reset`:  A property's reset button was pressed (`origins`):  the page does what that means.
+   * - `event.detail`:  `{ name: string }`
+   */
+  "ui-reset": CustomEvent<{ name: string }>
+  /**
+   * `ui-show-code`:  A property's code button was pressed (`origins`):  the page shows it.
+   * - `event.detail`:  `{ name: string }`
+   */
+  "ui-show-code": CustomEvent<{ name: string }>
   /**
    * `ui-loading`:  Its `source` page is about to load (P6).
    * - `event.detail`:  `{ source: string }`
@@ -22175,6 +22205,17 @@ export interface UIPropertyEditorAttributes {
    * @deprecated write `columns` -- `prop:` stays only for compiled spell
    */
   "prop:columns"?: number | `${number}`
+  /**
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  origins?: unknown
+  /**
+   * Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `origins` -- `prop:` stays only for compiled spell
+   */
+  "prop:origins"?: unknown
   /**
    * A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).
    * - takes:  flag (present / absent)
@@ -22730,6 +22771,16 @@ export interface UIPropertyEditorAttributes {
    * - `event.detail`:  `{ name: string, value: unknown, things: object[] }`
    */
   "on-ui-changed"?: (event: UIPropertyEditorEventMap["ui-changed"]) => void
+  /**
+   * `ui-reset`:  A property's reset button was pressed (`origins`):  the page does what that means.
+   * - `event.detail`:  `{ name: string }`
+   */
+  "on-ui-reset"?: (event: UIPropertyEditorEventMap["ui-reset"]) => void
+  /**
+   * `ui-show-code`:  A property's code button was pressed (`origins`):  the page shows it.
+   * - `event.detail`:  `{ name: string }`
+   */
+  "on-ui-show-code"?: (event: UIPropertyEditorEventMap["ui-show-code"]) => void
   /**
    * `ui-loading`:  Its `source` page is about to load (P6).
    * - `event.detail`:  `{ source: string }`
@@ -38134,7 +38185,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint (instead of `hint`).
        *   - `output`:  Rich output (instead of `output`).
        *   - `actions`:  Small buttons at the end of the label row (`Reset`, `Auto`);  a taller one never grows the row.
-       * - events:  `ui-changed`
+       * - events:  `ui-changed`, `ui-reset`, `ui-show-code`
        */
       "ui-property": UIPropertyJSXAttributes
       /**
@@ -38149,7 +38200,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never close it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
+       * - events:  `ui-changed`, `ui-reset`, `ui-show-code`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
        */
       "ui-property-editor": UIPropertyEditorJSXAttributes
       /**
@@ -38591,6 +38642,7 @@ export interface UIEventMap {
   "ui-form-value": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
   "ui-completed": CustomEvent<unknown>
+  "ui-show-code": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
   "ui-moved": CustomEvent<unknown>

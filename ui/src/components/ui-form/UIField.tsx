@@ -155,6 +155,11 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     return this.hasLabel || this.hasActions || this.hasOutput || this.hasDescription || this.hasHintInRow
   }
 
+  /** The label's tooltip:  none here;  a subclass may give one (a property says where its value comes from). */
+  get labelTitle(): string | undefined {
+    return undefined
+  }
+
   /** Glyph of the info icon, while there's a tip. */
   readonly infoGlyph = new E.IconGlyph({ owner: this, name: () => (this.hasDescription ? INFO_ICON : undefined) })
 
@@ -246,11 +251,21 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     )
   }
 
+  /** What a subclass adds at the label row's far end, before the hint:  nothing here. */
+  protected rowEnd(): JSX.Element {
+    return undefined
+  }
+
   /** The label row:  the label, then (at its far end) actions, the output and the info icon with its tip. */
   private labelRow(): JSX.Element {
     return (
       <div class={CLASSES.row} part={this.partForName("row")}>
-        <span class={CLASSES.label} part={this.partForName("label")} onClick={this.onLabelClick}>
+        <span
+          class={CLASSES.label}
+          part={this.partForName("label")}
+          title={this.labelTitle}
+          onClick={this.onLabelClick}
+        >
           <slot name={this.slotForName("label")}>{this.labelText}</slot>
         </span>
         <Show when={this.hasActions}>
@@ -263,6 +278,7 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
             <slot name={this.slotForName("output")}>{this.output}</slot>
           </span>
         </Show>
+        {this.rowEnd()}
         <Show when={this.hasHint && this.hasHintInRow}>
           <span class={CLASSES.hint} part={this.partForName("hint")} title={this.hintText}>
             <slot name={this.slotForName("hint")}>{this.hintText}</slot>

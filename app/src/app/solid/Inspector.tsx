@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { setDebugGlobal } from "spell/util"
 import { E } from "spell/element"
-import type { P } from "spell/parser/parser"
+import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 // By file:  the folder's barrel loads the language service
@@ -19,7 +19,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
-import { InspectorWrites, type NotWritten } from "./InspectorWrites"
+import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -557,13 +557,73 @@ export class Inspector {
    * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
    */
   static fieldWritten(part: { element?: Element; value: object }, name: string, value: unknown): void {
-    const why = InspectorWrites.written(part, name, value)
+    const why = InspectorWrites.written(part, name, value, Inspector.scopeOf(part))
     setNotSaved(why && { part, why })
   }
 
   /**
+   * What a change to `part`'s fields applies to:  this one, or all of its type.
+   * - The person's last choice for its type, in this project;  else where it starts (`InspectorWrites.startingScope()`).
+   * - A Spell UI element has no type of its own to change:  always this one.
+   */
+  static scopeOf(part: { value: object }): InspectorScope {
+    if (!isThing(part.value)) return "this"
+    void scopeChoices()
+    const chosen = Inspector.scopesChosen[part.value.constructor.name]
+    return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
+  }
+
+  /** Apply changes to `part`'s fields to `scope`, remembered for its type. */
+  static setScope(part: { value: object }, scope: InspectorScope): void {
+    const key = part.value.constructor.name
+    editorPrefs.set(Inspector.projectPref(SCOPE_PREF), { ...Inspector.scopesChosen, [key]: scope })
+    setScopeChoices((count) => count + 1)
+    setNotSaved(undefined)
+  }
+
+  /** The choices made in this project, by type. */
+  private static get scopesChosen(): Record<string, InspectorScope> {
+    return (editorPrefs.get(Inspector.projectPref(SCOPE_PREF)) as Record<string, InspectorScope> | undefined) ?? {}
+  }
+
+  /** The names of `thing`'s stored properties:  what the side bar can edit. */
+  private static storedNamesOf(thing: object): string[] {
+    return ClassSchemas.fromClass(thing.constructor).attributes.map((attribute) => attribute.name)
+  }
+
+  /** Where each of `part`'s fields comes from, for its `<ui-property-editor>`. */
+  static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
+    const names = part.layout
+      ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
+      : Inspector.storedNamesOf(part.value)
+    return InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+  }
+
+  /** Seen from "all of them", can nothing of `part`'s change?  Each one's values come from the code that makes it. */
+  static isAllFromCode(part: Inspected): boolean {
+    return Object.values(Inspector.originsOf(part)).every((origin) => origin.kind === "worked out")
+  }
+
+  /** The field's reset button:  take it off the source. */
+  static fieldReset(part: { element?: Element; value: object }, name: string): void {
+    InspectorWrites.reset(part, name)
+    setNotSaved(undefined)
+  }
+
+  /** The field's code button:  show where its value comes from. */
+  static fieldCode(part: { element?: Element; value: object }, name: string): void {
+    const why = InspectorWrites.written(
+      part,
+      name,
+      (part.value as Record<string, unknown>)[name],
+      Inspector.scopeOf(part)
+    )
+    if (why?.reason === "expression") void Inspector.showCode(why)
+  }
+
+  /**
    * Add `event` to `element`'s events, remembered with the project;  once:  added again, nothing changes.
-   * - Writing a handler into the code is later (T18), as with property edits.
+   * - Writing a handler into the code is later.
    * - Nothing happens for an element outside the app.
    */
   static addEvent(element: Element, event: string): void {
@@ -1330,31 +1390,34 @@ function PropertiesCard(): JSX.Element {
       bar={
         <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
-            <span slot="title" class="InspectorTrail">
-              <For each={part().crumbs}>
-                {(crumb) => (
-                  <>
-                    <Show when={crumb.depth}>
-                      <span class="InspectorTrailStep">›</span>
-                    </Show>
-                    <span
-                      class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
-                      title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
-                      onClick={(event: MouseEvent) => {
-                        if (crumb.depth === part().crumbs.length - 1) return
-                        event.stopPropagation()
-                        Inspector.backTo(crumb.depth)
-                      }}
-                    >
-                      <span class="InspectorPartTagText">{crumb.label}</span>
-                      <Show when={!crumb.depth}>
-                        <LetGo label={crumb.label} />
+            <>
+              <span slot="title" class="InspectorTrail">
+                <For each={part().crumbs}>
+                  {(crumb) => (
+                    <>
+                      <Show when={crumb.depth}>
+                        <span class="InspectorTrailStep">›</span>
                       </Show>
-                    </span>
-                  </>
-                )}
-              </For>
-            </span>
+                      <span
+                        class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
+                        title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
+                        onClick={(event: MouseEvent) => {
+                          if (crumb.depth === part().crumbs.length - 1) return
+                          event.stopPropagation()
+                          Inspector.backTo(crumb.depth)
+                        }}
+                      >
+                        <span class="InspectorPartTagText">{crumb.label}</span>
+                        <Show when={!crumb.depth}>
+                          <LetGo label={crumb.label} />
+                        </Show>
+                      </span>
+                    </>
+                  )}
+                </For>
+              </span>
+              <ScopeSwitch part={part()} />
+            </>
           )}
         </Show>
       }
@@ -1374,11 +1437,14 @@ function PropertiesCard(): JSX.Element {
           <ui-property-editor
             schema={part.schema}
             value={part.value}
+            origins={Inspector.originsOf(part)}
             compact=""
             show-defaults=""
             on-ui-changed={(event: CustomEvent<{ name: string; value: unknown }>) =>
               Inspector.fieldWritten(part, event.detail.name, event.detail.value)
             }
+            on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
+            on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
           >
             <NotSavedNote part={part} />
             <Show when={part.layout}>
@@ -1428,6 +1494,47 @@ function PropertiesCard(): JSX.Element {
 // DEBUG:  `Inspector` at the devtools console
 setDebugGlobal({ Inspector })
 
+/** Bumped as a thing's scope is chosen:  `Inspector.scopeOf()` reads it. */
+const [scopeChoices, setScopeChoices] = createSignal(0)
+
+/** The pref remembering `Inspector.setScope()`, by project. */
+const SCOPE_PREF = "scope"
+
+/****************
+ * ### `<ScopeSwitch>`
+ * `This card | All cards`, in the row that names what's inspected, so it costs no height.
+ * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
+ * - Only for a thing:  a Spell UI element has no type of its own to change.
+ * - A plain pair of the row's own items, so it collapses with the row when the card is narrow.
+ ****************/
+function ScopeSwitch(props: { part: Inspected }): JSX.Element {
+  const typeWords = () => wordsOfType(props.part.value)
+  const scope = () => Inspector.scopeOf(props.part)
+  return (
+    <Show when={isThing(props.part.value)}>
+      <ui-item
+        selected={scope() === "this"}
+        class="InspectorScope"
+        onClick={() => Inspector.setScope(props.part, "this")}
+      >
+        {appTexts.text("inspectorScopeThis", { type: typeWords() })}
+      </ui-item>
+      <ui-item
+        selected={scope() === "all"}
+        class="InspectorScope"
+        onClick={() => Inspector.setScope(props.part, "all")}
+      >
+        {appTexts.text("inspectorScopeAll", { types: P.pluralize(typeWords()) })}
+      </ui-item>
+    </Show>
+  )
+}
+
+/** A thing's type, in words:  `DiscardPile` => `discard pile`. */
+function wordsOfType(thing: object): string {
+  return thing.constructor.name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()
+}
+
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
 const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
 
@@ -1436,14 +1543,38 @@ const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } |
  * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
  * - No row of its own until a change can't be saved.
  ****************/
-function NotSavedNote(props: { part: object }): JSX.Element {
+function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
-  const why = () => (notSaved()?.part === props.part ? notSaved()?.why : undefined)
+  const why = (): NotWritten | undefined => {
+    // on This, one of many:  said at once, not only after a change
+    if (
+      isThing(props.part.value) &&
+      Inspector.scopeOf(props.part) === "this" &&
+      !InspectorWrites.hasOwnLine(props.part.value)
+    ) {
+      return { reason: "playing" }
+    }
+    if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
+      return { reason: "allFromCode" }
+    }
+    return notSaved()?.part === props.part ? notSaved()?.why : undefined
+  }
+  const words = (reason: NotWritten["reason"]) => {
+    if (reason === "playing") return appTexts.text("inspectorPlaying", { type: wordsOfType(props.part.value) })
+    if (reason === "allFromCode") {
+      return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
+    }
+    if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
+    if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
+    if (reason === "typeSets")
+      return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(props.part.value)) })
+    return appTexts.text("inspectorNotSavedRunning")
+  }
   return (
     <Show when={why()}>
       {(note) => (
         <p class="InspectorTip InspectorNotSaved">
-          {appTexts.text(note().reason === "expression" ? "inspectorNotSavedCode" : "inspectorNotSavedRunning")}
+          {words(note().reason)}
           <Show when={note().reason === "expression"}>
             {" "}
             <a

@@ -8,6 +8,8 @@
  * - `:state(inline-check)`:  a compact editor's yes or no, the box then its label then its tip, on one line.
  * - `:state(set)` under `:state(show-defaults)`:  its value bold, through the owner token every control reads
  *   (`InputOwnerTokens.weight`).
+ * - Where its value comes from (`PropertyOrigin`):  `:state(here)`, a dot before its label;  `:state(inherited)`,
+ *   a quieter label;  `.origin`, its small button at the row's end:  a reset only while it's hovered or focused.
  * - A run of yes-or-no properties (`FlagRun`):  the one heading it shows only its pills' select;  the rest hide.
  */
 
@@ -61,6 +63,50 @@
   /* ## A value other than its default, bold */
   :host(:state(set):state(show-defaults)) .field {
     --_ui-input-owner-weight: var(--ui-font-weight-bold, 700);
+  }
+
+  /* ## Where its value comes from */
+  :host(:state(here)) .field > .row > .label::before {
+    content: "";
+    display: inline-block;
+    width: 0.45em;
+    height: 0.45em;
+    margin-inline-end: 0.35em;
+    vertical-align: 0.12em;
+    border-radius: 50%;
+    background: var(--ui-primary, currentColor);
+  }
+  :host(:state(inherited)) .field > .row > .label {
+    color: var(--ui-text-muted);
+    font-weight: var(--ui-font-weight-normal, 400);
+  }
+  .field > .row > .origin {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    margin-inline-start: auto;
+    padding: 0 0.15em;
+    border: 0;
+    background: none;
+    color: var(--ui-text-muted);
+    font-size: 0.85em;
+    line-height: 1;
+    cursor: var(--ui-control-cursor);
+  }
+  .field > .row > .origin > svg {
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+  .field > .row > .origin:hover {
+    color: var(--ui-text);
+  }
+  .field > .row > .origin.reset {
+    opacity: 0;
+  }
+  :host(:hover) .field > .row > .origin.reset,
+  .field > .row > .origin.reset:focus-visible {
+    opacity: 1;
   }
 
   /* ## A run of yes-or-no properties, as pills */

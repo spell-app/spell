@@ -23947,6 +23947,20 @@
               "type": {
                 "text": "CustomEvent<{ name: string, value: unknown }>"
               }
+            },
+            {
+              "name": "ui-reset",
+              "description": "Its reset button was pressed (its editor's `origins`).",
+              "type": {
+                "text": "CustomEvent<{ name: string }>"
+              }
+            },
+            {
+              "name": "ui-show-code",
+              "description": "Its code button was pressed (its editor's `origins`).",
+              "type": {
+                "text": "CustomEvent<{ name: string }>"
+              }
             }
           ],
           "slots": [
@@ -23976,6 +23990,10 @@
             }
           ],
           "cssParts": [
+            {
+              "name": "origin",
+              "description": "The small button its value's origin offers."
+            },
             {
               "name": "field",
               "description": "The field box."
@@ -24041,6 +24059,14 @@
             {
               "name": "inline-check",
               "description": "A yes or no in a compact editor:  the box, then its label, on one line."
+            },
+            {
+              "name": "here",
+              "description": "Its value is set on this thing (its editor's `origins`):  a dot by its label."
+            },
+            {
+              "name": "inherited",
+              "description": "Its value comes from somewhere else (its editor's `origins`):  a quieter label."
             },
             {
               "name": "set",
@@ -24538,6 +24564,14 @@
             },
             {
               "kind": "field",
+              "name": "origins",
+              "description": "Where each property's value comes from, by name:  `{ rank: { kind: 'inherited', from: 'From Card' } }`.  `here` shows a dot, `inherited` a quieter label, `worked out` is read only;  `from` is the label's tooltip;  `action` adds a small button (`reset`, `show code`).  A property it doesn't name looks as it always did.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
               "name": "rules",
               "description": "Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: \"email\", password: [\"notEmpty\", \"minLength[6]\"], name: { rules: [{ type: \"notEmpty\", prompt: \"...\" }], optional: true } }`.  A JS property (rich data), not an attribute.",
               "type": {
@@ -24551,6 +24585,20 @@
               "description": "A property was written to the thing (or things).",
               "type": {
                 "text": "CustomEvent<{ name: string, value: unknown, things: object[] }>"
+              }
+            },
+            {
+              "name": "ui-reset",
+              "description": "A property's reset button was pressed (`origins`):  the page does what that means.",
+              "type": {
+                "text": "CustomEvent<{ name: string }>"
+              }
+            },
+            {
+              "name": "ui-show-code",
+              "description": "A property's code button was pressed (`origins`):  the page shows it.",
+              "type": {
+                "text": "CustomEvent<{ name: string }>"
               }
             },
             {
