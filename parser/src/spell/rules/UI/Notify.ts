@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { Wording } from "spell/parser/spell/rules/expressions"
+import { SpellType } from "spell/parser/spell/rules/types"
 
 /**
  * `notify` rule:  tells the person something for a moment, in a toast, e.g. `notify "Saved!"`.
@@ -25,6 +26,12 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  */
 export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?"> {
   @proto static alias = ["statement", "async"]
+
+  /** Notes its old words, `and wait`:  it waits when it says how long (epic `language` P13). */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens)
+    return match && SpellType.noteRetiredLiterals(match)
+  }
 
   getAST(match: P.MatchFor<this>) {
     const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton } = match.groups

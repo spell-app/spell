@@ -573,7 +573,7 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 The deal is a loop with a pause in it, so you watch it happen:
 
 ```spell
-- animation deal the cards:
+- to deal the cards:
 	for each card in its deck
 		set start pile to the pile of the card
 		turn the card face down
@@ -588,7 +588,7 @@ The deal is a loop with a pause in it, so you watch it happen:
 			if column is row
 				turn the last card of (item column of the tableaus) face up
 			pause for 50 msec
-	wait for: play from the stock
+	play from the stock
 ```
 
 _From a `<spell>` block in Solitaire.spellml:  plain Spell, in the outline style._

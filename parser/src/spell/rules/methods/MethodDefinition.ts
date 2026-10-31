@@ -496,7 +496,6 @@ export class MethodDefinition<
    *   - wraps the whole thing in a `test(...)` call instead of a bare function, when there's no `instanceType`
    * - `props`:  SIDE EFFECT -- unshifts a `DestructuredAssignment` (from `getPropsAssignment()`)
    *   onto the START of the body, so prop variables are in scope before the rest of the method runs.
-   * - `asAnimation`:  SIDE EFFECT -- makes the method `async`.
    *   What runs once at a time is the queue's job now, where a person's action enters (`ActionQueue`, `core`).
    * - `instanceType` set:  emits a `PropertyDefinition` for `Type`,
    *   a getter when `asPostfixExpression`, else a method.
@@ -504,10 +503,7 @@ export class MethodDefinition<
    *   when `asTest`, a loose function whose body is itself a `test(...)` call.
    */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
-    const { asTest, asAnimation } = match.groups as {
-      asTest?: P.Match
-      asAnimation?: P.Match
-    }
+    const { asTest } = match.groups as { asTest?: P.Match }
     const signature = this.getSignature(match)!
     const { methodName = "", args, props, instanceType, instanceTypeName, asPostfixExpression, testOf } = signature
     // what it declared is said by its `/*! SPELL: DECLARES` comment -- see `SP.SpellDeclarations.commentFor()`
@@ -563,10 +559,6 @@ export class MethodDefinition<
         isNewVariable: true
       })
       ;(method.body.statements ??= []).unshift(newOne)
-    }
-
-    if (asAnimation) {
-      method.async = true
     }
 
     if (instanceType) {

@@ -286,8 +286,13 @@ Its first line is how you call it, with each blank's type in brackets:
     - A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
     - In JavaScript and TypeScript, a drawing, a `create` and a `to test` must answer at once:
       they start what they call without waiting for it.
-    - `pause` and `wait for` in a drawing are errors:  make it a getter that waits, and draw that.
+    - `pause` in a drawing is an error:  make it a getter that waits, and draw that.
     - A `send` waits only if a handler of that event does.
+- Nothing says it, so nothing needs saying:  `animation`, `wait for` and `await` are retired, in English and Spanish.
+  - Old source still reads, each one an error, and `spell lint --fix` rewrites it:
+    `- animation deal:` is `- to deal:`, `wait for: deal` is `deal`, and `<action "deal" animated>` is `<action "deal">`.
+  - `start process` and `process x is running` stay;  `start animation` is now `start process`.
+  - The editor says which calls wait:  hover one.
 - A getter may wait too, with no new words:
 
   ```spell

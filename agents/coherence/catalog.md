@@ -101,6 +101,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `inString|let depth = 0` in a new scan of spell text
 - **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
 
+### A retired word
+
+- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredTypeWords` / `retiredRuleWords`:
+  it still reads, as a parse error naming its replacement (`""`:  simply gone), which `spell lint --fix` writes
+  (`SpellType.noteRetiredLiterals()`, `retiredWordErrorsIn()`, `spell/parser/spell`;  `fixRetiredWords()`, spell-app's `lintCommand.ts`)
+- **Use it when:**  taking a word out of the language:  no rewrite command of its own.
+- **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
+- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
+
 ### Comments in code
 
 - **It is:**  oxc's parser for JavaScript and TypeScript (as `parser/src/spell/node/spellSyntax.ts` uses it), spell's

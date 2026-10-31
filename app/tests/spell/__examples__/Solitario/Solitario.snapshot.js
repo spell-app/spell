@@ -89,9 +89,9 @@ export class Carta extends View {
     this.dirección = "abajo"
   }
 
-  async voltear() {
-    if (this.estáBocaDirección("arriba")) await this.voltearBocaAbajo()
-    else await this.voltearBocaArriba()
+  voltear() {
+    if (this.estáBocaDirección("arriba")) this.voltearBocaAbajo()
+    else this.voltearBocaArriba()
   }
 
   /**
@@ -789,7 +789,7 @@ export class Solitario extends App {
 
   /** voltea la siguiente carta de la reserva, sobre los descartes */
   async robarDeLaReserva() {
-    if (this.reserva.isEmpty) await this.rehacerLaReserva()
+    if (this.reserva.isEmpty) this.rehacerLaReserva()
 
     const it = this.reserva.lastItem
     it?.voltearBocaArriba()
@@ -836,7 +836,7 @@ export class Solitario extends App {
     const pila = core.randomItemOf(pilasRestantes)
     const cartasOcultas = pila?.filter((carta) => carta.estáBocaDirección("abajo"))
     const carta = cartasOcultas?.randomItem()
-    await carta?.voltearBocaArriba()
+    carta?.voltearBocaArriba()
     await core.pauseFor(30, "ticks")
     this.descartes.append(carta)
   }

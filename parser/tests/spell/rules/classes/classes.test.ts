@@ -191,8 +191,8 @@ describe("testing spell module classes", () => {
     test("an old word is an error naming its new word, and the line still means the same", () => {
       const { code, errors } = parsed("old-words", ["a card is a drawable thing", "a pile is a drawable list of cards"])
       expect(errors.map((error) => error.message)).toEqual([
-        '"drawable thing" is now "view":  say "view" instead',
-        '"drawable list" is now "viewable list":  say "viewable list" instead'
+        '"drawable thing" is now "view":  say "view" instead, or run `spell lint --fix`',
+        '"drawable list" is now "viewable list":  say "viewable list" instead, or run `spell lint --fix`'
       ])
       // what a quick fix puts in the old words' place, and where they are
       expect(errors.map((error) => [error.inputText.trim(), error.data.replacement])).toEqual([

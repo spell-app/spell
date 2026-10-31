@@ -49,16 +49,16 @@ solitaire is an app:
 			add it to the stock
 			turn the card face down
 	// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
-	- animation play from the stock:
+	- to play from the stock:
 		if the stock is empty
-			wait for: reset the stock
+			reset the stock
 		get the last card of the stock
 		turn it face up
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
 		add it to the discards
 	// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
-	- animation deal the cards:
+	- to deal the cards:
 		for each card in the deck
 			set start pile to the pile of the card
 			turn the card face down
@@ -73,7 +73,7 @@ solitaire is an app:
 				if column is row
 					turn the last card of (item column of the tableaus) face up
 				pause for 50 msec
-		wait for: play from the stock
+		play from the stock
 
 
 	// Its moves:  the menu's buttons, its keys, and the board's right click
@@ -90,7 +90,7 @@ solitaire is an app:
 		set anything changed to no
 		if the discards is not empty
 			set test card to the last card of the discards
-			if await play test card
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
 		// each tableau's last card onto its foundation
@@ -100,7 +100,7 @@ solitaire is an app:
 			set foundation to the first pile in the foundations where its suit is the suit of test card
 			if the foundation can take test card
 				set anything changed to yes
-				await play test card
+				play test card
 				pause for 100 msec
 		// each tableau's face-up cards, all together, onto another tableau
 		for each pile in the tableaus
@@ -108,10 +108,10 @@ solitaire is an app:
 			if face up cards is empty return
 			set test card to the first card of face up cards
 			if test card is a king and test card is the first card of the pile return
-			if await play test card
+			if play test card
 				set anything changed to yes
 				pause for 500 msec
-		if anything changed await auto play
+		if anything changed auto play
 	// Turn up a face-down card from a tableau, at random, onto the discards
 	- to cheat:
 		- shortcut C

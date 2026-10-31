@@ -84,6 +84,7 @@ async function checkProject(
  * - The parser marks each one as an error whose `data.replacement` is its new word:
  *   see `SpellType.retiredWordErrorsIn()`.
  * - A word written with a capital keeps it:  `Drawable thing` => `View`.
+ * - A word that's simply gone takes its colon and spaces with it:  `wait for: deal` => `deal` (epic `language` P13).
  * - Not a test project's files:  they stay frozen, as their editor pages do.
  * - SIDE EFFECT:  parses `project`, then hands it each file's new text, so what's listed after is what's left.
  * - Returns what it fixed, each a problem saying so, where the word was.
@@ -108,6 +109,10 @@ async function fixRetiredWords(
       .sort((a, b) => b.start - a.start)
     const edits = retired.map(({ start, end, replacement }) => {
       const written = text.slice(start, end)
+      if (!replacement) {
+        const gone = end + /^[ \t]*:?[ \t]*/.exec(text.slice(end))![0].length
+        return { start, end: gone, text: "", message: `fixed:  "${written}" isn't needed any more` }
+      }
       const word = /^[A-ZÁÉÍÓÚÑ]/.test(written) ? replacement[0]!.toUpperCase() + replacement.slice(1) : replacement
       return { start, end, text: word, message: `fixed:  "${written}" is now "${word}"` }
     })
@@ -119,7 +124,9 @@ async function fixRetiredWords(
 /**
  * With `--fix`:  put each HTML habit in `project`'s `.spellml` files right -- only `file`'s, if given --
  * and write each changed file back (epic `elemental-spell` P8):
- * a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`.
+ * - a component written by its tag, where spellx names it bare, `<ui-button>Go</ui-button>` => `<button>Go</button>`
+ * - an action's retired attribute, as spell waits by itself:  `<action "deal" animated>` => `<action "deal">`
+ *   (epic `language` P13)
  * - Only a tag the file's packs give that bare name (`SP.ComponentPacks`):  `<solitaire-card>` stays.
  * - Not in a `<spell>` chunk:  code spell, where `<button>` is the web's (`SP.isCodeSpell()`, J83).
  * - A named closer is renamed with its tag;  a `</>` is left alone.
@@ -139,6 +146,16 @@ async function fixHtmlHabits(
     const { lang } = spellFile.language
     const edits: TextEdit[] = []
     P.Tokenizer.forEachToken(spellFile.match.tokens, (token) => {
+      if (token instanceof SP.SpellxTagToken) {
+        for (const { name, word, start } of token.tag.attributes) {
+          if (name !== "animated") continue
+          const message = `fixed:  "${word}" isn't needed any more`
+          // with the spaces before it
+          const before = /[ \t]*$/.exec(spellFile.contents!.slice(0, start))![0].length
+          edits.push({ start: start - before, end: start + word.length, text: "", message })
+        }
+        return
+      }
       if (!(token instanceof P.JSXElementToken) || !token.tagName.includes("-")) return
       // a `<spell>` chunk is code spell, where a bare tag is the web's:  `<ui-button>` stays (J83)
       if (SP.isCodeSpell(token)) return

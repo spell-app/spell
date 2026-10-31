@@ -34,9 +34,9 @@ una "carta" es una vista donde:
 		poner su dirección a abajo
 	- para voltearla:
 		si está boca arriba:
-			esperar a voltear eso boca abajo
+			voltear eso boca abajo
 		de lo contrario:
-			esperar a voltear eso boca arriba
+			voltear eso boca arriba
 
 
 	// Imagen de la carta:  dibujada con letras especiales del juego de caracteres unicode

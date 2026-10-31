@@ -5467,8 +5467,8 @@
           "ruleNames": ["await"],
           "internal": false,
           "file": "src/spell/rules/async/Await.ts",
-          "line": 17,
-          "purpose": "`await`/`wait for` an expression, with the expression itself optional (bare `await`).",
+          "line": 21,
+          "purpose": "RETIRED words for waiting, as spell waits by itself (epic `language` P13, Q9): `await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
               "syntax": "(await|wait for) :? {expression:operand}?"
@@ -5496,7 +5496,7 @@
           "ruleNames": ["check_process"],
           "internal": false,
           "file": "src/spell/rules/async/CheckProcess.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Check whether a conceptual animation or process is currently running.",
           "syntaxes": [
             {
@@ -5600,7 +5600,7 @@
           "ruleNames": ["start_process"],
           "internal": false,
           "file": "src/spell/rules/async/StartProcess.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "Start a conceptual animation or process, e.g. `start animation dealing`.",
           "syntaxes": [
             {
@@ -5626,7 +5626,7 @@
           "ruleNames": ["stop_process"],
           "internal": false,
           "file": "src/spell/rules/async/StopProcess.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Stop a conceptual animation or process.",
           "syntaxes": [
             {
@@ -6530,11 +6530,11 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})?",
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (and wait)?",
               "example": "notify \"Yo!\"",
               "outputs": {
                 "js": {
@@ -6756,21 +6756,21 @@
           "ruleNames": ["create_animation"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateAnimation.ts",
-          "line": 14,
-          "purpose": "Defines an animation method: `animation deal the cards`, or `create animation deal the cards`.",
+          "line": 13,
+          "purpose": "RETIRED words for an action, as spell waits by itself (epic `language` P13, Q9): `animation deal the cards`, or `create animation deal the cards`.",
           "syntaxes": [
             {
-              "syntax": "(asAnimation:create? animation) {signature:method_signature} :? {statement_body}?",
+              "syntax": "create? animation {signature:method_signature} :? {statement_body}?",
               "example": "animation deal the cards",
               "outputs": {
                 "js": {
-                  "code": "export async function dealTheCards() {}"
+                  "code": "export function dealTheCards() {}"
                 },
                 "ts": {
-                  "code": "export async function dealTheCards() {}"
+                  "code": "export function dealTheCards() {}"
                 },
                 "py": {
-                  "code": "async def deal_the_cards() -> None:\n    pass"
+                  "code": "def deal_the_cards() -> None:\n    pass"
                 }
               }
             }

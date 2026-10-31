@@ -114,8 +114,8 @@ describe("SpellLanguageService, spellx", () => {
     ])
   })
 
-  // epic `debut` I97
-  test("an animation's `animated` colours as an attribute's name, as `description` does", async () => {
+  // epic `debut` I97, epic `language` P13
+  test("the retired `animated` is an error naming the fix, and colours as an attribute's name", async () => {
     const animatedFolder = resolve(dir, "AnimatedTiles")
     mkdirSync(animatedFolder)
     const animatedText = tileText.replace(
@@ -135,7 +135,9 @@ describe("SpellLanguageService, spellx", () => {
     const animatedUri = pathToFileURL(resolve(animatedFolder, "FlipTile.spellml")).href
     await workspace.update(animatedUri, animatedText)
     const animated = workspace.fileFor(animatedUri)!
-    expect(service.diagnostics(animated).map((it) => it.message)).toEqual([])
+    expect(service.diagnostics(animated).map((it) => it.message)).toEqual([
+      '"animated" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`'
+    ])
     const tokens = describeTokens(animated).filter((token) => token.startsWith("31:"))
     expect(tokens).toContain(`31:1 "<action" keyword`)
     expect(tokens).toContain(`31:16 "animated" property`)

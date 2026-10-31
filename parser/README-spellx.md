@@ -104,7 +104,7 @@ reversible:`, and reads to the same tree as the English card.
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `animated` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `animada` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
@@ -280,9 +280,8 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 - Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
   the twin puts it under the details.
-- An animation is an action written to wait, as any action that pauses already does:  `<action "deal the cards" animated>`,
-  the outline's `- animation deal the cards:`;  in Spanish, `<acción "repartir las cartas" animada>`.
-  - Run again while it's running, it does nothing.
+- An action that pauses waits, with no word for it;  run again by a person while it's running, it does nothing.
+  - The old attribute `animated` (Spanish `animada`) is an error, which `spell lint --fix` takes out.
 
 **Menus:**  `<menu "GameMenu">` holds `<action "deal" />`s, `<action "-" />` a line between groups;
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as

@@ -767,7 +767,7 @@ export class SpellLanguageService {
     // an outline body's line, as the sentence style says it -- see `SP.SpellStatement.getLongForm()`
     const longForm = statement?.rule instanceof SP.SpellStatement ? statement.rule.getLongForm(statement) : undefined
     if (longForm) sections.unshift(`**${LSP.LspTexts.for(file.language).text("readsAs")}**  \`${longForm}\``)
-    if (subject) sections.push(this.describeSubject(subject))
+    if (subject) sections.push(this.describeSubject(subject, file))
     const compiled = statement && SpellLanguageService.compileQuietly(statement)
     if (compiled) sections.push(["```js", SpellLanguageService.truncateLines(compiled, 20), "```"].join("\n"))
     const range = subject ? this.rangeOf(file, subject.nameMatch) : this.rangeOf(file, described)
@@ -794,7 +794,7 @@ export class SpellLanguageService {
   }
 
   /** Markdown for what `subject` is, and where it was declared -- in its program's language (`textsFor()`). */
-  private describeSubject(subject: LSP.SpellSubject): string {
+  private describeSubject(subject: LSP.SpellSubject, file?: SP.SpellFile): string {
     const texts = SpellLanguageService.textsFor(subject)
     const lines: string[] = []
     if (subject.kind === "variable") {
@@ -824,6 +824,11 @@ export class SpellLanguageService {
         subject.record.declaredBy && subject.record.declaredBy.rule.getDeclaration(subject.record.declaredBy)
       const kind = declaration?.kind === "function" ? texts.text("function") : texts.text("method")
       lines.push(`${kind} **${declaration?.name ?? subject.record.name}**`)
+      // no word in the source says it (epic `language` P13):  from the pass every target compiles with
+      const { record } = subject
+      if (file && ((record instanceof P.ScopeMethod && record.waits) || file.project.waitingNames().has(record.name))) {
+        lines.push(texts.text("waits"))
+      }
       const { syntax } = subject.record.definition
       const or = ` ${texts.text("or")} `
       if (syntax) lines.push(`${texts.text("matches")} \`${[syntax].flat().join(`\`${or}\``)}\``)

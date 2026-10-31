@@ -92,7 +92,7 @@ UI.addRule(Notify, {
     "notify {kind:notify_kind}? {message:expression} (titled {title:expression})?" +
     " (in (inverted:inverted)? {color:toast_color})? {position:toast_position}?" +
     " ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}?" +
-    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})?",
+    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (and wait)?",
   tests: [
     {
       compileAs: "statement",

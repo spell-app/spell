@@ -132,8 +132,25 @@ export const englishWords: SP.LanguageWords = {
     "drawable list": "viewable list",
     "drawable-list": "viewable list"
   },
-  /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
-  retiredWords: { parts: "slots" },
+  /**
+   * Spell's own old words, each an error naming its new one:
+   * - a view's parts are slots (epic `elemental-spell` P27)
+   * - waiting is the default, so nothing says it (epic `language` P13)
+   */
+  retiredWords: {
+    parts: "slots",
+    animation: "to",
+    "create animation": "to",
+    await: "",
+    "wait for": "",
+    "and wait": ""
+  },
+  /** A process was once also an animation. */
+  retiredRuleWords: {
+    start_process: { animation: "process" },
+    stop_process: { animation: "process" },
+    check_process: { animation: "process" }
+  },
 
   /**
    * Spellx's words, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -196,7 +213,7 @@ export const englishWords: SP.LanguageWords = {
       icon: "icon",
       "menu-bar": "menu-bar",
       locked: "locked",
-      // an action that may wait:  an animation (epic `debut` I97)
+      // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
       animated: "animated",
       draggable: "draggable",
       droppable: "droppable",
@@ -229,8 +246,6 @@ export const englishWords: SP.LanguageWords = {
       alias: "it {name}",
       aliasBlock: "it {name} :",
       action: "to {words} :",
-      // an action that may wait, `<action "deal the cards" animated>` (epic `debut` I97)
-      animation: "animation {words} :",
       actionDetails: {
         shortcut: "shortcut {shortcut}",
         "enabled-when": "enabled when {enabled-when}",

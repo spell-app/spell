@@ -57,12 +57,6 @@ describe("what waits", () => {
     expect(js).not.toMatch(/await await/)
   })
 
-  test("`wait for` says once what the pass would say", () => {
-    const js = compiled(PROJECT(`	- to go it:\n		wait for: bump it`))
-    expect(js).toContain("await this.bump()")
-    expect(js).not.toMatch(/await await/)
-  })
-
   test("a loop calling what waits goes one by one, in every target", () => {
     const spell = PROJECT(`	- to go it:\n		set deck to a new list\n		for each card in deck\n			bump the card`)
     const js = compiled(spell)
@@ -158,8 +152,8 @@ describe("what a person presses", () => {
     expect(compiled(DRAWN, "ts/solid")).toContain("onClick={core.pressed(this, async () => await this.deal())}")
   })
 
-  test("an animation holds no guard of its own:  that's the queue's job", () => {
-    const js = compiled("a card is a thing:\n\t- animation deal it:\n\t\tpause for 1 sec\n")
+  test("an action that waits holds no guard of its own:  that's the queue's job", () => {
+    const js = compiled("a card is a thing:\n\t- to deal it:\n\t\tpause for 1 sec\n")
     expect(js).toContain("async deal()")
     expect(js).not.toContain("processIsRunning")
   })
@@ -396,5 +390,65 @@ describe("reads after a wait", () => {
       "follow"
     )
     expect(warningsOf(`		pause for 1 sec\n		return the score`)).not.toContain("follow")
+  })
+})
+
+// epic `language` P13, Q9
+describe("the old words for waiting, retired", () => {
+  /** `lines`, a file of its own project:  each error's words and what replaces them, and its code. */
+  function parsed(path: string, lines: string[]) {
+    const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
+    const errors = (SP.Block.getParseErrors(file!.match!) ?? []).map((error) => [
+      error.inputText.trim(),
+      error.data.replacement
+    ])
+    return { errors, messages: file!.errors.map((error) => `${error}`), code: file!.compiled }
+  }
+
+  test.each([
+    ["- animation deal it:", "animation", "to"],
+    ["- create animation deal it:", "create animation", "to"],
+    ["wait for: slow it", "wait for", ""],
+    ["await slow it", "await", ""],
+    ["start animation dealing", "animation", "process"],
+    ["stop animation dealing", "animation", "process"],
+    ["if animation dealing is running then print 1", "animation", "process"],
+    ['notify "Bye" for 1 second and wait', "and wait", ""]
+  ])("English:  %s", (line, words, replacement) => {
+    const body = line.startsWith("-") ? [`\t${line}`, "\t\tpause for 1 sec"] : ["\t- to go it:", `\t\t${line}`]
+    const { errors, messages } = parsed("/Test.spell", [
+      "a card is a thing:",
+      "\t- to slow it:",
+      "\t\tpause for 1 sec",
+      ...body
+    ])
+    expect(errors).toEqual([[words, replacement]])
+    expect(messages[0]).toContain("spell lint --fix")
+  })
+
+  test.each([
+    ["- animación repartirla:", "animación", "para"],
+    ["- crear animacion repartirla:", "crear animacion", "para"],
+    ["esperar a: frenar", "esperar a", ""],
+    ["esperar frenar", "esperar", ""],
+    ["iniciar animación repartir", "animación", "proceso"],
+    ["detener animación repartir", "animación", "proceso"],
+    ['notificar "Adiós" durante 1 segundo y esperar', "y esperar", ""]
+  ])("Spanish:  %s", (line, words, replacement) => {
+    const body = line.startsWith("-") ? [`\t${line}`, "\t\tpausar 1 segundo"] : ["\t- para ir:", `\t\t${line}`]
+    const lines = ["una carta es una cosa donde:", "\t- para frenar:", "\t\tpausar 1 segundo", ...body]
+    const { errors, messages } = parsed("/Prueba.es.spell", lines)
+    expect(errors).toEqual([[words, replacement]])
+    expect(messages[0]).toContain("spell lint --fix")
+  })
+
+  test("what stays:  `start process`, `process x is running`", () => {
+    const { errors } = parsed("/Test.spell", ["start process dealing", "if process dealing is running then print 1"])
+    expect(errors).toEqual([])
+  })
+
+  test("a word in a comment or a text is left alone", () => {
+    const { errors } = parsed("/Test.spell", ["// wait for: an animation", 'print "wait for: an animation"'])
+    expect(errors).toEqual([])
   })
 })
