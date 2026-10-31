@@ -84,6 +84,12 @@ export type ServerConfig = {
    * (epics' `EpicHome.person()`, told by its route module)
    */
   person?: string
+  /**
+   * the server keeps the person's preferences at `/api/prefs` (`ServerPlace`'s protocol):  spell-app's spaces answer
+   * it, and say so through their route module;  absent:  nothing answers there (spell-epic's own server, a demo
+   * check's), so a page keeps them in the browser (Spell UI's `ThemePreference.keptIn`)
+   */
+  prefs?: boolean
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
   saveFile?: (save: FileSave) => Promise<PageEditResult>
   readPage?: () => Promise<PageSource>

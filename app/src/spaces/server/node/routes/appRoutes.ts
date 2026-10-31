@@ -21,6 +21,8 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *   - `/api/...` -- the app's API, `./api` (as `cli.ts` serves it alone, `yarn start:server`);  bodies as JSON5
  *     - a pref saved through it (`/api/prefs/save`) is told to every open page, over the live channel
  *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
+ *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):  a server without this
+ *       module (spell-epic's own) has none, and its pages never ask
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
@@ -37,7 +39,9 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  */
 const appRoutes: RouteModule = {
   name: "app",
-  setup({ router, root, info, live, onListening, onStop }) {
+  setup({ router, root, info, live, addPageConfig, onListening, onStop }) {
+    // the person's prefs are answered here (`/api/prefs`, under `api`):  every page keeps its theme in their space
+    addPageConfig(() => ({ prefs: true }))
     const editor = new EditorServer(root)
     onListening(() => editor.start(info.port))
     onStop(() => editor.stop())

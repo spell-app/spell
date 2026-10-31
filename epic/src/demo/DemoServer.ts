@@ -30,6 +30,13 @@ import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/
  *     - mounted, not linked into `content`:  a link there would put the real pages under `src/`, for `tsc` and the
  *       linter to walk
  *   - the route modules are this checkout's, set up for it (`EpicServer`'s `ROUTE_MODULES`)
+ *   - the bundles as they are on disk (`yarn pack:build`, `spell bundle --stale` first):  it builds none
+ *     (`EpicServer`'s `bundles: false`, epic `epic-engine` I186)
+ *     - a build in the background, as the real server's, finished mid-check:  live reload reloaded the pages under
+ *       it, and the steps it was in the middle of failed one run in two;  and it wrote committed generated files
+ *       from whatever was half-edited in the checkout
+ *   - and live reload follows the copies only, never the code (`watchCode: false`):  the checkout's own page server
+ *     rebuilds its bundles as its sources change (epic `epic-engine` P54), which reloaded the pages too
  * - NOTHING outside the check is touched:
  *   - a wake (Send or its countdown with nobody listening) never types into a window, opens a session or
  *     launches one:  `ReviewStart`'s `wake()` is stubbed, recording the epic in `wakes`, and answering what a
@@ -145,7 +152,7 @@ export class DemoServer {
     })
     for (const mount of mounts) made.web.files.mount(mount)
     for (const [name, dir] of sharedFolders()) made.web.files.mount({ prefix: `/${name}/`, dir })
-    const server = await made.start({ port, pidFile: false })
+    const server = await made.start({ port, pidFile: false, bundles: false, watchCode: false })
     // the copies a check just wrote:  macOS reports them to the new watcher late, and live reload would reload a page
     // opened before that
     await new Promise((settled) => setTimeout(settled, SETTLE_MS))
