@@ -38,10 +38,11 @@
  *   - `inbox watch`, `inbox wait`:  listening, the header's tooltips say so
  *   - on a question:  `status underway`, a blue Underway card, the item `progress`;  `status done`, the card green
  *   - `inbox apply`:
- *     - the sent Approve CLEARED (`review-as="approve"`), the chip solid green
+ *     - the sent Approve CLEARED (`review-as="approve"`), the chip solid grey (approved:  grey at once)
  *     - the skip:  reviewed, still open, its note kept as Owen's reply
- *     - the pick approves its call (closed, the reply's set `chosen`, a Noted card `Chose C · ...:  recorded ...`),
- *       its pill SOLID
+ *     - the pick approves its call (closed, the reply's set `chosen`, the pick on the set, `chosen-note`
+ *       `recorded, the call accepted;  ...`, no Noted card:  epic `epic-engine` I153), its pill SOLID
+ *   - a todo's plane and x on the first two open todos, never a limit (a `T` marked `limit`, epic `epic-engine` P44)
  *   - Auto Send's ring round the header's plane (epic `epic-engine` P53):  none with nothing marked, there while
  *     marks wait (2 minutes, the default, in a fresh browser), gone once sent
  *   - a countdown's send (epic `epic-engine` P20, P53, as Review Now did;  dispatched here, not waited for):
@@ -266,6 +267,7 @@ async function run() {
     Array.from(document.querySelectorAll("epic-item"), (item) => ({
       id: item.id,
       open: item.getAttribute("status") === "open",
+      limit: item.hasAttribute("limit"),
       details: item.hasAttribute("source") || Array.from(item.children).some((child) => !child.hasAttribute("slot"))
     }))
   )
@@ -300,8 +302,9 @@ async function run() {
   await expectMark(page, approved, { action: "approve" }, `Approve on ${approved}`)
 
   // a todo's plane and x (Owen, 2026-10-09):  marked dashed, green and grey;  applied below
-  // open ones:  a real doc's done todos can't be queued (its chip outlined only while open)
-  const todos = listed.filter((item) => item.open && /^t\d+$/.test(item.id)).map((item) => item.id)
+  // open ones:  a real doc's done todos can't be queued (its chip outlined only while open);  never a limit (a `T`
+  // marked `limit` since epic `epic-engine` P44, a caveat before), which has a line item's buttons, no plane or x
+  const todos = listed.filter((item) => item.open && !item.limit && /^t\d+$/.test(item.id)).map((item) => item.id)
   if (todos.length >= 2) {
     await press(page, todos[0], "next")
     await expectMark(page, todos[0], { action: "next" }, `the plane on ${todos[0]}`)
@@ -462,14 +465,16 @@ async function run() {
   const done = await statusOf(page, question)
   expect(`${question}:  the card Done`, done.cards, ["done"])
 
-  // `inbox apply`:  the sent Approve applied, its button cleared, the chip green;  the skip reviewed, its note kept
+  // `inbox apply`:  the sent Approve applied, its button cleared, the chip grey at once (approved on the day it last
+  // changed:  `ItemAge.shown()`, Owen, 2026-10-25:  "when we check a Q we should be able to grey it immediately");
+  // the skip reviewed, its note kept
   await tool.run(["inbox", docName, "apply"])
   await open(page)
   expect(`${approved}'s review-as`, await attribute(page, approved, "review-as"), "approve")
   expect(`${approved}'s Approve, applied:  cleared`, (await buttonState(page, approved, "approve")).fill, "none")
-  expect(`${approved}'s chip, applied:  its state's, solid`, await chipState(page, approved), {
+  expect(`${approved}'s chip, applied:  grey, solid`, await chipState(page, approved), {
     fill: null,
-    state: "recent"
+    state: "old"
   })
   await openBody(page, withDetails)
   expect(
@@ -497,7 +502,8 @@ async function run() {
     expect(`${todos[1]}:  canceled`, await attribute(page, todos[1], "status"), "canceled")
     expect(`${todos[1]}'s chip:  grey`, await chipState(page, todos[1]), { fill: null, state: "old" })
   }
-  // the pick:  the call approved with the reply's C (closed), that set chosen, a Noted card, the pill solid
+  // the pick:  the call approved with the reply's C (closed), that set chosen, the pill solid;  the pick recorded ON
+  // the set (`chosen-note`), not in a Noted card (epic `epic-engine` I153)
   await openBody(page, pickCall)
   expect(
     `${pickCall}, picked C from its reply`,
@@ -507,10 +513,11 @@ async function run() {
         status: item.getAttribute("status"),
         reviewAs: item.getAttribute("review-as"),
         chosen: Array.from(item.querySelectorAll("epic-choices"), (set) => set.getAttribute("chosen")),
-        card: item.querySelector(':scope > epic-status[slot="status"]')?.textContent.trim().replace(/:.*/s, "")
+        note: item.querySelector("epic-choices[chosen]")?.getAttribute("chosen-note")?.replace(/;.*/s, "") ?? null,
+        card: item.querySelector(':scope > epic-status[slot="status"]')?.textContent.trim() ?? null
       }
     }, pickCall),
-    { status: "done", reviewAs: "approve", chosen: [null, "C"], card: "Chose C · Option C" }
+    { status: "done", reviewAs: "approve", chosen: [null, "C"], note: "recorded, the call accepted", card: null }
   )
   await page.evaluate((id) => {
     const item = document.getElementById(id)
