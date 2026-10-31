@@ -86,10 +86,10 @@ export class EditorTheme {
 
   /**
    * The editor's full view, as the theme editor previews it (`<ui-theme-editor>`, epic `debut` P24):
-   * Edit with its Program panel, the Inspector with every card, and a part picked:
+   * Edit with its Program panel, the Inspector with every card, and a part selected:
    * a card, if the app draws one, else its first thing.
-   * - What's picked already stays.
-   * - Waits up to 3s for the app to draw something to pick;  nothing by then, nothing's picked.
+   * - What's selected already stays.
+   * - Waits up to 3s for the app to draw something to select;  nothing by then, nothing's selected.
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async showFullView(): Promise<void> {
@@ -100,7 +100,7 @@ export class EditorTheme {
     EditorMode.show("edit")
     ProgramPanelShown.set(true)
     for (const panel of INSPECTOR_PANELS) Inspector.setShown(panel, true)
-    if (Inspector.picked) return
+    if (Inspector.selected) return
     for (let tries = 0; tries < PICK_TRIES; tries++) {
       const area = Inspector.area
       const things = (area ? Inspector.partsIn(area) : [])
@@ -108,8 +108,8 @@ export class EditorTheme {
         .filter((part) => part && part.value !== part.element)
       const card = things.find((part) => CARD.test(part!.value.constructor.name)) ?? things[0]
       if (card) {
-        Inspector.pick(card.element)
-        Inspector.stopPicking()
+        Inspector.select(card.element)
+        Inspector.stopInspecting()
         return
       }
       await new Promise((resolve) => setTimeout(resolve, PICK_WAIT_MS))
@@ -203,11 +203,11 @@ export function followTabTitle(): () => { title: string | undefined; isNotebook:
 /** The chosen theme's title (`EditorTheme.chosenTitle`). */
 const [chosenTitle, setChosenTitle] = createSignal("")
 
-/** How many times `showFullView()` looks for a part to pick, while the app draws. */
+/** How many times `showFullView()` looks for a part to select, while the app draws. */
 const PICK_TRIES = 30
 
 /** How long it waits between looks, ms:  3s in all. */
 const PICK_WAIT_MS = 100
 
-/** A drawn thing's class that's a card:  the full view picks one first. */
+/** A drawn thing's class that's a card:  the full view selects one first. */
 const CARD = /card/i

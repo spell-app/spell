@@ -523,11 +523,17 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Then its Actions:  a button for each thing that can be done to it, `play it`, `turn over`.
   - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
-- The click goes to the Inspector, never the app;  picking stops once something's picked,
+- The click goes to the Inspector, never the app;  inspecting stops once something's selected,
   and the crosshairs start it again.  Esc stops it.
+- To select several while inspecting:  Shift takes everything from the last one clicked, Command or Control adds or
+  takes away, and dragging across the app's background draws a rubber band over what it touches.
+  The Views tree takes the same clicks.
+  - The properties card then shows what they share, "Mixed" where they differ, and a change to all of them is one undo step.
+  - `These 3 | All cards` says what a change applies to;  of several types, there's no "All".
+  - What's selected is found again by where it's written, after a recompile, a reload or a move.
 - Hold the mouse over what you selected to see where it is written:
   `Written in Deck.spellml, line 8:  52 of these come from this one place`.
-- The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
+- The ✕ in the selected part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
 **Not yet:**  an event's code typed there isn't written back into the code.

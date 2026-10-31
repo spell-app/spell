@@ -15,7 +15,7 @@ import { on } from "./on"
 /****************
  * ### `<InspectorCard>`
  * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
- * - The bar:  the chevron, then `bar` (the card's tabs, or what's picked), its `actions`, and the eye.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's selected), its `actions`, and the eye.
  * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
  * - The eye hides the card (`Inspector.setShown()`);  the Inspector's button, held, shows it again.
  * - The body scrolls by itself, and is drawn only while the card is unfolded.
@@ -55,7 +55,7 @@ export function InspectorCard(props: {
       <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
         {props.bar}
         {props.actions}
-        {/* an eye, not a ✕:  it hides the card, never lets go of what's picked (`<LetGo>`, I92) */}
+        {/* an eye, not a ✕:  it hides the card, never lets go of what's selected (`<LetGo>`, I92) */}
         <ui-icon
           slot="right"
           name="eye slash"
@@ -74,7 +74,7 @@ export function InspectorCard(props: {
 
 /**
  * The running app's parts (reactive):  walked again whenever its drawing changes, once a frame at most.
- * - Then what was picked is picked again, if it was redrawn (`Inspector.restorePick()`).
+ * - Then what was selected is selected again, if it was redrawn (`Inspector.restoreSelection()`).
  * - Call it in a component:  it watches the app while the component lives.
  */
 export function appParts(): () => PartRow[] {
@@ -102,9 +102,9 @@ export function appParts(): () => PartRow[] {
     const area = Inspector.area
     return area ? Inspector.partsIn(area) : []
   })
-  // what was picked comes back, once the app's drawn again
+  // what was selected comes back, once the app's drawn again
   createEffect(rows, (rows) => {
-    Inspector.restorePick(rows)
+    Inspector.restoreSelection(rows)
   })
   return rows
 }
@@ -118,7 +118,7 @@ export function appParts(): () => PartRow[] {
  * - Views:  the running app's parts as a tree (`<PartsTree>`);  the header's double chevron folds them all, or
  *   unfolds them all, as the epic page's does.
  * - Things:  what the running program has made, live (`<ThingExplorer>`);  a click on one inspects it at once
- *   (`Inspector.inspectThing()`), as a click on a View's row picks it.
+ *   (`Inspector.inspectThing()`), as a click on a View's row selects it.
  * - Templates:  every type the code knows (`<TypeExplorer>`).
  ****************/
 export function InspectorViews(props: {
@@ -222,7 +222,7 @@ const VIEW_PREF = "inspector:view"
  * in the app.
  * - A part is a drawn thing or a Spell UI element (`Inspector.isPart()`);  the elements between them are skipped.
  * - Each row's title in the text's colour, which one it is (`· discards`) and its icons muted.
- * - Clicking a row picks that part;  the picked one is highlighted.
+ * - Clicking a row selects that part, and Shift, Command or Control several, as in the app;  they're highlighted.
  * - A part with parts inside folds:  its caret;  what's folded is remembered with the project.
  * - Its icons are stubs (`Inspector.iconFor()`):  one for drawn things, one for Spell UI elements.
  ****************/
@@ -230,16 +230,22 @@ function PartsTree(props: { rows: readonly PartRow[] }): JSX.Element {
   const shown = createMemo(() => shownRows(props.rows, foldedKeys()))
   return (
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
-      <ul role="tree" class="InspectorTree">
+      <ul role="tree" aria-multiselectable="true" class="InspectorTree">
         <For each={shown()}>
           {(row) => (
             <li
               role="treeitem"
-              class={{ picked: Inspector.inspected?.element === row.element }}
+              class={{ selected: Inspector.isSelected(row.element) }}
               style={{ "--depth": row.depth }}
-              aria-selected={Inspector.inspected?.element === row.element ? "true" : "false"}
+              aria-selected={Inspector.isSelected(row.element) ? "true" : "false"}
               aria-expanded={row.hasChildren ? (row.isFolded ? "false" : "true") : undefined}
-              onClick={() => Inspector.pick(row.element)}
+              onClick={(event: MouseEvent) =>
+                Inspector.clicked(
+                  row.element,
+                  shown().map((each) => each.element),
+                  event
+                )
+              }
             >
               <Show when={row.hasChildren} fallback={<span class="InspectorFold" />}>
                 <ui-icon
@@ -311,7 +317,7 @@ const FOLDED_PREF = "inspector:folded"
 
 /****************
  * ### `<EventsBand>`
- * The picked part's events, a folding band at the end of the properties card, titled Events (epic `debut` P28):
+ * The selected part's events, a folding band at the end of the properties card, titled Events (epic `debut` P28):
  * what it does when people touch it.
  * - A drawn thing's, in its program's own words (`Inspector.writtenEventsOf()`):
  *   - first its abilities' conditions, a hand each:  `it can give up a card if`, its condition under it
@@ -325,7 +331,7 @@ const FOLDED_PREF = "inspector:folded"
  * - Drawn while the part has an event, or one could be added:  never a "None yet." line.
  ****************/
 export function EventsBand(props: {
-  /** The part picked, in the app. */
+  /** The part selected, in the app. */
   element: Element
 }): JSX.Element {
   const rows = createMemo((): EventRow[] => {
@@ -443,7 +449,7 @@ const ABILITY_ICON = "hand paper outline"
 
 /****************
  * ### `<ActionsBand>`
- * What can be done to the picked thing, a folding band at the very end of the properties card, titled Actions
+ * What can be done to the selected thing, a folding band at the very end of the properties card, titled Actions
  * (epic `debut` P29):  each action of its type, a button reading its own words (`turn over`, `play it`),
  * done to the thing in the running app.
  * - Its actions:  its type's own, then those it inherits, in their file's order (`InspectorActions.of()`).
@@ -456,7 +462,7 @@ const ABILITY_ICON = "hand paper outline"
  * - Not drawn for something that isn't one of the program's things, nor with nothing to do.
  ****************/
 export function ActionsBand(props: {
-  /** The thing picked (or the trail leads to). */
+  /** The thing selected (or the trail leads to). */
   thing: object
 }): JSX.Element {
   const actions = createMemo(() => {

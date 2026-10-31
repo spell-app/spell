@@ -260,11 +260,16 @@ export class InspectorWrites {
     }
     if (change.before === change.after) return
     editor.history.change(change, {
-      title: appTexts.text("changeField", { field: wordsOfName(name) }),
+      title: InspectorWrites.titleOf(name),
       // a run of changes to this field folds into one step;  a reset is a step of its own
       target: step.isReset ? undefined : `${file.path}:${anchor.start}:${name}`,
       live
     })
+  }
+
+  /** An undo step's title for a change to field `name`. */
+  static titleOf(name: string): string {
+    return appTexts.text("changeField", { field: wordsOfName(name) })
   }
 
   /** The edits writing `value` to `home`. */

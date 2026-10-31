@@ -310,7 +310,7 @@ export type DragOptions = {
 }
 
 /** How far the pointer moves before a press is a drag, in pixels:  less is a click. */
-const DRAG_START_PX = 6
+export const DRAG_START_PX = 6
 
 /** Above the board while dragged. */
 const DRAGGING_Z_INDEX = "1000"

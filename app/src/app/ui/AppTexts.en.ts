@@ -131,6 +131,11 @@ export const APP_TEXTS = {
   inspectorPlaying: "Changes to this {type} can't be saved.",
   inspectorAllFromCode: "Each {type} gets these from the code that makes it.",
   inspectorScopeThis: "This {type}",
+  inspectorScopeThese: "These {count}",
+  inspectorPlayingMany: "Changes to these can't be saved.",
+  inspectorSelectedMany: "{count} {kind}",
+  inspectorSelectedParts: "{count} parts",
+  inspectorNothingShared: "These have no fields in common.",
   inspectorScopeAll: "All {types}",
   inspectorScopeLabel: "What a change applies to",
   inspectorOriginHere: "Set here",
@@ -145,7 +150,8 @@ export const APP_TEXTS = {
   inspectorCard: "Inspector:  {card}",
   inspectApp: "Inspect App",
   stopInspecting: "Stop Inspecting",
-  inspectHelp: "Click a part of the app to inspect it.  Alt-click for a part inside it.  Esc stops.",
+  inspectHelp:
+    "Click a part of the app to inspect it.  Alt-click for a part inside it.  Shift or ⌘ for several, or drag across the background.  Esc stops.",
   inspectHelpClose: "Close",
   notSaved: "Not saved",
 
@@ -323,9 +329,10 @@ export const APP_TEXTS = {
   // a .spell file as spellx:  a view, never a second file (epic `elemental-spell` J95)
   spellxTab: "Spellx",
   inspector: "Inspector",
-  inspectorPick: "Inspect app",
-  inspectorTip: "Pick a part of the app with the crosshairs, to see what it is and change it.",
-  inspectorPicking: "Click a part of the app;  Alt-click for any part inside it.  Esc stops picking.",
+  inspectorInspect: "Inspect app",
+  inspectorTip: "Select a part of the app with the crosshairs, to see what it is and change it.",
+  inspectorInspecting:
+    "Click a part of the app;  Alt-click for any part inside it.  Hold Shift or ⌘ for several, or drag across the background.  Esc stops.",
   inspectorText: "Text",
   inspectorBuiltIn: "Built in",
   inspectorItems: "Its {count} items",

@@ -495,4 +495,206 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     expect(await mark()).toBe(true)
     await page.close()
   })
+
+  ////////////////
+  // ## Selecting several (P11)
+  ////////////////
+
+  /** Where each element named `tag` is drawn, in the page's order. */
+  function centersOf(page: Page, tag: string) {
+    return page.evaluate((name) => {
+      const all: Element[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === name) all.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      return all.map((element) => {
+        const box = element.getBoundingClientRect()
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      })
+    }, tag)
+  }
+
+  /** What's selected:  how many, and how many of them are ringed, or boxed when they can't ring themselves. */
+  function selection(page: Page) {
+    return page.evaluate(() => {
+      const { Inspector } = window as unknown as {
+        Inspector: { allSelected: { element: Element; label: string }[]; isInspecting: boolean }
+      }
+      return {
+        count: Inspector.allSelected.length,
+        labels: Inspector.allSelected.map((part) => part.label),
+        rings: document.querySelectorAll("[data-inspect-selected]").length,
+        boxes: document.querySelectorAll(".InspectorSelected:not([hidden])").length,
+        treeRows: document.querySelectorAll(".InspectorTree li.selected").length,
+        isInspecting: Inspector.isInspecting
+      }
+    })
+  }
+
+  /** Start Inspect app, as its crosshairs do. */
+  async function startInspecting(page: Page): Promise<void> {
+    await page.evaluate(() =>
+      (window as unknown as { Inspector: { startInspecting(): void } }).Inspector.startInspecting()
+    )
+    await page.waitForTimeout(200)
+  }
+
+  /** The moves the running game has counted:  it mustn't lose them, nor hear of the clicks. */
+  function gameState(page: Page) {
+    return page.evaluate(async () => {
+      const { editor } = window as unknown as DebugGlobals
+      const { core } = await editor.loadRuntime()
+      const game = core.things.all().find((thing) => thing.constructor.name === "Solitaire") as
+        | { moves: number; score: number }
+        | undefined
+      return { moves: game?.moves, score: game?.score, things: core.things.all().length }
+    })
+  }
+
+  test(
+    "several in the app:  a plain click, then ⌘ adds and takes away, Shift a range;  the tree follows",
+    { timeout: 120_000 },
+    async () => {
+      const page = await context.newPage()
+      await open(page, "Solitaire", { codeEditor: true })
+      const before = await gameState(page)
+      const foundations = await centersOf(page, "solitaire-foundation")
+      expect(foundations.length).toBe(4)
+
+      await page.mouse.click(foundations[0]!.x, foundations[0]!.y)
+      await page.waitForTimeout(300)
+      expect(await selection(page)).toMatchObject({ count: 1, isInspecting: false })
+
+      await startInspecting(page)
+      await page.keyboard.down("Meta")
+      await page.mouse.click(foundations[2]!.x, foundations[2]!.y)
+      await page.keyboard.up("Meta")
+      await page.waitForTimeout(300)
+      // a modifier keeps inspecting, for more;  the new one's the main one
+      const two = await selection(page)
+      expect(two).toMatchObject({ count: 2, isInspecting: true, treeRows: 2 })
+      expect(two.rings + two.boxes).toBe(2)
+      expect(await page.locator(".InspectorPartTagText").first().textContent()).toBe("2 foundations")
+
+      await page.keyboard.down("Meta")
+      await page.mouse.click(foundations[0]!.x, foundations[0]!.y)
+      await page.keyboard.up("Meta")
+      await page.waitForTimeout(300)
+      expect(await selection(page)).toMatchObject({ count: 1, treeRows: 1 })
+
+      // Shift:  from the last one clicked, among those of the same tag:  no piles or cards between
+      await page.keyboard.down("Shift")
+      await page.mouse.click(foundations[3]!.x, foundations[3]!.y)
+      await page.keyboard.up("Shift")
+      await page.waitForTimeout(300)
+      expect((await selection(page)).labels).toEqual(expect.arrayContaining([expect.stringMatching(/Foundation/)]))
+      expect((await selection(page)).count).toBe(4)
+
+      // the views tree takes the same clicks
+      await page
+        .locator(".InspectorTree li")
+        .nth(3)
+        .click({ modifiers: ["Meta"] })
+      await page.waitForTimeout(300)
+      expect((await selection(page)).count).toBe(5)
+
+      expect(await gameState(page)).toEqual(before)
+      await page.close()
+    }
+  )
+
+  test("a rubber band over the background selects the innermost parts it touches", { timeout: 120_000 }, async () => {
+    const page = await context.newPage()
+    await open(page, "Solitaire", { codeEditor: true })
+    const before = await gameState(page)
+    const foundations = await centersOf(page, "solitaire-foundation")
+    await startInspecting(page)
+
+    // from the empty cell left of the foundations, across the first two
+    const start = { x: foundations[0]!.x - 70, y: foundations[0]!.y + 4 }
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(start.x + 3, start.y, { steps: 2 })
+    expect(await page.locator(".InspectorBand").count()).toBe(0)
+    await page.mouse.move(foundations[1]!.x, foundations[1]!.y + 4, { steps: 6 })
+    expect(await page.locator(".InspectorBand").count()).toBe(1)
+    await page.mouse.up()
+    await page.waitForTimeout(300)
+
+    const banded = await selection(page)
+    expect(await page.locator(".InspectorBand").count()).toBe(0)
+    expect(banded).toMatchObject({ count: 2, isInspecting: true })
+    expect(banded.labels.every((label) => label.startsWith("Foundation"))).toBe(true)
+
+    // Esc cancels a band, and inspecting goes on
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(foundations[3]!.x, foundations[3]!.y + 4, { steps: 6 })
+    await page.keyboard.press("Escape")
+    await page.mouse.up()
+    await page.waitForTimeout(300)
+    expect(await selection(page)).toMatchObject({ count: 2, isInspecting: true })
+
+    expect(await gameState(page)).toEqual(before)
+    await page.close()
+  })
+
+  test("a change to several is one undo step;  the selection survives a recompile", { timeout: 150_000 }, async () => {
+    const page = await context.newPage()
+    await open(page, "Solitaire", { codeEditor: true })
+    const { text: before } = await fileState(page, "Solitaire.spellml")
+    const foundations = await centersOf(page, "solitaire-foundation")
+    await startInspecting(page)
+    for (const index of [0, 1]) {
+      await page.keyboard.down("Meta")
+      await page.mouse.click(foundations[index]!.x, foundations[index]!.y)
+      await page.keyboard.up("Meta")
+    }
+    await page.evaluate(() =>
+      (window as unknown as { Inspector: { stopInspecting(): void } }).Inspector.stopInspecting()
+    )
+    await page.waitForTimeout(400)
+    expect((await selection(page)).count).toBe(2)
+
+    // they differ:  the field says so
+    const nameField = page.locator('ui-property[name="name"]')
+    expect(await page.locator('ui-property[name="name"][mixed]').count()).toBe(1)
+
+    // real typing in the real field
+    const steps = await historyLength(page)
+    await nameField.locator("input").first().click()
+    await page.keyboard.type("piled")
+    await page.keyboard.press("Tab")
+    await page.waitForTimeout(400)
+    const { text: edited } = await fileState(page, "Solitaire.spellml")
+    expect(edited).toContain(`a new foundation with name = "piled", suit = clubs`)
+    expect(edited).toContain(`a new foundation with name = "piled", suit = diamonds`)
+    expect(await historyLength(page)).toBe(steps + 1)
+
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await press(page, "ControlOrMeta+z")
+    expect((await fileState(page, "Solitaire.spellml")).text).toBe(before)
+    await press(page, "ControlOrMeta+Shift+z")
+    expect((await fileState(page, "Solitaire.spellml")).text).toBe(edited)
+    await press(page, "ControlOrMeta+z")
+
+    // a recompile:  a typed comment in the same file, the game going on
+    const state = await gameState(page)
+    await page.locator("ui-item", { hasText: "Solitaire.spellml" }).first().click()
+    await page.waitForTimeout(800)
+    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await page.keyboard.press("ControlOrMeta+ArrowDown")
+    await page.keyboard.type("\n// a comment\n")
+    await page.waitForTimeout(6000)
+    const after = await selection(page)
+    expect(after.count).toBe(2)
+    expect(after.labels.every((label) => label.startsWith("Foundation"))).toBe(true)
+    expect(after.rings + after.boxes).toBe(2)
+    expect((await gameState(page)).moves).toBe(state.moves)
+    await page.close()
+  })
 })

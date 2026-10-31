@@ -406,7 +406,8 @@ export class UIProperty extends UIField {
       const choices = this.choices ?? []
       const isSegmented = control.attributes?.appearance === SEGMENTED
       // no value and no default:  it reads "none", never blank (a segmented row always shows its choices)
-      if (spec?.default === undefined && !isSegmented)
+      // (drawn again while its things disagree, it keeps saying "Mixed")
+      if (spec?.default === undefined && !isSegmented && !this.domElement.hasAttribute("mixed"))
         element.setAttribute("placeholder", this.translationForKey("none"))
       // every segment an icon:  icons alone, each one's name its tooltip
       const iconsOnly = isSegmented && choices.length > 0 && choices.every(UIProperty.hasIcon)

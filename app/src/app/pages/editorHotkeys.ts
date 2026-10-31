@@ -166,8 +166,8 @@ function isInProperties(event: KeyboardEvent): boolean {
 
 /** Esc:  stop inspecting, while inspecting;  otherwise not ours (`false`), so the key goes on. */
 function stopInspecting(): unknown {
-  if (!Inspector.isPicking) return false
-  Inspector.stopPicking()
+  if (!Inspector.isInspecting) return false
+  Inspector.stopInspecting()
   return undefined
 }
 
