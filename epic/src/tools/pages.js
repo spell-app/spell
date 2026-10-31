@@ -597,9 +597,11 @@ export function componentSetAddress(file) {
  * - `hash`:  an id on the page to land on, e.g. a goal `g1`
  * - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
  *   - an extension from before it ignores it:  the page shows as usual
- * - `view`:  which side bar tab;  each keeps its own page
- *   - `"docs"`:  "Epic Docs", the default
- *   - `"review"`:  "Review" (`/epic review`, `epic pages open <page> --review`)
+ * - which side bar tab:  the page's kind decides, in the extension (`docViewFor()`, epic `epic-engine` P59);  each tab
+ *   keeps its own page
+ *   - an epic or saga page:  "Review";  a details, review or choice page:  "Details";  anything else:  "Epic Docs"
+ *   - `view`:  asks for a tab, for a page of no such kind:  `"review"` (`epic pages open <page> --review`);  none sent
+ *     when not given
  * - the session is moving to a worktree's window (`/isolate`, `/epic`:  a pending handoff):
  *   shown THERE once it has moved, not in the window it's leaving
  * - no bridge (extension not reloaded, or not run from a VS Code window), or it failed:  the `vscode://` URI
@@ -611,16 +613,15 @@ export function componentSetAddress(file) {
  * - the command itself failed (none on the `PATH`):  falls back to Chrome
  * - async for the bridge's http request;  never rejects
  */
-export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
+export async function openInVSCode(file, { hash, query, view } = {}) {
   if (!Window.inVSCode) return openInChrome(file, { hash, query })
   const path = resolve(inContent(file))
   const served = ensurePageServer()
-  const review = view === "review"
   // a command run's page is served from a template, not from a file the window bridge could show:  its URL
   const isRun = !!runPagePath(path)
   if (!isRun) {
     try {
-      const { window, later } = await Window.show(path, { hash, query, view: review ? "review" : undefined })
+      const { window, later } = await Window.show(path, { hash, query, view })
       if (later) return console.log(`${path} shows in ${later} once this session moves there`)
       return console.log(`opened ${path} in VS Code (window ${window.pid})`)
     } catch (error) {
@@ -628,7 +629,7 @@ export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
     }
   }
   const url = served && `${serverUrl(served.base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
-  const params = new URLSearchParams({ ...(url && { url }), file: path, ...(review && { view: "review" }) })
+  const params = new URLSearchParams({ ...(url && { url }), file: path, ...(view && { view }) })
   const editor = EpicConfig.of(ROOT).editor
   const run = editor.run(["--open-url", `${editor.url(DOC_PREVIEW)}?${params}`])
   if (run.status === 0) return console.log(`opened ${path} in ${editor.name}`)

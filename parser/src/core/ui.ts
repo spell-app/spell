@@ -10,6 +10,14 @@ import { defineCoreModule } from "./core.types"
  * - Drawing (`h()`, `drawThing()` ...) is `drawing.ts`.
  */
 export const uiMethods = defineCoreModule({
+  /**
+   * The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`):
+   * true if it took the key.
+   * - The editor's, in Edit:  a program's move isn't what people mean to undo there, the side bar's change is.
+   * - None, as on any other page:  they're the program's.
+   */
+  pageUndoKey: undefined as ((action: "undo" | "redo") => boolean) | undefined,
+
   ////////////////
   // ## Time
   ////////////////
@@ -201,6 +209,7 @@ function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "und
   const [focused] = path
   if (isTypedIn(focused)) return false
   if (!path.includes(element) && focused !== element.ownerDocument.body) return false
+  if (core.pageUndoKey?.(action)) return true
   const { history, actions } = core.RUNTIME
   // while an action runs, undo is refused, as from a menu (epic `language`, J2);  the key is still taken
   if (actions.isBusy) return true

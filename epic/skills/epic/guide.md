@@ -130,5 +130,5 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
 | the window moves (`epic window handoff`, `launch`) | the session in the epic's VS Code window | print `epic window open <name>` for the person to run, and carry on where you are |
 | session titles (`epic session title`) | the epic's name on the session | none needed |
-| the Review tab (`epic open <epic> --review`) | the page beside the chat | `epic pages link <page> --show`:  open its browser link |
+| the Review tab (`epic open <epic>`) | the page beside the chat | `epic pages link <page> --show`:  open its browser link |
 | the time on a phase (`epic phase ... took`) | read from Claude Code's transcripts | not counted for other agents yet |

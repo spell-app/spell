@@ -1,6 +1,7 @@
 import { observe } from "spell/util"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
+import type { TextEdit } from "vscode-languageserver"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { LspToMonaco } from "./LspToMonaco"
@@ -87,6 +88,23 @@ export class SpellModels {
   saveAfterEdit(files: SP.AnySpellFile[]): void {
     for (const file of files) this.#toSave.add(file.path)
     setTimeout(() => files.forEach((file) => this.#toSave.delete(file.path)), SpellModels.SAVE_WAIT)
+  }
+
+  /**
+   * Make `edits` to `file` through its model, so its cursor and its own undo stay right:  false with no model of it.
+   * - Each is an undo stop of its own in the code editor too.
+   */
+  applyEdits(file: SP.AnySpellFile, edits: readonly TextEdit[]): boolean {
+    const model = this.#models.get(file.path)?.model
+    if (!model || model.isDisposed()) return false
+    model.pushStackElement()
+    model.pushEditOperations(
+      null,
+      edits.map(({ range, newText }) => ({ range: LspToMonaco.range(range), text: newText })),
+      () => null
+    )
+    model.pushStackElement()
+    return true
   }
 
   /** How long `saveAfterEdit()` waits for an edit, in msec. */

@@ -1,4 +1,4 @@
-import { $fetch, UIError, Observable, prop, CONFIRM } from "spell/util"
+import { $fetch, UIError, Observable, prop, CONFIRM, setDebugGlobal } from "spell/util"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -16,6 +16,9 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
+import { EditorHistory } from "spell/app/app/EditorHistory"
+// By file:  the folder's barrel loads the language service
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
 
@@ -180,6 +183,7 @@ export class EditorStore extends Observable {
     const sameProject = editor.project === project
     if (!sameProject) {
       console.info("selecting project", project)
+      editor.history.clear()
       // stop current compilation
       editor.clearCompileAppSoon()
       // remember this project was selected for projectRoot
@@ -625,7 +629,22 @@ export class EditorStore extends Observable {
   async saveFile(): Promise<void> {
     const { file } = editor
     if (file?.isLoaded) await file.save(undefined)
+    await editor.saveSideBarEdits()
   }
+
+  /**
+   * Save what the side bar changed, in files not showing too:  a change there doesn't say which file it's in,
+   * so Save can't ask people to go and show it.
+   * - Files only typed in wait for their own Save, as ever.
+   */
+  private async saveSideBarEdits(): Promise<void> {
+    const files = [...editor.filesEditedFromSideBar].filter((file) => file !== editor.file && file.isDirty)
+    editor.filesEditedFromSideBar.clear()
+    for (const file of files) await file.save(undefined)
+  }
+
+  /** The files the side bar has changed since the last Save:  see `saveSideBarEdits()`. */
+  private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
   /**
    * Revert current `file`:  read it from the server again, dropping its unsaved changes, and recompile
    * ("Revert File", ⌘⇧R).
@@ -891,18 +910,48 @@ export class EditorStore extends Observable {
    * - The normal editor's edits go through `SpellModels` instead -- see `onFileEdited()`.
    */
   onInputChanged(value: string): void {
-    const { file, project } = editor
-    if (!file || !project) return
+    if (editor.file) editor.takeText(editor.file, value)
+  }
+
+  /** `file`'s text is now `value`, with no code editor in the way:  re-parsed, marked unsaved, and compiled soon. */
+  private takeText(file: SP.AnySpellFile, value: string): void {
     file.isDirty = true
-    if (file instanceof SP.SpellFile) void project.updateText(file, value)
+    if (file instanceof SP.SpellFile) void file.project.updateText(file, value)
     else {
       file.contents = value
-      project.updatedContentsFor(file)
+      file.project.updatedContentsFor(file)
     }
     editor.keepEdit(file)
     // auto-compile 2 seconds after input settles
     editor.compileAppSoon(2)
   }
+
+  /**
+   * Make `edits` to `file`'s text, from the side bar or a notebook:  see `SourceEdits`.
+   * - The code editor loaded:  through it, so its cursor and its own undo stay right.
+   * - Not loaded:  straight into the file, which owns its text.  Run needs no code editor.
+   * - Either way the unsaved dot, the re-parse and the compile follow.
+   */
+  applySourceEdits(file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1]): void {
+    editor.filesEditedFromSideBar.add(file)
+    if (editor.codeEditorEdits?.(file, edits)) return
+    editor.takeText(file, SourceEdits.applied(file.contents ?? "", edits))
+  }
+
+  /** Puts edits through the code editor, once it's loaded:  false for a file it has no model of.  See `LazyMonaco`. */
+  codeEditorEdits: ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1]) => boolean) | undefined =
+    undefined
+
+  /**
+   * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.
+   * - Forgotten when another project opens:  its steps are about that project's files.
+   */
+  readonly history = new EditorHistory({
+    applyEdits: (file, edits) => editor.applySourceEdits(file as SP.AnySpellFile, edits),
+    onGone: (title) => editor.showNotice(appTexts.text("undoTextGone", { step: title })),
+    titleFor: (action, title) =>
+      title ? appTexts.text(action === "undo" ? "undoStep" : "redoStep", { step: title }) : appTexts.text(action)
+  })
 
   ////////////////
   // ## UI
@@ -973,6 +1022,8 @@ let inputEditorPath: string | undefined
 
 /** The `editor` singleton. */
 export const editor = new EditorStore({})
+// DEBUG:  `editor` at the devtools console
+setDebugGlobal({ editor })
 
 ////////////////
 // ## Supporting types

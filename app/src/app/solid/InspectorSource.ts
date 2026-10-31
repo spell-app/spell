@@ -1,4 +1,6 @@
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
+// By file:  the folder's barrel loads the language service
+import { endOfTag, SourceEdits } from "spell/app/lsp/SourceEdits"
 
 /**
  * What a program's source says of what the Inspector shows:  its text read, with no parser and no DOM.
@@ -17,68 +19,17 @@ export function handlersInSource(element: Element, sources: ReadonlyMap<string, 
   const place = SourceMarks.placeOfDrawn(element)
   const source = place && sources.get(place.path)
   if (!place || source === undefined) return {}
-  const opening = offsetOf(source, place.line, place.column)
-  if (source[opening] !== "<") return {}
-  const end = endOfTag(source, opening + 1)
-  if (end < 0) return {}
-  // past its name:  `<ui-button`
-  const inside = source.slice(opening + 1, end).replace(/^[^\s/>]+/, "")
+  const opening = SourceEdits.offsetAt(source, { line: place.line, character: place.column })
   const handlers: Record<string, string> = {}
-  for (const [name, code] of readAttributes(inside).handlers) handlers[name.slice(2).toLowerCase()] = code
+  for (const { name, quote, valueSpan } of SourceEdits.tagAt(source, opening)?.attributes ?? []) {
+    if (quote !== "{" || !HANDLER.test(name) || !valueSpan) continue
+    handlers[name.slice(2).toLowerCase()] = source.slice(valueSpan.start, valueSpan.end).trim()
+  }
   return handlers
 }
 
-/** The offset in `source` of `line`, `column`, both from 0. */
-function offsetOf(source: string, line: number, column: number): number {
-  let offset = 0
-  for (let at = 0; at < line; at++) offset = source.indexOf("\n", offset) + 1
-  return offset + column
-}
-
-/** A tag as written in spell:  its plain attributes, and its handlers (`onClick={...}`). */
-type WrittenTag = {
-  attributes: [name: string, value: string][]
-  handlers: [name: string, code: string][]
-}
-
-/** The index of the `>` closing a tag opened before `from`, past any `{...}` and quoted values;  -1 if none. */
-function endOfTag(source: string, from: number): number {
-  let depth = 0
-  for (let i = from; i < source.length; i++) {
-    const c = source[i]
-    if (c === '"' || c === "'") {
-      i = source.indexOf(c, i + 1)
-      if (i < 0) return -1
-    } else if (c === "{") depth++
-    else if (c === "}") depth--
-    else if (c === ">" && depth === 0) return i
-  }
-  return -1
-}
-
-/** A tag's attributes as written:  `name="value"` and bare `name` plain, `onX={code}` handlers. */
-function readAttributes(inside: string): Pick<WrittenTag, "attributes" | "handlers"> {
-  const attributes: WrittenTag["attributes"] = []
-  const handlers: WrittenTag["handlers"] = []
-  const re = /([a-zA-Z][\w-]*)(?:=("[^"]*"|'[^']*'|\{))?/g
-  let match: RegExpExecArray | null
-  while ((match = re.exec(inside))) {
-    const [, name, value] = match
-    if (value === "{") {
-      // its code:  to the brace that closes it
-      let depth = 1
-      let i = re.lastIndex
-      for (; i < inside.length && depth; i++) {
-        if (inside[i] === "{") depth++
-        else if (inside[i] === "}") depth--
-      }
-      const code = inside.slice(re.lastIndex, i - 1).trim()
-      if (/^on[A-Z]/.test(name)) handlers.push([name, code])
-      re.lastIndex = i
-    } else attributes.push([name, value ? value.slice(1, -1) : ""])
-  }
-  return { attributes, handlers }
-}
+/** An event handler's attribute:  `onClick`. */
+const HANDLER = /^on[A-Z]/
 
 ////////////////
 // ## A type's events and abilities, as written

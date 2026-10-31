@@ -13,8 +13,10 @@ import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "spell/epic/comma
  *   pass through to the docs tools verbatim:  `cli.test.ts` runs them
  */
 const OWENS_ROWS: [string[], string[][]][] = [
-  [["open", "seo"], [["open", "seo", "--docs"]]],
+  // an epic page's tab is Review, by its kind (epic `epic-engine` P59):  no flag chooses it
+  [["open", "seo"], [["open", "seo"]]],
   [["open", "seo", "--review"], [["open", "seo"]]],
+  [["open", "seo", "--docs"], [["open", "seo"]]],
   [["update", "seo#P3", "--goal", "<p>g</p>"], [["phase-body", "seo", "3", "--goal", "<p>g</p>"]]],
   [["updated", "seo#3", "<p>u</p>"], [["updated", "seo", "3", "<p>u</p>"]]],
   [["update", "seo#P3", "--estimate", "1-2h"], [["estimate", "seo", "3", "1-2h"]]],

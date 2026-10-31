@@ -54,6 +54,7 @@
         "elementApiOf",
         "thingFor",
         "appLayout",
+        "pageUndoKey",
         "domRoot",
         "useElement",
         "elementClassOf",

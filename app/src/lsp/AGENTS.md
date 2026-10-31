@@ -21,6 +21,10 @@ when working with code in this folder, `src/lsp/` of the kit's app folder (`spel
   - `ScopeExplorer`
   - `ScopesSource` / `ScopePack`:  the scope packs, `<Project>.scopes.js`
   - `SpellDiskWorkspace`:  loads from disk, through spaces' disk reader (`installDiskFetch()`)
+  - `SourceEdits`:  the ONE place a program's text is changed by what a person did, rather than typed:
+    the side bar's fields and a notebook's add, move and delete, each as `TextEdit`s
+  - `SourceHomes`:  where a value in the side bar lives in the source, read from the parse
+  - Those two are taken by file (`spell/app/lsp/SourceEdits`):  a side-bar edit must work with no language service loaded.
   - See "Language server" in [PARSING.md](../../../parser/src/spell/PARSING.md).
 - The VS Code extension that runs it is the app folder's [vscode/](../../vscode/), its own yarn project.
   - It runs THIS folder's source.

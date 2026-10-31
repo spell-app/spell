@@ -1686,6 +1686,26 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - File names keep their old words (`<epic-id>.plan.html`, `durable.html`, `syntax-choices.html`):
   links and tools depend on them.
 
+## Which side bar tab
+
+VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never the command that shows it
+(epic `epic-engine` P59, request r50:  a choice page Owen was answering vanished, the epic page shown in both tabs).
+- The ONE rule:  `docViewFor()`, in the extension's [docUrls.ts](../vscode/src/docUrls.ts), from the page's path:
+  - an epic page, a saga page:  "Review" (`review`), whatever was asked
+  - a details, review or choice page (a page in a `details/` folder):  "Details" (`details`)
+  - anything else:  "Epic Docs" (`docs`), unless the caller asked for "Review" (`--review`, `view=review`)
+- So the callers pass no tab:  `epic open`, `epic ask show`, `epic choices show`, `epic pages link --show`, the show
+  route (`GET /api/docs/show`), `epic window show`;  `--review` stays, asking for a page of no kind of its own
+  - the bridge's `show-doc` answers which tab it took, `{ file, view }`:  the show route's closing page names it
+- The "Details" tab never replaces a page still WAITING for Owen's answer (`DetailsPages.isWaiting()`,
+  [DetailsPages.ts](tools/DetailsPages.ts):  no answer for its round now, or a session waiting on it):
+  - the new page waits its turn (`DocView.offer()`), the tab's title bar and badge say "2 pages waiting"
+  - it shows by itself once the page in view no longer waits (looked at every 5 seconds while any wait)
+- Opened with nothing shown, or by its list button:  a list of the window's epic's details and choice pages
+  (`SeeAlso`'s, newest first), the waiting ones red, the pages waiting their turn on top;  "Other epic..." picks
+  another (remembered per window)
+  - the window's epic:  a worktree's folder name, else the epic changed last (`windowEpic()`)
+
 ## Templates
 
 - spell-epic's own, in its [`templates/`](../templates/) (epic `epic-eject` T11, Q8):  every repo's pages start from them.
@@ -2061,7 +2081,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
   epic ask create | round | show [--wait] | wait | answer [--round <n>] | draft | list | sweep | fold
   ```
 
-  - `show` opens a page in the side bar's "Review" tab (epic `windows-and-review` P6).
+  - `show` opens a page in the side bar's "Details" tab (epic `epic-engine` P59;  "Review" from epic
+    `windows-and-review` P6 until then):  see "Which side bar tab".
   - `draft` prints what Owen typed and hasn't sent (below):  read it before rewriting a page he may have open.
 - ONE PAGE PER QUESTION (epic `epic-engine` P37;  Owen, 2026-10-24:  "you updated the Event Names document several
   times, leaving multiple copies viable.  Better to replace the one file."):
@@ -2738,8 +2759,9 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
 - `epic pages open [page] [--vs | --review]` ([open.js](tools/open.js)):  shows a page, by default the index.
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
-  - `--vs`:  in VS Code's doc preview, the right side bar's "Epic Docs" tab (`/spell-docs`)
-  - `--review`:  its "Review" tab (`/epic review`)
+  - `--vs`:  in VS Code's right side bar, in the tab the page's kind says (see "Which side bar tab");
+    "Epic Docs" for a guide (`/spell-docs`)
+  - `--review`:  asks for its "Review" tab, for a page of no kind of its own (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.
 - `epic ask` ([details.js](tools/details.js)):  details pages (see "Details pages").
@@ -2777,7 +2799,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - The verbs, and an example:  the header of [agents.ts](tools/agents.ts).
 - `epic pages link <page> [--hash <id>] [--text "..."] [--review] [--show]` ([link.ts](tools/link.ts)):
   the markdown links Claude gives for a page.
-  - side bar first (`--review`:  its "Review" tab), then `• 🌐`, the browser link (Owen, 2026-10-11)
+  - side bar first (its tab the page's kind's;  `--review` asks for "Review"), then `• 🌐`, the browser link (Owen,
+    2026-10-11)
   - `<page>` may be a short address (`SAGA:/drawable-spell/python-target#T1`):  its `--hash`, and its text the short
     form and the item's title (`python-target T1 · ...`)
   - both through [showRoutes.ts](tools/showRoutes.ts) (`GET /api/docs/show`)
@@ -2803,8 +2826,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
     which plain `node` loads;  epic `coherence` P20)
   - `tidy()` (link targets + oxfmt), `serialize()`
   - `openInChrome()`, `openInVSCode()`
-    - epic pages:  the doc preview, through the spell extension's `DocPreview`
-    - `{ view: "review" }`:  the "Review" tab
+    - the side bar, through spell-epic's extension's `DocPreview`, in the tab the page's kind says
+    - `{ view: "review" }`:  asks for the "Review" tab, for a page of no kind of its own
 - `tools/check-spell.js <page> [outDir] [--base <url>]`, with Playwright:  writes screenshots.
   - It loads the page from the page server, always (epic `epic-engine` P46):  a page's root links mean nothing from disk.
   - `--base <url>`:  from that server, whatever the page

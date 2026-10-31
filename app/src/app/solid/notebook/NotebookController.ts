@@ -416,41 +416,52 @@ export class NotebookController {
     if (model) this.apply(NotebookPageCells.withLock(this.now.text, model, locked), { save: "always" })
   }
 
-  /** Undo the last add, move, delete, lock or unlock:  the text, its cells and their keys as they were. */
-  undo(): boolean {
-    const last = this.history.pop()
-    if (!last) return false
-    this.apply(last.text, { undoable: false, keys: last.keys })
-    if (this.now.selected && !this.now.keys.includes(this.now.selected)) this.setNow({ selected: undefined })
-    return true
+  /** The page has gone:  its steps in `editor.history` can't be put back. */
+  leave() {
+    this.isGone = true
   }
 
-  /** Is there something to undo? */
-  get canUndo(): boolean {
-    return this.history.length > 0
+  /** Has its page gone? */
+  private isGone = false
+
+  /**
+   * Put the text, its cells and their keys back as they were:  a step of `editor.history`.
+   * - A selected cell that's gone with it is let go.
+   * - The page has gone:  it says so, as its text may have moved on since.
+   */
+  private restore(text: string, keys: string[]) {
+    if (this.isGone) return editor.showNotice(appTexts.text("undoTextGone", { step: appTexts.text("changeNotebook") }))
+    this.apply(text, { undoable: false, keys })
+    if (this.now.selected && !this.now.keys.includes(this.now.selected)) this.setNow({ selected: undefined })
   }
 
   /**
    * The text is now `text`:  its cells, their keys, what draws again, and a save.
-   * - `undoable`:  ⌘Z puts it back (an add, move, delete, lock);  typing in an editor has the editor's own undo.
+   * - `undoable`:  ⌘Z puts it back through `editor.history` (an add, move, delete, lock);
+   *   typing in an editor has the editor's own undo.
    * - `keys`:  the cells' keys, as an undo had them;  else carried over from the old cells (`NotebookKeys`).
    * - Locked:  a try-out, never saved (`canSave()`), unless `save` is `always` (the lock itself).
    */
   private apply(text: string, options: { undoable?: boolean; keys?: string[]; save?: "always" } = {}) {
     const before = this.now.model?.cells ?? []
     const oldKeys = this.now.keys
-    if (options.undoable !== false) this.history.push({ text: this.now.text, keys: oldKeys })
+    const oldText = this.now.text
     const model = NotebookPageCells.of(text, this.file.path)
     const cells = model?.cells ?? []
     const keys = options.keys?.length === cells.length ? options.keys : NotebookKeys.carried(before, oldKeys, cells)
+    if (options.undoable !== false) {
+      // a whole file's text, with its keys:  a page's add or delete has no one meaning to find again;
+      // so undoing it puts back the whole text, and typing done since goes too
+      editor.history.record(
+        { undo: () => this.restore(oldText, oldKeys), redo: () => this.restore(text, keys) },
+        { title: appTexts.text("changeNotebook") }
+      )
+    }
     this.setNow({ text, model, keys })
     this.later(() => this.redrawChanged(before, oldKeys, cells, keys, text))
     if (this.canSave() || options.save === "always") this.saveSoon()
     else this.show("locked")
   }
-
-  /** What `undo()` puts back, newest last. */
-  private readonly history: Array<{ text: string; keys: string[] }> = []
 
   ////////////////
   // ## Saving

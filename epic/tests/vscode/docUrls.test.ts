@@ -1,6 +1,7 @@
 /**
  * Tests of spell-epic's VS Code extension's pure parts (`vscode/src/docUrls.ts`):
- * - page URLs, the epic pages "Open Epic..." lists, where a served URL's file is
+ * - page URLs, which side bar tab a page goes to, the epic pages "Open Epic..." lists, the window's epic, where a
+ *   served URL's file is
  * - a Claude tab's label, the bridge's registry folder, a window's folder by any spelling (`folderIndex()`)
  * - Plain `node --test` (types stripped):  the extension's own code needs `vscode`, these parts don't.
  */
@@ -11,14 +12,17 @@ import { join } from "node:path"
 import { after, test } from "node:test"
 
 import {
+  docViewFor,
   fileForPath,
   folderIndex,
+  isDocView,
   isLoopback,
   planDocsIn,
   planDocsOf,
   samePage,
   stamped,
   tabShows,
+  windowEpic,
   windowsFolder
 } from "spell/epic/vscode/src/docUrls.ts"
 
@@ -47,6 +51,54 @@ test("isLoopback():  plain http on this machine only", () => {
   equal(isLoopback("https://127.0.0.1/x"), false)
   equal(isLoopback("http://example.com/x"), false)
   equal(isLoopback("not a url"), false)
+})
+
+test("docViewFor():  the page's kind picks the tab, an epic page never Epic Docs (epic `epic-engine` P59)", () => {
+  const content = "/Users/o/www/spell/spell.epics"
+  // an epic page and a saga page:  Review, whatever was asked
+  for (const asked of [undefined, "docs", "review", "details"] as const) {
+    equal(docViewFor(`${content}/epics/data/data.plan.html`, asked), "review")
+    equal(docViewFor("/epics/data/data.plan.html", asked), "review")
+    equal(docViewFor(`${content}/sagas/spell/spell.saga.html`, asked), "review")
+    equal(docViewFor(`${content}/goals/old/old.goal.html`, asked), "review")
+  }
+  // details, review and choice pages:  Details, whatever was asked (the choice page Owen lost, request r50)
+  for (const asked of [undefined, "docs", "review"] as const) {
+    equal(docViewFor(`${content}/epics/data/details/data-words.html`, asked), "details")
+    equal(docViewFor(`${content}/pages/details/pick-layout.html`, asked), "details")
+    equal(docViewFor("/r/other/epics/seo/details/names.html", asked), "details")
+  }
+  // the epic `details` keeps its epic page in a `details/` folder:  still Review
+  equal(docViewFor(`${content}/epics/details/details.plan.html`), "review")
+  equal(docViewFor(`${content}/epics/details/details/q.html`), "details")
+  // anything else:  as asked, else Epic Docs;  never Details by asking
+  equal(docViewFor(`${content}/guides/solid/solid-2.html`), "docs")
+  equal(docViewFor(`${content}/guides/solid/solid-2.html`, "review"), "review")
+  equal(docViewFor(`${content}/guides/solid/solid-2.html`, "details"), "docs")
+  equal(docViewFor(`${content}/epics/data/parts/p1.html`), "docs")
+  equal(docViewFor("C:\\spell.epics\\epics\\x\\details\\y.html"), "details")
+})
+
+test("isDocView():  the three tabs' names, nothing else", () => {
+  deepEqual(["docs", "review", "details", "Docs", "", undefined, 1].map(isDocView), [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ])
+})
+
+test("windowEpic():  a worktree's own epic, else the one changed last", () => {
+  const content = join(top, "window-epic")
+  epicPage(content, "data", "Data", 1_000)
+  epicPage(content, "seo", "SEO", 5_000)
+  equal(windowEpic("/Users/o/www/spell.worktrees/data", content), "data")
+  equal(windowEpic("/Users/o/www/spell", content), "seo")
+  equal(windowEpic(undefined, content), "seo")
+  equal(windowEpic("/x", join(top, "no-epics")), undefined)
 })
 
 test("planDocsIn() / planDocsOf():  every repo's epic pages, newest first, titles without `Epic: `", () => {

@@ -63,7 +63,7 @@ export type LiveRoomPages = {
   /** The recipe box's servers. */
   servers: RecipeServers
   /** The page at this address runs `source` (left out:  the language's own), compiled:  answers its address. */
-  serve(name: keyof typeof LIVE_ROOM_PROGRAMS | string, source?: string): string
+  serve(name: string, source?: string): string
 }
 
 /** Start them:  see the file's docs.  `servers.close()` stops them. */

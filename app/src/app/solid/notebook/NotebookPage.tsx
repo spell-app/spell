@@ -3,7 +3,6 @@ import { render, type JSX } from "@solidjs/web"
 
 import { setDebugGlobal } from "spell/util"
 import { after } from "spell/element"
-import { UI } from "spell/ui/core"
 import { SP } from "spell/parser/spell"
 // Import directly:  the barrel brings the site header and the section editor too
 import { PagePatch } from "spell/server/site/PagePatch"
@@ -65,7 +64,10 @@ export function NotebookPage(props: {
   // the pane's header's tools:  once drawn (a write, never in the body)
   onSettled(() => {
     props.onController?.(controller)
-    return () => props.onController?.(undefined)
+    return () => {
+      controller.leave()
+      props.onController?.(undefined)
+    }
   })
   const owner = getOwner()
   const panelDisposers: Array<() => void> = []
@@ -98,14 +100,6 @@ export function NotebookPage(props: {
   }
 
   let page!: HTMLDivElement
-  onSettled(() =>
-    UI.keyboard.register({
-      chord: "Mod+Z",
-      // in the page, or with nothing focused (a button that just went disabled lets go of the focus);
-      // an editor has its own undo
-      handler: (event) => (isForPage(event, page) ? controller.undo() : false)
-    })
-  )
 
   // "On this page"'s column showing:  not hidden, and room for it (as the page's CSS lays it out)
   const [isNarrow, setNarrow] = createSignal(false)
@@ -425,15 +419,4 @@ function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP
     const location = new SP.SpellLocation(file.path)
     return url.pathname === location.editorUrl || url.pathname === location.runnerUrl
   })
-}
-
-/**
- * Is key `event` the notebook page's:  pressed in `page`, in the pane header's ⋯ menu, or with nothing focused --
- * but not in an editor, which has its own undo?
- */
-function isForPage(event: KeyboardEvent, page: HTMLElement): boolean {
-  const path = event.composedPath()
-  if (path.some((node) => node instanceof HTMLElement && node.classList.contains("monaco-editor"))) return false
-  const inMenu = path.some((node) => node instanceof HTMLElement && node.classList.contains("NotebookMenu"))
-  return inMenu || path.includes(page) || path[0] === document.body
 }
