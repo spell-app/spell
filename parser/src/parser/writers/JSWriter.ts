@@ -339,9 +339,7 @@ export class JSWriter extends ProgramWriter {
 
   /** As `ProgramWriter`'s;  a `send` waits only if a handler of its event does (epic `language`, J4). */
   protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
-    if (call.methodName !== "send") return super.coreCallWaits(call)
-    const eventName = call.args.args?.map(P.quotedText).find(Boolean)
-    return !!eventName && this.project.eventWaits(eventName)
+    return call.methodName === "send" ? this.sendWaits(call) : super.coreCallWaits(call)
   }
 
   ////////////////

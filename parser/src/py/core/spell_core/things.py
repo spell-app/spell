@@ -362,6 +362,7 @@ class SpellObject:
         - Its starting values that are things (`prop(early=True)`), e.g. a solitaire's piles,
           are made before `create()`, unless `props` gave them.
         - No `create()` inside `without_create()`:  a copy, not a new thing.
+        - A change to a property after this is one its `when <property> changes` handler hears.
         - A `create()` that waits (`async def`) runs to its end here too, its pauses not waiting:
           `core.run_at_once()`.
         """
@@ -375,6 +376,7 @@ class SpellObject:
             started = self.create()
             if inspect.iscoroutine(started):
                 program_core().run_at_once(started)
+        self.__dict__["_is_made"] = True
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """SIDE EFFECT:  every class of thing is known by name, for `core.from_json()`."""
@@ -413,9 +415,11 @@ class SpellObject:
         settings = _SETTINGS.get()
         if settings is not None and not any(owner is self and prop == name for owner, prop, _ in settings):
             settings.append((self, name, props.get(name)))
+        was = props.get(name)
         if value is None:
             if props.pop(name, None) is not None:
                 note_change(self)
+                self._note_property_change(name, was, value)
             return
         if name in props and is_same(props[name], value):
             return
@@ -423,6 +427,12 @@ class SpellObject:
         note_change(self)
         if check is not None:
             program_core().check_prop(name, value, check)
+        self._note_property_change(name, was, value)
+
+    def _note_property_change(self, name: str, was: object, value: object) -> None:
+        """Tell the core a property changed, once we're made:  starting values are no change."""
+        if self.__dict__.get("_is_made"):
+            program_core().note_property_change(self, name, was, value)
 
     def __getattr__(self, name: str) -> Any:
         """A name we don't declare:  spell reads a property nobody set or declared as nothing, `None`.

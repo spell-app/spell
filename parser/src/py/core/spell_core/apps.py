@@ -16,6 +16,8 @@ game.start()   # drawn on the page:  `core.page.body_html()` writes it
   `notebook.py`.
 """
 
+from typing import Any
+
 from spell_core.drawing import h
 from spell_core.lists import List
 from spell_core.things import Thing, program_core
@@ -46,6 +48,13 @@ class App(View):
       the compiled class names it, `element_tag = "solitaire-app"`.
     - Its `draw()` is compiled from `to draw (a game)`;  `start()` from `start the game`.
     """
+
+    def __init__(self, *args: Any, **props: Any) -> None:
+        """SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:  see `core.send()`."""
+        super().__init__(*args, **props)
+        runtime = program_core().RUNTIME
+        if runtime.app is None:
+            runtime.app = self
 
     def start(self) -> None:
         """SIDE EFFECT:  mount our drawing on the page, into `core.app_element()`:  see `start_drawing()`."""
