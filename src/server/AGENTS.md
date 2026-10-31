@@ -482,6 +482,8 @@ The steps between a page's content and its file on disk, for every tool that wri
 
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
+- `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
+  places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4).
   Never `fetch`, which resolves `..` before sending.
 
 ## Types / Exports

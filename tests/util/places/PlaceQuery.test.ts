@@ -241,3 +241,72 @@ describe("PlaceQuery.answer(), aborting", () => {
     expect(place.asks).toHaveLength(2)
   })
 })
+
+describe("PlaceQuery, a place's own cursors", () => {
+  /** A place whose `nextPage` is no number, as a real cursor isn't.  What it can filter:  `capabilities`. */
+  function cursors(capabilities: Partial<PlaceCapabilities>, handled: ListAnswer["handled"] = {}): Place {
+    return {
+      describe: () =>
+        ({
+          ...NOTHING_BUT_ROWS,
+          page: "cursor",
+          write: "none",
+          atomic: false,
+          live: "none",
+          abort: "hard",
+          idOf: "id",
+          ...capabilities
+        }) as PlaceCapabilities,
+      async list(_collection, { page }) {
+        const start = page?.at ? Number(page.at.slice(1)) : 0
+        const end = start + 2
+        return {
+          rows: RECIPES.slice(start, end),
+          ...(end < RECIPES.length && { nextPage: `p${end}` }),
+          handled
+        }
+      }
+    }
+  }
+
+  test("a place that does it all:  its cursor passes through, as it is", async () => {
+    const place = cursors({ filter: "every field", sort: "every field" }, { filter: true, sort: true })
+    const query = new PlaceQuery({ placeName: "p", place, collection: "c", query: { page: { at: "p2", size: 2 } } })
+    expect((await query.answer(new AbortController().signal)).nextPage).toBe("p4")
+  })
+
+  test("a place that can't filter:  its cursors stay in here, and a reader's `nextPage` is a place in the filtered list", async () => {
+    const asked = (at?: string) =>
+      new PlaceQuery({
+        placeName: "p",
+        place: cursors({}),
+        collection: "c",
+        query: { filter: { kind: "hot" }, page: { size: 1, ...(at !== undefined && { at }) } }
+      }).answer(new AbortController().signal)
+    const first = await asked()
+    expect(first).toMatchObject({ rows: [{ id: "r-1" }], nextPage: "1" })
+    expect(await asked(first.nextPage)).toMatchObject({ rows: [{ id: "r-3" }], nextPage: "2" })
+    expect(await asked("2")).toMatchObject({ rows: [{ id: "r-5" }] })
+  })
+
+  test("a place that says it can filter, and then doesn't:  it starts over from the first page, rather than count twice", async () => {
+    const place = cursors({ filter: "every field" })
+    const query = new PlaceQuery({
+      placeName: "p",
+      place,
+      collection: "c",
+      query: { filter: { kind: "hot" }, page: { at: "1", size: 1 } }
+    })
+    expect((await query.answer(new AbortController().signal)).rows).toMatchObject([{ id: "r-3" }])
+  })
+
+  test("a position that's no place in the list says so", async () => {
+    const query = new PlaceQuery({
+      placeName: "p",
+      place: cursors({}),
+      collection: "c",
+      query: { filter: { kind: "hot" }, page: { at: "abc", size: 1 } }
+    })
+    await expect(query.answer(new AbortController().signal)).rejects.toThrow("isn't a place in the list")
+  })
+})

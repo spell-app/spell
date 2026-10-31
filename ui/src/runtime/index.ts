@@ -15,7 +15,7 @@ export * from "./runtime.types"
 
 export { UI, load as loadUI } from "./load"
 export type { UIRuntime } from "./UIRuntime"
-export type { Api } from "./Api"
+export type { Api } from "spell/util/Api"
 export type { AppStylesheet } from "./AppStylesheet"
 export type { Browser } from "./Browser"
 export type { Chord, ChordModifier } from "./Chord"

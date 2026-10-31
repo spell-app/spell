@@ -83,6 +83,7 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
  *   - an undoable action running:  the run's undo history records it (`UndoHistory.noteSetting()`, `undoing.ts`)
  *   - a program running elsewhere (`core.remote`, e.g. Python):
  *     it's set there too, e.g. a task's title typed into a page's form
+ *   - a place, for a thing kept in one (`onPlaceWrite()`, epic `data` P3)
  *   - the thing's `when <property> changes` handler, once it's made (`onPropertyChange()`, epic `debut` P30)
  * - Nothing if it has that value already.
  * - What's being read in from where it's kept (`whileReading()`) is heard by the handler alone:  it's no one's write.
@@ -95,9 +96,30 @@ export function noteSetting(target: object, property: string, value: unknown): v
     if (recording && !isNoted) recording.push({ target, property, was })
     core.RUNTIME?.history.noteSetting(target, property, was, value)
     ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+    placeWrites?.setting(target, property, was, value)
   }
   if (madeThings.has(target) && !core.isCarryingOver) changeListener?.(target, property, was, value)
 }
+
+/**
+ * Hear every write to a property or a list:  what sends a saved thing's changes to its place (`places.ts`).
+ * - ONE listener:  a program with no places has none, and pays for one check.
+ * - Never what's being read in (`whileReading()`):  rows and heals would come back as writes.
+ */
+export function onPlaceWrite(listener: PlaceWriteListener): void {
+  placeWrites = listener
+}
+
+/** What hears a write -- see `onPlaceWrite()`. */
+export type PlaceWriteListener = {
+  /** `target`'s `property` is about to be `value`, from `was`. */
+  setting(target: object, property: string, was: unknown, value: unknown): void
+  /** `list`'s items are about to be `after`, from `before`. */
+  items(list: object, before: readonly unknown[], after: readonly unknown[]): void
+}
+
+/** Who hears a write -- see `onPlaceWrite()`. */
+let placeWrites: PlaceWriteListener | undefined
 
 /** Is `whileReading()` running? */
 let isReadingIn = false
@@ -151,11 +173,14 @@ let changeListener: PropertyChangeListener | undefined
  * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`.
  * - `List.writeItems()` calls it, for every change to a list.
  * - An undoable action running:  the run's undo history records it (`UndoHistory.noteItems()`, `undoing.ts`).
+ * - A place, for a list kept in one (`onPlaceWrite()`).
  * - A `while` handler's put-back leaves lists as they are:  see `recordingSettings()`.
  * - Not what's being read in:  see `whileReading()`.
  */
 export function noteItems(list: object, before: readonly unknown[], after: readonly unknown[]): void {
-  if (!isReadingIn) core.RUNTIME?.history.noteItems(list, before, after)
+  if (isReadingIn) return
+  core.RUNTIME?.history.noteItems(list, before, after)
+  placeWrites?.items(list, before, after)
 }
 
 /**

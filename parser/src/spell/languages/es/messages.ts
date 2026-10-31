@@ -21,5 +21,10 @@ export const spanishMessages: CoreMessages = {
   undo: "Deshacer",
   "undo-step": "Deshacer {step}",
   redo: "Rehacer",
-  "redo-step": "Rehacer {step}"
+  "redo-step": "Rehacer {step}",
+  "write-refused": "No se pudo guardar tu cambio en {thing}",
+  "write-retry": "Reintentar",
+  "write-show-me": "Muéstrame",
+  "write-merged": "{field} de {thing} también cambió en otro sitio.  Se conservó lo tuyo;  lo otro era:  {theirs}",
+  "write-use-theirs": "Usar lo otro"
 }

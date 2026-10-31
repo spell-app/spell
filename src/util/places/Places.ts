@@ -1,13 +1,16 @@
+import type { StorageLike } from "spell/util/persist/persist.types"
 import { untrackCells } from "spell/util/reactive"
 
+import { PendingChanges, type PlaceConflict, type PlaceRowsChange, type PlaceWriteFailure } from "./PendingChanges"
 import { PlaceCache } from "./PlaceCache"
+import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
 import { PlaceResult, type PlaceResultProps } from "./PlaceResult"
 import { PlaceError, type Place } from "./places.types"
 
 /****************
  * ### `Places`
- * Every place a program knows, by name, the one cache of rows they share, and the reads under way.
+ * Every place a program knows, by name, the one cache of rows they share, the reads under way and the writes pending.
  * - Everything asks for a place by name each time, so swapping the place behind a name
  *   (a sample, while designing) leaves everything that names it alone.
  * - Instances, not one page-wide list:  each run of a program, and each test, gets its own.
@@ -17,8 +20,24 @@ export class Places {
   readonly cache = new PlaceCache()
   /** The reads people are waiting on or looking at, so readers of one list share one request. */
   readonly reads = new PlaceReads()
+  /** Fetch the latest, replay what's pending:  how anything gets back in step with a place. */
+  readonly heal = new PlaceHeal({ places: this })
   /** Each place, by its name. */
   private places = new Map<string, Place>()
+  /** Each place's changes not yet confirmed, by its name. */
+  private pending = new Map<string, PendingChanges>()
+  /** Who shows rows, told as they change under them. */
+  private rowListeners = new Set<(change: PlaceRowsChange) => void>()
+  /** Who hears of a failed write. */
+  private failureListeners = new Set<(failure: PlaceWriteFailure) => void>()
+  /** Who hears that a merge kept your value over someone else's. */
+  private conflictListeners = new Set<(conflict: PlaceConflict) => void>()
+  /** The conflicts raised with nobody listening yet:  a change left from the last visit, merged as this one opens. */
+  private unheardConflicts: PlaceConflict[] = []
+  /** The failures raised with nobody listening yet:  a write left from the last visit, refused as this one opens. */
+  private unheardFailures: PlaceWriteFailure[] = []
+
+  constructor(private readonly props: PlacesProps = {}) {}
 
   /**
    * Name `place`.
@@ -29,6 +48,8 @@ export class Places {
       throw new TypeError(`Places.add():  there's already a place named "${name}";  swap() replaces one`)
     }
     this.places.set(name, place)
+    // what's left from the last visit goes out now:  on a device that keeps them
+    if (this.props.keepPendingAs !== undefined) void this.pendingFor(name).open()
     return this
   }
 
@@ -65,6 +86,101 @@ export class Places {
     return place
   }
 
+  ////////////////
+  // ## Writing
+  ////////////////
+
+  /**
+   * What's kept for this program on this device, under `what`:  a key for a `BrowserCopy`.
+   * - `undefined` when the program keeps nothing (`keepPendingAs`).
+   */
+  keyOnDevice(store: string, what: string): string | undefined {
+    const { keepPendingAs } = this.props
+    return keepPendingAs === undefined ? undefined : `${store}:${keepPendingAs}/${what}`
+  }
+
+  /** Where it keeps things on this device:  `PlacesProps.storage`. */
+  get storage(): PlacesProps["storage"] {
+    return this.props.storage
+  }
+
+  /**
+   * The changes pending for the place named `placeName`:  the ONE list for it.
+   * - The first time, it also sends as the page goes away, on a device that keeps them.
+   * - throws `PlaceError` if nothing goes by that name
+   */
+  pendingFor(placeName: string): PendingChanges {
+    let pending = this.pending.get(placeName)
+    if (pending) return pending
+    this.placeForOrDie(placeName)
+    const { keepPendingAs, storage, wait, retry } = this.props
+    pending = new PendingChanges({
+      placeName,
+      places: this,
+      ...(keepPendingAs !== undefined && { keepAs: keepPendingAs }),
+      ...(storage && { storage }),
+      ...(wait !== undefined && { wait }),
+      ...(retry !== undefined && { retry })
+    })
+    this.pending.set(placeName, pending)
+    if (keepPendingAs !== undefined && typeof window !== "undefined") pending.queue.watch(window)
+    return pending
+  }
+
+  /** The changes pending for `placeName`, if anything's asked for them:  a read looks here, and makes nothing. */
+  pendingIfAny(placeName: string): PendingChanges | undefined {
+    return this.pending.get(placeName)
+  }
+
+  /** Hear rows changing under what's showing:  a write, an answer, a heal.  Returns what stops it. */
+  onRows(listener: (change: PlaceRowsChange) => void): () => void {
+    this.rowListeners.add(listener)
+    return () => this.rowListeners.delete(listener)
+  }
+
+  /** Tell who's listening that rows changed:  `PendingChanges` and `PlaceHeal` call it. */
+  tellRows(change: PlaceRowsChange): void {
+    for (const listener of this.rowListeners) listener(change)
+  }
+
+  /**
+   * Hear each write a place refused:  the one event a notice is shown from, anywhere in the app.
+   * - Hears at once any raised before anyone listened.
+   * - Returns what stops it.
+   */
+  onWriteFailed(listener: (failure: PlaceWriteFailure) => void): () => void {
+    this.failureListeners.add(listener)
+    this.unheardFailures.splice(0).forEach(listener)
+    return () => this.failureListeners.delete(listener)
+  }
+
+  /** Raise `failure`:  `PendingChanges` calls it. */
+  tellWriteFailed(failure: PlaceWriteFailure): void {
+    if (!this.failureListeners.size) this.unheardFailures.push(failure)
+    for (const listener of this.failureListeners) listener(failure)
+  }
+
+  /**
+   * Hear each time a merge kept your value over what someone else saved:  what a notice is shown from, with what was lost.
+   * - Hears at once any raised before anyone listened.
+   * - Returns what stops it.
+   */
+  onConflict(listener: (conflict: PlaceConflict) => void): () => void {
+    this.conflictListeners.add(listener)
+    this.unheardConflicts.splice(0).forEach(listener)
+    return () => this.conflictListeners.delete(listener)
+  }
+
+  /** Raise `conflict`:  `PendingChanges` calls it. */
+  tellConflict(conflict: PlaceConflict): void {
+    if (!this.conflictListeners.size) this.unheardConflicts.push(conflict)
+    for (const listener of this.conflictListeners) listener(conflict)
+  }
+
+  ////////////////
+  // ## Reading
+  ////////////////
+
   /**
    * A new reader's result, not yet started:  `load()` it, and `leave()` it when nothing shows it any more.
    * - Readers of one collection and query share one request.
@@ -79,4 +195,16 @@ export class Places {
       return result
     })
   }
+}
+
+/** Constructor props of `Places`. */
+export type PlacesProps = {
+  /** What to keep pending changes and drafts under on this device, e.g. the project's id.  Left out:  they end with the page. */
+  keepPendingAs?: string
+  /** Finds where they're kept:  `BrowserCopyProps.storage`. */
+  storage?: () => StorageLike | undefined
+  /** How long after the last change one in no group is sent, ms. */
+  wait?: number
+  /** How long after no answer it tries again, ms. */
+  retry?: number
 }

@@ -535,13 +535,28 @@ What a component, or a page built on Spell UI, reaches for first.
   - Beside it:  `LoadOnce.abortable()`, one caller's wait ending early while the shared load runs on
     (`Sources`, `PlaceReads`)
 
+### Polling while the page is visible
+
+- **It is:**  `pollWhileVisible(seconds, fn)` (`src/util/polling.ts`):  on `every()`, skipped while the page is hidden,
+  once on coming back, never two looks at a time
+- **Use it when:**  anything on a page or place asks again and again, whether something changed.
+- **Flag:**  `visibilityState` inside an `every(` or a `setInterval(`
+- **Copies:**  `--` since epic `data` P4 (the notebook's file poll);  the epic pages' use `ServerLink.watch()` (above)
+
+### Requests with URL templates and real aborts
+
+- **It is:**  `Api` (`spell/util/Api`, on `fetchOk()`):  URL templates, combined abort signals, a newer request replacing
+  an older one;  no lodash.
+- **Use it when:**  Spell UI's `UI.api`, and any place that reaches a server (`WebPlace`, epic `data` P4).
+- **Copies:**  beside `$fetch()`, until that can sit on it.
+
 ### Fetching in Spell UI
 
-- **It is:**  `fetchOk()` / `fetchText()` (`ui/src/runtime/runtime.types.ts`):  an OK answer, else the
-  caller's own typed error (`SourceError`, `ApiError` ...)
+- **It is:**  `fetchOk()` / `fetchText()` (`src/util/fetching.ts`;  Spell UI's runtime re-exports them):  an OK answer,
+  else the caller's own typed error (`SourceError`, `ApiError` ...)
 - **Use it when:**  Spell UI's runtime fetches;  everywhere else, `$fetch()` (above).
 - **Flag:**  `response\.ok` in `ui/src`
-- **Score:**  `response\.ok` · in `ui/src` · home `ui/src/runtime/runtime.types.ts`
+- **Score:**  `response\.ok` · in `ui/src` · home `src/util/fetching.ts`
 - **Copies:**  `--` since epic `coherence` P10 (`Api`, `AppStylesheet`, `Sources`, `IconPacks`);  the docs site's
   `SiteData.request()` since P23
 
@@ -829,9 +844,18 @@ What a component, or a page built on Spell UI, reaches for first.
   - the syntax page's boxes (`syntax-choices.css`):  native on purpose, 750 of them, each a `<ui-textarea>` would draw
     a shadow root
 
+### Saving in the background
+
+- **It is:**  `SaveQueue` (`src/util/places/SaveQueue.ts`), handed the save call and the wait:
+  saves in order, one at a time, retries every 3s, sends as the page goes away, keeps a browser copy (`BrowserCopy`),
+  and words where it stands
+- **Flag:**  `retry.*save|save.*retry|keepalive`
+- **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/util/places/SaveQueue.ts`
+- **Copies:**  `--` since epic `data` P3:  `DraftSaver` and `PendingChanges` are both on it
+
 ### A draft that saves itself
 
-- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), handed the save call, the wait and the key:
+- **It is:**  `DraftSaver` (`epic/src/answers/DraftSaver.ts`), on `SaveQueue`, handed the save call, the wait and the key:
   saves as you type, says "saved 14:04", retries a failed save every 3s
 - **Flag:**  `draft saved|saveDraft`
 - **Score:**  `\bdraftTimer\b|setTimeout\(\(\) => (this\.)?saveDraft` · home `epic/src/answers/DraftSaver.ts`
@@ -951,8 +975,6 @@ Mechanisms with several copies and no shared one yet:  each a fix for a later ph
 code (epic `coherence`, Q4 and Q5).
 
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
-- **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
-  - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
 
 ## Fine as it is
 

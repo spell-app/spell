@@ -35,6 +35,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
+  - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
+  - `Api.ts` -- requests with URL templates, combined abort signals, a newer one replacing an older (`UI.api`, and the
+    places';  moved down from Spell UI by epic `data` P4);  on `fetching.ts`, `fetchOk()` and what `Api` throws.
+    Taken by file, `spell/util/Api`, in no barrel
   - `string.ts`, `number.ts`, `time.ts`, `color.ts` and `timing.ts` import nothing, so plain `node` loads them too,
     with their extension (`spell/util/time.ts`)
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
@@ -174,6 +178,27 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
+  - `RestPlace` and `GraphPlace`, on `WebPlace`:  a server, from a mapping of its paths and field names, on `Api`.
+    - `WebPlace` turns an answer into what the engine needs:  not found, refused, or no answer (a 5xx, a 429:  it resends).
+    - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses.
+    - `RestPlace`:  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
+    - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
+    - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
+  - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
+    - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
+    - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
+      (`Places.onWriteFailed()`).
+    - It sits on top of what's read (`replayOn()`), so you read your own writes.
+    - A write back to what it `was`, not yet sent, drops the change:  that's undo before sending.
+    - A group is an action's:  held until `end()`, never kept on the device, dropped by `cancel()`.
+    - A change says the version it was made from (`Place.versionOf()`).  Refused as out of date:  a three-way merge per
+      field, against its `was`, then sent again;  mine wins, and `Places.onConflict()` hears what was lost.
+  - [SaveQueue](places/SaveQueue.ts):  saving in the background, in order, until it goes through;
+    `PendingChanges` and spell-epic's `DraftSaver` are both on it.
+    - Taken by file, `spell/util/places/SaveQueue`:  a page that only types pays for no place.
+    - `BrowserCopy` beside it:  one value kept in the browser, under one key.
+  - `PlaceHeal` (`Places.heal`):  fetch the latest, replay what's pending;  on opening, on a refusal and on demand.
+    What changed is told through `Places.onRows()`.
   - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
     - Imports nothing:  spell's core takes it by file, `spell/util/places/refs`.
     - A program's mirrored state keeps its counted `"$id"`:  it's what the Python page speaks.
@@ -181,9 +206,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Nothing about Things or Spell's words:  those are above util (rows into Things:  `spell/parser/core/places`).
   - Whatever needs a server goes in `spell/server/places`.
 - Its files import each other as peers.
-- Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage.
+- Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage;
+  but `RestPlace` and `GraphPlace`'s, in node (`util:node`), since they need a real server.
   - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
-    which keep the interface honest until those two are built.
+    which keep the interface honest until those two are built;
+    and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.
 
 ## Decorators
 
