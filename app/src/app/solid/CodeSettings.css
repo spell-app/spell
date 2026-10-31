@@ -8,7 +8,9 @@
   width: 260px;
   box-sizing: border-box;
   padding: 8px 12px 12px;
-  background: var(--spell-pane-background, var(--spell-view-background));
+  background: var(--ui-popup-background, var(--ui-surface));
+  /* `--glass-blur` only exists in Glass and Fruity:  elsewhere this falls back to no frost */
+  backdrop-filter: var(--glass-blur);
   color: var(--ui-text-color);
   font-family: var(--ui-font-family);
   border: 1px solid var(--ui-border-color);

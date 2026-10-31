@@ -7,7 +7,7 @@ import type { SP } from "spell/parser/spell"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
-import { CODE_POPUP_DEFAULTS, type CodePopupChoices } from "spell/app/app/ui/codePopups"
+import { CODE_POPUP_DEFAULTS, codeHover, type CodePopupChoices } from "spell/app/app/ui/codePopups"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
 import { CodeSettings } from "spell/app/app/solid/CodeSettings"
@@ -224,7 +224,9 @@ describe("CodeSettings", () => {
     expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "off", comments: "off", strings: "off" })
     expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(false)
     expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(false)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
+    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(false)
+    expect(codeHover.detail).toBe("plain")
     expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(true)
   })
 
@@ -237,13 +239,17 @@ describe("CodeSettings", () => {
     choose("hover", "always")
     choose("suggest", "asYouType")
     choose("suggestDetails", true)
-    choose("parameterHints", false)
+    choose("parameterHints", true)
+    choose("pinnedLines", true)
+    choose("compilerWords", true)
     expect(inputEditor.getOption(option.hover).enabled).toBe("on")
     expect(inputEditor.getOption(option.multiCursorModifier)).toBe("altKey")
     expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "on", comments: "off", strings: "off" })
     expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(true)
     expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(true)
-    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
+    expect(inputEditor.getOption(option.stickyScroll).enabled).toBe(true)
+    expect(codeHover.detail).toBe("full")
     expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(false)
     expect(editorPrefs.get("codeHover")).toBe("always")
     expect(editorPrefs.get("codeSuggestDetails")).toBe(true)

@@ -47,6 +47,8 @@ const APP_TEXTS_ES: AppTextPack = {
   codeSuggestAsYouType: "Mientras escribes",
   codeSuggestDetails: "Detalles junto a las sugerencias",
   codeParameterHints: "Pistas de los parámetros",
+  codePinnedLines: "Líneas fijas sobre el código",
+  codeCompilerWords: "Detalles del compilador en la información",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageCodeAs: "Ver el código como",
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",

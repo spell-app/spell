@@ -42,6 +42,8 @@ export const APP_TEXTS = {
   codeSuggestAsYouType: "As you type",
   codeSuggestDetails: "Details beside suggestions",
   codeParameterHints: "Parameter hints",
+  codePinnedLines: "Pinned lines above the code",
+  codeCompilerWords: "Compiler details in hover",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageCodeAs: "Show code as",
   notebookPageLock: "Lock it:  nothing is saved while it's locked",

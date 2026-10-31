@@ -740,14 +740,12 @@ export class SpellLanguageService {
    * - the rule that matched there, its syntax and an example from its tests
    * - what the word refers to and where that was declared, e.g. a variable's kind and output name
    * - the javascript its statement compiles to
-   * - TODO: tune for who's reading.
-   *   - The rule + javascript sections are for parser developers,
-   *     and for a method call the rule's syntax repeats `describeSubject()`'s.
-   *   - Idea:  a `spell.hover` setting, read like `compileOnSave`:
-   *     `"simple"` shows only `describeSubject()`, in plain words;  `"full"` is today's.
-   *   - Or show a rule's `description` (none set yet) instead of its raw syntax.
+   * - `detail` says who's reading (`LSP.HoverDetail`):
+   *   - `"full"`:  all of the above, for programmers:  VS Code, and `spell explain`
+   *   - `"plain"`:  the sentence and its description, no compiler words:  the editor app, unless someone asks
+   *     (`CodeSettings`).  A word with nothing to say in plain words shows no hover at all.
    */
-  hover(file: SP.SpellFile, position: Position): Hover | null {
+  hover(file: SP.SpellFile, position: Position, detail: LSP.HoverDetail = "full"): Hover | null {
     const offset = this.offsetAt(file, position)
     const cssHover = this.css.hover(file.parseText, offset, position)
     if (cssHover !== undefined) return cssHover
@@ -761,23 +759,22 @@ export class SpellLanguageService {
       | P.Match
       | undefined
 
-    const sections = [
-      this.describeRule(described.data.statement instanceof P.Match ? described.data.statement : described)
-    ]
+    const ruleMatch = described.data.statement instanceof P.Match ? described.data.statement : described
+    const sections = detail === "full" ? [this.describeRule(ruleMatch)] : this.describeBuiltIns(ruleMatch)
     // an outline body's line, as the sentence style says it -- see `SP.SpellStatement.getLongForm()`
     const longForm = statement?.rule instanceof SP.SpellStatement ? statement.rule.getLongForm(statement) : undefined
     if (longForm) sections.unshift(`**${LSP.LspTexts.for(file.language).text("readsAs")}**  \`${longForm}\``)
-    if (subject) sections.push(this.describeSubject(subject))
-    const compiled = statement && SpellLanguageService.compileQuietly(statement)
+    if (subject) sections.push(this.describeSubject(subject, detail))
+    const compiled = detail === "full" && statement && SpellLanguageService.compileQuietly(statement)
     if (compiled) sections.push(["```js", SpellLanguageService.truncateLines(compiled, 20), "```"].join("\n"))
+    if (!sections.length) return null
     const range = subject ? this.rangeOf(file, subject.nameMatch) : this.rangeOf(file, described)
     return { contents: { kind: MarkupKind.Markdown, value: sections.join("\n\n---\n\n") }, range }
   }
 
   /**
    * Markdown for `match`'s rule:  its name, syntax, and the first example from its tests.
-   * - Then, for a built-in rule which spells a built-in type's member, e.g. `list_shuffle`:
-   *   that member and its docs -- see `SP.BUILT_IN_TYPE_TABLE`.
+   * - Then what `describeBuiltIns()` says of it.
    */
   private describeRule(match: P.Match): string {
     const { rule } = match
@@ -786,22 +783,35 @@ export class SpellLanguageService {
     const lines = [syntax ? `**${rule.name}** \`${syntax}\`` : `**${rule.name}**`]
     const example = SpellLanguageService.firstExample(rule)
     if (example) lines.push(`${texts.text("forExample")} \`${example}\``)
-    const members = rule.name ? SP.builtInMembersOfRule(rule.name) : []
-    const builtIn = members.map(({ type, member }) =>
-      [texts.text("builtIn", { words: member.words, type: type.name }), member.docstring].filter(Boolean).join("\n\n")
-    )
-    return [lines.join("  \n"), ...builtIn].join("\n\n")
+    return [lines.join("  \n"), ...this.describeBuiltIns(match)].join("\n\n")
   }
 
-  /** Markdown for what `subject` is, and where it was declared -- in its program's language (`textsFor()`). */
-  private describeSubject(subject: LSP.SpellSubject): string {
+  /**
+   * Markdown for each built-in type's member `match`'s rule spells, e.g. `list_shuffle`:
+   * that member and its docs -- see `SP.BUILT_IN_TYPE_TABLE`.
+   */
+  private describeBuiltIns(match: P.Match): string[] {
+    const { rule } = match
+    const texts = LSP.LspTexts.of(match.scope)
+    const members = rule.name ? SP.builtInMembersOfRule(rule.name) : []
+    return members.map(({ type, member }) =>
+      [texts.text("builtIn", { words: member.words, type: type.name }), member.docstring].filter(Boolean).join("\n\n")
+    )
+  }
+
+  /**
+   * Markdown for what `subject` is, and where it was declared -- in its program's language (`textsFor()`).
+   * - `"plain"` leaves out what only the compiler cares for:  output names, what it matches, what it compiles to.
+   */
+  private describeSubject(subject: LSP.SpellSubject, detail: LSP.HoverDetail = "full"): string {
     const texts = SpellLanguageService.textsFor(subject)
+    const isFull = detail === "full"
     const lines: string[] = []
     if (subject.kind === "variable") {
       const { name, output, kind, datatype, isAlias } = subject.record
       // what it holds, e.g. `card: Card` for an argument `(a card)`, a loop's item, `it` in a method
       const bits = [`${texts.text("variable")} **${name}**${datatype ? `: ${datatype}` : ""}`]
-      if (output && output !== name) bits.push(`${texts.text("as")} \`${output}\``)
+      if (isFull && output && output !== name) bits.push(`${texts.text("as")} \`${output}\``)
       if (kind) bits.push(kind)
       if (isAlias) bits.push(texts.text("alias"))
       lines.push(bits.join(" · "))
@@ -816,9 +826,8 @@ export class SpellLanguageService {
       const enumerations = classVariables.get().map((variable) => variable.name)
       if (enumerations.length) lines.push(`${texts.text("enumerations")}:  ${enumerations.join(", ")}`)
     } else if (subject.kind === "constant") {
-      lines.push(
-        `${texts.text("constant")} **${subject.record.name}** ${texts.text("as")} \`${subject.record.output}\``
-      )
+      const output = isFull ? ` ${texts.text("as")} \`${subject.record.output}\`` : ""
+      lines.push(`${texts.text("constant")} **${subject.record.name}**${output}`)
     } else if (subject.kind === "method") {
       const declaration =
         subject.record.declaredBy && subject.record.declaredBy.rule.getDeclaration(subject.record.declaredBy)
@@ -826,8 +835,8 @@ export class SpellLanguageService {
       lines.push(`${kind} **${declaration?.name ?? subject.record.name}**`)
       const { syntax } = subject.record.definition
       const or = ` ${texts.text("or")} `
-      if (syntax) lines.push(`${texts.text("matches")} \`${[syntax].flat().join(`\`${or}\``)}\``)
-      if (declaration?.detail) lines.push(`${texts.text("compilesTo")} \`${declaration.detail}\``)
+      if (isFull && syntax) lines.push(`${texts.text("matches")} \`${[syntax].flat().join(`\`${or}\``)}\``)
+      if (isFull && declaration?.detail) lines.push(`${texts.text("compilesTo")} \`${declaration.detail}\``)
     } else {
       const { record, owner } = subject
       const type = record?.scope instanceof P.TypeScope ? record.scope : owner
