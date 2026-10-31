@@ -383,7 +383,7 @@ The kit's [.epic/config.json5](../.epic/config.json5), key by key:
 | `extraInstalls` | `["epic/vscode", "app/vscode"]` | the two VS Code extensions, yarn projects of their own |
 | `windows` | `default` and `repoName` `"spell"`, `contentName` `"spell.epics"` | the window a worktree's window is opened from, and the names a window gives the kit's main checkout and the epic folder |
 | `linkSessionFolders` | `true` | each new worktree's saved-session folder is a link to the main checkout's, so every window's Claude panel lists every session, whichever folder comes first |
-| `sharedFolders` | `[]` | no content folders linked in at the root:  the kit tracks `agents/` itself |
+| `sharedFolders` | `[]` | none of the epic repo's folders linked in at the root:  the kit tracks `agents/` itself |
 | `engineFolder` | `""` | none:  the epic engine is already a folder of the repo, `epic/` |
 | `windowsFolder` | `"spell.epics/windows"` | the VS Code window files, each machine's own |
 | `voices` | `code`:  `"agents/wwod/writing.md"` | the house's own voice for `/voice`, besides spell-epic's:  WWOD's writing rules |

@@ -9,7 +9,7 @@ import { findPages } from "spell/epic/tools/pages.js"
 import { PlanDoc, PlanDocFiles, sharedDocLog } from "spell/epic/tools/plan-doc.js"
 
 /**
- * The docs tools with SHARED content (epic `shared-content`):  pages through a link to a folder in the epic repo.
+ * The docs tools with the epic repo (epic `shared-content`):  pages through a link to a folder in the epic repo.
  * - real links, in a temp folder
  */
 const temp = mkdtempSync(join(tmpdir(), "docs-shared-"))

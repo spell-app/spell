@@ -138,7 +138,7 @@ function contentSettings(content: string): PageServerSettings | undefined {
  * The parts `parts`, merged into one, every path relative to `root` (`pageServerSettings()`).
  * - `routes`, `watch`, `bundles`, `pageScripts`' `file`, `componentSets`' `dir` and `assets`, `engineRoutes`' folders:
  *   paths, each from its part's `dir`
- * - `writable`, `gone`, `siteTabs`, `localCopies`:  not paths of a repo (content folders, URLs), kept as they are
+ * - `writable`, `gone`, `siteTabs`, `localCopies`:  not paths of a repo (the epic repo's folders, URLs), kept as they are
  */
 export function mergeSettings(root: string, parts: readonly SettingsPart[]): PageServerSettings {
   const merged: PageServerSettings = {}

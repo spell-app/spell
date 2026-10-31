@@ -1399,7 +1399,7 @@ function sayBefore(sessionId) {
  * What's said about `checkout` (`checkoutOf()`'s) when it's a BROKEN worktree, one git no longer knows:  its `.git`
  * names a git folder that's gone (`missingGitDir`);  `[]` when it isn't one.
  * - the settings still come from its main checkout (`checkoutOf()` finds it from that folder's path), so the windows,
- *   worktrees and content folders are the right ones;  git itself fails there
+ *   worktrees and epic folders are the right ones;  git itself fails there
  *   - before P26 they came out inside the worktree (solid-17's, r20)
  * - the fix:  `git worktree repair`, from the main checkout
  */

@@ -20,7 +20,7 @@ import { Shared } from "spell/epic/command/Shared"
 
 /**
  * A throwaway repo `spell-app` with an epic repo beside it, `spell-app-dev`.
- * - the main checkout's content folders start as real (ignored) folders, as right after the cutover
+ * - the main checkout's epic repo folders start as real (ignored) folders, as right after the cutover
  * - worktree `wt` starts with none
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "shared-")))
