@@ -620,7 +620,8 @@ export class SpellLanguageService {
    * - its attributes' names:  `property`  (their values, a quoted name and a phrase are the twin's, coloured by the parse)
    * - a closer, `</>` or `</property>`:  `keyword`
    * - a prose line's or a note's text:  a comment, its markdown styled as a docstring's
-   * - a note's tag and closer on its line:  `keyword`
+   * - a note's tag and closer on its line:  `keyword`;  its head alone on its line too
+   * - a `<property-editor>`'s lines:  markup as written, coloured as a drawing's markup (`markupSpans()`)
    * - `prose`:  gets where each prose line starts, where the twin's own comments stand too
    */
   private spellxSpans(file: SP.SpellFile, prose: Set<number>): LSP.HighlightSpan[] {
@@ -642,8 +643,35 @@ export class SpellLanguageService {
         keyword(token.start, token.end)
       } else if (token instanceof SP.SpellxProseToken) {
         prose.add(token.start)
-        spans.push(...this.proseSpans(text, token))
+        if (token.isNoteHead) keyword(token.start, token.end)
+        else if (token.isMarkup) spans.push(...this.markupSpans(file, token))
+        else spans.push(...this.proseSpans(text, token))
       }
+    })
+    return spans
+  }
+
+  /**
+   * A line of a `<property-editor>`, markup as written:  its tags' names `type`s, attribute names `property`s,
+   * quoted values `string`s, as a drawing's markup colours (`jsxSpans()`).
+   * - Read by the file's own tokenizer, a line at a time:  a closer alone on its line, `</ui-property-group>`,
+   *   is no element there, so its name is found by hand.
+   */
+  private markupSpans(file: SP.SpellFile, token: SP.SpellxProseToken): LSP.HighlightSpan[] {
+    const line = token.value
+    const at = file.parseText.indexOf(line, token.start)
+    if (at < 0) return []
+    const closer = /^<\/([^\s>]+)>/.exec(line)
+    if (closer) return [{ start: at + 2, end: at + 2 + closer[1]!.length, kind: "type" }]
+    const spans: LSP.HighlightSpan[] = []
+    P.Tokenizer.forEachToken(file.language.parser.tokenize(line, "") ?? [], (piece) => {
+      const pieceSpans: LSP.HighlightSpan[] =
+        piece instanceof P.JSXToken
+          ? this.jsxSpans(piece)
+          : piece instanceof P.TextToken
+            ? [{ start: piece.start, end: piece.end, kind: "string" }]
+            : []
+      for (const span of pieceSpans) spans.push({ ...span, start: span.start + at, end: span.end + at })
     })
     return spans
   }

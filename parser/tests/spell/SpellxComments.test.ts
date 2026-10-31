@@ -158,6 +158,27 @@ describe("a `<property-editor>`", () => {
     expect(code).toContain("// </ui-property-group>")
   })
 
+  // epic `debut` I96:  its lines colour as markup (the editor's and the language server's colouring ask the tokens)
+  test("its lines are markup, its head a note's head;  a `<description>`'s lines are neither", () => {
+    const lines = [...SPELLX.slice(0, -1), "\t<description>", "\t\tA card.", "\t</description>", "</spell-view>"]
+    const text = lines.join("\n")
+    const [file] = parseSpellProject([{ path: "/Card.spellml", contents: text }]).files
+    const prose: string[] = []
+    P.Tokenizer.forEachToken(file!.match!.tokens, (token) => {
+      if (!(token instanceof SP.SpellxProseToken)) return
+      const line = text.slice(token.start, text.indexOf("\n", token.start))
+      prose.push(`${line} ${token.isNoteHead ? "head" : token.isMarkup ? "markup" : "prose"}`)
+    })
+    expect(prose).toEqual([
+      "<property-editor> head",
+      '<ui-property-group label="Card" columns="2"> markup',
+      '<ui-property name="suit" /> markup',
+      "</ui-property-group> markup",
+      "<description> head",
+      "A card. prose"
+    ])
+  })
+
   test("in Spanish, `<editor-de-propiedades>`", () => {
     const lines = SPELLX.map((line) => line.replace(/property-editor>/, "editor-de-propiedades>"))
     const parentScope = SP.Language.rootScopeFor([SP.Language.forFile("/Carta.es.spellml")])

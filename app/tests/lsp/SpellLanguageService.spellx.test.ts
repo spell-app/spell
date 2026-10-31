@@ -74,6 +74,46 @@ describe("SpellLanguageService, spellx", () => {
     }
   })
 
+  // epic `debut` I96, Owen:  "<property-editor> in Card.spellml is not syntax coloring"
+  test("a <property-editor>'s lines colour as markup:  tags, attribute names, values;  its head and closer as tags", async () => {
+    const editorFolder = resolve(dir, "EditedTiles")
+    mkdirSync(editorFolder)
+    const editorText = tileText.replace(
+      "</spell-view>",
+      [
+        "\t<property-editor>",
+        '\t\t<ui-property-group label="Tile" readonly>',
+        '\t\t\t<ui-property name="side" />',
+        "\t\t</ui-property-group>",
+        "\t</property-editor>",
+        "</spell-view>"
+      ].join("\n")
+    )
+    writeFileSync(resolve(editorFolder, "FlipTile.spellml"), editorText)
+    writeFileSync(
+      resolve(editorFolder, SP.PROJECT_FILE),
+      `{ imports: [{ path: "/FlipTile.spellml", active: true }] }\n`
+    )
+    const editorUri = pathToFileURL(resolve(editorFolder, "FlipTile.spellml")).href
+    await workspace.update(editorUri, editorText)
+    const edited = workspace.fileFor(editorUri)!
+    expect(service.diagnostics(edited).map((it) => it.message)).toEqual([])
+    const tokens = describeTokens(edited).filter((token) => Number(token.split(":")[0]) >= 31)
+    expect(tokens).toEqual([
+      `31:1 "<property-editor>" keyword`,
+      `32:3 "ui-property-group" type`,
+      `32:21 "label" property`,
+      `32:27 "\\"Tile\\"" string`,
+      `32:34 "readonly" property`,
+      `33:4 "ui-property" type`,
+      `33:16 "name" property`,
+      `33:21 "\\"side\\"" string`,
+      `34:4 "ui-property-group" type`,
+      `35:1 "</property-editor>" keyword`,
+      `36:0 "</spell-view>" keyword`
+    ])
+  })
+
   test("hover on a tag is its statement's, as its twin reads", () => {
     const hover = service.hover(tile, positionOf(tileText, '<property "side"', "<property"))
     const text = JSON.stringify(hover?.contents)
