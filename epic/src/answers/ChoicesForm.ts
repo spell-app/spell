@@ -42,6 +42,8 @@ import {
  *   - The browser's copy, newer than what the server has, is saved to it.
  * - Only the boxes that differ from the recommendation are sent, by row id (`values`), with the feedback.
  *   - A `blank` row's box (epic `epic-engine` P13):  when it holds something other than today's text.
+ * - Each row's comment box (epic `epic-engine` P58, r49 / r51), when it holds anything, by row id (`comments`):
+ *   saved, restored and sent as the boxes are.
  * - A table Owen can put in order (`<epic-choice-rows reorder>`, epic `epic-workflow` P15):
  *   its rows' ids in the order he left them go too (`order`), by its section's id.
  *   - On load they come back in `restoredOrder`, which the table puts its rows in.
@@ -71,6 +73,9 @@ export class ChoicesForm extends PageStore {
 
   /** The values read back on load, for a row that registers later. */
   private restored: Record<string, string> = {}
+
+  /** The comments read back on load, for a row that registers later. */
+  private restoredComments: Record<string, string> = {}
 
   /** The order of each reorderable table read back on load, by its section's id:  the table puts its rows in it. */
   restoredOrder: ChoicesOrder = {}
@@ -113,11 +118,16 @@ export class ChoicesForm extends PageStore {
   // ## Rows
   ////////////////
 
-  /** Register `row` while it's connected (a value read back already goes into its box);  returns the undo. */
+  /**
+   * Register `row` while it's connected (a value and a comment read back already go into its boxes);
+   * returns the undo.
+   */
   add(row: ChoiceRowPart): () => void {
     this.rows.set(row.rowName, row)
     const value = this.restored[row.rowName]
     if (value !== undefined) row.showValue(value)
+    const comment = this.restoredComments[row.rowName]
+    if (comment !== undefined) row.showComment(comment)
     this.changed()
     return () => {
       if (this.rows.get(row.rowName) === row) this.rows.delete(row.rowName)
@@ -125,10 +135,14 @@ export class ChoicesForm extends PageStore {
     }
   }
 
-  /** How many rows, and how many Owen changed. */
-  get counts(): { rows: number; changed: number } {
+  /** How many rows, how many Owen changed, and how many he commented on. */
+  get counts(): { rows: number; changed: number; commented: number } {
     const rows = [...this.rows.values()]
-    return { rows: rows.length, changed: rows.filter((row) => row.isChanged).length }
+    return {
+      rows: rows.length,
+      changed: rows.filter((row) => row.isChanged).length,
+      commented: rows.filter((row) => hasComment(row)).length
+    }
   }
 
   /** The changed boxes, by row id, as typed. */
@@ -136,6 +150,13 @@ export class ChoicesForm extends PageStore {
     const values: Record<string, string> = {}
     for (const row of this.rows.values()) if (row.isChanged) values[row.rowName] = row.value
     return values
+  }
+
+  /** The rows' comments, by row id, as typed:  only those that hold anything. */
+  collectComments(): Record<string, string> {
+    const comments: Record<string, string> = {}
+    for (const row of this.rows.values()) if (hasComment(row)) comments[row.rowName] = row.comment
+    return comments
   }
 
   /** Each reorderable table's row ids, in their order now, by its section's id;  `{}` for a page with none. */
@@ -246,11 +267,12 @@ export class ChoicesForm extends PageStore {
     const answer = this.sent
     if (!answer) return ""
     const changes = Object.keys(answer.values ?? {}).length
+    const commented = Object.keys(answer.comments ?? {}).length
     const again = answer.changes ? ` (sent ${answer.changes + 1} times)` : ""
     const at = clockOf(answer.answered)
     if (this.isStale) return `Sent at ${at}${again};  changed since:  press Do it again to send the new ones.`
     const left = [...this.rows.values()].every((row) => row.blank) ? "left as they are" : "as recommended"
-    const what = `${changes} changed, ${this.rows.size - changes} ${left}`
+    const what = `${changes} changed, ${commented ? `${commented} commented, ` : ""}${this.rows.size - changes} ${left}`
     return `Sent to Claude at ${at}${again}:  ${what}.  Change anything and press Do it again to resend.`
   }
 
@@ -285,6 +307,9 @@ export class ChoicesForm extends PageStore {
     if (last) {
       this.restored = last.values ?? {}
       for (const [id, value] of Object.entries(this.restored)) this.rows.get(id)?.showValue(value)
+      // an old draft has none
+      this.restoredComments = last.comments ?? {}
+      for (const [id, comment] of Object.entries(this.restoredComments)) this.rows.get(id)?.showComment(comment)
       this.feedback = last.feedback ?? ""
       this.restoredOrder = last.order ?? {}
     }
@@ -296,7 +321,7 @@ export class ChoicesForm extends PageStore {
 
   /**
    * What's typed, for Copy my answers:  the draft as the page server would save it, as JSON.
-   * - A `ChoicesDraft`:  the page, when, the changed boxes by row id, the feedback, the order.
+   * - A `ChoicesDraft`:  the page, when, the changed boxes by row id, the comments, the feedback, the order.
    * - Why:  a page whose server is gone for good can't save, and a reload brings back nothing;
    *   this gets it out without developer tools (r14).
    * - Saved as `<slug>.draft.json5` beside the page, the page shows it again.
@@ -414,11 +439,16 @@ export class ChoicesForm extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** What the routes take for this page:  the changed boxes, the feedback (trimmed), the order (when there is one). */
+  /**
+   * What the routes take for this page:  the changed boxes, the comments (when any), the feedback (trimmed), the order
+   * (when there is one).
+   */
   private body(): ChoicesValues {
     const order = this.collectOrder()
+    const comments = this.collectComments()
     return {
       values: this.collect(),
+      ...(Object.keys(comments).length > 0 && { comments }),
       feedback: this.feedback.trim(),
       ...(Object.keys(order).length > 0 && { order })
     }
@@ -445,6 +475,11 @@ export class ChoicesForm extends PageStore {
     if (reply === null) throw new Error("page server too old, restart it")
     return reply?.[what] ?? undefined
   }
+}
+
+/** `row`'s comment box holds something besides spaces and line breaks. */
+function hasComment(row: ChoiceRowPart): boolean {
+  return row.comment.trim() !== ""
 }
 
 /**

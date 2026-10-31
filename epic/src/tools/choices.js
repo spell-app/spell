@@ -312,6 +312,8 @@ export function readRows(page) {
  * (`file:line  current -> recommended  =>  typed`), how many stayed as recommended (accepted), then the feedback.
  * - a `blank` page (epic `epic-engine` P13) recommends nothing:  `file:line  current  =>  typed`, and the rest
  *   "left as they are"
+ * - a row's comment (epic `epic-engine` P58) goes on the lines under it (`comment:  ...`);  the rows with a comment
+ *   and no change follow, under "Commented, not changed"
  */
 export function formatAnswer(page, answer) {
   const { document } = parseHTML(readFileSync(page, "utf8"))
@@ -319,24 +321,34 @@ export function formatAnswer(page, answer) {
   if (!DataFile.exists(rowsFile(page))) return formatDeclared(page, title, answer)
   const { sections, rows, blank } = readRows(page)
   const values = answer.values ?? {}
+  const comments = commentsOf(answer)
   const lines = [`Choices on "${title}" (${shown(page)}), sent ${answer.answered}:`]
   if (answer.changes) lines[0] += `  (sent ${answer.changes + 1}×)`
   lines.push(`  Rows:  ${shown(DataFile.found(rowsFile(page)))}`)
   const changed = rows.filter((row) => row.id in values)
   lines.push(`  Changed (${changed.length}):`)
-  for (const section of sections) {
-    const mine = changed.filter((row) => row.section === section.id)
-    if (!mine.length) continue
-    lines.push(`    ${section.title}`)
-    for (const row of mine) {
+  lines.push(
+    ...bySection(sections, changed, (row) => {
       const typed = values[row.id].trim() || "(blank)"
       const was = blank ? row.current : `${row.current} -> ${row.recommended}`
-      lines.push(`      ${row.file}:${row.line}  ${was}  =>  ${typed}`)
-    }
-  }
+      return [`      ${row.file}:${row.line}  ${was}  =>  ${typed}`, ...commentLines(comments[row.id], "        ")]
+    })
+  )
   if (!changed.length) lines.push("    (none)")
+  const commented = rows.filter((row) => row.id in comments && !(row.id in values))
+  if (commented.length) {
+    lines.push(`  Commented, not changed (${commented.length}):`)
+    lines.push(
+      ...bySection(sections, commented, (row) => [
+        `      ${row.file}:${row.line}  ${row.current}`,
+        ...commentLines(comments[row.id], "        ")
+      ])
+    )
+  }
   lines.push(...formatOrder(sections, rows, answer.order ?? {}))
-  const unknown = Object.keys(values).filter((id) => !rows.some((row) => row.id === id))
+  const unknown = [...new Set([...Object.keys(values), ...Object.keys(comments)])].filter(
+    (id) => !rows.some((row) => row.id === id)
+  )
   if (unknown.length) lines.push(`  Rows no longer on the page, ignored:  ${unknown.join(", ")}`)
   const accepted = rows.filter((row) => !(row.id in values))
   const renames = accepted.filter((row) => row.recommended !== row.current).length
@@ -347,6 +359,30 @@ export function formatAnswer(page, answer) {
   )
   lines.push(answer.feedback ? `  Feedback:\n${indent(answer.feedback, "    ")}` : "  Feedback:  (none)")
   return lines.join("\n")
+}
+
+/** `rows`' lines (`linesOf()`), under their sections' titles, in the sections' order;  a section with none left out. */
+function bySection(sections, rows, linesOf) {
+  const lines = []
+  for (const section of sections) {
+    const mine = rows.filter((row) => row.section === section.id)
+    if (!mine.length) continue
+    lines.push(`    ${section.title}`)
+    for (const row of mine) lines.push(...linesOf(row))
+  }
+  return lines
+}
+
+/** `answer`'s comments that say anything, by row id (epic `epic-engine` P58);  `{}` for an answer without them. */
+function commentsOf(answer) {
+  return Object.fromEntries(Object.entries(answer.comments ?? {}).filter(([, comment]) => comment.trim()))
+}
+
+/** `comment` as lines after `prefix`:  `comment:  <its first line>`, the rest lined up under it;  none for none. */
+function commentLines(comment, prefix) {
+  if (!comment) return []
+  const [first, ...rest] = comment.trim().split("\n")
+  return [`${prefix}comment:  ${first}`, ...rest.map((line) => `${prefix}          ${line}`.trimEnd())]
 }
 
 /**
@@ -375,7 +411,8 @@ export function formatOrder(sections, rows, order) {
 
 /**
  * `answer` to a page naming its own rows (`declaredRows()`) as plain text, for Claude:  the page and when, its rows
- * file, each box Owen changed by its row (`IsGtLt`), then `field  =>  typed`, then the feedback.
+ * file, each box Owen changed by its row (`IsGtLt`), then `field  =>  typed`, then each row's comment, then the
+ * feedback.
  * - What each box held before is in the rows file:  the page's business, not this tool's
  */
 function formatDeclared(page, title, answer) {
@@ -395,6 +432,11 @@ function formatDeclared(page, title, answer) {
     for (const [field, typed] of fields) lines.push(`      ${field || "(box)"}  =>  ${typed.trim() || "(blank)"}`)
   }
   if (!byRow.size) lines.push("    (none)")
+  const comments = Object.entries(commentsOf(answer))
+  if (comments.length) {
+    lines.push(`  Commented (${comments.length}):`)
+    for (const [id, comment] of comments) lines.push(`    ${id}`, ...commentLines(comment, "      "))
+  }
   lines.push(answer.feedback ? `  Feedback:\n${indent(answer.feedback, "    ")}` : "  Feedback:  (none)")
   return lines.join("\n")
 }
