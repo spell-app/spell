@@ -41,6 +41,8 @@ export const PARSER_MESSAGES = {
   /** A local, argument or loop variable with the name of a property of the action's thing. */
   "reads-after-wait":
     "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
+  "cant-go-without-waiting": "Only a call can go without waiting:  this has a value or a body to wait for",
+  "cant-wait-for-toast-that-stays": "A toast that stays can't be waited for:  clicks would wait until it's closed",
   "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
   /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
   "place-read-only":

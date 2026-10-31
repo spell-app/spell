@@ -9,5 +9,6 @@ exports[`testing spell module async, in Spanish > rule group specs > match snaps
   "pause": "number|units",
   "start_process": "operator?|name",
   "stop_process": "name",
+  "without_waiting": "call",
 }
 `;

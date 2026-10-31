@@ -14,6 +14,7 @@ import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
+import { WithoutWaiting } from "./WithoutWaiting"
 
 _async.addRule(Await, {
   syntax: "(await|wait for) :? {expression}?",
@@ -98,6 +99,8 @@ _async.addRule(Meanwhile, {
     }
   ]
 })
+
+_async.addRule(WithoutWaiting, { syntax: "{call:statement} without waiting" })
 
 // `exclusive`, and its negated forms, for `start_process`:  `start non-exclusive animation dealing`
 _async.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {

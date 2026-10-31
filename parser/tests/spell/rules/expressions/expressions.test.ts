@@ -151,6 +151,7 @@ describe("priority and precedence", () => {
         "when_someone_else_changes:  Priority.specific",
         "when_thing_changes:  Priority.specific",
         "while_waiting:  Priority.declaration",
+        "without_waiting:  Priority.specific",
       ]
     `)
   })

@@ -31,6 +31,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "reads-after-wait":
     "Tras su primera espera, este valor no puede seguir lo que lee de otras cosas:  léelas antes de la espera",
+  "cant-go-without-waiting": "Solo una llamada puede ir sin esperar:  esto tiene un valor o un cuerpo que esperar",
+  "cant-wait-for-toast-that-stays":
+    "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
     "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",

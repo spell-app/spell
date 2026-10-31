@@ -333,10 +333,13 @@ Its first line is how you call it, with each blank's type in brackets:
     - A local made in one line belongs to that line.
   - `meanwhile load the scores` starts it and carries on.
     A failure is said on the program's console, and people's clicks don't wait for it.
-  - Spanish:  `al mismo tiempo:`, `mientras tanto`.
-- A toast is an aside:  `notify "Saved!"` shows it and carries on.
-  - It waits only when it says how long, `notify "Bye" for 5 seconds`, which holds clicks that long too.
-  - One that stays until it's closed never waits:  `until clicked`, `with "Got it"`.
+  - `load the scores without waiting` says the same, at the end of the line.
+    It's for a call:  `set x to load the scores without waiting` is an error, as there'd be no value yet to set.
+  - Spanish:  `al mismo tiempo:`, `mientras tanto`, `sin esperar`.
+- A toast is the one slow thing nothing waits for:  `notify "Bye" for 5 seconds` shows it and carries on.
+  - `notify "Bye" for 5 seconds and wait` waits until it's gone, and holds clicks that long too (Spanish `y esperar`).
+  - One that stays until it's closed can't be waited for:  `until clicked`, `with "Got it"`.
+  - Your own actions always wait:  the caller decides, with `without waiting`.
 - What a person starts runs one at a time:  a click, a key, a menu item, a drop.
   - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
   - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.
