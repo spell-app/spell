@@ -1478,7 +1478,8 @@ In `tools/`:
           its own in its gear ("Show this phase's commits", I183)
           - a commit's sentence longer than two lines is clamped to two, ending in "…" (`<epic-commit>`, J184, Owen's
             pick B):  a click on its text, or Enter on it, unfolds it;  unfolded ones remembered per page, by sha
-            (`spell-commit-folds:<path>`)
+            (`spell-commit-folds:<path>`);  its phase and item chips come before the sentence, so a folded one still
+            shows them all (Owen's "chips first")
       - the toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds

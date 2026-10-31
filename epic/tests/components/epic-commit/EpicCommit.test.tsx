@@ -51,7 +51,7 @@ describe("<epic-commit>", () => {
   })
 
   // epic `epic-engine` P52:  an entry of the Log
-  test("with `at` and `refs`:  its time, the sha link, its sentence, a chip per phase and item;  a gone one plain text", async () => {
+  test("with `at` and `refs`:  its time, the sha link, a chip per phase and item, then its sentence;  a gone one plain text", async () => {
     const root = await ElementFixture.render(
       `<epic-page epic="demo" title="Demo" repo="https://github.com/spell-app/spell">` +
         `<epic-phase id="p-commit-log" status="active"><span slot="title">Commit Log</span></epic-phase>` +
@@ -72,6 +72,11 @@ describe("<epic-commit>", () => {
     ])
     expect(chips[0]!.title).toBe("Go to P1:  Commit Log")
     expect(chips[1]!.title).toBe("p-gone isn't on this page any more")
+    // chips first (J184):  after the sha, before the sentence
+    const sha = shadow.querySelector('[part~="sha"]')!
+    const sentence = shadow.querySelector('[part~="sentence"]')!
+    expect(chips.every((chip) => sha.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true)
+    expect(chips.every((chip) => chip.compareDocumentPosition(sentence) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true)
     await expectAccessible(commit)
   })
 
@@ -95,12 +100,13 @@ describe("<epic-commit>", () => {
       "phase and item its subject names, so a reader sees what went in and when without opening git at all"
 
     /** A Log entry `sentence` long, in a box `width` px wide. */
-    async function entry(sentence: string, width = 320) {
+    async function entry(sentence: string, width = 320, refs = "") {
       localStorage.removeItem(`spell-commit-folds:${location.pathname}`)
       const root = await ElementFixture.render(
         `<epic-page epic="demo" title="Demo" repo="https://github.com/spell-app/spell">` +
-          `<div style="--epic-commits-display: block; width: ${width}px"><epic-commit sha="0123456789abcdef" ` +
-          `at="2026-10-29T11:46-04:00">${sentence}</epic-commit></div></epic-page>`
+          `<epic-phase id="p-commit-log" status="active"><span slot="title">Commit Log</span></epic-phase>` +
+          `<p id="q56">Q</p><div style="--epic-commits-display: block; width: ${width}px"><epic-commit ` +
+          `sha="0123456789abcdef" at="2026-10-29T11:46-04:00" refs="${refs}">${sentence}</epic-commit></div></epic-page>`
       )
       const commit = root.querySelector("epic-commit")!
       await ElementFixture.settle()
@@ -131,6 +137,19 @@ describe("<epic-commit>", () => {
       await ElementFixture.settle()
       expect(lines()).toBe(2)
       expect(localStorage.getItem(`spell-commit-folds:${location.pathname}`)).toBeNull()
+    })
+
+    test('folded, every chip still shows:  they come before the sentence (Owen\'s "chips first")', async () => {
+      const { shadow, text, lines } = await entry(LONG, 320, "p-commit-log q56")
+      expect(lines()).toBe(2)
+      const box = text.getBoundingClientRect()
+      const chips = Array.from(shadow.querySelectorAll<HTMLElement>('[part~="ref"]'))
+      expect(chips.map((chip) => chip.textContent)).toEqual(["P1", "Q56"])
+      for (const chip of chips) {
+        const rect = chip.getBoundingClientRect()
+        expect(rect.height).toBeGreaterThan(0)
+        expect(rect.bottom).toBeLessThanOrEqual(box.bottom + 1)
+      }
     })
 
     test("Enter on its sentence unfolds it;  a click on its sha doesn't", async () => {

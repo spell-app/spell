@@ -24,10 +24,12 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - The repo is read as it connects:  a commit moved under another page takes that page's.
  * - An entry of the LOG (epic `epic-engine` P52, Owen's comment C5:  the Log is the epic's change log):
  *   - with `at`, its time first, the git icon in the icon column, and no `Commits:` heading
- *   - with `refs`, a chip after its sentence per phase and item it names, each a `#id` link the docs runtime lands
+ *   - with `refs`, a chip per phase and item it names, after the sha and BEFORE its sentence (J184, Owen's "chips
+ *     first"), so a long sentence folded to two lines never hides one, each a `#id` link the docs runtime lands
  *     on;  a phase's chip says its number today (`P52`), read from the page;  one the page no longer has, plain text
  *   - always shown, newest first:  the Log's section says so (`EpicSection.css`), never this element
  * - A LONG sentence is clamped to two lines, ending in "…" (epic `epic-engine` J184, Owen's pick B):
+ *   - the clamp is the whole line's, chips first, so the "…" only ever cuts the sentence
  *   - only one that runs past two lines (`isLong`, measured as its box changes size) gets the "…", the pointer and
  *     the click;  a short one is drawn as before
  *   - a click on its text (never its sha or a chip, nor the end of a text selection) unfolds it, another folds it;
@@ -54,7 +56,7 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
     return this.isUnfoldedNow ?? CommitFolds.isUnfolded(this.sha ?? "")
   }
 
-  /** The box of its text (the time, the sha, the sentence, the chips), measured for `isLong`. */
+  /** The box of its text (the time, the sha, the chips, the sentence), measured for `isLong`. */
   private textBox: HTMLElement | undefined
 
   /** The heading's icon. */
@@ -143,18 +145,7 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
               >
                 {this.shortSha}
               </a>
-            </Show>{" "}
-            <span
-              class={SENTENCE}
-              part={this.partForName("sentence")}
-              role={this.isLong ? "button" : undefined}
-              tabindex={this.isLong ? "0" : undefined}
-              aria-expanded={this.isLong ? (this.isUnfolded ? "true" : "false") : undefined}
-              title={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
-              onKeyDown={(event: KeyboardEvent) => this.onSentenceKey(event)}
-            >
-              <slot />
-            </span>
+            </Show>
             <For each={this.refChips}>
               {(chip) => (
                 <>
@@ -173,7 +164,18 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
                   </Show>
                 </>
               )}
-            </For>
+            </For>{" "}
+            <span
+              class={SENTENCE}
+              part={this.partForName("sentence")}
+              role={this.isLong ? "button" : undefined}
+              tabindex={this.isLong ? "0" : undefined}
+              aria-expanded={this.isLong ? (this.isUnfolded ? "true" : "false") : undefined}
+              title={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
+              onKeyDown={(event: KeyboardEvent) => this.onSentenceKey(event)}
+            >
+              <slot />
+            </span>
           </span>
         </div>
       </div>

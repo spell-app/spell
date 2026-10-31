@@ -74,8 +74,8 @@
 
 /*
  * ## A Log entry (with `at`;  epic `epic-engine` P52):  a row like a log line's
- * - the git icon in the icon column, centred on the first line;  the time in mono, muted;  then the sha, the sentence
- *   and the chips, wrapping beside the icon;  a hairline between entries
+ * - the git icon in the icon column, centred on the first line;  the time in mono, muted;  then the sha, the chips
+ *   and the sentence (chips first:  J184), wrapping beside the icon;  a hairline between entries
  * - no `Commits:` heading;  whether it shows is the Log's (`EpicSection.css`), never this sheet's
  */
 @layer ui.components.epic-commit.content {
