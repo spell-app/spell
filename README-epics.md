@@ -761,8 +761,8 @@ It's what the Review tab shows.
 
 ```sh
 epic server start                       # in your repo:  register it the first time, start the server
-epic repo add ~/www/my-app --default    # or register a repo (its main checkout) by hand;  --default:  served at /
-epic repo list
+epic repos add ~/www/my-app --default    # or register a repo (its main checkout) by hand;  --default:  served at /
+epic repos list
 epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 ```
 
@@ -813,7 +813,7 @@ What you'd trip on today, roughly in the order you'd meet it.
    anywhere else, make it by hand and pass `--remote <address>`.
 3. **The review controls reach the DEFAULT repo only.**
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
-   `epic repo default <name>` picks which repo that is.
+   `epic repos default <name>` picks which repo that is.
 4. **Your pages wear Spell's look.**
    They load Spell's theme, and the top bar's tabs are Spell's own areas, not yours.
 5. **A few skills reach for Spell's own tools.**

@@ -234,7 +234,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const docs = planDocsOf(DocView.repos())
     if (!docs.length)
       return void vscode.window.showWarningMessage(
-        "Spell Epic:  no epic pages in any registered repo (epic repo list), nor in this window's first folder."
+        "Spell Epic:  no epic pages in any registered repo (epic repos list), nor in this window's first folder."
       )
     const picked = await vscode.window.showQuickPick(
       docs.map((doc) => ({
@@ -694,5 +694,3 @@ type Clipboard = { spell: "clipboard"; text?: string }
  * the frame's `data-vscode-context` (`rightClick()` in `html()`), and the view's id, `webview`.
  */
 type MenuContext = { webview?: string; spellField?: boolean; spellSelection?: boolean }
-
-

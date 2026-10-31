@@ -1,5 +1,5 @@
 /**
- * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
+ * Tests of `epic repos` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
  * - no server is started here (the server itself:  `EpicServer.test.ts`);  a port taken:  a plain web server's
  */
 import { execFileSync } from "node:child_process"
@@ -37,7 +37,7 @@ beforeEach(() => {
 })
 afterEach(() => vi.restoreAllMocks())
 
-describe("epic repo", () => {
+describe("epic repos", () => {
   test("add, list (and --json), default, remove", async () => {
     const list = new RepoList({ home: join(top, "home1") })
     const repos = new Repos({ list })

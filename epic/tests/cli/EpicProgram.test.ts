@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync, realpathSync } from "node:fs"
+import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import type { Command } from "commander"
 import JSON5 from "json5"
@@ -161,7 +162,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
     // epic `epic-eject` P5:  the verbs that were `epic window | worktree | park | session | stock | shared`
     test("worktree, session, park, shared, window, server:  their own headings, and their verbs' help", () => {
       const { stdout } = epic(["--help"])
-      for (const heading of ["Worktrees, sessions and parked work:", "Shared content:", "Windows and the page server:"])
+      for (const heading of ["Worktrees, sessions and parked work:", "The epic repo:", "Windows and the page server:"])
         expect(stdout).toContain(heading)
       for (const verb of ["worktree", "session", "park", "status", "shared", "window", "server"])
         expect(stdout).toMatch(new RegExp(`^ {2}${verb} `, "m"))
@@ -181,6 +182,38 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
     })
   }
 )
+
+// epic `epic-engine` P56 (Owen, Q63:  "epic repos add | list | remove | default"):  the code repos the epic server
+// serves are `epic repos`;  "the epic repo" is the one holding the pages.  The old `epic repo` still works, unshown.
+describe("epic repos", () => {
+  const home = realpathSync(mkdtempSync(join(tmpdir(), "epic-repos-")))
+  const run = (args: string[]) => {
+    const { status, stdout, stderr } = spawnSync(process.execPath, [EPIC, ...args], {
+      cwd: tmpdir(),
+      encoding: "utf8",
+      env: { ...process.env, SPELL_EPIC_HOME: home }
+    })
+    return { status, stdout, stderr }
+  }
+
+  test("repos <verb>, and the old repo <verb> the same;  no help shows the old name", () => {
+    try {
+      expect(run(["repos", "list"])).toMatchObject({ status: 0, stdout: "no repos yet:  epic repos add <checkout>\n" })
+      expect(run(["repo", "list"])).toMatchObject({ status: 0, stdout: "no repos yet:  epic repos add <checkout>\n" })
+      const help = run(["repos", "--help"]).stdout
+      for (const verb of ["add", "list", "remove", "default"]) expect(help).toMatch(new RegExp(`^ {2}${verb} `, "m"))
+      expect(run(["repos", "list", "--help"]).stdout).toMatch(/^Usage: epic repos list \[--json\]/)
+      expect(run(["repo", "list", "--help"]).stdout).toMatch(/^Usage: epic repos list \[--json\]/)
+      const top = run(["--help"]).stdout
+      expect(top).toMatch(/^ {2}repos +the code repos/m)
+      expect(top).not.toMatch(/\brepo\|/)
+      expect(top).not.toMatch(/^ {2}repo /m)
+      expect(run(["repos", "bogus"]).stderr).toContain("epic repos bogus?  no such verb.")
+    } finally {
+      rmSync(home, { recursive: true, force: true })
+    }
+  })
+})
 
 ////////////////
 // ## Flags (epic `coherence` P20):  each verb's listed in its help, any other refused, the help's examples taking them

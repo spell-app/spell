@@ -597,9 +597,11 @@ export class EpicProgram {
       )
       .usage("[--print] [--json]")
       .addHelpText("after", LOC_HELP)
+    // `repos`, the plural (epic `epic-engine` P56, Q63):  "the epic repo" is the one holding the pages;
+    // the old `epic repo ...` still works a while, an alias no help shows
     this.group(
-      epic.command("repo"),
-      "the repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
+      epic.command("repos").alias("repo"),
+      "the code repos the epic server serves (~/.spell-epic/repos.json5):  add, list, remove, default",
       (args) => new Repos().run(args)
     )
   }
@@ -745,7 +747,7 @@ export class EpicProgram {
       .action((args: string[]) => {
         // a known verb went to its own command (below):  a word here is a verb the group lacks
         if (args[0] !== undefined && !args[0].startsWith("-")) unknownVerb(command, `epic ${name} ${args[0]}`)
-        return runVerb(`epic ${name}`, anyVerbs, CLI.rawArgsAfter(name), run)
+        return runVerb(`epic ${name}`, anyVerbs, CLI.rawArgsAfter(typedName(command)), run)
       })
     for (const verb of verbs) {
       const typed = command.command(verb.name)
@@ -756,7 +758,7 @@ export class EpicProgram {
         .argument("[args...]")
         .allowUnknownOption()
         .addHelpText("after", example(verb.example))
-        .action(() => runVerb(`epic ${name} ${verb.name}`, verb.flags, CLI.rawArgsAfter(name), run))
+        .action(() => runVerb(`epic ${name} ${verb.name}`, verb.flags, CLI.rawArgsAfter(typedName(command)), run))
     }
     return command
   }
@@ -941,6 +943,16 @@ function runVerb(
   accepted: readonly string[] = []
 ): Promise<never> {
   return CLI.runCommand(async () => run([...EpicProgram.checkFlags(typed, flags, args, accepted)]))
+}
+
+/**
+ * The word the person typed for `command`:  its name, or one of its aliases (`epic repo` for `epic repos`),
+ * whichever comes first on the command line;  its name when neither is there.
+ */
+function typedName(command: Command): string {
+  const words = [command.name(), ...command.aliases()]
+  const at = (word: string) => process.argv.indexOf(word, 2)
+  return words.filter((word) => at(word) >= 0).sort((a, b) => at(a) - at(b))[0] ?? command.name()
 }
 
 /**

@@ -7,12 +7,14 @@ import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.typ
 
 /****************
  * ### `Repos`
- * `epic repo <verb>`:  the repos the machine's epic server serves
+ * `epic repos <verb>`:  the code repos the machine's epic server serves
  * (`RepoList`, `~/.spell-epic/repos.json5`;  epic `epic-eject` P7).
  * - `add [<checkout>] [--name <name>] [--default]`:
  *   register the repo `<checkout>` is in (default:  this one), as its folder's name or `<name>`
  *   - `--default`:  served at `/` from now on
- * - `list [--json]`:  every repo, its content folder and URL prefix, the default marked
+ * - `list [--json]`:  every repo, its epic folder and URL prefix, the default marked
+ * - `epic repo <verb>`, the old name, still works a while (epic `epic-engine` P56, Q63):
+ *   "the epic repo" is the one holding the epic pages, not one of these
  * - `remove <name>`:  unregister it
  * - `default <name>`:  serve it at `/`
  * - The server picks up a change at its next `epic hub ensure` (it restarts when the list is newer than it).
@@ -26,7 +28,7 @@ export class Repos {
     this.list = list
   }
 
-  /** Run `epic repo <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
+  /** Run `epic repos <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
   async run(args: string[]): Promise<number> {
     const { positional, flags } = parseVerbArgs(args, ["default", "json"])
     const [verb, target] = positional
@@ -41,17 +43,18 @@ export class Repos {
         case "list": {
           const repos = this.list.repos()
           if (flags.json) CLI.out(JSON.stringify(repos, null, 2))
-          else CLI.out(repos.length ? repos.map(Repos.line).join("\n") : "no repos yet:  epic repo add <checkout>")
+          else CLI.out(repos.length ? repos.map(Repos.line).join("\n") : "no repos yet:  epic repos add <checkout>")
           return EXIT.OK
         }
         case "remove": {
-          if (!target) throw new EpicCommandError("remove:  which repo?  epic repo remove <name>")
-          if (!this.list.remove(target)) throw new EpicCommandError(`no repo "${target}":  epic repo list`, EXIT.ERRORS)
+          if (!target) throw new EpicCommandError("remove:  which repo?  epic repos remove <name>")
+          if (!this.list.remove(target))
+            throw new EpicCommandError(`no repo "${target}":  epic repos list`, EXIT.ERRORS)
           CLI.out(`removed ${target}`)
           return EXIT.OK
         }
         case "default": {
-          if (!target) throw new EpicCommandError("default:  which repo?  epic repo default <name>")
+          if (!target) throw new EpicCommandError("default:  which repo?  epic repos default <name>")
           this.list.setDefault(target)
           CLI.out(`${target} is served at / now`)
           return EXIT.OK

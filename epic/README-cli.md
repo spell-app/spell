@@ -587,10 +587,10 @@ which serves every repo that uses spell-epic (its address and routes:  [README-e
 | `epic server url <file>` | makes sure it runs, then prints the URL that serves `<file>` |
 | `epic server prune` | stops the page and Vite servers whose checkout is gone;  every session's start runs it, at most once an hour;  `--dry-run` |
 | `epic hub serve \| start \| ensure \| stop \| status \| url <file>` | the same six for the machine's epic server:  every registered repo's pages, the engine's scripts and styles, the routes the review buttons call;  `ensure` restarts it when its code or the repo list changed |
-| `epic repo add [<checkout>]` | registers a repo for the epic server (default:  this one);  `--default`:  served at `/`, as well as `/r/<name>/` |
-| `epic repo list [--json]` | lists every registered repo:  its URL prefix, checkout and content folder |
-| `epic repo remove <name>` | unregisters a repo |
-| `epic repo default <name>` | serves that repo at `/` |
+| `epic repos add [<checkout>]` | registers a repo for the epic server (default:  this one);  `--default`:  served at `/`, as well as `/r/<name>/` |
+| `epic repos list [--json]` | lists every registered repo:  its URL prefix, checkout and content folder |
+| `epic repos remove <name>` | unregisters a repo |
+| `epic repos default <name>` | serves that repo at `/` |
 
 And the docs pages they serve:  the home page, the guides, and the pages made from templates.
 

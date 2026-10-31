@@ -923,13 +923,13 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     }
   ],
-  repo: [
+  repos: [
     {
       name: "add",
       usage: "[<checkout>] [--name <name>] [--default]",
       description:
         "register the repo <checkout> is in (default:  this one) for the epic server;  --default:  served at /",
-      example: "epic repo add ~/www/spell-app/spell-app --default",
+      example: "epic repos add ~/www/spell-app/spell-app --default",
       flags: {
         "--name <name>": "its name in the URL, /r/<name>/ (default its folder's)",
         "--default": "served at / too"
@@ -938,8 +938,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "list",
       usage: "[--json]",
-      description: "every registered repo:  its URL prefix, checkout and content folder",
-      example: "epic repo list",
+      description: "every registered repo:  its URL prefix, checkout and epic folder",
+      example: "epic repos list",
       flags: {
         "--json": "print them as JSON"
       }
@@ -948,14 +948,14 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "remove",
       usage: "<name>",
       description: "unregister a repo",
-      example: "epic repo remove spell-app",
+      example: "epic repos remove spell-app",
       flags: {}
     },
     {
       name: "default",
       usage: "<name>",
       description: "serve that repo at / (every repo is at /r/<name>/ too)",
-      example: "epic repo default spell-app",
+      example: "epic repos default spell-app",
       flags: {}
     }
   ],
@@ -1144,7 +1144,7 @@ export type GroupName =
   | "window"
   | "server"
   | "hub"
-  | "repo"
+  | "repos"
   | "turn"
   | "skills"
   | "plugin"

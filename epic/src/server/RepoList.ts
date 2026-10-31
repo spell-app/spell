@@ -32,7 +32,7 @@ import {
  *   Where its content folder is comes from its own `.epic/config.json5` each time (`EpicConfig`),
  *   so a move there needs no second edit here.
  * - The DEFAULT repo is served at `/` as well as `/r/<name>/`:  the one named `default`, else the first added.
- * - `epic repo add | list | remove | default` edit it (`Repos`);  nothing else writes it.
+ * - `epic repos add | list | remove | default` edit it (`Repos`);  nothing else writes it.
  * - The folder:  `~/.spell-epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
  * - Takes no lock:  one person adds a repo now and then.
  ****************/
@@ -201,7 +201,7 @@ export class RepoList {
    */
   setDefault(name: string): void {
     const data = this.read()
-    if (!data.repos.some((entry) => entry.name === name)) throw new RepoListError(`no repo "${name}":  epic repo list`)
+    if (!data.repos.some((entry) => entry.name === name)) throw new RepoListError(`no repo "${name}":  epic repos list`)
     this.write({ ...data, default: name })
   }
 

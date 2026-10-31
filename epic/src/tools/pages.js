@@ -495,7 +495,7 @@ export function ensurePageServer() {
  * as this checkout's page server:  `{ base, port }`, `base` the URL this repo's content is served at
  * (`http://127.0.0.1:4848/r/<repo>`, or the server's root for the default repo), so `serverUrl()` works unchanged:
  * it serves the content folder, and page paths are from it.
- * - `undefined` (and why, on stderr) when the repo isn't registered (`epic repo add`) or the server won't start
+ * - `undefined` (and why, on stderr) when the repo isn't registered (`epic repos add`) or the server won't start
  */
 function ensureEpicServer() {
   const run = spawnSync(process.execPath, [EPIC_BIN, "hub", "url", PAGES], { encoding: "utf8" })
