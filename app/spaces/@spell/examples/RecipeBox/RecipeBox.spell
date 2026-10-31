@@ -1,47 +1,100 @@
-// Where the recipes are kept:  in this browser, so no server is involved.
-// To keep them elsewhere, change this ONE line.  With "yarn tsx scripts/recipe-servers.ts" running, try:
+## Recipe Box
+// Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
+// Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
 //   family cookbook is a folder at "http://127.0.0.1:4791/api/places/recipes"
 //   family cookbook is a live room at "http://127.0.0.1:4791/api/rooms/recipes"
+// (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)
 family cookbook is this device
 
+
+## A recipe:  a card you can read and change
 a "recipe" is a view:
 	- it is saved in the family cookbook
 	- its "title" is text
 	- its "servings" is a number
+	- its "notes" is text
 	- to draw it:
-		<ui-form value={it} class="recipe">
-			<ui-input name="title" aria-label="Recipe"/>
-			<ui-text class="servings">serves {its servings}</ui-text>
-			<ui-button class="remove" onClick={remove it}>Remove</ui-button>
-		</ui-form>
-	- to remove it:
-		- undone as "Remove Recipe"
-		remove it from the recipes
+		<ui-card fluid>
+			<ui-content>
+				<ui-form value={it} class="recipe">
+					<ui-field label="Recipe name">
+						<ui-input name="title" class="title" size="large"/>
+					</ui-field>
+					<ui-field label="Serves" inline>
+						<ui-input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+					</ui-field>
+					<ui-field label="Notes">
+						<ui-textarea name="notes" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+			<ui-extra part="foot">
+				<ui-button class="remove" size="small" appearance="basic" onClick={remove it from the recipes}>Remove</ui-button>
+			</ui-extra>
+		</ui-card>
 
+
+## The box:  the card for a new recipe, then a card for each one you have
 recipe box is an app:
 	- its "search" is text
-	- its "draft" is text
-	- its "matches" is every recipe where its title includes the search, sorted by its title
-	- to add the draft:
-		if the draft is "" return
-		add (a new recipe with title = the draft, servings = 2) to the recipes
-		clear the draft
+	- its "new recipe" is a new recipe with servings = 4
+	- its "matches" is every recipe where its title includes the search
+	- its "box menu" is a menu of "undo"
+
+	// With nothing kept yet, a few to start from
+	- to create it:
+		if the number of (every recipe) is 0
+			add (a new recipe with title = "Tomato soup", servings = 4, notes = "Roast the tomatoes first.") to the recipes
+			add (a new recipe with title = "Dal", servings = 6, notes = "Add the spices last.") to the recipes
+			add (a new recipe with title = "Pizza Margherita", servings = 2, notes = "A very hot oven.") to the recipes
+
+	- to add the new recipe:
+		add its new recipe to the recipes
+		set its new recipe to a new recipe with servings = 4
+
 	- to draw it:
-		<ui-form value={it} class="box">
-			<ui-input name="draft" class="draft" label="New recipe" aria-label="New recipe"/>
-			<ui-button class="add" disabled={the draft is ""} onClick={add the draft}>Add</ui-button>
-			<ui-input name="search" class="search" label="Search" aria-label="Search"/>
-		</ui-form>
+		<header class="top">
+			<div class="heading">
+				<h1>Recipe Box</h1>
+				<p>Everything you type is saved as you go.</p>
+			</div>
+			<ui-toolbar class="undo" menu="box menu" aria-label="Recipes"/>
+			<ui-form value={it}>
+				<ui-field label="Search">
+					<ui-input name="search" class="search" icon="search"/>
+				</ui-field>
+			</ui-form>
+		</header>
+		<ui-card fluid class="new">
+			<ui-content>
+				<ui-form value={its new recipe}>
+					<h2>Add a recipe</h2>
+					<ui-field label="Recipe name">
+						<ui-input name="title" class="draft" size="large"/>
+					</ui-field>
+					<ui-field label="Serves" inline>
+						<ui-input class="serves" name="servings" type="number" min="1" labeled="right" label="people"/>
+					</ui-field>
+					<ui-field label="Notes">
+						<ui-textarea name="notes" rows="2" grow/>
+					</ui-field>
+				</ui-form>
+			</ui-content>
+			<ui-extra>
+				<ui-button class="add" size="small" color="primary" disabled={the title of its new recipe is ""} onClick={add the new recipe}>Add recipe</ui-button>
+			</ui-extra>
+		</ui-card>
 		for each recipe in the matches
 			draw the recipe
 		while waiting:
-			<ui-loader class="waiting"/>
+			<ui-loader class="waiting" visible inline text>Finding your recipes</ui-loader>
 		if there are none:
-			<ui-text class="none">{"No recipes yet. Add the first one." if the search is "" otherwise "No recipes match your search."}</ui-text>
+			<ui-text class="none">{"No recipes yet. Add your first one." if the search is "" otherwise "No recipes match your search."}</ui-text>
 		if that fails:
 			<ui-message class="failed" color="red">
-				Can't reach the cookbook right now.
+				<p>We can't reach your recipes right now.</p>
 				<ui-button class="again" onClick={try again}>Try again</ui-button>
 			</ui-message>
+
 
 start the recipe box

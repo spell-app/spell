@@ -5,13 +5,14 @@ export const words = {
     Receta: {
       título: "título",
       porciones: "porciones",
-      quitarEso: "quitar eso"
+      notas: "notas"
     },
     CajaDeRecetas: {
       búsqueda: "búsqueda",
-      borrador: "borrador",
+      recetaNueva: "receta nueva",
       coincidencias: "coincidencias",
-      agregarElBorrador: "agregar el borrador"
+      create: "crearla",
+      agregarLaRecetaNueva: "agregar la receta nueva"
     }
   },
   messages: {

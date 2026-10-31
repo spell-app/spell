@@ -2,7 +2,7 @@
  * The recipe box, compiled from spell, run in a real browser, reading and writing the demo's servers (epic `data` P11).
  * - The program is the frozen test project, `@spell/test/recipe-box`, and its Spanish twin, `recetario`.
  * - Each back-end changes only the lines that say where it lives (`BACK_ENDS`), with nothing else in the program touched.
- * - And the built-in examples as they ship:  what they say when there's nothing to show, and what Add does then.
+ * - And the built-in examples as they ship:  what a person does in them, and the same one-line swap to each back-end.
  * - Headless Chromium through Playwright, on the page's real `<spell-viewer>` and Spell UI, from `yarn build:element`:
  *   skips itself when that's not built.
  */
@@ -271,46 +271,137 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   const SHIPPED = [
     {
       path: "RecipeBox/RecipeBox.spell",
-      noRecipes: "No recipes yet. Add the first one.",
+      examples: ["Tomato soup", "Dal", "Pizza Margherita"],
+      noRecipes: "No recipes yet. Add your first one.",
       noMatches: "No recipes match your search."
     },
     {
       path: "CajaDeRecetas/CajaDeRecetas.es.spell",
+      examples: ["Sopa de tomate", "Dal", "Pizza Margarita"],
       noRecipes: "Todavía no hay recetas. Agrega la primera.",
       noMatches: "Ninguna receta coincide con tu búsqueda."
     }
   ]
 
-  for (const { path, noRecipes, noMatches } of SHIPPED) {
+  /** An example as it ships. */
+  const shipped = (path: string): Program => ({
+    path: `/${path.split("/")[1]}`,
+    source: readFileSync(join(EXAMPLES, path), "utf8"),
+    field: ""
+  })
+
+  /** The titles an example's cards show. */
+  const cardsOn = (page: Page) =>
+    page
+      .locator("ui-form.recipe ui-input.title input")
+      .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value))
+
+  /** Undo:  the one item of the box's own toolbar. */
+  const undoOn = (page: Page) =>
+    page
+      .locator("ui-toolbar.undo")
+      .getByText(/Undo|Deshacer/)
+      .first()
+
+  for (const { path, examples, noRecipes, noMatches } of SHIPPED) {
     test(
-      `the example ${path}, typing in the wrong box:  it says why nothing's there`,
+      `the example ${path}, the first time:  a few to start from, then what a person does`,
       { timeout: 60_000 },
       async () => {
-        const source = readFileSync(join(EXAMPLES, path), "utf8")
         const name = `example-${path.replace(/\W/g, "")}`
-        const { page, problems } = await opened(serve(name, { path: `/${path.split("/")[1]}`, source, field: "" }))
+        const { page, problems } = await opened(serve(name, shipped(path)))
         const none = page.locator("ui-text.none")
         const add = page.locator("ui-button.add")
-        await none.waitFor(WAITING)
-        await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
-        expect(await add.evaluate((button) => (button as HTMLButtonElement).disabled)).toBe(true)
+        const isAddOff = () => add.evaluate((button) => (button as HTMLButtonElement).disabled)
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
+        expect(await isAddOff()).toBe(true)
 
-        // what Owen did:  a search isn't a new recipe, and the page says so
+        // every field shown, and labelled
+        const firstCard = page.locator("ui-form.recipe").first()
+        expect(await firstCard.locator("ui-field").count()).toBe(3)
+        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("4")
+        expect(await firstCard.locator("textarea").inputValue()).not.toBe("")
+
+        // a search follows every letter typed, and says when it finds nothing
+        await page.locator("ui-input.search input").fill("Dal")
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["Dal"])
         await page.locator("ui-input.search input").fill("birria")
         await expect.poll(() => none.textContent(), WAITING).toBe(noMatches)
-        expect(await add.evaluate((button) => (button as HTMLButtonElement).disabled)).toBe(true)
         await page.locator("ui-input.search input").fill("")
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
 
+        // a new one:  its card has what was typed, and the new card is empty again
         await page.locator("ui-input.draft input").fill("birria")
-        await expect.poll(() => add.evaluate((button) => (button as HTMLButtonElement).disabled), WAITING).toBe(false)
+        await expect.poll(isAddOff, WAITING).toBe(false)
         await add.click()
-        await expect.poll(() => titlesOn(page), WAITING).toEqual(["birria"])
-        await expect.poll(() => none.count(), WAITING).toBe(0)
+        await expect.poll(() => cardsOn(page), WAITING).toContain("birria")
+        expect(await page.locator("ui-input.draft input").inputValue()).toBe("")
+
+        // typing in a card stays in that card, whatever it now says
+        const card = page.locator("ui-form.recipe ui-input.title input").first()
+        await card.click()
+        await card.press("End")
+        await page.keyboard.type(" again")
+        await expect.poll(() => cardsOn(page), WAITING).toContain(`${examples[0]} again`)
+
+        // remove, and undo:  back with what it said
+        const notes = await firstCard.locator("textarea").inputValue()
+        await page.locator("ui-button.remove").first().click()
+        await expect.poll(() => cardsOn(page), WAITING).not.toContain(`${examples[0]} again`)
+        await undoOn(page).click()
+        await expect.poll(() => cardsOn(page), WAITING).toContain(`${examples[0]} again`)
+        const back = page.locator("ui-form.recipe").filter({ hasText: "" }).last()
+        expect(await back.locator("textarea").inputValue()).toBe(notes)
+
+        // with none left, it says so
+        while (await page.locator("ui-button.remove").count()) await page.locator("ui-button.remove").first().click()
+        await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
         expect(problems).toEqual([])
         await page.close()
       }
     )
   }
+
+  // Changing its first lines is all a different back-end takes:  the example as it ships, not a copy
+  for (const backEnd of Object.keys(BACK_ENDS)) {
+    test(`the example RecipeBox, on ${backEnd}:  only its first lines change`, { timeout: 60_000 }, async () => {
+      const name = `shipped-${backEnd.replace(/\W/g, "")}`
+      const url = serve(name, withPlace(shipped("RecipeBox/RecipeBox.spell"), BACK_ENDS[backEnd]!(servers.url)))
+      const { page, problems } = await opened(url)
+      const held = heldBy[backEnd]!
+      await page.locator("ui-form.recipe").first().waitFor(WAITING)
+      expect(await cardsOn(page)).not.toContain("Pizza Margherita")
+
+      await page.locator("ui-input.draft input").fill("A shipped stew")
+      await page.locator("ui-button.add").click()
+      await expect.poll(held, WAITING).toContain("A shipped stew")
+
+      await page.locator("ui-button.remove").last().click()
+      await expect.poll(held, WAITING).not.toContain("A shipped stew")
+      await undoOn(page).click()
+      await expect.poll(held, WAITING).toContain("A shipped stew")
+      await expect.poll(() => cardsOn(page), WAITING).toContain("A shipped stew")
+
+      await page.locator("ui-button.remove").last().click()
+      await expect.poll(held, WAITING).not.toContain("A shipped stew")
+      expect(problems).toEqual([])
+      await page.close()
+    })
+  }
+
+  test(
+    "the example, when its place can't be reached:  it says so, in words, with Try again",
+    { timeout: 60_000 },
+    async () => {
+      const down = `family cookbook is a web service at "${servers.url}/nowhere":\n\t- it is checked every 500 seconds`
+      const { page } = await opened(serve("shipped-down", withPlace(shipped("RecipeBox/RecipeBox.spell"), down)))
+      const failed = page.locator("ui-message.failed")
+      await failed.waitFor(WAITING)
+      expect(await failed.textContent()).toContain("We can't reach your recipes right now.")
+      expect(await page.locator("ui-button.again").count()).toBe(1)
+      await page.close()
+    }
+  )
 
   test("Spanish, on REST:  the same servers, in its own words", { timeout: 60_000 }, async () => {
     const lines = `recetario familiar es un servicio web en "${servers.url}":

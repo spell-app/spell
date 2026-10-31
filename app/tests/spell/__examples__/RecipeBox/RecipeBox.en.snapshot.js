@@ -5,14 +5,15 @@ export const words = {
     Recipe: {
       title: "title",
       servings: "servings",
-      draw: "draw it",
-      remove: "remove it"
+      notes: "notes",
+      draw: "draw it"
     },
     RecipeBox: {
       search: "search",
-      draft: "draft",
+      newRecipe: "new recipe",
       matches: "matches",
-      addTheDraft: "add the draft",
+      create: "create it",
+      addTheNewRecipe: "add the new recipe",
       draw: "draw it"
     }
   }

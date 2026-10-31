@@ -1,0 +1,98 @@
+/* File styles.css:  how the recipe box looks (the same as Recipe Box, its twin).
+   - The box is one grid, <caja-de-recetas-app>:  its header across the top, then a card each, the new recipe's first.
+   - Each recipe is a <caja-de-recetas-receta>, an element of its own:  its insides are reached by their parts. */
+
+caja-de-recetas-app {
+  --ui-card-margin-block: 0;
+  --ui-form-row-distance: 0.75em;
+  --ui-menu-margin: 0;
+  --ui-message-margin: 0;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));
+  align-items: start;
+  gap: 1em;
+  max-width: 66em;
+  margin-inline: auto;
+  padding-block-end: 1.5em;
+}
+
+caja-de-recetas-receta {
+  display: block;
+}
+
+/****************
+ * Across the top:  the title, then undo and search, on the right while there's room
+ ****************/
+
+.top {
+  grid-column: 1 / -1;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5em 1em;
+
+  .heading {
+    flex: 1 1 100%;
+  }
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  p {
+    color: var(--ui-text-muted);
+  }
+
+  ui-form {
+    --ui-form-row-distance: 0;
+
+    flex: 1 1 10em;
+  }
+
+  /* with room, one line:  the search stays the same width as undo's words change */
+  @media (min-width: 40em) {
+    .heading {
+      flex-basis: 16em;
+    }
+
+    ui-form {
+      flex: 0 1 18em;
+    }
+  }
+}
+
+/****************
+ * The cards
+ ****************/
+
+/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */
+@media (min-width: 40em) {
+  .new::part(card) {
+    grid-row: span 2;
+  }
+}
+
+.new h2 {
+  margin: 0 0 0.5em;
+  font-size: 1.15em;
+}
+
+/* the buttons at the foot of a card are at its right */
+.new ui-extra,
+caja-de-recetas-receta::part(foot) {
+  text-align: end;
+}
+
+/* said beside the new recipe's card, in place of the others */
+.none {
+  color: var(--ui-text-muted);
+}
+
+.waiting {
+  justify-self: start;
+}
