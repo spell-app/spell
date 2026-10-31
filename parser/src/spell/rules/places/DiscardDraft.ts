@@ -5,11 +5,11 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { DRAFT_DATATYPE } from "./DraftOf"
 
 /**
- * `cancel_draft` rule:  a draft's changes are forgotten:  what a Cancel button does (epic `data` Q9).
- * - e.g. `cancel the draft`, `cancel d`
- * - Compiles to `core.cancelDraft(d)`.
+ * `discard_draft` rule:  a draft's changes are forgotten:  what a Cancel button does (epic `data` Q9).
+ * - e.g. `discard the draft`, `discard d`
+ * - Compiles to `core.discardDraft(d)`.
  */
-export class CancelDraft extends SpellStatement<"draft"> {
+export class DiscardDraft extends SpellStatement<"draft"> {
   @proto static alias = "statement"
   @proto static priority = Priority.preferred
 
@@ -20,7 +20,7 @@ export class CancelDraft extends SpellStatement<"draft"> {
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "cancelDraft",
+      methodName: "discardDraft",
       args: [P.asAST<P.ASTExpression>(match.groups.draft.AST)]
     })
   }

@@ -53,16 +53,16 @@ function withPlace(program: Program, lines: string): Program {
 
 /** What each back-end's lines say:  all that differs. */
 const BACK_ENDS: Record<string, (url: string) => string> = {
-  REST: (url) => `family cookbook is a web service at "${url}":
-	- a recipe's title is called "name"
-	- its versions are in "version"
-	- it is checked every 5 seconds`,
-  GraphQL: (url) => `family cookbook is a graph service at "${url}/graphql":
-	- a recipe's title is called "name"
-	- it is checked every 5 seconds`,
-  "a folder": (url) => `family cookbook is a folder at "${url}/api/places/recipes":
-	- it is checked every 5 seconds`,
-  "a live room": (url) => `family cookbook is a live room at "${url}/api/rooms/recipes"`
+  REST: (url) => `family cookbook is a web server at "${url}":
+	- a recipe's title is its "name"
+	- its version is its "version"
+	- check it every 5 seconds`,
+  GraphQL: (url) => `family cookbook is a graphql server at "${url}/graphql":
+	- a recipe's title is its "name"
+	- check it every 5 seconds`,
+  "a folder": (url) => `family cookbook is a data folder at "${url}/api/places/recipes":
+	- check it every 5 seconds`,
+  "a room": (url) => `family cookbook is a room at "${url}/api/rooms/recipes"`
 }
 
 describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe box, in a browser", () => {
@@ -180,7 +180,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     GraphQL: async () => [...servers.box.recipes.values()].map(({ name }) => name),
     "a folder": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
-    "a live room": async () =>
+    "a room": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
   }
 
@@ -227,7 +227,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   }
 
   // What the editor's page is to these servers:  another port, and no token it could know
-  for (const backEnd of ["a folder", "a live room"]) {
+  for (const backEnd of ["a folder", "a room"]) {
     test(
       `a page on another port, with no token, on ${backEnd}:  as the editor runs it`,
       { timeout: 60_000 },
@@ -393,7 +393,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     "the example, when its place can't be reached:  it says so, in words, with Try again",
     { timeout: 60_000 },
     async () => {
-      const down = `family cookbook is a web service at "${servers.url}/nowhere":\n\t- it is checked every 500 seconds`
+      const down = `family cookbook is a web server at "${servers.url}/nowhere":\n\t- check it every 500 seconds`
       const { page } = await opened(serve("shipped-down", withPlace(shipped("RecipeBox/RecipeBox.spell"), down)))
       const failed = page.locator("ui-message.failed")
       await failed.waitFor(WAITING)
@@ -404,11 +404,11 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   )
 
   test("Spanish, on REST:  the same servers, in its own words", { timeout: 60_000 }, async () => {
-    const lines = `recetario familiar es un servicio web en "${servers.url}":
+    const lines = `recetario familiar es un servidor web en "${servers.url}":
 	- las recetas están en "/recipes"
 	- el título de una receta se llama "name"
 	- las porciones de una receta se llaman "servings"
-	- sus versiones están en "version"
+	- su versión está en "version"
 	- se revisa cada 5 segundos`
     const { page, problems } = await opened(serve("es-rest", withPlace(spanish(), lines)))
     await roundTrip(page, heldBy.REST!)
@@ -417,7 +417,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   })
 
   test("Spanish, on a folder", { timeout: 60_000 }, async () => {
-    const lines = `recetario familiar es una carpeta en "${servers.url}/api/places/recipes":
+    const lines = `recetario familiar es una carpeta de datos en "${servers.url}/api/places/recipes":
 	- las recetas están en "recipes"
 	- el título de una receta se llama "title"
 	- las porciones de una receta se llaman "servings"
@@ -430,7 +430,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   })
 
   test("a sheet:  a write won't compile, and what only reads reads it", { timeout: 60_000 }, async () => {
-    const sheet = `family cookbook is a sheet at "${servers.url}/recipes.csv":\n\t- its ids are in "id"`
+    const sheet = `family cookbook is a sheet at "${servers.url}/recipes.csv":\n\t- its id is its "id"`
     const { path, source } = withPlace(english(), sheet)
     expect(errorsOf(path, source).join()).toContain("read only")
 
@@ -460,10 +460,10 @@ start the recipe box
     await page.close()
   })
 
-  /** A graph service's first lines. */
-  const onGraph = (url: string) => `family cookbook is a graph service at "${url}/graphql":
-	- a recipe's title is called "name"
-	- it is checked every 500 seconds`
+  /** A graphql server's first lines. */
+  const onGraph = (url: string) => `family cookbook is a graphql server at "${url}/graphql":
+	- a recipe's title is its "name"
+	- check it every 500 seconds`
 
   /** A recipe:  what its draw reads, and two fields nothing does. */
   const RECIPE_TYPE = `a "recipe" is a view:
@@ -514,7 +514,7 @@ start the recipe box
 `
   })
 
-  /** What the page asked the GraphQL service, from `from` on. */
+  /** What the page asked the GraphQL server, from `from` on. */
   const graphAsks = (from: number) => servers.box.asks.slice(from).filter(({ path }) => path === "/graphql")
 
   /** `program`, compiled, then changed as `edit` says, and opened:  its page, with the first load settled. */
@@ -609,7 +609,7 @@ start the recipe box
       `an action undone as one step, adding things saved ${backEnd}:  Undo takes them away, not leaves them blank`,
       { timeout: 60_000 },
       async () => {
-        const place = backEnd === "REST" ? BACK_ENDS.REST!(servers.url) : "family cookbook is in memory"
+        const place = backEnd === "REST" ? BACK_ENDS.REST!(servers.url) : "family cookbook is an in memory database"
         const source = `${place}
 
 a "recipe" is a view:
@@ -708,16 +708,45 @@ start the listing box`
   }
 
   // What a named operation does in each language:  a button for each, each reaching the demo's server
+  test(
+    "a question about a read, in a drawing:  it waits for the place, and never holds the drawing's own function",
+    { timeout: 60_000 },
+    async () => {
+      const source = `family cookbook is a web server at "${servers.url}":
+	- a recipe's title is its "name"
+	- check it every 5 seconds
+
+a "recipe" is a thing:
+	- it is saved in the family cookbook
+	- its "title" is text
+
+counting box is an app:
+	- to draw it:
+		if there are no recipes where its title is "nothing called this":
+			<ui-text class="none">None like that</ui-text>
+		if there are more than 100000 recipes:
+			<ui-text class="many">Too many</ui-text>
+		<ui-text class="count">{the number of recipes where its title is "nothing called this"}</ui-text>
+
+start the counting box`
+      const { page, problems } = await opened(serve("there-are", { path: "/Counting.spell", source, field: "title" }))
+      await page.locator("ui-text.none").waitFor(WAITING)
+      await expect.poll(() => page.locator("ui-text.count").innerText(), WAITING).toBe("0")
+      expect(await page.locator("ui-text.many").count()).toBe(0)
+      expect(problems).toEqual([])
+    }
+  )
+
   for (const { language, path, source } of [
     {
       language: "English",
       path: "/Publishing.spell",
-      source: `family cookbook is a web service at "URL":
-	- a recipe's title is called "name"
-	- its versions are in "version"
-	- it is checked every 5 seconds
+      source: `family cookbook is a web server at "URL":
+	- a recipe's title is its "name"
+	- its version is its "version"
+	- check it every 5 seconds
 	- to publish a recipe is at "/recipes/publish"
-	- to refresh is at "/recipes/refresh"
+	- to reload is at "/recipes/reload"
 
 a "recipe" is a view:
 	- it is saved in the family cookbook
@@ -727,7 +756,7 @@ a "recipe" is a view:
 
 publishing box is an app:
 	- to draw it:
-		<ui-button class="refresh" onClick={refresh}>Refresh</ui-button>
+		<ui-button class="reload" onClick={reload}>Reload</ui-button>
 		for each recipe in every recipe
 			draw the recipe
 
@@ -736,13 +765,13 @@ start the publishing box`
     {
       language: "Spanish",
       path: "/Publicando.es.spell",
-      source: `recetario familiar es un servicio web en "URL":
+      source: `recetario familiar es un servidor web en "URL":
 	- las recetas están en "/recipes"
 	- el título de una receta se llama "name"
-	- sus versiones están en "version"
+	- su versión está en "version"
 	- se revisa cada 5 segundos
 	- para publicar una receta está en "/recipes/publish"
-	- para recargar está en "/recipes/refresh"
+	- para recargar está en "/recipes/reload"
 
 una "receta" es una vista:
 	- se guarda en el recetario familiar
@@ -752,7 +781,7 @@ una "receta" es una vista:
 
 caja que publica es una aplicación:
 	- para dibujarla:
-		<ui-button class="refresh" onClick={recargar}>Recargar</ui-button>
+		<ui-button class="reload" onClick={recargar}>Recargar</ui-button>
 		para cada receta en cada receta
 			dibujar la receta
 
@@ -767,12 +796,12 @@ iniciar la caja que publica`
           serve(`operations-${language}`, { path, source: source.replace("URL", servers.url), field: "title" })
         )
         const asked = () =>
-          servers.box.asks.filter(({ method, path: at }) => method === "POST" && /publish|refresh/.test(at))
+          servers.box.asks.filter(({ method, path: at }) => method === "POST" && /publish|reload/.test(at))
         const before = { asks: asked().length, published: servers.box.published.length }
 
-        await page.locator("ui-button.refresh").click()
+        await page.locator("ui-button.reload").click()
         await expect.poll(() => asked().length, WAITING).toBe(before.asks + 1)
-        expect(asked().at(-1)).toMatchObject({ path: "/recipes/refresh" })
+        expect(asked().at(-1)).toMatchObject({ path: "/recipes/reload" })
 
         await page.locator("ui-button.publish").first().waitFor(WAITING)
         await page.locator("ui-button.publish").first().click()
@@ -786,8 +815,8 @@ iniciar la caja que publica`
   }
 
   test("riders:  if that fails shows, and Try again reads again", { timeout: 60_000 }, async () => {
-    const down = `family cookbook is a web service at "${servers.url}/flaky":
-	- it is checked every 500 seconds`
+    const down = `family cookbook is a web server at "${servers.url}/flaky":
+	- check it every 500 seconds`
     const { page } = await opened(serve("failed", withPlace(english(), down)))
     await page.locator("ui-message.failed").waitFor(WAITING)
     flakyIsUp = true
@@ -800,7 +829,9 @@ iniciar la caja que publica`
     "riders:  if there are none shows, on this device, and what's added is there on the next visit",
     { timeout: 60_000 },
     async () => {
-      const { page, problems } = await opened(serve("device", withPlace(english(), "family cookbook is this device")))
+      const { page, problems } = await opened(
+        serve("device", withPlace(english(), "family cookbook is a database on this device"))
+      )
       await page.locator("ui-text.none").waitFor(WAITING)
       await page.locator("ui-input.draft input").fill("Toast")
       await page.locator("ui-button.add").click()

@@ -316,7 +316,12 @@ eventsEs.addRule(WhenThingChanges, {
       tests: [
         {
           input: ["cuando cambia una receta:", "\timprimir el título de la receta"],
-          js: ['on("a-receta-change", (event) => {', "  const { receta } = event", "  core.console.log(receta.título)", "})"],
+          js: [
+            'on("a-receta-change", (event) => {',
+            "  const { receta } = event",
+            "  core.console.log(receta.título)",
+            "})"
+          ],
           ts: 'on<{ receta: Receta }>("a-receta-change", ({ receta }) => core.console.log(receta.título))'
         }
       ]

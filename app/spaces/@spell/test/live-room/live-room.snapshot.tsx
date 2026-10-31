@@ -5,7 +5,7 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/LiveRoom.spell", start: 802, end: 821 } })
+  @prop({ type: "text", declaredAt: { path: "/LiveRoom.spell", start: 797, end: 816 } })
   accessor title!: string
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {
@@ -42,7 +42,7 @@ core.useElement(Recipe, RecipeElement)
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), {
   name: "family_cookbook",
-  kind: "live room",
+  kind: "room",
   at: "/api/rooms/recipes"
 })
 
@@ -67,7 +67,7 @@ export class LiveBox extends App {
       core.drawRead(() => core.peopleHere(), (person) => <ui-label class="here">{person.name}</ui-label>),
       <ui-text class="news">{this.news}</ui-text>,
       <ui-text class="changes">{this.changes}</ui-text>,
-      <ui-button class="again" onClick={core.pressed(this, () => core.refreshSaved(Recipe))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved(Recipe))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         Check now
       </ui-button>,
       <ui-button class="add" onClick={core.pressed(this, () => this.addOne())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">

@@ -2,6 +2,7 @@
 
 exports[`testing spell module lists, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
+  "add_new_thing": "thing",
   "bracketed_list": "list?",
   "can_give_up": "operator|expression",
   "can_take": "operator|expression",
@@ -40,6 +41,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "range_count_expression": "ordinal|number|arg|list",
   "range_starting_with_expression": "arg|list|thing",
   "repeat_n_times": "number|body?",
+  "sort_key_field": "property",
   "starts_with": "operator|expression",
 }
 `;

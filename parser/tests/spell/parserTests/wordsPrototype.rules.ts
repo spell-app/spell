@@ -59,7 +59,7 @@ export class ProposedRider extends ProposedStatement {
   @proto static loops = true
 }
 
-/** A line that yields to a project's own action of the same words:  `to refresh the recipes:`, say. */
+/** A line that yields to a project's own action of the same words:  `to reload the recipes:`, say. */
 export class ProposedVerb extends ProposedStatement {
   @proto static priority = Priority.overridable
 }
@@ -172,7 +172,7 @@ export class ProposedBelongsTo extends BelongsToOne {
 }
 
 /**
- * `family cookbook is a web service at "..."`:  a one-of-a-kind thing of a kind that's a type (epic `data` Q2).
+ * `family cookbook is a web server at "..."`:  a one-of-a-kind thing of a kind that's a type (epic `data` Q2).
  * - Its body is a type's outline body:  its own details, and its named operations.
  */
 export class ProposedPlace extends CreateType {
@@ -189,7 +189,7 @@ export class ProposedPlace extends CreateType {
   }
 }
 
-/** `family cookbook is this device`, `... is the cloud`:  a place of one kind, with nothing to say where. */
+/** `family cookbook is a database on this device`, `... is saved in the cloud`:  a place of one kind, with nothing to say where. */
 export class ProposedOnlyPlace extends ProposedStatement {
   mutateScope(match: P.MatchFor<this>): void {
     declarePlaceVariable(match as P.Match)
@@ -208,41 +208,41 @@ function declarePlaceVariable(match: P.Match): void {
 
 /** The English of every proposed word:  each key is one rule. */
 const ENGLISH = {
-  place: "{type:type_words} is (a|an) {superType:type} at {address:text} {with_nested_statements}?",
-  eachOwn: "{type:type_words} is each person's own {superType:type} {with_nested_statements}?",
-  thisDevice: "{type:type_words} is this device",
-  theCloud: "{type:type_words} is the cloud",
-  collectionAt: "{collection:plural_type} are at {path:text}",
-  calledAs: "(a|an) {owner:known_type}'s {property:member_words} is called {name:text}",
+  place: "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?",
+  eachOwn: "{type:type_words} is a personal {superType:type} {with_nested_statements}?",
+  thisDevice: "{type:type_words} is a database on this device",
+  theCloud: "{type:type_words} is saved in the cloud",
+  collectionAt: "{collection:plural_type} live at {path:text}",
+  calledAs: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}",
   keyIsSecret: "{type:subject_its} key is the secret {name:text}",
-  checkedEvery: "{type:subject_it} is checked every {number} seconds",
-  savedIn: "{type:subject_it} is saved in {place:expression}",
+  checkedEvery: "check {type:subject_it} every {number} seconds",
+  savedIn: "{type:subject_it} (is saved|lives) in {place:expression}",
   belongsTo: "(a|an) {type} belongs to one {list:type}",
   firstFew: "the {ordinal} {number} {type:plural_type} where {inline_expression}?",
   numberWhere: "the number of {type:plural_type} where {inline_expression}?",
-  total: "the total of {list:operand}",
-  whileWaiting: "while waiting :? {statement_body}?",
+  total: "the (total|sum) of {list:operand}",
+  whileWaiting: "while (waiting|loading) :? {statement_body}?",
   ifNone: "if there are none :? {statement_body}?",
   ifFails: "if that fails :? {statement_body}?",
-  allOrNothing: "all or nothing :? {statement_body}?",
+  inOneGo: "in one go :? {statement_body}?",
   draftOf: "a draft of {thing:operand}",
   save: "save {draft:expression}",
   whenThingChanges: "when (a|an) {type:known_type} changes :? {statement_body}?",
   someoneElse: "when someone else changes it :? {statement_body}?",
-  refresh: "refresh {list:expression}",
+  reload: "reload {list:expression}",
   tryAgain: "try again",
-  currentPerson: "me",
-  peopleHere: "the people here",
-  cancelAction: "cancel {action:identifier}",
+  currentPerson: "(they|them|the person)",
+  peopleHere: "everyone here",
+  cancelAction: "(stop|cancel) the? {action:identifier}",
   savedYet: "saved yet {type:known_type}"
 }
 
 /** The same rules' Spanish:  the words in the Overview, each to go through the glossary in P11. */
 const SPANISH: ProposedWords = {
   place: "{type:type_words} es (un|una) {superType:type} en {address:text} {with_nested_statements}?",
-  eachOwn: "{type:type_words} es (el|la) (propio|propia) {superType:type} de cada persona {with_nested_statements}?",
-  thisDevice: "{type:type_words} es este dispositivo",
-  theCloud: "{type:type_words} es la nube",
+  eachOwn: "{type:type_words} es una {superType:type} personal {with_nested_statements}?",
+  thisDevice: "{type:type_words} es una base de datos en este dispositivo",
+  theCloud: "{type:type_words} se guarda en la nube",
   collectionAt: "(los|las) {collection:plural_type} están en {path:text}",
   calledAs: "(el|la) {property:member_words} de (un|una) {owner:known_type} se llama {name:text}",
   keyIsSecret: "{type:subject_its} clave es el secreto {name:text}",
@@ -251,19 +251,19 @@ const SPANISH: ProposedWords = {
   belongsTo: "(un|una) {type} pertenece a (un|una) {list:type}",
   firstFew: "(los|las) {ordinal} {number} {type:plural_type} donde {inline_expression}?",
   numberWhere: "el número de {type:plural_type} donde {inline_expression}?",
-  total: "el total de {list:operand}",
-  whileWaiting: "mientras espera :? {statement_body}?",
+  total: "(el total|la suma) de {list:operand}",
+  whileWaiting: "mientras (espera|carga) :? {statement_body}?",
   ifNone: "si no hay (ninguno|ninguna) :? {statement_body}?",
   ifFails: "si falla :? {statement_body}?",
-  allOrNothing: "todo o nada :? {statement_body}?",
+  inOneGo: "de una vez :? {statement_body}?",
   draftOf: "(un|una) borrador de {thing:operand}",
   save: "guardar {draft:expression}",
   whenThingChanges: "cuando cambia (un|una) {type:known_type} :? {statement_body}?",
   someoneElse: "cuando otra persona (lo|la) cambia :? {statement_body}?",
-  refresh: "recargar {list:expression}",
+  reload: "recargar {list:expression}",
   tryAgain: "reintentar",
-  currentPerson: "yo",
-  peopleHere: "las personas presentes",
+  currentPerson: "(esa persona|la persona)",
+  peopleHere: "(todos los presentes|las personas presentes)",
   cancelAction: "cancelar {action:identifier}",
   savedYet: "guardada ya {type:known_type}"
 }
@@ -286,12 +286,12 @@ const RULE_OF: Record<keyof ProposedWords, P.RuleConstructor> = {
   whileWaiting: ProposedRider,
   ifNone: ProposedRider,
   ifFails: ProposedRider,
-  allOrNothing: ProposedStatement,
+  inOneGo: ProposedStatement,
   draftOf: ProposedDraftOf,
   save: ProposedSave,
   whenThingChanges: ProposedStatement,
   someoneElse: ProposedStatement,
-  refresh: ProposedVerb,
+  reload: ProposedVerb,
   tryAgain: ProposedStatement,
   currentPerson: ProposedExpression,
   peopleHere: ProposedExpression,

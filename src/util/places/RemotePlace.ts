@@ -18,7 +18,7 @@ import { jsonIn, WebPlace } from "./WebPlace"
 
 /** What it assumes a place on a server side does:  it's told what's done on each answer, in `handled`. */
 const REMOTE_CAPABILITIES: PlaceCapabilities = {
-  kind: "web service",
+  kind: "web server",
   idOf: "id",
   filter: "none",
   sort: "none",

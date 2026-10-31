@@ -195,7 +195,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - On `LoadOnce`.  The last reader leaving aborts the read, and about ten released ones are kept for a quick return.
     - `newestWins`:  a name for reads where a newer one aborts the older, e.g. a search as you type.
   - `PlaceBatch`:  lists asked in the same moment go in one request, for a place with `listMany()`:  `GraphPlace`'s aliases.
-    A web service has one address per collection, so it can't:  its lists go one each, together.
+    A web server has one address per collection, so it can't:  its lists go one each, together.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.

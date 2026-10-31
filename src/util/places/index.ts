@@ -12,7 +12,7 @@
  * - `RemotePlace`:  any place on a server side (`PlaceServer`, in `spell/server/places`).
  * - `SheetPlace`:  a CSV file as a read-only place, read with `parseCsv()`, its rows made by `SheetTable`.
  * - `CsvFile`:  a CSV file's text, which saves by comparing new rows with old:  `CsvPlace`, in `spell/server/places`, is the place that writes one.
- * - `LiveRoomPlace`:  a live room, whose referee (`Referee`, in `spell/server/places`) puts everyone's changes in one order;
+ * - `LiveRoomPlace`:  a room, whose referee (`Referee`, in `spell/server/places`) puts everyone's changes in one order;
  *   `RoomCopy`, what both sides hold;  `positions`, a place in a list as a fraction.
  * - `refs` names anything saved in text, `Recipe#r-12`.
  * - `people`:  who's at this page, with no sign-in.

@@ -878,7 +878,7 @@ describe("PlaceDraft", () => {
   })
 })
 
-describe("PlaceThings, in a live room (epic `data` P8)", () => {
+describe("PlaceThings, in a room (epic `data` P8)", () => {
   /** A room with two people in it, each with their own things. */
   async function room() {
     const store = new MemoryPlace({
@@ -1069,7 +1069,7 @@ const DISH_CLASSES: Record<string, new (props?: Record<string, unknown>) => Thin
 
 /** A dish in a place, read and made into a thing. */
 async function aDish(place?: MemoryPlace, props: PlacesProps = {}) {
-  const real = place ?? new MemoryPlace({ capabilities: { kind: "web service" }, collections: { dishes: [DISH_ROW] } })
+  const real = place ?? new MemoryPlace({ capabilities: { kind: "web server" }, collections: { dishes: [DISH_ROW] } })
   const applied = vi.spyOn(real, "apply")
   const places = new Places({ wait: 0, retry: 5, ...props }).add("family cookbook", real)
   const things = new PlaceThings({ places, classNamed: (name) => DISH_CLASSES[name] })
@@ -1090,7 +1090,7 @@ describe("Places.originOf(), a saved value", () => {
     const { places, dish } = await aDish()
     expect(places.originOf(dish, "serves")).toEqual({
       place: "family cookbook",
-      kind: "web service",
+      kind: "web server",
       collection: "dishes",
       id: "r-12",
       canWrite: true,
@@ -1141,14 +1141,14 @@ describe("Places.originOf(), a saved value", () => {
 
   test("with a sample in:  it's a sample, it can be written, and it's still that name", async () => {
     const real = new MemoryPlace({
-      capabilities: { kind: "web service", write: "none" },
+      capabilities: { kind: "web server", write: "none" },
       collections: { dishes: [DISH_ROW] }
     })
     const { places, dish } = await aDish(real)
     await useSample(places, "family cookbook")
     expect(places.originOf(dish, "serves")).toMatchObject({
       place: "family cookbook",
-      kind: "web service",
+      kind: "web server",
       canWrite: true,
       isSample: true
     })

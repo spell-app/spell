@@ -9,7 +9,7 @@
  *   - the first time, a copy of `recipes.csv` beside the demo's pages, so the committed one never changes
  * - ONE folder of files, `<folder>`, two ways in:  edit `recipes/r-1.json` there, and both follow
  *   - `http://127.0.0.1:4791/api/places/recipes`:  as a place, behind a `PlaceServer`
- *   - `ws://127.0.0.1:4791/api/rooms/recipes`:  a live room, its referee keeping its recipes there (epic `data` P8)
+ *   - `ws://127.0.0.1:4791/api/rooms/recipes`:  a room, its referee keeping its recipes there (epic `data` P8)
  * - `<folder>`:  else `spell-recipe-box` in the system's temporary folder.  Both are kept between runs.
  * - `http://127.0.0.1:4791/api/places/google-sheet`:  your own Google Sheet, behind the same server, which holds its key (epic `data` P7)
  *   - only with `GOOGLE_SHEET_ID` and `GOOGLE_SHEETS_KEY` set:  its id, and a service account's key file, as JSON;
@@ -38,7 +38,7 @@ const PORT = RECIPE_SERVERS_PORT
 /** How often it looks whether what started it is still there, in ms. */
 const PARENT_CHECK_MS = 5_000
 
-/** Where its live room listens. */
+/** Where its room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
 
 /** Where the demo's committed CSV file is, in the epic repo. */
@@ -64,7 +64,7 @@ await startRecipeServers({
 })
 console.log(`the recipe servers are on http://127.0.0.1:${PORT}.  Ctrl-C stops them.`)
 console.log(`the CSV file, behind /recipes, /graphql, /recipes.csv and /api/places/recipes-csv, is ${csvFile}`)
-console.log(`the folder, behind /api/places/recipes and the live room, ${ROOM_PATH}, is ${folder}`)
+console.log(`the folder, behind /api/places/recipes and the room, ${ROOM_PATH}, is ${folder}`)
 if (googleSheet) console.log(`your Google Sheet ${spreadsheet} is on /api/places/google-sheet, its key held here.`)
 console.log(RECIPE_SERVERS_READY)
 

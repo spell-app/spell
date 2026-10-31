@@ -1,5 +1,5 @@
 // La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba
-recetario familiar está en memoria
+recetario familiar es una base de datos en memoria
 
 una "receta" es una vista:
 	- se guarda en el recetario familiar

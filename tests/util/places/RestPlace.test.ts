@@ -21,7 +21,7 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((close) => close()))
 })
 
-/** A real web service on a free port, its box, and a place for it. */
+/** A real web server on a free port, its box, and a place for it. */
 async function served(server: RestServerProps = {}, props: Partial<RestPlaceProps> = {}) {
   const box = new RecipeBox()
   const http = createServer(SRV.toListener(restHandler(box, server)))

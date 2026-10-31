@@ -44,29 +44,32 @@ type Line = {
 }
 
 /** A place to be saved in, that takes no address. */
-const A_PLACE: [string, string] = ["family cookbook is this device", "recetario familiar es este dispositivo"]
+const A_PLACE: [string, string] = [
+  "family cookbook is a database on this device",
+  "recetario familiar es una base de datos en este dispositivo"
+]
 
 /** The kinds of place, each a type (Q2):  in core, in The Words. */
 const KINDS = [
   `a place is a thing
-a web service is a place
-a graph service is a place
+a web server is a place
+a graphql server is a place
 a folder is a place
 a file is a place
-a live room is a place
+a room is a place
 a sheet is a place
-an airtable base is a place
-an at protocol account is a place
+an airtable is a place
+an atmosphere account is a place
 `,
   `un lugar es una cosa
-un servicio web es un lugar
-un servicio de grafos es un lugar
+un servidor web es un lugar
+un servidor graphql es un lugar
 una carpeta es un lugar
 un archivo es un lugar
-una sala en vivo es un lugar
+una sala es un lugar
 una hoja es un lugar
-una base de airtable es un lugar
-una cuenta de at protocol es un lugar
+una airtable es un lugar
+una cuenta de atmosphere es un lugar
 `
 ] as const
 
@@ -138,22 +141,22 @@ const NOTHING = [
 const LINES: Line[] = [
   // ## Where it lives:  one line for each kind of place
   {
-    en: 'family cookbook is a web service at "https://api.example.com/v1"',
-    es: 'recetario familiar es un servicio web en "https://api.example.com/v1"',
+    en: 'family cookbook is a web server at "https://api.example.com/v1"',
+    es: 'recetario familiar es un servidor web en "https://api.example.com/v1"',
     at: "top",
     today: "compiles",
     withRule: "compiles"
   },
   {
-    en: 'family cookbook is a graph service at "https://api.example.com/gql"',
-    es: 'recetario familiar es un servicio de grafos en "https://api.example.com/gql"',
+    en: 'family cookbook is a graphql server at "https://api.example.com/gql"',
+    es: 'recetario familiar es un servidor graphql en "https://api.example.com/gql"',
     at: "top",
     today: "compiles",
     withRule: "compiles"
   },
   {
-    en: 'family cookbook is a folder at "recipes"',
-    es: 'recetario familiar es una carpeta en "recetas"',
+    en: 'family cookbook is a data folder at "recipes"',
+    es: 'recetario familiar es una carpeta de datos en "recetas"',
     at: "top",
     today: "compiles",
     withRule: "compiles"
@@ -166,16 +169,16 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: "family cookbook is this device",
-    es: "recetario familiar es este dispositivo",
+    en: "family cookbook is a database on this device",
+    es: "recetario familiar es una base de datos en este dispositivo",
     at: "top",
     today: "compiles",
     withRule: "compiles",
     note: "no kind and no address:  its own rule, so a library can't add one of this shape"
   },
   {
-    en: 'family cookbook is a live room at "wss://rooms.example.com/family"',
-    es: 'recetario familiar es una sala en vivo en "wss://rooms.example.com/family"',
+    en: 'family cookbook is a room at "wss://rooms.example.com/family"',
+    es: 'recetario familiar es una sala en "wss://rooms.example.com/family"',
     at: "top",
     today: "compiles",
     withRule: "compiles"
@@ -188,37 +191,37 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: 'family cookbook is an airtable base at "appXXXXXXXXXXXXXX"',
-    es: 'recetario familiar es una base de airtable en "appXXXXXXXXXXXXXX"',
+    en: 'family cookbook is an airtable at "appXXXXXXXXXXXXXX"',
+    es: 'recetario familiar es una airtable en "appXXXXXXXXXXXXXX"',
     at: "top",
     today: "fails",
     withRule: "compiles"
   },
   {
-    en: 'family cookbook is an at protocol account at "did:plc:abc123"',
-    es: 'recetario familiar es una cuenta de at protocol en "did:plc:abc123"',
+    en: 'family cookbook is an atmosphere account at "did:plc:abc123"',
+    es: 'recetario familiar es una cuenta de atmosphere en "did:plc:abc123"',
     at: "top",
     today: "fails",
     withRule: "compiles",
     note: "`at` both starts the kind's name and follows it:  it reads, because a type's name is read longest first"
   },
   {
-    en: `family cookbook is each person's own at protocol account:
-	- recipes are at "com.example.recipe"`,
-    es: `recetario familiar es la propia cuenta de at protocol de cada persona:
+    en: `family cookbook is a personal atmosphere account:
+	- recipes live at "com.example.recipe"`,
+    es: `recetario familiar es una cuenta personal de atmosphere:
 	- las recetas están en "com.example.recipe"`,
     at: "top",
     today: "fails",
-    withRule: "compiles",
-    note: "the one that doesn't fit `is a ... at`:  its own rule, with no address"
+    withRule: ["compiles", "fails"],
+    note: "the one that doesn't fit `is a ... at`:  its own rule, an address optional;  until AT Protocol's phase, it says it isn't here yet"
   },
   {
-    en: `family cookbook is a web service at "https://api.example.com/v1":
-	- recipes are at "/dishes"
-	- a recipe's title is called "dish_name"
+    en: `family cookbook is a web server at "https://api.example.com/v1":
+	- recipes live at "/dishes"
+	- a recipe's title is its "dish_name"
 	- its key is the secret "COOKBOOK_KEY"
-	- it is checked every 30 seconds`,
-    es: `recetario familiar es un servicio web en "https://api.example.com/v1":
+	- check it every 30 seconds`,
+    es: `recetario familiar es un servidor web en "https://api.example.com/v1":
 	- las recetas están en "/platos"
 	- el título de una receta se llama "nombre_plato"
 	- su clave es el secreto "CLAVE_RECETARIO"
@@ -229,9 +232,9 @@ const LINES: Line[] = [
     note: "a place's details:  each its own rule, in the place's outline body"
   },
   {
-    en: `family cookbook is a web service at "https://api.example.com/v1":
+    en: `family cookbook is a web server at "https://api.example.com/v1":
 	- to publish (a recipe) is at "/recipes/publish"`,
-    es: `recetario familiar es un servicio web en "https://api.example.com/v1":
+    es: `recetario familiar es un servidor web en "https://api.example.com/v1":
 	- para publicar (una receta) está en "/recetas/publicar"`,
     at: "top",
     today: "compiles",
@@ -239,10 +242,10 @@ const LINES: Line[] = [
     note: "Q14's form, with its parentheses, still reads"
   },
   {
-    en: `family cookbook is a web service at "https://api.example.com/v1":
+    en: `family cookbook is a web server at "https://api.example.com/v1":
 	- to publish a recipe is at "/recipes/publish"
 	- to refresh is at "/recipes/refresh"`,
-    es: `recetario familiar es un servicio web en "https://api.example.com/v1":
+    es: `recetario familiar es un servidor web en "https://api.example.com/v1":
 	- para publicar una receta está en "/recetas/publicar"
 	- para recargar está en "/recetas/recargar"`,
     at: "top",
@@ -251,8 +254,8 @@ const LINES: Line[] = [
     note: "Q17's C:  one line, no parentheses;  a known type's name is what's sent, and with none, nothing is.  Only under a place"
   },
   {
-    en: "family cookbook is the cloud",
-    es: "recetario familiar es la nube",
+    en: "family cookbook is saved in the cloud",
+    es: "recetario familiar se guarda en la nube",
     at: "top",
     today: "fails",
     withRule: "compiles",
@@ -448,8 +451,8 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: "add (a new recipe with title = the draft, cook = me) to the recipes",
-    es: "agregar (una nueva receta con título = el borrador, cocinero = yo) a las recetas",
+    en: "add (a new recipe with title = the draft, cook = them) to the recipes",
+    es: "agregar (una nueva receta con título = el borrador, cocinero = esa persona) a las recetas",
     at: "action",
     today: "compiles",
     withRule: "compiles",
@@ -470,9 +473,9 @@ const LINES: Line[] = [
     withRule: "compiles"
   },
   {
-    en: `all or nothing:
+    en: `in one go:
 			print 1`,
-    es: `todo o nada:
+    es: `de una vez:
 			imprimir 1`,
     at: "action",
     today: "compiles",
@@ -524,22 +527,22 @@ const LINES: Line[] = [
     note: "an event nobody sent, until Live And Presence (P13).  Here a recipe's in no place, so it's refused:  it would never run"
   },
   {
-    en: "refresh the recipes",
+    en: "reload the recipes",
     es: "recargar las recetas",
     at: "action",
     today: "compiles",
     withRule: "compiles"
   },
   {
-    en: "me",
-    es: "yo",
+    en: "them",
+    es: "esa persona",
     at: "value",
     today: "compiles",
     withRule: "compiles",
-    note: "`the current person` until P15 (T48)"
+    note: "`the current person`, then `me`, until Owen settled it in P15:  they, them, their, the person"
   },
   {
-    en: "the people here",
+    en: "everyone here",
     es: "las personas presentes",
     at: "value",
     today: "compiles",
@@ -570,9 +573,9 @@ const LINES: Line[] = [
     en: "cancel search",
     es: "cancelar búsqueda",
     at: "action",
-    today: "compiles",
+    today: "fails",
     withRule: "compiles",
-    note: "inside a handler, today's `cancel <event>` still takes it:  below, `the collisions`"
+    note: "only of a thing with an action of that name, as the recipe box has none here:  below, `the collisions`"
   },
   {
     en: `- to search:
@@ -621,9 +624,9 @@ const LINES: Line[] = [
     today: "fails",
     withRule: "compiles",
     needs: [
-      `family cookbook is a web service at "https://api.example.com/v1":
+      `family cookbook is a web server at "https://api.example.com/v1":
 	- to publish a recipe is at "/recipes/publish"`,
-      `recetario familiar es un servicio web en "https://api.example.com/v1":
+      `recetario familiar es un servidor web en "https://api.example.com/v1":
 	- para publicar una receta está en "/recetas/publicar"`
     ],
     note: "Q14's call:  no verb of its own, an action declared under the place, called from anywhere.  Real since P15:  it reaches the place"
@@ -689,7 +692,7 @@ function statusFor(status: Status | [Status, Status], lang: 0 | 1): Status {
 
 /** A proposed program of many lines, as the Overview has it:  RecipeBox.spell, in each language. */
 const RECIPE_BOX = [
-  `family cookbook is a web service at "https://api.example.com/v1"
+  `family cookbook is a web server at "https://api.example.com/v1"
 
 a "recipe" is a view:
 	- it is saved in the family cookbook
@@ -720,7 +723,7 @@ recipe box is an app:
 	- its "matches" is every recipe where its title includes the search, sorted by its title
 	- to add the draft:
 		if the draft is "" return
-		add (a new recipe with title = the draft, cook = me) to the recipes
+		add (a new recipe with title = the draft, cook = them) to the recipes
 		clear the draft
 	- to draw its shelf:
 		for each recipe in the matches
@@ -737,7 +740,7 @@ recipe box is an app:
 
 start the recipe box
 `,
-  `recetario familiar es un servicio web en "https://api.example.com/v1"
+  `recetario familiar es un servidor web en "https://api.example.com/v1"
 
 una "receta" es una vista:
 	- se guarda en el recetario familiar
@@ -768,7 +771,7 @@ caja de recetas es una aplicación:
 	- sus "coincidencias" es cada receta donde su título incluye la búsqueda, ordenada por su título
 	- para agregar el borrador:
 		si el borrador es "" devolver
-		agregar (una nueva receta con título = el borrador, cocinero = yo) a las recetas
+		agregar (una nueva receta con título = el borrador, cocinero = esa persona) a las recetas
 		limpiar el borrador
 	- para dibujar su estante:
 		para cada receta en las coincidencias
@@ -851,13 +854,17 @@ describe("the collisions", () => {
   })
 
   it("belongs to one: a saved owner needn't be a list, one in memory is still refused", () => {
-    const owner = ["family cookbook is this device", "a recipe is a thing:", "\t- it is saved in the family cookbook"]
+    const owner = [
+      "family cookbook is a database on this device",
+      "a recipe is a thing:",
+      "\t- it is saved in the family cookbook"
+    ]
     expect(errorsOf(...owner, "an ingredient is a thing", "an ingredient belongs to one recipe")).toEqual([])
     expect(errorsOf("a pile is a thing", "a card is a thing", "a card belongs to one pile")[0]).toContain(
       "isn't a list"
     )
     const spanish = [
-      "recetario familiar es este dispositivo",
+      "recetario familiar es una base de datos en este dispositivo",
       "una receta es una cosa:",
       "\t- se guarda en el recetario familiar",
       "un ingrediente es una cosa",
@@ -869,7 +876,7 @@ describe("the collisions", () => {
   it("every recipe: the words are the same, so a saved type must be known where it's read", () => {
     // in memory, as ever:  a scratch list
     expect(codeOf("a recipe is a thing", "set x to every recipe")).toContain("core.everyThing(Recipe)")
-    const place = "family cookbook is this device"
+    const place = "family cookbook is a database on this device"
     const recipe = ["a recipe is a thing:", "\t- it is saved in the family cookbook"]
     // below the type, a read can tell it's saved
     expect(codeOf(place, ...recipe, "set below to saved yet recipe")).toContain("const below = true")
@@ -896,22 +903,22 @@ describe("the collisions", () => {
     expect(code).toContain('core.proposed("the total of its prices")')
   })
 
-  it("a program's own action of the same words wins over refresh, and find and load stay free", () => {
+  it("a program's own action of the same words wins over reload, and find and load stay free", () => {
     const box = [
       "recipe box is an app:",
-      "\t- to refresh the recipes:",
+      "\t- to reload the recipes:",
       "\t\tprint 1",
       "\t- to load the scores:",
       "\t\tprint 2",
       "\t- to find the scores:",
       "\t\tprint 3",
       "\t- to go:",
-      "\t\trefresh the recipes",
+      "\t\treload the recipes",
       "\t\tload the scores",
       "\t\tfind the scores"
     ]
     const code = codeOf("a recipe is a thing", ...box)
-    expect(code).toContain("this.refreshTheRecipes()")
+    expect(code).toContain("this.reloadTheRecipes()")
     expect(code).toContain("this.loadTheScores()")
     expect(code).toContain("this.findTheScores()")
   })

@@ -56,7 +56,7 @@ export const PARSER_MESSAGES = {
     'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
-    "A {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- it is checked every 30 seconds\" under it",
+    "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",
   /** `when a recipe changes`, on a type in no place:  won't compile.  `{what}` is the type, with its article. */
   "change-not-saved":
     '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "- it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
@@ -68,15 +68,15 @@ export const PARSER_MESSAGES = {
     "Nobody else can change what's kept here:  this would never run.  It takes a place other people share",
   /** `when someone else changes it`, on a place nothing tells about:  `{kind}`. */
   "someone-else-not-told":
-    "A {kind} can't announce what's changed, so this would never run:  add \"- it is checked every 30 seconds\" under it",
-  /** `the people here`, with no place that knows. */
-  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a live room",
+    "This {kind} can't announce what's changed, so this would never run:  add \"- check it every 30 seconds\" under it",
+  /** `everyone here`, with no place that knows. */
+  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a room",
   /** `to publish a recipe is at "..."`, with no place above it. */
   "operation-outside-place":
     "This action reaches a place only on a line under that place, so here it does nothing:  move it under the place",
   /** `to publish a recipe is at "..."`, under a kind of place that has no addresses of its own:  `{kind}`. */
   "operation-not-taken":
-    "A {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web service",
+    "This {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web server",
   /** A `where` on a saved type that can't go to its place. */
   "where-looks-through":
     "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
@@ -86,20 +86,23 @@ export const PARSER_MESSAGES = {
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
-  /** `all or nothing:` where a place can't make it so. */
-  "all-or-nothing-not-atomic":
+  /** `in one go:` where a place can't make it so. */
+  "in-one-go-not-atomic":
     "A place here can't apply changes all together:  they go one by one, so others may see some of them for a moment",
   /** `save` of something that's no draft:  `{text}`. */
   "no-save-step":
     '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
   /** A word people bring from elsewhere:  `{word}`. */
   "no-such-data-word":
-    'Spell has no "{word}" for data:  say where it lives once, "x is a web service at ...", and "- it is saved in x", then "every recipe where ..." reads it',
+    'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "- it lives in x", then "every recipe where ..." reads it',
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
   /** The cloud, before it's built. */
-  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a live room at ..."',
+  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** A kind of place whose words are settled, with nothing behind it yet:  `{kind}`. */
+  "place-kind-later":
+    'A place of the kind "{kind}" isn\'t here yet:  name another kind of place for now, e.g. "x is a web server at ..."',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
   /** A rider's word that doesn't agree. */

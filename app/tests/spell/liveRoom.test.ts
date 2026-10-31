@@ -1,5 +1,5 @@
 /**
- * Two people on a live room, in two real pages (epic `data` P13):  who's here, and what the other one changed.
+ * Two people on a room, in two real pages (epic `data` P13):  who's here, and what the other one changed.
  * - The program is the frozen test project, `@spell/test/live-room`, and its Spanish twin, `sala-en-vivo`:  `liveRoomPages`.
  * - Headless Chromium through Playwright, in two contexts, on the page's real `<spell-viewer>`, from `yarn build:element`:
  *   skips itself when that's not built.
@@ -67,7 +67,7 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("two people,
       const ana = await personOn(address, "Ana")
       const bo = await personOn(address, "Bo")
 
-      // who's here:  `my name`, `the people here`
+      // who's here:  `their name`, `everyone here`
       await expect.poll(() => textOn(ana.page, "me"), WAITING).toBe("Ana")
       await expect.poll(() => textOn(bo.page, "me"), WAITING).toBe("Bo")
       await expect.poll(() => hereOn(ana.page), WAITING).toEqual(["Ana", "Bo"])
@@ -115,15 +115,15 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("two people,
   }
 
   test(
-    "a place that can't announce:  `it is checked every 1 seconds` finds someone else's change by itself",
+    "a place that can't announce:  `check it every 1 seconds` finds someone else's change by itself",
     { timeout: 60_000 },
     async () => {
       const { source } = LIVE_ROOM_PROGRAMS.english
       const { servers } = demo
-      const lines = `family cookbook is a web service at "${servers.url}":
-	- a recipe's title is called "name"
-	- its versions are in "version"
-	- it is checked every 1 seconds`
+      const lines = `family cookbook is a web server at "${servers.url}":
+	- a recipe's title is its "name"
+	- its version is its "version"
+	- check it every 1 seconds`
       const address = demo.serve("polled", source.replace(/^family cookbook is .*$/m, lines))
       const { page, problems } = await personOn(address, "Ana")
       await page.locator("ui-form.recipe input").first().waitFor(WAITING)

@@ -4,12 +4,12 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 216, end: 236 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 232, end: 252 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 240, end: 268 } }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 256, end: 284 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
@@ -34,7 +34,7 @@ export class Receta extends View {
 
 /** La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "in memory" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "in memory database" })
 
 core.describeAction(Receta, "quitarEso", { title: "quitar eso", undoneAs: "Quitar receta" })
 
@@ -51,7 +51,7 @@ export class CajaDeRecetas extends App {
   get borrador() { return this.getProp("borrador") }
   set borrador(value) { this.setProp("borrador", value) }
 
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 693, end: 787 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 709, end: 803 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => receta.título.includes(this.búsqueda)), (item) => item.título)
   }, () => [this.búsqueda]) }
@@ -80,7 +80,7 @@ export class CajaDeRecetas extends App {
           "No se puede llegar al recetario.",
           h("ui-button", {
             class: "again",
-            onClick: core.pressed(this, () => core.refreshSaved()),
+            onClick: core.pressed(this, () => core.reloadSaved()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Reintentar")
         )

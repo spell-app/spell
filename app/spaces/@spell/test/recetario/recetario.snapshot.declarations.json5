@@ -14,24 +14,24 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/CajaDeRecetas.es.spell:148-601"
+      "defined": "/CajaDeRecetas.es.spell:164-617"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:216-236"
+      "defined": "/CajaDeRecetas.es.spell:232-252"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.es.spell:240-268"
+      "defined": "/CajaDeRecetas.es.spell:256-284"
     },
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
-      "defined": "/CajaDeRecetas.es.spell:112-146"
+      "defined": "/CajaDeRecetas.es.spell:112-162"
     },
     {
       "syntax": "quitar eso ((de|del) {thisArg:expression})?",
@@ -44,30 +44,30 @@
       ],
       "kind": "method",
       "name": "quitar eso",
-      "defined": "/CajaDeRecetas.es.spell:521-601"
+      "defined": "/CajaDeRecetas.es.spell:537-617"
     },
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:603-1610"
+      "defined": "/CajaDeRecetas.es.spell:619-1626"
     },
     {
       "property": "búsqueda",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:641-663"
+      "defined": "/CajaDeRecetas.es.spell:657-679"
     },
     {
       "property": "borrador",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:667-689"
+      "defined": "/CajaDeRecetas.es.spell:683-705"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:693-787"
+      "defined": "/CajaDeRecetas.es.spell:709-803"
     },
     {
       "syntax": "agregar el borrador ((de|del) {thisArg:expression})?",
@@ -81,7 +81,7 @@
       "kind": "method",
       "name": "agregar el borrador",
       "returns": "nothing",
-      "defined": "/CajaDeRecetas.es.spell:791-953"
+      "defined": "/CajaDeRecetas.es.spell:807-969"
     }
   ],
   "codeLines": [

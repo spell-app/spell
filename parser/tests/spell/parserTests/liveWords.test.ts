@@ -22,7 +22,7 @@ function compiledAs(path: string, lines: string[]) {
   return { js, errors, warnings }
 }
 
-const SAVED = `family cookbook is in memory
+const SAVED = `family cookbook is an in memory database
 a recipe is a thing:
 	- it is saved in the family cookbook
 	- its "title" is text`
@@ -67,7 +67,7 @@ describe("the words compile", () => {
 
   it("`when someone else changes it:` is its handler, and at a file's top it needs a type", () => {
     const { js, errors, warnings } = compiled(
-      'family cookbook is a live room at "/api/rooms/x"',
+      'family cookbook is a room at "/api/rooms/x"',
       "a recipe is a thing:",
       "\t- it is saved in the family cookbook",
       '\t- its "title" is text',
@@ -80,7 +80,7 @@ describe("the words compile", () => {
     expect(compiled("when someone else changes it:", "\tprint 1").errors.join()).toMatch(/goes under a saved type/)
   })
 
-  it("the table says what can't happen:  a file has no other people;  a plain web service says nothing", () => {
+  it("the table says what can't happen:  a file has no other people;  a plain web server says nothing", () => {
     const under = (place: string) =>
       compiled(
         place,
@@ -90,89 +90,99 @@ describe("the words compile", () => {
         "\t\tprint 1"
       )
     expect(under('book is a file at "/api/places/x"').warnings.join()).toMatch(/Nobody else can change/)
-    expect(under("book is this device").warnings.join()).toMatch(/Nobody else can change/)
-    expect(under('book is a web service at "https://x.test"').warnings.join()).toMatch(/this would never run:  add/)
+    expect(under("book is a database on this device").warnings.join()).toMatch(/Nobody else can change/)
+    expect(under('book is a web server at "https://x.test"').warnings.join()).toMatch(/this would never run:  add/)
     expect(
-      under('book is a web service at "https://x.test":\n\t- it is checked every 30 seconds').warnings.join()
+      under('book is a web server at "https://x.test":\n\t- check it every 30 seconds').warnings.join()
     ).not.toMatch(/never run/)
   })
 
-  it("`the people here` warns with no place that knows, and not with a room", () => {
-    expect(compiled(SAVED, "print the people here").warnings.join()).toMatch(/only ever you/)
-    expect(compiled('book is a live room at "/x"', "print the people here").warnings.join()).not.toMatch(
-      /only ever you/
-    )
-    expect(compiled(SAVED, "print me").js).toContain("core.currentPerson()")
+  it("`everyone here` warns with no place that knows, and not with a room", () => {
+    expect(compiled(SAVED, "print everyone here").warnings.join()).toMatch(/only ever you/)
+    expect(compiled('book is a room at "/x"', "print everyone here").warnings.join()).not.toMatch(/only ever you/)
+    expect(compiled(SAVED, "print them").js).toContain("core.currentPerson()")
   })
 
-  it("`me` and `my name` are who's at this page", () => {
-    const { js, errors } = compiled(SAVED, "print me", "print my name", "print my id", "print the name of me")
+  it("`them` and `their name` are who's at this page", () => {
+    const { js, errors } = compiled(
+      SAVED,
+      "print them",
+      "print their name",
+      "print their id",
+      "print the name of the person"
+    )
     expect(errors).toEqual([])
     expect(js).toContain("core.console.log(core.currentPerson())")
     expect(js).toContain("core.console.log(core.currentPerson().name)")
     expect(js).toContain("core.console.log(core.currentPerson().id)")
   })
 
-  it("`its cook is me` asks by who they are:  what's saved of a person comes back a new object", () => {
+  it("`its cook is them` asks by who they are:  what's saved of a person comes back a new object", () => {
     const { js, errors } = compiled(
       SAVED,
-      "print every recipe where its cook is me",
-      "print every recipe where its cook isn't me",
-      "add (a new recipe with cook = me) to the recipes"
+      "print every recipe where its cook is them",
+      "print every recipe where its cook isn't them",
+      "add (a new recipe with cook = them) to the recipes"
     )
     expect(errors).toEqual([])
-    expect(js).toContain("core.isMe(recipe.cook)")
-    expect(js).toContain("!core.isMe(recipe.cook)")
+    expect(js).toContain("core.isCurrentPerson(recipe.cook)")
+    expect(js).toContain("!core.isCurrentPerson(recipe.cook)")
     expect(js).toContain("new Recipe({ cook: core.currentPerson() })")
   })
 
-  it("Spanish says `soy yo`", () => {
+  it("Spanish says `esa persona`, as `su` already means its", () => {
     const { js, errors } = compiledEs(
-      'recetario es una sala en vivo en "/x"',
+      'recetario es una sala en "/x"',
       "una receta es una cosa:",
       "\t- se guarda en el recetario",
       '\t- su "título" es texto',
-      "imprimir cada receta donde su título soy yo",
-      "imprimir cada receta donde su título no soy yo"
+      "imprimir cada receta donde su título es esa persona",
+      "imprimir cada receta donde su título no es esa persona"
     )
     expect(errors).toEqual([])
-    expect(js).toContain("core.isMe(receta.título)")
-    expect(js).toContain("!core.isMe(receta.título)")
+    expect(js).toContain("core.isCurrentPerson(receta.título)")
+    expect(js).toContain("!core.isCurrentPerson(receta.título)")
   })
 
-  it("`my` only reads what a person has", () => {
-    expect(compiled("print my recipes").errors.join()).toMatch(/print my recipes/)
-    expect(compiledEs("imprimir mis recetas").errors.join()).toMatch(/mis recetas/)
+  it("`their` only reads what a person has", () => {
+    expect(compiled("print their recipes").errors.join()).toMatch(/print their recipes/)
   })
 
   it("a program's own words win", () => {
-    const variable = compiled("set me to 3", "print me").js
+    const variable = compiled("set them to 3", "print them").js
     expect(variable).not.toContain("core.currentPerson()")
 
     const own = compiled(
       "a card is a thing:",
-      '\t- its "me" is text',
-      '\t- its "my name" is text',
+      '\t- its "them" is text',
+      '\t- its "their name" is text',
       "\t- to go:",
-      "\t\tprint me",
-      "\t\tprint my name"
+      "\t\tprint them",
+      "\t\tprint their name"
     ).js
     expect(own).not.toContain("core.currentPerson()")
-    expect(own).toContain("core.console.log(this.me)")
-    expect(own).toContain("core.console.log(this.myName)")
+    expect(own).toContain("core.console.log(this.them)")
+    expect(own).toContain("core.console.log(this.theirName)")
 
-    const actions = compiled("to show me:", "\tprint 1", "show me", "to draw my hand:", "\tprint 2", "draw my hand").js
-    expect(actions).toContain("showMe()")
-    expect(actions).toContain("drawMyHand()")
+    const actions = compiled(
+      "to show them:",
+      "\tprint 1",
+      "show them",
+      "to draw their hand:",
+      "\tprint 2",
+      "draw their hand"
+    ).js
+    expect(actions).toContain("showThem()")
+    expect(actions).toContain("drawTheirHand()")
 
-    const argument = compiled("to greet (me as text):", "\tprint me").js
+    const argument = compiled("to greet (them as text):", "\tprint them").js
     expect(argument).not.toContain("core.currentPerson()")
   })
 
   it("Spanish:  `lo` or `la`, with its type's gender", () => {
     const es = (word: string) =>
       compiledEs(
-        'recetario es una sala en vivo en "/x"',
+        'recetario es una sala en "/x"',
         "una receta es una cosa:",
         "\t- se guarda en el recetario",
         '\t- su "título" es texto',
@@ -180,8 +190,8 @@ describe("the words compile", () => {
         "\t\timprimir su título",
         "cuando cambia una receta:",
         "\timprimir 1",
-        "imprimir yo",
-        "imprimir mi nombre",
+        "imprimir esa persona",
+        "imprimir el nombre de esa persona",
         "imprimir las personas presentes"
       )
     expect(es("la").errors).toEqual([])
@@ -197,8 +207,8 @@ describe("the words compile", () => {
 
 describe("an action at a place's address (Q17's C)", () => {
   const PLACE = [
-    'family cookbook is a web service at "https://example.com":',
-    "\t- it is checked every 5 seconds",
+    'family cookbook is a web server at "https://example.com":',
+    "\t- check it every 5 seconds",
     '\t- to publish a recipe is at "/recipes/publish"',
     '\t- to refresh is at "/recipes/refresh"'
   ]
@@ -224,7 +234,7 @@ describe("an action at a place's address (Q17's C)", () => {
 
   it("Spanish", () => {
     const { js, errors, warnings } = compiledEs(
-      'recetario familiar es un servicio web en "https://example.com":',
+      'recetario familiar es un servidor web en "https://example.com":',
       "\t- se revisa cada 5 segundos",
       '\t- para publicar una receta está en "/recetas/publicar"',
       '\t- para recargar está en "/recetas/recargar"',
@@ -252,7 +262,7 @@ describe("an action at a place's address (Q17's C)", () => {
   })
 
   it("a kind of place that can't take one says so", () => {
-    expect(compiled('book is a folder at "/x":', '\t- to refresh is at "/y"').warnings.join()).toMatch(
+    expect(compiled('book is a data folder at "/x":', '\t- to refresh is at "/y"').warnings.join()).toMatch(
       /takes no action/
     )
   })

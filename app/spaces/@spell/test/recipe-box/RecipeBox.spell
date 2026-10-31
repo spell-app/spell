@@ -1,5 +1,5 @@
 // The line a different back-end changes:  tests/spell/recipeBox.test.ts changes only this, for each one it runs
-family cookbook is in memory
+family cookbook is an in memory database
 
 a "recipe" is a view:
 	- it is saved in the family cookbook

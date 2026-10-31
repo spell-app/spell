@@ -3,11 +3,11 @@
  * - Each word through the glossary, `languages/es/GLOSSARY.md`.
  * - What agrees with its noun takes every form (`ninguno`, `ninguna`), and the agreement warning says which it should be.
  */
-import { Wording } from "spell/parser/spell/rules/expressions"
+import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 import { SpellParser } from "spell/parser/spell/SpellParser"
-import { AllOrNothing } from "./AllOrNothing"
+import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
-import { CancelDraft } from "./CancelDraft"
+import { DiscardDraft } from "./DiscardDraft"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -18,13 +18,17 @@ import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
+import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
-import { CurrentPerson, MyField, PeopleHere } from "./PeopleWords"
+import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
+import { TheyAre } from "./TheyAre"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
-import { RefreshThings } from "./RefreshThings"
+import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
+import { SavedInTheCloud } from "./SavedInTheCloud"
+import { ThereAreThings } from "./ThereAreThings"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
@@ -35,37 +39,59 @@ export const placesEs = new SpellParser({ module: "places" })
 const A = "(un|una)"
 const THE = "(el|la|los|las)"
 
+/** `hay menos de 2 recetas donde ...`, `no hay recetas`:  see `ThereAreThings`. */
+const THERE_ARE =
+  "(none:no)? hay {compare:there_are_how_many}? (one:un|una|uno)? {count:number}? ({type:known_type}|{list:member_words})"
+
 placesEs.addRule(
   Wording.specialize({
     ruleName: "place_kind",
-    meanings: ["web_service", "graph_service", "folder", "file", "live_room", "sheet"]
+    meanings: [
+      "web_server",
+      "graphql_server",
+      "data_folder",
+      "file",
+      "room",
+      "sheet",
+      "google_sheet",
+      "airtable",
+      "atmosphere_account"
+    ]
   }),
   {
     syntax:
-      "((web_service:servicio web)|(graph_service:servicio de grafos)|(folder:carpeta)|(file:archivo)|(live_room:sala en vivo)|(sheet:hoja))"
+      "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
   }
 )
 
 placesEs.addRule(
-  Wording.specialize({ ruleName: "place_kind_here", meanings: ["this_device", "in_memory", "the_cloud"] }),
+  Wording.specialize({ ruleName: "place_kind_here", meanings: ["database_on_this_device", "in_memory_database"] }),
   {
-    syntax: "((this_device:este dispositivo)|(in_memory:en memoria)|(the_cloud:la nube))"
+    syntax:
+      "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
   }
 )
 
+placesEs.addRule(
+  Wording.specialize({ ruleName: "place_kind_each_person", meanings: ["personal_atmosphere_account"] }),
+  { syntax: "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)" }
+)
+
+placesEs.addRule(Negatable.specialize({ ruleName: "are_or_are_not" }), { syntax: "(es|está|(negated:no es|no está))" })
+
 placesEs.addRule(CreatePlace, {
-  syntax: `{type:type_words} es ${A} {kind:place_kind} en {address:text} {with_nested_statements}?`,
+  syntax: `{type:type_words} es ${A} {kind:place_kind} (en|desde) {address:text} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'recetario familiar es un servicio web en "https://api.example.com/v1"',
+          'recetario familiar es un servidor web en "https://api.example.com/v1"',
           [
             "export class RecetarioFamiliar extends Place {}",
             "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
             '  name: "recetario_familiar",',
-            '  kind: "web service",',
+            '  kind: "web server",',
             '  at: "https://api.example.com/v1"',
             "})"
           ]
@@ -75,11 +101,14 @@ placesEs.addRule(CreatePlace, {
   ]
 })
 placesEs.addRule(CreatePlace, {
-  syntax: `{type:type_words} es ${A} {superType:type} en {address:text} {with_nested_statements}?`
+  syntax: `{type:type_words} es ${A} {superType:type} (en|desde) {address:text} {with_nested_statements}?`
 })
+placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
 placesEs.addRule(CreatePlace, {
-  syntax: "{type:type_words} (es|está) {kind:place_kind_here} {with_nested_statements}?"
+  syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
 })
+placesEs.addRule(SavedInTheCloud, { syntax: "{type:type_words} se guarda en la nube {with_nested_statements}?" })
+placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) en la nube" })
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
 placesEs.addRule(FieldCalled, {
@@ -87,25 +116,25 @@ placesEs.addRule(FieldCalled, {
 })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
-placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} segundos?" })
-placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versiones están en {field:text}" })
-placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificadores están en {column:text}" })
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} (segundo|segundos)?" })
+placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
+placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
-placesEs.addRule(SavedInPlace, { syntax: "{type:subject_it} se guarda en {place:expression}" })
-placesEs.addRule(SavedInPlace, { syntax: `${A} {type:known_type} se guarda en {place:expression}` })
-placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} se guarda en {place:expression}" })
+placesEs.addRule(SavedInPlace, { syntax: "{type:subject_it} (se guarda|vive) en {place:expression}" })
+placesEs.addRule(SavedInPlace, { syntax: `${A} {type:known_type} (se guarda|vive) en {place:expression}` })
+placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive) en {place:expression}" })
 
-placesEs.addRule(WhileWaiting, { syntax: "mientras espera :? {statement_body}?" })
+placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna) :? {statement_body}?" })
 placesEs.addRule(IfThatFails, { syntax: "si falla :? {statement_body}?" })
 
-placesEs.addRule(AllOrNothing, {
-  syntax: "todo o nada :? {statement_body}?",
+placesEs.addRule(InOneGo, {
+  syntax: "de una vez :? {statement_body}?",
   tests: [
     {
       compileAs: "statement",
-      tests: [["todo o nada: imprimir 1", "await core.allOrNothing(() => core.console.log(1))"]]
+      tests: [["de una vez: imprimir 1", "await core.inOneGo(() => core.console.log(1))"]]
     }
   ]
 })
@@ -114,35 +143,67 @@ placesEs.addRule(DraftOf, {
   tests: [{ compileAs: "expression", tests: [["un borrador de cosa", undefined]] }]
 })
 placesEs.addRule(SaveDraft, { syntax: "guardar {draft:expression}" })
-placesEs.addRule(CancelDraft, { syntax: "cancelar {draft:expression}" })
-placesEs.addRule(CancelAction, { syntax: "cancelar {action:identifier}" })
-placesEs.addRule(RefreshThings, { syntax: `recargar ${THE} {type:plural_type}` })
+placesEs.addRule(DiscardDraft, { syntax: "descartar {draft:expression}" })
+placesEs.addRule(CancelAction, { syntax: `(parar|cancelar) ${THE}? {action:identifier}` })
+placesEs.addRule(ReloadThings, { syntax: `recargar ${THE} {type:plural_type}` })
 placesEs.addRule(TryAgain, {
   syntax: "reintentar",
-  tests: [{ compileAs: "statement", tests: [["reintentar", "core.refreshSaved()"]] }]
+  tests: [{ compileAs: "statement", tests: [["reintentar", "core.reloadSaved()"]] }]
 })
 
 placesEs.addRule(FirstFewWhere, {
   syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} donde {inline_expression}?`
 })
 placesEs.addRule(NumberOfThingsWhere, { syntax: "el número de {type:plural_type} donde {inline_expression}?" })
+placesEs.addRule(
+  Wording.specialize({ ruleName: "there_are_how_many", meanings: ["none", "fewer", "more", "at_least", "at_most"] }),
+  { syntax: "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))" }
+)
+placesEs.addRule(ThereAreThings, { syntax: `${THERE_ARE} donde {inline_expression}?` })
+placesEs.addRule(ThereAreThings, { syntax: THERE_ARE })
 placesEs.addRule(TotalOf, {
-  syntax: "el total de {list:operand}",
-  tests: [{ compileAs: "expression", tests: [["el total de [1, 2]", "[1, 2].total"]] }]
+  syntax: "(el total|la suma) de {list:operand}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["el total de [1, 2]", "core.totalOf([1, 2])"],
+        ["la suma de [1, 2]", "core.totalOf([1, 2])"]
+      ]
+    }
+  ]
 })
 
+placesEs.addRule(TheyAre, { syntax: "{operator:are_or_are_not} {expression:operand}" })
 placesEs.addRule(CurrentPerson, {
-  syntax: "yo",
-  tests: [{ compileAs: "expression", tests: [["yo", "core.currentPerson()"]] }]
+  syntax: "(esa persona|la persona)",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["esa persona", "core.currentPerson()"],
+        ["la persona", "core.currentPerson()"]
+      ]
+    }
+  ]
 })
-placesEs.addRule(MyField, {
-  syntax: "mi {field:member_words}",
-  tests: [{ compileAs: "expression", tests: [["mi nombre", "core.currentPerson().name"]] }]
+placesEs.addRule(TheirField, {
+  syntax: `${THE} {field:member_words} de esa persona`,
+  tests: [{ compileAs: "expression", tests: [["el nombre de esa persona", "core.currentPerson().name"]] }]
 })
 placesEs.addRule(PeopleHere, {
-  syntax: "las personas presentes",
-  tests: [{ compileAs: "expression", tests: [["las personas presentes", "core.peopleHere()"]] }]
+  syntax: "(todos los presentes|las personas presentes)",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["las personas presentes", "core.peopleHere()"],
+        ["todos los presentes", "core.peopleHere()"]
+      ]
+    }
+  ]
 })
 
+placesEs.addRule(LoadThings, { syntax: "(cargar|traer) {value:expression}" })
 placesEs.addRule(HelpfulWord, { syntax: "(traer|consultar|unir)" })
 placesEs.addRule(HelpfulWord, { syntax: "conectar a" })

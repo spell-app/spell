@@ -24,9 +24,9 @@ const REST_PAGE_SIZE = 100
 /** The answers that mean "someone got there first", on a place with versions. */
 const OUT_OF_DATE_STATUSES = new Set([409, 412, 428])
 
-/** What it can do, unless it's told otherwise:  a plain web service, read and written, and nothing else promised. */
+/** What it can do, unless it's told otherwise:  a plain web server, read and written, and nothing else promised. */
 const REST_CAPABILITIES: PlaceCapabilities = {
-  kind: "web service",
+  kind: "web server",
   idOf: "id",
   filter: "none",
   sort: "none",
@@ -49,7 +49,7 @@ const IS_ADDRESS = /^(https?:)?\/\//
 
 /****************
  * ### `RestPlace`
- * A plain web service as a place:  a mapping of its paths and field names, and nothing else (epic `data` P4).
+ * A plain web server as a place:  a mapping of its paths and field names, and nothing else (epic `data` P4).
  *
  * ```ts
  * new RestPlace({

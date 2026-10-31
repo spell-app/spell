@@ -22,7 +22,7 @@ const REAL_ROWS: PlaceRow[] = [
 
 /** A real place that says who wrote to it. */
 function realPlace(rows = REAL_ROWS) {
-  const place = new MemoryPlace({ capabilities: { kind: "web service" }, collections: { recipes: rows } })
+  const place = new MemoryPlace({ capabilities: { kind: "web server" }, collections: { recipes: rows } })
   const apply = vi.spyOn(place, "apply")
   return { place, apply }
 }
@@ -114,7 +114,7 @@ describe("SamplePlace, as a place", () => {
     expect(writeAnswerFor(real, { collection: "recipes" })).toEqual({ canWrite: false, whyNot: "place" })
     expect(writeAnswerFor(sample, { collection: "recipes", kind: "update" })).toEqual({ canWrite: true })
     expect(sample.describe().isSample).toBe(true)
-    expect(new SamplePlace({ real: realPlace().place }).describe().kind).toBe("web service")
+    expect(new SamplePlace({ real: realPlace().place }).describe().kind).toBe("web server")
   })
 
   test("a change made before it's been read isn't lost to its first records", async () => {

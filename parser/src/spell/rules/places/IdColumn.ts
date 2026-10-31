@@ -3,7 +3,7 @@ import type { P } from "spell/parser/parser"
 
 /**
  * `id_column` rule:  the column that says which row is which, on a sheet.
- * - e.g. `- its ids are in "id"`
+ * - e.g. `- its id is its "id"`, with the second `its` or without
  * - Without it, rows share no identity.
  */
 export class IdColumn extends PlaceDetail<"type|column"> {

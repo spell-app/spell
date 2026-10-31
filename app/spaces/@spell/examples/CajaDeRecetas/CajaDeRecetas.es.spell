@@ -1,10 +1,10 @@
 ## Caja de recetas
 // Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
 // Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
-//   recetario familiar es una carpeta en "http://127.0.0.1:4791/api/places/recipes"
-//   recetario familiar es una sala en vivo en "http://127.0.0.1:4791/api/rooms/recipes"
+//   recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
+//   recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
 // (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
-recetario familiar es este dispositivo
+recetario familiar es una base de datos en este dispositivo
 
 
 ## Una receta:  una tarjeta que puedes leer y cambiar

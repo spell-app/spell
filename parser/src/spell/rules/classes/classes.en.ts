@@ -2295,6 +2295,10 @@ classes.addRule(EveryThingWhere, {
   ]
 })
 
+classes.addRule(EveryThingWhere, { syntax: "(all|the)? {type:plural_type} where {inline_expression}?" })
+
+classes.addRule(TheThings, { syntax: "all {type:plural_type}" })
+classes.addRule(TheThings, { syntax: "{type:plural_type}" })
 classes.addRule(TheThings, {
   syntax: "the {type:plural_type}",
   tests: [
@@ -2334,8 +2338,8 @@ classes.addRule(KindValues, {
       tests: [
         ["card suits", "Card.Suits"],
         ["card short ranks", "Card.ShortRanks"],
-        // a type that isn't a kind
-        ["cards", undefined]
+        // a type that isn't a kind:  a read, by the_things
+        ["cards", "core.everyThing(Card)"]
       ]
     }
   ]

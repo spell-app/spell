@@ -26,7 +26,7 @@ const TITLE_COLUMN = "title"
 /** The columns that hold numbers. */
 const NUMBERS = ["servings"]
 
-/** The field a row's place in the file reads as, for a page that moves rows:  a live room's word for it. */
+/** The field a row's place in the file reads as, for a page that moves rows:  a room's word for it. */
 const POSITION_FIELD = "place"
 
 /****************

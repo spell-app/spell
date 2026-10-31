@@ -2,7 +2,7 @@
  * What compiled spell calls for a type that's saved in a place (epic `data` P11):  the words reach `places.ts` here.
  *
  * ```js
- * export const familyCookbook = core.place(new FamilyCookbook(), { name: "family cookbook", kind: "web service", at: "..." })
+ * export const familyCookbook = core.place(new FamilyCookbook(), { name: "family cookbook", kind: "web server", at: "..." })
  * Recipe.savedIn = { place: "family cookbook", collection: "recipes" }
  * get matches() { return core.waitedValue(this, "matches", async () => core.filter(await core.savedThings(Recipe), ...)) }
  * ```
@@ -21,7 +21,7 @@
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
- *   plain data, one object per page, so `the person is me` means what it says.
+ *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
@@ -84,10 +84,10 @@ export type ReadRiders = {
 const ID_FIELD = "id"
 
 /** The kinds whose mapping says where a collection is, while it keeps its own name for the engine. */
-const KEEP_THEIR_OWN_NAME = new Set(["web service", "graph service"])
+const KEEP_THEIR_OWN_NAME = new Set(["web server", "graphql server"])
 
 /** The kind of place that knows who's here, among those spell knows by itself. */
-const LIVE_ROOM = "live room"
+const LIVE_ROOM = "room"
 
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000
@@ -176,11 +176,11 @@ class ProgramPlaces {
     }
     const { place: name } = savedIn
     const details = declared.details
-    // what a line under it calls the collection there:  a web service's and a graph service's is an address, read by their own mapping
+    // what a line under it calls the collection there:  a web server's and a graphql server's is an address, read by their own mapping
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =
       mapped && !KEEP_THEIR_OWN_NAME.has(details.kind ?? "") ? mapped.replace(/^\//, "") : savedIn.collection
-    const making = { details, folder: this.folder!, collection, Class, person: this.me }
+    const making = { details, folder: this.folder!, collection, Class, person: this.person }
     let behind = this.places!.placeFor(name)
     if (!behind) {
       const { thing } = declared
@@ -191,7 +191,7 @@ class ProgramPlaces {
   }
 
   /** Who's at this page:  the same object as long as the program runs. */
-  readonly me: PersonHere = inProgramWords({
+  readonly person: PersonHere = inProgramWords({
     ...personOnThisPage((number) => core.message("guest-person", { number })),
     page: ""
   })
@@ -200,7 +200,7 @@ class ProgramPlaces {
   get peopleHere(): List {
     if (!this.peopleList) {
       this.peopleList = core.newScratch(List) as List
-      this.showPeople([this.me])
+      this.showPeople([this.person])
       this.load()
         .then(() => this.followPeople())
         .catch((ignored) => console.error("core.peopleHere():  couldn't load the places folder", ignored))
@@ -224,24 +224,24 @@ class ProgramPlaces {
       if (!made) this.places!.add(name, behind)
       if (!behind.onPeopleHere || !behind.currentPerson) continue
       const { page } = behind.currentPerson()
-      this.me.page = page
-      this.knownPeople.set(page, this.me)
+      this.person.page = page
+      this.knownPeople.set(page, this.person)
       behind.onPeopleHere((people) => this.showPeople(people))
-      this.showPeople(behind.peopleHere?.() ?? [this.me])
+      this.showPeople(behind.peopleHere?.() ?? [this.person])
       return
     }
   }
 
   /** The room `details` says, with no class read from it yet:  it needs none. */
   private roomFor(details: PlaceDetails): PlaceBehind {
-    return placeBehind({ details, folder: this.folder!, collection: "", Class: Object, person: this.me })
+    return placeBehind({ details, folder: this.folder!, collection: "", Class: Object, person: this.person })
   }
 
   /** The list says `people` now, as a read does:  nobody's write. */
   private showPeople(people: readonly PersonHere[]): void {
     const items = people.map((person) => {
       const known =
-        this.knownPeople.get(person.page) ?? (person.page === this.me.page ? this.me : inProgramWords(person))
+        this.knownPeople.get(person.page) ?? (person.page === this.person.page ? this.person : inProgramWords(person))
       if (person.page) this.knownPeople.set(person.page, known)
       return known
     })
@@ -678,7 +678,7 @@ class SavedRead {
 /** `core`'s methods for what's saved in a place. */
 export const savedMethods = defineCoreModule({
   /**
-   * `thing` is a place of the running program, and `details` what its lines say:  what `x is a web service at "..."` compiles to.
+   * `thing` is a place of the running program, and `details` what its lines say:  what `x is a web server at "..."` compiles to.
    * - Nothing reaches the place until something's read or written.
    * - Returns `thing`.
    */
@@ -786,41 +786,41 @@ export const savedMethods = defineCoreModule({
     draftOfCopy(copy, "saveDraft").save()
   },
 
-  /** Forget what's changed in `copy`, a draft:  nothing had left.  What `cancel the draft` compiles to.  - throws for anything else */
-  cancelDraft(copy: unknown): void {
-    draftOfCopy(copy, "cancelDraft").cancel()
+  /** Forget what's changed in `copy`, a draft:  nothing had left.  What `discard the draft` compiles to.  - throws for anything else */
+  discardDraft(copy: unknown): void {
+    draftOfCopy(copy, "discardDraft").cancel()
   },
 
   /**
-   * Run `run`, its changes to each place one group:  what `all or nothing:` compiles to.
+   * Run `run`, its changes to each place one group:  what `in one go:` compiles to.
    * - Held until it ends, then sent together;  it throws, and they're dropped, and put back.
    * - As true as the place can make it:  a place that isn't `atomic` sends them one by one (the compiler says so).
    * - throws what `run` threw
    */
-  async allOrNothing(run: () => unknown): Promise<void> {
+  async inOneGo(run: () => unknown): Promise<void> {
     const program = programPlaces()
     const things = await program.thingMaker()
     await things.inOneGroup(run)
   },
 
-  /** Who's at this page:  what `me` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
+  /** The person using the program:  what `them` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
   currentPerson(): PersonHere {
-    return programPlaces().me
+    return programPlaces().person
   },
 
   /**
-   * Is `value` the person at this page:  what `its cook is me` compiles to.
+   * Is `value` the person using the program:  what `its cook is them` compiles to.
    * - By their `id`:  what's saved of a person comes back a new object each time it's read.
-   * - Or a text, their name or their id:  `its "cook" is text`, with `cook = my name`.
+   * - Or a text, their name or their id:  `its "cook" is text`, with `cook = their name`.
    */
-  isMe(value: unknown): boolean {
-    const { me } = programPlaces()
-    if (typeof value === "string") return value === me.name || value === me.id
-    return (value as { id?: unknown } | undefined | null)?.id === me.id
+  isCurrentPerson(value: unknown): boolean {
+    const { person } = programPlaces()
+    if (typeof value === "string") return value === person.name || value === person.id
+    return (value as { id?: unknown } | undefined | null)?.id === person.id
   },
 
   /**
-   * Everyone here, this page included:  what `the people here` compiles to.
+   * Everyone here, this page included:  what `everyone here` compiles to.
    * - The same list each time, its items changing as people come and go:  what draws it follows them.
    * - Asking starts following the program's first place that has people, connecting to it.  With none:  only you.
    */
@@ -828,8 +828,8 @@ export const savedMethods = defineCoreModule({
     return programPlaces().peopleHere as List<PersonHere>
   },
 
-  /** Ask the place again:  every read of `Class`, or of them all.  What `refresh the recipes` and `try again` compile to.  - NEVER throws */
-  refreshSaved(Class?: Function): Promise<void> {
+  /** Ask the place again:  every read of `Class`, or of them all.  What `reload the recipes` and `try again` compile to.  - NEVER throws */
+  reloadSaved(Class?: Function): Promise<void> {
     return programPlaces().refresh(Class as SavedClass | undefined)
   },
 
@@ -949,6 +949,6 @@ function noteUndo(title: "saved-added" | "saved-removed", undo: () => void, redo
 /** What shows when a read failed, and nothing said what to:  a message, and Try again. */
 function failedDrawing(error: unknown): Drawing {
   const message = core.message("read-failed", { why: `${(error as Error)?.message ?? error}` })
-  const button = h("ui-button", { onClick: () => void savedMethods.refreshSaved() }, core.message("write-retry"))
+  const button = h("ui-button", { onClick: () => void savedMethods.reloadSaved() }, core.message("write-retry"))
   return h("ui-message", { color: "red" }, message, button) as unknown as Drawing
 }

@@ -5,11 +5,11 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 216, end: 236 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 232, end: 252 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 240, end: 268 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 256, end: 284 } })
   accessor porciones!: number
 
   @drawn draw() {
@@ -51,7 +51,7 @@ core.useElement(Receta, RecetaElement)
 
 /** La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "in memory" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "in memory database" })
 
 core.describeAction(Receta, "quitarEso", { title: "quitar eso", undoneAs: "Quitar receta" })
 
@@ -66,7 +66,7 @@ export class CajaDeRecetas extends App {
   @prop({ type: "text" })
   accessor borrador!: string
 
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 693, end: 787 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 709, end: 803 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda)), (item: Receta) => item.título)
   }, () => [this.búsqueda]) }
@@ -91,7 +91,7 @@ export class CajaDeRecetas extends App {
         none: () => <ui-text class="none">Todavía no hay recetas.</ui-text>,
         failed: () => <ui-message class="failed" color="red">
           No se puede llegar al recetario.
-          <ui-button class="again" onClick={core.pressed(this, () => core.refreshSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Reintentar
           </ui-button>
         </ui-message>

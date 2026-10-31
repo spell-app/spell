@@ -25,7 +25,7 @@ const RECIPES = {
   delete: { mutation: "removeRecipe", id: "ID!" }
 } as const
 
-/** A real GraphQL service on a free port, its box, and a place for it. */
+/** A real GraphQL server on a free port, its box, and a place for it. */
 async function served(props: Partial<GraphPlaceProps> = {}) {
   const box = new RecipeBox()
   const http = createServer(SRV.toListener(graphHandler(box)))

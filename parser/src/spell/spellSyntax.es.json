@@ -1277,7 +1277,8 @@
             "starts_with_or_not",
             "ends_with_or_not",
             "has_or_has_no",
-            "exclusive_or_not"
+            "exclusive_or_not",
+            "are_or_are_not"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Negatable.ts",
@@ -1285,7 +1286,7 @@
           "purpose": "A word and its negated forms, e.g. `is_or_is_not`: `(is|(negated:is not|isn't|isnt))`.",
           "syntaxes": [
             {
-              "syntax": "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
+              "syntax": "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
             },
             {
               "syntax": "(es un|es una|son unos|son unas|son|(negated:no es un|no es una|no son unos|no son unas|no son))"
@@ -1319,6 +1320,9 @@
             },
             {
               "syntax": "(exclusivo|exclusiva|(negated:no exclusivo|no exclusiva|no-exclusivo|no-exclusiva))"
+            },
+            {
+              "syntax": "(es|está|(negated:no es|no está))"
             }
           ],
           "aliases": ["is", "can", "will", "has"]
@@ -1388,6 +1392,8 @@
             "pause_units",
             "place_kind",
             "place_kind_here",
+            "place_kind_each_person",
+            "there_are_how_many",
             "spell_jsx_tag",
             "spell_jsx_attribute"
           ],
@@ -1469,10 +1475,16 @@
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
             },
             {
-              "syntax": "((web_service:servicio web)|(graph_service:servicio de grafos)|(folder:carpeta)|(file:archivo)|(live_room:sala en vivo)|(sheet:hoja))"
+              "syntax": "((web_server:servidor web)|(graphql_server:servidor graphql)|(data_folder:carpeta de datos)|(file:archivo)|(room:sala)|(google_sheet:hoja de google)|(sheet:hoja de cálculo|hoja)|(airtable:airtable)|(atmosphere_account:cuenta de atmosphere/i|atmosphere/i))"
             },
             {
-              "syntax": "((this_device:este dispositivo)|(in_memory:en memoria)|(the_cloud:la nube))"
+              "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
+            },
+            {
+              "syntax": "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)"
+            },
+            {
+              "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
             },
             {
               "syntax": "((slot:hijos)|slot)"
@@ -2648,7 +2660,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 14,
+          "line": 15,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -2960,6 +2972,20 @@
           "aliases": ["expression"]
         },
         {
+          "className": "SortKeyField",
+          "ruleNames": ["sort_key_field"],
+          "internal": false,
+          "file": "src/spell/rules/lists/SortKeyField.ts",
+          "line": 14,
+          "purpose": "A field of what's being sorted, by its name alone (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "{property:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "ListMove",
           "ruleNames": ["list_move"],
           "internal": false,
@@ -3215,7 +3241,7 @@
           "ruleNames": ["list_sorted_by"],
           "internal": false,
           "file": "src/spell/rules/lists/ListSortedBy.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "A list in order of something about each item (epic `data` P10).",
           "syntaxes": [
             {
@@ -3677,6 +3703,20 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "AddNewThing",
+          "ruleNames": ["add_new_thing"],
+          "internal": false,
+          "file": "src/spell/rules/lists/AddNewThing.ts",
+          "line": 19,
+          "purpose": "A new thing, with no list named: it joins every other of its type (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "(añadir|agregar) {thing:expression}"
+            }
+          ],
+          "aliases": ["statement"]
         }
       ]
     },
@@ -3929,7 +3969,7 @@
           "ruleNames": ["every_thing_where"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThingWhere.ts",
-          "line": 16,
+          "line": 21,
           "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
           "syntaxes": [
             {
@@ -3946,6 +3986,9 @@
                   "code": "core.filter(core.every_thing(Carta), lambda carta: carta.rango == 1)"
                 }
               }
+            },
+            {
+              "syntax": "((todos|todas) (los|las)?|los|las)? {type:plural_type} donde {inline_expression}?"
             }
           ],
           "aliases": ["expression"]
@@ -3955,9 +3998,15 @@
           "ruleNames": ["the_things"],
           "internal": false,
           "file": "src/spell/rules/classes/TheThings.ts",
-          "line": 12,
+          "line": 18,
           "purpose": "`the foundations` -- every thing of a type, by its plural (epic page `outline-spell`, P23).",
           "syntaxes": [
+            {
+              "syntax": "(todos|todas) (los|las)? {type:plural_type}"
+            },
+            {
+              "syntax": "{type:plural_type}"
+            },
             {
               "syntax": "(los|las) {type:plural_type}",
               "example": "las pilas",
@@ -5897,13 +5946,13 @@
               "example": "reintentar",
               "outputs": {
                 "js": {
-                  "code": "core.refreshSaved()"
+                  "code": "core.reloadSaved()"
                 },
                 "ts": {
-                  "code": "core.refreshSaved()"
+                  "code": "core.reloadSaved()"
                 },
                 "py": {
-                  "code": "core.refresh_saved()"
+                  "code": "core.reload_saved()"
                 }
               }
             }
@@ -5929,7 +5978,7 @@
           "ruleNames": ["number_of_things_where"],
           "internal": false,
           "file": "src/spell/rules/places/NumberOfThingsWhere.ts",
-          "line": 14,
+          "line": 17,
           "purpose": "How many of a type fit (epic `data` P11).",
           "syntaxes": [
             {
@@ -5939,25 +5988,42 @@
           "aliases": ["expression"]
         },
         {
+          "className": "ThereAreThings",
+          "ruleNames": ["there_are_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThereAreThings.ts",
+          "line": 31,
+          "purpose": "A question about how many of them there are, anywhere a condition reads (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "(none:no)? hay {compare:there_are_how_many}? (one:un|una|uno)? {count:number}? ({type:known_type}|{list:member_words}) donde {inline_expression}?"
+            },
+            {
+              "syntax": "(none:no)? hay {compare:there_are_how_many}? (one:un|una|uno)? {count:number}? ({type:known_type}|{list:member_words})"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TotalOf",
           "ruleNames": ["total_of"],
           "internal": false,
           "file": "src/spell/rules/places/TotalOf.ts",
-          "line": 11,
+          "line": 16,
           "purpose": "The sum of a list (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "el total de {list:operand}",
+              "syntax": "(el total|la suma) de {list:operand}",
               "example": "el total de [1, 2]",
               "outputs": {
                 "js": {
-                  "code": "[1, 2].total"
+                  "code": "core.totalOf([1, 2])"
                 },
                 "ts": {
-                  "code": "[1, 2].total"
+                  "code": "core.totalOf([1, 2])"
                 },
                 "py": {
-                  "code": "[1, 2].total"
+                  "code": "core.total_of([1, 2])"
                 }
               }
             }
@@ -5969,12 +6035,12 @@
           "ruleNames": ["current_person"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 18,
-          "purpose": "Who's at this page (epic `data` P13, Owen's `me`, T48).",
+          "line": 20,
+          "purpose": "The person using the program (epic `data` P13, T48, P15): not always the one writing it.",
           "syntaxes": [
             {
-              "syntax": "yo",
-              "example": "yo",
+              "syntax": "(esa persona|la persona)",
+              "example": "esa persona",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson()"
@@ -5991,16 +6057,16 @@
           "aliases": ["expression"]
         },
         {
-          "className": "MyField",
-          "ruleNames": ["my_field"],
+          "className": "TheirField",
+          "ruleNames": ["their_field"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 47,
-          "purpose": "Something about who's at this page (T48).",
+          "line": 49,
+          "purpose": "Something about the person using the program (T48, P15).",
           "syntaxes": [
             {
-              "syntax": "mi {field:member_words}",
-              "example": "mi nombre",
+              "syntax": "(el|la|los|las) {field:member_words} de esa persona",
+              "example": "el nombre de esa persona",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson().name"
@@ -6021,11 +6087,11 @@
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 94,
+          "line": 97,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
-              "syntax": "las personas presentes",
+              "syntax": "(todos los presentes|las personas presentes)",
               "example": "las personas presentes",
               "outputs": {
                 "js": {
@@ -6047,55 +6113,89 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 36,
+          "line": 39,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} es (un|una) {kind:place_kind} en {address:text} {with_nested_statements}?",
-              "example": "recetario familiar es un servicio web en \"https://api.example.com/v1\"",
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind} (en|desde) {address:text} {with_nested_statements}?",
+              "example": "recetario familiar es un servidor web en \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {
-                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web service\",\n  at: \"https://api.example.com/v1\"\n})"
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
                 },
                 "ts": {
-                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web service\",\n  at: \"https://api.example.com/v1\"\n})"
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
                 },
                 "py": {
-                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"web service\",\n        \"at\": \"https://api.example.com/v1\",\n    },\n)"
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"web server\", \"at\": \"https://api.example.com/v1\"},\n)"
                 }
               }
             },
             {
-              "syntax": "{type:type_words} es (un|una) {superType:type} en {address:text} {with_nested_statements}?"
+              "syntax": "{type:type_words} es (un|una) {superType:type} (en|desde) {address:text} {with_nested_statements}?"
             },
             {
-              "syntax": "{type:type_words} (es|está) {kind:place_kind_here} {with_nested_statements}?"
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind_here} {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
         },
         {
-          "className": "AllOrNothing",
-          "ruleNames": ["all_or_nothing"],
+          "className": "InOneGo",
+          "ruleNames": ["in_one_go"],
           "internal": false,
-          "file": "src/spell/rules/places/AllOrNothing.ts",
+          "file": "src/spell/rules/places/InOneGo.ts",
           "line": 13,
           "purpose": "What's changed in its body goes out as one, or not at all (epic `data` P11).",
           "syntaxes": [
             {
-              "syntax": "todo o nada :? {statement_body}?",
-              "example": "todo o nada: imprimir 1",
+              "syntax": "de una vez :? {statement_body}?",
+              "example": "de una vez: imprimir 1",
               "outputs": {
                 "js": {
-                  "code": "await core.allOrNothing(() => core.console.log(1))"
+                  "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "ts": {
-                  "code": "await core.allOrNothing(() => core.console.log(1))"
+                  "code": "await core.inOneGo(() => core.console.log(1))"
                 },
                 "py": {
-                  "code": "core.all_or_nothing(lambda: print(1))"
+                  "code": "core.in_one_go(lambda: print(1))"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "LoadThings",
+          "ruleNames": ["load_things"],
+          "internal": false,
+          "file": "src/spell/rules/places/LoadThings.ts",
+          "line": 16,
+          "purpose": "The same as `get`, in the words people bring to a read (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "(cargar|traer) {value:expression}"
+            }
+          ],
+          "aliases": ["assignment", "statement"]
+        },
+        {
+          "className": "SavedInTheCloud",
+          "ruleNames": ["saved_in_the_cloud"],
+          "internal": false,
+          "file": "src/spell/rules/places/SavedInTheCloud.ts",
+          "line": 23,
+          "purpose": "A place Spell would host for you: it isn't here yet, so each of these refuses, saying so (epic `data` Q3, P15).",
+          "syntaxes": [
+            {
+              "syntax": "{type:type_words} se guarda en la nube {with_nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} (se guarda|vive) en la nube"
             }
           ],
           "aliases": ["statement"]
@@ -6165,7 +6265,7 @@
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_implied} se revisa cada {number} segundos?"
+              "syntax": "{type:subject_implied} se revisa cada {number} (segundo|segundos)?"
             }
           ],
           "aliases": ["statement"]
@@ -6176,10 +6276,10 @@
           "internal": false,
           "file": "src/spell/rules/places/VersionsIn.ts",
           "line": 9,
-          "purpose": "The field that says a row's version, on a web service that keeps one.",
+          "purpose": "The field that says a row's version, on a web server that keeps one.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} versiones están en {field:text}"
+              "syntax": "{type:subject_its} versión está en {field:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6193,7 +6293,7 @@
           "purpose": "The column that says which row is which, on a sheet.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} identificadores están en {column:text}"
+              "syntax": "{type:subject_its} identificador está en {column:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6217,17 +6317,17 @@
           "ruleNames": ["saved_in_place"],
           "internal": false,
           "file": "src/spell/rules/places/SavedInPlace.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "A type lives in a place (epic `data` P11, Q1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} se guarda en {place:expression}"
+              "syntax": "{type:subject_it} (se guarda|vive) en {place:expression}"
             },
             {
-              "syntax": "(un|una) {type:known_type} se guarda en {place:expression}"
+              "syntax": "(un|una) {type:known_type} (se guarda|vive) en {place:expression}"
             },
             {
-              "syntax": "{type:subject_implied} se guarda en {place:expression}"
+              "syntax": "{type:subject_implied} (se guarda|vive) en {place:expression}"
             }
           ],
           "aliases": ["statement"]
@@ -6238,10 +6338,10 @@
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
           "line": 65,
-          "purpose": "`while waiting:` -- see `ReadRider`.",
+          "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
-              "syntax": "mientras espera :? {statement_body}?"
+              "syntax": "mientras (espera|carga) :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -6289,15 +6389,15 @@
           "aliases": ["statement"]
         },
         {
-          "className": "CancelDraft",
-          "ruleNames": ["cancel_draft"],
+          "className": "DiscardDraft",
+          "ruleNames": ["discard_draft"],
           "internal": false,
-          "file": "src/spell/rules/places/CancelDraft.ts",
+          "file": "src/spell/rules/places/DiscardDraft.ts",
           "line": 12,
           "purpose": "A draft's changes are forgotten: what a Cancel button does (epic `data` Q9).",
           "syntaxes": [
             {
-              "syntax": "cancelar {draft:expression}"
+              "syntax": "descartar {draft:expression}"
             }
           ],
           "aliases": ["statement"]
@@ -6311,16 +6411,16 @@
           "purpose": "Stop an action of this thing's that's running (epic `data` P11, language's cancelling).",
           "syntaxes": [
             {
-              "syntax": "cancelar {action:identifier}"
+              "syntax": "(parar|cancelar) (el|la|los|las)? {action:identifier}"
             }
           ],
           "aliases": ["statement"]
         },
         {
-          "className": "RefreshThings",
-          "ruleNames": ["refresh_things"],
+          "className": "ReloadThings",
+          "ruleNames": ["reload_things"],
           "internal": false,
-          "file": "src/spell/rules/places/RefreshThings.ts",
+          "file": "src/spell/rules/places/ReloadThings.ts",
           "line": 12,
           "purpose": "Ask a place again (epic `data` P11).",
           "syntaxes": [
@@ -6346,6 +6446,20 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "TheyAre",
+          "ruleNames": ["they_are"],
+          "internal": false,
+          "file": "src/spell/rules/places/TheyAre.ts",
+          "line": 14,
+          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15).",
+          "syntaxes": [
+            {
+              "syntax": "{operator:are_or_are_not} {expression:operand}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         }
       ]
     },
