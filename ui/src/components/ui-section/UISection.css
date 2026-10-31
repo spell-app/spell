@@ -340,7 +340,7 @@
     text-align: var(--_section-title-align, start);
   }
   .ui.section > .title > .heading > button.toggle {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     -webkit-tap-highlight-color: transparent;
   }
   /*
@@ -401,7 +401,7 @@
     align-items: center;
     width: var(--_ui-section-fold-icon-size);
     height: var(--_ui-section-fold-icon-size);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     rotate: var(--_ui-section-fold-icon-rotate);
     transition: rotate var(--_ui-section-duration) var(--ui-ease);
   }

@@ -26,6 +26,7 @@ import math
 from collections.abc import Callable, Iterator, Mapping, MutableMapping, MutableSequence, Sequence, Sized
 from typing import TYPE_CHECKING, Any
 
+from spell_core.events import all_ended
 from spell_core.js_text import is_plain_number
 from spell_core.kinds import is_a_number, is_js_truthy, is_same
 from spell_core.lists import List
@@ -456,6 +457,31 @@ class CollectionMethods:
         is_list = self.is_array_like(collection)
         for value, position, coll in self.get_iterator_for(collection):
             if is_js_truthy(call(value, position, coll)):
+                if is_list:
+                    self.append(results, value)
+                else:
+                    self.set_item_at(results, position, value)
+        return results
+
+    def each_together(self, collection: object = None, method: Callback | None = None) -> Any:
+        """Call `method` for every item at once:  a loop right in `at the same time:`.  As `core.together()`."""
+        if not self._is_defined(collection, "each_together") or method is None:
+            return None
+        call = _callback(method)
+        return all_ended([call(value, position, coll) for value, position, coll in self.get_iterator_for(collection)])
+
+    async def filter_in_turn(self, collection: object = None, condition: Callback | None = None) -> Any:
+        """As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for.
+
+        - Compiled spell writes it for a `where` whose condition waits.
+        """
+        if not self._is_defined(collection, "filter_in_turn"):
+            return None
+        call = _callback(condition)
+        results = self.new_thing_like(collection)
+        is_list = self.is_array_like(collection)
+        for value, position, coll in self.get_iterator_for(collection):
+            if is_js_truthy(await call(value, position, coll)):
                 if is_list:
                     self.append(results, value)
                 else:

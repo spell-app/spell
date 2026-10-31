@@ -53,8 +53,8 @@ export class Card extends View {
     return h("ui-button", {
       appearance: "basic",
       color: () => this.color,
-      onClick: () => this.try(),
-      style: "cursor:pointer;user-select:none"
+      onClick: core.pressed(this, () => this.try()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.name)
   }
 

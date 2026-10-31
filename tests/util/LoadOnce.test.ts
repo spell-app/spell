@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LoadOnce } from "spell/ui/util"
+import { LoadOnce } from "spell/util/LoadOnce"
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -83,5 +83,30 @@ describe("LoadOnce.set() / forget()", () => {
     loads.forget()
     expect(loads.has("b")).toBe(false)
     expect(load).toHaveBeenCalledOnce()
+  })
+})
+
+describe("LoadOnce.abortable()", () => {
+  test("ends one wait early, and the shared load carries on", async () => {
+    const loads = new LoadOnce<string, string>()
+    let finish!: (value: string) => void
+    const shared = loads.get("a", () => new Promise((resolve) => (finish = resolve)))
+    const controller = new AbortController()
+    const waiting = LoadOnce.abortable(shared, controller.signal)
+    controller.abort()
+    await expect(waiting).rejects.toMatchObject({ name: "AbortError" })
+    finish("done")
+    expect(await shared).toBe("done")
+  })
+
+  test("the promise's own answer or failure, while it isn't aborted", async () => {
+    const { signal } = new AbortController()
+    expect(await LoadOnce.abortable(Promise.resolve("yes"), signal)).toBe("yes")
+    await expect(LoadOnce.abortable(Promise.reject(new Error("no")), signal)).rejects.toThrow("no")
+  })
+
+  test("a signal aborted already:  at once", async () => {
+    const signal = AbortSignal.abort()
+    await expect(LoadOnce.abortable(new Promise(() => {}), signal)).rejects.toMatchObject({ name: "AbortError" })
   })
 })

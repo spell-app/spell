@@ -105,7 +105,7 @@ UIEs.addRule(Notify, {
     " (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}?" +
     " ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))?" +
     " {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)?" +
-    " (con {okButton:text})? (waits:y esperar)?",
+    " (con {okButton:text})?",
   tests: [
     {
       compileAs: "statement",
@@ -118,7 +118,7 @@ UIEs.addRule(Notify, {
         [`notificar error "Ups" en negro`, `core.notify("Ups", { class: "error black" })`],
         [`notificar "¡Aquí!" arriba a la izquierda`, `core.notify("¡Aquí!", { position: "top left" })`],
         [`notificar "¡Aquí!" en el centro`, `core.notify("¡Aquí!", { position: "centered" })`],
-        [`notificar "Adiós" durante 5 segundos`, `core.notify("Adiós", { time: 5, units: "seconds" })`],
+        [`notificar "Adiós" durante 5 segundos`, `await core.notify("Adiós", { time: 5, units: "seconds" })`],
         [`notificar "Me quedo" hasta un clic`, `core.notify("Me quedo", { time: 0 })`],
         [`notificar "Mira" con una barra de progreso`, `core.notify("Mira", { showProgress: "bottom" })`],
         {
@@ -133,7 +133,10 @@ UIEs.addRule(Notify, {
           `notificar "Ocupado" con una barra de progreso arriba sin pausa`,
           `core.notify("Ocupado", { showProgress: "top", pauseOnHover: false })`
         ],
-        [`notificar "Me voy" durante 1 segundo y esperar`, `await core.notify("Me voy", { time: 1, units: "second" })`]
+        {
+          input: `notificar "¿Vale?" durante 5 segundos con "Sí"`,
+          js: [`core.notify("¿Vale?", {`, `  time: 5,`, `  units: "seconds",`, `  button: "Sí"`, `})`]
+        }
       ]
     }
   ]
@@ -158,8 +161,8 @@ UIEs.addRule(Warn, {
     {
       compileAs: "statement",
       tests: [
-        [`advertir "Yo!"`, `await core.warn("Yo!")`],
-        [`advertir "Yo!" con "vale"`, `await core.warn("Yo!", "vale")`]
+        [`advertir "Yo!"`, 'await core.warn("Yo!")'],
+        [`advertir "Yo!" con "vale"`, 'await core.warn("Yo!", "vale")']
       ]
     }
   ]

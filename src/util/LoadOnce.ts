@@ -10,7 +10,9 @@
  *   - `"forgotten offline"`:  forgotten only while the browser says it's offline (`navigator.onLine`):
  *     then the failure may be the connection, not the file (an icon's SVG)
  * - A caller that mustn't see a rejection catches it itself:  `loads.get(key).catch(() => undefined)`.
- * - Plain promises, no Solid:  the runtime's lazy chunk uses it too.
+ * - Plain promises, no Solid, imports nothing:  the runtime's lazy chunk uses it too, and so do the places' shared
+ *   reads (`PlaceReads`).
+ * - `LoadOnce.abortable()`:  one caller's wait ends early, while the shared load runs on for the others.
  ****************/
 export class LoadOnce<K, V> {
   /** What a failed load does. */
@@ -61,6 +63,29 @@ export class LoadOnce<K, V> {
   forget(key?: K) {
     if (key === undefined) this.loads.clear()
     else this.loads.delete(key)
+  }
+
+  /**
+   * `promise`, or the reason `signal` gives as soon as it aborts:  an `AbortError`, unless it was given another.
+   * - Ends only THIS wait:  `promise` carries on for whoever else holds it.
+   * - STATIC:  pure, no cache of its own.
+   */
+  static abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+    if (signal.aborted) return Promise.reject(signal.reason)
+    return new Promise<T>((resolve, reject) => {
+      const onAbort = () => reject(signal.reason)
+      signal.addEventListener("abort", onAbort, { once: true })
+      promise.then(
+        (value) => {
+          signal.removeEventListener("abort", onAbort)
+          resolve(value)
+        },
+        (error: unknown) => {
+          signal.removeEventListener("abort", onAbort)
+          reject(error)
+        }
+      )
+    })
   }
 
   /**

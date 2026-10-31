@@ -162,7 +162,7 @@
     font: inherit;
     color: var(--_ui-toolbar-button-color);
     background: var(--_ui-toolbar-button-background);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.toolbar > .scroll.start {
     left: anchor(left);

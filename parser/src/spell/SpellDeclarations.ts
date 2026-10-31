@@ -957,7 +957,8 @@ function literalKey(key: string): string {
 
 /**
  * Does the method `declaredBy` declares wait, e.g. `pause for 50 msec`?
- * - Its definition's `isAsync`, which says it has an `await` (epic `python-target` P11).
+ * - Its definition's `isAsync`, which says it waits or calls what does:
+ *   a compile sets it for the whole project (`P.WriterProject.findWaiting()`) before it writes this.
  */
 function waits(declaredBy: P.Match | undefined): boolean {
   let found: P.ASTMethodDefinition | undefined

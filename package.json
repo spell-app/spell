@@ -138,6 +138,11 @@
       "types": "./dist-types/src/util/persist/index.d.ts",
       "default": "./src/util/persist/index.ts"
     },
+    "./util/places": {
+      "spell-source": "./src/util/places/index.ts",
+      "types": "./dist-types/src/util/places/index.d.ts",
+      "default": "./src/util/places/index.ts"
+    },
     "./util/reactive": {
       "spell-source": "./src/util/reactive/index.ts",
       "types": "./dist-types/src/util/reactive/index.d.ts",

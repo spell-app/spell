@@ -86,6 +86,7 @@
       0 2px 6px light-dark(#281e5014, #00000059), 0 24px 56px light-dark(#281e5038, #0000008c);
     --ui-shadow-overlay: var(--ui-shadow-floating-hover);
     --ui-ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+    --ui-control-cursor: default;
     --ui-button-radius: var(--ui-radius-s);
     --ui-button-or-background: var(--glass-track-solid);
     --ui-button-or-color: var(--ui-text-muted);

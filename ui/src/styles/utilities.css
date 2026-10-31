@@ -309,6 +309,12 @@
     text-transform: capitalize;
   }
 
+  /* Text to read and copy, in a page that's an app (`<ui-root app>`):  selectable, and an I-beam over its words. */
+  .ui-selectable {
+    cursor: auto;
+    user-select: text;
+    -webkit-user-select: text;
+  }
   .ui-link,
   .ui-link-plain {
     color: var(--ui-link);

@@ -14,7 +14,7 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  * - The item may be named for a value kind of several words (`kind_name`, epic `spanish` P22):
  *   `for each card rank in card ranks`, then `card rank` in the body -- see `itemName()`.
  * - Builds `core.map(list, (item, position?) => { ... })`,
- *   or `await core.forEachSequential(...)` if its body contains an `await`.
+ *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
  * - How javascript writes it (`JSWriter`):
  *   - as the list's own method, where it knows the value is a list
  *   - as a `for...of` loop, when its body waits
@@ -49,9 +49,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     })
   }
   /**
-   * Build `map`/`forEachSequential` call over `{list}`.
-   * - SIDE EFFECT: switches to `forEachSequential` + wraps result in `AwaitExpression` when body's
-   *   `method.isAsync` -- set by an `await` expression somewhere in body.
+   * Build `map` call over `{list}`:  written one by one if its body waits, which only the whole project can say.
    */
   getAST(match: P.MatchFor<this>): P.ASTExpression {
     const { list, item, position } = match.groups
@@ -63,16 +61,6 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
       args,
       body: P.matchAST<MethodBody>(this.getBody(match))
     })
-
-    if (method.isAsync) {
-      // console.warn(match.inputText)
-      return new P.ASTAwaitExpression(match, {
-        expression: new P.ASTCoreMethodInvocation(match, {
-          methodName: "forEachSequential",
-          args: [P.matchAST(list), method]
-        })
-      })
-    }
 
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "map", // TODO...

@@ -5,6 +5,12 @@
       "why": "Actions run by a person's keys, clicks and menus (epic elemental-spell P10):  a page's, not yet Python's",
       "names": [
         "runAction",
+        "runPressed",
+        "pressed",
+        "holdWhile",
+        "runningAction",
+        "actionFinishing",
+        "takesEvent",
         "isActionEnabled",
         "isActionSelected",
         "actionTitle",
@@ -107,6 +113,7 @@
         "splitPath",
         "notify",
         "alert",
+        "warn",
         "confirm",
         "prompt"
       ]

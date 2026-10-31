@@ -26,6 +26,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (`as: "github"`, accented letters kept)
     - `withoutAccents(text, { keep })`, `escapeRegExp()`, `escapeHTML()`, `dedent()`, `indented(text, indent)`
   - `number.ts` -- `clamp()`, and `kb()`:  a size in KB, of 1024 bytes
+  - `LoadOnce.ts` -- a load per key, every caller the same promise, with a choice of what a failure does;
+    `LoadOnce.abortable()` ends one caller's wait (Spell UI's and the places', moved down by epic `data`, J12)
   - `time.ts` -- LOCAL dates and times (epic `coherence` I5):  `localDate()`, `clockTime()`, `compactTime()`,
     `localTime()` / `localMinutes()` with the offset, `localMidnight()`
     - never `toISOString().slice(0, 10)` for a day:  that's the UTC date, tomorrow in California from 5pm
@@ -152,6 +154,36 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its tests run in a real browser (project `util`):  they use the browser's own storage.
 - Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written
   byte for byte as before:  a store's name is the key's part before its first colon.
+
+## Where data lives (`places/`)
+
+- `spell/util/places`:  a PLACE is Spell's word for a back-end, one small interface for all of them (epic `data`).
+  - NOT flattened into the `spell/util` barrel:  no page pays for it until it uses it.
+  - [places.types.ts](places/places.types.ts), the bottom of the folder:
+    - `Place`:  say what you can do, list a collection;  the rest is optional
+    - `PlaceCapabilities`, and `writeAnswerFor()`:  whether a write would be taken, per thing and per field
+    - `PlaceError`:  a place THROWS when it fails, unlike preferences' `PrefPlace`
+  - `PlaceCache`:  ONE row per type and id, its fields reactive.
+  - `Places`:  places by name, swapping the one behind a name, and the one cache.
+  - `PlaceResult`:  one reader's read of one place, on `Loadable`;  its `status` and `leave()` are new.
+    - A failed refresh leaves its rows there, `"couldn't update"`.
+  - `PlaceReads`:  readers of one collection and query share one request.
+    - On `LoadOnce`.  The last reader leaving aborts the read, and about ten released ones are kept for a quick return.
+    - `newestWins`:  a name for reads where a newer one aborts the older, e.g. a search as you type.
+  - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
+    up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
+  - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
+  - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
+  - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
+    - Imports nothing:  spell's core takes it by file, `spell/util/places/refs`.
+    - A program's mirrored state keeps its counted `"$id"`:  it's what the Python page speaks.
+- Uses `Loadable` and `LoadOnce` by file (`spell/util/spell/Loadable`), the reactive engine and `PrefStore`.
+  - Nothing about Things or Spell's words:  those are above util (rows into Things:  `spell/parser/core/places`).
+  - Whatever needs a server goes in `spell/server/places`.
+- Its files import each other as peers.
+- Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage.
+  - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
+    which keep the interface honest until those two are built.
 
 ## Decorators
 

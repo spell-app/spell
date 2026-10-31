@@ -17,13 +17,14 @@ const KIT_TSCONFIG = "tsconfig.node.json"
 const FIXTURES_FILE = "app/src/spaces/test/fixtures.ts"
 
 /**
- * `spell content compare [--against <ref>]`:  what a language change did to every built-in project:
+ * `spell content compare [--against <ref>] [--target <name>]`:  what a language change did to every built-in project:
  * - every test project and notebook compiled here, and at `ref` (`HEAD` unless given), in a temp git worktree
+ * - `target`:  whose code, e.g. `py`;  javascript's by default.  The notebooks are javascript's whichever:  see the child.
  * - then each changed line of their compiled code, errors and warnings, as `git diff`, and how many files changed
  * - Keeps nothing:  uncommitted changes against `HEAD` are the usual question, and a commit is always there to ask again.
  * - Returns the exit code:  `CLI.EXIT.OK` whether or not anything changed;  `CLI.EXIT.ERRORS` if a side crashed.
  */
-export async function contentCompareCommand({ against = "HEAD" }: ContentCompareOptions = {}): Promise<number> {
+export async function contentCompareCommand({ against = "HEAD", target }: ContentCompareOptions = {}): Promise<number> {
   const kit = CLI.findCheckout(CLI.KIT_MARKER)
   const out = mkdtempSync(resolve(tmpdir(), "spell-compare-out-"))
   const [before, after] = [join(out, "before"), join(out, "after")]
@@ -32,7 +33,7 @@ export async function contentCompareCommand({ against = "HEAD" }: ContentCompare
     checkout = addCheckout(kit, against, "spell-compare-", (folder) => prepareCheckout(kit, folder, against))
     const runner = join(checkout, ".compareProjects.mts")
     copyFileSync(RUNNER, runner)
-    await Promise.all([compileSide(checkout, runner, before), compileSide(kit, RUNNER, after)])
+    await Promise.all([compileSide(checkout, runner, before, target), compileSide(kit, RUNNER, after, target)])
   } catch (error) {
     process.stderr.write(`spell content compare:  ${error instanceof Error ? error.message : String(error)}\n`)
     return CLI.EXIT.ERRORS
@@ -64,8 +65,8 @@ function prepareCheckout(kit: string, folder: string, ref: string): void {
 }
 
 /** Compile checkout `checkout`'s projects into `out`, with its copy of the child.  Rejects if the child fails. */
-function compileSide(checkout: string, runner: string, out: string): Promise<void> {
-  const args = ["--import", import.meta.resolve("tsx/esm"), runner, out]
+function compileSide(checkout: string, runner: string, out: string, target?: string): Promise<void> {
+  const args = ["--import", import.meta.resolve("tsx/esm"), runner, out, ...(target ? [target] : [])]
   const env = { ...process.env, TSX_TSCONFIG_PATH: join(checkout, KIT_TSCONFIG) }
   return new Promise((done, fail) => {
     const child = spawn(process.execPath, args, { cwd: checkout, stdio: ["ignore", "ignore", "pipe"], env })

@@ -21,8 +21,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *     text, a number or yes / no keeps its plain name (`ProgramWriter.mayHoldObject()`).
  * - A dotted tag, `<UI.Form>`, is an error:  `P.ASTJSXElement.tagError()`.
  * - An element with an `onClick` looks clickable by itself (epic `outline-spell` P28):
- *   a pointer cursor, and its text can't be selected.
- *   - `style="cursor:pointer;user-select:none"`, unless it says its own `style`.
+ *   the cursor controls have, and its text can't be selected.
+ *   - `style="cursor:var(--ui-control-cursor,pointer);user-select:none"`, unless it says its own `style`.
  *   - Every target writes it the same:  see `clickableAttrs()`.
  * - Spell's own words become the web's as the AST is built, so both writers write the web's:
  *   - `<children/>` => `h("slot")`
@@ -224,7 +224,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   }
 
   /**
-   * `attrs`, plus `style="cursor:pointer;user-select:none"` when they say `onClick` and no `style`:
+   * `attrs`, plus `style="cursor:var(--ui-control-cursor,pointer);user-select:none"` when they say `onClick` and no `style`:
    * what can be clicked shows it, and a click never selects its text.
    */
   private static clickableAttrs(match: P.AnyMatch, attrs: P.ASTJSXAttribute[] | undefined) {
@@ -435,4 +435,4 @@ const UNTIL_FOUND = "until-found"
 
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
-const CLICKABLE_STYLE = "cursor:pointer;user-select:none"
+const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"

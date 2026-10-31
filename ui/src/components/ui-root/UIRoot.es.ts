@@ -15,6 +15,7 @@ export const rootEs = {
     display: "visualizacion",
     timeout: "tiempo-limite",
     theme: "tema",
+    app: "aplicacion",
     icons: "iconos",
     emoji: "emoji",
     assets: "recursos"

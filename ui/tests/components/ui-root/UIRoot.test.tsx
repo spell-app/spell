@@ -368,6 +368,15 @@ describe("<ui-root> theme, size and box", () => {
     expect(getComputedStyle(host).backgroundColor).not.toBe("rgb(255, 0, 0)")
   })
 
+  it("app says the page is an app", async () => {
+    const { host, component } = await root(`<ui-root app><p>Text</p></ui-root>`)
+    await component.settled
+    expect(host.matches(":state(app)")).toBe(true)
+    const { host: plain, component: other } = await root(`<ui-root><p>Text</p></ui-root>`)
+    await other.settled
+    expect(plain.matches(":state(app)")).toBe(false)
+  })
+
   it("fixed pins it to the viewport", async () => {
     const { host, component } = await root(`<ui-root fixed><p>Text</p></ui-root>`)
     await component.settled

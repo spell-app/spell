@@ -292,7 +292,7 @@ The Python reads as a Python programmer would write it:
 - PEP 8's names:  `Card.SUITS`, `play_fizzbuzz()`, and `class_` for a name that's a keyword
 - Python's own words where it has them:  `for number in range(1, 101):`, `elif`, `x is None`, `in`, f-strings;
   `core` only where it has none (`core.random_item_of()`)
-- `async def` only for a function that waits, and every call of it awaits it:
+- `async def` only for a function that waits, and every call of it awaits it, as JavaScript's and TypeScript's do:
   a program that never waits is plain Python, and its top level runs the rest with `asyncio.run(...)`
 - type hints where Spell knows the kind
 

@@ -35,12 +35,14 @@ export const uiMethods = defineCoreModule({
    * - NEVER resolves while a recompiled program loads to take over the last run's things (`isCarryingOver`):
    *   - what its top level sets going stops at its first pause, e.g. `reset the game`'s new deal
    *   - and the game in progress carries on instead
+   * - An action canceled while it waits here stops at once (`CanceledError`, `ActionQueue`).
    */
   pauseFor(number: number, units = "seconds"): Promise<void> {
     if (core.isCarryingOver) return new Promise(() => {})
     const multiplier = core.TIME_UNITS_MAP[units] || 1000
     // default to 0 if `isNaN`
     const delay = Math.round(number * multiplier) || 0
+    if (core.RUNTIME) return core.RUNTIME.actions.pause(delay)
     return new Promise((resolve) => setTimeout(resolve, delay))
   },
 
@@ -58,7 +60,8 @@ export const uiMethods = defineCoreModule({
    *   - e.g. `notify success "Saved!" at the top right for 5 seconds` =>
    *     `core.notify("Saved!", { class: "success", position: "top right", time: 5, units: "seconds" })`
    * - Shown once Spell UI's runtime has loaded.
-   * - Returns a promise of the toast being gone:  `notify "..." and wait` waits for it, plain `notify` doesn't.
+   * - Returns a promise of the toast being gone:  `notify "..." for 5 seconds` waits for it, plain `notify` doesn't.
+   *   - One that stays until it's closed answers at once, so nothing waits on it for good.
    * - No Spell UI:  printed on the console, and gone at once.
    * - NEVER throws:  a toast that can't show says so on the console.
    */
@@ -67,7 +70,7 @@ export const uiMethods = defineCoreModule({
     if (!ui) return core.console.info(String(message))
     try {
       const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
-      await toast.closed
+      if (!toastStays(options)) await toast.closed
     } catch (error) {
       core.console.error("notify:  can't show a toast", error)
     }
@@ -75,8 +78,20 @@ export const uiMethods = defineCoreModule({
 
   /** Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed). */
   async alert(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
+    await (await ui.load()).modals.alert({ message: String(message), okText })
+  },
+
+  /**
+   * Warn the person in a dialog, and wait until it's closed -- compiled from `warn "Careful!"` (`await`ed).
+   * - No Spell UI:  printed as a warning on the console.
+   */
+  async warn(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
+    const ui = pageUI()
+    if (!ui) return core.console.warn(String(message))
     await (await ui.load()).modals.alert({ message: String(message), okText })
   },
 
@@ -85,6 +100,7 @@ export const uiMethods = defineCoreModule({
    * - No Spell UI:  `true`, printed with the question.
    */
   async confirm(message: unknown, okText?: string, cancelText?: string): Promise<boolean> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return (core.console.info(core.message("confirm-default", { question: String(message) })), true)
     return (await ui.load()).modals.confirm({ message: String(message), okText, cancelText })
@@ -96,6 +112,7 @@ export const uiMethods = defineCoreModule({
    * - No Spell UI:  `value`, printed with the question.
    */
   async prompt(message: unknown, value?: string): Promise<string | undefined> {
+    core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return (core.console.info(`${String(message)} (${value ?? ""})`), value)
     return (await ui.load()).modals.prompt({ message: String(message), value })
@@ -184,7 +201,9 @@ function undoKeyPressed(event: KeyboardEvent, element: HTMLElement, action: "und
   const [focused] = path
   if (isTypedIn(focused)) return false
   if (!path.includes(element) && focused !== element.ownerDocument.body) return false
-  const { history } = core.RUNTIME
+  const { history, actions } = core.RUNTIME
+  // while an action runs, undo is refused, as from a menu (epic `language`, J2);  the key is still taken
+  if (actions.isBusy) return true
   return action === "undo" ? history.undo() : history.redo()
 }
 
@@ -260,6 +279,11 @@ function toastOptionsFor(message: string, options: NotifyOptions): PageToastOpti
   const { time, units = "seconds", button, ...toastOptions } = options
   const displayTime = button ? 0 : time === undefined ? "auto" : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
   return { ...toastOptions, message, displayTime, ...(button ? { actions: [{ text: button }] } : {}) }
+}
+
+/** Does a toast stay until it's closed?  It has a button, or a time of 0. */
+function toastStays(options: NotifyOptions): boolean {
+  return !!options.button || options.time === 0
 }
 
 /**

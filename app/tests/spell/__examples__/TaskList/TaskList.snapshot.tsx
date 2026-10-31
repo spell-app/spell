@@ -239,7 +239,7 @@ export class TaskList extends App {
         </ui-toolbar>
         <ui-form value={this}>
           <ui-input name="draft" placeholder="Something to do" aria-label="New task" fluid={true} action={true}>
-            <ui-button slot="action" color="primary" disabled={this.draft === ""} onClick={() => this.addTheDraft()} style="cursor:pointer;user-select:none">
+            <ui-button slot="action" color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Add
             </ui-button>
           </ui-input>

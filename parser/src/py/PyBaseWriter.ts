@@ -714,7 +714,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const call = unwrapped(node as P.ASTExpression)
     if (!isCoreCall(call)) return undefined
     const { methodName, args } = call as P.ASTScopedMethodInvocation
-    if (!["map", "forEach", "forEachSequential"].includes(methodName)) return undefined
+    if (!P.CORE_LOOPS.has(methodName)) return undefined
     const [collection, callback] = args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition)) return undefined
@@ -1502,6 +1502,7 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** One field of a type's description as Python -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (value === true) return "True"
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))

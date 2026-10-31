@@ -177,6 +177,12 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     return RootBox.isBox({ width: this.width, height: this.height })
   }
 
+  /** `app`?  `:state(app)`, which the runtime's page sheet reads (`native.css`). */
+  @E.cssState("app")
+  get isApp(): boolean {
+    return this.app
+  }
+
   /** `fixed`?  `:state(fixed)`. */
   @E.cssState("fixed")
   get isFixed(): boolean {

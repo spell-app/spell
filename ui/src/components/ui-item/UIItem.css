@@ -54,7 +54,7 @@
     border: none;
     border-radius: 0;
     appearance: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   button.item:disabled {
     cursor: default;

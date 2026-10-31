@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
 import { InspectorActions } from "spell/app/app/solid/InspectorActions"
+import { core as realCore } from "spell/parser/core"
 import type { Core } from "spell/parser/core/core.types"
 import type { SP } from "spell/parser/spell"
 
@@ -86,17 +87,13 @@ describe("InspectorActions.run()", () => {
     const spy = vi.spyOn(card, "putOnPile")
     const foundation = new Foundation("clubs")
     const put = InspectorActions.of(card, coreFor([]), WORDS).find((action) => action.name === "putOnPile")!
-    await InspectorActions.run(coreFor([foundation]), card, put, [foundation])
+    realCore.resetRuntime()
+    await InspectorActions.run(realCore, card, put, [foundation])
     expect(spy).toHaveBeenCalledWith(foundation)
-    expect(
-      InspectorActions.run(
-        coreFor([], () => false),
-        card,
-        put,
-        [foundation]
-      )
-    ).toBeUndefined()
+    const notEnabled = vi.spyOn(realCore, "runAction").mockReturnValueOnce(false)
+    expect(InspectorActions.run(realCore, card, put, [foundation])).toBeUndefined()
     expect(spy).toHaveBeenCalledTimes(1)
+    notEnabled.mockRestore()
   })
 
   test("an error goes to the program's console", () => {
@@ -104,9 +101,11 @@ describe("InspectorActions.run()", () => {
     vi.spyOn(card, "play").mockImplementation(() => {
       throw new Error("no")
     })
-    const core = coreFor([])
-    void InspectorActions.run(core, card, InspectorActions.of(card, core, WORDS)[0]!)
-    expect(core.console.error).toHaveBeenCalledWith("play it failed", expect.any(Error))
+    realCore.resetRuntime()
+    const error = vi.spyOn(realCore.console, "error").mockImplementation(() => {})
+    void InspectorActions.run(realCore, card, InspectorActions.of(card, coreFor([]), WORDS)[0]!)
+    expect(error).toHaveBeenCalledWith("play failed", expect.any(Error))
+    error.mockRestore()
   })
 })
 

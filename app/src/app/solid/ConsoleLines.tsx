@@ -54,7 +54,7 @@ export type ConsoleInspector = {
 export function ConsoleLines(props: ConsoleLinesProps) {
   const indent = () => props.indent ?? 0
   return (
-    <div class={props.class ?? "ConsoleLines"}>
+    <div class={`${props.class ?? "ConsoleLines"} ui-selectable`}>
       <Show when={!props.collapsed}>
         <For each={props.lines}>
           {(line) =>
@@ -122,7 +122,7 @@ export function ConsoleGroup(props: ConsoleGroupProps) {
   const collapsed = tracked(() => props.line.collapsed)
   const icon = (
     <span class="ConsoleGroupIcon" style={{ width: `${NORMAL_LINE_SPACE}px` }}>
-      <span style={{ cursor: "pointer" }} onClick={toggle}>
+      <span class="ConsoleGroupToggle" onClick={toggle}>
         {collapsed() ? "▶" : "▼"}
       </span>
     </span>

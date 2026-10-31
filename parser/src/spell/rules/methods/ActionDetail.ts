@@ -14,6 +14,7 @@ import type { MethodSignatureData } from "./methods.shared"
  *   - `- selected when it is face up`:  when it shows checked, in a menu
  *   - `- undone as "Turn Card"`:  its undo's name, `Undo Turn Card`
  *   - `- icon "rotate"`:  its icon
+ *   - `- a new one replaces the last one`:  the newest wins, a running one canceled, where a repeat is otherwise ignored
  * - An action is a described command (Q33):  one action drives a menu item, a button and a key.
  *   Nothing runs from its description yet:  the actions phase (P10) reads it.
  * - Only in the body of an action of a template (`MethodDefinition`, its signature on a type):
@@ -23,7 +24,7 @@ import type { MethodSignatureData } from "./methods.shared"
  *   Its action's definition gathers them (`detailsOf()`):  a getter for each condition, then
  *   `core.describeAction(Card, "turnOver", {...})` after the class.
  */
-export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoneAs?|icon?"> {
+export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoneAs?|icon?|replacesLast?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
@@ -57,12 +58,13 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undon
       const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
       if (!statement?.is(ActionDetail)) continue
       any = true
-      const { keys, enabled, selected, undoneAs, icon } = statement.groups
+      const { keys, enabled, selected, undoneAs, icon, replacesLast } = statement.groups
       if (keys) details.shortcuts.push(`${keys.value}`)
       if (enabled) details.enabled = enabled
       if (selected) details.selected = selected
       if (undoneAs) details.undoneAs = ActionDetail.textOf(undoneAs)
       if (icon) details.icon = ActionDetail.textOf(icon)
+      if (replacesLast) details.replacesLast = true
     }
     return any ? details : undefined
   }
@@ -93,4 +95,6 @@ export type ActionDetails = {
   selected?: P.Match
   undoneAs?: string
   icon?: string
+  /** `- a new one replaces the last one` */
+  replacesLast?: boolean
 }

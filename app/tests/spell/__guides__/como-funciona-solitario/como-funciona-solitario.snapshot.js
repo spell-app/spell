@@ -54,8 +54,8 @@ export class Carta extends View {
     return h("es-boton", {
       apariencia: "básico",
       color: () => this.color,
-      onClick: () => this.jugar(),
-      style: "cursor:pointer;user-select:none"
+      onClick: core.pressed(this, () => this.jugar()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.nombre)
   }
 

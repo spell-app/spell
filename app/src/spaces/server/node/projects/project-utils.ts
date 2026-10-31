@@ -410,14 +410,16 @@ export const getIndex = async (
   }
 
   // create manifest including created/modified/size info per file
+  // in the files' order, not in whichever order the disk answers
   const manifest: ManifestJSON = {}
-  await Promise.all(
+  const entries = await Promise.all(
     fileNames.map(async (name) => {
       const location = SP.SpellLocation.getFileLocation(projectId, name)
       const { created, modified, size } = await fileUtils.getPathInfo(location.serverPath)
-      manifest[location.path] = { created, modified, size }
+      return [location.path, { created, modified, size }] as const
     })
   )
+  for (const [path, info] of entries) manifest[path] = info
 
   // get `imports` from existing imports file if present
   const importsFile = await loadProjectFile(projectId)

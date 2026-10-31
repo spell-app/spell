@@ -36,7 +36,7 @@ class Counter(View):
             {
                 "class": "Counter",
                 "onClick": lambda event: self.increment(),
-                "style": "cursor:pointer;user-select:none",
+                "style": "cursor:var(--ui-control-cursor,pointer);user-select:none",
             },
             f"Count: {self.count}",
         )

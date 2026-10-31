@@ -4,7 +4,8 @@
  *   Its copy in `--against`'s temp checkout finds that checkout's spell through its own imports.
  * - Writes, per project:  `<project>/compiled.js`, and `<project>/<file>.messages.txt` for a file with errors or warnings.
  *   - The test projects:  `compiledFixture()`, as their snapshots are made
- *   - The notebooks:  each file's own compile, as the snapshots have none
+ *   - The notebooks:  each file's own compile, as the snapshots have none, and only in javascript:  it's all they run in
+ * - A second argument names the target, e.g. `py`:  the test projects are compiled for it.
  * - Never `spell/app/cli`.
  * - `.mts`, so it loads as an ES module wherever it's copied -- see `PAPERCUTS.md`.
  */
@@ -23,7 +24,7 @@ import {
 
 type ParsedFile = ReturnType<typeof parseSpellProject>["files"][number]
 
-const [outFolder] = process.argv.slice(2)
+const [outFolder, target] = process.argv.slice(2)
 
 /** Write `text` as `file` of `project`'s folder under `outFolder`. */
 function write(project: string, file: string, text: string): void {
@@ -42,7 +43,7 @@ function writeMessages(project: string, files: ParsedFile[]): void {
 
 for (const name of fixtureProjectNames()) {
   try {
-    write(name, "compiled.js", compiledFixture(name))
+    write(name, target ? `compiled.${target.replace(/\W/g, "-")}` : "compiled.js", compiledFixture(name, target))
     const sources = loadFixtureProject(name)
     writeMessages(name, parseSpellProject(sources, { parentScope: fixtureImportScope(name) }).files)
   } catch (error) {

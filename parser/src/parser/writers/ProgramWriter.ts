@@ -92,7 +92,21 @@ export abstract class ProgramWriter extends Writer {
     // our language's names, as set on us
     writer.naming = this.naming
     writer.listsStartAt = options?.listsStartAt ?? 1
+    writer.project.findWaiting(files, scope, {
+      canWait: (name, isGetter) => writer.canWait(name, isGetter),
+      coreCallWaits: (call) => writer.coreCallWaits(call)
+    })
     return writer
+  }
+
+  /** May a function of `name` wait?  Any can, as in Python;  see `JSWriter`'s. */
+  protected canWait(_name: string | undefined, _isGetter: boolean): boolean {
+    return true
+  }
+
+  /** Does `call`, of `core`, wait?  What it always waits for;  see `JSWriter`'s, for sending. */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    return P.CORE_CALLS_THAT_WAIT.has(call.methodName)
   }
 
   /**

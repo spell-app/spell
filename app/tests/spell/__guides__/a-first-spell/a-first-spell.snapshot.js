@@ -65,9 +65,11 @@ export class HelloSign extends App {
   draw() {
     return h("div", { class: "Sign" },
       h("h1", () => this.message),
-      h("ui-button", { color: "primary", onClick: () => this.waveBack(), style: "cursor:pointer;user-select:none" },
-        "Wave back"
-      ),
+      h("ui-button", {
+        color: "primary",
+        onClick: core.pressed(this, () => this.waveBack()),
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+      }, "Wave back"),
       h("p", () => this.count)
     )
   }

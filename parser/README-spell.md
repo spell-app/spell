@@ -271,15 +271,54 @@ Its first line is how you call it, with each blank's type in brackets:
 | --- | --- |
 | `to start the game` | `export function startTheGame() {}` |
 | `to move (a card) to (a pile)` | `async moveToPile(pile) { ... }`, a method of the card |
-| `for each card in the deck`, then `move it to the stock` | `deck.forEach((card) => card.moveToPile(stock))` |
-| `wait for: move the card to the stock` | `await card.moveToPile(stock)` |
+| `for each card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
+| `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellml` declares
     ([Solitaire.spellml](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellml)).
-- An action that pauses (`pause for 50 msec`) compiles to an `async` method,
-  and its caller waits for it only when it says `wait for`:  that's what makes Solitaire's deal animate, card by card.
+- An action that pauses (`pause for 50 msec`) waits, and so does every action that calls it:
+  each call waits for it to finish, with no word in the source, in JavaScript, TypeScript and Python alike.
+  - One project-wide pass works this out, by name:  if one `play` waits, every `play` does.
+  - A `where` whose condition waits asks each item in turn.
+  - The edges:
+    - A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
+    - In JavaScript and TypeScript, a getter, a drawing, a `create` and a `to test` must answer at once:
+      they start what they call without waiting for it.
+    - A `send` waits only if a handler of that event does.
+- To not wait, say so, in JavaScript, TypeScript and Python alike:
+
+  ```spell
+  to deal in a burst:
+  	at the same time:
+  		move the first card to the pile
+  		move the second card to the pile
+  	meanwhile load the scores
+  	print "dealt"
+  ```
+
+  - `at the same time:` runs each line at once, and carries on once they've all ended.
+    - A failed line doesn't stop the others;  the failure comes out once they've ended.
+    - A loop right in the block runs all its items at once.  One inside an `if` still runs one by one.
+    - A local made in one line belongs to that line.
+  - `meanwhile load the scores` starts it and carries on.
+    A failure is said on the program's console, and people's clicks don't wait for it.
+  - Spanish:  `al mismo tiempo:`, `mientras tanto`.
+- A toast is an aside:  `notify "Saved!"` shows it and carries on.
+  - It waits only when it says how long, `notify "Bye" for 5 seconds`, which holds clicks that long too.
+  - One that stays until it's closed never waits:  `until clicked`, `with "Got it"`.
+- What a person starts runs one at a time:  a click, a key, a menu item, a drop.
+  - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
+  - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.
+  - What the program calls itself never waits in that line, so a deal can't wait for itself.
+    Nor does a drag's move, a `while`, or what a drawing reads:  a click never waits behind a slow load.
+  - One that fails says so on the program's console, and the next one runs.
+  - Under an action, `- a new one replaces the last one` makes the newest win:  the running one stops at its next wait,
+    for a search as you type.
+    Code can do the same with `core.cancelActions()`, which leaves what the action already wrote.
+  - Each step of an action that waits shows as it happens.
+    A step with no real pause doesn't paint:  the browser draws between timers, so use `pause for`.
 - An action can be used above its definition, or from an earlier file:
   every action's first line is registered before the project's first line is read.
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
@@ -292,7 +331,7 @@ Its first line is how you call it, with each blank's type in brackets:
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as` and `icon` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,

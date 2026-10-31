@@ -25,6 +25,8 @@
  * - Pure javascript:  the mouse and keys come from `core.input` (`input.ts`), never from a browser event.
  * - The browser's events reach a view's thing through its element (spell-app's `SpellElement`), which calls `send()`.
  */
+import { CanceledError } from "spell/util"
+
 import { core, onPropertyChange } from "./core"
 import { defineCoreModule } from "./core.types"
 import { InputState } from "./input"
@@ -73,6 +75,7 @@ export class SentEvent extends SpellEvent {
  * - `sender`:  the thing sending it, when a thing does (compiled spell passes `this`).
  * - Returns the event:  `canceled` says if a handler canceled it.
  * - NEVER throws for a handler:  one that fails is said on the console, and the event goes on as if it took it.
+ *   - But for a handler stopped by canceling its action (`CanceledError`):  what sent it stops too.
  */
 export async function send(
   target: object | undefined,
@@ -90,8 +93,9 @@ export async function send(
     event.passed = false
     event.handled = true
     try {
-      await handler.call(thing, event)
+      await waitOf(handler, handler.call(thing, event))
     } catch (error) {
+      if (error instanceof CanceledError) throw error
       console.warn(`send ${event.type}:  ${(thing as object).constructor?.name}'s handler failed`, error)
     }
     if (!event.passed) return event
@@ -102,6 +106,20 @@ export async function send(
   await Promise.all(results)
   if (results.length) event.handled = true
   return event
+}
+
+/**
+ * What calling `handler` gave, to wait for:  `result` if it's written `async`, else nothing.
+ * - So `- on click:` `notify "Saved!"`, which hands back its toast's promise, doesn't hold what sent it.
+ */
+export function waitOf(handler: Function, result: unknown): unknown {
+  return handler.constructor.name === "AsyncFunction" ? result : undefined
+}
+
+/** Would anything take event `type` sent to `target`:  a handler up its chain, or one of the program's own listeners? */
+export function takesEvent(target: object | undefined, type: string): boolean {
+  for (const thing of chainOf(target)) if (handlerOf(thing, type)) return true
+  return !!core.RUNTIME && !!SpellEvent.getEventList(core.RUNTIME, eventName(type))?.length
 }
 
 /** Spell's name for an event, as `on()` keys it:  `card flipped` / `Card-Flipped` => `card-flipped`. */
@@ -172,6 +190,8 @@ function dashed(property: string): string {
 export const sendingMethods = defineCoreModule({
   /** `core.send(...)`:  send an event to a thing, up its chain until a handler takes it -- see `send()`. */
   send,
+  /** Would anything take this event -- see `takesEvent()`. */
+  takesEvent,
   /** The mouse and keys, readable anywhere:  `the shift key is down` is `core.input.shiftKey` -- see `input.ts`. */
   input: new InputState()
 })

@@ -153,8 +153,8 @@ export class HabitTracker extends App {
           h("ui-button", {
             color: "primary",
             disabled: () => this.draft === "",
-            onClick: () => this.addTheDraft(),
-            style: "cursor:pointer;user-select:none"
+            onClick: core.pressed(this, () => this.addTheDraft()),
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add")
         )
       ),

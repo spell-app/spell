@@ -500,9 +500,7 @@ describe("SpellLanguageService", () => {
     const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
     // `for each card in the cards` / `add it to the stock`:  the loop's item
-    expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain(
-      "variable **it**: Card"
-    )
+    expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain("variable **it**: Card")
     // `- on click play it`
     expect(hover(solitaire, at(solitaire, IT_CALL, "it"))).toContain("variable **it**: Card")
   })

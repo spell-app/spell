@@ -13,9 +13,9 @@ import { ActionMenus } from "./ActionMenus"
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
  * How a view's states look.
- * - A clickable thing (`:state(clickable)`):  the pointer cursor, unless its drawing says otherwise.
- * - A draggable thing:  the browser's grab cursor, grabbing while it's dragged,
- *   over its drawing's own `cursor` (e.g. a clickable card's pointer).
+ * - A clickable thing (`:state(clickable)`):  the cursor controls have (`--ui-control-cursor`), unless its drawing says otherwise
+ * - A draggable thing:  the browser's grab cursor (`--spell-drag-cursor` changes it), unless its drawing says otherwise.
+ *   While it's dragged, `Dragging` shows the closed hand over the whole page.
  *   And a finger drags it, rather than scrolling the page.
  * - A list that will take what's dragged over it glows, a soft purple halo outside and in, a little out from its edges:
  *   - drawn by its `::after`, over its items, so it never moves them
@@ -29,11 +29,10 @@ import { ActionMenus } from "./ActionMenus"
  *   `--spell-selected-outline` and `--spell-selected-outline-offset` change it.
  */
 const STATES_CSS = `
-  :host(:state(clickable)) { cursor: pointer; }
+  :host(:state(clickable)) { cursor: var(--ui-control-cursor, pointer); }
   :host(:state(clickable)), :host(:state(draggable)) { user-select: none; -webkit-user-select: none; }
   :host(:state(draggable)) { touch-action: none; }
-  :host(:state(draggable)), :host(:state(draggable)) * { cursor: grab !important; }
-  :host(:state(dragging)), :host(:state(dragging)) * { cursor: grabbing !important; }
+  :host(:state(draggable)) { cursor: var(--spell-drag-cursor, grab); }
   :host(:state(accepting-drop)) { position: relative; }
   :host(:state(accepting-drop))::after {
     content: "";
@@ -119,7 +118,7 @@ const STATES_CSS = `
  *   - A pile with no `dropped on it`:  the program hears `<thing>-drop` instead,
  *     e.g. `on card drop with a card and a pile` -- see `dropOn()`.
  *   - The web's own drag events say so as it goes:  `dragstart`, `dragenter`, `drop` ... (`Dragging`).
- *   - It shows the browser's grab cursor while it can be dragged, grabbing while it is (`STATES_CSS`).
+ *   - It shows the browser's grab cursor while it can be dragged, and the page the closed hand while it is (`STATES_CSS`).
  * - Reordering (P30):  `- its items can be reordered` lets people drag a list's items to new places in it.
  *   - The dragged items stay put, dimmed, while a line shows where they'd go;  a wait there moves them.
  *   - `immediately`:  no line, no wait, the items move as the pointer does.
@@ -344,7 +343,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return !!list && "items" in list && !!this.entry?.core.isAble(list, "droppable")
   }
 
-  /** Is it being dragged now?  Its cursor is grabbing meanwhile. */
+  /** Is it being dragged now? */
   @E.cssState("dragging")
   @E.state
   accessor isDragging = false
@@ -496,14 +495,11 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * Run a drag handler through our program's core, `run`:  where the program runs, Python's too (`core.remote`).
    * - The program's own code:  a throw, or a promise that fails, goes to its console, and the drag goes on.
+   * - At once, outside the queue:  a drag's moves and a `while` keep up with the mouse, even during a deal
+   *   (epic `language`, J3).  What a person PRESSES goes through it:  `runPressed()`.
    */
   private runHandler(run: () => unknown) {
-    const { entry } = this
-    try {
-      void Promise.resolve(run()).catch((error) => entry?.core.console.error(error))
-    } catch (error) {
-      entry?.core.console.error(error)
-    }
+    void this.entry?.core.meanwhile(run)
   }
 
   /**
@@ -529,7 +525,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (!list) return this.sendToThing("drag-cancelled")
     if (!thing || !entry) return
     const dropped = (component as SpellElement).handlerFor("when", "DroppedOn", thing)
-    if (dropped) return this.runHandler(() => entry.core.runHandler(list, dropped, thing))
+    if (dropped) return entry.core.runPressed(list, dropped, () => entry.core.runHandler(list, dropped, thing))
     const name = SpellElement.instanceName(thing.constructor)
     const details: Record<string, object> = { [name]: thing }
     for (
@@ -541,8 +537,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     }
     const event = entry.core.message("drop-event", { thing: kebabCase(name) })
     if (entry.core.remote) return entry.core.remote.trigger(event, details)
-    const heard = entry.core.trigger(event, details)
-    if (!heard.length) entry.core.move(thing, list)
+    entry.core.runPressed(thing, event, () => {
+      const heard = entry.core.trigger(event, details)
+      return heard.length ? Promise.all(heard) : entry.core.move(thing, list)
+    })
   }
 
   ////////////////
@@ -781,20 +779,28 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.runWhile(event, thing)
     // a click its thing would take, while it isn't clickable, `- clickable when it is face down`:  nothing happens
     const isClick = CLICK_HANDLERS.includes(SpellElement.handlerNameFor(spellEvent))
-    if (isClick && SpellElement.handles(thing, spellEvent) && !core.isAble(thing, "clickable")) return
-    this.sendToThing(spellEvent)
+    const isAble = () => !isClick || !SpellElement.handles(thing, spellEvent) || !!core.isAble(thing, "clickable")
+    if (!isAble()) return
+    this.sendToThing(spellEvent, isAble)
   }
 
   /**
    * Send `spellEvent`, e.g. `click`, `drag-cancelled`, to our thing, through the program's core:  its handler takes it
    * (`onDragCancelled()`), or hands it up its chain (`core.send()`).
+   * - A press (`PRESSES`) goes through the queue, if anything takes it:  it runs when no action is running.
+   *   `canRun`:  may it still, when its turn comes?  The mouse's other events run at once.
    * - A program running elsewhere (Python, `core.remote`) hears only its own handler.
    */
-  private sendToThing(spellEvent: string) {
+  private sendToThing(spellEvent: string, canRun?: () => boolean) {
     const thing = this.currentThing as Record<string, unknown> | undefined
     const core = this.entry?.core
     if (!thing || !core) return
-    if (!core.remote && core.send) return this.runHandler(() => core.send(thing, spellEvent))
+    if (!core.remote && core.send) {
+      if (PRESSES.has(spellEvent) && core.takesEvent(thing, spellEvent)) {
+        return core.runPressed(thing, spellEvent, () => core.send(thing, spellEvent), canRun)
+      }
+      return this.runHandler(() => core.send(thing, spellEvent))
+    }
     if (!SpellElement.handles(thing, spellEvent)) return
     this.runHandler(() => core.runHandler(thing, SpellElement.handlerNameFor(spellEvent), { type: spellEvent }))
   }
@@ -1600,6 +1606,9 @@ const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSi
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
+
+/** The mouse's events that are a person's action, which waits its turn (`core.runPressed()`). */
+const PRESSES = new Set(["click", "double-click", "right-click", "center-click"])
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()
