@@ -1,5 +1,5 @@
 /*
- * Look of `<FileTabs>` (`FileTabs.tsx`):  the project's files as the theme's tabs, over the code.
+ * Look of `<FileTabs>`'s row (`FileTabs.tsx`);  the tabs' own look is in `FileTabs.spellml`.
  * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
  * - Narrower than two tabs and a scroll button (about 280px), the file dropdown instead:  a container query.
  */
@@ -7,32 +7,12 @@
 .FileTabs {
   flex: 0 0 auto;
   container: FileTabs / inline-size;
+  /* the row's height, while its Spell loads:  the code below stays where it'll be */
+  min-height: 44px;
   /* the pane header's fill, under the tabs, as the panes' headers had */
   background: var(--spell-header-background);
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
-
-  & > ui-toolbar.FileTabsRow::part(toolbar) {
-    padding-inline: 8px 0;
-    padding-block-start: 6px;
-  }
-  & > ui-toolbar.FileTabsRow::part(menu) {
-    margin-block: 0;
-    min-height: 0;
-  }
-  & > ui-toolbar.FileTabsRow ui-item::part(item) {
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  /* the dot on a tab whose file isn't saved:  the theme's warning hue */
-  & .NotSaved {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--ui-warning, var(--ui-orange, #f2994a));
-  }
 
   /* the narrow column's dropdown:  hidden while the tabs fit */
   & > ui-menu.FileTabsNarrow {
@@ -52,7 +32,7 @@
 
 /* too narrow for two tabs and a scroll button:  one dropdown of every file */
 @container FileTabs (width < 280px) {
-  .FileTabs > ui-toolbar.FileTabsRow {
+  .FileTabs > :first-child:not(ui-menu) {
     display: none;
   }
   .FileTabs > ui-menu.FileTabsNarrow {

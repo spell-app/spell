@@ -454,6 +454,23 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
   - A project may list a `.spellml` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
+### The editor in Spell
+
+The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
+The file tabs over the code are the first piece:
+
+```text
+app/src/app/layout/FileTabs/FileTabs.spellml   the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                 the editor's side:  which files there are, what showing one does
+```
+
+- A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
+- It runs on the layout's own copy of the runtime, so a program's run never touches it.
+  A program's things stay the only ones in the Things tab, and its console stays its own.
+- It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
+  The tabs show no later:  they already wait for the project's files.
+- What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
+
 ### The Inspector:  look inside the running app
 
 The sliders button in the app's header opens the Inspector, a column at the window's far right.

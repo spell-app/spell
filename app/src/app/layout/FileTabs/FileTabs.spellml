@@ -1,0 +1,55 @@
+# The file tabs
+Every file of the project as a tab over the code, in the theme's tab look.
+A click shows that file, and a file with changes not saved shows a dot.
+The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
+
+<spell-thing "file">
+	<property "name">text</>
+	<property "path">text</>
+	<property "status" one-of="saved or changed" alias="is (status)"/>
+	<property "place" one-of="chosen or other" alias="is (place)"/>
+	<action "show it"/>
+</spell-thing>
+
+<spell-thing "file list" template="viewable list of files">
+	<spell>
+		- to draw each item:
+			return <ui-item selected={the file is chosen} onClick={show the file}>{the name of the file}<if the file is changed><span class="NotSaved"/></if></ui-item>
+	</spell>
+</spell-thing>
+
+<spell-view "file tab bar">
+	<property "files">a new file list</>
+	<spell>
+		<css>
+			ui-toolbar::part(toolbar) {
+				padding-inline: 8px 0;
+				padding-block-start: 6px;
+			}
+			ui-toolbar::part(menu) {
+				margin-block: 0;
+				min-height: 0;
+			}
+			ui-item::part(item) {
+				gap: 6px;
+				white-space: nowrap;
+			}
+			/* the dot on a tab whose file isn't saved:  the theme's warning hue */
+			.NotSaved {
+				display: inline-block;
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--ui-warning, var(--ui-orange, #f2994a));
+			}
+			.NotSaved[hidden] {
+				display: none;
+			}
+		</css>
+	</spell>
+	<draw>
+		<ui-toolbar appearance="tabular" size="small" aria-label="Files">
+			{draw each file in its files}
+		</ui-toolbar>
+	</draw>
+</spell-view>
