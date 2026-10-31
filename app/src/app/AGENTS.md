@@ -41,6 +41,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - `runner/`:  runs compiled spell (below)
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
+  - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
+    `solid/InspectorWrites.ts` writes the Inspector's changes through it
   - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).

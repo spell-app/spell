@@ -588,3 +588,10 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
   --spell-drag-cursor: crosshair;
   cursor: crosshair;
 }
+
+/* a change that only changed the running app says so, the whole width of the card */
+.InspectorNotSaved {
+  grid-column: 1 / -1;
+  max-width: none;
+  width: auto;
+}

@@ -1,10 +1,13 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { setDebugGlobal } from "spell/util"
 import { E } from "spell/element"
 import type { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
+// By file:  the folder's barrel loads the language service
+import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
@@ -16,6 +19,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
+import { InspectorWrites, type NotWritten } from "./InspectorWrites"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -35,7 +39,8 @@ import "./Inspector.css"
  *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):  its thing, with its class's properties
  *     (`ClassSchemas`)
  *   - a Spell UI element (`<ui-input>`):  the element, with its tag's attributes (its vocabulary)
- * - Edits change the running app at once (J62):  writing them back into the code is later (T18).
+ * - Edits change the running app at once, and go into the program's text as a step of `editor.history`
+ *   (`InspectorWrites`;  epic `editor`);  what can't go there says so in the card (`<NotSavedNote>`).
  * - The column is `<InspectorColumn>`, in its pane (`<InspectorPane>`);
  *   the app's area it watches is handed over by `<AppPane>` (`watch()`).
  * - On a phone, the pane is a SHEET over the page's lower part, up while something's just been picked
@@ -532,6 +537,28 @@ export class Inspector {
     const { place, sharedBy } = written
     const params = { file: place.path, line: place.line + 1, count: sharedBy }
     return appTexts.text(sharedBy > 1 ? "inspectorWrittenAtShared" : "inspectorWrittenAt", params)
+  }
+
+  /** Show the code a field's value comes from. */
+  static async showCode(home: Extract<NotWritten, { reason: "expression" }>): Promise<void> {
+    const file = editor.project?.spellFiles.find((each) => each.path.endsWith(`/${home.file}`))
+    if (!file) return
+    const text = file.contents ?? ""
+    const anchor = SourceEdits.positionAt(text, home.span.start)
+    const head = SourceEdits.positionAt(text, home.span.end)
+    await editor.showFileAt(file.path, {
+      anchor: { line: anchor.line, ch: anchor.character },
+      head: { line: head.line, ch: head.character }
+    })
+  }
+
+  /**
+   * Field `name` of `part` was changed in the properties card:  the same change goes into the program's source.
+   * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
+   */
+  static fieldWritten(part: { element?: Element; value: object }, name: string, value: unknown): void {
+    const why = InspectorWrites.written(part, name, value)
+    setNotSaved(why && { part, why })
   }
 
   /**
@@ -1344,7 +1371,16 @@ function PropertiesCard(): JSX.Element {
       >
         {(part) => (
           // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
-          <ui-property-editor schema={part.schema} value={part.value} compact="" show-defaults="">
+          <ui-property-editor
+            schema={part.schema}
+            value={part.value}
+            compact=""
+            show-defaults=""
+            on-ui-changed={(event: CustomEvent<{ name: string; value: unknown }>) =>
+              Inspector.fieldWritten(part, event.detail.name, event.detail.value)
+            }
+          >
+            <NotSavedNote part={part} />
             <Show when={part.layout}>
               {(layout) => (
                 <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
@@ -1386,6 +1422,44 @@ function PropertiesCard(): JSX.Element {
         )}
       </Show>
     </InspectorCard>
+  )
+}
+
+// DEBUG:  `Inspector` at the devtools console
+setDebugGlobal({ Inspector })
+
+/** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
+const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
+
+/****************
+ * ### `<NotSavedNote>`
+ * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
+ * - No row of its own until a change can't be saved.
+ ****************/
+function NotSavedNote(props: { part: object }): JSX.Element {
+  // only for what's inspected now:  selecting something else lets go of it
+  const why = () => (notSaved()?.part === props.part ? notSaved()?.why : undefined)
+  return (
+    <Show when={why()}>
+      {(note) => (
+        <p class="InspectorTip InspectorNotSaved">
+          {appTexts.text(note().reason === "expression" ? "inspectorNotSavedCode" : "inspectorNotSavedRunning")}
+          <Show when={note().reason === "expression"}>
+            {" "}
+            <a
+              href="#"
+              onClick={(event: MouseEvent) => {
+                event.preventDefault()
+                const home = note()
+                if (home.reason === "expression") void Inspector.showCode(home)
+              }}
+            >
+              {appTexts.text("inspectorShowCode")}
+            </a>
+          </Show>
+        </p>
+      )}
+    </Show>
   )
 }
 

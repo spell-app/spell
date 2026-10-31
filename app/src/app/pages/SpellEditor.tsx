@@ -70,10 +70,10 @@ import "./SpellEditor.css"
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
 export function SpellEditor(props: { mode: Mode }) {
-  editorHotkeys()
   const isPhone = phoneWidth()
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
+  editorHotkeys(isRunning)
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
   const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen))
   const codeRows = rememberedSizes(() => ({

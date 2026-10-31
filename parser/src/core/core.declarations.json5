@@ -1194,6 +1194,12 @@
       "description": "The character with unicode code point `code`, e.g. `\"🂠\"` for `0x1F0A0`."
     },
     {
+      "property": "pageUndoKey",
+      "of": "core",
+      "module": "ui",
+      "description": "The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`): true if it took the key."
+    },
+    {
       "property": "TIME_UNITS_MAP",
       "of": "core",
       "module": "ui",

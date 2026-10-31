@@ -8,7 +8,13 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import type * as Modals from "spell/app/app/solid/modals"
 import { tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
-import { EDITOR_HOTKEYS, runCodeEditorAction, type HotkeyName } from "spell/app/app/pages/editorHotkeys"
+import {
+  EDITOR_HOTKEYS,
+  runCodeEditorAction,
+  undoOrRedo,
+  undoWay,
+  type HotkeyName
+} from "spell/app/app/pages/editorHotkeys"
 
 /****************
  * ### `<Action>`
@@ -318,8 +324,8 @@ export const Actions = {
   // ## The code editor's own -- run in it, with its own keys (`EDITOR_HOTKEYS`'s `codeEditorAction`)
   ////////////////
 
-  undo: (props: ActionProps) => <CodeEditorAction hotkey="undo" title={appTexts.text("undo")} {...props} />,
-  redo: (props: ActionProps) => <CodeEditorAction hotkey="redo" title={appTexts.text("redo")} {...props} />,
+  undo: (props: ActionProps) => <UndoAction action="undo" {...props} />,
+  redo: (props: ActionProps) => <UndoAction action="redo" {...props} />,
   find: (props: ActionProps) => <CodeEditorAction hotkey="find" title={appTexts.text("find")} {...props} />,
 
   ////////////////
@@ -482,12 +488,34 @@ function DialogAction<P>(props: {
 const DIALOG_ACTION_KEYS = ["callback", "title", "icon", "itemProps"] as const
 
 /****************
+ * ### `<UndoAction>`
+ * Undo or Redo, going by focus (`undoWay()`), titled by what it'll do:  `Undo Change Suit`.
+ ****************/
+function UndoAction(props: ActionProps & { action: "undo" | "redo" }) {
+  const title = tracked(() =>
+    undoWay() === "history"
+      ? props.action === "undo"
+        ? editor.history.undoTitle
+        : editor.history.redoTitle
+      : appTexts.text(props.action)
+  )
+  return (
+    <Action
+      title={title()}
+      shortcut={EDITOR_HOTKEYS[props.action].shortcut}
+      onClick={() => undoOrRedo(props.action)}
+      {...omit(props, "action")}
+    />
+  )
+}
+
+/****************
  * ### `<CodeEditorAction>`
  * An `<Action>` that runs one of the code editor's own actions (Undo, Find ...), showing its key.
  * - `hotkey`:  its entry in `EDITOR_HOTKEYS`, which names the code editor's action and its key.
  * - Run with the code editor focused first;  nothing while there's no code editor (Run).
  ****************/
-function CodeEditorAction(props: ActionProps & { hotkey: Extract<HotkeyName, "undo" | "redo" | "find"> }) {
+function CodeEditorAction(props: ActionProps & { hotkey: Extract<HotkeyName, "find"> }) {
   const hotkey = () => EDITOR_HOTKEYS[props.hotkey]
   return (
     <Action

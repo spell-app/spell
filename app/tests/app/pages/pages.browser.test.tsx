@@ -187,7 +187,7 @@ async function mountHotkeys(): Promise<HTMLElement> {
   const host = document.createElement("div")
   document.body.append(host)
   const dispose = render(() => {
-    editorHotkeys()
+    editorHotkeys(() => false)
     return <span>page</span>
   }, host)
   cleanups.push(() => {

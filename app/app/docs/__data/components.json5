@@ -979,6 +979,10 @@
         {
           "name": "ThemeSubMenu",
           "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "UndoAction",
+          "file": "src/app/solid/Actions.tsx"
         }
       ],
       "href": "Actions.html"

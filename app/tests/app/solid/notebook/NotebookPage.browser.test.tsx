@@ -20,15 +20,19 @@ import "spell/app/spaces"
  * - The project:  an incremental parse of the notebook (`incrementalSpellProject()`), standing in for the editor's;
  *   its file, a plain object that counts its saves.
  */
-vi.mock("spell/app/app/editor", () => ({
-  editor: {
-    loadRuntime: testRuntime,
-    showError: (error: unknown) => console.error(error),
-    onFileEdited: () => {},
-    setScopeExplorer: () => {},
-    showFileAt: async () => {}
+vi.mock("spell/app/app/editor", async () => {
+  const { UndoStack } = await import("spell/util")
+  return {
+    editor: {
+      history: new UndoStack(),
+      loadRuntime: testRuntime,
+      showError: (error: unknown) => console.error(error),
+      onFileEdited: () => {},
+      setScopeExplorer: () => {},
+      showFileAt: async () => {}
+    }
   }
-}))
+})
 
 /** The Counter notebook, as the plan writes it, its section's text left out. */
 const COUNTER = [
@@ -168,6 +172,20 @@ describe("<NotebookPage>", () => {
     await until(() => file.saves === 1)
     expect(file.contents).toContain('\t<example "one counter">\n\t\t<counter/>\n\t\t<counter/>\n\t\t<counter/>\n')
     expect(controller.status()).toBe("saved")
+  })
+
+  test("a lock is a step of the editor's history:  undone and redone", async () => {
+    const { editor } = await import("spell/app/app/editor")
+    const { file, controller } = await mount()
+    controller.setLocked(true)
+    await until(() => file.saves === 1)
+    const locked = controller.text()
+    expect(locked).toContain("locked")
+    editor.history.undo()
+    await until(() => !controller.text().includes(" locked"))
+    editor.history.redo()
+    await until(() => controller.text() === locked)
+    editor.history.clear()
   })
 
   test("locked, nothing is ever saved:  an edit is a try-out, drawn but not saved, and its Reset puts it back", async () => {

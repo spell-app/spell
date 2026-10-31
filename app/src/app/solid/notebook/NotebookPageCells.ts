@@ -1,5 +1,6 @@
 import { SX } from "spell/parser/spellx"
-import { dedented, indentAt, indented, replaceSpan } from "spell/app/app/solid/NotebookCells"
+// By file:  the folder's barrel loads the language service
+import { dedented, indentAt, indented, replaceSpan, SourceEdits } from "spell/app/lsp/SourceEdits"
 
 /**
  * A `.spellml` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).
@@ -58,10 +59,7 @@ export class NotebookPageCells {
     const other = cells[direction === "up" ? index - 1 : index + 1]
     if (!cell || !other || cell.block || other.block) return text
     const [first, second] = other.span.start < cell.span.start ? [other, cell] : [cell, other]
-    const firstText = text.slice(first.span.start, first.span.end)
-    const secondText = text.slice(second.span.start, second.span.end)
-    // the later span first, so the earlier one's offsets still hold
-    return replaceSpan(replaceSpan(text, second.span, firstText), first.span, secondText)
+    return SourceEdits.applied(text, SourceEdits.swapped(text, first.span, second.span))
   }
 
   /**
@@ -81,9 +79,7 @@ export class NotebookPageCells {
     const title = model.cells.find((each) => each.title)
     if (index < 0 || !other || (title && other.start <= title.span.start && title.span.start < other.end)) return text
     const [first, second] = other.start < block.start ? [other, block] : [block, other]
-    const firstText = text.slice(first.start, first.end)
-    const secondText = text.slice(second.start, second.end)
-    return replaceSpan(replaceSpan(text, second, firstText), first, secondText)
+    return SourceEdits.applied(text, SourceEdits.swapped(text, first, second))
   }
 
   /**
@@ -91,16 +87,7 @@ export class NotebookPageCells {
    * - A section written as a tag goes whole, with what's inside it (`block`).
    */
   static deleted(text: string, cell: PageCell): string {
-    const span = cell.block ?? cell.span
-    const start = text.lastIndexOf("\n", span.start - 1) + 1
-    let end = text.indexOf("\n", span.end)
-    end = end < 0 ? text.length : end + 1
-    // one blank line between its neighbours, not two
-    const before = text.slice(0, start)
-    if (before.endsWith("\n\n") && /^[ \t]*\n/.test(text.slice(end))) end = text.indexOf("\n", end) + 1
-    // the last in its block:  no blank line left before its block's closing tag
-    else if (before.endsWith("\n\n") && /^[ \t]*<\//.test(text.slice(end))) return before.slice(0, -1) + text.slice(end)
-    return text.slice(0, start) + text.slice(end)
+    return SourceEdits.applied(text, [SourceEdits.deletedLines(text, cell.block ?? cell.span)])
   }
 
   /**
@@ -112,10 +99,8 @@ export class NotebookPageCells {
   static inserted(text: string, model: NotebookPageModel, cell: PageCell | undefined, code: string) {
     const indent = cell ? cell.indent + (cell.block ? "\t" : "") : (model.cells[0]?.indent ?? "\t")
     const after = cell?.span.end ?? NotebookPageCells.bodyEnd(text, model)
-    const lineEnd = text.indexOf("\n", after)
-    const at = lineEnd < 0 ? text.length : lineEnd
-    const added = `\n\n${indent}${indented(code, indent)}`
-    return { text: text.slice(0, at) + added + text.slice(at), start: at + 2 + indent.length }
+    const { edit, start } = SourceEdits.insertedAfterLine(text, after, code, indent)
+    return { text: SourceEdits.applied(text, [edit]), start }
   }
 
   /** `text` with the notebook locked (`locked`) or not:  its tag's `locked` added or taken off. */
