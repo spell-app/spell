@@ -198,7 +198,7 @@ describe("Spanish's spell syntax table, spellSyntax.es.json", () => {
   test("a word rule says its Spanish words", () => {
     const row = rows.find((it) => it.className === "Negatable")
     expect(row?.syntaxes[0]).toEqual({
-      syntax: "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
+      syntax: "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
     })
   })
 

@@ -19,7 +19,7 @@ import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
-import { CurrentPerson, PeopleHere } from "./PeopleWords"
+import { CurrentPerson, MyField, PeopleHere } from "./PeopleWords"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
 import { RefreshThings } from "./RefreshThings"
 import { SaveDraft } from "./SaveDraft"
@@ -98,7 +98,7 @@ places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(CheckedEvery, { syntax: "{type:subject_it} is checked every {number} seconds?" })
 places.addRule(VersionsIn, { syntax: "{type:subject_its} versions are in {field:text}" })
 places.addRule(IdColumn, { syntax: "{type:subject_its} ids are in {column:text}" })
-places.addRule(OperationAt, { syntax: "it is at {path:text}" })
+places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 
 places.addRule(SavedInPlace, { syntax: "{type:subject_it} is saved in {place:expression}" })
 places.addRule(SavedInPlace, { syntax: "(a|an) {type:known_type} is saved in {place:expression}" })
@@ -138,8 +138,12 @@ places.addRule(TotalOf, {
 })
 
 places.addRule(CurrentPerson, {
-  syntax: "the current person",
-  tests: [{ compileAs: "expression", tests: [["the current person", "core.currentPerson()"]] }]
+  syntax: "me",
+  tests: [{ compileAs: "expression", tests: [["me", "core.currentPerson()"]] }]
+})
+places.addRule(MyField, {
+  syntax: "my {field:member_words}",
+  tests: [{ compileAs: "expression", tests: [["my name", "core.currentPerson().name"]] }]
 })
 places.addRule(PeopleHere, {
   syntax: "the people here",

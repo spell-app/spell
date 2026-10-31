@@ -67,7 +67,7 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("two people,
       const ana = await personOn(address, "Ana")
       const bo = await personOn(address, "Bo")
 
-      // who's here:  `the current person`, `the people here`
+      // who's here:  `my name`, `the people here`
       await expect.poll(() => textOn(ana.page, "me"), WAITING).toBe("Ana")
       await expect.poll(() => textOn(bo.page, "me"), WAITING).toBe("Bo")
       await expect.poll(() => hereOn(ana.page), WAITING).toEqual(["Ana", "Bo"])

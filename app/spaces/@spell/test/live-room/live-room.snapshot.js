@@ -4,7 +4,7 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/LiveRoom.spell", start: 825, end: 844 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/LiveRoom.spell", start: 802, end: 821 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 

@@ -868,7 +868,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -2316,10 +2316,10 @@
                   "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event) {\n    return core.console.log(2)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: any ) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: any ) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: any ) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: any ) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: DragCancelledEvent) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: Any) -> Any:\n        return print(2)"
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: DoubleClickEvent) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: DragCancelledEvent) -> Any:\n        return print(2)"
                 }
               }
             },
@@ -2331,10 +2331,10 @@
                   "code": "export class Game extends Thing {\n  static { this.declareProp(\"highScore\", { type: \"number\" }) }\n  get highScore() { return this.getProp(\"highScore\") }\n  set highScore(value) { this.setProp(\"highScore\", value) }\n\n  static { this.declareProp(\"hint\", { type: \"text\" }) }\n  get hint() { return this.getProp(\"hint\") }\n  set hint(value) { this.setProp(\"hint\", value) }\n\n  onHighScoreChange(event) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event) {\n    return core.console.log(this.hint)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Game extends Thing {\n  @prop({ type: \"number\" })\n  accessor highScore!: number\n\n  @prop({ type: \"text\" })\n  accessor hint!: string\n\n  onHighScoreChange(event: any ) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event: any ) {\n    return core.console.log(this.hint)\n  }\n}"
+                  "code": "export class Game extends Thing {\n  @prop({ type: \"number\" })\n  accessor highScore!: number\n\n  @prop({ type: \"text\" })\n  accessor hint!: string\n\n  onHighScoreChange(event: HighScoreChangeEvent) {\n    this.hint = \"Best yet!\"\n  }\n\n  onHintChange(event: HintChangeEvent) {\n    return core.console.log(this.hint)\n  }\n}"
                 },
                 "py": {
-                  "code": "class Game(Thing):\n    high_score = prop(type=\"number\")\n\n    hint = prop(type=\"text\")\n\n    def on_high_score_change(self, event: Any) -> None:\n        self.hint = \"Best yet!\"\n\n    def on_hint_change(self, event: Any) -> Any:\n        return print(self.hint)"
+                  "code": "class Game(Thing):\n    high_score = prop(type=\"number\")\n\n    hint = prop(type=\"text\")\n\n    def on_high_score_change(self, event: HighScoreChangeEvent) -> None:\n        self.hint = \"Best yet!\"\n\n    def on_hint_change(self, event: HintChangeEvent) -> Any:\n        return print(self.hint)"
                 }
               }
             },
@@ -5003,7 +5003,7 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [\n    { name: \"direction\", kind: \"string\", description: \"Its direction.\" }\n  ])\n\n  turnOver() {\n    return this.currentThing?.turnOver()\n  }\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(View):\n    element_tag = \"syntax-block-card\"\n\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\""
                 }
               }
             }
@@ -5771,7 +5771,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -5930,12 +5930,12 @@
           "ruleNames": ["current_person"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 16,
-          "purpose": "Who's at this page (epic `data` P13).",
+          "line": 18,
+          "purpose": "Who's at this page (epic `data` P13, Owen's `me`, T48).",
           "syntaxes": [
             {
-              "syntax": "the current person",
-              "example": "the current person",
+              "syntax": "me",
+              "example": "me",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson()"
@@ -5952,11 +5952,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "MyField",
+          "ruleNames": ["my_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 47,
+          "purpose": "Something about who's at this page (T48).",
+          "syntaxes": [
+            {
+              "syntax": "my {field:member_words}",
+              "example": "my name",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson().name"
+                },
+                "ts": {
+                  "code": "core.currentPerson().name"
+                },
+                "py": {
+                  "code": "core.current_person().name"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PeopleHere",
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 33,
+          "line": 94,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
@@ -6138,11 +6164,11 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 19,
-          "purpose": "Where an action declared under a place goes (epic `data` Q14, Q17's option A).",
+          "line": 33,
+          "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
-              "syntax": "it is at {path:text}"
+              "syntax": "to {signature:method_signature} is at {path:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7320,7 +7346,7 @@
                   "code": "export class Card extends Thing {\n  @prop({ type: \"number\" })\n  accessor rank!: number\n}\nexport function testCardSetup() {\n  return core.test(\"test card setup\", function testCardSetup() {\n    const it = new Card()\n    core.expect(it.rank, `its rank`, undefined, `nothing`)\n    core.echoTestAction(`get a new card whose rank is 3`)\n    const it2 = new Card({ rank: 3 })\n    core.expect(it2.rank, `its rank`, 3, `3`)\n  })\n}"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> Any:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
+                  "code": "class Card(Thing):\n    rank = prop(type=\"number\")\n\ndef test_card_setup() -> None:\n    with core.test(\"test card setup\"):\n        it = Card()\n        core.expect(it.rank, \"its rank\", None, \"nothing\")\n        core.echo_test_action(\"get a new card whose rank is 3\")\n        it_2 = Card(rank=3)\n        core.expect(it_2.rank, \"its rank\", 3, \"3\")"
                 }
               }
             }
@@ -7430,7 +7456,7 @@
                   "code": "export type Direction = (typeof Card.Directions)[number]\n\nexport class Card extends Thing {\n  static Directions = [\"up\", \"down\"] as const\n  @prop({ oneOf: () => Card.Directions })\n  accessor direction!: Direction\n\n  turnOver() {\n    this.direction = \"up\"\n  }\n\n  get turnOverIsEnabled() {\n    return this.direction === \"down\"\n  }\n\n  get turnOverIsSelected() {\n    return this.direction === \"up\"\n  }\n}\ncore.describeAction(Card, \"turnOver\", { title: \"turn it over\", shortcuts: [\"meta+T\", \"F2\"], icon: \"rotate\", enabledWhen: \"turnOverIsEnabled\", selectedWhen: \"turnOverIsSelected\", undoneAs: \"Turn Card\" })"
                 },
                 "py": {
-                  "code": "class Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                  "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
                 }
               }
             },

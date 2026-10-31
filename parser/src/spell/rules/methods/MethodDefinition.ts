@@ -514,7 +514,7 @@ export class MethodDefinition<
       args,
       // body's `.AST` is generically typed `ASTNode`, but is always a
       // StatementBlock/Statement/Expression by construction of block / inline-statement parsing.
-      body: this.getBody(match)?.AST as P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined
+      body: this.bodyAST(match)
     })
 
     if (asTest) {
@@ -615,6 +615,11 @@ export class MethodDefinition<
     }
 
     return new P.ASTStatementGroup(match, { statements: output })
+  }
+
+  /** What the method does:  its body's lines, as a rule with no body of its own may say otherwise (`operation_at`). */
+  protected bodyAST(match: P.MatchFor<this>): P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined {
+    return this.getBody(match)?.AST as P.ASTStatementBlock | P.ASTStatement | P.ASTExpression | undefined
   }
 
   /**

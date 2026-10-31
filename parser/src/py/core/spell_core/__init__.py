@@ -12,7 +12,8 @@
 from spell_core.apps import App, Page, View, ViewableList
 from spell_core.console import SpellConsole
 from spell_core.core import Core, core
-from spell_core.drawing import h
+from spell_core.drawing import Element, h
+from spell_core.events import SpellEvent
 from spell_core.lists import List
 from spell_core.notebook import Notebook
 from spell_core.positions import end_position, position, spell_position, with_spell_positions
@@ -24,6 +25,7 @@ from spell_core.two_sided_view import TwoSidedView
 __all__ = [
     "App",
     "Core",
+    "Element",
     "List",
     "Loader",
     "Notebook",
@@ -32,6 +34,7 @@ __all__ = [
     "SavedRef",
     "Saver",
     "SpellConsole",
+    "SpellEvent",
     "StateMirror",
     "StateWriter",
     "Thing",

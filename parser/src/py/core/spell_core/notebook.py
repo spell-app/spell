@@ -4,11 +4,13 @@
 - The twin of the JavaScript core's `Notebook`:  what a view made from it extends.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from spell_core.apps import Page
-from spell_core.drawing import h
+from spell_core.drawing import Element, h
 from spell_core.things import prop
+
+Lock = Literal["unlocked", "locked"]
 
 
 class Notebook(Page):
@@ -25,7 +27,7 @@ class Notebook(Page):
     LOCKS = ("unlocked", "locked")
     lock = prop(one_of=LOCKS)
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         """its content:  the editor app draws its own page around it, with the sections and the toolbar"""
         return h("slot", {"name": "content"}, self.draw_content())
 

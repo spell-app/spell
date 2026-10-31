@@ -118,14 +118,16 @@ export class RestPlace extends WebPlace implements Place {
 
   /**
    * `POST` to a named operation's address:  what the server answers.
+   * - A row of `collection` goes in the server's own names, as a write does.
    * - throws `TypeError` for an operation it wasn't told of;  `PlaceError` for an answer that means something
    */
-  async call(name: string, input: unknown, context: SelectingContext): Promise<unknown> {
+  async call(name: string, input: unknown, context: SelectingContext, collection?: string): Promise<unknown> {
     const path = this.operations[name]
     if (path === undefined) {
       throw new TypeError(`RestPlace.call():  nobody says where "${name}" is;  name it in \`operations\``)
     }
-    const response = await this.answerTo({ url: path, urlData: {}, method: "POST", data: input as never }, context)
+    const data = collection && input ? this.onTheWire(collection, input as PlaceRow) : input
+    const response = await this.answerTo({ url: path, urlData: {}, method: "POST", data: data as never }, context)
     return jsonIn(response)
   }
 

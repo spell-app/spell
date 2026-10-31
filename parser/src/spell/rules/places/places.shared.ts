@@ -13,6 +13,7 @@ import { textIn } from "./PlaceDetail"
  *   - `saysWhatChanged`:  it tells us;  a kind that doesn't warns unless its line says how often to ask.
  *   - `hasOtherPeople`:  `false`, only you ever change what's in it:  `when someone else changes it` warns.
  *   - `knowsWhoIsHere`:  `the people here` can list more than you.
+ *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
 export const PLACE_KIND_ABILITIES: Readonly<
@@ -24,10 +25,11 @@ export const PLACE_KIND_ABILITIES: Readonly<
       saysWhatChanged?: boolean
       hasOtherPeople?: boolean
       knowsWhoIsHere?: boolean
+      takesOperations?: boolean
     }
   >
 > = {
-  "web service": {},
+  "web service": { takesOperations: true },
   "graph service": {},
   folder: {},
   file: { hasOtherPeople: false },

@@ -538,7 +538,19 @@ export type ASTVariableExpressionProps = Prettify<{
   raw?: string
   variable?: P.ScopeVariable
   plurality?: "singular" | "plural"
+  handles?: HandledEvent
 }>
+
+/**
+ * The event a template's handler hears, on its `event` parameter:  what its type comes from (epic `rust` P2).
+ * - An explicit property, as a handler's method name changes with the language:  names aren't identifiers.
+ */
+export type HandledEvent = {
+  /** The event's name, spell's, as `core.send()` keys it:  `score-change`, `key-down`. */
+  event: string
+  /** The property whose change it is, by spell's name, for `- when its score changes:`. */
+  changedProperty?: string
+}
 
 export class ASTVariableExpression extends ASTExpression {
   declare name: string
@@ -547,6 +559,8 @@ export class ASTVariableExpression extends ASTExpression {
   declare raw: string | undefined
   declare variable: P.ScopeVariable | undefined
   declare plurality: "singular" | "plural" | undefined
+  /** On a template's handler's `event` parameter:  the event it hears. */
+  declare handles: HandledEvent | undefined
   /** `name` defaults to `match.value` when not passed. */
   constructor(match: P.AnyMatch, props?: ASTVariableExpressionProps) {
     super(match, props)

@@ -4,7 +4,7 @@ import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
 
-const { attributeName, isCoreCall, kindFromDatatype, unwrapped } = P.jsShapes
+const { attributeName, isCoreCall, kindFromDatatype, textValue, unwrapped } = P.jsShapes
 
 /****************
  * ### `PyBaseWriter`
@@ -52,7 +52,16 @@ export class PyBaseWriter extends P.ProgramWriter {
   }
 
   /** What `spell_core` gives besides spell's runtime names, imported when the code uses them -- see `module()`. */
-  static CORE_EXTRAS = ["prop", "h", "position", "spell_position", "end_position", "with_spell_positions"]
+  static CORE_EXTRAS = [
+    "prop",
+    "h",
+    "position",
+    "spell_position",
+    "end_position",
+    "with_spell_positions",
+    "Element",
+    "SpellEvent"
+  ]
 
   /** How Python says nothing:  `None`, for a range with no end -- see `P.ProgramWriter.positionArgs()`. */
   nothing = "None"
@@ -69,12 +78,14 @@ export class PyBaseWriter extends P.ProgramWriter {
    * (`ruff`'s F401, an unused import).
    */
   module(code: string): string {
+    const events = this.eventDeclarations()
+    if (events) code = `${code.replace(/\n*$/, "")}\n\n\n${events}\n`
     const imported = code.replace(/^from spell_core import (.*)$/m, (_line, names: string) => {
       const body = code.slice(code.indexOf("\n"))
       // what the code says that only Python's writer does:  a stored property, an element
       const all = [...names.split(/,\s*/), ...PyBaseWriter.CORE_EXTRAS]
       // a function by its call, `position(...)`:  a variable may say the word
-      const used = all.filter((name) => new RegExp(`\\b${name}\\b${CALLED.has(name) ? "\\(" : ""}`).test(body))
+      const used = all.filter((name) => usesCoreName(body, name))
       return used.length ? `from spell_core import ${used.join(", ")}` : ""
     })
     // the standard library's modules it uses, first, in order, as PEP 8 orders imports:
@@ -82,7 +93,7 @@ export class PyBaseWriter extends P.ProgramWriter {
     const standard = [
       /\bmath\.\w+\(/.test(imported) && "import math",
       /\bre\.compile\(/.test(imported) && "import re",
-      /(?:: |-> |\[)Any\b/.test(imported) && "from typing import Any"
+      typingImport(imported)
     ].filter(Boolean)
     // then a blank line, then the rest:  PEP 8's groups
     const withStandard = standard.length ? `${standard.join("\n")}\n\n${imported.replace(/^\n+/, "")}` : imported
@@ -1133,7 +1144,9 @@ export class PyBaseWriter extends P.ProgramWriter {
     // a bare `return` in it is its own, even in a loop's body
     this.returnContinues = false
     try {
-      const params = [...(first ? [first] : []), ...(node.args ?? []).map((arg) => this.param(arg))]
+      // a method's parameter may be named for a property of its class;  a function inside it, nothing to do with one
+      const memberOf = inClassBody ? this.currentClass : undefined
+      const params = [...(first ? [first] : []), ...(node.args ?? []).map((arg) => this.param(arg, memberOf))]
       const body = this.inBlock(() => {
         this.noteParams(node)
         return this.blockBody(node.body)
@@ -1151,19 +1164,42 @@ export class PyBaseWriter extends P.ProgramWriter {
     }
   }
 
-  /** A parameter, by our name, with its hint where spell knows its kind:  `suit: str`, `pile: Pile | None = None`. */
-  param(arg: P.ASTVariableExpression): string {
+  /**
+   * A parameter, by our name, with its hint where spell knows its kind:  `suit: Suit`, `pile: Pile | None = None`.
+   * - `memberOf`:  the class it's a method of, so it may be named for a property, or a value kind -- see `paramHint()`.
+   */
+  param(arg: P.ASTVariableExpression, memberOf?: string): string {
     const name = this.variableName(arg)
     // spell can't tell what it is:  `Any`, said out loud (Owen, Q30)
-    const hint = this.hintOf(kindOfDatatype(arg.datatype ?? arg.variable?.datatype)) ?? "Any"
+    const hint = this.paramHint(arg, memberOf) ?? "Any"
     const defaultValue = arg.default ? this.bare(arg.default) : undefined
     return defaultValue === undefined ? `${name}: ${hint}` : `${name}: ${hint} = ${defaultValue}`
+  }
+
+  /**
+   * What parameter `arg` is, as a hint, as `TSWriter.paramType()` works it out:
+   * - spell's own datatype for it
+   * - a template's handler's `event`:  its event's own type, `KeyDownEvent`, once anything says what it holds
+   * - a method's parameter named for a property of its class:  that property's -- `is_a_rank(self, rank: Rank)`
+   * - a value kind's parameter named for it:  one of its values
+   * - `undefined` if spell can't tell
+   */
+  paramHint(arg: P.ASTVariableExpression, memberOf: string | undefined): string | undefined {
+    const declared = this.hintOf(kindOfDatatype(arg.datatype ?? arg.variable?.datatype))
+    if (declared) return declared
+    if (arg.handles && this.eventShapeOf(arg.handles.event)) return this.eventTypeName(arg.handles.event)
+    if (!memberOf) return undefined
+    const property = this.slotProperty(arg)
+    if (property) return this.hintOf(this.propertyKind(property))
+    const list = this.valueKindList(arg)
+    return list && this.valueListHint(list)
   }
 
   /**
    * What `method` returns, as a hint:
    * - `None` when it never returns a value
    * - else the kind all its returns share, `str`, with `| None` after it when one may give nothing
+   * - `Element` for a drawing, `None` for a test:  Python's `with` block returns nothing
    * - `undefined` when they differ or can't be told
    * - Worked out in its class, its parameters known -- see `ProgramWriter.returnedKinds()`.
    */
@@ -1171,6 +1207,10 @@ export class PyBaseWriter extends P.ProgramWriter {
     const returns: P.ASTReturnStatement[] = []
     forEachReturn(method.body, (node) => returns.push(node))
     if (!returns.some((it) => it.value)) return "None"
+    if (returns.every((it) => it.value && isTestCall(it.value))) return "None"
+    const isDrawing = returns.every((it) => it.value && unwrapped(it.value) instanceof P.ASTJSXElement)
+    // a class of the program's may take the name
+    if (isDrawing) return this.project.isClass("Element") ? undefined : "Element"
     const kinds = this.inPlace({ typeName: this.currentClass ?? "", methods: [method] }, () =>
       this.returnedKinds(method)
     )
@@ -1197,6 +1237,33 @@ export class PyBaseWriter extends P.ProgramWriter {
     return this.inPlace({ typeName: this.currentClass ?? "", methods: [method] }, () => this.mayBeNothing(value))
   }
 
+  /**
+   * What returning `value` gives:  through a call of the program's own method, what THAT returns --
+   * `return await self.put_on_pile(pile)` gives what `put_on_pile()` gives.
+   * - TypeScript has no need:  it works this out by itself.
+   * - One already being worked out can't be told.
+   */
+  protected returnKindsOf(value: P.ASTExpression): Array<string | undefined> {
+    const inner = unwrapped(value)
+    const call = inner instanceof P.ASTAwaitExpression ? unwrapped(inner.expression) : inner
+    if (!(call instanceof P.ASTScopedMethodInvocation) || call.thing instanceof P.ASTCoreExpression) {
+      return super.returnKindsOf(value)
+    }
+    const method = this.project.methodOf(this.kindOf(call.thing), call.methodName)
+    if (!method || this.returnsBeingTold.has(method)) return super.returnKindsOf(value)
+    this.returnsBeingTold.add(method)
+    try {
+      const owner = this.kindOf(call.thing) ?? ""
+      const kinds = this.inPlace({ typeName: owner, methods: [method] }, () => this.returnedKinds(method))
+      return kinds ? [...kinds] : [undefined]
+    } finally {
+      this.returnsBeingTold.delete(method)
+    }
+  }
+
+  /** The methods `returnKindsOf()` is working out:  one that calls itself can't be told. */
+  private returnsBeingTold = new Set<P.ASTMethodDefinition>()
+
   /** May each `return` written give nothing, as `mayBeNothing()` said in its place -- see `returnsNothingMaybe()`. */
   protected returnsInPlace = new WeakMap<P.ASTReturnStatement, boolean>()
 
@@ -1205,6 +1272,7 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - `str`, `bool`, a class
    * - `float`, which takes an `int` too, as PEP 484 has it
    * - `List` (spell's), `list` (Python's)
+   * - a list of values' own name, `Rank` -- see `valueListHint()`
    */
   hintOf(kind: string | undefined): string | undefined {
     if (kind === "text") return "str"
@@ -1212,7 +1280,72 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (kind === "choice") return "bool"
     if (kind === "list") return "List"
     if (kind === "array") return "list"
+    const list = this.valueListOfKind(kind)
+    if (list) return this.valueListHint(list)
     return kind && this.project.isClass(kind) ? this.typeNameOf(kind) : undefined
+  }
+
+  /**
+   * The type of each event the program's templates handle:  `TSWriter.eventDeclarations()`, as Python says it.
+   * - `ClickEvent = SpellEvent` for one holding only what every event does.
+   * - A class for one holding more, so its fields can be read:  an event is made as a `SpellEvent`, its fields read by
+   *   name, so a class only ever says what it has.
+   * - `""` if none.
+   */
+  eventDeclarations(): string {
+    const basics: string[] = []
+    const classes: string[] = []
+    for (const name of this.project.handledEvents.keys()) {
+      const shape = this.eventShapeOf(name)
+      if (!shape) continue
+      const typeName = this.eventTypeName(name)
+      if (!shape.size) basics.push(`${typeName} = SpellEvent`)
+      else {
+        const fields = [...shape].map(([field, kind]) => {
+          const hint = this.isNameableKind(kind) ? this.hintOf(kind) : undefined
+          return `${this.nameOf(field, "variable")}: ${hint ?? "Any"}`
+        })
+        classes.push(pyText.block(`class ${typeName}(SpellEvent)`, fields.join(pyText.NEWLINE)))
+      }
+    }
+    const written = [...(basics.length ? [basics.join(pyText.NEWLINE)] : []), ...classes]
+    return written.length ? `# what each event this program hears holds\n${written.join("\n\n\n")}` : ""
+  }
+
+  /**
+   * The hint for one of `list`'s values:  its alias, `Rank`, written above its class (`valueListAliases()`);
+   * without a name free for one, `Literal["red", "black"]` -- `undefined` if `Literal` can't say its values.
+   */
+  valueListHint(list: P.TSList): string | undefined {
+    const literal = this.literalOf(list)
+    return literal && (list.type ? this.typeNameOf(list.type) : literal)
+  }
+
+  /**
+   * `list`'s values as a hint:  `Literal["ace", 2, "king"]`.
+   * - `undefined` when it holds what `Literal` can't say:  a number with a fraction, or anything but plain values.
+   */
+  literalOf(list: P.TSList): string | undefined {
+    const value = unwrapped(list.definition.value)
+    if (!(value instanceof P.ASTEnumeration)) return undefined
+    if (value.values.some((it) => typeof it === "number" && !Number.isInteger(it))) return undefined
+    return `Literal${pyText.call("", this.items(value.enumeration), ["[", "]"])}`
+  }
+
+  /**
+   * What goes above class `node`:  a name for one of each of its lists' values, `Rank = Literal["ace", 2, ...]`.
+   * - As TypeScript's `export type Rank = (typeof Card.Ranks)[number]`.
+   * - Python can't work a `Literal` out from the tuple, so it says the values again.
+   */
+  valueListAliases(node: P.ASTClassDeclaration): string {
+    const lists = [...this.project.lists.values()]
+    const own = (node.members ?? []).flatMap((member) => lists.filter((list) => list.definition === member))
+    return own
+      .flatMap((list) => {
+        const literal = this.literalOf(list)
+        return list.type && literal ? [`${this.typeNameOf(list.type)} = ${literal}`] : []
+      })
+      .join(pyText.NEWLINE)
   }
 
   /**
@@ -1309,7 +1442,12 @@ export class PyBaseWriter extends P.ProgramWriter {
     this.inClassBody = true
     try {
       const body = this.inClass(type.name, () => this.statementLines(members ?? []))
-      return pyText.block(`class ${this.typeNameOf(type.name)}${base}`, [docstring, body].filter(Boolean).join("\n\n"))
+      const written = pyText.block(
+        `class ${this.typeNameOf(type.name)}${base}`,
+        [docstring, body].filter(Boolean).join("\n\n")
+      )
+      const aliases = this.valueListAliases(node)
+      return aliases ? `${aliases}\n\n\n${written}` : written
     } finally {
       this.inClassBody = previous
     }
@@ -1562,6 +1700,28 @@ function forEachReturn(body: unknown, callback: (node: P.ASTReturnStatement) => 
   for (const [key, value] of Object.entries(body)) if (key !== "match") forEachReturn(value, callback)
 }
 
+/** Is `value` spell's test, `core.test(name, fn)`?  Python writes it as a `with` block, which returns nothing. */
+function isTestCall(value: P.ASTExpression): boolean {
+  const inner = unwrapped(value)
+  return isCoreCall(inner) && (inner as P.ASTScopedMethodInvocation).methodName === "test"
+}
+
+/**
+ * Does module `body` use `spell_core`'s `name`?
+ * - A function by its call, `position(...)`:  a variable may say the word.
+ * - `Element` by its hint:  a comment may say the word.
+ */
+function usesCoreName(body: string, name: string): boolean {
+  if (name === "Element") return /-> Element\b/.test(body)
+  return new RegExp(`\\b${name}\\b${CALLED.has(name) ? "\\(" : ""}`).test(body)
+}
+
+/** `from typing import ...`, for the hints `code` says:  `Any`, a hint spell couldn't tell;  `Literal`, a list's values. */
+function typingImport(code: string): string | false {
+  const names = [/(?:: |-> |\[)Any\b/.test(code) && "Any", /\bLiteral\[/.test(code) && "Literal"].filter(Boolean)
+  return names.length > 0 && `from typing import ${names.join(", ")}`
+}
+
 /** The kind (`kindOf()`'s word) of a value spell declares as `datatype`:  `text`, `number`, a class's name. */
 function kindOfDatatype(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   return kindFromDatatype(datatype)
@@ -1614,16 +1774,6 @@ function isDefinitionStatement(node: P.ASTNode): boolean {
 function textLiteral(node: P.ASTExpression): string | undefined {
   const inner = unwrapped(node)
   return inner instanceof P.ASTStringLiteral && inner.quote ? inner.value : undefined
-}
-
-/** The text `node` says, written out (`"integer"`) -- `undefined` if it isn't text written out. */
-function textValue(node: P.ASTExpression | undefined): string | undefined {
-  const inner = node && unwrapped(node)
-  if (inner instanceof P.ASTStringLiteral) return inner.value
-  if (inner instanceof P.ASTConstantExpression) return String(inner.value)
-  if (!(inner instanceof P.ASTQuotedExpression)) return undefined
-  const quoted = inner.expression
-  return quoted instanceof P.ASTLiteral ? String(quoted.value) : undefined
 }
 
 /**

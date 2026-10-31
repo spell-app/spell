@@ -52,6 +52,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Un {kind} no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
   "people-here-only-you":
     "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala en vivo",
+  "operation-outside-place":
+    "Esta acción llega a un lugar solo en una línea debajo de ese lugar, así que aquí no hace nada:  muévela debajo del lugar",
+  "operation-not-taken":
+    "Un {kind} no acepta una acción en una dirección propia, así que esto fallaría al ejecutarse:  hace falta un servicio web",
+  "draw-items-of-a-thing":
+    "Un {type} no es una lista, así que no tiene elementos que dibujar:  un dibujo propio lo dibuja él, en sus propias líneas",
+  "type-from-itself":
+    'Nada puede hacerse de sí mismo:  "{name}" ya es una clase de cosa, así que llama a esta de otra forma',
   "where-looks-through":
     "Esto no se puede enviar al lugar, que solo busca valores exactos:  lee cada {type} y las revisa aquí, hasta un límite",
   "sort-key-waits":

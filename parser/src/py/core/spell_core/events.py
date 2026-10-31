@@ -25,7 +25,17 @@ Handler = Callable[..., object]
 
 
 class SpellEvent:
-    """An event:  its `type`, e.g. `card-click`, and what it carries, read as attributes -- `event.card`."""
+    """An event:  its `type`, e.g. `card-click`, and what it carries, read as attributes -- `event.card`.
+
+    - What every event shares, as the JavaScript core's `SentEvent`:
+      - `target`:  the thing whose handler is running
+      - `original_target`:  the thing it was triggered on first
+      - `sender`:  the thing that sent it, if one did
+    """
+
+    target: object | None = None
+    original_target: object | None = None
+    sender: object | None = None
 
     def __init__(self, type: str, **props: object) -> None:
         """An event of `type`, carrying `props`:  `SpellEvent("card-click", card=card)`."""
@@ -98,6 +108,9 @@ class Eventful:
         if isinstance(event, str):
             event = SpellEvent(event)
         event.__dict__.update(props)
+        if event.original_target is None:
+            event.original_target = self
+        event.target = self
         results: list[object] = []
         for handler in list(self._handlers_for(event.type) or []):
             try:

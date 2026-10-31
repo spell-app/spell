@@ -23,6 +23,9 @@ const SAME_ITEMS = new Set(["filter", "sortedBy", "firstFew", "reversed", "filte
 /** `core`'s calls after which a thing's whole row must be here:  undo puts it back, or it's written again. */
 const NEEDS_WHOLE_ROW = new Set(["removeSaved", "saveThing", "draftOf"])
 
+/** `core`'s call that sends a thing, whole, to a place's named operation, and where in its arguments the thing is. */
+const SENDS_WHOLE_ROW = { call: "callPlace", argument: 2 }
+
 /** A thing's own name:  `core` reads it for a reference to it, `Foundation#clubs`, whatever a program does. */
 const THINGS_NAME = "name"
 
@@ -400,7 +403,9 @@ export class ReadGathering {
     if (methodName === "on") this.noteListener(args[0], node)
     if (SAVED_READS.has(methodName)) this.noteSavedRead(node, args, facts)
     else if (NEEDS_WHOLE_ROW.has(methodName)) this.noteWholeRow(node, args, at)
-    else if (methodName === "drawThing") this.noteDraw(args[0], facts, at)
+    else if (methodName === SENDS_WHOLE_ROW.call && args[SENDS_WHOLE_ROW.argument]) {
+      this.noteWholeRow(node, args.slice(SENDS_WHOLE_ROW.argument), at)
+    } else if (methodName === "drawThing") this.noteDraw(args[0], facts, at)
     this.noteCallbacks(args, at)
   }
 

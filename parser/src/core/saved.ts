@@ -21,7 +21,7 @@
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
- *   plain data, one object per page, so `the person is the current person` means what it says.
+ *   plain data, one object per page, so `the person is me` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
@@ -803,9 +803,20 @@ export const savedMethods = defineCoreModule({
     await things.inOneGroup(run)
   },
 
-  /** Who's at this page:  what `the current person` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
+  /** Who's at this page:  what `me` compiles to.  With no sign-in, the name its server knows them by, else a guest. */
   currentPerson(): PersonHere {
     return programPlaces().me
+  },
+
+  /**
+   * Is `value` the person at this page:  what `its cook is me` compiles to.
+   * - By their `id`:  what's saved of a person comes back a new object each time it's read.
+   * - Or a text, their name or their id:  `its "cook" is text`, with `cook = my name`.
+   */
+  isMe(value: unknown): boolean {
+    const { me } = programPlaces()
+    if (typeof value === "string") return value === me.name || value === me.id
+    return (value as { id?: unknown } | undefined | null)?.id === me.id
   },
 
   /**
@@ -839,10 +850,12 @@ export const savedMethods = defineCoreModule({
   },
 
   /**
-   * `run`, through the place named `placeName`, by the operation `name`:  what an action under a place's line compiles to.
+   * Run the operation `name` of the place named `placeName`:  what `to publish a recipe is at "..."` compiles to.
+   * - `input`:  what's sent, the recipe, as its row:  left out, nothing is.
+   * - Waits for the place's answer, and answers with it.
    * - throws `PlaceError` if the place says no;  `TypeError` if it takes no named operations
    */
-  async callPlace(placeName: string, name: string, input: unknown): Promise<unknown> {
+  async callPlace(placeName: string, name: string, input?: unknown): Promise<unknown> {
     const program = programPlaces()
     await program.load()
     const behind = program.placesNow!.placeFor(placeName)
@@ -850,7 +863,9 @@ export const savedMethods = defineCoreModule({
       throw new TypeError(`core.callPlace():  "${placeName}" takes no named operations, so "${name}" can't reach it`)
     }
     const things = program.thingMakerNow!
-    return behind.call(name, things.rowValue(input), {})
+    const sent = input === undefined ? undefined : things.rowSent(input)
+    const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
+    return behind.call(name, sent, {}, savedIn?.collection)
   },
 
   /**

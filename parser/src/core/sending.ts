@@ -37,6 +37,8 @@ import { holderOf } from "./classes/List"
 /**
  * The event `send()` hands each handler, and returns.
  * - Its params are on it by name:  `send flipped with side = up` gives `event.side`.
+ * - What compiled TypeScript's event types build on, one per event name:
+ *   `export type KeyDownEvent = SentEvent & { key: string }` (`TSWriter.eventDeclarations()`, epic `rust` P2).
  */
 export class SentEvent extends SpellEvent {
   /** The thing it was sent to:  `the original target`. */

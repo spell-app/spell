@@ -5,7 +5,7 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 912, end: 932 } })
+  @prop({ type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 891, end: 911 } })
   accessor título!: string
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {
@@ -65,7 +65,7 @@ export class CajaEnVivo extends App {
 
   @drawn draw() {
     return [
-      <ui-text class="me">{core.currentPerson().nombre}</ui-text>,
+      <ui-text class="me">{core.currentPerson().name}</ui-text>,
       core.drawRead(() => core.peopleHere(), (persona) => <ui-label class="here">{persona.nombre}</ui-label>),
       <ui-text class="news">{this.noticias}</ui-text>,
       <ui-text class="changes">{this.cambios}</ui-text>,

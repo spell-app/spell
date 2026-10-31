@@ -4,7 +4,7 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 912, end: 932 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 891, end: 911 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
@@ -48,7 +48,7 @@ export class CajaEnVivo extends App {
 
   draw() {
     return [
-      h("ui-text", { class: "me" }, () => core.currentPerson().nombre),
+      h("ui-text", { class: "me" }, () => core.currentPerson().name),
       core.drawRead(() => core.peopleHere(), (persona) => h("ui-label", { class: "here" }, () => persona.nombre)),
       h("ui-text", { class: "news" }, () => this.noticias),
       h("ui-text", { class: "changes" }, () => this.cambios),
