@@ -291,6 +291,13 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - TypeScript reads every folder's source, so no `spell-types --below` runs between them;  except the app's node
   program (`app/tsconfig.node.json`, React's JSX for the Ink screens), which reads declarations:  its `yarn ts` runs
   `spell-types --below` first.
+- Lint's type-aware rules read declarations too, for every node-only file:  so every `lint` builds them first,
+  as `ts` does (`spell-types`;  the app's `--below`;  the kit's `node bin/spell-types.ts`;  epic `epic-engine` I176).
+  - Why:  the linter's type checker (tsgolint) finds only files named `tsconfig.json`.
+    A file only `tsconfig.node.json` includes (a folder's `src/cli/` ...) gets a program of default settings,
+    with no `spell-source`, so its `spell/...` imports resolve to `dist-types/`.
+  - Missing or stale declarations made their types `error`:  `no-redundant-type-constituents` failed on
+    `string | TranslatedType` in parser's `NamesReview.ts`, and on `UIVocabulary | undefined` in the app.
 - esbuild, used directly, takes the toolchain's `sourceNames()` plugin, which finds our names as their source files
   (a folder's too:  `spell/ui/core` => `ui/src/core.ts`).
 - A bundler reads `sideEffects` off the package a name resolves through:  the kit's `package.json` lists every
