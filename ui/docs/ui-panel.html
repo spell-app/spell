@@ -69,7 +69,7 @@
 
               <ui-section id="examples-types-pane" label="Pane" sticky="stack" collapsible dividing>
                 <ui-example
-                  description='`appearance="pane"` is a whole pane under one flat bar, with no box of its own.  Put a toolbar in its `slot="actions"`, and the chevron, the toolbar\'s items and its actions read as one row.  Closed, only the bar is left, still saying which is chosen.  Give it a hidden `slot="label"`:  the fold button needs a name.'
+                  description='`appearance="pane"` is a whole pane under one flat bar, with no box of its own.  Put a toolbar in its `slot="actions"`, and the chevron, the toolbar&apos;s items and its actions read as one row.  Closed, only the bar is left, still saying which is chosen.  Give it a hidden `slot="label"`:  the fold button needs a name.'
                 >
                   <div style="max-width: 380px; height: 160px; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
                     <ui-panel appearance="pane" collapsible fold-icon="start">
@@ -81,6 +81,20 @@
                         <ui-icon slot="right" name="eye slash" link label="Hide"></ui-icon>
                       </ui-toolbar>
                       <p style="margin: 12px">The pane's content fills what's left, and can scroll by itself.</p>
+                    </ui-panel>
+                  </div>
+                </ui-example>
+                <ui-example
+                  description="With no `collapsible`, the bar is just what's in it, the same height:  the way to head a pane that doesn't fold, such as a row of file tabs.  In a pane, `label` is for screen readers:  what the bar says is in its actions."
+                >
+                  <div style="max-width: 380px; height: 110px; border: 1px solid var(--ui-border-color); border-radius: 12px; overflow: hidden">
+                    <ui-panel appearance="pane" label="Files">
+                      <ui-toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first aria-label="Files">
+                        <ui-item selected>Card.spellml</ui-item>
+                        <ui-item>Deck.spellml</ui-item>
+                        <ui-item>Pile.spellml</ui-item>
+                      </ui-toolbar>
+                      <p style="margin: 12px">The file's code.</p>
                     </ui-panel>
                   </div>
                 </ui-example>

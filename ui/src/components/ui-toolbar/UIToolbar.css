@@ -91,19 +91,20 @@
     flex: 0 1 auto;
   }
   /*
-   * a header's row (`appearance="segmented header"`):  it takes the row, its items sharing it, its actions after them
+   * a header's row (`appearance="segmented header"`):  its items hug their words, its actions at the far end
    * - the actions as quiet as its caret, each with room to press:  `--ui-toolbar-header-action-gap`
    */
   .ui.toolbar > .ui.segmented.header.menu:not([class*="fluid aligned"]) {
-    --_ui-menu-item-flex: 1 1 0;
-    flex: 1 1 auto;
+    --_ui-menu-item-flex: 0 0 auto;
+    flex: 0 1 auto;
   }
   .ui.toolbar:has(> .ui.segmented.header.menu) > .right {
     --ui-icon-width: auto;
     --ui-icon-distance: 0;
     --ui-icon-link-opacity: 1;
     gap: var(--ui-toolbar-header-action-gap, 10px);
-    margin-inline-start: 8px;
+    margin-inline-start: auto;
+    padding-inline-start: 8px;
     color: var(--ui-text-muted);
     font-size: var(--ui-menu-segmented-header-font-size, 13px);
   }

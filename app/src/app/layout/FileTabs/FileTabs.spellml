@@ -1,5 +1,5 @@
 # The file tabs
-Every file of the project as a tab over the code, in the theme's tab look.
+Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
 A click shows that file, and a file with changes not saved shows a dot.
 The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 
@@ -22,21 +22,10 @@ The editor's own side of it, which files there are and what showing one does, is
 	<property "files">a new file list</>
 	<spell>
 		<css>
-			ui-toolbar::part(toolbar) {
-				padding-inline: 8px 0;
-				padding-block-start: 6px;
-			}
-			ui-toolbar::part(menu) {
-				margin-block: 0;
-				min-height: 0;
-			}
-			ui-item::part(item) {
-				gap: 6px;
-				white-space: nowrap;
-			}
 			/* the dot on a tab whose file isn't saved:  the theme's warning hue */
 			.NotSaved {
 				display: inline-block;
+				margin-inline-start: 6px;
 				width: 7px;
 				height: 7px;
 				border-radius: 50%;
@@ -48,8 +37,10 @@ The editor's own side of it, which files there are and what showing one does, is
 		</css>
 	</spell>
 	<draw>
-		<ui-toolbar appearance="tabular" size="small" aria-label="Files">
-			{draw each file in its files}
-		</ui-toolbar>
+		<ui-panel appearance="pane" label="Files">
+			<ui-toolbar slot="actions" appearance="segmented link header" tabs shrinkable scroll-first label="Files">
+				{draw each file in its files}
+			</ui-toolbar>
+		</ui-panel>
 	</draw>
 </spell-view>

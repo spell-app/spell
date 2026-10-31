@@ -4,8 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
-import { appTexts } from "spell/app/app/ui/AppTexts"
-import { FileDropdown, trackProjectFiles } from "./FileDropdown"
+import { trackProjectFiles } from "./FileDropdown"
 
 import "./FileTabs.css"
 
@@ -15,8 +14,7 @@ import "./FileTabs.css"
  * This is the editor's side of them, which Spell can't reach yet (epic `editor`'s Backing In Spell):
  * - which files there are, and which is showing (`trackProjectFiles()`), kept in the bar's files as they change
  * - what showing one does:  `editor.showEditor()`
- * - Narrower than two tabs and a button:  the file dropdown instead (`<FileDropdown>`), by a container query
- *   (`FileTabs.css`).
+ * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()
@@ -30,7 +28,7 @@ export function FileTabs() {
       setPiece(() => loaded)
       setBar(() => new loaded.exports.FileTabBar() as FileTabBar)
     },
-    // no tabs, but the dropdown's still a way round:  a person can go on
+    // no tabs:  the code still shows, and File > Open is a way round
     (problem: unknown) => console.error("<FileTabs>:  can't load its Spell", problem)
   )
 
@@ -52,14 +50,7 @@ export function FileTabs() {
     }
   )
 
-  return (
-    <div class="FileTabs">
-      {piece()?.draw(bar()) as JSX.Element}
-      <ui-menu size="small" class="FileTabsNarrow" aria-label={appTexts.text("fileTabs")}>
-        <FileDropdown />
-      </ui-menu>
-    </div>
-  )
+  return <div class="FileTabs">{piece()?.draw(bar()) as JSX.Element}</div>
 }
 
 /** A file in `FileTabs.spellml`, as its compiled class has it. */

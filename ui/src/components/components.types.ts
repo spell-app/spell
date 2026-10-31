@@ -173,7 +173,7 @@ export type ItemContext = {
 }
 
 /** Roles an owner may give an item's root. */
-export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem"
+export type ItemRole = "menuitem" | "menuitemradio" | "menuitemcheckbox" | "option" | "treeitem" | "tab"
 
 /**
  * What an owner of `<ui-item>`s (`<ui-list>`, `<ui-menu>`, `<ui-items>`) implements on its COMPONENT;

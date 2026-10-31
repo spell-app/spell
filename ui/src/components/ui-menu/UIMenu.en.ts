@@ -229,6 +229,14 @@ export const menuVocabulary = {
         "showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
     },
     {
+      name: "tabs",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  " +
+        "one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+    },
+    {
       name: "interactive",
       group: "behaviour",
       kind: "boolean",

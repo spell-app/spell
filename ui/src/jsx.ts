@@ -17388,6 +17388,16 @@ export interface UIMenuAttributes {
    */
   "prop:shrinkable"?: boolean | ""
   /**
+   * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  tabs?: boolean | ""
+  /**
+   * `tabs`, as the DOM element's property.
+   * @deprecated write `tabs` -- `prop:` stays only for compiled spell
+   */
+  "prop:tabs"?: boolean | ""
+  /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
    */
@@ -35609,6 +35619,16 @@ export interface UIToolbarAttributes {
    */
   "prop:shrinkable"?: boolean | ""
   /**
+   * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  tabs?: boolean | ""
+  /**
+   * `tabs`, as the DOM element's property.
+   * @deprecated write `tabs` -- `prop:` stays only for compiled spell
+   */
+  "prop:tabs"?: boolean | ""
+  /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
    */
@@ -35618,6 +35638,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `interactive` -- `prop:` stays only for compiled spell
    */
   "prop:interactive"?: boolean | ""
+  /**
+   * With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files.
+   * - takes:  flag (present / absent)
+   */
+  "scroll-first"?: boolean | ""
+  /**
+   * `scroll-first`, as the DOM element's property.
+   * @deprecated write `scroll-first` -- `prop:` stays only for compiled spell
+   */
+  "prop:scrollFirst"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)

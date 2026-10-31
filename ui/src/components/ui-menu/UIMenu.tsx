@@ -168,9 +168,10 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   @E.derived({ equals: isSameContext })
   get ownItemContext(): UIT.ItemContext {
     const isInteractive = this.interactive
+    const isTabs = this.isTabs
     return {
-      domElementRole: isInteractive ? "none" : undefined,
-      role: isInteractive ? "menuitem" : undefined,
+      domElementRole: isInteractive || isTabs ? "none" : undefined,
+      role: isTabs ? "tab" : isInteractive ? "menuitem" : undefined,
       // a form's segmented control (`name`) chooses with a click, as a toggle row does
       interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination || this.choosesMany || this.isAFormValue,
       current: "page",
@@ -393,6 +394,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   // ## Fitting titles (`shrinkable`)
   ////////////////
 
+  /** A segmented row scrolls before it's a dropdown:  a menu's never does (`UIToolbar`). */
+  protected get scrollsFirst(): boolean {
+    return false
+  }
+
   /** It fits its titles to its row:  `shrinkable`, a top-level menu whose items run sideways. */
   get isShrinking(): boolean {
     return this.shrinkable && !this.parentMenu && !this.isVertical
@@ -437,6 +443,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       domElement: this.domElement,
       children: () => this.fitChildren(),
       isSegmented: () => this.isSegmented,
+      scrollsFirst: () => this.scrollsFirst,
       onAnswer: (answer) => this.onFitAnswer(answer)
     })
     this.titleFit = fit
@@ -760,6 +767,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return !this.parentMenu && this.interactive
   }
 
+  /** Top-level `tabs`:  a `role=tablist` of `role=tab`s, one Tab stop, arrow keys between them;  not while `interactive`. */
+  get isTabs(): boolean {
+    return !this.parentMenu && !!this.tabs && !this.interactive
+  }
+
+  /** Keys move between its items:  a live menubar, or tabs once rendered. */
+  get isRoving(): boolean {
+    return this.isMenubar || (this.isTabs && this.isReady)
+  }
+
   /** The menubar is live:  top-level, `interactive`, rendered. */
   get isMenubar(): boolean {
     return !this.parentMenu && this.interactive && this.isReady
@@ -777,9 +794,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   private bar: HTMLElement | undefined
 
   /** SIDE EFFECT:  a roving tabindex over the item DOM elements while this is a menubar;  returns its stop. */
-  @E.onChange("isMenubar", "orientation")
-  protected onMenubarChanged(isMenubar: boolean, orientation: E.RovingOrientation) {
-    if (!isMenubar) return
+  @E.onChange("isRoving", "orientation")
+  protected onMenubarChanged(isRoving: boolean, orientation: E.RovingOrientation) {
+    if (!isRoving) return
     E.afterSolidUpdate(() => this.startRoving(orientation))
     return () => this.stopRoving()
   }
@@ -894,9 +911,13 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
         </Match>
         <Match when={true}>
           <nav
-            ref={(element: HTMLElement) => (this.box = element)}
+            ref={(element: HTMLElement) => {
+              this.bar = element
+              this.box = element
+            }}
             class={this.rootClass}
             part={this.partForName("menu")}
+            role={this.isTabs ? "tablist" : undefined}
             aria-label={this.landmarkLabel}
           >
             {this.overflowButtonBox()}

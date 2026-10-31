@@ -45,7 +45,7 @@
   .ui.segment:not(.basic),
   .ui.section:is(.bordered, .styled),
   .ui.section:is(.block, .styled) > .title,
-  .ui.menu:not(.secondary, .text, .tabular),
+  .ui.menu:not(.secondary, .text, .tabular, .segmented.header),
   .ui.popup,
   .ui.dropdown .menu[role="listbox"],
   .ui.modal,

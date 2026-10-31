@@ -27,6 +27,17 @@ export const toolbarVocabulary = {
     "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end " +
     "while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every " +
     "`<ui-menu>` attribute.",
+  attributes: [
+    ...menuVocabulary.attributes,
+    {
+      name: "scroll-first",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's " +
+        "`--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
+    }
+  ],
   slots: [
     ...menuVocabulary.slots,
     { name: "icon", description: "First, at the start:  an icon or an icon button (a menu button)." },
@@ -46,7 +57,10 @@ export const toolbarVocabulary = {
   ],
   states: [
     ...menuVocabulary.states,
-    { name: "overflowing", description: "Its items don't all fit:  they scroll sideways (never once `shrinkable`)." }
+    {
+      name: "overflowing",
+      description: "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
+    }
   ],
   texts: [
     ...menuVocabulary.texts,

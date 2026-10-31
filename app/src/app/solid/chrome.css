@@ -196,16 +196,19 @@ ui-item.ThemeMenu ui-theme-menu {
  *   (Owen:  "inconsistent colors in icons";  "header icons should all be dark gray rather than black"):
  *   a link icon is drawn at 80% by default
  */
+/* a pane's bar (`<ui-panel appearance="pane">`), everywhere in the editor, wears the headers' fill */
+:root {
+  --ui-panel-pane-bar-background: var(--spell-header-background);
+}
 ui-menu.AppMenu,
 ui-menu.PanelMenu,
-.AppPaneHeader,
-.RunnerPaneTools {
+.AppPaneHeader {
   --spell-bar-group-gap: 60px;
   --spell-bar-icon-gap: 12px;
   --spell-bar-icon-color: var(--ui-text-muted);
 }
 /* every bar's icons:  the top bar's, a pane header's, a pane toolbar's (the code pane's:  upload, reload, new file, "...") */
-:is(ui-menu.AppMenu, ui-menu.PanelMenu, .AppPaneHeader, .RunnerPaneTools) ui-icon.IconAction {
+:is(ui-menu.AppMenu, ui-menu.PanelMenu, .AppPaneHeader) ui-icon.IconAction {
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
   --ui-icon-link-opacity: 1;
@@ -240,27 +243,10 @@ ui-menu.AppMenu ui-item.ThemeMenu::part(item) {
 ui-menu.AppMenu ui-item.ModeButtons::part(item) {
   padding-inline: 0;
 }
-/*
- * ... a segmented menu (the theme's segmented tabs), its thumb sliding to the mode chosen, drawn as the docs
- * site's tabs (Owen:  "I like this appearance better"):  a half-white band round the grey track, the chosen tab a
- * raised white pill
- */
-ui-menu.ModeTabs {
-  /* no border of its own (below), so none taken off its inside:  Spell UI's menu still took 1px,
-     and Merlot's chosen tab sat 5px in from its 8px track, not 6px (J117);  `0px`, as a bare 0 breaks its calc() */
-  --ui-border-width: 0px;
-  --ui-menu-segmented-item-padding: 0.3em 1.1em;
-  --ui-menu-segmented-border: 0 solid transparent;
-  /* the track and its band let the bar's background show through (Owen:  "what if the background bled through") */
-  --ui-menu-segmented-background: light-dark(rgb(40 20 90 / 0.06), rgb(255 255 255 / 0.06));
-}
-ui-menu.ModeTabs::part(menu) {
-  box-shadow: 0 0 0 2px light-dark(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.05));
-}
+/* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item::part(item) {
   gap: 0.4em;
-  /* the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
-  padding-block: 0.3em;
+  padding-block: 0.42em;
 }
 
 /*
@@ -303,54 +289,6 @@ ui-item.ThemeMenu ui-theme-menu::part(palette) {
 ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   background: transparent;
   color: var(--spell-bar-icon-color);
-}
-
-/*
- * The Program panel's tab bar (the Inspector's Views | Things | Templates is `appearance="segmented header"` now):  a header like every other pane's
- * (40px, see-through, a hairline under it), its tabs a slim track in it, as the docs site's tabs
- * (Owen:  "doesn't match ... too tall, colors don't match, font size difference"):
- * - the track:  the tabs sharing the header's width evenly, the chosen one a raised white pill (Owen:  "still want
- *   the buttons to be pills")
- * - the tabs' text the headers' size
- */
-:root {
-  --spell-tabs-track: light-dark(rgb(40 20 90 / 0.06), rgb(255 255 255 / 0.06));
-}
-ui-toolbar.RunnerPaneToolbar {
-  --ui-menu-segmented-background: var(--spell-tabs-track);
-  --ui-menu-segmented-border: 0 solid transparent;
-  --ui-menu-segmented-radius: 9999px;
-  --ui-menu-segmented-padding: 2px;
-  --ui-menu-segmented-item-radius: 9999px;
-  /* taller pills in the same 40px header (Owen:  "make the buttons taller leaving the header the same height") */
-  --ui-menu-segmented-item-padding: 0.5em 0.85em;
-  /* the words a shade darker and heavier (Owen:  "the text is a little light") */
-  --ui-menu-segmented-item-color: var(--ui-text-dark, var(--ui-text-color));
-  /* the size of a header's plain words (the code pane's menus), a step under its bold title */
-  --ui-font-size: 13px;
-  font-size: 13px;
-}
-ui-toolbar.RunnerPaneToolbar > ui-item::part(item) {
-  flex: 1 1 0;
-  font-weight: 500;
-  min-width: max-content;
-  justify-content: center;
-}
-/*
- * the Program panel's tabs scroll (`<ui-toolbar>`):  the track is the toolbar's own box, not its menu's,
- * so its rounded ends stay put while the tabs scroll under them, the fade and the `‹` / `›` inside them
- * - on the menu, the fade took the track's end with it, cut square under the `›`
- */
-ui-toolbar.RunnerPaneToolbar {
-  --ui-menu-segmented-background: transparent;
-}
-ui-toolbar.RunnerPaneToolbar::part(toolbar) {
-  border-radius: 9999px;
-  background: var(--spell-tabs-track);
-}
-/* ... as tall as its tabs:  a menu keeps room above and below it for the text round it, and here there's none */
-ui-toolbar.RunnerPaneToolbar::part(menu) {
-  margin-block: 0;
 }
 
 /*

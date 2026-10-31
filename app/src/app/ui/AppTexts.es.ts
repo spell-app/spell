@@ -127,7 +127,6 @@ const APP_TEXTS_ES: AppTextPack = {
   stopInspecting: "Dejar de inspeccionar",
   inspectHelp: "Haz clic en una parte de la app para inspeccionarla.  Alt y clic, en una parte de dentro.  Esc para.",
   inspectHelpClose: "Cerrar",
-  fileTabs: "Archivos",
   notSaved: "Sin guardar",
 
   ////////////////
@@ -179,8 +178,6 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorProperties: "Propiedades",
   inspectorThings: "Cosas",
   inspectorTemplates: "Plantillas",
-  inspectorFold: "Cerrar",
-  inspectorUnfold: "Abrir",
   inspectorHide: "Ocultar esta tarjeta",
   inspectorLetGo: "Soltar {part} (Esc)",
   inspectorExpandAll: "Desplegar todo",

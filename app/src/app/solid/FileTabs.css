@@ -1,41 +1,13 @@
 /*
- * Look of `<FileTabs>`'s row (`FileTabs.tsx`);  the tabs' own look is in `FileTabs.spellml`.
- * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
- * - Narrower than two tabs and a scroll button (about 280px), the file dropdown instead:  a container query.
+ * `<FileTabs>`'s place over the code (`FileTabs.tsx`);  the tabs are a pane's bar, in `FileTabs.spellml`.
+ * - Its height while its Spell loads:  the code below stays where it'll be.
+ * - The bar follows the pane's rounded top.
  */
 
 .FileTabs {
   flex: 0 0 auto;
-  container: FileTabs / inline-size;
-  /* the row's height, while its Spell loads:  the code below stays where it'll be */
-  min-height: 44px;
-  /* the pane header's fill, under the tabs, as the panes' headers had */
-  background: var(--spell-header-background);
+  overflow: clip;
+  min-height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
   border-start-start-radius: var(--spell-pane-radius, 0);
   border-start-end-radius: var(--spell-pane-radius, 0);
-
-  /* the narrow column's dropdown:  hidden while the tabs fit */
-  & > ui-menu.FileTabsNarrow {
-    display: none;
-  }
-  & > ui-menu.FileTabsNarrow::part(menu) {
-    min-height: 40px;
-    margin: 0;
-    padding-inline: 8px;
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--ui-border-color);
-    border-radius: 0;
-    box-shadow: none;
-  }
-}
-
-/* too narrow for two tabs and a scroll button:  one dropdown of every file */
-@container FileTabs (width < 280px) {
-  .FileTabs > :first-child:not(ui-menu) {
-    display: none;
-  }
-  .FileTabs > ui-menu.FileTabsNarrow {
-    display: contents;
-  }
 }

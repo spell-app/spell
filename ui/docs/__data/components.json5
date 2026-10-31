@@ -17242,6 +17242,11 @@
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
         },
         {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+        },
+        {
           "name": "interactive",
           "kind": "boolean",
           "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
@@ -36700,9 +36705,19 @@
           "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
         },
         {
+          "name": "tabs",
+          "kind": "boolean",
+          "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default."
+        },
+        {
           "name": "interactive",
           "kind": "boolean",
           "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
+        },
+        {
+          "name": "scroll-first",
+          "kind": "boolean",
+          "description": "With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files."
         },
         {
           "name": "disabled",
@@ -36926,7 +36941,7 @@
         },
         {
           "name": "overflowing",
-          "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
+          "description": "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
         },
         {
           "name": "disabled",
@@ -45568,7 +45583,7 @@
         },
         {
           "name": "--ui-menu-segmented-header-item-padding",
-          "default": "0.5em 0.85em",
+          "default": "0.42em 0.7em",
           "type": "length"
         },
         {
@@ -46169,12 +46184,12 @@
         },
         {
           "name": "--ui-panel-pane-bar-height",
-          "default": "40px",
+          "default": "max(40px, calc(var(--ui-control-height, 0px) + 12px))",
           "type": "length"
         },
         {
           "name": "--ui-panel-pane-bar-padding",
-          "default": "8px",
+          "default": "6px 8px",
           "type": "length"
         },
         {

@@ -14,21 +14,20 @@ import { on } from "./on"
 
 /****************
  * ### `<InspectorCard>`
- * The Inspector's properties card:  a header, in the editor's theme as the App pane's, over its body, in the brand's.
- * - The Views card is a pane already (`<InspectorViews>`);  this one follows once its look is settled (`editor` P2).
- * - The header:  a caret, the card's icon and title (`title`), then its own buttons (`actions`) and Close.
- * - A click on the caret or title folds the card to its header, or unfolds it (`Inspector.toggleFolded()`).
- * - Close hides the card (`Inspector.setShown()`);  the Inspector's button, held, shows it again.
+ * One of the Inspector's cards:  a pane (`<ui-panel appearance="pane">`), ONE bar over its body.
+ * - The bar:  the chevron, then `bar` (the card's tabs, or what's picked), its `actions`, and the eye.
+ * - The chevron folds the card to its bar, or unfolds it (`Inspector.toggleFolded()`), which remembers.
+ * - The eye hides the card (`Inspector.setShown()`);  the Inspector's button, held, shows it again.
  * - The body scrolls by itself, and is drawn only while the card is unfolded.
  ****************/
 export function InspectorCard(props: {
   /** Which card. */
   panel: InspectorPanel
-  /** Its title. */
-  title: JSX.Element
-  /** Its title's icon. */
-  icon?: string
-  /** Its own buttons, before Close. */
+  /** What a screen reader calls it. */
+  label: string
+  /** What the bar says:  `<ui-item>`s, or `slot="title"`. */
+  bar?: JSX.Element
+  /** Its own buttons, before the eye:  `slot="right"`. */
   actions?: JSX.Element
   /** The body's class. */
   class?: string
@@ -36,35 +35,40 @@ export function InspectorCard(props: {
   children?: JSX.Element
 }): JSX.Element {
   const isFolded = () => Inspector.isFolded(props.panel)
+  const setFolded = (folded: boolean) => {
+    if (folded !== isFolded()) Inspector.toggleFolded(props.panel)
+  }
   return (
-    <section class={["InspectorCard", { folded: isFolded() }]} data-panel={props.panel}>
-      <header class="AppPaneHeader InspectorCardHead">
-        <h2
-          aria-expanded={isFolded() ? "false" : "true"}
-          title={appTexts.text(isFolded() ? "inspectorUnfold" : "inspectorFold")}
-          onClick={() => Inspector.toggleFolded(props.panel)}
-        >
-          <ui-icon name={isFolded() ? "caret right" : "caret down"} class="InspectorCardFold" />
-          <Show when={props.icon}>{(icon) => <ui-icon name={icon()} />}</Show>
-          {props.title}
-        </h2>
+    <ui-panel
+      appearance="pane"
+      class={["InspectorCard", { folded: isFolded() }]}
+      data-panel={props.panel}
+      label={props.label}
+      collapsible=""
+      fold-icon="start"
+      open={isFolded() ? "false" : undefined}
+      ref={(panel: HTMLElement) => {
+        on("ui-closing", () => setFolded(true))(panel)
+        on("ui-opening", () => setFolded(false))(panel)
+      }}
+    >
+      <ui-toolbar slot="actions" appearance="segmented link header" tabs="" shrinkable="" label={props.label}>
+        {props.bar}
         {props.actions}
         {/* an eye, not a ✕:  it hides the card, never lets go of what's picked (`<LetGo>`, I92) */}
         <ui-icon
+          slot="right"
           name="eye slash"
           link=""
-          class="IconAction InspectorHideCard"
           label={appTexts.text("inspectorHide")}
-          data-tooltip={appTexts.text("inspectorHide")}
-          data-position="bottom right"
-          data-inverted=""
+          title={appTexts.text("inspectorHide")}
           onClick={() => Inspector.setShown(props.panel, false)}
         />
-      </header>
+      </ui-toolbar>
       <Show when={!isFolded()}>
         <div class={["Inspector", "InspectorSection", props.class]}>{props.children}</div>
       </Show>
-    </section>
+    </ui-panel>
   )
 }
 
@@ -109,7 +113,7 @@ export function appParts(): () => PartRow[] {
  * ### `<InspectorViews>`
  * The Inspector's bottom card:  the app as Views, Things or Templates, which its header switches between
  * (remembered:  `VIEW_PREF`).
- * - Its header is ONE bar (`<ui-panel appearance="pane">`):  the chevron, the views, then its actions.
+ * - It's an `<InspectorCard>`:  the chevron, the views, then its actions.
  *   Closed, the bar is left, still saying which view is chosen;  choosing one opens the card.
  * - Views:  the running app's parts as a tree (`<PartsTree>`);  the header's double chevron folds them all, or
  *   unfolds them all, as the epic page's does.
@@ -122,15 +126,11 @@ export function InspectorViews(props: {
   rows: readonly PartRow[]
 }): JSX.Element {
   const [view, setView] = createSignal((editorPrefs.get(VIEW_PREF) as ViewId | undefined) ?? "views")
-  const isFolded = () => Inspector.isFolded("views")
-  const setFolded = (folded: boolean) => {
-    if (folded !== isFolded()) Inspector.toggleFolded("views")
-  }
   // choosing a view while closed shows it
   const show = (id: ViewId) => {
     setView(id)
     editorPrefs.set(VIEW_PREF, id)
-    setFolded(false)
+    if (Inspector.isFolded("views")) Inspector.toggleFolded("views")
   }
   const parents = () => shownRows(props.rows, new Set()).filter((row) => row.hasChildren)
   const isAllFolded = () => {
@@ -140,27 +140,11 @@ export function InspectorViews(props: {
   // the Things view's state, kept here so it outlives switching views
   let thingsState: ThingExplorerState = {}
   return (
-    <ui-panel
-      appearance="pane"
-      class={["InspectorCard", { folded: isFolded() }]}
-      data-panel="views"
-      collapsible=""
-      fold-icon="start"
-      open={isFolded() ? "false" : undefined}
-      ref={(panel: HTMLElement) => {
-        on("ui-closing", () => setFolded(true))(panel)
-        on("ui-opening", () => setFolded(false))(panel)
-      }}
-    >
-      <span slot="label" class="ui-visually-hidden">
-        {appTexts.text(VIEW_TEXTS.views)}
-      </span>
-      <ui-toolbar
-        slot="actions"
-        appearance="segmented link header"
-        shrinkable=""
-        label={appTexts.text(VIEW_TEXTS.views)}
-      >
+    <InspectorCard
+      panel="views"
+      label={appTexts.text(VIEW_TEXTS.views)}
+      class="InspectorViews"
+      bar={
         <For each={VIEWS}>
           {(id) => (
             <ui-item selected={view() === id} onClick={() => show(id)}>
@@ -169,6 +153,8 @@ export function InspectorViews(props: {
             </ui-item>
           )}
         </For>
+      }
+      actions={
         <Show when={view() === "views" && parents().length}>
           <ui-icon
             slot="right"
@@ -179,51 +165,39 @@ export function InspectorViews(props: {
             onClick={() => setFolds(isAllFolded() ? [] : parents().map((row) => row.key))}
           />
         </Show>
-        {/* an eye, not a ✕:  it hides the card, never lets go of what's picked (`<LetGo>`, I92) */}
-        <ui-icon
-          slot="right"
-          name="eye slash"
-          link=""
-          label={appTexts.text("inspectorHide")}
-          title={appTexts.text("inspectorHide")}
-          onClick={() => Inspector.setShown("views", false)}
-        />
-      </ui-toolbar>
-      <Show when={!isFolded()}>
-        <div class="Inspector InspectorSection InspectorViews">
-          <Switch>
-            <Match when={view() === "views"}>
-              <PartsTree rows={props.rows} />
-            </Match>
-            <Match when={view() === "things"}>
-              <Show
-                when={runtimeCore()?.things}
-                keyed
-                fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}
-              >
-                {(things) => (
-                  <ThingExplorer
-                    things={things}
-                    words={editor.programWords}
-                    state={thingsState}
-                    onStateChange={(changed) => (thingsState = changed)}
-                    onSelect={(thing) => Inspector.inspectThing(thing)}
-                  />
-                )}
-              </Show>
-            </Match>
-            <Match when={view() === "templates"}>
-              <TypeExplorer
-                tree={editor.scopeTree}
-                onOpen={editor.openScopeLink}
-                loadDetails={editor.scopeDetails}
-                onRefresh={() => void editor.refreshScopes()}
+      }
+    >
+      <Switch>
+        <Match when={view() === "views"}>
+          <PartsTree rows={props.rows} />
+        </Match>
+        <Match when={view() === "things"}>
+          <Show
+            when={runtimeCore()?.things}
+            keyed
+            fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}
+          >
+            {(things) => (
+              <ThingExplorer
+                things={things}
+                words={editor.programWords}
+                state={thingsState}
+                onStateChange={(changed) => (thingsState = changed)}
+                onSelect={(thing) => Inspector.inspectThing(thing)}
               />
-            </Match>
-          </Switch>
-        </div>
-      </Show>
-    </ui-panel>
+            )}
+          </Show>
+        </Match>
+        <Match when={view() === "templates"}>
+          <TypeExplorer
+            tree={editor.scopeTree}
+            onOpen={editor.openScopeLink}
+            loadDetails={editor.scopeDetails}
+            onRefresh={() => void editor.refreshScopes()}
+          />
+        </Match>
+      </Switch>
+    </InspectorCard>
   )
 }
 

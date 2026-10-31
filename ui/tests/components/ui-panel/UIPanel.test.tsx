@@ -325,4 +325,35 @@ describe("<ui-panel> accessibility", () => {
     expect(host.querySelectorAll("ui-panel").length).toBeGreaterThan(0)
     await expectAccessible(host)
   })
+
+  describe("a pane's bar", () => {
+    it("with no way to fold it:  its label is for screen readers", async () => {
+      const host = await ElementFixture.render(
+        '<ui-panel appearance="pane" label="Files"><span slot="actions">tabs</span></ui-panel>'
+      )
+      await ElementFixture.settle()
+      const heading = host.shadowRoot!.querySelector<HTMLElement>("[part~=heading]")!
+      expect(heading.textContent).toContain("Files")
+      expect(heading.getBoundingClientRect().width).toBeLessThanOrEqual(1)
+    })
+
+    it("folding:  the triangle has 14px to itself, 6px in", async () => {
+      const host = await ElementFixture.render(
+        '<ui-panel appearance="pane" label="Views" collapsible fold-icon="start"></ui-panel>'
+      )
+      await ElementFixture.settle()
+      const toggle = host.shadowRoot!.querySelector<HTMLElement>("button.toggle")!
+      expect(toggle.getBoundingClientRect().width).toBe(14)
+      expect(toggle.getBoundingClientRect().left - host.getBoundingClientRect().left).toBe(6)
+    })
+
+    it("at least 40px, and the theme's control height with 6px round it", async () => {
+      const host = await ElementFixture.render(
+        '<ui-panel appearance="pane" label="Files" style="--ui-control-height: 36px"></ui-panel>'
+      )
+      await ElementFixture.settle()
+      const title = host.shadowRoot!.querySelector<HTMLElement>("[part~=title]")!
+      expect(title.getBoundingClientRect().height).toBe(48)
+    })
+  })
 })

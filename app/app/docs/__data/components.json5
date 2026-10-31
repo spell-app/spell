@@ -1693,12 +1693,6 @@
           "description": "Append `Actions.FILE_DROPDOWN_ACTIONS` after a divider -- never in the static build, which has none."
         }
       ],
-      "usedIn": [
-        {
-          "name": "FileTabs",
-          "file": "src/app/solid/FileTabs.tsx"
-        }
-      ],
       "href": "FileDropdown.html"
     },
     {

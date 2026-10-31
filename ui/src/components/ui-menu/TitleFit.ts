@@ -10,6 +10,7 @@ import { E } from "spell/ui/core"
  *   4. once even the icons don't fit (a button under `--ui-menu-item-min`, 34px):  the items fold into ONE overflow
  *      button, whose menu holds them all
  * - A `segmented` menu has two:  whole, else a dropdown (its overflow button showing the chosen item).
+ *   - A toolbar's `scroll-first` puts one between them:  the row scrolls while it has `--ui-toolbar-scroll-min`.
  * - Plain DOM, no Solid, shaped like `SegmentedThumb`:  `<ui-menu>` hands it its box and a way to find its items,
  *   starts it, and hears each new answer (`onAnswer`).
  * - The maths are pure statics (`cap()`, `fit()`), tested on their own.
@@ -112,7 +113,10 @@ export class TitleFit {
     const sizes = this.measure(rows, others)
     if (sizes.fitsWhole) return WHOLE
     const titlesRoom = sizes.room - sizes.fixed.reduce((sum, width) => sum + width, 0)
-    if (this.setup.isSegmented()) return TitleFit.cap(sizes.titles, titlesRoom) === undefined ? WHOLE : OVERFLOW
+    if (this.setup.isSegmented()) {
+      if (TitleFit.cap(sizes.titles, titlesRoom) === undefined) return WHOLE
+      return this.setup.scrollsFirst?.() && sizes.room >= sizes.scrollMin ? WHOLE : OVERFLOW
+    }
     return TitleFit.fit(sizes.titles, titlesRoom, sizes.titleMin, {
       widths: sizes.icons,
       room: sizes.room,
@@ -149,13 +153,14 @@ export class TitleFit {
     )
     const titleMin = TitleFit.lengthOf(style.getPropertyValue(TITLE_MIN), fontSize, DEFAULT_TITLE_MIN)
     const itemMin = TitleFit.lengthOf(style.getPropertyValue(ITEM_MIN), fontSize, DEFAULT_ITEM_MIN)
+    const scrollMin = TitleFit.lengthOf(style.getPropertyValue(SCROLL_MIN), fontSize, DEFAULT_SCROLL_MIN)
     let icons: number[] = []
     if (!this.setup.isSegmented()) {
       this.present(ICONS)
       icons = rows.map(({ box: itemBox }) => TitleFit.outerWidthOf(itemBox))
     }
     this.present(this.answer)
-    return { fitsWhole, room, titles, fixed, icons, titleMin, itemMin }
+    return { fitsWhole, room, titles, fixed, icons, titleMin, itemMin, scrollMin }
   }
 
   /** Write `answer`'s look:  `--_menu-fit` and `--_menu-title-max` on the box, the stage's `:state()`. */
@@ -322,6 +327,8 @@ export type TitleFitSetup = {
   children: () => { rows: FitRow[]; others: Element[] }
   /** a segmented menu:  whole, else a dropdown */
   isSegmented: () => boolean
+  /** a segmented menu scrolls while it has `--ui-toolbar-scroll-min`, rather than become a dropdown (`scroll-first`) */
+  scrollsFirst?: () => boolean
   /** the stage changed */
   onAnswer: (answer: FitAnswer) => void
 }
@@ -345,6 +352,8 @@ type FitSizes = {
   icons: number[]
   titleMin: number
   itemMin: number
+  /** the least room a `scroll-first` row scrolls in */
+  scrollMin: number
 }
 
 ////////////////
@@ -366,10 +375,14 @@ const TITLE_MAX = "--_menu-title-max"
 /** The two minimums' aliases, declared on the menu's box (`UIMenu.css`). */
 const TITLE_MIN = "--_ui-menu-title-min"
 const ITEM_MIN = "--_ui-menu-item-min"
+/** The token of the least room a `scroll-first` row scrolls in. */
+const SCROLL_MIN = "--ui-toolbar-scroll-min"
 
 /** Their defaults, should a token not read as a length. */
 const DEFAULT_TITLE_MIN = 50
 const DEFAULT_ITEM_MIN = 34
+/** `SCROLL_MIN`, unset. */
+const DEFAULT_SCROLL_MIN = 200
 
 /** How far past its box a title may run, in px, and still count as whole:  layout's rounding. */
 const HAIR = 0.5

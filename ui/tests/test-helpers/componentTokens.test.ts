@@ -63,6 +63,7 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
       "a zoom's backdrop is dark whatever the page's theme (its own `--ui-zoom-backdrop`):  it sets its modal's dimmer"
   },
   "ui-property-editor/UIPropertyEditor.css": {
+    "--ui-button-padding-block": "a compact editor's buttons, as its inputs:  it sets no control height for them",
     "--ui-input-padding-block": "a compact editor's inputs are tight, about 24px tall, as an inspector's",
     "--ui-input-padding-inline": "a compact editor's inputs are tight, about 24px tall, as an inspector's",
     "--ui-select-padding-block": "a compact editor's selects are tight, as its inputs",

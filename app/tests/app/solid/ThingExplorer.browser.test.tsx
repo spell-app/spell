@@ -186,9 +186,9 @@ describe("<ThingExplorer> (Solid, live)", () => {
   test("the order buttons switch to by-type", async () => {
     new Card({ rank: "queen" })
     const host = await mount({ open: ["type:Card"] })
-    host.querySelectorAll<HTMLElement>("ui-icon.order")[1]!.click()
+    host.querySelectorAll<HTMLElement>("ui-item.order")[1]!.click()
     flush()
-    expect(host.querySelector("ui-icon.order.active")!.getAttribute("title")).toBe(
+    expect(host.querySelector("ui-item.order.active")!.getAttribute("title")).toBe(
       "By template, sub-templates included"
     )
     expect(groupLabels(host)).toEqual(["Card1"])

@@ -125,7 +125,6 @@ export const APP_TEXTS = {
   stopInspecting: "Stop Inspecting",
   inspectHelp: "Click a part of the app to inspect it.  Alt-click for a part inside it.  Esc stops.",
   inspectHelpClose: "Close",
-  fileTabs: "Files",
   notSaved: "Not saved",
 
   ////////////////
@@ -341,8 +340,6 @@ export const APP_TEXTS = {
   inspectorProperties: "Properties",
   inspectorThings: "Things",
   inspectorTemplates: "Templates",
-  inspectorFold: "Close",
-  inspectorUnfold: "Open",
   inspectorHide: "Hide this card",
   inspectorLetGo: "Let go of {part} (Esc)",
   inspectorExpandAll: "Expand all",
