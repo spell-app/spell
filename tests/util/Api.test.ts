@@ -46,6 +46,13 @@ describe("Api.request()", () => {
     expect(fetchMock.mock.calls[0]![1]).toMatchObject({ keepalive: true })
   })
 
+  it("says how it treats the browser's cache, when told", async () => {
+    await api.request({ url: "/part", cache: "no-cache" })
+    expect(fetchMock.mock.calls[0]![1]).toMatchObject({ cache: "no-cache" })
+    await api.request({ url: "/part" })
+    expect(fetchMock.mock.calls[1]![1]).not.toHaveProperty("cache")
+  })
+
   it("GETs a templated URL with data as query parameters and parses JSON", async () => {
     const result = await api.request({
       url: "/api/{kind}",

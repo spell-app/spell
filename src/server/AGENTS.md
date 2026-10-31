@@ -374,7 +374,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `ChunkFiles`:  a folder of files as a place's chunks:  the file half of `ChunkedPlace`, the app's `SpaceStorage` shape
       - versions through `FileOperations`' own conflict check, changes through `LiveReload`'s watching (no raw watcher)
       - its statics (`writeListAndBodies()` ...) are for a tool writing files straight off, in its own lock:  the epic page
-        tool, from epic `data`'s Epic Pages On Chunked Files on
+        tool's every write, since epic `data` P6 (`PlanDocFiles.writeDoc()`)
     - `FolderPlace`:  a folder as a place, a list file and one file per thing, on any `FolderStorage` (`ChunkFiles`, or the
       app's `DiskStorage` as it stands)
       - the files are the truth:  each read checks each file's version against the list file, and reads only what differs

@@ -195,10 +195,12 @@ const commentsRoutes: RouteModule = {
     router.post(API, guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }), async (request, reply) => {
       const change = toChange(request.body)
       const file = commentsPage(web.files, change.page)
+      // before the inbox's lock:  what takes a mark, from the page's list, which reads no body
+      const parts = takesAMark(change) && PLAN_DOC.test(file) ? await ReviewInbox.itemIdsOf(file) : new Set<string>()
       const id = await changeComments(
         file,
         (comments) => changeComment(comments, change),
-        (inbox, changed) => revisitFor(inbox, change, changed, file)
+        (inbox, changed) => revisitFor(inbox, change, changed, parts)
       ).catch((error: unknown) => {
         throw error instanceof CommentsError ? new SRV.HttpError(error.status, error.message) : error
       })
@@ -323,14 +325,18 @@ export async function changeComments<T>(
  * - a new comment, or one put back (Undo), in the text of an item, a phase or an Overview part presses its Revisit
  *   (`ReviewInbox.noteComment()`);  on a part already approved, the approve carries it, to fold in (I163)
  * - one deleted or cleared leaves every revisit or approve naming it (`ReviewInbox.dropComment()`)
- * - `id`:  the comment's, as the file keys it;  `file`:  the epic page, read for what takes a mark (`itemIds()`)
+ * - `id`:  the comment's, as the file keys it;  `parts`:  what takes a mark on the epic page (`itemIdsOf()`), when `takesAMark()`
  * - here, not in each element:  the docs runtime writes comments through this route, so the review client never sees
  *   one saved;  the page's review inbox follows the file's change, and the pill shows pressed
  */
-function revisitFor(inbox: ReviewInbox, change: CommentChange, id: string, file: string): void {
-  if (change.action === "add" || change.action === "restore")
-    inbox.noteComment(id, ReviewInbox.itemIds(readFileSync(file, "utf8")))
+function revisitFor(inbox: ReviewInbox, change: CommentChange, id: string, parts: Set<string>): void {
+  if (takesAMark(change)) inbox.noteComment(id, parts)
   else if (change.action === "delete" || change.action === "clear") inbox.dropComment(id)
+}
+
+/** Does `change` press a Revisit on what the comment's in:  a new comment, or one put back? */
+function takesAMark(change: CommentChange): boolean {
+  return change.action === "add" || change.action === "restore"
 }
 
 /** Make `change` in `comments`;  returns the comment's id, as the file keys it (`c3`, asked as `C3` or the old `cm3` too). */

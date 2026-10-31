@@ -1,7 +1,13 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
-import { dirname, join, posix } from "node:path"
+import { dirname, posix } from "node:path"
 
+import { ChunkedPlace } from "spell/util/places/ChunkedPlace"
 import { SRV } from "spell/server"
+// By file:  the barrel brings every place and their server, which an `epic` command doesn't need
+import { ChunkFiles } from "spell/server/places/ChunkFiles"
+
+import { EpicPageFormat, PART_EXT, PARTS_DIR, PART_SOURCE } from "./EpicPageFormat"
+
+export { PART_EXT, PARTS_DIR, PART_SOURCE }
 
 /****************
  * ### `PlanParts`
@@ -9,8 +15,10 @@ import { SRV } from "spell/server"
  * per bulky section or item, `epics/<name>/parts/<id>.html`, which the page loads the first time it's opened.  Rules:
  * `PLAN-DOC.md` beside this, "Parts".
  * - the parts' FILES and URLS:  where a part lives (`partFile()`), reading one (`reader()`), the few relative URLs a
- *   body still holds rebased to `parts/` and back (`rebase()`), formatting and writing (`formatHTML()`,
- *   `writeChanged()`)
+ *   body still holds rebased to `parts/` and back (`rebase()`), formatting (`formatHTML()`)
+ *   - the files are the kit's chunked files' (`ChunkFiles`, epic `data` P6), as `EpicPageFormat` says where they are:
+ *     `partFile()` and `reader()` call through, and `PlanDocFiles.writeDoc()` writes through it
+ *   - a page's place, for what needs only its list:  `placeOf()`
  *   - every other link is a ROOT PATH (epic `epic-engine` P46), the same text in a part as in its page:  only a
  *     page's links into its own folder stay relative (Owen's Q1), and a part's own `parts/` siblings
  * - `EpicParts` beside this splits and assembles a doc on them;  so does the converter (`spell-epic/convert`), whose
@@ -72,15 +80,21 @@ export class PlanParts {
 
   /** The file of part `id` of the skeleton at `file`:  `<folder>/parts/<id>.html`. */
   static partFile(file: string, id: string): string {
-    return join(dirname(file), PARTS_DIR, `${id}${PART_EXT}`)
+    return ChunkFiles.bodyFile(file, id, PART_FILES)
   }
 
   /** The part files of the skeleton at `file`, as a reader:  `id` -> its text, or `undefined`. */
   static reader(file: string): PartReader {
-    return (id) => {
-      const path = PlanParts.partFile(file, id)
-      return existsSync(path) ? readFileSync(path, "utf8") : undefined
-    }
+    return ChunkFiles.reader(file, PART_FILES)
+  }
+
+  /**
+   * The epic page at `file` as a place:  its collection is the page's file name.
+   * - `list()` reads the skeleton alone, no body:  what a mark checks against (`ReviewInbox.itemIdsOf()`)
+   * - read only:  edits go through `PlanDocFiles.edit()`, under its lock (epic `data` J13)
+   */
+  static placeOf(file: string): ChunkedPlace {
+    return new ChunkedPlace({ store: new ChunkFiles({ root: dirname(file) }), format: new EpicPageFormat() })
   }
 
   /**
@@ -90,42 +104,13 @@ export class PlanParts {
   static formatHTML(file: string, html: string): Promise<string> {
     return SRV.formatHTML(file, html)
   }
-
-  /**
-   * Write each `[file, text]` whose file doesn't already hold `text`, in order, each ATOMICALLY (a temp file beside
-   * it, then a rename:  a reader, or the page server's watcher, never sees half a file);  returns the files written.
-   * - the temp name ends `.tmp`:  the page server's watcher never reports it (`LiveReload` `IGNORED`)
-   * - makes missing folders (`parts/`)
-   */
-  static writeChanged(outputs: [file: string, text: string][]): string[] {
-    const written: string[] = []
-    for (const [file, text] of outputs) {
-      if (existsSync(file) && readFileSync(file, "utf8") === text) continue
-      mkdirSync(dirname(file), { recursive: true })
-      const temp = `${file}.${process.pid}.tmp`
-      try {
-        writeFileSync(temp, text)
-        renameSync(temp, file)
-      } finally {
-        rmSync(temp, { force: true })
-      }
-      written.push(file)
-    }
-    return written
-  }
 }
 
 /** Part `id`'s text, `undefined` when there's no such part. */
 export type PartReader = (id: string) => string | undefined
 
-/** The parts folder, beside the skeleton:  `epics/<name>/parts/`. */
-export const PARTS_DIR = "parts"
-
-/** A part file's extension:  a part is told from a page by its folder (see the class's banner). */
-export const PART_EXT = ".html"
-
-/** A part's `source`, as a skeleton writes it:  `parts/<id>.html`, `id` a section's or item's. */
-export const PART_SOURCE = /^parts\/([\w-]+)\.html$/
+/** Where a skeleton's parts are, to the chunked files. */
+const PART_FILES = { folder: PARTS_DIR, ending: PART_EXT }
 
 /** A file name in `parts/` that's a part:  `[, id]`. */
 export const PART_FILE = /^([\w-]+)\.html$/

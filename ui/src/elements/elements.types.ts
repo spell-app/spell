@@ -515,6 +515,22 @@ export type LoadableBodyOwner = {
   target(): Element
   /** dispatch vocabulary event `name` (`ui-loaded`, `ui-error`);  false when a cancelable one was vetoed */
   send(name: string, detail: object): boolean
+  /**
+   * The owner's own way to load this `source`'s text;  left out, or `undefined` for it:  `UI.sources`.
+   * - `<epic-*>` folds hand in their epic page's chunked place (`EpicBodies`);  the rest never do.
+   * - `fresh`:  past any cache of its own
+   * - `signal`:  aborted by a newer load, whose result makes this one moot
+   * - a rejection is the body's failure, as `UI.sources`' is
+   */
+  loadText?(source: string, request: BodyTextRequest): Promise<string> | undefined
+}
+
+/** How `LoadableBody` asks for a body's text (`LoadableBodyOwner.loadText()`). */
+export type BodyTextRequest = {
+  /** past any cache:  `reload()` */
+  fresh: boolean
+  /** aborted when a newer load starts */
+  signal: AbortSignal
 }
 
 /** What `DOMLoadableBodyElement` asks of its component (`<ui-section>`, `<ui-accordion>`). */

@@ -859,7 +859,8 @@ What a component, or a page built on Spell UI, reaches for first.
 - **It is:**  `ChunkedPlace` (`src/util/places/ChunkedPlace.ts`), handed a `ChunkFormat` and a `ChunkStore`:  summaries with no
   body read, each body when it's read;  writes the body first and the list last (`ChunkFiles`, for a tool writing straight off)
 - **Use it when:**  a long list ships as a skeleton, and each thing's body comes when it's opened.
-- **Copies:**  `epic/src/tool/PlanParts.ts` and `ui/src/elements/LoadableBody.ts`, until epic `data`'s Epic Pages On Chunked Files
+- **Copies:**  `--` since epic `data` P6:  epic pages read through it (`EpicPageFormat`), and write their files through `ChunkFiles`.
+  `LoadableBody` stays:  it's what draws a body, and any other section's still comes through `UI.sources`.
 
 ### A draft that saves itself
 

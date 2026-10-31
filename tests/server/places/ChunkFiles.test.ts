@@ -89,6 +89,12 @@ describe("ChunkFiles, straight to the files", () => {
     expect(read("p1")).toBe("text")
   })
 
+  test("a body's file, for a list named from where it is:  no `./` on the front", () => {
+    expect(ChunkFiles.bodyFile("x.plan.html", "p1", { folder: "parts", ending: ".html" })).toBe(
+      join("parts", "p1.html")
+    )
+  })
+
   test("bodies first and the list last, each only if changed, and what's gone removed", () => {
     const { list, body } = outputs()
     const first = ChunkFiles.writeListAndBodies({

@@ -70,7 +70,8 @@ export class Api {
     timeout,
     headers,
     responseType = "auto",
-    keepalive
+    keepalive,
+    cache
   }: ApiRequest): Promise<T> {
     let url = this.url(template, urlData)
     const controller = new AbortController()
@@ -82,7 +83,13 @@ export class Api {
     const signal = AbortSignal.any(signals.filter((it): it is AbortSignal => !!it))
     try {
       if (throttle > 0) await this.delay(throttle, signal)
-      const init: RequestInit = { method, headers: new Headers(headers), signal, ...(keepalive && { keepalive }) }
+      const init: RequestInit = {
+        method,
+        headers: new Headers(headers),
+        signal,
+        ...(keepalive && { keepalive }),
+        ...(cache && { cache })
+      }
       if (method === "GET" || method === "HEAD") url = this.withQuery(url, data)
       else this.setBody(init, data)
       const response = await fetchOk(url, (failure) => Api.failed(method, failure), init)

@@ -1,6 +1,6 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { readdir, readFile } from "node:fs/promises"
-import { dirname } from "node:path"
+import { dirname, join } from "node:path"
 
 import { PlaceError } from "spell/util/places/places.types"
 import { SRV } from "spell/server"
@@ -17,8 +17,8 @@ const QUIET_MS = 100
  * - A version is the file's `ETag`, as `StaticHandler` serves it;  a conflict is the file operations' own check (`ifMatch`).
  *   - An `ETag` is the size and the time to the millisecond:  two saves of one size in one millisecond look the same.
  * - Changes heard through `LiveReload`'s watching, so nothing here watches the disk by itself, and a save seen twice is told once.
- * - STATIC, for a tool that writes files straight off and in its own lock (the epic page tool):  `bodyFile()`, `reader()`,
- *   `writeChanged()`, `writeListAndBodies()`.
+ * - STATIC, for a tool that writes files straight off and in its own lock (`PlanParts` and `PlanDocFiles`, the epic page tool's,
+ *   since epic `data` P6):  `bodyFile()`, `reader()`, `writeChanged()`, `writeListAndBodies()`.
  * - Node only.  Every path stays inside `root`:  `..`, an absolute path or a dot file is refused (`SRV.fileInside()`).
  ****************/
 export class ChunkFiles {
@@ -126,7 +126,7 @@ export class ChunkFiles {
    * - `bodyFile("x/x.plan.html", "p1", { folder: "parts", ending: ".html" })` => `x/parts/p1.html`
    */
   static bodyFile(listFile: string, id: string, { folder, ending }: BodyFilePlace): string {
-    return `${dirname(listFile)}/${folder}/${id}${ending}`
+    return join(dirname(listFile), folder, `${id}${ending}`)
   }
 
   /** The bodies of the list at `listFile`, as a reader:  an id to its text, or `undefined`. */
@@ -138,10 +138,10 @@ export class ChunkFiles {
   }
 
   /**
-   * Write each `[file, text]` whose file doesn't already hold `text`, in order, each all at once, making its folders:
-   * the files written.
+   * Write each `[file, text]` whose file doesn't already hold `text`, in order, each all at once (a temp file beside it,
+   * then a rename:  a reader, or the page server's watcher, never sees half a file), making its folders:  the files written.
    * - Takes no lock:  the caller holds its own.
-   * - The temp name ends `.tmp`:  live reload never reports it.
+   * - The temp name ends `.tmp`:  live reload never reports it (`LiveReload`'s `IGNORED`).
    */
   static writeChanged(outputs: readonly ChunkFileOutput[]): string[] {
     const written: string[] = []

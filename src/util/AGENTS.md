@@ -191,6 +191,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `ChunkFiles`, in `spell/server/places`:  a folder).
     - A read names a field the summaries don't hold:  that's when bodies are read.  `bodyOf()`:  one body, no list.
     - Taken by file (`spell/util/places/ChunkedPlace`), it imports only `places.types`.
+    - `WebChunks` reads past the browser's cache (`no-cache`):  what's there now.
+    - Epic pages run on it every day (epic `data` P6, `EpicPageFormat`):  read only, whole-page writes staying the tool's.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.

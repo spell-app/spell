@@ -10,6 +10,7 @@ import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
 import { SHOW_NOTE, stopIfOwn } from "spell/epic/components/epic-review/EpicReview.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
 import { CONTROLS, DEEP_TIPS, Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
+import { EpicBodies } from "spell/epic/components/epic-item/EpicBodies"
 
 import {
   BODY,
@@ -67,7 +68,8 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   a nested one below its parent's title (the inner sections stack themselves).
  *   Its children get `--epic-stack`, the bottom of the stuck titles above them (px from the viewport top),
  *   for their own sticky lines (`<epic-item>`'s).
- * - Source:  `source="parts/p3.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
+ * - Source:  `source="parts/p3.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`),
+ *   through the epic page's chunked place (`EpicBodies`), a live re-fetch too.
  *   - into the DOM element's LIGHT children, replacing any placeholder;  `ui-loaded` then
  *   - the inner section stays folded while the part is on its way (`isVeiled`), so it opens on the body
  *   - from `file://` it can't load:  the `Loads from parts/x.html when opened (needs the page server)` note, as today
@@ -349,7 +351,8 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     source: () => this.partSource(),
     select: () => undefined,
     target: () => this.domElement,
-    send: (name, detail) => this.send(name as never, detail)
+    send: (name, detail) => this.send(name as never, detail),
+    loadText: (source, request) => EpicBodies.loadText(source, request)
   })
 
   /** Its `source`, for `body`:  untracked, so a load never follows it. */

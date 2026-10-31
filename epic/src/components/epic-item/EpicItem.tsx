@@ -17,6 +17,7 @@ import {
 } from "spell/epic/components/epic-review/EpicReview.types"
 
 import { AnswerThread } from "./AnswerThread"
+import { EpicBodies } from "./EpicBodies"
 import { epicItemVocabulary } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
 import {
@@ -124,7 +125,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - no collapse-all of its own (Owen, 2026-10-25:  "I don't like the 'collapse all' chevron here moving the buttons
  *     over ... lose it entirely");  the page's collapse-all folds the item and everything in it (`collapse()`)
  *   - ⌥-click (Alt-click) on its chevron or line:  it and everything in it open, or fold (`Fold.toggleFrom()`, I161)
- * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`).
+ * - SOURCE:  `source="parts/q7.html"` is fetched the first time it opens (`LoadableBody`, as `<ui-section source>`),
+ *   through the epic page's chunked place (`EpicBodies`), a live re-fetch too.
  *   - into its LIGHT children, replacing the placeholder;  `ui-loaded` then
  *   - from `file://` it can't load:  the `Loads from ... (needs the page server)` note, as today
  * - The DOM element's own `title` would show as a tooltip over everything in it, prose included:
@@ -191,7 +193,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     source: () => this.partSource(),
     select: () => undefined,
     target: () => this.domElement,
-    send: (name, detail) => this.send(name as never, detail)
+    send: (name, detail) => this.send(name as never, detail),
+    loadText: (source, request) => EpicBodies.loadText(source, request)
   })
 
   /** Its `source`, for `body`:  untracked, so a load never follows it. */

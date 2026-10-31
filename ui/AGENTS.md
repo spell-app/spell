@@ -144,6 +144,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
       (`source`, inline text, loading / error look, `save()`)
     - `LoadableBody` + `DOMLoadableBodyElement`:  a section's body, loaded from `source` the first time it opens
+      - through `UI.sources`, unless its owner hands in what loads it (`loadText()`:  `<epic-*>` folds, epic `data` P6)
   - [SpellUISettings](src/elements/SpellUISettings.ts):  what Spell UI hands the kit's element as `spell/ui/core` loads
     (`SpellSolid.install()`), a side effect
   - The DOM element bases keep their own files (`DOMElement.ts`, `DOMFormControl.ts` ...).

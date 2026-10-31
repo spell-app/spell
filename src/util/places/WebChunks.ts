@@ -8,6 +8,7 @@ import { WebPlace, type WebPlaceProps } from "./WebPlace"
  * - Read only, as static hosting is:  a `ChunkedPlace` on it says `write: "none"`.
  * - Nothing there (a 404) is no chunk;  a 5xx or nothing at all is thrown, as no answer.
  * - On `WebPlace`, for its requests:  real aborts, and a key is never written.
+ * - Always asks the server whether what the browser holds is still good (`no-cache`):  a read is of what's there NOW.
  ****************/
 export class WebChunks extends WebPlace implements ChunkStore {
   /** A real abort. */
@@ -34,7 +35,7 @@ export class WebChunks extends WebPlace implements ChunkStore {
   /** The text at `address`, under `url`:  `undefined` if there's none. */
   async read(address: string, context: PlaceContext = {}): Promise<string | undefined> {
     try {
-      const response = await this.answerTo({ url: `${this.url}/${address}`, urlData: {} }, context)
+      const response = await this.answerTo({ url: `${this.url}/${address}`, urlData: {}, cache: "no-cache" }, context)
       return await response.text()
     } catch (error) {
       if (error instanceof PlaceError && error.kind === "not found") return undefined

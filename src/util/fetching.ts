@@ -103,6 +103,8 @@ export type ApiRequest = {
   responseType?: ApiResponseType
   /** the page is going away:  the request outlives it, as `fetch`'s `keepalive` does */
   keepalive?: boolean
+  /** how it treats the browser's cache, as `fetch`'s `cache` does;  default the browser's */
+  cache?: RequestCache
 }
 
 /** `cause` of an `ApiError`. */
