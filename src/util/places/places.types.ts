@@ -329,6 +329,27 @@ export type Place = {
 }
 
 /**
+ * Versions moving on inside one `apply()`:  each change after the first to a thing was made from the version the batch
+ * started at, so it follows on from what the batch just wrote.
+ * - So one edit to two fields is one conflict at most.
+ */
+export class MovedVersions {
+  /** Where each thing's version went, by collection and id. */
+  private readonly moved = new Map<string, { from: string | undefined; to: string | undefined }>()
+
+  /** The version `change` should say. */
+  versionFor(change: PlaceChange): string | undefined {
+    const before = this.moved.get(`${change.collection}\n${change.id}`)
+    return before && before.from === change.version ? before.to : change.version
+  }
+
+  /** `change` was sent as `from`, and its thing is now at `to`. */
+  note(change: PlaceChange, from: string | undefined, to: string | undefined): void {
+    if (change.id !== undefined) this.moved.set(`${change.collection}\n${change.id}`, { from, to })
+  }
+}
+
+/**
  * Would `place` take this write, as far as we know?
  * - First what it says of itself (`describe().write`), then what it says of this thing and this field (`canWrite()`).
  * - A hint, not a promise:  the place can still refuse.

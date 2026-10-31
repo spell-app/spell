@@ -6,6 +6,7 @@
  *   S3 or Git can replace it later, behind this same interface.
  * - Text in, text out:  reading and writing JSON5 so its comments stay is `spell/app/spaces/server/node/storage/json5`'s.
  * - Types only:  safe in a browser, where nothing implements it.
+ * - A place can stand on it as it is:  `FolderPlace` and `FilePlace` (`spell/server/places`, epic `data` P5) take this shape.
  */
 export interface SpaceStorage {
   /** The text of file `path`;  `undefined` if there's none. */
@@ -29,4 +30,13 @@ export interface SpaceStorage {
    * - Until the function it returns is called.
    */
   watch(folder: string, onChange: (path: string) => void): () => void
+
+  /**
+   * File `path`'s version now:  `undefined` if it isn't there, or this storage keeps none.
+   * - With `writeIfVersion()`, what lets a place on this storage refuse a change made from an old version (`FolderPlace`).
+   */
+  versionOf?(path: string): string | undefined
+
+  /** Write file `path` whole, only if it's still at `version`:  its new version.  - throws `PlaceError` `"out of date"` */
+  writeIfVersion?(path: string, text: string, version: string): Promise<string>
 }

@@ -168,6 +168,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - `app/src/spaces/server/node/storage/DiskStorage.ts`
   - `app/src/cli/commands/watchCommand.tsx`
   - `src/server/page/BundleBuild.ts` (the score's first run found it)
+  - `ChunkFiles` (`spell/server/places`, epic `data` P5) is ON it, as a small subclass told each path:  no raw `watch()`.
   - The shared piece doesn't stand alone yet:  `LiveReload` is a watcher AND a websocket server.  The watcher half,
     split out, is what the copies would use ("Wanted", below).
 
@@ -852,6 +853,13 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `retry.*save|save.*retry|keepalive`
 - **Score:**  `setTimeout\(\(\) => (void )?(this\.)?save\(` · home `src/util/places/SaveQueue.ts`
 - **Copies:**  `--` since epic `data` P3:  `DraftSaver` and `PendingChanges` are both on it
+
+### A list, with bodies on demand
+
+- **It is:**  `ChunkedPlace` (`src/util/places/ChunkedPlace.ts`), handed a `ChunkFormat` and a `ChunkStore`:  summaries with no
+  body read, each body when it's read;  writes the body first and the list last (`ChunkFiles`, for a tool writing straight off)
+- **Use it when:**  a long list ships as a skeleton, and each thing's body comes when it's opened.
+- **Copies:**  `epic/src/tool/PlanParts.ts` and `ui/src/elements/LoadableBody.ts`, until epic `data`'s Epic Pages On Chunked Files
 
 ### A draft that saves itself
 

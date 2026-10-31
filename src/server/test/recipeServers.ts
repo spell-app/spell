@@ -6,6 +6,7 @@
  *   It answers ONLY the fields asked for, and an error for one it hasn't got, as a real one does.
  * - `RecipeBox`:  what they share, so a program can change back-end and find the same recipes.
  * - `scripts/recipe-servers.ts` runs them, for the recipe box demo;  `RestPlace`'s and `GraphPlace`'s tests serve them.
+ * - `DemoGuard`:  what lets the demo's page reach its place server (`scripts/recipe-servers.ts`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
  */
 import { SRV, type Handler } from "spell/server"
@@ -368,11 +369,11 @@ function readSelection(query: string): Selected[] {
  * Every answer says any page may read it, which the demo needs:  its page is on another port.
  * - Answers `OPTIONS`, and says so.
  */
-function answeredAcrossOrigins(request: SRV.Request, reply: SRV.Reply): boolean {
+export function answeredAcrossOrigins(request: SRV.Request, reply: SRV.Reply): boolean {
   reply.set({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
-    "Access-Control-Allow-Headers": "Content-Type, If-Match, Idempotency-Key",
+    "Access-Control-Allow-Headers": "Content-Type, If-Match, Idempotency-Key, x-server-token",
     "Access-Control-Expose-Headers": "ETag, Link",
     "Cache-Control": "no-store"
   })
@@ -399,6 +400,30 @@ async function noteAsk(
     if (!reply.raw.writableEnded) box.cutOff++
   })
   await box.holdAnswers
+}
+
+/** The token the demo's place server wants:  the demo's page knows it. */
+export const DEMO_TOKEN = "recipe-box-demo"
+
+/** A page on any local port. */
+const LOCAL_ORIGIN = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/
+
+/**
+ * The demo's guard:  its page is served by the page server, on another port, so it can't know this run's token,
+ * and it isn't this server's own origin.
+ * - A fixed token, and any local page.  Fine ONLY because this server holds no keys, and only a throwaway folder.
+ */
+export class DemoGuard extends SRV.Guard {
+  constructor() {
+    super({ token: DEMO_TOKEN })
+  }
+
+  /** The token, from a local page. */
+  checkWrite(request: SRV.Request): void {
+    if (request.get("x-server-token") !== DEMO_TOKEN) throw new SRV.HttpError(403, "bad token")
+    const origin = request.get("origin")
+    if (origin && !LOCAL_ORIGIN.test(origin)) throw new SRV.HttpError(403, "wrong origin")
+  }
 }
 
 /** Both servers, each at its own address, for one box.  What `scripts/recipe-servers.ts` runs. */

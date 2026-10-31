@@ -7,6 +7,8 @@
  * - `PlaceQuery` does what a place can't, up to a ceiling.
  * - `MemoryPlace` and `DevicePlace` (this device, over preferences' `PrefPlace`) are the first two places.
  * - `RestPlace` and `GraphPlace` reach a server, on `WebPlace`.
+ * - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read;  `WebChunks` from static hosting.
+ * - `RemotePlace`:  any place on a server side (`PlaceServer`, in `spell/server/places`).
  * - `refs` names anything saved in text, `Recipe#r-12`.
  * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
@@ -33,3 +35,7 @@ export * from "./DevicePlace"
 export * from "./WebPlace"
 export * from "./RestPlace"
 export * from "./GraphPlace"
+export * from "./ChunkedPlace"
+export * from "./JsonChunks"
+export * from "./WebChunks"
+export * from "./RemotePlace"

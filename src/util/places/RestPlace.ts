@@ -1,6 +1,7 @@
 import {
   canDoAll,
   idOfRow,
+  MovedVersions,
   PlaceError,
   type ApplyAnswer,
   type ListAnswer,
@@ -160,14 +161,12 @@ export class RestPlace extends WebPlace implements Place {
    */
   async apply(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer> {
     const rows: PlaceRow[] = []
-    const moved = new Map<string, { from: string | undefined; to: string | undefined }>()
+    const moved = new MovedVersions()
     for (const change of changes) {
-      const key = versionKey(change.collection, change.id ?? "")
-      const before = moved.get(key)
-      const version = before && before.from === change.version ? before.to : change.version
+      const version = moved.versionFor(change)
       const row = await this.makeChange({ ...change, ...(version !== undefined && { version }) }, context)
       if (row) rows.push(row)
-      if (change.id !== undefined) moved.set(key, { from: version, to: this.versionOf(change.collection, change.id) })
+      if (change.id !== undefined) moved.note(change, version, this.versionOf(change.collection, change.id))
     }
     return { rows }
   }
