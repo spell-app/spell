@@ -48,6 +48,8 @@
   .ui.menu:not(.secondary, .text, .tabular, .segmented.header),
   .ui.popup,
   .ui.dropdown .menu[role="listbox"],
+  .overflow-menu,
+  .panel[popover],
   .ui.modal,
   .ui.toast {
     backdrop-filter: var(--glass-blur);

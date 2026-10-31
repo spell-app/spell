@@ -1,4 +1,4 @@
-import { core, List, App, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position } from "@spell/core"
+import { core, List, App, TwoSidedView, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("A playing card")
@@ -147,17 +147,17 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  async onClick(event: any /* spell: type unknown */) {
+  async onClick(event: ClickEvent) {
     return await this.play()
   }
 
   /** a drag starting clears the last hint */
-  onDrag(event: any /* spell: type unknown */) {
+  onDrag(event: DragSpellEvent) {
     solitaire.hint = ""
   }
 
   /** dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so */
-  onDragCancelled(event: any /* spell: type unknown */) {
+  onDragCancelled(event: DragCancelledEvent) {
     solitaire.hint = " -- Not there"
   }
 
@@ -218,15 +218,15 @@ export class CardElement extends SpellElement<Card> {
     return this.currentThing?.countThePointsForCardOnPile(pile)
   }
 
-  onClick(event: any /* spell: type unknown */) {
+  onClick(event: ClickEvent) {
     return this.currentThing?.onClick(event)
   }
 
-  onDrag(event: any /* spell: type unknown */) {
+  onDrag(event: DragSpellEvent) {
     return this.currentThing?.onDrag(event)
   }
 
-  onDragCancelled(event: any /* spell: type unknown */) {
+  onDragCancelled(event: DragCancelledEvent) {
     return this.currentThing?.onDragCancelled(event)
   }
 }
@@ -480,7 +480,7 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  async onClick(event: any /* spell: type unknown */) {
+  async onClick(event: ClickEvent) {
     await solitaire.playFromTheStock()
   }
 }
@@ -506,7 +506,7 @@ export class StockPileElement extends SpellElement<StockPile> {
     return this.currentThing?.drawItsPlaceholder()
   }
 
-  onClick(event: any /* spell: type unknown */) {
+  onClick(event: ClickEvent) {
     return this.currentThing?.onClick(event)
   }
 }
@@ -664,7 +664,7 @@ export class Solitaire extends App {
   accessor hint!: string
 
   /** a change to a property is an event:  each runs just after the change lands */
-  onScoreChange(event: any /* spell: type unknown */) {
+  onScoreChange(event: ScoreChangeEvent) {
     /** every card on a foundation:  the game is won */
     let home = this.clubs.length + this.diamonds.length
     home = home + this.hearts.length + this.spades.length
@@ -672,7 +672,7 @@ export class Solitaire extends App {
   }
 
   /** a card played:  the last hint goes */
-  onMovesChange(event: any /* spell: type unknown */) {
+  onMovesChange(event: MovesChangeEvent) {
     this.hint = ""
   }
 
@@ -898,11 +898,11 @@ export class SolitaireElement extends SpellElement<Solitaire> {
     { name: "-t7", kind: "json", description: "Its T7." }
   ])
 
-  onScoreChange(event: any /* spell: type unknown */) {
+  onScoreChange(event: ScoreChangeEvent) {
     return this.currentThing?.onScoreChange(event)
   }
 
-  onMovesChange(event: any /* spell: type unknown */) {
+  onMovesChange(event: MovesChangeEvent) {
     return this.currentThing?.onMovesChange(event)
   }
 
@@ -1049,6 +1049,13 @@ if (!core.isCarryingOver) testCardSetup()
 if (!core.isCarryingOver) testANewDeck()
 if (!core.isCarryingOver) testPiles()
 if (!core.isCarryingOver) testTheMoves()
+
+// what each event this program hears holds
+export type ClickEvent = SentEvent
+export type DragSpellEvent = SentEvent
+export type DragCancelledEvent = SentEvent
+export type ScoreChangeEvent = SentEvent & { value: number; was: number }
+export type MovesChangeEvent = SentEvent & { value: number; was: number }
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

@@ -18,7 +18,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-choices-bar>`:  a choice page's bar (epic `epic-workflow` P12), pinned to the
  * window's bottom while the rows scroll above it;  ivory, as the page's toolbar at the top (Owen, 2026-10-13).
  * - Draws the page's `ChoicesForm`:
- *   - the feedback box (it grows with its text), then "Do it", whose tooltip counts the changed boxes
+ *   - the feedback box (it grows with its text), then "Do it", whose tooltip counts the changed boxes and the
+ *     commented rows
  *   - under them:  the save status only when a save FAILED (Owen, 2026-10-13:  "Lose the `0 boxes saved` bit"), in
  *     red, bold;  then Copy my answers and Expand all
  *     - Copy my answers (epic `epic-engine` P15):  what's typed, as the draft's JSON, onto the clipboard
@@ -153,11 +154,12 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   // ## What it shows
   ////////////////
 
-  /** "Do it"'s tooltip:  how many boxes changed, of how many. */
+  /** "Do it"'s tooltip:  how many boxes changed, of how many, and how many rows have a comment (when any). */
   get sendTip(): string {
     void this.version
-    const { rows, changed } = this.form?.counts ?? { rows: 0, changed: 0 }
-    return this.translationForKey("sendTip", { changed: String(changed), rows: String(rows) })
+    const { rows, changed, commented } = this.form?.counts ?? { rows: 0, changed: 0, commented: 0 }
+    const counts = { changed: String(changed), rows: String(rows), commented: String(commented) }
+    return this.translationForKey(commented ? "sendTipCommented" : "sendTip", counts)
   }
 
   /** "Do it" on its way:  it spins. */

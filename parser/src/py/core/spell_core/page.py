@@ -35,6 +35,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from spell_core.core import core
+from spell_core.events import SpellEvent
 from spell_core.references import is_reference, thing_for_reference
 from spell_core.state import ID_KEY, StateWriter
 from spell_core.things import SpellObject
@@ -120,7 +121,7 @@ class PageSession:
                     props.setdefault(python_name(type(target).__name__), target)
             return core.trigger(message["trigger"], **props)
         if "call" in message:
-            return [self.callable(message)(*[self.read(arg) for arg in message.get("args") or []])]
+            return [self.callable(message)(*[self.event_or_read(arg, message) for arg in message.get("args") or []])]
         raise ValueError(f"A page's message is a call or an event:  {message!r}")
 
     def callable(self, message: dict[str, Any]) -> Any:
@@ -135,6 +136,15 @@ class PageSession:
         if not callable(found):
             raise ValueError(f"The program has no function '{name}'")
         return found
+
+    def event_or_read(self, value: Any, message: dict[str, Any]) -> Any:
+        """`value` as `read()` says it;  the page's mouse event, `{"type": "click"}`, an event on its thing."""
+        if not (isinstance(value, dict) and set(value) == {"type"}):
+            return self.read(value)
+        event = SpellEvent(value["type"])
+        if "on" in message:
+            event.target = event.original_target = self.read(message["on"])
+        return event
 
     def read(self, value: Any) -> Any:
         """`value` from a page's message:  each `{"$id": ...}`, or reference (`"Card#3"`), the thing it names.

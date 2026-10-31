@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import "./RunnerPane.css"
+import "./RunnerSplit.css"
 
 /****************
  * ### `<RunnerPane>`
@@ -83,3 +84,33 @@ export type RunnerTab<Id extends string> = {
   /** What it says, e.g. `Type Explorer`. */
   title: string
 }
+
+/**
+ * A runner's `<ui-split-panel>` attributes:  the program on top, under it what's shown while the runner shows it.
+ * - `unit`:
+ *   - `"%"`, for a split of a fixed height:  `split` is the TOP pane's share of it, in %
+ *   - `"px"`, for one as tall as it needs to be, e.g. a fluid `<spell-viewer>`:  the top pane is as tall as its
+ *     content, and `split` is the BOTTOM pane's height, in px
+ * - `onSplit` is called only as the bar's let go:  so e.g. the VS Code extension writes `settings.json5` once.
+ */
+export function runnerSplit(split: number, unit: "%" | "px", onSplit: (split: number) => void) {
+  const isPixels = unit === "px"
+  return {
+    rows: isPixels ? `auto,${split}px` : `${split}%,${100 - split}%`,
+    "min-size": isPixels ? MIN_PIXELS : MIN_SHARE,
+    "on-ui-changed": (event: Event) => {
+      if (event.target !== event.currentTarget) return
+      const [top, bottom] = (event as CustomEvent<{ sizes: string }>).detail.sizes.split(",")
+      onSplit(Math.round(parseFloat(isPixels ? bottom : top)))
+    }
+  }
+}
+
+/** Top pane's share of the height to start, in % -- until dragged. */
+export const DEFAULT_SPLIT = 60
+
+/** Least share of the height either pane can be dragged to. */
+const MIN_SHARE = "10%"
+
+/** Least height the bottom pane can be dragged to, split by `px`. */
+const MIN_PIXELS = "60px"

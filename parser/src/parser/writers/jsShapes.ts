@@ -15,6 +15,24 @@ export function unwrapped(node: P.ASTExpression): P.ASTExpression {
   return node
 }
 
+/** Spell's name for an event, as `core.send()` keys it:  `Card Flipped` => `card-flipped`. */
+export function eventKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-")
+}
+
+/** The text `node` says, written out (`"integer"`) -- `undefined` if it isn't text written out. */
+export function textValue(node: P.ASTExpression | undefined): string | undefined {
+  const inner = node && unwrapped(node)
+  if (inner instanceof P.ASTStringLiteral) return inner.value
+  if (inner instanceof P.ASTConstantExpression) return String(inner.value)
+  if (!(inner instanceof P.ASTQuotedExpression)) return undefined
+  const quoted = inner.expression
+  return quoted instanceof P.ASTLiteral ? String(quoted.value) : undefined
+}
+
 /** Does `node` bind at least as tightly as `.`, so nothing needs parentheses around it?  A name, a read, a call ... */
 export function isTight(node: P.ASTExpression): boolean {
   return !(

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import Any, Literal
 
-from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position
+from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, position, spell_position, Element, SpellEvent
 
 
 ###################
@@ -14,6 +14,10 @@ from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, pos
 # On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
 
+Rank = Literal["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
+Suit = Literal["clubs", "diamonds", "hearts", "spades"]
+
+
 class Card(TwoSidedView):
     element_tag = "test-project-card"
 
@@ -22,7 +26,7 @@ class Card(TwoSidedView):
     RANKS = ("ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king")
     rank = prop(one_of=RANKS)
 
-    def is_a_rank(self, rank: Any) -> bool:
+    def is_a_rank(self, rank: Rank) -> bool:
         return self.rank == rank
 
     @property
@@ -42,7 +46,7 @@ class Card(TwoSidedView):
     SUITS = ("clubs", "diamonds", "hearts", "spades")
     suit = prop(one_of=SUITS)
 
-    def is_a_suit(self, suit: Any) -> bool:
+    def is_a_suit(self, suit: Suit) -> bool:
         return self.suit == suit
 
     # - its "color" is one of red, black :
@@ -70,7 +74,7 @@ class Card(TwoSidedView):
     def name(self) -> str:
         return f"{self.rank} of {self.suit}"
 
-    def is_the_rank_of_suit(self, rank: Any, suit: Any) -> bool:
+    def is_the_rank_of_suit(self, rank: Rank, suit: Suit) -> bool:
         return self.rank == rank and self.suit == suit
 
     @property
@@ -111,10 +115,10 @@ class Card(TwoSidedView):
             position(column),
         )
 
-    def draw_front(self) -> Any:
+    def draw_front(self) -> Element:
         return h("ui-text", {"color": self.color, "part": "front"}, self.picture)
 
-    def draw_back(self) -> Any:
+    def draw_back(self) -> Element:
         return h("ui-text", {"color": "blue", "part": "back"}, "🂠")
 
     ###################
@@ -122,7 +126,7 @@ class Card(TwoSidedView):
     ###################
     # What a click or a drag does:  the card's own moves, and each pile's, as the game plays them.
 
-    async def play(self) -> Any:
+    async def play(self) -> bool | None:
         """
         the card, and every card on it, onto the first pile that takes it;  it says whether it moved
         - the stock's card turns over onto the discards instead
@@ -164,15 +168,15 @@ class Card(TwoSidedView):
             return 5
         return 0
 
-    async def on_click(self, event: Any) -> Any:
+    async def on_click(self, event: ClickEvent) -> bool | None:
         """a click plays it"""
         return await self.play()
 
-    def on_drag(self, event: Any) -> None:
+    def on_drag(self, event: DragSpellEvent) -> None:
         """a drag starting clears the last hint"""
         solitaire.hint = ""
 
-    def on_drag_cancelled(self, event: Any) -> None:
+    def on_drag_cancelled(self, event: DragCancelledEvent) -> None:
         """dropped where no pile takes it, or Escape pressed:  it slides back, and the score says so"""
         solitaire.hint = " -- Not there"
 
@@ -210,7 +214,7 @@ class Card(TwoSidedView):
 # </ui-property-group>
 
 
-def test_card_setup() -> Any:
+def test_card_setup() -> None:
     with core.test("test card setup"):
         it = Card()
         core.echo_test_action(
@@ -291,7 +295,7 @@ class Deck(List):
         return f"deck: {card_names}"
 
 
-def test_a_new_deck() -> Any:
+def test_a_new_deck() -> None:
     with core.test("test a new deck"):
         it = Deck()
         core.echo_test_action("the deck is a new deck")
@@ -329,6 +333,9 @@ def test_a_new_deck() -> Any:
 # A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 # Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
 # A card dragged over it glows when it would take the card, by its own rules (`droppable`).
+
+
+Layout = Literal["stacked", "vertical", "horizontal", "fanned"]
 
 
 class Pile(ViewableList):
@@ -380,7 +387,7 @@ class Pile(ViewableList):
     exclusive = True
 
 
-def test_piles() -> Any:
+def test_piles() -> None:
     with core.test("test piles"):
         it = Pile()
         core.echo_test_action("set the stock to a new pile with name = \"stock\"")
@@ -456,10 +463,10 @@ class StockPile(Pile):
 
     # A light grey card, face down
 
-    def draw_its_placeholder(self) -> Any:
+    def draw_its_placeholder(self) -> Element:
         return h("ui-text", {"part": "placeholder"}, "🂠")
 
-    async def on_click(self, event: Any) -> None:
+    async def on_click(self, event: ClickEvent) -> None:
         """Empty:  a click turns the discards back over;  a click on one of its cards is the card's"""
         await solitaire.play_from_the_stock()
 
@@ -499,7 +506,7 @@ class Foundation(Pile):
 
     # A light grey ace of its suit, face up
 
-    def draw_its_placeholder(self) -> Any:
+    def draw_its_placeholder(self) -> Element:
         return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
 
     def can_take(self, card: Card) -> bool:
@@ -547,7 +554,7 @@ class Solitaire(App):
     # - its "hint" is text
     hint = prop(type="text")
 
-    def on_score_change(self, event: Any) -> None:
+    def on_score_change(self, event: ScoreChangeEvent) -> None:
         """a change to a property is an event:  each runs just after the change lands"""
         # every card on a foundation:  the game is won
         home = len(self.clubs) + len(self.diamonds)
@@ -555,7 +562,7 @@ class Solitaire(App):
         if home == 52:
             self.hint = " -- You won!"
 
-    def on_moves_change(self, event: Any) -> None:
+    def on_moves_change(self, event: MovesChangeEvent) -> None:
         """a card played:  the last hint goes"""
         self.hint = ""
 
@@ -642,7 +649,7 @@ class Solitaire(App):
                 await core.pause_for(50, "msec")
         await self.play_from_the_stock()
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         """Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
         async def _each_1(event: Any) -> Any:
             return await self.auto_play()
@@ -801,7 +808,7 @@ core.describe_menu(Solitaire, "game_menu", {"items": ["start_a_new_game", "-", "
 # a king onto an empty one;  else one lower, in the other color
 
 
-def test_the_moves() -> Any:
+def test_the_moves() -> None:
     with core.test("test the moves"):
         it = Tableau()
         core.echo_test_action("set the column to a new tableau with name = \"T1\"")
@@ -1119,3 +1126,20 @@ test_card_setup()
 test_a_new_deck()
 test_piles()
 test_the_moves()
+
+
+# what each event this program hears holds
+ClickEvent = SpellEvent
+DragSpellEvent = SpellEvent
+DragCancelledEvent = SpellEvent
+
+
+class ScoreChangeEvent(SpellEvent):
+    value: float
+    was: float
+
+
+class MovesChangeEvent(SpellEvent):
+    value: float
+    was: float
+

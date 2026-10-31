@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from spell_core import core, List, App, View, ViewableList, prop, h
+from spell_core import core, List, App, View, ViewableList, prop, h, Element
 
 
 ###########
@@ -12,6 +12,9 @@ from spell_core import core, List, App, View, ViewableList, prop, h
 # Each task is its own element on the page, `<task-list-task>`.
 # A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
 # its grip drags it, the selected ones with it (`draggable`).
+
+
+Priority = Literal["low", "normal", "high"]
 
 
 class Task(View):
@@ -40,7 +43,7 @@ class Task(View):
     def is_active(self) -> bool:
         return not self.is_done
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         """A form of its own, bound to it:  checking the box, or typing a title, changes the task;  its priority shows only when it isn't normal"""
         return h(
             "ui-form",
@@ -76,7 +79,7 @@ class Task(View):
         return Checklist.owner_of(self)
 
 
-def test_checking_one_off() -> Any:
+def test_checking_one_off() -> None:
     with core.test("test checking one off"):
         it = Task()
         core.echo_test_action("set the task to a new task with title = \"Write the tests\"")
@@ -102,6 +105,9 @@ def test_checking_one_off() -> Any:
 # The tasks, each its own element inside it:  `<task-list-checklist>`, around its `<task-list-task>`s.
 
 
+Showing = Literal["all", "active", "done"]
+
+
 class Checklist(ViewableList):
     item_type = Task
     element_tag = "test-project-checklist"
@@ -112,7 +118,7 @@ class Checklist(ViewableList):
     SHOWINGS = ("all", "active", "done")
     showing = prop(one_of=SHOWINGS)
 
-    def is_showing_showing(self, showing: Any) -> bool:
+    def is_showing_showing(self, showing: Showing) -> bool:
         return self.showing == showing
 
     # each task, unless the filter hides it
@@ -126,7 +132,7 @@ class Checklist(ViewableList):
 
     # What it shows while it's empty
 
-    def draw_its_placeholder(self) -> Any:
+    def draw_its_placeholder(self) -> Element:
         return h("ui-text", {"part": "placeholder"}, "Nothing to do")
 
     reorder_items_after = 0
@@ -137,7 +143,7 @@ class Checklist(ViewableList):
 # on the page, its tasks can be dragged to another place:  they move as the pointer does, gliding there
 
 
-def test_the_filter() -> Any:
+def test_the_filter() -> None:
     with core.test("test the filter"):
         it = Checklist()
         core.echo_test_action("set the tasks to a new checklist")
@@ -191,7 +197,7 @@ class TaskList(App):
         self.checklist.append(Task(title=self.draft, priority="normal"))
         self.draft = ""
 
-    def draw(self) -> Any:
+    def draw(self) -> Element:
         """The property editor edits every selected task at once:  a property they disagree on shows Mixed"""
         return h(
             "ui-container",

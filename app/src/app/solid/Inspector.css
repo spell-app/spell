@@ -65,14 +65,22 @@
   flex-direction: column;
   min-height: 0;
 }
-.SpellPage .InspectorPane.SplitPanel > .SplitPanelPane:has(> .InspectorColumn) {
+.InspectorPane {
+  display: flex;
+
+  & > .SplitPane {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+.SpellPage .InspectorPane > .SplitPane {
   background: none;
   border: 0;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-.SpellPage .InspectorPane.SplitPanel > .SplitPanelPane:has(> .InspectorColumn)::before {
+.SpellPage .InspectorPane > .SplitPane::before {
   content: none;
 }
 
@@ -175,27 +183,26 @@ ui-panel.InspectorCard > .InspectorSection {
 }
 
 /*
- * The cards (`<SplitPanel rows resizable>`):  what's picked, its events, the app's views.
+  * The cards (`<ui-split-panel rows resizable>`):  what's picked, its events, the app's views.
  * - Each a card as the editor's panes are (the look's);  each scrolls by itself, and the bars between them drag.
  * - Narrow seams, the page in them, so they read as a set (Owen:  "less space between these panels").
  * - No white edge, and no shadow under them (Owen:  "lose the white border around panels";
  *   "lose background shading underneath").
  */
-.InspectorSplit {
+.SpellPage .InspectorSplit {
+  --ui-split-panel-bar-size: 6px;
   flex: 1 1 auto;
   min-height: 0;
 }
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelPane {
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane {
   border: 0;
   box-shadow: none;
 }
 /* Events, as tall as its events (`cardsLayout()`), up to this much of the column */
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelPane.fit {
+.SpellPage .InspectorColumn > .InspectorSplit > .SplitPane[data-split-fit] {
   max-height: 45%;
 }
-.SpellPage .InspectorColumn > .SplitPanel.InspectorSplit > .SplitPanelSizer {
-  flex-basis: 6px;
-}
+
 /* a card's body:  scrolling by itself, its content 14px in */
 .InspectorSection {
   display: flex;
@@ -496,7 +503,7 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 }
 
 @media (--ui-mobile) {
-  .SplitPanel.InspectorPane {
+  .InspectorPane {
     --InspectorPane-room: var(--spell-gap, 14px);
     --InspectorPane-corner: calc(var(--spell-pane-radius, 12px) + var(--InspectorPane-room));
     position: fixed;
@@ -532,12 +539,12 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 
   /*
    * the outlines under the sheet, over the rest:  the panel holding the sheet is a layer of its own
-   * (`SplitPanel.css`'s `z-index: 1`), which would keep the sheet under them, so it isn't one while the sheet's up
+      * (`SplitPane.css`'s `z-index: 1`), which would keep the sheet under them, so it isn't one while the sheet's up
    */
   .InspectorBox {
     z-index: 899;
   }
-  .SplitPanel:has(> .SplitPanel.InspectorPane.up) {
+  .EditorColumns:has(> .InspectorPane.up) {
     z-index: auto;
   }
 

@@ -44,7 +44,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It writes Python as a person would:
     - PEP 8's names, e.g. `Card.RANKS`, and `class_` for a keyword
     - Python's own words:  `for number in range(1, 101):`, `x is None`, f-strings
-    - type hints where spell knows the kind
+    - type hints where spell knows the kind:  `rank: Rank`, its `Literal` above its class;  `event: KeyDownEvent`, each
+      event a program handles declared at the end of the module (epic `rust` P1, P2)
   - It calls `spell_core`'s one object, `core`, only where Python has no word for what spell says.
   - A function that waits is `async def`, and every call of it awaits it.
     A program that never waits is plain Python (one target since P22).

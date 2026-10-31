@@ -77,6 +77,7 @@ import { modalEs } from "spell/ui/components/ui-modal/UIModal.es"
 import { zoomEs } from "spell/ui/components/ui-zoom/UIZoom.es"
 import { nagEs } from "spell/ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell/ui/components/ui-panel/UIPanel.es"
+import { splitPanelEs } from "spell/ui/components/ui-split-panel/UISplitPanel.es"
 import { actionsEs } from "spell/ui/components/ui-parts/UIActions.es"
 import { authorEs } from "spell/ui/components/ui-parts/UIAuthor.es"
 import { avatarEs } from "spell/ui/components/ui-parts/UIAvatar.es"
@@ -715,6 +716,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   zoomEs,
   nagEs,
   panelEs,
+  splitPanelEs,
   actionsEs,
   actionEs,
   authorEs,

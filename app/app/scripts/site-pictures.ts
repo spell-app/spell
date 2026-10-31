@@ -50,7 +50,6 @@ type Picture = {
 /** Every picture, by page. */
 const PICTURES: Picture[] = [
   { name: "SpellPage", page: "", selector: ".SpellPage" },
-  { name: "SplitPanel", page: PROJECT, selector: ".SplitPanel" },
   { name: "AppRoot", page: PROJECT, selector: ".AppRoot" },
   { name: "AppContainer", page: PROJECT, selector: ".AppContainer" },
   { name: "chrome", page: PROJECT, selector: ".AppMenu" },

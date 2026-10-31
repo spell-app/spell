@@ -8,8 +8,8 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
-import { RunnerSplit, DEFAULT_SPLIT } from "./RunnerSplit"
-import { RunnerPane, type RunnerTab } from "./RunnerPane"
+
+import { RunnerPane, type RunnerTab, runnerSplit, DEFAULT_SPLIT } from "./RunnerPane"
 import { RunnerConsole } from "./RunnerConsole"
 import { wordsIn, wordsOfLanguages } from "./words"
 import { showTestResults, testReportsOf } from "./testResults"
@@ -131,31 +131,35 @@ export function VSCodeRunner(props: VSCodeRunnerProps) {
         showConsole={hasApp() ? showConsole() : undefined}
         onToggleConsole={() => save({ runner: { ...settings().runner, showConsole: !showConsole() } })}
       />
-      <RunnerSplit
-        split={split()}
-        onSplit={(changed) => save({ runner: { ...settings().runner, split: changed } })}
-        showBottom={!hasApp() || showConsole()}
-        bottom={
-          <RunnerPane
-            tabs={tabsFor(...tabIds())}
-            pane={showing()}
-            onPane={(changed) => save({ runner: { ...settings().runner, pane: changed } })}
-          >
-            <Switch>
-              <Match when={showing() === "types"}>{explorer()}</Match>
-              <Match when={showing() === "things"}>{things()}</Match>
-              <Match when={showing() === "output"}>{output()}</Match>
-            </Switch>
-          </RunnerPane>
-        }
+      <ui-split-panel
+        class="RunnerSplit"
+        resizable
+        {...runnerSplit(split(), "%", (changed) => save({ runner: { ...settings().runner, split: changed } }))}
       >
-        {appPane}
-        <Show when={!hasApp()}>
-          <RunnerPane tabs={tabsFor("output")} pane="output">
-            {output()}
-          </RunnerPane>
+        <div class="RunnerSplitTop">
+          {appPane}
+          <Show when={!hasApp()}>
+            <RunnerPane tabs={tabsFor("output")} pane="output">
+              {output()}
+            </RunnerPane>
+          </Show>
+        </div>
+        <Show when={!hasApp() || showConsole()}>
+          <div class="RunnerSplitBottom">
+            <RunnerPane
+              tabs={tabsFor(...tabIds())}
+              pane={showing()}
+              onPane={(changed) => save({ runner: { ...settings().runner, pane: changed } })}
+            >
+              <Switch>
+                <Match when={showing() === "types"}>{explorer()}</Match>
+                <Match when={showing() === "things"}>{things()}</Match>
+                <Match when={showing() === "output"}>{output()}</Match>
+              </Switch>
+            </RunnerPane>
+          </div>
         </Show>
-      </RunnerSplit>
+      </ui-split-panel>
     </div>
   )
 

@@ -3107,6 +3107,26 @@
       ]
     },
     {
+      "path": "ui-split-panel.html",
+      "title": "Split Panel",
+      "summary": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
+      "tag": "ui-split-panel",
+      "tabs": {"examples":"Examples","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"usage-using-it","title":"Using it","tab":"examples"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"examples"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"examples"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-events","title":"Events","tab":"api"},
+        {"id":"api-slots","title":"Slots","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-states","title":"States","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-stack.html",
       "title": "Stack",
       "summary": "A stack lays its children out in a column, or a row that wraps, evenly spaced.",

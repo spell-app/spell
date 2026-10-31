@@ -7,7 +7,6 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell/app/app/runner/runner.types"
 import { uiReady } from "spell/app/app/solid/loadUI"
 import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell/app/app/runner/SpellAppRunner"
-import { RunnerSplit } from "spell/app/app/runner/RunnerSplit"
 import { VSCodeRunner } from "spell/app/app/runner/VSCodeRunner"
 import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
 
@@ -922,40 +921,6 @@ if (!core.isCarryingOver) testMath()
     const button = await waitFor(() => host.querySelector<HTMLElement>(".VSCodeRunnerToolbar .run-tests"))
     await userEvent.click(button)
     await waitFor(() => results() === 3)
-  })
-})
-
-describe("<RunnerSplit>", () => {
-  test("the bottom pane and its bar show only with `showBottom`;  the top pane is never redrawn", async () => {
-    const host = document.createElement("div")
-    host.style.height = "400px"
-    document.body.append(host)
-    let show!: (value: boolean) => void
-    const { createSignal } = await import("solid-js")
-    const dispose = render(() => {
-      const [showBottom, setShowBottom] = createSignal(false)
-      show = setShowBottom
-      return (
-        <RunnerSplit split={60} onSplit={() => {}} showBottom={showBottom()} bottom={<p class="bottom">bottom</p>}>
-          <p class="top">top</p>
-        </RunnerSplit>
-      )
-    }, host)
-    cleanups.push(() => {
-      dispose()
-      host.remove()
-    })
-    flush()
-    const top = host.querySelector(".top")
-    expect(host.querySelector(".RunnerSplitter")).toBeNull()
-    expect(host.querySelector<HTMLElement>(".RunnerSplitTop")!.style.flex).toBe("1 1 0px")
-
-    show(true)
-    flush()
-    expect(host.querySelector(".RunnerSplitter")).not.toBeNull()
-    expect(host.querySelector(".RunnerSplitBottom .bottom")).not.toBeNull()
-    expect(host.querySelector<HTMLElement>(".RunnerSplitTop")!.style.flex).toBe("60 1 0px")
-    expect(host.querySelector(".top")).toBe(top)
   })
 })
 

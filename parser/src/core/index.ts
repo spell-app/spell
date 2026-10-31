@@ -45,6 +45,7 @@ import "./abilities"
 import { send } from "./sending"
 
 export { core, assert, SpellEvent, Eventful }
+export type { SentEvent } from "./sending"
 // Events, imported by name:  `trigger("card-click", { card: this })`.
 // Compiled JavaScript and TypeScript both say it so, since epic `output-targets` P19;
 // `core.trigger(...)`, which javascript compiled before then says, is the same function.
