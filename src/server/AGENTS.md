@@ -210,8 +210,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         spell-brand, its set, engine routes, watched folders, bundle.
       - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
-      - The kit's own part (its `package.json`'s `"pageServer"`):  one route module, the recipe box demo's servers' start and stop
+      - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
         (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
+        And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
@@ -406,7 +407,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
       - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
       - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
-    - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says;  Airtable's next
+    - `AirtablePlace`:  an Airtable base as a place, each table a collection (epic `data` P19)
+      - its key on the server side;  a program's lines come with each request (`Place.withLines()`), so the program stays the one source of them
+      - one read, however many tabs, for a window (`checkedEvery`);  `watch()` shares it, on one `every()`
+      - an id column and an upsert, so a new row sent twice is one row;  with none, Airtable makes the id, and a line warns of doubling
+      - no version check:  the last save wins a field.  A `Referee` can sit in front, and each of its steps then waits for Airtable
+      - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
+      - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
+    - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says, or as `RateLimit.waitAfterHitSeconds` says
     - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
@@ -521,6 +529,7 @@ The steps between a page's content and its file on disk, for every tool that wri
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
 - `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
+- `spell/server/test/airtableStub`:  a stub of Airtable's API, for `AirtablePlace`'s tests and the recipe box demo:  checks the token, the limit and batches of 10.
 - `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network, hosts on their own ports, a directory, a relay and a Jetstream, for
   `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16).
   `spell/server/test/FakeSignIn`:  someone signed in on it, in node or a page.

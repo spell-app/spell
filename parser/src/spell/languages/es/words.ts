@@ -140,8 +140,7 @@ export const spanishWords: SP.LanguageWords = {
     "crear animación": "para",
     "crear animacion": "para",
     esperar: "",
-    "esperar a": "",
-    "y esperar": ""
+    "esperar a": ""
   },
   retiredRuleWords: {
     start_process: { animación: "proceso", animacion: "proceso" },

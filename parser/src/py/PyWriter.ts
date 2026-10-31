@@ -42,15 +42,15 @@ export class PyWriter extends PyBaseWriter {
   /** The steps lifted out of the top level, for a name each -- see `topLevelStep()`. */
   protected steps = 0
 
-  /** Does `call`, of `core`, wait?  Spell's pause alone:  Python's `spell_core` has no other that does. */
+  /** Does `call`, of `core`, wait?  Spell's pause, and a `send` a handler of which waits:  `spell_core` has no other. */
   protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
-    return call.methodName === "pauseFor"
+    return call.methodName === "pauseFor" || this.sendWaits(call)
   }
 
   /** Is `node` a call of a function that waits, by name, or spell's own pause? */
   isWaitingCall(node: P.ASTNode): boolean {
     if (!(node instanceof P.ASTMethodInvocation)) return false
-    if (isCoreCall(node)) return node.methodName === "pauseFor"
+    if (isCoreCall(node)) return this.coreCallWaits(node as P.ASTScopedMethodInvocation)
     return this.project.waitingNames.has(node.methodName)
   }
 
@@ -106,7 +106,10 @@ export class PyWriter extends PyBaseWriter {
     }
     const written = super.ASTScopedMethodInvocation(node)
     if (this.project.togetherWaits(node, (run) => this.project.waitingMethods.has(run))) return `await ${written}`
-    const waits = !isCoreCall(node) && this.project.waitingNames.has(node.methodName)
+    // a `send` where nothing can wait, a drawing or a getter, runs its handlers beside it:  `core.send()`
+    const waits = isCoreCall(node)
+      ? this.sendWaits(node) && this.project.awaited.has(node)
+      : this.project.waitingNames.has(node.methodName)
     return waits ? `await ${written}` : written
   }
 

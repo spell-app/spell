@@ -314,6 +314,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "alert",
       "at_the_same_time",
       "meanwhile",
+      "without_waiting",
     ],
     "belongs_to_one": [
       "belongs_to_one",
@@ -438,6 +439,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "list_membership_test",
       "can_take",
       "can_give_up",
+      "they_are",
       "they_are",
     ],
     "has_slots": [
@@ -909,6 +911,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "pause",
       "at_the_same_time",
       "meanwhile",
+      "without_waiting",
       "start_process",
       "stop_process",
       "expect_test",
@@ -962,6 +965,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "there_are_things": [
       "there_are_things",
       "there_are_things",
+    ],
+    "they_are": [
+      "they_are",
+      "they_are",
     ],
     "trigger": [
       "trigger",
@@ -1292,7 +1299,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "there_are_things · places · 2",
     "there_is_a · expressions · 1",
     "there_is_or_is_not · expressions · 1",
-    "they_are · places · 1",
+    "they_are · places · 2",
     "thing_at_place · classes · 1",
     "thing_name · classes · 1",
     "times · math · 1",
@@ -1332,12 +1339,14 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "when_or_if · classes · 1",
     "when_someone_else_changes · events · 1",
     "when_thing_changes · events · 1",
+    "where_field · places · 1",
     "while_handler · events · 2",
     "while_waiting · places · 1",
     "whitespace · core · 1",
     "will_or_will_not · expressions · 1",
     "with_nested_statements · classes · 2",
     "with_props_arg · methods · 1",
+    "without_waiting · async · 1",
     "words_assignment · assignment · 1",
     "words_identifier · variables · 1",
     "words_variable · variables · 1",

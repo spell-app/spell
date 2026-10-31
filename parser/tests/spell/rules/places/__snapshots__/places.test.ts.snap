@@ -29,6 +29,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "they_are": "operator|expression",
   "total_of": "list",
   "versions_in": "type|field",
+  "where_field": "property",
   "while_waiting": "body?",
 }
 `;

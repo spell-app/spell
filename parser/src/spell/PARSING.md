@@ -575,6 +575,8 @@ A kind that says so is saved in a file of its own.
 - And EVERY one of a type (epic `outline-spell` P16):  [`every_thing`](rules/classes/EveryThing.ts).
   - Some of them, its short form of `list_filter`:  [`every_thing_where`](rules/classes/EveryThingWhere.ts),
     `every recipe where its title includes the search` (epic `data` P10).
+    - Any `where`, `recipes where they are the cook` ~== `recipes where its cook is them`:  there, [`where_field`](rules/places/WhereField.ts)
+      reads `the cook` as the thing's own, only after [`they_are`](rules/places/TheyAre.ts) (epic `data` T66).
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
@@ -1539,11 +1541,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
-  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, `and wait`, spellx's `animated`) are retired:
+  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, spellx's `animated`) are retired:
     each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
     (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
   - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
     then adds every function that calls one, by name, until nothing changes.
+  - A `notify` is the one slow thing nothing waits for, unless it says `and wait`.
+  - `meanwhile deal` and `deal without waiting` are a function of their own, so what holds them doesn't wait because of them.
   - It sets `method.waiting` on every compile, and the calls to write `await` in `project.awaited`:
     `method.isAsync` then says `async`, and the project's declarations carry the same answer.
   - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
@@ -1562,7 +1566,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
       a getter reading another thing's member after a wait warns (`reads-after-wait`).
   - Two rules say not to wait, each by running functions of its own:
-    - `meanwhile`, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
+    - `meanwhile`, or `... without waiting` at a line's end, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
     - `at the same time:`, `core.together(() => ..., () => ...)`:  waits if a line does (`togetherWaits()`);
       a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.

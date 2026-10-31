@@ -7,6 +7,7 @@ import {
   type PlaceChange,
   type PlaceErrorCause,
   type PlaceErrorKind,
+  type PlaceLines,
   type PlaceRow
 } from "spell/util/places/places.types"
 import { SRV } from "spell/server"
@@ -43,6 +44,7 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - STANDS BEHIND `Guard`, reads too:  a read can spend a key, and without it any web page could reach a local server holding some.
  *   - NOTE: Guard's token covers a LOCAL server only.  A hosted one needs its own sign-in, which epic `data`'s The Cloud has to answer:
  *     don't put this on a public address as it stands.
+ * - A program's lines about a place come with each request (`lines`), and a place that takes them follows them (`Place.withLines()`):  no key among them.
  * - A refusal says why (`whyNot`), so `RemotePlace` can pass it on, per field and per owner.
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
  * - A change's `changeId` it has seen is made once:  it's answered with what it made.
@@ -189,7 +191,7 @@ export class PlaceServer {
     try {
       const placeName = request.params.place ?? ""
       answered = await answer({
-        place: this.placeOrDie(placeName),
+        place: this.placeForLines(this.placeOrDie(placeName), request.body),
         placeName,
         body: request.body,
         context: { signal: stop.signal }
@@ -216,6 +218,12 @@ export class PlaceServer {
     const place = Object.hasOwn(this.places, name) ? this.places[name] : undefined
     if (!place) throw new SRV.HttpError(404, `no place is served as "${name}"`)
     return place
+  }
+
+  /** `place`, as the program asking describes it:  what its lines say go with each request.  - throws what `withLines()` throws */
+  private placeForLines(place: Place, body: unknown): Place {
+    const { lines } = (body ?? {}) as { lines?: PlaceLines }
+    return (lines && place.withLines?.(lines)) ?? place
   }
 
   /** - throws `HttpError(400)` for a request that names no collection */

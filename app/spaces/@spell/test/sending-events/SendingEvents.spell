@@ -1,0 +1,83 @@
+## Events sent to things, which every target must deliver alike
+
+a "card" is a thing where:
+	- its "name" is text
+	- its "flips" is a number
+	- its "locked" is a choice
+	- it sends "flipped" with side as a text
+
+	- to create it:
+		set its flips to 0
+
+	- to flip it:
+		set its flips to its flips + 1
+		send flipped with side = "up"
+		print "[its name] flipped"
+
+	// taken here:  its pile never hears it
+	- when flipped with side as text:
+		print "[its name] heard flipped [side]"
+
+	// handed on up:  its pile hears it too
+	- when picked:
+		print "[its name] heard picked"
+		pass event
+
+	- when its flips changes:
+		print "[its name] has flipped [its flips] times"
+
+	// a handler that waits:  what sends it waits for it
+	- when slowly flipped:
+		pause for 10 msec
+		print "[its name] slowly flipped"
+
+	- to flip it slowly:
+		send slowly flipped
+		print "[its name] done slowly"
+
+	// an event still happening can be canceled:  the step after it doesn't run
+	- to close it:
+		send closing
+		print "[its name] closed"
+
+	- when closing:
+		if its locked:
+			print "[its name] won't close"
+			cancel event
+
+
+a "pile" is a list of cards where:
+	- when picked:
+		print "the pile heard picked"
+		pass event
+
+	- when flipped with side as text:
+		print "the pile heard flipped"
+
+a card belongs to one pile
+
+on picked:
+	print "the program heard picked"
+
+on lonely:
+	print "the program heard lonely"
+
+to play the story:
+	get a new pile
+	set the pile to it
+	get a new card with name = "ace"
+	set the ace to it
+	add it to the pile
+	get a new card with name = "king", locked = yes
+	set the king to it
+
+	close the ace
+	close the king
+	send picked to the ace
+	send lonely to the ace
+	send nobody listens to the ace
+	flip the ace
+	flip the ace slowly
+	print "the end"
+
+play the story

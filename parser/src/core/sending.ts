@@ -19,7 +19,8 @@
  * - An event still happening (`closing`) can be CANCELED (`cancel closing`, `event.cancel()`, Q27):
  *   the sender's step after it doesn't run -- compiled spell checks `canceled` for such an event:
  *   `if ((await send(this, "closing")).canceled) return`.
- * - Waits for each handler in turn (a handler may `pause`), so `send` is a promise:  `wait for send x` waits (Q28).
+ * - Waits for each handler that waits, in turn (a handler may `pause`), so `send` is a promise:
+ *   `wait for send x` waits (Q28).  Handlers that don't wait all run before `send()` returns.
  * - In a handler:  `target` is the thing whose handler runs, `the original target` the thing it was sent to,
  *   `sender` the thing that sent it (Q26) -- the event's `target`, `originalTarget`, `sender`.
  * - Pure javascript:  the mouse and keys come from `core.input` (`input.ts`), never from a browser event.
@@ -95,7 +96,9 @@ export async function send(
     event.passed = false
     event.handled = true
     try {
-      await waitOf(handler, handler.call(thing, event))
+      // only a handler that waits holds the rest:  a passed event reaches the next one at once, on every target
+      const waiting = waitOf(handler, handler.call(thing, event))
+      if (waiting) await waiting
     } catch (error) {
       if (error instanceof CanceledError) throw error
       console.warn(`send ${event.type}:  ${(thing as object).constructor?.name}'s handler failed`, error)
@@ -105,17 +108,22 @@ export async function send(
   // nobody took it, or the last handler passed it on:  the program's own `on <event>:` listeners
   event.target = undefined
   const results = core.RUNTIME?.trigger(event) ?? []
-  await Promise.all(results)
   if (results.length) event.handled = true
+  if (results.some(isPromise)) await Promise.all(results)
   return event
+}
+
+/** Is `value` something to wait for? */
+function isPromise(value: unknown): boolean {
+  return typeof (value as { then?: unknown } | undefined)?.then === "function"
 }
 
 /**
  * What calling `handler` gave, to wait for:  `result` if it's written `async`, else nothing.
  * - So `- on click:` `notify "Saved!"`, which hands back its toast's promise, doesn't hold what sent it.
  */
-export function waitOf(handler: Function, result: unknown): unknown {
-  return handler.constructor.name === "AsyncFunction" ? result : undefined
+export function waitOf(handler: Function, result: unknown): Promise<unknown> | undefined {
+  return handler.constructor.name === "AsyncFunction" ? (result as Promise<unknown>) : undefined
 }
 
 /** Would anything take event `type` sent to `target`:  a handler up its chain, or one of the program's own listeners? */

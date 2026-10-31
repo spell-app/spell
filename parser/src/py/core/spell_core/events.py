@@ -17,7 +17,7 @@ core.trigger("card-click", card=card)
 
 import asyncio
 import inspect
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Generator
 from typing import Any
 
 # What a handler is called with:  the event, and what it was triggered on
@@ -44,8 +44,41 @@ class SpellEvent:
 
     def __repr__(self) -> str:
         """`SpellEvent('card-click', card=...)`:  its type and what it carries, for a reader in a debugger."""
-        props = ", ".join(f"{key}={value!r}" for key, value in self.__dict__.items() if key != "type")
+        carried = {key: value for key, value in self.__dict__.items() if key not in ("type", "finishing")}
+        props = ", ".join(f"{key}={value!r}" for key, value in carried.items())
         return f"SpellEvent({self.type!r}{', ' + props if props else ''})"
+
+
+class SentEvent(SpellEvent):
+    """The event `core.send()` hands each handler, and returns:  the JavaScript core's `SentEvent`.
+
+    - `await core.send(...)` waits for its handlers that wait, then gives the event.
+    """
+
+    # Has a handler canceled it?  Only an event still happening is checked (`closing`)
+    canceled: bool = False
+    # Has the running handler handed it on up (`pass event`)?
+    passed: bool = False
+    # Has any handler taken it?
+    handled: bool = False
+    # What's left of its handlers, running beside what sent it, if any waits
+    finishing: object = None
+
+    def pass_(self) -> "SentEvent":
+        """`pass event`:  hand it on to the next handler up the chain, after this one."""
+        self.passed = True
+        return self
+
+    def cancel(self) -> "SentEvent":
+        """`cancel event`, `cancel closing`:  the sender's next step won't run."""
+        self.canceled = True
+        return self
+
+    def __await__(self) -> Generator[Any, None, "SentEvent"]:
+        """Wait for its handlers still running, if any:  `await core.send(...)` gives the event."""
+        if inspect.isawaitable(self.finishing):
+            yield from self.finishing.__await__()
+        return self
 
 
 class Eventful:

@@ -107,7 +107,6 @@ export class SpellEvent {
     const callbacks = SpellEvent.getEventList(target, event.type)
     let results: unknown[] = []
     if (callbacks) {
-      console.info("triggering", event, " on ", target)
       results = [...callbacks].map((callback) => {
         try {
           return callback(event as SpellEvent, target)

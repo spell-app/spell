@@ -1,0 +1,10 @@
+{
+  "title": "Sending Events",
+  "description": "Events sent to things:  up a chain, passed on, canceled, waited for, and a property's change",
+  "imports": [
+    {
+      "path": "/SendingEvents.spell",
+      "active": true
+    }
+  ]
+}

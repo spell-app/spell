@@ -1,9 +1,9 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { Wording } from "spell/parser/spell/rules/expressions"
-import { SpellType } from "spell/parser/spell/rules/types"
 
 /**
  * `notify` rule:  tells the person something for a moment, in a toast, e.g. `notify "Saved!"`.
@@ -18,23 +18,31 @@ import { SpellType } from "spell/parser/spell/rules/types"
  *   - `side by side`:  toasts there line up in a row
  *   - `without pausing`:  the countdown keeps running under the pointer
  *   - `with "Got it"`:  a button that closes it;  it stays until closed
+ *   - `and wait`:  whatever's next waits until the toast has gone
  * - Compiles to `core.notify(message, options)`, the options only the clauses written.
- * - It waits only when it says how long, `notify "Bye" for 5 seconds`:  `await core.notify(...)`.
- *   - Any other toast is an aside, shown while the program carries on, so it never holds a person's clicks.
- *   - One that stays until it's closed never waits, or clicks would wait for good:  `until clicked`, `with "Got it"`.
- *   - `meanwhile notify "Bye" for 5 seconds` carries on too.
+ * - The one thing core does that's slow yet NOT waited for:  a toast is an aside, so the program carries on,
+ *   and it never holds a person's clicks.
+ *   - Only `and wait` waits, `await core.notify(...)`:  the pass that works out what waits starts from that alone
+ *     (`P.WriterProject.findWaiting()`), so `core.notify` stays out of `P.CORE_CALLS_THAT_WAIT`.
+ *   - One that stays until it's closed, with `and wait`, is an error:  clicks would wait for good.
+ *     That's `until clicked`, `with "Got it"` and a time of 0;  `core.notify()` checks a time worked out as it runs.
  */
-export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?"> {
+export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?"> {
   @proto static alias = ["statement", "async"]
 
-  /** Notes its old words, `and wait`:  it waits when it says how long (epic `language` P13). */
+  /** Refuses `and wait` on a toast that stays. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens)
-    return match && SpellType.noteRetiredLiterals(match)
+    if (!match) return match
+    const { wait, time, untilClicked, okButton } = (match as P.MatchFor<this>).groups
+    const stays = untilClicked || okButton || `${time?.raw}` === "0"
+    if (!wait || !stays) return match
+    return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("cant-wait-for-toast-that-stays"))
   }
 
   getAST(match: P.MatchFor<this>) {
-    const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton } = match.groups
+    const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton, wait } =
+      match.groups
     const options = new P.ASTObjectLiteral(match)
     const expression = (group: P.AnyMatch) => P.asAST<P.ASTExpression>(group.AST)
     const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
@@ -58,7 +66,7 @@ export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color
     const args = [expression(message)]
     if (options.properties.length) args.push(options)
     const notify = new P.ASTCoreMethodInvocation(match, { methodName: "notify", args })
-    return time && !okButton ? new P.ASTAwaitExpression(match, { expression: notify }) : notify
+    return wait ? new P.ASTAwaitExpression(match, { expression: notify }) : notify
   }
 
   /**

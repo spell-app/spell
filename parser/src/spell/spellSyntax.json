@@ -5795,6 +5795,20 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "WithoutWaiting",
+          "ruleNames": ["without_waiting"],
+          "internal": false,
+          "file": "src/spell/rules/async/WithoutWaiting.ts",
+          "line": 23,
+          "purpose": "Starts a call and carries on, its words at the end of the line: `deal the cards without waiting`.",
+          "syntaxes": [
+            {
+              "syntax": "{call:statement} without waiting"
+            }
+          ],
+          "aliases": ["statement", "async"]
         }
       ]
     },
@@ -6251,7 +6265,7 @@
           "internal": false,
           "file": "src/spell/rules/places/IdColumn.ts",
           "line": 9,
-          "purpose": "The column that says which row is which, on a sheet.",
+          "purpose": "The column that says which row is which, on a sheet or an airtable.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} id is its? {column:text}"
@@ -6427,14 +6441,31 @@
           "ruleNames": ["they_are"],
           "internal": false,
           "file": "src/spell/rules/places/TheyAre.ts",
-          "line": 14,
-          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15).",
+          "line": 20,
+          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15, T66).",
           "syntaxes": [
+            {
+              "syntax": "{operator:are_or_are_not} {expression:where_field}"
+            },
             {
               "syntax": "{operator:are_or_are_not} {expression:operand}"
             }
           ],
           "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "WhereField",
+          "ruleNames": ["where_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/WhereField.ts",
+          "line": 19,
+          "purpose": "A field of the thing a `where` is looking at, by its name alone (epic `data` T66).",
+          "syntaxes": [
+            {
+              "syntax": "the {property:member_words}"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
@@ -7260,11 +7291,11 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 27,
+          "line": 30,
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (and wait)?",
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
               "example": "notify \"Yo!\"",
               "outputs": {
                 "js": {

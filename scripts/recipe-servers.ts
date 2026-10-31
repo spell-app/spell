@@ -16,6 +16,8 @@
  *     the steps are the epic page's manual test
  *   - its tab has to be called `recipes`
  * - `http://127.0.0.1:4792`:  a fake of AT Protocol's network, its two hosts on 4793 and 4794 (epic `data` P16), for `?back-end=atmosphere`
+ * - `http://127.0.0.1:4791/api/places/airtable`:  a stub of Airtable, on 4795 (epic `data` P19), for `?back-end=airtable`;  edit it as if in Airtable's window with `curl`
+ *   - your own base instead, with `AIRTABLE_BASE` and `AIRTABLE_KEY` set:  a table `Recipes`, the columns in `AIRTABLE_DEMO_LINES`;  the steps are the epic page's manual test
  * - `RECIPE_SERVERS_PORT`:  another port than 4791, the rest after it:  the demo's page then says `?servers=http://127.0.0.1:<port>`.
  * - The demo's page can start, stop and restart them, through the page server:  `recipeServersRoutes.ts`.
  *   - What it starts ends when the page server does.
@@ -25,9 +27,9 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { contentFolderOf } from "spell/server/contentFolder"
-import { GoogleSheetPlace, PlaceKeys } from "spell/server/places"
+import { AirtablePlace, GoogleSheetPlace, PlaceKeys } from "spell/server/places"
 import { SRV } from "spell/server"
-import { startRecipeServers } from "spell/server/test/recipeDemo"
+import { AIRTABLE_DEMO_LINES, startRecipeServers } from "spell/server/test/recipeDemo"
 import {
   RECIPE_SERVERS_FOLDER,
   RECIPE_SERVERS_PARENT,
@@ -39,6 +41,9 @@ const PORT = Number(process.env.RECIPE_SERVERS_PORT) || RECIPE_SERVERS_PORT
 
 /** How often it looks whether what started it is still there, in ms. */
 const PARENT_CHECK_MS = 5_000
+
+/** How far past the port the stub of Airtable listens:  past the fake atmosphere's three. */
+const AIRTABLE_STUB_AFTER = 4
 
 /** Where its room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
@@ -52,8 +57,12 @@ const committedCsv = join(contentFolderOf(process.cwd()) ?? "", COMMITTED_CSV)
 
 const SHEET_KEY = "GOOGLE_SHEETS_KEY"
 const spreadsheet = process.env.GOOGLE_SHEET_ID
-const keys = new PlaceKeys({ names: [SHEET_KEY] })
+const AIRTABLE_KEY = "AIRTABLE_KEY"
+const airtableBase = process.env.AIRTABLE_BASE
+const keys = new PlaceKeys({ names: [SHEET_KEY, AIRTABLE_KEY] })
 const googleSheet = spreadsheet && new GoogleSheetPlace({ spreadsheet, keyNamed: SHEET_KEY, keys, idColumn: "id" })
+const airtable =
+  airtableBase && new AirtablePlace({ base: airtableBase, keyNamed: AIRTABLE_KEY, keys, ...AIRTABLE_DEMO_LINES })
 
 await startRecipeServers({
   port: PORT,
@@ -63,12 +72,18 @@ await startRecipeServers({
   ...(existsSync(committedCsv) && { firstCsv: readFileSync(committedCsv, "utf8") }),
   keys,
   atmospherePort: PORT + 1,
-  ...(googleSheet && { morePlaces: { "google-sheet": googleSheet } })
+  airtablePort: PORT + AIRTABLE_STUB_AFTER,
+  morePlaces: { ...(googleSheet && { "google-sheet": googleSheet }), ...(airtable && { airtable }) }
 })
 console.log(`the recipe servers are on http://127.0.0.1:${PORT}.  Ctrl-C stops them.`)
 console.log(`the CSV file, behind /recipes, /graphql, /recipes.csv and /api/places/recipes-csv, is ${csvFile}`)
 console.log(`the folder, behind /api/places/recipes and the room, ${ROOM_PATH}, is ${folder}`)
 if (googleSheet) console.log(`your Google Sheet ${spreadsheet} is on /api/places/google-sheet, its key held here.`)
+console.log(
+  airtable
+    ? `your Airtable base ${airtableBase} is on /api/places/airtable, its key held here.`
+    : `a stub of Airtable, on port ${PORT + AIRTABLE_STUB_AFTER}, is on /api/places/airtable.`
+)
 console.log(RECIPE_SERVERS_READY)
 
 // Started by the demo's page, through the page server:  never outlive it

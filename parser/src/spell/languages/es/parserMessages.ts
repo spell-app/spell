@@ -31,6 +31,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "reads-after-wait":
     "Tras su primera espera, este valor no puede seguir lo que lee de otras cosas:  léelas antes de la espera",
+  "cant-go-without-waiting": "Solo una llamada puede ir sin esperar:  esto tiene un valor o un cuerpo que esperar",
+  "cant-wait-for-toast-that-stays":
+    "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
     "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
@@ -88,9 +91,21 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
   "version-step-no-rename-there":
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
-  "place-kind-later":
-    'Un lugar de tipo "{kind}" aún no está:  nombra otro tipo de lugar por ahora, p. ej. "x es un servidor web en ..."',
+  "airtable-not-a-base":
+    '"{address}" no es una base de Airtable:  su id empieza por "app", p. ej. "appXXXXXXXXXXXXXX", y está en la dirección de la base en Airtable',
+  "airtable-last-save-wins":
+    "Airtable no puede saber que otra persona llegó antes:  cuando dos personas cambian un campo, gana el último en guardar, sin aviso, también con lo que se edita en el propio Airtable.  Campos distintos se conservan los dos.  Para un árbitro que diga quién perdió, pon una sala delante",
+  "airtable-worked-out-fields":
+    "Airtable calcula por sí mismo sus fórmulas, búsquedas, resúmenes y recuentos, y solo se pueden leer:  a un programa que escribe uno se le deshace el cambio al ejecutarse, con un aviso que dice por qué",
+  "airtable-calls-count":
+    "Cada página de 100 filas es una petición, y todos los que usan esta base comparten 5 por segundo.  El plan gratuito de Airtable además se detiene en 1.000 peticiones al mes, que revisar cada 30 segundos gasta en unas 8 horas",
+  "airtable-no-id-column":
+    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "- su id es su "id encanto"" debajo',
+  "airtable-needs-key":
+    'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
+  "where-field-unknown":
+    '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',

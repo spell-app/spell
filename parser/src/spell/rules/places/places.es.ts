@@ -24,6 +24,7 @@ import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
+import { WhereField } from "./WhereField"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
@@ -176,6 +177,11 @@ placesEs.addRule(TotalOf, {
   ]
 })
 
+placesEs.addRule(WhereField, { syntax: `${THE} {property:member_words}` })
+// Before its plain self:  the same words, in a `where`, are the thing's field
+placesEs.addRule(TheyAre, {
+  syntax: "{operator:are_or_are_not} {expression:where_field}"
+})
 placesEs.addRule(TheyAre, { syntax: "{operator:are_or_are_not} {expression:operand}" })
 placesEs.addRule(CurrentPerson, {
   syntax: "(esa persona|la persona)",

@@ -9,6 +9,7 @@ import {
   ITEMS_KEY,
   Observable,
   peekState,
+  isLastToConstruct,
   runsCreate,
   typedJSON,
   type PropInfo
@@ -109,8 +110,8 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
     super(props)
     registerThing(this)
     if (runsCreate(List, new.target)) this.create(props)
-    // its starting values are set:  a change from now on is heard (`when its score changes`)
-    noteMade(this)
+    // its starting values are set:  a change from now on is heard (`when its score changes`);  `@thing`'s say so later
+    if (isLastToConstruct(List, new.target)) noteMade(this)
   }
 
   /** `items` array as state. */
