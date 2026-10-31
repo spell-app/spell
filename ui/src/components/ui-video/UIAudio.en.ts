@@ -15,6 +15,7 @@ import { MediaAttributes, MediaEvents } from "./UIVideo.types"
  ****************/
 export const audioVocabulary = {
   tag: "ui-audio",
+  icon: "volume up",
   topics: ["media", "elements"],
   aka: ["audio", "sound", "music", "sound effect", "audio player"],
   noun: "audio",

@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const eventVocabulary = {
   tag: "ui-event",
+  icon: "bolt",
   topics: ["social", "content parts", "views"],
   aka: ["activity", "feed item", "timeline entry"],
   noun: "event",

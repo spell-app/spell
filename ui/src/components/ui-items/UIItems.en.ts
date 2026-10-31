@@ -19,6 +19,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const itemsVocabulary = {
   tag: "ui-items",
+  icon: "list",
   topics: ["lists", "data display", "views"],
   aka: ["item list", "media list", "product list", "results"],
   skeleton: "header with image, 3 line paragraph",

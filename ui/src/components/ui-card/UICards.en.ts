@@ -14,6 +14,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const cardsVocabulary = {
   tag: "ui-cards",
+  icon: "th",
   topics: ["cards", "layout", "lists", "views"],
   aka: ["card grid", "card group", "gallery"],
   noun: "cards",

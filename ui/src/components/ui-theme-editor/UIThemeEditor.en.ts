@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const themeEditorVocabulary = {
   tag: "ui-theme-editor",
+  icon: "palette",
   topics: ["forms", "controls", "typography"],
   aka: [
     "theme editor",

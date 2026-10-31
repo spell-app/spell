@@ -87,6 +87,7 @@ const OWN_ATTRIBUTES = [
  ****************/
 export const propertyEditorVocabulary = {
   tag: "ui-property-editor",
+  icon: "sliders horizontal",
   topics: ["forms", "inputs", "collections"],
   aka: ["inspector", "property sheet", "properties panel", "settings form", "object editor"],
   skeleton: "header, 3 line paragraph",

@@ -13,6 +13,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const sidesVocabulary = {
   tag: "ui-sides",
+  icon: "cubes",
   formControl: true,
   topics: ["inputs", "forms", "controls"],
   aka: ["margin", "padding", "box model", "spacing", "insets", "sides"],

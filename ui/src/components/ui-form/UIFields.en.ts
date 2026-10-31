@@ -17,6 +17,7 @@ import { STATE_STATES } from "./UIForm.types"
  ****************/
 export const fieldsVocabulary = {
   tag: "ui-fields",
+  icon: "wpforms",
   topics: ["forms", "layout", "collections"],
   aka: ["field group", "form row", "inline fields"],
   noun: "fields",

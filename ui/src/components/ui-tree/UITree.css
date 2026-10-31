@@ -1,0 +1,121 @@
+/*
+ * `<ui-tree>` and `<ui-tree-item>` (`UITree.tsx`, `UITreeItem.tsx`):  rows nested in rows, each row the tree's full width.
+ * - Tokens:
+ *   | `--ui-tree-indent` | how far in each level goes |
+ *   | `--ui-tree-row-height` | a row's least height |
+ *   | `--ui-tree-gap` | the room between a row's triangle, icon and words |
+ *   | `--ui-tree-hover-background` | a row under the mouse |
+ *   | `--ui-tree-selected-background` / `-color` | a selected row |
+ *   | `--ui-tree-muted-color` | the triangle, the icon and `which` |
+ */
+@layer ui.components {
+  :host {
+    --_ui-tree-indent: var(--ui-tree-indent, 12px);
+    --_ui-tree-row-height: var(--ui-tree-row-height, 22px);
+    --_ui-tree-gap: var(--ui-tree-gap, 4px);
+    --_ui-tree-hover-background: var(
+      --ui-tree-hover-background,
+      color-mix(in oklab, var(--ui-primary) 6%, transparent)
+    );
+    --_ui-tree-selected-background: var(--ui-tree-selected-background, var(--ui-primary-background));
+    --_ui-tree-selected-color: var(--ui-tree-selected-color, var(--ui-primary-text, var(--ui-text-color)));
+    --_ui-tree-muted-color: var(--ui-tree-muted-color, var(--ui-text-muted));
+    display: block;
+    min-width: 0;
+    color: var(--ui-text-color);
+    outline: none;
+    cursor: var(--ui-control-cursor);
+  }
+  :host(:state(filtered-out)) {
+    display: none;
+  }
+  /* what isn't a row, between rows, makes no sense among matches */
+  :host(:state(filtering)) ::slotted(:not([label])) {
+    display: none;
+  }
+
+  .empty {
+    padding: 0.5em 8px;
+    color: var(--_ui-tree-muted-color);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    box-sizing: border-box;
+    min-height: var(--_ui-tree-row-height);
+    padding-inline: calc(8px + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent)) 8px;
+    white-space: nowrap;
+  }
+  .row:hover {
+    background: var(--_ui-tree-hover-background);
+  }
+  :host(:state(selected)) > .row {
+    background: var(--_ui-tree-selected-background);
+    color: var(--_ui-tree-selected-color);
+  }
+  :host(:focus-visible) > .row {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(var(--ui-focus-width) * -1);
+  }
+
+  /* the room for a triangle is always there, so the rows' icons line up */
+  .toggle {
+    flex: 0 0 12px;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--_ui-tree-muted-color);
+  }
+  :host(:state(has-items)) > .row > .toggle::before {
+    content: "";
+    width: 0.62em;
+    height: 0.62em;
+    background: currentColor;
+    clip-path: polygon(20% 5%, 90% 50%, 20% 95%);
+    transition: rotate 0.1s;
+  }
+  :host(:state(has-items)[aria-expanded="true"]) > .row > .toggle::before,
+  :host(:state(open):state(has-items)) > .row > .toggle::before {
+    rotate: 90deg;
+  }
+
+  .icon,
+  ::slotted([slot="icon"]) {
+    flex: none;
+    margin: 0;
+    color: var(--_ui-tree-muted-color);
+    --ui-icon-width: 1em;
+    --ui-icon-distance: 0;
+  }
+  .label {
+    flex: 0 1 auto;
+    display: flex;
+    gap: 0.33em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .words {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* which one it is:  shortened before the words are */
+  .which {
+    flex: 0 10 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--_ui-tree-muted-color);
+  }
+  .actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    margin-inline-start: auto;
+  }
+}

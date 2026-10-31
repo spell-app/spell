@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { setDebugGlobal } from "spell/util"
+import { setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
@@ -524,9 +524,37 @@ export class Inspector {
     return { title: thing.constructor.name, which: name ? `· ${name}` : "" }
   }
 
-  /** A part's icon:  a stub for now, one for drawn things and one for Spell UI elements. */
+  /**
+   * A part's words in the views tree, as a person would say them:  `Moves: 0`, `Card · ace of spades`, `Menu`.
+   * - A drawn thing:  its type, then which one (`labelPartsFor()`).
+   * - A Spell UI element:  which one it is, when it says (its `name`, `label` or own words), else what it is.
+   * - `tag`:  how it's written, for the row's tooltip.
+   */
+  static rowWordsFor(element: Element): { label: string; which: string; tag: string } {
+    const tag = Inspector.labelFor(element)
+    if (SpellElement.thingOf(element)) {
+      const { title, which } = Inspector.labelPartsFor(element)
+      return { label: title, which, tag: element.localName }
+    }
+    const words = element.getAttribute("name") || element.getAttribute("label") || element.getAttribute("aria-label")
+    const noun = Inspector.vocabularyOf(element)?.noun
+    return { label: words || ownWords(element) || upperFirst(noun ?? element.localName), which: "", tag }
+  }
+
+  /**
+   * A part's icon, in the views tree.
+   * - A drawn thing:  the type's own, when it has a property `icon`;  else a cube.
+   * - A Spell UI element:  its vocabulary's (`ComponentVocabulary.icon`).
+   */
   static iconFor(element: Element): string {
-    return SpellElement.thingOf(element) ? THING_ICON : CONTROL_ICON
+    const thing = SpellElement.thingOf(element) as { icon?: unknown } | undefined
+    if (thing) return typeof thing.icon === "string" && thing.icon ? thing.icon : THING_ICON
+    return Inspector.vocabularyOf(element)?.icon ?? CONTROL_ICON
+  }
+
+  /** A Spell UI element's vocabulary, once its family has loaded. */
+  private static vocabularyOf(element: Element): E.ComponentVocabulary | undefined {
+    return (element as E.DOMElement).component?.vocabulary as E.ComponentVocabulary | undefined
   }
 
   /**

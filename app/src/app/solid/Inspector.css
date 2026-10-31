@@ -313,59 +313,14 @@ ui-panel.InspectorCard > .InspectorSection {
    Plain text in every theme (Owen:  "and inspector tree"):  each title the text's colour, which one it is
    (`· discards`) and the icons muted, the selected row the theme's selected fill */
 .InspectorTree {
-  /* rows run the card's width:  its padding taken back, then given to each row */
+  /* rows run the card's width:  its padding taken back */
+  display: block;
   margin: -4px -14px 0;
-  padding: 0;
-  list-style: none;
-  color: var(--ui-text-color);
-
-  & li {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 22px;
-    padding-inline: calc(8px + var(--depth, 0) * 12px) 14px;
-    font-size: 13px;
-    white-space: nowrap;
-    cursor: var(--ui-control-cursor);
-
-    &:hover {
-      background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
-    }
-    &.selected {
-      background: var(--ui-primary-background);
-      color: var(--ui-primary-text, var(--ui-text-color));
-    }
-    & > .InspectorTreeTitle {
-      flex: 0 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    /* which one it is:  shortened before the title is */
-    & > .InspectorTreeWhich {
-      flex: 0 10 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--ui-text-muted);
-    }
-    & > ui-icon {
-      margin: 0;
-      color: var(--ui-text-muted);
-      /* the glyph's own width, not the usual 1.18em box:  the label close by */
-      --ui-icon-width: 1em;
-      --ui-icon-distance: 0;
-    }
-    /* the caret, or the room for one */
-    & > .InspectorFold {
-      flex: 0 0 12px;
-      display: inline-flex;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--ui-text-muted);
-    }
-  }
+  font-size: 13px;
+}
+.InspectorFilter {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* the Inspector's button (`<InspectorToggle>`):  its icon, then its arrow, close by, the header's grey */

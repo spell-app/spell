@@ -22,6 +22,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const tableVocabulary = {
   tag: "ui-table",
+  icon: "table",
   topics: ["tables", "data display", "basic", "collections"],
   aka: ["data table", "data grid", "grid", "spreadsheet"],
   skeleton: "long line, 4 line paragraph",

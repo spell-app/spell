@@ -173,7 +173,14 @@
                   root. Edit a value below to try it.
                 </script>
               </ui-markdown>
-              <ui-docs-tokens family="ui-split-panel" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-split-panel" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-split-panel columns="25%,*" resizable style="height: 8em">
+                  <ui-segment>Tree</ui-segment>
+                  <ui-segment>Code</ui-segment>
+                </ui-split-panel>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
             <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>

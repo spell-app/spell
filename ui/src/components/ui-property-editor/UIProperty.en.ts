@@ -16,6 +16,7 @@ import { passThrough } from "./UIPropertyEditor.types"
 export const propertyVocabulary = {
   ...fieldVocabulary,
   tag: "ui-property",
+  icon: "sliders horizontal",
   topics: ["forms", "inputs"],
   aka: ["property", "inspector row", "setting", "schema field"],
   description:

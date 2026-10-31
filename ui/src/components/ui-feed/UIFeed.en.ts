@@ -19,6 +19,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const feedVocabulary = {
   tag: "ui-feed",
+  icon: "rss",
   topics: ["social", "lists", "data display", "views"],
   aka: ["activity feed", "timeline", "news feed", "activity stream"],
   skeleton: "header with image, 2 line paragraph",

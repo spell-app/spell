@@ -152,7 +152,13 @@
                   root. Edit a value below to try it.
                 </script>
               </ui-markdown>
-              <ui-docs-tokens family="ui-sides" playground></ui-docs-tokens>
+              <ui-docs-tokens family="ui-sides" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-sides aria-label="Margin" value="10 20 10 20"></ui-sides>
+                <ui-sides aria-label="Padding" value='{ "top": 8, "bottom": 8 }'></ui-sides>
+                <ui-sides aria-label="Vertical padding" sides="top bottom" value="4 0"></ui-sides>
+                <!-- playground:end -->
+              </ui-docs-tokens>
             </ui-section>
             <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>

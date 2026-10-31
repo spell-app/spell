@@ -18,6 +18,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const iconPickerVocabulary = {
   tag: "ui-icon-picker",
+  icon: "icons",
   formControl: true,
   topics: ["forms", "inputs", "selection", "icons", "controls"],
   aka: ["icon chooser", "icon selector", "glyph picker", "symbol picker", "icon search"],

@@ -23,6 +23,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const modalVocabulary = {
   tag: "ui-modal",
+  icon: "window restore outline",
   topics: ["dialogs", "overlays", "popups", "modules"],
   aka: ["dialog", "popup window", "lightbox", "confirm", "alert dialog"],
   noun: "modal",

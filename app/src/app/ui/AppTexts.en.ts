@@ -369,8 +369,6 @@ export const APP_TEXTS = {
   inspectorActionNeeds: "Fill in what it takes first",
   inspectorActionValue: "a value",
   inspectorProperties: "Properties",
-  inspectorThings: "Things",
-  inspectorTemplates: "Templates",
   inspectorHide: "Hide this card",
   inspectorLetGo: "Let go of {part} (Esc)",
   inspectorExpandAll: "Expand all",
@@ -381,6 +379,8 @@ export const APP_TEXTS = {
   inspectorSheetClose: "Put the Inspector away",
   inspectorAddEvent: "Add event",
   inspectorParts: "Views",
+  inspectorFilter: "Filter",
+  inspectorNotDrawn: "Not drawn",
   inspectorNoParts: "Run the app to see its parts.",
   // an event's name, for people (`<EventsBand>`):  "event.<the DOM event>"
   "event.click": "click",

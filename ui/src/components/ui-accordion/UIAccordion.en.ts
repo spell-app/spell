@@ -32,6 +32,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const accordionVocabulary = {
   tag: "ui-accordion",
+  icon: "bars",
   topics: ["containers", "navigation", "data display", "modules"],
   aka: ["collapse", "collapsible", "disclosure", "expander", "details", "faq"],
   skeleton: "long line, long line, long line",

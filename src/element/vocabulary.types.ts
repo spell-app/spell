@@ -325,6 +325,12 @@ export type TextSpec = {
 export type ComponentVocabulary = {
   /** Canonical tag, e.g. `ui-card`. */
   tag: string
+  /**
+   * The icon people know it by, in a list of tags (a palette, the Inspector's tree):  `"id card outline"`.
+   * - Fomantic's names, from the pack every page has.
+   * - None:  the list's own default.
+   */
+  icon?: string
   /** Class-grammar noun, emitted last by `ClassBuilder`, e.g. `card` (`ui red card`). */
   noun: string
   /** Group noun, e.g. `cards` for `<ui-cards>`. */

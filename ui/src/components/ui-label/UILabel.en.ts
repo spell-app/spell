@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const labelVocabulary = {
   tag: "ui-label",
+  icon: "tag",
   topics: ["status", "text", "basic", "elements"],
   aka: ["badge", "chip", "tag", "pill", "lozenge", "count"],
   skeleton: "inline 4 x 1.8",

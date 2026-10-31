@@ -31,6 +31,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const menuVocabulary = {
   tag: "ui-menu",
+  icon: "bars",
   // a segmented menu with a `name` is a native form's field too (epic `debut` J166)
   formControl: true,
   topics: ["menus", "navigation", "basic", "collections"],

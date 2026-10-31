@@ -1041,6 +1041,13 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 
 ## Showing and hiding
 
+### A tree of rows
+
+- **It is:**  `<ui-tree>` and `<ui-tree-item>` (Spell UI, `ui/src/components/ui-tree/`;  epic `editor`):
+  rows nested in rows, opening on `Disclosure`, selecting by `ListSelection`, moving by `RovingTabindex`, with a `filter`.
+- **Copies:**  `--`:  the Inspector's Views card, Things and Templates are on it.
+  · home `ui/src/components/ui-tree/UITree.tsx`
+
 ### A disclosure:  open and closed
 
 - **It is:**  `Disclosure` (the kit's `spell/element`, `src/element/Disclosure.ts`;  epic `coherence` P8):

@@ -12,6 +12,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const orVocabulary = {
   tag: "ui-or",
+  icon: "exchange alternate",
   topics: ["buttons", "controls", "elements"],
   aka: ["button separator", "or divider"],
   noun: "or",

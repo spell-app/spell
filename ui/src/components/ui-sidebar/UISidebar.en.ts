@@ -26,6 +26,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const sidebarVocabulary = {
   tag: "ui-sidebar",
+  icon: "columns",
   topics: ["navigation", "overlays", "layout", "menus", "modules"],
   aka: ["drawer", "off canvas", "side menu", "nav drawer", "hamburger menu"],
   noun: "sidebar",

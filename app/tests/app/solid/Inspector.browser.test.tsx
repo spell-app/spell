@@ -216,8 +216,10 @@ describe("the parts tree and events", () => {
     Inspector.toggle()
     flush()
     await ElementFixture.settle(host)
-    const rows = [...host.querySelectorAll<HTMLElement>(".InspectorTree li")]
-    expect(rows.map((row) => row.textContent)).toEqual(["<ui-segment />", '<ui-button "Go" />'])
+    const rows = [...host.querySelectorAll<HTMLElement>(".InspectorTree ui-tree-item")]
+    expect(rows.map((row) => row.getAttribute("label"))).toEqual(["Segment", "Go"])
+    expect(rows.map((row) => row.title)).toEqual(["<ui-segment />", '<ui-button "Go" />'])
+    expect(rows[1]!.getAttribute("icon")).toBe("hand point up outline")
     rows[1]!.click()
     flush()
     expect(Inspector.selected?.element).toBe(area.querySelector("ui-button"))
@@ -230,13 +232,20 @@ describe("the parts tree and events", () => {
     Inspector.toggle()
     flush()
     await ElementFixture.settle(host)
-    const labels = () => [...host.querySelectorAll(".InspectorTree li")].map((row) => row.textContent)
-    expect(labels()).toEqual(["<ui-segment />", '<ui-button "go" />', '<ui-button "Stop" />'])
-    host.querySelector<HTMLElement>(".InspectorTree li ui-icon.InspectorFold")!.click()
+    const labels = () =>
+      [...host.querySelectorAll<HTMLElement>(".InspectorTree ui-tree-item")]
+        .filter((row) => row.checkVisibility())
+        .map((row) => row.getAttribute("label"))
+    const toggle = () =>
+      host.querySelector(".InspectorTree ui-tree-item")!.shadowRoot!.querySelector<HTMLElement>('[part~="toggle"]')!
+    expect(labels()).toEqual(["Segment", "go", "Stop"])
+    toggle().click()
     flush()
-    expect(labels()).toEqual(["<ui-segment />", '<ui-button "Stop" />'])
-    host.querySelector<HTMLElement>(".InspectorTree li ui-icon.InspectorFold")!.click()
+    await ElementFixture.settle(host)
+    expect(labels()).toEqual(["Segment", "Stop"])
+    toggle().click()
     flush()
+    await ElementFixture.settle(host)
     expect(labels()).toHaveLength(3)
   })
 

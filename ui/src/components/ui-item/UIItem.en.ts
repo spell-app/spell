@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const itemVocabulary = {
   tag: "ui-item",
+  icon: "circle outline",
   topics: ["lists", "content parts", "data display", "views"],
   aka: ["list item", "media object", "row"],
   noun: "item",

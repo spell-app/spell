@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const zoomVocabulary = {
   tag: "ui-zoom",
+  icon: "search plus",
   topics: ["images", "media", "overlays"],
   aka: ["lightbox", "zoom", "full size", "image viewer", "magnifier", "expand", "screenshot", "thumbnail"],
   noun: "zoom",

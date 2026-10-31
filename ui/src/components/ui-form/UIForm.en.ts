@@ -28,6 +28,7 @@ import { FormApplyModes, STATE_STATES, ValidationTriggers } from "./UIForm.types
  ****************/
 export const formVocabulary = {
   tag: "ui-form",
+  icon: "wpforms",
   topics: ["forms", "inputs", "basic", "collections"],
   aka: ["form layout", "fieldset", "validation"],
   noun: "form",

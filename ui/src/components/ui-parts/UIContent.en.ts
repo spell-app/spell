@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const contentVocabulary = {
   tag: "ui-content",
+  icon: "align left",
   topics: ["content parts", "containers", "cards"],
   aka: ["body", "content area", "card body"],
   noun: "content",

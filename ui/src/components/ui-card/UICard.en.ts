@@ -20,6 +20,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const cardVocabulary = {
   tag: "ui-card",
+  icon: "id card outline",
   topics: ["cards", "containers", "data display", "views"],
   aka: ["tile", "panel", "profile card"],
   skeleton: "18 wide: square image, header, 3 line paragraph",

@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const placeholderParagraphVocabulary = {
   tag: "ui-placeholder-paragraph",
+  icon: "align left",
   topics: ["loading", "content parts", "elements"],
   aka: ["skeleton text", "skeleton paragraph"],
   noun: "paragraph",

@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const repeatVocabulary = {
   tag: "ui-repeat",
+  icon: "redo",
   topics: ["forms", "lists", "collections"],
   aka: ["repeater", "field array", "form list", "for each", "list editor"],
   noun: "repeat",

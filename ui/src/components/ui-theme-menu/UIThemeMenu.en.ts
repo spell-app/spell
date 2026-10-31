@@ -18,6 +18,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const themeMenuVocabulary = {
   tag: "ui-theme-menu",
+  icon: "palette",
   topics: ["controls", "selection", "menus"],
   aka: ["theme picker", "theme switcher", "dark mode toggle", "colour scheme", "appearance", "skin"],
   skeleton: "inline 5 x 2.25",

@@ -13,6 +13,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const imagesVocabulary = {
   tag: "ui-images",
+  icon: "images outline",
   topics: ["images", "media", "layout", "elements"],
   aka: ["image group", "gallery", "avatars"],
   noun: "images",

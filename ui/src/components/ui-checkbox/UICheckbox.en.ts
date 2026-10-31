@@ -21,6 +21,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const checkboxVocabulary = {
   tag: "ui-checkbox",
+  icon: "check square outline",
   formControl: true,
   topics: ["forms", "inputs", "controls", "selection", "basic", "modules"],
   aka: ["check box", "toggle", "switch", "tick box"],

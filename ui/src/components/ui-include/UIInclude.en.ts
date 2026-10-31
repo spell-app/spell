@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const includeVocabulary = {
   tag: "ui-include",
+  icon: "file import",
   topics: ["containers", "layout", "modules"],
   aka: ["island", "partial", "fragment", "server-side include", "html import", "transclusion", "embed"],
   skeleton: "4 line paragraph",

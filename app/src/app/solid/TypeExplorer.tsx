@@ -1,5 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal, untrack } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { For, Show, createMemo, createSignal, untrack } from "solid-js"
 
 import { PrefStore } from "spell/util"
 // Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
@@ -7,6 +6,7 @@ import { SCOPE_MEMBER_GROUPS, type ScopeDetails, type ScopeMember, type ScopeNod
 import type { ScopeOrder, TypeExplorerState } from "spell/app/app/ui/ui.types"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editorPrefs } from "spell/app/app/editorPrefs"
+import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import {
   SCOPE_ICONS,
   ScopeDetailsPane,
@@ -99,7 +99,7 @@ export function TypeExplorer(props: TypeExplorerProps) {
                 </Show>
               </span>
             </div>
-            <div class="PaneBody">
+            <ui-tree class="PaneBody" label={appTexts.text("scopes")} ref={treeChoosesRows}>
               <ScopeTreeNode
                 node={tree()}
                 depth={0}
@@ -109,7 +109,7 @@ export function TypeExplorer(props: TypeExplorerProps) {
                 onToggle={toggle}
                 onSelect={select}
               />
-            </div>
+            </ui-tree>
           </div>
           <div class="DetailsPane">
             <div class="PaneHeader">{appTexts.text("details")}</div>
@@ -233,7 +233,6 @@ export type TypeExplorerProps = {
  * - Scrolls itself into view when selected, e.g. from the breadcrumbs.
  ****************/
 function ScopeTreeNode(props: ScopeTreeNodeProps) {
-  let row: HTMLDivElement | undefined
   const isRoot = () => props.node.kind === "root"
   const isOpen = () => isRoot() || props.open.has(props.node.path)
   const isSelected = () => props.node === props.selected
@@ -242,35 +241,24 @@ function ScopeTreeNode(props: ScopeTreeNodeProps) {
   )
   const grouped = () => props.node.kind === "type" && props.order === "alphabetical"
 
-  createEffect(
-    () => isSelected(),
-    (selected) => {
-      if (selected) row?.scrollIntoView({ block: "nearest" })
-    }
-  )
-
   return (
-    <>
-      <TreeRow
-        onElement={(element) => {
-          row = element
-        }}
-        class={["ScopeTreeNode", props.node.kind, { selected: isSelected() }]}
-        depth={props.depth}
-        isOpen={props.node.children.length && !isRoot() ? isOpen() : undefined}
-        onToggle={() => {
-          if (!isRoot()) props.onToggle(props.node.path)
-        }}
-        onClick={() => props.onSelect(props.node)}
-      >
-        <span class="label">
-          <ui-icon name={SCOPE_ICONS[props.node.kind]} />
-          {props.node.name}
-          <Show when={props.node.detail}>
-            <span class="detail">{props.node.detail}</span>
-          </Show>
-        </span>
-      </TreeRow>
+    <ui-tree-item
+      class={["ScopeTreeNode", props.node.kind]}
+      icon={SCOPE_ICONS[props.node.kind]}
+      label={props.node.name}
+      which={props.node.detail}
+      selected={isSelected()}
+      expandable={props.node.children.length && !isRoot() ? "" : undefined}
+      open={isOpen() ? "" : undefined}
+      ref={(row: Element) => {
+        // the root is always open
+        row.addEventListener("ui-closing", (event) => {
+          if (isRoot() && event.target === row) event.preventDefault()
+        })
+        whenRowToggled(() => props.onToggle(props.node.path))(row)
+        chooseRow(() => props.onSelect(props.node))(row)
+      }}
+    >
       <Show when={isOpen() && !grouped()}>
         <For each={children()} keyed={(child) => child.path}>
           {(child, index) => (
@@ -289,7 +277,7 @@ function ScopeTreeNode(props: ScopeTreeNodeProps) {
       <Show when={isOpen() && grouped()}>
         <For each={SCOPE_MEMBER_GROUPS}>{(group) => memberGroup(group)}</For>
       </Show>
-    </>
+    </ui-tree-item>
   )
 
   /** Collapsible "Properties", "Actions" ... row of this type's `group` of members, and them while it's open. */
@@ -299,22 +287,21 @@ function ScopeTreeNode(props: ScopeTreeNodeProps) {
     const isGroupOpen = () => props.open.has(path())
     return (
       <Show when={members().length}>
-        <TreeRow
+        <ui-tree-item
+          group=""
+          expandable=""
           class="ScopeTreeGroup"
-          depth={props.depth + 1}
-          isOpen={isGroupOpen()}
-          onToggle={() => props.onToggle(path())}
-          onClick={() => props.onToggle(path())}
+          label={memberGroupTitle(group.label)}
+          which={String(members().length)}
+          open={isGroupOpen() ? "" : undefined}
+          ref={whenRowToggled(() => props.onToggle(path()))}
         >
-          <span class="label">
-            {memberGroupTitle(group.label)} <span class="detail">{members().length}</span>
-          </span>
-        </TreeRow>
-        <Show when={isGroupOpen()}>
-          <For each={members()} keyed={(child) => child.path}>
-            {(child) => childNode(child, props.depth + 2)}
-          </For>
-        </Show>
+          <Show when={isGroupOpen()}>
+            <For each={members()} keyed={(child) => child.path}>
+              {(child) => childNode(child, props.depth + 2)}
+            </For>
+          </Show>
+        </ui-tree-item>
       </Show>
     )
   }
@@ -351,50 +338,6 @@ type ScopeTreeNodeProps = {
   onToggle: (path: string) => void
   /** Select `node`. */
   onSelect: (node: ScopeNode) => void
-}
-
-/****************
- * ### `<TreeRow>`
- * One row of the "Scopes" tree, all of it clickable:  its indent and open / closed arrow `onToggle`,
- * the rest -- `children`, and the space after them -- `onClick`.
- * - Shared with `<ThingExplorer>`'s tree.
- ****************/
-export function TreeRow(props: TreeRowProps) {
-  return (
-    <div ref={(element) => props.onElement?.(element)} class={["TreeRow", props.class]}>
-      <span
-        class="opener"
-        style={{ "padding-left": `${ROW_PADDING + props.depth * INDENT_WIDTH}px` }}
-        onClick={() => props.onToggle()}
-      >
-        <span class="toggle">{props.isOpen === undefined ? "" : props.isOpen ? "▼" : "▶"}</span>
-      </span>
-      <span class="body" onClick={() => props.onClick()}>
-        {props.children}
-      </span>
-    </div>
-  )
-}
-
-/** Props for `<TreeRow>`. */
-export type TreeRowProps = {
-  /** Class names -- any form Solid's `class` takes, e.g. `["ScopeTreeNode", { selected }]`. */
-  class: JSX.HTMLAttributes<HTMLDivElement>["class"]
-  /** Nesting depth, for indenting. */
-  depth: number
-  /** Is it open?  `undefined` if there's nothing to open. */
-  isOpen?: boolean
-  /** Indent or arrow clicked. */
-  onToggle: () => void
-  /** Anywhere right of the arrow clicked. */
-  onClick: () => void
-  /**
-   * The row's element is made -- a ref callback, e.g. to scroll it into view.
-   * - NOT `rowRef`, as React's was:  the React lint takes a `*Ref` prop for a React ref (`react(refs)`).
-   */
-  onElement?: (element: HTMLDivElement) => void
-  /** What's in the row. */
-  children: JSX.Element
 }
 
 ////////////////

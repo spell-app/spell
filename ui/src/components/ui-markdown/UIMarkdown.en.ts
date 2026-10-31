@@ -17,6 +17,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const markdownVocabulary = {
   tag: "ui-markdown",
+  icon: "markdown",
   topics: ["text", "typography", "data display"],
   aka: ["markdown", "md", "gfm", "readme", "rich text", "prose"],
   skeleton: "header, 4 line paragraph",

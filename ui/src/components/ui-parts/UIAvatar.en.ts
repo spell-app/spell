@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const avatarVocabulary = {
   tag: "ui-avatar",
+  icon: "user circle",
   topics: ["content parts", "images", "social"],
   aka: ["profile picture", "user image", "userpic"],
   noun: "avatar",

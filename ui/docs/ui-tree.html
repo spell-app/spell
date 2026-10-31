@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Tree | Spell UI</title>
+    <meta
+      name="description"
+      content="A tree shows rows nested in rows, which open and close, and can be selected one or many at a time."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Tree">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-tree%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Tree
+            <ui-header>A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-rows-in-rows" label="Rows in rows" sticky="stack" collapsible dividing>
+                <ui-example description="Each row's rows are its children.  The triangle opens and closes a row, with `open`, `ui-opening` and `ui-closing`.">
+                  <ui-tree label="Files" style="width: 18em">
+                    <ui-tree-item label="src" icon="folder" open>
+                      <ui-tree-item label="Card.spellml" icon="file code" selected></ui-tree-item>
+                      <ui-tree-item label="Deck.spellml" icon="file code"></ui-tree-item>
+                      <ui-tree-item label="styles" icon="folder">
+                        <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-many-selected" label="Many selected" sticky="stack" collapsible dividing>
+                <ui-example description="With `choose=&quot;many&quot;`, Shift takes a range of the rows on screen, and Command or Control adds a row or takes it away.">
+                  <ui-tree choose="many" label="Files" style="width: 18em">
+                    <ui-tree-item label="src" icon="folder" open>
+                      <ui-tree-item label="Card.spellml" icon="file code" selected></ui-tree-item>
+                      <ui-tree-item label="Deck.spellml" icon="file code"></ui-tree-item>
+                      <ui-tree-item label="styles" icon="folder">
+                        <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-which-one" label="Which one" sticky="stack" collapsible dividing>
+                <ui-example description="`which` says which one it is, quieter, and shortens first when there's no room.  A button in the `actions` slot keeps its own click.">
+                  <ui-tree label="Things" style="width: 18em">
+                    <ui-tree-item label="Card" which="ace of spades" icon="cube">
+                      <ui-button slot="actions" size="mini">Show</ui-button>
+                    </ui-tree-item>
+                    <ui-tree-item label="Pile" which="discards" icon="cube"></ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-content-groups" label="Groups" sticky="stack" collapsible dividing>
+                <ui-example description="A `group` row only holds rows:  a click opens or closes it, and it's never selected.">
+                  <ui-tree label="Kinds" style="width: 18em">
+                    <ui-tree-item group label="Cards" which="2" open>
+                      <ui-tree-item label="ace of spades"></ui-tree-item>
+                      <ui-tree-item label="king of hearts"></ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-filtered" label="Filtered" sticky="stack" collapsible dividing>
+                <ui-example description="`filter` shows only the rows whose words hold it, with the rows they're inside kept open.  It changes no row's `open`.">
+                  <ui-tree filter="card" label="Files" style="width: 18em">
+                    <ui-tree-item label="src" icon="folder" open>
+                      <ui-tree-item label="Card.spellml" icon="file code" selected></ui-tree-item>
+                      <ui-tree-item label="Deck.spellml" icon="file code"></ui-tree-item>
+                      <ui-tree-item label="styles" icon="folder">
+                        <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Write your rows as children, each row holding the rows inside it.
+                  - A row says `label`, and `which` one, quieter, with an `icon`.
+                  - `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
+                  - `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
+                  - `filter` looks only at rows that are drawn.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  document.querySelector("ui-tree").addEventListener("ui-changed", (event) => show(event.detail.values))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The tree is one tab stop.
+                  - Up and down move between the rows on screen;  Home and End go to the ends.
+                  - Right opens a row, then goes into it;  left closes it, then goes out to its parent.
+                  - Enter and Space select, with Shift, Command or Control as a click takes them.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  It's a `tree` of `treeitem`s, each saying its level, and whether it's open and selected.  Give it a `label`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-tree" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-tree choose="many" label="Files" style="width: 16em">
+                  <ui-tree-item label="src" icon="folder" open>
+                    <ui-tree-item label="Card.spellml" icon="file code" selected></ui-tree-item>
+                    <ui-tree-item label="Deck.spellml" icon="file code"></ui-tree-item>
+                    <ui-tree-item label="styles" icon="folder">
+                      <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree-item>
+                  <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                </ui-tree>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

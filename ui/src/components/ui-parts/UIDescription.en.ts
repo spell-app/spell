@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const descriptionVocabulary = {
   tag: "ui-description",
+  icon: "align left",
   topics: ["content parts", "text"],
   aka: ["body text", "summary text", "details"],
   noun: "description",

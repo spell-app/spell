@@ -37565,6 +37565,234 @@
       "href": "ui-transition.html"
     },
     {
+      "tag": "ui-tree",
+      "name": "Tree",
+      "folder": "ui-tree",
+      "topics": [
+        "lists",
+        "navigation"
+      ],
+      "aka": [
+        "tree view",
+        "outline",
+        "hierarchy",
+        "file tree",
+        "nested list",
+        "folder list"
+      ],
+      "description": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "noun": "tree",
+      "attributes": [
+        {
+          "name": "choose",
+          "kind": "valueOnly",
+          "values": [
+            "one",
+            "many"
+          ],
+          "description": "How rows are selected:  `one` (the default), or `many`, where Shift takes a range, and Command or Control adds a row or takes it away."
+        },
+        {
+          "name": "filter",
+          "kind": "string",
+          "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What a screen reader calls the tree."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The top rows:  `<ui-tree-item>`s."
+        },
+        {
+          "name": "empty",
+          "description": "Shown when `filter` matches no row."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-selecting",
+          "detail": "{ item: HTMLElement, value: string, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: string, values: string[], originalEvent?: Event }",
+          "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`)."
+        }
+      ],
+      "parts": [
+        {
+          "name": "empty",
+          "description": "The box around the `empty` slot."
+        }
+      ],
+      "states": [
+        {
+          "name": "filtering",
+          "description": "It has a `filter`."
+        },
+        {
+          "name": "no-matches",
+          "description": "Its `filter` matches no row."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "noMatches",
+          "text": "Nothing matches",
+          "description": "Shown when `filter` matches no row and no `empty` is given."
+        }
+      ],
+      "mainTag": "ui-tree",
+      "main": true,
+      "page": true,
+      "href": "ui-tree.html"
+    },
+    {
       "tag": "ui-tree-diagram",
       "name": "Tree diagram",
       "folder": "ui-tree-diagram",
@@ -37785,6 +38013,286 @@
       "main": true,
       "page": true,
       "href": "ui-tree-diagram.html"
+    },
+    {
+      "tag": "ui-tree-item",
+      "name": "Tree item",
+      "folder": "ui-tree",
+      "topics": [
+        "lists",
+        "navigation"
+      ],
+      "aka": [
+        "tree node",
+        "tree row",
+        "outline row"
+      ],
+      "description": "One row of a tree:  an icon and a label, with the rows inside it, which it opens and closes.",
+      "noun": "tree item",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "What the row says."
+        },
+        {
+          "name": "which",
+          "kind": "string",
+          "description": "Which one it is, quieter, after its label."
+        },
+        {
+          "name": "icon",
+          "kind": "icon",
+          "description": "The icon before its label."
+        },
+        {
+          "name": "value",
+          "kind": "string",
+          "description": "What `ui-changed` calls this row.  None:  its `label`."
+        },
+        {
+          "name": "open",
+          "kind": "keyOnly",
+          "description": "The rows inside it show."
+        },
+        {
+          "name": "selected",
+          "kind": "keyOnly",
+          "description": "It's selected."
+        },
+        {
+          "name": "expandable",
+          "kind": "keyOnly",
+          "description": "It can open though it has no rows inside it yet:  for rows drawn only once it opens."
+        },
+        {
+          "name": "group",
+          "kind": "keyOnly",
+          "description": "It only holds rows:  a click opens or closes it, and it's never selected."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The rows inside it:  `<ui-tree-item>`s, and anything else to show between them."
+        },
+        {
+          "name": "label",
+          "description": "The row's words, in place of `label` and `which`."
+        },
+        {
+          "name": "icon",
+          "description": "The row's icon, in place of `icon`."
+        },
+        {
+          "name": "actions",
+          "description": "Buttons at the row's end."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-opening",
+          "detail": "{ open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "It's about to open:  cancel it to stay closed."
+        },
+        {
+          "name": "ui-closing",
+          "detail": "{ open: boolean, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "It's about to close:  cancel it to stay open."
+        }
+      ],
+      "parts": [
+        {
+          "name": "row",
+          "description": "The row itself."
+        },
+        {
+          "name": "toggle",
+          "description": "The triangle that opens and closes it."
+        },
+        {
+          "name": "label",
+          "description": "Its words."
+        },
+        {
+          "name": "group",
+          "description": "The box around the rows inside it."
+        }
+      ],
+      "states": [
+        {
+          "name": "open",
+          "description": "The rows inside it show."
+        },
+        {
+          "name": "selected",
+          "description": "It's selected."
+        },
+        {
+          "name": "has-items",
+          "description": "It has rows inside it, or could:  it draws its triangle."
+        },
+        {
+          "name": "filtered-out",
+          "description": "The tree's `filter` hides it."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "open",
+          "text": "Open",
+          "description": "The triangle's name, closed."
+        },
+        {
+          "key": "close",
+          "text": "Close",
+          "description": "The triangle's name, open."
+        }
+      ],
+      "mainTag": "ui-tree",
+      "main": false,
+      "page": false,
+      "href": "ui-tree.html#ui-tree-item"
     },
     {
       "tag": "ui-value",
@@ -49672,6 +50180,55 @@
         {
           "name": "--ui-transition-inverted-pulse",
           "default": "oklch(0.97 0 0)",
+          "type": "color"
+        }
+      ]
+    },
+    "ui-tree": {
+      "folder": "ui-tree",
+      "mainTag": "ui-tree",
+      "title": "Tree",
+      "summary": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-tree",
+        "ui-tree-item"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-tree-indent",
+          "default": "12px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-row-height",
+          "default": "22px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-gap",
+          "default": "4px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-tree-hover-background",
+          "default": "color-mix(in oklab, var(--ui-primary) 6%, transparent)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-selected-background",
+          "default": "var(--ui-primary-background)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-selected-color",
+          "default": "var(--ui-primary-text, var(--ui-text-color))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-muted-color",
+          "default": "var(--ui-text-muted)",
           "type": "color"
         }
       ]

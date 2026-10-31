@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const stickyVocabulary = {
   tag: "ui-sticky",
+  icon: "thumbtack",
   topics: ["layout", "navigation", "modules"],
   aka: ["affix", "pinned", "fixed header", "sticky header"],
   noun: "sticky",

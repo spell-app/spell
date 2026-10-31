@@ -22,6 +22,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const placeholderVocabulary = {
   tag: "ui-placeholder",
+  icon: "ellipsis horizontal",
   topics: ["loading", "feedback", "elements"],
   aka: ["skeleton", "shimmer", "ghost", "loading placeholder", "content loader"],
   noun: "placeholder",

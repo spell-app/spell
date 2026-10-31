@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const radioVocabulary = {
   tag: "ui-radio",
+  icon: "dot circle outline",
   formControl: true,
   topics: ["forms", "inputs", "controls", "selection", "modules"],
   aka: ["radio button", "option button", "radio group"],

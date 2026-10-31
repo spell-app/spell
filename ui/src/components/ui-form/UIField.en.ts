@@ -21,6 +21,7 @@ import { STATE_STATES } from "./UIForm.types"
  ****************/
 export const fieldVocabulary = {
   tag: "ui-field",
+  icon: "edit outline",
   topics: ["forms", "inputs", "collections"],
   aka: ["form field", "form group", "form control", "label and input", "property", "inspector row"],
   skeleton: "4.5 tall",

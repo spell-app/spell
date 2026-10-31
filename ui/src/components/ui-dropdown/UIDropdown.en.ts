@@ -17,6 +17,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const dropdownVocabulary = {
   tag: "ui-dropdown",
+  icon: "caret square down outline",
   formControl: true,
   topics: ["forms", "inputs", "selection", "menus", "controls", "basic", "modules"],
   aka: ["select", "combobox", "picker", "autocomplete", "menu button", "multi select"],
