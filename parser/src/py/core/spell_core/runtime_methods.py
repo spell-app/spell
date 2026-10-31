@@ -29,6 +29,10 @@ class SpellRuntime(Eventful):
         self.state: dict[str, Any] = {}
         # what a person starts, one at a time
         self.actions = ActionQueue()
+        # the program's first app:  the last stop up an event's chain, before its own listeners (`core.send()`)
+        self.app: object | None = None
+        # the property changes still to send -- see `core.note_property_change()`
+        self.changes_waiting: list[Callable[[], object]] = []
 
 
 class RuntimeMethods:
@@ -47,6 +51,8 @@ class RuntimeMethods:
     }
 
     console: "SpellConsole"
+    # Sends what's changed:  `SendingMethods`'s
+    send_waiting_changes: Callable[[], None]
 
     # Do pauses wait?  `False` in a test run, where only what's printed matters
     pauses: bool = True
@@ -70,6 +76,8 @@ class RuntimeMethods:
         - Each of `before_pause` is called first, and awaited if it's a coroutine:
           a web page is sent what changed so far, so a game animates (epic python-target P20).
         """
+        # what changed so far is heard now, as javascript's microtasks run at its first wait
+        self.send_waiting_changes()
         if not self.pauses or self._running_at_once:
             return
         for listener in list(self.before_pause):

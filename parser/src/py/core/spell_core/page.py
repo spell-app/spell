@@ -35,7 +35,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from spell_core.core import core
-from spell_core.events import SpellEvent
+from spell_core.events import SentEvent
 from spell_core.references import is_reference, thing_for_reference
 from spell_core.state import ID_KEY, StateWriter
 from spell_core.things import SpellObject
@@ -64,6 +64,7 @@ class PageSession:
         - throws `ValueError` for a message that's neither a call nor an event, or names nothing the program has.
         """
         self.run(message)
+        core.send_waiting_changes()
         return self.writer.patch()
 
     async def handle_async(self, message: dict[str, Any]) -> list[dict[str, object]]:
@@ -73,6 +74,7 @@ class PageSession:
           A pause on the way sends what changed so far, through `core.before_pause`:  see `spell_quart`.
         """
         await self.run_async(message)
+        core.send_waiting_changes()
         return self.writer.patch()
 
     def is_action(self, message: dict[str, Any]) -> bool:
@@ -141,7 +143,7 @@ class PageSession:
         """`value` as `read()` says it;  the page's mouse event, `{"type": "click"}`, an event on its thing."""
         if not (isinstance(value, dict) and set(value) == {"type"}):
             return self.read(value)
-        event = SpellEvent(value["type"])
+        event = SentEvent(value["type"])
         if "on" in message:
             event.target = event.original_target = self.read(message["on"])
         return event

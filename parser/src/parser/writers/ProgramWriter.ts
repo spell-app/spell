@@ -149,6 +149,13 @@ export abstract class ProgramWriter extends Writer {
     return P.CORE_CALLS_THAT_WAIT.has(call.methodName)
   }
 
+  /** Is `call`, of `core`, a `send` that waits?  Only if a handler of its event does (epic `language`, J4). */
+  protected sendWaits(call: P.ASTScopedMethodInvocation): boolean {
+    if (call.methodName !== "send") return false
+    const eventName = call.args.args?.map(P.quotedText).find(Boolean)
+    return !!eventName && this.project.eventWaits(eventName)
+  }
+
   /**
    * `match`'s code (a file's, a statement's or a rule test's), written as if it were the whole project.
    * - In its scope (`forProject()`):

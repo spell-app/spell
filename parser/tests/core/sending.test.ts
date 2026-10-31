@@ -179,3 +179,19 @@ describe("a property's change", () => {
     expect(heard).toEqual([])
   })
 })
+
+describe("what doesn't wait", () => {
+  test("a passed event reaches the next handler before send() returns", () => {
+    const heard: string[] = []
+    const pile = Object.assign(new Pile(), { onPicked: () => void heard.push("pile") })
+    const card = Object.assign(new Card(), {
+      onPicked(event: SentEvent) {
+        heard.push("card")
+        return event.pass()
+      }
+    })
+    pile.add(card)
+    void send(card, "picked")
+    expect(heard).toEqual(["card", "pile"])
+  })
+})

@@ -69,7 +69,9 @@ def run_program(path: str | Path, seed: int | None = None, pauses: bool = True) 
         sys.path.insert(0, str(program.parent))
     for beside in program.parent.glob("*.py"):
         sys.modules.pop(beside.stem, None)
-    return runpy.run_path(str(program), run_name="__main__")
+    names = runpy.run_path(str(program), run_name="__main__")
+    core.send_waiting_changes()
+    return names
 
 
 def print_page() -> None:

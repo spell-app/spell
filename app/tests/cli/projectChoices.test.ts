@@ -35,6 +35,7 @@ describe("projectChoices()", () => {
       "@spell/test/recetario/",
       "@spell/test/recipe-box/",
       "@spell/test/sala-en-vivo/",
+      "@spell/test/sending-events/",
       "@spell/test/thing-references/",
       "@spell/test/todos-form-based/"
     ])
