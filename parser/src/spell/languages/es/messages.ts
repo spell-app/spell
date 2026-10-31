@@ -34,5 +34,8 @@ export const spanishMessages: CoreMessages = {
   "write-lost": "Otra persona cambió {field} de {thing} a la vez, y queda lo suyo.  Lo tuyo era:  {mine}",
   "write-deleted": "Otra persona borró {thing} mientras lo cambiabas.",
   "write-use-mine": "Usar lo mío",
-  "write-restore": "Restaurar"
+  "write-restore": "Restaurar",
+  "write-changed-under-draft":
+    "Otra persona cambió {thing} mientras lo editabas.  Lo que estás editando aún no lo muestra.",
+  "guest-person": "Invitado {number}"
 }

@@ -5,7 +5,7 @@
       "why": "What's saved in a place (epic data P11, J10):  browser work first, and a Python project with a saved type doesn't compile yet, saying why",
       "names": [
         "place", "savedThings", "savedThingAt", "readRider", "saveThing", "removeSaved", "draftOf", "saveDraft", "cancelDraft",
-        "allOrNothing", "refreshSaved", "ownerOfSaved", "savedWithOwner", "callPlace", "drawRead", "firstFew", "totalOf"
+        "allOrNothing", "refreshSaved", "currentPerson", "peopleHere", "ownerOfSaved", "savedWithOwner", "callPlace", "drawRead", "firstFew", "totalOf"
       ]
     },
     {

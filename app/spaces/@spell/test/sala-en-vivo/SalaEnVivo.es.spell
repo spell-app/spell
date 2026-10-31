@@ -1,0 +1,33 @@
+// Una caja de recetas que comparten dos personas:  quién está, y qué cambió la otra (épica data P13)
+recetario familiar es una sala en vivo en "/api/rooms/recipes"
+
+caja en vivo es una aplicación:
+	- sus "noticias" es texto
+	- sus "cambios" es un número
+	- para agregar una:
+		agregar (una nueva receta con título = "Nueva") a las recetas
+	- para dibujarla:
+		<ui-text class="me">{el nombre de la persona actual}</ui-text>
+		para cada persona en las personas presentes
+			<ui-label class="here">{el nombre de la persona}</ui-label>
+		<ui-text class="news">{sus noticias}</ui-text>
+		<ui-text class="changes">{sus cambios}</ui-text>
+		<ui-button class="again" onClick={recargar las recetas}>Revisar ahora</ui-button>
+		<ui-button class="add" onClick={agregar una}>Agregar una</ui-button>
+		para cada receta en cada receta
+			dibujar la receta
+
+una "receta" es una vista:
+	- se guarda en el recetario familiar
+	- su "título" es texto
+	- cuando otra persona la cambia:
+		poner las noticias de la caja en vivo a "Otra persona cambió [su título]"
+	- para dibujarla:
+		<ui-form value={eso} class="recipe">
+			<ui-input name="título" aria-label="Receta"/>
+		</ui-form>
+
+cuando cambia una receta:
+	poner los cambios de la caja en vivo a los cambios de la caja en vivo + 1
+
+iniciar la caja en vivo

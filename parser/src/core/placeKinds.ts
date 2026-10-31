@@ -8,7 +8,7 @@
  */
 import { schemaOf } from "spell/util"
 import type * as PlacesFolder from "spell/util/places"
-import type { ListQuery, Place as PlaceBehind } from "spell/util/places/places.types"
+import type { ListQuery, Place as PlaceBehind, PlacePerson } from "spell/util/places/places.types"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -48,6 +48,8 @@ export type PlaceMaking = {
   collection: string
   /** The class first read from this place:  what a sheet's numbers and a graph service's fields are read from. */
   Class: Function
+  /** Who's at this page, for a place that has people. */
+  person: PlacePerson
 }
 
 /** A row's id, in a place that isn't told otherwise. */
@@ -108,7 +110,8 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       `core.place():  "${details.name}" is a file, and a browser can't write one by itself:  give it a server side, at its address`
     )
   },
-  "live room": ({ details }, { LiveRoomPlace }) => new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http") }),
+  "live room": ({ details, person }, { LiveRoomPlace }) =>
+    new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
   sheet: ({ details, collection, Class }, { SheetPlace }) =>
     new SheetPlace({
       url: new URL(details.at!, globalThis.location?.href).href,

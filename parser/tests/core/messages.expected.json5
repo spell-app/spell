@@ -26,6 +26,8 @@
     "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
     "write-deleted": "Someone else deleted {thing} while you were changing it.",
     "write-use-mine": "Use mine",
-    "write-restore": "Restore"
+    "write-restore": "Restore",
+    "write-changed-under-draft": "Someone else changed {thing} while you were editing it.  What you're editing doesn't show that yet.",
+    "guest-person": "Guest {number}"
   }
 }

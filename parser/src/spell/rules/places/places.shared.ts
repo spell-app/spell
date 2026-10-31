@@ -8,19 +8,30 @@ import { SP } from "spell/parser/spell"
  *   - `isReadOnly`:  a write won't compile.
  *   - `isAtomic`:  `all or nothing:` is really that.
  *   - `saysWhatChanged`:  it tells us;  a kind that doesn't warns unless its line says how often to ask.
+ *   - `hasOtherPeople`:  `false`, only you ever change what's in it:  `when someone else changes it` warns.
+ *   - `knowsWhoIsHere`:  `the people here` can list more than you.
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
 export const PLACE_KIND_ABILITIES: Readonly<
-  Record<string, { isReadOnly?: boolean; isAtomic?: boolean; saysWhatChanged?: boolean }>
+  Record<
+    string,
+    {
+      isReadOnly?: boolean
+      isAtomic?: boolean
+      saysWhatChanged?: boolean
+      hasOtherPeople?: boolean
+      knowsWhoIsHere?: boolean
+    }
+  >
 > = {
   "web service": {},
   "graph service": {},
   folder: {},
-  file: {},
-  "live room": { isAtomic: true, saysWhatChanged: true },
+  file: { hasOtherPeople: false },
+  "live room": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },
-  "this device": { isAtomic: true, saysWhatChanged: true },
-  "in memory": { isAtomic: true, saysWhatChanged: true }
+  "this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },
+  "in memory": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false }
 }
 
 /** What a kind's word, as `place_kind` names its meaning (`web_service`), is in `core.place()`'s words. */
@@ -63,6 +74,31 @@ export function loopItemOf(scope: P.Scope): P.TypeScope | undefined {
 export function abilitiesOf(saved: P.SavedPlace | undefined) {
   const kind = saved?.placeType.placeKind
   return kind ? PLACE_KIND_ABILITIES[kind] : undefined
+}
+
+/** Does a line under the place `saved` names say how often to ask it what changed? */
+export function isCheckedOften(saved: P.SavedPlace): boolean {
+  const { declaredBy } = saved.placeType
+  const rule = declaredBy?.rule.constructor as unknown as { detailsOf?(match: P.Match): { checkedEvery?: number } }
+  return !!declaredBy && rule.detailsOf?.(declaredBy)?.checkedEvery !== undefined
+}
+
+/**
+ * The kind of each place in the project `scope` is in:  `undefined` for one a library added, which nothing's known of.
+ * - Empty:  it has no place.
+ * - Asked when the project's parsed:  the lines that say so may be anywhere.
+ */
+export function placeKindsIn(scope: P.Scope): (string | undefined)[] {
+  return [...typesIn(scope)].filter((type) => type.placeName !== undefined).map((type) => type.placeKind)
+}
+
+/** Every type `scope` can see. */
+function typesIn(scope: P.Scope): Set<P.TypeScope> {
+  const types = new Set<P.TypeScope>()
+  for (let each: P.Scope | undefined = scope; each; each = each.parentScope) {
+    for (const type of each.types?.get() ?? []) types.add(type)
+  }
+  return types
 }
 
 /**

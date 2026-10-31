@@ -1,5 +1,12 @@
 import { isListPosition, POSITIONS_KEY, withListEdits } from "./positions"
-import { PlaceError, type ApplyAnswer, type PlaceChange, type PlaceRow } from "./places.types"
+import {
+  PlaceError,
+  type ApplyAnswer,
+  type PersonHere,
+  type PlaceChange,
+  type PlacePerson,
+  type PlaceRow
+} from "./places.types"
 
 /** The field holding a row's id, in a room. */
 export const ROOM_ID_FIELD = "id"
@@ -55,6 +62,8 @@ export type RoomAsk =
   | { kind: "call"; from: string; callId: string; name: string; input: unknown }
   /** Am I in step?  Here's what I hold. */
   | { kind: "check"; run?: string; seq: number; checksum: string }
+  /** Here I am, and who I am:  sent each time the connection opens. */
+  | { kind: "here"; from: string; person: PlacePerson }
 
 /** What a referee says to a page. */
 export type RoomAnswer =
@@ -74,6 +83,8 @@ export type RoomAnswer =
   | { kind: "no answer"; changeIds: string[]; message: string }
   /** Where the room stands. */
   | { kind: "at"; run: string; seq: number }
+  /** Everyone here now, in the order they came:  to everyone, each time it changes. */
+  | { kind: "people"; people: PersonHere[] }
 
 /****************
  * ### `RoomCopy`

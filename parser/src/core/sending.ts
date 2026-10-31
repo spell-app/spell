@@ -135,7 +135,7 @@ export function eventName(type: string): string {
  * - `- on card flipped:` and `- when card flipped:` in its template's outline are those.
  */
 export function handlerOf(thing: object, type: string): ((event: SentEvent) => unknown) | undefined {
-  const name = eventName(type).replace(/(^|-)(\w)/g, (_dash, _start, letter: string) => letter.toUpperCase())
+  const name = eventName(type).replace(/(^|-)(\p{L}|\d)/gu, (_dash, _start, letter: string) => letter.toUpperCase())
   const methods = thing as Record<string, unknown>
   for (const handler of [methods[`on${name}`], methods[`when${name}`]]) {
     if (typeof handler === "function") return handler as (event: SentEvent) => unknown

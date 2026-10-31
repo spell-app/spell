@@ -251,6 +251,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       I replaced from offline (`onConflict()`), a delete of what I was changing (`onThingDeleted()`).
     - `PlaceHeal.follow()` is what turns all of it into rows on screen, for a page;  `PlaceThings` does it by itself.
     - A room trusts everyone in it:  no per-person rules yet.
+    - Who's here (epic `data` P13):  `currentPerson()`, `peopleHere()`, `onPeopleHere()`, optional on any `Place`:  one for each page.
+      A guest, with no name from the server that served the page, is one per tab:  [people.ts](places/people.ts).
+    - A batch is answered once each of its changes is heard of, in however many steps:  a batch sent again can hold more than the one before.
   - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
   - [positions.ts](places/positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
     (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).

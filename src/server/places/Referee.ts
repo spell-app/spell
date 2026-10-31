@@ -6,6 +6,7 @@ import { every } from "spell/util/timing"
 import {
   PlaceError,
   idOfRow,
+  type PersonHere,
   type ListQuery,
   type Place,
   type PlaceChange,
@@ -108,7 +109,9 @@ export type RoomMember = {
  *   - A store that makes its own ids (Airtable):  it keeps the browser's ids in the room, and each one's name in the store.
  * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.  The compiler's choice of which comes
  *   with the words.
- * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.
+ * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed.
+ * - WHO'S HERE (epic `data` P13):  each page says who it is as it opens;  a page joining or leaving is told to everyone.
+ *   Never logged or numbered:  it's about now, and a page that comes back simply says so again.
  * - LOCAL ONLY, behind `Guard`:  this run's token, its own host and origin.  A hosted one needs its own sign-in (T23, The Cloud), so
  *   anyone asking from another machine, or at another address, is refused, and told why.
  * - NOT `StateMirror` (`spell/parser/core/state`), which it doesn't grow from:  see the docstring there.
@@ -136,6 +139,8 @@ export class Referee {
   private seq = 0
   /** The pages here, and how to reach each. */
   private readonly members = new Set<(text: string) => void>()
+  /** Who each page says it is, in the order they came. */
+  private readonly people = new Map<(text: string) => void, PersonHere>()
   /** What each change's id made:  oldest first. */
   private readonly made = new Map<string, { seq: number; result?: unknown }>()
   /** Who last wrote each field, and when:  oldest first. */
@@ -160,6 +165,11 @@ export class Referee {
   /** Where it stands. */
   get sequence(): number {
     return this.seq
+  }
+
+  /** Who's here now, in the order they came. */
+  get peopleHere(): PersonHere[] {
+    return [...this.people.values()]
   }
 
   /** The rows, as it holds them:  for a test, or an action's own reading. */
@@ -250,8 +260,23 @@ export class Referee {
     this.members.add(send)
     return {
       receive: (text) => this.heard(text, send),
-      leave: () => this.members.delete(send)
+      leave: () => {
+        this.members.delete(send)
+        if (this.people.delete(send)) this.tellPeople()
+      }
     }
+  }
+
+  /** A page says who it is:  everyone's told who's here. */
+  private isHere({ from, person }: Extract<RoomAsk, { kind: "here" }>, send: (text: string) => void): void {
+    this.people.set(send, { ...person, page: from })
+    this.tellPeople()
+  }
+
+  /** Tell everyone who's here. */
+  private tellPeople(): void {
+    const text = JSON.stringify({ kind: "people", people: this.peopleHere } satisfies RoomAnswer)
+    for (const send of this.members) send(text)
   }
 
   ////////////////
@@ -272,6 +297,8 @@ export class Referee {
         return this.catchUp(ask, answer)
       case "check":
         return this.check(ask, answer)
+      case "here":
+        return this.isHere(ask, send)
       case "changes":
         return void this.inTurn(() => this.makeChanges(ask.changes, ask.from, answer))
       case "call":

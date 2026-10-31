@@ -391,7 +391,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
       - each batch is written to the store before it's numbered, so a store's "no" is a "no"
       - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
-      - named actions re-run on it (`actions`);  which ones is the compiler's choice, with the words
+      - named actions re-run on it (`actions`):  a server side says which;  the compiler sends none there yet, as a program's code is in the browser
+      - who's here:  each page says who it is as it opens, and a page joining or leaving is told to everyone (`peopleHere`);  never numbered or logged
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
       - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
       - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race

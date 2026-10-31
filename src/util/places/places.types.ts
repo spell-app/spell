@@ -284,6 +284,20 @@ export type ApplyAnswer = {
   version?: string
 }
 
+/** Who someone is, as a place knows them. */
+export type PlacePerson = {
+  /** What tells them apart from other people, across visits. */
+  id: string
+  /** What they're called. */
+  name: string
+}
+
+/** One person, at one page:  two windows of one person are two of these. */
+export type PersonHere = PlacePerson & {
+  /** Which page:  what the place calls it, new with each visit. */
+  page: string
+}
+
 /** What to watch:  a collection, or one thing in it. */
 export type WatchTarget = {
   /** The collection. */
@@ -306,6 +320,8 @@ export type PlaceEvent = {
   lost?: ReplacedValue[]
   /** What I replaced with a change made while I was offline:  theirs lost.  A live room says. */
   overwrote?: ReplacedValue[]
+  /** This page made it, and it's only coming back:  a place that can tell says.  Left out:  someone else did, as far as anyone knows. */
+  isMine?: boolean
 }
 
 /** A field's value replaced by someone who hadn't seen it:  last wins, and the other value is kept here. */
@@ -401,6 +417,12 @@ export type Place = {
   rowKnown?(collection: string, id: string): PlaceRow | undefined
   /** Hear each time the connection comes back:  what's waiting can go now.  Returns what stops it. */
   onBack?(listener: () => void): () => void
+  /** Who this place knows the person at this page as:  a place that has people says (epic `data` P13). */
+  currentPerson?(): PersonHere
+  /** Everyone here now, this page included, in the order they came:  one for each page. */
+  peopleHere?(): readonly PersonHere[]
+  /** Hear `peopleHere()` changing.  Returns what stops it. */
+  onPeopleHere?(listener: (people: readonly PersonHere[]) => void): () => void
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */
   changesSince?(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer>
   /**
