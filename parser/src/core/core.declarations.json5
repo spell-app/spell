@@ -2298,6 +2298,33 @@
     },
     {
       "kind": "method",
+      "name": "together",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "...runs"
+        }
+      ],
+      "description": "Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line."
+    },
+    {
+      "kind": "method",
+      "name": "eachTogether",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "description": "Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`."
+    },
+    {
+      "kind": "method",
       "name": "holdWhile",
       "of": "core",
       "module": "acting",

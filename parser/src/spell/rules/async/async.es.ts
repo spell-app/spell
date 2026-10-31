@@ -8,8 +8,10 @@
 import { SpellParser } from "spell/parser/spell/SpellParser"
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 
+import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
@@ -65,6 +67,40 @@ asyncEs.addRule(Pause, {
         [`pausar durante 500 milisegundos`, 'await core.pauseFor(500, "milliseconds")'],
         [`pausar 10 tics`, 'await core.pauseFor(10, "ticks")'],
         [`pausar (10 + 10) seg`, 'await core.pauseFor(10 + 10, "sec")']
+      ]
+    }
+  ]
+})
+
+asyncEs.addRule(AtTheSameTime, {
+  syntax: "al mismo tiempo :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["para do something", "\tal mismo tiempo:", "\t\timprimir 1", "\t\timprimir 2"],
+          js: [
+            "export function doSomething() {",
+            "  core.together(() => core.console.log(1), () => core.console.log(2))",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+asyncEs.addRule(Meanwhile, {
+  syntax: "mientras tanto :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["para do something", "\tmientras tanto imprimir 1"],
+          js: ["export function doSomething() {", "  core.meanwhile(() => core.console.log(1))", "}"]
+        }
       ]
     }
   ]

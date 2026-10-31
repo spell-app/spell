@@ -17,16 +17,17 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *   - `side by side`:  toasts there line up in a row
  *   - `without pausing`:  the countdown keeps running under the pointer
  *   - `with "Got it"`:  a button that closes it;  it stays until closed
- *   - `and wait`:  waits until it's gone
- * - Compiles to `core.notify(message, options)`, the options only the clauses written,
- *   `await`ed only with `and wait`:  a toast is never waited for otherwise.
+ * - Compiles to `core.notify(message, options)`, the options only the clauses written.
+ * - It waits only when it says how long, `notify "Bye" for 5 seconds`:  `await core.notify(...)`.
+ *   - Any other toast is an aside, shown while the program carries on, so it never holds a person's clicks.
+ *   - One that stays until it's closed never waits, or clicks would wait for good:  `until clicked`, `with "Got it"`.
+ *   - `meanwhile notify "Bye" for 5 seconds` carries on too.
  */
-export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|waits?"> {
+export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color?|position?|time?|units?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?"> {
   @proto static alias = ["statement", "async"]
 
   getAST(match: P.MatchFor<this>) {
-    const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton, waits } =
-      match.groups
+    const { message, title, time, units, untilClicked, progress, sideBySide, keepRunning, okButton } = match.groups
     const options = new P.ASTObjectLiteral(match)
     const expression = (group: P.AnyMatch) => P.asAST<P.ASTExpression>(group.AST)
     const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
@@ -50,7 +51,7 @@ export class Notify extends SpellStatement<"kind?|message|title?|inverted?|color
     const args = [expression(message)]
     if (options.properties.length) args.push(options)
     const notify = new P.ASTCoreMethodInvocation(match, { methodName: "notify", args })
-    return waits ? new P.ASTAwaitExpression(match, { expression: notify }) : notify
+    return time && !okButton ? new P.ASTAwaitExpression(match, { expression: notify }) : notify
   }
 
   /**

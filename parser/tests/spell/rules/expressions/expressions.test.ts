@@ -37,6 +37,7 @@ describe("priority and precedence", () => {
         "as_a_type:  Precedence.comparison",
         "as_lowercase:  Precedence.comparison",
         "as_uppercase:  Precedence.comparison",
+        "at_the_same_time:  Priority.preferred",
         "backwards_if:  Precedence.ternary",
         "belongs_to_one:  Priority.declaration",
         "can_belong_to_many:  Priority.declaration",

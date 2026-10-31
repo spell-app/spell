@@ -170,3 +170,85 @@ describe("what a person presses", () => {
     expect(compiled(action, "py")).toContain('"replaces_last": True')
   })
 })
+
+describe("saying not to wait", () => {
+  const SAME_TIME = `	- to go it:
+		at the same time:
+			slow it
+			rest it
+`
+
+  test("`at the same time:` runs each line, and waits if any does", () => {
+    const js = compiled(PROJECT(SAME_TIME))
+    expect(js).toContain("async go()")
+    expect(js).toMatch(/await core\.together\(\s*async \(\) => await this\.slow\(\),\s*\(\) => this\.rest\(\)/)
+    const py = compiled(PROJECT(SAME_TIME), "py")
+    expect(py).toContain("async def go(self)")
+    expect(py).toMatch(/await core\.together\(/)
+  })
+
+  test("`at the same time:` with nothing that waits doesn't wait", () => {
+    const js = compiled(PROJECT(`	- to go it:\n		at the same time:\n			rest it\n			rest it`))
+    expect(js).not.toContain("async go()")
+    expect(js).not.toContain("await core.together")
+  })
+
+  test("a loop in `at the same time:` runs its items together", () => {
+    const spell = PROJECT(`	- to go it:\n		at the same time:\n			for each n in [1, 2]\n				pause for 1 sec`)
+    expect(compiled(spell)).toMatch(/core\.eachTogether\(\s*\[1, 2\]/)
+    expect(compiled(spell, "py")).toMatch(/core\.each_together\(/)
+  })
+
+  test("`meanwhile` starts it, and its caller doesn't wait", () => {
+    const spell = PROJECT(`	- to go it:\n		meanwhile bump it\n		rest it`)
+    const js = compiled(spell)
+    expect(js).not.toContain("async go()")
+    expect(js).toContain("core.meanwhile(async () => await this.bump())")
+    const py = compiled(spell, "py")
+    expect(py).not.toContain("async def go(self)")
+    expect(py).toMatch(/core\.meanwhile\(_\w+\)/)
+  })
+
+  test("in Spanish", () => {
+    const spell = `una carta es una cosa:
+	- para irla:
+		al mismo tiempo:
+			pausar 1 seg
+			pausar 2 seg
+		mientras tanto pausar 1 seg
+`
+    const { files } = parseSpellProject([{ path: "/Test.es.spell", contents: spell }])
+    expect(files.flatMap((file) => file.errors)).toEqual([])
+    const js = SP.SpellProject.combineCompiled(
+      files.map(({ match }) => match?.AST as P.ASTStatementGroup),
+      SP.TARGETS["js/solid"]!.writer
+    )
+    expect(js).toContain("await core.together(")
+    expect(js).toContain("core.meanwhile(")
+  })
+
+  test("`its` and `it` in a block read as they do outside it", () => {
+    const js = compiled(
+      PROJECT(
+        `	- to go it:\n		at the same time:\n			set the score to its score\n			meanwhile set the score to 2`
+      )
+    )
+    expect(js).toContain("this.score = this.score")
+    expect(js).toContain("this.score = 2")
+  })
+
+  test("a toast waits only when it says how long, and never one that stays", () => {
+    const js = compiled(`to show it:
+	notify "Aside"
+	notify "Stays" until clicked
+	notify "Stays" with "Got it"
+	notify "A while" for 1 second
+to carry on:
+	meanwhile notify "A while" for 1 second
+`)
+    expect(js).toContain('core.notify("Aside")')
+    expect(js).toContain('await core.notify("A while"')
+    expect(js).toContain("export async function showIt()")
+    expect(js).toContain("export function carryOn()")
+  })
+})

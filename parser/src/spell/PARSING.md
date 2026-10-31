@@ -1534,6 +1534,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
     when its function turns out to wait.
   - It stops at a program's top level, a function inside a function, and what a writer's `canWait()` refuses.
+  - Two rules say not to wait, each by running functions of its own:
+    - `meanwhile`, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
+    - `at the same time:`, `core.together(() => ..., () => ...)`:  waits if a line does (`togetherWaits()`);
+      a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.
 
 ## Projects

@@ -148,6 +148,24 @@ export const actingMethods = defineCoreModule({
   },
 
   /**
+   * Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line.
+   * - None waits:  they've ended by the time it returns, and nothing need wait for it.
+   * - One that fails doesn't stop the others:  the first failure is thrown once they've all ended.
+   */
+  together(...runs: Array<() => unknown>): Promise<void> {
+    return allEnded(runs.map((run) => run()))
+  },
+
+  /**
+   * Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`.
+   * - `method` gets `(value, position, collection)`, as `forEach()`.
+   * - Throws as `together()` does.
+   */
+  eachTogether(collection: unknown, method: (...args: never[]) => unknown): Promise<void> {
+    return allEnded(core.map(collection as never, method as never) as Iterable<unknown>)
+  },
+
+  /**
    * Run `run`, one of the program's own top-level steps, as `core.meanwhile()`, with people's actions waiting for it:
    * `core.holdWhile(() => solitaire.startANewGame())`.
    * - So the first draw comes at once, and a click during the opening deal waits its turn.
@@ -394,4 +412,11 @@ export function shortcutMatches(shortcut: string, key: ShortcutKey, isMac = fals
     !!key.shiftKey === wants.shift &&
     !!key.altKey === wants.option
   )
+}
+
+/** When each of `waits` has ended;  then throws the first failure, if any. */
+async function allEnded(waits: Iterable<unknown>): Promise<void> {
+  const ended = await Promise.allSettled(waits)
+  const failed = ended.find((each) => each.status === "rejected")
+  if (failed) throw (failed as PromiseRejectedResult).reason
 }

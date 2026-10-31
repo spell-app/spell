@@ -12,10 +12,13 @@
 import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Coroutine
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from spell_core.action_queue import ActionQueue
-from spell_core.events import Eventful, Handler, SpellEvent
+from spell_core.events import Eventful, Handler, SpellEvent, all_ended, run_beside
+
+if TYPE_CHECKING:
+    from spell_core.console import SpellConsole
 
 
 class SpellRuntime(Eventful):
@@ -42,6 +45,8 @@ class RuntimeMethods:
         "tick": 1000 / 60,
         "ticks": 1000 / 60,
     }
+
+    console: "SpellConsole"
 
     # Do pauses wait?  `False` in a test run, where only what's printed matters
     pauses: bool = True
@@ -73,6 +78,37 @@ class RuntimeMethods:
                 await result
         await asyncio.sleep(self._milliseconds(number, units) / 1000)
 
+    def together(self, *runs: Callable[[], Any]) -> Coroutine[Any, Any, None] | None:
+        """Run each of `runs` at once:  `at the same time:`, each its line.
+
+        - One that waits makes this something to wait for, which ends when they've all ended,
+          then raises the first failure.  With none, it's `None`:  they've ended already.
+        """
+        return all_ended([run() for run in runs])
+
+    def meanwhile(self, run: Callable[[], Any]) -> None:
+        """Run `run` now, not holding the caller up:  `meanwhile deal the cards`.
+
+        - It goes on beside whatever comes next, outside the queue:  people's actions don't wait for it.
+        - A failure is said on the program's console, rather than vanishing.
+        """
+
+        async def reporting(coroutine: Coroutine[Any, Any, Any]) -> None:
+            try:
+                await coroutine
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                self.console.error(error)
+
+        try:
+            result = run()
+        except Exception as error:
+            self.console.error(error)
+            return
+        if inspect.iscoroutine(result):
+            run_beside(reporting(result))
+
     def cancel_actions(self, thing: object = None, name: str | None = None) -> bool:
         """Cancel what a person started that's running or waiting;  with `thing`, or its `name` too, only theirs.
 
@@ -88,7 +124,7 @@ class RuntimeMethods:
           every card is face down as soon as the deck is made, as in javascript.
         - Python's `__init__()` can't wait, and a pause there would hold up making the thing:
           the deck's 52 turns, 50 msec each.
-        - Why not a task that goes on beside the program, as an event's handler does (`events._run()`):
+        - Why not a task that goes on beside the program, as an event's handler does (`events.run_beside()`):
           the thing would be made half set up, its cards still turning while the game deals them.
         - throws `RuntimeError` if it waits for something other than a pause, which only a running loop could give it
         """

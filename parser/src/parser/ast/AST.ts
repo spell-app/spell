@@ -2221,6 +2221,9 @@ export const CORE_CALLS_THAT_WAIT = new Set(["pauseFor", "alert", "warn", "confi
 /** `core`'s loops, which call their function for each item right there. */
 export const CORE_LOOPS = new Set(["map", "forEach", "forEachSequential"])
 
+/** `core`'s calls that run functions together, right there:  `at the same time:`. */
+export const CORE_TOGETHER = new Set(["together", "eachTogether"])
+
 /**
  * Does AST `node` wait by itself, not counting a nested `ASTMethodDefinition`:
  * an `ASTAwaitExpression`, or a call in `CORE_CALLS_THAT_WAIT`?
@@ -2235,6 +2238,9 @@ function containsAwait(node: unknown): boolean {
     if (CORE_LOOPS.has(node.methodName)) {
       const callback = node.args.args?.[1]
       if (callback instanceof ASTMethodDefinition && callback.waitsItself) return true
+    }
+    if (CORE_TOGETHER.has(node.methodName)) {
+      if (node.args.args?.some((run) => run instanceof ASTMethodDefinition && run.waitsItself)) return true
     }
   }
   return Object.entries(node).some(([key, value]) => {
