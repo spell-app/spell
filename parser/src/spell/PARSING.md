@@ -1595,6 +1595,7 @@ What a program's lines about where data lives compile to, and what reads the res
 - What can't be, a line elsewhere may settle:  `SP.SpellWarnings.refuseIf()`, `noteIf()` for what won't compile.
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
   - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
+  - A sheet is read only at a plain address, and takes writes at a place server's (`isReadOnlyPlace()`):  no word for it, the address says.
 - A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
 
 ## Projects

@@ -1,19 +1,21 @@
 /**
  * One CSV file as the recipe servers' box of recipes, so REST, GraphQL and a sheet are three ways into one file (epic `data` I21).
  * - Node only;  a test helper, as `recipeServers.ts` is.
- * - The writer stays here, not in `spell/util/places`:  a sheet in the engine is read only (`SheetPlace`), and only this demo writes one.
+ * - The file's reading and writing are `CsvPlace`'s, the real thing (epic `data` P14):  this only says it in the servers' names.
  */
-import { createHash } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
 
-import { parseCsv } from "spell/util/places/csv"
+import { CsvFile, PlaceError, type PlaceChange, type PlaceRow } from "spell/util/places"
 import { SRV, type Handler } from "spell/server"
-import { ChunkFiles } from "spell/server/places"
+import { ChunkFiles, CsvPlace, csvRowVersion } from "spell/server/places"
 
 import { answeredAcrossOrigins, FIRST_RECIPES, RecipeBox, type WireRecipe } from "./recipeServers"
 
 /** Where the file is served. */
 const CSV_PATH = "/recipes.csv"
+
+/** The one collection. */
+const COLLECTION = "recipes"
 
 /** The column that says which recipe a row is. */
 const ID_COLUMN = "id"
@@ -21,11 +23,11 @@ const ID_COLUMN = "id"
 /** The column the servers call `name`:  a sheet says `title`, as the page does. */
 const TITLE_COLUMN = "title"
 
-/** The columns of a file it makes itself. */
-const FIRST_COLUMNS = [ID_COLUMN, TITLE_COLUMN, "cuisine", "servings", "notes"]
+/** The columns that hold numbers. */
+const NUMBERS = ["servings"]
 
-/** What needs quotes in a CSV file. */
-const NEEDS_QUOTES = /[",\r\n]/
+/** The field a row's place in the file reads as, for a page that moves rows:  a live room's word for it. */
+const POSITION_FIELD = "place"
 
 /****************
  * ### `RecipeFile`
@@ -33,32 +35,34 @@ const NEEDS_QUOTES = /[",\r\n]/
  * - EVERY request reads the file first (`readOutsideChanges()`), so an edit in VS Code is in the very next answer.
  *   - So it needs no watcher at all:  everything that asks here polls, and a small file costs nothing to read.
  *   - It also means a write is made onto what's in the file now:  an edit saved a moment ago isn't written over.
- * - A write saves the whole file at once (`ChunkFiles.writeChanged()`:  a temp file, then a rename).
- *   - Its quoting is the writer's:  a field quoted with no need comes back without.  Other columns are kept.
- * - A VERSION IS THE ROW'S OWN CONTENT, hashed:  a CSV file has no version column, and a person's editor won't write one.
+ * - A write is `place.applyNow()`:  only the lines that changed change, and any other column stays.
+ * - A VERSION IS THE ROW'S OWN CONTENT, hashed (`csvRowVersion()`), as a number:  what `If-Match` says.
  *   - So editing one row in VS Code moves that row's version, and no other's:  REST's `If-Match` clashes on that row only (412),
  *     and the page merges per field, as with any other second person.
- *   - Not the file's version:  every edit would clash with every row.
- *   - Changed and changed back is the same version, which is right:  the content is the same.
  * - A file it can't read (half saved, no `id` column, a blank or repeated id):  it answers as it last read, says so once in the
  *   log, and refuses every write (409), so a broken file is never replaced by an old copy.
  ****************/
 export class RecipeFile extends RecipeBox {
   /** The file, absolute. */
   readonly file: string
-  /** The file's columns, in its order. */
-  private columns = FIRST_COLUMNS
+  /** The file as a place:  what `/api/places/recipes-csv` serves. */
+  readonly place: CsvPlace
   /** The file's text as last read or written. */
   private text = ""
-  /** Why the file's text can't be used. */
-  private unreadable: Error | undefined
+  /** The file's columns, as last read. */
+  private columns: readonly string[] = []
 
   constructor({ file, firstText }: RecipeFileProps) {
     super([])
     this.file = file
-    if (!existsSync(file)) {
-      ChunkFiles.writeChanged([[file, firstText ?? csvFor(FIRST_COLUMNS, FIRST_RECIPES.map(withVersion))]])
-    }
+    this.place = new CsvPlace({
+      file,
+      collection: COLLECTION,
+      idColumn: ID_COLUMN,
+      numbers: NUMBERS,
+      positionField: POSITION_FIELD
+    })
+    if (!existsSync(file)) ChunkFiles.writeChanged([[file, firstText ?? firstRecipesText()]])
     this.readOutsideChanges()
   }
 
@@ -73,68 +77,58 @@ export class RecipeFile extends RecipeBox {
     if (text === this.text && this.recipes.size) return
     this.text = text
     try {
-      this.holdRowsOf(text)
-      this.unreadable = undefined
+      this.holdRowsOf(this.place.csvNow())
     } catch (error) {
-      this.unreadable = error as Error
       console.error(`RecipeFile:  ${this.file} can't be read yet;  it stays as it last read`, error)
     }
   }
 
   /** Add a row, and save the file.  - throws `HttpError` 409, while the file can't be read */
   add(fields: Partial<WireRecipe>): WireRecipe {
-    this.refuseIfUnreadable()
-    return this.saved(super.add(fields).id)
+    const id = this.idFor(fields)
+    this.save({ kind: "insert", collection: COLLECTION, id, fields: this.cellsFor({ ...fields, id }) })
+    return this.recipes.get(id)!
   }
 
   /** Change a row, and save the file.  - throws `HttpError` 409, while the file can't be read */
   change(id: string, fields: Partial<WireRecipe>): WireRecipe {
-    this.refuseIfUnreadable()
-    return this.saved(super.change(id, fields).id)
+    this.save({ kind: "update", collection: COLLECTION, id, fields: this.cellsFor(fields) })
+    return this.recipes.get(id)!
   }
 
   /** Take a row out, and save the file.  - throws `HttpError` 409, while the file can't be read */
   remove(id: string): void {
-    this.refuseIfUnreadable()
-    super.remove(id)
-    this.save()
+    this.save({ kind: "delete", collection: COLLECTION, id })
   }
 
-  /** The row `id`, as the saved file holds it. */
-  private saved(id: string): WireRecipe {
-    this.save()
-    return this.recipes.get(id)!
-  }
-
-  /** Write the file, and hold what it now says:  so the box and the file can't differ, down to a number's text. */
-  private save(): void {
-    const text = csvFor(this.columns, [...this.recipes.values()])
-    ChunkFiles.writeChanged([[this.file, text]])
-    this.text = text
-    this.holdRowsOf(text)
-  }
-
-  /** Hold the rows of `text`, or nothing changes.  - throws `SyntaxError` for a file that's half saved, or doesn't say which row is which */
-  private holdRowsOf(text: string): void {
-    const [header, ...rows] = parseCsv(text)
-    if (!header?.includes(ID_COLUMN)) throw new SyntaxError(`RecipeFile:  ${this.file} has no "${ID_COLUMN}" column`)
-    const recipes = new Map<string, WireRecipe>()
-    for (const cells of rows) {
-      const recipe = recipeFor(header, cells)
-      if (!recipe.id || recipes.has(recipe.id)) {
-        throw new SyntaxError(`RecipeFile:  ${this.file} has a blank or repeated id:  "${recipe.id}"`)
-      }
-      recipes.set(recipe.id, recipe)
+  /** Make `change`, and hold what the file now says:  so the box and the file can't differ, down to a number's text. */
+  private save(change: PlaceChange): void {
+    try {
+      this.place.applyNow([change])
+    } catch (error) {
+      if (error instanceof PlaceError && error.kind === "refused") throw new SRV.HttpError(409, error.message)
+      throw error
     }
-    this.columns = header
-    this.recipes.clear()
-    for (const [id, recipe] of recipes) this.recipes.set(id, recipe)
+    this.readOutsideChanges()
   }
 
-  /** - throws `HttpError` 409:  writing now would replace what someone's halfway through with an old copy */
-  private refuseIfUnreadable(): void {
-    if (this.unreadable)
-      throw new SRV.HttpError(409, `${this.file} can't be read, so it can't be saved over:  fix it first`)
+  /** `fields` in the file's names:  `name` is its `title`, and what it has no column for isn't kept, as a real service's unknown field isn't. */
+  private cellsFor({ name, version: _version, ...fields }: Partial<WireRecipe>): PlaceRow {
+    const row: PlaceRow = { ...fields, ...(name !== undefined && { [TITLE_COLUMN]: name }) }
+    return Object.fromEntries(Object.entries(row).filter(([column]) => this.columns.includes(column)))
+  }
+
+  /** Hold the rows of `csv`, or nothing changes.  - throws `SyntaxError` for a file that doesn't say which row is which */
+  private holdRowsOf(csv: CsvFile): void {
+    if (csv.whyUnclear || !csv.columns.includes(ID_COLUMN)) {
+      throw new SyntaxError(csv.whyUnclear ?? `RecipeFile:  ${this.file} has no "${ID_COLUMN}" column`)
+    }
+    this.columns = csv.columns
+    this.recipes.clear()
+    csv.rows.forEach((row, at) => {
+      const recipe = recipeFor(row, csv.cellsOfRow(at))
+      this.recipes.set(recipe.id, recipe)
+    })
   }
 }
 
@@ -148,55 +142,33 @@ export type RecipeFileProps = {
 
 /**
  * The file itself, at `/recipes.csv`, for a sheet to read:  `GET` only.
- * - A sheet can't write, whatever else can:  anything else is a 405.
+ * - A plain address can't write, whatever else can:  anything else is a 405.  What writes it is its place server.
  */
 export function csvHandler(box: RecipeFile): Handler {
   return (request, reply, next) => {
     if (request.path !== CSV_PATH) return next()
     if (answeredAcrossOrigins(request, reply)) return
-    if (request.method !== "GET") return void reply.status(405).json({ error: "a sheet is read only" })
+    if (request.method !== "GET") return void reply.status(405).json({ error: "a sheet is read only at this address" })
     box.readOutsideChanges()
     reply.type("text/csv").send(box.csv)
   }
 }
 
-/**
- * `recipes` as a CSV file, with a line end after every row.
- * - Quotes only what needs it, as RFC 4180 says, and as `parseCsv()` reads.
- */
-export function csvFor(columns: readonly string[], recipes: readonly WireRecipe[]): string {
-  const rows = recipes.map((recipe) => columns.map((column) => cellFor(recipe, column)))
-  return [columns, ...rows].map((cells) => `${cells.map(quoted).join(",")}\n`).join("")
+/** A file holding the first recipes. */
+function firstRecipesText(): string {
+  const rows = FIRST_RECIPES.map(({ id, name, ...fields }) => ({ [ID_COLUMN]: id, [TITLE_COLUMN]: name, ...fields }))
+  return new CsvFile("", { name: COLLECTION, idColumn: ID_COLUMN }).saved(rows).text
 }
 
-/** The text of `recipe`'s cell in `column`. */
-function cellFor(recipe: WireRecipe, column: string): string {
-  const name = column === TITLE_COLUMN ? "name" : column
-  return `${(recipe as Record<string, string | number | undefined>)[name] ?? ""}`
-}
-
-/** `cell`, as a CSV file holds it. */
-function quoted(cell: string): string {
-  return NEEDS_QUOTES.test(cell) ? `"${cell.replaceAll('"', '""')}"` : cell
-}
-
-/** The recipe in a row:  any other column rides along, and is written back. */
-function recipeFor(header: readonly string[], cells: readonly string[]): WireRecipe {
-  const { [TITLE_COLUMN]: title = "", ...row } = Object.fromEntries(
-    header.map((column, index) => [column, cells[index] ?? ""])
-  )
-  return withVersion({
+/** The recipe in a row:  any other column rides along.  Its version:  a hash of `cells`. */
+function recipeFor({ [TITLE_COLUMN]: title = "", ...row }: PlaceRow, cells: readonly string[]): WireRecipe {
+  return {
     cuisine: "",
     notes: "",
     ...row,
-    id: row[ID_COLUMN] ?? "",
-    name: title,
-    servings: Number(row.servings) || 0
-  })
-}
-
-/** `recipe`, its version its content's hash, as a number:  what `If-Match` says. */
-function withVersion(recipe: Omit<WireRecipe, "version">): WireRecipe {
-  const hash = createHash("sha1").update(JSON.stringify(recipe)).digest("hex")
-  return { ...recipe, version: Number.parseInt(hash.slice(0, 8), 16) }
+    id: `${row[ID_COLUMN] as string}`,
+    name: `${title as string}`,
+    servings: Number(row.servings) || 0,
+    version: Number.parseInt(csvRowVersion(cells).slice(0, 8), 16)
+  } as WireRecipe
 }

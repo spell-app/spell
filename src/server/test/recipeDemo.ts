@@ -4,7 +4,8 @@
  *   - one CSV file (`RecipeFile`):
  *     - `/recipes`, with versions in a field
  *     - `/graphql`
- *     - `/recipes.csv`:  the file as it is, for a sheet to read
+ *     - `/recipes.csv`:  the file as it is, for a sheet to read, which a plain address can't write
+ *     - `/api/places/recipes-csv`:  the file behind a `PlaceServer`, for a sheet that writes (`CsvPlace`, epic `data` P14)
  *   - one folder of files (`FolderPlace`):
  *     - `/api/places/recipes`:  behind a `PlaceServer`
  *     - `/api/rooms/recipes`:  a live room, whose referee keeps its recipes in that same folder
@@ -24,6 +25,9 @@ import { bothHandlers, DemoGuard, FIRST_RECIPES } from "./recipeServers"
 
 /** The one collection. */
 const COLLECTION = "recipes"
+
+/** The name the CSV file's place server goes by. */
+const CSV_PLACE = "recipes-csv"
 
 /** Where its live room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
@@ -93,7 +97,7 @@ export async function startRecipeServers({
   router.use(bothHandlers(box))
   const guardFor = (at: number) => new DemoGuard().allowPort(at)
   const server: Server = createServer()
-  const places = { [COLLECTION]: folderPlace, ...morePlaces }
+  const places = { [COLLECTION]: folderPlace, [CSV_PLACE]: box.place, ...morePlaces }
   server.on("request", SRV.toListener(router.handle))
   await (fixedPort
     ? SRV.listenPreferred(server, { port, fallback: false })

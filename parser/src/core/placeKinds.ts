@@ -112,13 +112,20 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   },
   "live room": ({ details, person }, { LiveRoomPlace }) =>
     new LiveRoomPlace({ url: details.at!.replace(/^ws/, "http"), person }),
-  sheet: ({ details, collection, Class }, { SheetPlace }) =>
-    new SheetPlace({
-      url: new URL(details.at!, globalThis.location?.href).href,
+  sheet: ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress }) => {
+    const at = details.at!
+    const { idColumn } = details
+    // a server in front:  it knows the file's numbers, and it's what takes writes;  with no id column, rows share no identity
+    if (isPlaceServerAddress(at)) {
+      return new RemotePlace({ url: at, can: { kind: "sheet", atomic: true, idOf: idColumn as string } })
+    }
+    return new SheetPlace({
+      url: new URL(at, globalThis.location?.href).href,
       collection,
       numbers: fieldsOfKind(Class, "number"),
-      ...(details.idColumn !== undefined && { idColumn: details.idColumn })
-    }),
+      ...(idColumn !== undefined && { idColumn })
+    })
+  },
   "this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory": (_making, { MemoryPlace }) => new MemoryPlace()
 }

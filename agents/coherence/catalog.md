@@ -76,6 +76,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 - **It is:**  `parseCsv()` (`spell/util/places/csv`):  quoted fields, doubled quotes, any line end, text only, no dependency
 - **Use it when:**  reading CSV anywhere in the repos.  What the columns mean is `SheetTable`'s (`spell/util/places`).
+  - Saving one:  `CsvFile` (`spell/util/places`) compares new rows with old, and changes only the lines that differ;
+    `CsvPlace` (`spell/server/places`) is that as a place.  Never write a whole file from rows:  a diff would show every line.
+  - The diff is `rowsInCommon()`, a longest common subsequence;  line-by-line merging of text is spell-epic's `ContentMerge`.
 - **Flag:**  `split\(","\)` over a line of a file
 - **Copies:**  `--`
 - **Fine:**  it's itself a small copy of "A new syntax", above, on purpose (epic `data` P7):

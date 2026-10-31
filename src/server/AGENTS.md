@@ -399,6 +399,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `GoogleToken`:  a service account's key file makes a token, an hour at a time;  both go in `PlaceKeys`, to be scrubbed
       - read only, from a browser, with no key:  `SheetPlace`, on the sheet's CSV address
       - its tests run against `spell/server/test/sheetsStub`, a fair stub checked against Google's docs
+    - `CsvPlace`:  a CSV file as a place that takes writes (epic `data` P14)
+      - each save compares new rows with old (`CsvFile`), so only the lines that changed change, byte for byte
+      - read, changed and written under the file's `FileLock`, synchronously, all at once:  two writers both stand
+      - a row's version is a hash of its cells, so only a change to that row is refused, and the engine merges it per field
+      - with no id column it only adds;  `call(CSV_SAVE_ROWS, ...)` compares a whole list by each row's text
+      - half saved, not UTF-8, or a blank or repeated id:  it refuses a write, and says so
+      - a program says it with no new word:  a sheet whose address is a place server's (`isPlaceServerAddress()`)
     - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says;  Airtable's next
     - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
@@ -517,7 +524,7 @@ The steps between a page's content and its file on disk, for every tool that wri
 - `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
-  - `spell/server/test/RecipeFile`:  that box as a CSV file;  `spell/server/test/recipeDemo`:  the demo's two sources, a CSV file
+  - `spell/server/test/RecipeFile`:  that box as a CSV file, on `CsvPlace`;  `spell/server/test/recipeDemo`:  the demo's two sources, a CSV file
     and a folder, each with several ways in.
 
 ## Types / Exports

@@ -74,8 +74,7 @@ export class RecipeBox {
 
   /** Add a recipe:  the id it came with, or a new one. */
   add(fields: Partial<WireRecipe>): WireRecipe {
-    let id = fields.id
-    while (id === undefined || (fields.id === undefined && this.recipes.has(id))) id = `made-${++this.idsMade}`
+    const id = this.idFor(fields)
     const recipe: WireRecipe = {
       name: "",
       cuisine: "",
@@ -87,6 +86,13 @@ export class RecipeBox {
     }
     this.recipes.set(id, recipe)
     return recipe
+  }
+
+  /** The id a new recipe has:  the one it came with, or a new one. */
+  protected idFor(fields: Partial<WireRecipe>): string {
+    let id = fields.id
+    while (id === undefined || (fields.id === undefined && this.recipes.has(id))) id = `made-${++this.idsMade}`
+    return id
   }
 
   /** Change a recipe:  its version moves on.  This is also how a test is someone else. */

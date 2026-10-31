@@ -1,11 +1,14 @@
+import { isPlaceServerAddress } from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+
+import { textIn } from "./PlaceDetail"
 
 /**
  * What the compiler can say about each kind of place, with no place in hand (epic `data` P11).
  * - The same words as `core.place()`'s kinds, and as `PlaceCapabilities.kind` (J55).
  * - A hint for what to refuse or warn about, at a program's line:  a place still answers for itself when it runs.
- *   - `isReadOnly`:  a write won't compile.
+ *   - `isReadOnly`:  a write won't compile, unless its address is a place server, which takes writes (`isReadOnlyPlace()`).
  *   - `isAtomic`:  `all or nothing:` is really that.
  *   - `saysWhatChanged`:  it tells us;  a kind that doesn't warns unless its line says how often to ask.
  *   - `hasOtherPeople`:  `false`, only you ever change what's in it:  `when someone else changes it` warns.
@@ -76,6 +79,17 @@ export function abilitiesOf(saved: P.SavedPlace | undefined) {
   return kind ? PLACE_KIND_ABILITIES[kind] : undefined
 }
 
+/**
+ * Is what's saved in `saved` read only:  a kind that is, at a plain address?
+ * - A sheet at a place server isn't:  `family cookbook is a sheet at "/api/places/recipes"` (epic `data` P14).
+ *   No new word:  the address says it, as a folder's and a file's do.
+ */
+export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
+  if (!abilitiesOf(saved)?.isReadOnly) return false
+  const address = saved?.placeType.declaredBy?.groups.address as P.Match | undefined
+  return !address || !isPlaceServerAddress(textIn(address))
+}
+
 /** Does a line under the place `saved` names say how often to ask it what changed? */
 export function isCheckedOften(saved: P.SavedPlace): boolean {
   const { declaredBy } = saved.placeType
@@ -115,7 +129,7 @@ export function refuseWriteIfReadOnly(match: P.Match, type: P.TypeScope | undefi
       kind: `${saved?.placeType.placeKind ?? ""}`
     })
   }
-  SP.SpellWarnings.refuseIf(match, message, () => !!abilitiesOf(type.savedPlace())?.isReadOnly)
+  SP.SpellWarnings.refuseIf(match, message, () => isReadOnlyPlace(type.savedPlace()))
 }
 
 /** The name a collection goes by, from a type's name as written in its language:  `recipe` => `recipes`. */

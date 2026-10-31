@@ -221,12 +221,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
+    A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with
       `GoogleSheetPlace`, in `spell/server/places`.
     - An author's `idColumn`, or rows share no identity.  A row with no id or a repeated one is left out, and said.
     - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
       `PlaceQuery` adds the one for rows with no id, for every place.
     - Its ceiling holds while it reads:  the engine only counts rows it's handed.
+  - [CsvFile](places/CsvFile.ts):  a CSV file's text as rows, saved by comparing new rows with old, so only the lines that differ change (epic `data` P14).
+    - By the id column, or with none by each row's whole text (`rowsInCommon()`, a longest common subsequence).
+    - `csvLinesIn()` keeps what `parseCsv()` throws away:  each cell as written, each line end, the blank lines.
+    - Plain text in and out;  the place that writes a file is `CsvPlace`, in `spell/server/places`.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised

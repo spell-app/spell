@@ -4,7 +4,8 @@
  * - ONE CSV file, `<folder>.csv`, three ways in:  edit it in VS Code, and all three follow
  *   - `http://127.0.0.1:4791/recipes`:  REST, with versions in a field
  *   - `http://127.0.0.1:4791/graphql`
- *   - `http://127.0.0.1:4791/recipes.csv`:  the file itself, for a sheet to read
+ *   - `http://127.0.0.1:4791/recipes.csv`:  the file itself, for a sheet to read, which can't write
+ *   - `http://127.0.0.1:4791/api/places/recipes-csv`:  the file behind a `PlaceServer`, for a sheet that writes
  *   - the first time, a copy of `recipes.csv` beside the demo's pages, so the committed one never changes
  * - ONE folder of files, `<folder>`, two ways in:  edit `recipes/r-1.json` there, and both follow
  *   - `http://127.0.0.1:4791/api/places/recipes`:  as a place, behind a `PlaceServer`
@@ -62,7 +63,7 @@ await startRecipeServers({
   ...(googleSheet && { morePlaces: { "google-sheet": googleSheet } })
 })
 console.log(`the recipe servers are on http://127.0.0.1:${PORT}.  Ctrl-C stops them.`)
-console.log(`the CSV file, behind /recipes, /graphql and /recipes.csv, is ${csvFile}`)
+console.log(`the CSV file, behind /recipes, /graphql, /recipes.csv and /api/places/recipes-csv, is ${csvFile}`)
 console.log(`the folder, behind /api/places/recipes and the live room, ${ROOM_PATH}, is ${folder}`)
 if (googleSheet) console.log(`your Google Sheet ${spreadsheet} is on /api/places/google-sheet, its key held here.`)
 console.log(RECIPE_SERVERS_READY)

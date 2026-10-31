@@ -4,6 +4,33 @@ const FIELD_END = /[,\r\n]/g
 /** What some programs start a text file with. */
 const BYTE_ORDER_MARK = "﻿"
 
+/** What needs quotes in a CSV file. */
+const NEEDS_QUOTES = /[",\r\n]/
+
+/** One field of a line of a CSV file. */
+export type CsvCell = {
+  /** Its text, unquoted. */
+  value: string
+  /** Exactly as the file holds it:  what's written back while it hasn't changed. */
+  raw: string
+}
+
+/** One line of a CSV file, which a quoted line end makes longer than one line of text. */
+export type CsvLine = {
+  /** Its fields:  one with nothing in it, for a line with nothing on it. */
+  cells: CsvCell[]
+  /** What ends it, as the file holds it:  `""` only on the last line. */
+  ending: string
+}
+
+/** A CSV file's text, in pieces which put back together are that text, byte for byte. */
+export type CsvLines = {
+  /** The byte order mark it starts with:  `""` for none. */
+  byteOrderMark: string
+  /** Every line, those with nothing on them too. */
+  lines: CsvLine[]
+}
+
 /**
  * The rows of a CSV file, as text:  commas between fields, double quotes around any field that needs them.
  * - As RFC 4180 says, and as spreadsheets write it:
@@ -18,22 +45,50 @@ const BYTE_ORDER_MARK = "﻿"
  * - throws `SyntaxError` for a quoted field that never closes, as in a file half saved
  */
 export function parseCsv(csv: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let at = csv.startsWith(BYTE_ORDER_MARK) ? BYTE_ORDER_MARK.length : 0
-  if (at >= csv.length) return rows
+  return csvLinesIn(csv)
+    .lines.filter(isCsvRow)
+    .map(({ cells }) => cells.map(({ value }) => value))
+}
+
+/** Does `line` hold a row?  One with nothing on it doesn't. */
+export function isCsvRow({ cells }: CsvLine): boolean {
+  return cells.length > 1 || !!cells[0]?.value
+}
+
+/**
+ * The lines of a CSV file, keeping what `parseCsv()` throws away:  how each field was written, each line's end, the blank lines.
+ * - What lets a save change one line and leave the rest alone (`CsvFile`).
+ * - throws `SyntaxError` for a quoted field that never closes, as in a file half saved
+ */
+export function csvLinesIn(csv: string): CsvLines {
+  const byteOrderMark = csv.startsWith(BYTE_ORDER_MARK) ? BYTE_ORDER_MARK : ""
+  const lines: CsvLine[] = []
+  let cells: CsvCell[] = []
+  let at = byteOrderMark.length
+  if (at >= csv.length) return { byteOrderMark, lines }
   for (;;) {
-    const { value, end } = csv[at] === '"' ? quotedField(csv, at, rows.length + 1) : plainField(csv, at)
-    row.push(value)
+    const { value, end } = csv[at] === '"' ? quotedField(csv, at, lines.length + 1) : plainField(csv, at)
+    cells.push({ value, raw: csv.slice(at, end) })
     if (csv[end] === ",") {
       at = end + 1
       continue
     }
-    if (row.length > 1 || row[0]) rows.push(row)
-    row = []
-    at = end + (csv.startsWith("\r\n", end) ? 2 : 1)
-    if (at >= csv.length) return rows
+    const ending = csv.startsWith("\r\n", end) ? "\r\n" : (csv[end] ?? "")
+    lines.push({ cells, ending })
+    cells = []
+    at = end + ending.length
+    if (at >= csv.length) return { byteOrderMark, lines }
   }
+}
+
+/** `value`, as a CSV file holds it:  in quotes if it needs them, or if `quoted`. */
+export function csvCellFor(value: string, quoted = false): string {
+  return quoted || NEEDS_QUOTES.test(value) ? `"${value.replaceAll('"', '""')}"` : value
+}
+
+/** The text of `line`, with no line end:  its fields as the file holds them. */
+export function csvLineText({ cells }: CsvLine): string {
+  return cells.map(({ raw }) => raw).join(",")
 }
 
 /** One field read from a CSV file. */

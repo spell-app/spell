@@ -155,6 +155,14 @@ describe("what compiles", () => {
     const plain = RECIPE.split("\n\t- to throw")[0]!
     expect(compiled(sheet, plain, ...set).errors.join()).toContain("read only")
     expect(compiled(sheet, plain).errors).toEqual([])
+    for (const fronted of [
+      'family cookbook is a sheet at "/api/places/recipes"',
+      'family cookbook is a sheet at "http://127.0.0.1:4791/api/places/recipes":\n\t- its ids are in "id"'
+    ]) {
+      expect(compiled(fronted, plain, ...set).errors).toEqual([])
+    }
+    const plainWithQuery = 'family cookbook is a sheet at "https://example.com/x.csv?from=/api/places/recipes"'
+    expect(compiled(plainWithQuery, plain, ...set).errors.join()).toContain("read only")
   })
 
   it("a sort key that waits won't compile;  a rider outside a drawing won't", () => {

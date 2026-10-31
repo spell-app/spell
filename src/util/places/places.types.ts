@@ -467,6 +467,22 @@ export function writeAnswerFor(place: Place, question: WriteQuestion): WriteAnsw
 }
 
 ////////////////
+// ## Where a place is served
+////////////////
+
+/** Where a `PlaceServer` listens, unless it's told otherwise:  each place by its name under this. */
+export const PLACES_PREFIX = "/api/places"
+
+/**
+ * Does `address` name a place on a `PlaceServer`, rather than a file anyone can fetch?
+ * - How a program says a sheet has a server in front, with no word for it:  `family cookbook is a sheet at "/api/places/recipes"`.
+ * - Only its path counts:  a file's address may hold anything in its query.
+ */
+export function isPlaceServerAddress(address: string): boolean {
+  return address.split(/[?#]/)[0]!.includes(`${PLACES_PREFIX}/`)
+}
+
+////////////////
 // ## Errors
 ////////////////
 

@@ -4,7 +4,6 @@ import { join } from "node:path"
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { parseCsv } from "spell/util/places"
-import { csvFor } from "spell/server/test/RecipeFile"
 import { DEMO_TOKEN, type WireRecipe } from "spell/server/test/recipeServers"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 
@@ -112,11 +111,33 @@ describe("the demo's servers:  one source, several ways in", () => {
       expect((await onRest("r-1")).version).toBe(version)
     })
 
-    test("a sheet can't write, though REST can write the same file", async () => {
+    test("a plain address can't write, though REST and the place server can write the same file", async () => {
       const before = readFileSync(csv, "utf8")
       const response = await fetch(`${servers.url}/recipes.csv`, { method: "PUT", body: "id\nr-1\n" })
       expect(response.status).toBe(405)
       expect(readFileSync(csv, "utf8")).toBe(before)
+    })
+
+    test("a change over REST changes one line, byte for byte:  the quoting and the column it doesn't know stay", async () => {
+      expect((await changeOnRest("r-2", { servings: 7 })).status).toBe(200)
+      expect(readFileSync(csv, "utf8")).toBe(FIRST_CSV.replace("Dal,Indian,6", "Dal,Indian,7"))
+    })
+
+    test("the place server writes the same file, and REST reads it;  a line it changes is the only one", async () => {
+      const apply = (changes: object[]) =>
+        fetch(`${servers.url}/api/places/recipes-csv/apply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-server-token": DEMO_TOKEN },
+          body: JSON.stringify({ changes })
+        })
+      const update = { kind: "update", collection: "recipes", id: "r-1", fields: { title: "From the place" } }
+      expect((await apply([update])).status).toBe(200)
+      expect(readFileSync(csv, "utf8")).toBe(FIRST_CSV.replace("Tomato soup", "From the place"))
+      expect((await onRest("r-1")).name).toBe("From the place")
+      const insert = { kind: "insert", collection: "recipes", id: "r-9", fields: { title: "Toast", servings: 1 } }
+      expect((await apply([insert])).status).toBe(200)
+      expect((await onRest("r-9")).servings).toBe(1)
+      expect(readFileSync(csv, "utf8").endsWith("r-9,Toast,,1,,\n")).toBe(true)
     })
 
     test("a file half saved:  answers stand as last read, and nothing's saved over it until it's fixed", async () => {
@@ -132,16 +153,6 @@ describe("the demo's servers:  one source, several ways in", () => {
       expect(errors).toHaveBeenCalled()
       errors.mockRestore()
     })
-  })
-
-  test("csvFor():  what it writes, parseCsv() reads back", () => {
-    const notes = 'One, "two"\nthree\r\nfour'
-    const recipe: WireRecipe = { id: "r", name: "Name", cuisine: "", servings: 2, notes, version: 1 }
-    const text = csvFor(["id", "title", "cuisine", "servings", "notes"], [recipe])
-    expect(parseCsv(text)).toEqual([
-      ["id", "title", "cuisine", "servings", "notes"],
-      ["r", "Name", "", "2", notes]
-    ])
   })
 
   describe("one folder", () => {
