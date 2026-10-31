@@ -242,7 +242,8 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  place, for where a program's data lives:  `Place`, `Places`, `PlaceThings`, in code;  a place's kind in plain words, the same in
   `PlaceCapabilities.kind` and a program's line:  `web server`, `graphql server`, `data folder`, `file`, `room`, `sheet`, `google sheet`,
-  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`;  coming:  `airtable`.
+  `database on this device`, `in memory database`, `atmosphere account`, `personal atmosphere account`, `airtable`.
+  - An Airtable's own word stays for what it holds:  a base, a table, a record.  The kind is `airtable`, never "airtable base".
   - The line:  `family cookbook is a web server (at|from) "..."`:  `at` and `from` mean the same, never read only.
   - `sheet` and `spreadsheet` are one kind, a CSV-style file;  `google sheet` is its own.
   - Code names that say what they are stay:  `RestPlace`, `GraphPlace`, `LiveRoomPlace`, `DevicePlace`.
@@ -284,11 +285,14 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  `they`, `them`, `their name`, and `the person` when things are ambiguous:  the person using the program, who may not be whoever wrote it.
   - `(everyone|the people) here`, for all of them.
+  - `recipes where they are the cook`, `where they aren't the cook`:  just what `where its cook is them` is;
+    there, `the cook` is the recipe's own, whatever the program has by that name.  Spanish:  `recetas donde esa persona es el cocinero`.
   - In code:  `core.currentPerson()`, `core.isCurrentPerson()`.
   - Spanish:  `esa persona`, `la persona`, `el nombre de esa persona`:  no `su`, which already means its.
 - **Not:**  me, my, the current person, the user.
 - A program's own wins:  in `for each person in everyone here`, `the person` is the loop's, and `them` still the one using it.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15:  "you are speaking about the person using the program, which may not be 'you'".
+  `where they are the cook`:  Owen, 2026-10-31, epic `data` T66.
 
 ### waits
 

@@ -1,4 +1,5 @@
 import { proto, snakeCase } from "spell/util"
+import { airtableBaseIn, isPlaceServerAddress } from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Wording } from "spell/parser/spell/rules/expressions"
@@ -18,9 +19,6 @@ const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\
  * every line of a program.
  */
 const WORDS_READ = new Map<string, boolean>()
-
-/** The kinds whose words are settled, with nothing behind them until their phase:  each refuses, saying so. */
-const KINDS_LATER = new Set(["airtable"])
 
 /** An account's name, as the protocol has it:  a DID. */
 const ACCOUNT_DID = /^did:(?:plc|web):[A-Za-z0-9._:%-]+$/
@@ -42,9 +40,11 @@ const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9
  * - The lines under it say the rest (`PlaceDetail`), and name its operations.
  * - Declares a type and its one instance, the variable `family_cookbook`, as `solitaire is an app` does.
  * - e.g. `family cookbook is an atmosphere account at "did:plc:abc123"`:  one account's records, anyone's to read (epic `data` P16).
+ * - e.g. `family cookbook is an airtable at "appXXXXXXXXXXXXXX"`:  a base, through a server side that holds its key (epic `data` P19).
  * - What it can't do is said here, at this line:  a key in its address won't compile, and a place that can't announce
  *   what changed warns unless it says how often to ask.
  *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
+ *   - An Airtable warns of the last save winning, of fields it works out, of its limits, of a missing id column or key (`warnOfAirtable()`).
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
@@ -87,16 +87,13 @@ export class CreatePlace extends TypeDeclaration<
       return SpellStatement.refuse(match, language.parserMessage("key-written"))
     }
     match.data.placeKind = kind ? placeKindWords(Wording.meaningOf(kind) ?? "") : undefined
-    if (KINDS_LATER.has(match.data.placeKind ?? "")) {
-      const kind = language.placeKindWord(match.data.placeKind!)
-      return SpellStatement.refuse(match, language.parserMessage("place-kind-later", { kind }))
-    }
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
-    const notAnAddress = this.refuseAtmosphereAddress(match)
+    const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
     if (notAnAddress) return notAnAddress
     this.warnIfItCantSay(match)
     this.warnOfNoReferee(match)
+    this.warnOfAirtable(match)
     return match
   }
 
@@ -112,6 +109,38 @@ export class CreatePlace extends TypeDeclaration<
       return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-a-corner", { address }))
     }
     return undefined
+  }
+
+  /** An Airtable's address has to name a base:  `appXXXXXXXXXXXXXX`, Airtable's address for one, or a place server that holds one. */
+  private refuseAirtableAddress(match: P.MatchFor<this>): P.Match | undefined {
+    if (match.data.placeKind !== "airtable") return undefined
+    const address = textIn(match.groups.address)
+    if (isPlaceServerAddress(address) || airtableBaseIn(address)) return undefined
+    return SpellStatement.refuse(match, SP.Language.of(match.scope).parserMessage("airtable-not-a-base", { address }))
+  }
+
+  /**
+   * SIDE EFFECT:  says, at this line, what an Airtable can't promise (epic `data` P19, T11, I5):
+   * - two people on one field:  the last save wins, with no notice, and an edit in Airtable's own window is the same
+   * - it works some fields out, and can't be asked which from here:  a write to one is refused when it runs
+   * - each page of a read is a request, and plans cap them
+   * - with no id column, Airtable makes the id, so a new row sent again can double;  with no key named, it can't be reached
+   */
+  private warnOfAirtable(match: P.MatchFor<this>): void {
+    if (match.data.placeKind !== "airtable") return
+    const language = SP.Language.of(match.scope)
+    SP.SpellWarnings.note(match, language.parserMessage("airtable-last-save-wins"))
+    SP.SpellWarnings.note(match, language.parserMessage("airtable-worked-out-fields"))
+    SP.SpellWarnings.note(match, language.parserMessage("airtable-calls-count"))
+    const details = () => CreatePlace.detailsOf(match)
+    SP.SpellWarnings.noteIf(
+      match,
+      language.parserMessage("airtable-no-id-column"),
+      () => details().idColumn === undefined
+    )
+    const isItsOwnServer = isPlaceServerAddress(textIn(match.groups.address))
+    const needsKey = language.parserMessage("airtable-needs-key")
+    SP.SpellWarnings.noteIf(match, needsKey, () => !isItsOwnServer && details().keyNamed === undefined)
   }
 
   /**

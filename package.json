@@ -1328,7 +1328,8 @@
   "packageManager": "yarn@4.18.0",
   "pageServer": {
     "routes": [
-      "src/server/test/recipeServersRoutes.ts"
+      "src/server/test/recipeServersRoutes.ts",
+      "src/server/places/airtableRoutes.ts"
     ]
   },
   "spell": {

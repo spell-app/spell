@@ -2,6 +2,7 @@
  * Fake places with the odd shapes of the back-ends (epic `data`, Airtable and AT Protocol),
  * so the engine's tests can't quietly assume every place is an easy one.
  * - They copy the SHAPE of each back-end, and nothing about reaching it.
+ * - `FieldRulesPlace` is `AirtablePlace` with no id column:  the same capabilities.
  * - `OwnedPlace` and `HostsPlace` are what `AtProtoPlace` turned out to be:  the same capabilities and the same `owner` field.
  *   One difference:  it knows who's asking from its sign-in, so it never reads `PlaceContext.identity`, as these do.
  */
