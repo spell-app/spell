@@ -156,7 +156,11 @@ export type TestCheck = {
  * | `write-refused` | the notice when a place refuses a change | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
+ * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
+ * | `write-deleted` | the notice when someone else deleted what you were editing | `thing` |
  * | `write-use-theirs` | that notice's button | |
+ * | `write-use-mine` | `write-lost`'s button | |
+ * | `write-restore` | `write-deleted`'s button | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -178,7 +182,11 @@ export const CORE_MESSAGES = {
   "write-retry": "Retry",
   "write-show-me": "Show me",
   "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
-  "write-use-theirs": "Use theirs"
+  "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
+  "write-deleted": "Someone else deleted {thing} while you were changing it.",
+  "write-use-theirs": "Use theirs",
+  "write-use-mine": "Use mine",
+  "write-restore": "Restore"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

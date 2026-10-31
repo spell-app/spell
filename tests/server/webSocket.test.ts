@@ -1,6 +1,8 @@
 import { mkdtempSync, rmSync } from "node:fs"
+import type { IncomingMessage } from "node:http"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { PassThrough } from "node:stream"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -77,3 +79,79 @@ async function open(port: number): Promise<{ socket: WebSocket; messages: unknow
   })
   return { socket, messages }
 }
+
+// What a page says:  masked, as a browser's frames are;  whole, or in pieces
+describe("acceptWebSocket()'s `onText`", () => {
+  /** A socket accepted with an `onText`, and what it heard and wrote. */
+  function accepted() {
+    const socket = new PassThrough()
+    const heard: string[] = []
+    const written: Buffer[] = []
+    const raw = { headers: { "sec-websocket-key": "k", upgrade: "websocket" } } as unknown as IncomingMessage
+    socket.write = ((chunk: Buffer) => (written.push(Buffer.from(chunk)), true)) as typeof socket.write
+    expect(SRV.acceptWebSocket(raw, socket, { onText: (text) => heard.push(text) })).toBe(true)
+    return { socket, heard, written }
+  }
+
+  /** A frame as a page sends it. */
+  function pageFrame(text: string, { opcode = 1, isFinal = true } = {}): Buffer {
+    const payload = Buffer.from(text)
+    const mask = Buffer.from([1, 2, 3, 4])
+    const masked = payload.map((byte, at) => byte ^ mask[at % 4]!)
+    const first = (isFinal ? 0x80 : 0) | opcode
+    const head =
+      payload.length < 126
+        ? Buffer.from([first, 0x80 | payload.length])
+        : Buffer.from([first, 0x80 | 126, payload.length >> 8, payload.length & 0xff])
+    return Buffer.concat([head, mask, masked])
+  }
+
+  test("takes a frame's mask off", () => {
+    const { socket, heard } = accepted()
+    socket.emit("data", pageFrame("héllo"))
+    expect(heard).toEqual(["héllo"])
+  })
+
+  test("reads a frame split over chunks, and several in one, long and short", () => {
+    const { socket, heard } = accepted()
+    const long = "x".repeat(5000)
+    const frames = Buffer.concat([pageFrame("one"), pageFrame(long), pageFrame("three")])
+    for (let at = 0; at < frames.length; at += 1000) socket.emit("data", frames.subarray(at, at + 1000))
+    expect(heard).toEqual(["one", long, "three"])
+  })
+
+  test("joins a message that came in pieces", () => {
+    const { socket, heard } = accepted()
+    socket.emit("data", pageFrame("wh", { isFinal: false }))
+    socket.emit("data", pageFrame("ole", { opcode: 0 }))
+    expect(heard).toEqual(["whole"])
+  })
+
+  test("answers a ping, and a close;  a listener that throws doesn't end it", () => {
+    const { socket, written } = accepted()
+    socket.emit("data", pageFrame("hi", { opcode: 9 }))
+    expect(written.at(-1)!.subarray(0, 2)).toEqual(Buffer.from([0x8a, 2]))
+    expect(written.at(-1)!.subarray(2).toString()).toBe("hi")
+    const ended = vi.spyOn(socket, "end")
+    socket.emit("data", pageFrame("", { opcode: 8 }))
+    expect(ended).toHaveBeenCalled()
+  })
+
+  test("a message past the limit closes the socket, as too big", () => {
+    const { socket } = accepted()
+    const ended = vi.spyOn(socket, "end")
+    const head = Buffer.alloc(14)
+    head[0] = 0x81
+    head[1] = 0x80 | 127
+    head.writeBigUInt64BE(BigInt(20 * 1024 * 1024), 2)
+    socket.emit("data", head)
+    expect(ended.mock.calls[0]![0]).toEqual(Buffer.from([0x88, 2, 1009 >> 8, 1009 & 0xff]))
+  })
+
+  test("with no `onText`, what a page sends goes nowhere:  live reload's sockets", () => {
+    const socket = new PassThrough()
+    const raw = { headers: { "sec-websocket-key": "k", upgrade: "websocket" } } as unknown as IncomingMessage
+    expect(SRV.acceptWebSocket(raw, socket)).toBe(true)
+    expect(() => socket.emit("data", pageFrame("nobody hears this"))).not.toThrow()
+  })
+})

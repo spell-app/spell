@@ -2,6 +2,8 @@
 import { ColorScheme } from "spell/util/persist/ColorScheme"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { ServerPlace } from "spell/util/persist/ServerPlace"
+// Import directly:  only a page the page server didn't serve opens one
+import { ReconnectingSocket } from "spell/util/ReconnectingSocket"
 import {
   COLOR_SCHEME_KEY,
   OLD_COLOR_SCHEME_KEYS,
@@ -433,22 +435,14 @@ export class ThemePreference {
   /**
    * Open the page server's live channel (`/api/server/live`) and hear its saved prefs:  for a page it didn't serve,
    * whose `/api` reaches it (the editor's dev server passes the socket on).
-   * - Closed (the server restarted):  tries again, `wait` ms later, doubling up to 10s.
+   * - Closed (the server restarted):  it comes back by itself (`ReconnectingSocket`).
    */
-  private static listenLive(wait = 1000): void {
-    if (typeof WebSocket === "undefined") return
-    const url = new URL(LIVE_CHANNEL, location.href)
-    url.protocol = url.protocol === "https:" ? "wss:" : "ws:"
-    const socket = new WebSocket(url)
-    let opened = false
-    socket.addEventListener("open", () => (opened = true))
-    socket.addEventListener("message", (message: MessageEvent<string>) => {
-      const { event, data } = JSON.parse(message.data) as { event: string; data: PrefSaved }
-      if (event === PREF_SAVED_EVENT) void ThemePreference.heard(data)
-    })
-    socket.addEventListener("close", () => {
-      const retry = opened ? 1000 : wait
-      void E.after(retry / 1000, () => ThemePreference.listenLive(Math.min(retry * 2, 10_000)))
+  private static listenLive(): void {
+    new ReconnectingSocket(LIVE_CHANNEL, {
+      onMessage(text) {
+        const { event, data } = JSON.parse(text) as { event: string; data: PrefSaved }
+        if (event === PREF_SAVED_EVENT) void ThemePreference.heard(data)
+      }
     })
   }
 

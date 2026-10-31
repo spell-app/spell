@@ -10,6 +10,14 @@
 // ## Rows
 ////////////////
 
+/** How long a text is before losing it is worth a notice, in characters:  a title just flips once, a paragraph is kept (J1). */
+const LONG_TEXT_CHARS = 40
+
+/** Is `value` long text:  several words someone would miss, or several lines? */
+export function isLongText(value: unknown): boolean {
+  return typeof value === "string" && (value.length >= LONG_TEXT_CHARS || value.includes("\n"))
+}
+
 /** One saved thing, as a place holds it:  plain fields by name. */
 export type PlaceRow = Record<string, unknown>
 
@@ -113,6 +121,12 @@ export type PlaceCapabilities = {
   atomic: boolean
   /** Does it refuse a change whose `version` is out of date?  Airtable doesn't. */
   versionCheck?: boolean
+  /**
+   * Does it take a change that says what happened, not only the value after it:  an addition (`PlaceChange.adds`), and items
+   * added to or moved in a list (`PlaceChange.list`)?  A live room does, so two at once both count.
+   * - Left out:  `PendingChanges` works out the whole value, and sends that, so the last save wins.
+   */
+  edits?: boolean
   /** How it tells us that something changed. */
   live: LiveKind
   /** The limit it lives under, if it has one. */
@@ -215,9 +229,14 @@ export type PlaceChange = {
   id?: string
   /** The fields written. */
   fields?: PlaceRow
+  /** An update's additions, by field:  `{ servings: 1 }` adds 1 to what's there, whoever else is adding.  See `edits`. */
+  adds?: Record<string, number>
+  /** An update's changes to list fields, one item at a time, by field.  See `edits`. */
+  list?: Record<string, ListEdit[]>
   /**
    * The version this change was made from (`Place.versionOf()`):  a place with `versionCheck` refuses it, `"out of date"`,
-   * if the thing has moved on.  Only an update carries one:  a delete wins over what someone's editing.
+   * if the thing has moved on;  a live room lets it win, and says who it overwrote.
+   * Only an update carries one:  a delete wins over what someone's editing.
    */
   version?: string
   /**
@@ -226,6 +245,19 @@ export type PlaceChange = {
    *   what the first made;  an insert into a place that `makesIds` is the one that can double.
    */
   changeId?: string
+}
+
+/**
+ * One item of a list field added, moved or gone, without saying anything about the others:  what `PlaceChange.list` holds.
+ * - So two people adding at once both stay, and a move can't double or lose an item.
+ */
+export type ListEdit = {
+  /** Names the item in its list:  `listItemKeys()`. */
+  key: string
+  /** Its position:  `positionBetween()`.  Left out:  it's gone. */
+  at?: string
+  /** The item, as JSON, when it's added. */
+  item?: unknown
 }
 
 /** A place's answer to `apply()`. */
@@ -252,6 +284,22 @@ export type PlaceEvent = {
   id: string
   /** The row as it's now kept.  Left out:  the thing was removed. */
   row?: PlaceRow
+  /** The thing was removed:  the row as it was, for putting back. */
+  was?: PlaceRow
+  /** What of mine this change replaced, without having seen it:  mine lost.  A live room says. */
+  lost?: ReplacedValue[]
+  /** What I replaced with a change made while I was offline:  theirs lost.  A live room says. */
+  overwrote?: ReplacedValue[]
+}
+
+/** A field's value replaced by someone who hadn't seen it:  last wins, and the other value is kept here. */
+export type ReplacedValue = {
+  /** The field. */
+  field: string
+  /** The value from this person. */
+  mine: unknown
+  /** The value from the other person. */
+  theirs: unknown
 }
 
 /** A place's answer to `changesSince()`. */
@@ -324,6 +372,13 @@ export type Place = {
   versionOf?(collection: string, id: string): string | undefined
   /** Tell `onEvent` of each change to `target`.  Returns what stops it. */
   watch?(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void
+  /**
+   * The row as this place holds it right now, if it can say at once:  a live room's copy.
+   * - What a list's changes are worked out from, as they have to be made straight away.
+   */
+  rowKnown?(collection: string, id: string): PlaceRow | undefined
+  /** Hear each time the connection comes back:  what's waiting can go now.  Returns what stops it. */
+  onBack?(listener: () => void): () => void
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */
   changesSince?(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer>
   /**

@@ -10,6 +10,8 @@
  * - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read;  `WebChunks` from static hosting.
  * - `RemotePlace`:  any place on a server side (`PlaceServer`, in `spell/server/places`).
  * - `SheetPlace`:  a CSV file as a read-only place, read with `parseCsv()`, its rows made by `SheetTable`.
+ * - `LiveRoomPlace`:  a live room, whose referee (`Referee`, in `spell/server/places`) puts everyone's changes in one order;
+ *   `RoomCopy`, what both sides hold;  `positions`, a place in a list as a fraction.
  * - `refs` names anything saved in text, `Recipe#r-12`.
  * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
@@ -40,6 +42,9 @@ export * from "./ChunkedPlace"
 export * from "./JsonChunks"
 export * from "./WebChunks"
 export * from "./RemotePlace"
+export * from "./positions"
+export * from "./RoomCopy"
+export * from "./LiveRoomPlace"
 export * from "./csv"
 export * from "./SheetTable"
 export * from "./SheetPlace"

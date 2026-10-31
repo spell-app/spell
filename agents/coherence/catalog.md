@@ -553,6 +553,31 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `visibilityState` inside an `every(` or a `setInterval(`
 - **Copies:**  `--` since epic `data` P4 (the notebook's file poll);  the epic pages' use `ServerLink.watch()` (above)
 
+### A websocket that comes back
+
+- **It is:**  `ReconnectingSocket` (`spell/util/ReconnectingSocket`, epic `data` P8):  opens, and tries again as it closes, 1s then
+  doubling to 10s;  `send()` says whether it went
+- **Use it when:**  a page keeps a socket open to anything.
+- **Flag:**  `new WebSocket\(`
+- **Score:**  `new WebSocket\(` · in `src/`, `ui/src/`, `epic/src/`, `app/src/` · home `src/util/ReconnectingSocket.ts` · not `src/server/liveClient.ts`
+- **Copies:**  `--`:  `ThemePreference` on it since P8
+- **Fine:**  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing.
+  `parser/src/core/page.ts` (`connectPage()`) opens once:  a program's page has no reconnect yet.
+
+### Everyone's changes, in one order
+
+- **It is:**  `Referee` (`spell/server/places`), `LiveRoomPlace` (`spell/util/places`), both on `RoomCopy`;  epic `data` P8
+- **Use it when:**  several people change one thing, and their screens should come back together.
+- **Copies:**  `--`
+- **Fine:**  `StateMirror` (`parser/src/core/state.ts`):  counted ids and whole things, one way, for a program that runs elsewhere.
+
+### A place in a list
+
+- **It is:**  `positionBetween()`, `ListPosition`, `rowsInPlace()` (`spell/util/places/positions`, epic `data` P8):  a parent and a fraction, one field
+- **Use it when:**  people reorder a saved list:  no array to fight over.
+- **Flag:**  `splice\(` of a saved list, an `order` or `index` field written by hand
+- **Copies:**  `--`
+
 ### How long to wait before asking again
 
 - **It is:**  `retryAfter(response, mostMs)` and `backoffFor(attempt, { jitterMs, mostMs })` (`spell/util/retrying`,

@@ -4,6 +4,7 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { bridgeSolid, observe } from "spell/util"
 import { MemoryStorage } from "spell/util/persist/MemoryStorage"
 import {
+  LiveRoomPlace,
   MemoryPlace,
   PlaceError,
   Places,
@@ -14,6 +15,8 @@ import {
   type PlaceResult,
   type PlacesProps
 } from "spell/util/places"
+import { SRV } from "spell/server"
+import { Referee } from "spell/server/places"
 import { App, core, List, Thing } from "spell/parser/core"
 import { PlaceThings } from "spell/parser/core/places"
 
@@ -867,5 +870,108 @@ describe("PlaceDraft", () => {
   test("a thing kept in no place needs none", async () => {
     const { things } = await writing()
     expect(() => things.draftOf(new Recipe({ title: "Mine" }))).toThrow(TypeError)
+  })
+})
+
+describe("PlaceThings, in a live room (epic `data` P8)", () => {
+  /** A room with two people in it, each with their own things. */
+  async function room() {
+    const store = new MemoryPlace({
+      collections: { recipes: [{ id: "r-1", title: "Soup", serves: 2, tags: ["hot"] }] }
+    })
+    const referee = await new Referee({
+      path: "/room",
+      place: store,
+      collections: { recipes: {} },
+      guard: new SRV.Guard()
+    }).open()
+    const person = async () => {
+      const place = new LiveRoomPlace({
+        url: "ws://nowhere/",
+        answerSeconds: 0.5,
+        socket: (listeners) => {
+          const member = referee.join((text) => queueMicrotask(() => listeners.onMessage(text)))
+          queueMicrotask(() => listeners.onOpen())
+          return { isOpen: true, send: (text) => (member.receive(text), true), close: () => member.leave() }
+        }
+      })
+      const places = new Places({ wait: 0, retry: 5 }).add("cookbook", place)
+      const things = new PlaceThings({ places, classNamed: (name) => CLASSES[name] })
+      const result = places.read({ placeName: "cookbook", collection: "recipes", type: "Recipe" })
+      await result.load()
+      const [recipe] = things.thingsFrom(result) as Recipe[]
+      return { place, places, recipe: recipe!, pending: places.pendingFor("cookbook") }
+    }
+    const people = [await person(), await person()] as const
+    const stop = () => {
+      people.forEach(({ place }) => place.close())
+      referee.close()
+    }
+    return { store, referee, people, stop }
+  }
+
+  test("a list changes one item at a time, so two adding at once both stay (T17)", async () => {
+    const { people, store, stop } = await room()
+    const [mine, theirs] = people
+    mine.recipe.tags.add("spicy")
+    theirs.recipe.tags.add("quick")
+    expect(mine.pending.changes[0]).toMatchObject({ kind: "update", list: { tags: [{ item: "spicy" }] } })
+    await vi.waitFor(() => {
+      expect([...mine.recipe.tags.items].sort()).toEqual(["hot", "quick", "spicy"])
+      expect(theirs.recipe.tags.items).toEqual(mine.recipe.tags.items)
+    })
+    expect((await store.getMany("recipes", ["r-1"]))[0]!.tags).toEqual(mine.recipe.tags.items)
+    stop()
+  })
+
+  test("what someone else does changes my thing in place, and goes to no undo step and back to no place", async () => {
+    const { people, referee, stop } = await room()
+    const [mine, theirs] = people
+    const { recipe } = mine
+    theirs.recipe.title = "Stew"
+    await vi.waitFor(() => expect(recipe.title).toBe("Stew"))
+    expect(mine.recipe).toBe(recipe)
+    expect(mine.pending.hasPending).toBe(false)
+    await vi.waitFor(() => expect(theirs.pending.hasPending).toBe(false))
+    expect(referee.sequence).toBe(1)
+    stop()
+  })
+
+  test("someone deleting what I'm changing:  a notice, and Restore brings it back with what I'd done", async () => {
+    const { people, referee, stop } = await room()
+    const notify = vi.spyOn(core, "notify").mockResolvedValue(undefined)
+    const [mine, theirs] = people
+    mine.recipe.title = "Mine now"
+    await vi.waitFor(() => expect(mine.pending.hasPending).toBe(false))
+    theirs.pending.delete({ collection: "recipes", type: "Recipe", id: "r-1" })
+    await vi.waitFor(() => expect(notify).toHaveBeenCalledTimes(1))
+    const [message, options] = notify.mock.calls[0]!
+    expect(message).toMatch(/deleted Recipe r-1/)
+    const restore = (options as { actions: { text: string; click(): void }[] }).actions[0]!
+    expect(restore.text).toBe("Restore")
+    restore.click()
+    await vi.waitFor(() =>
+      expect(referee.rows.rowFor("recipes", "r-1")).toMatchObject({ title: "Mine now", serves: 2 })
+    )
+    notify.mockRestore()
+    stop()
+  })
+
+  test("my long text replaced:  a notice holding it, and Use mine puts it back", async () => {
+    const { people, referee, stop } = await room()
+    const notify = vi.spyOn(core, "notify").mockResolvedValue(undefined)
+    const [mine, theirs] = people
+    const long = "A long sentence of mine, about making the soup slowly."
+    mine.recipe.title = long
+    theirs.place.versionOf = () => "0"
+    await vi.waitFor(() => expect(mine.pending.hasPending).toBe(false))
+    theirs.recipe.title = "Theirs, written without seeing mine"
+    await vi.waitFor(() => expect(notify).toHaveBeenCalledTimes(1))
+    const [message, options] = notify.mock.calls[0]!
+    expect(message).toContain(long)
+    ;(options as { actions: { text: string; click(): void }[] }).actions[0]!.click()
+    await vi.waitFor(() => expect(referee.rows.rowFor("recipes", "r-1")!.title).toBe(long))
+    notify.mockRestore()
+    stop()
   })
 })

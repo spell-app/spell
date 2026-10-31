@@ -1,11 +1,13 @@
-import type { PendingChange } from "./PendingChanges"
+import type { PendingChange, PendingChanges } from "./PendingChanges"
 import type { Places } from "./Places"
-import { idOfRow, type Place, type PlaceRow } from "./places.types"
+import { idOfRow, isLongText, type Place, type PlaceEvent, type PlaceRow, type ReplacedValue } from "./places.types"
 
 /****************
  * ### `PlaceHeal`
  * The ONE way anything gets back in step with a place:  fetch the latest, replay what's pending (epic `data` P3).
  * - It runs on opening (`PendingChanges.open()`), on a refusal or a cancel, and on demand (`heal()`).
+ * - A place that says what changed (`watch()`), a live room above all, is followed (`follow()`):  what it hears goes the same way,
+ *   the place's row with what's pending on top, so what a room heals shows without any more to it.
  * - It needs nothing else to have gone right, so a bug heals the same way as a lost message.
  * - A heal that can't reach the place changes nothing, and says so by answering false:  what's showing stays.
  * - Whoever shows rows hears through `Places.onRows()`.  Knows nothing of Things.
@@ -53,6 +55,96 @@ export class PlaceHeal {
       )
       return false
     }
+  }
+
+  /**
+   * From now on, what `place` says changed in `collection` shows, with what's pending on top:  someone else's change, or a heal.
+   * - Someone else's delete wins.  If I was editing that thing, a notice says so, with Restore (`Places.onThingDeleted()`).
+   * - Long text of mine replaced raises a notice holding it (`Places.onLost()`);  a change I made offline replacing newer
+   *   work raises a conflict holding theirs (`Places.onConflict()`).
+   * - The connection coming back sends what's waiting at once.
+   * - A place that doesn't watch:  nothing to follow.
+   * - Returns what stops it.
+   * - throws `PlaceError` if nothing goes by that name
+   */
+  follow(ask: Omit<HealAsk, "ids">): () => void {
+    const { placeName, collection } = ask
+    const place = this.places.placeForOrDie(placeName)
+    const pending = this.places.pendingFor(placeName)
+    const stops = [
+      place.watch?.({ collection }, (event) => this.heardEvent(ask, place, pending, event)),
+      place.onBack?.(() => {
+        if (pending.hasPending) pending.queue.changed({ now: true })
+      })
+    ]
+    return () => stops.forEach((stop) => stop?.())
+  }
+
+  /** `place` says this changed:  show it, on top of what's pending, and say what needs saying. */
+  private heardEvent(ask: Omit<HealAsk, "ids">, place: Place, pending: PendingChanges, event: PlaceEvent): void {
+    const { placeName, collection, type } = ask
+    const { idOf } = place.describe()
+    if (idOf === undefined) return
+    const { id, row, was, lost = [], overwrote = [] } = event
+    if (!row) return this.thingWentAway(ask, idOf, pending, id, was)
+    const rows = pending.replayOn(collection, [row])
+    this.keep(type, rows, idOf)
+    this.places.tellRows({ placeName, collection, ...(type !== undefined && { type }), idField: idOf, rows })
+    const thing = { placeName, collection, ...(type !== undefined && { type }), id }
+    for (const { field, mine, theirs } of lost.filter(({ mine }: ReplacedValue) => isLongText(mine))) {
+      this.places.tellLost({
+        ...thing,
+        field,
+        mine,
+        theirs,
+        useMine: () =>
+          pending.setField({ collection, ...(type !== undefined && { type }), id, field, value: mine, was: theirs })
+      })
+    }
+    for (const { field, mine, theirs } of overwrote) {
+      this.places.tellConflict({
+        ...thing,
+        field,
+        was: undefined,
+        mine,
+        theirs,
+        useTheirs: () =>
+          pending.setField({ collection, ...(type !== undefined && { type }), id, field, value: theirs, was: mine })
+      })
+    }
+  }
+
+  /** The thing `id` is gone, by someone else's hand:  it goes from here, with whatever I had of it;  if I was editing it, I'm told. */
+  private thingWentAway(
+    { placeName, collection, type }: Omit<HealAsk, "ids">,
+    idField: string,
+    pending: PendingChanges,
+    id: string,
+    was: PlaceRow | undefined
+  ): void {
+    const wasEditing =
+      pending.wasEditing(collection, id) ||
+      pending.changes.some((change) => change.id === id && change.collection === collection && change.kind !== "delete")
+    const [row] = pending.replayOn(collection, [was ?? { [idField]: id }])
+    pending.dropThing(collection, id)
+    if (type !== undefined) this.places.cache.forget(type, id)
+    this.places.tellRows({
+      placeName,
+      collection,
+      ...(type !== undefined && { type }),
+      idField,
+      rows: [],
+      removed: [id]
+    })
+    if (!wasEditing || !row) return
+    this.places.tellThingDeleted({
+      placeName,
+      collection,
+      ...(type !== undefined && { type }),
+      id,
+      row,
+      restore: () => pending.insert({ collection, ...(type !== undefined && { type }), id, fields: row })
+    })
   }
 
   /**

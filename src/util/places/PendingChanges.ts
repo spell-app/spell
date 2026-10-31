@@ -1,5 +1,6 @@
 import type { StorageLike } from "spell/util/persist/persist.types"
 
+import { listEditsTo, POSITIONS_KEY, withListEdits } from "./positions"
 import { rowsInOrder, rowsMatching } from "./PlaceQuery"
 import { SaveQueue } from "./SaveQueue"
 import type { Places } from "./Places"
@@ -7,6 +8,7 @@ import {
   PlaceError,
   idOfRow,
   type ApplyAnswer,
+  type ListEdit,
   type ListQuery,
   type Place,
   type PlaceChange,
@@ -21,6 +23,12 @@ const MOST_MERGES = 3
 
 /** The kinds of `PlaceError` that are an answer:  the outcome is known, so sending it again won't help. */
 const KNOWN_OUTCOMES = new Set<PlaceError["kind"]>(["refused", "not found", "out of date"])
+
+/** How long after I last changed something I still count as editing it, ms:  someone deleting it then gets me a notice. */
+const EDITING_MS = 30_000
+
+/** How many things it remembers changing. */
+const TOUCHED_MOST = 200
 
 /** The store the browser's copy of pending changes is kept in. */
 const PENDING_STORE = "spell-pending-changes"
@@ -99,6 +107,48 @@ export type PlaceConflict = {
   useTheirs(): void
 }
 
+/**
+ * Someone else's change replaced long text of mine, without having seen it:  last wins, and here's my text (J1).
+ * - `Places.onLost()` hears it, for a notice.  It's repeated as they go on typing:  the latest for a thing and field stands.
+ */
+export type PlaceLostText = {
+  /** The place's name. */
+  placeName: string
+  /** The collection. */
+  collection: string
+  /** The type it's cached under. */
+  type?: string
+  /** The thing's id. */
+  id: string
+  /** The field. */
+  field: string
+  /** What I wrote:  the losing text. */
+  mine: unknown
+  /** What it holds now. */
+  theirs: unknown
+  /** Put mine back, as a new change. */
+  useMine(): void
+}
+
+/**
+ * Someone deleted a thing I was editing:  the delete won, and here's the thing, with my changes in it.
+ * - `Places.onThingDeleted()` hears it, for a notice.
+ */
+export type PlaceThingDeleted = {
+  /** The place's name. */
+  placeName: string
+  /** The collection. */
+  collection: string
+  /** The type it's cached under. */
+  type?: string
+  /** The thing's id. */
+  id: string
+  /** The thing as I last had it. */
+  row: PlaceRow
+  /** Make it again, with the same id. */
+  restore(): void
+}
+
 /** An action's changes, shown at once and held until it ends:  `PendingChanges.startGroup()`. */
 export type PendingGroup = {
   /** The action ended:  its changes go out together. */
@@ -122,6 +172,8 @@ export type PendingGroup = {
  *   - A field written back to what it `was`, before that change has left, drops the change.
  *   - Once it has left, even with no answer, it's a new change, reversing it:  it may have been made.
  * - A second write to a field, with the first not sent, replaces it:  a form's typing is one change.
+ * - On a place that takes `edits`, an addition goes as an addition (`addToField()`), and a list changes one item at a time
+ *   (`changeList()`), so two at once both count.  On any other it's the whole value, and the last save wins.
  * - An unfinished group (an action) is NEVER sent or kept:  it's in this page's memory until `end()`,
  *   so closing the tab or `cancel()` really drops it.  Everything after it waits, to keep the order.
  * - One per place name, from `Places.pendingFor()`.  Knows nothing of Things or Spell's words.
@@ -142,6 +194,8 @@ export class PendingChanges {
   private wasRefused = false
   /** The last group number given. */
   private lastGroup = 0
+  /** When each thing was last changed here:  oldest first. */
+  private readonly touched = new Map<string, number>()
   /** The list of places, and the cache:  STATIC for its life. */
   private readonly places: Places
 
@@ -205,6 +259,7 @@ export class PendingChanges {
    */
   setField(change: FieldWrite): void {
     const { collection, type, id, field, value, was, group } = change
+    this.noteTouched(collection, id)
     this.showAtOnce({ collection, ...(type !== undefined && { type }) }, [{ [this.idField]: id, [field]: value }])
 
     const unsentInsert = this.pending.find(
@@ -249,6 +304,116 @@ export class PendingChanges {
   }
 
   /**
+   * Add `by` to the number in `field` of the thing `id`, which was `was`:  shown at once, sent soon.
+   * - A place that takes `edits` is told it's an addition, so two people adding both count.
+   * - Any other gets the whole new value, as `setField()`.
+   */
+  addToField({
+    collection,
+    type,
+    id,
+    field,
+    by,
+    was,
+    group
+  }: ThingWrite & { field: string; by: number; was?: number }): void {
+    const value = (was ?? 0) + by
+    if (!this.placeTakesEdits)
+      return this.setField({
+        collection,
+        ...(type !== undefined && { type }),
+        id,
+        field,
+        value,
+        was,
+        ...(group !== undefined && { group })
+      })
+    this.noteTouched(collection, id)
+    this.showAtOnce({ collection, ...(type !== undefined && { type }) }, [{ [this.idField]: id, [field]: value }])
+    const earlier = this.pending.find(
+      (other) =>
+        other.id === id &&
+        other.collection === collection &&
+        other.adds?.[field] !== undefined &&
+        this.isUnsent(other) &&
+        other.group === group
+    )
+    if (earlier) {
+      earlier.adds![field]! += by
+      return this.changedList(group)
+    }
+    this.pushUpdate({ collection, type, id, field, was, group }, { adds: { [field]: by } })
+  }
+
+  /**
+   * The list in `field` of the thing `id` now holds `items`, and held `was`:  shown at once, sent soon.
+   * - A place that takes `edits` is told only which items changed, so two people adding both stay, and a move can't double
+   *   or lose one (T17).
+   * - Any other gets the whole list, as `setField()`, and the last save wins:  it's all such a place can take.
+   */
+  changeList({
+    collection,
+    type,
+    id,
+    field,
+    items,
+    was,
+    group
+  }: ThingWrite & { field: string; items: unknown[]; was?: unknown }): void {
+    const isUnsentInsert = this.pending.some(
+      (other) => other.kind === "insert" && other.id === id && this.isUnsent(other)
+    )
+    if (!this.placeTakesEdits || isUnsentInsert) {
+      return this.setField({
+        collection,
+        ...(type !== undefined && { type }),
+        id,
+        field,
+        value: items,
+        was,
+        ...(group !== undefined && { group })
+      })
+    }
+    this.noteTouched(collection, id)
+    const place = this.places.placeFor(this.placeName)
+    const [known] = this.replayOn(collection, [
+      place?.rowKnown?.(collection, id) ?? { [this.idField]: id, [field]: was }
+    ])
+    const edits = listEditsTo(known, field, items)
+    if (!edits.length) return
+    const after = withListEdits(known!, field, edits)
+    const row = { [this.idField]: id, [field]: items, [POSITIONS_KEY]: after[POSITIONS_KEY] }
+    this.showAtOnce({ collection, ...(type !== undefined && { type }) }, [row])
+    this.pushUpdate({ collection, type, id, field, was, group }, { list: { [field]: edits } })
+  }
+
+  /** A new update of `field`, saying what `extra` says, in place of a value. */
+  private pushUpdate(
+    { collection, type, id, field, was, group }: ThingWrite & { field: string; was?: unknown },
+    extra: Pick<PendingChange, "adds" | "list">
+  ): void {
+    const version = this.versionOf(collection, id)
+    this.pending.push({
+      changeId: newChangeId(),
+      kind: "update",
+      collection,
+      ...(type !== undefined && { type }),
+      id,
+      field,
+      ...extra,
+      ...(version !== undefined && { version }),
+      ...(was !== undefined && { was }),
+      ...(group !== undefined && { group })
+    })
+    this.changedList(group)
+  }
+
+  /** Does this place take what happened, not only the value after it? */
+  private get placeTakesEdits(): boolean {
+    return !!this.places.placeFor(this.placeName)?.describe().edits
+  }
+
+  /**
    * A new thing:  `fields`, under `id`.  Shown at once.
    * - A place that `makesIds` gets it with no id:  its answer names it, and `Places.onRows()` tells (`renamed`).
    */
@@ -272,6 +437,7 @@ export class PendingChanges {
    * - Whatever's unsent of it goes too;  if that was its insert, nothing need be sent at all.
    */
   delete({ collection, type, id, group }: ThingWrite): void {
+    this.touched.delete(`${collection}\n${id}`)
     const unsent = this.pending.filter(
       (other) => other.collection === collection && other.id === id && this.isUnsent(other)
     )
@@ -286,6 +452,36 @@ export class PendingChanges {
       ...(group !== undefined && { group })
     })
     this.changedList(group)
+  }
+
+  /**
+   * Someone else deleted the thing `id`, and that won:  everything of it here is dropped, sent or not.
+   * - One already on its way comes back refused, and that's nothing to tell:  it's already been dealt with.
+   * - Returns what it dropped.
+   */
+  dropThing(collection: string, id: string): PendingChange[] {
+    const dropped = this.pending.filter((other) => other.collection === collection && other.id === id)
+    this.remove(dropped)
+    this.keepCopy()
+    this.settleList()
+    return dropped
+  }
+
+  /** Was the thing `id` changed here just now, confirmed or not?  Then whoever's here counts as editing it. */
+  wasEditing(collection: string, id: string): boolean {
+    const at = this.touched.get(`${collection}\n${id}`)
+    return at !== undefined && Date.now() - at < EDITING_MS
+  }
+
+  /** Note that this thing was changed here now. */
+  private noteTouched(collection: string, id: string): void {
+    const key = `${collection}\n${id}`
+    this.touched.delete(key)
+    this.touched.set(key, Date.now())
+    for (const oldest of this.touched.keys()) {
+      if (this.touched.size <= TOUCHED_MOST) break
+      this.touched.delete(oldest)
+    }
   }
 
   /**
@@ -329,10 +525,18 @@ export class PendingChanges {
     if (!here.length) return rows
     const { idField } = this
     const replayed = new Map(rows.map((row, index) => [idOfRow(row, idField) ?? `row ${index}`, row]))
-    for (const { kind, id, fields } of here) {
+    for (const { kind, id, fields, adds, list } of here) {
       if (id === undefined) continue
-      if (kind === "delete") replayed.delete(id)
-      else replayed.set(id, { ...replayed.get(id), ...fields })
+      if (kind === "delete") {
+        replayed.delete(id)
+        continue
+      }
+      // a change to a thing these rows don't hold says nothing about them:  a row of only its fields would be no row at all
+      if (kind === "update" && !replayed.has(id)) continue
+      let row: PlaceRow = { ...replayed.get(id), ...fields }
+      for (const [field, by] of Object.entries(adds ?? {})) row[field] = (Number(row[field]) || 0) + by
+      for (const [field, edits] of Object.entries(list ?? {})) row = withListEdits(row, field, edits)
+      replayed.set(id, row)
     }
     const all = [...replayed.values()]
     const matching = query.filter ? rowsMatching(all, query.filter) : all
@@ -491,13 +695,17 @@ export class PendingChanges {
     const isByChange = rows.length === written.length
     const renamed = isByChange ? this.renameMade(written, rows) : []
     const { idField } = this
+    const place = this.places.placeFor(this.placeName)
     for (const change of written) {
       const newId = renamed.find(({ from }) => from === change.id)?.to ?? change.id
-      const row = isByChange
-        ? rows[written.indexOf(change)]
-        : rows.find((candidate) => idOfRow(candidate, idField) === newId)
-      if (!row) continue
       const { collection, type } = change
+      // a place that knows the row right now knows better than an answer:  someone may have changed it, or deleted it, since
+      const row = place?.rowKnown
+        ? place.rowKnown(collection, newId!)
+        : isByChange
+          ? rows[written.indexOf(change)]
+          : rows.find((candidate) => idOfRow(candidate, idField) === newId)
+      if (!row) continue
       const replayed = this.replayOn(collection, [row])
       this.showAtOnce({ collection, ...(type !== undefined && { type }) }, replayed, { renamed })
     }
@@ -509,7 +717,8 @@ export class PendingChanges {
    */
   private followVersions(batch: readonly PendingChange[]): void {
     const place = this.places.placeFor(this.placeName)
-    if (!place?.versionOf) return
+    // what a change has seen, on a place that doesn't refuse, is only for saying who it overwrote:  it stays as it was
+    if (!place?.versionOf || !place.describe().versionCheck) return
     for (const { collection, id, version } of batch) {
       if (id === undefined) continue
       const now = place.versionOf(collection, id)
@@ -559,12 +768,28 @@ export class PendingChanges {
 
   /** Make `changes` again, as new ones:  a person pressed Retry. */
   private again(changes: readonly PendingChange[]): void {
-    for (const { kind, collection, type, id, field, fields, was } of changes) {
+    for (const { kind, collection, type, id, field, fields, was, adds, list } of changes) {
       const thing = { collection, ...(type !== undefined && { type }), id: id! }
-      if (kind === "update") this.setField({ ...thing, field: field!, value: fields![field!], was })
+      if (adds?.[field!] !== undefined)
+        this.addToField({ ...thing, field: field!, by: adds[field!]!, ...(typeof was === "number" && { was }) })
+      else if (list?.[field!]) this.again(this.replayedList(thing, field!, list[field!]!, was))
+      else if (kind === "update") this.setField({ ...thing, field: field!, value: fields![field!], was })
       else if (kind === "insert") this.insert({ ...thing, fields: fields! })
       else this.delete(thing)
     }
+  }
+
+  /** A list change as a whole list again, for `again()`:  it was refused, so what's here is what it was. */
+  private replayedList(
+    thing: { collection: string; type?: string; id: string },
+    field: string,
+    edits: readonly ListEdit[],
+    was: unknown
+  ): PendingChange[] {
+    const place = this.places.placeFor(this.placeName)
+    const row = place?.rowKnown?.(thing.collection, thing.id) ?? { [this.idField]: thing.id, [field]: was }
+    const value = withListEdits(row, field, edits)[field]
+    return [{ changeId: "", kind: "update", ...thing, field, fields: { [field]: value }, was }]
   }
 
   ////////////////

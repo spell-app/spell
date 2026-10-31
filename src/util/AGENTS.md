@@ -36,6 +36,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
+  - `ReconnectingSocket.ts` -- a websocket that comes back (epic `data` P8):  Spell UI's `ThemePreference` and `LiveRoomPlace` are on it.
+    Taken by file, in no barrel.  NOT `spell/server`'s `liveClient`, sent to pages as one function's text, which can import nothing
   - `retrying.ts` -- `retryAfter()`, `backoffFor()`:  how long to wait before asking a server again.
     Taken by file, in no barrel
   - `Api.ts` -- requests with URL templates, combined abort signals, a newer one replacing an older (`UI.api`, and the
@@ -221,6 +223,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `BrowserCopy` beside it:  one value kept in the browser, under one key.
   - `PlaceHeal` (`Places.heal`):  fetch the latest, replay what's pending;  on opening, on a refusal and on demand.
     What changed is told through `Places.onRows()`.
+  - `LiveRoomPlace`:  a shared space, its referee (`Referee`, in `spell/server/places`) putting everyone's changes in one order (epic `data` P8).
+    - The screen is the referee's copy, with my pending changes on top.  So a change of mine never flickers.
+    - ONE heal routine:  ask what I missed, replay.  Opening, reconnecting, a gap in the numbers, a periodic checksum, a refusal.
+    - Takes `edits`:  an addition goes as an addition (`PendingChanges.addToField()`), a list's change one item at a time
+      (`changeList()`), so two at once both count.  A place with no `edits` is sent the whole value.
+    - A change's `version` says what it had seen, so what it replaced is told:  long text of mine (`Places.onLost()`), newer work
+      I replaced from offline (`onConflict()`), a delete of what I was changing (`onThingDeleted()`).
+    - `PlaceHeal.follow()` is what turns all of it into rows on screen, for a page;  `PlaceThings` does it by itself.
+    - A room trusts everyone in it:  no per-person rules yet.
+  - `RoomCopy`:  a room's rows, and the ONE place a change is worked out, used by both sides;  what they say to each other (`RoomAsk`, `RoomAnswer`).
+  - [positions.ts](places/positions.ts):  a place in a list as a fraction (`positionBetween()`), its parent and its fraction one field
+    (`ListPosition`, `rowsInPlace()`);  and a list field's items, one at a time (`ListEdit`, `listEditsTo()`, `withListEdits()`).
   - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
     - Imports nothing:  spell's core takes it by file, `spell/util/places/refs`.
     - A program's mirrored state keeps its counted `"$id"`:  it's what the Python page speaks.

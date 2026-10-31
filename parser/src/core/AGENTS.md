@@ -248,12 +248,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Every write is heard at `noteSetting()` and `noteItems()` (`onPlaceWrite()`), the two points undo hears,
       never `whileReading()`.  A thing with no place costs a lookup;  a program with no places, one check.
     - Each becomes a pending change (`PendingChanges`), shown at once.
-      A list's change is a write of that field, the whole list.
+      A list's change is a write of that field, the whole list;  on a place that takes `edits`, a live room, only the items
+      that changed (epic `data` P8).
     - An action's changes are one group, sent when it ends:  through `core.runAction()`, or `declareAction()`.
       Cancelling (`core.cancelActions()`) drops them, and they go back.
     - Undo's put-back is a write like any other:  before it's sent it drops the change, after it reverses it.
     - A refused write raises one notice, through `core.notify`'s `actions`:  Retry, or Show me.
     - A write merged over someone else's raises one too (`Places.onConflict()`), holding what was lost:  Use theirs.
+    - On a live room, which it follows as its things are made:  your long text replaced raises one (Use mine), and someone
+      deleting what you're changing raises one (Restore).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):

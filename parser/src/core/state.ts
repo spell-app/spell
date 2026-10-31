@@ -24,6 +24,9 @@
  * - A `StateMirror` keeps what it read by id, and reads each new state INTO it:
  *   a thing it has already gets the new props, a list its new items.
  * - The twin of Python's `spell_core.state`:  both write the same JSON for the same things.
+ * - NOT what a place's referee (`Referee`, `spell/server/places`) grows from (epic `data` P8):
+ *   this sends whole things with counted ids, one way, from one program, where a room needs browser-made ids and one field
+ *   at a time, both ways.  They share the shape of the JSON and the in-place read (`PlaceThings`), no more.
  *   `stateById.expected.json5`, with the core's tests (`tests/core/`), holds one, read by both.
  */
 import { getProp, ITEMS_KEY, keysOf, setProp, TYPE_KEY, withoutCreate } from "spell/util"

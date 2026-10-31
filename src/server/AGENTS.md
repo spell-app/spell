@@ -59,7 +59,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `LiveReload` + [liveClient.ts](liveClient.ts) -- live reload over a websocket, and the page-side client.
     - The client:  `/api/server/live.js` (`editPage()`).
     - Its websocket:  `/api/server/live`.
-    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins).
+    - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins):  accept, send, ping;  and read what a page sends
+      (`onText`, for a `Referee`), which live reload doesn't ask for, so its pages stay as they were.
     - NEVER an `EventSource`, or any other request held open:
       each takes one of Chrome's 6 connections per host, and every VS Code window shares them.
     - A PAGE's change comes WITH the page, as a navigation gets it (`StaticHandler.render()`), and its `ETag`
@@ -384,6 +385,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - holds keys (`PlaceKeys`), and scrubs them from every answer
       - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
         to answer
+    - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
+      - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
+      - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
+      - each batch is written to the store before it's numbered, so a store's "no" is a "no"
+      - NOTE:  LOCAL ONLY, behind `Guard`:  a hosted room needs its own sign-in (The Cloud), so anyone else is refused, and told why
+      - named actions re-run on it (`actions`);  which ones is the compiler's choice, with the words
     - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
       - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
       - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race

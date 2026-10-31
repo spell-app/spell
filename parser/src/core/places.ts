@@ -39,6 +39,10 @@
  * - A refused write raises a notice, anywhere in the app:  Retry, or Show me.
  * - A write merged over what someone else saved raises one too, holding what was lost:  Use theirs, or Show me.
  * - `draftOf()`:  a copy of a thing that takes changes and sends nothing, until it's saved.
+ * - A list's change is a write of that field, the whole list, on a place that can take no more;
+ *   on one that takes `edits`, a live room, it's only the items that changed, so two at once both stay (T17).
+ * - A live room is followed as its first read's things are made (`PlaceHeal.follow()`):  what others do shows here too.
+ *   Someone deleting what you're editing raises a notice with Restore;  your long text replaced, one with Use mine.
  * - `saveNew()`:  a thing made here goes to a place, under its own id (`Thing.id`, made in the browser).
  */
 import { ITEMS_KEY, keysOf, TYPE_KEY, untrackCells } from "spell/util"
@@ -46,13 +50,16 @@ import type {
   PendingChanges,
   PendingGroup,
   PlaceConflict,
+  PlaceLostText,
   PlaceRowsChange,
+  PlaceThingDeleted,
   PlaceWriteFailure
 } from "spell/util/places/PendingChanges"
 import type { PlaceCache } from "spell/util/places/PlaceCache"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
 import type { Places } from "spell/util/places/Places"
 import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
+import { POSITIONS_KEY } from "spell/util/places/positions"
 import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
@@ -188,6 +195,8 @@ export class PlaceThings extends Loader {
       places.onRows((change) => this.rowsChanged(change))
       places.onWriteFailed((failure) => this.writeFailed(failure))
       places.onConflict((conflict) => this.merged(conflict))
+      places.onLost((lost) => this.lostText(lost))
+      places.onThingDeleted((deleted) => this.thingDeleted(deleted))
     }
   }
 
@@ -204,7 +213,8 @@ export class PlaceThings extends Loader {
       )
     }
     const { placeName, collection } = result
-    const { idOf } = result.place.describe()
+    const { idOf, live } = result.place.describe()
+    if (this.places && live === "push") this.followPlace(placeName, collection, type)
     return untrackCells(() =>
       whileReading(() =>
         contents.map((row) => {
@@ -220,6 +230,17 @@ export class PlaceThings extends Loader {
   ////////////////
   // ## What's done to a thing goes to its place
   ////////////////
+
+  /** Follow what a place that pushes says, once for each collection it's read from. */
+  private followPlace(placeName: string, collection: string, type: string): void {
+    const key = `${placeName}\n${collection}\n${type}`
+    if (this.following.has(key)) return
+    this.following.add(key)
+    this.places!.heal.follow({ placeName, collection, type })
+  }
+
+  /** What it's following already. */
+  private readonly following = new Set<string>()
 
   /**
    * `thing`, made here, is now kept in a place:  sent there whole, under its own id (`Thing.id`, made in the browser).
@@ -316,17 +337,13 @@ export class PlaceThings extends Loader {
     const { placeName, collection, type, id } = home
     const pending = this.placesOrDie("noteWrite").pendingFor(placeName)
     const group = this.groupNumberFor(pending)
-    this.writing(() =>
-      pending.setField({
-        collection,
-        type,
-        id,
-        field,
-        value: this.writer.jsonFor(value),
-        was: this.writer.jsonFor(was),
-        ...(group !== undefined && { group })
-      })
-    )
+    const asJson = this.writer.jsonFor(value)
+    const wasJson = this.writer.jsonFor(was)
+    const thing = { collection, type, id, field, ...(group !== undefined && { group }) }
+    this.writing(() => {
+      if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
+      else pending.setField({ ...thing, value: asJson, was: wasJson })
+    })
   }
 
   /** Run `write`:  what it tells `Places.onRows()` is this thing's own, so it comes back to nobody here. */
@@ -419,6 +436,28 @@ export class PlaceThings extends Loader {
     void core.notify(message, { class: "warning", actions })
   }
 
+  /** Someone else's change replaced my long text:  the notice, holding it -- Use mine, or Show me. */
+  private lostText({ type, id, field, mine, theirs: _theirs, useMine }: PlaceLostText): void {
+    const thing = this.loaded.get(`${type}#${id}`)
+    const actions = [
+      { text: core.message("write-use-mine"), click: useMine },
+      ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
+    ]
+    const message = core.message("write-lost", {
+      thing: `${type ?? ""} ${id}`.trim(),
+      field,
+      mine: `${mine as string}`
+    })
+    void core.notify(message, { class: "warning", actions })
+  }
+
+  /** Someone else deleted what I was editing:  the notice -- Restore. */
+  private thingDeleted({ type, id, restore }: PlaceThingDeleted): void {
+    const actions = [{ text: core.message("write-restore"), click: restore }]
+    const message = core.message("write-deleted", { thing: `${type ?? ""} ${id}`.trim() })
+    void core.notify(message, { class: "warning", actions })
+  }
+
   /**
    * The thing for `row` of `type`:  made, or changed in place.
    * - A row with no id shares no identity:  a new thing each time, belonging to its list alone.
@@ -436,7 +475,8 @@ export class PlaceThings extends Loader {
       this.changeInPlace(known, row)
       return known
     }
-    const made = this.make({ ...row, [TYPE_KEY]: type, ...(id !== undefined && { id }) }, ref) as SpellObject
+    const { [POSITIONS_KEY]: _positions, ...fields } = row
+    const made = this.make({ ...fields, [TYPE_KEY]: type, ...(id !== undefined && { id }) }, ref) as SpellObject
     if (id === undefined) this.loaded.delete(ref)
     return made
   }

@@ -30,6 +30,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
+| `write-lost`, `write-use-mine` | your long text replaced:  the JavaScript core's | `thing`, `field`, `mine` |
+| `write-deleted`, `write-restore` | what you were changing deleted:  the JavaScript core's | `thing` |
 """
 
 import re
@@ -54,6 +56,10 @@ MESSAGES: dict[str, str] = {
     "write-show-me": "Show me",
     "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
     "write-use-theirs": "Use theirs",
+    "write-lost": "Someone else changed {thing}'s {field} at the same time, and theirs stands.  Yours was:  {mine}",
+    "write-deleted": "Someone else deleted {thing} while you were changing it.",
+    "write-use-mine": "Use mine",
+    "write-restore": "Restore",
 }
 
 # A named placeholder in a message, `{type}`.

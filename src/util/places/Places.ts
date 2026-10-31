@@ -1,7 +1,14 @@
 import type { StorageLike } from "spell/util/persist/persist.types"
 import { untrackCells } from "spell/util/reactive"
 
-import { PendingChanges, type PlaceConflict, type PlaceRowsChange, type PlaceWriteFailure } from "./PendingChanges"
+import {
+  PendingChanges,
+  type PlaceConflict,
+  type PlaceLostText,
+  type PlaceRowsChange,
+  type PlaceThingDeleted,
+  type PlaceWriteFailure
+} from "./PendingChanges"
 import { PlaceCache } from "./PlaceCache"
 import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
@@ -32,6 +39,10 @@ export class Places {
   private failureListeners = new Set<(failure: PlaceWriteFailure) => void>()
   /** Who hears that a merge kept your value over someone else's. */
   private conflictListeners = new Set<(conflict: PlaceConflict) => void>()
+  /** Who hears that someone else's change replaced long text of yours. */
+  private lostListeners = new Set<(lost: PlaceLostText) => void>()
+  /** Who hears that someone else deleted what you were editing. */
+  private deletedListeners = new Set<(deleted: PlaceThingDeleted) => void>()
   /** The conflicts raised with nobody listening yet:  a change left from the last visit, merged as this one opens. */
   private unheardConflicts: PlaceConflict[] = []
   /** The failures raised with nobody listening yet:  a write left from the last visit, refused as this one opens. */
@@ -175,6 +186,28 @@ export class Places {
   tellConflict(conflict: PlaceConflict): void {
     if (!this.conflictListeners.size) this.unheardConflicts.push(conflict)
     for (const listener of this.conflictListeners) listener(conflict)
+  }
+
+  /** Hear each time someone else's change replaced long text of yours:  what a notice is shown from, with your text.  Returns what stops it. */
+  onLost(listener: (lost: PlaceLostText) => void): () => void {
+    this.lostListeners.add(listener)
+    return () => this.lostListeners.delete(listener)
+  }
+
+  /** Raise `lost`:  `PlaceHeal` calls it. */
+  tellLost(lost: PlaceLostText): void {
+    for (const listener of this.lostListeners) listener(lost)
+  }
+
+  /** Hear each time someone else deleted what you were editing:  what a notice with Restore is shown from.  Returns what stops it. */
+  onThingDeleted(listener: (deleted: PlaceThingDeleted) => void): () => void {
+    this.deletedListeners.add(listener)
+    return () => this.deletedListeners.delete(listener)
+  }
+
+  /** Raise `deleted`:  `PlaceHeal` calls it. */
+  tellThingDeleted(deleted: PlaceThingDeleted): void {
+    for (const listener of this.deletedListeners) listener(deleted)
   }
 
   ////////////////
