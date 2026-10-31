@@ -146,7 +146,9 @@ export const PARSER_MESSAGES = {
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
   /** An old word for a built-in type, `a card is a drawable thing`:  `{replacement}` is its new word. */
-  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead',
+  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
+  "retired-word-gone":
+    '"{words}" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`',
   /** A `<css>` block in a type that doesn't draw. */
   "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */

@@ -18,7 +18,7 @@ describe("testing spell module classes, in Spanish", () => {
     const block = SP.spanish.parser.getScope("old-words").parse("una carta es una cosa dibujable", "block")!
     const errors = SP.Block.getParseErrors(block) ?? []
     expect(errors.map((error) => [error.message, error.data.replacement])).toEqual([
-      ['"cosa dibujable" ahora es "vista":  di "vista"', "vista"]
+      ['"cosa dibujable" ahora es "vista":  di "vista", o ejecuta `spell lint --fix`', "vista"]
     ])
     expect(`${block.compile()}`).toContain("export class Carta extends View {")
   })

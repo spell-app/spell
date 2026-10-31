@@ -105,7 +105,7 @@ UIEs.addRule(Notify, {
     " (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}?" +
     " ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))?" +
     " {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)?" +
-    " (con {okButton:text})?",
+    " (con {okButton:text})? (y esperar)?",
   tests: [
     {
       compileAs: "statement",

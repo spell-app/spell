@@ -352,9 +352,9 @@ describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)",
     const { status, stdout } = spell(["lint", "."], retired)
     expect(stdout).toBe(
       [
-        'Retired.spell:1:15  "drawable thing" is now "view":  say "view" instead',
-        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead',
-        'Retired.spell:4:15  "drawable list" is now "viewable list":  say "viewable list" instead',
+        'Retired.spell:1:15  "drawable thing" is now "view":  say "view" instead, or run `spell lint --fix`',
+        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead, or run `spell lint --fix`',
+        'Retired.spell:4:15  "drawable list" is now "viewable list":  say "viewable list" instead, or run `spell lint --fix`',
         ""
       ].join("\n")
     )
@@ -379,6 +379,32 @@ describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)",
         'a "pile" is a viewable list of cards\n'
     )
     expect(spell(["lint", "."], fixing).status).toBe(0)
+  }, 30_000)
+})
+
+describe("spell lint:  the old words for waiting (epic language P13)", () => {
+  test("--fix:  a phrase, a word that's gone with its colon, a capital;  then nothing's left, and a second run does nothing", () => {
+    const source =
+      "a card is a thing:\n\t- to slow it:\n\t\tpause for 1 sec\n\t- animation deal it:\n\t\twait for: slow it\n" +
+      "\t\tif await slow it then print 1\n\t\t// wait for: this comment stays\n"
+    const fixing = tempProject("Waiting", source)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    const fixed = readFileSync(resolve(fixing, "Waiting.spell"), "utf8")
+    expect(fixed).toBe(
+      "a card is a thing:\n\t- to slow it:\n\t\tpause for 1 sec\n\t- to deal it:\n\t\tslow it\n" +
+        "\t\tif slow it then print 1\n\t\t// wait for: this comment stays\n"
+    )
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, "Waiting.spell"), "utf8")).toBe(fixed)
+  }, 30_000)
+
+  test("--fix takes `animated` out of a spellx action, its details kept", () => {
+    const source =
+      '<spell-thing "card">\n\t<action "deal it" animated description="Slowly">pause for 1 sec</>\n</spell-thing>\n'
+    const fixing = tempProject("Animated", source, SP.SPELLML_SUFFIX)
+    expect(spell(["lint", "."], fixing).status).toBe(1)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, `Animated${SP.SPELLML_SUFFIX}`), "utf8")).toBe(source.replace(" animated", ""))
   }, 30_000)
 })
 

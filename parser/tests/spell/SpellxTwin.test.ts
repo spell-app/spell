@@ -609,61 +609,15 @@ describe("spellx:  a third style of spell", () => {
     })
   })
 
-  // epic `debut` I97
-  describe('an animation is an action that may wait:  <action "..." animated>', () => {
-    test("it compiles as the outline's `- animation ...:` does", () => {
-      const spellx = compiledText([
-        '<spell-app "game">',
-        '\t<action "reset" description="Resets it">print "reset"</>',
-        '\t<action "deal" animated description="Deals, slowly">',
-        "\t\twait for: reset",
-        "\t\tpause for 50 msec",
-        "\t</action>",
-        "</spell-app>"
-      ])
-      const spell = compiledText(
-        [
-          "game is an app where:",
-          "\t// Resets it",
-          '\t- to reset: print "reset"',
-          "\t// Deals, slowly",
-          "\t- animation deal:",
-          "\t\twait for: reset",
-          "\t\tpause for 50 msec"
-        ],
-        { path: "/test.spell" }
-      )
-      expect(spellx.errors).toEqual([])
-      expect(spell.errors).toEqual([])
-      expect(spellx.code).toBe(spell.code)
-      expect(spellx.code).toContain("async deal()")
-    })
-
-    test('in Spanish:  <acción "..." animada>, the outline\'s `- animación ...:`', () => {
-      const spellx = compiledText(
-        [
-          '<encanto-aplicación "juego">',
-          '\t<acción "repartir" animada descripción="Reparte, despacio">',
-          "\t\tpausar 50 milisegundos",
-          "\t</acción>",
-          "</encanto-aplicación>"
-        ],
-        { path: "/test.es.spellml" }
-      )
-      const spell = compiledText(
-        [
-          "juego es una aplicación donde:",
-          "\t// Reparte, despacio",
-          "\t- animación repartir:",
-          "\t\tpausar 50 milisegundos"
-        ],
-        { path: "/test.es.spell" }
-      )
-      expect(spellx.errors).toEqual([])
-      expect(spell.errors).toEqual([])
-      expect(spellx.code).toBe(spell.code)
-      expect(spellx.code).toContain("async repartir()")
-    })
+  // epic `language` P13
+  test.each([
+    ['<spell-app "game">', '\t<action "deal" animated>pause for 50 msec</>', "</spell-app>"],
+    ['<encanto-aplicación "juego">', '\t<acción "repartir" animada>pausar 50 milisegundos</>', "</encanto-aplicación>"]
+  ])("`animated`, a retired word:  %s reads as a plain action, with an error naming the fix", (...lines) => {
+    const path = lines[0]!.includes("encanto") ? "/test.es.spellml" : "/test.spellml"
+    const { code, errors } = compiledText(lines, { path })
+    expect(errors.map((error) => `${error}`)).toEqual([expect.stringContaining("spell lint --fix")])
+    expect(code).toMatch(/async (deal|repartir)\(\)/)
   })
 })
 

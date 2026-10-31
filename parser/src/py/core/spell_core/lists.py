@@ -355,6 +355,11 @@ class List(SpellObject, MutableSequence[Any]):
         return self.get_item(-1)
 
     @property
+    def length(self) -> int:
+        """How many we hold:  `the length of the deck`, as javascript's list says it."""
+        return len(self._items)
+
+    @property
     def is_empty(self) -> bool:
         """Do we hold nothing?  `the deck is empty`."""
         return not self._items

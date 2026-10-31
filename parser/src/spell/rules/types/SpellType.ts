@@ -106,12 +106,14 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
    * `match`, noting a retired word its RULE spells literally:  its `data.retired` and `data.retiredTokens`.
    * - A type word, two at a time, e.g. `drawable list` in `a pile is a drawable list of cards`
    *   (`create_viewable_list_type`):  the language's `retiredTypeWords`.
-   * - Or one of spell's own words, e.g. `parts` in `it has parts "front" and "back"` (`has_slots`):
-   *   the language's `retiredWords`.
+   * - Or one of spell's own words, one or two at a time, e.g. `parts` in `it has parts "front" and "back"`
+   *   (`has_slots`), `wait for`:  the language's `retiredWords`, and its `retiredRuleWords` for this rule.
+   * - A replacement of nothing, `""`:  the word is simply gone (epic `language` P13).
    * - Looks only at the words the rule matched itself (its syntax's literal words), never inside its named groups.
    */
   static noteRetiredLiterals<M extends P.Match>(match: M): M {
-    const { retiredTypeWords = {}, retiredWords = {} } = SP.Language.of(match.scope).words
+    const { retiredTypeWords = {}, retiredWords = {}, retiredRuleWords = {} } = SP.Language.of(match.scope).words
+    const own = { ...retiredWords, ...retiredRuleWords[match.rule.name ?? ""] }
     // a syntax's literal words are its tokens, or an unnamed match's:  `is a drawable list of`
     const literal = match.matched.flatMap((item) => (item instanceof P.Match && !item.rule?.name ? item.matched : item))
     const words = literal.filter((item): item is P.WordToken => item instanceof P.WordToken)
@@ -123,13 +125,14 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     }
     for (let index = 0; index < words.length - 1; index++) {
       const pair = words.slice(index, index + 2)
-      const replacement = retiredTypeWords[pair.map((token) => `${token.value}`.toLowerCase()).join(" ")]
-      if (replacement) return note(pair, replacement)
+      const said = pair.map((token) => `${token.value}`.toLowerCase()).join(" ")
+      const replacement = retiredTypeWords[said] ?? own[said]
+      if (replacement !== undefined) return note(pair, replacement)
     }
     // one of spell's own old words, e.g. `parts` in `it has parts "front" and "back"` (epic `elemental-spell` P27)
     for (const word of words) {
-      const replacement = retiredWords[`${word.value}`.toLowerCase()]
-      if (replacement) return note([word], replacement)
+      const replacement = own[`${word.value}`.toLowerCase()]
+      if (replacement !== undefined) return note([word], replacement)
     }
     return match
   }
@@ -143,7 +146,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   /**
    * A parse error for each retired type word in `statement`, e.g. `a card is a drawable thing`:
    * `"drawable thing" is now "view"`, over just those words.
-   * - Each error's `data.replacement` is the words to put in their place, for a quick fix.
+   * - Each error's `data.replacement` is the words to put in their place, for a quick fix;  `""` if they just go.
    * - Reported by the line, as JSX errors are:  the statement still compiles, its words read as the new ones.
    */
   static retiredWordErrorsIn(statement: P.Match): P.Match[] {
@@ -155,11 +158,14 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     function visit(match: P.Match) {
       if (match.rule.name === "block") return
       const { retired: replacement, retiredTokens } = match.data as RetiredData
-      if (replacement) {
+      if (replacement !== undefined) {
         const { scope } = match
         const tokens = retiredTokens ?? (match.matched as P.Token[])
         const words = tokens.map((token) => token.value).join(" ")
-        const message = SP.Language.of(scope).parserMessage("retired-type-word", { words, replacement })
+        const language = SP.Language.of(scope)
+        const message = replacement
+          ? language.parserMessage("retired-type-word", { words, replacement })
+          : language.parserMessage("retired-word-gone", { words })
         const error = SP.spellParser.createParseError(scope, [...tokens], message)
         error.data.replacement = replacement
         errors.push(error)

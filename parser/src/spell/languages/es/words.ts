@@ -117,7 +117,21 @@ export const spanishWords: SP.LanguageWords = {
     "lista-dibujable": "lista visible"
   },
   /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
-  retiredWords: { partes: "ranuras" },
+  retiredWords: {
+    partes: "ranuras",
+    animación: "para",
+    animacion: "para",
+    "crear animación": "para",
+    "crear animacion": "para",
+    esperar: "",
+    "esperar a": "",
+    "y esperar": ""
+  },
+  retiredRuleWords: {
+    start_process: { animación: "proceso", animacion: "proceso" },
+    stop_process: { animación: "proceso", animacion: "proceso" },
+    check_process: { animación: "proceso", animacion: "proceso" }
+  },
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -197,7 +211,7 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
-      // una acción que puede esperar:  una animación (épica `debut` I97)
+      // retirada, pues esperar es lo normal:  un error, que `spell lint --fix` quita (épica `language` P13)
       animada: "animated",
       arrastrable: "draggable",
       soltable: "droppable",
@@ -232,8 +246,6 @@ export const spanishWords: SP.LanguageWords = {
       alias: "{name}",
       aliasBlock: "{name} :",
       action: "para {words} :",
-      // una acción que puede esperar, `<acción "repartir las cartas" animada>` (épica `debut` I97)
-      animation: "animación {words} :",
       actionDetails: {
         shortcut: "atajo {shortcut}",
         "enabled-when": "activa cuando {enabled-when}",

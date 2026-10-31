@@ -668,7 +668,7 @@ methodsEs.addRule(ToDoSomething, {
 })
 
 methodsEs.addRule(CreateAnimation, {
-  syntax: `(asAnimation:crear? (animación|animacion)) {signature:method_signature} :? {statement_body}?`,
+  syntax: `crear? (animación|animacion) {signature:method_signature} :? {statement_body}?`,
   tests: [
     {
       title: "inline method signatures & variables",
@@ -683,11 +683,11 @@ methodsEs.addRule(CreateAnimation, {
       tests: [
         {
           input: "animación repartir las cartas",
-          js: "export async function repartirLasCartas() {}"
+          js: "export function repartirLasCartas() {}"
         },
         {
           input: "crear animacion repartir las cartas",
-          js: "export async function repartirLasCartas() {}"
+          js: "export function repartirLasCartas() {}"
         },
         {
           input: ["animación repartir las cartas", "\tpausar 10 segundos"],

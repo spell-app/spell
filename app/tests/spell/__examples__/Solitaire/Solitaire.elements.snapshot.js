@@ -509,7 +509,7 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
-    if (this.stock.isEmpty) await this.resetTheStock()
+    if (this.stock.isEmpty) this.resetTheStock()
     const it = this.stock.lastItem
     it?.turnFaceUp()
     // as long as its flip takes (styles.css), so it turns over before it moves

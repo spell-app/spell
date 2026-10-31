@@ -8,7 +8,6 @@ import { SP } from "spell/parser/spell"
  *   - `<property "suit" one-of="clubs, diamonds" alias="is a (suit)" />` reads as
  *     `its "suit" is one of clubs, diamonds`, with `- it "is a (suit)"` indented under it
  *   - `<action "turn it over">` and its lines read as `to turn it over:` and the same lines
- *   - `<action "deal" animated>`, an action that may wait, reads as `animation deal:`
  *   - `<on mouse down>` reads as `on mouse down:`
  * - So a spellx tag compiles to exactly what its code-spell twin does:  the same rule parses it, makes the same
  *   match, the same AST.  Nothing is written as text in between (Q70).
@@ -397,9 +396,11 @@ export class SpellxTwin {
         if (this.inlineBody.length || !this.block) return this.lineAndBlock(this.expand(words.alias))
         return this.lineAndBlock(this.expand(words.aliasBlock))
       case "action": {
-        // an action that may wait, `<action "deal the cards" animated>`:  an animation (epic `debut` I97)
-        const animated = tag.attributes.some((attribute) => attribute.name === "animated")
-        return this.lineAndBlock(this.expand(animated ? words.animation : words.action), this.actionDetails())
+        // an old word, as spell waits by itself:  an error, which `spell lint --fix` takes out (epic `language` P13)
+        for (const { name, word } of tag.attributes)
+          if (name === "animated")
+            SP.addSpellxError(this.head, this.language.parserMessage("retired-word-gone", { words: word }))
+        return this.lineAndBlock(this.expand(words.action), this.actionDetails())
       }
       case "test":
         return this.lineAndBlock(this.expand(words.test))

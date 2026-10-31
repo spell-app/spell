@@ -59,8 +59,8 @@ describe("SpellLanguageService", () => {
   const READ_SYMBOL = "return letter + its symbol + arrow"
   /** Solitaire.spell's declaration of a method of the solitaire's own. */
   const OWN_METHOD = "- to reset the stock:"
-  /** ...and a call to it, in `- animation play from the stock:`. */
-  const OWN_CALL = "wait for: reset the stock"
+  /** ...and a call to it, in `- to play from the stock:`. */
+  const OWN_CALL = "reset the stock"
   /** Solitaire.spell's lines naming the variable `cards`, in `- to reset the stock:`:  it's set, then read twice. */
   const RESET_CARDS = ["set cards to", "reverse the cards", "for each card in the cards"] as const
   /** A card, as Solitaire.spell's last line can name one. */
@@ -376,7 +376,7 @@ describe("SpellLanguageService", () => {
       const markdown = (service.hover(solitaire, at(solitaire, OWN_CALL, "reset"))!.contents as { value: string }).value
       expect(markdown).toContain("action **reset the stock**")
       expect(markdown).toContain("compiles to `resetTheStock()`")
-      expect(markdown).toContain("```js\nawait this.resetTheStock()\n```")
+      expect(markdown).toContain("```js\nthis.resetTheStock()\n```")
     })
 
     test("a declaration's docstring, just under its name", () => {

@@ -202,7 +202,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - as the statement, its syntax as is
     - as an `operand`:  a twin whose LAST expression slot is `{x:operand}` instead
       - Its `statementRule` points back.
-  - Method calls and `wait for` do:
+  - Method calls and the retired `wait for` do:
     - the statement `notify x + y` => `notify(x + y)`
     - `if double x is 4` => `double(x) == 4`
     - the statement `wait for x is 1` => `await (x == 1)`
@@ -1379,7 +1379,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:
-      - at a file's top:  `to ...`, `animation ...`
+      - at a file's top:  `to ...`, and old source's `animation ...`
       - in a type's outline body:  `- to ...`, later parsed in a `P.SubjectScope` of that type
     - Each first line, parsed alone, registers its call rule early, marked `ahead` (`MethodDefinition.callAhead()`).
       It steps aside once the real definition has run (`DynamicMethodRule.test()`).
@@ -1527,7 +1527,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
-  - It starts from what waits by itself (`wait for`, and `core`'s calls in `P.CORE_CALLS_THAT_WAIT`),
+  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, `and wait`, spellx's `animated`) are retired:
+    each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
+    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+  - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
     then adds every function that calls one, by name, until nothing changes.
   - It sets `method.waiting` on every compile, and the calls to write `await` in `project.awaited`:
     `method.isAsync` then says `async`, and the project's declarations carry the same answer.
@@ -1544,7 +1547,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       `drawsWaiting`, and its boundary holds the whole thing (`heldDrawings`, `drawInBoundary()`).
     - `createDeferred()`, never an async `createMemo()`, which freezes what else draws;  `lazy`, so nobody's slow work
       runs unread.
-    - `pause` and `wait for` in a drawing are parse errors (`refuseWaitInDraw()`);
+    - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
       a getter reading another thing's member after a wait warns (`reads-after-wait`).
   - Two rules say not to wait, each by running functions of its own:
     - `meanwhile`, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
