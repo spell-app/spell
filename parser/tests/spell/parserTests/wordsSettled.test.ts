@@ -17,6 +17,10 @@ function compiled(lines: string[], path = "/Test.spell") {
 /** The same, in Spanish. */
 const compiledEs = (lines: string[]) => compiled(lines, "/Test.es.spell")
 
+const RECIPE_AIRTABLE = `a recipe is a thing:
+	- it lives in the family cookbook
+	- its "title" is text`
+
 const PLACE = "family cookbook is an in memory database"
 const RECIPE = `a recipe is a thing:
 	- it lives in the family cookbook
@@ -91,9 +95,84 @@ describe("a place's line", () => {
     expect(js).toContain(`kind: "${kind}"`)
   })
 
-  it("an airtable reads, and says it isn't here yet", () => {
-    expect(compiled(['x is an airtable at "appX"']).errors.join()).toContain("isn't here yet")
-    expect(compiledEs(['x es un airtable en "appX"']).errors.join()).toContain("aún no está")
+  describe("an airtable", () => {
+    const LINES = [
+      'family cookbook is an airtable at "appXXXXXXXXXXXXXX":',
+      '\t- recipes live at "Recipes"',
+      '\t- a recipe\'s title is its "Title"',
+      '\t- its id is its "Spell id"',
+      '\t- its key is the secret "AIRTABLE_KEY"',
+      "\t- check it every 30 seconds",
+      RECIPE_AIRTABLE
+    ]
+
+    it("compiles with the settled details, all of them handed to the place", () => {
+      const { js, errors } = compiled(LINES)
+      expect(errors).toEqual([])
+      expect(js).toContain('kind: "airtable"')
+      expect(js).toContain('at: "appXXXXXXXXXXXXXX"')
+      expect(js).toContain('at: "Recipes"')
+      expect(js).toContain('title: "Title"')
+      expect(js).toContain('idColumn: "Spell id"')
+      expect(js).toContain('keyNamed: "AIRTABLE_KEY"')
+      expect(js).toContain("checkedEvery: 30")
+    })
+
+    it("in Spanish too", () => {
+      const { js, errors } = compiledEs(['x es un airtable en "appX"'])
+      expect(errors).toEqual([])
+      expect(js).toContain('kind: "airtable"')
+    })
+
+    it("an address copied from a browser, and a place server's, are fine;  anything else isn't a base", () => {
+      expect(compiled(['x is an airtable at "https://airtable.com/appAbc123/tblX/viwY"']).errors).toEqual([])
+      expect(compiled(['x is an airtable at "http://127.0.0.1:4791/api/places/airtable"']).errors).toEqual([])
+      expect(compiled(['x is an airtable at "patSomeToken.abc"']).errors.join()).toContain("isn't an Airtable base")
+    })
+
+    it("a key written into the program won't compile", () => {
+      const { errors } = compiled(['x is an airtable at "appX":', '\t- its key is "patAbc.123"'])
+      expect(errors.join()).toContain("can be read by anyone")
+    })
+
+    it("says, at its line, what it can't promise", () => {
+      const { warnings } = compiled(LINES)
+      const said = warnings.join("\n")
+      expect(said).toContain("the last save wins it, with no notice")
+      expect(said).toContain("edits made in Airtable itself")
+      expect(said).toContain("formulas, lookups, rollups")
+      expect(said).toContain("1,000 requests a month")
+      expect(said).toContain("needs a small server side")
+      expect(said).not.toContain("second row")
+      expect(said).not.toContain('add "- check it every')
+    })
+
+    it("with no id column, no key and no check, it says those too", () => {
+      const said = compiled(['x is an airtable at "appX"']).warnings.join("\n")
+      expect(said).toContain("would be a second row")
+      expect(said).toContain("Airtable answers nobody without a key")
+      expect(said).toContain("check it every 30 seconds")
+    })
+
+    it("at a place server, the key isn't this program's business", () => {
+      const said = compiled(['x is an airtable at "/api/places/x"']).warnings.join("\n")
+      expect(said).not.toContain("Airtable answers nobody without a key")
+    })
+
+    it("the people here has no answer on it, and says so", () => {
+      const { warnings } = compiled(['x is an airtable at "appX"', "print the people here"])
+      expect(warnings.join("\n")).toContain("No place here knows who else is here")
+    })
+
+    it("in one go isn't all or nothing on it, and says so", () => {
+      const { warnings } = compiled([
+        ...LINES,
+        "to go:",
+        "\tin one go:",
+        '\t\tadd (a new recipe with title = "x") to the recipes'
+      ])
+      expect(warnings.join("\n")).toContain("can't apply changes all together")
+    })
   })
 
   it.each([

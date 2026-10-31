@@ -1017,7 +1017,7 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
@@ -1028,6 +1028,7 @@ recipe box is an app:
   - a write to a sheet won't compile
   - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
+  - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
 - A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
 

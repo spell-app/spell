@@ -88,8 +88,18 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
   "version-step-no-rename-there":
     "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
-  "place-kind-later":
-    'Un lugar de tipo "{kind}" aún no está:  nombra otro tipo de lugar por ahora, p. ej. "x es un servidor web en ..."',
+  "airtable-not-a-base":
+    '"{address}" no es una base de Airtable:  su id empieza por "app", p. ej. "appXXXXXXXXXXXXXX", y está en la dirección de la base en Airtable',
+  "airtable-last-save-wins":
+    "Airtable no puede saber que otra persona llegó antes:  cuando dos personas cambian un campo, gana el último en guardar, sin aviso, también con lo que se edita en el propio Airtable.  Campos distintos se conservan los dos.  Para un árbitro que diga quién perdió, pon una sala delante",
+  "airtable-worked-out-fields":
+    "Airtable calcula por sí mismo sus fórmulas, búsquedas, resúmenes y recuentos, y solo se pueden leer:  a un programa que escribe uno se le deshace el cambio al ejecutarse, con un aviso que dice por qué",
+  "airtable-calls-count":
+    "Cada página de 100 filas es una petición, y todos los que usan esta base comparten 5 por segundo.  El plan gratuito de Airtable además se detiene en 1.000 peticiones al mes, que revisar cada 30 segundos gasta en unas 8 horas",
+  "airtable-no-id-column":
+    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "- su id es su "id encanto"" debajo',
+  "airtable-needs-key":
+    'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',

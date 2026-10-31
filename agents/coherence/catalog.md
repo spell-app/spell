@@ -634,7 +634,7 @@ Plain, Command or Control, and Shift, one rule.
 
 - **It is:**  `RateQueue` (`spell/server/places`, `src/server/places/RateQueue.ts`, epic `data` P7):  one queue per NAMED
   limit, in order, spaced over a sliding window;  on a 429 everything waits as it says, and the request goes round again
-- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' now, Airtable's next.
+- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' and Airtable's.
 - **Flag:**  `status === 429`
 - **Copies:**  `--`
 - **Fine:**  `parser/src/cli/claudeRunners.ts`:  one caller at a time, retrying 429s and 529s, with no limit to space out to

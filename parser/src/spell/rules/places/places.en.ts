@@ -46,16 +46,14 @@ const KINDS_AT = [
   "room",
   "sheet",
   "google_sheet",
+  "airtable",
   "atmosphere_account"
 ]
 
 /** The kinds with no address. */
 const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
-/** The kinds whose words are settled, and which nothing's behind yet:  each refuses, saying so (`CreatePlace`). */
-const KINDS_LATER = ["airtable"]
-
-places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: [...KINDS_AT, ...KINDS_LATER] }), {
+places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
     "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })

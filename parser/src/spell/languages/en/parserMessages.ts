@@ -120,9 +120,24 @@ export const PARSER_MESSAGES = {
   /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
   "version-step-no-rename-there":
     "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
-  /** A kind of place whose words are settled, with nothing behind it yet:  `{kind}`. */
-  "place-kind-later":
-    'A place of the kind "{kind}" isn\'t here yet:  name another kind of place for now, e.g. "x is a web server at ..."',
+  /** An Airtable's address that names no base. */
+  "airtable-not-a-base":
+    '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',
+  /** An Airtable's line:  no version check (epic `data` T11). */
+  "airtable-last-save-wins":
+    "Airtable can't tell that someone else got there first:  when two people change one field, the last save wins it, with no notice, and that includes edits made in Airtable itself.  Different fields both stand.  For a referee that says who lost, put a room in front of it",
+  /** An Airtable's line:  the compiler can't reach a base to ask which fields it works out. */
+  "airtable-worked-out-fields":
+    "Airtable works out its formulas, lookups, rollups and counts by itself, and they can only be read:  a program that writes one has the change put back when it runs, with a notice saying why",
+  /** An Airtable's line:  requests cost. */
+  "airtable-calls-count":
+    "Every page of 100 rows is one request, and everyone using this base shares 5 a second.  Airtable's free plan also stops at 1,000 requests a month, which checking every 30 seconds uses in about 8 hours",
+  /** An Airtable with no id column (epic `data` I5). */
+  "airtable-no-id-column":
+    'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "- its id is its "spell id"" under this',
+  /** An Airtable at a base, with no key named. */
+  "airtable-needs-key":
+    'Airtable answers nobody without a key:  add "- its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
   /** A rider's word that doesn't agree. */

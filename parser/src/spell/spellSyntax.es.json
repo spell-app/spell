@@ -6290,7 +6290,7 @@
           "internal": false,
           "file": "src/spell/rules/places/IdColumn.ts",
           "line": 9,
-          "purpose": "The column that says which row is which, on a sheet.",
+          "purpose": "The column that says which row is which, on a sheet or an airtable.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} identificador está en {column:text}"

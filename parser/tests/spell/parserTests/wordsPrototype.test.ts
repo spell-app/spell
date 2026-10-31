@@ -194,7 +194,7 @@ const LINES: Line[] = [
     en: 'family cookbook is an airtable at "appXXXXXXXXXXXXXX"',
     es: 'recetario familiar es una airtable en "appXXXXXXXXXXXXXX"',
     at: "top",
-    today: "fails",
+    today: "compiles",
     withRule: "compiles"
   },
   {

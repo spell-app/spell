@@ -26,7 +26,7 @@ export type PlaceDetails = {
   checkedEvery?: number
   /** The field holding a row's version, on a web server that has one. */
   versionsIn?: string
-  /** The column holding a row's id, on a sheet. */
+  /** The column holding a row's id, on a sheet or an airtable. */
   idColumn?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
@@ -147,6 +147,21 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       collection,
       numbers: fieldsOfKind(Class, "number"),
       ...(idColumn !== undefined && { idColumn })
+    })
+  },
+  // always through a server side, which holds the key:  a place server's address, or this page's own server, by the base's name
+  airtable: ({ details }, { RemotePlace, isPlaceServerAddress, airtableBaseIn, PLACES_PREFIX }) => {
+    const at = details.at!
+    const { collections, idColumn, keyNamed, checkedEvery } = details
+    return new RemotePlace({
+      url: isPlaceServerAddress(at) ? at : `${PLACES_PREFIX}/${airtableBaseIn(at)}`,
+      can: { kind: "airtable", versionCheck: false, ...(idColumn === undefined && { makesIds: true }) },
+      lines: {
+        ...(collections && { collections }),
+        ...(idColumn !== undefined && { idColumn }),
+        ...(keyNamed !== undefined && { keyNamed }),
+        ...(checkedEvery !== undefined && { checkedEvery })
+      }
     })
   },
   "atmosphere account": ({ details, person }, { AtProtoPlace }) =>
