@@ -36,6 +36,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
+  - `retrying.ts` -- `retryAfter()`, `backoffFor()`:  how long to wait before asking a server again.
+    Taken by file, in no barrel
   - `Api.ts` -- requests with URL templates, combined abort signals, a newer one replacing an older (`UI.api`, and the
     places';  moved down from Spell UI by epic `data` P4);  on `fetching.ts`, `fetchOk()` and what `Api` throws.
     Taken by file, `spell/util/Api`, in no barrel
@@ -185,6 +187,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `RestPlace`:  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
+    - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
       thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;
@@ -195,6 +198,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Epic pages run on it every day (epic `data` P6, `EpicPageFormat`):  read only, whole-page writes staying the tool's.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
+    - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
+  - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
+    - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with
+      `GoogleSheetPlace`, in `spell/server/places`.
+    - An author's `idColumn`, or rows share no identity.  A row with no id or a repeated one is left out, and said.
+    - What a place wants known about an answer is `ListAnswer.notes`, shown by `PlaceResult.notes`;
+      `PlaceQuery` adds the one for rows with no id, for every place.
+    - Its ceiling holds while it reads:  the engine only counts rows it's handed.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
@@ -218,7 +229,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Whatever needs a server goes in `spell/server/places`.
 - Its files import each other as peers.
 - Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage;
-  but `RestPlace` and `GraphPlace`'s, in node (`util:node`), since they need a real server.
+  but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`util:node`), since they need a real server.
   - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
     which keep the interface honest until those two are built;
     and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.

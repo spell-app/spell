@@ -25,6 +25,7 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  *     place's own cursors stay in here, walking its pages (a cursor-paged API fits).
  * - The ceiling is `PlaceCapabilities.ceiling`, over `DEFAULT_CEILING`:  past it, a `PlaceError` naming the place.
  * - A row keeps its id field through `select`:  it's what makes it one row, in `PlaceCache`.
+ * - Rows with no id:  it says so on every answer (`ListAnswer.notes`).
  * - Stops between pages when `signal` aborts, even for a place that ignores it.
  * - Knows nothing of readers or the cache:  `PlaceReads` runs one of these per request.
  ****************/
@@ -61,7 +62,7 @@ export class PlaceQuery {
     const isSorting = !!sort?.length && !handled.sort
     const isSlicing = !!page && (!this.ask.page || isFiltering || isSorting)
     if (!isFiltering && !isSorting && !isSlicing) {
-      return { ...first, rows: this.withSelection(first.rows, handled) }
+      return { ...first, rows: this.withSelection(first.rows, handled), ...this.notesOn(first) }
     }
 
     const start = page?.at === undefined ? 0 : Number(page.at)
@@ -93,8 +94,16 @@ export class PlaceQuery {
       rows: this.withSelection(sliced, handled),
       ...(isSlicing && end !== undefined && end < ordered.length && { nextPage: String(end) }),
       ...(first.version !== undefined && { version: first.version }),
+      ...this.notesOn(first),
       handled
     }
+  }
+
+  /** What `answer` said about its rows, and, for rows with no id, that they share no identity:  the same for every place. */
+  private notesOn({ notes = [] }: ListAnswer): Pick<ListAnswer, "notes"> {
+    if (this.place.describe().idOf !== undefined) return notes.length ? { notes } : {}
+    const shared = `Nothing says which column of "${this.collection}" is its id, so its rows share no identity:  each stays inside its list, and none can be changed`
+    return { notes: [...notes, shared] }
   }
 
   /** One `list()` of the place.  - throws once `signal` has aborted, even if the place answered */

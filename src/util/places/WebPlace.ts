@@ -39,7 +39,7 @@ export abstract class WebPlace {
   /** The name of the key it needs, if it does. */
   protected readonly keyNamed: string | undefined
   /** Finds that key, on a server side. */
-  private readonly keyFrom: ((name: string) => string | undefined) | undefined
+  private readonly keyFrom: WebPlaceProps["keyFrom"]
   /** Puts that key on a request. */
   private readonly sendKey: (headers: Headers, key: string) => void
   /** The header a change's id goes in:  `false` for none. */
@@ -68,7 +68,7 @@ export abstract class WebPlace {
     { signal, keepalive }: PlaceContext,
     changeId?: string
   ): Promise<Response> {
-    const key = this.keyOrRefusal()
+    const key = await this.keyOrRefusal()
     const headers = new Headers(request.headers)
     if (key !== undefined) this.sendKey(headers, key)
     if (changeId !== undefined && this.changeIdHeader) headers.set(this.changeIdHeader, changeId)
@@ -83,8 +83,14 @@ export abstract class WebPlace {
     } catch (error) {
       if (!(error instanceof ApiError) || !this.isAnAnswer(error.status)) throw error
       const kind = this.errorKindFor(error.status!)
-      throw new PlaceError(error.message, { cause: { kind, ...(kind === "refused" && { whyNot: "place" }) } })
+      const message = await this.messageOf(error)
+      throw new PlaceError(message, { cause: { kind, ...(kind === "refused" && { whyNot: "place" }) } })
     }
+  }
+
+  /** What to say of a failure that means something.  A subclass that knows why says that. */
+  protected messageOf(error: ApiError): Promise<string> | string {
+    return error.message
   }
 
   /** What a server's answer of `status`, a 4xx, means.  A subclass says more. */
@@ -98,9 +104,9 @@ export abstract class WebPlace {
   }
 
   /** The key it needs, if it needs one.  - throws `PlaceError` `"refused"` when nothing here holds it */
-  private keyOrRefusal(): string | undefined {
+  private async keyOrRefusal(): Promise<string | undefined> {
     if (this.keyNamed === undefined) return undefined
-    const key = this.keyFrom?.(this.keyNamed)
+    const key = await this.keyFrom?.(this.keyNamed)
     if (key !== undefined) return key
     throw new PlaceError(
       `${this.constructor.name}:  ${this.url} needs the key named "${this.keyNamed}", and a key is never kept in a page;  this place has to go through a server side`,
@@ -115,8 +121,11 @@ export type WebPlaceProps = {
   url: string
   /** The NAME of the key it needs:  it's never written here.  See `WebPlace`. */
   keyNamed?: string
-  /** Finds a key by its name:  only ever handed in on a server side (`PlaceKeys`).  Left out:  a place with `keyNamed` refuses. */
-  keyFrom?: (name: string) => string | undefined
+  /**
+   * Finds a key by its name:  only ever handed in on a server side (`PlaceKeys`).  Left out:  a place with `keyNamed` refuses.
+   * - It can wait, for a key that's a token made from another (`GoogleToken`).
+   */
+  keyFrom?: (name: string) => string | undefined | Promise<string | undefined>
   /** How the key goes on a request;  default `Authorization: Bearer <key>`. */
   sendKey?: (headers: Headers, key: string) => void
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */

@@ -5,6 +5,10 @@
  * - `http://127.0.0.1:4791/api/places/recipes`:  a folder of files, as a place, behind a `PlaceServer`
  *   - the folder:  `<folder>`, else `spell-recipe-box` in the system's temporary folder, kept between runs
  *   - edit `recipes/r-1.json` there, and the page follows
+ * - `http://127.0.0.1:4791/api/places/google-sheet`:  your own Google Sheet, behind the same server, which holds its key (epic `data` P7)
+ *   - only with `GOOGLE_SHEET_ID` and `GOOGLE_SHEETS_KEY` set:  its id, and a service account's key file, as JSON;
+ *     the steps are the epic page's manual test
+ *   - its tab has to be called `recipes`
  * - The demo's page is `/guides/data/experiments/recipe-box/recipe-box.html`, on the page server.
  */
 import { createServer } from "node:http"
@@ -13,7 +17,7 @@ import { join } from "node:path"
 
 import { JsonChunks } from "spell/util/places"
 import { SRV } from "spell/server"
-import { ChunkFiles, FolderPlace, PlaceServer } from "spell/server/places"
+import { ChunkFiles, FolderPlace, GoogleSheetPlace, PlaceKeys, PlaceServer } from "spell/server/places"
 import { bothHandlers, DemoGuard, FIRST_RECIPES, RecipeBox } from "spell/server/test/recipeServers"
 
 const PORT = 4791
@@ -45,9 +49,16 @@ router.post("/someone-else/folder/:id", SRV.parseBodies(), async (request, reply
   await files.write(address, format.bodyText({ ...thing, title: name }))
   reply.json({ ok: true })
 })
-new PlaceServer({ places: { [COLLECTION]: place } }).route(router, new DemoGuard().allowPort(PORT))
+
+const SHEET_KEY = "GOOGLE_SHEETS_KEY"
+const spreadsheet = process.env.GOOGLE_SHEET_ID
+const keys = new PlaceKeys({ names: [SHEET_KEY] })
+const googleSheet = spreadsheet && new GoogleSheetPlace({ spreadsheet, keyNamed: SHEET_KEY, keys, idColumn: "id" })
+const places = { [COLLECTION]: place, ...(googleSheet && { "google-sheet": googleSheet }) }
+new PlaceServer({ places, keys }).route(router, new DemoGuard().allowPort(PORT))
 
 const server = createServer(SRV.toListener(router.handle))
 await SRV.listenPreferred(server, { port: PORT, fallback: false })
 console.log(`the recipe servers are on http://127.0.0.1:${PORT}:  /recipes, /graphql and /api/places/recipes.`)
 console.log(`the folder is ${folder}:  edit a file in recipes/, and the page follows.  Ctrl-C stops them.`)
+if (googleSheet) console.log(`your Google Sheet ${spreadsheet} is on /api/places/google-sheet, its key held here.`)

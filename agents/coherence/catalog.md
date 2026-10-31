@@ -72,6 +72,15 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **History:**  elemental-spell's `.spellml` reader was 1,270 lines by hand (its P3) until its P6 moved it onto a
   tokenizer subclass and rules.
 
+### A CSV file
+
+- **It is:**  `parseCsv()` (`spell/util/places/csv`):  quoted fields, doubled quotes, any line end, text only, no dependency
+- **Use it when:**  reading CSV anywhere in the repos.  What the columns mean is `SheetTable`'s (`spell/util/places`).
+- **Flag:**  `split\(","\)` over a line of a file
+- **Copies:**  `--`
+- **Fine:**  it's itself a small copy of "A new syntax", above, on purpose (epic `data` P7):
+  util sits under the parser, so it can't reach `P.Tokenizer`, and this is the one format it needs.
+
 ### Walking a rule's syntax
 
 - **It is:**  `rule.childRules` (every rule inside it) and `P.leadingRules(rule, { parser, followGroups })` (what it
@@ -543,6 +552,24 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Use it when:**  anything on a page or place asks again and again, whether something changed.
 - **Flag:**  `visibilityState` inside an `every(` or a `setInterval(`
 - **Copies:**  `--` since epic `data` P4 (the notebook's file poll);  the epic pages' use `ServerLink.watch()` (above)
+
+### How long to wait before asking again
+
+- **It is:**  `retryAfter(response, mostMs)` and `backoffFor(attempt, { jitterMs, mostMs })` (`spell/util/retrying`,
+  `src/util/retrying.ts`;  lifted from `claudeRunners` by epic `data` P7)
+- **Use it when:**  a server said "not now":  they only work out the wait, and waiting is the caller's.
+- **Flag:**  `retry-after`, `2 \*\* \(?attempt`
+- **Score:**  `get\("retry-after"\)` · home `src/util/retrying.ts`
+- **Copies:**  `--`
+
+### Keeping to a service's request limit
+
+- **It is:**  `RateQueue` (`spell/server/places`, `src/server/places/RateQueue.ts`, epic `data` P7):  one queue per NAMED
+  limit, in order, spaced over a sliding window;  on a 429 everything waits as it says, and the request goes round again
+- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' now, Airtable's next.
+- **Flag:**  `status === 429`
+- **Copies:**  `--`
+- **Fine:**  `parser/src/cli/claudeRunners.ts`:  one caller at a time, retrying 429s and 529s, with no limit to space out to
 
 ### Requests with URL templates and real aborts
 

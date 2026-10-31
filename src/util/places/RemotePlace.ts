@@ -1,3 +1,5 @@
+import type { ApiError } from "spell/util/fetching"
+
 import {
   type ApplyAnswer,
   type ChangesAnswer,
@@ -130,6 +132,15 @@ export class RemotePlace extends WebPlace implements Place {
     if (status === OUT_OF_DATE_STATUS) return "out of date"
     if (status === OVER_CEILING_STATUS) return "over the ceiling"
     return super.errorKindFor(status)
+  }
+
+  /** What the server side said went wrong:  `PlaceServer` answers `{ error }`, already scrubbed of keys. */
+  protected async messageOf(error: ApiError): Promise<string> {
+    const said = await error.response
+      ?.clone()
+      .json()
+      .catch(() => undefined)
+    return (said as { error?: string } | undefined)?.error ?? error.message
   }
 
   /** A stale token isn't an answer about the request:  see the class. */

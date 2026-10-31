@@ -197,6 +197,12 @@ export type ListAnswer = {
   version?: string
   /** Which parts of the query it did itself. */
   handled: ListHandled
+  /**
+   * What it wants known about these rows, in words for whoever keeps the data:  a row left out, and why.
+   * - The answer still stands:  what's wrong with ONE row of a sheet someone keeps by hand shouldn't blank the page.
+   * - `PlaceResult.notes` shows them;  `PlaceQuery` adds one of its own for rows that share no identity.
+   */
+  notes?: string[]
 }
 
 /** One change to one thing. */

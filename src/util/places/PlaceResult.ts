@@ -100,6 +100,11 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     return this.answer?.handled
   }
 
+  /** What the place, or the engine, wants known about these rows, in words:  see `ListAnswer.notes`. */
+  get notes(): readonly string[] {
+    return this.answer?.notes ?? []
+  }
+
   /** The place's last answer, without its rows. */
   private get answer(): Omit<ListAnswer, "rows"> | undefined {
     return this.getState("answer")

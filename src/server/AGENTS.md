@@ -384,6 +384,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - holds keys (`PlaceKeys`), and scrubs them from every answer
       - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
         to answer
+    - `GoogleSheetPlace`:  a Google Sheet as a place, read and written, its tabs the collections (epic `data` P7)
+      - a whole `apply()` is one read and one `spreadsheets:batchUpdate`, all or none;  values, never formulas
+      - no versions in Sheets:  the last save wins a cell.  Its class docstring has the known race
+      - `GoogleToken`:  a service account's key file makes a token, an hour at a time;  both go in `PlaceKeys`, to be scrubbed
+      - read only, from a browser, with no key:  `SheetPlace`, on the sheet's CSV address
+      - its tests run against `spell/server/test/sheetsStub`, a fair stub checked against Google's docs
+    - `RateQueue`:  requests under a service's named limit, in order, waiting as a 429 says;  Airtable's next
     - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
@@ -497,6 +504,7 @@ The steps between a page's content and its file on disk, for every tool that wri
 
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
+- `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
 - `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`, which also serves a folder;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.

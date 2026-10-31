@@ -12,7 +12,7 @@
  ****************/
 export class PlaceKeys {
   /** Each key, by its name. */
-  private readonly keys: ReadonlyMap<string, string>
+  private readonly keys: Map<string, string>
 
   constructor({ names = [], from = process.env }: PlaceKeysProps = {}) {
     const entries = names.flatMap((name) => {
@@ -25,10 +25,24 @@ export class PlaceKeys {
   /** The key by this name;  `undefined` if it isn't set.  Handed to a place as `keyFrom`. */
   keyNamed = (name: string): string | undefined => this.keys.get(name)
 
-  /** `text`, with every key in it replaced by its name. */
+  /**
+   * Hold something made from a key, as secret as the key:  scrubbed from every answer from now on.
+   * - Under one name there's only ever the latest:  a token that's replaced stops being worth anything.
+   */
+  hold(name: string, secret: string): void {
+    this.keys.set(name, secret)
+  }
+
+  /**
+   * `text`, with every key in it replaced by its name.
+   * - As written in JSON too:  a key with a line end in it doesn't look like itself inside an answer.
+   */
   scrubbed(text: string): string {
     let clean = text
-    for (const [name, key] of this.keys) clean = clean.replaceAll(key, `[the key ${name}]`)
+    for (const [name, key] of this.keys) {
+      const inJson = JSON.stringify(key).slice(1, -1)
+      clean = clean.replaceAll(key, `[the key ${name}]`).replaceAll(inJson, `[the key ${name}]`)
+    }
     return clean
   }
 
