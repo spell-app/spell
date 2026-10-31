@@ -17,6 +17,7 @@ import { fieldNamed, textIn } from "./PlaceDetail"
  *   - `knowsWhoIsHere`:  `everyone here` can list more than you.
  *   - `takesOperations`:  `to publish a recipe is at "..."` can reach it, by its address.
  *   - `hasNoReferee`:  each person has their own, and can change only that:  what the line warns of.
+ * - `airtable` has no version check and no people, and takes changes in batches of 10:  so it has none of these, and its line says more (`warnOfAirtable()`).
  * - A kind a library adds isn't here:  nothing's known of it, so nothing's said.
  */
 export const PLACE_KIND_ABILITIES: Readonly<
@@ -40,6 +41,7 @@ export const PLACE_KIND_ABILITIES: Readonly<
   room: { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true },
   sheet: { isReadOnly: true },
   "google sheet": { isReadOnly: true, isAtomic: true },
+  airtable: {},
   "atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
   "personal atmosphere account": { isAtomic: true, saysWhatChanged: true, knowsWhoIsHere: true, hasNoReferee: true },
   "database on this device": { isAtomic: true, saysWhatChanged: true, hasOtherPeople: false },

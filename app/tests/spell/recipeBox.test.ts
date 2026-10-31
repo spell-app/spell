@@ -63,7 +63,14 @@ const BACK_ENDS: Record<string, (url: string) => string> = {
 	- check it every 5 seconds`,
   "a folder": (url) => `family cookbook is a data folder at "${url}/api/places/recipes":
 	- check it every 5 seconds`,
-  "a room": (url) => `family cookbook is a room at "${url}/api/rooms/recipes"`
+  "a room": (url) => `family cookbook is a room at "${url}/api/rooms/recipes"`,
+  Airtable: (url) => `family cookbook is an airtable at "${url}/api/places/airtable":
+	- recipes live at "Recipes"
+	- a recipe's title is its "Title"
+	- a recipe's servings is its "Servings"
+	- a recipe's notes is its "Notes"
+	- its id is its "Spell id"
+	- check it every 5 seconds`
 }
 
 describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe box, in a browser", () => {
@@ -182,7 +189,8 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     "a folder": async () =>
       (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
     "a room": async () =>
-      (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
+      (await servers.folderPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`),
+    Airtable: async () => servers.airtableStub!.rowsOf("Recipes").map(({ Title }) => `${Title as string}`)
   }
 
   /** Reads, adds, changes and removes through the page, each reaching the server. */

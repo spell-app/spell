@@ -23,6 +23,7 @@ import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
+import { WhereField } from "./WhereField"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
@@ -46,16 +47,14 @@ const KINDS_AT = [
   "room",
   "sheet",
   "google_sheet",
+  "airtable",
   "atmosphere_account"
 ]
 
 /** The kinds with no address. */
 const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
-/** The kinds whose words are settled, and which nothing's behind yet:  each refuses, saying so (`CreatePlace`). */
-const KINDS_LATER = ["airtable"]
-
-places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: [...KINDS_AT, ...KINDS_LATER] }), {
+places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }), {
   syntax:
     "((web_server:web server)|(graphql_server:graphql server)|(data_folder:data folder)|(file:file)|(room:room)|(sheet:sheet|spreadsheet)|(google_sheet:google sheet)|(airtable:airtable)|(atmosphere_account:atmosphere/i account|atmosphere/i))"
 })
@@ -185,6 +184,11 @@ places.addRule(TotalOf, {
   ]
 })
 
+places.addRule(WhereField, { syntax: "the {property:member_words}" })
+// Before its plain self:  the same words, in a `where`, are the thing's field
+places.addRule(TheyAre, {
+  syntax: "{operator:are_or_are_not} {expression:where_field}"
+})
 places.addRule(TheyAre, { syntax: "{operator:are_or_are_not} {expression:operand}" })
 places.addRule(CurrentPerson, {
   syntax: "(they|them|the person)",

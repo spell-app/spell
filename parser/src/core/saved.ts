@@ -91,7 +91,8 @@ const KEEP_THEIR_OWN_NAME = new Set([
   "web server",
   "graphql server",
   "atmosphere account",
-  "personal atmosphere account"
+  "personal atmosphere account",
+  "airtable"
 ])
 
 /** The kinds of place that know who's here, among those spell knows by itself. */

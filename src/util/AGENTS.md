@@ -234,6 +234,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
+    - A program's lines go with every request (`lines`, `PlaceLines`):  never a key, only its name.  A place that takes them follows them (`Place.withLines()`).
+    - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
     A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with
@@ -286,7 +288,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage;
   but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`util:node`), since they need a real server.
   - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
-    which keep the engine's own tests honest about those shapes (AT Protocol's is built now, and held to the same interface);
+    which keep the engine's own tests honest about those shapes (both are built now, and held to the same interface);
     and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.
 
 ## Decorators

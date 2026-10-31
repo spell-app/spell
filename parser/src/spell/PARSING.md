@@ -575,6 +575,8 @@ A kind that says so is saved in a file of its own.
 - And EVERY one of a type (epic `outline-spell` P16):  [`every_thing`](rules/classes/EveryThing.ts).
   - Some of them, its short form of `list_filter`:  [`every_thing_where`](rules/classes/EveryThingWhere.ts),
     `every recipe where its title includes the search` (epic `data` P10).
+    - Any `where`, `recipes where they are the cook` ~== `recipes where its cook is them`:  there, [`where_field`](rules/places/WhereField.ts)
+      reads `the cook` as the thing's own, only after [`they_are`](rules/places/TheyAre.ts) (epic `data` T66).
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made

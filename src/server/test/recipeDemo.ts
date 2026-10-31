@@ -10,6 +10,7 @@
  *     - `/api/places/recipes`:  behind a `PlaceServer`
  *     - `/api/rooms/recipes`:  a room, whose referee keeps its recipes in that same folder
  *       - it hears the place's every change, through the place's own `watch()`, as a step of the room
+ * - `/api/places/airtable`:  a stub of Airtable on a port of its own (`AirtableStub`, epic `data` P19), or your own base, through `morePlaces`.
  * - `atmospherePort`:  a fake of AT Protocol's network too (`FakeAtmosphere`, epic `data` P16):  two hosts, Alice's recipes on one and Bob's on the other.
  * - `routes`:  anything else, by a caller:  a test's page.
  * - Node only;  a test helper, as `recipeServers.ts` is.
@@ -19,8 +20,9 @@ import { join } from "node:path"
 
 import { JsonChunks, type Place } from "spell/util/places"
 import { SRV } from "spell/server"
-import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
+import { AirtablePlace, ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
 
+import { AIRTABLE_STUB_TOKEN, AirtableStub } from "./airtableStub"
 import { FakeAtmosphere } from "./fakeAtmosphere"
 import { csvHandler, RecipeFile } from "./RecipeFile"
 import { bothHandlers, DemoGuard, FIRST_RECIPES } from "./recipeServers"
@@ -36,6 +38,23 @@ const ROOM_PATH = "/api/rooms/recipes"
 
 /** What a room's recipe holds. */
 const ROOM_FIELDS = ["title", "cuisine", "servings", "notes", "place"]
+
+/** The name the Airtable base goes by, behind its place server. */
+const AIRTABLE_PLACE = "airtable"
+
+/** The name of the key the stub of Airtable takes. */
+const AIRTABLE_STUB_KEY = "AIRTABLE_STUB_KEY"
+
+/** What the demo's lines say of a base, whether the stub or your own:  its table, its columns, and Spell's id column. */
+export const AIRTABLE_DEMO_LINES = {
+  idColumn: "Spell id",
+  collections: {
+    [COLLECTION]: {
+      at: "Recipes",
+      fields: { title: "Title", cuisine: "Cuisine", servings: "Servings", notes: "Notes" }
+    }
+  }
+}
 
 /** What `startRecipeServers()` is told. */
 export type RecipeServersProps = {
@@ -57,6 +76,8 @@ export type RecipeServersProps = {
   fixedPort?: boolean
   /** Where a fake of AT Protocol's network listens, its hosts on the next two ports:  left out, it isn't started. */
   atmospherePort?: number
+  /** Where the stub of Airtable listens, for `/api/places/airtable`:  left out, any free port.  Your own base in `morePlaces` takes its place. */
+  airtablePort?: number
 }
 
 /** What's running. */
@@ -67,6 +88,8 @@ export type RecipeServers = {
   box: RecipeFile
   /** The folder place:  the room's store too. */
   folderPlace: FolderPlace
+  /** The stub of Airtable, unless it's your own base. */
+  airtableStub?: AirtableStub
   /** Stops it. */
   close(): Promise<void>
 }
@@ -81,7 +104,8 @@ export async function startRecipeServers({
   keys = new PlaceKeys({ names: [] }),
   routes,
   fixedPort = false,
-  atmospherePort
+  atmospherePort,
+  airtablePort = 0
 }: RecipeServersProps): Promise<RecipeServers> {
   // only one back-end of the demo's:  a port in use shouldn't stop the others
   const atmosphere =
@@ -113,7 +137,13 @@ export async function startRecipeServers({
   router.use(bothHandlers(box))
   const guardFor = (at: number) => new DemoGuard().allowPort(at)
   const server: Server = createServer()
-  const places = { [COLLECTION]: folderPlace, [CSV_PLACE]: box.place, ...morePlaces }
+  const airtable = morePlaces?.[AIRTABLE_PLACE] ? undefined : await startAirtableStub(airtablePort)
+  const places = {
+    [COLLECTION]: folderPlace,
+    [CSV_PLACE]: box.place,
+    ...(airtable && { [AIRTABLE_PLACE]: airtable.place }),
+    ...morePlaces
+  }
   server.on("request", SRV.toListener(router.handle))
   await (fixedPort
     ? SRV.listenPreferred(server, { port, fallback: false })
@@ -135,13 +165,50 @@ export async function startRecipeServers({
     url: `http://127.0.0.1:${at}`,
     box,
     folderPlace,
+    ...(airtable && { airtableStub: airtable.stub }),
     close: () =>
       new Promise((resolve) => {
         referee.close?.()
         void atmosphere?.close()
+        void airtable?.stub.stop()
         server.closeAllConnections()
         server.close(() => resolve())
       })
+  }
+}
+
+/** The stub of Airtable, with the first recipes, and a place on it:  a port of its own, as Airtable is another server. */
+async function startAirtableStub(port: number): Promise<{ stub: AirtableStub; place: AirtablePlace }> {
+  const fields = [
+    { name: "Spell id" },
+    { name: "Title" },
+    { name: "Cuisine" },
+    { name: "Servings", type: "number" },
+    { name: "Notes", type: "multilineText" },
+    {
+      name: "Note length",
+      type: "formula",
+      worksOut: (cells: Record<string, unknown>) => `${(cells.Notes as string | undefined) ?? ""}`.length
+    }
+  ]
+  const rows = FIRST_RECIPES.map(({ id, name, cuisine, servings, notes }) => ({
+    "Spell id": id,
+    Title: name,
+    Cuisine: cuisine,
+    Servings: servings,
+    Notes: notes
+  }))
+  const stub = await new AirtableStub().addTable("Recipes", fields, rows).start(port)
+  const keys = new PlaceKeys({ names: [AIRTABLE_STUB_KEY], from: { [AIRTABLE_STUB_KEY]: AIRTABLE_STUB_TOKEN } })
+  return {
+    stub,
+    place: new AirtablePlace({
+      base: stub.base,
+      keyNamed: AIRTABLE_STUB_KEY,
+      keys,
+      url: stub.url,
+      ...AIRTABLE_DEMO_LINES
+    })
   }
 }
 

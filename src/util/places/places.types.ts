@@ -90,6 +90,8 @@ export type RateLimit = {
   perSeconds: number
   /** How many changes one request can hold. */
   changesPerRequest?: number
+  /** How long a limit hit lasts, in seconds, for a service whose answer doesn't say:  Airtable's is 30. */
+  waitAfterHitSeconds?: number
 }
 
 /**
@@ -217,6 +219,22 @@ export type ListHandled = {
   select?: boolean
 }
 
+/**
+ * What a program's lines say about a place on a server side, sent with every request:  the program is the one source of them.
+ * - Never a key:  only the NAME of one the server side already holds, which it checks.
+ * - They rename and choose within what the server side already serves, so they can't reach anything further.
+ */
+export type PlaceLines = {
+  /** Each collection's name there, and its fields' names there, by what the program calls them. */
+  collections?: Record<string, { at?: string; fields?: Record<string, string> }>
+  /** The column holding a row's id. */
+  idColumn?: string
+  /** The NAME of the key the program says it needs. */
+  keyNamed?: string
+  /** How often it's asked what changed, in seconds. */
+  checkedEvery?: number
+}
+
 /** A place's answer to `list()`. */
 export type ListAnswer = {
   /** The rows. */
@@ -233,6 +251,11 @@ export type ListAnswer = {
    * - `PlaceResult.notes` shows them;  `PlaceQuery` adds one of its own for rows that share no identity.
    */
   notes?: string[]
+  /**
+   * The fields that read, and take no write, as far as the place knows:  Airtable's formulas, lookups and rollups.
+   * - For a place behind a server side, whose `canWrite()` a browser can't call:  `RemotePlace` keeps them, and answers from them.
+   */
+  readOnlyFields?: string[]
 }
 
 /** One change to one thing. */
@@ -414,6 +437,12 @@ export type WriteAnswer = {
 export type Place = {
   /** What it can do. */
   describe(): PlaceCapabilities
+  /**
+   * This place, as a program's lines describe it:  for a place behind a server side, which takes them from each request (`PlaceServer`).
+   * - Left out:  its lines are its own, and a program's make no difference.
+   * - throws `PlaceError` for lines it can't honour
+   */
+  withLines?(lines: PlaceLines): Place
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
   /**
@@ -510,6 +539,14 @@ export const PLACES_PREFIX = "/api/places"
  */
 export function isPlaceServerAddress(address: string): boolean {
   return address.split(/[?#]/)[0]!.includes(`${PLACES_PREFIX}/`)
+}
+
+/** An Airtable base's id, alone or in an address someone copied from their browser. */
+const AIRTABLE_BASE = /(?:^|\/)(app[A-Za-z0-9]+)(?:$|[/?#])/
+
+/** The base `address` names:  `appXXXXXXXXXXXXXX`, or Airtable's address for it.  `undefined` if it names none. */
+export function airtableBaseIn(address: string): string | undefined {
+  return AIRTABLE_BASE.exec(address)?.[1]
 }
 
 ////////////////

@@ -106,7 +106,7 @@ export type RoomMember = {
  *   - So a store that refuses is a refusal, and one that fails is "no answer":  the page sends it again.
  *   - A store with a `watch()` is heard:  someone saving a file by hand becomes a step, `FROM_THE_PLACE`.
  *   - It's written whole values:  this is the store's one writer, so nothing's lost by it.
- *   - A store that makes its own ids (Airtable):  it keeps the browser's ids in the room, and each one's name in the store.
+ *   - A store that makes its own ids (an Airtable with no id column):  it keeps the browser's ids in the room, and each one's name in the store.
  * - A named action (`actions`) re-runs here, so "check, then write" holds for two at once.  The compiler's choice of which comes
  *   with the words.
  * - A ROOM TRUSTS EVERYONE IN IT:  no per-person rules yet.  So who someone says they are is believed.

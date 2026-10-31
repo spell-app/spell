@@ -6265,7 +6265,7 @@
           "internal": false,
           "file": "src/spell/rules/places/IdColumn.ts",
           "line": 9,
-          "purpose": "The column that says which row is which, on a sheet.",
+          "purpose": "The column that says which row is which, on a sheet or an airtable.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} id is its? {column:text}"
@@ -6441,14 +6441,31 @@
           "ruleNames": ["they_are"],
           "internal": false,
           "file": "src/spell/rules/places/TheyAre.ts",
-          "line": 14,
-          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15).",
+          "line": 20,
+          "purpose": "`they are`, as `is` after the person using the program (epic `data` P15, T66).",
           "syntaxes": [
+            {
+              "syntax": "{operator:are_or_are_not} {expression:where_field}"
+            },
             {
               "syntax": "{operator:are_or_are_not} {expression:operand}"
             }
           ],
           "aliases": ["expression_suffix"]
+        },
+        {
+          "className": "WhereField",
+          "ruleNames": ["where_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/WhereField.ts",
+          "line": 19,
+          "purpose": "A field of the thing a `where` is looking at, by its name alone (epic `data` T66).",
+          "syntaxes": [
+            {
+              "syntax": "the {property:member_words}"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
