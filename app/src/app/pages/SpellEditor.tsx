@@ -1,6 +1,6 @@
 import type { RouteSectionProps } from "@solidjs/router"
 import { Match, Show, Switch, createSignal, onCleanup } from "solid-js"
-import { isServer } from "@solidjs/web"
+import { isServer, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
 import {
@@ -23,7 +23,6 @@ import {
   ProjectBarMenu,
   SpellPage,
   SplitPanel,
-  Submenu,
   ThemeMenu,
   TreeRoot,
   tracked,
@@ -32,6 +31,8 @@ import {
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
+import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
+import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -268,21 +269,19 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  * - right, ONE group of icons:  Run:  Restart, the theme, you;  Edit:  Inspect app and the Inspector's menu, a thin
  *   line, then Restart, the theme, you
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
+ * - How they're arranged is Spell, `EditorBar.spellml`;  what's in each is still the editor's, handed over here, each a thing that
+ *   draws itself.
  * - A phone runs only:  no app menus, no Run | Edit (`chrome.css`).
  * - Its spacing is the top bar's one rule (`chrome.css`):  60px between groups, 12px between icons.
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
-  return (
-    <AppMenu class="EditorBar">
-      <Submenu left spring>
-        <ProjectBarMenu useRunner={props.mode === "run"} />
-        <AppBarMenus mode={props.mode} />
-      </Submenu>
-      <Submenu center spring>
-        <ModeButtons current={props.mode} />
-      </Submenu>
-      <Submenu right spring class="BarTools">
-        <Submenu appearance="capsule">
+  const parts = {
+    projectMenu: { draw: () => <ProjectBarMenu useRunner={props.mode === "run"} /> },
+    appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
+    modeButtons: { draw: () => <ModeButtons current={props.mode} /> },
+    tools: {
+      draw: () => (
+        <>
           <Show when={props.mode === "edit"}>
             <InspectorPick id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
@@ -291,10 +290,40 @@ export function EditorToolbar(props: { mode: Mode }) {
           </Show>
           <Actions.restartApp iconOnly />
           <ThemeMenu />
-        </Submenu>
-        <Actions.you />
-      </Submenu>
-    </AppMenu>
+        </>
+      )
+    },
+    you: { draw: () => <Actions.you /> }
+  }
+  const [piece, setPiece] = createSignal<LayoutPiece>()
+  const [isBroken, setBroken] = createSignal(false)
+  let isGone = false
+  onCleanup(() => (isGone = true))
+  void loadLayoutPiece(editorBarSpell).then(
+    (loaded) => {
+      if (isGone) return
+      Object.assign(loaded.exports.editorBar, parts)
+      setPiece(() => loaded)
+    },
+    (problem: unknown) => {
+      console.error("<EditorToolbar>:  can't load its Spell", problem)
+      setBroken(true)
+    }
+  )
+  return (
+    <div class="EditorBarPlace">
+      {piece()?.draw(piece()!.exports.editorBar) as JSX.Element}
+      {/* no Spell:  every menu still, in a plain row, so a person can go on */}
+      <Show when={isBroken()}>
+        <AppMenu class="EditorBar">
+          {parts.projectMenu.draw()}
+          {parts.appMenus.draw()}
+          {parts.modeButtons.draw()}
+          {parts.tools.draw()}
+          {parts.you.draw()}
+        </AppMenu>
+      </Show>
+    </div>
   )
 }
 

@@ -457,11 +457,13 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-The file tabs over the code are the first piece:
+The file tabs and the top bar's arrangement are the first pieces:
 
 ```text
-app/src/app/layout/FileTabs/FileTabs.spellml   the tabs:  what each shows and how it looks, in Spell
-app/src/app/solid/FileTabs.tsx                 the editor's side:  which files there are, what showing one does
+app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
+app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
+app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
+app/src/app/pages/SpellEditor.tsx                what's in each section, each a thing that draws itself
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -469,6 +471,7 @@ app/src/app/solid/FileTabs.tsx                 the editor's side:  which files t
   A program's things stay the only ones in the Things tab, and its console stays its own.
 - It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
   The tabs show no later:  they already wait for the project's files.
+  The top bar does:  about 170 to 300 ms on a local server, its place held so nothing moves, still before the code.
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
 
 ### The Inspector:  look inside the running app
