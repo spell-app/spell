@@ -199,3 +199,29 @@ export const PROJECT_ICON = "app store ios"
 
 /** Icon name used for files, e.g. by a file dropdown. */
 export const FILE_ICON = "file code"
+
+/** The icon of each kind of file, by its extension:  anything else is `FILE_ICON`. */
+const FILE_ICONS: Record<string, string> = {
+  spell: "hat wizard",
+  spellml: "hat wizard",
+  spellx: "hat wizard",
+  css: "css3 alternate",
+  ts: "js",
+  tsx: "js",
+  js: "js",
+  jsx: "js",
+  py: "python",
+  md: "markdown",
+  html: "html5",
+  png: "file image",
+  jpg: "file image",
+  jpeg: "file image",
+  gif: "file image",
+  svg: "file image",
+  webp: "file image"
+}
+
+/** The icon for the file named `name`:  a small one per kind of file, in the file tabs and their dropdown. */
+export function fileIconFor(name: string): string {
+  return FILE_ICONS[name.split(".").at(-1)!.toLowerCase()] ?? FILE_ICON
+}

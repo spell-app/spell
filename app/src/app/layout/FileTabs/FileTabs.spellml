@@ -1,10 +1,12 @@
 # The file tabs
 Every file of the project as a tab over the code, in a pane's one bar, as every header in the editor.
+Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 A click shows that file, and a file with changes not saved shows a dot.
 The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 
 <spell-thing "file">
 	<property "name">text</>
+	<property "icon">text</>
 	<property "path">text</>
 	<property "status" one-of="saved or changed" alias="is (status)"/>
 	<property "place" one-of="chosen or other" alias="is (place)"/>
@@ -14,7 +16,7 @@ The editor's own side of it, which files there are and what showing one does, is
 <spell-thing "file list" template="viewable list of files">
 	<spell>
 		- to draw each item:
-			return <ui-item selected={the file is chosen} onClick={show the file}>{the name of the file}<if the file is changed><span class="NotSaved"/></if></ui-item>
+			return <ui-item icon={the icon of the file} selected={the file is chosen} onClick={show the file}>{the name of the file}<if the file is changed><span class="NotSaved"/></if></ui-item>
 	</spell>
 </spell-thing>
 
