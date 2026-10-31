@@ -10,6 +10,8 @@ import type { JSX } from "@solidjs/web"
  * - Its look is `CountdownRing.css`, which each of them adds to its own style sheets;
  *   the element sets its colours and size:
  *   - `--_ring`:  its width and height;  `--_ring-tint`:  what has gone;  `--_ring-track`:  the whole wait
+ * - Its TURNING form (`turning()`, epic `epic-engine` P55):  the same frame, a blue arc going round, while the session
+ *   works through what Send sent
  * - A method, not a tag of its own:  it's drawn in the button's own shadow root, centred on the icon's box
  *   (`position: relative`), in the first frame.
  ****************/
@@ -39,6 +41,29 @@ export class CountdownRing {
     )
   }
 
+  /**
+   * The ring TURNING (epic `epic-engine` P55;  Owen, r46:  "put the spinning wheel cursor around this button (same size
+   * as countdown) while you are digesting remarks"):  the countdown's frame and track, a quarter arc going round
+   * clockwise over it, its ends round;  `part`:  its `part` name (the element's `working`).
+   * - it turns in CSS (`CountdownRing.css`, `.turning`):  no clock here
+   */
+  static turning(part: string): JSX.Element {
+    return (
+      <svg class={[RING, TURNING]} part={part} viewBox="0 0 28 28" aria-hidden="true">
+        <circle class={TRACK} cx="14" cy="14" r="11.5" pathLength="100" />
+        {/* 5% past the circle's start, as the countdown's:  Chrome cuts a round cap off at a closed path's start point */}
+        <circle
+          class={ARC}
+          cx="14"
+          cy="14"
+          r="11.5"
+          pathLength="100"
+          style={{ "stroke-dasharray": "25 100", "stroke-dashoffset": "-5" }}
+        />
+      </svg>
+    )
+  }
+
   /** `ms` as minutes and seconds, rounded up, for a ring's tooltip:  `1:42`, `0:05`. */
   static timeLeft(ms: number): string {
     const seconds = Math.ceil(ms / 1000)
@@ -51,3 +76,5 @@ const RING = "ring"
 const TRACK = "track"
 const DONE = "done"
 const EMPTY = "empty"
+const TURNING = "turning"
+const ARC = "arc"

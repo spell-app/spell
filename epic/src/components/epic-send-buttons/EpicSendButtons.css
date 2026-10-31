@@ -15,6 +15,8 @@
  *     by the element, eased over the second)
  *   - the pill's own outline goes while it counts:  ring and button never read as one border
  *   - started again (a key, a click, a scroll):  it unwinds back to empty in 0.3s, never jumps there
+ * - The TURNING ring (`working`, `:state(working)`;  epic `epic-engine` P55):  the countdown ring's frame and track,
+ *   a blue arc going round (`CountdownRing.css`);  the plane sits in it as in the countdown's, the pill's outline gone.
  * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
  *   - `--epic-send-buttons-size`:  the pill's height (the plane's round end).  Default 28px (an epic page's
  *     `--epic-control-size`).
@@ -104,7 +106,7 @@
     background: color-mix(in oklab, var(--_tint) 75%, white);
   }
   /* inside the ring while it counts:  the disc 1px in from it, so it fills the ring's middle and no more */
-  :host(:state(counting)) .send {
+  :host(:is(:state(counting), :state(working))) .send {
     padding: calc((var(--_size) - 2px - var(--_disc)) / 2);
     background-clip: content-box;
     font-size: 10px;
@@ -155,9 +157,9 @@
     --_ring: var(--_size);
     --_disc: calc(var(--_size) - 12px);
   }
-  /* while it counts, the pill's own outline goes, a waiting-on-you one too:  the ring is the only border (Owen,
+  /* while it counts or turns, the pill's own outline goes, a waiting-on-you one too:  the ring is the only border (Owen,
      2026-10-29:  "dotted line came back") */
-  :host(:state(counting)) .group {
+  :host(:is(:state(counting), :state(working))) .group {
     border-color: transparent;
   }
   /* the ring itself:  `CountdownRing.css`, Send's and a stage button's;  its colours and size here */

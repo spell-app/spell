@@ -219,6 +219,12 @@ export type HeaderMarks = {
   idle: string
   /** what the page server's wake did, while nobody listens (epic `epic-workflow` P16);  `""` for none */
   woken: string
+  /**
+   * the session is answering what was sent (epic `epic-engine` P55):  the ids it's on, `J201, J202`;  `""` while it
+   * isn't (idle, or other work:  "Building P35")
+   * - Send's turning ring and its tooltip
+   */
+  answering: string
 }
 
 /** The kickoff prompt, which the `Plan hung?` aside offers to copy. */

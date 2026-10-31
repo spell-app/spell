@@ -1317,7 +1317,8 @@ describe("<epic-page> what Claude is doing", () => {
 
   // T53:  "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
   // already round, doesn't need to be in a circular border"
-  test("the session's spinner beside Send, bare, its words the tooltip;  the styled tooltip lists what it answers;  none while idle", async () => {
+  // P55 (Owen, r46;  Q62 A):  answering a Send, the spinner hides and Send's own ring turns
+  test("the session's spinner beside Send, bare, its words the tooltip, for other work;  answering a Send, Send's ring turns instead;  none while idle", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
     routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
@@ -1340,19 +1341,19 @@ describe("<epic-page> what Claude is doing", () => {
       ],
       at: new Date().toISOString()
     }
+    const send = () => host.shadowRoot!.querySelector<HTMLElement>("epic-send-buttons")!
+    expect(send().hasAttribute("working")).toBe(false)
     await client.refresh()
     await ElementFixture.tick()
-    expect(line()!.getAttribute("aria-label")).toBe("Responding:  Q1, C3")
-    const tip = agentsRoot(host, "spinner").querySelector("ui-popup.doing-tip")!
-    expect(tip.getAttribute("open-on")).toBe("hover")
-    expect(Array.from(tip.querySelectorAll("a"), (link) => [link.getAttribute("href"), link.textContent])).toEqual([
-      ["#q1", "Q1 Which?"],
-      ["#c3", "C3 This reads oddly"]
-    ])
+    expect(line()).toBeNull()
+    expect([send().hasAttribute("working"), send().getAttribute("working-on")]).toEqual([true, "Q1, C3"])
+    expect(send().matches(":state(working)")).toBe(true)
+    expect(send().shadowRoot!.querySelector("[part~='working']")).not.toBeNull()
     routes.inbox.doing = null
     await client.refresh()
     await ElementFixture.tick()
     expect(line()).toBeNull()
+    expect(send().hasAttribute("working")).toBe(false)
   })
 })
 

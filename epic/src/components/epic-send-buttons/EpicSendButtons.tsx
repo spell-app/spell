@@ -34,6 +34,12 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *   - at the end the owner is asked to send (`auto` true), as a press would, waking the epic when nobody listens
  *   - Auto Send Immediately:  no ring;  each change goes as it's finished
  *   - the choice is the page header's gear's (`SendCountdown.choose()`), never this element's
+ * - the TURNING ring (`working`, epic `epic-engine` P55;  Owen, r46:  "put the spinning wheel cursor around this
+ *   button (same size as countdown) while you are digesting remarks"):  while the session works through what was sent,
+ *   a blue arc goes round the plane, in the countdown ring's frame (`CountdownRing.turning()`)
+ *   - the countdown wins:  something new marked, its ring shows instead, since that's what the next press sends
+ *   - the plane's tooltip says Claude is working on what you sent, and what (`working-on`)
+ *   - only an epic page's header sets it, from the inbox's `doing` while it lists items
  * - the plane in every stage of an epic page:  the stage's Accept is on the title row of what it accepts
  *   (`<epic-stage-button>`, epic `epic-engine` I180;  the stage button took the plane's place here before, P29)
  * - WAITING ON OWEN (`asks`;  Owen, 2026-10-25:  "try the thicker border if you are waiting on me"):  the pill
@@ -74,6 +80,12 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   get isCounting(): boolean {
     void this.version
     return !this.isManual && !!this.pageCountdown?.hasRing
+  }
+
+  /** The session works through what was sent (`working`), and the countdown isn't running:  the turning ring. */
+  @E.cssState("working")
+  get isWorking(): boolean {
+    return !!this.working && !this.isCounting
   }
 
   /** Auto Send off, something not sent:  the plane is filled, waiting for a press. */
@@ -149,6 +161,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           <span class={GLYPH}>
             <ui-icon name={this.busy ? "circle notch" : "paper plane"} loading={this.busy ? "" : undefined} />
             <Show when={this.isCounting}>{CountdownRing.draw(() => this.fractionLeft, this.partForName("ring"))}</Show>
+            <Show when={this.isWorking}>{CountdownRing.turning(this.partForName("working"))}</Show>
           </span>
           <Show when={(this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
@@ -167,10 +180,14 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
 
   /**
    * The plane's tooltip and name:  what a press sends (`send-tip`), then, while the ring
-   * counts, how long is left and that a click sends now.
+   * counts, how long is left and that a click sends now;  while it turns, what Claude is working on.
    */
   get sendTitle(): string {
     const words = this.sendTip || this.translationForKey("send")
+    if (this.isWorking) {
+      const on = this.workingOn
+      return `${words} · ${on ? this.translationForKey("workingOn", { items: on }) : this.translationForKey("working")}`
+    }
     if (!this.isCounting) return words
     const countdown = this.pageCountdown!
     const when = countdown.isHeld

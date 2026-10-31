@@ -125,6 +125,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - SEND, `<epic-send-buttons countdown>`, at the header's middle (epic `epic-engine` P53;  P20 put it at the right,
  *   before the labels, in place of P10's Send and Review Now)
  *   - centred while the title fits beside it;  narrower, right after the title, never over it (J161)
+ *   - while the session answers what was sent, a blue arc turns round the plane (`working`, epic `epic-engine` P55)
  *   - there whenever the page is reviewed (served with a token, its inbox answering:
  *     `ReviewClient`, through a `ReviewState` of its own), so it's always in the same place
  *   - Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header,
@@ -440,7 +441,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       listening: client.listening,
       listener: this.listenerWords(client.inbox.listening, "listening"),
       idle: client.listening ? "" : this.listenerWords(client.inbox.lastListener, "idle"),
-      woken: client.inbox.woken?.message ?? ""
+      woken: client.inbox.woken?.message ?? "",
+      answering: (client.doing?.items ?? []).map((item) => item.id.toUpperCase()).join(", ")
     }
   })
 
@@ -980,6 +982,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * Send (`<epic-send-buttons countdown>`), at the header's middle, with Auto Send's ring.
    * - the plane by the fill rule (Q20), its tooltip what a press sends, or why it sends nothing
    * - a press, or the countdown running out:  `onSendAsked()`
+   * - while the session answers what was sent (the inbox's `doing` lists items), the plane's ring turns (`working`,
+   *   epic `epic-engine` P55);  the spinner beside it hides then (`<epic-agents draws="spinner">`)
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
     const plans = () => this.plansWaiting()
@@ -994,6 +998,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         state={marks().send}
         countdown=""
         asks={plans()?.asks}
+        working={marks().answering ? "" : undefined}
+        working-on={marks().answering || undefined}
         send-tip={this.withNobody(sendTip(), marks(), marks().send !== "idle")}
       />
     )

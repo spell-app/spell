@@ -26,6 +26,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * - the session's LINE:  what it's doing now, a word or two ("Responding", "Building P35"), a quiet spinner before it,
  *   in a grey pill like the header's step label (Owen, 2026-10-25:  "should look like "running P6" pill");
  *   nothing when idle, or nobody listens (`epic inbox status`, the inbox's `doing`:  `ReviewClient.doing`)
+ *   - the bare spinner beside Send shows only for OTHER work ("Building P35"):  answering a Send (`doing` lists items),
+ *     it hides, and Send's own ring turns instead (epic `epic-engine` P55, Q62 A)
  *   - hovered or focused, a STYLED tooltip (Owen, 2026-10-24:  "pretty tooltip for what you are responding to"):
  *     what it's answering, each item's id and title, linked (`<ui-popup open-on="hover">`)
  * - the RUNNING AGENTS (epic `skillz` P3):  `2 🤖`, a button, only while any runs ("2 agents running" its name);  a click opens them in
@@ -100,14 +102,24 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   protected cssStates() {
     return {
       running: this.draws !== "spinner" && this.draws !== "doing" && this.agents.length > 0,
-      doing: this.draws !== "agents" && !!this.doing
+      doing: this.draws !== "agents" && !!this.doing && !this.isSendsRing
     }
+  }
+
+  /**
+   * The session is answering a Send, and this is the spinner beside it (`draws="spinner"`):  it hides, since Send's own
+   * ring turns (epic `epic-engine` P55, Q62 A;  Owen, r46).  Other work ("Building P35") still shows it.
+   */
+  get isSendsRing(): boolean {
+    return this.draws === "spinner" && !!this.doing?.items?.length
   }
 
   render(): JSX.Element {
     return (
       <span class={TOOLS} part={this.partForName("base")}>
-        <Show when={this.draws === "spinner" && this.doing}>{(doing) => this.bareSpinner(doing)}</Show>
+        <Show when={this.draws === "spinner" && !this.isSendsRing && this.doing}>
+          {(doing) => this.bareSpinner(doing)}
+        </Show>
         <Show when={this.draws !== "agents" && this.draws !== "spinner" && this.doing}>
           {(doing) => (
             <>

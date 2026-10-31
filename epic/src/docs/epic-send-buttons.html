@@ -74,9 +74,10 @@
   <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
   <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
   <epic-send-buttons countdown state="unsent" count="3" send-tip="Send 3 marks"></epic-send-buttons>
+  <epic-send-buttons state="sent" working working-on="J201, J202" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
 </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The example above · 6 lines</ui-title>
+              <ui-title>The example above · 7 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
@@ -87,6 +88,7 @@
                       <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
                       <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
                       <epic-send-buttons countdown state="unsent" count="3" send-tip="Send 3 marks"></epic-send-buttons>
+                      <epic-send-buttons state="sent" working working-on="J201, J202" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
                     </p>
                   </script></ui-code
                 >
@@ -100,6 +102,11 @@
                 alone. Any key, click or scroll fills it again; its tooltip says how long is left.
               </li>
               <li>Its wait running out sends nothing here: nobody on this page listens.</li>
+              <li>
+                The last is <code>working</code>: the session is working through what was sent, and a blue arc turns
+                round the plane, in the countdown ring's frame (epic <code>epic-engine</code> P55). Its tooltip names
+                what it's answering.
+              </li>
               <li>The wait is this browser's Auto Send choice, made in an epic page header's gear: Off, and no ring shows.</li>
             </ul>
           </ui-section>
@@ -185,6 +192,8 @@
                   <tr><td><code>count</code></td><td>How many things a press sends: a badge on the plane. None at 0.</td></tr>
                   <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
                   <tr><td><code>asks</code></td><td>The pill WAITS ON YOU (Owen, 2026-10-25): <code>waiting</code>, the pill's own border 2px #666, darker than its hairline, solid; <code>taken</code>, dotted once you've pressed what it waits for. An epic page's header sets it while Claude's build plans wait for your Accept on their phases: still the plane, never green.</td></tr>
+                  <tr><td><code>working</code></td><td>The session is working through what was sent (epic <code>epic-engine</code> P55): a blue arc turns round the plane, in the countdown ring's frame. The countdown wins: while it runs, its ring shows instead. An epic page's header sets it while its inbox's <code>doing</code> lists the items being answered; the spinner beside Send hides then.</td></tr>
+                  <tr><td><code>working-on</code></td><td>What the session is answering, for the plane's tooltip while the ring turns: <code>J201, J202</code>.</td></tr>
                   <tr><td><code>countdown</code></td><td>Auto Send: counts down to Send by itself, a ring round the plane (section 3). Off by default: only an epic page's header sets it, as only it has the gear that chooses the wait (J142). <code>wand</code> before P53, which drew the wand too.</td></tr>
                 </tbody>
               </table>
@@ -201,6 +210,7 @@
                   <tr><td><code>send</code></td><td>The paper plane, a <code>&lt;button&gt;</code>.</td></tr>
                   <tr><td><code>count</code></td><td>The badge on the plane.</td></tr>
                   <tr><td><code>ring</code></td><td>The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts.</td></tr>
+                  <tr><td><code>working</code></td><td>The turning ring round the plane:  a blue arc going round, only while the session works on a Send.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -215,6 +225,7 @@
                 <tbody>
                   <tr><td><code>countdown</code></td><td>Auto Send is on, and this Send counts down (<code>countdown</code>).</td></tr>
                   <tr><td><code>counting</code></td><td>The countdown runs with a wait (not Immediately): the ring drains.</td></tr>
+                  <tr><td><code>working</code></td><td>The session works through what was sent, and the countdown isn't running: the ring turns.</td></tr>
                   <tr><td><code>waiting</code></td><td>Auto Send is off, or no <code>countdown</code>, and something isn't sent: the plane is filled blue.</td></tr>
                 </tbody>
               </table>

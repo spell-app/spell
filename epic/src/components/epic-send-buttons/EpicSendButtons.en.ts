@@ -24,6 +24,8 @@ export const epicSendButtonsVocabulary = {
     "something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait " +
     "the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the " +
     "page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  " +
+    "While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the " +
+    "plane in the same frame, unless the countdown runs.  " +
     "Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  " +
     "the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's " +
     "Send (`<epic-send>`) and a docs page's comments Send.",
@@ -60,6 +62,21 @@ export const epicSendButtonsVocabulary = {
         "The same ring as a waiting plan's own buttons on its phase."
     },
     {
+      name: "working",
+      kind: "boolean",
+      description:
+        "The session is working through what was sent (epic `epic-engine` P55):  a blue arc turns round the plane, " +
+        "in the countdown ring's frame.  The countdown wins:  while it runs, its ring shows instead.  An epic page's " +
+        "header sets it while its inbox's `doing` lists the items being answered."
+    },
+    {
+      name: "working-on",
+      kind: "string",
+      description:
+        "What the session is answering, for the plane's tooltip while it turns (`J201, J202`);  none:  the tooltip " +
+        "only says Claude is working on what you sent."
+    },
+    {
       name: "countdown",
       kind: "boolean",
       description:
@@ -90,6 +107,10 @@ export const epicSendButtonsVocabulary = {
       description: "The badge on the plane:  how many things a press sends."
     },
     {
+      name: "working",
+      description: "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
+    },
+    {
       name: "ring",
       description: "The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts."
     }
@@ -97,6 +118,10 @@ export const epicSendButtonsVocabulary = {
   states: [
     { name: "countdown", description: "Auto Send is on, and this Send counts down (`countdown`)." },
     { name: "counting", description: "The countdown is running:  something waits, and the ring drains." },
+    {
+      name: "working",
+      description: "The session works through what was sent, and the countdown isn't running:  the ring turns."
+    },
     { name: "waiting", description: "Auto Send is off and something isn't sent:  the plane is filled blue." }
   ],
   texts: [
@@ -106,6 +131,16 @@ export const epicSendButtonsVocabulary = {
       key: "counting",
       text: "sends by itself in {time};  click to send now",
       description: "After the plane's words while the ring counts;  `{time}` like `1:42`."
+    },
+    {
+      key: "working",
+      text: "Claude is working on what you sent",
+      description: "After the plane's words while the ring turns, with nothing named (`working-on`)."
+    },
+    {
+      key: "workingOn",
+      text: "Claude is working on what you sent:  {items}",
+      description: "After the plane's words while the ring turns;  `{items}` like `J201, J202`."
     },
     {
       key: "held",

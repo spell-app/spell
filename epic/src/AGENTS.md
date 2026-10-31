@@ -208,8 +208,9 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
         - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
-          `doing`), a bare spinner (`draws="spinner"`, T53), its words the tooltip;  answering items, a styled
-          tooltip lists them
+          `doing`), a bare spinner (`draws="spinner"`, T53), its words the tooltip, for OTHER work only ("Building
+          P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
+          `epic-engine` P55, Q62 A)
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -1450,6 +1451,10 @@ In `tools/`:
         - the h1, one line, cut short when narrow (its full name first in its tooltip)
         - in the exact middle (Owen's comment C7):  Send while reviewed (`<epic-send-buttons countdown>`), and beside it
           what the session is doing, a bare spinner;  narrow, they follow the title, never over it
+          - while the session answers what was sent, a blue arc TURNS round the plane, the countdown ring's frame
+            (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, Owen's r46:  "put the spinning wheel
+            cursor around this button (same size as countdown) while you are digesting remarks");  the countdown's
+            ring wins once something new is marked;  the plane's tooltip names what it's answering
         - at the right:  the step label, then the GEAR, where the git toggle was
           - its menu:  "Auto Send · 2 minutes" (Immediately, 2 minutes, 5 minutes, Off;  `SendCountdown.choose()`)
             and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
@@ -1474,8 +1479,8 @@ In `tools/`:
       - It shows while any agent of the epic runs, after the step label, the pill grey (Owen, 2026-10-25).
       - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
         (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (Owen, 2026-10-29:
-        "the spinner is already round, doesn't need to be in a circular border"), its words the tooltip;  hovered, a
-        styled tooltip of what it's answering.  The toolbar no longer has it.
+        "the spinner is already round, doesn't need to be in a circular border"), its words the tooltip.  Answering a
+        Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.

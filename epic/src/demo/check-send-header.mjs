@@ -19,6 +19,9 @@
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
  *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`, and each stage's Accept
  *   pressed, 2 minutes into its 5-minute countdown (I181):  `stage-<stage>-counting-<w>-<scheme>.png`
+ * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
+ *   turns round the plane, centred on it (1px), the element's height, no spinner beside it;  then idle:  neither ring;
+ *   `working-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -77,6 +80,7 @@ try {
   for (const width of [1200, 400])
     for (const scheme of ["light", "dark"]) {
       await header(width, scheme)
+      await working(width, scheme)
       for (const which of Object.keys(STAGED)) await stage(which, width, scheme)
     }
 } catch (error) {
@@ -151,6 +155,55 @@ async function header(width, scheme) {
   summary[tag].rows = await page.evaluate(() => gearRows().map((row) => row.textContent.replace(/\s+/g, " ").trim()))
   await shotMenu(page, `theme-${tag}`, width)
   await page.close()
+}
+
+/**
+ * Send while the session answers what was sent (P55):  the turning ring round the plane, centred, no countdown ring,
+ * no spinner;  then idle, neither.
+ */
+async function working(width, scheme) {
+  const tag = `working-${width}-${scheme}`
+  writeInbox(NAME, "working")
+  const page = await openPage(NAME, width, scheme)
+  await page
+    .waitForFunction(() => sendRoot()?.querySelector('[part~="working"]'), null, { timeout: 8000 })
+    .catch(() => problems.push(`${tag}:  no turning ring round the plane`))
+  const found = await page.evaluate(() => {
+    const ring = sendRoot()?.querySelector('[part~="working"]')
+    const host = page_().querySelector('[part~="send"]')
+    if (!ring) return null
+    const plane = measure().plane
+    const rect = ring.getBoundingClientRect()
+    return {
+      dx: Math.round((rect.left + rect.width / 2 - plane.middle) * 10) / 10,
+      dy: Math.round((rect.top + rect.height / 2 - plane.centre) * 10) / 10,
+      size: Math.round(rect.height * 10) / 10,
+      hostHeight: Math.round(host.getBoundingClientRect().height * 10) / 10,
+      turning: getComputedStyle(ring.querySelector(".arc")).animationName,
+      countdown: !!sendRoot().querySelector('[part~="ring"]'),
+      spinner: !!spinner(),
+      title: sendRoot().querySelector('[part~="send"]').title
+    }
+  })
+  summary[tag] = found
+  if (found) {
+    if (Math.abs(found.dx) > 1 || Math.abs(found.dy) > 1) problems.push(`${tag}:  the ring is off the plane's centre`)
+    if (found.size > found.hostHeight + 0.5) problems.push(`${tag}:  the ring is wider than Send (${found.size})`)
+    if (found.turning !== "epic-ring-turn") problems.push(`${tag}:  the ring doesn't turn`)
+    if (found.countdown) problems.push(`${tag}:  the countdown ring shows too`)
+    if (found.spinner) problems.push(`${tag}:  the spinner still shows beside Send`)
+    const header = await page.evaluate(() => measure().header)
+    await page.screenshot({ path: join(out, `${tag}.png`), clip: clipOf(header, width) })
+  }
+  await page.close()
+  writeInbox(NAME, "idle")
+  const idle = await openPage(NAME, width, scheme)
+  const rings = await idle.evaluate(() => [
+    !!sendRoot()?.querySelector('[part~="working"]'),
+    !!sendRoot()?.querySelector('[part~="ring"]')
+  ])
+  if (rings.some(Boolean)) problems.push(`idle-${width}-${scheme}:  a ring shows with nothing to do (${rings})`)
+  await idle.close()
 }
 
 /**
@@ -358,12 +411,29 @@ function copyEpic(name, stage) {
   return /<epic-item\s+id="([qj]\d+)"[^>]*status="open"/.exec(html)?.[1] ?? "q1"
 }
 
-/** Copy `name`'s inbox:  a session listening and building, one item marked and not sent. */
-function writeInbox(name) {
+/**
+ * Copy `name`'s inbox, as `mode` says:
+ * - `counting`:  a session listening and building, one item marked and not sent
+ * - `working`:  the session answering two sent items, nothing unsent (P55)
+ * - `idle`:  listening, nothing marked, nothing doing
+ */
+function writeInbox(name, mode = "counting") {
   const now = new Date().toISOString()
+  const doing = {
+    counting: { text: "Building P53", at: now },
+    working: {
+      text: "Responding",
+      items: [
+        { id: marked, title: "the marked item" },
+        { id: "c1", title: "a comment" }
+      ],
+      at: now
+    },
+    idle: null
+  }[mode]
   const inbox = {
     version: 1,
-    marks: { [marked]: { action: "approve", at: now } },
+    marks: mode === "counting" ? { [marked]: { action: "approve", at: now } } : {},
     drafts: {},
     urgency: {},
     sent: null,
@@ -373,7 +443,7 @@ function writeInbox(name) {
     listening: { session: "check-send-header", since: now, seen: now, pid: process.pid },
     comments: {},
     woken: null,
-    doing: { text: "Building P53", at: now },
+    doing,
     reviewAsked: null
   }
   writeFileSync(join(CONTENT, "epics", name, `${name}.inbox.json5`), JSON.stringify(inbox, null, 2))

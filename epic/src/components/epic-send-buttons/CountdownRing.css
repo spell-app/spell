@@ -6,6 +6,8 @@
  * - How much of the wait has gone fills in clockwise from the top (`stroke-dasharray`, set each second by the element,
  *   eased over the second).
  * - Started again:  it unwinds back to empty in 0.3s, never jumps there.
+ * - TURNING (`CountdownRing.turning()`, epic `epic-engine` P55):  the same frame and track, a quarter arc in the tint
+ *   going round clockwise, once a second;  with reduced motion, once every 4 seconds.
  * - The element sets, on its host:
  *   - `--_ring`:  its size.  Default 28px.
  *   - `--_ring-tint`:  what has gone (Send's blue, a stage button's green).
@@ -50,9 +52,26 @@
       stroke-dasharray 0.3s ease-out,
       visibility 0s 0.3s;
   }
+  /* turning:  a quarter arc, its ends round, going round the track's centre */
+  .ring .arc {
+    stroke: var(--_ring-tint, currentColor);
+    stroke-linecap: round;
+    transform-box: view-box;
+    transform-origin: 14px 14px;
+    animation: epic-ring-turn 1s linear infinite;
+  }
+  @keyframes epic-ring-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     .ring .done {
       transition: none;
+    }
+    /* still going round:  it says the session is at work, slowly */
+    .ring .arc {
+      animation-duration: 4s;
     }
   }
 }
