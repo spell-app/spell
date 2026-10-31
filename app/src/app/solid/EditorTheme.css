@@ -67,7 +67,7 @@
 }
 /* ... its title bar frosted, as every panel is:  the panel's glass, the header's wash over it (Owen:  "the titlebar should
    be frosted") */
-:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .AppPaneHeader {
+:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .NotebookHeader::part(title) {
   background:
     linear-gradient(var(--spell-header-background), var(--spell-header-background)), var(--spell-pane-background);
   border-start-start-radius: var(--spell-pane-radius);

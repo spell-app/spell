@@ -103,7 +103,7 @@ export function SpellEditor(props: { mode: Mode }) {
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
- *   - It keeps a header of its own:  its title, a menu of the project's notebooks, the lock after it, and what
+ *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
  *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
@@ -115,11 +115,10 @@ export function AppPane() {
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
         {(page) => (
-          <header class="AppPaneHeader">
-            <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />
+          <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()}>
             {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
             <NotebookMenu controller={page} />
-          </header>
+          </NotebookHeader>
         )}
       </Show>
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>

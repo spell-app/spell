@@ -202,13 +202,13 @@ ui-item.ThemeMenu ui-theme-menu {
 }
 ui-menu.AppMenu,
 ui-menu.PanelMenu,
-.AppPaneHeader {
+.NotebookHeader {
   --spell-bar-group-gap: 60px;
   --spell-bar-icon-gap: 12px;
   --spell-bar-icon-color: var(--ui-text-muted);
 }
 /* every bar's icons:  the top bar's, a pane header's, a pane toolbar's (the code pane's:  upload, reload, new file, "...") */
-:is(ui-menu.AppMenu, ui-menu.PanelMenu, .AppPaneHeader) ui-icon.IconAction {
+:is(ui-menu.AppMenu, ui-menu.PanelMenu, .NotebookHeader) ui-icon.IconAction {
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
   --ui-icon-link-opacity: 1;
