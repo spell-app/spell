@@ -28,8 +28,7 @@ export class TextLiteral extends P.TokenType<never, { fillIns?: FillInParts }> {
     const fillIns = parseFillIns(scope, token.innerText)
     if (fillIns === null) return undefined
     if (fillIns) match.data.fillIns = fillIns
-    // A fill-in's tokens aren't the file's:  its warnings go on the text
-    for (const part of fillIns ?? []) if (typeof part !== "string") SP.SpellWarnings.noteAgain(match, part)
+    noteFillInWarnings(match, fillIns ?? [])
     return match
   }
 
@@ -63,7 +62,7 @@ export type FillInParts = Array<string | P.Match>
  * `inner`, the text between a string's quotes, split into plain pieces and parsed `[...]` fill-ins
  * (epic page `outline-spell`, P4):
  * - `[x]`:  `x` is an expression, e.g. `[rank + 1]`
- *   - inside a method, a bare property name is the thing's:  `[rank]` ~== `[its rank]`
+ *   - inside an action, a bare property name is the thing's:  `[rank]` ~== `[the rank]`
  * - a real bracket:  `[[` or `\[` for `[`, `]]` for `]` (Q15:  both)
  * - `undefined`:  no brackets at all, the text stays as written;  `null`:  a fill-in that doesn't parse
  * - Parses each fill-in on its own, so a fill-in's tokens don't map back onto the file:  no hover inside, yet.
@@ -100,16 +99,24 @@ export function parseFillIns(scope: P.Scope, inner: string): FillInParts | undef
 
 /**
  * One fill-in's words, parsed as an expression.
- * - `its <words>` if they're a property of `it`'s type, e.g. `[rank]` in a card's getter.
+ * - `the <words>`, in the file's language, if they're a property of the thing the action runs on:
+ *   `[rank]` in a card's getter, `[rango]` in a `carta`'s.
+ *   - So in a loop too it's what `the rank` is:  the action's thing, never the item's (epic `language`, P6).
+ * - A local, argument or loop variable called that comes first, as for `the rank`.
  * - `undefined` if it doesn't parse, whole.
  * - Markdown's `{holes}` read the same way:  see `markdown_block`.
  */
 export function parseFillIn(scope: P.Scope, words: string): P.Match | undefined {
   if (!words) return undefined
-  const itType = scope.getType(scope.variables?.get("it")?.datatype)
-  const source = itType?.getMember(words) ? `its ${words}` : words
+  const isOwnProperty = !scope.variables?.get(words) && P.MethodScope.thingTypeOf(scope)?.hasProperty(words)
+  const source = isOwnProperty ? SP.Language.of(scope).withArticle("definite", words) : words
   const match = scope.parse(source, "expression")
   return match && match.inputText.trim() === source ? match : undefined
+}
+
+/** A fill-in's tokens aren't the file's, so its warnings go on `match`, the text or markup it's in. */
+export function noteFillInWarnings(match: P.Match, parts: Array<string | P.Match>): void {
+  for (const part of parts) if (typeof part !== "string") SP.SpellWarnings.noteAgain(match, part)
 }
 
 /** The AST of text with fill-ins:  a javascript template string -- see `P.ASTTemplateString`. */

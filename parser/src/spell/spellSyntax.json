@@ -3579,218 +3579,6 @@
       ]
     },
     {
-      "module": "UI",
-      "rules": [
-        {
-          "className": "CSSStyles",
-          "ruleNames": ["css"],
-          "internal": false,
-          "file": "src/spell/rules/UI/CSSStyles.ts",
-          "line": 10,
-          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
-          "syntaxes": [
-            {
-              "example": "\"\"",
-              "outputs": {
-                "js": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "ts": {
-                  "code": "core.installStyles(undefined, `\"\"`)"
-                },
-                "py": {
-                  "code": "core.install_styles(None, f\"{\"\"}\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["expression"]
-        },
-        {
-          "className": "Print",
-          "ruleNames": ["print"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Print.ts",
-          "line": 13,
-          "purpose": "Print an expression (to the console currently).",
-          "syntaxes": [
-            {
-              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
-              "example": "print \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.console.log(\"Yo!\")"
-                },
-                "py": {
-                  "code": "print(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "EndPrintGroup",
-          "ruleNames": ["end_print_group"],
-          "internal": false,
-          "file": "src/spell/rules/UI/EndPrintGroup.ts",
-          "line": 10,
-          "purpose": "Stop a previous `print group...`",
-          "syntaxes": [
-            {
-              "syntax": "end print group",
-              "example": "end print group\"",
-              "outputs": {
-                "js": {
-                  "code": "core.console.groupEnd()"
-                },
-                "ts": {
-                  "code": "core.console.groupEnd()"
-                },
-                "py": {
-                  "code": "core.console.group_end()"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Notify",
-          "ruleNames": ["notify"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Notify.ts",
-          "line": 24,
-          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
-          "syntaxes": [
-            {
-              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (waits:and wait)?",
-              "example": "notify \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "core.notify(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.notify(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Alert",
-          "ruleNames": ["alert"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Alert.ts",
-          "line": 13,
-          "purpose": "Show user a `message` in a modal alert.",
-          "syntaxes": [
-            {
-              "syntax": "alert {message:expression} (with {okButton:text})?",
-              "example": "alert \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.alert(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.alert(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement", "async"]
-        },
-        {
-          "className": "Warn",
-          "ruleNames": ["warn"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Warn.ts",
-          "line": 13,
-          "purpose": "Warning message -- like alert but more dire.",
-          "syntaxes": [
-            {
-              "syntax": "warn {message:expression} (with {okButton:text})?",
-              "example": "warn \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.warn(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.warn(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Confirm",
-          "ruleNames": ["confirm"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Confirm.ts",
-          "line": 13,
-          "purpose": "Confirm message -- present a question with two answers.",
-          "syntaxes": [
-            {
-              "syntax": "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
-              "example": "confirm \"Yo!\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "ts": {
-                  "code": "await core.confirm(\"Yo!\")"
-                },
-                "py": {
-                  "code": "core.confirm(\"Yo!\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "Prompt",
-          "ruleNames": ["prompt"],
-          "internal": false,
-          "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 14,
-          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
-          "syntaxes": [
-            {
-              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
-              "example": "prompt \"Name for the new baby?\"",
-              "outputs": {
-                "js": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "ts": {
-                  "code": "await core.prompt(\"Name for the new baby?\")"
-                },
-                "py": {
-                  "code": "core.prompt(\"Name for the new baby?\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        }
-      ]
-    },
-    {
       "module": "classes",
       "rules": [
         {
@@ -6627,6 +6415,218 @@
             }
           ],
           "aliases": ["statement"]
+        }
+      ]
+    },
+    {
+      "module": "UI",
+      "rules": [
+        {
+          "className": "Print",
+          "ruleNames": ["print"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Print.ts",
+          "line": 13,
+          "purpose": "Print an expression (to the console currently).",
+          "syntaxes": [
+            {
+              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
+              "example": "print \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.console.log(\"Yo!\")"
+                },
+                "py": {
+                  "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EndPrintGroup",
+          "ruleNames": ["end_print_group"],
+          "internal": false,
+          "file": "src/spell/rules/UI/EndPrintGroup.ts",
+          "line": 10,
+          "purpose": "Stop a previous `print group...`",
+          "syntaxes": [
+            {
+              "syntax": "end print group",
+              "example": "end print group\"",
+              "outputs": {
+                "js": {
+                  "code": "core.console.groupEnd()"
+                },
+                "ts": {
+                  "code": "core.console.groupEnd()"
+                },
+                "py": {
+                  "code": "core.console.group_end()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Notify",
+          "ruleNames": ["notify"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Notify.ts",
+          "line": 24,
+          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
+          "syntaxes": [
+            {
+              "syntax": "notify {kind:notify_kind}? {message:expression} (titled {title:expression})? (in (inverted:inverted)? {color:toast_color})? {position:toast_position}? ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}? (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (waits:and wait)?",
+              "example": "notify \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "core.notify(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.notify(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Alert",
+          "ruleNames": ["alert"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Alert.ts",
+          "line": 13,
+          "purpose": "Show user a `message` in a modal alert.",
+          "syntaxes": [
+            {
+              "syntax": "alert {message:expression} (with {okButton:text})?",
+              "example": "alert \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.alert(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.alert(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Warn",
+          "ruleNames": ["warn"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Warn.ts",
+          "line": 13,
+          "purpose": "Warning message -- like alert but more dire.",
+          "syntaxes": [
+            {
+              "syntax": "warn {message:expression} (with {okButton:text})?",
+              "example": "warn \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.warn(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.warn(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Confirm",
+          "ruleNames": ["confirm"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Confirm.ts",
+          "line": 13,
+          "purpose": "Confirm message -- present a question with two answers.",
+          "syntaxes": [
+            {
+              "syntax": "confirm {message:expression} (with {okButton:text} ((and|or) {cancelButton:text})?)?",
+              "example": "confirm \"Yo!\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "ts": {
+                  "code": "await core.confirm(\"Yo!\")"
+                },
+                "py": {
+                  "code": "core.confirm(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Prompt",
+          "ruleNames": ["prompt"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Prompt.ts",
+          "line": 14,
+          "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
+          "syntaxes": [
+            {
+              "syntax": "prompt {message:expression} (with {defaultValue:expression})?",
+              "example": "prompt \"Name for the new baby?\"",
+              "outputs": {
+                "js": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "ts": {
+                  "code": "await core.prompt(\"Name for the new baby?\")"
+                },
+                "py": {
+                  "code": "core.prompt(\"Name for the new baby?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CSSStyles",
+          "ruleNames": ["css"],
+          "internal": false,
+          "file": "src/spell/rules/UI/CSSStyles.ts",
+          "line": 12,
+          "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
+          "syntaxes": [
+            {
+              "example": "\"\"",
+              "outputs": {
+                "js": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "ts": {
+                  "code": "core.installStyles(undefined, `\"\"`)"
+                },
+                "py": {
+                  "code": "core.install_styles(None, f\"{\"\"}\")"
+                }
+              }
+            }
+          ],
+          "aliases": []
         }
       ]
     },

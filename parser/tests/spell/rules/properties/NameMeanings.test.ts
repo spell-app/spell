@@ -222,6 +222,56 @@ const ENGLISH: NameRow[] = [
     warns: HIDES
   },
 
+  // a text's fill-in, and markup's
+  {
+    title: "own property:  [X] in a text reads it",
+    spell: 'set v to "x [score]"',
+    js: "${this.score}"
+  },
+  {
+    title: "own property of several words:  [X] in a text reads it",
+    spell: 'set v to "x [short rank]"',
+    js: "${this.shortRank}"
+  },
+  {
+    title: "local hiding a property:  a bare [X] in a text reads the local, with no warning on the read",
+    action: "to play (a game) on (a pile):",
+    spell: 'set v to "x [pile]"',
+    js: "${pile}"
+  },
+  {
+    title: "in a loop:  [X] in a text is the action's thing, never the item's",
+    spell: 'for each card in its rounds\n\tset v to "x [score]"',
+    js: "${this.score}"
+  },
+  {
+    title: "in a loop:  [X] that only the item has does not read it",
+    spell: 'for each card in the cards\n\tset v to "x [rank]"',
+    js: ERROR
+  },
+  {
+    title: "argument hiding a property:  [the X] in markup text warns",
+    action: "to play (a game) on (a pile):",
+    spell: "return <span>[the pile]</span>",
+    js: "${pile}",
+    warns: HIDES
+  },
+  {
+    title: "argument hiding a property:  [the X] in a markup attribute warns",
+    action: "to play (a game) on (a pile):",
+    spell: 'return <span title="[the pile]"></span>',
+    js: "${pile}",
+    warns: HIDES
+  },
+
+  {
+    title: "argument hiding a property:  {the X} in a markdown hole warns",
+    action: "to play (a game) on (a pile):",
+    spell: "return <markdown>x {the pile}</markdown>",
+    js: "${pile}",
+    warns: HIDES
+  },
+
   // an argument
   {
     title: "argument hiding a property:  the X reads the argument, and warns",
@@ -344,6 +394,11 @@ ${lines.replace(/^/gm, "\t\t")}
 const JUGAR = "para jugarlo:"
 
 const SPANISH: NameRow[] = [
+  {
+    title: "propiedad propia:  [X] en un texto la lee",
+    spell: 'poner v a "x [puntuación]"',
+    js: "${this.puntuación}"
+  },
   {
     title: "propiedad propia:  la X la lee",
     spell: "poner v a la puntuación",
