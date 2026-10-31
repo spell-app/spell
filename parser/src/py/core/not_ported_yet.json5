@@ -7,7 +7,6 @@
         "runAction",
         "runPressed",
         "pressed",
-        "meanwhile",
         "holdWhile",
         "runningAction",
         "actionFinishing",
@@ -114,6 +113,7 @@
         "splitPath",
         "notify",
         "alert",
+        "warn",
         "confirm",
         "prompt"
       ]

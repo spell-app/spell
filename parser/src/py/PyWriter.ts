@@ -94,6 +94,7 @@ export class PyWriter extends PyBaseWriter {
       return `await ${pyText.call("core.filter_in_turn", this.items(node.args.args))}`
     }
     const written = super.ASTScopedMethodInvocation(node)
+    if (this.project.togetherWaits(node, (run) => this.project.waitingMethods.has(run))) return `await ${written}`
     const waits = !isCoreCall(node) && this.project.waitingNames.has(node.methodName)
     return waits ? `await ${written}` : written
   }

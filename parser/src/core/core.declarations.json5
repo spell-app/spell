@@ -1208,6 +1208,23 @@
     },
     {
       "kind": "method",
+      "name": "warn",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "message"
+        },
+        {
+          "name": "okText"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Warn the person in a dialog, and wait until it's closed -- compiled from `warn \"Careful!\"` (`await`ed)."
+    },
+    {
+      "kind": "method",
       "name": "confirm",
       "of": "core",
       "module": "ui",
@@ -2278,6 +2295,33 @@
         }
       ],
       "description": "Run `run` now, not holding the caller up:  it goes on beside whatever comes next, and its failure is said on the program's console, rather than vanishing."
+    },
+    {
+      "kind": "method",
+      "name": "together",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "...runs"
+        }
+      ],
+      "description": "Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line."
+    },
+    {
+      "kind": "method",
+      "name": "eachTogether",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "description": "Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`."
     },
     {
       "kind": "method",

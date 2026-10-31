@@ -196,6 +196,7 @@ export class WriterProject {
     if (statement.constructor === P.ASTStatementGroup) {
       for (const each of (statement as P.ASTStatementGroup).statements ?? []) this.noteHeldSteps(each, callWaits)
     } else if (!isCoreCall(statement) && callWaits(statement)) this.heldSteps.add(statement)
+    else if (this.togetherWaits(statement, (run) => run.isAsync)) this.heldSteps.add(statement)
   }
 
   /** Does a handler of event `eventName`, dashed, wait?  A thing's `on_hit`, by name, or a listener of the program's. */
@@ -230,7 +231,8 @@ export class WriterProject {
       // a function inside it is its own, e.g. a click's handler:  it waits when it's called, not now
       if (node instanceof P.ASTMethodDefinition && node !== method) return
       // ...but a loop runs its function right there, and a `where` its condition
-      if (callWaits(node) || this.functionWaits(node, (callback) => this.waitingMethods.has(callback))) {
+      const isWaiting = (callback: P.ASTMethodDefinition) => this.waitingMethods.has(callback)
+      if (callWaits(node) || this.functionWaits(node, isWaiting) || this.togetherWaits(node, isWaiting)) {
         found = true
         return
       }
@@ -250,6 +252,17 @@ export class WriterProject {
     return callback instanceof P.ASTMethodDefinition && waits(callback)
   }
 
+  /** Is `node` `at the same time:`, or its loop, with a function that `waits` says yes to? */
+  togetherWaits(node: P.ASTNode, waits: (run: P.ASTMethodDefinition) => boolean): boolean {
+    if (!isCoreCall(node)) return false
+    const { methodName, args } = node as P.ASTScopedMethodInvocation
+    if (!P.CORE_TOGETHER.has(methodName)) return false
+    return !!args.args?.some((arg) => {
+      const run = unwrapped(arg)
+      return run instanceof P.ASTMethodDefinition && waits(run)
+    })
+  }
+
   /** Is `node` a loop or a `where` to run one by one?  Its function waits. */
   waitsInTurn(node: P.ASTNode): boolean {
     return this.functionWaits(node, (callback) => callback.isAsync)
@@ -265,7 +278,8 @@ export class WriterProject {
       if (Array.isArray(node)) return node.forEach((item) => visit(item))
       if (!(node instanceof P.ASTNode) || node instanceof P.ASTMethodDefinition) return
       if (node instanceof P.ASTAwaitExpression) return visit(unwrapped(node.expression), true)
-      if (!saidAwait && (callWaits(node) || this.waitsInTurn(node))) this.awaited.add(node)
+      const waits = callWaits(node) || this.waitsInTurn(node) || this.togetherWaits(node, (run) => run.isAsync)
+      if (!saidAwait && waits && !this.heldSteps.has(node)) this.awaited.add(node)
       for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
     }
     visit(body)

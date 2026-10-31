@@ -123,14 +123,14 @@ def _call(handler: Handler, args: tuple[object, ...]) -> object:
     else:
         takes = code.co_argcount - (1 if hasattr(handler, "__self__") else 0)
         result = handler(*args[:takes])
-    return _run(result) if inspect.iscoroutine(result) else result
+    return run_beside(result) if inspect.iscoroutine(result) else result
 
 
 # the handlers' tasks still running:  kept, so none is let go before it ends
 _tasks: set[asyncio.Task[object]] = set()
 
 
-def _run(coroutine: Coroutine[object, object, object]) -> object:
+def run_beside(coroutine: Coroutine[object, object, object]) -> object:
     """Run an `async def` handler's `coroutine` -- see `_call()`:  its task, or what it returned."""
     try:
         loop = asyncio.get_running_loop()
@@ -140,3 +140,17 @@ def _run(coroutine: Coroutine[object, object, object]) -> object:
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)
     return task
+
+
+def all_ended(results: list[object]) -> Coroutine[object, object, None] | None:
+    """What to wait for, for `results` to end, the first failure raised once they all have:  `None` if none waits."""
+    waiting = [result for result in results if inspect.isawaitable(result)]
+    if not waiting:
+        return None
+
+    async def ended() -> None:
+        for outcome in await asyncio.gather(*waiting, return_exceptions=True):
+            if isinstance(outcome, BaseException):
+                raise outcome
+
+    return ended()

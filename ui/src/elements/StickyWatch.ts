@@ -21,6 +21,11 @@ import { E } from "spell/ui/core"
  *     COLUMN (a sidebar), not a header:  it reserves nothing, or paging would barely move
  *   - the inline property is the watches' while any is stuck, removed once none is:  a page's own
  *     `scroll-padding` belongs in a stylesheet
+ * - A PRESS on a control in a stuck box focuses it WITHOUT scrolling (`onPress()`;  epic `epic-engine` I189):
+ *   - the room reserved covers the box itself, so the browser took the button a press focused for one "under" the
+ *     stuck titles, and scrolled the page to show it, between the press and the release:  the release landed
+ *     elsewhere, and the click was lost (Owen, 2026-10-31:  "the page jumps without accepting the click")
+ *   - a text field is left to the browser:  the caret goes where it's pressed
  ****************/
 export class StickyWatch {
   /** Edge stuck to now (last report);  `undefined` when not stuck. */
@@ -64,10 +69,26 @@ export class StickyWatch {
       if (this.stuckTo && this.scrollRoot) StickyWatch.reserve(this.scrollRoot)
     })
     resizes.observe(box)
+    // capturing:  before a control's own handlers, and before the browser focuses it
+    box.addEventListener("mousedown", this.onPress, { capture: true })
     return () => {
       observer.disconnect()
       resizes.disconnect()
+      box.removeEventListener("mousedown", this.onPress, { capture: true })
     }
+  }
+
+  /**
+   * A press in the box while it's stuck:  a control pressed takes the focus WITHOUT scrolling, as the press would
+   * have given it, so the page stays put under the pointer and the click lands (see the class's notes).
+   * - only the main button;  a text field, a disabled control, or no control at all:  left to the browser
+   */
+  private readonly onPress = (event: Event) => {
+    if (!this.stuckTo || (event as MouseEvent).button !== 0 || event.defaultPrevented) return
+    const control = StickyWatch.pressedControl(event)
+    if (!control) return
+    event.preventDefault()
+    control.focus({ preventScroll: true })
   }
 
   /** Unstuck and unbound, e.g. once disconnected:  leaves the reservation and reports. */
@@ -158,6 +179,26 @@ export class StickyWatch {
     else root.style.removeProperty(property)
   }
 
+  /**
+   * The control `event` pressed, inside the box it's heard on:  the innermost a press focuses, unless it's a text
+   * field or disabled.
+   * - a control, a link, anything with a tab stop
+   * - or an element whose shadow root hands its focus on (`delegatesFocus`:  a `<ui-button>`, which a press lands on
+   *   itself, its inner `<button>` out of the event's path), unless what it hands it to is typed in (a `<ui-input>`)
+   * - Static:  reads the event only.
+   */
+  private static pressedControl(event: Event): HTMLElement | undefined {
+    for (const node of event.composedPath()) {
+      if (node === event.currentTarget) return undefined
+      if (!(node instanceof HTMLElement)) continue
+      if (node.shadowRoot?.delegatesFocus)
+        return node.shadowRoot.querySelector(TYPED_IN) || node.matches(":disabled") ? undefined : node
+      if (!node.matches(PRESSABLE)) continue
+      return node.matches(TYPED_IN) || node.matches(":disabled") ? undefined : node
+    }
+    return undefined
+  }
+
   ////////////////
   // ## Geometry
   ////////////////
@@ -202,6 +243,14 @@ export class StickyWatch {
    */
   private static readonly stuckIn = new Map<HTMLElement, Set<StickyWatch>>()
 }
+
+/** What a press focuses:  a control, a link, anything given a tab stop. */
+const PRESSABLE = "button, input, select, textarea, a[href], summary, [tabindex], [contenteditable]"
+
+/** What's typed in:  a press there places the caret, so the browser keeps it. */
+const TYPED_IN =
+  "input:not([type='button'], [type='submit'], [type='reset'], [type='checkbox'], [type='radio']), " +
+  "select, textarea, [contenteditable]:not([contenteditable='false'])"
 
 /** What `reset()` reports:  not stuck, not bound. */
 const UNSTUCK = { edge: undefined, isBound: false } as const

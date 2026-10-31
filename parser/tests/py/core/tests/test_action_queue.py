@@ -115,3 +115,61 @@ def test_a_pages_presses_queue_and_its_moves_run_at_once():
 
     asyncio.run(run())
     assert PLAYED == ["click starts", "while", "click ends"]
+
+
+def test_together_overlaps_its_lines_and_ends_when_they_all_have():
+    async def run():
+        steps = []
+
+        async def slow():
+            steps.append("slow starts")
+            await asyncio.sleep(STEP * 2)
+            steps.append("slow ends")
+
+        await core.together(slow, recorder(steps, "b"))
+        return steps
+
+    assert asyncio.run(run())[:2] == ["slow starts", "b starts"]
+    assert core.together(lambda: None, lambda: 1) is None
+
+
+def test_each_together_overlaps_its_items():
+    async def run():
+        steps = []
+
+        async def item(value):
+            steps.append(f"{value} starts")
+            await asyncio.sleep(STEP * value)
+            steps.append(f"{value} ends")
+
+        await core.each_together([2, 1], item)
+        return steps
+
+    assert asyncio.run(run()) == ["2 starts", "1 starts", "1 ends", "2 ends"]
+
+
+def test_a_failure_in_together_comes_out_once_they_have_all_ended():
+    async def run():
+        steps = []
+
+        async def fails():
+            raise ValueError("no")
+
+        try:
+            await core.together(fails, recorder(steps, "b"))
+        except ValueError:
+            steps.append("failed")
+        return steps
+
+    assert asyncio.run(run()) == ["b starts", "b ends", "failed"]
+
+
+def test_meanwhile_carries_on():
+    async def run():
+        steps = []
+        core.meanwhile(recorder(steps, "a"))
+        steps.append("carried on")
+        await asyncio.sleep(STEP * 4)
+        return steps
+
+    assert asyncio.run(run()) == ["carried on", "a starts", "a ends"]

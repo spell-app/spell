@@ -36,6 +36,9 @@ import stickyCSS from "./UISticky.css?inline"
  *     is a sticky COLUMN (a sidebar), not a header:  it reserves nothing, or paging would barely move.
  *   - The inline property is the stickies' while any is stuck, removed once none is:
  *     a page's own `scroll-padding` belongs in a stylesheet.
+ *   - A press on a button IN a stuck box focuses it without scrolling (`StickyWatch`'s `onPress()`):  the room
+ *     covers the box itself, so the browser would scroll the page to "show" it, and the click would be lost
+ *     (epic `epic-engine` I189).
  ****************/
 export class UISticky extends E.UIComponent<StickyVocabulary> {
   @E.proto static vocabulary = stickyVocabulary

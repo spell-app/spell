@@ -2,8 +2,10 @@
 
 exports[`testing spell module async, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
+  "at_the_same_time": "body?",
   "await": "expression?",
   "check_process": "name|operator",
+  "meanwhile": "body?",
   "pause": "number|units",
   "start_process": "operator?|name",
   "stop_process": "name",

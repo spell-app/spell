@@ -176,3 +176,45 @@ describe("an action's selected state", () => {
     expect(core.isActionSelected(game, "deal")).toBe(false)
   })
 })
+
+describe("at the same time", () => {
+  /** A step that takes `milliseconds`, noting when it starts and ends. */
+  const step = (notes: string[], name: string, milliseconds: number) => async () => {
+    notes.push(`${name} starts`)
+    await new Promise((resolve) => setTimeout(resolve, milliseconds))
+    notes.push(`${name} ends`)
+  }
+
+  test("`together()` overlaps its lines, and ends when they all have", async () => {
+    const notes: string[] = []
+    await core.together(step(notes, "a", 20), step(notes, "b", 5))
+    expect(notes).toEqual(["a starts", "b starts", "b ends", "a ends"])
+  })
+
+  test("`eachTogether()` overlaps its items", async () => {
+    const notes: string[] = []
+    await core.eachTogether([20, 5], (milliseconds: number) => step(notes, String(milliseconds), milliseconds)())
+    expect(notes).toEqual(["20 starts", "5 starts", "5 ends", "20 ends"])
+  })
+
+  test("a failure doesn't stop the others, and comes out once they've all ended", async () => {
+    const notes: string[] = []
+    const fails = async () => {
+      throw new Error("no")
+    }
+    await expect(core.together(fails, step(notes, "b", 5))).rejects.toThrow("no")
+    expect(notes).toEqual(["b starts", "b ends"])
+  })
+
+  test("`meanwhile()` carries on, and says a failure on the console", async () => {
+    const notes: string[] = []
+    const error = vi.spyOn(core.console, "error").mockImplementation(() => {})
+    void core.meanwhile(step(notes, "a", 5))
+    expect(notes).toEqual(["a starts"])
+    await core.meanwhile(async () => {
+      throw new Error("no")
+    })
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
+  })
+})
