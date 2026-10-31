@@ -43,6 +43,25 @@
     --_ui-item-media: 1;
   }
 
+  /* `<ui-menu ticks>`:  every row keeps the gutter;  only a selected one's tick shows */
+  .item > .tick {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    width: var(--ui-item-tick-width, 1em);
+    height: 1em;
+    margin-inline-end: var(--ui-item-tick-distance, 0.5em);
+    visibility: hidden;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  :host(:state(selected)) > .item > .tick {
+    visibility: visible;
+  }
+
   /* A `<button>` item looks like its owner's item, never like a native button. */
   button.item {
     margin: 0;

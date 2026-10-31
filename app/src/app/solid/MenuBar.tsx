@@ -83,6 +83,7 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
               direction="vertical"
               size="small"
               class="BarMenuItems"
+              ticks={props.ticks ? "" : undefined}
               aria-label={props.name}
               onPointerOver={(event) => followPointer(event, control)}
             >
@@ -114,6 +115,8 @@ export type BarMenuProps = {
   class?: string
   /** Its sub-menus' panels, by the id their `<SubMenuRow sub>` names. */
   subMenus?: Record<string, () => JSX.Element>
+  /** Its rows are on or off:  a tick for what is on (`<ui-menu ticks>`). */
+  ticks?: boolean
   /** Its items. */
   children?: JSX.Element
 }
@@ -214,6 +217,7 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
           <ui-menu
             direction="vertical"
             size="small"
+            ticks=""
             class={["ProjectsSubMenu", { many: root().projects.length > PROJECTS_PER_COLUMN }]}
             aria-label={appTexts.text("moreProjects", root().words)}
           >
@@ -298,7 +302,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         <Divider />
         <Action menu title={appTexts.text("codeSettings")} onClick={() => showCodeSettings()} />
       </BarMenu>
-      <BarMenu id="ViewBarMenu" label={appTexts.text("menuView")} name={appTexts.text("menuView")}>
+      <BarMenu id="ViewBarMenu" label={appTexts.text("menuView")} name={appTexts.text("menuView")} ticks>
         <Action
           menu
           title={appTexts.text("runMode")}

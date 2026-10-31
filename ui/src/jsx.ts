@@ -17388,6 +17388,16 @@ export interface UIMenuAttributes {
    */
   "prop:shrinkable"?: boolean | ""
   /**
+   * A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  ticks?: boolean | ""
+  /**
+   * `ticks`, as the DOM element's property.
+   * @deprecated write `ticks` -- `prop:` stays only for compiled spell
+   */
+  "prop:ticks"?: boolean | ""
+  /**
    * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
    * - takes:  flag (present / absent)
    */
@@ -35618,6 +35628,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
    */
   "prop:shrinkable"?: boolean | ""
+  /**
+   * A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  ticks?: boolean | ""
+  /**
+   * `ticks`, as the DOM element's property.
+   * @deprecated write `ticks` -- `prop:` stays only for compiled spell
+   */
+  "prop:ticks"?: boolean | ""
   /**
    * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
    * - takes:  flag (present / absent)

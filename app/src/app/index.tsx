@@ -4,6 +4,7 @@ import { render } from "@solidjs/web"
 import "spell/parser/parser"
 import { editor } from "spell/app/app/editor"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
+import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { EditorTheme, ErrorNotice, Notice, addAppIconsPageWide } from "spell/app/app/solid"
 import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
@@ -50,3 +51,6 @@ render(
   ),
   document.getElementById("app-root")!
 )
+
+// The hero over the page goes once what holds it is ready:  the bar and the code, on the editor's pages.
+PageLoading.start()

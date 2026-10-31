@@ -6,6 +6,7 @@ import { SPACES } from "spell/app/spaces"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import {
   Actions,
+  AppMark,
   AppMenu,
   SpellPage,
   Submenu,
@@ -245,17 +246,24 @@ function hueFor(path: string): string {
 
 /****************
  * ### `<ChooserToolbar>`
- * Top menu of `<ProjectChooser>`:  Home (lit:  this is it), the theme menu and the person.
+ * Top menu of `<ProjectChooser>`:  two pills with a gap, as a Mac's toolbar has them (Owen, epic `editor` J8):
+ * Spell's mark, then Home (lit:  this is it), the theme menu and the person.
  * - Also the theme editor's (`<ThemeEditorPage>`), with Home unlit (`isHome={false}`).
  ****************/
 export function ChooserToolbar(props: { isHome?: boolean }) {
   return (
     <AppMenu>
-      <Submenu left spring mark />
+      <Submenu left spring>
+        <ui-menu appearance="capsule">
+          <AppMark />
+        </ui-menu>
+      </Submenu>
       <Submenu right spring>
-        <Actions.showProjectChooser iconOnly active={props.isHome ?? true} />
-        <ThemeMenu />
-        <Actions.you />
+        <ui-menu appearance="capsule">
+          <Actions.showProjectChooser iconOnly active={props.isHome ?? true} />
+          <ThemeMenu />
+          <Actions.you />
+        </ui-menu>
       </Submenu>
     </AppMenu>
   )

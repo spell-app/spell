@@ -170,6 +170,11 @@ export type ItemContext = {
    * never `aria-current`.
    */
   pressed?: boolean
+  /**
+   * Its items keep a gutter, with a tick there while selected (`<ui-menu ticks>`):  `:state(in-ticks)`.
+   * - What's on is the tick, in plain text;  the row under the pointer or keyboard takes the fill.
+   */
+  ticks?: boolean
 }
 
 /** Roles an owner may give an item's root. */

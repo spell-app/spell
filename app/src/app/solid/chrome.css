@@ -246,7 +246,8 @@ ui-menu.AppMenu ui-item.ModeButtons::part(item) {
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item::part(item) {
   gap: 0.4em;
-  padding-block: 0.42em;
+  padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
+  padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
 
 /*

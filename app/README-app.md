@@ -471,7 +471,8 @@ app/src/app/pages/SpellEditor.tsx                what's in each section, each a 
   A program's things stay the only ones in the Things tab, and its console stays its own.
 - It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
   The tabs show no later:  they already wait for the project's files.
-  The top bar does:  about 170 to 300 ms on a local server, its place held so nothing moves, still before the code.
+  The top bar does:  about 170 to 300 ms on a local server.
+  So a hero covers the whole page until the bar and the code are ready, and nothing appears piecemeal.
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
 
 ### The Inspector:  look inside the running app
@@ -518,6 +519,8 @@ Each one dresses the whole editor:
 - The top bar joins the top of the window, 38px high, and the code, the Program panel and the app sit in rounded panels
   under it, with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
   - Merlot's panels meet edge to edge, and Spell's bar has no fill or line of its own.
+  - A theme floats its panels or attaches their window-edge sides:  `--ui-panel-pane-window-room` and `-window-radius`,
+    `0` and `0` to attach.  Glass and Fruity float.
 - The bars' and panels' colours, corners and shadows are the theme's own, as the docs pages' bars are.
 - The theme is ONE choice for every Spell place:  pick Merlot dark in the editor, and the epic pages and Spell UI's
   pages draw in it too, open tabs at once;  and the other way round.

@@ -36,6 +36,7 @@ import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
+import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
 import { NotebookMenu } from "spell/app/app/solid/notebook/NotebookCellTools"
@@ -298,18 +299,24 @@ export function EditorToolbar(props: { mode: Mode }) {
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
-  onCleanup(() => (isGone = true))
-  void loadLayoutPiece(editorBarSpell).then(
-    (loaded) => {
-      if (isGone) return
-      Object.assign(loaded.exports.editorBar, parts)
-      setPiece(() => loaded)
-    },
-    (problem: unknown) => {
-      console.error("<EditorToolbar>:  can't load its Spell", problem)
-      setBroken(true)
-    }
-  )
+  const release = PageLoading.hold()
+  onCleanup(() => {
+    isGone = true
+    release()
+  })
+  void loadLayoutPiece(editorBarSpell)
+    .then(
+      (loaded) => {
+        if (isGone) return
+        Object.assign(loaded.exports.editorBar, parts)
+        setPiece(() => loaded)
+      },
+      (problem: unknown) => {
+        console.error("<EditorToolbar>:  can't load its Spell", problem)
+        setBroken(true)
+      }
+    )
+    .finally(release)
   return (
     <div class="EditorBarPlace">
       {piece()?.draw(piece()!.exports.editorBar) as JSX.Element}

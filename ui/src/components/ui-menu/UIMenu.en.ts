@@ -229,6 +229,16 @@ export const menuVocabulary = {
         "showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default."
     },
     {
+      name: "ticks",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while " +
+        "`selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, " +
+        "never for what's on.  It moves nothing itself:  the page says which are `selected`.  " +
+        "Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
+    },
+    {
       name: "tabs",
       group: "behaviour",
       kind: "boolean",

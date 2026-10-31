@@ -621,6 +621,10 @@
               "description": "Menu:  the box around the `badge` slot."
             },
             {
+              "name": "tick",
+              "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
+            },
+            {
               "name": "shortcut",
               "description": "The key caps of its shortcut, at the end:  a `<kbd>` each."
             }
@@ -13732,6 +13736,10 @@
             {
               "name": "badge",
               "description": "Menu:  the box around the `badge` slot."
+            },
+            {
+              "name": "tick",
+              "description": "A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
             }
           ],
           "cssStates": [
@@ -13776,7 +13784,16 @@
               "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
             }
           ],
-          "cssProperties": []
+          "cssProperties": [
+            {
+              "name": "--ui-item-tick-width",
+              "default": "1em"
+            },
+            {
+              "name": "--ui-item-tick-distance",
+              "default": "0.5em"
+            }
+          ]
         }
       ],
       "exports": [
@@ -16569,6 +16586,14 @@
                 "text": "boolean"
               },
               "fieldName": "shrinkable"
+            },
+            {
+              "name": "ticks",
+              "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "ticks"
             },
             {
               "name": "tabs",
@@ -37103,6 +37128,14 @@
                 "text": "boolean"
               },
               "fieldName": "shrinkable"
+            },
+            {
+              "name": "ticks",
+              "description": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "ticks"
             },
             {
               "name": "tabs",

@@ -6,6 +6,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
+import "spell/ui/components/ui-action"
 import "spell/ui/components/ui-menu"
 import "spell/ui/components/ui-parts"
 import "spell/ui/components/ui-icon"
@@ -478,6 +479,39 @@ describe('<ui-menu appearance="header"> (a window\'s bar)', () => {
 })
 
 // epic `editor` P5
+describe("<ui-menu ticks> (things on or off)", () => {
+  /** A ticks menu's two rows, the second on, and their boxes. */
+  async function rows(attribute = "ticks") {
+    const { host } = await menu(
+      `direction="vertical" ${attribute}`,
+      "<ui-action>Off</ui-action><ui-action selected>On</ui-action>"
+    )
+    const [off, on] = [...host.querySelectorAll("ui-action")]
+    return { offBox: boxOf(off), onBox: boxOf(on) }
+  }
+
+  it("keeps every row's gutter, and shows the tick only while selected", async () => {
+    const { offBox, onBox } = await rows()
+    expect(getComputedStyle(offBox.querySelector(".tick")!).visibility).toBe("hidden")
+    expect(getComputedStyle(onBox.querySelector(".tick")!).visibility).toBe("visible")
+    expect(offBox.querySelector(".title")!.getBoundingClientRect().left).toBe(
+      onBox.querySelector(".title")!.getBoundingClientRect().left
+    )
+  })
+
+  it("says it's pressed, not current", async () => {
+    const { offBox, onBox } = await rows()
+    expect(onBox.getAttribute("aria-pressed")).toBe("true")
+    expect(offBox.getAttribute("aria-pressed")).toBe("false")
+    expect(onBox.hasAttribute("aria-current")).toBe(false)
+  })
+
+  it("draws no gutter without `ticks`", async () => {
+    const { onBox } = await rows("")
+    expect(onBox.querySelector(".tick")).toBeNull()
+  })
+})
+
 describe('<ui-menu appearance="capsule"> (a group of actions)', () => {
   /** A capsule's box, inside a bar. */
   async function capsule(style = "") {
