@@ -116,6 +116,7 @@
   /* Purpose:  a few words or a short sentence, the "stays" tag, the note in small print */
   .note {
     margin-top: 2px;
+    white-space: pre-wrap;
     color: var(--_epic-choice-muted);
     font-size: 0.8em;
     line-height: 1.35;
