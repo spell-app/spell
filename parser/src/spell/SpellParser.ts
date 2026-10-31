@@ -538,6 +538,8 @@ export class SpellParser extends P.Parser {
     const onlyOnes = new Set(this.oneOfAKindsIn(text))
     let subject = ""
     for (const line of text.split("\n")) {
+      // a blank line, or a comment at the left, doesn't end a type's outline
+      if (!line.trim() || line.startsWith("//") || line.startsWith("##")) continue
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line, onlyOnes) ?? ""
         visit(subject, line, undefined)

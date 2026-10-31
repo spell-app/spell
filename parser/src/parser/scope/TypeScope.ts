@@ -136,6 +136,11 @@ export class TypeScope extends BlockScope {
     return this.chain().some((type) => type.propertiesAhead?.includes(key))
   }
 
+  /** Do we have a property called `words`, inherited or declared further down?  NOT a method. */
+  hasProperty(words: string): boolean {
+    return this.getMember(words) instanceof P.ScopeVariable || this.knowsPropertyAhead(words)
+  }
+
   /** Is `name` a slot of ours, or of a type we're built on?  See `slots`. */
   hasSlot(name: string): boolean {
     return this.chain().some((type) => type.slots?.includes(name))

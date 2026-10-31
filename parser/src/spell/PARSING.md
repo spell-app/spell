@@ -414,7 +414,11 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `the X` inside an action is [`the_own_property`](rules/properties/TheOwnProperty.ts) (epic `language` P2):
     - it reads the thing the action runs on (`P.MethodScope.withThing()`, through loops), never `it`
     - the article is required, in the language's own word (`{definite_article}`), so a bare word never reads a property
-    - it steps aside for a variable or constant of that name
+    - it steps aside for a variable of that name, never a constant:  no `the` reads one
+    - `set the X to` writes it (P3):  `Variable` steps aside, so `AssignmentStatement` takes its expression branch
+      - a variable of that name is assigned instead;  `set X to`, with no article, still makes a local
+      - `the X is V` has a syntax of its own, since that form takes only a variable
+      - a rule taking only `{variable}` can't say it with `the`:  `the score 1 to 3 of ...`
     - the longest run its type declares, or a scan found further down (`P.TypeScope.knowsPropertyAhead()`)
     - `the_things` (`the cards`) steps aside for a property of that name, by the same walk
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).

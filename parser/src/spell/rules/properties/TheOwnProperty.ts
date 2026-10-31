@@ -7,12 +7,13 @@ import { MemberReadExpression } from "./MemberReadExpression"
  * e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).
  * - The LONGEST run of our words the thing's type declares, inherited ones too, e.g. `short rank` in `the short rank + 1`.
  * - Declared further down counts:  `P.Parser.stubDeclaredProperties()` knows the names ahead.
- * - What else `the X` can mean comes first, so it rejects the match for any of these:
- *   - a local, argument, loop variable or alias called that:  those win, and `its X` still reads the property
- *   - a constant called that
+ * - A local, argument, loop variable or alias called that comes first, so we reject the match:
+ *   those win, and `its X` still reads the property.
+ * - A constant called that doesn't:  no `the` reads one, e.g. `the clubs` beside a suit's value `clubs`.
  * - The article is REQUIRED:  a bare `stock` reads only variables (Q3).
  *   Named values and bare words beside a property went silently wrong when it could:  `this.side === this.front`.
  * - NEVER follows `it`:  in a loop, `the X` is still the action's thing, and `its X` the item's (Q4).
+ * - `set the X to` writes it, for the same reason `Variable` steps aside for it (Q1).
  * - Not a `KnownVariable`:  it's a member read, so enums, built-in members and other languages' words come with it,
  *   and `set the X to` can ask `MemberReadExpression.memberRead()`.
  */
@@ -29,15 +30,12 @@ export class TheOwnProperty extends MemberReadExpression<"definite_article" | "p
     if (!match) return undefined
     const ownerType = P.MethodScope.thingTypeOf(scope)
     const { property } = match.groups
-    const count = declaredPrefix(
-      property,
-      (words) => !!MemberReadExpression.propertyOf(ownerType, words) || !!ownerType?.knowsPropertyAhead(words)
-    )
+    const count = declaredPrefix(property, (words) => !!ownerType?.hasProperty(words))
     if (!count) return undefined
     // fewer words than we took:  parse just those -- our article and them
     if (count < property.length) return this.parse(scope, tokens.slice(0, 1 + count))
     const words = `${property.raw}`
-    if (scope.variables?.get(words) || scope.constants?.get(words)) return undefined
+    if (scope.variables?.get(words)) return undefined
     match.data.ownerType = ownerType
     this.resolveMember(match, ownerType, words)
     return match

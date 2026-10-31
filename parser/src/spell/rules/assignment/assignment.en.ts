@@ -102,6 +102,10 @@ assignment.addRule(AssignmentStatement, {
   ]
 })
 
+assignment.addRule(AssignmentStatement, {
+  syntax: "{thing:the_own_property} is {value:expression}"
+})
+
 assignment.addRule(WordsAssignment, {
   syntax: "set {thing:words_variable} to {value:expression}",
   tests: [

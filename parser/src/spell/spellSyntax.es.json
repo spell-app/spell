@@ -437,7 +437,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
           "syntaxes": [
             {
@@ -1806,7 +1806,7 @@
           "ruleNames": ["the_own_property"],
           "internal": false,
           "file": "src/spell/rules/properties/TheOwnProperty.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
           "syntaxes": [
             {
@@ -6376,6 +6376,9 @@
                   "code": "bob = Person(name=\"bob\")"
                 }
               }
+            },
+            {
+              "syntax": "{thing:the_own_property} es {value:expression}"
             }
           ],
           "aliases": ["statement"]

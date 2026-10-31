@@ -128,6 +128,8 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
   - A local, argument or loop variable of that name comes first.
   - It's always the thing the action runs on:  in a loop, `its X` is the item's, and `the X` still the action's thing's.
   - A bare `stock` never reads a property.
+  - `set the score to 1` writes the property, unless a local has that name;
+    `set score to 1` makes a local.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:

@@ -67,6 +67,8 @@ a game is a base:
 	- ${action}
 ${lines.replace(/^/gm, "\t\t")}
 	- it has a later as a number
+
+	- it has a blue as a number
 to helper:
 ${loose.replace(/^/gm, "\t")}
 `
@@ -83,7 +85,7 @@ const ENGLISH: NameRow[] = [
   { title: "own property:  a bare X does NOT read it", spell: "set v to score", js: ERROR },
   { title: "own property:  a bare X is no argument", spell: "shuffle stock", js: ERROR },
   { title: "own property:  the X of Y", spell: "shuffle the stock of the game", js: "this.stock.shuffle()" },
-  { title: "own property:  set the X writes it", spell: "set the score to 1", js: "this.score = 1", notYet: "P3" },
+  { title: "own property:  set the X writes it", spell: "set the score to 1", js: "this.score = 1" },
   { title: "own property:  set its X writes it", spell: "set its score to 1", js: "this.score = 1" },
   {
     title: "own property:  set X makes a local, and warns",
@@ -92,9 +94,46 @@ const ENGLISH: NameRow[] = [
     warns: HIDES,
     notYet: "P4"
   },
-  { title: "own property:  the X is V writes it", spell: "the score is 1", js: "this.score = 1", notYet: "P3" },
-  { title: "own property:  the X = V writes it", spell: "the score = 1", js: "this.score = 1", notYet: "P3" },
-  { title: "own property:  let the X = V writes it", spell: "let the score = 1", js: "this.score = 1", notYet: "P3" },
+  { title: "own property:  the X is V writes it", spell: "the score is 1", js: "this.score = 1" },
+  { title: "own property:  the X = V writes it", spell: "the score = 1", js: "this.score = 1" },
+  { title: "own property:  let the X = V writes it", spell: "let the score = 1", js: "this.score = 1" },
+  {
+    title: "own property:  the X is V in a condition compares",
+    spell: "if the score is 1\n\tset x to 2",
+    js: "this.score === 1"
+  },
+  { title: "own property:  add to the X reads it", spell: "add 1 to the rounds", js: "this.rounds" },
+  {
+    title: "own property:  set the X in a loop is the action's thing",
+    spell: "for each card in the cards\n\tset the score to 1",
+    js: "this.score = 1"
+  },
+  {
+    title: "own property:  a local's block ended, set the X writes it",
+    spell: "if 1 is 1\n\tset score to 3\nset the score to 4",
+    js: "this.score = 4",
+    warns: HIDES,
+    notYet: "P4"
+  },
+  { title: "outside an action:  set the X makes a local", spell: "set the score to 1", js: "score = 1", outside: true },
+  { title: "enum property:  set the X writes it", spell: 'set the color to "red"', js: 'this.color = "red"' },
+  {
+    title: "named like another type's value:  the X reads the property",
+    spell: "set v to the blue",
+    js: "v = this.blue"
+  },
+  { title: "several words:  the X is V writes it", spell: "the short rank is 4", js: "this.shortRank = 4" },
+  { title: "several words:  the X = V writes it", spell: "the short rank = 4", js: "this.shortRank = 4" },
+  {
+    title: "getter:  set the X writes as set its X does",
+    spell: "set its total to 1\nset the total to 1",
+    js: "this.total = 1"
+  },
+  {
+    title: "own property:  a rule taking a variable can't take its word with the",
+    spell: "set v to the score 1 to 3 of its rounds",
+    js: ERROR
+  },
   {
     title: "own property:  a rule taking a variable keeps its own word",
     spell: "set v to score 1 to 3 of its rounds",
@@ -130,8 +169,7 @@ const ENGLISH: NameRow[] = [
   {
     title: "inherited property:  set the X writes it",
     spell: 'set the label to "x"',
-    js: 'this.label = "x"',
-    notYet: "P3"
+    js: 'this.label = "x"'
   },
   { title: "getter:  the X reads it", spell: "set v to the total", js: "v = this.total" },
   { title: "getter:  its X reads it", spell: "set v to its total", js: "v = this.total" },
@@ -323,9 +361,11 @@ const SPANISH: NameRow[] = [
   {
     title: "propiedad propia:  poner la X la escribe",
     spell: "poner la puntuación a 1",
-    js: "this.puntuación = 1",
-    notYet: "P3"
+    js: "this.puntuación = 1"
   },
+  { title: "propiedad propia:  la X es V la escribe", spell: "la puntuación es 1", js: "this.puntuación = 1" },
+  { title: "propiedad propia:  la X = V la escribe", spell: "la puntuación = 1", js: "this.puntuación = 1" },
+  { title: "propiedad propia:  sea la X = V la escribe", spell: "sea la puntuación = 1", js: "this.puntuación = 1" },
   {
     title: "propiedad propia:  poner X hace una local, y avisa",
     spell: "poner puntuación a 1",
