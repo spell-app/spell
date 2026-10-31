@@ -153,6 +153,30 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written
   byte for byte as before:  a store's name is the key's part before its first colon.
 
+## Where data lives (`places/`)
+
+- `spell/util/places`:  a PLACE is Spell's word for a back-end, one small interface for all of them (epic `data`).
+  - NOT flattened into the `spell/util` barrel:  no page pays for it until it uses it.
+  - [places.types.ts](places/places.types.ts), the bottom of the folder:
+    - `Place`:  say what you can do, list a collection;  the rest is optional
+    - `PlaceCapabilities`, and `writeAnswerFor()`:  whether a write would be taken, per thing and per field
+    - `PlaceError`:  a place THROWS when it fails, unlike preferences' `PrefPlace`
+  - `PlaceCache`:  ONE row per type and id, its fields reactive.
+  - `Places`:  places by name, swapping the one behind a name, and the one cache.
+  - `PlaceResult`:  one read of one place, on `Loadable`;  only its `status` is new.
+  - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
+  - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
+  - [refs.ts](places/refs.ts):  the ONE way anything saved is named in text, `Recipe#r-12` (`parseRef()`, `refText()`).
+    - Imports nothing:  spell's core takes it by file, `spell/util/places/refs`.
+    - A program's mirrored state keeps its counted `"$id"`:  it's what the Python page speaks.
+- Uses `Loadable` by file (`spell/util/spell/Loadable`), the reactive engine and `PrefStore`.
+  - Nothing about Things or Spell's words:  those are above util.
+  - Whatever needs a server goes in `spell/server/places`.
+- Its files import each other as peers.
+- Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage.
+  - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
+    which keep the interface honest until those two are built.
+
 ## Decorators
 
 As WWOD §12, plus:
