@@ -6455,6 +6455,12 @@
           "type": "other"
         },
         {
+          "name": "--ui-control-height",
+          "default": "0px",
+          "description": "A control's height at the medium size;  `0px`:  its padding says how tall it is.",
+          "type": "length"
+        },
+        {
           "name": "--ui-duration-fast",
           "default": "100ms",
           "description": "Duration `fast`.",

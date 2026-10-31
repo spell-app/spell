@@ -55,7 +55,7 @@ export const menuVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: [...UIT.MenuAppearances, "link", "borderless", "header"],
+      values: [...UIT.MenuAppearances, "link", "borderless", "header", "capsule"],
       // its words are Fomantic's classes as they are
       classes: {},
       replaces: [...UIT.MenuAppearances.filter((word) => word !== "segmented"), "link", "borderless"].map((word) => ({
@@ -70,7 +70,8 @@ export const menuVocabulary = {
         "it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link " +
         "hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat " +
         "and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, " +
-        "with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, " +
+        "with no track of its own, the bar behind it being the track, and its items sharing the row's width), `capsule` " +
+        "(a nested menu of actions, grouped on one rounded piece of glass).  Old names:  the bare switches `tabular`, `pointing`, " +
         "`secondary`, `text`, `link`, `borderless`."
     },
     {

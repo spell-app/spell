@@ -1512,6 +1512,15 @@
         }
       }
     },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
     "components": {
       "type": "object",
       "description": "a family's own tokens, under its name:  menu > radius is --ui-menu-radius",

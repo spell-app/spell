@@ -182,6 +182,19 @@
                     </ui-menu>
                   </ui-menu>
                 </ui-example>
+                <ui-example
+                  description="A nested menu can group a bar's actions on one piece of glass:  `appearance=&quot;capsule&quot;`."
+                >
+                  <ui-menu appearance="header" aria-label="Window bar with a capsule">
+                    <ui-item link="#file">File</ui-item>
+                    <ui-menu position="right">
+                      <ui-menu appearance="capsule">
+                        <ui-item link="#one" icon="crosshairs" aria-label="Inspect"></ui-item>
+                        <ui-item link="#two" icon="redo" aria-label="Restart"></ui-item>
+                      </ui-menu>
+                    </ui-menu>
+                  </ui-menu>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>

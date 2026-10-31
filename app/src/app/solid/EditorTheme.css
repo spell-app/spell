@@ -7,9 +7,9 @@
  * - Its colours, corners, shadows and blur are the THEME's own bar and panel tokens (epic `debut` P17, J89),
  *   the ones the epic pages' bars and Spell UI's panels read:
  *   - a panel:  `--ui-panel-radius`, `--ui-panel-shadow`;  else the theme's large radius and raised shadow
+ *   - its glass (Glass's and Fruity's, epic `editor` P5):  `--ui-panel-pane-background`, `-filter`, `-header-background`
  *   - a theme with none of them still dresses the chrome, from its plain tokens
  * - What's the editor's alone is keyed on the theme's name, `<html data-spell-theme>`, which `EditorTheme` sets:
- *   - Glass and Fruity:  the glass chrome, frosted panels clearer than their headers
  *   - Spell:  the bar has no fill or line, on the brand's pale page
  *   - Merlot:  flat panels joined by hairlines, edge to edge
  *   - every theme:  the code see-through, on its panel
@@ -31,8 +31,10 @@
   /* a panel, and its header (a panel's menu) */
   --spell-pane-radius: var(--ui-panel-radius, var(--ui-radius-l));
   --spell-pane-shadow: var(--ui-panel-shadow, var(--ui-shadow-raised));
-  --spell-pane-filter: none;
-  --spell-header-background: transparent;
+  --spell-pane-background: var(--ui-panel-pane-background, var(--ui-surface));
+  --spell-pane-border-color: var(--ui-panel-pane-border-color, var(--ui-border-color));
+  --spell-pane-filter: var(--ui-panel-pane-filter, none);
+  --spell-header-background: var(--ui-panel-pane-header-background, transparent);
   /* the views show the panel through them */
   --spell-view-background: transparent;
 }
@@ -40,18 +42,6 @@
 /*******************************
      Each theme's own, the editor's alone
 *******************************/
-
-/* Glass and Fruity:  frosted panels over the page (Fruity's wallpaper) */
-:root:is([data-spell-theme="glass"], [data-spell-theme="fruity"]) {
-  /* a pane's body clearer than its header (Owen:  "The panel bodies used to be less opaque than the header, I liked
-     that") */
-  --spell-pane-background: var(--glass-surface);
-  --spell-pane-border-color: var(--glass-edge);
-  --spell-pane-filter: var(--glass-blur);
-  /* a panel's header a wash of the theme's purple:  the frosted glass draws its top edge whiter than the rest
-     (the blur reaches past the panel), so a see-through header stood out near-white (Owen, epic `elemental-spell` C39) */
-  --spell-header-background: color-mix(in oklab, var(--glass-accent-wash) 50%, transparent);
-}
 
 /*
  * the running app's pane has NO background, in every theme:  the app (a program, a notebook) sits straight on the page

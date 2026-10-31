@@ -477,6 +477,49 @@ describe('<ui-menu appearance="header"> (a window\'s bar)', () => {
   })
 })
 
+// epic `editor` P5
+describe('<ui-menu appearance="capsule"> (a group of actions)', () => {
+  /** A capsule's box, inside a bar. */
+  async function capsule(style = "") {
+    const { host } = await bar(
+      "",
+      `<ui-menu appearance="capsule" style="${style}"><ui-item link="#a">A</ui-item></ui-menu>`
+    )
+    return host.querySelector<DOMElement>("ui-menu")!.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+  }
+
+  it("draws a nested menu as one rounded piece, its height and fill from its tokens", async () => {
+    const root = await capsule("--ui-menu-capsule-height: 28px; --ui-menu-capsule-background: rgb(1, 2, 3)")
+    const style = getComputedStyle(root)
+    expect(root.classList.contains("capsule")).toBe(true)
+    expect(style.minHeight).toBe("28px")
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.borderRadius).toBe("999px")
+  })
+})
+
+// epic `editor` P5
+describe("<ui-menu> a theme's solid selection (`--ui-menu-active-fill`)", () => {
+  const FILL = `style="--ui-menu-active-fill: rgb(1, 2, 3); --ui-menu-active-fill-color: rgb(4, 5, 6)"`
+  /** The selected item's box. */
+  async function selected(attributes: string) {
+    const { items } = await bar(`${FILL} ${attributes}`, `<ui-item link="#a" selected>A</ui-item>`)
+    return getComputedStyle(items[0]!.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
+  }
+
+  it("fills a plain menu's active item", async () => {
+    const style = await selected("")
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.color).toBe("rgb(4, 5, 6)")
+  })
+
+  it.each(["text", "tabular", "secondary"])("leaves a %s menu's active item as it was", async (appearance) => {
+    const style = await selected(`appearance="${appearance}"`)
+    expect(style.backgroundColor).not.toBe("rgb(1, 2, 3)")
+    expect(style.color).not.toBe("rgb(4, 5, 6)")
+  })
+})
+
 describe("<ui-menu> variation tokens", () => {
   /** Three link items with icons, the second selected. */
   const ICONS =

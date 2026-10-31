@@ -302,6 +302,10 @@ const GROUPS: GroupDefinition[] = [
     rules: [
       [/^--ui-duration-(\w+)$/, (match) => `Duration \`${match[1]}\`.`],
       [/^--ui-hover-delay$/, () => "How long a hover popup waits before it shows."],
+      [
+        /^--ui-control-height$/,
+        () => "A control's height at the medium size;  `0px`:  its padding says how tall it is."
+      ],
       [/^--ui-control-cursor$/, () => "The cursor over a control:  a button, a menu item, a tab."],
       [/^--ui-ease$/, () => "Default easing."],
       [/^--ui-ease-([\w-]+)$/, (match) => `Easing \`${match[1]}\`.`]

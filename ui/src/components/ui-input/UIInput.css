@@ -174,9 +174,12 @@
     min-inline-size: 0;
     max-inline-size: 100%;
     margin: 0;
-    padding: var(--_input-pad-block, var(--_ui-input-padding-block))
-      var(--_input-pad-end, var(--_ui-input-padding-inline)) var(--_input-pad-block, var(--_ui-input-padding-block))
-      var(--_input-pad-start, var(--_ui-input-padding-inline));
+    padding-block: max(
+      var(--_input-pad-block, var(--_ui-input-padding-block)),
+      (var(--ui-control-height, 0px) * var(--ui-scale, 1) - 1lh) / 2 - var(--_ui-input-border-width)
+    );
+    padding-inline: var(--_input-pad-start, var(--_ui-input-padding-inline))
+      var(--_input-pad-end, var(--_ui-input-padding-inline));
     border: var(--_ui-input-border-width) solid
       var(--_input-border, var(--_ui-field-state-border, var(--_ui-input-border-color)));
     border-radius: var(--_ui-input-radius);

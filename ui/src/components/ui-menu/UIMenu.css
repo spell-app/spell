@@ -89,6 +89,8 @@
  * | `--ui-menu-arrow-color`             | arrow fill                            | inverted, coloured                   |
  * | `--ui-menu-header-*`                | header item colour / size / case / margin | text, secondary pointing, inverted |
  * | `--ui-menu-header-padding` / `-font-family` / `-weight` / `-letter-spacing` | header item box and type (the item's padding, inherited family, bold) | -- |
+ * | `--ui-menu-active-fill` / `-fill-color` | a plain menu's active item as a solid fill, and its text | a theme;  never text, tabular, secondary, segmented, inverted or coloured
+ * | `--ui-menu-capsule-*`                | `appearance="capsule"`:  its `-background`, `-height`, `-padding`    | themes
  * | `--ui-menu-header-bar-*`            | `appearance="header"`:  the bar's `-height`, `-font-size`, `-background`, `-filter`, `-border` | -- |
  * | `--ui-menu-disabled-color`          | disabled item text                    | inverted                             |
  * | `--ui-menu-icon-*`                  | an item's icon margin / opacity / size / display | vertical, icon, labeled icon |
@@ -202,6 +204,8 @@
     --_ui-menu-pressed-color: var(--ui-menu-pressed-color, var(--ui-text-selected));
     --_ui-menu-active-background: var(--ui-menu-active-background, oklch(from var(--ui-ink) l c h / 0.05));
     --_ui-menu-active-color: var(--ui-menu-active-color, var(--ui-text-selected));
+    --_ui-menu-active-fill: var(--ui-menu-active-fill, initial);
+    --_ui-menu-active-fill-color: var(--ui-menu-active-fill-color, initial);
     --_ui-menu-active-weight: var(--ui-menu-active-weight, var(--ui-font-weight-normal));
     --_ui-menu-active-border-color: var(--ui-menu-active-border-color, var(--_ui-menu-item-border-color));
     --_ui-menu-active-border-width: var(--ui-menu-active-border-width, var(--_ui-menu-item-border-width));
@@ -1110,6 +1114,53 @@
     -webkit-backdrop-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
     backdrop-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
   }
+  /* a theme's solid selection is for a plain menu:  these have words, tabs, thumbs or a colour of their own */
+  .ui.menu:is(
+      .text,
+      .tabular,
+      .secondary,
+      .segmented,
+      .inverted,
+      .primary,
+      .red,
+      .orange,
+      .yellow,
+      .olive,
+      .green,
+      .teal,
+      .blue,
+      .violet,
+      .purple,
+      .pink,
+      .brown,
+      .grey,
+      .black
+    ) {
+    --_ui-menu-active-fill: initial;
+    --_ui-menu-active-fill-color: initial;
+  }
+
+  /*
+   * ## Capsule (`appearance="capsule"`):  a group of actions on one piece of glass, as a Mac's toolbar has them.
+   * - A nested menu in a bar;  its items keep their own look.
+   * - Tokens:  `--ui-menu-capsule-background`, `-height` (the theme's control height), `-padding`, `-item-padding`.
+   */
+  .capsule.menu {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    align-self: center;
+    width: auto;
+    min-height: var(--ui-menu-capsule-height, var(--ui-control-height, 0px));
+    margin: 0;
+    padding-inline: var(--ui-menu-capsule-padding, 0.5em);
+    --_ui-menu-capsule-item-padding: var(--ui-menu-capsule-item-padding, 0.25em 0.5em);
+    --_ui-menu-item-padding: var(--_ui-menu-capsule-item-padding);
+    background: var(--ui-menu-capsule-background, oklch(from var(--ui-ink) l c h / 0.06));
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+  }
   .ui.segmented.toggles.menu {
     --_ui-menu-active-shadow: var(--_ui-menu-segmented-pressed-shadow);
     --_ui-menu-segmented-pressed-shadow: var(
@@ -1449,8 +1500,11 @@
   .ui.menu .active.item {
     margin: var(--_ui-menu-active-margin);
     font-weight: var(--_ui-menu-active-weight);
-    color: var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-color)));
-    background: var(--_ui-menu-active-background);
+    color: var(
+      --_ui-menu-active-fill-color,
+      var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-color)))
+    );
+    background: var(--_ui-menu-active-fill, var(--_ui-menu-active-background));
     border-width: var(--_ui-menu-active-border-width);
     border-color: var(--ui-color, var(--_ui-menu-active-border-color));
     border-radius: var(--_ui-menu-active-radius);
@@ -1466,8 +1520,11 @@
   }
   :host(:state(in-menu)) > .active.item:hover,
   .ui.menu .active.item:hover {
-    color: var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-hover-color)));
-    background: var(--_ui-menu-active-hover-background);
+    color: var(
+      --_ui-menu-active-fill-color,
+      var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-hover-color)))
+    );
+    background: var(--_ui-menu-active-fill, var(--_ui-menu-active-hover-background));
   }
   .ui.tabular.menu .active.item:hover,
   :host(:state(in-menu)) > .active.item:is(.header):hover {

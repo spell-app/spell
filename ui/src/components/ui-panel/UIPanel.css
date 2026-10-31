@@ -13,6 +13,8 @@
  *   them, flush under a folded band.
  * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, no box.  `--ui-panel-pane-bar-height`,
  *   `--ui-panel-pane-bar-background`, `--ui-panel-pane-bar-padding`.
+ * - `--ui-panel-pane-background`, `-border-color`, `-filter`, `-header-background`:  a theme's glass for a window's pane.
+ *   An app's own panes read them, and so Glass and Fruity need nothing in the app (the editor's `EditorTheme.css`).
  * - Layers:  `ui.components.panel.*` are declared after the section's, so these rules win without
  *   `!important`.
  * - Public tokens (`--ui-panel-*`) are never declared here:  read through private aliases, so a value set on

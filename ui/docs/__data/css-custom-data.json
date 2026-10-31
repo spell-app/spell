@@ -1713,7 +1713,7 @@
       "name": "--ui-dropdown-min-height",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-dropdown>`'s token.  Default:  `calc(var(--ui-dropdown-line-height) * 1em + 2 * var(--ui-dropdown-padding-block))`"
+        "value": "`<ui-dropdown>`'s token.  Default:  `max( var(--ui-control-height, 0px) * var(--ui-scale, 1), calc(var(--ui-dropdown-line-height) * 1em + 2 * var(--ui-dropdown-padding-block)) )`"
       }
     },
     {
@@ -5525,6 +5525,20 @@
       }
     },
     {
+      "name": "--ui-menu-active-fill",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `initial`"
+      }
+    },
+    {
+      "name": "--ui-menu-active-fill-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `initial`"
+      }
+    },
+    {
       "name": "--ui-menu-active-weight",
       "description": {
         "kind": "markdown",
@@ -5966,6 +5980,13 @@
       }
     },
     {
+      "name": "--ui-menu-capsule-item-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `0.25em 0.5em`"
+      }
+    },
+    {
       "name": "--ui-menu-segmented-pressed-shadow",
       "description": {
         "kind": "markdown",
@@ -6047,6 +6068,27 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-menu>`'s token.  Default:  `var(--ui-bar-rest-filter, var(--ui-bar-filter, none))`"
+      }
+    },
+    {
+      "name": "--ui-menu-capsule-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-control-height, 0px)`"
+      }
+    },
+    {
+      "name": "--ui-menu-capsule-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `0.5em`"
+      }
+    },
+    {
+      "name": "--ui-menu-capsule-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `oklch(from var(--ui-ink) l c h / 0.06)`"
       }
     },
     {

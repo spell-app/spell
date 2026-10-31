@@ -369,7 +369,10 @@
                       <td><code>glass</code></td>
                       <td>
                         macOS today: the system font, rounded rectangles, Apple's system colours, and translucent glass surfaces
-                        that blur what's behind them, on a solid page. Page-wide.
+                        that blur what's behind them, on a solid page. Page-wide. On a page that's an app
+                        (<code>&lt;ui-root app&gt;</code>):  13px text and 28px controls, with
+                        <code>.ui-content-size</code> keeping what the app shows at 15px. Solid surfaces under
+                        <code>prefers-reduced-transparency</code>, stronger edges under <code>prefers-contrast</code>.
                       </td>
                       <td>everything, through the global tokens</td>
                     </tr>

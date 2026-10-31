@@ -42,6 +42,8 @@ export class OldNames {
       for (const spec of specs) {
         for (const old of spec.replaces ?? []) {
           const rule = OldNames.ruleFor(spec, old, current)
+          // a key of today, written bare, is today's (`<ui-property-editor compact>`), never a word its section once took
+          if (specs.some(({ name, kind }) => name === rule.from && kind === "keyOnly")) continue
           byOldName.set(rule.from, rule)
         }
       }

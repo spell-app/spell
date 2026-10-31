@@ -404,6 +404,15 @@ export const hoverDelay = 800
  */
 export const controlCursor = "pointer"
 
+/**
+ * A control's height:  a button, an input, a dropdown, a select (`--ui-control-height`), at the `medium` size.
+ * - `0px`:  no fixed height, so its padding says how tall it is, as the web does.
+ * - A theme that wants a Mac's one height per size sets it (Glass, on a page that's an app), and sets those controls'
+ *   padding to `0px` so the height alone decides.
+ * - Each size follows:  the height times `--ui-scale`.
+ */
+export const controlHeight = "0px"
+
 ////////////////
 // ## Layout
 ////////////////
@@ -703,7 +712,8 @@ export const themeTree = {
     ease: { ...tokensFor(easings, "--ui-ease-"), default: "--ui-ease" },
     "hover-delay": "--ui-hover-delay"
   },
-  cursors: { control: "--ui-control-cursor" }
+  cursors: { control: "--ui-control-cursor" },
+  controls: { height: "--ui-control-height" }
 } as const satisfies ThemeTree
 
 /** Scale `scale`'s steps, each the token `<prefix><step>`:  `tokensFor(sizes, "--ui-size-")`. */

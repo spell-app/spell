@@ -125,7 +125,10 @@
     max-width: 100%;
     min-height: calc(var(--_ui-select-line-height) * 1em + 2 * var(--_ui-select-padding-block));
     margin: 0;
-    padding-block: var(--_ui-select-padding-block);
+    padding-block: max(
+      var(--_ui-select-padding-block),
+      (var(--ui-control-height, 0px) * var(--ui-scale, 1) - 1lh) / 2 - var(--ui-border-width)
+    );
     padding-inline: var(--_ui-select-padding-inline) var(--_ui-select-icon-distance);
     border: var(--ui-border-width) solid var(--_ui-select-border-color);
     border-radius: var(--_ui-select-radius);

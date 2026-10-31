@@ -120,7 +120,7 @@ export function AppPane() {
           </header>
         )}
       </Show>
-      <div class="AppPaneBody" ref={(area) => onCleanup(Inspector.watch(area))}>
+      <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
         <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
           <AppRoot showToolbar={false} />
         </div>
@@ -282,14 +282,16 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons current={props.mode} />
       </Submenu>
       <Submenu right spring class="BarTools">
-        <Show when={props.mode === "edit"}>
-          <InspectorPick id={INSPECT_APP_ID} />
-          <InspectHelp for={INSPECT_APP_ID} />
-          <InspectorToggle />
-          <span class="BarToolsLine" role="separator" />
-        </Show>
-        <Actions.restartApp iconOnly />
-        <ThemeMenu />
+        <Submenu appearance="capsule">
+          <Show when={props.mode === "edit"}>
+            <InspectorPick id={INSPECT_APP_ID} />
+            <InspectHelp for={INSPECT_APP_ID} />
+            <InspectorToggle />
+            <span class="BarToolsLine" role="separator" />
+          </Show>
+          <Actions.restartApp iconOnly />
+          <ThemeMenu />
+        </Submenu>
         <Actions.you />
       </Submenu>
     </AppMenu>

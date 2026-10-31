@@ -106,7 +106,10 @@
     --_ui-dropdown-min-width: var(--ui-dropdown-min-width, 14em);
     --_ui-dropdown-min-height: var(
       --ui-dropdown-min-height,
-      calc(var(--_ui-dropdown-line-height) * 1em + 2 * var(--_ui-dropdown-padding-block))
+      max(
+        var(--ui-control-height, 0px) * var(--ui-scale, 1),
+        calc(var(--_ui-dropdown-line-height) * 1em + 2 * var(--_ui-dropdown-padding-block))
+      )
     );
     --_ui-dropdown-icon-size: var(--ui-dropdown-icon-size, 0.875em);
     --_ui-dropdown-icon-spacing: var(--ui-dropdown-icon-spacing, var(--ui-space-m));

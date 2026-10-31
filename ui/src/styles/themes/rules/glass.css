@@ -4,7 +4,8 @@
  *   Its sheet, `glass.css`, imports this one:  `yarn gen:styles` writes it.
  * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
  * - What's here:  the page's wallpaper, the secondary grey's states, the blur behind every glass surface,
- *   the dark inverted segment, the docs' flyout, the tight San Francisco headings, long words that break.
+ *   the dark inverted segment, the docs' flyout, the tight San Francisco headings, long words that break,
+ *   a Mac's sizes on a page that's an app, and what reduced transparency and more contrast ask for.
  */
 
 @layer ui.theme {
@@ -39,6 +40,8 @@
 
   /* the blur behind every translucent surface;  plain surfaces (`basic`, `text`, `secondary` menus) stay clear */
   .ui.card,
+  .ui.sidebar,
+  .ui.section.panel:not(.sub, .loose, .pane),
   .ui.segment:not(.basic),
   .ui.section:is(.bordered, .styled),
   .ui.section:is(.block, .styled) > .title,
@@ -68,6 +71,67 @@
   /* a flyout blurs the page it covers, as a modal does */
   dialog.ui.flyout::backdrop {
     backdrop-filter: var(--ui-dimmer-blur);
+  }
+
+  /*******************************
+         A page that's an app
+  *******************************/
+
+  /*
+   * `<ui-root app>`:  a Mac's 13px text and one 28px height per control, so a short laptop screen holds more.
+   * - Docs pages have no marker, so they keep their size.
+   * - The controls' own padding goes:  the height alone decides (`--ui-control-height`).
+   * - `.ui-content-size`:  what the app SHOWS keeps the theme's own sizes.
+   *   A program in the editor looks as it will on its own page, and an app of its own reads it too.
+   */
+  :root:has(ui-root:state(app)) {
+    --ui-font-size: var(--glass-app-font-size);
+    --ui-control-height: var(--glass-app-control-height);
+    --ui-button-padding-block: 0px;
+    --ui-input-padding-block: 0px;
+    --ui-select-padding-block: 0px;
+    --ui-dropdown-padding-block: 0px;
+  }
+  :root:has(ui-root:state(app)) :where(.ui-content-size) {
+    --ui-font-size: var(--glass-content-font-size);
+    --ui-control-height: 0px;
+    --ui-button-padding-block: initial;
+    --ui-input-padding-block: initial;
+    --ui-select-padding-block: initial;
+    --ui-dropdown-padding-block: initial;
+  }
+
+  /*******************************
+       What a person has asked for
+  *******************************/
+
+  /*
+   * Reduce transparency (macOS's setting, in the browsers that pass it on):  solid surfaces, no blur.
+   * - `:root:root`:  this sheet comes before the values it replaces.
+   */
+  @media (prefers-reduced-transparency: reduce) {
+    :root:root {
+      --glass-blur: none;
+      --glass-surface: light-dark(#f7f5fc, #24222d);
+      --glass-surface-strong: light-dark(#ffffff, #1e1c26);
+      --glass-surface-faint: light-dark(#f7f5fc, #2b2935);
+      --glass-track: light-dark(#e9e9ee, #3a3846);
+      --glass-bar: light-dark(#ffffff, #1e1c26);
+      --ui-bar-rest-background: var(--glass-bar);
+      --ui-bar-title-background: var(--glass-bar);
+      --ui-bar-panel-background: var(--glass-bar);
+      --ui-bar-wallpaper-tint: var(--glass-bar);
+    }
+  }
+  /* Increase contrast:  edges that show, and quieter text no longer so quiet */
+  @media (prefers-contrast: more) {
+    :root:root {
+      --glass-edge: light-dark(#3c3c4399, #ffffff80);
+      --glass-hairline: light-dark(#3c3c4399, #ffffff80);
+      --ui-border-color: var(--glass-hairline);
+      --ui-text-muted: light-dark(#3a3a40, #d1d1d6);
+      --ui-text-light: light-dark(#3a3a40, #d1d1d6);
+    }
   }
 
   /*******************************
