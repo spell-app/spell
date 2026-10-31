@@ -100,6 +100,26 @@ export const PARSER_MESSAGES = {
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
   /** The cloud, before it's built. */
   "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
+  "atmosphere-public":
+    "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
+  /** An atmosphere account's line:  no referee (epic `data` Q13). */
+  "atmosphere-your-own":
+    "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
+  /** An atmosphere account's line:  a host hands out pages, and that's all. */
+  "atmosphere-reads-here":
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+  /** An atmosphere account's address, or an account named under one, that isn't one. */
+  "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** A personal atmosphere account's address that isn't the start of a collection's name. */
+  "atmosphere-not-a-corner":
+    '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',
+  /** A collection's name under an atmosphere account that isn't one. */
+  "atmosphere-not-a-collection":
+    '"{address}" isn\'t a collection there:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
+  "version-step-no-rename-there":
+    "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
   /** A kind of place whose words are settled, with nothing behind it yet:  `{kind}`. */
   "place-kind-later":
     'A place of the kind "{kind}" isn\'t here yet:  name another kind of place for now, e.g. "x is a web server at ..."',

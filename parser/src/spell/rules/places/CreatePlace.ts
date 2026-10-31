@@ -20,7 +20,16 @@ const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\
 const WORDS_READ = new Map<string, boolean>()
 
 /** The kinds whose words are settled, with nothing behind them until their phase:  each refuses, saying so. */
-const KINDS_LATER = new Set(["airtable", "atmosphere account", "personal atmosphere account"])
+const KINDS_LATER = new Set(["airtable"])
+
+/** An account's name, as the protocol has it:  a DID. */
+const ACCOUNT_DID = /^did:(?:plc|web):[A-Za-z0-9._:%-]+$/
+
+/** The start of a collection's name:  a domain, backwards, of two parts or more. */
+const CORNER_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/i
+
+/** A collection's whole name, which has three parts at the least, and only letters and digits in its last. */
+const COLLECTION_NAME = /^[a-z][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+\.[a-z][a-z0-9]*$/i
 
 /**
  * `create_place` rule:  a program's data lives here (epic `data` P11, Q2).
@@ -32,8 +41,10 @@ const KINDS_LATER = new Set(["airtable", "atmosphere account", "personal atmosph
  * - e.g. `family cookbook is a supabase project at "..."`:  a kind a library adds, a type made from `place`.
  * - The lines under it say the rest (`PlaceDetail`), and name its operations.
  * - Declares a type and its one instance, the variable `family_cookbook`, as `solitaire is an app` does.
+ * - e.g. `family cookbook is an atmosphere account at "did:plc:abc123"`:  one account's records, anyone's to read (epic `data` P16).
  * - What it can't do is said here, at this line:  a key in its address won't compile, and a place that can't announce
  *   what changed warns unless it says how often to ask.
+ *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
@@ -82,8 +93,47 @@ export class CreatePlace extends TypeDeclaration<
     }
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
+    const notAnAddress = this.refuseAtmosphereAddress(match)
+    if (notAnAddress) return notAnAddress
     this.warnIfItCantSay(match)
+    this.warnOfNoReferee(match)
     return match
+  }
+
+  /** An atmosphere account's address has to be what the protocol can read:  a DID, or the start of a collection's name. */
+  private refuseAtmosphereAddress(match: P.MatchFor<this>): P.Match | undefined {
+    const { placeKind } = match.data
+    const address = textIn(match.groups.address)
+    const language = SP.Language.of(match.scope)
+    if (placeKind === "atmosphere account" && !ACCOUNT_DID.test(address)) {
+      return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-an-account", { address }))
+    }
+    if (placeKind === "personal atmosphere account" && match.groups.address && !CORNER_NAME.test(address)) {
+      return SpellStatement.refuse(match, language.parserMessage("atmosphere-not-a-corner", { address }))
+    }
+    return undefined
+  }
+
+  /**
+   * SIDE EFFECT:  says, at this line, what a place with no referee can't promise (Q13, T9, T10):
+   * - everything in it is public, for good
+   * - each person can change only their own, and `everyone here` isn't who's looking
+   * - it hands out pages and nothing else, so `where` and `sorted by` happen in the browser, and it holds no decimal numbers
+   * - an account named under it, or a collection's name, has to be one the protocol can read:  won't compile
+   */
+  private warnOfNoReferee(match: P.MatchFor<this>): void {
+    const { placeKind } = match.data
+    if (!placeKind || !PLACE_KIND_ABILITIES[placeKind]?.hasNoReferee) return
+    const language = SP.Language.of(match.scope)
+    const words = { kind: language.placeKindWord(placeKind) }
+    SP.SpellWarnings.note(match, language.parserMessage("atmosphere-public", words))
+    SP.SpellWarnings.note(match, language.parserMessage("atmosphere-your-own", words))
+    SP.SpellWarnings.note(match, language.parserMessage("atmosphere-reads-here", words))
+    SP.SpellWarnings.refuseIf(
+      match,
+      () => atmosphereLineProblem(match) ?? "",
+      () => atmosphereLineProblem(match) !== undefined
+    )
   }
 
   /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */
@@ -169,9 +219,20 @@ export class CreatePlace extends TypeDeclaration<
   }
 }
 
+/** What's wrong with the lines under an atmosphere account:  an account, or a collection's name, the protocol can't read. */
+function atmosphereLineProblem(match: P.MatchFor<CreatePlace>): string | undefined {
+  const { accounts = [], collections = {} } = CreatePlace.detailsOf(match)
+  const language = SP.Language.of(match.scope)
+  const account = accounts.find((did) => !ACCOUNT_DID.test(did))
+  if (account) return language.parserMessage("atmosphere-not-an-account", { address: account })
+  const named = Object.values(collections).find(({ at }) => at?.includes(".") && !COLLECTION_NAME.test(at))?.at
+  return named ? language.parserMessage("atmosphere-not-a-collection", { address: named }) : undefined
+}
+
 /** `from` merged into `into`:  a collection's mapping field by field. */
-function mergeDetail(into: PlaceDetailValue, { collections, ...rest }: PlaceDetailValue): void {
+function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }: PlaceDetailValue): void {
   Object.assign(into, rest)
+  if (accounts) (into.accounts ??= []).push(...accounts)
   for (const [name, { at, fields }] of Object.entries(collections ?? {})) {
     const held = ((into.collections ??= {})[name] ??= {})
     if (at !== undefined) held.at = at
@@ -183,6 +244,9 @@ function mergeDetail(into: PlaceDetailValue, { collections, ...rest }: PlaceDeta
 export function plainValueAST(match: P.Match, value: unknown): P.ASTExpression {
   if (typeof value === "number") return new P.ASTNumericLiteral(match, { value })
   if (typeof value === "string") return new P.ASTStringLiteral(match, { value: JSON.stringify(value) })
+  if (Array.isArray(value)) {
+    return new P.ASTListExpression(match, { items: value.map((each) => plainValueAST(match, each)) })
+  }
   const properties = Object.entries(value as object).map(
     ([property, each]) =>
       new P.ASTObjectLiteralProperty(match, {

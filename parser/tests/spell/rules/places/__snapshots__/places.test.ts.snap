@@ -2,6 +2,7 @@
 
 exports[`testing spell module places > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
+  "account_included": "type|account",
   "cancel_action": "action",
   "checked_every": "type|number",
   "collection_at": "collection|path",

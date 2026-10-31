@@ -15,6 +15,7 @@ const MOST_WAIT_MS = 10_000
  * ```
  *
  * - A relative address is read against this page's, and `http` becomes `ws`.
+ * - The address can be a function, asked each try:  an address that says where to carry on from.
  * - Closed after it had opened:  it tries again after `firstWait` ms.
  * - A try that failed:  it waits twice as long each time, up to 10s.
  * - `send()` with no socket open answers false, and sends nothing:  what to do about it is the caller's.
@@ -33,7 +34,7 @@ export class ReconnectingSocket {
   private wait: number
 
   constructor(
-    private readonly address: string | URL,
+    private readonly address: string | URL | (() => string | URL),
     private readonly props: ReconnectingSocketProps = {}
   ) {
     this.wait = props.firstWait ?? AFTER_OPEN_MS
@@ -63,7 +64,8 @@ export class ReconnectingSocket {
   /** Open a socket, and hear it. */
   private open(): void {
     if (this.isStopped || typeof WebSocket === "undefined") return
-    const socket = new WebSocket(socketAddressOf(this.address))
+    const address = socketAddressOf(typeof this.address === "function" ? this.address() : this.address)
+    const socket = this.props.protocols ? new WebSocket(address, [...this.props.protocols]) : new WebSocket(address)
     this.socket = socket
     let hasOpened = false
     socket.addEventListener("open", () => {
@@ -93,6 +95,8 @@ export type ReconnectingSocketProps = {
   onClose?: () => void
   /** How long the first try after a close waits, ms;  default 1s. */
   firstWait?: number
+  /** The sub-protocols it offers the server, as `new WebSocket()` takes them. */
+  protocols?: readonly string[]
 }
 
 /** `address` as a socket's:  read against this page's, with its scheme turned from `http` to `ws`. */

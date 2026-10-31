@@ -34,6 +34,9 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `write-deleted`, `write-restore` | what you were changing deleted:  the JavaScript core's | `thing` |
 | `write-changed-under-draft` | someone else changed what a draft is a copy of:  the JavaScript core's | `thing` |
 | `guest-person` | what someone with no name is called:  the JavaScript core's | `number` |
+| `sign-in-signed-out`, `sign-in-signing`, `sign-in-as` | signing in to a place:  the JavaScript core's | `place` |
+| `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
+| `sign-in`, `sign-out` | its buttons | |
 """
 
 import re
@@ -70,6 +73,19 @@ MESSAGES: dict[str, str] = {
         "Someone else changed {thing} while you were editing it.  What you're editing doesn't show that yet."
     ),
     "guest-person": "Guest {number}",
+    "sign-in-signed-out": (
+        "You aren't signed in to {place}, so you can read it, and what you change waits here until you do."
+    ),
+    "sign-in-signing": "Signing in to {place}…",
+    "sign-in-as": "Signed in to {place} as {name}.",
+    "sign-in-ended": (
+        "Your sign-in to {place} has ended:  they last two weeks at most.  "
+        "Sign in again, and what you changed goes through."
+    ),
+    "sign-in-failed": "That didn't sign you in:  {why}",
+    "sign-in-who": "Your handle, e.g. alice.bsky.social",
+    "sign-in": "Sign in",
+    "sign-out": "Sign out",
 }
 
 # A named placeholder in a message, `{type}`.

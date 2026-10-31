@@ -7,6 +7,7 @@ import { places } from "./places.parser"
 import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
 import { DiscardDraft } from "./DiscardDraft"
+import { AccountIncluded } from "./AccountIncluded"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -37,13 +38,22 @@ const THERE_ARE =
   "there (is|are) {compare:there_are_how_many}? (one:one)? {count:number}? ({type:known_type}|{list:member_words})"
 
 /** The kinds of place spell knows, each a meaning `core.place()` knows by its words, dashes for spaces. */
-const KINDS_AT = ["web_server", "graphql_server", "data_folder", "file", "room", "sheet", "google_sheet"]
+const KINDS_AT = [
+  "web_server",
+  "graphql_server",
+  "data_folder",
+  "file",
+  "room",
+  "sheet",
+  "google_sheet",
+  "atmosphere_account"
+]
 
 /** The kinds with no address. */
 const KINDS_HERE = ["database_on_this_device", "in_memory_database"]
 
-/** The kinds whose words are settled, and which nothing's behind yet:  each refuses, saying so. */
-const KINDS_LATER = ["airtable", "atmosphere_account"]
+/** The kinds whose words are settled, and which nothing's behind yet:  each refuses, saying so (`CreatePlace`). */
+const KINDS_LATER = ["airtable"]
 
 places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: [...KINDS_AT, ...KINDS_LATER] }), {
   syntax:
@@ -121,6 +131,7 @@ places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} (second|seconds)?" })
 places.addRule(VersionsIn, { syntax: "{type:subject_its} version is its? {field:text}" })
 places.addRule(IdColumn, { syntax: "{type:subject_its} id is its? {column:text}" })
+places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 
 places.addRule(SavedInPlace, { syntax: "{type:subject_it} (is saved|lives) in {place:expression}" })

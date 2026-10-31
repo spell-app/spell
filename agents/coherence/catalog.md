@@ -645,6 +645,7 @@ Plain, Command or Control, and Shift, one rule.
   an older one;  no lodash.
 - **Use it when:**  Spell UI's `UI.api`, and any place that reaches a server (`WebPlace`, epic `data` P4).
 - **Copies:**  beside `$fetch()`, until that can sit on it.
+- **Fine:**  `AtProtoPlace`:  its writes go through the official library's own signed `fetch`, which `Api` has no way to take, and a host's no is in its body, not its status.
 
 ### Fetching in Spell UI
 

@@ -66,6 +66,7 @@ Names people choose keep their accents.
 | recipes live at "...", a recipe's title is its? "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
 | its key is the secret "...", check it every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
 | its version is its? "...", its id is its? "..." | `su versión está en "..."`, `su identificador está en "..."` |
+| it includes the account "..." | `incluye la cuenta "..."` |
 | while (waiting\|loading), if there are none, if that fails | `mientras (espera\|carga)`, `si no hay (ninguno\|ninguna)` (agrees with what its loop reads), `si falla` |
 | in one go | `de una vez` |
 | a draft of, save, discard | `un borrador de`, `guardar`, `descartar` |

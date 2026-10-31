@@ -28,6 +28,8 @@ const TOO_BIG_CODE = 1009
 export type SocketListeners = {
   /** Hear each whole text message, as text.  Left out:  they're dropped. */
   onText?: (text: string) => void
+  /** The sub-protocol it speaks:  a browser that offered one closes a socket that doesn't say so. */
+  protocol?: string
 }
 
 /**
@@ -46,7 +48,9 @@ export function acceptWebSocket(raw: IncomingMessage, socket: Duplex, listeners:
     .digest("base64")
   socket.write(
     "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n" +
-      `Sec-WebSocket-Accept: ${accept}\r\n\r\n`
+      `Sec-WebSocket-Accept: ${accept}\r\n` +
+      (listeners.protocol ? `Sec-WebSocket-Protocol: ${listeners.protocol}\r\n` : "") +
+      "\r\n"
   )
   socket.on("error", () => socket.destroy())
   readFrames(socket, listeners)

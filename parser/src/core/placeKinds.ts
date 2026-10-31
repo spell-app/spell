@@ -30,6 +30,8 @@ export type PlaceDetails = {
   idColumn?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
+  /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
+  accounts?: readonly string[]
   /**
    * What a first draw reads from it, as the compiler found them (epic `data` P12):  each a class and what's asked.
    * - Read when the place is first read:  each class is declared by then.
@@ -147,6 +149,21 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(idColumn !== undefined && { idColumn })
     })
   },
+  "atmosphere account": ({ details, person }, { AtProtoPlace }) =>
+    new AtProtoPlace({
+      kind: "atmosphere account",
+      accounts: [details.at!],
+      collections: atmosphereCollections(details),
+      person
+    }),
+  "personal atmosphere account": ({ details, person }, { AtProtoPlace }) =>
+    new AtProtoPlace({
+      kind: "personal atmosphere account",
+      ...(details.at !== undefined && { corner: details.at }),
+      ...(details.accounts && { accounts: details.accounts }),
+      collections: atmosphereCollections(details),
+      person
+    }),
   "database on this device": (_making, { DevicePlace }) => new DevicePlace({ wholeRows: true }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
 }
@@ -160,6 +177,11 @@ function googleSheetCsvAddress(address: string): string {
   if (!id)
     throw new TypeError(`core.place():  "${address}" isn't a Google Sheet's address:  it has no /spreadsheets/d/<id>`)
   return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`
+}
+
+/** What an atmosphere account's lines call each collection. */
+function atmosphereCollections({ collections = {} }: PlaceDetails): Record<string, string> {
+  return Object.fromEntries(Object.entries(collections).flatMap(([name, { at }]) => (at ? [[name, at]] : [])))
 }
 
 /** A web server's mapping:  each collection's address, and its fields' names there. */

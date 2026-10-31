@@ -4,6 +4,7 @@ import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { PLACE_KIND_ABILITIES } from "spell/parser/spell/rules/places/places.shared"
 
 /**
  * `version_step` rule:  how a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6):
@@ -15,6 +16,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - The loader reads a file of an older one step by step:  `SC.upgradeEntry()`.
  * - Compiles to a static the loader finds by its name, after the class:
  *   `Person.v2_renames_name = "names"`, `Person.v3_drops_nickname = true`.
+ * - On an atmosphere account it only changes how a record reads here:  each person's old records keep their old names,
+ *   as their schemas can't rename a field (epic `data` T10).  It warns, at this line.
  */
 export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> {
   @proto static priority = Priority.declaration
@@ -27,6 +30,11 @@ export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> 
     const version = VersionStep.versionOf(match)
     if (!Number.isInteger(version) || version < 2) {
       return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("version-step-before-2"))
+    }
+    const { scopeType } = match.groups.type.data as { scopeType?: unknown }
+    if (scopeType instanceof P.TypeScope) {
+      const message = SP.Language.of(scope).parserMessage("version-step-no-rename-there")
+      SP.SpellWarnings.noteIf(match, message, () => !!PLACE_KIND_ABILITIES[placeKindOf(scopeType)]?.hasNoReferee)
     }
     return match
   }
@@ -54,4 +62,9 @@ export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> 
   static versionOf(match: P.MatchFor<VersionStep>): number {
     return Number(match.groups.version.value)
   }
+}
+
+/** The kind of place `type` is saved in:  `""` for none, or one a library added. */
+function placeKindOf(type: P.TypeScope): string {
+  return type.savedPlace()?.placeType.placeKind ?? ""
 }

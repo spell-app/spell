@@ -521,6 +521,9 @@ The steps between a page's content and its file on disk, for every tool that wri
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
 - `spell/server/test/sheetsStub`:  a stub of Google's Sheets API and its token endpoint, for `GoogleSheetPlace`'s tests.
+- `spell/server/test/fakeAtmosphere`:  a fake of AT Protocol's network, hosts on their own ports, a directory, a relay and a Jetstream, for
+  `AtProtoPlace`'s tests, a program's and the recipe box demo's (epic `data` P16).
+  `spell/server/test/FakeSignIn`:  someone signed in on it, in node or a page.
 - `spell/server/test/recipeServers`:  a fair fake of a web server and a GraphQL server over one box of recipes, for the
   places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
