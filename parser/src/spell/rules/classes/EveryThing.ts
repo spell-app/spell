@@ -19,11 +19,16 @@ export class EveryThing extends SpellExpression<"type"> {
   }
 
   getAST(match: P.MatchFor<this>): P.ASTExpression {
-    const kindList = EveryThing.kindListAST(match, match.groups.type)
+    return EveryThing.listAST(match, match.groups.type)
+  }
+
+  /** Every thing or value of `type`, for `match`:  `every_thing_where` filters it. */
+  static listAST(match: P.Match, type: P.Match): P.ASTExpression {
+    const kindList = EveryThing.kindListAST(match, type)
     if (kindList) return kindList
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "everyThing",
-      args: [P.matchAST<P.ASTTypeExpression>(match.groups.type)]
+      args: [P.matchAST<P.ASTTypeExpression>(type)]
     })
   }
 

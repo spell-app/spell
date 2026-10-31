@@ -278,3 +278,11 @@ def test_filter_in_turn_waits_for_each_answer(core: Core) -> None:
 
     assert asyncio.run(core.filter_in_turn([1, 2, 3], condition)) == [2, 3]
     assert asked == [1, 2, 3]
+
+
+def test_sorted_by_sorts_as_the_javascript_core_does(core: Core) -> None:
+    assert core.sorted_by(["pear", "fig", "apple"], lambda word: len(word)) == ["fig", "pear", "apple"]
+    assert core.sorted_by(["b", "A", "c"], lambda word: word) == ["A", "b", "c"]
+    items = [{"n": None}, {"n": 2}, {"n": 1}]
+    assert core.sorted_by(items, lambda item: item["n"]) == [{"n": 1}, {"n": 2}, {"n": None}]
+    assert core.sorted_by({"a": 2, "b": 1}, lambda value: value) == [1, 2]

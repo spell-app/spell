@@ -20,6 +20,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "draw_slot": "slot",
   "drawn_markup": "markup",
   "every_thing": "type",
+  "every_thing_where": "type|body?",
   "has_slots": "type|slots",
   "items_reordered": "type|seconds?|now?",
   "its_quoted_property": "type|property",

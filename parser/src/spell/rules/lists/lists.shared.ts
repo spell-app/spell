@@ -19,20 +19,44 @@ export type GuardOperands = { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
 //    shared by `list_filter`, `list_membership_test` and `list_remove_where`
 ////////////////
 
+/** Every scope of a predicate or sort key, where `it` is the item -- see `isItemScope()`. */
+const ITEM_SCOPES = new WeakSet<P.Scope>()
+
+/**
+ * Is `scope` a predicate's or sort key's?
+ * - So `list_sorted_by` can tell it's inside one, and leave the comma to the list:
+ *   `every card where its rank is the rank, sorted by its suit` sorts the cards, not the rank.
+ */
+export function isItemScope(scope: P.Scope): boolean {
+  return ITEM_SCOPES.has(scope)
+}
+
+/** `props` as a scope where `it` is the item:  a predicate's or sort key's. */
+export function itemScope(props: ConstructorParameters<typeof P.MethodScope>[0]): P.MethodScope {
+  const scope = new P.MethodScope(props)
+  ITEM_SCOPES.add(scope)
+  return scope
+}
+
 /**
  * Nested scope for `match`'s `where` clause's predicate:  singularized `arg` is the current item,
  * also aliased from `it`, e.g. `word` for `words in my-list where word starts with "a"`.
  * - Both are what `list` holds, if we can tell, e.g. `Card` for `the cards in the deck where ...`
  * - Looked up now, while parsing:  the predicate parses in this scope.
+ * - `name`:  what to call the item, if `arg` doesn't say, as a type's name doesn't:  `every recipe where ...`.
  */
-export function getWhereScope(match: P.Match, arg: P.Match, list: P.Match | undefined): P.MethodScope {
+export function getWhereScope(
+  match: P.Match,
+  arg: P.Match,
+  list: P.Match | undefined,
   // `cards` names a `card` too, in a Spanish file naming an English type (epic `spanish` J89)
-  const name = SP.singularIn(match.scope, arg.value)
+  name = SP.singularIn(match.scope, arg.value)
+): P.MethodScope {
   const datatype = list && match.scope.getItemType(list.datatype)
   const variable = new P.ScopeVariable({ name, datatype, declaredBy: arg })
   // for `getWhereMethod()`, which can't look it up:  `getAST()` must be pure
   ;(match.data as ItemVariableData).itemVariable = variable
-  return new P.MethodScope({
+  return itemScope({
     parentScope: match.scope,
     args: [variable],
     mapItTo: name,

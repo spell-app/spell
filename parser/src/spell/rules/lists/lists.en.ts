@@ -20,6 +20,7 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
+import { ListSortedBy } from "./ListSortedBy"
 import { ListIteration } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -534,6 +535,27 @@ lists.addRule(ListFilter, {
         ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"]
+      ]
+    }
+  ]
+})
+
+lists.addRule(ListSortedBy, {
+  syntax: ",? sorted by {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("my-list")
+      },
+      tests: [
+        ["my-list sorted by its foo", "core.sortedBy(myList, (item) => item.foo)"],
+        ["my-list, sorted by its foo", "core.sortedBy(myList, (item) => item.foo)"],
+        [
+          "the items in my-list where its foo is 1, sorted by its bar",
+          "core.sortedBy(core.filter(myList, (item) => item.foo === 1), (item) => item.bar)"
+        ]
       ]
     }
   ]

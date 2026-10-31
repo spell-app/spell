@@ -3163,6 +3163,32 @@
           "aliases": []
         },
         {
+          "className": "ListSortedBy",
+          "ruleNames": ["list_sorted_by"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListSortedBy.ts",
+          "line": 19,
+          "purpose": "A list in order of something about each item (epic `data` P10).",
+          "syntaxes": [
+            {
+              "syntax": ",? (ordenado|ordenada|ordenados|ordenadas) por {inline_expression}?",
+              "example": "mi-lista ordenada por su foo",
+              "outputs": {
+                "js": {
+                  "code": "core.sortedBy(miLista, (item) => item.foo)"
+                },
+                "ts": {
+                  "code": "core.sortedBy(miLista, (item) => item.foo)"
+                },
+                "py": {
+                  "code": "core.sorted_by(mi_lista, lambda item: item.foo)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "ListMembershipTest",
           "ruleNames": ["list_membership_test"],
           "internal": false,
@@ -3844,6 +3870,32 @@
                 },
                 "py": {
                   "code": "core.every_thing(Pile)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "EveryThingWhere",
+          "ruleNames": ["every_thing_where"],
+          "internal": false,
+          "file": "src/spell/rules/classes/EveryThingWhere.ts",
+          "line": 15,
+          "purpose": "Every thing of a type that fits (epic `data` P10, a short form of `list_filter`).",
+          "syntaxes": [
+            {
+              "syntax": "(cada|todo|toda) {type:known_type} donde {inline_expression}?",
+              "example": "cada carta donde su rango es 1",
+              "outputs": {
+                "js": {
+                  "code": "core.filter(core.everyThing(Carta), (carta) => carta.rango === 1)"
+                },
+                "ts": {
+                  "code": "core.filter(core.everyThing(Carta), (carta: Carta) => carta.rango === 1)"
+                },
+                "py": {
+                  "code": "core.filter(core.every_thing(Carta), lambda carta: carta.rango == 1)"
                 }
               }
             }

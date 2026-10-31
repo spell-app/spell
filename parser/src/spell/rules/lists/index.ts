@@ -34,6 +34,7 @@ export * from "./RangeBetweenExpression"
 export * from "./RangeStartingWithExpression"
 export * from "./RangeCountExpression"
 export * from "./ListFilter"
+export * from "./ListSortedBy"
 export * from "./ListMembershipTest"
 // Adding to list (in-place)
 export * from "./ListAdd"

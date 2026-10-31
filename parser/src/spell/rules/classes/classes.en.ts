@@ -27,6 +27,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EveryThingWhere } from "./EveryThingWhere"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE, ITEMS_DRAGGABLE, DROPPABLE_WHEN } from "./ListGuard"
@@ -2266,6 +2267,30 @@ classes.addRule(EveryThing, {
         scope.compile(["a card is a thing", "a card has a suit as one of clubs, diamonds"].join("\n"), "block")
       },
       tests: [["every card suit", "Card.Suits"]]
+    }
+  ]
+})
+
+classes.addRule(EveryThingWhere, {
+  syntax: "every {type:known_type} where {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a rank as number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "every card where its rank is 1",
+          "core.filter(core.everyThing(Card), (card) => card.rank === 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card.rank === 1)"
+        ],
+        [
+          "every card where it is 1",
+          "core.filter(core.everyThing(Card), (card) => card === 1)",
+          "core.filter(core.everyThing(Card), (card: Card) => card === 1)"
+        ]
+      ]
     }
   ]
 })

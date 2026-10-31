@@ -37,6 +37,22 @@ export type CollectionIterationCallback<T = unknown> = (
   collection: unknown
 ) => unknown
 
+/**
+ * Which of two sort keys goes first -- see `core.sortedBy()`.
+ * - Nothing goes last;  text ignores case;  anything else compares as javascript's `<` does.
+ * - Python's core sorts the same:  `_sort_key()`.
+ */
+function compareSortKeys(one: unknown, other: unknown): number {
+  if (one === undefined || one === null) return other === undefined || other === null ? 0 : 1
+  if (other === undefined || other === null) return -1
+  const [first, second] = [one, other].map((key) => (typeof key === "string" ? key.toLowerCase() : key)) as [
+    number,
+    number
+  ]
+  if (first < second) return -1
+  return first > second ? 1 : 0
+}
+
 /** A list with guards, e.g. a `List` -- see `core.move()`, `List.moveHere()`. */
 type Guarded = {
   /** Move `thing` here, if allowed -- returns whether it moved. */
@@ -364,6 +380,29 @@ export const collectionOtherMethods = defineCoreModule({
       }
     }
     core.forEach(collection, filter)
+    return results as C
+  },
+
+  /**
+   * Return new `collection` of the same things, in order of what `key` says of each:  smallest first.
+   * - Compiles from `every card, sorted by its rank` -- see `rules/lists/ListSortedBy.ts`.
+   * - Two with the same key keep their order;  one with no key goes last.
+   * - Text compares ignoring case:  `apple` before `Bread`.  Accents aren't considered:  see epic `data` P10.
+   * - A plain object's values, in an array.
+   * - NEVER waits:  a `key` that waits is a mistake.
+   */
+  sortedBy<T = unknown, C extends CollectionOf<T> = CollectionOf<T>>(
+    collection?: C & CollectionOf<T>,
+    key?: CollectionIterationCallback<NoInfer<T>>
+  ): C {
+    if (!assert.isDefined(collection, "core.sortedBy(collection)")) return undefined as C
+    const keyed: Array<{ value: T; sortKey: unknown }> = []
+    core.forEach(collection, (value, position, _collection) => {
+      keyed.push({ value, sortKey: key ? key(value, position, _collection) : value })
+    })
+    keyed.sort((one, other) => compareSortKeys(one.sortKey, other.sortKey))
+    const results = core.isArrayLike(collection) ? core.newThingLike(collection) : []
+    for (const { value } of keyed) core.append(results, value)
     return results as C
   },
 
