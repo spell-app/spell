@@ -8,6 +8,9 @@
  *   - `no-file`:  Purpose, a sentence, takes File's room;  `stacked`:  one Syntax column for Current and the box.
  *   - `blank`:  that one column FIRST (today's text, the box under it), then Purpose.
  *   - `reorder`:  an Order column first, as narrow as its place and two buttons, before the shares (`--_epic-choice-cols`).
+ *   - `notes` (epic `epic-engine` P58, r51):  some row has a note, so Explanation is a column of its own, LAST;
+ *     each layout's shares make room for it, and the grid's least width grows to 800px.
+ * - Under each box, a comment box (P58):  the same look, in the text's own font, as it's prose.
  * - A row whose box Owen changed:  an orange box, an orange edge on the row.
  * - Public tokens (`--epic-choice-rows-*`) are never declared here:  read through private aliases.
  */
@@ -52,6 +55,26 @@
   }
   .table.blank.no-file {
     --_epic-choice-cols: 45fr 55fr;
+  }
+  /* with Explanation, last:  each layout's shares again, one more column */
+  .table.notes {
+    --_epic-choice-cols: 14fr 18fr 20fr 26fr 22fr;
+    min-width: 800px;
+  }
+  .table.notes.no-file {
+    --_epic-choice-cols: 24fr 24fr 28fr 24fr;
+  }
+  .table.notes.stacked {
+    --_epic-choice-cols: 14fr 22fr 36fr 28fr;
+  }
+  .table.notes.stacked.no-file {
+    --_epic-choice-cols: 28fr 40fr 32fr;
+  }
+  .table.notes.blank {
+    --_epic-choice-cols: 14fr 34fr 24fr 28fr;
+  }
+  .table.notes.blank.no-file {
+    --_epic-choice-cols: 40fr 28fr 32fr;
   }
   .table.reorder {
     grid-template-columns: max-content var(--_epic-choice-cols);
@@ -113,9 +136,8 @@
     font: 0.72em / 1.3 var(--ui-font-family-mono, ui-monospace, monospace);
   }
 
-  /* Purpose:  a few words or a short sentence, the "stays" tag, the note in small print */
+  /* Purpose:  a few words or a short sentence, the "stays" tag;  Explanation:  the note in small print, its lines kept */
   .note {
-    margin-top: 2px;
     white-space: pre-wrap;
     color: var(--_epic-choice-muted);
     font-size: 0.8em;
@@ -178,11 +200,16 @@
     flex: 1 1 auto;
     min-width: 0;
   }
-  .box::part(input) {
+  /* the comment box under it:  the whole cell's width */
+  .comment {
+    display: flex;
+    margin-top: 4px;
+  }
+  :is(.box, .comment)::part(input) {
     flex: 1 1 auto;
     font: inherit;
   }
-  .box::part(control) {
+  :is(.box, .comment)::part(control) {
     min-block-size: calc(1lh + 8px);
     margin: 0;
     box-sizing: border-box;
@@ -195,7 +222,10 @@
     color: var(--ui-text-color, CanvasText);
     font: 0.85em / 1.4 var(--ui-font-family-mono, ui-monospace, monospace);
   }
-  .box::part(control):focus-visible {
+  .comment::part(control) {
+    font: 0.85em / 1.4 var(--ui-font-family, system-ui, sans-serif);
+  }
+  :is(.box, .comment)::part(control):focus-visible {
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: -1px;
   }

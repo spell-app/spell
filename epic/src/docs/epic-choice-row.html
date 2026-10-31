@@ -7,7 +7,7 @@
     <title>epic-choice-row</title>
     <meta
       name="description"
-      content="One row of a choice page: a use site, and the box holding Claude's recommendation."
+      content="One row of a choice page: a use site, the box holding Claude's recommendation, and a comment box."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -40,7 +40,8 @@
           ></ui-menu>
           <ui-header level="1" class="site-title"
             >&lt;epic-choice-row&gt;<ui-header
-              >One row of a choice page: a use site, and the box holding Claude's recommendation.</ui-header
+              >One row of a choice page: a use site, the box holding Claude's recommendation, and a comment
+              box.</ui-header
             ></ui-header
           >
         </ui-container></ui-segment
@@ -49,7 +50,8 @@
         ><article class="site-article">
           <p class="lede">
             One row of a choice page: the use site, what it's for, how it reads today, and a box pre-filled with
-            Claude's call, which Owen types over or leaves.
+            Claude's call, which Owen types over or leaves. Under the box, a comment box for his choice or notes on
+            that row alone; the row's note, Claude's short why, is a column of its own, last.
           </p>
           <p class="meta">
             For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
@@ -59,7 +61,8 @@
               target="src-spell-epic-src-components-epic-choice-rows"
               ><code title="epic/src/components/epic-choice-rows/">epic-choice-rows/</code></a
             >
-            (epic <code>epic-workflow</code> P12).<br />
+            (epic <code>epic-workflow</code> P12; the comment box and the Explanation column, epic
+            <code>epic-engine</code> P58).<br />
             Its vocabulary (every table below comes from it):
             <a
               href="/epic/src/components/epic-choice-rows/EpicChoiceRow.en.ts"
@@ -174,7 +177,8 @@
                     <td><code>note</code></td>
                     <td>text</td>
                     <td>
-                      A short why, small, under the purpose; `<code> </code>code<code> </code>` in it shows as code.
+                      A short why, small, in the Explanation column, last; its line breaks show, and
+                      `<code> </code>code<code> </code>` in it shows as code.
                     </td>
                     <td></td>
                   </tr>
@@ -232,7 +236,14 @@
                     </tr>
                     <tr>
                       <td><code>purpose</code></td>
-                      <td>The Purpose cell: the purpose, <code>stays</code> when it stays, the note.</td>
+                      <td>The Purpose cell: the purpose, and <code>stays</code> when it stays.</td>
+                    </tr>
+                    <tr>
+                      <td><code>note</code></td>
+                      <td>
+                        The Explanation cell, last: the note; empty for a row without one, in a table where others
+                        have one.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>current</code></td>
@@ -245,12 +256,20 @@
                     <tr>
                       <td><code>box</code></td>
                       <td>
-                        The <code>&lt;textarea&gt;</code>: one line of text, wrapping and growing; Enter adds no line.
+                        The <code>&lt;ui-textarea grow&gt;</code>: one line of text, wrapping and growing; Enter adds no
+                        line.
                       </td>
                     </tr>
                     <tr>
                       <td><code>reset</code></td>
                       <td>The round button putting the recommendation back.</td>
+                    </tr>
+                    <tr>
+                      <td><code>comment</code></td>
+                      <td>
+                        The comment box under the box, a <code>&lt;ui-textarea grow&gt;</code>: your choice or notes on
+                        this row, free text; Enter adds a line. Saved and sent with the box.
+                      </td>
                     </tr>
                   </tbody>
                 </table></ui-table
@@ -294,13 +313,19 @@
               <li>
                 File: the file's name and line, a link that opens VS Code at the line; its folder under it, small.
               </li>
-              <li>
-                Purpose: a few words or a sentence, <code>stays</code> when Claude would keep it, the note in small
-                print.
-              </li>
+              <li>Purpose: a few words or a sentence, <code>stays</code> when Claude would keep it.</li>
               <li>
                 The box: monospace, one line of text that wraps and grows. Changed: orange, an orange edge on the row,
                 and a round button putting the recommendation back.
+              </li>
+              <li>
+                The comment box, under it: the cell's whole width, in the text's own font, empty, a quiet placeholder
+                ("Your choice, notes ..."). It grows with its text; Enter adds a line. A comment is no change to the
+                box: the row stays as it was, and the comment goes with the draft and "Do it" on its own.
+              </li>
+              <li>
+                Explanation, the last column: the note in small grey print, its line breaks kept. Only when some row
+                of the table has a note.
               </li>
             </ul></ui-section
           >
@@ -317,8 +342,8 @@
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
             <p class="meta">
-              Last checked 2026-10-14 against branch <code>epic-workflow</code> (P12, P15): the tables are its
-              vocabulary's (epic-choice-row); the rest from its component and its stylesheet.
+              Last checked 2026-10-31 against branch <code>epic-engine</code> (P58): the tables are its vocabulary's
+              (epic-choice-row); the rest from its component and its stylesheet.
             </p>
           </footer>
         </article></ui-container
