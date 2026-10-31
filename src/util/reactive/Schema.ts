@@ -220,6 +220,22 @@ export type PropInfo = {
    * - Only `false` says anything:  every other prop is undone with the action that set it.
    */
   undoable?: boolean
+  /**
+   * The line that declares it, for the editor's side bar (`Places.originOf()`).
+   * - Nothing writes it yet:  epic `data`'s Gathering Reads phase has the compiler write it into each saved property's
+   *   declaration, and settles this shape.
+   */
+  declaredAt?: PropDeclaredAt
+}
+
+/** Where a property is declared:  a file, and where its statement starts and ends in it. */
+export type PropDeclaredAt = {
+  /** Full path of its file, e.g. `@spell/examples/Solitaire/Card.spell`. */
+  path: string
+  /** Character offset in that file where its declaring statement starts. */
+  start: number
+  /** Character offset where that statement ends. */
+  end: number
 }
 
 ////////////////

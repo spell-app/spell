@@ -97,6 +97,14 @@ export type RateLimit = {
  * - What's missing, the engine does instead, the same way for every place.
  */
 export type PlaceCapabilities = {
+  /**
+   * What sort of place it is, in words for people, e.g. `"web service"`:  what the side bar says beside its name.
+   * - Words only, never a thing to branch on:  branch on what it can do.
+   * - Left out:  nobody said.
+   */
+  kind?: string
+  /** Is it a sample, standing in while designing (`SamplePlace`)?  Left out:  no. */
+  isSample?: boolean
   /** The field holding a row's id.  Left out:  rows share no identity, and stay inside their list. */
   idOf?: string
   /** Is the id made by the place, as Airtable's are?  Left out:  whoever inserts a row names its id. */

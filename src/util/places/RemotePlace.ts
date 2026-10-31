@@ -11,12 +11,14 @@ import {
   type PlaceContext,
   type PlaceErrorKind,
   type PlaceRow,
-  type SelectingContext
+  type SelectingContext,
+  type WhyNotWritable
 } from "./places.types"
 import { jsonIn, WebPlace } from "./WebPlace"
 
 /** What it assumes a place on a server side does:  it's told what's done on each answer, in `handled`. */
 const REMOTE_CAPABILITIES: PlaceCapabilities = {
+  kind: "web service",
   idOf: "id",
   filter: "none",
   sort: "none",
@@ -141,6 +143,15 @@ export class RemotePlace extends WebPlace implements Place {
       .json()
       .catch(() => undefined)
     return (said as { error?: string } | undefined)?.error ?? error.message
+  }
+
+  /** Why it was refused:  `PlaceServer` passes on what the place behind it said, per field and per owner. */
+  protected async whyNotOf(error: ApiError): Promise<WhyNotWritable> {
+    const said = await error.response
+      ?.clone()
+      .json()
+      .catch(() => undefined)
+    return (said as { whyNot?: WhyNotWritable } | undefined)?.whyNot ?? "place"
   }
 
   /** A stale token isn't an answer about the request:  see the class. */

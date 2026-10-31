@@ -173,6 +173,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `PlaceError`:  a place THROWS when it fails, unlike preferences' `PrefPlace`
   - `PlaceCache`:  ONE row per type and id, its fields reactive.
   - `Places`:  places by name, swapping the one behind a name, and the one cache.
+    - `originOf(thing, property)`:  where a value came from, for the editor's side bar (epic `data` P9):
+      its place, its kind, its collection and id, whether it can be written and why not, whether it's a sample;
+      a worked-out value says it's read only, and the places it read (`sourcesReadBy()`, the cells).
+      `declaredAt` is the declaration's (`PropInfo.declaredAt`), which nothing writes until Gathering Reads.
+    - `useInstead()` / `backToDeclared()`:  another place behind a name for now, whole:  its own rows and its own changes,
+      with what's pending for the real one set aside (`PendingChanges.setAside()`), and every reader reading again.
+      `swap()` only changes where the next read goes.
+  - [SamplePlace](places/SamplePlace.ts):  editable records in place of a real place, while designing (epic `data` P9).
+    - `useSample(places, name)`, `useRealPlace(places, name)`.
+    - Copied from the real place when it answers in time, else made from the type (`rowsMadeFrom()`, in
+      `spell/parser/core/placeSamples`), and kept in this browser only:  nothing writes a file, so nothing reaches git (J2).
+    - Taken by file, in NO barrel, and nothing a program loads imports it, so a built app leaves it out:
+      `parser/tests/core/places.build.test.ts` builds one, and looks.
   - `PlaceResult`:  one reader's read of one place, on `Loadable`;  its `status` and `leave()` are new.
     - A failed refresh leaves its rows there, `"couldn't update"`.
   - `PlaceReads`:  readers of one collection and query share one request.

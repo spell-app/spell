@@ -6,6 +6,7 @@ import {
   type PlaceCapabilities,
   type PlaceContext,
   type PlaceErrorKind,
+  type WhyNotWritable,
   type PlaceRow
 } from "./places.types"
 
@@ -84,13 +85,19 @@ export abstract class WebPlace {
       if (!(error instanceof ApiError) || !this.isAnAnswer(error.status)) throw error
       const kind = this.errorKindFor(error.status!)
       const message = await this.messageOf(error)
-      throw new PlaceError(message, { cause: { kind, ...(kind === "refused" && { whyNot: "place" }) } })
+      const whyNot = kind === "refused" ? await this.whyNotOf(error) : undefined
+      throw new PlaceError(message, { cause: { kind, ...(whyNot && { whyNot }) } })
     }
   }
 
   /** What to say of a failure that means something.  A subclass that knows why says that. */
   protected messageOf(error: ApiError): Promise<string> | string {
     return error.message
+  }
+
+  /** Why a refused write wasn't allowed:  a plain server says only no.  A subclass that knows why says that. */
+  protected whyNotOf(_error: ApiError): Promise<WhyNotWritable> | WhyNotWritable {
+    return "place"
   }
 
   /** What a server's answer of `status`, a 4xx, means.  A subclass says more. */

@@ -6,7 +6,16 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { SRV, type Handler } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer } from "spell/server/places"
 import { ask, serveHandler, type Served } from "spell/server/test/serve"
-import { JsonChunks, MemoryPlace, Places, RemotePlace, RestPlace, type Place } from "spell/util/places"
+import {
+  JsonChunks,
+  MemoryPlace,
+  Places,
+  RemotePlace,
+  RestPlace,
+  type Place,
+  type WriteAnswer,
+  type WriteQuestion
+} from "spell/util/places"
 
 import { newFolder, removeFolders } from "./places.helpers"
 
@@ -113,6 +122,25 @@ describe("PlaceServer and RemotePlace", () => {
     const { remote: refusing } = await placeServer({ box: readOnly })
     await expect(refusing.apply([{ kind: "insert", collection: "x", id: "1", fields: {} }], {})).rejects.toMatchObject({
       kind: "refused"
+    })
+  })
+
+  test("why a write was refused crosses it:  per field and per owner, not only the place's", async () => {
+    /** A place where the title can't be written. */
+    class FormulaPlace extends MemoryPlace {
+      canWrite({ field }: WriteQuestion): WriteAnswer {
+        return field === "title" ? { canWrite: false, whyNot: "field" } : { canWrite: true }
+      }
+    }
+    const place = new FormulaPlace({ collections: { recipes: [{ id: "r-1", title: "Soup" }] } })
+    const { remote } = await placeServer({ box: place })
+    await expect(
+      remote.apply([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "x" } }], {})
+    ).rejects.toMatchObject({ kind: "refused", cause: { whyNot: "field" } })
+
+    const { remote: noWrites } = await placeServer({ box: new MemoryPlace({ capabilities: { write: "none" } }) })
+    await expect(noWrites.apply([{ kind: "insert", collection: "x", id: "1", fields: {} }], {})).rejects.toMatchObject({
+      cause: { whyNot: "place" }
     })
   })
 

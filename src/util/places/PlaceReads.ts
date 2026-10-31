@@ -94,6 +94,11 @@ export class PlaceReads {
     }
   }
 
+  /** Everyone reading from `placeName` now:  including one whose last read failed, as it's still waiting for rows. */
+  readersOf(placeName: string): PlaceResult[] {
+    return [...this.readOfReader].filter(([, read]) => read.placeName === placeName).map(([reader]) => reader)
+  }
+
   ////////////////
   // ## Readers coming and going
   ////////////////

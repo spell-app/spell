@@ -75,6 +75,20 @@ export function initializeExtended(target: any, ..._what: Array<"derived" | "pro
   extendedFor(target)
 }
 
+/**
+ * Each cell `target` has so far:  a prop's, a piece of state's, its key set's.
+ * - A cell is made the first time something tracked reads it, so one nobody read isn't here.
+ * - For telling whose a cell is (`sourcesReadBy()`):  only something asked about, never each read.
+ */
+export function cellsOf(target: object): Cell[] {
+  const extended = target as Partial<Extended>
+  return [
+    ...(extended[PROP_CELLS]?.values() ?? []),
+    ...(extended[STATE_CELLS]?.values() ?? []),
+    ...(extended[KEYS] ? [extended[KEYS]] : [])
+  ]
+}
+
 ////////////////
 // ## Props
 ////////////////

@@ -26,6 +26,7 @@ const OUT_OF_DATE_STATUSES = new Set([409, 412, 428])
 
 /** What it can do, unless it's told otherwise:  a plain web service, read and written, and nothing else promised. */
 const REST_CAPABILITIES: PlaceCapabilities = {
+  kind: "web service",
   idOf: "id",
   filter: "none",
   sort: "none",

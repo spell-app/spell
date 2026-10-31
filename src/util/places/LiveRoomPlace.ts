@@ -30,6 +30,7 @@ import {
 
 /** What a room does:  nearly nothing of a query, as the engine does that from the copy it hands over. */
 const ROOM_CAPABILITIES: PlaceCapabilities = {
+  kind: "live room",
   idOf: ROOM_ID_FIELD,
   filter: "none",
   sort: "none",

@@ -23,6 +23,7 @@ import {
 
 /** What a `MemoryPlace` can do, unless it's told otherwise:  everything but `makesIds`. */
 const MEMORY_CAPABILITIES: PlaceCapabilities = {
+  kind: "in memory",
   idOf: "id",
   filter: "every field",
   sort: "every field",
@@ -351,6 +352,21 @@ export class MemoryPlace implements Place {
       if (ifMissing) this.collections.set(collection, rows)
     }
     return rows
+  }
+
+  /** Does it hold `collection` yet, even with no rows in it? */
+  protected holdsCollection(collection: string): boolean {
+    return this.collections.has(collection)
+  }
+
+  /** `collection` now holds copies of `rows`:  what it starts with, not a write, so nobody's told. */
+  protected startCollection(collection: string, rows: readonly PlaceRow[]): void {
+    this.collections.set(collection, structuredClone([...rows]))
+  }
+
+  /** Every collection it holds, by name:  copies. */
+  protected get everyCollection(): Record<string, PlaceRow[]> {
+    return structuredClone(Object.fromEntries(this.collections))
   }
 
   /** The real row of `collection` with this id. */

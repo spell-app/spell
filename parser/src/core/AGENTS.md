@@ -259,6 +259,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       deleting what you're changing raises one (Restore).
     - `draftOf()`:  a copy that takes changes and sends nothing, until `save()`;  it's kept on this device.
     - `saveNew()`:  a thing made here, under its browser-made `Thing.id`;  a place that makes ids renames it.
+    - `startEdit()`, for a side bar:  a plain set per keystroke, held;  `commit()` makes one undo step and sends it (J4), in the
+      history it's handed, the program's by default;  `cancel()` puts it back (epic `data` P9).
+    - `describeValue()` is what `Places.originOf()` asks about a thing.
+    - A sample going in or out (`spell/util/places/SamplePlace`), through `Places.onSwapped()`:
+      the program's undo steps go, as when saved state loads, and a `PlaceEdit`'s step or a draft from before does nothing,
+      so nothing done to a sample reaches the real place.
+    - `rowsMadeFrom()`:  a sample's records from what a class declares.
+      By file, `spell/parser/core/placeSamples`:  what a built app loads never imports it.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

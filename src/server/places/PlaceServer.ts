@@ -4,6 +4,7 @@ import {
   type ListQuery,
   type Place,
   type PlaceChange,
+  type PlaceErrorCause,
   type PlaceErrorKind,
   type PlaceRow
 } from "spell/util/places/places.types"
@@ -44,6 +45,7 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - STANDS BEHIND `Guard`, reads too:  a read can spend a key, and without it any web page could reach a local server holding some.
  *   - NOTE: Guard's token covers a LOCAL server only.  A hosted one needs its own sign-in, which epic `data`'s The Cloud has to answer:
  *     don't put this on a public address as it stands.
+ * - A refusal says why (`whyNot`), so `RemotePlace` can pass it on, per field and per owner.
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
  * - A change's `changeId` it has seen is made once:  it's answered with what it made.
  * - Each read stops as the asker hangs up.
@@ -196,7 +198,8 @@ export class PlaceServer {
       })
     } catch (error) {
       status = this.statusOf(error)
-      answered = { error: (error as Error).message, ...(error instanceof PlaceError && { kind: error.kind }) }
+      const { kind, whyNot } = error instanceof PlaceError ? (error.cause ?? {}) : ({} as Partial<PlaceErrorCause>)
+      answered = { error: (error as Error).message, ...(kind && { kind }), ...(whyNot && { whyNot }) }
       if (status >= 500 && !stop.signal.aborted) console.error(this.keys.scrubbed(`PlaceServer:  ${String(error)}`))
     }
     if (reply.raw.destroyed) return

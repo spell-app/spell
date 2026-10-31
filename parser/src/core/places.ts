@@ -44,8 +44,23 @@
  * - A live room is followed as its first read's things are made (`PlaceHeal.follow()`):  what others do shows here too.
  *   Someone deleting what you're editing raises a notice with Restore;  your long text replaced, one with Use mine.
  * - `saveNew()`:  a thing made here goes to a place, under its own id (`Thing.id`, made in the browser).
+ *
+ * For the editor's side bar (epic `data` P9, request r1 of epic `editor`):
+ *
+ * ```ts
+ * places.originOf(recipe, "title")             // which place, can it be written, why not, is it a sample
+ * const edit = things.startEdit(recipe, "title", { title: "Change Title" })
+ * edit.set("Stew")                             // a plain set, shown at once, held:  once per keystroke if you like
+ * edit.commit()                                // one undo step, and the change goes out (J4)
+ * ```
+ *
+ * - `originOf()` is `Places`'s;  it asks here about a thing:  `describeValue()`.
+ * - A sample (`spell/util/places/SamplePlace`) isn't known here, so a program doesn't carry it.
+ *   This only makes sure nothing done for one reaches the real place:  `swapped()`.
  */
-import { ITEMS_KEY, keysOf, TYPE_KEY, untrackCells } from "spell/util"
+import { cellsOf, ITEMS_KEY, keysOf, schemaOf, sourcesReadBy, TYPE_KEY, untrackCells } from "spell/util"
+import type { UndoRecord } from "spell/util/persist/persist.types"
+import type { UndoStack } from "spell/util/persist/UndoStack"
 import type {
   PendingChanges,
   PendingGroup,
@@ -57,7 +72,7 @@ import type {
 } from "spell/util/places/PendingChanges"
 import type { PlaceCache } from "spell/util/places/PlaceCache"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
-import type { Places } from "spell/util/places/Places"
+import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/util/places/Places"
 import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
 import { POSITIONS_KEY } from "spell/util/places/positions"
 import { parseRef } from "spell/util/places/refs"
@@ -165,7 +180,7 @@ class RowWriter extends Saver {
  * - One per program:  it's what remembers which things it made.
  * - A `Loader`, for its entry reading:  its `load()` is left to saved things.
  ****************/
-export class PlaceThings extends Loader {
+export class PlaceThings extends Loader implements PlaceThingMaker {
   /** The places its things are kept in. */
   private readonly places: Places | undefined
   /** What Show me does. */
@@ -197,6 +212,8 @@ export class PlaceThings extends Loader {
       places.onConflict((conflict) => this.merged(conflict))
       places.onLost((lost) => this.lostText(lost))
       places.onThingDeleted((deleted) => this.thingDeleted(deleted))
+      places.onSwapped((placeName) => this.swapped(placeName))
+      places.addThingMaker(this)
     }
   }
 
@@ -285,6 +302,7 @@ export class PlaceThings extends Loader {
     const home = HOMES.get(thing)
     if (!home) throw new TypeError("PlaceThings.draftOf():  this thing isn't kept in a place;  it needs no draft")
     let draft = this.drafts.get(thing)
+    if (draft && !draft.isStillGood) draft = undefined
     if (!draft) this.drafts.set(thing, (draft = new PlaceDraft(thing, home, () => this.drafts.delete(thing))))
     return draft
   }
@@ -314,6 +332,112 @@ export class PlaceThings extends Loader {
     return dateIfDeclared(thing.constructor as never, key, this.read(json))
   }
 
+  ////////////////
+  // ## The side bar:  where a value came from, and changing it
+  ////////////////
+
+  /**
+   * What's known of `property` of `thing`, for `Places.originOf()`:  `undefined` if it's nothing of this one's.
+   * - A getter with no setter and no stored value is worked out:  it's read, to see what it read.
+   *   - Reading it changes nothing (`whileReading()`), and it may make what it needs, as any read does.
+   *   - It sees what this one reading read:  so nothing, for a list with nothing in it.
+   * - A list held by a thing in a place answers as that thing's field.
+   * - NEVER throws:  a worked-out value that throws is logged.
+   */
+  describeValue(thing: object, property: string): SavedValue | WorkedOutValue | undefined {
+    if (!(thing instanceof Thing || thing instanceof List)) return undefined
+    const info = schemaOf(thing.constructor).info(property)
+    const declaredAt = info?.declaredAt
+    const declared = declaredAt && { declaredAt }
+    if (isWorkedOut(thing, property)) {
+      try {
+        const read = () => whileReading(() => (thing as unknown as Record<string, unknown>)[property])
+        const workedOutFrom = sourcesReadBy(read)
+        return { workedOutFrom, readsFrom: this.placesHolding(workedOutFrom), ...declared }
+      } catch (error) {
+        console.error(`PlaceThings.describeValue():  reading \`${property}\` threw, so it has no origin`, error)
+        return undefined
+      }
+    }
+    const held = LIST_FIELDS.get(thing)
+    const home = HOMES.get(held?.owner ?? thing)
+    if (home?.things !== this) return undefined
+    const { placeName, collection, type, id } = home
+    const field = held && property === "items" ? held.field : property === "items" ? ITEMS_KEY : property
+    return { placeName, collection, type, id, field, isIdentity: field === "id", ...declared }
+  }
+
+  /** The name of the place of each thing whose cells are among `sources`. */
+  private placesHolding(sources: ReadonlySet<unknown>): string[] {
+    const names = new Set<string>()
+    for (const thing of this.loaded.values()) {
+      const placeName = HOMES.get(thing)?.placeName
+      if (placeName !== undefined && cellsOf(thing).some((cell) => sources.has(cell))) names.add(placeName)
+    }
+    return [...names]
+  }
+
+  /**
+   * One person's change to one property:  what a side bar's field does.
+   * - `set()`:  a plain set, the program's own path, shown at once and held.  Call it for every keystroke.
+   * - `commit()`, on Enter or leaving the field:  one undo step, and the change goes out (J4).
+   * - `cancel()`:  put back, and nothing went.
+   * - `history`:  where the step goes;  the running program's by default.
+   *   A plain set outside an action joins no step by itself, so this records one wherever you say.
+   * - Undoing it is the same write back:  unsent, the change is dropped;  sent, a reversing one goes out.
+   * - throws `TypeError` for a value that's worked out:  it has nothing to set
+   */
+  startEdit(thing: SpellObject, property: string, { title, history }: PlaceEditOptions): PlaceEdit {
+    if (isWorkedOut(thing, property)) {
+      throw new TypeError(`PlaceThings.startEdit():  \`${property}\` is worked out;  change what it reads instead`)
+    }
+    return new PlaceEdit({ things: this, thing, property, title, history: history ?? core.RUNTIME?.history })
+  }
+
+  /** The group a change made inside an edit is held in. */
+  editing(group: number, write: () => void): void {
+    const outer = this.savingInGroup
+    this.savingInGroup = group
+    try {
+      write()
+    } finally {
+      this.savingInGroup = outer
+    }
+  }
+
+  /** The changes `thing` writes to, if it's kept in a place. */
+  pendingOf(thing: SpellObject): PendingChanges | undefined {
+    const home = HOMES.get(thing)
+    return home && this.places?.pendingFor(home.placeName)
+  }
+
+  /** The place behind what `thing` is kept in, now. */
+  placeBehind(thing: SpellObject): object | undefined {
+    const home = HOMES.get(thing)
+    return home && this.places?.placeFor(home.placeName)
+  }
+
+  /**
+   * Another place went behind `placeName`, or left:  nothing done there may reach what's behind it now.
+   * - The running program's undo steps go, as when saved state is loaded:  undoing one would write to the other place.
+   *   (`PlaceEdit` guards steps in anyone else's history itself.)
+   * - A field written while it was in, and that the next place's row won't name, goes back to nothing.
+   */
+  private swapped(placeName: string): void {
+    core.RUNTIME?.history.clear()
+    whileReading(() => {
+      for (const [ref, fields] of this.writtenInstead) {
+        const thing = this.loaded.get(ref)
+        if (HOMES.get(thing as object)?.placeName !== placeName) continue
+        for (const field of fields) writeInto(thing!, field, valueOf(thing!, field) instanceof List ? [] : undefined)
+        this.writtenInstead.delete(ref)
+      }
+    })
+  }
+
+  /** The fields written while another place was in for the real one, by thing. */
+  private readonly writtenInstead = new Map<string, Set<string>>()
+
   /** The list of places, the program's.  - throws `TypeError` with none */
   placesOrDie(method: string): Places {
     if (!this.places) throw new TypeError(`PlaceThings.${method}():  it was made with no \`places\`, so it only reads`)
@@ -335,7 +459,10 @@ export class PlaceThings extends Loader {
    */
   noteWrite(home: ThingHome, field: string, was: unknown, value: unknown): void {
     const { placeName, collection, type, id } = home
-    const pending = this.placesOrDie("noteWrite").pendingFor(placeName)
+    const places = this.placesOrDie("noteWrite")
+    const pending = places.pendingFor(placeName)
+    if (places.placeFor(placeName) !== places.declaredPlaceFor(placeName))
+      this.noteWrittenInstead(`${type}#${id}`, field)
     const group = this.groupNumberFor(pending)
     const asJson = this.writer.jsonFor(value)
     const wasJson = this.writer.jsonFor(was)
@@ -344,6 +471,13 @@ export class PlaceThings extends Loader {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
       else pending.setField({ ...thing, value: asJson, was: wasJson })
     })
+  }
+
+  /** `field` of the thing `ref` was written while another place is in for its own. */
+  private noteWrittenInstead(ref: string, field: string): void {
+    let fields = this.writtenInstead.get(ref)
+    if (!fields) this.writtenInstead.set(ref, (fields = new Set()))
+    fields.add(field)
   }
 
   /** Run `write`:  what it tells `Places.onRows()` is this thing's own, so it comes back to nobody here. */
@@ -506,6 +640,118 @@ export class PlaceThings extends Loader {
 }
 
 /****************
+ * ### `PlaceEdit`
+ * One person's change to one property, from a side bar:  see `PlaceThings.startEdit()`.
+ * - Its changes are a group, so nothing leaves and nothing's kept on the device until `commit()`.
+ * - The undo step is recorded at `commit()`:  until then there's nothing to undo but `cancel()`.
+ * - A thing in no place works the same, with nothing to send.
+ * - A step undone after another place went behind the name does nothing:
+ *   so a change made to a sample can't be undone into the real place.
+ ****************/
+export class PlaceEdit {
+  /** What the property held before:  what `cancel()` and undo put back. */
+  private readonly was: unknown
+  /** Holds what's written until it's committed:  none, for a thing in no place. */
+  private readonly group: (PendingGroup & { number: number }) | undefined
+  /** Has it been set yet? */
+  private isChanged = false
+  /** Committed or cancelled:  it does nothing more. */
+  private isOver = false
+
+  constructor(private readonly props: PlaceEditProps) {
+    const { things, thing, property } = props
+    this.was = heldValue(valueOf(thing, property))
+    this.group = things.pendingOf(thing)?.startGroup()
+  }
+
+  /** The property is now `value`:  shown at once, held until `commit()`. */
+  set(value: unknown): void {
+    if (this.isOver) return
+    this.isChanged = true
+    this.write(value)
+  }
+
+  /** It's done:  one undo step, and the change goes out.  Nothing was set:  no step, and nothing goes. */
+  commit(): void {
+    if (this.isOver) return
+    this.isOver = true
+    this.group?.end()
+    if (!this.isChanged) return
+    const { history, title, thing, property, things } = this.props
+    const after = heldValue(valueOf(thing, property))
+    if (isSameHeld(after, this.was)) return
+    const placeThen = things.placeBehind(thing)
+    const putIf = (value: unknown) => {
+      if (things.placeBehind(thing) === placeThen) writeInto(thing, property, value, "write")
+    }
+    const record: UndoRecord = { undo: () => putIf(this.was), redo: () => putIf(after) }
+    history?.record(record, { title })
+  }
+
+  /** Never mind:  it's put back, and nothing went.  No step. */
+  cancel(): void {
+    if (this.isOver) return
+    this.isOver = true
+    this.group?.cancel()
+    if (this.isChanged) whileReading(() => writeInto(this.props.thing, this.props.property, this.was))
+  }
+
+  /** Write `value`, in this edit's group. */
+  private write(value: unknown): void {
+    const { things, thing, property } = this.props
+    const write = () => writeInto(thing, property, value, "write")
+    if (this.group) things.editing(this.group.number, write)
+    else write()
+  }
+}
+
+/** What `PlaceThings.startEdit()` is told. */
+export type PlaceEditOptions = {
+  /** What the step is called in the Edit menu, in the person's language:  `Change Title`. */
+  title: string
+  /** Where the step goes, e.g. the editor's own history.  Left out:  the running program's. */
+  history?: UndoStack
+}
+
+/** Constructor props of a `PlaceEdit`. */
+type PlaceEditProps = Omit<PlaceEditOptions, "history"> & {
+  /** Who made it. */
+  things: PlaceThings
+  /** The thing. */
+  thing: SpellObject
+  /** The property. */
+  property: string
+  /** Where the step goes:  none, with no history and no program running. */
+  history: UndoStack | undefined
+}
+
+/** What `value` holds now, that a later change won't change:  a list's items, not the list. */
+function heldValue(value: unknown): unknown {
+  return value instanceof List ? [...value.items] : value
+}
+
+/** Are these two the same, or the same list of the same things? */
+function isSameHeld(one: unknown, other: unknown): boolean {
+  if (Array.isArray(one) && Array.isArray(other)) return isSameItems(one, other)
+  return one === other || isSameDate(one, other)
+}
+
+/** Is `property` worked out:  read with a getter, with no setter, and declared as nothing to store? */
+function isWorkedOut(thing: object, property: string): boolean {
+  const info = schemaOf(thing.constructor).info(property)
+  if (info && Object.keys(info).some((key) => key !== "declaredAt")) return false
+  for (
+    let proto = Object.getPrototypeOf(thing) as object | null;
+    proto;
+    proto = Object.getPrototypeOf(proto) as object
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, property)
+    if (descriptor) return !!descriptor.get && !descriptor.set
+  }
+  return false
+}
+
+/****************
  * ### `PlaceDraft`
  * A thing's changes, held apart until they're saved, for an Edit screen with a Cancel button (epic `data`, Q9).
  * - `thing` is a copy:  draw a form on it.  What's written to it goes nowhere, and the real thing doesn't change.
@@ -519,6 +765,8 @@ export class PlaceDraft {
   readonly thing: SpellObject
   /** Each field changed so far, as a row holds it. */
   private readonly changed: PlaceRow = {}
+  /** The place behind its name when it began:  it's for that place, and no other. */
+  private readonly placeAtStart: object | undefined
   /** What's kept on this device. */
   private readonly copy: BrowserCopy
 
@@ -531,7 +779,9 @@ export class PlaceDraft {
     const places = things.placesOrDie("draftOf")
     const key = places.keyOnDevice(DRAFT_STORE, `${placeName}/${type}#${id}`)
     const { storage } = places
-    this.copy = new BrowserCopy({ ...(key !== undefined && { key }), ...(storage && { storage }) })
+    this.placeAtStart = places.placeFor(placeName)
+    const isOwnPlace = this.placeAtStart === places.declaredPlaceFor(placeName)
+    this.copy = new BrowserCopy({ ...(isOwnPlace && key !== undefined && { key }), ...(storage && { storage }) })
     this.thing = core.newScratch(original.constructor as new () => unknown) as SpellObject
     DRAFT_COPIES.set(this.thing, this)
     whileReading(() => {
@@ -554,9 +804,23 @@ export class PlaceDraft {
     this.copy.keep(this.changed)
   }
 
-  /** Write each field changed to the real thing:  one group, shown at once.  Nothing changed:  nothing is sent. */
+  /** Is the place it began with still behind its name?  A draft of a sample's thing is no draft of the real place's. */
+  get isStillGood(): boolean {
+    return this.home.things.placesOrDie("draftOf").placeFor(this.home.placeName) === this.placeAtStart
+  }
+
+  /**
+   * Write each field changed to the real thing:  one group, shown at once.  Nothing changed:  nothing is sent.
+   * - throws `TypeError`, and forgets it, if another place went behind its name since it began (`isStillGood`)
+   */
   save(): void {
     const { things } = this.home
+    if (!this.isStillGood) {
+      this.finish()
+      throw new TypeError(
+        "PlaceDraft.save():  another place went behind this draft's name since it began;  nothing saved"
+      )
+    }
     things.saveDraftFields(this.home, () => {
       for (const field of Object.keys(this.changed))
         writeInto(this.original, field, valueOf(this.thing, field), "write")

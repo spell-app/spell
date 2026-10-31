@@ -1,7 +1,7 @@
 import { createMemo, createRoot, createSignal, enableExternalSource, flush, onCleanup } from "solid-js"
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { bridgeSolid, observe } from "spell/util"
+import { bridgeSolid, keysOf, observe } from "spell/util"
 import { MemoryStorage } from "spell/util/persist/MemoryStorage"
 import {
   LiveRoomPlace,
@@ -13,11 +13,16 @@ import {
   type PlaceContext,
   type PlaceRow,
   type PlaceResult,
-  type PlacesProps
+  type PlacesProps,
+  type WriteAnswer,
+  type WriteQuestion
 } from "spell/util/places"
+import { UndoStack } from "spell/util/persist/UndoStack"
+import { useRealPlace, useSample } from "spell/util/places/SamplePlace"
 import { SRV } from "spell/server"
 import { Referee } from "spell/server/places"
 import { App, core, List, Thing } from "spell/parser/core"
+import { rowsMadeFrom } from "spell/parser/core/placeSamples"
 import { PlaceThings } from "spell/parser/core/places"
 
 /**
@@ -973,5 +978,538 @@ describe("PlaceThings, in a live room (epic `data` P8)", () => {
     await vi.waitFor(() => expect(referee.rows.rowFor("recipes", "r-1")!.title).toBe(long))
     notify.mockRestore()
     stop()
+  })
+})
+
+////////////////
+// ## The side bar (epic `data` P9, epic `editor`'s r1)
+////////////////
+
+/** A dish with a place's fields, and values worked out from them. */
+class Dish extends Thing {
+  static {
+    this.declareProp("title", { type: "text", declaredAt: { path: "Box.spell", start: 412, end: 470 } })
+    this.declareProp("serves", { type: "number" })
+    this.declareProp("day", { oneOf: ["today", "tomorrow"] })
+    this.declareProp("friend", { type: "Person" })
+    this.declareProp("loud", { declaredAt: { path: "Box.spell", start: 500, end: 540 } })
+  }
+  get title(): string {
+    return this.getProp("title")
+  }
+  set title(title: string) {
+    this.setProp("title", title)
+  }
+  get serves(): number {
+    return this.getProp("serves")
+  }
+  set serves(serves: number) {
+    this.setProp("serves", serves)
+  }
+  /** Worked out from its own title. */
+  get label(): string {
+    return `A ${this.title}`
+  }
+  /** Worked out, with its line declared. */
+  get loud(): string {
+    return this.title.toUpperCase()
+  }
+  /** Worked out, and it throws. */
+  get broken(): string {
+    throw new Error("broken")
+  }
+}
+
+/** A box on the page:  holds dishes, in no place of its own, and works things out from them. */
+class Box extends Thing {
+  get dishes(): Dish[] {
+    return this.getProp("dishes") ?? []
+  }
+  set dishes(dishes: Dish[]) {
+    this.setProp("dishes", dishes)
+  }
+  get search(): string {
+    return this.getProp("search") ?? ""
+  }
+  set search(search: string) {
+    this.setProp("search", search)
+  }
+  /** The dishes that match:  what `recipeBox.matches` is in the Overview. */
+  get matches(): Dish[] {
+    return this.dishes.filter(({ title }) => title.includes(this.search))
+  }
+  /** The app's own:  it reads no place. */
+  get searchLength(): number {
+    return this.search.length
+  }
+  /** A Solid memo. */
+  titleMemo?: () => string
+  /** Worked out through it. */
+  get throughMemo(): string | undefined {
+    return this.titleMemo?.()
+  }
+  /** Worked out from a read's rows, with no things. */
+  rows?: PlaceResult
+  get rowCount(): number {
+    return this.rows?.contents?.length ?? 0
+  }
+}
+
+/** A place where who's asking makes a difference, and the title is a formula. */
+class RulesPlace extends MemoryPlace {
+  canWrite({ row, field, identity }: WriteQuestion): WriteAnswer {
+    if (field === "title") return { canWrite: false, whyNot: "field" }
+    if (row && row.owner !== identity) return { canWrite: false, whyNot: "owner" }
+    return { canWrite: true }
+  }
+}
+
+/** The classes of a program that has them. */
+const DISH_CLASSES: Record<string, new (props?: Record<string, unknown>) => Thing | List> = { Dish, Box, Person }
+
+/** A dish in a place, read and made into a thing. */
+async function aDish(place?: MemoryPlace, props: PlacesProps = {}) {
+  const real = place ?? new MemoryPlace({ capabilities: { kind: "web service" }, collections: { dishes: [DISH_ROW] } })
+  const applied = vi.spyOn(real, "apply")
+  const places = new Places({ wait: 0, retry: 5, ...props }).add("family cookbook", real)
+  const things = new PlaceThings({ places, classNamed: (name) => DISH_CLASSES[name] })
+  const result = places.read({ placeName: "family cookbook", collection: "dishes", type: "Dish" })
+  await result.load()
+  const [dish] = things.thingsFrom(result) as Dish[]
+  const allSent = () =>
+    vi.waitFor(() => expect(places.pendingFor("family cookbook").hasPending).toBe(false), { interval: 1 })
+  const onPlace = async () => (await real.list("dishes", {}, {})).rows[0]!
+  return { real, applied, places, things, result, dish: dish!, allSent, onPlace }
+}
+
+/** The one row. */
+const DISH_ROW: PlaceRow = { id: "r-12", title: "Soup", serves: 2, owner: "owen" }
+
+describe("Places.originOf(), a saved value", () => {
+  test("names its place, its kind, its collection and its id, and that it can be written", async () => {
+    const { places, dish } = await aDish()
+    expect(places.originOf(dish, "serves")).toEqual({
+      place: "family cookbook",
+      kind: "web service",
+      collection: "dishes",
+      id: "r-12",
+      canWrite: true,
+      isSample: false
+    })
+  })
+
+  test("carries the line that declares it, once the declaration does;  absent till then", async () => {
+    const { places, dish } = await aDish()
+    expect(places.originOf(dish, "title")).toMatchObject({ declaredAt: { path: "Box.spell", start: 412, end: 470 } })
+    expect(places.originOf(dish, "serves")).not.toHaveProperty("declaredAt")
+  })
+
+  test("a place that takes no writes:  why is the place", async () => {
+    const real = new MemoryPlace({ capabilities: { write: "none" }, collections: { dishes: [DISH_ROW] } })
+    const { places, dish } = await aDish(real)
+    expect(places.originOf(dish, "serves")).toMatchObject({ canWrite: false, whyNot: "place" })
+  })
+
+  test("per field and per owner, and who's asking counts", async () => {
+    const { places, dish } = await aDish(new RulesPlace({ collections: { dishes: [DISH_ROW] } }))
+    expect(places.originOf(dish, "title")).toMatchObject({ canWrite: false, whyNot: "field" })
+    expect(places.originOf(dish, "serves", { identity: "matt" })).toMatchObject({ canWrite: false, whyNot: "owner" })
+    expect(places.originOf(dish, "serves", { identity: "owen" })).toMatchObject({ canWrite: true })
+  })
+
+  test("its id can't change:  why is the field", async () => {
+    const { places, dish } = await aDish()
+    expect(places.originOf(dish, "id")).toMatchObject({ canWrite: false, whyNot: "field" })
+  })
+
+  test("a thing in no place, and a thing of no PlaceThings:  no origin", async () => {
+    const { places } = await aDish()
+    expect(places.originOf(new Dish(), "title")).toBeUndefined()
+    expect(new Places().originOf(new Dish(), "title")).toBeUndefined()
+    expect(places.originOf({ title: "Soup" }, "title")).toBeUndefined()
+  })
+
+  test("a plain list a thing holds answers as that thing's field", async () => {
+    const real = new MemoryPlace({ collections: { recipes: [{ id: "r-1", title: "Soup", tags: ["hot"] }] } })
+    const places = new Places({ wait: 0 }).add("cookbook", real)
+    const things = new PlaceThings({ places, classNamed: (name) => CLASSES[name] })
+    const result = places.read({ placeName: "cookbook", collection: "recipes", type: "Recipe" })
+    await result.load()
+    const [recipe] = things.thingsFrom(result) as Recipe[]
+    expect(places.originOf(recipe!.tags, "items")).toMatchObject({ place: "cookbook", id: "r-1", canWrite: true })
+  })
+
+  test("with a sample in:  it's a sample, it can be written, and it's still that name", async () => {
+    const real = new MemoryPlace({
+      capabilities: { kind: "web service", write: "none" },
+      collections: { dishes: [DISH_ROW] }
+    })
+    const { places, dish } = await aDish(real)
+    await useSample(places, "family cookbook")
+    expect(places.originOf(dish, "serves")).toMatchObject({
+      place: "family cookbook",
+      kind: "web service",
+      canWrite: true,
+      isSample: true
+    })
+    await useRealPlace(places, "family cookbook")
+    expect(places.originOf(dish, "serves")).toMatchObject({ canWrite: false, whyNot: "place", isSample: false })
+  })
+
+  test("a memo asking again hears the swap", async () => {
+    const { places, dish } = await aDish()
+    const answers: unknown[] = []
+    const stop = observe(() => answers.push((places.originOf(dish, "serves") as { isSample: boolean }).isSample))
+    expect(answers).toEqual([false])
+    await useSample(places, "family cookbook")
+    await vi.waitFor(() => expect(answers).toEqual([false, true]))
+    stop()
+  })
+})
+
+describe("Places.originOf(), a worked-out value", () => {
+  test("read only, with the places it read:  through a list, on a thing in no place", async () => {
+    const { places, dish } = await aDish()
+    const box = new Box()
+    box.dishes = [dish]
+    expect(places.originOf(box, "matches")).toEqual({
+      workedOut: true,
+      canWrite: false,
+      readsFrom: ["family cookbook"]
+    })
+  })
+
+  test("from two places, each named once", async () => {
+    const one = await aDish()
+    const pantry = new MemoryPlace({ collections: { dishes: [{ id: "p-1", title: "Rice" }] } })
+    one.places.add("pantry", pantry)
+    const read = one.places.read({ placeName: "pantry", collection: "dishes", type: "Dish" })
+    await read.load()
+    const [rice] = one.things.thingsFrom(read) as Dish[]
+    const box = new Box()
+    box.dishes = [one.dish, rice!]
+    expect(one.places.originOf(box, "matches")).toMatchObject({ readsFrom: ["family cookbook", "pantry"] })
+  })
+
+  test("a thing's own worked-out value, its line declared", async () => {
+    const { places, dish } = await aDish()
+    expect(places.originOf(dish, "label")).toMatchObject({ workedOut: true, readsFrom: ["family cookbook"] })
+    expect(places.originOf(dish, "loud")).toMatchObject({
+      workedOut: true,
+      declaredAt: { path: "Box.spell", start: 500, end: 540 }
+    })
+  })
+
+  test("a read's rows, with no things", async () => {
+    const { places, result } = await aDish()
+    const box = new Box()
+    box.rows = result
+    expect(places.originOf(box, "rowCount")).toMatchObject({ readsFrom: ["family cookbook"] })
+  })
+
+  test("the app's own:  it read no place, so no origin", async () => {
+    const { places } = await aDish()
+    expect(places.originOf(new Box(), "searchLength")).toBeUndefined()
+  })
+
+  test("LIMIT:  only what this reading read, so a list with nothing in it has no origin yet", async () => {
+    const { places } = await aDish()
+    expect(places.originOf(new Box(), "matches")).toBeUndefined()
+  })
+
+  test("LIMIT:  what a Solid memo read is the memo's:  a value read through one has no origin", async () => {
+    const { places, dish } = await aDish()
+    const box = new Box()
+    createRoot(() => {
+      box.titleMemo = createMemo(() => dish.title)
+    })
+    flush()
+    expect(box.throughMemo).toBe("Soup")
+    expect(places.originOf(box, "throughMemo")).toBeUndefined()
+  })
+
+  test("one that throws is logged:  it has no origin, and nothing throws", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { places, dish } = await aDish()
+    expect(places.originOf(dish, "broken")).toBeUndefined()
+    expect(error).toHaveBeenCalledOnce()
+    error.mockRestore()
+  })
+
+  test("asking changes nothing:  it's no write, and joins no undo step", async () => {
+    const { places, dish, applied } = await aDish()
+    places.originOf(dish, "label")
+    expect(places.pendingFor("family cookbook").hasPending).toBe(false)
+    expect(applied).not.toHaveBeenCalled()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+})
+
+describe("PlaceThings.startEdit()", () => {
+  test("each keystroke shows at once, and nothing leaves until it's committed:  one change, one step", async () => {
+    const { things, dish, applied, allSent, onPlace, places } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("S")
+    edit.set("St")
+    edit.set("Stew")
+    expect(dish.title).toBe("Stew")
+    expect(places.pendingFor("family cookbook").changes).toHaveLength(1)
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    expect(applied).not.toHaveBeenCalled()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+
+    edit.commit()
+    expect(core.RUNTIME.history.undoTitle).toBe("Undo Change Title")
+    expect(core.RUNTIME.history.steps).toHaveLength(1)
+    await allSent()
+    expect(applied).toHaveBeenCalledOnce()
+    expect((await onPlace()).title).toBe("Stew")
+  })
+
+  test("it's the program's own write:  it reaches noteSetting(), as a program elsewhere hears", async () => {
+    const { things, dish } = await aDish()
+    const set = vi.fn()
+    core.remote = { set } as never
+    try {
+      const edit = things.startEdit(dish, "title", { title: "Change Title" })
+      edit.set("Stew")
+      expect(set).toHaveBeenCalledWith(dish, "title", "Stew")
+      edit.cancel()
+    } finally {
+      core.remote = undefined
+    }
+  })
+
+  test("undo after it's sent:  a reversing change goes out, and redo another", async () => {
+    const { things, dish, applied, allSent, onPlace } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.commit()
+    await allSent()
+    core.RUNTIME.history.undo()
+    expect(dish.title).toBe("Soup")
+    await allSent()
+    expect((await onPlace()).title).toBe("Soup")
+    core.RUNTIME.history.redo()
+    expect(dish.title).toBe("Stew")
+    await allSent()
+    expect((await onPlace()).title).toBe("Stew")
+    expect(applied).toHaveBeenCalledTimes(3)
+  })
+
+  test("undo before it's sent:  the change is dropped, and the place never hears of it", async () => {
+    const { things, dish, real, applied, allSent, onPlace, places } = await aDish()
+    let answer: () => void = () => {}
+    const reallyApply = applied.getMockImplementation() ?? MemoryPlace.prototype.apply.bind(real)
+    applied.mockImplementationOnce(async (changes, context) => {
+      await new Promise<void>((resolve) => (answer = resolve))
+      return reallyApply(changes, context)
+    })
+    // this one's on its way, so the next one waits behind it
+    const first = things.startEdit(dish, "serves", { title: "Change Serves" })
+    first.set(5)
+    first.commit()
+    await vi.waitFor(() => expect(applied).toHaveBeenCalledOnce(), { interval: 1 })
+
+    const second = things.startEdit(dish, "title", { title: "Change Title" })
+    second.set("Stew")
+    second.commit()
+    expect(places.pendingFor("family cookbook").changes).toHaveLength(2)
+    core.RUNTIME.history.undo()
+    expect(dish.title).toBe("Soup")
+    expect(places.pendingFor("family cookbook").changes).toHaveLength(1)
+
+    answer()
+    await allSent()
+    expect(applied).toHaveBeenCalledOnce()
+    expect(await onPlace()).toMatchObject({ title: "Soup", serves: 5 })
+  })
+
+  test("cancel():  put back, and nothing went;  no step", async () => {
+    const { things, dish, applied, allSent } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.cancel()
+    expect(dish.title).toBe("Soup")
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+
+  test("nothing changed, or changed back:  no step, and nothing goes", async () => {
+    const { things, dish, applied, allSent } = await aDish()
+    things.startEdit(dish, "title", { title: "Change Title" }).commit()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.set("Soup")
+    edit.commit()
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+
+  test("after commit or cancel it does nothing more", async () => {
+    const { things, dish } = await aDish()
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.commit()
+    edit.set("Late")
+    edit.cancel()
+    expect(dish.title).toBe("Stew")
+    expect(core.RUNTIME.history.steps).toHaveLength(1)
+  })
+
+  test("the step can go in the editor's own history, and the program's records nothing", async () => {
+    const { things, dish, allSent, onPlace } = await aDish()
+    const history = new UndoStack()
+    const edit = things.startEdit(dish, "title", { title: "Change Title", history })
+    edit.set("Stew")
+    edit.commit()
+    await allSent()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+    history.undo()
+    expect(dish.title).toBe("Soup")
+    await allSent()
+    expect((await onPlace()).title).toBe("Soup")
+  })
+
+  test("a thing in no place:  the same, with nothing to send", () => {
+    const things = new PlaceThings({ places: new Places(), classNamed: (name) => DISH_CLASSES[name] })
+    const dish = new Dish({ title: "Soup" })
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.commit()
+    core.RUNTIME.history.undo()
+    expect(dish.title).toBe("Soup")
+  })
+
+  test("a place that refuses anyway:  it heals back to the place's copy, with a notice", async () => {
+    const notify = vi.spyOn(core, "notify").mockResolvedValue(undefined)
+    const real = new RulesPlace({ collections: { dishes: [DISH_ROW] } })
+    const { things, dish, allSent } = await aDish(real)
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Stew")
+    edit.commit()
+    await allSent()
+    await vi.waitFor(() => expect(dish.title).toBe("Soup"))
+    expect(notify).toHaveBeenCalledOnce()
+    notify.mockRestore()
+  })
+
+  test("REFUSES a value that's worked out", async () => {
+    const { things, dish } = await aDish()
+    expect(() => things.startEdit(dish, "label", { title: "Change Label" })).toThrow(/worked out/)
+  })
+})
+
+describe("a sample, under things", () => {
+  test("the SAME thing shows the sample's values, and takes a plain set, and back again", async () => {
+    const { places, things, result, dish, applied, allSent } = await aDish()
+    await useSample(places, "family cookbook")
+    const [same] = things.thingsFrom(result) as Dish[]
+    expect(same).toBe(dish)
+    dish.title = "Sample stew"
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+
+    await useRealPlace(places, "family cookbook")
+    things.thingsFrom(result)
+    expect(dish.title).toBe("Soup")
+    await useSample(places, "family cookbook")
+    things.thingsFrom(result)
+    expect(dish.title).toBe("Sample stew")
+  })
+
+  test("reading the sample's rows, and the real ones again, is no write", async () => {
+    const { places, things, result, applied, allSent } = await aDish()
+    await useSample(places, "family cookbook")
+    things.thingsFrom(result)
+    await useRealPlace(places, "family cookbook")
+    things.thingsFrom(result)
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+  })
+
+  test("a field only the sample was given doesn't stay on the thing", async () => {
+    const { places, things, result, dish, allSent } = await aDish()
+    await useSample(places, "family cookbook")
+    const edit = things.startEdit(dish, "day", { title: "Change Day" })
+    edit.set("tomorrow")
+    edit.commit()
+    await allSent()
+    await useRealPlace(places, "family cookbook")
+    things.thingsFrom(result)
+    expect(keysOf(dish)).not.toContain("day")
+  })
+
+  test("the program's undo can't carry a sample's change into the real place", async () => {
+    const { places, dish, applied, allSent, things } = await aDish()
+    await useSample(places, "family cookbook")
+    const edit = things.startEdit(dish, "title", { title: "Change Title" })
+    edit.set("Sample stew")
+    edit.commit()
+    await allSent()
+    await useRealPlace(places, "family cookbook")
+    expect(core.RUNTIME.history.canUndo).toBe(false)
+    expect(applied).not.toHaveBeenCalled()
+  })
+
+  test("nor can a step in the editor's own history:  undoing it there does nothing", async () => {
+    const { places, dish, applied, allSent, things, result } = await aDish()
+    const history = new UndoStack()
+    await useSample(places, "family cookbook")
+    const edit = things.startEdit(dish, "title", { title: "Change Title", history })
+    edit.set("Sample stew")
+    edit.commit()
+    await allSent()
+    await useRealPlace(places, "family cookbook")
+    things.thingsFrom(result)
+    expect(history.undo()).toBe(true)
+    expect(dish.title).toBe("Soup")
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+  })
+
+  test("a draft of a sample's thing can't be saved to the real place", async () => {
+    const { places, dish, applied, allSent, things } = await aDish()
+    await useSample(places, "family cookbook")
+    const draft = things.draftOf(dish)
+    ;(draft.thing as Dish).title = "Drafted in the sample"
+    await useRealPlace(places, "family cookbook")
+    expect(() => draft.save()).toThrow(/another place went behind/)
+    await allSent()
+    expect(applied).not.toHaveBeenCalled()
+    expect(things.draftOf(dish)).not.toBe(draft)
+  })
+
+  test("made from the type, when the real place can't say", async () => {
+    const real = new MemoryPlace({ collections: { dishes: [DISH_ROW] } })
+    const { places, things, result } = await aDish(real)
+    vi.spyOn(real, "list").mockRejectedValue(new Error("no server"))
+    await useSample(places, "family cookbook", { rowsFromType: (type) => rowsMadeFrom(things.classNamed(type), 2) })
+    const dishes = things.thingsFrom(result) as Dish[]
+    expect(dishes.map(({ title }) => title)).toEqual(["Sample title 1", "Sample title 2"])
+    expect(dishes[1]!.serves).toBe(2)
+  })
+})
+
+describe("rowsMadeFrom()", () => {
+  test("something in each property it declares:  a thing's type is left out, and a list starts empty", () => {
+    const [row] = rowsMadeFrom(Recipe, 1)!
+    expect(row).toEqual({
+      title: "Sample title 1",
+      serves: 1,
+      added: "2026-01-01T00:00:00.000Z",
+      tags: []
+    })
+  })
+
+  test("a choice of values takes each in turn", () => {
+    expect(rowsMadeFrom(Dish, 3)!.map(({ day }) => day)).toEqual(["today", "tomorrow", "today"])
+  })
+
+  test("no class:  none", () => {
+    expect(rowsMadeFrom(undefined)).toBeUndefined()
   })
 })

@@ -571,6 +571,19 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Copies:**  `--`
 - **Fine:**  `StateMirror` (`parser/src/core/state.ts`):  counted ids and whole things, one way, for a program that runs elsewhere.
 
+### Something else behind a place's name, for now
+
+- **It is:**  `Places.useInstead()` / `backToDeclared()` (`spell/util/places`), and on them `useSample()` (`spell/util/places/SamplePlace`);  epic `data` P9
+- **Use it when:**  designing against other data, with the line that declares the place untouched.
+- **Copies:**  `--`
+- **Fine:**  `Places.swap()`:  only where the next read goes, for a place replaced for good.
+
+### What a value was worked out from
+
+- **It is:**  `sourcesReadBy()` (`spell/util/reactive`), with `cellsOf()` to say whose a cell is;  epic `data` P9
+- **Use it when:**  asking what a value depends on, once.  To react to it:  `observe()`, or a `Derived`.
+- **Copies:**  `--`
+
 ### A place in a list
 
 - **It is:**  `positionBetween()`, `ListPosition`, `rowsInPlace()` (`spell/util/places/positions`, epic `data` P8):  a parent and a fraction, one field

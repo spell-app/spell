@@ -152,6 +152,23 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     return this
   }
 
+  /**
+   * The place behind its name changed for a whole other one:  it reads that, and what it had doesn't stand.
+   * - What's here shows until the answer comes, so nothing flashes empty.
+   * - A failed read leaves no rows:  the old place's would show as if the new one had said them.  `loadError` says why.
+   * - NEVER throws.
+   */
+  async readAfterSwap(): Promise<void> {
+    try {
+      await this.reload()
+    } catch (error) {
+      if (this.contents !== undefined) {
+        this.contents = undefined
+        this.updateLoadState({ loadError: error as Error })
+      }
+    }
+  }
+
   /** It's gone from the page:  it stops reading. */
   onRemove() {
     super.onRemove()
@@ -232,7 +249,9 @@ export class PlaceResult extends Loadable<PlaceRow[]> {
     return rows.map((row) => {
       const id = idOfRow(row, idOf)
       if (id === undefined) return row
-      return (writing === "only new ones" && cache.rowFor(type, id)) || cache.keep(type, id, row)
+      return (
+        (writing === "only new ones" && cache.rowFor(type, id)) || this.places.keepRow(this.placeName, type, id, row)
+      )
     })
   }
 }

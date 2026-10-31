@@ -68,6 +68,7 @@ export class FilePlace implements Place {
   /** What it can do:  all the writes at once, and no querying of its own. */
   describe(): PlaceCapabilities {
     return {
+      kind: "file",
       idOf: this.idField,
       filter: "none",
       sort: "none",

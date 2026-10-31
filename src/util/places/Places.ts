@@ -1,5 +1,5 @@
 import type { StorageLike } from "spell/util/persist/persist.types"
-import { untrackCells } from "spell/util/reactive"
+import { Cell, cellsOf, untrackCells, type CellSource, type PropDeclaredAt } from "spell/util/reactive"
 
 import {
   PendingChanges,
@@ -13,7 +13,7 @@ import { PlaceCache } from "./PlaceCache"
 import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
 import { PlaceResult, type PlaceResultProps } from "./PlaceResult"
-import { PlaceError, type Place } from "./places.types"
+import { PlaceError, writeAnswerFor, type Place, type PlaceRow, type WhyNotWritable } from "./places.types"
 
 /****************
  * ### `Places`
@@ -21,6 +21,8 @@ import { PlaceError, type Place } from "./places.types"
  * - Everything asks for a place by name each time, so swapping the place behind a name
  *   (a sample, while designing) leaves everything that names it alone.
  * - Instances, not one page-wide list:  each run of a program, and each test, gets its own.
+ * - Asked about one property of one thing, it says where the value came from:  `originOf()`.
+ * - Another place can go behind a name for now, whole, and come out again:  `useInstead()`, what a sample is.
  ****************/
 export class Places {
   /** The ONE cache of rows, so a thing read from two lists is one row. */
@@ -47,6 +49,18 @@ export class Places {
   private unheardConflicts: PlaceConflict[] = []
   /** The failures raised with nobody listening yet:  a write left from the last visit, refused as this one opens. */
   private unheardFailures: PlaceWriteFailure[] = []
+  /** What's behind each name another place is in for:  its place, and its pending changes, set aside. */
+  private readonly setAside = new Map<string, { place: Place; pending?: PendingChanges }>()
+  /** Who hears that another place went behind a name, or left. */
+  private readonly swapListeners = new Set<(placeName: string) => void>()
+  /** Changes when another place goes behind a name, or leaves:  so a side bar's `originOf()` is asked again. */
+  private readonly swaps = new Cell()
+  /** The ids of each type's rows in the cache that came from each place, by its name. */
+  private readonly rowsFromPlace = new Map<string, Map<string, Set<string>>>()
+  /** Which type each collection of each place is read as. */
+  private readonly typesRead = new Map<string, string>()
+  /** Whoever makes things from these rows. */
+  private readonly thingMakers = new Set<PlaceThingMaker>()
 
   constructor(private readonly props: PlacesProps = {}) {}
 
@@ -76,6 +90,92 @@ export class Places {
     this.places.set(name, place)
     this.reads.forgetPlace(name)
     return replaced
+  }
+
+  /**
+   * Put `place` behind `name` for now, with its own rows and its own changes, until `backToDeclared()`:  what a sample is.
+   * - Unlike `swap()`, which only changes where the next read goes, this changes everything showing:
+   *   - changes pending for the place there wait, set aside, and go to it when it's back:  never to `place`
+   *   - changes made now go to `place`, and are never kept on this device as pending
+   *   - rows from the place there leave the cache
+   *   - each reader reads again, and what it held doesn't stand if that fails
+   *   - `onSwapped()` is told
+   * - Resolves once every reader has its answer.  Writes made while it waits go to `place`.
+   * - throws `PlaceError` if nothing goes by that name;  `TypeError` if another place is already in for it
+   */
+  async useInstead(name: string, place: Place): Promise<void> {
+    const declared = this.placeForOrDie(name)
+    if (this.setAside.has(name)) {
+      throw new TypeError(`Places.useInstead():  another place is already in for "${name}";  backToDeclared() first`)
+    }
+    const pending = this.pending.get(name)
+    pending?.setAside()
+    this.pending.delete(name)
+    this.setAside.set(name, { place: declared, ...(pending && { pending }) })
+    this.places.set(name, place)
+    await this.readAfresh(name)
+  }
+
+  /**
+   * The place `useInstead()` set aside is behind `name` again, and what was waiting for it goes.
+   * - What's pending for the one leaving is sent to it first, so it's there next time.
+   * - Nothing was set aside:  nothing happens.
+   * - Resolves once every reader has its answer.
+   */
+  async backToDeclared(name: string): Promise<void> {
+    if (!this.setAside.has(name)) return
+    const leaving = this.pending.get(name)
+    await leaving?.queue.save()
+    const held = this.setAside.get(name)
+    if (!held) return
+    leaving?.setAside()
+    this.pending.delete(name)
+    this.setAside.delete(name)
+    this.places.set(name, held.place)
+    if (held.pending) {
+      this.pending.set(name, held.pending)
+      held.pending.comeBack()
+    }
+    await this.readAfresh(name)
+  }
+
+  /** The place the program declared under `name`, whatever's behind it for now. */
+  declaredPlaceFor(name: string): Place | undefined {
+    return this.setAside.get(name)?.place ?? this.places.get(name)
+  }
+
+  /** Hear another place going behind a name, or leaving:  before anyone reads it.  Returns what stops it. */
+  onSwapped(listener: (placeName: string) => void): () => void {
+    this.swapListeners.add(listener)
+    return () => this.swapListeners.delete(listener)
+  }
+
+  /** What showed from the place behind `name` no longer stands -- see `useInstead()`. */
+  private async readAfresh(name: string): Promise<void> {
+    const readers = this.reads.readersOf(name)
+    this.reads.forgetPlace(name)
+    for (const [type, ids] of this.rowsFromPlace.get(name) ?? []) {
+      for (const id of ids) this.cache.forget(type, id)
+    }
+    this.rowsFromPlace.delete(name)
+    for (const listener of this.swapListeners) listener(name)
+    this.swaps.changed()
+    await Promise.all(readers.map((reader) => reader.readAfterSwap()))
+  }
+
+  /** The ONE row for `type` and `id`, from the place named `placeName`:  `PlaceCache.keep()`, noting whose it is. */
+  keepRow(placeName: string, type: string, id: string, fields: PlaceRow): PlaceRow {
+    let ofPlace = this.rowsFromPlace.get(placeName)
+    if (!ofPlace) this.rowsFromPlace.set(placeName, (ofPlace = new Map()))
+    let ids = ofPlace.get(type)
+    if (!ids) ofPlace.set(type, (ids = new Set()))
+    ids.add(id)
+    return this.cache.keep(type, id, fields)
+  }
+
+  /** The type `collection` of the place named `placeName` was last read as, if any was named. */
+  typeReadFrom(placeName: string, collection: string): string | undefined {
+    return this.typesRead.get(`${placeName}\n${collection}`)
   }
 
   /** The place named `name`, if there is one. */
@@ -124,7 +224,9 @@ export class Places {
     let pending = this.pending.get(placeName)
     if (pending) return pending
     this.placeForOrDie(placeName)
-    const { keepPendingAs, storage, wait, retry } = this.props
+    const { storage, wait, retry } = this.props
+    // what's written to a place in for another for now isn't kept:  it's that place's to keep
+    const keepPendingAs = this.setAside.has(placeName) ? undefined : this.props.keepPendingAs
     pending = new PendingChanges({
       placeName,
       places: this,
@@ -221,6 +323,7 @@ export class Places {
    * - Follows nothing, so it's safe inside a memo.
    */
   read(props: PlaceResultProps): PlaceResult {
+    if (props.type !== undefined) this.typesRead.set(`${props.placeName}\n${props.collection}`, props.type)
     return untrackCells(() => {
       const result = new PlaceResult(props, { places: this })
       const earlier = this.reads.releasedFor(props)
@@ -228,6 +331,162 @@ export class Places {
       return result
     })
   }
+
+  ////////////////
+  // ## Where a value came from
+  ////////////////
+
+  /**
+   * Whoever makes things from these rows:  what lets `originOf()` be asked about a thing.
+   * - `PlaceThings` calls it:  this folder knows nothing of things.
+   */
+  addThingMaker(maker: PlaceThingMaker): void {
+    this.thingMakers.add(maker)
+  }
+
+  /**
+   * Where `property` of `thing` came from, for a side bar:  see `ValueOrigin`.
+   * - `undefined`:  it's from no place, such as what the app holds itself.
+   * - Re-asked by a memo when another place goes behind a name, or leaves;  it follows nothing else.
+   * - `canWrite` is a hint:  the place can still refuse.
+   * - `identity`:  who's asking, for a place where it depends on who owns the thing.
+   * - NEVER throws:  a worked-out value that throws when it's read is logged, and has no origin to give.
+   */
+  originOf(thing: object, property: string, { identity }: { identity?: string } = {}): ValueOrigin | undefined {
+    this.swaps.read()
+    return untrackCells(() => {
+      for (const maker of this.thingMakers) {
+        const found = maker.describeValue(thing, property)
+        if (!found) continue
+        return "workedOutFrom" in found ? this.workedOutOrigin(found) : this.savedOrigin(found, identity)
+      }
+      return undefined
+    })
+  }
+
+  /** What's known of a saved value. */
+  private savedOrigin(found: SavedValue, identity: string | undefined): SavedOrigin {
+    const { placeName, collection, type, id, field, isIdentity, declaredAt } = found
+    const place = this.placeForOrDie(placeName)
+    const { kind, isSample = false } = place.describe()
+    const row = this.cache.rowFor(type, id) ?? place.rowKnown?.(collection, id)
+    const { canWrite, whyNot } = isIdentity
+      ? { canWrite: false, whyNot: "field" as const }
+      : writeAnswerFor(place, {
+          collection,
+          kind: "update",
+          field,
+          ...(row && { row }),
+          ...(identity !== undefined && { identity })
+        })
+    return {
+      place: placeName,
+      ...(kind !== undefined && { kind }),
+      collection,
+      id,
+      canWrite,
+      ...(whyNot && { whyNot }),
+      isSample,
+      ...(declaredAt && { declaredAt })
+    }
+  }
+
+  /**
+   * What's known of a worked-out value:  `undefined` when it read no place.
+   * - Whose a cell is:  a thing's (its maker says), a reader's rows, or a row in the cache.
+   */
+  private workedOutOrigin({ workedOutFrom, readsFrom, declaredAt }: WorkedOutValue): WorkedOutOrigin | undefined {
+    const names = new Set(readsFrom)
+    for (const [name, ofPlace] of this.rowsFromPlace) {
+      for (const [type, ids] of ofPlace) {
+        for (const id of ids) {
+          const row = this.cache.rowFor(type, id)
+          if (row && isAmong(row, workedOutFrom)) names.add(name)
+        }
+      }
+    }
+    for (const name of this.places.keys()) {
+      if (this.reads.readersOf(name).some((reader) => isAmong(reader, workedOutFrom))) names.add(name)
+    }
+    if (!names.size) return undefined
+    return { workedOut: true, canWrite: false, readsFrom: [...names], ...(declaredAt && { declaredAt }) }
+  }
+}
+
+/** Has anything read one of `target`'s cells? */
+function isAmong(target: object, sources: ReadonlySet<CellSource>): boolean {
+  return cellsOf(target).some((cell) => sources.has(cell))
+}
+
+/** What a saved value's place says about it:  one of the answers of `Places.originOf()`. */
+export type SavedOrigin = {
+  /** Worked out?  No:  it's saved. */
+  workedOut?: false
+  /** The name of the place it's kept in, as the program declares it, sample or not. */
+  place: string
+  /** What sort of place that is, in words:  `PlaceCapabilities.kind`. */
+  kind?: string
+  /** The collection it's in. */
+  collection: string
+  /** The thing's id in that collection. */
+  id: string
+  /** Can it be changed, as far as we know? */
+  canWrite: boolean
+  /** Why not. */
+  whyNot?: WhyNotWritable
+  /** Is a sample behind the name now, so the real place can't be touched? */
+  isSample: boolean
+  /** The line that declares this property.  Absent until the compiler writes it (epic `data`, Gathering Reads). */
+  declaredAt?: PropDeclaredAt
+}
+
+/** What a value worked out from others says:  one of the answers of `Places.originOf()`. */
+export type WorkedOutOrigin = {
+  /** It has no one place. */
+  workedOut: true
+  /** Never:  change what it's worked out from. */
+  canWrite: false
+  /** The name of each place it read this time. */
+  readsFrom: string[]
+  /** The line that works it out.  Absent until the compiler writes it (epic `data`, Gathering Reads). */
+  declaredAt?: PropDeclaredAt
+}
+
+/** Where a value came from:  see `Places.originOf()`. */
+export type ValueOrigin = SavedOrigin | WorkedOutOrigin
+
+/** What a thing's maker knows of a saved value. */
+export type SavedValue = {
+  /** The place's name. */
+  placeName: string
+  /** The collection. */
+  collection: string
+  /** The type it's cached under. */
+  type: string
+  /** The thing's id. */
+  id: string
+  /** The field. */
+  field: string
+  /** Is this field the thing's id, so it can't change? */
+  isIdentity: boolean
+  /** The line that declares it. */
+  declaredAt?: PropDeclaredAt
+}
+
+/** What a thing's maker knows of a value worked out from others. */
+export type WorkedOutValue = {
+  /** Everything reading it read, this time. */
+  workedOutFrom: ReadonlySet<CellSource>
+  /** The name of the place of each thing among those. */
+  readsFrom: readonly string[]
+  /** The line that works it out. */
+  declaredAt?: PropDeclaredAt
+}
+
+/** Whoever makes things from a place's rows, as `Places.originOf()` needs it:  `PlaceThings`. */
+export type PlaceThingMaker = {
+  /** What it knows of `property` of `thing`:  `undefined` if that's nothing of its. */
+  describeValue(thing: object, property: string): SavedValue | WorkedOutValue | undefined
 }
 
 /** Constructor props of `Places`. */

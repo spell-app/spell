@@ -37,7 +37,7 @@ export class PlaceHeal {
       const rows = pending.replayOn(collection, answered)
       const held = new Set(rows.map((row) => idOfRow(row, idOf)))
       const removed = (ids ?? []).filter((id) => !held.has(id))
-      this.keep(type, rows, idOf)
+      this.keep(placeName, type, rows, idOf)
       for (const id of type === undefined ? [] : removed) this.places.cache.forget(type!, id)
       this.places.tellRows({
         placeName,
@@ -83,12 +83,14 @@ export class PlaceHeal {
   /** `place` says this changed:  show it, on top of what's pending, and say what needs saying. */
   private heardEvent(ask: Omit<HealAsk, "ids">, place: Place, pending: PendingChanges, event: PlaceEvent): void {
     const { placeName, collection, type } = ask
+    // another place is behind the name for now:  what this one says shows when it's back, as a new read
+    if (this.places.placeFor(placeName) !== place) return
     const { idOf } = place.describe()
     if (idOf === undefined) return
     const { id, row, was, lost = [], overwrote = [] } = event
     if (!row) return this.thingWentAway(ask, idOf, pending, id, was)
     const rows = pending.replayOn(collection, [row])
-    this.keep(type, rows, idOf)
+    this.keep(placeName, type, rows, idOf)
     this.places.tellRows({ placeName, collection, ...(type !== undefined && { type }), idField: idOf, rows })
     const thing = { placeName, collection, ...(type !== undefined && { type }), id }
     for (const { field, mine, theirs } of lost.filter(({ mine }: ReplacedValue) => isLongText(mine))) {
@@ -177,11 +179,11 @@ export class PlaceHeal {
   }
 
   /** Each of `rows` into the cache's one row. */
-  private keep(type: string | undefined, rows: PlaceRow[], idOf: string): void {
+  private keep(placeName: string, type: string | undefined, rows: PlaceRow[], idOf: string): void {
     if (type === undefined) return
     for (const row of rows) {
       const id = idOfRow(row, idOf)
-      if (id !== undefined) this.places.cache.keep(type, id, row)
+      if (id !== undefined) this.places.keepRow(placeName, type, id, row)
     }
   }
 }

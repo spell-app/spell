@@ -83,6 +83,7 @@ export class GoogleSheetPlace extends WebPlace implements Place {
   describe(): PlaceCapabilities {
     const write = this.idColumn === undefined ? "none" : (["insert", "update", "delete"] as const)
     return {
+      kind: "sheet",
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",

@@ -54,6 +54,7 @@ export class SheetPlace extends WebPlace implements Place {
   /** What it can do:  be read, whole, by asking again. */
   describe(): PlaceCapabilities {
     return {
+      kind: "sheet",
       ...(this.idColumn !== undefined && { idOf: this.idColumn }),
       filter: "none",
       sort: "none",

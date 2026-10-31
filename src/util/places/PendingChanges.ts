@@ -176,6 +176,8 @@ export type PendingGroup = {
  *   (`changeList()`), so two at once both count.  On any other it's the whole value, and the last save wins.
  * - An unfinished group (an action) is NEVER sent or kept:  it's in this page's memory until `end()`,
  *   so closing the tab or `cancel()` really drops it.  Everything after it waits, to keep the order.
+ * - Set aside (`setAside()`):  it holds on to the place it had, sends nothing, and shows nothing, until `comeBack()`.
+ *   So a sample standing in never gets what was meant for the real place, or the other way round.
  * - One per place name, from `Places.pendingFor()`.  Knows nothing of Things or Spell's words.
  ****************/
 export class PendingChanges {
@@ -198,6 +200,8 @@ export class PendingChanges {
   private readonly touched = new Map<string, number>()
   /** The list of places, and the cache:  STATIC for its life. */
   private readonly places: Places
+  /** The place it had when it was set aside:  `setAside()`. */
+  private placeAside: Place | undefined
 
   constructor({ placeName, places, keepAs, storage, wait = PENDING_WAIT_MS, retry }: PendingChangesProps) {
     this.placeName = placeName
@@ -230,6 +234,28 @@ export class PendingChanges {
   /** Is anything not yet confirmed? */
   get hasPending(): boolean {
     return this.pending.length > 0
+  }
+
+  /**
+   * Another place went behind its name, for now (`Places.useInstead()`):  nothing's sent, or shown, until `comeBack()`.
+   * - What's on its way lands where it was going, and shows nothing.
+   * - What's kept on the device stays kept.
+   * - MUST be called while its own place is still behind the name.
+   */
+  setAside(): void {
+    this.placeAside = this.placeNow
+    this.queue.stop()
+  }
+
+  /** Its own place is behind its name again:  what's waiting goes now. */
+  comeBack(): void {
+    this.placeAside = undefined
+    if (this.pending.length) this.queue.changed({ now: true })
+  }
+
+  /** The place its changes are for. */
+  private get placeNow(): Place | undefined {
+    return this.placeAside ?? this.places.placeFor(this.placeName)
   }
 
   /**
@@ -375,7 +401,7 @@ export class PendingChanges {
       })
     }
     this.noteTouched(collection, id)
-    const place = this.places.placeFor(this.placeName)
+    const place = this.placeNow
     const [known] = this.replayOn(collection, [
       place?.rowKnown?.(collection, id) ?? { [this.idField]: id, [field]: was }
     ])
@@ -410,7 +436,7 @@ export class PendingChanges {
 
   /** Does this place take what happened, not only the value after it? */
   private get placeTakesEdits(): boolean {
-    return !!this.places.placeFor(this.placeName)?.describe().edits
+    return !!this.placeNow?.describe().edits
   }
 
   /**
@@ -505,7 +531,7 @@ export class PendingChanges {
         this.remove(dropped)
         this.settleList()
         this.putBack(dropped)
-        void this.places.heal.healChanges(this.placeName, dropped)
+        if (!this.placeAside) void this.places.heal.healChanges(this.placeName, dropped)
       }
     }
   }
@@ -549,7 +575,7 @@ export class PendingChanges {
 
   /** Everything that can go, batch by batch.  - throws when an answer didn't come:  the queue tries again. */
   private async send({ keepalive }: { keepalive: boolean }): Promise<void> {
-    for (let batch = this.nextBatch(); batch.length; batch = this.nextBatch()) {
+    for (let batch = this.nextBatch(); batch.length && !this.placeAside; batch = this.nextBatch()) {
       await this.sendBatch(batch, keepalive)
     }
     // "saved" would be untrue of what it just took back
@@ -561,7 +587,7 @@ export class PendingChanges {
   private nextBatch(): PendingChange[] {
     const [first] = this.pending
     if (!first || this.isOpen(first)) return []
-    const size = this.places.placeFor(this.placeName)?.describe().rateLimit?.changesPerRequest ?? Infinity
+    const size = this.placeNow?.describe().rateLimit?.changesPerRequest ?? Infinity
     const batch: PendingChange[] = []
     for (const change of this.pending) {
       if (change.group !== first.group || batch.length >= size) break
@@ -577,7 +603,7 @@ export class PendingChanges {
    * - throws what the place threw, when the outcome is unknown
    */
   private async sendBatch(batch: PendingChange[], keepalive: boolean, merges = 0): Promise<boolean> {
-    const place = this.places.placeForOrDie(this.placeName)
+    const place = this.placeNow ?? this.places.placeForOrDie(this.placeName)
     for (const change of batch) {
       change.hasLeft = true
       this.onTheirWay.add(change.changeId)
@@ -695,7 +721,7 @@ export class PendingChanges {
     const isByChange = rows.length === written.length
     const renamed = isByChange ? this.renameMade(written, rows) : []
     const { idField } = this
-    const place = this.places.placeFor(this.placeName)
+    const place = this.placeNow
     for (const change of written) {
       const newId = renamed.find(({ from }) => from === change.id)?.to ?? change.id
       const { collection, type } = change
@@ -716,7 +742,7 @@ export class PendingChanges {
    * - So it moves to the version that write made, rather than be refused, read and merged, one keystroke at a time.
    */
   private followVersions(batch: readonly PendingChange[]): void {
-    const place = this.places.placeFor(this.placeName)
+    const place = this.placeNow
     // what a change has seen, on a place that doesn't refuse, is only for saying who it overwrote:  it stays as it was
     if (!place?.versionOf || !place.describe().versionCheck) return
     for (const { collection, id, version } of batch) {
@@ -757,7 +783,7 @@ export class PendingChanges {
     this.remove(changes)
     this.keepCopy()
     this.putBack(changes)
-    void this.places.heal.healChanges(this.placeName, changes)
+    if (!this.placeAside) void this.places.heal.healChanges(this.placeName, changes)
     this.places.tellWriteFailed({
       placeName: this.placeName,
       changes,
@@ -786,7 +812,7 @@ export class PendingChanges {
     edits: readonly ListEdit[],
     was: unknown
   ): PendingChange[] {
-    const place = this.places.placeFor(this.placeName)
+    const place = this.placeNow
     const row = place?.rowKnown?.(thing.collection, thing.id) ?? { [this.idField]: thing.id, [field]: was }
     const value = withListEdits(row, field, edits)[field]
     return [{ changeId: "", kind: "update", ...thing, field, fields: { [field]: value }, was }]
@@ -815,11 +841,12 @@ export class PendingChanges {
     rows: PlaceRow[],
     { renamed }: Pick<PlaceRowsChange, "renamed"> = {}
   ): void {
+    if (this.placeAside) return
     const { idField, placeName } = this
     if (type !== undefined) {
       for (const row of rows) {
         const id = idOfRow(row, idField)
-        if (id !== undefined) this.places.cache.keep(type, id, row)
+        if (id !== undefined) this.places.keepRow(placeName, type, id, row)
       }
     }
     this.places.tellRows({
@@ -861,7 +888,7 @@ export class PendingChanges {
 
   /** The version of this thing as its place last showed it:  what a change made now is made from. */
   private versionOf(collection: string, id: string): string | undefined {
-    return this.places.placeFor(this.placeName)?.versionOf?.(collection, id)
+    return this.placeNow?.versionOf?.(collection, id)
   }
 
   /** Has `change` not left yet? */
@@ -871,7 +898,7 @@ export class PendingChanges {
 
   /** The field holding a row's id:  `"id"` for a place that doesn't say. */
   private get idField(): string {
-    return this.places.placeFor(this.placeName)?.describe().idOf ?? "id"
+    return this.placeNow?.describe().idOf ?? "id"
   }
 }
 

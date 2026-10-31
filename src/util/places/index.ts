@@ -16,6 +16,8 @@
  * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
  * - `PlaceHeal`:  fetch the latest, replay what's pending.
+ * - `Places.originOf()`:  where a value came from.
+ * - NOT here:  `SamplePlace`, taken by file, `spell/util/places/SamplePlace`, so a built app leaves it out.
  * - NOTE:  NOT flattened into `spell/util`, so no page pays for it until it uses it.
  * - GENERIC:  nothing about Things or Spell's words.
  *   Everything that needs a server is `spell/server/places`.
