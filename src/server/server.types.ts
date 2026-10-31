@@ -59,7 +59,7 @@ export type ServedFile = {
  * - `index`:  file a folder resolves to (default `index.html`);  `false`:  folders 404
  * - `skip`:  how many folders of the path after `prefix` to drop before looking in `dir` (default 0)
  *   - e.g. `{ prefix: "/worktrees/", dir: content, skip: 1 }`:  `/worktrees/<w>/epics/x.html` is `<content>/epics/x.html`,
- *     for EVERY `<w>` (the page server's content folder, `PageServer.serveContent()`)
+ *     for EVERY `<w>` (the page server's epic folder, `PageServer.serveContent()`)
  *   - a catch-all:  at one prefix, it comes after the folders that look the path up as it is (`StaticHandler`)
  */
 export type Mount = {
@@ -100,7 +100,7 @@ export type ServerInfo = {
    */
   worktreesFolders?: string[]
   /**
-   * the shared content folder it serves at `/`, after the checkout's own files, once a route module has said where it
+   * the epic folder it serves at `/`, after the checkout's own files, once a route module has said where it
    * is (`PageServer.serveContent()`, epic `epic-eject` P12):  epics, guides, pages, sagas, brand ...
    */
   contentFolder?: string
@@ -279,7 +279,7 @@ const SPELL_UI_SOURCES = [
 ]
 
 /**
- * What spell-epic's pack and docs bundle read:  the epic folder's code, Spell UI's (the shared modules a page
+ * What spell-epic's pack and docs bundle read:  the `epic/` folder's code, Spell UI's (the shared modules a page
  * hands its packs), the element layer, the kit's util, the site header, the lock file.
  */
 const EPIC_SOURCES = [

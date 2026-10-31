@@ -46,13 +46,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Over HTTP, `/api/files` (`route()`), for pages the server served:
       - `PUT ?path=` (save), `POST /create`, `/rename`, `/duplicate`, `DELETE ?path=`
       - every one needs `Guard`'s strong write check (this run's token, same origin)
-      - ONLY inside the writable folders, the shared content ones;  anything else:  403
+      - ONLY inside the writable folders, the epic repo ones;  anything else:  403
         - the list:  `"writable"`, in the page server's settings (below)
         - today:
           `epics`, `guides`, `pages`, `brand`
           (not `templates` since epic `epic-eject` T11:  they're spell-epic's, at the engine route `/templates/`)
       - The page editor's writes are held to the same list (`FileOperations.writableFile()`).
-      - Those folders are the shared content folder's, once the page server serves it (`FileOperations.content`,
+      - Those folders are the epic folder's, once the page server serves it (`FileOperations.content`,
         `serveContent()`, below);  else the checkout's.
         - In a checkout that still links them in:  paths are resolved (`fileInside()`), never followed,
           so they stay "inside".
@@ -138,11 +138,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A component set's page at its ADDRESS, `/worktrees/<w>/components/<set>/...` (`componentSetAddressOf()`, in
       `page/settings.ts`;  epic `epic-engine` I136):  by its folder's path it loads none of its `_assets/`.
     - It asks that server for `/api/epics/running` (`RUNNING_EPICS_API`).
-    - A file of the shared content folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
+    - A file of the epic folder, by its own path (`.../spell.epics/epics/...`, as spell-epic hands them out):
       its path there, `/epics/...` (epic `epic-eject` I20).
-      - The content folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
+      - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
-        the one beside the content repo whose pid file names it (`contentServerOf()`).
+        the one beside the epic repo whose pid file names it (`contentServerOf()`).
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -163,7 +163,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
   - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
-    its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
+    its rows in the epic folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
     - its files' shapes:  [runs.types.ts](runs/runs.types.ts), the contract with spell-epic's page and routes
     - it names no element and no big folder;  `show()` runs `epic` as a program, when there is one
     - steering (P25):  the command runs on while Owen answers
@@ -207,11 +207,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `app/`:  the app's route module, App UI, `pageScripts`
       - A project beside the kit declares its part the same way, in its own `package.json`:
         spell-brand, its set, engine routes, watched folders, bundle.
-      - The content repo's part:  `page-server.json5` at the content folder's root
+      - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  none today.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
-        the kit's, the content repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
+        the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
@@ -228,8 +228,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at.
       Every page it serves gets the local one (`withLocalCopies()`), so pages load offline.
       - Today spell-epic's:  highlight.js from cdnjs, its copy at `/_epic/assets/highlight.min.js` (epic `airplane` P1).
-    - GONE (`"gone"`):  URL prefixes answered "not found" though the content folder holds them.
-      Today the content repo's `/ui` (Spell UI's old docs, now `/components/ui/`).
+    - GONE (`"gone"`):  URL prefixes answered "not found" though the epic folder holds them.
+      Today the epic repo's `/ui` (Spell UI's old docs, now `/components/ui/`).
     - PAGE SCRIPTS (`"pageScripts"`, epic `repo-split` P2):
       module scripts it adds to every HTML page it serves, before `</body>` (`PageServer.withPageScripts()`).
       - Each says its URL (`src`), the file it is (`file`, from the root) and the pages it skips (`skip`, URL prefixes).
@@ -272,7 +272,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       The old paths answer "not found" (no redirects, Q30 of `people-and-orgs`).
     - It may use deps (`parse5`).
     - It serves the repo at `/`.
-      - And the SHARED CONTENT folder after it (`serveContent(dir)`, epic `epic-eject` P12):
+      - And the Epic folder after it (`serveContent(dir)`, epic `epic-eject` P12):
         epics, guides, pages, sagas, brand ... with no link at the checkout's root.
         - The checkout first:  a path it has is its own.
         - Under every worktree's address too (`/worktrees/<w>/...`), after that worktree's own files:
@@ -286,7 +286,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `/api/files` and `/api/pages` write in it:  the `"writable"` names are its folders.
         - `/api/server` reports it (`contentFolder`).
         - `spell server url <file>` gives a file of it its path there (`contentPathOf()`).
-      - What moved out of it, still in the content repo for older checkouts (`/ui/`):  `"gone"`, "not found".
+      - What moved out of it, still in the epic repo for older checkouts (`/ui/`):  `"gone"`, "not found".
     - And the COMPONENT SETS:  the docs of each set of elements, in Spell UI's page shape, in its package's `docs/`.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order
         (`componentSets()`, epic `repo-split` P4;  `ComponentSet`, in [page.types.ts](page/page.types.ts)).
@@ -350,7 +350,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           (the bundles' fallback tabs, for a page opened from disk, went in epic `epic-engine` P46, with its `root`)
         - each:  its label and home;  `ownTab`;  what lights it (`litTab()`):
           component sets by id (`sets`), path patterns (`paths`), docs area folders (`areas`)
-        - the content repo's part (`page-server.json5`)
+        - the epic repo's part (`page-server.json5`)
         - a tab whose home is a component set's address, none of whose `sets` is served, is left out:
           no App/UI tab without spell-app
       - its `theme` SLOT:  a page's own theme control, at the bar's end, in place of its light / dark button
@@ -436,11 +436,11 @@ The steps between a page's content and its file on disk, for every tool that wri
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
-  - NEVER make it import the epic folder's code:  `epic/` imports this.
+  - NEVER make it import the `epic/` folder's code:  `epic/` imports this.
   - `DataFile` (`SRV.DataFile`, or `spell/server/DataFile` alone):  the tooling's JSON5 data files,
     here since epic `epic-eject` I5, so the CLI reads the commands page's data without the engine.
   - `contentFolderOf()` (`SRV.contentFolderOf()`, or `spell/server/contentFolder` alone, epic `epic-eject` P12):
-    the repo's shared content folder, `contentFolder` in the main checkout's `.epic/config.json5`,
+    the repo's epic folder, `contentFolder` in the main checkout's `.epic/config.json5`,
     so a tool finds the content with no link at the checkout's root.
     - The `Linker` lays it under the checkout (`content`), and the CLI reads the commands page's data and the WWOD
       check's shared citers from it.
@@ -459,7 +459,7 @@ The steps between a page's content and its file on disk, for every tool that wri
       - `guides/`
       - `epics/`
       - `templates/`
-      - in the shared content folder (`contentFolderOf()`), laid under the checkout:
+      - in the epic folder (`contentFolderOf()`), laid under the checkout:
         its folders the checkout has none of are found there (`Linker`'s `content`)
     - the epic engine's code, docs tools included:  the kit's `epic/src/` (epic `repo-split` P20),
       else an older checkout's `spell-epic/src/`

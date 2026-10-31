@@ -19,7 +19,7 @@ import type { SiteTab } from "spell/server/site/site.types"
  * - `source`:  the served file's absolute path on disk, e.g. `/Users/x/spell-app.epics/guides/solid/index.html`
  *   - what the site header's "open in VS Code" opens (`SiteHeader.sourceFile`)
  *   - `root` + `file` isn't always it (epic `epic-engine` I42):
- *     a content folder's page (`file` is from the content folder), a worktree's on the main checkout's server,
+ *     an epic folder's page (`file` is from the epic folder), a worktree's on the main checkout's server,
  *     spell-epic's server's `/r/<repo>/...`
  * - `root`:  absolute folder served
  * - `branch` / `worktree`:  of that checkout, when known

@@ -353,8 +353,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - "durable doc" -- the epic's guide;  "syntax-choices page" -- a choice page;
     "analysis page" -- a review page;  "docs index", "docs home" -- the home page;
     "goal", "goals page" -- a saga (an epic of epics), a saga page
-  - "shared content repo", "content repo", "shared repo", "shared content" -- the epic repo, `spell.epics`
-    (Owen, 2026-10-29, epic `epic-engine` r47);  "content folder" -- the epic folder, that repo's folder on disk (r48)
+  - "epic repo", "epic repo", "epic repo", "the epic repo" -- the epic repo, `spell.epics`
+    (Owen, 2026-10-29, epic `epic-engine` r47);  "epic folder" -- the epic folder, that repo's folder on disk (r48)
     - `epic repos ...` and the code name `EpicRepo` are about CODE repos, not the epic repo (Q63 of epic `epic-engine`)
 - Names only code reads keep the old words:
   - `<epic-id>.plan.html`, `PlanDoc`, `plan-doc.md`

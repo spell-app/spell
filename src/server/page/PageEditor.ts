@@ -17,13 +17,13 @@ import { SRV } from "spell/server"
  * - a section edit replaces only the element's exact byte range (parse5 source locations)
  *   - every other byte of the file stays as it was, so diffs show only the edit
  * - which file a path names:  as the page server serves it
- *   - reading:  the checkout's, else the content folder's (`SRV.FileOperations.content`, `PageServer.serveContent()`)
- *   - writing:  the content folder's, once there is one, else the checkout's (`SRV.FileOperations.writableRoot`)
+ *   - reading:  the checkout's, else the epic folder's (`SRV.FileOperations.content`, `PageServer.serveContent()`)
+ *   - writing:  the epic folder's, once there is one, else the checkout's (`SRV.FileOperations.writableRoot`)
  * - safety:
  *   - writes need the `Guard` token and same origin
  *   - under the root only, through `resolveInside()` (no dot files, no `..`)
  *   - WRITES only inside the `writable` folders, as `/api/files` (`SRV.FileOperations.writableFile()`):
- *     the root `package.json`'s `"pageServer"` `"writable"` list, the shared content folders;  anything else:  403
+ *     the root `package.json`'s `"pageServer"` `"writable"` list, the epic repo folders;  anything else:  403
  *     - reading (`GET`) isn't held to it:  any text file the server serves
  *   - which files:  `.html` for `PATCH`, any `TEXT_FILE` for `GET` / `PUT`
  *   - `If-Match` MUST be the `ETag` the page was served with
@@ -103,7 +103,7 @@ export class PageEditor {
 
   /**
    * The file a request names in `?path=`:  one that `allowed` matches, or an `HttpError`.
-   * - to `read`:  the checkout's, else the content folder's, as the page server serves them
+   * - to `read`:  the checkout's, else the epic folder's, as the page server serves them
    * - to `write`:  in the folder the `writable` folders are in (`SRV.FileOperations.writableRoot`)
    */
   private pageFile(request: SRV.Request, allowed: RegExp, to: "read" | "write"): { path: string; file: string } {

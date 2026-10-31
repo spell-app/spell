@@ -9,14 +9,14 @@ import { litTab } from "spell/server/site/site.types"
 /** The kit:  its tests are in its `tests/`. */
 const KIT = resolve(import.meta.dirname, "../../..")
 
-/** The content repo's settings file, where the tabs are:  none in the kit's CI, which clones no content repo. */
+/** The epic repo's settings file, where the tabs are:  none in the kit's CI, which clones no epic repo. */
 const CONTENT = contentFolderOf(KIT)
 
 /**
- * The site header's tabs, as the kit's page server names them:  the content repo's part of its settings
+ * The site header's tabs, as the kit's page server names them:  the epic repo's part of its settings
  * (`CONTENT_SETTINGS`'s `siteTabs`), which it hands every page it serves (`SPELL_SERVER.siteTabs`;  epic `repo-split` I4).
  * - the header's code (`SiteHeader`, `litTab()`) names none of them:  these pin the data
- * - spell-app's `package.json` held them until epic `repo-split` P16:  they describe the content repo's areas
+ * - spell-app's `package.json` held them until epic `repo-split` P16:  they describe the epic repo's areas
  */
 const TABS = pageServerSettings(KIT).siteTabs ?? []
 

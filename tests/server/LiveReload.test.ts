@@ -10,7 +10,7 @@ describe("LiveReload", () => {
   const temp = mkdtempSync(join(tmpdir(), "srv-live-"))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
-  // shared content (epic `shared-content`):  a watched folder that is a link into a repo beside the checkout
+  // the epic repo (epic `shared-content`):  a watched folder that is a link into a repo beside the checkout
   it("reports a change inside a watched LINKED folder, under the link's path", async () => {
     mkdirSync(join(temp, "peer/content"), { recursive: true })
     mkdirSync(join(temp, "root/packages/docs"), { recursive: true })

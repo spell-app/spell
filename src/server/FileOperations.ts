@@ -11,9 +11,9 @@ import { SRV } from "spell/server"
  *     - they check no list of writable folders:  that's the caller's job
  *     - spaces saves its projects' files this way, and the page editor its pages
  *   - over HTTP, for pages the server served:  `/api/files` (`route()`), on URL paths,
- *     and ONLY inside the folders of a `writable` list (the page server's:  the shared content folders).
+ *     and ONLY inside the folders of a `writable` list (the page server's:  the epic repo folders).
  *     The page editor (`/api/pages`) checks its writes against the same list (`writableFile()`).
- *     - those folders are in `root`, or in the content folder once the page server serves one (`content`)
+ *     - those folders are in `root`, or in the epic folder once the page server serves one (`content`)
  * - Every change is made under the file's `FileLock`, so tools writing the same file take turns.
  * - A save is all at once:  a temp file beside the file, then a rename,
  *   so a reader never sees half a file.
@@ -25,7 +25,7 @@ export class FileOperations {
   readonly root: string
 
   /**
-   * the shared content folder, once the page server serves one (`PageServer.serveContent()`):
+   * the epic folder, once the page server serves one (`PageServer.serveContent()`):
    * the `writable` folders are ITS folders from then on, not `root`'s
    * - so `/epics/x/x.plan.html` is written in `<content>/epics/x/`, with no `epics` link in the checkout
    */
@@ -329,7 +329,7 @@ export class FileOperations {
  * `new FileOperations()` props.
  * - `root`:  folder URL paths are under (the checkout)
  * - `writable`:  folders, relative to `root`, that `/api/files` may change things in;  none by default
- *   - relative to the content folder instead, once it's set (`FileOperations.content`)
+ *   - relative to the epic folder instead, once it's set (`FileOperations.content`)
  */
 export type FileOperationsProps = { root: string; writable?: string[] }
 

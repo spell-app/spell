@@ -401,7 +401,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS"):
     - its pages in this folder's `docs/`, served at `/components/ui/`
     - the site bundle laid over them, at `_assets/`
-    - From 2026-10-05 (claude-design P6) until P18, the pages were SHARED content, the checkout's `ui/`.
+    - From 2026-10-05 (claude-design P6) until P18, the pages were in the epic repo, the checkout's `ui/`.
 - In two halves, one constant each in [the tools' types](src/tools/tools.types.ts).
 - `SITE_PAGES`, the PAGES:  [`docs/`](docs/index.html), tracked here.
   - So a page changes in the same commit as its element.

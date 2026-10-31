@@ -1,12 +1,12 @@
 /**
- * A worktree's files, and the shared content folder's, on the MAIN checkout's page server, so every link points to
+ * A worktree's files, and the epic folder's, on the MAIN checkout's page server, so every link points to
  * one port.
  * - The main page server serves each worktree under `/worktrees/<w>/` (`spell/server/page` `PageServer`).
  * - Used by `spell server url` and the VS Code doc preview;  either falls back to the worktree's own server.
- * - Shared content is served from the main checkout itself:  `/epics/...`, not `/worktrees/<w>/epics/...`.
- *   - shared content:  `epics/`, `guides/` ...:  ONE shared repo, the same in every checkout
+ * - The epic repo is served from the main checkout itself:  `/epics/...`, not `/worktrees/<w>/epics/...`.
+ *   - the epic repo:  `epics/`, `guides/` ...:  ONE epic repo, the same in every checkout
  *     - a file in it by its own path, as spell-epic hands them out (`.../spell-app.epics/epics/x/x.plan.html`):
- *       the content folder the main server serves at `/` (`contentFolder` in its `/api/server`), from any checkout
+ *       the epic folder the main server serves at `/` (`contentFolder` in its `/api/server`), from any checkout
  *     - or through an old link at a checkout's root
  *   - Why:  a page loads its scripts from the checkout it's served from,
  *     so an epic page shown through an old worktree drew with that worktree's old `<epic-*>` elements
@@ -26,13 +26,13 @@ import { SERVER_API } from "./WebServer"
 
 /**
  * `file`'s URL on the main checkout's page server;  else `undefined`.
- * - only when `file` is in a worktree of a main checkout, or in the shared content folder that server serves,
+ * - only when `file` is in a worktree of a main checkout, or in the epic folder that server serves,
  *   and that server is running and serves worktrees
  *   - in a worktree:  as `SRV.checkoutOf()` finds it, e.g. `<main>/.claude/worktrees/<w>/...`
- *   - in the content folder (epic `epic-eject` P12):  its path there, `/epics/...`, from the content folder the
+ *   - in the epic folder (epic `epic-eject` P12):  its path there, `/epics/...`, from the epic folder the
  *     server says it serves (`contentFolder` in its `/api/server`, live:  the server knows it, this package can't
  *     read `.epic/config.json5`)
- *     - which main checkout:  `file`'s;  else that of checkout `from`;  else the one beside the content repo whose
+ *     - which main checkout:  `file`'s;  else that of checkout `from`;  else the one beside the epic repo whose
  *       page server serves it (`contentServerOf()`), so a caller that knows no checkout (the doc preview) finds it
  * - "serves worktrees":  its running epics answer (`RUNNING_EPICS_API`, epics' route module)
  *   - so a main server started before it learned to (an older checkout, not yet restarted)
@@ -63,10 +63,10 @@ export async function mainServerUrl(file: string, from?: string): Promise<string
 }
 
 /**
- * File `file`'s URL path on a page server that serves the content folder `server.contentFolder`
+ * File `file`'s URL path on a page server that serves the epic folder `server.contentFolder`
  * (`PageServer.serveContent()`):  `/epics/x/x.plan.html`;  `undefined` for a file outside it.
- * - by its path, else by its real path:  a file reached through a link into the content folder (a checkout's old
- *   `epics` link, the worktrees' folder's `spell-app.epics`) is the content folder's
+ * - by its path, else by its real path:  a file reached through a link into the epic folder (a checkout's old
+ *   `epics` link, the worktrees' folder's `spell-app.epics`) is the epic folder's
  */
 export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFolder">): string | undefined {
   const folder = server.contentFolder
@@ -77,13 +77,13 @@ export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFol
 }
 
 /**
- * The main checkout whose page server serves the content folder `file` is in;  else `undefined`.
- * - the content folder is a repo of its own, beside the checkouts (`../spell-app.epics`) or inside the kit
+ * The main checkout whose page server serves the epic folder `file` is in;  else `undefined`.
+ * - the epic folder is a repo of its own, beside the checkouts (`../spell-app.epics`) or inside the kit
  *   (`spell/spell.epics`), and names none of them:  so the folder holding it (the kit, whose page server serves it
  *   since epic `repo-split` P16) and each folder beside it are asked, by their page server's pid file
  *   (`.spell-server.json`, written once the route modules have said what it serves:  `contentFolder`)
  * - a worktree's server serves it too:  that worktree's main checkout, then
- * - real paths compared, so a file through a link to the content folder counts
+ * - real paths compared, so a file through a link to the epic folder counts
  * - NEVER throws
  */
 export function contentServerOf(file: string): string | undefined {
@@ -119,8 +119,8 @@ async function liveInfo(base: string): Promise<ServerInfo | undefined> {
 }
 
 /**
- * Whether `at`'s file is shared content:  its top folder in the worktree and in the main checkout
- * are the same real folder (both links into the shared repo).
+ * Whether `at`'s file is in the epic repo:  its top folder in the worktree and in the main checkout
+ * are the same real folder (both links into the epic repo).
  */
 function isShared(at: WorktreePath): boolean {
   const top = at.path[0]

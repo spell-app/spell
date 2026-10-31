@@ -21,7 +21,7 @@ function put(root: string, path: string, json: unknown): void {
 }
 
 /**
- * A kit (epic `repo-split` P16, P20):  its own part (the content repo's tabs), and its folders (its `workspaces`) each
+ * A kit (epic `repo-split` P16, P20):  its own part (the epic repo's tabs), and its folders (its `workspaces`) each
  * declaring their own part, paths from their own folder.
  * - `ui` and `epic`:  there;  `app`:  listed, not there
  */
@@ -111,10 +111,10 @@ describe("pageServerSettings()", () => {
     expect(sets?.epics?.dir).toBe("../epic/src/docs")
   })
 
-  test("the content repo's part, from its own file in the content folder, after the kit's:  its tabs, writable folders", () => {
+  test("the epic repo's part, from its own file in the epic folder, after the kit's:  its tabs, writable folders", () => {
     const withContent = kit()
     put(withContent, ".epic/config.json5", "{ contentFolder: 'content' }")
-    put(withContent, "content/page-server.json5", "// the content repo's\n{ writable: ['guides'], gone: ['/ui'] }")
+    put(withContent, "content/page-server.json5", "// the epic repo's\n{ writable: ['guides'], gone: ['/ui'] }")
     expect(settingsParts(withContent).map((part) => part.dir)).toEqual([
       withContent,
       join(withContent, "content"),

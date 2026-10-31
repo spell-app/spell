@@ -13,7 +13,7 @@ import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server
  * `{}` without any.
  * - Each part declares ITS OWN settings, in its own `package.json`, the way it declares its `"spell": { "commands" }`:
  *   the route modules, folders, component sets ... it adds to the page server.
- * - Which parts:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
+ * - Which parts:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the epic repo's
  *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each of the kit's folders (its `package.json`'s
  *   `workspaces`, lowest first), then each repo beside it (`REPOS_FILE`'s peers:  spell-brand), then each project
  *   the checkout names (`LOCAL_SETTINGS`), in that order (`settingsParts()`);  outside a kit, `root`'s own.
@@ -37,7 +37,7 @@ export type SettingsPart = { readonly dir: string; readonly settings: PageServer
 
 /**
  * The parts of the page server's settings for checkout `root`, in merge order:
- * - in a kit (`kitOf()`):  the kit's own part, then the content repo's (`CONTENT_SETTINGS`, in the content folder
+ * - in a kit (`kitOf()`):  the kit's own part, then the epic repo's (`CONTENT_SETTINGS`, in the epic folder
  *   `contentFolderOf()` names), then each of the kit's folders (`kitFolders()`:  `parser/`, `ui/`, `epic/`, `app/`),
  *   then each repo beside the kit `REPOS_FILE` lists as a peer (`peerRepos()`:  spell-brand), then each project the
  *   checkout's own `LOCAL_SETTINGS` names (`localProjects()`:  a tester's)
@@ -117,15 +117,15 @@ export function localProjects(kit: string): string[] {
 }
 
 /**
- * The content repo's part of the page server's settings:  a file of its own, at the content folder's root
- * (epic `repo-split` P16, Owen:  they describe the content repo, so they live in it)
+ * The epic repo's part of the page server's settings:  a file of its own, at the epic folder's root
+ * (epic `repo-split` P16, Owen:  they describe the epic repo, so they live in it)
  * - what's in it:  the site header's tabs (`siteTabs`), the folders the page editor may write (`writable`), what moved
  *   out of it (`gone`)
- * - JSON5, like every data file of the content repo;  its paths (none today) from the content folder
+ * - JSON5, like every data file of the epic repo;  its paths (none today) from the epic folder
  */
 export const CONTENT_SETTINGS = "page-server.json5"
 
-/** The content repo's part, `CONTENT_SETTINGS` in folder `content`;  `undefined` without one, or unreadable. */
+/** The epic repo's part, `CONTENT_SETTINGS` in folder `content`;  `undefined` without one, or unreadable. */
 function contentSettings(content: string): PageServerSettings | undefined {
   try {
     return JSON5.parse(readFileSync(join(content, CONTENT_SETTINGS), "utf8")) as PageServerSettings
@@ -181,7 +181,7 @@ export const REPOS_FILE = "repos.json5"
 
 /**
  * The checkout a page server for folder `from` serves (epic `repo-split` P16):
- * - in a kit:  the kit (`kitOf()`), from any folder of it, a big folder's or the content folder's alike
+ * - in a kit:  the kit (`kitOf()`), from any folder of it, a big folder's or the epic folder's alike
  * - else the git checkout `from` is in (`findRoot()`), else `from` itself
  * - So `spell server start | status | stop` mean ONE server from anywhere in the kit.
  */

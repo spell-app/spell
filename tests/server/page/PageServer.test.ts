@@ -416,9 +416,9 @@ describe("PageServer", () => {
     }
   })
 
-  // epic `epic-eject` P12:  the shared content with no link at the checkout's root
-  it("serves the content folder at / after the checkout, and under every worktree's address (serveContent())", async () => {
-    // a checkout of its own, with no links:  its content folder and worktrees beside it
+  // epic `epic-eject` P12:  the epic repo with no link at the checkout's root
+  it("serves the epic folder at / after the checkout, and under every worktree's address (serveContent())", async () => {
+    // a checkout of its own, with no links:  its epic folder and worktrees beside it
     const main = mkdtempSync(join(tmpdir(), "srv-content-"))
     const content = `${main}.epics`
     const worktrees = `${main}.worktrees`
@@ -447,7 +447,7 @@ describe("PageServer", () => {
         return { text: /<p[^>]*>(.*?)<\/p>/.exec(answer.text)?.[1], ...config }
       }
       expect((await ask(at, "GET", "/epics/x/x.plan.html")).status).toBe(404)
-      // the content folder first, then the worktrees:  either order;  a second call with it changes nothing
+      // the epic folder first, then the worktrees:  either order;  a second call with it changes nothing
       const context = served.routeContext()
       context.serveContent!(content)
       context.serveContent!(content)
@@ -456,7 +456,7 @@ describe("PageServer", () => {
       expect(JSON.parse((await ask(at, "GET", "/api/server")).text)).toMatchObject({ contentFolder: content })
 
       // its pages, told their path in it:  what the page editor saves and live reload reports;
-      // and the file itself, in the content folder, not the checkout (`source`, epic `epic-engine` I42)
+      // and the file itself, in the epic folder, not the checkout (`source`, epic `epic-engine` I42)
       expect(await told("/epics/x/x.plan.html")).toMatchObject({
         text: "plan",
         file: "/epics/x/x.plan.html",
@@ -478,7 +478,7 @@ describe("PageServer", () => {
       })
       expect((await ask(at, "GET", "/worktrees/w/epics/missing.html")).status).toBe(404)
 
-      // writes land in the content folder, and live pages hear of it at / and at the worktree's address
+      // writes land in the epic folder, and live pages hear of it at / and at the worktree's address
       const events = await listen(at)
       const changed = events.next("change", "/epics/x/x.plan.html")
       const inWorktree = events.next("change", `${urlPathOf(main, worktrees)}w/epics/x/x.plan.html`)
@@ -802,7 +802,7 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     writeFileSync(join(root, "docs/offline.html"), `<!doctype html><head></head><script src="${cdn}"></script>\n`)
     writeFileSync(join(root, "ui/button.html"), "<!doctype html><p>old</p>\n")
     writeFileSync(join(root, "brand/index.html"), "<!doctype html><p>Brand</p>\n")
-    // the content folder still holds `old/`, which moved out of it
+    // the epic folder still holds `old/`, which moved out of it
     mkdirSync(join(`${root}-content`, "old"), { recursive: true })
     writeFileSync(join(`${root}-content`, "old/button.html"), "<!doctype html><p>old</p>\n")
     server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
@@ -822,7 +822,7 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     expect(answer.text).not.toContain("cdnjs")
   })
 
-  it('answers "not found" at what\'s gone, though the content folder holds it:  no redirect (Q30)', async () => {
+  it('answers "not found" at what\'s gone, though the epic folder holds it:  no redirect (Q30)', async () => {
     for (const old of ["/old/button.html", "/old/", "/old"]) expect((await ask(port, "GET", old)).status, old).toBe(404)
     expect((await ask(port, "GET", "/brand/index.html")).status).toBe(200)
   })
@@ -832,7 +832,7 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
   })
 
   it("leaves out a tab whose home is a component set it doesn't serve:  no App/UI without spell-app", () => {
-    // Brand's home is the content repo's:  it stays without its set
+    // Brand's home is the epic repo's:  it stays without its set
     expect(server.siteTabs?.map((tab) => tab.name)).toEqual(["Epics", "Spell/UI", "Brand"])
   })
 })
