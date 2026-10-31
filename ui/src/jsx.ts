@@ -29686,6 +29686,230 @@ export interface UISpaceAttributes {
 export interface UISpaceJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UISpaceAttributes>, UISpaceAttributes {}
 
+/** `<ui-split-panel>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UISplitPanelEventMap {
+  /**
+   * `ui-changed`:  A bar was let go, or moved with a key:  `sizes` in the form `columns` and `rows` take, to keep and give back.
+   * - `event.detail`:  `{ sizes: string, panes: HTMLElement[] }`
+   */
+  "ui-changed": CustomEvent<{ sizes: string; panes: HTMLElement[] }>
+}
+
+/** `<ui-split-panel>`'s own attributes, from its vocabulary. */
+export interface UISplitPanelAttributes {
+  /**
+   * Side by side, sized across:  a comma list, one size for each pane, such as `"20%,*,380px"`.  A number, `px` or `em` is a fixed size;  `%` is that share of what the fixed panes leave;  `*` or a missing size shares the percent that's left;  `auto` is as big as its content.  Empty:  all the same.
+   * - takes:  text
+   */
+  columns?: string
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
+  "prop:columns"?: string
+  /**
+   * One above the other, sized down, as `columns` says.  With neither, the panes are side by side.
+   * - takes:  text
+   */
+  rows?: string
+  /**
+   * `rows`, as the DOM element's property.
+   * @deprecated write `rows` -- `prop:` stays only for compiled spell
+   */
+  "prop:rows"?: string
+  /**
+   * A bar between each two panes, to drag or to move with the arrow keys.
+   * - takes:  flag (present / absent)
+   */
+  resizable?: boolean | ""
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: boolean | ""
+  /**
+   * The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`.
+   * - takes:  text
+   */
+  "min-size"?: string
+  /**
+   * `min-size`, as the DOM element's property.
+   * @deprecated write `min-size` -- `prop:` stays only for compiled spell
+   */
+  "prop:minSize"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-changed`:  A bar was let go, or moved with a key:  `sizes` in the form `columns` and `rows` take, to keep and give back.
+   * - `event.detail`:  `{ sizes: string, panes: HTMLElement[] }`
+   */
+  "on-ui-changed"?: (event: UISplitPanelEventMap["ui-changed"]) => void
+}
+
+/** `<ui-split-panel>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UISplitPanelJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UISplitPanelEventMap>>, keyof UISplitPanelAttributes>,
+    UISplitPanelAttributes {}
+
 /** `<ui-stack>`'s own attributes, from its vocabulary. */
 export interface UIStackAttributes {
   /**
@@ -38108,6 +38332,14 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-space": UISpaceJSXAttributes
       /**
+       * `<ui-split-panel>`:  A split panel lays its children out side by side or one above the other, with bars to resize them.
+       * - also known as:  split view, split pane, resizable panes, panes, splitter, sash
+       * - slots:
+       *   - default:  The panes, one per child.  A child with `hidden` isn't one:  the others share its room, and it stays as it is.
+       * - events:  `ui-changed`
+       */
+      "ui-split-panel": UISplitPanelJSXAttributes
+      /**
        * `<ui-stack>`:  A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own.
        * - also known as:  stack, cluster, flex box, row, column, hbox, vbox, spacer
        * - slots:
@@ -38477,6 +38709,7 @@ declare global {
     "ui-sides": UIHTMLElement<UISidesEventMap>
     "ui-slider": UIHTMLElement<UISliderEventMap>
     "ui-space": HTMLElement
+    "ui-split-panel": UIHTMLElement<UISplitPanelEventMap>
     "ui-stack": HTMLElement
     "ui-statistic": HTMLElement
     "ui-statistics": HTMLElement

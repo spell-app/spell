@@ -29706,6 +29706,239 @@
       "href": "ui-space.html"
     },
     {
+      "tag": "ui-split-panel",
+      "name": "Split panel",
+      "folder": "ui-split-panel",
+      "topics": [
+        "layout",
+        "containers"
+      ],
+      "aka": [
+        "split view",
+        "split pane",
+        "resizable panes",
+        "panes",
+        "splitter",
+        "sash"
+      ],
+      "description": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
+      "noun": "split panel",
+      "attributes": [
+        {
+          "name": "columns",
+          "kind": "string",
+          "description": "Side by side, sized across:  a comma list, one size for each pane, such as `\"20%,*,380px\"`.  A number, `px` or `em` is a fixed size;  `%` is that share of what the fixed panes leave;  `*` or a missing size shares the percent that's left;  `auto` is as big as its content.  Empty:  all the same."
+        },
+        {
+          "name": "rows",
+          "kind": "string",
+          "description": "One above the other, sized down, as `columns` says.  With neither, the panes are side by side."
+        },
+        {
+          "name": "resizable",
+          "kind": "keyOnly",
+          "description": "A bar between each two panes, to drag or to move with the arrow keys."
+        },
+        {
+          "name": "min-size",
+          "kind": "string",
+          "description": "The smallest a dragged pane may get, `10%` for shares or `60px` for fixed sizes.  Default:  `5%` and `0px`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The panes, one per child.  A child with `hidden` isn't one:  the others share its room, and it stays as it is."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-changed",
+          "detail": "{ sizes: string, panes: HTMLElement[] }",
+          "description": "A bar was let go, or moved with a key:  `sizes` in the form `columns` and `rows` take, to keep and give back."
+        }
+      ],
+      "parts": [
+        {
+          "name": "bar",
+          "description": "The bar between two panes."
+        },
+        {
+          "name": "last-bar",
+          "description": "The last of them, also a `bar`:  before the last pane."
+        }
+      ],
+      "states": [
+        {
+          "name": "rows",
+          "description": "One above the other."
+        },
+        {
+          "name": "resizable",
+          "description": "Its bars drag."
+        },
+        {
+          "name": "dragging",
+          "description": "A bar is being dragged."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "resizePanes",
+          "text": "Resize these panes",
+          "description": "A bar's name, for a screen reader."
+        }
+      ],
+      "mainTag": "ui-split-panel",
+      "main": true,
+      "page": true,
+      "href": "ui-split-panel.html"
+    },
+    {
       "tag": "ui-stack",
       "name": "Stack",
       "folder": "ui-stack",
@@ -48281,6 +48514,34 @@
         "ui-space"
       ],
       "tokens": []
+    },
+    "ui-split-panel": {
+      "folder": "ui-split-panel",
+      "mainTag": "ui-split-panel",
+      "title": "Split Panel",
+      "summary": "A split panel lays its children out side by side or one above the other, with bars to resize them.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-split-panel"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-split-panel-bar-size",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-split-panel-bar-background",
+          "default": "transparent",
+          "type": "color"
+        },
+        {
+          "name": "--ui-split-panel-bar-active-background",
+          "default": "var(--ui-split-panel-bar-background, transparent)",
+          "type": "color"
+        }
+      ]
     },
     "ui-stack": {
       "folder": "ui-stack",

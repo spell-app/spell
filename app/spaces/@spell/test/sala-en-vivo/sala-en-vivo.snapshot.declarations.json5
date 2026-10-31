@@ -14,13 +14,13 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/SalaEnVivo.es.spell:844-1162"
+      "defined": "/SalaEnVivo.es.spell:823-1141"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/SalaEnVivo.es.spell:912-932"
+      "defined": "/SalaEnVivo.es.spell:891-911"
     },
     {
       "type": "RecetarioFamiliar",
@@ -30,7 +30,7 @@
     {
       "type": "CajaEnVivo",
       "superType": "App",
-      "defined": "/SalaEnVivo.es.spell:166-842"
+      "defined": "/SalaEnVivo.es.spell:166-821"
     },
     {
       "property": "noticias",

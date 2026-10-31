@@ -979,6 +979,10 @@
         {
           "name": "ThemeSubMenu",
           "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
+          "name": "UndoAction",
+          "file": "src/app/solid/Actions.tsx"
         }
       ],
       "href": "Actions.html"
@@ -2404,72 +2408,6 @@
       "href": "RunnerPane.html"
     },
     {
-      "tag": "RunnerSplit",
-      "name": "RunnerSplit",
-      "folder": "RunnerSplit",
-      "mainTag": "RunnerSplit",
-      "main": true,
-      "page": true,
-      "topics": [
-        "runner"
-      ],
-      "aka": [],
-      "description": "`children` in a pane on top, then `bottom` below while `showBottom` -- split by a bar you drag.",
-      "noun": "RunnerSplit",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "split",
-          "type": "number",
-          "required": true,
-          "description": "Top pane's share of the height, in % -- or, by `px`, the bottom pane's height.  See `unit`."
-        },
-        {
-          "name": "onSplit",
-          "type": "(split: number) => void",
-          "required": true,
-          "description": "Bar dragged and let go, to `split`."
-        },
-        {
-          "name": "unit",
-          "type": "\"%\" | \"px\"",
-          "description": "What `split` is in:  `\"%\"` of a fixed height (default), or `\"px\"` of the bottom pane, with no fixed height."
-        },
-        {
-          "name": "showBottom",
-          "type": "boolean",
-          "description": "Show the bottom pane, and the bar?"
-        },
-        {
-          "name": "bottom",
-          "type": "JSX.Element",
-          "description": "What's in the bottom pane, while `showBottom`."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "required": true,
-          "description": "What's in the top pane."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SpellAppRunner",
-          "file": "src/app/runner/SpellAppRunner.tsx"
-        },
-        {
-          "name": "VSCodeRunner",
-          "file": "src/app/runner/VSCodeRunner.tsx"
-        }
-      ],
-      "href": "RunnerSplit.html"
-    },
-    {
       "tag": "ScopeDetailsPane",
       "name": "ScopeDetailsPane",
       "folder": "ScopeDetailsPane",
@@ -2891,234 +2829,6 @@
         }
       ],
       "href": "SpellPage.html"
-    },
-    {
-      "tag": "SplitPane",
-      "name": "SplitPane",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "One pane of a `<SplitPanel>`:  write one yourself to give a pane its own look.",
-      "noun": "SplitPane",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "...JSX.HTMLAttributes<HTMLDivElement>",
-          "type": "JSX.HTMLAttributes<HTMLDivElement>",
-          "description": "Every prop of this type too."
-        },
-        {
-          "name": "bordered",
-          "type": "boolean",
-          "description": "A border around the pane."
-        },
-        {
-          "name": "padded",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Padding:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "light",
-          "type": "boolean",
-          "description": "White background and a shadow."
-        },
-        {
-          "name": "rounded",
-          "type": "boolean",
-          "description": "Round corners."
-        },
-        {
-          "name": "scrolling",
-          "type": "boolean",
-          "description": "Scrolls its content."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitPane"
-    },
-    {
-      "tag": "SplitPanel",
-      "name": "SplitPanel",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": true,
-      "page": true,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "Lays its `children` out in a row (`columns`) or a column (`rows`) of panes, sized as `columns` / `rows` say.",
-      "noun": "SplitPanel",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "...Omit<JSX.HTMLAttributes<HTMLDivElement>, \"children\">",
-          "type": "Omit<JSX.HTMLAttributes<HTMLDivElement>, \"children\">",
-          "description": "Every prop of this type too."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "description": "The panes:  any content, one pane per node it draws."
-        },
-        {
-          "name": "columns",
-          "type": "PanelSizeSpec",
-          "description": "Sizes across, for panes side by side:  `true`, a string or an array.  See `<SplitPanel>`."
-        },
-        {
-          "name": "rows",
-          "type": "PanelSizeSpec",
-          "description": "Sizes down, for panes one above the other:  `true`, a string or an array.  See `<SplitPanel>`."
-        },
-        {
-          "name": "fluid",
-          "type": "boolean",
-          "description": "Fill the container the other way."
-        },
-        {
-          "name": "spaced",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Room around and between the panes:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "resizable",
-          "type": "boolean",
-          "description": "Bars to drag between the panes;  sizes remembered under `id`."
-        },
-        {
-          "name": "onDragged",
-          "type": "(panes: HTMLElement[]) => void",
-          "description": "A drag between two panes ended:  the panes, in order, at their new sizes."
-        },
-        {
-          "name": "minSize",
-          "type": "number",
-          "description": "Smallest share a pane may be dragged to, in percent.  Default:  `5`."
-        },
-        {
-          "name": "bordered",
-          "type": "boolean",
-          "description": "Wrapped panes are bordered."
-        },
-        {
-          "name": "padded",
-          "type": "boolean | \"tightly\" | \"loosely\"",
-          "description": "Padding in wrapped panes:  `true`, `\"tightly\"` or `\"loosely\"`."
-        },
-        {
-          "name": "light",
-          "type": "boolean",
-          "description": "Wrapped panes are light."
-        },
-        {
-          "name": "rounded",
-          "type": "boolean",
-          "description": "Wrapped panes are rounded."
-        },
-        {
-          "name": "scrolling",
-          "type": "boolean",
-          "description": "Wrapped panes scroll."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "InspectorColumn",
-          "file": "src/app/solid/Inspector.tsx"
-        },
-        {
-          "name": "InspectorPane",
-          "file": "src/app/solid/Inspector.tsx"
-        },
-        {
-          "name": "SpellEditor",
-          "file": "src/app/pages/SpellEditor.tsx"
-        }
-      ],
-      "href": "SplitPanel.html"
-    },
-    {
-      "tag": "SplitSizer",
-      "name": "SplitSizer",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "The bar between two panes of a `resizable` `<SplitPanel>`:  drag it to resize them.",
-      "noun": "SplitSizer",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "onMouseDown",
-          "type": "(event: MouseEvent) => void",
-          "required": true,
-          "description": ""
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitSizer"
-    },
-    {
-      "tag": "SplitSpacer",
-      "name": "SplitSpacer",
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "main": false,
-      "page": false,
-      "topics": [
-        "shell"
-      ],
-      "aka": [],
-      "description": "Room between two panes of a `spaced`, not `resizable`, `<SplitPanel>`.",
-      "noun": "SplitSpacer",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "usedIn": [
-        {
-          "name": "SplitPanel",
-          "file": "src/app/solid/SplitPanel.tsx"
-        }
-      ],
-      "href": "SplitPanel.html#SplitSpacer"
     },
     {
       "tag": "Spring",
@@ -3616,21 +3326,6 @@
       ],
       "tokens": []
     },
-    "SplitPanel": {
-      "folder": "SplitPanel",
-      "mainTag": "SplitPanel",
-      "title": "SplitPanel",
-      "summary": "Panes side by side or one above the other, with bars to drag between them.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "SplitPanel",
-        "SplitPane",
-        "SplitSpacer",
-        "SplitSizer"
-      ],
-      "tokens": []
-    },
     "AppRoot": {
       "folder": "AppRoot",
       "mainTag": "AppRoot",
@@ -3914,18 +3609,6 @@
       "docs": false,
       "tags": [
         "RunnerPane"
-      ],
-      "tokens": []
-    },
-    "RunnerSplit": {
-      "folder": "RunnerSplit",
-      "mainTag": "RunnerSplit",
-      "title": "RunnerSplit",
-      "summary": "A runner's two panes, one above the other, with a bar to drag between them.",
-      "status": "done",
-      "docs": false,
-      "tags": [
-        "RunnerSplit"
       ],
       "tokens": []
     },

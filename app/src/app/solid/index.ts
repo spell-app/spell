@@ -16,7 +16,7 @@
  *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `Markdown.tsx`
  * - The pages' shell (P8):
  *   - `SpellPage`
- *   - `SplitPanel` (+ `SplitPane` ...)
+ *   - `rememberedSizes()`:  what a `<ui-split-panel>` was dragged to
  *   - `AppRoot` / `AppContainer`:  where a program draws, with React
  *   - `ProjectMenu` / `ProjectDropdown`
  *   - The pages and the router are `spell/app/app/pages`.
@@ -60,7 +60,7 @@ export * from "./OutputEditor"
 export * from "./FileDropdown"
 
 export * from "./SpellPage"
-export * from "./SplitPanel"
+export * from "./rememberedSizes"
 export * from "./AppContainer"
 export * from "./AppRoot"
 export * from "./ProjectDropdown"

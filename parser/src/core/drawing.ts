@@ -28,6 +28,7 @@ import { Errored, For, createMemo, runWithOwner } from "solid-js"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
+import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { listenForUndoKeys } from "./ui"
 import { standInFor } from "./waiting"
@@ -303,11 +304,13 @@ const DRAWN = Symbol("drawn")
  *   - inside the boundary:  a tag or child that throws while it's made shows the stand-in
  *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
  * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.
+ * - So is a loop among other drawn lines:  `core.map()` answers a spell `List`, which Solid can't put on a page.
  * - ONLY `h()`'s thunks:  any other function is a live value, which Solid calls itself, again when it changes.
  *   `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
  */
 function madeOnce(drawing: Drawing): Drawing {
   if (Array.isArray(drawing)) return drawing.map(madeOnce)
+  if ((drawing as unknown) instanceof List) return (drawing as unknown as List<Drawing>).items.map(madeOnce)
   return isElementThunk(drawing) ? madeOnce(drawing()) : drawing
 }
 

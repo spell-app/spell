@@ -171,6 +171,14 @@ async function mountAt(url: string): Promise<{ host: HTMLElement; history: Memor
     host.remove()
   })
   await settle(host)
+  // the panes are Spell, and come as its runtime has loaded (or, unable to, in a plain stand-in)
+  await vi.waitFor(
+    () => {
+      if (host.querySelector("#SpellEditor")) expect(host.querySelector("#spell-app-root")).not.toBeNull()
+    },
+    { timeout: 20_000 }
+  )
+  await settle(host)
   return { host, history }
 }
 
@@ -179,7 +187,7 @@ async function mountHotkeys(): Promise<HTMLElement> {
   const host = document.createElement("div")
   document.body.append(host)
   const dispose = render(() => {
-    editorHotkeys()
+    editorHotkeys(() => false)
     return <span>page</span>
   }, host)
   cleanups.push(() => {

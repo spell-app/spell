@@ -10,13 +10,13 @@
     {
       "type": "Recipe",
       "superType": "View",
-      "defined": "/LiveRoom.spell:762-1060"
+      "defined": "/LiveRoom.spell:739-1037"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/LiveRoom.spell:825-844"
+      "defined": "/LiveRoom.spell:802-821"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -29,7 +29,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/LiveRoom.spell:950-1060"
+      "defined": "/LiveRoom.spell:927-1037"
     },
     {
       "type": "FamilyCookbook",
@@ -39,7 +39,7 @@
     {
       "type": "LiveBox",
       "superType": "App",
-      "defined": "/LiveRoom.spell:150-760"
+      "defined": "/LiveRoom.spell:150-737"
     },
     {
       "property": "news",
@@ -77,7 +77,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/LiveRoom.spell:294-760"
+      "defined": "/LiveRoom.spell:294-737"
     }
   ],
   "codeLines": [

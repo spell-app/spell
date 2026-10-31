@@ -401,8 +401,11 @@ export type Place = {
   getMany?(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]>
   /** Make these changes.  All or none, if it's `atomic`. */
   apply?(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer>
-  /** Run the operation it calls `name`, e.g. a GraphQL mutation. */
-  call?(name: string, input: unknown, context: SelectingContext): Promise<unknown>
+  /**
+   * Run the operation it calls `name`, e.g. a GraphQL mutation.
+   * - `collection`:  what `input` is a row of, so it can be sent in the server's own names.
+   */
+  call?(name: string, input: unknown, context: SelectingContext, collection?: string): Promise<unknown>
   /**
    * The version of this thing as this place last showed it:  what a change made now is made from.
    * - Left out, or `undefined` for a thing it hasn't shown:  the change says nothing, and the last write wins.

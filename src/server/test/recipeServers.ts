@@ -31,6 +31,12 @@ export const FIRST_RECIPES: readonly Omit<WireRecipe, "version">[] = [
   { id: "r-5", name: "Chana masala", cuisine: "Indian", servings: 4, notes: "Better the next day." }
 ]
 
+/** The operation that sends a recipe, for a program's `to publish a recipe is at "..."`:  it's kept in `box.published`. */
+const PUBLISH_PATH = "/recipes/publish"
+
+/** The operation that takes nothing, for a program's `to refresh is at "..."`:  it says how many there are. */
+const REFRESH_PATH = "/recipes/refresh"
+
 /** How many requests it remembers:  a page left polling mustn't grow it for ever. */
 const ASKS_KEPT = 10_000
 
@@ -57,6 +63,8 @@ export class RecipeBox {
   readonly recipes = new Map<string, WireRecipe>()
   /** What's been asked, oldest first. */
   readonly asks: RecipeAsk[] = []
+  /** What's been sent to `/recipes/publish`, oldest first. */
+  readonly published: Record<string, unknown>[] = []
   /** What each change's id made:  a change sent again is answered with this, and made once. */
   readonly changesMade = new Map<string, WireRecipe>()
   /** A request answered from here on waits for this, so a test can catch one under way. */
@@ -147,6 +155,13 @@ export function restHandler(box: RecipeBox, props: RestServerProps = {}): Handle
     if (!isList && !one) return next()
     const body = await bodyOf(request)
     await noteAsk(box, request, reply, body)
+
+    // the named operations, which a list's address has under it:  `to publish a recipe is at "/recipes/publish"`
+    if (method === "POST" && path === PUBLISH_PATH) {
+      box.published.push(body ?? {})
+      return void reply.json({ published: box.published.length })
+    }
+    if (method === "POST" && path === REFRESH_PATH) return void reply.json({ recipes: box.recipes.size })
 
     if (isList && method === "GET") return listRecipes(box, request, reply, { paging, wire })
 

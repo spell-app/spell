@@ -457,13 +457,14 @@ A `.spellml` file, Spell's tag-shaped form, opens as text in the code editor:  c
 ### The editor in Spell
 
 The editor is being written in Spell, a piece at a time, so one day it can be edited in itself.
-The file tabs and the top bar's arrangement are the first pieces:
+The file tabs, the top bar's arrangement and how the panes are arranged are the first pieces:
 
 ```text
 app/src/app/layout/FileTabs/FileTabs.spellml     the tabs:  what each shows and how it looks, in Spell
 app/src/app/solid/FileTabs.tsx                   the editor's side:  which files there are, what showing one does
 app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
-app/src/app/pages/SpellEditor.tsx                what's in each section, each a thing that draws itself
+app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
+app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -473,6 +474,10 @@ app/src/app/pages/SpellEditor.tsx                what's in each section, each a 
   The tabs show no later:  they already wait for the project's files.
   The top bar does:  about 170 to 300 ms on a local server.
   So a hero covers the whole page until the bar and the code are ready, and nothing appears piecemeal.
+- The panes are `<ui-split-panel>`s, Spell UI's.
+  A pane that isn't showing stays hidden in its place, so the running app keeps running as the others come and go.
+- The page's loading hero stays up until they're drawn:  about 60ms later on a local server, 670ms instead of 610ms,
+  with the running app at the same time as before.
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
 
 ### The Inspector:  look inside the running app
@@ -486,6 +491,24 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - A Spell UI control, a button or an input:  its attributes, as its tag names them.
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
+- It also goes into the program's text, touching only those characters, so the file's tab shows its unsaved dot and Save saves it.
+  Where it goes depends on where the value lives:
+
+  | Where the value comes from | What a change does |
+  | --- | --- |
+  | Written on the drawn tag | Changes it there |
+  | Not on the tag yet | Adds it to the tag |
+  | The line that made the thing, `a new foundation with suit = clubs` | Changes it there |
+  | The type's default, `set its count to 0` in `to create it` | Changes it there, and every thing still holding the old one |
+  | Code:  an expression, or `suit = the suit` in a loop | Writes nothing, and the card says so, with a link to the code |
+  | Nothing in the source says:  the program set it | Writes nothing, and the card says so |
+
+  - ⌘Z undoes it:  the editor's own history, `editor.history`, titled in the Edit menu ("Undo Change Suit").
+    In the code, ⌘Z is the code editor's;  in Run, the program's.
+  - It works with the code editor not loaded:  a file owns its text, and the code editor only shows it.
+  - Save also saves what the side bar changed in files not showing.
+  - Most of a program's values come from code or a loop today, and only `Counter` has a literal default among the built-in examples:
+    so choosing between this one and all of them is still to come.
 - Under its properties, its Events:  what it does when people touch it, in the program's own words,
   each with its code under it.
   - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).

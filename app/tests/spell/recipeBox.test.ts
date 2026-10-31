@@ -603,6 +603,188 @@ start the recipe box
     }
   )
 
+  // Undoing an action that adds saved things, wherever they're saved
+  for (const backEnd of ["in memory", "REST"]) {
+    test(
+      `an action undone as one step, adding things saved ${backEnd}:  Undo takes them away, not leaves them blank`,
+      { timeout: 60_000 },
+      async () => {
+        const place = backEnd === "REST" ? BACK_ENDS.REST!(servers.url) : "family cookbook is in memory"
+        const source = `${place}
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- to draw it:
+		<ui-label class="item">{its title}</ui-label>
+
+adding box is an app:
+	- to add the examples:
+		- undone as "Add Examples"
+		add (a new recipe with title = "Undo a") to the recipes
+		add (a new recipe with title = "Undo b") to the recipes
+	- to draw it:
+		<ui-button class="add" onClick={add the examples}>Add</ui-button>
+		for each recipe in every recipe
+			draw the recipe
+
+start the adding box`
+        const { page, problems } = await opened(
+          serve(`undone-as-${backEnd.replace(/\W/g, "")}`, { path: "/Adding.spell", source, field: "title" })
+        )
+        const items = page.locator(".item")
+        await page.locator("ui-button.add").waitFor(WAITING)
+        const before = (await items.allInnerTexts()).length
+        await page.locator("ui-button.add").click()
+        await expect.poll(() => items.allInnerTexts(), WAITING).toEqual(expect.arrayContaining(["Undo a", "Undo b"]))
+        await page.keyboard.press("ControlOrMeta+z")
+        await expect.poll(async () => (await items.allInnerTexts()).length, WAITING).toBe(before)
+        expect(await items.allInnerTexts()).not.toContain("")
+        await page.keyboard.press("ControlOrMeta+Shift+z")
+        await expect.poll(() => items.allInnerTexts(), WAITING).toEqual(expect.arrayContaining(["Undo a", "Undo b"]))
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+  }
+
+  // A program's own list, among other drawn lines:  it draws, and follows the list (T51)
+  for (const { kind, source } of [
+    {
+      kind: "of text",
+      source: `listing box is an app:
+	- its "items" is a list of text
+	- to add one:
+		add "c" to its items
+	- to draw it:
+		<ui-text class="top">top</ui-text>
+		for each item in its items
+			<ui-label class="item">{item}</ui-label>
+		<ui-button class="add" onClick={add one}>Add</ui-button>
+		<ui-text class="bottom">bottom</ui-text>
+	- when created:
+		add "a" to its items
+		add "b" to its items
+
+start the listing box`
+    },
+    {
+      kind: "of things",
+      source: `a "card" is a view:
+	- its "name" is text
+	- to draw it:
+		<ui-label class="item">{its name}</ui-label>
+
+listing box is an app:
+	- its "cards" is a list of cards
+	- to add one:
+		add (a new card with name = "c") to its cards
+	- to draw it:
+		<ui-text class="top">top</ui-text>
+		for each card in its cards
+			draw the card
+		<ui-button class="add" onClick={add one}>Add</ui-button>
+		<ui-text class="bottom">bottom</ui-text>
+	- when created:
+		add (a new card with name = "a") to its cards
+		add (a new card with name = "b") to its cards
+
+start the listing box`
+    }
+  ]) {
+    test(`a program's own list ${kind}, among other drawn lines, draws and follows`, { timeout: 60_000 }, async () => {
+      const { page, problems } = await opened(
+        serve(`own-list-${kind.replace(/\W/g, "")}`, { path: "/Listing.spell", source, field: "" })
+      )
+      const items = page.locator(".item")
+      await page.locator("ui-text.bottom").waitFor(WAITING)
+      await expect.poll(() => items.allInnerTexts(), WAITING).toEqual(["a", "b"])
+      await page.locator("ui-button.add").click()
+      await expect.poll(() => items.allInnerTexts(), WAITING).toEqual(["a", "b", "c"])
+      expect(await page.locator("ui-text.top").count()).toBe(1)
+      expect(problems).toEqual([])
+      await page.close()
+    })
+  }
+
+  // What a named operation does in each language:  a button for each, each reaching the demo's server
+  for (const { language, path, source } of [
+    {
+      language: "English",
+      path: "/Publishing.spell",
+      source: `family cookbook is a web service at "URL":
+	- a recipe's title is called "name"
+	- its versions are in "version"
+	- it is checked every 5 seconds
+	- to publish a recipe is at "/recipes/publish"
+	- to refresh is at "/recipes/refresh"
+
+a "recipe" is a view:
+	- it is saved in the family cookbook
+	- its "title" is text
+	- to draw it:
+		<ui-button class="publish" onClick={publish the recipe}>Publish</ui-button>
+
+publishing box is an app:
+	- to draw it:
+		<ui-button class="refresh" onClick={refresh}>Refresh</ui-button>
+		for each recipe in every recipe
+			draw the recipe
+
+start the publishing box`
+    },
+    {
+      language: "Spanish",
+      path: "/Publicando.es.spell",
+      source: `recetario familiar es un servicio web en "URL":
+	- las recetas están en "/recipes"
+	- el título de una receta se llama "name"
+	- sus versiones están en "version"
+	- se revisa cada 5 segundos
+	- para publicar una receta está en "/recipes/publish"
+	- para recargar está en "/recipes/refresh"
+
+una "receta" es una vista:
+	- se guarda en el recetario familiar
+	- su "título" es texto
+	- para dibujarla:
+		<ui-button class="publish" onClick={publicar la receta}>Publicar</ui-button>
+
+caja que publica es una aplicación:
+	- para dibujarla:
+		<ui-button class="refresh" onClick={recargar}>Recargar</ui-button>
+		para cada receta en cada receta
+			dibujar la receta
+
+iniciar la caja que publica`
+    }
+  ]) {
+    test(
+      `${language}:  an action at a place's address reaches the server, with what it sends`,
+      { timeout: 60_000 },
+      async () => {
+        const { page, problems } = await opened(
+          serve(`operations-${language}`, { path, source: source.replace("URL", servers.url), field: "title" })
+        )
+        const asked = () =>
+          servers.box.asks.filter(({ method, path: at }) => method === "POST" && /publish|refresh/.test(at))
+        const before = { asks: asked().length, published: servers.box.published.length }
+
+        await page.locator("ui-button.refresh").click()
+        await expect.poll(() => asked().length, WAITING).toBe(before.asks + 1)
+        expect(asked().at(-1)).toMatchObject({ path: "/recipes/refresh" })
+
+        await page.locator("ui-button.publish").first().waitFor(WAITING)
+        await page.locator("ui-button.publish").first().click()
+        await expect.poll(() => servers.box.published.length, WAITING).toBe(before.published + 1)
+        expect(asked().at(-1)).toMatchObject({ path: "/recipes/publish" })
+        expect(servers.box.published.at(-1)).toMatchObject({ id: "r-1", name: "Tomato soup" })
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+  }
+
   test("riders:  if that fails shows, and Try again reads again", { timeout: 60_000 }, async () => {
     const down = `family cookbook is a web service at "${servers.url}/flaky":
 	- it is checked every 500 seconds`

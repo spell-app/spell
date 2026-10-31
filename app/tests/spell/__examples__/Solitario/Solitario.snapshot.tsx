@@ -1,4 +1,4 @@
-import { core, List, App, View, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, trigger } from "@spell/core"
+import { core, List, App, View, ViewableList, prop, derived, thing, drawn, positionOf, spellPosition, position, trigger, type SentEvent } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("Una carta de la baraja -- en el estilo de esquema:  su nombre, luego lo que es cierto de ella")
@@ -199,17 +199,17 @@ export class Carta extends View {
   }
 
   /** un clic la juega */
-  async onClick(event: any /* spell: type unknown */) {
+  async onClick(event: ClickEvent) {
     return await this.jugar()
   }
 
   /** al empezar un arrastre, la última pista se va */
-  onDrag(event: any /* spell: type unknown */) {
+  onDrag(event: DragSpellEvent) {
     solitario.pista = ""
   }
 
   /** soltada donde ninguna pila la toma, o con Escape:  vuelve a su lugar, y la puntuación lo dice */
-  onDragCancelled(event: any /* spell: type unknown */) {
+  onDragCancelled(event: DragCancelledEvent) {
     solitario.pista = " -- Ahí no"
   }
 
@@ -279,15 +279,15 @@ export class CartaElement extends SpellElement<Carta> {
     return this.currentThing?.contarLosPuntosDeCartaEnPila(pila)
   }
 
-  onClick(event: any /* spell: type unknown */) {
+  onClick(event: ClickEvent) {
     return this.currentThing?.onClick(event)
   }
 
-  onDrag(event: any /* spell: type unknown */) {
+  onDrag(event: DragSpellEvent) {
     return this.currentThing?.onDrag(event)
   }
 
-  onDragCancelled(event: any /* spell: type unknown */) {
+  onDragCancelled(event: DragCancelledEvent) {
     return this.currentThing?.onDragCancelled(event)
   }
 }
@@ -874,7 +874,7 @@ export class Solitario extends App {
   accessor pista!: string
 
   /** el cambio de una propiedad es un evento:  cada uno corre justo después del cambio */
-  onPuntuaciónChange(event: any /* spell: type unknown */) {
+  onPuntuaciónChange(event: PuntuaciónChangeEvent) {
     /** cada carta en una fundación:  el juego está ganado */
     let colocadas = this.tréboles.length + this.diamantes.length
     colocadas = colocadas + this.corazones.length + this.espadas.length
@@ -882,7 +882,7 @@ export class Solitario extends App {
   }
 
   /** una carta jugada:  la última pista se va */
-  onMovimientosChange(event: any /* spell: type unknown */) {
+  onMovimientosChange(event: MovimientosChangeEvent) {
     this.pista = ""
   }
 
@@ -1132,11 +1132,11 @@ export class SolitarioElement extends SpellElement<Solitario> {
     { name: "-c7", kind: "json", description: "Its C7." }
   ])
 
-  onPuntuaciónChange(event: any /* spell: type unknown */) {
+  onPuntuaciónChange(event: PuntuaciónChangeEvent) {
     return this.currentThing?.onPuntuaciónChange(event)
   }
 
-  onMovimientosChange(event: any /* spell: type unknown */) {
+  onMovimientosChange(event: MovimientosChangeEvent) {
     return this.currentThing?.onMovimientosChange(event)
   }
 
@@ -1278,6 +1278,13 @@ if (!core.isCarryingOver) testLaCreaciónDelMazo()
 if (!core.isCarryingOver) testElMazoConComodines()
 if (!core.isCarryingOver) testLasPilas()
 if (!core.isCarryingOver) testLosMovimientos()
+
+// what each event this program hears holds
+export type ClickEvent = SentEvent
+export type DragSpellEvent = SentEvent
+export type DragCancelledEvent = SentEvent
+export type PuntuaciónChangeEvent = SentEvent & { value: number; was: number }
+export type MovimientosChangeEvent = SentEvent & { value: number; was: number }
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

@@ -94,7 +94,8 @@ export function noteSetting(target: object, property: string, value: unknown): v
   if (!isReadingIn) {
     const isNoted = recording?.some((change) => change.target === target && change.property === property)
     if (recording && !isNoted) recording.push({ target, property, was })
-    core.RUNTIME?.history.noteSetting(target, property, was, value)
+    // a thing's starting values are nothing to undo:  taking it away is, and put back blank it would stay on the page
+    if (madeThings.has(target)) core.RUNTIME?.history.noteSetting(target, property, was, value)
     ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
     placeWrites?.setting(target, property, was, value)
   }

@@ -1,5 +1,5 @@
 import type { RouteSectionProps } from "@solidjs/router"
-import { Match, Show, Switch, createSignal, onCleanup } from "solid-js"
+import { Match, Show, Switch, createEffect, createSignal, onCleanup } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
@@ -22,17 +22,19 @@ import {
   ProgramPanelShown,
   ProjectBarMenu,
   SpellPage,
-  SplitPanel,
   ThemeMenu,
   TreeRoot,
+  on,
   tracked,
   trackProjectRoot,
+  rememberedSizes,
   type Mode
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
+import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
@@ -57,7 +59,10 @@ import "./SpellEditor.css"
  *   - A phone only runs (epic `debut` P32):  Run, whatever the address says.
  * - The Program panel (`<ProgramPanel>`), while View › Program Panel shows it (`ProgramPanelShown`), sits under
  *   the code:  its output and compiled code.  Its Close hides it.
- * - Showing or hiding the panel never redraws the code or the program:  the panel keeps each pane by its node.
+ * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
+ * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
+ *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
+ *     each a thing that draws itself.
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
@@ -65,33 +70,119 @@ import "./SpellEditor.css"
  * - SIDE EFFECT:  the page's keyboard shortcuts while it's up, outside Monaco (`editorHotkeys()`).
  ****************/
 export function SpellEditor(props: { mode: Mode }) {
-  editorHotkeys()
   const isPhone = phoneWidth()
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
+  editorHotkeys(isRunning)
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const layout = () => columnsFor(isRunning(), Inspector.isOpen)
-  return (
-    <SpellPage id="SpellEditor" fillWindow dark rows>
-      <EditorToolbar mode={mode()} />
-      <SplitPanel id={layout().id} columns={layout().columns} resizable fluid spaced="tightly">
-        <Show when={!isRunning()}>
-          <SplitPanel id="spellEditor-left" rows={showsProgramPanel() ? "65%" : "100%"} resizable rounded>
+  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen))
+  const codeRows = rememberedSizes(() => ({
+    id: "spellEditor-left",
+    sizes: showsProgramPanel() ? "65%" : "100%"
+  }))
+  const parts = {
+    code: {
+      draw: () => (
+        <div class="SplitPane">
+          <Show when={!isRunning()}>
             <InputRoot />
-            <Show when={showsProgramPanel()}>
-              <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
-            </Show>
-          </SplitPanel>
+          </Show>
+        </div>
+      )
+    },
+    programPanel: {
+      draw: () => (
+        <Show when={showsProgramPanel()}>
+          <div class="SplitPane">
+            <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+          </div>
         </Show>
-        <SplitPanel rows rounded>
+      )
+    },
+    app: {
+      draw: () => (
+        <div class="SplitPane">
           <AppPane />
-        </SplitPanel>
+        </div>
+      )
+    },
+    inspector: {
+      draw: () => (
         <Show when={Inspector.isOpen}>
           <InspectorPane />
         </Show>
-      </SplitPanel>
+      )
+    }
+  }
+  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: mode() })
+  const layout = drawnPiece(editorLayoutSpell, "editorLayout", () => ({ ...parts, ...settings() }))
+  createEffect(settings, (changed) => {
+    const thing = layout.thing()
+    if (thing) Object.assign(thing, changed)
+  })
+  /** A bar let go in the column of code, or between the columns:  the panels' own, not a control's in a pane. */
+  const keepSizes = (event: CustomEvent<{ sizes: string }>) => {
+    const panel = event.target as Element
+    if (panel.matches(".EditorColumns")) columns.save(event.detail.sizes)
+    else if (panel.matches(".EditorCode")) codeRows.save(event.detail.sizes)
+  }
+  return (
+    <SpellPage id="SpellEditor" fillWindow dark rows>
+      <EditorToolbar mode={mode()} />
+      <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
+        {layout.drawing()}
+        {/* no Spell:  every pane still, arranged the same, so a person can go on */}
+        <Show when={layout.isBroken()}>
+          <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
+            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={isRunning()}>
+              {parts.code.draw()}
+              {parts.programPanel.draw()}
+            </ui-split-panel>
+            {parts.app.draw()}
+            {parts.inspector.draw()}
+          </ui-split-panel>
+        </Show>
+      </div>
     </SpellPage>
   )
+}
+
+/**
+ * The thing `name` of the layout piece `compiled`, once it's loaded, and its drawing.
+ * - `values()`:  what it's given before it first draws:  the things it draws, and its settings.
+ * - The page's hero stays up while it loads (`PageLoading`).
+ * - Call in a component body.
+ * - NEVER throws:  a piece that won't load says so on the console, and `isBroken()`, for a plain stand-in.
+ */
+function drawnPiece(compiled: string, name: string, values: () => object) {
+  const [piece, setPiece] = createSignal<LayoutPiece>()
+  const [isBroken, setBroken] = createSignal(false)
+  let isGone = false
+  const release = PageLoading.hold()
+  onCleanup(() => {
+    isGone = true
+    release()
+  })
+  void loadLayoutPiece(compiled)
+    .then(
+      (loaded) => {
+        if (isGone) return
+        Object.assign(loaded.exports[name], values())
+        setPiece(() => loaded)
+      },
+      (problem: unknown) => {
+        console.error(`can't load the Spell of ${name}`, problem)
+        setBroken(true)
+      }
+    )
+    .finally(release)
+  return {
+    /** The thing, once loaded. */
+    thing: (): object | undefined => piece()?.exports[name],
+    /** What it draws, once loaded. */
+    drawing: () => piece()?.draw(piece()!.exports[name]) as JSX.Element,
+    isBroken
+  }
 }
 
 /****************
@@ -228,10 +319,10 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; columns: string | true } {
+function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; sizes: string } {
   const id = `spellEditor-columns${isRunning ? "-run" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting) return { id, columns: true }
-  return { id, columns: isRunning ? "*,380px" : "*,*,380px" }
+  if (!isInspecting) return { id, sizes: "" }
+  return { id, sizes: isRunning ? "*,380px" : "*,*,380px" }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
@@ -295,32 +386,12 @@ export function EditorToolbar(props: { mode: Mode }) {
     },
     you: { draw: () => <Actions.you /> }
   }
-  const [piece, setPiece] = createSignal<LayoutPiece>()
-  const [isBroken, setBroken] = createSignal(false)
-  let isGone = false
-  const release = PageLoading.hold()
-  onCleanup(() => {
-    isGone = true
-    release()
-  })
-  void loadLayoutPiece(editorBarSpell)
-    .then(
-      (loaded) => {
-        if (isGone) return
-        Object.assign(loaded.exports.editorBar, parts)
-        setPiece(() => loaded)
-      },
-      (problem: unknown) => {
-        console.error("<EditorToolbar>:  can't load its Spell", problem)
-        setBroken(true)
-      }
-    )
-    .finally(release)
+  const bar = drawnPiece(editorBarSpell, "editorBar", () => parts)
   return (
     <div class="EditorBarPlace">
-      {piece()?.draw(piece()!.exports.editorBar) as JSX.Element}
+      {bar.drawing()}
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
-      <Show when={isBroken()}>
+      <Show when={bar.isBroken()}>
         <AppMenu class="EditorBar">
           {parts.projectMenu.draw()}
           {parts.appMenus.draw()}

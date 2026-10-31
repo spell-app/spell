@@ -884,7 +884,7 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
@@ -1285,7 +1285,7 @@
           "purpose": "A word and its negated forms, e.g. `is_or_is_not`: `(is|(negated:is not|isn't|isnt))`.",
           "syntaxes": [
             {
-              "syntax": "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
+              "syntax": "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
             },
             {
               "syntax": "(es un|es una|son unos|son unas|son|(negated:no es un|no es una|no son unos|no son unas|no son))"
@@ -2326,10 +2326,10 @@
                   "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: any ) {\n    return core.console.log(1)\n  }\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [])\n\n  onDoubleClick(event: any ) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n}\ncore.useElement(Carta, CartaElement)"
+                  "code": "export class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return core.console.log(1)\n  }\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [])\n\n  onDoubleClick(event: DoubleClickEvent) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n}\ncore.useElement(Carta, CartaElement)"
                 },
                 "py": {
-                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)"
+                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    def on_double_click(self, event: DoubleClickEvent) -> Any:\n        return print(1)"
                 }
               }
             },
@@ -2341,10 +2341,10 @@
                   "code": "export class Juego extends Thing {\n  static { this.declareProp(\"puntuación\", { type: \"number\" }) }\n  get puntuación() { return this.getProp(\"puntuación\") }\n  set puntuación(value) { this.setProp(\"puntuación\", value) }\n\n  onPuntuaciónChange(event) {\n    return core.console.log(this.puntuación)\n  }\n}"
                 },
                 "ts": {
-                  "code": "export class Juego extends Thing {\n  @prop({ type: \"number\" })\n  accessor puntuación!: number\n\n  onPuntuaciónChange(event: any ) {\n    return core.console.log(this.puntuación)\n  }\n}"
+                  "code": "export class Juego extends Thing {\n  @prop({ type: \"number\" })\n  accessor puntuación!: number\n\n  onPuntuaciónChange(event: PuntuaciónChangeEvent) {\n    return core.console.log(this.puntuación)\n  }\n}"
                 },
                 "py": {
-                  "code": "class Juego(Thing):\n    puntuación = prop(type=\"number\")\n\n    def on_puntuación_change(self, event: Any) -> Any:\n        return core.console.log(self.puntuación)"
+                  "code": "class Juego(Thing):\n    puntuación = prop(type=\"number\")\n\n    def on_puntuación_change(self, event: PuntuaciónChangeEvent) -> Any:\n        return core.console.log(self.puntuación)"
                 }
               }
             },
@@ -5056,7 +5056,7 @@
                   "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n}\n\nexport class CartaElement extends SpellElement<Carta> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-carta\", \"carta\", [\n    { name: \"dirección\", kind: \"string\", description: \"Its dirección.\" }\n  ])\n}\ncore.useElement(Carta, CartaElement)"
                 },
                 "py": {
-                  "code": "class Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
+                  "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(View):\n    element_tag = \"syntax-block-carta\"\n\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)"
                 }
               }
             }
@@ -5810,7 +5810,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 16,
+          "line": 19,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -5969,12 +5969,12 @@
           "ruleNames": ["current_person"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 16,
-          "purpose": "Who's at this page (epic `data` P13).",
+          "line": 18,
+          "purpose": "Who's at this page (epic `data` P13, Owen's `me`, T48).",
           "syntaxes": [
             {
-              "syntax": "la persona actual",
-              "example": "la persona actual",
+              "syntax": "yo",
+              "example": "yo",
               "outputs": {
                 "js": {
                   "code": "core.currentPerson()"
@@ -5991,11 +5991,37 @@
           "aliases": ["expression"]
         },
         {
+          "className": "MyField",
+          "ruleNames": ["my_field"],
+          "internal": false,
+          "file": "src/spell/rules/places/PeopleWords.ts",
+          "line": 47,
+          "purpose": "Something about who's at this page (T48).",
+          "syntaxes": [
+            {
+              "syntax": "mi {field:member_words}",
+              "example": "mi nombre",
+              "outputs": {
+                "js": {
+                  "code": "core.currentPerson().name"
+                },
+                "ts": {
+                  "code": "core.currentPerson().name"
+                },
+                "py": {
+                  "code": "core.current_person().name"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "PeopleHere",
           "ruleNames": ["people_here"],
           "internal": false,
           "file": "src/spell/rules/places/PeopleWords.ts",
-          "line": 33,
+          "line": 94,
           "purpose": "Everyone here now, this page included (epic `data` P13).",
           "syntaxes": [
             {
@@ -6177,11 +6203,11 @@
           "ruleNames": ["operation_at"],
           "internal": false,
           "file": "src/spell/rules/places/OperationAt.ts",
-          "line": 19,
-          "purpose": "Where an action declared under a place goes (epic `data` Q14, Q17's option A).",
+          "line": 33,
+          "purpose": "An action that happens at a place, by its own address (epic `data` Q14, Q17's C).",
           "syntaxes": [
             {
-              "syntax": "está en {path:text}"
+              "syntax": "para {signature:method_signature} está en {path:text}"
             }
           ],
           "aliases": ["statement"]
@@ -7465,7 +7491,7 @@
                   "code": "export type Dirección = (typeof Carta.Direcciones)[number]\n\nexport class Carta extends Thing {\n  static Direcciones = [\"arriba\", \"abajo\"] as const\n  @prop({ oneOf: () => Carta.Direcciones })\n  accessor dirección!: Dirección\n\n  voltear() {\n    this.dirección = \"arriba\"\n  }\n\n  get voltearIsEnabled() {\n    return this.dirección === \"abajo\"\n  }\n}\ncore.describeAction(Carta, \"voltear\", { title: \"voltearla\", shortcuts: [\"meta+T\"], enabledWhen: \"voltearIsEnabled\", undoneAs: \"Voltear carta\" })"
                 },
                 "py": {
-                  "code": "class Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                  "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
                 }
               }
             },

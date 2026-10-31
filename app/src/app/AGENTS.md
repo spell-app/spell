@@ -27,7 +27,7 @@ and in the app's build folder, `app/` at the app folder's root.
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
-    - the pages' shell (`SpellPage`, `SplitPanel`, `AppRoot`)
+    - the pages' shell (`SpellPage`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
     - `cellsBridge.ts` makes every Solid computation follow spell cells:
       spell Things, `SP.*`, the editor (P11).
@@ -41,7 +41,9 @@ and in the app's build folder, `app/` at the app folder's root.
   - `runner/`:  runs compiled spell (below)
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
-  - `layout/`:  the editor's own pieces written in Spell (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
+  - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
+    `solid/InspectorWrites.ts` writes the Inspector's changes through it
+  - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`

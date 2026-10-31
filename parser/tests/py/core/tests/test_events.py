@@ -7,6 +7,7 @@ import pytest
 
 from spell_core import Thing
 from spell_core.core import Core
+from spell_core.events import Eventful
 
 
 class Card(Thing):
@@ -138,3 +139,20 @@ def test_an_async_handler_is_a_task_inside_the_loop(core: Core) -> None:
 
     asyncio.run(program())
     assert heard == ["ping"]
+
+
+def test_an_event_says_where_it_is():
+    """What every event shares:  its `target`, the thing it was first triggered on, and its `sender`, if one sent it."""
+
+    class Holder(Eventful):
+        pass
+
+    class Held(Eventful):
+        pass
+
+    holder, held = Holder(), Held()
+    held.event_parent = holder
+    heard = []
+    holder.on("click", lambda event: heard.append((event.target, event.original_target, event.sender)))
+    held.trigger("click")
+    assert heard == [(holder, held, None)]

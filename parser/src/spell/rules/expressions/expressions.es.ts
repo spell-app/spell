@@ -48,7 +48,7 @@ export const expressionsEs = new SpellParser({ module: "expressions" })
 // Every form of `is`, `{is_or_is_not}`:  `no` goes before the verb;
 // and its plural, `son` / `están`, which English's `is` has no need of:  `las cartas están vacías`
 expressionsEs.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
-  syntax: "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
+  syntax: "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
 })
 
 // `es un`, and the plural's `son unos`, or bare `son`:  `cartas que no son figuras`
