@@ -347,6 +347,15 @@ export const spanishWords: SP.LanguageWords = {
      */
     propertyListDeclaration:
       /^[ \t]+-[ \t]+(?:(?:sus?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)|tiene[ \t]+(?:un[oa]?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+como)[ \t]+(?:un[oa][ \t]+de|o[ \t]+bien)\b/iu,
+    /** A body's line declaring a property, its words in group `has` or `is`:  `tiene un mazo como un mazo`, `su "palo" es un palo`. */
+    propertyLine:
+      /^(?:tiene[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)|(?:sus?[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)\b)/iu,
+    /** A line at a file's top declaring a property, in groups `type` and `property`. */
+    typePropertyLines: [
+      /^un[oa]?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+tiene[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)/iu,
+      /^(?:l[oa]s[ \t]+)?(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+tienen[ \t]+(?:un[oa]?[ \t]+(?:propiedad[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|como\b|=)/iu,
+      /^(?:el|la|los|las)[ \t]+["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+de[ \t]+un[oa]?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+(?:es|son)\b/iu
+    ],
     /**
      * A line starting a method:  `para mover una carta`, `animación repartir`.
      * - Not a loop, which starts `para cada` too:  `para cada carta en el mazo:`.

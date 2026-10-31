@@ -1,7 +1,17 @@
 import { spawnSync } from "child_process"
-import { lstatSync, mkdtempSync, realpathSync, rmSync, unlinkSync } from "fs"
+import {
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readlinkSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  unlinkSync
+} from "fs"
 import { tmpdir } from "os"
-import { resolve } from "path"
+import { join, resolve } from "path"
 
 import { CLI } from "spell/cli"
 
@@ -26,6 +36,23 @@ export function addCheckout(repo: string, ref: string, prefix: string, prepare: 
     throw error
   }
   return folder
+}
+
+/**
+ * Give temp checkout `folder` a `node_modules` of its own, so it runs as itself:
+ * - each package linked to the kit's
+ * - EXCEPT the kit's own links (`spell`, `spell-parser` ...), relative ones, kept relative:
+ *   so its imports find ITS source, never this checkout's
+ */
+export function linkInstall(kit: string, folder: string): void {
+  const modules = join(kit, "node_modules")
+  const own = join(folder, "node_modules")
+  mkdirSync(own)
+  for (const name of readdirSync(modules)) {
+    const entry = join(modules, name)
+    const isLocalLink = lstatSync(entry).isSymbolicLink() && readlinkSync(entry).startsWith("..")
+    symlinkSync(isLocalLink ? readlinkSync(entry) : entry, join(own, name))
+  }
 }
 
 /**

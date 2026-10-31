@@ -11,6 +11,7 @@ import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { BodyMemberWords } from "./BodyMemberWords"
 import { ItsKnownProperty } from "./ItsKnownProperty"
+import { TheOwnProperty } from "./TheOwnProperty"
 import { ItsOrdinal } from "./ItsOrdinal"
 import { ItsProperty } from "./ItsProperty"
 import { MemberWords } from "./MemberWords"
@@ -142,6 +143,10 @@ propertiesEs.addRule(PropertyExpression, {
       ]
     }
   ]
+})
+
+propertiesEs.addRule(TheOwnProperty, {
+  syntax: "{definite_article} {property:member_words}"
 })
 
 propertiesEs.addRule(ItsKnownProperty, {

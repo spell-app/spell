@@ -219,6 +219,23 @@ export class Parser extends Derivative {
   stubDeclaredMethods(_scope: P.Scope, _texts: string[]): void {}
 
   /**
+   * Make each property `texts` declare known ahead of its declaration, by a scan -- see `P.TypeScope.propertiesAhead`.
+   * - Why:  so `the X` can read a property declared further down, or in a later file.
+   * - Run BEFORE a project's files parse, after `stubDeclaredTypes()`, so its type is there.
+   * - Default:  nothing.  Languages override, e.g. `SpellParser`.
+   */
+  stubDeclaredProperties(_scope: P.Scope, _texts: string[]): void {}
+
+  /**
+   * Does `after`, a new version of a file's `before`, change which properties it declares?
+   * - Then `P.IncrementalProject` re-parses everything, as for `changesMethods()`, whose `keepEdited` this takes.
+   * - Default:  `false`.  Languages override, e.g. `SpellParser`.
+   */
+  changesProperties(_before: string, _after: string, _keepEdited = false): boolean {
+    return false
+  }
+
+  /**
    * Does `after`, a new version of a file's `before`, change which methods can be called ahead of their definitions?
    * - A method whose first line is new, or gone, and parses alone -- see `stubDeclaredMethods()`.
    * - Then `P.IncrementalProject` re-parses everything, so every line sees the change, as a full parse would.

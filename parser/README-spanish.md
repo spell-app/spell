@@ -211,6 +211,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | --- | --- |
 | the grammar | every rule of all 19 rule modules:  templates, aliases, actions, lists, math, drawing, events, tests, async |
 | articles | `un / una / unos / unas`, `el / la / los / las`, and the contractions `del` and `al` |
+| a property read inside an action | `barajar la reserva` for `barajar su reserva`:  `el`, `la`, `los` or `las` before the name |
 | plurals | Spanish's own:  `corazón / corazones`, and words that don't change, `lunes` |
 | "is" | `es` and `está` both mean "is";  `no es` and `no está` its negation |
 | numbers | the decimal comma:  `1,5` is a number, `1, 5` a list of two |

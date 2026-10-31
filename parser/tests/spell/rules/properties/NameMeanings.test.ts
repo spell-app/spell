@@ -60,6 +60,7 @@ a game is a base:
 	- it has a score as a number
 	- it has a short rank as a number
 	- it has rounds as a list
+	- its "color" is one of red or blue
 	- its "total" is its score + 1
 	- to reset the stock:
 		set x to 1
@@ -72,12 +73,11 @@ ${loose.replace(/^/gm, "\t")}
 
 const ENGLISH: NameRow[] = [
   // an own property
-  { title: "own property:  the X reads it", spell: "set v to the score", js: "v = this.score", notYet: "P2" },
+  { title: "own property:  the X reads it", spell: "set v to the score", js: "v = this.score" },
   {
     title: "own property:  the X as an argument",
     spell: "shuffle the stock",
-    js: "this.stock.shuffle()",
-    notYet: "P2"
+    js: "this.stock.shuffle()"
   },
   { title: "own property:  its X reads it", spell: "set v to its score", js: "v = this.score" },
   { title: "own property:  a bare X does NOT read it", spell: "set v to score", js: ERROR },
@@ -100,30 +100,40 @@ const ENGLISH: NameRow[] = [
     spell: "set v to score 1 to 3 of its rounds",
     js: "this.rounds.slice(0, 3)"
   },
-  { title: "several words:  the X reads it", spell: "set v to the short rank", js: "v = this.shortRank", notYet: "P2" },
+  {
+    title: "several words:  a longer property beats a local of its first word",
+    spell: "set short to 1\nset v to the short rank",
+    js: "v = this.shortRank"
+  },
+  {
+    title: "several words:  a local of the whole name beats the property",
+    spell: "set short rank to 1\nset v to the short rank",
+    js: "v = shortRank",
+    warns: HIDES,
+    notYet: "P4"
+  },
+  { title: "several words:  the X reads it", spell: "set v to the short rank", js: "v = this.shortRank" },
   {
     title: "several words:  set the X writes it",
     spell: "set the short rank to 4",
-    js: "this.shortRank = 4",
-    notYet: "P3"
+    js: "this.shortRank = 4"
   },
   {
     title: "declared below the action:  the X reads it",
     spell: "set v to the later",
-    js: "v = this.later",
-    notYet: "P2"
+    js: "v = this.later"
   },
   { title: "declared below the action:  its X reads it", spell: "set v to its later", js: "v = this.later" },
 
   // an inherited property, and a getter
-  { title: "inherited property:  the X reads it", spell: "set v to the label", js: "v = this.label", notYet: "P2" },
+  { title: "inherited property:  the X reads it", spell: "set v to the label", js: "v = this.label" },
   {
     title: "inherited property:  set the X writes it",
     spell: 'set the label to "x"',
     js: 'this.label = "x"',
     notYet: "P3"
   },
-  { title: "getter:  the X reads it", spell: "set v to the total", js: "v = this.total", notYet: "P2" },
+  { title: "getter:  the X reads it", spell: "set v to the total", js: "v = this.total" },
   { title: "getter:  its X reads it", spell: "set v to its total", js: "v = this.total" },
 
   // a local
@@ -207,8 +217,7 @@ const ENGLISH: NameRow[] = [
   {
     title: "in a loop:  the X is the action's thing",
     spell: "for each card in the cards\n\tset v to the score",
-    js: "v = this.score",
-    notYet: "P2"
+    js: "v = this.score"
   },
   {
     title: "in a loop:  the X is NEVER the item's",
@@ -235,8 +244,13 @@ const ENGLISH: NameRow[] = [
   {
     title: "after a get:  the X is still the action's thing",
     spell: "get the stock of the game\nset v to the score",
-    js: "v = this.score",
-    notYet: "P2"
+    js: "v = this.score"
+  },
+
+  {
+    title: "in a loop:  a thing's own event is still from the thing",
+    spell: "for each card in the cards\n\tsend hit",
+    js: 'send(this, "hit", {}, this)'
   },
 
   // a type
@@ -246,14 +260,20 @@ const ENGLISH: NameRow[] = [
   {
     title: "property named as a type:  the X is the property",
     spell: "set v to the pile",
-    js: "v = this.pile",
-    notYet: "P2"
+    js: "v = this.pile"
   },
   {
     title: "plural property named as a type:  the Xs are the property",
     spell: "set v to the rounds",
-    js: "v = this.rounds",
-    notYet: "P2"
+    js: "v = this.rounds"
+  },
+
+  // an enumerated property keeps its lookup:  the values live on the type
+  {
+    title: "enumerated property:  the position of the X keeps its list",
+    action: "to play it:",
+    spell: "set v to the position of the color in the colors",
+    js: "positionOf(Game.Colors, this.color)"
   },
 
   // an action's own words
@@ -291,14 +311,12 @@ const SPANISH: NameRow[] = [
   {
     title: "propiedad propia:  la X la lee",
     spell: "poner v a la puntuación",
-    js: "v = this.puntuación",
-    notYet: "P2"
+    js: "v = this.puntuación"
   },
   {
     title: "propiedad propia:  el X como argumento",
     spell: "barajar la reserva",
-    js: "this.reserva.barajar()",
-    notYet: "P2"
+    js: "this.reserva.barajar()"
   },
   { title: "propiedad propia:  su X la lee", spell: "poner v a su puntuación", js: "v = this.puntuación" },
   { title: "propiedad propia:  una X sola NO la lee", spell: "poner v a puntuación", js: ERROR },
@@ -315,8 +333,8 @@ const SPANISH: NameRow[] = [
     warns: HIDES,
     notYet: "P4"
   },
-  { title: "declarada debajo:  el X la lee", spell: "poner v a el resto", js: "v = this.resto", notYet: "P2" },
-  { title: "heredada:  la X la lee", spell: "poner v a la etiqueta", js: "v = this.etiqueta", notYet: "P2" },
+  { title: "declarada debajo:  el X la lee", spell: "poner v a el resto", js: "v = this.resto" },
+  { title: "heredada:  la X la lee", spell: "poner v a la etiqueta", js: "v = this.etiqueta" },
   {
     title: "local que oculta:  la X lee la local, y avisa",
     spell: "poner puntuación a 3\nponer v a la puntuación",
@@ -327,8 +345,7 @@ const SPANISH: NameRow[] = [
   {
     title: "en un bucle:  la X es la de la acción",
     spell: "para cada carta en las cartas\n\tponer v a la puntuación",
-    js: "v = this.puntuación",
-    notYet: "P2"
+    js: "v = this.puntuación"
   },
   {
     title: "en un bucle:  el X NUNCA es el del elemento",
@@ -344,8 +361,7 @@ const SPANISH: NameRow[] = [
   {
     title: "propiedad con nombre de tipo:  la X es la propiedad",
     spell: "poner v a la pila",
-    js: "v = this.pila",
-    notYet: "P2"
+    js: "v = this.pila"
   }
 ]
 

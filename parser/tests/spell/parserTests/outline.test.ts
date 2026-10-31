@@ -453,6 +453,37 @@ describe("outline style", () => {
       expect(SP.spellParser.declaredMethods(lines.join("\n"))).toEqual(["klondike\tto deal"])
     })
 
+    test("the properties a file declares, by a scan:  body lines and top lines", () => {
+      const lines = [
+        "a card has a suit",
+        'cards have a "rank" as a number',
+        "the short rank of a card is: 1",
+        "a game is a thing:",
+        "\t- it has a deck",
+        "\t- has a stock pile as a pile",
+        '\t- its "score" is 1',
+        "\t- to play it:",
+        "\t- bank is a number"
+      ]
+      expect(SP.spellParser.declaredProperties(lines.join("\n"))).toEqual([
+        "card\tsuit",
+        "cards\trank",
+        "card\tshort rank",
+        "game\tdeck",
+        "game\tstock pile",
+        "game\tscore",
+        "game\tbank"
+      ])
+      const spanish = SP.Language.for("es").parser
+      const es = [
+        "una carta tiene un palo",
+        "un juego es una cosa:",
+        "\t- tiene un mazo como un mazo",
+        '\t- su "nota" es 1'
+      ]
+      expect(spanish.declaredProperties(es.join("\n"))).toEqual(["carta\tpalo", "juego\tmazo", "juego\tnota"])
+    })
+
     test("in Spanish, the scan:  `puntuaciones altas es una página de puntos`", () => {
       const spanish = SP.Language.for("es").parser
       const lines = ['una "página de puntos" es una página', "puntuaciones altas es una página de puntos"]

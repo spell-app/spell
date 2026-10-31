@@ -1,24 +1,21 @@
 import { spawn } from "child_process"
-import { existsSync, symlinkSync } from "fs"
-import { dirname, resolve } from "path"
+import { existsSync } from "fs"
+import { resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
 import { CLI } from "spell/app/cli"
-import { addCheckout, git, removeCheckout } from "spell/app/cli/tempCheckout"
+import { addCheckout, git, linkInstall, removeCheckout } from "spell/app/cli/tempCheckout"
 import environment from "spell/app/spaces/server/node/environment"
 
 /** cli's own folder, `src/cli/`. */
 const CLI_SRC_DIR = resolve(fileURLToPath(import.meta.url), "..", "..")
 /** The child process that times one run -- see its header. */
 const RUNNER = resolve(CLI_SRC_DIR, "runner", "speedTest.mts")
-/**
- * Where spell's source is in a checkout of spell-parser, the repo whose parser is timed (epic `repo-split` P8),
- * from its root.
- * - Since epic `repo-split` P14:  every import a package name, so it runs with no run-time alias hook.
- * - A ref from before P14 has none:  `--against` says so (`checkSpellSource()`).
- */
+/** The parser folder in a checkout of the kit, from its root (epic `repo-split` P20). */
+const PARSER_FOLDER = "parser"
+/** Where spell's source is in the parser folder (a ref from before P14 has none:  `checkSpellSource()`). */
 const SPELL_SRC = "src/spell"
-/** The tsconfig `tsx` compiles spell's source with (its decorators, its JSX), from the checkout's root. */
+/** The tsconfig `tsx` compiles spell's source with (its decorators, its JSX), from the parser folder. */
 const SPELL_TSCONFIG = "tsconfig.json"
 
 /** A run whose average is this much over the others' median is a fluke, e.g. the machine was busy. */
@@ -57,7 +54,7 @@ export async function speedtestCommand(
       const row = status.start(`Checking out ${options.against}`)
       checkout = checkoutOf(options.against)
       status.done(row, "ok", session.relative(checkout))
-      sides.unshift({ label: "Previous", checkout })
+      sides.unshift({ label: "Previous", checkout: resolve(checkout, PARSER_FOLDER) })
     }
     for (let run = 1; run <= runs; run++) {
       for (const side of sides) {
@@ -72,7 +69,7 @@ export async function speedtestCommand(
     return CLI.EXIT.ERRORS
   } finally {
     status.finish()
-    if (checkout) removeCheckout(spellParserRepo(), checkout)
+    if (checkout) removeCheckout(kitRepo(), checkout)
   }
 
   const totals = sides.map((side) => ({ label: side.label, ...combined(side.results!) }))
@@ -91,7 +88,7 @@ export async function speedtestCommand(
 
 /**
  * One side of the comparison.
- * - `checkout`:  the spell-parser checkout `speedTest.mts` times:  ours (`spell/parser/spell`'s), or the temp one
+ * - `checkout`:  the parser folder `speedTest.mts` times:  ours (`spell/parser/spell`'s), or the temp checkout's
  * - `results`:  each run's, so far
  */
 type Side = {
@@ -201,39 +198,30 @@ export function speedTable(totals: Pick<SideTotal, "label" | "average" | "min" |
 ////////////////
 
 /**
- * A temp git worktree of spell-parser (the repo of our `spell/parser/spell`) at `ref`, ready to time:  the top repo's
- * `node_modules` linked in (epic `repo-split` P7:  one install for every repo), so its packages from the OTHER repos
- * (`spell/util`) are ours, its own (`spell/parser/parser` ...) its own.
+ * A temp git worktree of the kit at `ref`, ready to time:  it runs its own source (`linkInstall()`).
  * - A `ref` with different dependencies may not run.
  * - `removeCheckout()` when done.
  */
 function checkoutOf(ref: string): string {
-  return addCheckout(spellParserRepo(), ref, "spell-speed-", (folder) => {
-    symlinkSync(installedModules(), resolve(folder, "node_modules"))
+  const kit = kitRepo()
+  return addCheckout(kit, ref, "spell-speed-", (folder) => {
+    linkInstall(kit, folder)
     checkSpellSource(folder, ref)
   })
 }
 
 /**
- * Make sure spell-parser checkout `folder` (at `ref`) has spell's source where we run it, `SPELL_SRC`.
- * - throws if not:  `ref` is from before epic `repo-split` P14, whose imports needed the run-time alias hook
+ * Make sure checkout `folder` (at `ref`) has spell's source where we run it.
+ * - throws if not:  `ref` is from before epic `repo-split` P20, when spell-parser was its own repo
  */
 function checkSpellSource(folder: string, ref: string): void {
-  if (existsSync(resolve(folder, SPELL_SRC))) return
+  if (existsSync(resolve(folder, PARSER_FOLDER, SPELL_SRC))) return
   throw new CLI.CliError(
-    `${ref} has no ${SPELL_SRC}:  --against needs a spell-parser ref from after epic repo-split P14 (one import name)`
+    `${ref} has no ${PARSER_FOLDER}/${SPELL_SRC}:  --against needs a ref from after epic repo-split P20 (one repo)`
   )
 }
 
-/** spell-parser's checkout:  the git repo our spell's source is in. */
-function spellParserRepo(): string {
+/** The kit's checkout:  the git repo our spell's source is in. */
+function kitRepo(): string {
   return git(["rev-parse", "--show-toplevel"], environment.srcDir)
-}
-
-/** The `node_modules` our spell is installed from:  the nearest one above spell's source (the top repo's). */
-function installedModules(): string {
-  for (let dir = environment.srcDir; ; dir = dirname(dir)) {
-    if (existsSync(resolve(dir, "node_modules", "spell-parser"))) return resolve(dir, "node_modules")
-    if (dirname(dir) === dir) throw new CLI.CliError(`no node_modules above ${environment.srcDir}`)
-  }
 }

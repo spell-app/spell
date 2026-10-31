@@ -1802,6 +1802,20 @@
           "aliases": ["expression"]
         },
         {
+          "className": "TheOwnProperty",
+          "ruleNames": ["the_own_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/TheOwnProperty.ts",
+          "line": 19,
+          "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
+          "syntaxes": [
+            {
+              "syntax": "{definite_article} {property:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "ItsKnownProperty",
           "ruleNames": ["its_known_property"],
           "internal": false,
@@ -3946,7 +3960,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 29,
+          "line": 28,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {

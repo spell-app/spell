@@ -1,15 +1,5 @@
 import { spawn, spawnSync } from "child_process"
-import {
-  copyFileSync,
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readlinkSync,
-  rmSync,
-  symlinkSync
-} from "fs"
+import { copyFileSync, existsSync, mkdtempSync, readdirSync, rmSync } from "fs"
 import { tmpdir } from "os"
 import { dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
@@ -17,7 +7,7 @@ import { fileURLToPath } from "url"
 // Import directly, not through `spell/app/cli`:  the barrel loads spell, and each side's child loads its own
 import { CLI } from "spell/cli"
 import type { ContentCompareOptions } from "spell/app/cli/cli.types"
-import { addCheckout, removeCheckout } from "spell/app/cli/tempCheckout"
+import { addCheckout, linkInstall, removeCheckout } from "spell/app/cli/tempCheckout"
 
 /** The child process that compiles one side -- see its header. */
 const RUNNER = resolve(dirname(fileURLToPath(import.meta.url)), "..", "runner", "compareProjects.mts")
@@ -65,21 +55,12 @@ export async function contentCompareCommand({ against = "HEAD" }: ContentCompare
 
 /**
  * Ready temp checkout `folder` of `ref` to compile as itself:
- * - a `node_modules` of its own, linking each package to the kit's
- *   - EXCEPT the kit's own links (`spell`, `spell-parser` ...), relative ones, kept relative:
- *     so its imports find ITS source, never this checkout's
+ * - a `node_modules` of its own (`linkInstall()`)
  * - throws if `ref` is too old to have the helpers the child uses
  */
 function prepareCheckout(kit: string, folder: string, ref: string): void {
   if (!existsSync(join(folder, FIXTURES_FILE))) throw new CLI.CliError(`${ref} has no ${FIXTURES_FILE}`)
-  const modules = join(kit, "node_modules")
-  const own = join(folder, "node_modules")
-  mkdirSync(own)
-  for (const name of readdirSync(modules)) {
-    const entry = join(modules, name)
-    const isLocalLink = lstatSync(entry).isSymbolicLink() && readlinkSync(entry).startsWith("..")
-    symlinkSync(isLocalLink ? readlinkSync(entry) : entry, join(own, name))
-  }
+  linkInstall(kit, folder)
 }
 
 /** Compile checkout `checkout`'s projects into `out`, with its copy of the child.  Rejects if the child fails. */

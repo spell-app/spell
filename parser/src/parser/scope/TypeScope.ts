@@ -33,6 +33,12 @@ export class TypeScope extends BlockScope {
    * - Read when a later article must agree with it, e.g. `el carta` warns "`la carta`?" -- see `SP.Language.agreement()`.
    */
   declare gender?: string
+  /**
+   * Keys of the properties its files declare, found by a scan before they parse -- `undefined` if none.
+   * - So `the X` can read a property declared further down:  see `P.Parser.stubDeclaredProperties()`.
+   * - Journaled:  see `declarePropertyAhead()`.  Read through `knowsPropertyAhead()`.
+   */
+  declare propertiesAhead?: string[]
   /** If true, the type was created as a stub. */
   declare stub?: boolean
   /**
@@ -113,6 +119,21 @@ export class TypeScope extends BlockScope {
   declareSlot(name: string, declaredBy: P.Match): void {
     if (this.slots?.includes(name)) return
     P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { slots: [...(this.slots ?? []), name] })
+  }
+
+  /** SIDE EFFECT:  property `words` is declared somewhere in our files -- see `propertiesAhead`.  Journaled. */
+  declarePropertyAhead(words: string): void {
+    const key = snakeCase(words)
+    if (this.propertiesAhead?.includes(key)) return
+    P.ParseJournal.assign(this.parser?.journal, this as TypeScope, {
+      propertiesAhead: [...(this.propertiesAhead ?? []), key]
+    })
+  }
+
+  /** Is `words` a property a scan found on us, or on a type we're built on?  See `propertiesAhead`. */
+  knowsPropertyAhead(words: string): boolean {
+    const key = snakeCase(words)
+    return this.chain().some((type) => type.propertiesAhead?.includes(key))
   }
 
   /** Is `name` a slot of ours, or of a type we're built on?  See `slots`. */
