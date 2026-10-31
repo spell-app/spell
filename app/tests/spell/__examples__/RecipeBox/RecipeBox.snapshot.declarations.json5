@@ -9,7 +9,7 @@
     {
       "type": "Recipe",
       "superType": "View",
-      "defined": "/RecipeBox.spell:562-1353"
+      "defined": "/RecipeBox.spell:562-1365"
     },
     {
       "property": "title",
@@ -40,7 +40,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:701-1353"
+      "defined": "/RecipeBox.spell:701-1365"
     },
     {
       "type": "FamilyCookbook",
@@ -50,26 +50,26 @@
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spell:1430-3766"
+      "defined": "/RecipeBox.spell:1442-3906"
     },
     {
       "property": "search",
       "of": "RecipeBox",
       "datatype": "text",
-      "defined": "/RecipeBox.spell:1455-1475"
+      "defined": "/RecipeBox.spell:1467-1487"
     },
     {
       "property": "new_recipe",
       "asWritten": "new recipe",
       "of": "RecipeBox",
       "datatype": "Recipe",
-      "defined": "/RecipeBox.spell:1479-1529"
+      "defined": "/RecipeBox.spell:1491-1541"
     },
     {
       "property": "matches",
       "of": "RecipeBox",
       "datatype": "list of recipes",
-      "defined": "/RecipeBox.spell:1533-1598"
+      "defined": "/RecipeBox.spell:1626-1738"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -83,7 +83,7 @@
       "kind": "method",
       "name": "create it",
       "waits": true,
-      "defined": "/RecipeBox.spell:1688-2068"
+      "defined": "/RecipeBox.spell:1828-2208"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -96,7 +96,7 @@
       ],
       "kind": "method",
       "name": "add the new recipe",
-      "defined": "/RecipeBox.spell:2073-2186"
+      "defined": "/RecipeBox.spell:2213-2326"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -109,7 +109,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:2191-3766"
+      "defined": "/RecipeBox.spell:2331-3906"
     }
   ],
   "codeLines": [
@@ -118,13 +118,13 @@
     16,
     21,
     26,
-    61,
-    68,
-    71,
-    76,
-    81,
-    87,
-    107,
-    112
+    63,
+    70,
+    73,
+    78,
+    84,
+    92,
+    112,
+    117
   ]
 }

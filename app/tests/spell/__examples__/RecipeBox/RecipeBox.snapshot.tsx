@@ -28,6 +28,7 @@ export class Recipe extends View {
         <ui-content>
           <ui-form class="recipe" value={this}>
             <ui-field label="Recipe name">
+              <ui-button class="remove" slot="actions" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
               <ui-input class="title" name="title" size="large" />
             </ui-field>
             <ui-field label="Serves" inline={true}>
@@ -38,11 +39,6 @@ export class Recipe extends View {
             </ui-field>
           </ui-form>
         </ui-content>
-        <ui-extra part="foot">
-          <ui-button class="remove" size="small" appearance="basic" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Remove
-          </ui-button>
-        </ui-extra>
       </ui-card>
     )
   }
@@ -90,9 +86,12 @@ export class RecipeBox extends App {
   @prop({ init: () => new Recipe({ servings: 4 }), early: true })
   accessor newRecipe!: Recipe
 
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1533, end: 1598 }, readsFrom: ["family_cookbook"] }) }
+  /** newest first:  a new one joins the end, so they're shown the other way round */
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1626, end: 1738 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
-    return core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search))
+    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search))
+    core.reverse(found)
+    return found
   }, () => [this.search]) }
 
   /** With nothing kept yet, a few to start from */
@@ -199,7 +198,7 @@ core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
 
 if (!core.isCarryingOver) recipeBox.start()
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the recipe box looks.¬   - The box is one grid, <recipe-box-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <recipe-box-recipe>, an element of its own:  its insides are reached by their parts. */¬¬recipe-box-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬recipe-box-recipe {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* the buttons at the foot of a card are at its right */¬.new ui-extra,¬recipe-box-recipe::part(foot) {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the recipe box looks.¬   - The box is one grid, <recipe-box-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <recipe-box-recipe>, an element of its own:  its insides are reached by their parts. */¬¬recipe-box-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬recipe-box-recipe {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* Add, at the foot of its card, on the right */¬.new ui-extra {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

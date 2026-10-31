@@ -82,9 +82,8 @@ recipe-box-recipe {
   font-size: 1.15em;
 }
 
-/* the buttons at the foot of a card are at its right */
-.new ui-extra,
-recipe-box-recipe::part(foot) {
+/* Add, at the foot of its card, on the right */
+.new ui-extra {
   text-align: end;
 }
 

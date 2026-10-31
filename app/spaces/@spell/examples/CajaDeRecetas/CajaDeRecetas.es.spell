@@ -18,6 +18,7 @@ una "receta" es una vista:
 			<ui-content>
 				<ui-form value={eso} class="recipe">
 					<ui-field label="Nombre de la receta">
+						<ui-button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Quitar" title="Quitar" onClick={quitar eso de las recetas}/>
 						<ui-input name="título" class="title" size="large"/>
 					</ui-field>
 					<ui-field label="Para" inline>
@@ -28,9 +29,6 @@ una "receta" es una vista:
 					</ui-field>
 				</ui-form>
 			</ui-content>
-			<ui-extra part="foot">
-				<ui-button class="remove" size="small" appearance="basic" onClick={quitar eso de las recetas}>Quitar</ui-button>
-			</ui-extra>
 		</ui-card>
 
 
@@ -38,7 +36,11 @@ una "receta" es una vista:
 caja de recetas es una aplicación:
 	- su "búsqueda" es texto
 	- su "receta nueva" es una nueva receta con porciones = 4
-	- sus "coincidencias" es cada receta donde su título incluye la búsqueda
+	// las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés
+	- sus "coincidencias" es:
+		fijar halladas a cada receta donde su título incluye la búsqueda
+		invertir halladas
+		devolver halladas
 	- su "menú de la caja" es un menú de "deshacer"
 
 	// Si todavía no hay nada guardado, unas cuantas para empezar

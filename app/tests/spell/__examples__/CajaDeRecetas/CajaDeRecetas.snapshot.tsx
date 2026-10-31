@@ -28,6 +28,7 @@ export class Receta extends View {
         <ui-content>
           <ui-form class="recipe" value={this}>
             <ui-field label="Nombre de la receta">
+              <ui-button class="remove" slot="actions" icon="close" size="mini" appearance="transparent" aria-label="Quitar" title="Quitar" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />
               <ui-input class="title" name="título" size="large" />
             </ui-field>
             <ui-field label="Para" inline={true}>
@@ -38,11 +39,6 @@ export class Receta extends View {
             </ui-field>
           </ui-form>
         </ui-content>
-        <ui-extra part="foot">
-          <ui-button class="remove" size="small" appearance="basic" onClick={core.pressed(this, () => core.removeSaved(this))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
-            Quitar
-          </ui-button>
-        </ui-extra>
       </ui-card>
     )
   }
@@ -91,9 +87,12 @@ export class CajaDeRecetas extends App {
   @prop({ init: () => new Receta({ porciones: 4 }), early: true })
   accessor recetaNueva!: Receta
 
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1645, end: 1715 }, readsFrom: ["recetario_familiar"] }) }
+  /** las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1750, end: 1880 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
-    return core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda))
+    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda))
+    core.reverse(halladas)
+    return halladas
   }, () => [this.búsqueda]) }
 
   /** Si todavía no hay nada guardado, unas cuantas para empezar */
@@ -200,7 +199,7 @@ core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
 
 if (!core.isCarryingOver) cajaDeRecetas.start()
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the recipe box looks (the same as Recipe Box, its twin).¬   - The box is one grid, <caja-de-recetas-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <caja-de-recetas-receta>, an element of its own:  its insides are reached by their parts. */¬¬caja-de-recetas-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬caja-de-recetas-receta {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* the buttons at the foot of a card are at its right */¬.new ui-extra,¬caja-de-recetas-receta::part(foot) {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the recipe box looks (the same as Recipe Box, its twin).¬   - The box is one grid, <caja-de-recetas-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <caja-de-recetas-receta>, an element of its own:  its insides are reached by their parts. */¬¬caja-de-recetas-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬caja-de-recetas-receta {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* Add, at the foot of its card, on the right */¬.new ui-extra {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
 
 // each view type's tag, for the JSX
 declare module "@solidjs/web/types/jsx.js" {

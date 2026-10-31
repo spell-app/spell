@@ -271,13 +271,13 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
   const SHIPPED = [
     {
       path: "RecipeBox/RecipeBox.spell",
-      examples: ["Tomato soup", "Dal", "Pizza Margherita"],
+      examples: ["Pizza Margherita", "Dal", "Tomato soup"],
       noRecipes: "No recipes yet. Add your first one.",
       noMatches: "No recipes match your search."
     },
     {
       path: "CajaDeRecetas/CajaDeRecetas.es.spell",
-      examples: ["Sopa de tomate", "Dal", "Pizza Margarita"],
+      examples: ["Pizza Margarita", "Dal", "Sopa de tomate"],
       noRecipes: "Todavía no hay recetas. Agrega la primera.",
       noMatches: "Ninguna receta coincide con tu búsqueda."
     }
@@ -319,7 +319,7 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         // every field shown, and labelled
         const firstCard = page.locator("ui-form.recipe").first()
         expect(await firstCard.locator("ui-field").count()).toBe(3)
-        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("4")
+        expect(await firstCard.locator("ui-input.serves input").inputValue()).toBe("2")
         expect(await firstCard.locator("textarea").inputValue()).not.toBe("")
 
         // a search follows every letter typed, and says when it finds nothing
@@ -330,11 +330,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         await page.locator("ui-input.search input").fill("")
         await expect.poll(() => cardsOn(page), WAITING).toEqual(examples)
 
-        // a new one:  its card has what was typed, and the new card is empty again
+        // a new one:  first of all, with what was typed, and the new card is empty again
         await page.locator("ui-input.draft input").fill("birria")
+        await page.locator("ui-card.new textarea").pressSequentially("Slowly")
         await expect.poll(isAddOff, WAITING).toBe(false)
         await add.click()
-        await expect.poll(() => cardsOn(page), WAITING).toContain("birria")
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria", ...examples])
         expect(await page.locator("ui-input.draft input").inputValue()).toBe("")
 
         // typing in a card stays in that card, whatever it now says
@@ -342,16 +343,14 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
         await card.click()
         await card.press("End")
         await page.keyboard.type(" again")
-        await expect.poll(() => cardsOn(page), WAITING).toContain(`${examples[0]} again`)
+        await expect.poll(() => cardsOn(page), WAITING).toContain("birria again")
 
-        // remove, and undo:  back with what it said
-        const notes = await firstCard.locator("textarea").inputValue()
+        // remove, and undo:  back where it was, with what it said
         await page.locator("ui-button.remove").first().click()
-        await expect.poll(() => cardsOn(page), WAITING).not.toContain(`${examples[0]} again`)
+        await expect.poll(() => cardsOn(page), WAITING).not.toContain("birria again")
         await undoOn(page).click()
-        await expect.poll(() => cardsOn(page), WAITING).toContain(`${examples[0]} again`)
-        const back = page.locator("ui-form.recipe").filter({ hasText: "" }).last()
-        expect(await back.locator("textarea").inputValue()).toBe(notes)
+        await expect.poll(() => cardsOn(page), WAITING).toEqual(["birria again", ...examples])
+        expect(await firstCard.locator("textarea").inputValue()).toBe("Slowly")
 
         // with none left, it says so
         while (await page.locator("ui-button.remove").count()) await page.locator("ui-button.remove").first().click()
@@ -375,14 +374,15 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
       await page.locator("ui-input.draft input").fill("A shipped stew")
       await page.locator("ui-button.add").click()
       await expect.poll(held, WAITING).toContain("A shipped stew")
+      expect((await cardsOn(page))[0]).toBe("A shipped stew")
 
-      await page.locator("ui-button.remove").last().click()
+      await page.locator("ui-button.remove").first().click()
       await expect.poll(held, WAITING).not.toContain("A shipped stew")
       await undoOn(page).click()
       await expect.poll(held, WAITING).toContain("A shipped stew")
       await expect.poll(() => cardsOn(page), WAITING).toContain("A shipped stew")
 
-      await page.locator("ui-button.remove").last().click()
+      await page.locator("ui-button.remove").first().click()
       await expect.poll(held, WAITING).not.toContain("A shipped stew")
       expect(problems).toEqual([])
       await page.close()

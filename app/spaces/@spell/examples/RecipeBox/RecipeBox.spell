@@ -18,6 +18,7 @@ a "recipe" is a view:
 			<ui-content>
 				<ui-form value={it} class="recipe">
 					<ui-field label="Recipe name">
+						<ui-button slot="actions" class="remove" icon="close" size="mini" appearance="transparent" aria-label="Remove" title="Remove" onClick={remove it from the recipes}/>
 						<ui-input name="title" class="title" size="large"/>
 					</ui-field>
 					<ui-field label="Serves" inline>
@@ -28,9 +29,6 @@ a "recipe" is a view:
 					</ui-field>
 				</ui-form>
 			</ui-content>
-			<ui-extra part="foot">
-				<ui-button class="remove" size="small" appearance="basic" onClick={remove it from the recipes}>Remove</ui-button>
-			</ui-extra>
 		</ui-card>
 
 
@@ -38,7 +36,11 @@ a "recipe" is a view:
 recipe box is an app:
 	- its "search" is text
 	- its "new recipe" is a new recipe with servings = 4
-	- its "matches" is every recipe where its title includes the search
+	// newest first:  a new one joins the end, so they're shown the other way round
+	- its "matches" is:
+		set found to every recipe where its title includes the search
+		reverse found
+		return found
 	- its "box menu" is a menu of "undo"
 
 	// With nothing kept yet, a few to start from
