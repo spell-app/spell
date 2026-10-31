@@ -101,6 +101,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "airtable-needs-key":
     'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
+  "where-field-unknown":
+    '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',

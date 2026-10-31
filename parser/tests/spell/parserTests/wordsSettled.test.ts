@@ -688,6 +688,114 @@ describe("the person using the program", () => {
     expect(js).toContain("if (!core.isCurrentPerson(this.cook))")
   })
 
+  describe("`where they are the cook` (T66):  the short form of `where its cook is them`", () => {
+    /** What `lines` compile to, less where each thing is in the file:  the short form is shorter, and that's all. */
+    const lineOf = (...lines: string[]) => {
+      const { js, errors } = compiled(lines)
+      expect(errors).toEqual([])
+      return js
+        .split("\n")
+        .filter((line) => !/^\s*(defined:|\/\/ )/.test(line))
+        .join("\n")
+        .replace(/declaredAt: \{[^}]*\}/g, "")
+    }
+    /** A program with a `"cook"` of its own, beside the recipe's. */
+    const program = (line: string, ...before: string[]) =>
+      lineOf(PLACE, RECIPE, "box is an app:", ...before, "\t- to go:", `\t\t${line}`)
+
+    it.each([
+      ["recipes where they are the cook", "recipes where its cook is them"],
+      ["every recipe where they are the cook", "every recipe where its cook is them"],
+      ["recipes where they are not the cook", "recipes where its cook is not them"],
+      ["recipes where they aren't the cook", "recipes where its cook is not them"],
+      [
+        'recipes where they are the cook and its title is "Soup"',
+        'recipes where its cook is them and its title is "Soup"'
+      ],
+      ["recipes where they are the cook, sorted by title", "recipes where its cook is them, sorted by title"]
+    ])("`%s` compiles to just what `%s` does", (short, long) => {
+      expect(program(`print ${short}`)).toEqual(program(`print ${long}`))
+    })
+
+    it("a place is handed the same read, for a list and a test of it", () => {
+      const js = program("print recipes where they are the cook")
+      expect(js).toContain("core.isCurrentPerson(recipe.cook)")
+      expect(js).toContain("core.savedThings(Recipe")
+      expect(program("if there are no recipes where they are the cook then print 1")).toEqual(
+        program("if there are no recipes where its cook is them then print 1")
+      )
+      expect(program("remove the recipes where they are the cook from the box")).toEqual(
+        program("remove the recipes where its cook is them from the box")
+      )
+    })
+
+    it("a field of several words", () => {
+      const lines = (line: string) =>
+        lineOf(PLACE, 'a recipe is a thing:\n\t- it lives in the family cookbook\n\t- its "head cook" is text', line)
+      expect(lines("print recipes where they are the head cook")).toEqual(
+        lines("print recipes where its head cook is them")
+      )
+    })
+
+    it("`the cook` is the recipe's, not the program's, which still has its own words", () => {
+      const own = ['\t- its "cook" is text']
+      const short = program("print recipes where they are the cook", ...own)
+      expect(short).toEqual(program("print recipes where its cook is them", ...own))
+      expect(short).not.toContain("this.cook")
+      expect(program("print recipes where the cook is them", ...own)).toContain("core.isCurrentPerson(this.cook)")
+    })
+
+    it("`the cook of it` is the long form, still", () => {
+      expect(program("print recipes where they are the cook of it")).toContain("core.isCurrentPerson(recipe.cook)")
+    })
+
+    it("a program's own `they` wins", () => {
+      const js = program("print recipes where they are the cook", '\t- its "they" is text', '\t- its "cook" is text')
+      expect(js).toContain("this.they === this.cook")
+      expect(js).not.toContain("isCurrentPerson")
+    })
+
+    it("outside a `where`, `the cook` is what it always was", () => {
+      expect(program("if they are the cook then print 1", '\t- its "cook" is text')).toContain(
+        "if (core.isCurrentPerson(this.cook))"
+      )
+      expect(inAction("if they are the cook then print 1").errors.join()).toContain("Don't understand")
+    })
+
+    it("a field the thing hasn't got says so", () => {
+      const { errors } = inAction("print recipes where they are the chef")
+      expect(errors.join()).toContain('A recipe has no "chef"')
+      // nor does a program's own `chef` stand in for it
+      const own = compiled([
+        PLACE,
+        RECIPE,
+        "box is an app:",
+        '\t- its "chef" is text',
+        "\t- to go:",
+        "\t\tprint recipes where they are the chef"
+      ])
+      expect(own.errors.join()).toContain('A recipe has no "chef"')
+    })
+
+    it("in Spanish:  `recetas donde esa persona es el cocinero`", () => {
+      const es = (line: string) => {
+        const { js, errors } = inActionEs(line)
+        expect(errors).toEqual([])
+        return js
+      }
+      expect(es("imprimir recetas donde esa persona es el cocinero")).toEqual(
+        es("imprimir recetas donde su cocinero es esa persona")
+      )
+      expect(es("imprimir recetas donde esa persona no es el cocinero")).toEqual(
+        es("imprimir recetas donde su cocinero no es esa persona")
+      )
+      expect(es("imprimir recetas donde esa persona es el cocinero")).toContain("core.isCurrentPerson(receta.cocinero)")
+      expect(inActionEs("imprimir recetas donde esa persona es el chef").errors.join()).toContain(
+        'Una receta no tiene "chef"'
+      )
+    })
+  })
+
   it("the old words are gone", () => {
     expect(inAction("print me").errors.join()).toContain("Don't understand")
     expect(inAction("print my name").errors.join()).toContain("Don't understand")

@@ -140,6 +140,9 @@ export const PARSER_MESSAGES = {
     'Airtable answers nobody without a key:  add "- its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
+  /** `where they are the cook`, of something with no `cook`. */
+  "where-field-unknown":
+    '{AType} has no "{field}":  declare it there, or say "the {field} is them" for the program\'s own',
   /** A rider's word that doesn't agree. */
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
