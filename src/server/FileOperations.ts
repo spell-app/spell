@@ -292,7 +292,7 @@ export class FileOperations {
   ////////////////
 
   /** `file`'s `ETag`, as `StaticHandler` serves it;  `undefined` if it's not there */
-  private static etagFor(file: string): string | undefined {
+  static etagFor(file: string): string | undefined {
     const found = statSync(file, { throwIfNoEntry: false })
     return found ? SRV.StaticHandler.etagOf(found) : undefined
   }

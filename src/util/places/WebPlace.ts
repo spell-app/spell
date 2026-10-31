@@ -27,8 +27,9 @@ const GONE_STATUSES = new Set([404, 410])
  *   - any other 4xx:  `PlaceError` `"refused"`, or what a subclass says it means (`errorKindFor()`)
  *   - a 5xx, a 408, a 425, a 429, or nothing at all:  thrown as it is, so it counts as no answer, and a change resends
  * - A KEY is named, never written (epic `data`, Q11):
- *   - `keyNamed` says a place needs one, by name;  this browser can't hold it, so every request refuses, saying so.
- *     A small server side holds keys, built in the next phase.
+ *   - `keyNamed` says a place needs one, by name.
+ *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
+ *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
  * - Knows nothing of paths or queries.
  ****************/
@@ -37,14 +38,20 @@ export abstract class WebPlace {
   protected readonly url: string
   /** The name of the key it needs, if it does. */
   protected readonly keyNamed: string | undefined
+  /** Finds that key, on a server side. */
+  private readonly keyFrom: ((name: string) => string | undefined) | undefined
+  /** Puts that key on a request. */
+  private readonly sendKey: (headers: Headers, key: string) => void
   /** The header a change's id goes in:  `false` for none. */
   private readonly changeIdHeader: string | false
   /** Sends the requests. */
   private readonly api = new Api()
 
-  constructor({ url, keyNamed, changeIdHeader = CHANGE_ID_HEADER }: WebPlaceProps) {
+  constructor({ url, keyNamed, keyFrom, sendKey = sendAsBearer, changeIdHeader = CHANGE_ID_HEADER }: WebPlaceProps) {
     this.url = url.replace(/\/+$/, "")
     this.keyNamed = keyNamed
+    this.keyFrom = keyFrom
+    this.sendKey = sendKey
     this.changeIdHeader = changeIdHeader
   }
 
@@ -61,8 +68,9 @@ export abstract class WebPlace {
     { signal, keepalive }: PlaceContext,
     changeId?: string
   ): Promise<Response> {
-    this.refuseIfItNeedsAKey()
+    const key = this.keyOrRefusal()
     const headers = new Headers(request.headers)
+    if (key !== undefined) this.sendKey(headers, key)
     if (changeId !== undefined && this.changeIdHeader) headers.set(this.changeIdHeader, changeId)
     try {
       return await this.api.request<Response>({
@@ -73,7 +81,7 @@ export abstract class WebPlace {
         ...(keepalive && { keepalive })
       })
     } catch (error) {
-      if (!(error instanceof ApiError) || !isAnAnswer(error.status)) throw error
+      if (!(error instanceof ApiError) || !this.isAnAnswer(error.status)) throw error
       const kind = this.errorKindFor(error.status!)
       throw new PlaceError(error.message, { cause: { kind, ...(kind === "refused" && { whyNot: "place" }) } })
     }
@@ -84,9 +92,16 @@ export abstract class WebPlace {
     return GONE_STATUSES.has(status) ? "not found" : "refused"
   }
 
-  /** It needs a key, which only a server side holds.  - throws `PlaceError` `"refused"` */
-  private refuseIfItNeedsAKey(): void {
-    if (this.keyNamed === undefined) return
+  /** Is this status an answer about the request, rather than the server having no answer yet?  A subclass says more. */
+  protected isAnAnswer(status: number | undefined): boolean {
+    return status !== undefined && status >= 400 && status < 500 && !TRY_AGAIN_STATUSES.has(status)
+  }
+
+  /** The key it needs, if it needs one.  - throws `PlaceError` `"refused"` when nothing here holds it */
+  private keyOrRefusal(): string | undefined {
+    if (this.keyNamed === undefined) return undefined
+    const key = this.keyFrom?.(this.keyNamed)
+    if (key !== undefined) return key
     throw new PlaceError(
       `${this.constructor.name}:  ${this.url} needs the key named "${this.keyNamed}", and a key is never kept in a page;  this place has to go through a server side`,
       { cause: { kind: "refused", whyNot: "place" } }
@@ -100,6 +115,10 @@ export type WebPlaceProps = {
   url: string
   /** The NAME of the key it needs:  it's never written here.  See `WebPlace`. */
   keyNamed?: string
+  /** Finds a key by its name:  only ever handed in on a server side (`PlaceKeys`).  Left out:  a place with `keyNamed` refuses. */
+  keyFrom?: (name: string) => string | undefined
+  /** How the key goes on a request;  default `Authorization: Bearer <key>`. */
+  sendKey?: (headers: Headers, key: string) => void
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */
   changeIdHeader?: string | false
 }
@@ -131,7 +150,7 @@ export function turnedRound(names: Readonly<Record<string, string>>): Record<str
   return Object.fromEntries(Object.entries(names).map(([ours, theirs]) => [theirs, ours]))
 }
 
-/** Is this status an answer about the request, rather than the server having no answer yet? */
-function isAnAnswer(status: number | undefined): boolean {
-  return status !== undefined && status >= 400 && status < 500 && !TRY_AGAIN_STATUSES.has(status)
+/** The usual way a key goes on a request. */
+function sendAsBearer(headers: Headers, key: string): void {
+  headers.set("Authorization", `Bearer ${key}`)
 }

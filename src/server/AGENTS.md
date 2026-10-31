@@ -370,6 +370,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `WebServer` imports the leaf, never the browser-only barrel.
     - An epic's state and the Epics page's cards left for `spell/epic/list/` (epic `people-and-orgs` P16).
       - `EpicState`, `EpicCards`
+  - `spell/server/places` -- the places that need node (epic `data` P5), for what a browser can't do:
+    - `ChunkFiles`:  a folder of files as a place's chunks:  the file half of `ChunkedPlace`, the app's `SpaceStorage` shape
+      - versions through `FileOperations`' own conflict check, changes through `LiveReload`'s watching (no raw watcher)
+      - its statics (`writeListAndBodies()` ...) are for a tool writing files straight off, in its own lock:  the epic page
+        tool, from epic `data`'s Epic Pages On Chunked Files on
+    - `FolderPlace`:  a folder as a place, a list file and one file per thing, on any `FolderStorage` (`ChunkFiles`, or the
+      app's `DiskStorage` as it stands)
+      - the files are the truth:  each read checks each file's version against the list file, and reads only what differs
+      - a file that isn't JSON yet answers as it last read
+    - `FilePlace`:  one JSON5 file as a place, its comments kept
+    - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
+      - holds keys (`PlaceKeys`), and scrubs them from every answer
+      - NOTE:  `Guard`'s token covers a LOCAL server only:  a hosted one needs its own sign-in, which epic `data`'s The Cloud has
+        to answer
+    - It imports util's places by file (`spell/util/places/places.types` ...), and nothing in `spell/server` imports it.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):
@@ -483,7 +498,7 @@ The steps between a page's content and its file on disk, for every tool that wri
 - As WWOD §4.
 - Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
 - `spell/server/test/recipeServers`:  a fair fake of a web service and a GraphQL service over one box of recipes, for the
-  places' tests and the recipe box demo (`scripts/recipe-servers.ts`;  epic `data` P4).
+  places' tests and the recipe box demo (`scripts/recipe-servers.ts`, which also serves a folder;  epic `data` P4, P5).
   Never `fetch`, which resolves `..` before sending.
 
 ## Types / Exports

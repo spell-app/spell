@@ -180,10 +180,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `DevicePlace`:  this device, an adapter over a `PrefPlace`.  Preferences' code knows nothing of it.
   - `RestPlace` and `GraphPlace`, on `WebPlace`:  a server, from a mapping of its paths and field names, on `Api`.
     - `WebPlace` turns an answer into what the engine needs:  not found, refused, or no answer (a 5xx, a 429:  it resends).
-    - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses.
+    - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
+      unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
     - `RestPlace`:  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
+  - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
+    - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
+      thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;
+      `ChunkFiles`, in `spell/server/places`:  a folder).
+    - A read names a field the summaries don't hold:  that's when bodies are read.  `bodyOf()`:  one body, no list.
+    - Taken by file (`spell/util/places/ChunkedPlace`), it imports only `places.types`.
+  - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
+    - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
   - `PendingChanges` (`Places.pendingFor()`, one per place name):  every change made and not yet confirmed.
     - One field of one thing, each with its own id, in the order made, shown at once, kept on this device.
     - No answer:  it resends with the same id.  The place says no:  dropped, put back, healed, one failure raised
