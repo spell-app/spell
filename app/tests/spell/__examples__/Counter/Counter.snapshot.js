@@ -38,7 +38,7 @@ export class Counter extends View {
 
   /** a button saying how many times it's been clicked:  a click counts up */
   draw() {
-    return h("ui-button", { onClick: () => this.countUp(), style: "cursor:pointer;user-select:none" },
+    return h("ui-button", { onClick: core.pressed(this, () => this.countUp()), style: "cursor:pointer;user-select:none" },
       "Clicked ",
       () => this.count,
       " times"

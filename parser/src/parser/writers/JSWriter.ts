@@ -12,6 +12,7 @@ import {
   attributeName,
   isCoreCall,
   isTight,
+  PRESS_ATTRIBUTES,
   topLevelOf,
   unwrapped,
   withUsedCoreClasses
@@ -1043,7 +1044,8 @@ export class JSWriter extends ProgramWriter {
         if (prefix) lines.splice(docStart, 0, prefix)
       }
       this.statements.add(statement)
-      lines.push(String(this.write(statement)))
+      const written = String(this.write(statement))
+      lines.push(this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written)
       docStart = lines.length
     }
     return elseOnItsLine(lines.join(jsText.NEWLINE))
@@ -1390,6 +1392,7 @@ export class JSWriter extends ProgramWriter {
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (value === true) return "true"
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("members" in value && Array.isArray(value.members)) {
@@ -1466,7 +1469,7 @@ export class JSWriter extends ProgramWriter {
     if (!children.length) return `${head})`
     const inline = children.join(", ")
     const lastLine = head.slice(head.lastIndexOf("\n") + 1)
-    const fits = !inline.includes("\n") && lastLine.length + inline.length < JSWriter.DRAWING_LINE
+    const fits = !inline.includes("\n") && P.SourceMarks.widthOf(lastLine + inline) < JSWriter.DRAWING_LINE
     // more than one child, with an element among them:  one a line, as JSX reads
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
     if (fits && isFlat) return `${head}, ${inline})`
@@ -1482,7 +1485,7 @@ export class JSWriter extends ProgramWriter {
     const children = node.childValues.map((child) => String(this.write(child)))
     const inline = children.join(", ")
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
-    if (isFlat && !inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `[${inline}]`
+    if (isFlat && !inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `[${inline}]`
     return `[\n${jsText.indented(children.join(",\n"))}\n]`
   }
 
@@ -1498,13 +1501,24 @@ export class JSWriter extends ProgramWriter {
         const value = attribute.propValue
         const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
-        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${this.write(value)}${error}`
+        const written = this.pressedHandler(key, value) ?? this.write(value)
+        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${written}${error}`
       })
       .sort((a, b) => Number(b.startsWith("class:")) - Number(a.startsWith("class:")))
     if (!props.length) return ""
     const inline = props.join(", ")
-    if (!inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `{ ${inline} }`
+    if (!inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `{ ${inline} }`
     return `{\n${jsText.indented(props.join(",\n"))}\n}`
+  }
+
+  /**
+   * `value`, the handler of attribute `key`, if it's a press:  `core.pressed(this, () => this.deal())`, a person's
+   * action, which waits its turn (`ActionQueue`, epic `language`, Q6);  `undefined` for any other.
+   * - `onInput`, `onMouseEnter` ... aren't:  they keep up with the person.
+   */
+  protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
+    if (!PRESS_ATTRIBUTES.test(key) || !(value instanceof P.ASTMethodDefinition)) return undefined
+    return `core.pressed(this, ${this.write(value)})`
   }
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */

@@ -496,14 +496,11 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   /**
    * Run a drag handler through our program's core, `run`:  where the program runs, Python's too (`core.remote`).
    * - The program's own code:  a throw, or a promise that fails, goes to its console, and the drag goes on.
+   * - At once, outside the queue:  a drag's moves and a `while` keep up with the mouse, even during a deal
+   *   (epic `language`, J3).  What a person PRESSES goes through it:  `runPressed()`.
    */
   private runHandler(run: () => unknown) {
-    const { entry } = this
-    try {
-      void Promise.resolve(run()).catch((error) => entry?.core.console.error(error))
-    } catch (error) {
-      entry?.core.console.error(error)
-    }
+    void this.entry?.core.meanwhile(run)
   }
 
   /**
@@ -529,7 +526,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (!list) return this.sendToThing("drag-cancelled")
     if (!thing || !entry) return
     const dropped = (component as SpellElement).handlerFor("when", "DroppedOn", thing)
-    if (dropped) return this.runHandler(() => entry.core.runHandler(list, dropped, thing))
+    if (dropped) return entry.core.runPressed(list, dropped, () => entry.core.runHandler(list, dropped, thing))
     const name = SpellElement.instanceName(thing.constructor)
     const details: Record<string, object> = { [name]: thing }
     for (
@@ -541,8 +538,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     }
     const event = entry.core.message("drop-event", { thing: kebabCase(name) })
     if (entry.core.remote) return entry.core.remote.trigger(event, details)
-    const heard = entry.core.trigger(event, details)
-    if (!heard.length) entry.core.move(thing, list)
+    entry.core.runPressed(thing, event, () => {
+      const heard = entry.core.trigger(event, details)
+      return heard.length ? Promise.all(heard) : entry.core.move(thing, list)
+    })
   }
 
   ////////////////
@@ -781,20 +780,28 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.runWhile(event, thing)
     // a click its thing would take, while it isn't clickable, `- clickable when it is face down`:  nothing happens
     const isClick = CLICK_HANDLERS.includes(SpellElement.handlerNameFor(spellEvent))
-    if (isClick && SpellElement.handles(thing, spellEvent) && !core.isAble(thing, "clickable")) return
-    this.sendToThing(spellEvent)
+    const isAble = () => !isClick || !SpellElement.handles(thing, spellEvent) || !!core.isAble(thing, "clickable")
+    if (!isAble()) return
+    this.sendToThing(spellEvent, isAble)
   }
 
   /**
    * Send `spellEvent`, e.g. `click`, `drag-cancelled`, to our thing, through the program's core:  its handler takes it
    * (`onDragCancelled()`), or hands it up its chain (`core.send()`).
+   * - A press (`PRESSES`) goes through the queue, if anything takes it:  it runs when no action is running.
+   *   `canRun`:  may it still, when its turn comes?  The mouse's other events run at once.
    * - A program running elsewhere (Python, `core.remote`) hears only its own handler.
    */
-  private sendToThing(spellEvent: string) {
+  private sendToThing(spellEvent: string, canRun?: () => boolean) {
     const thing = this.currentThing as Record<string, unknown> | undefined
     const core = this.entry?.core
     if (!thing || !core) return
-    if (!core.remote && core.send) return this.runHandler(() => core.send(thing, spellEvent))
+    if (!core.remote && core.send) {
+      if (PRESSES.has(spellEvent) && core.takesEvent(thing, spellEvent)) {
+        return core.runPressed(thing, spellEvent, () => core.send(thing, spellEvent), canRun)
+      }
+      return this.runHandler(() => core.send(thing, spellEvent))
+    }
     if (!SpellElement.handles(thing, spellEvent)) return
     this.runHandler(() => core.runHandler(thing, SpellElement.handlerNameFor(spellEvent), { type: spellEvent }))
   }
@@ -1600,6 +1607,9 @@ const CORE_BASE_NAMES = new Set(["Thing", "View", "List", "ViewableList", "TwoSi
 
 /** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
 const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
+
+/** The mouse's events that are a person's action, which waits its turn (`core.runPressed()`). */
+const PRESSES = new Set(["click", "double-click", "right-click", "center-click"])
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()

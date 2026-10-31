@@ -287,6 +287,17 @@ Its first line is how you call it, with each blank's type in brackets:
     - In JavaScript and TypeScript, a getter, a drawing, a `create` and a `to test` must answer at once:
       they start what they call without waiting for it.
     - A `send` waits only if a handler of that event does.
+- What a person starts runs one at a time:  a click, a key, a menu item, a drop.
+  - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
+  - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.
+  - What the program calls itself never waits in that line, so a deal can't wait for itself.
+    Nor does a drag's move, a `while`, or what a drawing reads:  a click never waits behind a slow load.
+  - One that fails says so on the program's console, and the next one runs.
+  - Under an action, `- a new one replaces the last one` makes the newest win:  the running one stops at its next wait,
+    for a search as you type.
+    Code can do the same with `core.cancelActions()`, which leaves what the action already wrote.
+  - Each step of an action that waits shows as it happens.
+    A step with no real pause doesn't paint:  the browser draws between timers, so use `pause for`.
 - An action can be used above its definition, or from an earlier file:
   every action's first line is registered before the project's first line is read.
 - An action of a template can DESCRIBE itself, in lines indented under it, before its steps:
@@ -299,7 +310,7 @@ Its first line is how you call it, with each blank's type in brackets:
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as` and `icon` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,

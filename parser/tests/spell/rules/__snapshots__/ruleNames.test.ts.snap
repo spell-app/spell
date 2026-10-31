@@ -281,6 +281,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "action_detail",
       "action_detail",
       "action_detail",
+      "action_detail",
     ],
     "as_a_type": [
       "as_a_type",
@@ -844,6 +845,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "action_detail",
       "action_detail",
       "action_detail",
+      "action_detail",
       "await",
       "pause",
       "start_process",
@@ -897,7 +899,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
   "rules": [
     "a_things_property · classes · 1",
     "absolute_value · math · 1",
-    "action_detail · methods · 5",
+    "action_detail · methods · 6",
     "alert · UI · 1",
     "and · expressions · 1",
     "and_or · expressions · 1",

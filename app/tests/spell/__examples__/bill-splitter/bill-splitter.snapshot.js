@@ -59,7 +59,7 @@ export class Diner extends View {
           icon: "close",
           appearance: "basic",
           "aria-label": "Remove",
-          onClick: () => this.remove(),
+          onClick: core.pressed(this, () => this.remove()),
           style: "cursor:pointer;user-select:none"
         })
       )
@@ -150,13 +150,13 @@ export class BillSplitter extends App {
             labeled: "right"
           }),
           h("ui-buttons", { size: "small", appearance: "basic" },
-            h("ui-button", { onClick: () => (this.percent = 15), style: "cursor:pointer;user-select:none" },
+            h("ui-button", { onClick: core.pressed(this, () => (this.percent = 15)), style: "cursor:pointer;user-select:none" },
               "15%"
             ),
-            h("ui-button", { onClick: () => (this.percent = 18), style: "cursor:pointer;user-select:none" },
+            h("ui-button", { onClick: core.pressed(this, () => (this.percent = 18)), style: "cursor:pointer;user-select:none" },
               "18%"
             ),
-            h("ui-button", { onClick: () => (this.percent = 20), style: "cursor:pointer;user-select:none" },
+            h("ui-button", { onClick: core.pressed(this, () => (this.percent = 20)), style: "cursor:pointer;user-select:none" },
               "20%"
             )
           )
@@ -166,7 +166,7 @@ export class BillSplitter extends App {
       h("ui-button", {
         appearance: "basic",
         icon: "plus",
-        onClick: () => this.addSomeone(),
+        onClick: core.pressed(this, () => this.addSomeone()),
         style: "cursor:pointer;user-select:none"
       }, "Add someone"),
       h("ui-segment",

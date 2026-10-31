@@ -87,7 +87,13 @@ describe("what waits", () => {
 describe("places that can't simply wait", () => {
   test("the top level starts the program's and carries on, so it never holds the first draw", () => {
     const js = compiled(`to deal:\n	pause for 1 sec\ndeal`)
-    expect(js).toMatch(/^deal\(\)$/m)
+    expect(js).toMatch(/^core\.holdWhile\(\(\) => deal\(\)\)$/m)
+    // Python's page draws from what it ended up as, so it runs to its end
+    expect(compiled(`to deal:\n	pause for 1 sec\ndeal`, "py")).toContain("asyncio.run(deal())")
+  })
+
+  test("a step that doesn't wait stays as it is", () => {
+    expect(compiled(`to deal:\n	print 1\ndeal`)).toMatch(/^deal\(\)$/m)
   })
 
   test("the top level still waits for `core`'s own, as it says", () => {
@@ -134,5 +140,33 @@ describe("what a project imports", () => {
     })
     expect(methods.length).toBeGreaterThan(0)
     expect(methods.every((method) => method.isAsync)).toBe(true)
+  })
+})
+
+describe("what a person presses", () => {
+  const DRAWN = `a card is a view:
+	- to deal it:
+		pause for 1 sec
+	- to draw it:
+		<button onClick={deal it} onInput={deal it}>"Deal"</button>
+`
+
+  test("a click in a drawing waits its turn, written `core.pressed()`;  what keeps up with the person doesn't", () => {
+    const js = compiled(DRAWN)
+    expect(js).toContain("onClick: core.pressed(this, async () => await this.deal())")
+    expect(js).toContain("onInput: async () => await this.deal()")
+    expect(compiled(DRAWN, "ts/solid")).toContain("onClick={core.pressed(this, async () => await this.deal())}")
+  })
+
+  test("an animation holds no guard of its own:  that's the queue's job", () => {
+    const js = compiled("a card is a thing:\n\t- animation deal it:\n\t\tpause for 1 sec\n")
+    expect(js).toContain("async deal()")
+    expect(js).not.toContain("processIsRunning")
+  })
+
+  test("`- a new one replaces the last one`, in both languages", () => {
+    const action = "a card is a thing:\n\t- to search it:\n\t\t- a new one replaces the last one\n\t\tpause for 1 sec\n"
+    expect(compiled(action)).toContain("replacesLast: true")
+    expect(compiled(action, "py")).toContain('"replaces_last": True')
   })
 })

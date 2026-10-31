@@ -122,7 +122,7 @@ export class Carta extends View {
   // una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
   @drawn draw() {
     return (
-      <span part="lados" onClick={() => trigger("clic-carta", { carta: this })} style="cursor:pointer;user-select:none">
+      <span part="lados" onClick={core.pressed(this, () => trigger("clic-carta", { carta: this }))} style="cursor:pointer;user-select:none">
         <es-texto part="frente" color={this.color}>{this.cara}</es-texto>
         <es-texto part="dorso" color="azul">🂠</es-texto>
       </span>
@@ -683,7 +683,7 @@ export class PilaDeReserva extends Pila {
   // vacía:  una carta gris claro, boca abajo -- un clic vuelve a voltear los descartes
   drawItsPlaceholder() {
     return (
-      <div part="marcador" onClick={async () => await solitario.robarDeLaReserva()} style="cursor:pointer;user-select:none">
+      <div part="marcador" onClick={core.pressed(this, async () => await solitario.robarDeLaReserva())} style="cursor:pointer;user-select:none">
         🂠
       </div>
     )
@@ -969,51 +969,37 @@ export class Solitario extends App {
 
   /** voltea la siguiente carta de la reserva, sobre los descartes */
   async robarDeLaReserva() {
-    if (core.processIsRunning("robar_de_la_reserva")) return
-    core.startProcess("robar_de_la_reserva", "EXCLUSIVE")
-    try {
-      if (this.reserva.isEmpty) await this.rehacerLaReserva()
+    if (this.reserva.isEmpty) await this.rehacerLaReserva()
 
-      const it = this.reserva.lastItem
-      it?.voltearBocaArriba()
-      // lo que tarda su giro (styles.css), así se voltea antes de moverse
-      await core.pauseFor(300, "msec")
-      this.descartes.append(it!)
-    }
-    finally {
-      core.stopProcess("robar_de_la_reserva")
-    }
+    const it = this.reserva.lastItem
+    it?.voltearBocaArriba()
+    // lo que tarda su giro (styles.css), así se voltea antes de moverse
+    await core.pauseFor(300, "msec")
+    this.descartes.append(it!)
   }
 
   /** junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha */
   async repartirLasCartas() {
-    if (core.processIsRunning("repartir_las_cartas")) return
-    core.startProcess("repartir_las_cartas", "EXCLUSIVE")
-    try {
-      for (const carta of this.mazo) {
-        const pilaInicial = carta.pila
-        carta.voltearBocaAbajo()
-        if (pilaInicial !== this.reserva) {
-          this.reserva.append(carta)
-          await core.pauseFor(50, "msec")
-        }
+    for (const carta of this.mazo) {
+      const pilaInicial = carta.pila
+      carta.voltearBocaAbajo()
+      if (pilaInicial !== this.reserva) {
+        this.reserva.append(carta)
+        await core.pauseFor(50, "msec")
       }
-      this.reserva.randomize()
+    }
+    this.reserva.randomize()
 
-      // la primera carta de cada fila cae boca abajo, y se voltea donde queda
-      for (const fila of core.getRange(1, 7)) {
-        for (const lugar of core.getRange(fila, 7)) {
-          core.getItemAt(core.everyThing(Columna), position(lugar))?.append(this.reserva.lastItem!)
-          if (lugar === fila) core.getItemAt(core.everyThing(Columna), position(lugar))?.lastItem?.voltearBocaArriba()
-          await core.pauseFor(50, "msec")
-        }
+    // la primera carta de cada fila cae boca abajo, y se voltea donde queda
+    for (const fila of core.getRange(1, 7)) {
+      for (const lugar of core.getRange(fila, 7)) {
+        core.getItemAt(core.everyThing(Columna), position(lugar))?.append(this.reserva.lastItem!)
+        if (lugar === fila) core.getItemAt(core.everyThing(Columna), position(lugar))?.lastItem?.voltearBocaArriba()
+        await core.pauseFor(50, "msec")
       }
+    }
 
-      await this.robarDeLaReserva()
-    }
-    finally {
-      core.stopProcess("repartir_las_cartas")
-    }
+    await this.robarDeLaReserva()
   }
 
   async empezarElJuego() {
@@ -1084,15 +1070,15 @@ export class Solitario extends App {
           <es-elemento>{`Movimientos: ${this.movimientos}`}</es-elemento>
           <es-elemento>{`Puntos: ${this.puntuación}${this.pista}`}</es-elemento>
           <es-menu posicion="derecha">
-            <es-elemento aria-label="Jugar solo" onClick={async () => await this.jugarSolo()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Jugar solo" onClick={core.pressed(this, async () => await this.jugarSolo())} style="cursor:pointer;user-select:none">
               <es-icono name="fast forward" />
               <es-emergente etiqueta="Jugar solo" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Trampa" onClick={async () => await this.hacerTrampa()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Trampa" onClick={core.pressed(this, async () => await this.hacerTrampa())} style="cursor:pointer;user-select:none">
               <es-icono name="eye" />
               <es-emergente etiqueta="Trampa" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Reiniciar" onClick={async () => await this.empezarElJuego()} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Reiniciar" onClick={core.pressed(this, async () => await this.empezarElJuego())} style="cursor:pointer;user-select:none">
               <es-icono name="redo" />
               <es-emergente etiqueta="Reiniciar" invertido={true} tamano="pequeño" />
             </es-elemento>
@@ -1196,7 +1182,7 @@ core.heading("Jugar una carta:  qué hace un clic o un arrastre")
 core.heading("Inicio")
 //## Inicio
 core.console.log(solitario)
-solitario.empezarElJuego()
+core.holdWhile(() => solitario.empezarElJuego())
 if (!core.isCarryingOver) solitario.start()
 
 core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están sus cartas")

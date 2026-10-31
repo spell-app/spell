@@ -126,6 +126,9 @@ const BUILT_IN_KINDS: Record<P.Datatype, string | undefined> = {
  */
 export const LOOSE_CORE_CALL = /^!|^typeof |\s(?:===|!==|instanceof)\s/
 
+/** A drawing's attributes that are a person's press, a handler written `core.pressed(...)`:  `JSWriter.pressedHandler()`. */
+export const PRESS_ATTRIBUTES = /^on(?:Click|DoubleClick|Dblclick|ContextMenu|Auxclick)$/i
+
 /**
  * `text`, a piece of code, without what's inside its brackets:  its top level,
  * e.g. `core.filter` for `core.filter(xs, (x) => x === y)`.

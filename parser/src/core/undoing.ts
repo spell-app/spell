@@ -85,7 +85,8 @@ export class UndoHistory extends UndoStack {
    * - `undoneAs`:  ONE step, open until `act` returns, or until its promise settles (`transaction()`).
    * - `cantBeUndone`:  nothing it changes is recorded until it's done.
    *   Then `"clears history"` forgets every step, even if it threw.
-   * - Both kinds count work begun while they wait as theirs:  a click while a deal waits joins the deal.
+   * - Both kinds count work begun while they wait as theirs:  what isn't queued (`ActionQueue`), e.g. a drag's move
+   *   while a deal waits, joins the deal.  A click isn't:  it waits its turn, a step of its own.
    */
   run<T>(info: ActionInfo, act: () => T): T {
     if (info.undoneAs !== undefined) return this.transaction(info.undoneAs, act)

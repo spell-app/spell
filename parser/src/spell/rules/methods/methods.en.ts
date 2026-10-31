@@ -725,31 +725,11 @@ methods.addRule(CreateAnimation, {
       tests: [
         {
           input: "animation deal the cards",
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {}",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
+          js: "export async function dealTheCards() {}"
         },
         {
           input: ["animation deal the cards", "\tpause for 10 seconds"],
-          js: [
-            "export async function dealTheCards() {",
-            '  if (core.processIsRunning("deal_the_cards")) return',
-            '  core.startProcess("deal_the_cards", "EXCLUSIVE")',
-            "  try {",
-            '    await core.pauseFor(10, "seconds")',
-            "  }",
-            "  finally {",
-            '    core.stopProcess("deal_the_cards")',
-            "  }",
-            "}"
-          ]
+          js: ["export async function dealTheCards() {", '  await core.pauseFor(10, "seconds")', "}"]
         }
       ]
     }
@@ -1202,3 +1182,4 @@ methods.addRule(ActionDetail, { syntax: "enabled when {enabled:expression}" })
 methods.addRule(ActionDetail, { syntax: "selected when {selected:expression}" })
 methods.addRule(ActionDetail, { syntax: "undone as {undoneAs:text}" })
 methods.addRule(ActionDetail, { syntax: "icon {icon:text}" })
+methods.addRule(ActionDetail, { syntax: "(replacesLast:a new one replaces the last one)" })

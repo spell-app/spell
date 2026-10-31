@@ -2,7 +2,7 @@
 
 exports[`testing spell module methods, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
-  "action_detail": "keys?|enabled?|selected?|undoneAs?|icon?",
+  "action_detail": "keys?|enabled?|selected?|undoneAs?|replacesLast?|icon?",
   "bare_type_arg": "type",
   "create_animation": "asAnimation|signature|body?",
   "create_hook": "signature|body?",

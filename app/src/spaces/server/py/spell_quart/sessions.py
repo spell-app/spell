@@ -15,6 +15,8 @@ async def ws():
 - The program's own start runs with its pauses skipped:  no page draws it yet, so they'd only delay the first one.
 - Each page, a tab, gets the whole state when it opens, then a patch after each of its messages,
   and at each pause (`core.before_pause`):  so a game animates.
+- What a person pressed runs one at a time, through the visitor's queue (`PageSession.enter()`):
+  the loop goes on reading, so a repeat is ignored, and only the latest click waits.
 - A message that fails is logged, and the page goes on:
   it's sent `{"error": "ValueError: ...", "message": {...}}`, which its console shows as `< ERROR  >`.
 """
@@ -121,6 +123,19 @@ class SpellSessions:
             try:
                 while True:
                     message = json.loads(await socket.receive())
+                    if page.is_action(message):
+                        # through the queue, not waited for here:  the next click must be read while this one runs
+
+                        async def ended(error: BaseException | None, message: dict[str, Any] = message) -> None:
+                            if error:
+                                log.error("spell_quart:  the page's message %r failed", message, exc_info=error)
+                                await send(
+                                    json.dumps({ERROR_KEY: f"{type(error).__name__}: {error}", "message": message})
+                                )
+                            await visit.send_changes()
+
+                        page.enter(message, ended)
+                        continue
                     try:
                         await page.run_async(message)
                     except Exception as error:

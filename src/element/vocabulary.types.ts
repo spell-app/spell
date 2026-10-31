@@ -238,17 +238,7 @@ export type AttributeReplacement =
  * - `thing`:  a nested thing, with its own `attributesOf`
  * - `data`:  anything else (JSON), edited as text
  */
-export type ValueType =
-  | "text"
-  | "number"
-  | "boolean"
-  | "date"
-  | "choice"
-  | "icon"
-  | "sides"
-  | "list"
-  | "thing"
-  | "data"
+export type ValueType = "text" | "number" | "boolean" | "date" | "choice" | "icon" | "sides" | "list" | "thing" | "data"
 
 /**
  * What a property editor reads (`<ui-property-editor schema>`):  a thing's name and its attributes.

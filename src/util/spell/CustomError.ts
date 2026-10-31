@@ -54,6 +54,12 @@ export class UIError extends CustomError {
 }
 
 /**
+ * A piece of work was called off:  the sentinel of a cancel, which nothing reports (WWOD §5).
+ * - e.g. an action canceled at its next wait (`core.cancelActions()`).
+ */
+export class CanceledError extends CustomError {}
+
+/**
  * Props for `CustomError` and subclasses.
  * - None are required at the type level, but `message` should always be set in practice.
  */

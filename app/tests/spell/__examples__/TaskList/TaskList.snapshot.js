@@ -207,7 +207,7 @@ export class TaskList extends App {
             slot: "action",
             color: "primary",
             disabled: () => this.draft === "",
-            onClick: () => this.addTheDraft(),
+            onClick: core.pressed(this, () => this.addTheDraft()),
             style: "cursor:pointer;user-select:none"
           }, "Add")
         )

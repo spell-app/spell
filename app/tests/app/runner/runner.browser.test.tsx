@@ -649,6 +649,24 @@ describe("compiled spell draws with Solid", () => {
     expect(printed).not.toContain("test counting")
   })
 
+  test("`Solitaire`'s clicks during its deal wait their turn, and the board stays whole (epic `language`, Q6)", async () => {
+    const { host } = await mountSettable(await solitaireSource())
+    const tableaus = () => [...host.querySelectorAll<HTMLElement>("test-project-tableau")]
+    const stock = () => host.querySelector<HTMLElement>("test-project-stock-pile")!
+    const discards = () => host.querySelector<HTMLElement>("test-project-discard-pile")!
+    await waitFor(() => (host.querySelector("test-project-stock-pile")?.children.length ?? 0) > 0)
+    // mid-deal:  three clicks on the stock's card, each a person's, the last one kept
+    for (let click = 0; click < 3; click++) {
+      const card = stock().lastElementChild as HTMLElement
+      card.shadowRoot?.querySelector<HTMLElement>("[part=back]")?.click()
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length >= 1, 10_000)
+    await ElementFixture.settle(host)
+    expect(tableaus().map((tableau) => tableau.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
+    expect(consoleText()).not.toContain("failed")
+  })
+
   test("`Solitaire` played, then its app's own file edited:  a fresh game, as Restart deals (P17)", async () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)
@@ -656,7 +674,7 @@ describe("compiled spell draws with Solid", () => {
     const tableaus = () => [...host.querySelectorAll<Element>("test-project-tableau")]
     const stock = () => host.querySelector<Element>("test-project-stock-pile")!
     const discards = () => host.querySelector<Element>("test-project-discard-pile")!
-    // dealt, and the deal's own play from the stock done:  it's an animation, which ignores a click while it runs
+    // dealt, and the deal's own play from the stock done:  a click while it runs would wait its turn
     await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
     await ElementFixture.settle(host)
     ;(stock().lastElementChild as HTMLElement).shadowRoot!.querySelector<HTMLElement>("[part=back]")!.click()
@@ -665,8 +683,8 @@ describe("compiled spell draws with Solid", () => {
 
     // Solitaire's own file, which says `start a new game`:  a new score to start from
     const edited = solitaire.compiled!.replace(
-      "solitaire.startANewGame()\n",
-      "solitaire.score = 1\nsolitaire.startANewGame()\n"
+      "core.holdWhile(() => solitaire.startANewGame())\n",
+      "solitaire.score = 1\ncore.holdWhile(() => solitaire.startANewGame())\n"
     )
     expect(edited).not.toBe(solitaire.compiled)
     setSource({ ...solitaire, compiled: edited })

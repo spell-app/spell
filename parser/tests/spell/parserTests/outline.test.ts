@@ -1175,8 +1175,10 @@ describe("outline style", () => {
         "\t- to draw it:",
         '\t\treturn <div><b onClick={print 1}/><i onClick={print 2} style="color: red"/><u/></div>'
       ])
-      expect(js).toContain('h("b", { onClick: () => core.console.log(1), style: "cursor:pointer;user-select:none" })')
-      expect(js).toContain('h("i", { onClick: () => core.console.log(2), style: "color: red" })')
+      expect(js).toContain(
+        'h("b", { onClick: core.pressed(this, () => core.console.log(1)), style: "cursor:pointer;user-select:none" })'
+      )
+      expect(js).toContain('h("i", { onClick: core.pressed(this, () => core.console.log(2)), style: "color: red" })')
       expect(js).toContain('h("u")')
     })
 

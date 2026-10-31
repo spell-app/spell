@@ -29,7 +29,7 @@ export class Counter extends View {
   //## drawing:  a button showing its count;  a click counts
   @drawn draw() {
     return (
-      <ui-button class="Counter" onClick={() => this.increment()} style="cursor:pointer;user-select:none">
+      <ui-button class="Counter" onClick={core.pressed(this, () => this.increment())} style="cursor:pointer;user-select:none">
         {`Count: ${this.count}`}
       </ui-button>
     )

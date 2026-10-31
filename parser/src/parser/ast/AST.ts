@@ -1801,6 +1801,7 @@ export type ASTTypeDescriptionProps = Prettify<{
 
 /** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
 export type ASTDescriptionValue =
+  | true
   | string
   | string[]
   | { member: string }

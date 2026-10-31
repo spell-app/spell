@@ -683,44 +683,15 @@ methodsEs.addRule(CreateAnimation, {
       tests: [
         {
           input: "animación repartir las cartas",
-          js: [
-            "export async function repartirLasCartas() {",
-            '  if (core.processIsRunning("repartir_las_cartas")) return',
-            '  core.startProcess("repartir_las_cartas", "EXCLUSIVE")',
-            "  try {}",
-            "  finally {",
-            '    core.stopProcess("repartir_las_cartas")',
-            "  }",
-            "}"
-          ]
+          js: "export async function repartirLasCartas() {}"
         },
         {
           input: "crear animacion repartir las cartas",
-          js: [
-            "export async function repartirLasCartas() {",
-            '  if (core.processIsRunning("repartir_las_cartas")) return',
-            '  core.startProcess("repartir_las_cartas", "EXCLUSIVE")',
-            "  try {}",
-            "  finally {",
-            '    core.stopProcess("repartir_las_cartas")',
-            "  }",
-            "}"
-          ]
+          js: "export async function repartirLasCartas() {}"
         },
         {
           input: ["animación repartir las cartas", "\tpausar 10 segundos"],
-          js: [
-            "export async function repartirLasCartas() {",
-            '  if (core.processIsRunning("repartir_las_cartas")) return',
-            '  core.startProcess("repartir_las_cartas", "EXCLUSIVE")',
-            "  try {",
-            '    await core.pauseFor(10, "seconds")',
-            "  }",
-            "  finally {",
-            '    core.stopProcess("repartir_las_cartas")',
-            "  }",
-            "}"
-          ]
+          js: ["export async function repartirLasCartas() {", '  await core.pauseFor(10, "seconds")', "}"]
         }
       ]
     }
@@ -1130,4 +1101,5 @@ methodsEs.addRule(ActionDetail, {
 methodsEs.addRule(ActionDetail, { syntax: "activa cuando {enabled:expression}" })
 methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:expression}" })
 methodsEs.addRule(ActionDetail, { syntax: "se deshace como {undoneAs:text}" })
+methodsEs.addRule(ActionDetail, { syntax: "(replacesLast:uno nuevo reemplaza al anterior)" })
 methodsEs.addRule(ActionDetail, { syntax: "icono {icon:text}" })
