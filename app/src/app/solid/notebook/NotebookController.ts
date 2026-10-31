@@ -2,8 +2,9 @@ import { createSignal, runWithOwner, type Accessor } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { LoadableFile } from "spell/util"
+import { pollWhileVisible } from "spell/util/polling"
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { after, every } from "spell/element"
+import { after } from "spell/element"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
@@ -569,12 +570,11 @@ export class NotebookController {
    * and hand a new text to `outsideChange()`.
    * - Never while a save of ours is on its way:  the file is about to be ours.
    * - Returns what stops it.
-   * - SEE:  the kit's coming `pollWhileVisible()` (coherence sweep 2, #12):  this poll moves onto it once it's there.
    */
   watchFile(): () => void {
-    return every(FILE_POLL, () => {
-      if (document.visibilityState !== "visible" || this.pendingSave || this.saving()) return
-      void this.readFile()
+    return pollWhileVisible(FILE_POLL, () => {
+      if (this.pendingSave || this.saving()) return
+      return this.readFile()
     })
   }
 

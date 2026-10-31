@@ -16,6 +16,9 @@ import {
 /** How long after the last change a change that's in no group is sent, ms:  a form's typing goes out as one. */
 const PENDING_WAIT_MS = 500
 
+/** How many times a change refused as out of date is merged and sent again, before it counts as refused. */
+const MOST_MERGES = 3
+
 /** The kinds of `PlaceError` that are an answer:  the outcome is known, so sending it again won't help. */
 const KNOWN_OUTCOMES = new Set<PlaceError["kind"]>(["refused", "not found", "out of date"])
 
@@ -71,6 +74,31 @@ export type PlaceWriteFailure = {
   retry(): void
 }
 
+/**
+ * Someone else saved this field while my change was on its way, and my value was kept:  what's lost is `theirs`.
+ * - `Places.onConflict()` hears it, for a notice.  Nothing's undone:  it's for a person to look at.
+ */
+export type PlaceConflict = {
+  /** The place's name. */
+  placeName: string
+  /** The collection. */
+  collection: string
+  /** The type it's cached under. */
+  type?: string
+  /** The thing's id. */
+  id: string
+  /** The field. */
+  field: string
+  /** What the field held when I changed it. */
+  was: unknown
+  /** What I changed it to:  what it holds now. */
+  mine: unknown
+  /** What someone else changed it to:  the losing text, kept here. */
+  theirs: unknown
+  /** Put theirs back, as a new change. */
+  useTheirs(): void
+}
+
 /** An action's changes, shown at once and held until it ends:  `PendingChanges.startGroup()`. */
 export type PendingGroup = {
   /** The action ended:  its changes go out together. */
@@ -88,6 +116,7 @@ export type PendingGroup = {
  *   - it's confirmed:  it's gone, and what the place answered is told to whoever shows it
  *   - no answer (`fetch` failed, the answer was lost):  the outcome is unknown, so it resends with the SAME id
  *   - the place says no (`KNOWN_OUTCOMES`):  it's dropped, put back to what it `was`, healed, and a failure raised
+ *   - the place says it's out of date:  it's merged field by field, and sent again (`mergedAndSent()`)
  * - What's pending sits on top of what's read (`replayOn()`), so a read never takes back your own write.
  * - Undo needs no second path:  it's just another write, heard here.
  *   - A field written back to what it `was`, before that change has left, drops the change.
@@ -121,6 +150,7 @@ export class PendingChanges {
     this.places = places
     this.queue = new SaveQueue({
       save: (options) => this.send(options),
+      onChange: () => this.stateListeners.forEach((listener) => listener()),
       wait,
       ...(retry !== undefined && { retry }),
       ...(keepAs !== undefined && { key: `${PENDING_STORE}:${keepAs}/${placeName}` }),
@@ -134,6 +164,14 @@ export class PendingChanges {
   get changes(): readonly PendingChange[] {
     return this.pending
   }
+
+  /** Hear where saving stands changing (`queue.state`, `queue.text`), for what shows it.  Returns what stops it. */
+  onStateChange(listener: () => void): () => void {
+    this.stateListeners.add(listener)
+    return () => this.stateListeners.delete(listener)
+  }
+  /** Who hears where saving stands. */
+  private readonly stateListeners = new Set<() => void>()
 
   /** Is anything not yet confirmed? */
   get hasPending(): boolean {
@@ -194,6 +232,7 @@ export class PendingChanges {
     const replaces = earlier && earlier.group === group
     if (replaces) this.remove([earlier])
     const first = replaces ? earlier.was : was
+    const version = replaces ? earlier.version : this.versionOf(collection, id)
     this.pending.push({
       changeId: newChangeId(),
       kind: "update",
@@ -202,6 +241,7 @@ export class PendingChanges {
       id,
       field,
       fields: { [field]: value },
+      ...(version !== undefined && { version }),
       ...(first !== undefined && { was: first }),
       ...(group !== undefined && { group })
     })
@@ -328,9 +368,11 @@ export class PendingChanges {
 
   /**
    * Send `batch`, and deal with how it ended -- see the class.
+   * - Answers whether the place took it.
+   * - `merges`:  how many times it's been merged already.
    * - throws what the place threw, when the outcome is unknown
    */
-  private async sendBatch(batch: PendingChange[], keepalive: boolean): Promise<void> {
+  private async sendBatch(batch: PendingChange[], keepalive: boolean, merges = 0): Promise<boolean> {
     const place = this.places.placeForOrDie(this.placeName)
     for (const change of batch) {
       change.hasLeft = true
@@ -341,9 +383,10 @@ export class PendingChanges {
       if (!place.apply) throw refusal(`Places:  "${this.placeName}" takes no changes`)
       const toSend = batch.map((change) => this.placeChangeFor(change, place))
       this.confirmed(batch, await place.apply(toSend, keepalive ? { keepalive } : {}))
+      return true
     } catch (error) {
       if (!isKnownOutcome(error)) throw error
-      await this.answeredNo(batch, error, place)
+      return await this.answeredNo(batch, error, place, keepalive, merges)
     } finally {
       batch.forEach(({ changeId }) => this.onTheirWay.delete(changeId))
     }
@@ -362,22 +405,87 @@ export class PendingChanges {
    * The place said no to `batch`.
    * - All of it, if it was one group on a place that does all or nothing.
    * - Else we can't tell which:  each is sent on its own, with the same id, so what was already made stays made once.
+   * - Out of date, on a place that checks versions:  merged, and sent again.
+   * - Answers whether the place took it in the end.
    */
-  private async answeredNo(batch: PendingChange[], error: PlaceError, place: Place): Promise<void> {
+  private async answeredNo(
+    batch: PendingChange[],
+    error: PlaceError,
+    place: Place,
+    keepalive: boolean,
+    merges: number
+  ): Promise<boolean> {
     const isWholeGroup = place.describe().atomic && batch[0]!.group !== undefined
     if (batch.length > 1 && !isWholeGroup) {
-      for (const change of batch) await this.sendBatch([change], false)
-      return
+      let isAllTaken = true
+      for (const change of batch) isAllTaken = (await this.sendBatch([change], false)) && isAllTaken
+      return isAllTaken
     }
     const [only] = batch
     // already gone is what a delete wanted
-    if (batch.length === 1 && only!.kind === "delete" && error.kind === "not found") return this.confirmed(batch, {})
-    this.refused(batch, error)
+    if (batch.length === 1 && only!.kind === "delete" && error.kind === "not found") {
+      this.confirmed(batch, {})
+      return true
+    }
+    const canMerge = error.kind === "out of date" && place.describe().versionCheck && merges < MOST_MERGES
+    if (canMerge && (await this.mergedAndSent(batch, place, keepalive, merges))) return true
+    if (this.pending.includes(only!)) this.refused(batch, error)
+    return false
+  }
+
+  /**
+   * `batch` was refused as out of date:  a three-way merge per field, with the latest row, then sent again (epic `data`, J1).
+   * - Each change names one field, and what it `was`, so that's all it takes:
+   *   - theirs is what it `was`, or what I wrote:  nobody disagrees
+   *   - else theirs and mine both changed it:  mine wins, and a conflict is raised once the place has taken it
+   * - Fields only they changed aren't in the change, so they stay theirs.  So nothing's lost but the one value, which the
+   *   conflict holds.
+   * - NOT `ContentMerge`, which merges lines of text:  a place's unit is a field.
+   * - Answers whether the place took it;  `false` for a thing that's gone, and for one still out of date after
+   *   `MOST_MERGES`, which end as a refusal.
+   * - throws what the place threw reading the latest:  the outcome's still unknown, so the queue tries again
+   */
+  private async mergedAndSent(
+    batch: PendingChange[],
+    place: Place,
+    keepalive: boolean,
+    merges: number
+  ): Promise<boolean> {
+    const { placeName } = this
+    const updates = batch.filter(({ kind, id }) => kind === "update" && id !== undefined)
+    const conflicts: PlaceConflict[] = []
+    for (const change of updates) {
+      const { collection, type, id, field, was } = change
+      const [theirRow] = await this.places.heal.latestRows(place, collection, [id!])
+      if (!theirRow) return false
+      change.version = place.versionOf?.(collection, id!)
+      if (change.version === undefined) delete change.version
+      const theirs = theirRow[field!]
+      const mine = change.fields?.[field!]
+      if (!isSameValue(theirs, was) && !isSameValue(theirs, mine)) {
+        const thing = { collection, ...(type !== undefined && { type }), id: id! }
+        conflicts.push({
+          placeName,
+          ...thing,
+          field: field!,
+          was,
+          mine,
+          theirs,
+          useTheirs: () => this.setField({ ...thing, field: field!, value: theirs, was: mine })
+        })
+      }
+      // what they changed shows now:  only my own fields are still mine
+      this.showAtOnce({ collection, ...(type !== undefined && { type }) }, this.replayOn(collection, [theirRow]))
+    }
+    const isTaken = await this.sendBatch(batch, keepalive, merges + 1)
+    if (isTaken) conflicts.forEach((conflict) => this.places.tellConflict(conflict))
+    return isTaken
   }
 
   /** The place took `batch`:  they're gone, and whoever shows them hears what it answered. */
   private confirmed(batch: PendingChange[], { rows = [] }: Partial<ApplyAnswer>): void {
     this.remove(batch)
+    this.followVersions(batch)
     this.keepCopy()
     const written = batch.filter(({ kind }) => kind !== "delete")
     const isByChange = rows.length === written.length
@@ -392,6 +500,30 @@ export class PendingChanges {
       const { collection, type } = change
       const replayed = this.replayOn(collection, [row])
       this.showAtOnce({ collection, ...(type !== undefined && { type }) }, replayed, { renamed })
+    }
+  }
+
+  /**
+   * What's still pending of a thing `batch` just changed was made from the version before:  my own write isn't news.
+   * - So it moves to the version that write made, rather than be refused, read and merged, one keystroke at a time.
+   */
+  private followVersions(batch: readonly PendingChange[]): void {
+    const place = this.places.placeFor(this.placeName)
+    if (!place?.versionOf) return
+    for (const { collection, id, version } of batch) {
+      if (id === undefined) continue
+      const now = place.versionOf(collection, id)
+      if (now === undefined) continue
+      for (const change of this.pending) {
+        if (
+          change.kind === "update" &&
+          change.collection === collection &&
+          change.id === id &&
+          change.version === version
+        ) {
+          change.version = now
+        }
+      }
     }
   }
 
@@ -500,6 +632,11 @@ export class PendingChanges {
   /** Is `change` in a group still open? */
   private isOpen({ group }: PendingChange): boolean {
     return group !== undefined && this.openGroups.has(group)
+  }
+
+  /** The version of this thing as its place last showed it:  what a change made now is made from. */
+  private versionOf(collection: string, id: string): string | undefined {
+    return this.places.placeFor(this.placeName)?.versionOf?.(collection, id)
   }
 
   /** Has `change` not left yet? */

@@ -103,6 +103,8 @@ function bucket(id: string): Bucket {
   }
   if (src.startsWith("icons/data/") || src.startsWith("icons/icon-packs/")) return "icons"
   if (src.startsWith("runtime/") && !/^runtime\/(load|runtime\.types)\.ts$/.test(src)) return "runtime"
+  // the kit's, since epic `data` P4, and still only in the lazy chunk:  `UI.api`
+  if (src === "util/Api.ts") return "runtime"
   if (src.startsWith("styles/themes/")) return "runtime"
   if (src.startsWith("styles/")) return "extra:styles"
   return "core"

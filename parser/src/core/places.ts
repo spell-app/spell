@@ -37,11 +37,18 @@
  * - Undo needs nothing here:  its put-back is a write like any other (`PendingChanges`).
  * - A place's answers, heals and put-backs come back through `Places.onRows()`, and change each thing in place.
  * - A refused write raises a notice, anywhere in the app:  Retry, or Show me.
+ * - A write merged over what someone else saved raises one too, holding what was lost:  Use theirs, or Show me.
  * - `draftOf()`:  a copy of a thing that takes changes and sends nothing, until it's saved.
  * - `saveNew()`:  a thing made here goes to a place, under its own id (`Thing.id`, made in the browser).
  */
 import { ITEMS_KEY, keysOf, TYPE_KEY, untrackCells } from "spell/util"
-import type { PendingChanges, PendingGroup, PlaceRowsChange, PlaceWriteFailure } from "spell/util/places/PendingChanges"
+import type {
+  PendingChanges,
+  PendingGroup,
+  PlaceConflict,
+  PlaceRowsChange,
+  PlaceWriteFailure
+} from "spell/util/places/PendingChanges"
 import type { PlaceCache } from "spell/util/places/PlaceCache"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
 import type { Places } from "spell/util/places/Places"
@@ -180,6 +187,7 @@ export class PlaceThings extends Loader {
       onPlaceWrite(PLACE_WRITES)
       places.onRows((change) => this.rowsChanged(change))
       places.onWriteFailed((failure) => this.writeFailed(failure))
+      places.onConflict((conflict) => this.merged(conflict))
     }
   }
 
@@ -397,6 +405,18 @@ export class PlaceThings extends Loader {
     ]
     const message = core.message("write-refused", { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
+  }
+
+  /** A merge kept this person's value over someone else's:  the notice, holding what was lost -- Use theirs, or Show me. */
+  private merged({ type, id, field, theirs, useTheirs }: PlaceConflict): void {
+    const thing = this.loaded.get(`${type}#${id}`)
+    const actions = [
+      { text: core.message("write-use-theirs"), click: useTheirs },
+      ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
+    ]
+    const lost = typeof theirs === "string" ? theirs : JSON.stringify(theirs)
+    const message = core.message("write-merged", { thing: `${type ?? ""} ${id}`.trim(), field, theirs: lost })
+    void core.notify(message, { class: "warning", actions })
   }
 
   /**

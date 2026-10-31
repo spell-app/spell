@@ -1,5 +1,6 @@
 // The runtime sits BELOW `core` (which re-exports its loader):  never the `spell/ui/core` entry, or Rolldown splits the
 // modules both reach into a chunk of their own (I16)
+import { Api } from "spell/util/Api"
 import { proto, Warnings } from "spell/ui/util"
 import { Vocabulary } from "spell/ui/vocabulary"
 import {
@@ -24,7 +25,6 @@ import {
   type ToastOptions,
   type VisibilityOptions
 } from "./runtime.types"
-import { Api } from "./Api"
 import { Browser } from "./Browser"
 import { CodeLanguages } from "./CodeLanguages"
 import { Focus } from "./Focus"

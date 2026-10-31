@@ -157,7 +157,11 @@ export type SortField = {
 export type PageAsk = {
   /** How many rows, at most. */
   size?: number
-  /** Where to start:  a `nextPage` the place answered with.  Left out:  the first page. */
+  /**
+   * Where to start:  the last answer's `nextPage`.  Left out:  the first page.
+   * - It means what that answer meant:  the place's own cursor, or a place in the list when the engine did the filtering
+   *   (`PlaceQuery`).  Hand it back as it is, and it comes out right either way.
+   */
   at?: string
 }
 
@@ -187,7 +191,7 @@ export type ListHandled = {
 export type ListAnswer = {
   /** The rows. */
   rows: PlaceRow[]
-  /** What to ask for next, as `PageAsk.at`.  Left out:  this is the last page. */
+  /** What to ask for next, as `PageAsk.at`:  to a reader, it means nothing else.  Left out:  this is the last page. */
   nextPage?: string
   /** Where the place stood when it answered:  for `changesSince()`, and a change's `version`. */
   version?: string
@@ -205,7 +209,10 @@ export type PlaceChange = {
   id?: string
   /** The fields written. */
   fields?: PlaceRow
-  /** The version this change was made from:  a place with `versionCheck` refuses it if the thing has moved on. */
+  /**
+   * The version this change was made from (`Place.versionOf()`):  a place with `versionCheck` refuses it, `"out of date"`,
+   * if the thing has moved on.  Only an update carries one:  a delete wins over what someone's editing.
+   */
   version?: string
   /**
    * Names this one change:  sent again with no answer, it has the same one, so a place that remembers them makes it once.
@@ -304,6 +311,11 @@ export type Place = {
   apply?(changes: readonly PlaceChange[], context: PlaceContext): Promise<ApplyAnswer>
   /** Run the operation it calls `name`, e.g. a GraphQL mutation. */
   call?(name: string, input: unknown, context: SelectingContext): Promise<unknown>
+  /**
+   * The version of this thing as this place last showed it:  what a change made now is made from.
+   * - Left out, or `undefined` for a thing it hasn't shown:  the change says nothing, and the last write wins.
+   */
+  versionOf?(collection: string, id: string): string | undefined
   /** Tell `onEvent` of each change to `target`.  Returns what stops it. */
   watch?(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */

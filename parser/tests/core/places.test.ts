@@ -704,6 +704,29 @@ describe("PlaceThings, actions", () => {
   })
 })
 
+describe("PlaceThings, merged", () => {
+  test("a write merged over someone else's keeps mine, and a notice holds theirs:  Use theirs works", async () => {
+    const { place, recipe, allSent, onPlace } = await writing({})
+    const notify = vi.spyOn(core, "notify").mockResolvedValue(undefined)
+    await place.getMany("recipes", ["r-1"])
+    recipe.title = "Mine"
+    await place.applyFromElsewhere([{ kind: "update", collection: "recipes", id: "r-1", fields: { title: "Theirs" } }])
+    await allSent()
+    await vi.waitFor(() => expect(notify).toHaveBeenCalledTimes(1))
+    expect(recipe.title).toBe("Mine")
+    const [message, options] = notify.mock.calls[0]!
+    expect(message).toBe("Recipe r-1's title also changed elsewhere.  Yours was kept;  theirs was:  Theirs")
+    expect(options!.class).toBe("warning")
+    expect(options!.actions!.map(({ text }) => text)).toEqual(["Use theirs", "Show me"])
+
+    options!.actions![0]!.click()
+    expect(recipe.title).toBe("Theirs")
+    await allSent()
+    expect((await onPlace()).title).toBe("Theirs")
+    notify.mockRestore()
+  })
+})
+
 describe("PlaceThings, refused", () => {
   test("it heals back to the place's copy, and a notice offers Retry and Show me, which work", async () => {
     const shown: object[] = []

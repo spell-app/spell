@@ -119,7 +119,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - Components call `UI.load()` on connect, which dynamic-imports this chunk once.
   - Services are classes:
     - `Browser`:  sniffing, and the `UI.browser.supports` flags
-    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`, `Api`
+    - `Keyboard`, `Overlays`, `Focus`, `Styles`, `Vocabulary`, `I18n`, `Transitions`, `Ids`, `Toasts`, `Modals`
+    - `Api` (`UI.api`):  the kit's, `spell/util/Api`, moved down for the places by epic `data` P4
     - `IconPacks` (`UI.icons`), `Sources` (`UI.sources`), `Themes` (`UI.themes`)
 - [`src/icons/`](src/icons/):  the icon PACK format, and the built-in packs.
   - the format:  `IconPackIndex`, `IconName`, `BuiltInPacks`

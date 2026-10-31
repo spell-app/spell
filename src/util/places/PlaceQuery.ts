@@ -21,7 +21,8 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  *   - A filter or a sort left:  it loads the place's pages here, up to a ceiling, then filters, sorts and slices them.
  * - What it expects to do comes from `describe()`, so what it asks the place holds what it'll need:
  *   a place that can't filter is asked for whole rows, with no page of its own.
- *   - Then `nextPage` is a place in the filtered list, not the place's own cursor.
+ *   - Then `nextPage` is a place in the filtered list, not the place's own cursor:  a reader only hands it back, and the
+ *     place's own cursors stay in here, walking its pages (a cursor-paged API fits).
  * - The ceiling is `PlaceCapabilities.ceiling`, over `DEFAULT_CEILING`:  past it, a `PlaceError` naming the place.
  * - A row keeps its id field through `select`:  it's what makes it one row, in `PlaceCache`.
  * - Stops between pages when `signal` aborts, even for a place that ignores it.
@@ -53,7 +54,7 @@ export class PlaceQuery {
    *   `PlaceError` over the ceiling, or `TypeError` for a page that isn't a place in the filtered list
    */
   async answer(signal: AbortSignal): Promise<ListAnswer> {
-    const first = await this.list(this.ask, signal)
+    let first = await this.list(this.ask, signal)
     const { filter, sort, page } = this.query
     const { handled } = first
     const isFiltering = !!filter && !!Object.keys(filter).length && !handled.filter
@@ -68,6 +69,11 @@ export class PlaceQuery {
       throw new TypeError(`PlaceQuery.answer():  page "${page!.at}" isn't a place in the list;  use its \`nextPage\``)
     }
     const end = page?.size === undefined ? undefined : start + page.size
+    // it said it could, and didn't:  what it answered is only one page, so start over from the place's first
+    if (this.ask.page) {
+      const { page: _page, ...unpaged } = this.ask
+      first = await this.list(unpaged, signal)
+    }
 
     ////// Every page it needs, each filtered as it comes
     const seen = { rows: 0, bytes: 0 }

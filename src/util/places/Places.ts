@@ -1,7 +1,7 @@
 import type { StorageLike } from "spell/util/persist/persist.types"
 import { untrackCells } from "spell/util/reactive"
 
-import { PendingChanges, type PlaceRowsChange, type PlaceWriteFailure } from "./PendingChanges"
+import { PendingChanges, type PlaceConflict, type PlaceRowsChange, type PlaceWriteFailure } from "./PendingChanges"
 import { PlaceCache } from "./PlaceCache"
 import { PlaceHeal } from "./PlaceHeal"
 import { PlaceReads } from "./PlaceReads"
@@ -30,6 +30,10 @@ export class Places {
   private rowListeners = new Set<(change: PlaceRowsChange) => void>()
   /** Who hears of a failed write. */
   private failureListeners = new Set<(failure: PlaceWriteFailure) => void>()
+  /** Who hears that a merge kept your value over someone else's. */
+  private conflictListeners = new Set<(conflict: PlaceConflict) => void>()
+  /** The conflicts raised with nobody listening yet:  a change left from the last visit, merged as this one opens. */
+  private unheardConflicts: PlaceConflict[] = []
   /** The failures raised with nobody listening yet:  a write left from the last visit, refused as this one opens. */
   private unheardFailures: PlaceWriteFailure[] = []
 
@@ -154,6 +158,23 @@ export class Places {
   tellWriteFailed(failure: PlaceWriteFailure): void {
     if (!this.failureListeners.size) this.unheardFailures.push(failure)
     for (const listener of this.failureListeners) listener(failure)
+  }
+
+  /**
+   * Hear each time a merge kept your value over what someone else saved:  what a notice is shown from, with what was lost.
+   * - Hears at once any raised before anyone listened.
+   * - Returns what stops it.
+   */
+  onConflict(listener: (conflict: PlaceConflict) => void): () => void {
+    this.conflictListeners.add(listener)
+    this.unheardConflicts.splice(0).forEach(listener)
+    return () => this.conflictListeners.delete(listener)
+  }
+
+  /** Raise `conflict`:  `PendingChanges` calls it. */
+  tellConflict(conflict: PlaceConflict): void {
+    if (!this.conflictListeners.size) this.unheardConflicts.push(conflict)
+    for (const listener of this.conflictListeners) listener(conflict)
   }
 
   ////////////////

@@ -152,6 +152,8 @@ export type TestCheck = {
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
  * | `write-refused` | the notice when a place refuses a change | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
+ * | `write-use-theirs` | that notice's button | |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -170,7 +172,9 @@ export const CORE_MESSAGES = {
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
   "write-retry": "Retry",
-  "write-show-me": "Show me"
+  "write-show-me": "Show me",
+  "write-merged": "{thing}'s {field} also changed elsewhere.  Yours was kept;  theirs was:  {theirs}",
+  "write-use-theirs": "Use theirs"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

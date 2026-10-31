@@ -1,6 +1,6 @@
 import type { PendingChange } from "./PendingChanges"
 import type { Places } from "./Places"
-import { idOfRow, type PlaceRow } from "./places.types"
+import { idOfRow, type Place, type PlaceRow } from "./places.types"
 
 /****************
  * ### `PlaceHeal`
@@ -30,10 +30,7 @@ export class PlaceHeal {
       const place = this.places.placeForOrDie(placeName)
       const { idOf } = place.describe()
       if (idOf === undefined) return false
-      const answered =
-        ids && place.getMany
-          ? await place.getMany(collection, ids, {})
-          : (await place.list(collection, {}, {})).rows.filter((row) => !ids || ids.includes(idOfRow(row, idOf) ?? ""))
+      const answered = await this.latestRows(place, collection, ids)
       const pending = this.places.pendingFor(placeName)
       const rows = pending.replayOn(collection, answered)
       const held = new Set(rows.map((row) => idOfRow(row, idOf)))
@@ -56,6 +53,17 @@ export class PlaceHeal {
       )
       return false
     }
+  }
+
+  /**
+   * What `place` holds now of `collection`:  every row, or only those of `ids`.
+   * - throws what the place threw
+   */
+  async latestRows(place: Place, collection: string, ids?: readonly string[]): Promise<PlaceRow[]> {
+    if (ids && place.getMany) return place.getMany(collection, ids, {})
+    const { idOf } = place.describe()
+    const { rows } = await place.list(collection, {}, {})
+    return rows.filter((row) => !ids || ids.includes(idOfRow(row, idOf) ?? ""))
   }
 
   /** Heal the things `changes` were to, collection by collection.  NEVER throws. */

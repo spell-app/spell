@@ -12,6 +12,7 @@ export function isAbortError(error: Error) {
  * - Use `isAbortError()` above to determine if the response was cancelled.
  * - `fetcher`:  the `fetch()` to call (a test's stub, a page's own);  default the global one.
  * - See https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+ * - SEE:  `Api` (`spell/util/Api`), which aborts with real signals:  what `$fetch()` should sit on later (epic `data` P4).
  * - We attempt to propagate the `.cancel()` method to subsequent promises made via `.then()`, `.catch()` etc.
  *   However, this propagation is fragile and in particular doesn't survive being returned by an `async` function.
  *

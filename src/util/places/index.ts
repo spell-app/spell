@@ -6,6 +6,7 @@
  * - `PlaceReads` shares one request between readers, and aborts it when the last one leaves.
  * - `PlaceQuery` does what a place can't, up to a ceiling.
  * - `MemoryPlace` and `DevicePlace` (this device, over preferences' `PrefPlace`) are the first two places.
+ * - `RestPlace` and `GraphPlace` reach a server, on `WebPlace`.
  * - `refs` names anything saved in text, `Recipe#r-12`.
  * - `SaveQueue`:  saving in the background, in order, until it goes through:  `DraftSaver`'s too, by file.
  * - `PendingChanges`:  every change made and not yet confirmed, on top of what's read.
@@ -29,3 +30,6 @@ export * from "./PendingChanges"
 export * from "./PlaceHeal"
 export * from "./MemoryPlace"
 export * from "./DevicePlace"
+export * from "./WebPlace"
+export * from "./RestPlace"
+export * from "./GraphPlace"

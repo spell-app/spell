@@ -116,6 +116,7 @@ export class MemoryPlace implements Place {
     const { select } = query
     const selecting = !!select && canDoAll(selectAbility, select)
     if (selecting) handled.select = true
+    for (const row of rows) this.noteShown(collection, row)
     return {
       rows: rows.map((row) => (selecting ? selected(row, select) : structuredClone(row))),
       ...(nextPage !== undefined && { nextPage }),
@@ -132,8 +133,23 @@ export class MemoryPlace implements Place {
   ): Promise<PlaceRow[]> {
     signal?.throwIfAborted()
     const rows = this.rowsOf(collection).filter((row) => ids.includes(this.idOf(row) ?? ""))
+    for (const row of rows) this.noteShown(collection, row)
     return rows.map((row) => (select ? selected(row, select) : structuredClone(row)))
   }
+
+  /** The version of this thing as it last showed it:  where it stood then. */
+  versionOf(collection: string, id: string): string | undefined {
+    return this.shown.get(`${collection}\n${id}`)
+  }
+
+  /** Note that `row` has been shown, as of now. */
+  private noteShown(collection: string, row: PlaceRow): void {
+    const id = this.idOf(row)
+    if (id !== undefined) this.shown.set(`${collection}\n${id}`, this.version)
+  }
+
+  /** Where it stood when each thing was last shown, by collection and id. */
+  private readonly shown = new Map<string, string>()
 
   /** Run the operation named `name`, on `input`.  - throws `PlaceError` if it has none by that name */
   async call(name: string, input: unknown, { signal }: SelectingContext = {}): Promise<unknown> {
@@ -161,18 +177,36 @@ export class MemoryPlace implements Place {
   async apply(changes: readonly PlaceChange[], { signal, identity }: PlaceContext = {}): Promise<ApplyAnswer> {
     signal?.throwIfAborted()
     const isNew = ({ changeId }: PlaceChange) => changeId === undefined || !this.changesMade.has(changeId)
-    if (this.capabilities.atomic) changes.filter(isNew).forEach((change) => this.checkChange(change, identity))
+    // what this one apply writes is no reason to refuse the rest of it:  two fields of one thing are made from one version
+    const writesBefore = this.history.length
+    if (this.capabilities.atomic) {
+      changes.filter(isNew).forEach((change) => this.checkChange(change, identity, writesBefore))
+    }
     const rows: PlaceRow[] = []
     for (const change of changes) {
       if (isNew(change)) {
-        this.checkChange(change, identity)
+        this.checkChange(change, identity, writesBefore)
         const made = this.makeChange(change)
         if (change.changeId !== undefined) this.changesMade.set(change.changeId, made)
       }
       const row = change.changeId === undefined ? this.lastMade : this.changesMade.get(change.changeId)
-      if (row) rows.push(structuredClone(row))
+      if (row) {
+        this.noteShown(change.collection, row)
+        rows.push(structuredClone(row))
+      }
     }
     return { rows, version: this.version }
+  }
+
+  /**
+   * Make these changes as someone else, on another device:  the version moves on, and nothing here has seen it.
+   * - What a test does to make a write out of date.
+   */
+  async applyFromElsewhere(changes: readonly PlaceChange[]): Promise<void> {
+    const shownBefore = [...this.shown]
+    await this.apply(changes)
+    this.shown.clear()
+    for (const [thing, version] of shownBefore) this.shown.set(thing, version)
   }
 
   /** Allowed, by default:  a subclass with its own rules overrides this. */
@@ -194,7 +228,7 @@ export class MemoryPlace implements Place {
    * Throw if `change` can't be made.
    * - throws `PlaceError`
    */
-  private checkChange(change: PlaceChange, identity: string | undefined): void {
+  private checkChange(change: PlaceChange, identity: string | undefined, writesBefore: number): void {
     const { kind, collection, id, fields, version } = change
     const row = id === undefined ? undefined : this.rowFor(collection, id)
     const question: WriteQuestion = { collection, kind, identity, ...(row && { row }) }
@@ -220,7 +254,7 @@ export class MemoryPlace implements Place {
     if (
       this.capabilities.versionCheck &&
       version !== undefined &&
-      this.lastWriteOf(collection, id!) > Number(version)
+      this.lastWriteOf(collection, id!, writesBefore) > Number(version)
     ) {
       throw new PlaceError(`MemoryPlace.apply():  "${id}" has changed since version ${version};  read it again`, {
         cause: { kind: "out of date" }
@@ -299,9 +333,10 @@ export class MemoryPlace implements Place {
     }
   }
 
-  /** The version of the last write to this thing:  0 if it hasn't changed since it was handed in. */
-  private lastWriteOf(collection: string, id: string): number {
-    return this.history.findLastIndex((event) => event.collection === collection && event.id === id) + 1
+  /** The version of the last write to this thing, of the first `writes`:  0 if it hasn't changed since it was handed in. */
+  private lastWriteOf(collection: string, id: string, writes: number): number {
+    const earlier = this.history.slice(0, writes)
+    return earlier.findLastIndex((event) => event.collection === collection && event.id === id) + 1
   }
 
   ////////////////
