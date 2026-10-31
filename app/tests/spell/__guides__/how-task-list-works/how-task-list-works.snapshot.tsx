@@ -127,13 +127,13 @@ export class TaskList extends App {
       <ui-container class="TaskList">
         <ui-menu appearance="secondary">
           <ui-item kind="header">{`${this.activeCount} to do`}</ui-item>
-          <ui-item selected={this.tasks.showing === "all"} onClick={() => (this.tasks.showing = "all")} style="cursor:pointer;user-select:none">
+          <ui-item selected={this.tasks.showing === "all"} onClick={() => (this.tasks.showing = "all")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             All
           </ui-item>
-          <ui-item selected={this.tasks.showing === "active"} onClick={() => (this.tasks.showing = "active")} style="cursor:pointer;user-select:none">
+          <ui-item selected={this.tasks.showing === "active"} onClick={() => (this.tasks.showing = "active")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             To do
           </ui-item>
-          <ui-item selected={this.tasks.showing === "done"} onClick={() => (this.tasks.showing = "done")} style="cursor:pointer;user-select:none">
+          <ui-item selected={this.tasks.showing === "done"} onClick={() => (this.tasks.showing = "done")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Done
           </ui-item>
         </ui-menu>

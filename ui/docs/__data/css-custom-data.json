@@ -11388,6 +11388,13 @@
       }
     },
     {
+      "name": ":state(app)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page>`:  `app`:  this page is an app.\n- `<ui-root>`:  `app`:  this page is an app."
+      }
+    },
+    {
       "name": ":state(attached)",
       "description": {
         "kind": "markdown",

@@ -215,7 +215,7 @@
     block-size: calc(
       var(--_ui-input-line-height) + 2 * var(--_ui-input-padding-block) + 2 * var(--_ui-input-border-width)
     );
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.input > input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
@@ -231,7 +231,7 @@
   .ui.input > input::-webkit-calendar-picker-indicator {
     padding: 0;
     opacity: var(--_ui-input-icon-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--_ui-input-duration) var(--ui-ease);
   }
 
@@ -327,7 +327,7 @@
     --_input-pad-block: 0;
     --_input-pad-start: 0;
     --_input-pad-end: 0;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.file.input > input[type="file"]::file-selector-button {
     margin-block: 0;
@@ -339,7 +339,7 @@
     font: inherit;
     font-weight: var(--ui-font-weight-bold);
     line-height: var(--_ui-input-line-height);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.file.input > input[type="file"]:is(:hover, :focus-visible)::file-selector-button {
     background: var(--ui-color-hover, var(--_ui-input-file-button-background-hover));

@@ -54,7 +54,7 @@ export class Card extends View {
       appearance: "basic",
       color: () => this.color,
       onClick: () => this.try(),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.name)
   }
 

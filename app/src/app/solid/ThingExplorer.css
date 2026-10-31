@@ -64,13 +64,13 @@
     }
 
     &.list > summary {
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
       color: var(--ui-text-muted);
     }
   }
 
   a.ThingValue {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     color: var(--ui-link);
 
     &:hover {
@@ -80,6 +80,6 @@
 
   /* Does an action which takes no arguments:  a `<ui-icon color="green">`, so no colour here. */
   ui-icon.perform::part(icon) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }

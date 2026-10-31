@@ -55,7 +55,7 @@ export class Carta extends View {
       apariencia: "básico",
       color: () => this.color,
       onClick: () => this.jugar(),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.nombre)
   }
 

@@ -1503,6 +1503,15 @@
         }
       }
     },
+    "cursors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control": {
+          "$ref": "#/definitions/value"
+        }
+      }
+    },
     "components": {
       "type": "object",
       "description": "a family's own tokens, under its name:  menu > radius is --ui-menu-radius",

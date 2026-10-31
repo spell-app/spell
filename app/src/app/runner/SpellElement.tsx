@@ -13,9 +13,9 @@ import { ActionMenus } from "./ActionMenus"
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
  * How a view's states look.
- * - A clickable thing (`:state(clickable)`):  the pointer cursor, unless its drawing says otherwise.
- * - A draggable thing:  the browser's grab cursor, grabbing while it's dragged,
- *   over its drawing's own `cursor` (e.g. a clickable card's pointer).
+ * - A clickable thing (`:state(clickable)`):  the cursor controls have (`--ui-control-cursor`), unless its drawing says otherwise
+ * - A draggable thing:  the browser's grab cursor (`--spell-drag-cursor` changes it), unless its drawing says otherwise.
+ *   While it's dragged, `Dragging` shows the closed hand over the whole page.
  *   And a finger drags it, rather than scrolling the page.
  * - A list that will take what's dragged over it glows, a soft purple halo outside and in, a little out from its edges:
  *   - drawn by its `::after`, over its items, so it never moves them
@@ -29,11 +29,10 @@ import { ActionMenus } from "./ActionMenus"
  *   `--spell-selected-outline` and `--spell-selected-outline-offset` change it.
  */
 const STATES_CSS = `
-  :host(:state(clickable)) { cursor: pointer; }
+  :host(:state(clickable)) { cursor: var(--ui-control-cursor, pointer); }
   :host(:state(clickable)), :host(:state(draggable)) { user-select: none; -webkit-user-select: none; }
   :host(:state(draggable)) { touch-action: none; }
-  :host(:state(draggable)), :host(:state(draggable)) * { cursor: grab !important; }
-  :host(:state(dragging)), :host(:state(dragging)) * { cursor: grabbing !important; }
+  :host(:state(draggable)) { cursor: var(--spell-drag-cursor, grab); }
   :host(:state(accepting-drop)) { position: relative; }
   :host(:state(accepting-drop))::after {
     content: "";
@@ -119,7 +118,7 @@ const STATES_CSS = `
  *   - A pile with no `dropped on it`:  the program hears `<thing>-drop` instead,
  *     e.g. `on card drop with a card and a pile` -- see `dropOn()`.
  *   - The web's own drag events say so as it goes:  `dragstart`, `dragenter`, `drop` ... (`Dragging`).
- *   - It shows the browser's grab cursor while it can be dragged, grabbing while it is (`STATES_CSS`).
+ *   - It shows the browser's grab cursor while it can be dragged, and the page the closed hand while it is (`STATES_CSS`).
  * - Reordering (P30):  `- its items can be reordered` lets people drag a list's items to new places in it.
  *   - The dragged items stay put, dimmed, while a line shows where they'd go;  a wait there moves them.
  *   - `immediately`:  no line, no wait, the items move as the pointer does.
@@ -344,7 +343,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return !!list && "items" in list && !!this.entry?.core.isAble(list, "droppable")
   }
 
-  /** Is it being dragged now?  Its cursor is grabbing meanwhile. */
+  /** Is it being dragged now? */
   @E.cssState("dragging")
   @E.state
   accessor isDragging = false

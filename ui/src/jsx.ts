@@ -8929,7 +8929,7 @@ export interface UIEmojiAttributes {
    */
   "prop:label"?: string
   /**
-   * The look:  `link` (clickable look:  a pointer cursor;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag.
+   * The look:  `link` (clickable look:  the cursor controls have;  the page adds the control).  It was the `link` switch, which can't stay an old name:  `link` is where a click goes now, on every tag.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
@@ -12381,7 +12381,7 @@ export interface UIIconAttributes {
    */
   "prop:padding"?: "none"
   /**
-   * The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, pointer cursor), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance="link"`, as `link` is where a click goes.
+   * The look, several words at once:  `outline` (the glyph's outlined drawing, Fomantic's `bell outline icon`;  no class of its own), `link` (clickable look:  dimmed until hovered, the cursor controls have), `circular` (inside a circular ring), `bordered` (inside a square ring).  Old names:  `outline`, `circular`, `bordered` written alone;  the old `link` switch is `appearance="link"`, as `link` is where a click goes.
    * - takes:  space-separated:  `outline` · `link` · `circular` · `bordered`
    */
   appearance?: string
@@ -19111,6 +19111,16 @@ export interface UIPageAttributes {
    */
   "prop:stackWith"?: "container" | "page"
   /**
+   * This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`).
+   * - takes:  flag (present / absent)
+   */
+  app?: boolean | ""
+  /**
+   * `app`, as the DOM element's property.
+   * @deprecated write `app` -- `prop:` stays only for compiled spell
+   */
+  "prop:app"?: boolean | ""
+  /**
    * Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).
    * - takes:  text
    */
@@ -25298,6 +25308,16 @@ export interface UIRootAttributes {
    * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
    */
   "prop:stackWith"?: "container" | "page"
+  /**
+   * This page is an app, not a document:  it starts with the arrow cursor and no text selection, so nothing is left to the browser's guess.  Text meant to be selected opts back in (`ui-selectable`).
+   * - takes:  flag (present / absent)
+   */
+  app?: boolean | ""
+  /**
+   * `app`, as the DOM element's property.
+   * @deprecated write `app` -- `prop:` stays only for compiled spell
+   */
+  "prop:app"?: boolean | ""
   /**
    * Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).
    * - takes:  text

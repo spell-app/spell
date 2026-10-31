@@ -53,13 +53,13 @@ export class TodosApp extends App {
             <ui-item kind="header">To Do:</ui-item>
             <ui-menu position="right">
               <ui-item>Show:</ui-item>
-              <ui-item onClick={() => (app.filter = "all")} selected={app.filter === "all"} style="cursor:pointer;user-select:none">
+              <ui-item onClick={() => (app.filter = "all")} selected={app.filter === "all"} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 All
               </ui-item>
-              <ui-item onClick={() => (app.filter = "active")} selected={app.filter === "active"} style="cursor:pointer;user-select:none">
+              <ui-item onClick={() => (app.filter = "active")} selected={app.filter === "active"} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 Active
               </ui-item>
-              <ui-item onClick={() => (app.filter = "completed")} selected={app.filter === "completed"} style="cursor:pointer;user-select:none">
+              <ui-item onClick={() => (app.filter = "completed")} selected={app.filter === "completed"} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 Completed
               </ui-item>
             </ui-menu>
@@ -80,7 +80,7 @@ export class TodosApp extends App {
                 <ui-input name="newTaskName" placeholder="New task name" label="New task:" />
               </ui-field>
               <ui-field>
-                <ui-button disabled={app.newTaskName === ""} onClick={() => createANewTask()} style="cursor:pointer;user-select:none">
+                <ui-button disabled={app.newTaskName === ""} onClick={() => createANewTask()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   Add Task
                 </ui-button>
               </ui-field>
@@ -90,16 +90,16 @@ export class TodosApp extends App {
           <br />
           <ui-menu inverted={true} color="grey">
             <ui-item kind="header">Test:</ui-item>
-            <ui-item onClick={() => createANewTask({ title: "Moar" })} style="cursor:pointer;user-select:none">
+            <ui-item onClick={() => createANewTask({ title: "Moar" })} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Add Item
             </ui-item>
-            <ui-item onClick={() => core.removeItemAt(app.tasks, 0)} style="cursor:pointer;user-select:none">
+            <ui-item onClick={() => core.removeItemAt(app.tasks, 0)} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Remove Item
             </ui-item>
-            <ui-item onClick={() => (core.getItemAt(app.tasks, 0)!.title = "New title")} style="cursor:pointer;user-select:none">
+            <ui-item onClick={() => (core.getItemAt(app.tasks, 0)!.title = "New title")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Change name
             </ui-item>
-            <ui-item onClick={() => core.removeWhere(app.tasks, (item: Task) => item.isComplete)} style="cursor:pointer;user-select:none">
+            <ui-item onClick={() => core.removeWhere(app.tasks, (item: Task) => item.isComplete)} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Remove Completed
             </ui-item>
           </ui-menu>

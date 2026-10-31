@@ -208,7 +208,7 @@ export class TaskList extends App {
             color: "primary",
             disabled: () => this.draft === "",
             onClick: () => this.addTheDraft(),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add")
         )
       ),

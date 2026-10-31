@@ -802,13 +802,13 @@ export class Solitaire extends App {
           <ui-item>Moves: {this.moves}</ui-item>
           <ui-item>Score: {this.score}{this.hint}</ui-item>
           <ui-menu position="right">
-            <ui-item aria-label="Auto play" title="Auto play" onClick={() => this.autoPlay()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Auto play" title="Auto play" onClick={() => this.autoPlay()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="fast forward" />
             </ui-item>
-            <ui-item aria-label="Cheat" title="Cheat" onClick={() => this.cheat()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Cheat" title="Cheat" onClick={() => this.cheat()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="eye" />
             </ui-item>
-            <ui-item aria-label="Restart" title="Restart" onClick={() => this.startANewGame()} style="cursor:pointer;user-select:none">
+            <ui-item aria-label="Restart" title="Restart" onClick={() => this.startANewGame()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="redo" />
             </ui-item>
           </ui-menu>

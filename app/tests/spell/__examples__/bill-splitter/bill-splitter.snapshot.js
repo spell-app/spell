@@ -60,7 +60,7 @@ export class Diner extends View {
           appearance: "basic",
           "aria-label": "Remove",
           onClick: () => this.remove(),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         })
       )
     )
@@ -150,15 +150,18 @@ export class BillSplitter extends App {
             labeled: "right"
           }),
           h("ui-buttons", { size: "small", appearance: "basic" },
-            h("ui-button", { onClick: () => (this.percent = 15), style: "cursor:pointer;user-select:none" },
-              "15%"
-            ),
-            h("ui-button", { onClick: () => (this.percent = 18), style: "cursor:pointer;user-select:none" },
-              "18%"
-            ),
-            h("ui-button", { onClick: () => (this.percent = 20), style: "cursor:pointer;user-select:none" },
-              "20%"
-            )
+            h("ui-button", {
+              onClick: () => (this.percent = 15),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "15%"),
+            h("ui-button", {
+              onClick: () => (this.percent = 18),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "18%"),
+            h("ui-button", {
+              onClick: () => (this.percent = 20),
+              style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+            }, "20%")
           )
         )
       ),
@@ -167,7 +170,7 @@ export class BillSplitter extends App {
         appearance: "basic",
         icon: "plus",
         onClick: () => this.addSomeone(),
-        style: "cursor:pointer;user-select:none"
+        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Add someone"),
       h("ui-segment",
         h("div", { class: "Sums" },

@@ -46,7 +46,11 @@ export class FlashCard extends View {
 
   /** one side at a time:  a click turns it over */
   draw() {
-    return h("div", { part: "card", onClick: () => this.turnOver(), style: "cursor:pointer;user-select:none" },
+    return h("div", {
+      part: "card",
+      onClick: () => this.turnOver(),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    },
       h("div", { part: "hint" }, () => this.side === "back" ? "What it means" : "Spanish"),
       h("div", { part: "word" }, () => this.isTurnedOver ? this.back : this.front)
     )
@@ -122,7 +126,7 @@ export class Quiz extends App {
         h("ui-item", { kind: "header" }, "Flash Cards"),
         h("ui-item", () => this.score),
         h("ui-menu", { position: "right" },
-          h("ui-item", { onClick: () => this.startOver(), style: "cursor:pointer;user-select:none" },
+          h("ui-item", { onClick: () => this.startOver(), style: "cursor:var(--ui-control-cursor,pointer);user-select:none" },
             h("ui-icon", { name: "redo" }),
             "Start over"
           )
@@ -130,21 +134,23 @@ export class Quiz extends App {
       ),
       () => core.drawThing(this.card),
       h("div", { class: "Answers" },
-        () => !this.card.isTurnedOver ? h("ui-button", { color: "primary", onClick: () => this.card.turnOver(), style: "cursor:pointer;user-select:none" },
-          "Show the answer"
-        ) : [
+        () => !this.card.isTurnedOver ? h("ui-button", {
+          color: "primary",
+          onClick: () => this.card.turnOver(),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Show the answer") : [
           h("ui-button", {
             color: "positive",
             icon: "check",
             onClick: () => this.sayIKnew(),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "I knew it"),
           h("ui-button", {
             color: "negative",
             appearance: "basic",
             icon: "close",
             onClick: () => this.sayIMissed(),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "I missed it")
         ]
       )

@@ -167,7 +167,7 @@ ui-item.ThemeMenu ui-theme-menu {
   border: none;
   border-radius: 50%;
   background: none;
-  cursor: pointer;
+  cursor: var(--ui-control-cursor);
 
   /* the letter in a circle, in the theme's primary colours:  a picture of it kept Spell's violet in every theme */
   & > .YouLetter {

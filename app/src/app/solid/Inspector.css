@@ -89,8 +89,7 @@
   }
   /* the caret, icon and title fold the card */
   & > h2 {
-    cursor: pointer;
-    user-select: none;
+    cursor: var(--ui-control-cursor);
   }
   & > h2 > ui-icon.InspectorCardFold {
     --ui-icon-width: 0.8em;
@@ -337,7 +336,7 @@
     padding-inline: calc(8px + var(--depth, 0) * 12px) 14px;
     font-size: 13px;
     white-space: nowrap;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
 
     &:hover {
       background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
@@ -458,13 +457,13 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     margin-right: -4px;
     font-size: 0.85em;
     opacity: 0.7;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   & .InspectorLetGo:hover {
     opacity: 1;
   }
   & > .InspectorPartTag.back {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     opacity: 0.75;
   }
   & > .InspectorPartTag.back:hover {
@@ -592,7 +591,7 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     position: absolute;
     inset-inline-end: 4px;
     font-size: 1em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }
 
@@ -600,4 +599,14 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 .Inspector ui-property.InspectorComputed.failed {
   opacity: 0.55;
   font-style: italic;
+}
+
+/*
+ * While Inspect app is on, the app's area shows a crosshair over everything:  a click selects, it doesn't press.
+ * - Through the tokens, which inherit into a drawn thing's and a widget's shadow root.
+ */
+[data-inspecting] {
+  --ui-control-cursor: crosshair;
+  --spell-drag-cursor: crosshair;
+  cursor: crosshair;
 }

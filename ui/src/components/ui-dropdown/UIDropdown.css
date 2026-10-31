@@ -171,7 +171,7 @@
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     text-align: start;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     outline: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -327,7 +327,7 @@
     border: 0;
     background: none;
     color: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     translate: 0 -50%;
     opacity: 0.5;
     transition: opacity var(--_ui-dropdown-duration) var(--ui-ease);
@@ -500,7 +500,7 @@
   .ui.inline.dropdown {
     display: inline-block;
     color: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.inline.dropdown > .text {
     font-weight: var(--ui-font-weight-bold);
@@ -565,7 +565,7 @@
     font-size: 1em;
     opacity: 0.5;
     vertical-align: -0.05em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--_ui-dropdown-duration) var(--ui-ease);
     appearance: none;
   }
@@ -592,7 +592,7 @@
     text-align: start;
     text-transform: none;
     box-shadow: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     -webkit-touch-callout: none;
   }
   .ui.dropdown .menu > .item.vertical {

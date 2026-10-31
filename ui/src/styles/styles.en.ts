@@ -396,6 +396,14 @@ export const disabledOpacity = 0.45
  */
 export const hoverDelay = 800
 
+/**
+ * The cursor over a control:  a button, a menu item, a tab (`--ui-control-cursor`).
+ * - `pointer`, as the web does;  a theme that wants a Mac's arrow sets `default` (Glass, and Fruity from it).
+ * - One value, inherited into every shadow root, so a page or theme changes it once.
+ * - NOT real links, which keep the hand, as a Mac app's do.
+ */
+export const controlCursor = "pointer"
+
 ////////////////
 // ## Layout
 ////////////////
@@ -694,7 +702,8 @@ export const themeTree = {
     duration: tokensFor(durations, "--ui-duration-"),
     ease: { ...tokensFor(easings, "--ui-ease-"), default: "--ui-ease" },
     "hover-delay": "--ui-hover-delay"
-  }
+  },
+  cursors: { control: "--ui-control-cursor" }
 } as const satisfies ThemeTree
 
 /** Scale `scale`'s steps, each the token `<prefix><step>`:  `tokensFor(sizes, "--ui-size-")`. */

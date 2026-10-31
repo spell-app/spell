@@ -849,6 +849,8 @@ function hasOwnHandler(element: Element): boolean {
 /** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and picked. */
 const HOVER_MARK = "data-inspect-hover"
 const PICKED_MARK = "data-inspect-picked"
+/** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
+const PICKING_MARK = "data-inspecting"
 /** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
 const INSET_MARK = "data-inspect-inset"
 
@@ -876,6 +878,8 @@ class Picker {
     Picker.stop()
     const stop = new AbortController()
     Picker.listening = stop
+    Picker.area = area
+    area.setAttribute(PICKING_MARK, "")
     const options = { capture: true, signal: stop.signal }
     area.addEventListener("pointermove", (event) => Picker.hover(Picker.partAt(event, area)), options)
     area.addEventListener("pointerleave", () => Picker.hover(undefined), options)
@@ -904,6 +908,8 @@ class Picker {
   static stop(): void {
     Picker.listening?.abort()
     Picker.listening = undefined
+    Picker.area?.removeAttribute(PICKING_MARK)
+    Picker.area = undefined
     Picker.hover(undefined)
   }
 
@@ -1019,6 +1025,8 @@ class Picker {
   private static selected: Element | undefined
   /** Stops the listeners, while listening. */
   private static listening: AbortController | undefined
+  /** The app's area it's listening on, marked `PICKING_MARK`. */
+  private static area: HTMLElement | undefined
 }
 
 /****************

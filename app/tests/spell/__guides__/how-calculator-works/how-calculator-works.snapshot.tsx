@@ -76,19 +76,19 @@ export class AddingMachine extends App {
         <ui-segment appearance="raised">
           <div class="Display">{!this.input ? this.total : this.input}</div>
           <div class="Keys">
-            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("1")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("1")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               1
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("2")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("2")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               2
             </ui-button>
-            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("5")} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} onClick={() => this.pressDigitOnAddingMachine("5")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               5
             </ui-button>
-            <ui-button fluid={true} color="primary" onClick={() => this.addTheInputToAddingMachine()} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="primary" onClick={() => this.addTheInputToAddingMachine()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               +
             </ui-button>
-            <ui-button fluid={true} color="negative" onClick={() => this.clear()} style="cursor:pointer;user-select:none">
+            <ui-button fluid={true} color="negative" onClick={() => this.clear()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               C
             </ui-button>
           </div>

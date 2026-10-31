@@ -164,7 +164,7 @@ export function NotebookPage(props: {
   const sections = () => sectionsOf(controller.cells())
   const pageTitle = () => controller.cells().find((each) => each.cell.title)?.cell.title
   return (
-    <div class="NotebookPage" ref={followWidth} onClick={followNotebookLinks}>
+    <div class="NotebookPage ui-selectable" ref={followWidth} onClick={followNotebookLinks}>
       <div class="NotebookScroller ui-docs-sections" id={ids.scroller}>
         <div class="NotebookColumns">
           <main class="NotebookMain" id={ids.main}>

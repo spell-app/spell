@@ -151,7 +151,7 @@ export class Themes {
    *   - Why the foundation too:  its tokens are worked out from the theme's (`--ui-primary-hover` ...),
    *     and a custom property's `var()` resolves where it's declared:  on `:root`, they'd keep the page's.
    * - NOT the theme's class-grammar rules (`.ui.button { ... }`):  those go on the whole page or nowhere.
-   * - NOT the scheme (`SCHEME_PROPERTIES`):  light or dark stays the page's, inherited.
+   * - NOT the scheme or the control cursor (`PAGE_PROPERTIES`):  they stay the page's, inherited.
    *   - The foundation's `:root { color-scheme: light dark }`, re-declared on `scope`, made it follow the OS:
    *     on a page set to dark under a light OS, the Inspector's tree read dark grey on near-black (epic `debut` I80).
    * - Throws a `TypeError` on an unknown name, as `load()`.
@@ -184,7 +184,7 @@ function rootRulesOn(rules: CSSRuleList, scope: string): string {
         .split(",")
         .map((selector) => selector.trim())
         .filter((selector) => ROOT_ONLY.test(selector))
-      const tokens = rule.style.cssText.replace(SCHEME_DECLARATIONS, "")
+      const tokens = rule.style.cssText.replace(PAGE_DECLARATIONS, "")
       if (selectors.length && tokens.trim())
         out.push(`${selectors.map((selector) => `${selector} ${scope}`).join(", ")} { ${tokens} }`)
     } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule) {
@@ -198,12 +198,14 @@ function rootRulesOn(rules: CSSRuleList, scope: string): string {
 }
 
 /**
- * What says light or dark, left to the page by `Themes.scopedTokens()`:  a scope re-declaring them would pick its
- * own scheme (the foundation's `light dark`:  the OS's), not the one the page was set to.
+ * What stays the page's, under `Themes.scopedTokens()`:
+ * - what says light or dark:  a scope re-declaring them would pick its own scheme
+ *   (the foundation's `light dark`:  the OS's), not the one the page was set to
+ * - the control cursor:  a panel wearing another theme's look still behaves as its page does
  */
-const SCHEME_PROPERTIES = ["color-scheme", "--ui-scheme"]
-/** `SCHEME_PROPERTIES`' declarations in a rule's `cssText` (`color-scheme: light dark; `). */
-const SCHEME_DECLARATIONS = new RegExp(`(?<=^|;\\s*)(?:${SCHEME_PROPERTIES.join("|")})\\s*:[^;]*;\\s*`, "g")
+const PAGE_PROPERTIES = ["color-scheme", "--ui-scheme", "--ui-control-cursor"]
+/** `PAGE_PROPERTIES`' declarations in a rule's `cssText` (`color-scheme: light dark; `). */
+const PAGE_DECLARATIONS = new RegExp(`(?<=^|;\\s*)(?:${PAGE_PROPERTIES.join("|")})\\s*:[^;]*;\\s*`, "g")
 
 /** A selector that is `:root` alone, perhaps with classes or states on it (`:root.ui-dark`). */
 const ROOT_ONLY = /^:root(?:[.:[][^\s>+~]*)?$/

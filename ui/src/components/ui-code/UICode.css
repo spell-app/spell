@@ -107,7 +107,7 @@
     color: var(--_ui-code-gutter-color);
     font: inherit;
     font-size: 0.875em;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.code .copy > svg {
     width: 1em;

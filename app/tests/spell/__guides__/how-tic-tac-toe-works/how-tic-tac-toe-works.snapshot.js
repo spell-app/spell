@@ -32,9 +32,11 @@ export class Square extends View {
 
   /** a click plays it */
   draw() {
-    return h("button", { part: "mark", onClick: () => this.play(), style: "cursor:pointer;user-select:none" },
-      () => this.mark
-    )
+    return h("button", {
+      part: "mark",
+      onClick: () => this.play(),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    }, () => this.mark)
   }
 
   //////////////////////

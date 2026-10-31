@@ -187,7 +187,7 @@ export class TaskList extends App {
             color: "primary",
             disabled: () => this.draft === "",
             onClick: () => sendCall("add_the_draft", [], this),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Add")
         )
       ),

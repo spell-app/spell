@@ -49,7 +49,7 @@
     --ui-checkbox-label-distance: 0;
   }
   :host(:state(inline-check)) .inline.field > .row > .label {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /* ## Compact:  the tip's icon at the text's size */

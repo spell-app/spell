@@ -27,9 +27,11 @@ export class Counter extends View {
 
   //## drawing:  a button showing its count;  a click counts
   draw() {
-    return h("ui-button", { class: "Counter", onClick: () => this.increment(), style: "cursor:pointer;user-select:none" },
-      () => `Count: ${this.count}`
-    )
+    return h("ui-button", {
+      class: "Counter",
+      onClick: () => this.increment(),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    }, () => `Count: ${this.count}`)
   }
 }
 

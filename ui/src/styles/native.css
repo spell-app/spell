@@ -17,6 +17,26 @@
 
 @layer ui.components {
   /*******************************
+           A page that's an app
+  *******************************/
+
+  /*
+   * `<ui-root app>`:  the arrow and no text selection, on the whole page so a body-level modal has them too.
+   * - The cursor inherits, into every shadow root:  a browser left to guess flips over each word.
+   * - Text someone may want to copy opts back in:  `.ui-selectable`, and these.
+   */
+  :root:has(ui-root:state(app)) {
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  :root:has(ui-root:state(app)) :where(ui-markdown, ui-message, ui-toast) {
+    cursor: auto;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /*******************************
        Native form controls
   *******************************/
 
@@ -68,7 +88,7 @@
     background-color: var(--ui-surface-strong);
     border: 0;
     border-radius: var(--ui-radius);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :where(ui-form, ui-field) :where(button):hover {
     color: var(--ui-text-selected);
@@ -559,7 +579,7 @@
     background-color: var(--ui-surface-strong);
     border: 0;
     border-radius: var(--ui-radius);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :where(.ui-native) :where(button, input:is([type="button"], [type="submit"], [type="reset"])):hover {
     background-color: oklch(from var(--ui-surface-strong) calc(l - 0.04) c h);
@@ -603,6 +623,6 @@
   }
   :where(.ui-native) :where(summary) {
     font-weight: var(--ui-font-weight-semibold);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }
