@@ -153,7 +153,7 @@
     transition-property: background-color, color, box-shadow, border-color;
   }
   .ui.search .prompt ~ .search.icon {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 
   /* Results:  hidden until open;  a popover in the top layer, anchored to the root. */
@@ -227,7 +227,7 @@
     font-size: 1em;
     line-height: var(--_ui-search-result-line-height);
     text-decoration: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.search > .results .result:last-child {
     border-bottom: none;

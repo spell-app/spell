@@ -307,7 +307,7 @@
 <!-- Interaction › Access created toast:  a toast, waited for until it's gone, then another -->
 <spell-view "gone in a second">
 	<action "show the toasts" description="A toast that goes after a second;  once it's gone, a toast saying so">
-		notify "I'll be gone in a second" for 1 second and wait
+		notify "I'll be gone in a second" for 1 second
 		notify "The first toast is gone"
 	</action>
 	<draw>

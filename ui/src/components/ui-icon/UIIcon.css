@@ -264,7 +264,7 @@
 
   /* Link:  dimmed until hovered. */
   span.ui.link:is(.icon, .icons):not(.disabled, .label) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     opacity: var(--_ui-icon-link-opacity);
     transition: opacity var(--_ui-icon-duration) var(--ui-ease);
   }

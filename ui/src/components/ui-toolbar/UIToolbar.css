@@ -91,6 +91,24 @@
     flex: 0 1 auto;
   }
   /*
+   * a header's row (`appearance="segmented header"`):  it takes the row, its items sharing it, its actions after them
+   * - the actions as quiet as its caret, each with room to press:  `--ui-toolbar-header-action-gap`
+   */
+  .ui.toolbar > .ui.segmented.header.menu:not([class*="fluid aligned"]) {
+    --_ui-menu-item-flex: 1 1 0;
+    flex: 1 1 auto;
+  }
+  .ui.toolbar:has(> .ui.segmented.header.menu) > .right {
+    --ui-icon-width: auto;
+    --ui-icon-distance: 0;
+    --ui-icon-link-opacity: 1;
+    gap: var(--ui-toolbar-header-action-gap, 10px);
+    margin-inline-start: 8px;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-menu-segmented-header-font-size, 13px);
+  }
+
+  /*
    * on a segmented track, a key's corners nest inside the track's (its radius less its border and padding),
    * as an end option's do:  a circle in a less round track was rounder than the corner it sits in
    * (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits");  a pill track's stays a disc
@@ -162,7 +180,7 @@
     font: inherit;
     color: var(--_ui-toolbar-button-color);
     background: var(--_ui-toolbar-button-background);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .ui.toolbar > .scroll.start {
     left: anchor(left);

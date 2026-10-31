@@ -14,6 +14,7 @@ import "spell/ui/components/ui-input"
 import "spell/ui/components/ui-slider"
 import "spell/ui/components/ui-checkbox"
 import "spell/ui/components/ui-form"
+import "spell/ui/components/ui-toolbar"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-panel/examples/elements/*.html", {
@@ -83,6 +84,82 @@ describe("<ui-panel> structure", () => {
 ////////////////
 // ## Folding
 ////////////////
+
+describe('<ui-panel appearance="pane">', () => {
+  /** A pane 400px wide and 200px tall, a segmented header toolbar in its actions. */
+  async function pane(attributes = "") {
+    const box = await ElementFixture.render(
+      `<div style="width: 400px; height: 200px"><ui-panel appearance="pane" collapsible fold-icon="start" ${attributes}>
+        <span slot="label" class="ui-visually-hidden">Views</span>
+        <ui-toolbar slot="actions" appearance="segmented link header" shrinkable aria-label="Views">
+          <ui-item selected>Views</ui-item><ui-item>Things</ui-item>
+          <ui-icon slot="right" name="eye slash" link label="Hide"></ui-icon>
+        </ui-toolbar>
+        <p>body</p>
+      </ui-panel></div>`
+    )
+    await ElementFixture.tick()
+    return box.querySelector<HTMLElement>("ui-panel")!
+  }
+
+  it("is the whole box:  no padding or edge, its bar 40px at the top, its content filling the rest", async () => {
+    const host = await pane()
+    expect(host.matches(":state(pane)")).toBe(true)
+    expect(part(host, "section").className).toContain("pane")
+    expect(getComputedStyle(part(host, "section")).paddingTop).toBe("0px")
+    expect(host.getBoundingClientRect().height).toBe(200)
+    const bar = part(host, "title").getBoundingClientRect()
+    expect(bar.height).toBe(40)
+    expect(bar.top).toBe(host.getBoundingClientRect().top)
+    const content = part(host, "content").getBoundingClientRect()
+    expect(Math.round(content.top)).toBe(Math.round(bar.bottom))
+    expect(Math.round(content.bottom)).toBe(Math.round(host.getBoundingClientRect().bottom))
+  })
+
+  it("its chevron, the toolbar's items and its actions share one centre line, the toolbar taking the row", async () => {
+    const host = await pane()
+    const bar = part(host, "title").getBoundingClientRect()
+    const toolbar = host.querySelector("ui-toolbar")!
+    await expect
+      .poll(() => toolbar.shadowRoot!.querySelector("[part~=menu]")!.getBoundingClientRect().height)
+      .toBeGreaterThan(0)
+    const middle = (element: Element) => {
+      const box = element.getBoundingClientRect()
+      return box.top + box.height / 2
+    }
+    const centre = bar.top + (bar.height - 1) / 2
+    expect(Math.abs(middle(part(host, "fold-icon")) - centre)).toBeLessThan(1)
+    expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=menu]")!) - centre)).toBeLessThan(1)
+    expect(Math.abs(middle(toolbar.shadowRoot!.querySelector("[part~=right]")!) - centre)).toBeLessThan(1)
+    expect(Math.round(toolbar.getBoundingClientRect().right)).toBe(Math.round(bar.right - 8))
+  })
+
+  it("closed, only the bar is left, with its toolbar and no hairline;  a click in the toolbar never closes it", async () => {
+    const host = await pane()
+    host.querySelector<HTMLElement>("ui-toolbar ui-item")!.click()
+    await ElementFixture.tick()
+    expect(host.matches(":state(collapsed)")).toBe(false)
+    part(host, "toggle").click()
+    await ElementFixture.tick()
+    expect(host.matches(":state(collapsed)")).toBe(true)
+    expect(part(host, "content").getAttribute("hidden")).toBe("until-found")
+    expect(getComputedStyle(part(host, "title")).borderBottomWidth).toBe("0px")
+    expect(host.querySelector("ui-toolbar")!.getBoundingClientRect().width).toBeGreaterThan(0)
+  })
+
+  it("is accessible, its fold button named by the hidden label", async () => {
+    const host = await pane()
+    expect(part(host, "toggle").getAttribute("aria-expanded")).toBe("true")
+    await expectAccessible(host.parentElement!)
+  })
+
+  it("only the panel takes the word", () => {
+    const words = (vocabulary: typeof sectionVocabulary | typeof panelVocabulary) =>
+      vocabulary.attributes.find((spec) => spec.name === "appearance")!.values as readonly string[]
+    expect(words(panelVocabulary)).toContain("pane")
+    expect(words(sectionVocabulary)).not.toContain("pane")
+  })
+})
 
 describe("<ui-panel> folding", () => {
   it("folds from its band:  the content hides, `:state(collapsed)`, `ui-closing`", async () => {

@@ -1054,6 +1054,38 @@
       transition-timing-function: var(--ui-ease-out);
     }
   }
+  /*
+   * ## Header (`appearance="segmented header"`):  a segmented control as the row of a pane's bar.
+   * - It has no track of its own:  the bar it sits in is the track, so the bar, its caret, these items and its
+   *   actions read as one thing rather than a capsule in a band (Owen:  "several concepts bolted together").
+   * - The raised thumb stays:  that's what says which is chosen.
+   * - Its items share the row's width evenly (a `<ui-toolbar>`'s too:  its sheet).
+   * - Tokens:  `--ui-menu-segmented-header-background` (a track after all), `-font-size`, `-item-padding`, `-item-color`, `-item-weight`.
+   */
+  .ui.segmented.header.menu {
+    --_ui-menu-segmented-header-background: var(--ui-menu-segmented-header-background, transparent);
+    --_ui-menu-segmented-header-font-size: var(--ui-menu-segmented-header-font-size, 13px);
+    --_ui-menu-segmented-header-item-padding: var(--ui-menu-segmented-header-item-padding, 0.5em 0.85em);
+    --_ui-menu-segmented-header-item-color: var(
+      --ui-menu-segmented-header-item-color,
+      var(--ui-text-dark, var(--ui-text-color))
+    );
+    --_ui-menu-segmented-header-item-weight: var(--ui-menu-segmented-header-item-weight, 500);
+    --_ui-menu-segmented-background: var(--_ui-menu-segmented-header-background);
+    --_ui-menu-segmented-border: 0 solid transparent;
+    --_ui-menu-segmented-padding: 0px;
+    --_ui-menu-segmented-radius: var(--ui-radius-pill, 9999px);
+    --_ui-menu-segmented-item-radius: var(--ui-radius-pill, 9999px);
+    --_ui-menu-segmented-item-padding: var(--_ui-menu-segmented-header-item-padding);
+    --_ui-menu-segmented-item-color: var(--_ui-menu-segmented-header-item-color);
+    --_ui-menu-item-weight: var(--_ui-menu-segmented-header-item-weight);
+    --_ui-menu-active-weight: var(--_ui-menu-segmented-header-item-weight);
+    --_ui-menu-item-flex: 1 1 0;
+    --_ui-menu-item-min-width: max-content;
+    width: 100%;
+    margin-block: 0;
+    font-size: var(--_ui-menu-segmented-header-font-size);
+  }
   .ui.segmented.toggles.menu {
     --_ui-menu-active-shadow: var(--_ui-menu-segmented-pressed-shadow);
     --_ui-menu-segmented-pressed-shadow: var(
@@ -1379,7 +1411,7 @@
   .ui.link.menu .item:hover {
     color: var(--_ui-menu-hover-color);
     background: var(--_ui-menu-hover-background);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-menu)) > :is(a, button).item:active,
   .ui.menu :is(a.item, button.item, .link.item):active,
@@ -1521,7 +1553,7 @@
     font-family: inherit;
     letter-spacing: inherit;
     appearance: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   @container style(--_menu-fit: overflow) {
     .ui.menu > .overflow.item {
@@ -1607,7 +1639,7 @@
     background: none;
     border: 0;
     appearance: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .overflow-menu > .row:hover,
   .overflow-menu > .row:focus-visible {

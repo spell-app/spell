@@ -155,7 +155,7 @@
     border: 0;
     background: none;
     color: var(--ui-text-muted);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .edge.start {
     inset-inline-start: 0;
@@ -652,7 +652,7 @@
     border-radius: 0.45em;
     background: none;
     color: var(--ui-text-muted);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   .toggle-all:hover {
     color: var(--ui-link, var(--ui-primary));

@@ -5931,6 +5931,41 @@
       }
     },
     {
+      "name": "--ui-menu-segmented-header-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `transparent`"
+      }
+    },
+    {
+      "name": "--ui-menu-segmented-header-font-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `13px`"
+      }
+    },
+    {
+      "name": "--ui-menu-segmented-header-item-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `0.5em 0.85em`"
+      }
+    },
+    {
+      "name": "--ui-menu-segmented-header-item-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-text-dark, var(--ui-text-color))`"
+      }
+    },
+    {
+      "name": "--ui-menu-segmented-header-item-weight",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `500`"
+      }
+    },
+    {
       "name": "--ui-menu-segmented-pressed-shadow",
       "description": {
         "kind": "markdown",
@@ -6572,6 +6607,27 @@
       "description": {
         "kind": "markdown",
         "value": "the box shadow\n\n`<ui-panel>`'s token.  Default:  `var(--spell-shadow-sm, var(--ui-shadow-raised))`"
+      }
+    },
+    {
+      "name": "--ui-panel-pane-bar-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `40px`"
+      }
+    },
+    {
+      "name": "--ui-panel-pane-bar-padding",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `8px`"
+      }
+    },
+    {
+      "name": "--ui-panel-pane-bar-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-panel>`'s token.  Default:  `none`"
       }
     },
     {
@@ -9893,6 +9949,13 @@
       }
     },
     {
+      "name": "--ui-toolbar-header-action-gap",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-toolbar>`'s token.  Default:  `10px`"
+      }
+    },
+    {
       "name": "--ui-transition-inverted-pulse",
       "description": {
         "kind": "markdown",
@@ -11385,6 +11448,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-shape>`:  Flipping.\n- `<ui-side>`:  Turning into view (set by the shape).\n- `<ui-transition>`:  An animation is running."
+      }
+    },
+    {
+      "name": ":state(app)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page>`:  `app`:  this page is an app.\n- `<ui-root>`:  `app`:  this page is an app."
       }
     },
     {

@@ -1208,6 +1208,23 @@
     },
     {
       "kind": "method",
+      "name": "warn",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "message"
+        },
+        {
+          "name": "okText"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Warn the person in a dialog, and wait until it's closed -- compiled from `warn \"Careful!\"` (`await`ed)."
+    },
+    {
+      "kind": "method",
       "name": "confirm",
       "of": "core",
       "module": "ui",
@@ -2281,6 +2298,33 @@
     },
     {
       "kind": "method",
+      "name": "together",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "...runs"
+        }
+      ],
+      "description": "Run each of `runs` at once, ending when they've all ended -- compiled from `at the same time:`, each its line."
+    },
+    {
+      "kind": "method",
+      "name": "eachTogether",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "description": "Call `method` for every item at once, ending when they've all ended -- a loop right in `at the same time:`."
+    },
+    {
+      "kind": "method",
       "name": "holdWhile",
       "of": "core",
       "module": "acting",
@@ -2459,6 +2503,55 @@
         }
       ],
       "description": "The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = \"game menu\"` (`- its menu bar is \"game menu\"`, spellx's `menu-bar=`).  `undefined` when it names none."
+    },
+    {
+      "kind": "method",
+      "name": "waitedValue",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "compute"
+        },
+        {
+          "name": "follows"
+        }
+      ],
+      "description": "The value of `thing`'s getter `name`, worked out by `compute`, which waits:  what a getter that waits compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "whileWaiting",
+      "of": "core",
+      "module": "waiting",
+      "params": [
+        {
+          "name": "read"
+        }
+      ],
+      "description": "`read`'s drawing, or a \"…\" until its first answer:  a value in a drawing that waits, `{the total}`."
+    },
+    {
+      "kind": "method",
+      "name": "answerOf",
+      "of": "core",
+      "module": "waiting",
+      "waits": true,
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "The answer of `thing`'s member `name`, once it has one:  what an action writes for reading what waits."
     },
     {
       "kind": "method",

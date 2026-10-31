@@ -7,8 +7,10 @@
 import { Negatable, Wording } from "spell/parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
+import { AtTheSameTime } from "./AtTheSameTime"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
+import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
@@ -58,6 +60,40 @@ _async.addRule(Pause, {
         [`pause for 500 msec"`, 'await core.pauseFor(500, "msec")'],
         [`pause for 10 ticks"`, 'await core.pauseFor(10, "ticks")'],
         [`pause for (10 + 10) sec`, 'await core.pauseFor(10 + 10, "sec")']
+      ]
+    }
+  ]
+})
+
+_async.addRule(AtTheSameTime, {
+  syntax: "at the same time :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["to do something", "\tat the same time:", "\t\tprint 1", "\t\tprint 2"],
+          js: [
+            "export function doSomething() {",
+            "  core.together(() => core.console.log(1), () => core.console.log(2))",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+_async.addRule(Meanwhile, {
+  syntax: "meanwhile :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["to do something", "\tmeanwhile print 1"],
+          js: ["export function doSomething() {", "  core.meanwhile(() => core.console.log(1))", "}"]
+        }
       ]
     }
   ]

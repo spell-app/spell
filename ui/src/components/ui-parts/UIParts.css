@@ -708,7 +708,7 @@
   .in-feed.meta > a {
     /* `text-light`, not Fomantic's 0.5 alpha (3.7:1 on white) */
     color: var(--ui-feed-meta-action-color, var(--ui-text-light));
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: color var(--ui-duration-fast) var(--ui-ease);
   }
   :host(:state(in-feed)) > .meta > ::slotted(a:hover),
@@ -792,7 +792,7 @@
     background: none;
     color: var(--ui-comment-action-color, var(--ui-text-unselected));
     font: inherit;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-comment)) > .actions > ::slotted(:is(a, button):last-child),
   .in-comment.actions > :is(a, button):last-child {
@@ -991,7 +991,7 @@
   :host(:state(in-list)) > a.header,
   a.in-list.header {
     color: var(--ui-link);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-list)) > a.header:hover,
   a.in-list.header:hover {
@@ -1098,7 +1098,7 @@
     font-size: 1em;
     line-height: 1;
     list-style: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
   :host(:state(in-accordion)) > .content,
   .in-accordion.content {

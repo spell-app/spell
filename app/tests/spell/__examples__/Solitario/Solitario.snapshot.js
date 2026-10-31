@@ -122,7 +122,7 @@ export class Carta extends View {
     return h("span", {
       part: "lados",
       onClick: core.pressed(this, () => trigger("clic-carta", { carta: this })),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     },
       h("es-texto", { part: "frente", color: () => this.color }, () => this.cara),
       h("es-texto", { part: "dorso", color: "azul" }, "🂠")
@@ -576,7 +576,7 @@ export class PilaDeReserva extends Pila {
     return h("div", {
       part: "marcador",
       onClick: core.pressed(this, async () => await solitario.robarDeLaReserva()),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, "🂠")
   }
 }
@@ -892,7 +892,7 @@ export class Solitario extends App {
           h("es-elemento", {
             "aria-label": "Jugar solo",
             onClick: core.pressed(this, async () => await this.jugarSolo()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "fast forward" }),
             h("es-emergente", { etiqueta: "Jugar solo", invertido: true, tamano: "pequeño" })
@@ -900,7 +900,7 @@ export class Solitario extends App {
           h("es-elemento", {
             "aria-label": "Trampa",
             onClick: core.pressed(this, async () => await this.hacerTrampa()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "eye" }),
             h("es-emergente", { etiqueta: "Trampa", invertido: true, tamano: "pequeño" })
@@ -908,7 +908,7 @@ export class Solitario extends App {
           h("es-elemento", {
             "aria-label": "Reiniciar",
             onClick: core.pressed(this, async () => await this.empezarElJuego()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "redo" }),
             h("es-emergente", { etiqueta: "Reiniciar", invertido: true, tamano: "pequeño" })

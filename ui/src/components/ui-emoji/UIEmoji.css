@@ -106,7 +106,7 @@
 
   /* Link:  a clickable look, unless disabled. */
   .ui.link.emoji:not(.disabled) {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }
 

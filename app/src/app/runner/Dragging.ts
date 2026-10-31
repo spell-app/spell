@@ -26,11 +26,27 @@ import { E } from "spell/ui/core"
  * - Escape cancels it (epic `debut` P27, Q47):  everything slides back, and its owner hears `onCancel`,
  *   as it does for a drag the browser takes away.
  *   - What moved is drawn again in its new list, and glides there from where it was dropped (`Glides`).
+ * - A mouse drag covers the whole page with the closed hand, whatever is under it (`DRAG_COVER`).
+ *   - A rule can't do that:  nothing in a page's sheets reaches into every shadow root,
+ *     and the code editor sets its own cursor.
  * - Plain DOM:  no Solid, no core.  Its owner hands it the element and what to do.
  ****************/
 export class Dragging {
   /** The drag in progress, if any:  a list under the pointer asks it what's coming. */
   static current: Dragging | undefined
+
+  /** What covers the page during a mouse drag, showing the closed hand:  made once, on the first use. */
+  private static get cover(): HTMLElement {
+    if (!Dragging.madeCover) {
+      Dragging.madeCover = document.createElement("div")
+      Dragging.madeCover.style.cssText = DRAG_COVER
+    }
+    return Dragging.madeCover
+  }
+  private static madeCover: HTMLElement | undefined
+
+  /** Was it pressed with a finger?  No cursor to show, so no cover. */
+  private readonly isTouch: boolean
 
   /** Start watching a press on `element`, `event` its `pointerdown`:  a drag once it moves far enough. */
   constructor(
@@ -38,6 +54,7 @@ export class Dragging {
     event: PointerEvent,
     private readonly options: DragOptions
   ) {
+    this.isTouch = event.pointerType === "touch"
     this.startX = event.clientX
     this.startY = event.clientY
     this.pointerId = event.pointerId
@@ -128,6 +145,7 @@ export class Dragging {
     // no text selected as the pointer sweeps the page, as the browser's own drag selects none
     getSelection()?.removeAllRanges()
     document.documentElement.style.userSelect = "none"
+    if (!this.isTouch) document.body.append(Dragging.cover)
     Dragging.current = this
     this.element.dispatchEvent(new DragEvent("dragstart", { bubbles: true, composed: true }))
   }
@@ -195,6 +213,7 @@ export class Dragging {
       }
     }
     document.documentElement.style.userSelect = ""
+    Dragging.cover.remove()
     if (Dragging.current === this) Dragging.current = undefined
     this.element.dispatchEvent(new DragEvent("dragend", { bubbles: true, composed: true }))
   }
@@ -214,7 +233,7 @@ export class Dragging {
    */
   static dropTargetAt(element: HTMLElement, x: number, y: number): HTMLElement | undefined {
     const root = element.getRootNode() as Document | ShadowRoot
-    const hits = root.elementsFromPoint(x, y)
+    const hits = root.elementsFromPoint(x, y).filter((hit) => hit !== Dragging.cover)
     let under: HTMLElement | undefined
     for (const hit of hits) {
       under = Dragging.upFrom(hit).find((at) => Dragging.isDropTarget(at)) as HTMLElement | undefined
@@ -295,6 +314,9 @@ const DRAG_START_PX = 6
 
 /** Above the board while dragged. */
 const DRAGGING_Z_INDEX = "1000"
+
+/** How the page's cover looks during a mouse drag (`Dragging.cover`):  clear, over everything, the closed hand. */
+const DRAG_COVER = "position: fixed; inset: 0; z-index: 2147483647; cursor: grabbing"
 
 /** How long a drop nobody took slides back, in milliseconds. */
 const SLIDE_BACK_MS = 200

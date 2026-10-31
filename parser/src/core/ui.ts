@@ -60,7 +60,8 @@ export const uiMethods = defineCoreModule({
    *   - e.g. `notify success "Saved!" at the top right for 5 seconds` =>
    *     `core.notify("Saved!", { class: "success", position: "top right", time: 5, units: "seconds" })`
    * - Shown once Spell UI's runtime has loaded.
-   * - Returns a promise of the toast being gone:  `notify "..." and wait` waits for it, plain `notify` doesn't.
+   * - Returns a promise of the toast being gone:  `notify "..." for 5 seconds` waits for it, plain `notify` doesn't.
+   *   - One that stays until it's closed answers at once, so nothing waits on it for good.
    * - No Spell UI:  printed on the console, and gone at once.
    * - NEVER throws:  a toast that can't show says so on the console.
    */
@@ -69,7 +70,7 @@ export const uiMethods = defineCoreModule({
     if (!ui) return core.console.info(String(message))
     try {
       const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
-      await toast.closed
+      if (!toastStays(options)) await toast.closed
     } catch (error) {
       core.console.error("notify:  can't show a toast", error)
     }
@@ -80,6 +81,17 @@ export const uiMethods = defineCoreModule({
     core.RUNTIME?.actions.throwIfCanceled()
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
+    await (await ui.load()).modals.alert({ message: String(message), okText })
+  },
+
+  /**
+   * Warn the person in a dialog, and wait until it's closed -- compiled from `warn "Careful!"` (`await`ed).
+   * - No Spell UI:  printed as a warning on the console.
+   */
+  async warn(message: unknown, okText?: string): Promise<void> {
+    core.RUNTIME?.actions.throwIfCanceled()
+    const ui = pageUI()
+    if (!ui) return core.console.warn(String(message))
     await (await ui.load()).modals.alert({ message: String(message), okText })
   },
 
@@ -282,6 +294,11 @@ function toastOptionsFor(message: string, options: NotifyOptions): PageToastOpti
       ? "auto"
       : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
   return { ...toastOptions, message, displayTime, ...(actions.length ? { actions } : {}) }
+}
+
+/** Does a toast stay until it's closed?  It has a button, or a time of 0. */
+function toastStays(options: NotifyOptions): boolean {
+  return !!options.button || options.time === 0
 }
 
 /**

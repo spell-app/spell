@@ -284,9 +284,54 @@ Its first line is how you call it, with each blank's type in brackets:
   - A `where` whose condition waits asks each item in turn.
   - The edges:
     - A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
-    - In JavaScript and TypeScript, a getter, a drawing, a `create` and a `to test` must answer at once:
+    - In JavaScript and TypeScript, a drawing, a `create` and a `to test` must answer at once:
       they start what they call without waiting for it.
+    - `pause` and `wait for` in a drawing are errors:  make it a getter that waits, and draw that.
     - A `send` waits only if a handler of that event does.
+- A getter may wait too, with no new words:
+
+  ```spell
+  a game is an app:
+  	- it has a score as a number
+  	- its "total" is:
+  		pause for 1 sec
+  		return the score + 1
+  	- to go it:
+  		print the total
+  	- to draw it:
+  		<div>Total: {the total}</div>
+  ```
+
+  - A drawing shows `…` where the value goes, then fills it in, and the rest of the page keeps moving.
+    A later change keeps the old value until the new one lands.
+  - An `if` or an attribute has no spot for a `…`, so that whole thing shows one first.
+    An app's whole drawing doing that hides the board until the first answer, so it warns on the program's console.
+  - An action reading it waits for the answer, the newest:  a write just before it counts.
+  - A getter follows its own members, however late it reads them.
+    A member of something else, read after its first wait, isn't followed, and warns:  read it above the wait.
+  - Python sends its page with its values, so no `…` shows there.
+    A library's is a plain async getter, which code that imports it awaits.
+- To not wait, say so, in JavaScript, TypeScript and Python alike:
+
+  ```spell
+  to deal in a burst:
+  	at the same time:
+  		move the first card to the pile
+  		move the second card to the pile
+  	meanwhile load the scores
+  	print "dealt"
+  ```
+
+  - `at the same time:` runs each line at once, and carries on once they've all ended.
+    - A failed line doesn't stop the others;  the failure comes out once they've ended.
+    - A loop right in the block runs all its items at once.  One inside an `if` still runs one by one.
+    - A local made in one line belongs to that line.
+  - `meanwhile load the scores` starts it and carries on.
+    A failure is said on the program's console, and people's clicks don't wait for it.
+  - Spanish:  `al mismo tiempo:`, `mientras tanto`.
+- A toast is an aside:  `notify "Saved!"` shows it and carries on.
+  - It waits only when it says how long, `notify "Bye" for 5 seconds`, which holds clicks that long too.
+  - One that stays until it's closed never waits:  `until clicked`, `with "Got it"`.
 - What a person starts runs one at a time:  a click, a key, a menu item, a drop.
   - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
   - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.

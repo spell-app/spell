@@ -93,6 +93,11 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   "ui-theme-editor/UIThemeToken.css": {
     "--ui-icon-width": "the readers' icons take their glyph's own width, in a 22px square"
   },
+  "ui-toolbar/UIToolbar.css": {
+    "--ui-icon-width": "a header's actions are bare icons:  it sets the nested icons' box",
+    "--ui-icon-distance": "the same",
+    "--ui-icon-link-opacity": "the same"
+  },
   "ui-theme-menu/UIThemeMenu.css": {
     "--ui-button-background":
       "its `compact` theme dropdown is a quiet round icon button:  it themes the dropdown's button box",

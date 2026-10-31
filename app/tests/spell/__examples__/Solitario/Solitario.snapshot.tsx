@@ -122,7 +122,7 @@ export class Carta extends View {
   // una letra, del tamaño del texto de alrededor:  su pila la escala para que quepa -- styles.css
   @drawn draw() {
     return (
-      <span part="lados" onClick={core.pressed(this, () => trigger("clic-carta", { carta: this }))} style="cursor:pointer;user-select:none">
+      <span part="lados" onClick={core.pressed(this, () => trigger("clic-carta", { carta: this }))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         <es-texto part="frente" color={this.color}>{this.cara}</es-texto>
         <es-texto part="dorso" color="azul">🂠</es-texto>
       </span>
@@ -683,7 +683,7 @@ export class PilaDeReserva extends Pila {
   // vacía:  una carta gris claro, boca abajo -- un clic vuelve a voltear los descartes
   drawItsPlaceholder() {
     return (
-      <div part="marcador" onClick={core.pressed(this, async () => await solitario.robarDeLaReserva())} style="cursor:pointer;user-select:none">
+      <div part="marcador" onClick={core.pressed(this, async () => await solitario.robarDeLaReserva())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         🂠
       </div>
     )
@@ -1070,15 +1070,15 @@ export class Solitario extends App {
           <es-elemento>{`Movimientos: ${this.movimientos}`}</es-elemento>
           <es-elemento>{`Puntos: ${this.puntuación}${this.pista}`}</es-elemento>
           <es-menu posicion="derecha">
-            <es-elemento aria-label="Jugar solo" onClick={core.pressed(this, async () => await this.jugarSolo())} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Jugar solo" onClick={core.pressed(this, async () => await this.jugarSolo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="fast forward" />
               <es-emergente etiqueta="Jugar solo" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Trampa" onClick={core.pressed(this, async () => await this.hacerTrampa())} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Trampa" onClick={core.pressed(this, async () => await this.hacerTrampa())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="eye" />
               <es-emergente etiqueta="Trampa" invertido={true} tamano="pequeño" />
             </es-elemento>
-            <es-elemento aria-label="Reiniciar" onClick={core.pressed(this, async () => await this.empezarElJuego())} style="cursor:pointer;user-select:none">
+            <es-elemento aria-label="Reiniciar" onClick={core.pressed(this, async () => await this.empezarElJuego())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <es-icono name="redo" />
               <es-emergente etiqueta="Reiniciar" invertido={true} tamano="pequeño" />
             </es-elemento>

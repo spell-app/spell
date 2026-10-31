@@ -98,17 +98,17 @@ export class TaskList extends App {
         h("ui-item", {
           selected: () => this.tasks.showing === "all",
           onClick: core.pressed(this, () => (this.tasks.showing = "all")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "All"),
         h("ui-item", {
           selected: () => this.tasks.showing === "active",
           onClick: core.pressed(this, () => (this.tasks.showing = "active")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "To do"),
         h("ui-item", {
           selected: () => this.tasks.showing === "done",
           onClick: core.pressed(this, () => (this.tasks.showing = "done")),
-          style: "cursor:pointer;user-select:none"
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Done")
       ),
       () => core.drawThing(this.tasks)

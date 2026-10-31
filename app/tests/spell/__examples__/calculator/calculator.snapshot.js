@@ -117,93 +117,93 @@ export class Calculator extends App {
             fluid: true,
             color: "negative",
             onClick: core.pressed(this, () => this.clear()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "C"),
           h("ui-button", {
             fluid: true,
             color: "secondary",
             onClick: core.pressed(this, () => this.finish()),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "="),
           h("ui-button", {
             fluid: true,
             color: "primary",
             onClick: core.pressed(this, () => this.applyOpToCalculator("÷")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "÷"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("7")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "7"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("8")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "8"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("9")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "9"),
           h("ui-button", {
             fluid: true,
             color: "primary",
             onClick: core.pressed(this, () => this.applyOpToCalculator("×")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "×"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("4")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "4"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("5")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "5"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("6")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "6"),
           h("ui-button", {
             fluid: true,
             color: "primary",
             onClick: core.pressed(this, () => this.applyOpToCalculator("–")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "–"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("1")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "1"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("2")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "2"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("3")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "3"),
           h("ui-button", {
             fluid: true,
             color: "primary",
             onClick: core.pressed(this, () => this.applyOpToCalculator("+")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "+"),
           h("ui-button", {
             class: "Wide",
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator("0")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "0"),
           h("ui-button", {
             fluid: true,
             onClick: core.pressed(this, () => this.appendDigitToCalculator(".")),
-            style: "cursor:pointer;user-select:none"
+            style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, ".")
         )
       )

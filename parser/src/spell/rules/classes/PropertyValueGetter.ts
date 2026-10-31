@@ -69,7 +69,34 @@ export class PropertyValueGetter extends SpellStatement<
     if (match.groups.specifier) match.priority = Priority.declaration
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
+    this.warnIfReadsAfterWait(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+  }
+
+  /**
+   * Warn when a getter reads a member of something else after its first wait, e.g. `the rank of the kitchen`:
+   * what's read after a wait isn't followed, so its value won't change when that does (epic `language` P8).
+   * - Its own members are:  see `core.waitedValue()`'s `follows`.
+   * - A wait said in its own body:  a slow action it calls isn't known until the whole project is.
+   */
+  private warnIfReadsAfterWait(match: P.MatchFor<this>): void {
+    const message = SP.Language.of(match.scope).parserMessage("reads-after-wait")
+    SP.SpellWarnings.noteIf(match, message, () => PropertyValueGetter.readsAfterWait(match))
+  }
+
+  /** Does `match`'s getter read a member of something else after a wait in its own body? */
+  private static readsAfterWait(match: P.Match): boolean {
+    let hasWaited = false
+    let found = false
+    P.forEachNode(match.AST, (node) => {
+      if (node instanceof P.ASTAwaitExpression) hasWaited = true
+      else if (node instanceof P.ASTScopedMethodInvocation && P.CORE_CALLS_THAT_WAIT.has(node.methodName))
+        hasWaited = true
+      else if (hasWaited && node instanceof P.ASTPropertyExpression && !(node.object instanceof P.ASTSelfLiteral)) {
+        found = true
+      }
+    })
+    return found
   }
 
   /**

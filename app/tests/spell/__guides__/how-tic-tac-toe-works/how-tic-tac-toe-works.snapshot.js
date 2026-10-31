@@ -35,7 +35,7 @@ export class Square extends View {
     return h("button", {
       part: "mark",
       onClick: core.pressed(this, () => this.play()),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.mark)
   }
 

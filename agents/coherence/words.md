@@ -215,6 +215,16 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   epic repo from now on");  "change spell.epics folder to epic folder not content folder" (epic `epic-engine` r48);
   built in epic `epic-engine` P56.
 
+## Running
+
+### waits
+
+- **Say:**  waits, for what takes a while and whatever calls or reads it:  `waiting`, `waitingValues`, `waits` in a
+  project's declarations, `core.waitedValue()`, `core.whileWaiting()`.
+- **Not:**  slow as a name in code (`core.slowly()`), async, in anything a person reads;  `async` stays JavaScript's own word.
+- **Decided:**  epic `language` J5, and its P12.
+
+
 ## Open
 
 Words a sweep found more than one of, still to decide.

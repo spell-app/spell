@@ -374,7 +374,7 @@
   /* Link steps. */
   :host > :is(a, button).step,
   .ui.steps > :is(a, .link).step {
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
   }
 }
 
@@ -786,7 +786,7 @@
     }
     :host > :is(a, button).step,
     .ui.steps > :is(a, .link).step {
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
     }
     /* The step's own `color` wins over the group's. */
     :host
@@ -956,7 +956,7 @@
     .ui.steps > :is(a, .link).step.active:hover::after {
       color: var(--_ui-step-active-hover-color);
       background: var(--_ui-step-active-hover-background);
-      cursor: pointer;
+      cursor: var(--ui-control-cursor);
     }
 
     /* Disabled */

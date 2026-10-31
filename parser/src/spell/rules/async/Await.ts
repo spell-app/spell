@@ -19,6 +19,11 @@ export class Await extends SpellStatement<"expression?"> {
   /** `wait for x is 1` => `await (x == 1)`, but `if wait for x is 1` => `(await x) == 1` (epic page D33). */
   @proto static operandInExpressions = true
 
+  /** Not in a drawing, which must answer at once. */
+  parse(scope: P.Scope, tokens: P.Token[]) {
+    return SpellStatement.refuseWaitInDraw(super.parse(scope, tokens))
+  }
+
   getAST(match: P.MatchFor<this>) {
     const { expression } = match.groups
     return new P.ASTAwaitExpression(match, {

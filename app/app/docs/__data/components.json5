@@ -6449,6 +6449,12 @@
           "type": "time"
         },
         {
+          "name": "--ui-control-cursor",
+          "default": "pointer",
+          "description": "The cursor over a control:  a button, a menu item, a tab.",
+          "type": "other"
+        },
+        {
           "name": "--ui-duration-fast",
           "default": "100ms",
           "description": "Duration `fast`.",

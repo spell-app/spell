@@ -259,7 +259,7 @@
     color: inherit;
     font: inherit;
     opacity: var(--_ui-message-close-opacity);
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: opacity var(--_ui-message-duration) var(--ui-ease);
   }
   .ui.message > .close.icon > svg {

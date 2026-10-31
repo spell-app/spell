@@ -30,7 +30,7 @@ export class Counter extends View {
     return h("ui-button", {
       class: "Counter",
       onClick: core.pressed(this, () => this.increment()),
-      style: "cursor:pointer;user-select:none"
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => `Count: ${this.count}`)
   }
 }

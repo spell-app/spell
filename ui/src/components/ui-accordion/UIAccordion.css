@@ -128,7 +128,7 @@
     line-height: 1;
     color: var(--_ui-accordion-title-color);
     list-style: none;
-    cursor: pointer;
+    cursor: var(--ui-control-cursor);
     transition: var(--_ui-accordion-title-transition);
     -webkit-tap-highlight-color: transparent;
   }

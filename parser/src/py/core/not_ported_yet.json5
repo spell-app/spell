@@ -2,12 +2,15 @@
   "about": "What spell_core doesn't have yet of the core's method list (src/core/core.declarations.json5), by the JavaScript name, grouped by why.  Read by tests/py/core/tests/test_core_declarations.py, and by the core reference page (guides/targets/core-reference.html).  Take a name out as it's ported.",
   "groups": [
     {
+      "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
+      "names": ["waitedValue", "whileWaiting"]
+    },
+    {
       "why": "Actions run by a person's keys, clicks and menus (epic elemental-spell P10):  a page's, not yet Python's",
       "names": [
         "runAction",
         "runPressed",
         "pressed",
-        "meanwhile",
         "holdWhile",
         "runningAction",
         "actionFinishing",
@@ -114,6 +117,7 @@
         "splitPath",
         "notify",
         "alert",
+        "warn",
         "confirm",
         "prompt"
       ]

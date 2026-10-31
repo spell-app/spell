@@ -374,8 +374,9 @@ describe("SpellElement", () => {
     /**
      * Drag `element` from its middle to `target`'s, with pointer events, as a finger does.
      * - `before`:  what to check over the target, before the pointer's let go.
+     * - `pointerType`:  a finger, unless it says a mouse.
      */
-    async function drag(element: HTMLElement, target: HTMLElement, before?: () => void) {
+    async function drag(element: HTMLElement, target: HTMLElement, before?: () => void, pointerType = "touch") {
       const at = (box: HTMLElement) => {
         const rect = box.getBoundingClientRect()
         return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
@@ -387,7 +388,7 @@ describe("SpellElement", () => {
             bubbles: true,
             composed: true,
             pointerId: 3,
-            pointerType: "touch",
+            pointerType,
             clientX: x,
             clientY: y
           })
@@ -466,6 +467,24 @@ describe("SpellElement", () => {
       await drag(element, root.querySelectorAll<HTMLElement>("game-tray")[1]!)
       // nobody listens for token-drop:  it moved, as the trays' rules let it
       expect([...trays[1]!.items]).toEqual([token])
+      done()
+    })
+
+    test("a mouse drag covers the page with the closed hand, and leaves nothing behind;  a finger shows no cursor", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const covers = () =>
+        [...document.body.children].filter((child) => (child as HTMLElement).style.cursor === "grabbing")
+      const element = root.querySelector("game-token") as HTMLElement
+      const target = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+      await drag(element, target, () => expect(covers()).toHaveLength(1), "mouse")
+      // the cover hid nothing from the drop:  it landed
+      expect([...trays[1]!.items]).toEqual([token])
+      expect(covers()).toEqual([])
+      const moved = root.querySelector("game-token") as HTMLElement
+      await drag(moved, root.querySelectorAll<HTMLElement>("game-tray")[0]!, () => expect(covers()).toEqual([]))
+      expect([...trays[0]!.items]).toEqual([token])
       done()
     })
 

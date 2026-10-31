@@ -167,7 +167,7 @@ ui-item.ThemeMenu ui-theme-menu {
   border: none;
   border-radius: 50%;
   background: none;
-  cursor: pointer;
+  cursor: var(--ui-control-cursor);
 
   /* the letter in a circle, in the theme's primary colours:  a picture of it kept Spell's violet in every theme */
   & > .YouLetter {
@@ -309,7 +309,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
 }
 
 /*
- * Tab bars (the Program panel's, the Inspector's Views | Things | Templates):  a header like every other pane's
+ * The Program panel's tab bar (the Inspector's Views | Things | Templates is `appearance="segmented header"` now):  a header like every other pane's
  * (40px, see-through, a hairline under it), its tabs a slim track in it, as the docs site's tabs
  * (Owen:  "doesn't match ... too tall, colors don't match, font size difference"):
  * - the track:  the tabs sharing the header's width evenly, the chosen one a raised white pill (Owen:  "still want
@@ -319,7 +319,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
 :root {
   --spell-tabs-track: light-dark(rgb(40 20 90 / 0.06), rgb(255 255 255 / 0.06));
 }
-:is(ui-toolbar.RunnerPaneToolbar, ui-menu.InspectorViewTabs) {
+ui-toolbar.RunnerPaneToolbar {
   --ui-menu-segmented-background: var(--spell-tabs-track);
   --ui-menu-segmented-border: 0 solid transparent;
   --ui-menu-segmented-radius: 9999px;
@@ -333,7 +333,7 @@ ui-item.ThemeMenu ui-theme-menu::part(palette):hover {
   --ui-font-size: 13px;
   font-size: 13px;
 }
-:is(ui-toolbar.RunnerPaneToolbar, ui-menu.InspectorViewTabs) > ui-item::part(item) {
+ui-toolbar.RunnerPaneToolbar > ui-item::part(item) {
   flex: 1 1 0;
   font-weight: 500;
   min-width: max-content;

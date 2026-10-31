@@ -5583,6 +5583,58 @@
           "aliases": ["statement"]
         },
         {
+          "className": "AtTheSameTime",
+          "ruleNames": ["at_the_same_time"],
+          "internal": false,
+          "file": "src/spell/rules/async/AtTheSameTime.ts",
+          "line": 23,
+          "purpose": "Runs its lines together, and carries on once they've all ended.",
+          "syntaxes": [
+            {
+              "syntax": "al mismo tiempo :? {statement_body}?",
+              "example": "para do something\n\tal mismo tiempo:\n\t\timprimir 1\n\t\timprimir 2",
+              "outputs": {
+                "js": {
+                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                },
+                "ts": {
+                  "code": "export function doSomething() {\n  core.together(() => core.console.log(1), () => core.console.log(2))\n}"
+                },
+                "py": {
+                  "code": "def do_something() -> None:\n    core.together(lambda: print(1), lambda: print(2))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
+          "className": "Meanwhile",
+          "ruleNames": ["meanwhile"],
+          "internal": false,
+          "file": "src/spell/rules/async/Meanwhile.ts",
+          "line": 16,
+          "purpose": "Starts something and carries on, with no waiting for it: `meanwhile deal the cards`.",
+          "syntaxes": [
+            {
+              "syntax": "mientras tanto :? {statement_body}?",
+              "example": "para do something\n\tmientras tanto imprimir 1",
+              "outputs": {
+                "js": {
+                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                },
+                "ts": {
+                  "code": "export function doSomething() {\n  core.meanwhile(() => core.console.log(1))\n}"
+                },
+                "py": {
+                  "code": "def do_something() -> None:\n    core.meanwhile(lambda: print(1))"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement", "async"]
+        },
+        {
           "className": "StartProcess",
           "ruleNames": ["start_process"],
           "internal": false,
@@ -6513,11 +6565,11 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 24,
+          "line": 26,
           "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})? (waits:y esperar)?",
+              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})?",
               "example": "notificar \"Yo!\"",
               "outputs": {
                 "js": {
@@ -6565,7 +6617,7 @@
           "ruleNames": ["warn"],
           "internal": false,
           "file": "src/spell/rules/UI/Warn.ts",
-          "line": 13,
+          "line": 11,
           "purpose": "Warning message -- like alert but more dire.",
           "syntaxes": [
             {
@@ -6573,10 +6625,10 @@
               "example": "advertir \"Yo!\"",
               "outputs": {
                 "js": {
-                  "code": "core.warn(\"Yo!\")"
+                  "code": "await core.warn(\"Yo!\")"
                 },
                 "ts": {
-                  "code": "core.warn(\"Yo!\")"
+                  "code": "await core.warn(\"Yo!\")"
                 },
                 "py": {
                   "code": "core.warn(\"Yo!\")"
