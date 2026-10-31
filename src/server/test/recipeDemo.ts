@@ -1,6 +1,7 @@
 /**
  * The recipe box demo's servers, on one port:  what `scripts/recipe-servers.ts` runs, and the recipe box test (epic `data` P11).
- * - `/recipes`, with versions in a field;  `/graphql`
+ * - `/recipes`, with versions in a field;  `/graphql`:  one box of recipes behind both
+ * - `/apart/graphql`:  GraphQL with a box of its own, for showing back-ends that share nothing
  * - `/api/places/recipes`:  a folder of files, as a place, behind a `PlaceServer`
  * - `/api/rooms/recipes`:  a live room, its referee keeping a folder of its own (`<folder>-room`)
  * - `routes`:  anything else, by a caller:  a test's page, someone else's button.
@@ -12,13 +13,16 @@ import { JsonChunks, type Place } from "spell/util/places"
 import { SRV } from "spell/server"
 import { ChunkFiles, FolderPlace, PlaceKeys, PlaceServer, Referee } from "spell/server/places"
 
-import { bothHandlers, DemoGuard, FIRST_RECIPES, RecipeBox } from "./recipeServers"
+import { bothHandlers, DemoGuard, FIRST_RECIPES, graphHandler, RecipeBox } from "./recipeServers"
 
 /** The one collection. */
 const COLLECTION = "recipes"
 
 /** Where its live room listens. */
 const ROOM_PATH = "/api/rooms/recipes"
+
+/** Where the GraphQL server with its own recipes listens. */
+const APART_GRAPH_PATH = "/apart/graphql"
 
 /** What a room's recipe holds. */
 const ROOM_FIELDS = ["title", "cuisine", "servings", "notes", "place"]
@@ -45,6 +49,8 @@ export type RecipeServers = {
   url: string
   /** The REST and GraphQL servers' recipes. */
   box: RecipeBox
+  /** The recipes of the GraphQL server at `/apart/graphql`. */
+  apartBox: RecipeBox
   /** The folder place. */
   folderPlace: FolderPlace
   /** The room's folder place. */
@@ -78,6 +84,8 @@ export async function startRecipeServers({
   const box = new RecipeBox()
   const router = new SRV.Router()
   routes?.(router)
+  const apartBox = new RecipeBox()
+  router.use(graphHandler(apartBox, APART_GRAPH_PATH))
   router.use(bothHandlers(box))
   // Someone else, in another program:  the file saved behind the page's back, as VS Code would
   router.post("/someone-else/folder/:id", SRV.parseBodies(), async (request, reply) => {
@@ -121,6 +129,7 @@ export async function startRecipeServers({
   return {
     url: `http://127.0.0.1:${at}`,
     box,
+    apartBox,
     folderPlace,
     roomPlace,
     close: () =>

@@ -1,7 +1,8 @@
 /**
  * The recipe box demo's servers, on one port, until you stop them (epics `data` P4, P5):
  * - `yarn tsx scripts/recipe-servers.ts [<folder>]`, at the kit's root
- * - `http://127.0.0.1:4791/recipes`, with versions in a field;  `http://127.0.0.1:4791/graphql`
+ * - `http://127.0.0.1:4791/recipes`, with versions in a field;  `http://127.0.0.1:4791/graphql`:  the same recipes
+ * - `http://127.0.0.1:4791/apart/graphql`:  GraphQL with recipes of its own, for the page showing every back-end
  * - `http://127.0.0.1:4791/api/places/recipes`:  a folder of files, as a place, behind a `PlaceServer`
  *   - the folder:  `<folder>`, else `spell-recipe-box` in the system's temporary folder, kept between runs
  *   - edit `recipes/r-1.json` there, and the page follows
@@ -11,7 +12,7 @@
  *   - only with `GOOGLE_SHEET_ID` and `GOOGLE_SHEETS_KEY` set:  its id, and a service account's key file, as JSON;
  *     the steps are the epic page's manual test
  *   - its tab has to be called `recipes`
- * - The demo's page is `/guides/data/experiments/recipe-box/recipe-box.html`, on the page server.
+ * - The demo's pages are `recipe-box.html` and `all-back-ends.html`, in `/guides/data/experiments/recipe-box/`, on the page server.
  */
 import { tmpdir } from "node:os"
 import { join } from "node:path"

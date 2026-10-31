@@ -5,11 +5,11 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 231, end: 251 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 314, end: 334 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 255, end: 283 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 338, end: 366 } })
   accessor porciones!: number
 
   @drawn draw() {
@@ -49,7 +49,10 @@ export class RecetaElement extends SpellElement<Receta> {
 }
 core.useElement(Receta, RecetaElement)
 
-/** La ÚNICA línea que cambia otro servidor:  prueba "una sala en vivo en ...", "un servicio web en ...", "una hoja en ..." */
+/**
+ * Dónde se guardan las recetas:  en este navegador, sin ningún servidor.
+ * Para guardarlas en otro lugar, cambia esta línea:  prueba "una sala en vivo en ...", "un servicio web en ...", "una hoja en ..."
+ */
 export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "this device" })
 
@@ -66,7 +69,7 @@ export class CajaDeRecetas extends App {
   @prop({ type: "text" })
   accessor borrador!: string
 
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 708, end: 802 }, readsFrom: ["recetario_familiar"] }) }
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 791, end: 885 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
     return core.sortedBy(core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda)), (item: Receta) => item.título)
   }) }
@@ -80,15 +83,17 @@ export class CajaDeRecetas extends App {
   @drawn draw() {
     return [
       <ui-form class="box" value={this}>
-        <ui-input class="search" name="búsqueda" aria-label="Búsqueda" />
-        <ui-input class="draft" name="borrador" aria-label="Receta nueva" />
-        <ui-button class="add" onClick={core.pressed(this, () => this.agregarElBorrador())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-input class="draft" name="borrador" label="Receta nueva" aria-label="Receta nueva" />
+        <ui-button class="add" disabled={this.borrador === ""} onClick={core.pressed(this, () => this.agregarElBorrador())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Agregar
         </ui-button>
+        <ui-input class="search" name="búsqueda" label="Buscar" aria-label="Buscar" />
       </ui-form>,
       core.drawRead(() => this.coincidencias, (receta: Receta) => core.drawThing(receta), {
         waiting: () => <ui-loader class="waiting" />,
-        none: () => <ui-text class="none">Todavía no hay recetas.</ui-text>,
+        none: () => <ui-text class="none">
+          {this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."}
+        </ui-text>,
         failed: () => <ui-message class="failed" color="red">
           No se puede llegar al recetario.
           <ui-button class="again" onClick={core.pressed(this, () => core.refreshSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">

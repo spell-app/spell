@@ -2,17 +2,19 @@
  * The recipe box, compiled from spell, run in a real browser, reading and writing the demo's servers (epic `data` P11).
  * - The program is the frozen test project, `@spell/test/recipe-box`, and its Spanish twin, `recetario`.
  * - Each back-end changes only the lines that say where it lives (`BACK_ENDS`), with nothing else in the program touched.
+ * - And the built-in examples as they ship:  what they say when there's nothing to show, and what Add does then.
  * - Headless Chromium through Playwright, on the page's real `<spell-viewer>` and Spell UI, from `yarn build:element`:
  *   skips itself when that's not built.
  */
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "fs"
+import { createServer, type Server } from "http"
 import { tmpdir } from "os"
 import { join, resolve } from "path"
 
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell/server"
+import { SRV, type Handler } from "spell/server"
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
@@ -37,6 +39,9 @@ type Program = {
   /** The classes its elements carry. */
   field: string
 }
+
+/** The built-in examples:  what people run, in the editor. */
+const EXAMPLES = resolve(__dirname, "../../spaces/@spell/examples")
 
 /** The lines a program starts with, up to its first type. */
 const PLACE_LINES = /^[\s\S]*?(?=^(?:a|una) ")/m
@@ -68,6 +73,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let flakyIsUp = false
   /** What the page server hands out, by its name. */
   const programs = new Map<string, string>()
+  /** Another server of pages, on another port, as the editor is. */
+  let elsewhere: Server
+  /** Where it's listening. */
+  let elsewhereUrl: string
 
   /** Compile `program`, and say where its page is. */
   function serve(name: string, { path, source }: Program): string {
@@ -76,10 +85,10 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
     return `${servers.url}/${name}.html`
   }
 
-  /** A page:  `<spell-viewer>`, and nothing else. */
-  function pageFor(name: string): string {
+  /** A page:  `<spell-viewer>`, and nothing else.  `token`:  what its server hands it, as the demo's own does. */
+  function pageFor(name: string, token: string | undefined = DEMO_TOKEN): string {
     return `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<script>window.SPELL_SERVER = { token: "${DEMO_TOKEN}" }</script>
+${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
 <script type="module" src="/element/spell-viewer.js"></script>
 </head><body><spell-viewer src="/programs/${name}.js"></spell-viewer></body></html>`
   }
@@ -100,16 +109,22 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   beforeAll(async () => {
     folder = mkdtempSync(join(tmpdir(), "spell-recipe-box-test-"))
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
+    /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
+    const pages: Handler = (request, reply, next) => {
+      const text = programs.get(request.path)
+      if (text !== undefined) {
+        const type = request.path.endsWith(".js") ? "text/javascript" : "text/html; charset=utf-8"
+        return reply.type(type).send(text)
+      }
+      const found = element(request.path)
+      if (found && "file" in found && found.file) return reply.sendFile(found.file)
+      return next()
+    }
     servers = await startRecipeServers({
       port: 0,
       folder,
       routes: (router) => {
         router.use((request, reply, next) => {
-          const text = programs.get(request.path)
-          if (text !== undefined) {
-            const type = request.path.endsWith(".js") ? "text/javascript" : "text/html; charset=utf-8"
-            return reply.type(type).send(text)
-          }
           if (request.path === "/flaky/recipes") {
             if (!flakyIsUp) return reply.status(404).send("not yet")
             return reply.json([{ id: "r-1", title: "Back again", servings: 1 }])
@@ -117,18 +132,22 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
           if (request.path === "/recipes.csv") {
             return reply.type("text/csv").send("id,title,servings\nr-1,Tomato soup,4\nr-2,Dal,6\n")
           }
-          const found = element(request.path)
-          if (found && "file" in found && found.file) return reply.sendFile(found.file)
-          return next()
+          return pages(request, reply, next)
         })
       }
     })
+    const pagesRouter = new SRV.Router()
+    pagesRouter.use(pages)
+    elsewhere = createServer(SRV.toListener(pagesRouter.handle))
+    await new Promise<void>((done) => elsewhere.listen(0, "127.0.0.1", done))
+    elsewhereUrl = `http://127.0.0.1:${(elsewhere.address() as { port: number }).port}`
     browser = await chromium.launch()
   }, 60_000)
 
   afterAll(async () => {
     await browser?.close()
     await servers?.close()
+    elsewhere?.close()
     if (folder) {
       rmSync(folder, { recursive: true, force: true })
       rmSync(`${folder}-room`, { recursive: true, force: true })
@@ -164,6 +183,11 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
     "a live room": async () =>
       (await servers.roomPlace.list("recipes", {}, {})).rows.map(({ title }) => `${title as string}`)
   }
+
+  /** The servers' GraphQL service with recipes of its own, as a program says it. */
+  const apartLines = (url: string) => `family cookbook is a graph service at "${url}/apart/graphql":
+	- a recipe's title is called "name"
+	- it is checked every 5 seconds`
 
   /** Reads, adds, changes and removes through the page, each reaching the server. */
   async function roundTrip(page: Page, held: () => Promise<string[]>): Promise<void> {
@@ -205,6 +229,93 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
       expect(problems).toEqual([])
       await page.close()
     })
+  }
+
+  // What the editor's page is to these servers:  another port, and no token it could know
+  for (const backEnd of ["a folder", "a live room"]) {
+    test(
+      `a page on another port, with no token, on ${backEnd}:  as the editor runs it`,
+      { timeout: 60_000 },
+      async () => {
+        const name = `editor-${backEnd.replace(/\W/g, "")}`
+        serve(name, withPlace(english(), BACK_ENDS[backEnd]!(servers.url)))
+        programs.set(`/${name}.html`, pageFor(name, ""))
+        const { page, problems } = await opened(`${elsewhereUrl}/${name}.html`)
+        await roundTrip(page, heldBy[backEnd]!)
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
+  }
+
+  test("the place server still refuses another site, and what isn't a page without its token", async () => {
+    const asked = (headers: Record<string, string>) =>
+      fetch(`${servers.url}/api/places/recipes/list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ collection: "recipes", query: {} })
+      })
+    expect((await asked({ Origin: "https://example.com", "x-server-token": DEMO_TOKEN })).status).toBe(403)
+    expect((await asked({})).status).toBe(403)
+    expect((await asked({ "x-server-token": DEMO_TOKEN })).status).toBe(200)
+    expect((await asked({ Origin: elsewhereUrl })).status).toBe(200)
+  })
+
+  test("GraphQL with its own recipes shares nothing with the other one", { timeout: 60_000 }, async () => {
+    const { page, problems } = await opened(serve("apart", withPlace(english(), apartLines(servers.url))))
+    const apart = async () => [...servers.apartBox.recipes.values()].map(({ name }) => name)
+    await page.locator("ui-form.recipe").first().waitFor(WAITING)
+    await page.locator("ui-input.draft input").fill("Only over here")
+    await page.locator("ui-button.add").click()
+    await expect.poll(apart, WAITING).toContain("Only over here")
+    expect(await heldBy.REST!()).not.toContain("Only over here")
+    expect(problems).toEqual([])
+    await page.close()
+  })
+
+  /** Each built-in example, and what it should say:  the words differ, the classes don't. */
+  const SHIPPED = [
+    {
+      path: "RecipeBox/RecipeBox.spell",
+      noRecipes: "No recipes yet. Add the first one.",
+      noMatches: "No recipes match your search."
+    },
+    {
+      path: "CajaDeRecetas/CajaDeRecetas.es.spell",
+      noRecipes: "Todavía no hay recetas. Agrega la primera.",
+      noMatches: "Ninguna receta coincide con tu búsqueda."
+    }
+  ]
+
+  for (const { path, noRecipes, noMatches } of SHIPPED) {
+    test(
+      `the example ${path}, typing in the wrong box:  it says why nothing's there`,
+      { timeout: 60_000 },
+      async () => {
+        const source = readFileSync(join(EXAMPLES, path), "utf8")
+        const name = `example-${path.replace(/\W/g, "")}`
+        const { page, problems } = await opened(serve(name, { path: `/${path.split("/")[1]}`, source, field: "" }))
+        const none = page.locator("ui-text.none")
+        const add = page.locator("ui-button.add")
+        await none.waitFor(WAITING)
+        await expect.poll(() => none.textContent(), WAITING).toBe(noRecipes)
+        expect(await add.evaluate((button) => (button as HTMLButtonElement).disabled)).toBe(true)
+
+        // what Owen did:  a search isn't a new recipe, and the page says so
+        await page.locator("ui-input.search input").fill("birria")
+        await expect.poll(() => none.textContent(), WAITING).toBe(noMatches)
+        expect(await add.evaluate((button) => (button as HTMLButtonElement).disabled)).toBe(true)
+        await page.locator("ui-input.search input").fill("")
+
+        await page.locator("ui-input.draft input").fill("birria")
+        await expect.poll(() => add.evaluate((button) => (button as HTMLButtonElement).disabled), WAITING).toBe(false)
+        await add.click()
+        await expect.poll(() => titlesOn(page), WAITING).toEqual(["birria"])
+        await expect.poll(() => none.count(), WAITING).toBe(0)
+        expect(problems).toEqual([])
+        await page.close()
+      }
+    )
   }
 
   test("Spanish, on REST:  the same servers, in its own words", { timeout: 60_000 }, async () => {

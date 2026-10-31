@@ -6,7 +6,7 @@
  *   It answers ONLY the fields asked for, and an error for one it hasn't got, as a real one does.
  * - `RecipeBox`:  what they share, so a program can change back-end and find the same recipes.
  * - `scripts/recipe-servers.ts` runs them, for the recipe box demo;  `RestPlace`'s and `GraphPlace`'s tests serve them.
- * - `DemoGuard`:  what lets the demo's page reach its place server (`scripts/recipe-servers.ts`).
+ * - `DemoGuard`:  what lets a local page reach the demo's place server and live room (`scripts/recipe-servers.ts`).
  * - Node only;  a test helper:  nothing here is careful about anything but being a fair fake.
  */
 import { SRV, type Handler } from "spell/server"
@@ -239,11 +239,12 @@ const RECIPE_FIELDS = new Set(["id", "name", "cuisine", "servings", "notes", "ve
  * - `recipes(filter, first, after) { edges { node } pageInfo { hasNextPage endCursor } }`
  * - `recipe(id)`
  * - `addRecipe(input)`, `changeRecipe(id, input)`, `removeRecipe(id)`
+ * - `path`:  another address, for a service with a box of its own beside this one
  */
-export function graphHandler(box: RecipeBox): Handler {
+export function graphHandler(box: RecipeBox, path = "/graphql"): Handler {
   return async (request, reply, next) => {
     if (answeredAcrossOrigins(request, reply)) return
-    if (request.path !== "/graphql" || request.method !== "POST") return next()
+    if (request.path !== path || request.method !== "POST") return next()
     const body = (await bodyOf(request)) as { query: string; variables?: Record<string, unknown> }
     await noteAsk(box, request, reply, body)
     const { query, variables = {} } = body
@@ -409,20 +410,28 @@ export const DEMO_TOKEN = "recipe-box-demo"
 const LOCAL_ORIGIN = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/
 
 /**
- * The demo's guard:  its page is served by the page server, on another port, so it can't know this run's token,
- * and it isn't this server's own origin.
- * - A fixed token, and any local page.  Fine ONLY because this server holds no keys, and only a throwaway folder.
+ * The demo's guard:  its pages are served from elsewhere (the page server, the editor), on other ports,
+ * so they can't know this run's token, and aren't this server's own origin.
+ * - Any page on this machine may write, token or no token:  the editor's running program has no way to say a token.
+ *   - A browser sets `Origin` itself, so a page can't lie about it.
+ * - With no `Origin`, not a page:  the fixed token.
+ * - Fine ONLY for a demo on your own machine:  a page on it can change this folder,
+ *   and spend a Google Sheet's key, if the servers were started with one.
+ *   The fixed token, written in the demo's own page, never stopped that either.
  */
 export class DemoGuard extends SRV.Guard {
   constructor() {
     super({ token: DEMO_TOKEN })
   }
 
-  /** The token, from a local page. */
+  /** Any local page;  anything else that isn't a page, with the token. */
   checkWrite(request: SRV.Request): void {
-    if (request.get("x-server-token") !== DEMO_TOKEN) throw new SRV.HttpError(403, "bad token")
     const origin = request.get("origin")
-    if (origin && !LOCAL_ORIGIN.test(origin)) throw new SRV.HttpError(403, "wrong origin")
+    if (origin) {
+      if (!LOCAL_ORIGIN.test(origin)) throw new SRV.HttpError(403, "wrong origin")
+      return
+    }
+    if (request.get("x-server-token") !== DEMO_TOKEN) throw new SRV.HttpError(403, "bad token")
   }
 }
 

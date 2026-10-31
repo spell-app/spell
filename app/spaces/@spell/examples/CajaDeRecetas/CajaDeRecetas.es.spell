@@ -1,4 +1,5 @@
-// La ÚNICA línea que cambia otro servidor:  prueba "una sala en vivo en ...", "un servicio web en ...", "una hoja en ..."
+// Dónde se guardan las recetas:  en este navegador, sin ningún servidor.
+// Para guardarlas en otro lugar, cambia esta línea:  prueba "una sala en vivo en ...", "un servicio web en ...", "una hoja en ..."
 recetario familiar es este dispositivo
 
 una "receta" es una vista:
@@ -25,16 +26,16 @@ caja de recetas es una aplicación:
 		limpiar el borrador
 	- para dibujarla:
 		<ui-form value={eso} class="box">
-			<ui-input name="búsqueda" class="search" aria-label="Búsqueda"/>
-			<ui-input name="borrador" class="draft" aria-label="Receta nueva"/>
-			<ui-button class="add" onClick={agregar el borrador}>Agregar</ui-button>
+			<ui-input name="borrador" class="draft" label="Receta nueva" aria-label="Receta nueva"/>
+			<ui-button class="add" disabled={el borrador es ""} onClick={agregar el borrador}>Agregar</ui-button>
+			<ui-input name="búsqueda" class="search" label="Buscar" aria-label="Buscar"/>
 		</ui-form>
 		para cada receta en las coincidencias
 			dibujar la receta
 		mientras espera:
 			<ui-loader class="waiting"/>
 		si no hay ninguna:
-			<ui-text class="none">Todavía no hay recetas.</ui-text>
+			<ui-text class="none">{"Todavía no hay recetas. Agrega la primera." si la búsqueda es "" sino "Ninguna receta coincide con tu búsqueda."}</ui-text>
 		si falla:
 			<ui-message class="failed" color="red">
 				No se puede llegar al recetario.

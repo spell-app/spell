@@ -1,4 +1,7 @@
-// The ONE line a different back-end changes:  try "a live room at ...", "a web service at ...", "a sheet at ..."
+// Where the recipes are kept:  in this browser, so no server is involved.
+// To keep them elsewhere, change this ONE line.  With "yarn tsx scripts/recipe-servers.ts" running, try:
+//   family cookbook is a folder at "http://127.0.0.1:4791/api/places/recipes"
+//   family cookbook is a live room at "http://127.0.0.1:4791/api/rooms/recipes"
 family cookbook is this device
 
 a "recipe" is a view:
@@ -25,16 +28,16 @@ recipe box is an app:
 		clear the draft
 	- to draw it:
 		<ui-form value={it} class="box">
-			<ui-input name="search" class="search" aria-label="Search"/>
-			<ui-input name="draft" class="draft" aria-label="New recipe"/>
-			<ui-button class="add" onClick={add the draft}>Add</ui-button>
+			<ui-input name="draft" class="draft" label="New recipe" aria-label="New recipe"/>
+			<ui-button class="add" disabled={the draft is ""} onClick={add the draft}>Add</ui-button>
+			<ui-input name="search" class="search" label="Search" aria-label="Search"/>
 		</ui-form>
 		for each recipe in the matches
 			draw the recipe
 		while waiting:
 			<ui-loader class="waiting"/>
 		if there are none:
-			<ui-text class="none">No recipes yet. Add the first one.</ui-text>
+			<ui-text class="none">{"No recipes yet. Add the first one." if the search is "" otherwise "No recipes match your search."}</ui-text>
 		if that fails:
 			<ui-message class="failed" color="red">
 				Can't reach the cookbook right now.
