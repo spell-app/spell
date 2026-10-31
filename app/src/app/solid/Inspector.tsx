@@ -1292,7 +1292,7 @@ function PropertiesCard(): JSX.Element {
       >
         {(part) => (
           // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
-          <ui-property-editor schema={part.schema} value={part.value} padding="compact" show-defaults="">
+          <ui-property-editor schema={part.schema} value={part.value} compact="" show-defaults="">
             <Show when={part.layout}>
               {(layout) => (
                 <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>

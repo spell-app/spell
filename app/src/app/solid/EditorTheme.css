@@ -1,17 +1,16 @@
 /*
  * Look of the editor's chrome in every theme of the set (`EditorTheme.tsx`):  Spell, Glass, Fruity, Merlot, Paper,
  * Midnight, Crisp and Pop.
- * - The shape every theme shares (below, "Every theme"):  a floating top bar, panels with gaps and rounded corners,
+ * - The shape every theme shares (below, "Every theme"):  a top bar joined to the window (`<AppMenu>`, Spell UI's
+ *   `<ui-menu appearance="header">`), panels with gaps and rounded corners under it,
  *   each panel's menu a plain header over a hairline.
  * - Its colours, corners, shadows and blur are the THEME's own bar and panel tokens (epic `debut` P17, J89),
  *   the ones the epic pages' bars and Spell UI's panels read:
- *   - the top bar:  a bar at rest (`--ui-bar-rest-background`, `--ui-bar-rest-filter`), as nothing scrolls under it;
- *     else the theme's bar (`--ui-bar-background`, `--ui-bar-filter`);  else its surface
  *   - a panel:  `--ui-panel-radius`, `--ui-panel-shadow`;  else the theme's large radius and raised shadow
+ *   - its glass (Glass's and Fruity's, epic `editor` P5):  `--ui-panel-pane-background`, `-filter`, `-header-background`
  *   - a theme with none of them still dresses the chrome, from its plain tokens
  * - What's the editor's alone is keyed on the theme's name, `<html data-spell-theme>`, which `EditorTheme` sets:
- *   - Glass and Fruity:  the glass chrome, frosted panels clearer than their headers, the top bar a pill
- *   - Spell:  the bar has no box, on the brand's pale page
+ *   - Spell:  the bar has no fill or line, on the brand's pale page
  *   - Merlot:  flat panels joined by hairlines, edge to edge
  *   - every theme:  the code see-through, on its panel
  *   - Paper, Midnight, Crisp and Pop (epic `debut` P20) need nothing of their own:  their bar and panel tokens say it
@@ -26,21 +25,16 @@
 *******************************/
 
 :root[data-spell-theme] {
-  /* room round the page, and between the bar and the panels, and between panels */
-  --spell-page-padding: 14px;
-  --spell-gap: 14px;
-  /* the top bar:  a bar at rest, as the theme draws one */
-  --spell-bar-background: var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)));
-  --spell-bar-filter: var(--ui-bar-rest-filter, var(--ui-bar-filter, none));
-  --spell-bar-border: 0 solid transparent;
-  --spell-bar-radius: var(--ui-panel-radius, var(--ui-radius-l));
-  /* a theme without panel shadows (Spell, Merlot):  a bar flat on the page */
-  --spell-bar-shadow: var(--ui-panel-shadow, none);
+  /* room round the panels, under the bar, and between panels */
+  --spell-page-padding: 8px;
+  --spell-gap: 8px;
   /* a panel, and its header (a panel's menu) */
   --spell-pane-radius: var(--ui-panel-radius, var(--ui-radius-l));
   --spell-pane-shadow: var(--ui-panel-shadow, var(--ui-shadow-raised));
-  --spell-pane-filter: none;
-  --spell-header-background: transparent;
+  --spell-pane-background: var(--ui-panel-pane-background, var(--ui-surface));
+  --spell-pane-border-color: var(--ui-panel-pane-border-color, var(--ui-border-color));
+  --spell-pane-filter: var(--ui-panel-pane-filter, none);
+  --spell-header-background: var(--ui-panel-pane-header-background, transparent);
   /* the views show the panel through them */
   --spell-view-background: transparent;
 }
@@ -48,21 +42,6 @@
 /*******************************
      Each theme's own, the editor's alone
 *******************************/
-
-/* Glass and Fruity:  frosted panels over the page (Fruity's wallpaper) */
-:root:is([data-spell-theme="glass"], [data-spell-theme="fruity"]) {
-  /* a pane's body clearer than its header (Owen:  "The panel bodies used to be less opaque than the header, I liked
-     that") */
-  --spell-pane-background: var(--glass-surface);
-  --spell-pane-border-color: var(--glass-edge);
-  --spell-pane-filter: var(--glass-blur);
-  /* a panel's header a wash of the theme's purple:  the frosted glass draws its top edge whiter than the rest
-     (the blur reaches past the panel), so a see-through header stood out near-white (Owen, epic `elemental-spell` C39) */
-  --spell-header-background: color-mix(in oklab, var(--glass-accent-wash) 50%, transparent);
-  /* the top bar a full pill:  its ends follow the round avatar 9px inside them, at any height the bar takes
-     (Owen's pick, epic `debut` P17, Q5:  its 14px corners were less round than the 28px avatar inside) */
-  --spell-bar-radius: 999px;
-}
 
 /*
  * the running app's pane has NO background, in every theme:  the app (a program, a notebook) sits straight on the page
@@ -104,12 +83,12 @@
   --vscode-editorGutter-background: transparent;
 }
 
-/* Spell:  white cards with soft shadows on the brand's pale page;  the bar has no box */
+/* Spell:  white cards with soft shadows on the brand's pale page;  the bar has no fill or line */
 :root[data-spell-theme="spell"] {
   --spell-page-padding: 16px 20px 20px;
   --spell-gap: 16px;
-  --spell-bar-background: transparent;
-  --spell-bar-border: 1px solid transparent;
+  --ui-menu-header-bar-background: transparent;
+  --ui-menu-header-bar-border: 1px solid transparent;
   /* a panel's edge:  the brand card's hairline round its soft shadow, so a white panel shows on the pale page */
   --spell-pane-shadow: 0 0 0 1px var(--spell-border-subtle), var(--ui-shadow-raised);
 }
@@ -118,9 +97,8 @@
 :root[data-spell-theme="merlot"] {
   --spell-page-padding: 0;
   --spell-gap: 0;
-  --spell-bar-radius: 0px;
-  /* the bar a panel-coloured strip (below), though Merlot's bars over a docs page are its page's colour (Q2) */
-  --spell-bar-background: var(--ui-surface);
+  /* the bar a panel-coloured strip over its hairline, though Merlot's bars over a docs page are its page's colour (Q2) */
+  --ui-menu-header-bar-background: var(--ui-surface);
   --spell-pane-radius: 0px;
   --spell-pane-shadow: none;
 }
@@ -130,35 +108,21 @@
 *******************************/
 
 :root[data-spell-theme] {
-  /* the page:  room round it, a gap under the bar */
+  /* the page:  no room of its own, as the bar runs to the window's edges;  the room is round the panels under it */
   & .SpellPage.fill-window {
     box-sizing: border-box;
-    padding: var(--spell-page-padding);
-    gap: var(--spell-gap);
+    padding: 0;
     /* the gap between panels is the panel's own spacing, so its sizers and spacers are the gap too */
     --spell-tight-padding: var(--spell-gap);
   }
   & .SpellPage > .SplitPanel.spaced {
-    padding: 0;
+    padding: var(--spell-page-padding);
   }
 
-  /* the top bar:  a floating box of its own */
+  /* the top bar's ends:  the hat and the avatar line up with the panels' edges under them, the end items' own room
+     (8px and 6px) making up the rest */
   & ui-menu.AppMenu::part(menu) {
-    /* the page's width, no wider:  an attached menu reaches 1px past each side (its border's room), which put Merlot's
-       edge-to-edge bar 1px off the screen and the page 2px too wide (391 x 847 on a 390 x 844 phone) */
-    width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
-    min-height: 46px;
-    /* its ends as close as its top and bottom:  the hat and the avatar each 11px from its edge (Owen:  "less
-       padding start/end of bar");  the end items' own room makes up the rest */
-    padding-inline: 4px;
-    background: var(--spell-bar-background);
-    border: var(--spell-bar-border);
-    border-radius: var(--spell-bar-radius);
-    box-shadow: var(--spell-bar-shadow);
-    -webkit-backdrop-filter: var(--spell-bar-filter);
-    backdrop-filter: var(--spell-bar-filter);
+    padding-inline: max(0px, calc(var(--spell-gap) - 8px)) max(0px, calc(var(--spell-gap) - 6px));
   }
   /* its sections take the room their items need, never less:  the hat goes first */
   & ui-menu.AppMenu > ui-menu.third::part(menu) {
@@ -216,11 +180,6 @@
   & ui-menu.PanelMenu ui-item::part(item)::before {
     width: 0;
   }
-}
-
-/* Merlot's bar:  a panel-coloured strip over a hairline, as Studio's board drew it */
-:root[data-spell-theme="merlot"] ui-menu.AppMenu::part(menu) {
-  border-bottom: 1px solid var(--ui-border-color);
 }
 
 /*

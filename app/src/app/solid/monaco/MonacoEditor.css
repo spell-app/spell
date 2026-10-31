@@ -18,10 +18,19 @@
   --vscode-editorSuggestWidget-background: var(--spell-popup-background);
   --vscode-editorSuggestWidget-foreground: var(--spell-popup-color);
   --vscode-editorSuggestWidget-border: var(--spell-popup-border);
-  --vscode-editorSuggestWidget-selectedBackground: var(--ui-menu-active-background, var(--ui-surface-raised));
-  --vscode-editorSuggestWidget-selectedForeground: var(--ui-menu-active-color, var(--spell-popup-color));
+  --vscode-editorSuggestWidget-selectedBackground: var(
+    --ui-menu-active-fill,
+    var(--ui-menu-active-background, var(--ui-surface-raised))
+  );
+  --vscode-editorSuggestWidget-selectedForeground: var(
+    --ui-menu-active-fill-color,
+    var(--ui-menu-active-color, var(--spell-popup-color))
+  );
   --vscode-editorSuggestWidget-highlightForeground: var(--ui-primary-text);
-  --vscode-editorSuggestWidget-focusHighlightForeground: var(--ui-menu-active-color, var(--ui-primary-text));
+  --vscode-editorSuggestWidget-focusHighlightForeground: var(
+    --ui-menu-active-fill-color,
+    var(--ui-menu-active-color, var(--ui-primary-text))
+  );
   --vscode-textCodeBlock-background: transparent;
 
   & .monaco-hover,

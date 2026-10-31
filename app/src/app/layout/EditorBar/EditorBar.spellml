@@ -1,0 +1,34 @@
+# The editor's top bar
+Joined to the top of the window, with three sections:
+the project's menu and the app's menus, then Run and Edit in the middle, then the tools and you.
+What's in each is still the editor's own, `EditorToolbar` in `SpellEditor.tsx`:  each is a thing here that draws itself.
+
+<spell-app "editor bar">
+	<property "project menu" description="The project's menu:  Spell's hat, and its name">a thing</>
+	<property "app menus" description="File, Edit, View, Run and Help">a thing</>
+	<property "mode buttons" description="Run and Edit">a thing</>
+	<property "tools" description="Inspect app and the Inspector's menu in Edit, then Restart and the theme">a thing</>
+	<property "you" description="The person's own menu">a thing</>
+
+	<draw>
+		<ui-menu appearance="header" class="AppMenu tight EditorBar">
+			<ui-menu position="left" class="third side">
+				{draw its project menu}
+				{draw its app menus}
+				<ui-item class="spring no-border"/>
+			</ui-menu>
+			<ui-menu position="left" class="third">
+				<ui-item class="spring no-border"/>
+				{draw its mode buttons}
+				<ui-item class="spring no-border"/>
+			</ui-menu>
+			<ui-menu position="right" class="third side BarTools">
+				<ui-item class="spring no-border"/>
+				<ui-menu appearance="capsule">
+					{draw its tools}
+				</ui-menu>
+				{draw its you}
+			</ui-menu>
+		</ui-menu>
+	</draw>
+</spell-app>

@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import path from "node:path"
 import solid from "@solidjs/vite-plugin"
@@ -41,6 +42,7 @@ export const TOP_REPO = (() => {
  *   (`vitest`:  node, so `@solidjs/web`'s server build, `renderToString`).
  * - `standardDecorators()` FIRST:  it and the Solid plugin are both `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
+ * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spellml`.
  * - `iconPacks`:  a BUILD that bundles `spell-ui` emits its built-in icon packs
  *   beside the chunk that loads them (`iconPacksBesideBuiltIns()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
@@ -52,7 +54,8 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
   const plugins: PluginOption[] = [
     standardDecorators(),
     packageVersion(import.meta.dirname),
-    solid({ exclude: [NOT_SOLID_SOURCE] })
+    solid({ exclude: [NOT_SOLID_SOURCE] }),
+    compiledSpell()
   ]
   if (iconPacks) plugins.push(iconPacksBesideBuiltIns())
   return {
@@ -254,6 +257,35 @@ function iconPacksBesideBuiltIns(): Plugin {
       // `as unknown`:  spell-ui has its own `vite` in its `node_modules` (I59), so its `Plugin` type is a different one
       const emit = emitIconPacks(dir) as unknown as { generateBundle(this: unknown, ...args: unknown[]): void }
       emit.generateBundle.call(this, options, bundle, isWrite)
+    }
+  }
+}
+
+/** The editor's layout pieces:  any other `.spellml` is a program's, read as text (a test's `?raw`). */
+const LAYOUT_FOLDER = "/src/app/layout/"
+
+/**
+ * A `.spellml` file in the layout's folder, imported, is its project's compiled javascript, as text:  the editor's own layout pieces,
+ * in Spell (`layoutSpell.ts`).
+ * - Its folder is a project of its own:  this runs `spell compile <folder> --stdout`, which writes nothing.
+ * - Compiled in a process of its own, as the preview build compiles, so no config loads the parser.
+ * - A piece that doesn't compile stops the build, saying why:  a dev server shows it on the page.
+ * - Text, not a module:  it can only run on a copy of the runtime, which isn't in this bundle.
+ */
+function compiledSpell(): Plugin {
+  return {
+    name: "spell-app:compiled-spell",
+    enforce: "pre",
+    load(id) {
+      const file = id.split("?")[0]!
+      if (!file.endsWith(".spellml") || !file.includes(LAYOUT_FOLDER)) return null
+      this.addWatchFile(file)
+      const bin = path.join(TOP_REPO, "bin/spell.mjs")
+      const { status, stdout, stderr } = spawnSync(process.execPath, [bin, "compile", path.dirname(file), "--stdout"], {
+        encoding: "utf8"
+      })
+      if (status !== 0) this.error(`${file} doesn't compile:\n${stderr}`)
+      return `export default ${JSON.stringify(stdout)}`
     }
   }
 }

@@ -169,6 +169,34 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-types-bar" label="Window Bar" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A menu can be a whole bar across the top of a window or a page:  flat and short, over a hairline, in the theme's bar.  An app's top bar is this.  With `segmented` too, `header` is instead the row of a pane's bar:  SEE ui-panel."
+                >
+                  <ui-menu appearance="header" aria-label="Window bar">
+                    <ui-item link="#file">File</ui-item>
+                    <ui-item link="#edit">Edit</ui-item>
+                    <ui-item link="#view">View</ui-item>
+                    <ui-menu position="right">
+                      <ui-item link="#help">Help</ui-item>
+                    </ui-menu>
+                  </ui-menu>
+                </ui-example>
+                <ui-example
+                  description="A nested menu can group a bar's actions on one piece of glass:  `appearance=&quot;capsule&quot;`."
+                >
+                  <ui-menu appearance="header" aria-label="Window bar with a capsule">
+                    <ui-item link="#file">File</ui-item>
+                    <ui-menu position="right">
+                      <ui-menu appearance="capsule">
+                        <ui-item link="#one" icon="crosshairs" aria-label="Inspect"></ui-item>
+                        <ui-item link="#two" icon="redo" aria-label="Restart"></ui-item>
+                      </ui-menu>
+                    </ui-menu>
+                  </ui-menu>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined."

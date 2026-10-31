@@ -9,6 +9,8 @@
     --glass-accent-light: #6a3fd6;
     --glass-accent-dark: #b79bff;
     --glass-accent-wash: light-dark(#7a4fe01f, #b79bff33);
+    --glass-accent-solid: light-dark(#6a3fd6, #7650e3);
+    --glass-on-accent: #ffffff;
     --glass-accent-text: light-dark(#5a35c4, #d3c2ff);
     --glass-surface: light-dark(#ffffff73, #26243073);
     --glass-surface-strong: light-dark(#ffffff9e, #1e1c2694);
@@ -18,9 +20,12 @@
     --glass-track: light-dark(#7676801f, #7676803d);
     --glass-track-solid: light-dark(#e9e9ee, #3a3846);
     --glass-blur: blur(28px) saturate(1.7);
+    --glass-app-font-size: 13px;
+    --glass-app-control-height: 28px;
+    --glass-content-font-size: 15px;
     --glass-bar: light-dark(#fffffff2, #1e1c26f2);
     --glass-wallpaper: none;
-    --ui-font-size: 15px;
+    --ui-font-size: var(--glass-content-font-size);
     --ui-font-family:
       -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", "Noto Sans", Cantarell, Ubuntu,
       "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
@@ -76,12 +81,17 @@
     --ui-link: light-dark(#0066d6, #4da3ff);
     --ui-link-hover: light-dark(#004fa8, #7dbcff);
     --ui-focus-width: 3px;
+    --ui-focus-offset: 1px;
     --ui-focus-color: light-dark(#7c5ae0, var(--glass-accent-dark));
     --ui-focus-border: var(--glass-accent-dark);
     --ui-shadow-ink: light-dark(#281e50, #000000);
     --ui-shadow-subtle: 0 1px 2px light-dark(#0000000f, #0000004d);
-    --ui-shadow-raised: 0 1px 2px light-dark(#281e500f, #00000040), 0 8px 30px light-dark(#281e501f, #00000059);
-    --ui-shadow-floating: 0 2px 4px light-dark(#281e500f, #0000004d), 0 16px 40px light-dark(#281e5029, #00000073);
+    --ui-shadow-raised:
+      inset 0 0.5px 0 light-dark(#ffffffb3, #ffffff26), 0 1px 2px light-dark(#281e500f, #00000040),
+      0 8px 30px light-dark(#281e501f, #00000059);
+    --ui-shadow-floating:
+      inset 0 0.5px 0 light-dark(#ffffffb3, #ffffff26), 0 2px 4px light-dark(#281e500f, #0000004d),
+      0 16px 40px light-dark(#281e5029, #00000073);
     --ui-shadow-floating-hover:
       0 2px 6px light-dark(#281e5014, #00000059), 0 24px 56px light-dark(#281e5038, #0000008c);
     --ui-shadow-overlay: var(--ui-shadow-floating-hover);
@@ -122,7 +132,12 @@
     --ui-menu-hover-background: light-dark(#0000000d, #ffffff12);
     --ui-menu-active-background: var(--glass-accent-wash);
     --ui-menu-active-color: var(--glass-accent-text);
-    --ui-menu-segmented-background: var(--glass-track-solid);
+    --ui-menu-active-fill: var(--glass-accent-solid);
+    --ui-menu-active-fill-color: var(--glass-on-accent);
+    --ui-menu-arrow-color: var(--glass-accent-solid);
+    --ui-menu-capsule-background: var(--glass-track);
+    --ui-menu-capsule-height: var(--glass-app-control-height);
+    --ui-menu-segmented-background: var(--glass-track);
     --ui-menu-segmented-border: none;
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;
@@ -152,6 +167,10 @@
     --ui-section-sticky-background: var(--glass-surface-strong);
     --ui-panel-radius: var(--ui-radius-l);
     --ui-panel-shadow: var(--ui-shadow-raised);
+    --ui-panel-pane-background: var(--glass-surface);
+    --ui-panel-pane-border-color: var(--glass-edge);
+    --ui-panel-pane-filter: var(--glass-blur);
+    --ui-panel-pane-header-background: color-mix(in oklab, var(--glass-accent-wash) 50%, transparent);
     --ui-message-radius: var(--ui-radius-m);
     --ui-toast-radius: var(--ui-radius-l);
     --ui-toast-background: var(--glass-surface-strong);
@@ -200,8 +219,8 @@
     --ui-docs-nav-band-background: transparent;
     --ui-docs-nav-band-color: var(--ui-text-muted);
     --ui-docs-nav-border-color: var(--glass-hairline);
-    --ui-docs-nav-current-background: var(--glass-accent-wash);
-    --ui-docs-nav-current-color: var(--glass-accent-text);
+    --ui-docs-nav-current-background: var(--glass-accent-solid);
+    --ui-docs-nav-current-color: var(--glass-on-accent);
     --ui-example-frame-background: light-dark(#ffffff59, #1e1c2659);
     --ui-example-frame-border: 1px solid var(--glass-edge);
     --ui-example-frame-filter: saturate(1.7);

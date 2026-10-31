@@ -140,6 +140,7 @@
     --ui-disabled-opacity: 0.45;
     --ui-hover-delay: 800ms;
     --ui-control-cursor: pointer;
+    --ui-control-height: 0px;
     --ui-duration-fast: 100ms;
     --ui-duration-normal: 200ms;
     --ui-duration-slow: 300ms;
@@ -306,6 +307,7 @@
       --ui-disabled-opacity: 0.45;
       --ui-hover-delay: 800ms;
       --ui-control-cursor: pointer;
+      --ui-control-height: 0px;
       --ui-duration-fast: 100ms;
       --ui-duration-normal: 200ms;
       --ui-duration-slow: 300ms;

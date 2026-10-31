@@ -149,9 +149,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return this.parentMenu?.topMenu ?? this
   }
 
-  /** A sub-menu's classes:  `[position] menu`, no `ui`. */
+  /** A sub-menu's classes:  `[position] menu`, no `ui`;  `capsule` when it's one (`appearance`). */
   private get subMenuClasses(): string {
-    return [this.position, this.vocabulary.noun].filter(Boolean).join(" ")
+    return [this.position, this.hasLook("capsule") && "capsule", this.vocabulary.noun].filter(Boolean).join(" ")
   }
 
   ////////////////

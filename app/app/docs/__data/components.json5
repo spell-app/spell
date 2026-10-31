@@ -1038,7 +1038,7 @@
         "shell"
       ],
       "aka": [],
-      "description": "Top-level app menu, attached to the top of the page.",
+      "description": "Top-level app menu, joined to the top of the window:  a `<ui-menu appearance=\"header\">`, which draws the bar.",
       "noun": "AppMenu",
       "attributes": [],
       "slots": [],
@@ -3223,10 +3223,6 @@
         {
           "name": "ConsoleToolbar",
           "file": "src/app/solid/ConsoleViewer.tsx"
-        },
-        {
-          "name": "EditorToolbar",
-          "file": "src/app/pages/SpellEditor.tsx"
         },
         {
           "name": "OutputToolbar",
@@ -6453,6 +6449,12 @@
           "default": "pointer",
           "description": "The cursor over a control:  a button, a menu item, a tab.",
           "type": "other"
+        },
+        {
+          "name": "--ui-control-height",
+          "default": "0px",
+          "description": "A control's height at the medium size;  `0px`:  its padding says how tall it is.",
+          "type": "length"
         },
         {
           "name": "--ui-duration-fast",

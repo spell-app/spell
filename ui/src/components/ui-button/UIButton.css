@@ -185,7 +185,11 @@
     /* less the group's inset (`--_buttons-trim`), so a group stands as tall as a lone button */
     padding-block: max(
       0px,
-      var(--_button-pad-block, var(--_ui-button-padding-block)) * var(--_button-density, 1) - var(--_buttons-trim, 0px)
+      max(
+          var(--_button-pad-block, var(--_ui-button-padding-block)),
+          (var(--ui-control-height, 0px) * var(--ui-scale, 1) - 1lh) / 2
+        ) *
+        var(--_button-density, 1) - var(--_buttons-trim, 0px)
     );
     padding-inline-start: calc(
       var(--_button-pad-inline, var(--_ui-button-padding-inline)) * var(--_button-density, 1) +

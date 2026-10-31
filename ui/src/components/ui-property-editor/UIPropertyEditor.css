@@ -63,6 +63,7 @@
     /* its controls size their text from the base size:  the editor's */
     --ui-font-size: var(--_ui-property-editor-font-size);
     /* controls about 26px tall */
+    --ui-control-height: 0px;
     --ui-input-padding-block: 0.3em;
     --ui-input-padding-inline: 0.6em;
     --ui-select-padding-block: 0.3em;

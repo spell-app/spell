@@ -1070,7 +1070,7 @@ function dialogs() {
  * - a build:  its own entry, at a FIXED name -- see `vite.config.ts`
  * - NOTE: NOT `new URL(..., import.meta.url)`:  vite takes that for an asset to bundle, and inlines it.
  */
-function runtimeUrl(): string {
+export function runtimeUrl(): string {
   if (import.meta.env.DEV)
     return `${import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)}runner/spellRuntime.ts`
   return new URL(`${import.meta.env.BASE_URL}spell-runtime.js`, location.href).href

@@ -589,6 +589,7 @@ export const sharedEs = {
     halfway: "media vuelta",
     item: "elemento",
     header: "encabezado",
+    capsule: "capsula",
     divider: "divisor",
     above: "encima",
     below: "debajo",
