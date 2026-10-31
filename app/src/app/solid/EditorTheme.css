@@ -56,18 +56,18 @@
  *   background";  this replaces I48's clearer fill (the epic page drawer's 28% white)
  * - its header keeps its wash, so the pane still reads as one
  */
-:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) {
+:root[data-spell-theme] .SplitPane:has(> .AppPane) {
   background: transparent;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane)::before {
+:root[data-spell-theme] .SplitPane:has(> .AppPane)::before {
   content: none;
 }
 /* ... its title bar frosted, as every panel is:  the panel's glass, the header's wash over it (Owen:  "the titlebar should
    be frosted") */
-:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .NotebookHeader::part(title) {
+:root[data-spell-theme] .SplitPane:has(> .AppPane) .NotebookHeader::part(title) {
   background:
     linear-gradient(var(--spell-header-background), var(--spell-header-background)), var(--spell-pane-background);
   border-start-start-radius: var(--spell-pane-radius);
@@ -122,7 +122,7 @@
     /* the gap between panels is the panel's own spacing, so its sizers and spacers are the gap too */
     --spell-tight-padding: var(--spell-gap);
   }
-  & .SpellPage > .SplitPanel.spaced {
+  & .SpellPage > .EditorColumns {
     padding: var(--spell-page-padding);
   }
 
@@ -148,7 +148,7 @@
   }
 
   /* a panel:  a rounded box with its own shadow;  no white edge (Owen:  "remove white border in splitpanel") */
-  & .SplitPanel > .SplitPanelPane {
+  & .SplitPane {
     border: 0;
     border-radius: var(--spell-pane-radius);
     box-shadow: var(--spell-pane-shadow);
@@ -156,15 +156,18 @@
     isolation: isolate;
   }
   /* ... its corners on the window's edges:  the left and right columns' outer sides, every column's bottom */
-  & .SpellPage > .SplitPanel.spaced > .SplitPanel:first-child .SplitPanelPane {
+  & .EditorColumns > :nth-child(1 of :not([hidden])):is(.SplitPane),
+  & .EditorColumns > :nth-child(1 of :not([hidden])) .SplitPane {
     border-start-start-radius: var(--spell-window-radius);
     border-end-start-radius: var(--spell-window-radius);
   }
-  & .SpellPage > .SplitPanel.spaced > .SplitPanel:last-child .SplitPanelPane {
+  & .EditorColumns > :nth-last-child(1 of :not([hidden])):is(.SplitPane),
+  & .EditorColumns > :nth-last-child(1 of :not([hidden])) .SplitPane {
     border-start-end-radius: var(--spell-window-radius);
     border-end-end-radius: var(--spell-window-radius);
   }
-  & .SpellPage > .SplitPanel.spaced > .SplitPanel .SplitPanelPane:last-child {
+  & .EditorColumns > .SplitPane,
+  & .EditorColumns .SplitPane:nth-last-child(1 of :not([hidden])) {
     border-end-start-radius: var(--spell-window-radius);
     border-end-end-radius: var(--spell-window-radius);
   }
@@ -174,7 +177,7 @@
    * menu) couldn't leave it (Owen:  "This is a problem I've been seeing with menus for a while, we need to use
    * position:fixed so it's always visible")
    */
-  & .SplitPanel > .SplitPanelPane::before {
+  & .SplitPane::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -211,9 +214,9 @@
  * - NOT a wider drag area round it (`::after`, 3px either side):  on a phone the panes stack, and it ran 3px off the
  *   screen
  */
-:root[data-spell-theme="merlot"] .SpellPage :is(.SplitPanel, .SplitPanel.InspectorSplit) > .SplitPanelSizer {
-  flex-basis: 1px;
-  background: var(--ui-border-color);
+:root[data-spell-theme="merlot"] .SpellPage ui-split-panel {
+  --ui-split-panel-bar-size: 1px;
+  --ui-split-panel-bar-background: var(--ui-border-color);
 }
 
 /*******************************

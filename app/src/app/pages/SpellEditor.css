@@ -8,7 +8,6 @@
 @import "spell/ui/styles/media.css";
 
 /* the Inspector's pane:  never narrower than 300px, whatever a drag asks (Owen) */
-.SplitPanelPane:has(> .InspectorPane),
 .InspectorPane {
   min-width: 300px;
 }
@@ -54,13 +53,13 @@
  *   button and its menu of cards don't
  */
 @media (--ui-mobile) {
-  #SpellEditor > .SplitPanel.horizontal {
+  #SpellEditor > .EditorColumns {
     flex-direction: column;
   }
-  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer {
+  #SpellEditor > .EditorColumns::part(bar) {
     pointer-events: none;
   }
-  #SpellEditor > .SplitPanel.horizontal > .SplitPanelSizer:has(+ .InspectorPane) {
+  #SpellEditor > .EditorColumns:has(> .InspectorPane)::part(last-bar) {
     display: none;
   }
 }

@@ -22,11 +22,11 @@ import {
   ProgramPanelShown,
   ProjectBarMenu,
   SpellPage,
-  SplitPanel,
   ThemeMenu,
   TreeRoot,
   tracked,
   trackProjectRoot,
+  rememberedSizes,
   type Mode
 } from "spell/app/app/solid"
 import { editor } from "spell/app/app/editor"
@@ -57,7 +57,8 @@ import "./SpellEditor.css"
  *   - A phone only runs (epic `debut` P32):  Run, whatever the address says.
  * - The Program panel (`<ProgramPanel>`), while View › Program Panel shows it (`ProgramPanelShown`), sits under
  *   the code:  its output and compiled code.  Its Close hides it.
- * - Showing or hiding the panel never redraws the code or the program:  the panel keeps each pane by its node.
+ * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
+ * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
@@ -70,26 +71,34 @@ export function SpellEditor(props: { mode: Mode }) {
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const layout = () => columnsFor(isRunning(), Inspector.isOpen)
+  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen))
+  const codeRows = rememberedSizes(() => ({
+    id: "spellEditor-left",
+    sizes: showsProgramPanel() ? "65%" : "100%"
+  }))
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
-      <SplitPanel id={layout().id} columns={layout().columns} resizable fluid spaced="tightly">
+      <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable on-ui-changed={columns.keep}>
         <Show when={!isRunning()}>
-          <SplitPanel id="spellEditor-left" rows={showsProgramPanel() ? "65%" : "100%"} resizable rounded>
-            <InputRoot />
+          <ui-split-panel rows={codeRows.sizes()} resizable on-ui-changed={codeRows.keep}>
+            <div class="SplitPane">
+              <InputRoot />
+            </div>
             <Show when={showsProgramPanel()}>
-              <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+              <div class="SplitPane">
+                <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+              </div>
             </Show>
-          </SplitPanel>
+          </ui-split-panel>
         </Show>
-        <SplitPanel rows rounded>
+        <div class="SplitPane">
           <AppPane />
-        </SplitPanel>
+        </div>
         <Show when={Inspector.isOpen}>
           <InspectorPane />
         </Show>
-      </SplitPanel>
+      </ui-split-panel>
     </SpellPage>
   )
 }
@@ -228,10 +237,10 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; columns: string | true } {
+function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; sizes: string } {
   const id = `spellEditor-columns${isRunning ? "-run" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting) return { id, columns: true }
-  return { id, columns: isRunning ? "*,380px" : "*,*,380px" }
+  if (!isInspecting) return { id, sizes: "" }
+  return { id, sizes: isRunning ? "*,380px" : "*,*,380px" }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */

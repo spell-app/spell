@@ -45,7 +45,7 @@ const RULES: [where: RegExp, allowed: RegExp][] = [
   // the app's own, to be dragged
   [/solitaire-/, /^(grab|default)$/],
   // the bars between panes
-  [/SplitPanel/, /^(default|col-resize|row-resize|ns-resize)$/],
+  [/ui-split-panel/, /^(default|col-resize|row-resize|ns-resize)$/],
   [/./, /^(default|col-resize|row-resize|ns-resize)$/]
 ]
 

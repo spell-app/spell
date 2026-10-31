@@ -82,12 +82,12 @@
               <ui-content>
                 <ui-code language="typescript"
                   ><script type="text/plain">
-                    <SplitPanel id="spellEditor-left" rows={showsProgramPanel() ? "65%" : "100%"} resizable rounded>
-                      <InputRoot />
+                    <ui-split-panel rows={codeRows.sizes()} resizable on-ui-changed={codeRows.keep}>
+                      <div class="SplitPane"><InputRoot /></div>
                       <Show when={showsProgramPanel()}>
-                        <ProgramPanel onClose={() => ProgramPanelShown.set(false)} />
+                        <div class="SplitPane"><ProgramPanel onClose={() => ProgramPanelShown.set(false)} /></div>
                       </Show>
-                    </SplitPanel>
+                    </ui-split-panel>
                   </script></ui-code
                 >
               </ui-content>

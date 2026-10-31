@@ -27,7 +27,7 @@ and in the app's build folder, `app/` at the app folder's root.
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
   - `spell/app/app/solid` is the app's UI, all Solid (P8).
-    - the pages' shell (`SpellPage`, `SplitPanel`, `AppRoot`)
+    - the pages' shell (`SpellPage`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
     - `cellsBridge.ts` makes every Solid computation follow spell cells:
       spell Things, `SP.*`, the editor (P11).
