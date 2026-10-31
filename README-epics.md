@@ -667,7 +667,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `windows.settings` | not written:  `{}` | VS Code settings every window file gets:  the WINDOW settings a folder's `.vscode/settings.json` can't give in a window of several folders (which TypeScript the editor runs, say;  none of Spell's repos names any today);  `epic window init` writes them into the files that exist |
 | `windowsFolder` | `"../<repo>.epics/windows"` | where the VS Code window files go;  worktree windows in its `ongoing/` |
 | `linkSessionFolders` | `true` | whether each worktree's saved Claude sessions show in every window's Claude panel |
-| `sharedFolders` | `epics`, `sagas`, `guides`, `pages` | the content folders each checkout links in at its root |
+| `sharedFolders` | `epics`, `sagas`, `guides`, `pages` | the epic repo's folders each checkout links in at its root |
 | `colors` | not written:  none | a colour for each person (by the short name `epic whoami` prints) and each agent (`codex`) on the epic pages, `{ people: { ana: "green" }, agents: { codex: "#0f8b8d" } }`:  a Spell UI colour name (red, orange, yellow, olive, green, teal, blue, violet, purple, pink, brown, grey, black), drawn from the theme so it suits light and dark, or any CSS colour;  their replies and comment-thread messages draw in it, an agent's words in the agent's;  anyone left out keeps the shared person or agent colour |
 | `editor` | not written:  `""` | the editor the tools drive, `code` (VS Code) or `cursor`, when neither this machine (`SPELL_EPIC_EDITOR`) nor the window they run in says;  `""`:  VS Code |
 | `engineFolder` | `""` | an engine checkout to link in at each checkout's root, for a repo whose own code imports the engine;  `""`:  none |
@@ -714,7 +714,7 @@ An epic's worktree is `../my-app.worktrees/<name>`, on branch `<name>`,
 cut from your LOCAL base branch, unpushed work included.
 
 Before it hands the worktree over, the hook:
-- links the content folders in, and the worktrees folder's one link to the epic folder,
+- links the epic repo's folders in, and the worktrees folder's one link to the epic folder,
   `my-app.worktrees/my-app.epics`, so a page's `../my-app.epics/...` links work from a worktree too
 - links the worktree's saved Claude sessions to the main checkout's (`linkSessionFolders`)
 - runs `installCommand` in it, when `installOnCreate` is on

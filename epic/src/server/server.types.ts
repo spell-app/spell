@@ -47,7 +47,7 @@ export const DEFAULT_EPIC_PORT = Number(process.env.SPELL_EPIC_PORT) || 4848
  * - one prefix, starting `_`, so no epic folder's own folder can take it
  * - and the templates, `/templates/...` (spell-epic's `templates/`, epic `epic-eject` T11):  NOT under `/_epic/`,
  *   since every page links the Templates page as an epic folder, `../templates/index.html` (the top bar's tab)
- *   - so the content folders can't hold a `templates/` of their own:  a repo's own templates are `repoTemplates`
+ *   - so the epic repo's folders can't hold a `templates/` of their own:  a repo's own templates are `repoTemplates`
  *     (`EpicConfig`), elsewhere
  *   - served for each repo too, at `/r/<repo>/templates/` (`EpicServer`)
  */

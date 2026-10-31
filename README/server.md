@@ -740,7 +740,7 @@ export default helloRoutes
 | --- | --- | --- |
 | `routes` | route modules, loaded in order;  each one's `setup()` runs once, before the server listens | its repo |
 | `watch` | the folders live reload watches, besides the sets', the engine routes' and the epic folder;  none named:  `epics`, `guides`, `pages` ...;  one that isn't there is skipped | its repo |
-| `writable` | the content folders pages may be saved into (`/api/files`, `/api/pages`);  none by default, so every write is a 403 | the epic folder |
+| `writable` | the epic repo's folders pages may be saved into (`/api/files`, `/api/pages`);  none by default, so every write is a 403 | the epic folder |
 | `gone` | URL prefixes answered "not found", though the epic folder still holds them | URLs |
 | `bundles` | the bundles built on demand, by output folder (above, "Bundles built on demand");  `spell bundle` reads the same list | its repo |
 | `pageScripts` | module scripts added before every page's `</body>`:  `src`, `file` (added only while it exists), `skip` (URL prefixes) | its repo, for `file` |
