@@ -10,12 +10,16 @@
  * - The same noun (`section`) and `ownsParts`:  a panel nests in a section, and a section in a panel.
  * - The class words are the section's, then `panel` (and `sub` inside another panel):
  *   `<ui-panel color="violet">` => `ui violet panel section`.
+ * - `appearance` gains `pane`, which only the panel draws.
  */
 
 import type { E } from "spell/ui/core"
 import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
 
 // NOTE:  above the vocabulary, which reads them as it's built
+
+/** The `appearance` word for a whole pane under one bar. */
+export const PANE_APPEARANCE = "pane"
 
 /** `color`'s description, as the panel uses it. */
 const COLOR_DESCRIPTION =
@@ -26,6 +30,13 @@ const COLOR_DESCRIPTION =
 const FOLD_ICON_DESCRIPTION =
   "Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's " +
   "default), or `start`, before the title."
+
+/** `appearance`'s description, as the panel uses it:  the section's words, and `pane`. */
+const APPEARANCE_DESCRIPTION =
+  "The look:  `pane`, a whole pane under one flat bar, with no box or padding of its own:  its title is the bar " +
+  "and its content fills what's left, so it can scroll by itself.  " +
+  "Put a toolbar in its `slot=\"actions\"`, and the bar's chevron, the toolbar's items and its actions read as one row.  " +
+  "Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`."
 
 /****************
  * ### `panelVocabulary`
@@ -45,6 +56,8 @@ export const panelVocabulary = {
       ? { ...spec, description: COLOR_DESCRIPTION }
       : spec.name === "fold-icon"
         ? { ...spec, description: FOLD_ICON_DESCRIPTION }
-        : spec
+        : spec.name === "appearance"
+          ? { ...spec, values: [...spec.values, PANE_APPEARANCE], description: APPEARANCE_DESCRIPTION }
+          : spec
   )
 } as const satisfies E.ComponentVocabulary

@@ -16396,7 +16396,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.",
+              "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.",
               "type": {
                 "text": "string"
               },
@@ -17130,6 +17130,26 @@
             {
               "name": "--ui-menu-thumb-duration",
               "default": "200ms"
+            },
+            {
+              "name": "--ui-menu-segmented-header-background",
+              "default": "transparent"
+            },
+            {
+              "name": "--ui-menu-segmented-header-font-size",
+              "default": "13px"
+            },
+            {
+              "name": "--ui-menu-segmented-header-item-padding",
+              "default": "0.5em 0.85em"
+            },
+            {
+              "name": "--ui-menu-segmented-header-item-color",
+              "default": "var(--ui-text-dark, var(--ui-text-color))"
+            },
+            {
+              "name": "--ui-menu-segmented-header-item-weight",
+              "default": "500"
             },
             {
               "name": "--ui-menu-segmented-pressed-shadow",
@@ -18909,7 +18929,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
+              "description": "The look:  `pane`, a whole pane under one flat bar, with no box or padding of its own:  its title is the bar and its content fills what's left, so it can scroll by itself.  Put a toolbar in its `slot=\"actions\"`, and the bar's chevron, the toolbar's items and its actions read as one row.  Closed, only the bar is left.  The section's words too:  `bordered`, `styled`, `raised`, `basic`, `drawer`.",
               "type": {
                 "text": "string"
               },
@@ -19337,6 +19357,18 @@
               "name": "--ui-panel-shadow",
               "default": "var(--spell-shadow-sm, var(--ui-shadow-raised))",
               "description": "the box shadow"
+            },
+            {
+              "name": "--ui-panel-pane-bar-height",
+              "default": "40px"
+            },
+            {
+              "name": "--ui-panel-pane-bar-padding",
+              "default": "8px"
+            },
+            {
+              "name": "--ui-panel-pane-bar-background",
+              "default": "none"
             }
           ]
         }
@@ -36846,7 +36878,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.",
+              "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`.",
               "type": {
                 "text": "string"
               },
@@ -37283,6 +37315,10 @@
             {
               "name": "--ui-toolbar-button-radius",
               "default": "50%"
+            },
+            {
+              "name": "--ui-toolbar-header-action-gap",
+              "default": "10px"
             }
           ]
         }

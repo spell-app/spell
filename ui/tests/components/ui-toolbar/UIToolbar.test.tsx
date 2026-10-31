@@ -95,6 +95,20 @@ describe("<ui-toolbar>", () => {
     await expect.poll(() => menu.classList.contains("thumbed")).toBe(true)
   })
 
+  it("`segmented header`:  no track, 13px, its items sharing the row;  the chosen one no heavier", async () => {
+    const items = `<ui-item selected>Views</ui-item><ui-item>Things</ui-item>`
+    const { host, menu } = await toolbar(400, items, 'appearance="segmented link header"')
+    expect(menu.className).toContain("header")
+    const style = getComputedStyle(menu)
+    expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(style.fontSize).toBe("13px")
+    const boxes = [...host.querySelectorAll("ui-item")].map((item) => item.shadowRoot!.querySelector("[part~=item]")!)
+    await expect.poll(() => boxes[0].getBoundingClientRect().width).toBeGreaterThan(0)
+    expect(Math.round(boxes[0].getBoundingClientRect().width)).toBe(Math.round(boxes[1].getBoundingClientRect().width))
+    expect(getComputedStyle(boxes[0]).fontWeight).toBe(getComputedStyle(boxes[1]).fontWeight)
+    expect(Math.round(menu.getBoundingClientRect().width)).toBe(400)
+  })
+
   it("its examples are accessible", async () => {
     for (const markup of Object.values(EXAMPLES)) {
       const box = await ElementFixture.render(markup)

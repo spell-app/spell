@@ -55,7 +55,7 @@ export const menuVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: [...UIT.MenuAppearances, "link", "borderless"],
+      values: [...UIT.MenuAppearances, "link", "borderless", "header"],
       // its words are Fomantic's classes as they are
       classes: {},
       replaces: [...UIT.MenuAppearances.filter((word) => word !== "segmented"), "link", "borderless"].map((word) => ({
@@ -68,7 +68,8 @@ export const menuVocabulary = {
         "`segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, " +
         "else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle " +
         "it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link " +
-        "hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, " +
+        "hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, " +
+        "with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, " +
         "`secondary`, `text`, `link`, `borderless`."
     },
     {
