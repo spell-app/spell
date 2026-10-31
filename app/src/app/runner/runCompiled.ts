@@ -117,8 +117,9 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       imports[projectId] = await url
     }
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
+    const stamped = !chain.length && options.placesFrom ? SourceMarks.stamped(source, options.placesFrom) : source
     const linkedSource = SourceMarks.inline(
-      linkModule(source, coreUrl, imports),
+      linkModule(stamped, coreUrl, imports),
       chain.length ? undefined : options.sourceMap
     )
     const url = URL.createObjectURL(new Blob([linkedSource], { type: "text/javascript" }))
@@ -167,6 +168,11 @@ export type RunCompiledOptions = {
    * - None:  the program's own `sourceMappingURL` line comes out, since a `blob:` URL can't fetch the map beside it.
    */
   sourceMap?: string
+  /**
+   * The source map to stamp the program from, so what it draws and makes says where it's written
+   * (`SourceMarks.stamped()`):  the editor's, so it can show a part's source.  None, the code as it shipped.
+   */
+  placesFrom?: string
 }
 
 /**

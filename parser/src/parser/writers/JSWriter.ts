@@ -1208,8 +1208,13 @@ export class JSWriter extends ProgramWriter {
     return this.typeNameOf(node.superType!.name)
   }
 
-  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  /** What's made, with the marks saying where it's written (`P.SourceMarks`). */
   ASTNewInstanceExpression(node: P.ASTNewInstanceExpression): string {
+    return P.SourceMarks.markMade(this.newInstance(node), node)
+  }
+
+  /** `new Type()` (empty parens) when it has no `props`, else `new Type(props)`. */
+  protected newInstance(node: P.ASTNewInstanceExpression): string {
     const props = jsText.InParens({ children: node.props ? this.write(node.props) : undefined })
     return `new ${this.write(node.type)}${props}`
   }
@@ -1491,7 +1496,7 @@ export class JSWriter extends ProgramWriter {
     if (tagError) return `null ${this.write(new P.ASTParseError(node.match, { value: tagError }))}`
     this.coreImports.add("h")
     const props = this.jsxProps(node)
-    const head = `h(${JSON.stringify(tag)}${props ? `, ${props}` : ""}`
+    const head = `h(${JSON.stringify(tag)}${P.SourceMarks.markDrawn(node)}${props ? `, ${props}` : ""}`
     const children = node.childValues.map((child) => String(this.write(child)))
     if (!children.length) return `${head})`
     const inline = children.join(", ")

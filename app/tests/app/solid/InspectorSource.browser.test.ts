@@ -12,46 +12,42 @@ import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
 import solitaire from "../../../spaces/@spell/examples/Solitaire/Solitaire.spellml?raw"
 
 /**
- * `handlersInSource()`:  the handlers an element was written with, found in the program's spell by its tag,
- * words and attributes.
+ * `handlersInSource()`:  the handlers an element was written with, read at the place the compiler marked on it.
  */
 
-const SOURCE = `
-to draw it:
-	return <div>
-		<ui-button onClick={set its percent to 15}>15%</ui-button>
-		<ui-button onClick={set its percent to 18}>18%</ui-button>
-		<ui-button appearance="basic" icon="plus" onClick={add someone}>Add someone</ui-button>
-		<ui-button part="remove" icon="close" appearance="basic" aria-label="Remove" onClick={remove it}/>
-	</div>
-`
+const FILE = "Tip.spellml"
+const SOURCE = [
+  "to draw it:",
+  "\treturn <div>",
+  "\t\t<ui-button onClick={set its percent to 15}>15%</ui-button>",
+  '\t\t<ui-button appearance="basic" icon="plus" onClick={add someone}>Add someone</ui-button>',
+  '\t\t<ui-button part="remove" aria-label="Remove" onClick={remove it}/>',
+  "\t</div>"
+].join("\n")
+const SOURCES = new Map([[FILE, SOURCE]])
 
-/** A `<tag>` element with `attributes` and `words`, as the page draws it. */
-function drawn(tag: string, attributes: Record<string, string>, words = ""): Element {
-  const element = document.createElement(tag)
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value)
-  element.textContent = words
+/** An element the compiler marked as written at `line`, `column`, in `file`. */
+function drawnAt(line: number, column: number, file = FILE): Element {
+  const element = document.createElement("ui-button")
+  element.setAttribute("data-spell-at", `${file}:${line}:${column}`)
   return element
 }
 
 describe("handlersInSource()", () => {
-  test("finds the tag with the same words:  its handlers, by event", () => {
-    expect(handlersInSource(drawn("ui-button", {}, "18%"), [SOURCE])).toEqual({ click: "set its percent to 18" })
-    expect(
-      handlersInSource(drawn("ui-button", { appearance: "basic", icon: "plus" }, "Add someone"), [SOURCE])
-    ).toEqual({
-      click: "add someone"
-    })
+  test("its tag's handlers, by event", () => {
+    expect(handlersInSource(drawnAt(2, 2), SOURCES)).toEqual({ click: "set its percent to 15" })
+    expect(handlersInSource(drawnAt(3, 2), SOURCES)).toEqual({ click: "add someone" })
+    expect(handlersInSource(drawnAt(4, 2), SOURCES)).toEqual({ click: "remove it" })
   })
 
-  test("a tag with no words:  by the attributes it has in common", () => {
-    const remove = drawn("ui-button", { part: "remove", icon: "close", appearance: "basic", "aria-label": "Remove" })
-    expect(handlersInSource(remove, [SOURCE])).toEqual({ click: "remove it" })
+  test("a tag with none:  nothing", () => {
+    expect(handlersInSource(drawnAt(1, 8), SOURCES)).toEqual({})
   })
 
-  test("nothing that matches:  nothing", () => {
-    expect(handlersInSource(drawn("ui-button", {}, "Pay"), [SOURCE])).toEqual({})
-    expect(handlersInSource(drawn("ui-input", {}), [SOURCE])).toEqual({})
+  test("no mark, or no such file, or no tag there:  nothing, never a guess", () => {
+    expect(handlersInSource(document.createElement("ui-button"), SOURCES)).toEqual({})
+    expect(handlersInSource(drawnAt(2, 2, "Other.spellml"), SOURCES)).toEqual({})
+    expect(handlersInSource(drawnAt(0, 0), SOURCES)).toEqual({})
   })
 })
 

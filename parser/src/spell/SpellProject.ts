@@ -335,7 +335,20 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    */
   static sourcePlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
     if (!(node instanceof P.ASTStatement) || node instanceof P.ASTStatementGroup) return undefined
-    const { match } = node
+    return SpellProject.placeOfMatch(node.match)
+  }
+
+  /**
+   * Where `node` came from, if it's a drawn tag or a made thing:  its file, line and column -- see `P.SourceMarks`.
+   * - A drawn tag spell made itself, a branch's `<span>`:  the place of the words it holds.
+   */
+  static partPlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
+    if (!(node instanceof P.ASTJSXElement || node instanceof P.ASTNewInstanceExpression)) return undefined
+    return SpellProject.placeOfMatch(node.match)
+  }
+
+  /** Where `match` is:  its file, line and column. */
+  private static placeOfMatch(match: P.AnyMatch | undefined): P.SourcePlace | undefined {
     const path = match?.getScopeOfType(P.FileScope)?.path
     const line = match?.line
     const column = match?.char
@@ -568,7 +581,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                   // - never a library's (`ts/lib`):  its `.lib.ts` is source the repo commits and imports, not output
                   const sourceMarks =
                     target.writer instanceof P.JSWriter && target.can.run !== false
-                      ? new P.SourceMarks(SpellProject.sourcePlaceOf)
+                      ? new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
                       : undefined
                   const combine = () =>
                     SpellProject.combineCompiled(parts, target.writer, header, this.scope, {

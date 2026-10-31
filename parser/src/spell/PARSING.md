@@ -1971,6 +1971,12 @@ What a program's lines about where data lives compile to, and what reads the res
   - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
     carries it inline:  `P.SourceMarks.inline()`.
   - A `.spellml` file's positions are its own (Q69), so its map points at its `.spellml` lines.
+  - What's drawn and made has marks too (epic `editor` P7):  each drawn tag and each `a new card`, its place
+    (`SP.SpellProject.partPlaceOf()`) listed in the map's `x_spellPlaces`.
+    - The code stays EXACTLY the same.
+    - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
+      where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
+    - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
   - Not the Python target, yet.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:

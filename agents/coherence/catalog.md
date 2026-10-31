@@ -1057,7 +1057,6 @@ Copies a sweep found and Owen kept, with why:  a later sweep skips them.
 - `parser/src/markdown/blocks/BlockScanner.ts`:  markdown's block structure is a state machine, not a grammar;
   it asks rulex's line rules what each line is.
 - Spell UI's marked and the parser's markdown:  two engines on purpose (the parser's markdown `AGENTS.md`).
-- `app/src/app/solid/InspectorSource.ts`:  reads tags by hand on purpose:  "no parser, a best guess".
 - `epic/bin/`, its hooks:  each stands alone, so a few lines of boilerplate repeat.
 
 ## See also

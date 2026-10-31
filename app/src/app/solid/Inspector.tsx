@@ -2,6 +2,8 @@ import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
+import type { P } from "spell/parser/parser"
+import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -493,11 +495,43 @@ export class Inspector {
    * - Not found:  `{}`.
    */
   static writtenHandlersOf(element: Element): Record<string, string> {
-    const sources = editor.project?.spellFiles.map((file) => file.contents ?? "") ?? []
+    const sources = new Map(
+      (editor.project?.spellFiles ?? []).map((file) => [
+        SP.SpellLocation.filePathOf(file.path)?.replace(/^\//, "") ?? file.path,
+        file.contents ?? ""
+      ])
+    )
     const handling = [...(element.shadowRoot?.querySelectorAll("*") ?? [])].filter((at) =>
       Object.keys(at).some((key) => SOLID_HANDLER.test(key))
     )
     return Object.assign({}, ...[element, ...handling].map((at) => handlersInSource(at, sources)))
+  }
+
+  /**
+   * Where `element` is written, as the compiler marked it:  a thing's making (`a new card`), else its drawn tag.
+   * - `sharedBy`:  how many of the app's parts come from that one place.  More than one:  made in a loop, so an edit
+   *   of "this one" has nowhere of its own to go.
+   * - `undefined`:  it has no place, e.g. a widget made it.
+   */
+  static writtenPlaceOf(element: Element): { place: P.SourcePlace; sharedBy: number } | undefined {
+    const place = placeOfPart(element)
+    if (!place) return undefined
+    const rows = appArea ? Inspector.partsIn(appArea) : []
+    const key = placeKey(place)
+    const sharedBy = rows.filter((row) => {
+      const other = placeOfPart(row.element)
+      return other && placeKey(other) === key
+    }).length
+    return { place, sharedBy }
+  }
+
+  /** The tooltip saying where `element` is written, in the app's words:  `""` when it has no place. */
+  static writtenPlaceTitle(element: Element | undefined): string {
+    const written = element && Inspector.writtenPlaceOf(element)
+    if (!written) return ""
+    const { place, sharedBy } = written
+    const params = { file: place.path, line: place.line + 1, count: sharedBy }
+    return appTexts.text(sharedBy > 1 ? "inspectorWrittenAtShared" : "inspectorWrittenAt", params)
   }
 
   /**
@@ -557,6 +591,17 @@ export class Inspector {
     }
     return undefined
   }
+}
+
+/** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */
+function placeOfPart(element: Element): P.SourcePlace | undefined {
+  const thing = SpellElement.thingOf(element)
+  return (thing && SourceMarks.placeOfThing(thing)) ?? SourceMarks.placeOfDrawn(element)
+}
+
+/** `place` as a key. */
+function placeKey({ path, line, column }: P.SourcePlace): string {
+  return `${path}:${line}:${column}`
 }
 
 /** What the properties card shows:  a pick, or the thing its trail leads to, with the trail to it. */
@@ -1262,6 +1307,7 @@ function PropertiesCard(): JSX.Element {
                     </Show>
                     <span
                       class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
+                      title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
                       onClick={(event: MouseEvent) => {
                         if (crumb.depth === part().crumbs.length - 1) return
                         event.stopPropagation()

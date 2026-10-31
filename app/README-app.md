@@ -494,6 +494,8 @@ Point at the app and a part of it is outlined;  click, and its properties are th
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
 - The click goes to the Inspector, never the app;  picking stops once something's picked,
   and the crosshairs start it again.  Esc stops it.
+- Hold the mouse over what you selected to see where it is written:
+  `Written in Deck.spellml, line 8:  52 of these come from this one place`.
 - The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 

@@ -212,6 +212,8 @@ const APP_TEXTS_ES: AppTextPack = {
   consoleCompiledTo: "Compilado a JavaScript:",
   consoleExecuting: "Ejecutando {theType}",
   consoleFailed: "{Type}:  falló con un error:",
+  inspectorWrittenAt: "Escrito en {file}, línea {line}",
+  inspectorWrittenAtShared: "Escrito en {file}, línea {line}:  {count} de estos salen de este único lugar",
   consoleExecuted: "{Type}:  se ejecutó sin errores.",
   testResults: "Pruebas:  {passed} pasaron, {failed} fallaron",
   noTests: "No hay pruebas:  escribe una como `para probar <algo>:`",
