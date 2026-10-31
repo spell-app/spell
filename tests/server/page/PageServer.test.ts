@@ -314,20 +314,52 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/worktrees/w/components/ui/_assets/site.js")).text).toBe("// w\n")
   })
 
-  it("starts a worktree's bundles' build at its first request through a set's address (worktreeBuildFor())", () => {
+  // a worktree's epic page too, since epic `epic-engine` P54:  its committed generated files are rebuilt there
+  it("starts a worktree's bundles' build at its first request, a page of any kind (worktreeBuildFor())", () => {
     const worktree = join(root, ".claude", "worktrees", "w")
     // not a checkout yet:  nothing to build
     expect(server.worktreeBuildFor("/worktrees/w/components/ui/x.html")).toBeUndefined()
     writeFileSync(join(worktree, "package.json"), "{}\n")
     const build = server.worktreeBuildFor("/worktrees/w/components/ui/_assets/site.js")
     expect(build?.root).toBe(worktree)
-    // one per worktree, from any of its sets
+    // one per worktree, from any of its pages
     expect(server.worktreeBuildFor("/worktrees/w/components/epics/x.html")).toBe(build)
-    // not a set's address, nor a worktree's
-    expect(server.worktreeBuildFor("/worktrees/w/guides/x.html")).toBeUndefined()
+    expect(server.worktreeBuildFor("/worktrees/w/epics/x/x.plan.html")).toBe(build)
+    // not a worktree's address
     expect(server.worktreeBuildFor("/components/ui/x.html")).toBeUndefined()
     expect(server.worktreeBuildFor("/worktrees/../components/ui/x.html")).toBeUndefined()
     expect(server.worktreeBuildFor("/worktrees/nope/components/ui/x.html")).toBeUndefined()
+    rmSync(join(worktree, "package.json"))
+  })
+
+  // epic `epic-engine` P54:  a page whose root catalog is stale tells its server, which checks its checkout's bundles
+  it("takes a page's stale catalog report:  with the write token;  the worktree's build checked again", async () => {
+    const worktree = join(root, ".claude", "worktrees", "w")
+    writeFileSync(join(worktree, "package.json"), "{}\n")
+    const page = (await ask(port, "GET", "/docs/page.html")).text
+    expect(page).toContain('"staleReport":"/api/server/stale"')
+    const body = JSON.stringify({ path: "/worktrees/w/epics/x/x.plan.html", tag: "ui-menu", missing: ["choose"] })
+    const headers = { "content-type": "application/json", "x-server-token": server.web.guard.token }
+    expect(
+      (await ask(port, "POST", "/api/server/stale", { headers: { "content-type": "application/json" }, body })).status
+    ).toBe(403)
+    const build = server.worktreeBuildFor("/worktrees/w/epics/x/x.plan.html")!
+    let checks = 0
+    build.checkAgain = () => void checks++
+    const logs: string[] = []
+    const log = console.log
+    console.log = (line: string) => void logs.push(line)
+    try {
+      const answer = await ask(port, "POST", "/api/server/stale", { headers, body })
+      expect(answer.status).toBe(200)
+      expect(JSON.parse(answer.text)).toEqual({ checking: true })
+    } finally {
+      console.log = log
+    }
+    expect(checks).toBe(1)
+    expect(logs).toContain(
+      "bundles:  /worktrees/w/epics/x/x.plan.html found its catalog stale, at <ui-menu> (no choose):  checking again"
+    )
     rmSync(join(worktree, "package.json"))
   })
 

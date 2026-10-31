@@ -218,7 +218,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | Command | What it does |
 | --- | --- |
 | `spell server <verb>` | the kit's page server, from any folder of the kit:  docs, epic pages, the app's `/api`;  `start all`, every web server of the kit |
-| `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site` |
+| `spell bundle [names...]` | builds the bundles the page server serves, which are built on demand and never committed:  Spell UI's docs site, `ui-site`;  and the generated files its pages need, which are committed:  `ui-root`, `epics-pack`, `epic-docs` |
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
@@ -259,7 +259,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | Option | What it does |
 | --- | --- |
 | `spell bundle` (no names) | every bundle |
-| `spell bundle --stale` | only the bundles whose sources changed since their last build |
+| `spell bundle --stale` | only the bundles whose sources changed since their last build;  the committed ones only in a worktree |
 | `spell bundle --json`, `spell bundle check --json` | the report as JSON |
 | `spell commands list` | the default:  each command, ✓ if the commands page names it |
 | `spell commands check` | only the gaps, exit 1 on any |
@@ -277,6 +277,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   The page server builds the stale ones when it starts, and a page waits for them.
 - `spell bundle check` ends with the fix:
   `ui-site:  STALE (built from older sources)`, then `fix:  spell bundle ui-site`.
+- A committed one (the root catalog, the epics pack, the docs bundle) is rebuilt by `--stale` only in a worktree.
+  On `main` it's never written:  the line says what to run instead,
+  `ui-root is stale (its check failed):  run yarn gen:root in ui/`.
 - `spell commands` checks the nearest kit from the current folder up, so a worktree checks its own.
   The commands page's data is `guides/dev/commands/commands.json5`, in the epic folder.
 - `spell wwod`:  run it after editing WWOD or an `AGENTS.md`.

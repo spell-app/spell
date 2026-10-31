@@ -2,6 +2,8 @@
 import type { E } from "spell/element"
 
 import { RichAttributes } from "./RichAttributes"
+// Import directly:  this file loads before the barrel's values are there (it holds only types for `E`)
+import { StaleCatalogError } from "./elements.types"
 
 /**
  * `HTMLElement`, or a stand-in outside a browser, so modules that define DOM elements can be IMPORTED during SSR
@@ -630,18 +632,21 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
    * Its family has loaded:  `Class`, defined early, becomes `Base`'s with `tag`'s setup, and every pending element
    * of it is set up as an upgrade would (its attributes read, properties set early taken, connected again).
    * - `UIComponent.define()` calls it, for a tag already defined early.
-   * - throws a `TypeError` when the root's catalog no longer matches the family (form control, observed
-   *   attributes):  the platform fixed those when the tag was defined, so its catalog must be regenerated
+   * - throws a `StaleCatalogError` (a `TypeError`) when the root's catalog no longer matches the family (form
+   *   control, observed attributes):  the platform fixed those when the tag was defined, so its catalog must be
+   *   regenerated
    */
   static attach(Class: DOMElementClass, Base: AnyDOMElementClass, tag: TagSetup) {
     const early = EARLY.get(Class)!
     const missing = DOMElement.observedAttributesFor(tag.elementDefinition).filter(
       (attribute) => !early.attributes.includes(attribute)
     )
-    if (tag.isAFormControl !== early.isAFormControl || missing.length) {
-      throw new TypeError(
+    const isFormControlWrong = tag.isAFormControl !== early.isAFormControl
+    if (isFormControlWrong || missing.length) {
+      throw new StaleCatalogError(
         `<${early.tag}>:  its root's catalog is stale (${missing.length ? `no ${missing.join(", ")}` : "form control"});  ` +
-          "regenerate it (Spell UI's `yarn gen:root`, a pack's `spell-pack build`)"
+          "regenerate it (Spell UI's `yarn gen:root`, a pack's `spell-pack build`)",
+        { cause: { tag: early.tag, missing, isFormControlWrong } }
       )
     }
     if (Base !== DOMElement) {

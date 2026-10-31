@@ -178,6 +178,8 @@ export class PageServer {
         // a content folder's page:  its path there, what the page editor saves and live reload reports
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
+        // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
+        staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
         // the site header's tabs:  what the settings name (`"siteTabs"`)
         ...(this.siteTabs && { siteTabs: this.siteTabs }),
@@ -211,6 +213,7 @@ export class PageServer {
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
     router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -438,28 +441,39 @@ export class PageServer {
    * - its pages too, not only a missing bundle file:  a page would otherwise load the worktree's OLD bundle
    */
   private waitForWorktreeBundles: Handler = async (request, _reply, next) => {
-    if (request.method === "GET" || request.method === "HEAD") await this.worktreeBuildFor(request.path)?.untilBuilt()
+    if (request.method !== "GET" && request.method !== "HEAD") return next()
+    const build = this.worktreeBuildFor(request.path)
+    if (build && this.isAtComponentSet(request.path)) await build.untilBuilt()
     next()
   }
 
+  /** Is URL path `path` at one of a worktree's component set addresses (`/worktrees/<w>/components/<set>/...`)? */
+  private isAtComponentSet(path: string): boolean {
+    const match = WORKTREE_ADDRESS.exec(path)
+    const inside = match ? path.slice(match[0].length - 1) : ""
+    return this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))
+  }
+
   /**
-   * The bundles' build of the worktree whose component set address URL path `path` is in
-   * (`/worktrees/<w>/components/<set>/...`);  else `undefined`.
-   * - begun at the first such request (`spell bundle --stale`, with the WORKTREE's own `spell`), then watching its
-   *   sources (`BundleBuild.watch()`):  a worktree's bundle is never committed, and only its own server built it before
+   * The bundles' build of the worktree whose address URL path `path` is in (`/worktrees/<w>/...`);  else `undefined`.
+   * - begun at the FIRST request at its address, a page of any kind (an epic page too, epic `epic-engine` P54;
+   *   a component set's page before):  `spell bundle --stale`, with the WORKTREE's own `spell`, then watching its
+   *   sources (`BundleBuild.watch()`)
+   *   - a worktree's bundles are never committed, and only its own server built them before
+   *   - its committed generated files (`SRV.BundleSpec.committed`:  the root catalog, the epics pack, spell-epic's
+   *     docs bundle) are rebuilt there too, from its sources
    * - SIDE EFFECT:  live reload watches the worktree's sets and their bundle at its address from then on
+   * - `lookOnly`:  the one begun already, if any;  begins none
    * - NEVER throws:  a worktree whose settings won't read builds nothing
    */
-  worktreeBuildFor(path: string): BundleBuild | undefined {
+  worktreeBuildFor(path: string, { lookOnly = false }: { lookOnly?: boolean } = {}): BundleBuild | undefined {
     const match = WORKTREE_ADDRESS.exec(path)
     const name = match?.[1]
     if (!match || !name || name === "." || name === "..") return undefined
-    const inside = path.slice(match[0].length - 1)
-    if (!this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))) return undefined
     const root = this.worktrees.map((each) => join(each, name)).find((each) => existsSync(join(each, "package.json")))
     if (!root) return undefined
     let build = this.worktreeBuilds.get(root)
-    if (build) return build
+    if (build || lookOnly) return build
     try {
       build = new BundleBuild({ root })
     } catch (error) {
@@ -474,6 +488,30 @@ export class PageServer {
     }
     console.log(`bundles:  worktree ${name}`)
     return build.start().watch()
+  }
+
+  /**
+   * The router handler for `POST STALE_API`:  a page found a stale generated file (`SPELL_SERVER.reportStale()`,
+   * Spell UI's `<ui-root>` on a `StaleCatalogError`;  epic `epic-engine` P54).
+   * - its checkout's bundles are checked again (`spell bundle --stale`):  the worktree's whose address the page is at,
+   *   else this checkout's
+   *   - ONE run however many pages ask:  while one runs, one more once it ends (`BundleBuild.checkAgain()`)
+   *   - in a worktree it rebuilds the stale ones, and live reload brings the pages back;  this checkout, if it's the
+   *     main one, writes nothing, and logs what to run
+   * - answers `{ checking }`:  whether a checkout was found to check
+   */
+  private onStaleReport: Handler = (request, reply) => {
+    const { path, tag, missing } = (request.body ?? {}) as { path?: unknown; tag?: unknown; missing?: unknown }
+    const at = typeof path === "string" ? path : ""
+    const isWorktree = WORKTREE_ADDRESS.test(at)
+    const isNew = isWorktree && !this.worktreeBuildFor(at, { lookOnly: true })
+    const build = isWorktree ? this.worktreeBuildFor(at) : this.bundles
+    const what =
+      typeof tag === "string" ? `<${tag}>${Array.isArray(missing) ? ` (no ${missing.join(", ")})` : ""}` : "a page"
+    console.log(`bundles:  ${at || "a page"} found its catalog stale, at ${what}:  checking again`)
+    // a build begun just now checks them anyway
+    if (build && !isNew) build.checkAgain()
+    reply.json({ checking: build !== undefined })
   }
 
   /** Add `add`'s fields to every page's `window.SPELL_SERVER`, from a route module;  returns `this`. */
@@ -547,6 +585,9 @@ export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
 
 /** The page server's own call:  its `ServerInfo` (`SRV.SERVER_API`). */
 const SERVER_API = SRV.SERVER_API
+
+/** Where a page tells of a stale generated file (`SPELL_SERVER.reportStale()`, `onStaleReport()`). */
+const STALE_API = `${SERVER_API}/stale`
 
 /**
  * `PageServer.start()` options.

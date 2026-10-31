@@ -316,7 +316,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         the checkout never leaves pages on an old bundle (epic `epic-engine`, 2026-10-25)
       - A request for a MISSING file of one waits while that runs (`BUNDLE_WAIT_MS`).
       - A worktree's too, seen through this server (`worktreeBuildFor()`, r35):  built by the worktree's own `spell`
-        at the first request at its sets' addresses, then watched;  while it builds, those requests wait, pages too
+        at the first request at its address, a page of any kind (an epic page too, since epic `epic-engine` P54), then
+        watched;  while it builds, requests at its sets' addresses wait, pages too
+      - And the COMMITTED generated files a page needs (epic `epic-engine` P54;  Owen, r45:  "can we make
+        `<ui-root>` signal the page server ... so it can auto-regenerate?"):  Spell UI's root catalog (`ui-root`),
+        the epics pack (`epics-pack`), spell-epic's docs bundle (`epic-docs`), `BUNDLES` entries marked `committed`,
+        first in their folders' `"bundles"`, so what's built from them builds after
+        - rebuilt only in a WORKTREE (Q61):  the main checkout writes nothing, and logs what to run
+          (`ui-root is stale (its check failed):  run yarn gen:root in ui/`)
+        - the watch regenerates the catalog a few seconds after a component gains an attribute, and live reload
+          brings the pages back
+        - the backstop:  a page that still finds its catalog stale tells the server once (`SPELL_SERVER.reportStale()`,
+          from Spell UI's `<ui-root>` on a `StaleCatalogError`), `POST /api/server/stale` with the write token;  the
+          page's checkout's bundles are checked again, one run however many pages ask (`BundleBuild.checkAgain()`)
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
       - [ProjectBuild](../../app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
@@ -403,6 +415,13 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `ui-site`:  Spell UI's docs site
     - `brand`:  the brand pages
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
+    epics pack, spell-epic's docs bundle
+    - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
+    - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
+    - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check
+      when it has none
+    - what its build writes beside other sources (`generated`) is no bundle's source, so no build makes another stale
   - `build()`:  runs its package's script, then records the hash in its output folder (`.bundle.json`).
   - Its command line:  `spell bundle [<name>...] [--stale]` / `check`.
   - The page server runs `build --stale` when it starts:  `BundleBuild`, in `page/`.

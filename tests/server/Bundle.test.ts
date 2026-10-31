@@ -15,6 +15,7 @@ import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
 /** The kit:  its tests are in its `tests/`. */
 const KIT = join(import.meta.dirname, "../..")
@@ -122,16 +123,115 @@ describe("Bundle", () => {
   })
 })
 
-/** An install holding Spell UI's and the brand's packages, each its own repo beside the checkout, `app/`. */
+/** An install holding Spell UI's, spell-epic's and the brand's packages, each its own repo beside the checkout, `app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
-  install(dir, { "spell-ui": "ui", "spell-brand": "spell-brand" })
+  install(dir, { "spell-ui": "ui", "spell-epic": "epic", "spell-brand": "spell-brand" })
   mkdirSync(join(dir, "spell-app"))
   return dir
 }
 
-/** The two bundles' folders, as spell-app's root `package.json` names them. */
-const BUNDLES = ["../ui/site/_assets", "../spell-brand/_assets/ui"]
+/** Every bundle's folder, as spell-app's root `package.json` would name them, the committed ones first. */
+const BUNDLES = [
+  "../ui/src/components/ui-root",
+  "../ui/site/_assets",
+  "../spell-brand/_assets/ui",
+  "../epic/src/components/__pack",
+  "../epic/src/tools/_assets"
+]
+
+// epic `epic-engine` P54 (Owen, Q61:  "Only in a worktree")
+describe("a committed bundle", () => {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "assembler-committed-")))
+  install(dir, { "@demo/gen": "gen" })
+  put(dir, "gen/src/a.ts", "a")
+  const main = fakeMainCheckout(join(dir))
+  const worktree = fakeWorktree(main, join(dir, "w"))
+  /** its check passes while `gen/OK` exists */
+  const SPEC_COMMITTED: SRV.BundleSpec = {
+    ...SPEC,
+    package: "@demo/gen",
+    sources: ["@demo/gen/src"],
+    committed: true,
+    check: [process.execPath, "-e", `process.exit(require("fs").existsSync("OK") ? 0 : 1)`]
+  }
+  const inWorktree = new SRV.Bundle(worktree, SPEC_COMMITTED)
+  const inMain = new SRV.Bundle(main, SPEC_COMMITTED)
+
+  afterAll(() => rmSync(dir, { recursive: true, force: true }))
+
+  test("in a worktree:  stale with no record and a failing check;  built, its record in the install's cache", () => {
+    expect(inWorktree.isWorktree).toBe(true)
+    expect(inWorktree.buildsWhenStale).toBe(true)
+    put(dir, "gen/out/entry.js", "old")
+    expect(inWorktree.check().stale).toBe("never built here")
+    inWorktree.build({ stdio: "ignore" })
+    // never beside the file it writes:  that's committed
+    expect(inWorktree.recordFile).toBe(join(dir, "node_modules/.cache/spell-bundles/demo.json"))
+    expect(existsSync(join(dir, "gen/out", SRV.BUNDLE_RECORD))).toBe(false)
+    expect(inWorktree.isStale).toBe(false)
+    // a merge rewriting it says nothing;  its sources changing does
+    const later = new Date(Date.now() + 60_000)
+    utimesSync(join(dir, "gen/out/entry.js"), later, later)
+    expect(inWorktree.isStale).toBe(false)
+    put(dir, "gen/src/a.ts", "a changed")
+    expect(inWorktree.check().stale).toBe("built from older sources")
+    rmSync(inWorktree.recordFile)
+  })
+
+  test("in a worktree, no record:  a passing check is recorded as current", () => {
+    put(dir, "gen/OK", "")
+    expect(inWorktree.check().stale).toBeUndefined()
+    expect(inWorktree.record()?.sources).toBe(inWorktree.sourcesHash())
+    rmSync(join(dir, "gen/OK"))
+    rmSync(inWorktree.recordFile)
+  })
+
+  test("in the main checkout:  never built by --stale;  its check says, with what to run", () => {
+    expect(inMain.isWorktree).toBe(false)
+    expect(inMain.buildsWhenStale).toBe(false)
+    expect(inMain.check()).toMatchObject({ stale: "its check failed", fix: expect.stringMatching(/^run .+ in gen\/$/) })
+    put(dir, "gen/OK", "")
+    expect(inMain.check().stale).toBeUndefined()
+    // no record:  the main checkout goes by its check alone
+    expect(existsSync(inMain.recordFile)).toBe(false)
+    rmSync(join(dir, "gen/out/entry.js"))
+    expect(inMain.check()).toMatchObject({ stale: "no entry.js", fix: expect.stringContaining("run ") })
+  })
+})
+
+describe("Bundle sources", () => {
+  // the ONE package `spell` at the root, spell-epic its `epic/`:  the epics pack and the docs bundle write beside
+  // each other's sources
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "assembler-generated-")))
+  install(root, { spell: ".", "spell-epic": "epic" })
+  put(root, "epic/src/tool/Tool.ts", "tool")
+  put(root, "epic/src/components/__pack/epics.pack.js", "pack")
+  put(root, "epic/src/docs/__data/components.json5", "{}")
+  put(root, "epic/src/tools/_assets/spell-ui.js", "bundle")
+  put(root, "epic/src/tools/_assets/emoji/cldr/a.js", "emoji")
+  put(root, "epic/src/tools/_assets/spell-doc-runtime.js", "runtime")
+  afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+  /** a bundle of `SRV.BUNDLES`, by name */
+  const bundleOf = (name: string) =>
+    new SRV.Bundle(
+      root,
+      SRV.BUNDLES.find((spec) => spec.name === name)!
+    )
+
+  test("never what any committed one generates, nor its own entry:  so no build makes another stale", () => {
+    const epicFiles = (name: string) =>
+      bundleOf(name)
+        .sourceFiles()
+        .filter((file) => file.startsWith("spell/epic/"))
+    expect(epicFiles("epics-pack")).toEqual([
+      "spell/epic/src/tool/Tool.ts",
+      "spell/epic/src/tools/_assets/spell-doc-runtime.js"
+    ])
+    expect(epicFiles("epic-docs")).toEqual(epicFiles("epics-pack"))
+  })
+})
 
 describe("a build script's steps", () => {
   // the ONE package `spell` at the root, Spell UI's packs in its `ui/`, and a bundle's output folder, `site/out/`
@@ -183,13 +283,21 @@ describe("Bundle.all()", () => {
   afterAll(() => rmSync(dir, { recursive: true, force: true }))
 
   test("every bundle, or the ones named, in that order;  an unknown name says which there are", () => {
-    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual(["ui-site", "brand"])
+    expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual([
+      "ui-root",
+      "ui-site",
+      "brand",
+      "epics-pack",
+      "epic-docs"
+    ])
     expect(SRV.Bundle.all(repo, ["brand", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
       join(realpathSync(dir), "spell-brand/_assets/ui"),
       join(realpathSync(dir), "ui/site/_assets")
     ])
     expect(SRV.Bundle.all(repo).map((bundle) => bundle.output)).toEqual(BUNDLES)
-    expect(() => SRV.Bundle.all(repo, ["nope"])).toThrow("Bundle.all():  no bundle 'nope';  bundles:  ui-site, brand")
+    expect(() => SRV.Bundle.all(repo, ["nope"])).toThrow(
+      "Bundle.all():  no bundle 'nope';  bundles:  ui-root, ui-site, brand, epics-pack, epic-docs"
+    )
   })
 })
 

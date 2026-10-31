@@ -41,6 +41,10 @@ import type { SiteTab } from "spell/server/site/site.types"
  *     client on `load`
  *   - `revealAfter(ready)`:  wait for `ready` too (Spell UI's site:  its layout mounted);  call it before `load`
  * - `etag` follows the page:  an in-place update (`PageChange`) moves it to the new version's
+ * - `staleReport`:  URL path the page tells of a stale generated file at (the page server's `STALE_API`);
+ *   `reportStale(cause)`, added by `liveClient()` when it's there:  Spell UI's `<ui-root>` calls it on a stale catalog
+ *   (`StaleCatalogError`), ONCE a page, with the write token;  the server rebuilds it in a worktree (epic
+ *   `epic-engine` P54), and live reload brings the page back
  */
 export type ServerConfig = {
   port: number
@@ -64,6 +68,7 @@ export type ServerConfig = {
    */
   worktreesPath?: string
   edit?: string
+  staleReport?: string
   /**
    * the site header's tabs, in order:  the page server's settings' `"siteTabs"` (`SiteHeader.tabs`);
    * none:  the header shows none
@@ -87,7 +92,16 @@ export type ServerConfig = {
   reloadNow?: () => void
   reveal?: (settle?: () => void) => void
   revealAfter?: (ready: Promise<unknown>) => void
+  reportStale?: (cause?: StaleReport) => void
 }
+
+/**
+ * What a page tells the page server of a stale generated file (`SPELL_SERVER.reportStale()`):  the stale catalog's
+ * `cause`, as Spell UI's `<ui-root>` has it (`StaleCatalogCause`, the kit's element), when it has one.
+ * - `tag`:  the tag whose family found it, e.g. `ui-menu`
+ * - `missing`:  the attributes it lacks, e.g. `["choose"]`
+ */
+export type StaleReport = { tag?: string; missing?: string[] }
 
 /** The page's file as served now:  its HTML (with what the server injects) and `ETag`. */
 export type PageSource = { html: string; etag?: string }
@@ -311,6 +325,20 @@ export function liveClient(scrollKey: string): void {
     if (answer.ok && shown && body.etag) ownEtags.add(body.etag)
     return { ok: answer.ok, status: answer.status, etag: body.etag, error: body.error }
   }
+
+  // a stale generated file:  told once a page, and nothing waits for the answer (best effort, NEVER throws)
+  const staleReport = config.staleReport
+  let isStaleReported = false
+  if (staleReport)
+    config.reportStale = (cause) => {
+      if (isStaleReported) return
+      isStaleReported = true
+      void fetch(staleReport, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-server-token": config.token },
+        body: JSON.stringify({ path: location.pathname, tag: cause?.tag, missing: cause?.missing })
+      }).catch(() => {})
+    }
 
   config.saveFile = async ({ path, text, etag: version, fragment, shown }) => {
     const url = `${config.edit ?? "/api/pages"}?path=${encodeURIComponent(path)}`

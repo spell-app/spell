@@ -83,9 +83,15 @@ export default function kitCommands(spell: Command): void {
 
   const bundle = spell
     .command("bundle")
-    .description("build the bundles the page server serves, built on demand, never committed (Spell UI's site ...)")
+    .description(
+      "build the bundles the page server serves (Spell UI's site ...), and the generated files its pages need " +
+        "(the root catalog, the epics pack, the docs bundle)"
+    )
     .argument("[names...]", "the bundles to build;  none:  every one")
-    .option("--stale", "only the bundles whose sources changed since their last build")
+    .option(
+      "--stale",
+      "only those whose sources changed since their last build;  the committed ones only in a worktree"
+    )
     .option("--json", "print the report as JSON")
     .action((names: string[], options: CLI.BundleOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/bundleCommand")).buildBundles(names, options))

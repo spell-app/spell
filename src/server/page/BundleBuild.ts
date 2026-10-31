@@ -17,6 +17,9 @@ import {
 /**
  * Builds the bundles the page server serves, as it starts (`PageServer.start()`).
  * - the bundles:  the Spell UI docs site's, the brand pages';  built on demand, never committed
+ *   - and the committed generated files (`SRV.BundleSpec.committed`:  Spell UI's root catalog, the epics pack,
+ *     spell-epic's docs bundle):  rebuilt only in a worktree;  the main checkout's run logs what to run (epic
+ *     `epic-engine` P54)
  *   - `folders`:  the settings' `"bundles"`, every installed repo's (`pageServerSettings()`)
  * - `start()`:  runs `spell bundle --stale` in the background, with the checkout's OWN `spell` (the kit's, as its
  *   install resolves it)
@@ -145,7 +148,7 @@ export class BundleBuild {
     }
     const changed = () => {
       clearTimeout(this.quiet)
-      this.quiet = setTimeout(() => this.rebuild(), quiet)
+      this.quiet = setTimeout(() => this.checkAgain("sources changed"), quiet)
       this.quiet.unref()
     }
     const roots = new Set(specs.flatMap((spec) => new SRV.Bundle(this.root, spec).sourceRoots()))
@@ -165,13 +168,19 @@ export class BundleBuild {
     return this
   }
 
-  /** The sources changed:  check the bundles now, or once the running build ends. */
-  private rebuild(): void {
+  /**
+   * Check the bundles again (`spell bundle --stale`):  now, or once the running build ends.
+   * - however many ask while one runs, ONE more run
+   * - who:  `watch()`, its sources changed;  the page server, a page found a stale catalog (`PageServer`'s
+   *   `onStaleReport`, epic `epic-engine` P54)
+   * - `why`:  logged as it starts
+   */
+  checkAgain(why = "asked again"): void {
     if (this.child) {
       this.again = true
       return
     }
-    console.log("bundles:  sources changed")
+    console.log(`bundles:  ${why}`)
     this.start()
   }
 

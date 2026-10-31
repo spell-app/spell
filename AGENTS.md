@@ -307,6 +307,9 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   (spell-brand), then each project a checkout's own git-ignored `page-server.local.json5` names
   (`{ projects: ["../x"] }`, someone's project trying the epic framework).
 - How:  [the server's AGENTS.md](src/server/AGENTS.md), "The page server's settings".
+- It keeps a WORKTREE's generated files current by itself (epic `epic-engine` P54):  Spell UI's root catalog, the
+  epics pack, spell-epic's docs bundle, rebuilt as their sources change or a page finds one stale;
+  on `main` it only says what to run.
 
 ## Tests
 

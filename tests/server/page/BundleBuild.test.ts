@@ -173,6 +173,26 @@ describe("BundleBuild", () => {
     bundles.stop()
   })
 
+  // epic `epic-engine` P54:  pages reporting a stale catalog while a build runs make ONE more run
+  test("checkAgain():  now, or once the running build ends;  however many ask meanwhile, one more run", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    const first = new FakeChild()
+    const spawn = spawnOf(first)
+    const bundles = new BundleBuild({ root, spawn }).start()
+    bundles.checkAgain("a page found its catalog stale")
+    bundles.checkAgain("a page found its catalog stale")
+    expect(spawn).toHaveBeenCalledTimes(1)
+    first.exit(0)
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledTimes(2))
+    first.exit(0)
+    await new Promise((done) => setTimeout(done, 50))
+    expect(spawn).toHaveBeenCalledTimes(2)
+    // none running:  at once
+    bundles.checkAgain()
+    expect(spawn).toHaveBeenCalledTimes(3)
+    bundles.stop()
+  })
+
   test("stop() ends the build's whole process group", async () => {
     await serve()
     vi.spyOn(console, "log").mockImplementation(() => {})

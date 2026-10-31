@@ -589,6 +589,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `gen:icons`:  the built-in icon packs.  Downloads Font Awesome, needs `reference/Fomantic-UI/`.
   - `gen:emoji`:  `ui-emoji/data/`.  Needs `reference/Fomantic-UI/`.
   - `gen:root`:  `<ui-root>`'s catalog
+    - In a worktree the page server runs it by itself, a few seconds after a vocabulary changes, or when a page
+      finds the catalog stale (epic `epic-engine` P54:  `spell bundle`'s `ui-root`);  on `main` it only says to run it
 - `yarn tokens:alias <family> [--write]`:  the codemod of [the theming doc](../spell.epics/guides/ui/notes/theming.md).
   It only prints, without `--write`.
 - `yarn tsc`, not `npx tsc`, and no hard-coded `node_modules` paths:

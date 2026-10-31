@@ -108,6 +108,7 @@
   "customElements": "./docs/__data/custom-elements.json",
   "pageServer": {
     "bundles": [
+      "src/components/ui-root",
       "site/_assets"
     ],
     "componentSets": {

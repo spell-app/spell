@@ -4,7 +4,8 @@
  * - how a `ComponentVocabulary` becomes typed, converted property values (`AttributeValues`)
  * - what the pieces of `UIComponent` hand each other:  `ElementSetup`, `ResolvedAttribute`, the owner context's
  * - the settings a component set's runtime hands spell-element as it loads (`SpellSolidSettings`)
- * - Runtime-light:  types, plus a few constants (`AriaNames`, `ERROR_EVENT`, `ERRORED_STATE`, `NO_ANIMATION`).
+ * - Runtime-light:  types, plus a few constants (`AriaNames`, `ERROR_EVENT`, `ERRORED_STATE`, `NO_ANIMATION`) and
+ *   one error class (`StaleCatalogError`).
  * - The BOTTOM of the package's import graph:  `import type` only (the package's types as `E`, erased),
  *   so it NEVER loads a class module, the DOM or Solid.
  */
@@ -520,6 +521,29 @@ export const ERROR_EVENT = "ui-error"
  * set by the error boundary (`UIComponent.onError()`) and by the fallback.
  */
 export const ERRORED_STATE = "errored"
+
+/**
+ * Thrown as a family attaches to a tag its root defined early (`DOMElement.attach()`), when the root's catalog no
+ * longer matches the family:  the platform fixed the tag's observed attributes and form-control-ness when it was
+ * defined, so the catalog must be regenerated (Spell UI's `yarn gen:root`, a pack's `spell-pack build`).
+ * - a `TypeError`:  the page was built from a stale file
+ * - `<ui-root>` tells the page server, when the page has one (`SPELL_SERVER.reportStale()`):  it rebuilds the
+ *   catalog in a worktree, and live reload brings the page back (epic `epic-engine` P54)
+ */
+export class StaleCatalogError extends TypeError {
+  declare cause: StaleCatalogCause | undefined
+}
+StaleCatalogError.prototype.name = "StaleCatalogError"
+
+/** `StaleCatalogError`'s `cause`. */
+export type StaleCatalogCause = {
+  /** the tag, e.g. `ui-menu` */
+  tag: string
+  /** the attributes the family observes that the catalog doesn't list, e.g. `["choose"]` */
+  missing: string[]
+  /** the family is a form control, the catalog says it isn't (or the other way round) */
+  isFormControlWrong: boolean
+}
 
 ////////////////
 // ## Settings

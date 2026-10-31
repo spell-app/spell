@@ -66,6 +66,10 @@
     "node": ">=24.11"
   },
   "pageServer": {
+    "bundles": [
+      "src/components/__pack",
+      "src/tools/_assets"
+    ],
     "routes": [
       "src/tools/detailsRoutes.ts",
       "src/tools/choicesRoutes.ts",

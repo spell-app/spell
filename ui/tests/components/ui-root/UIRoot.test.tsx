@@ -89,6 +89,30 @@ describe("<ui-root> loading on demand", () => {
     expect(events.ready).toEqual([failed])
   })
 
+  // epic `epic-engine` P54:  the page server rebuilds a stale catalog in a worktree, and live reload brings the page back
+  it("tells the page server of a family that found its catalog stale (`SPELL_SERVER.reportStale()`)", async () => {
+    const { component } = await root(`<ui-root></ui-root>`)
+    const told: unknown[] = []
+    const page = globalThis as { SPELL_SERVER?: { reportStale?: (cause: unknown) => void } }
+    const before = page.SPELL_SERVER
+    page.SPELL_SERVER = { reportStale: (cause) => void told.push(cause) }
+    try {
+      const fail = (failure: RootFailure) =>
+        (component as unknown as { fail(failure: RootFailure): void }).fail(failure)
+      const cause = { tag: "ui-menu", missing: ["choose"], isFormControlWrong: false }
+      fail({
+        tag: "ui-menu",
+        reason: "failed",
+        error: new E.StaleCatalogError("<ui-menu>:  its root's catalog is stale", { cause })
+      })
+      // any other failure isn't one
+      fail({ tag: "ui-card", reason: "failed", error: new Error("network") })
+      expect(told).toEqual([cause])
+    } finally {
+      page.SPELL_SERVER = before
+    }
+  })
+
   it("shows the content after the timeout, reporting what wasn't ready", async () => {
     const { component, host } = await root(
       `<ui-root timeout="50ms"><ui-test-never-ready></ui-test-never-ready><p>Text</p></ui-root>`
