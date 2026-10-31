@@ -113,7 +113,7 @@ describe("picking", () => {
     await ElementFixture.settle(host)
     const editor = host.querySelector<HTMLElement & { schema: unknown }>(".Inspector ui-property-editor")!
     expect(editor.schema).toBe("ui-input")
-    expect(host.querySelector(".InspectorCard h2")!.textContent!.trim()).toBe("<ui-input />")
+    expect(host.querySelector(".InspectorCard .InspectorTrail")!.textContent!.trim()).toBe("<ui-input />")
   })
 
   test("the pill's ✕ lets go of what's picked, and so does Esc;  Esc in a field doesn't (I92)", async () => {
@@ -124,7 +124,7 @@ describe("picking", () => {
     Inspector.pick(area.querySelector("ui-input")!)
     flush()
     await ElementFixture.settle(host)
-    const letGo = host.querySelector<HTMLElement>(".InspectorCard h2 .InspectorLetGo")!
+    const letGo = host.querySelector<HTMLElement>(".InspectorCard .InspectorLetGo")!
     expect(letGo.getAttribute("title")).toBe("Let go of <ui-input /> (Esc)")
     letGo.click()
     flush()
@@ -357,7 +357,7 @@ describe("the phone's sheet", () => {
       bottom: style.bottom,
       width: sheet.offsetWidth
     }).toEqual({ display: "flex", position: "fixed", bottom: "0px", width: 390 })
-    expect(host.querySelector(".InspectorCard h2")!.textContent!.trim()).toBe('<ui-button "Go" />')
+    expect(host.querySelector(".InspectorCard .InspectorTrail")!.textContent!.trim()).toBe('<ui-button "Go" />')
 
     host.querySelector<HTMLElement>(".InspectorSheetClose")!.click()
     flush()

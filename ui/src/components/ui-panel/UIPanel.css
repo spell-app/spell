@@ -11,7 +11,8 @@
  * - `.sub` (a panel inside a panel):  no box;  its title is a full-width SUB-HEAD BAND (bold 12px capitals,
  *   a hairline above), its content the fields under it.  Bands sit `--ui-panel-band-space` (20px) under what's above
  *   them, flush under a folded band.
- * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, no box.  `--ui-panel-pane-bar-height`,
+ * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, no box.  `--ui-panel-pane-bar-height`
+ *   (default:  the theme's control height and 6px round it, at least 40px),
  *   `--ui-panel-pane-bar-background`, `--ui-panel-pane-bar-padding`.
  * - `--ui-panel-pane-background`, `-border-color`, `-filter`, `-header-background`:  a theme's glass for a window's pane.
  *   An app's own panes read them, and so Glass and Fruity need nothing in the app (the editor's `EditorTheme.css`).
@@ -290,9 +291,10 @@
     box-sizing: border-box;
     align-items: center;
     gap: 0;
-    height: var(--ui-panel-pane-bar-height, 40px);
+    height: var(--ui-panel-pane-bar-height, max(40px, calc(var(--ui-control-height, 0px) + 12px)));
     margin: 0;
-    padding: 0 var(--ui-panel-pane-bar-padding, 8px);
+    padding-block: 0;
+    padding-inline: var(--ui-panel-pane-bar-padding, 6px 8px);
     border-bottom: 1px solid var(--ui-border-color);
     border-radius: 0;
     background: var(--ui-panel-pane-bar-background, none);
@@ -303,15 +305,29 @@
     margin: 0;
     font-size: 13px;
   }
-  /* the chevron's button:  room to press, as round as what's beside it */
+  /* no way to fold it:  the bar starts with what's in it, and its label is for screen readers (epic `editor` P2) */
+  .ui.pane.section.panel:not(:has(> .title > .heading > button.toggle)) > .title {
+    padding-inline: var(--ui-panel-pane-bar-padding, 8px);
+  }
+  .ui.pane.section.panel:not(:has(> .title > .heading > button.toggle)) > .title > .heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* the chevron's button:  as little room round it as a press can take (Owen:  "Less padding around the disclosure
+     triangle");  round when hovered, as what's beside it */
   .ui.pane.section.panel > .title > .heading > .toggle {
     display: inline-grid;
     place-items: center;
     justify-content: center;
     grid-auto-flow: column;
     gap: 0;
-    min-width: 24px;
-    height: 24px;
+    width: 14px;
+    min-width: 14px;
+    height: 16px;
     padding: 0;
     border-radius: var(--ui-radius-pill, 9999px);
     color: var(--ui-text-muted);
@@ -325,6 +341,15 @@
     height: 10px;
     margin: 0;
     opacity: 1;
+  }
+  /* the label's for screen readers:  what the bar says is in its actions */
+  .ui.pane.section.panel > .title > .heading > .toggle > .header {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   /* what's in the actions slot takes the rest of the bar */
   .ui.pane.section.panel > .title > .actions {

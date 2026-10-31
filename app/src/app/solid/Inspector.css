@@ -76,44 +76,12 @@
   content: none;
 }
 
-/* a card (`<InspectorCard>`):  its header (the App pane's, `.AppPaneHeader`, in the editor's theme), then its body */
-.InspectorCard {
-  display: flex;
-  flex-direction: column;
-  /* the Views card is a pane (`<ui-panel appearance="pane">`):  its bar wears the headers' fill */
-  --ui-panel-pane-bar-background: var(--spell-header-background);
-}
-/* ... its body filling what's left under the bar */
+/* a card (`<InspectorCard>`):  a pane;  its body fills what's left under the bar */
 ui-panel.InspectorCard > .InspectorSection {
   flex: 1 1 auto;
   min-height: 0;
 }
-/* its eye at the far edge, in line with the Views card's (`<ui-panel appearance="pane">`, 8px in) */
-.InspectorCard > .InspectorCardHead {
-  padding-inline-end: 8px;
-  & ui-icon.IconAction.InspectorHideCard {
-    margin-inline-end: 0;
-  }
-}
-.InspectorCardHead {
-  /* its icons the text's size:  the top bar's 1.15em read too big on a card (Owen:  "x and upward chevron are too
-     big") */
-  & ui-icon.IconAction {
-    font-size: 1em;
-  }
-  /* the caret, icon and title fold the card */
-  & > h2 {
-    cursor: var(--ui-control-cursor);
-  }
-  & > h2 > ui-icon.InspectorCardFold {
-    --ui-icon-width: 0.8em;
-    font-size: 0.8em;
-    color: var(--ui-text-muted);
-  }
-  /* folded:  its header alone, no line under it */
-  .InspectorCard.folded > & {
-    border-bottom: 0;
-  }
+.InspectorCard {
   /* what's picked, as its title:  a blue pill (Owen) */
   & .InspectorPartTag {
     min-width: 0;

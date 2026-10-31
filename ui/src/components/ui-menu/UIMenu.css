@@ -1064,13 +1064,14 @@
    * - It has no track of its own:  the bar it sits in is the track, so the bar, its caret, these items and its
    *   actions read as one thing rather than a capsule in a band (Owen:  "several concepts bolted together").
    * - The raised thumb stays:  that's what says which is chosen.
-   * - Its items share the row's width evenly (a `<ui-toolbar>`'s too:  its sheet).
+   * - Its items hug their words, close together, and its actions go to the row's far end (Owen's pick, epic `editor`
+   *   P2:  "The raised pill, tightened").
    * - Tokens:  `--ui-menu-segmented-header-background` (a track after all), `-font-size`, `-item-padding`, `-item-color`, `-item-weight`.
    */
   .ui.segmented.header.menu {
     --_ui-menu-segmented-header-background: var(--ui-menu-segmented-header-background, transparent);
     --_ui-menu-segmented-header-font-size: var(--ui-menu-segmented-header-font-size, 13px);
-    --_ui-menu-segmented-header-item-padding: var(--ui-menu-segmented-header-item-padding, 0.5em 0.85em);
+    --_ui-menu-segmented-header-item-padding: var(--ui-menu-segmented-header-item-padding, 0.42em 0.7em);
     --_ui-menu-segmented-header-item-color: var(
       --ui-menu-segmented-header-item-color,
       var(--ui-text-dark, var(--ui-text-color))
@@ -1085,9 +1086,10 @@
     --_ui-menu-segmented-item-color: var(--_ui-menu-segmented-header-item-color);
     --_ui-menu-item-weight: var(--_ui-menu-segmented-header-item-weight);
     --_ui-menu-active-weight: var(--_ui-menu-segmented-header-item-weight);
-    --_ui-menu-item-flex: 1 1 0;
+    --_ui-menu-item-flex: 0 0 auto;
     --_ui-menu-item-min-width: max-content;
-    width: 100%;
+    gap: 1px;
+    width: auto;
     margin-block: 0;
     font-size: var(--_ui-menu-segmented-header-font-size);
   }

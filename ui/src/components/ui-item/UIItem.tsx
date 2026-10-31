@@ -140,8 +140,13 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /** `aria-current` while selected:  the owner's value on a link (`page`), else `true`. */
   private get ariaCurrent(): UIT.ItemContext["current"] | undefined {
-    if (!this.isSelected || this.kind !== UIT.ITEM || this.isAToggle) return undefined
+    if (!this.isSelected || this.kind !== UIT.ITEM || this.isAToggle || this.isATab) return undefined
     return this.rootTag === "a" ? (this.itemContext?.current ?? "page") : "true"
+  }
+
+  /** A tab in its owner (`<ui-menu tabs>`):  it says `aria-selected`, never `aria-current`. */
+  private get isATab(): boolean {
+    return this.itemContext?.role === "tab" && this.kind === UIT.ITEM
   }
 
   /** A toggle in its owner (`ItemContext.pressed`):  a button box, pressed while selected. */
@@ -366,6 +371,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}
         aria-disabled={this.isDisabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
         aria-current={this.ariaCurrent}
+        aria-selected={this.isATab ? (this.isSelected ? "true" : "false") : undefined}
         aria-pressed={this.isAToggle ? (this.isSelected ? "true" : "false") : undefined}
         aria-label={this.boxLabel}
         title={this.boxTooltip}

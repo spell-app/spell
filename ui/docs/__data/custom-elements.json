@@ -16571,6 +16571,14 @@
               "fieldName": "shrinkable"
             },
             {
+              "name": "tabs",
+              "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "tabs"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
@@ -17149,7 +17157,7 @@
             },
             {
               "name": "--ui-menu-segmented-header-item-padding",
-              "default": "0.5em 0.85em"
+              "default": "0.42em 0.7em"
             },
             {
               "name": "--ui-menu-segmented-header-item-color",
@@ -19404,11 +19412,11 @@
             },
             {
               "name": "--ui-panel-pane-bar-height",
-              "default": "40px"
+              "default": "max(40px, calc(var(--ui-control-height, 0px) + 12px))"
             },
             {
               "name": "--ui-panel-pane-bar-padding",
-              "default": "8px"
+              "default": "6px 8px"
             },
             {
               "name": "--ui-panel-pane-bar-background",
@@ -37097,12 +37105,28 @@
               "fieldName": "shrinkable"
             },
             {
+              "name": "tabs",
+              "description": "Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "tabs"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
                 "text": "boolean"
               },
               "fieldName": "interactive"
+            },
+            {
+              "name": "scroll-first",
+              "description": "With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "scrollFirst"
             },
             {
               "name": "disabled",
@@ -37296,7 +37320,7 @@
             },
             {
               "name": "overflowing",
-              "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
+              "description": "Its items don't all fit:  they scroll sideways (once `shrinkable`, only with `scroll-first`)."
             },
             {
               "name": "disabled",

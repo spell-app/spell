@@ -6,15 +6,13 @@ import "./RunnerPane.css"
 /****************
  * ### `<RunnerPane>`
  * One of a runner's panes:  a toolbar of `tabs`, then `children`, what tab `pane` shows.
- * - Its header:  the toolbar, then `tools`, if any, at the header's right, beside the toolbar:
+ * - It's a `<ui-panel appearance="pane">`:  ONE bar, the same as every header's in the editor.
+ * - Its header:  the toolbar, then `tools`, if any, in the toolbar's `right` slot:
  *   plain `<ui-icon link>`s, each with a `title`, e.g. the editor's Restart
  *   (an item there wouldn't take the menu's look).
  * - A single tab just says what it is.
- * - Tabs are `<ui-item>`s in a `<ui-toolbar appearance="segmented">`:  the theme's segmented tabs, a track as wide
- *   as its tabs, the chosen one raised.  In a narrow pane they scroll sideways, with `‹` / `›` buttons,
+ * - Tabs are `<ui-item>`s in a `<ui-toolbar appearance="segmented header">`:  the theme's segmented tabs, no track, the chosen one raised.  In a narrow pane they scroll sideways, with `‹` / `›` buttons,
  *   never wrapping, and `tools` stay at the right, on the same bar.
- *   - The tools sit OUTSIDE the toolbar, so the toolbar's own box is the track (`chrome.css`):
- *     its rounded ends stay put while the tabs scroll, the fade and the `‹` / `›` inside them.
  *   Whoever mounts a runner defines the `<ui-*>` tags,
  *   with `spell/app/app/solid/loadUI`, or a root around it (`<spell-viewer>`),
  *   and gives it Fomantic's icon names (`<ui-root icons="fomantic">`, `<spell-viewer>`'s default `icons`).
@@ -23,30 +21,40 @@ import "./RunnerPane.css"
  * - SEE:  its App UI components page, `app/docs/RunnerPane.html` (`/components/app/RunnerPane.html`).
  ****************/
 export function RunnerPane<Id extends string>(props: RunnerPaneProps<Id>) {
+  // what a screen reader calls the pane:  the tab it shows
+  const showing = () => props.tabs.find((tab) => tab.id === props.pane)?.title
   return (
-    <div class={["RunnerPane", props.class]}>
-      <div class="RunnerPaneHeader">
-        <ui-toolbar appearance="segmented" class="RunnerPaneToolbar">
-          <For each={props.tabs}>
-            {(tab) => (
-              <ui-item
-                appearance={props.onPane ? "link" : undefined}
-                selected={props.pane === tab.id}
-                data-tab={tab.id}
-                onClick={() => props.onPane?.(tab.id)}
-              >
-                <ui-icon name={tab.icon} />
-                {tab.title}
-              </ui-item>
-            )}
-          </For>
-        </ui-toolbar>
+    <ui-panel appearance="pane" class={["RunnerPane", props.class]} label={showing()}>
+      <ui-toolbar
+        slot="actions"
+        appearance="segmented header"
+        tabs=""
+        shrinkable=""
+        scroll-first=""
+        class="RunnerPaneToolbar"
+        label={showing()}
+      >
+        <For each={props.tabs}>
+          {(tab) => (
+            <ui-item
+              appearance={props.onPane ? "link" : undefined}
+              selected={props.pane === tab.id}
+              data-tab={tab.id}
+              onClick={() => props.onPane?.(tab.id)}
+            >
+              <ui-icon name={tab.icon} />
+              {tab.title}
+            </ui-item>
+          )}
+        </For>
         <Show when={props.tools}>
-          <span class="RunnerPaneTools">{props.tools}</span>
+          <span slot="right" class="RunnerPaneTools">
+            {props.tools}
+          </span>
         </Show>
-      </div>
+      </ui-toolbar>
       {props.children}
-    </div>
+    </ui-panel>
   )
 }
 

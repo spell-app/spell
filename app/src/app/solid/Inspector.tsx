@@ -1224,7 +1224,7 @@ function foldSmallCards(panes: HTMLElement[], id: string): void {
 
 /** Each card's usual share of the column, among those open. */
 const CARD_SHARES: Record<InspectorPanel, number> = { properties: 60, views: 40 }
-/** A folded card's height:  its header's (`.AppPaneHeader`). */
+/** A folded card's height:  its bar's (`<ui-panel appearance="pane">`). */
 const FOLDED_CARD_HEIGHT = 40
 /** The least a card's body may show, px:  dragged smaller, it folds. */
 const SMALLEST_CARD_BODY = 32
@@ -1249,10 +1249,11 @@ function PropertiesCard(): JSX.Element {
     <InspectorCard
       panel="properties"
       class="InspectorMain"
-      title={
-        <Show when={Inspector.inspected} fallback={appTexts.text("inspector")}>
+      label={appTexts.text("inspector")}
+      bar={
+        <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
-            <span class="InspectorTrail">
+            <span slot="title" class="InspectorTrail">
               <For each={part().crumbs}>
                 {(crumb) => (
                   <>

@@ -75,18 +75,17 @@ const [isShowing, setShowing] = createSignal(!!editorPrefs.get(PANEL_PREF))
  * ### `<ModeButtons>`
  * Run | Edit in the top bar, as the theme's segmented tabs:  the one showing is chosen.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
- * - A segmented menu (`<ui-menu appearance="segmented">`), inside the bar's own:
- *   its thumb slides to the mode chosen.
- * - Its look is set in `chrome.css`, through the theme's `--ui-menu-segmented-*` settings.
+ * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
+ *   its thumb slides to the mode chosen, the same look as every header's tabs.
  * - Not on a phone, which only runs (`chrome.css`).
  ****************/
 export function ModeButtons(props: { current: Mode }): JSX.Element {
   return (
     <ui-item class="ModeButtons">
-      <ui-menu appearance="segmented" size="small" class="ModeTabs" aria-label={appTexts.text("modes")}>
+      <ui-menu appearance="segmented link header" tabs="" class="ModeTabs" aria-label={appTexts.text("modes")}>
         <For each={MODES}>
           {(mode) => (
-            <ui-item appearance="link" selected={props.current === mode} onClick={() => EditorMode.show(mode)}>
+            <ui-item selected={props.current === mode} onClick={() => EditorMode.show(mode)}>
               <ui-icon name={MODE_LOOKS[mode].icon} />
               <span class="ModeText">{appTexts.text(MODE_LOOKS[mode].text)}</span>
             </ui-item>

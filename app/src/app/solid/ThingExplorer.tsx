@@ -119,20 +119,21 @@ function ThingExplorerView(props: ThingExplorerViewProps) {
         <div class="ScopesPane">
           <div class="PaneHeader">
             {appTexts.text("things")}
-            <span class="tools">
+            <ui-menu appearance="segmented link header" size="tiny" class="tools" aria-label={appTexts.text("things")}>
               <For each={ORDERS}>
                 {(it) => (
-                  <ui-icon
-                    name={it.icon}
-                    link=""
-                    label={appTexts.text(it.text)}
+                  <ui-item
+                    selected={order() === it.id}
                     class={["order", { active: order() === it.id }]}
                     title={appTexts.text(it.text)}
+                    aria-label={appTexts.text(it.text)}
                     onClick={() => props.onChange({ order: it.id })}
-                  />
+                  >
+                    <ui-icon name={it.icon} />
+                  </ui-item>
                 )}
               </For>
-            </span>
+            </ui-menu>
           </div>
           <div class="PaneBody">
             <Show when={topLevel().length}>
