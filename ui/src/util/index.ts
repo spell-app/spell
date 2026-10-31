@@ -23,7 +23,7 @@
  *   - the kit's timing helpers (`spell/util/timing`), to run a function later:
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and to wait:  `waitUntil()`, `within()`
  *   - `Warnings` -- `ui`'s console warnings, its own
- *   - `LoadOnce` -- a load per key, once per page, with a choice of what a failure does
+ *   - `LoadOnce` (`spell/util/LoadOnce`) -- a load per key, once per page, with a choice of what a failure does
  */
 
 export * from "spell/util/class"
@@ -35,4 +35,4 @@ export * from "spell/util/util.types"
 
 export * from "spell/util/timing"
 export * from "./Warnings"
-export * from "./LoadOnce"
+export * from "spell/util/LoadOnce"

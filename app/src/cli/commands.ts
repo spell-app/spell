@@ -7,7 +7,7 @@
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
  *   Spell guides (epic `content` P2)
- * - `spell content compare [--against <ref>]`:  what a language change did to every project's output (epic `language` P1)
+ * - `spell content compare [--against <ref>] [--target <name>]`:  what a language change did to every project's output (epic `language` P1)
  * - `spell content update [--json] [--done [--always <id> ...]]`:  what the parser and Spell UI learned since the
  *   last content update (epic `content` P3)
  * - Under `app` on purpose (Owen's names, 2026-10-21), not only on a clash as Q33 has it.
@@ -121,6 +121,7 @@ export default function appCommands(spell: Command): void {
     .command("compare")
     .description("compile every project here and at a commit, then list each change to its output, errors and warnings")
     .option("--against <ref>", "the commit to compare with", "HEAD")
+    .option("--target <name>", "the target whose code to compare, e.g. py (default:  the running one, javascript)")
     .action((_options, command: Command) => contentCompareCommand(command.optsWithGlobals()))
 
   content
@@ -142,7 +143,7 @@ function contentUpdateCommand(options: { json?: boolean; done?: boolean; always?
 }
 
 /** `spell content compare`:  loads no spell, each side's child loads its own (`contentCompareCommand.ts`). */
-function contentCompareCommand(options: { against?: string }): Promise<never> {
+function contentCompareCommand(options: { against?: string; target?: string }): Promise<never> {
   return CLI.runCommand(async () =>
     (await import("spell/app/cli/commands/contentCompareCommand")).contentCompareCommand(options)
   )

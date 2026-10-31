@@ -172,11 +172,11 @@ JSXEs.addRule(SpellJSX, {
             "  number: 1,",
             "  boolean: true,",
             "  expression: () => 1 + 1,",
-            "  onClick: (event) => core.console.log(event.target.value),",
+            "  onClick: core.pressed(this, (event) => core.console.log(event.target.value)),",
             '  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"',
             "})"
           ],
-          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />'
+          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={core.pressed(this, (event) => core.console.log(event.target.value))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" />'
         ]
       ]
     },
@@ -301,12 +301,12 @@ JSXEs.addRule(SpellJSX, {
           [
             'h("es-boton", {',
             '  class: "mano",',
-            "  onClick: () => core.console.log(1),",
+            "  onClick: core.pressed(this, () => core.console.log(1)),",
             '  style: "cursor:var(--ui-control-cursor,pointer);user-select:none"',
             "}, () => card.rank)"
           ],
           [
-            '<es-boton class="mano" onClick={() => core.console.log(1)} style="cursor:var(--ui-control-cursor,pointer);user-select:none">',
+            '<es-boton class="mano" onClick={core.pressed(this, () => core.console.log(1))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">',
             "  {card.rank}",
             "</es-boton>"
           ]

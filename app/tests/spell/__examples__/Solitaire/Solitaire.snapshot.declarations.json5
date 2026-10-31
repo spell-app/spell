@@ -228,6 +228,7 @@
       "group": "Playing a card",
       "kind": "method",
       "name": "play a card",
+      "waits": true,
       "defined": "/Solitaire.spellml:6764-7015"
     },
     {
@@ -627,6 +628,7 @@
       "groupDescription": "Its moves:  the menu's buttons, its keys, and the board's right click",
       "kind": "method",
       "name": "start a new game",
+      "waits": true,
       "defined": "/Solitaire.spellml:3594-3704"
     },
     {
@@ -732,11 +734,11 @@
     574,
     579,
     589,
-    606,
-    635,
-    739,
-    742,
-    745,
-    768
+    599,
+    621,
+    725,
+    728,
+    731,
+    754
   ]
 }

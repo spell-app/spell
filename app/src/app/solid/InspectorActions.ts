@@ -93,19 +93,12 @@ export class InspectorActions {
    * - Nothing while it isn't enabled (`core.isActionEnabled()`).
    * - Returns its wait, if it waits (`put it on a pile` pauses):  the button shows it's busy meanwhile.
    * - An error, thrown or from that wait, goes to the program's console, as the program's own would.
-   * - Called directly rather than through `core.runAction()`, which takes no arguments.
+   * - Through `core.runAction()`, as a person's press:  while another action runs, it waits its turn, its button busy.
    * - NEVER throws.
    */
   static run(core: Core, thing: object, action: InspectorAction, args: unknown[] = []): Promise<void> | undefined {
-    const report = (error: unknown) => core.console.error(`${action.words} failed`, error)
-    if (!core.isActionEnabled(thing, action.name)) return undefined
-    try {
-      const result: unknown = (thing as Record<string, (...args: unknown[]) => unknown>)[action.name]!(...args)
-      if (result instanceof Promise) return result.then(() => undefined, report)
-    } catch (error) {
-      report(error)
-    }
-    return undefined
+    if (!core.runAction(thing, action.name, "click", args)) return undefined
+    return core.actionFinishing(thing, action.name)
   }
 
   /**

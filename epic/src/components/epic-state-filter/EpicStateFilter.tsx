@@ -4,7 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
+import { StateFilter, WITH_CLAUDE, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
@@ -94,12 +94,13 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
    */
   get markedCount(): number {
     const marked = Math.max(0, Number(this.marked ?? 0))
-    return marked + (this.stateCounts.get(SUBMITTED_STATE) ?? 0)
+    return marked + (this.stateCounts.get(WITH_CLAUDE) ?? 0)
   }
 
   /** The chips drawn:  every state present but `progress`, which counts in the blue badge. */
   get chips(): readonly ChipState[] {
-    return this.present.filter((it) => it.state !== SUBMITTED_STATE)
+    const chips = StateFilter.chipStatesOf(this.present.map((it) => it.state))
+    return this.present.filter((it) => chips.includes(it.state))
   }
 
   ////////////////
@@ -171,12 +172,10 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   @E.untracked
   private pick(state: string, how: ChipPick) {
     const present = this.present.map((it) => it.state as string)
+    // what Claude is on has no chip of its own:  `nextShown()` keeps it showing
     const next = StateFilter.nextShown(present, [...this.showing], state, how)
-    // what's handed to Claude has no chip of its own:  it never hides behind one
-    const withSubmitted =
-      present.includes(SUBMITTED_STATE) && !next.includes(SUBMITTED_STATE) ? [...next, SUBMITTED_STATE] : next
     // the grey chip is `old` and `handled` both:  shown or hidden together
-    const shown = withSubmitted.includes(SETTLED) ? [...withSubmitted, SETTLED_TOO] : withSubmitted
+    const shown = next.includes(SETTLED) ? [...next, SETTLED_TOO] : next
     this.send(STATE_PICK, { state, shown, how } satisfies StatePickDetail)
   }
 }
@@ -184,9 +183,6 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 /** The grey chip's state, and the one that counts in it (`handled`, epic `epic-engine` P31):  one chip for both. */
 const SETTLED = "old"
 const SETTLED_TOO = "handled"
-
-/** The state of what Claude is working on:  it counts in the blue badge, with the marked items. */
-const SUBMITTED_STATE = "progress"
 
 /** Class of the blue badge, the items marked in this pass (P43). */
 const MARKED = "marked"

@@ -98,17 +98,17 @@ export class ListaDeTareas extends App {
         h("es-elemento", { clase: "encabezado" }, () => `${this.cuentaPendiente} pendientes`),
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "todas",
-          onClick: () => (this.tareas.mostrando = "todas"),
+          onClick: core.pressed(this, () => (this.tareas.mostrando = "todas")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Todas"),
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "pendientes",
-          onClick: () => (this.tareas.mostrando = "pendientes"),
+          onClick: core.pressed(this, () => (this.tareas.mostrando = "pendientes")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Pendientes"),
         h("es-elemento", {
           seleccionado: () => this.tareas.mostrando === "hechas",
-          onClick: () => (this.tareas.mostrando = "hechas"),
+          onClick: core.pressed(this, () => (this.tareas.mostrando = "hechas")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
         }, "Hechas")
       ),

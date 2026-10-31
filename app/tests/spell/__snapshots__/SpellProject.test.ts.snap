@@ -476,8 +476,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event) {
-    solitaire.playFromTheStock()
+  async onClick(event) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -791,19 +791,12 @@ export class Solitaire extends App {
     defined: "/Solitaire.spellml:2396-2779",
   } */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) await this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
   /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
@@ -814,31 +807,24 @@ export class Solitaire extends App {
     defined: "/Solitaire.spellml:2792-3478",
   } */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
@@ -857,19 +843,19 @@ export class Solitaire extends App {
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: () => this.autoPlay(),
+            onClick: core.pressed(this, async () => await this.autoPlay()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: () => this.cheat(),
+            onClick: core.pressed(this, async () => await this.cheat()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: () => this.startANewGame(),
+            onClick: core.pressed(this, async () => await this.startANewGame()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
@@ -893,11 +879,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {
@@ -955,7 +941,7 @@ export const solitaire = new Solitaire()
   syntax: "start a new game (of {thisArg:expression})?", output: "start_a_new_game",
   rule: "method_call", of: "Solitaire", alias: ["statement", "expression"], group: "game",
   groupDescription: "Its moves:  the menu's buttons, its keys, and the board's right click",
-  kind: "method", name: "start a new game",
+  kind: "method", name: "start a new game", waits: true,
   defined: "/Solitaire.spellml:3594-3704",
 } */
 core.describeAction(Solitaire, "startANewGame", { title: "start a new game", shortcuts: ["N"] })
@@ -994,16 +980,17 @@ core.heading("Playing a card")
 /*! SPELL: DECLARES {
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Playing a card", kind: "method", name: "play a card",
+  waits: true,
   defined: "/Solitaire.spellml:6764-7015",
 } */
-Card.prototype.play = function () {
+Card.prototype.play = async function () {
   if (this.pile === solitaire.stock) {
-    solitaire.playFromTheStock()
+    await solitaire.playFromTheStock()
     return
   }
   const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
   if (endPile === undefined) return false
-  return this.putOnPile(endPile)
+  return await this.putOnPile(endPile)
 }
 
 /**
@@ -1057,8 +1044,8 @@ Object.defineProperty(Card.prototype, "clickableWhen", {
 })
 Card.clickable = true
 /** a click plays it */
-Card.prototype.onClick = function (event) {
-  return this.play()
+Card.prototype.onClick = async function (event) {
+  return await this.play()
 }
 /** a drag starting clears the last hint */
 Card.prototype.onDrag = function (event) {
@@ -1074,8 +1061,8 @@ Pile.prototype.whileCardDraggedOver = function (card) {
   const points = card.countThePointsForCardOnPile(this)
   if (core.canTake(this, card) && points > 0) solitaire.hint = \` (+\${points})\`
 }
-Pile.prototype.whenCardDroppedOn = function (card) {
-  card.putOnPile(this)
+Pile.prototype.whenCardDroppedOn = async function (card) {
+  await card.putOnPile(this)
 }
 
 core.heading("The piles")
@@ -1166,7 +1153,7 @@ export function testTheMoves() {
   })
 }
 
-solitaire.startANewGame()
+core.holdWhile(() => solitaire.startANewGame())
 if (!core.isCarryingOver) solitaire.start()",
     "errors": [],
     "path": "/Solitaire.spellml",

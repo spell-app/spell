@@ -107,14 +107,14 @@ export class Card extends TwoSidedView {
    * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
    * - the stock's card turns over onto the discards instead
    */
-  play() {
+  async play() {
     if (this.pile === solitaire.stock) {
-      solitaire.playFromTheStock()
+      await solitaire.playFromTheStock()
       return
     }
     const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
-    return this.putOnPile(endPile)
+    return await this.putOnPile(endPile)
   }
 
   /**
@@ -144,8 +144,8 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  onClick(event) {
-    return this.play()
+  async onClick(event) {
+    return await this.play()
   }
 
   /** a drag starting clears the last hint */
@@ -269,8 +269,8 @@ export class Pile extends ViewableList {
     if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
-  whenCardDroppedOn(card) {
-    card.putOnPile(this)
+  async whenCardDroppedOn(card) {
+    await card.putOnPile(this)
   }
 
   static droppable = true
@@ -313,8 +313,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event) {
-    solitaire.playFromTheStock()
+  async onClick(event) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -509,48 +509,34 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) await this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
   /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
@@ -564,19 +550,19 @@ export class Solitaire extends App {
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: () => sendCall("auto_play", [], this),
+            onClick: async () => sendCall("auto_play", [], this),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: () => sendCall("cheat", [], this),
+            onClick: async () => sendCall("cheat", [], this),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: () => sendCall("start_a_new_game", [], this),
+            onClick: async () => sendCall("start_a_new_game", [], this),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
@@ -600,11 +586,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {

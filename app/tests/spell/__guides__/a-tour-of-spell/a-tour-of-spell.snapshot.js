@@ -86,7 +86,7 @@ export class Plant extends View {
         appearance: "basic",
         size: "small",
         icon: "tint",
-        onClick: () => this.water(),
+        onClick: core.pressed(this, () => this.water()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Water")
     )
@@ -129,7 +129,7 @@ export class Garden extends App {
     return h("div", { class: "Garden" },
       h("ui-button", {
         color: "primary",
-        onClick: () => this.waitADay(),
+        onClick: core.pressed(this, () => this.waitADay()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "A day goes by"),
       () => core.drawThing(this.sill)

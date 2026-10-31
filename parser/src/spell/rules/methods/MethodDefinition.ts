@@ -496,8 +496,8 @@ export class MethodDefinition<
    *   - wraps the whole thing in a `test(...)` call instead of a bare function, when there's no `instanceType`
    * - `props`:  SIDE EFFECT -- unshifts a `DestructuredAssignment` (from `getPropsAssignment()`)
    *   onto the START of the body, so prop variables are in scope before the rest of the method runs.
-   * - `asAnimation`:  SIDE EFFECT -- makes the method `async`, and wraps its body in
-   *   `StartProcessInvocation` (`exclusive: true`) / `try { ... } finally { StopProcessInvocation }`.
+   * - `asAnimation`:  SIDE EFFECT -- makes the method `async`.
+   *   What runs once at a time is the queue's job now, where a person's action enters (`ActionQueue`, `core`).
    * - `instanceType` set:  emits a `PropertyDefinition` for `Type`,
    *   a getter when `asPostfixExpression`, else a method.
    * - No `instanceType`:  emits a loose function;
@@ -567,15 +567,6 @@ export class MethodDefinition<
 
     if (asAnimation) {
       method.async = true
-      method.body = new P.ASTStatementBlock(match, {
-        statements: [
-          new P.ASTStartProcessInvocation(match, { name: methodName, exclusive: true }),
-          new P.ASTTryCatchBlock(match, {
-            body: method.body || new P.ASTStatementBlock(match),
-            finallyBlock: new P.ASTStopProcessInvocation(match, { name: methodName })
-          })
-        ]
-      })
     }
 
     if (instanceType) {
@@ -670,6 +661,7 @@ export class MethodDefinition<
       description[`${moment}_when`] = { member: getter }
     }
     if (details.undoneAs) description.undone_as = details.undoneAs
+    if (details.replacesLast) description.replaces_last = true
     statements.push(
       new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description })
     )

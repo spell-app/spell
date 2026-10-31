@@ -129,13 +129,13 @@ export class ListaDeTareas extends App {
       <es-contenedor class="ListaDeTareas">
         <es-menu apariencia="secundario">
           <es-elemento clase="encabezado">{`${this.cuentaPendiente} pendientes`}</es-elemento>
-          <es-elemento seleccionado={this.tareas.mostrando === "todas"} onClick={() => (this.tareas.mostrando = "todas")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <es-elemento seleccionado={this.tareas.mostrando === "todas"} onClick={core.pressed(this, () => (this.tareas.mostrando = "todas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Todas
           </es-elemento>
-          <es-elemento seleccionado={this.tareas.mostrando === "pendientes"} onClick={() => (this.tareas.mostrando = "pendientes")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <es-elemento seleccionado={this.tareas.mostrando === "pendientes"} onClick={core.pressed(this, () => (this.tareas.mostrando = "pendientes"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Pendientes
           </es-elemento>
-          <es-elemento seleccionado={this.tareas.mostrando === "hechas"} onClick={() => (this.tareas.mostrando = "hechas")} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          <es-elemento seleccionado={this.tareas.mostrando === "hechas"} onClick={core.pressed(this, () => (this.tareas.mostrando = "hechas"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Hechas
           </es-elemento>
         </es-menu>

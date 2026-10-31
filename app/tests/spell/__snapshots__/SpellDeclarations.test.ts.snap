@@ -64,12 +64,12 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     573,
     578,
     588,
-    605,
-    634,
-    738,
-    741,
-    744,
-    767,
+    598,
+    620,
+    724,
+    727,
+    730,
+    753,
   ],
   "provides": [
     "Card",
@@ -301,6 +301,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "output": "play",
       "rule": "method_call",
       "syntax": "play {thisArg:expression}",
+      "waits": true,
     },
     {
       "alias": [
@@ -700,6 +701,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "output": "start_a_new_game",
       "rule": "method_call",
       "syntax": "start a new game (of {thisArg:expression})?",
+      "waits": true,
     },
     {
       "alias": [

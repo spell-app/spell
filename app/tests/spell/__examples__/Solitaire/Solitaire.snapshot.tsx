@@ -110,14 +110,14 @@ export class Card extends TwoSidedView {
    * the card, and every card on it, onto the first pile that takes it;  it says whether it moved
    * - the stock's card turns over onto the discards instead
    */
-  play() {
+  async play() {
     if (this.pile === solitaire.stock) {
-      solitaire.playFromTheStock()
+      await solitaire.playFromTheStock()
       return
     }
     const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
-    return this.putOnPile(endPile)
+    return await this.putOnPile(endPile)
   }
 
   /**
@@ -147,8 +147,8 @@ export class Card extends TwoSidedView {
   }
 
   /** a click plays it */
-  onClick(event: any /* spell: type unknown */) {
-    return this.play()
+  async onClick(event: any /* spell: type unknown */) {
+    return await this.play()
   }
 
   /** a drag starting clears the last hint */
@@ -377,8 +377,8 @@ export class Pile extends ViewableList<Card> {
     if (core.canTake(this, card) && points > 0) solitaire.hint = ` (+${points})`
   }
 
-  whenCardDroppedOn(card: Card) {
-    card.putOnPile(this)
+  async whenCardDroppedOn(card: Card) {
+    await card.putOnPile(this)
   }
 
   static droppable = true
@@ -480,8 +480,8 @@ export class StockPile extends Pile {
   }
 
   /** Empty:  a click turns the discards back over;  a click on one of its cards is the card's */
-  onClick(event: any /* spell: type unknown */) {
-    solitaire.playFromTheStock()
+  async onClick(event: any /* spell: type unknown */) {
+    await solitaire.playFromTheStock()
   }
 }
 
@@ -749,48 +749,34 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it!)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) await this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it!)
   }
 
   /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem!)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem!)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
@@ -802,13 +788,13 @@ export class Solitaire extends App {
           <ui-item>Moves: {this.moves}</ui-item>
           <ui-item>Score: {this.score}{this.hint}</ui-item>
           <ui-menu position="right">
-            <ui-item aria-label="Auto play" title="Auto play" onClick={() => this.autoPlay()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            <ui-item aria-label="Auto play" title="Auto play" onClick={core.pressed(this, async () => await this.autoPlay())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="fast forward" />
             </ui-item>
-            <ui-item aria-label="Cheat" title="Cheat" onClick={() => this.cheat()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            <ui-item aria-label="Cheat" title="Cheat" onClick={core.pressed(this, async () => await this.cheat())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="eye" />
             </ui-item>
-            <ui-item aria-label="Restart" title="Restart" onClick={() => this.startANewGame()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            <ui-item aria-label="Restart" title="Restart" onClick={core.pressed(this, async () => await this.startANewGame())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               <ui-icon name="redo" />
             </ui-item>
           </ui-menu>
@@ -833,11 +819,11 @@ export class Solitaire extends App {
     )
   }
 
-  startANewGame() {
+  async startANewGame() {
     this.score = 0
     this.moves = 0
     this.hint = ""
-    this.dealTheCards()
+    await this.dealTheCards()
   }
 
   async autoPlay() {
@@ -1054,7 +1040,7 @@ export function testTheMoves() {
   })
 }
 
-solitaire.startANewGame()
+core.holdWhile(() => solitaire.startANewGame())
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the board looks -- each card, and how each pile lays its cards out.¬   - Every pile and card is an element of its own on the board, so these rules reach them all:¬     - a pile by its layout, e.g. <solitaire-tableau layout="vertical">¬     - each card in it by its place, --index from 0, and how many there are, --count:  the pile numbers them¬     - an empty pile's placeholder, which it draws itself, by its part:  ::part(placeholder)¬   - A card is one letter of unicode's Playing Cards, at its pile's width:¬     so a card is as wide as its column, whatever the window's width. */¬¬/* A card's picture, in ems of its own letter (measured in Chrome on a Mac):¬   0.604em wide, 0.805em tall, its left edge 0.049em into the letter;  its outline reaches a little past that, so a¬   card keeps 0.008em to spare above and below. */¬:root,¬:host {¬  /* how wide a card is, for each em of its letter */¬  --card-width: 0.604;¬  /* how tall it is, for each of its widths:  (0.805 + 2 x 0.008) / 0.604 */¬  --card-height: 1.359;¬  /* down a column, how much of each card shows under the next:  a fifth of it, its rank and suit */¬  --card-step-down: 0.2;¬  /* along a row, how much of each card the next one covers:  a tenth of it */¬  --card-overlap: 0.1;¬  /* fanned, how far each card turns from the one before */¬  --card-turn: 8deg;¬}¬¬/****************¬ * The board:  below the game's menu, its piles seven to a line¬ ****************/¬¬.Board {¬  /* gutters that shrink with a narrow window, so the cards keep most of its width */¬  --ui-grid-gutter: min(2rem, 2.5vw);¬  --ui-grid-row-spacing: min(2rem, 4vw);¬  /* 1.5rem below the menu:  the grid pulls itself up by half a row's spacing */¬  margin-top: calc(1.5rem + var(--ui-grid-row-spacing) / 2);¬}¬¬/* A narrow window, a phone's:  the menu loses its title, so the score and buttons fit on one line */¬@media (width < 36rem) {¬  ui-item[kind="header"] {¬    display: none;¬  }¬}¬¬/****************¬ * A pile:  as wide as its cell of the board, and as tall as its cards¬ ****************/¬¬[layout] {¬  /* a box of its own, holding its floated sizer */¬  display: flow-root;¬  position: relative;¬  /* its cards size themselves by its width */¬  container-type: inline-size;¬  /* no glow around the whole pile when a dragged card would land on it:  its top card glows instead (below) */¬  --spell-drop-glow: none;¬}¬/* its height:  a card's, by default -- a percentage of padding is one of its width */¬[layout]::before {¬  content: "";¬  /* floated, so its cards start at the top of its content, not below it */¬  float: left;¬  width: 100%;¬  padding-top: calc(100% * var(--card-height));¬}¬¬/* Each card, and the placeholder:  a card's letter as wide as the pile, cut to the card it draws */¬[layout] > *,¬[layout]::part(placeholder) {¬  position: absolute;¬  display: block;¬  /* where its pile's content starts, inside the cell's gutters:  its offsets in a layout are margins */¬  top: auto;¬  left: auto;¬  font-size: calc(100cqi / var(--card-width));¬  width: calc(var(--card-width) * 1em);¬  height: calc(var(--card-width) * var(--card-height) * 1em);¬  overflow: hidden;¬  /* in the font that draws the cards, so the page's font never moves them:  a line's height comes from its FIRST font,¬     and a theme's (Fruity's system font) set them 0.027em higher than Lato did, cutting off their tops */¬  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;¬  /* the card's spare room above and below its ink (0.008em) padding, its white face only the content, so it hugs the ink¬     (not a border:  a browser rounds a border to whole pixels) */¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  /* Apple Symbols rises 0.67em and drops 0.25em, its card's ink 0.666em above its baseline:¬     a line of 0.917 starts the ink at the top of the face (measured:  0.912 by the font's rounded numbers) */¬  line-height: 0.917;¬  --ui-text-line-height: 0.917;¬  text-indent: -0.049em;¬  user-select: none;¬}¬¬/****************¬ * Turning over:  a card draws both its sides (Card.spellml), back to back, and turns over in 3D¬ * - The card is the thing that turns:  face up it's square on, face down it's turned half round (180°).¬ *   Its back side is drawn already turned half round, so it faces you when the card does.¬ * - Each side hides while it faces away (backface-visibility), so you see the front, then the back come round.¬ * - A side is one letter, cut to the card and on its white face:  the cut and the face are the side's own, since a¬ *   card that cut its own content would draw flat, and its sides couldn't turn with it.¬ * - A card that's drawn already turned shows that side at once:  only a change turns it.¬ * - 0.3s:  the game pauses that long after turning the stock's card (Solitaire.spellml), so it turns over before it moves.¬ ****************/¬¬[layout] > * {¬  /* its sides turn with it, in 3D */¬  transform-style: preserve-3d;¬  overflow: visible;¬  transform: perspective(3em) rotateY(0deg);¬  transition: transform 0.3s ease-in-out;¬}¬[layout] > :not([direction="up"]) {¬  transform: perspective(3em) rotateY(180deg);¬}¬/* each side:  the card's whole box, its letter cut to it on a white face, its corners rounded as the letter's are;¬   a <ui-text> draws no box of its own, so it's given one */¬[layout] > *::part(front),¬[layout] > *::part(back) {¬  display: block;¬  position: absolute;¬  inset: 0;¬  box-sizing: border-box;¬  padding-block: 0.008em;¬  overflow: hidden;¬  background: #fff;¬  background-clip: content-box;¬  border-radius: 0.035em;¬  backface-visibility: hidden;¬}¬[layout] > *::part(back) {¬  transform: rotateY(180deg);¬}¬@media (prefers-reduced-motion: reduce) {¬  [layout] > * {¬    transition: none;¬  }¬}¬¬/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */¬[layout]::part(placeholder) {¬  color: #8a8f99;¬  opacity: 0.35;¬}¬[layout]::part(placeholder):hover {¬  opacity: 0.5;¬}¬¬/*¬ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",¬ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,¬ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder¬ * (above) a mid grey that shows on a light page and a dark one alike¬ */¬[layout] > * {¬  color-scheme: light;¬  --ui-red-text: #c8102e;¬  --ui-black-text: #1a1a1a;¬  --ui-blue-text: #2f6fd6;¬}¬¬/****************¬ * Dropping:  a card dragged anywhere over a pile that would take it lights up the card it would land on¬ * - That's the pile's top card, its last:  on a column, the face-up card at its foot.¬ *   An empty pile's placeholder, where it would lie.¬ * - A tight glow hugging the card:  a thin ring, then a soft halo.¬ *   The rings grow out from the card's own corners, so they round more than it does.¬ * - The pile says it would take the card by its state, :state(accepting-drop):  the runtime sets it, by the pile's rules.¬ ****************/¬¬[layout]:state(accepting-drop) > :last-child,¬[layout]:state(accepting-drop)::part(placeholder) {¬  border-radius: 0.035em;¬  box-shadow:¬    0 0 0 0.012em rgb(150 80 255 / 0.85),¬    0 0 0.06em 0.025em rgb(150 80 255 / 0.55);¬}¬/* an empty pile's placeholder shows clearly while it would take the card */¬[layout]:state(accepting-drop)::part(placeholder) {¬  opacity: 1;¬}¬¬/****************¬ * The layouts:  stacked puts every card on top of the one before¬ ****************/¬¬/* vertical:  each card a step below the one before */¬[layout="vertical"]::before {¬  padding-top: calc(100% * var(--card-height) * (1 + (max(var(--count, 1), 1) - 1) * var(--card-step-down)));¬}¬[layout="vertical"] > * {¬  margin-top: calc(var(--index) * var(--card-width) * var(--card-height) * 1em * var(--card-step-down));¬}¬¬/* horizontal:  side by side, each covering the edge of the one before;  smaller as there are more, to fit the pile */¬[layout="horizontal"] {¬  --spread: calc(1 + (max(var(--count, 1), 1) - 1) * (1 - var(--card-overlap)));¬}¬[layout="horizontal"]::before {¬  padding-top: calc(100% * var(--card-height) / var(--spread));¬}¬[layout="horizontal"] > * {¬  font-size: calc(100cqi / var(--card-width) / var(--spread));¬  margin-left: calc(var(--index) * var(--card-width) * 1em * (1 - var(--card-overlap)));¬}¬¬/* fanned:  as a hand of cards is held, each turned a little from the one before, around a point below them */¬[layout="fanned"] > * {¬  font-size: calc(60cqi / var(--card-width));¬  left: calc(50% - var(--card-width) * 0.5em);¬  margin-top: 10%;¬  transform-origin: 50% 200%;¬  rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));¬}¬`)

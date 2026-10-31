@@ -76,7 +76,7 @@ export class Sources {
       return Promise.reject(error)
     }
     const pending = this.cache.get(url.href, () => this.fetch(url.href), { fresh })
-    return signal ? Sources.abortable(pending, signal) : pending
+    return signal ? LoadOnce.abortable(pending, signal) : pending
   }
 
   /** Drop `source`'s cache entry, or every entry. */
@@ -139,28 +139,6 @@ export class Sources {
   ////////////////
   // ## Helpers
   ////////////////
-
-  /**
-   * `promise`, or an `AbortError` as soon as `signal` aborts.
-   * - STATIC:  pure, no cache of its own.
-   */
-  private static abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
-    if (signal.aborted) return Promise.reject(signal.reason)
-    return new Promise<T>((resolve, reject) => {
-      const onAbort = () => reject(signal.reason)
-      signal.addEventListener("abort", onAbort, { once: true })
-      promise.then(
-        (value) => {
-          signal.removeEventListener("abort", onAbort)
-          resolve(value)
-        },
-        (error: unknown) => {
-          signal.removeEventListener("abort", onAbort)
-          reject(error)
-        }
-      )
-    })
-  }
 
   /**
    * The `load` `SourceError` a failed fetch throws, the network error (if any) as `cause.error`;

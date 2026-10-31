@@ -12,6 +12,7 @@ import {
   attributeName,
   isCoreCall,
   isTight,
+  PRESS_ATTRIBUTES,
   topLevelOf,
   unwrapped,
   withUsedCoreClasses
@@ -297,9 +298,31 @@ export class JSWriter extends ProgramWriter {
     return node.type === "global" ? node.name : this.nameOf(node.name, "variable")
   }
 
-  /** `await x`, or a loop whose body waits written as a plain loop -- see `loop()`. */
+  /** `await x`:  what the program said to wait for.  Anything else that waits, its call says:  see `writesAwait()`. */
   ASTAwaitExpression(node: P.ASTAwaitExpression): string {
-    return (this.statements.has(node) && this.loop(node.expression)) || `await ${this.tight(node.expression)}`
+    return `await ${this.tight(node.expression)}`
+  }
+
+  /**
+   * Is `node`, a call, written `await`?
+   * - As the project's pass says (`P.WriterProject.findWaiting()`).
+   * - With no project, e.g. this writer alone on one node:  when it's `core`'s, which always waits.
+   */
+  protected writesAwait(node: P.ASTNode): boolean {
+    if (this.project.hasFoundWaiting) return this.project.awaited.has(node)
+    return isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)
+  }
+
+  /** May a function of `name` wait?  Not one that must answer at once:  a getter, a drawing, `create()`, a `to test`. */
+  protected canWait(name: string | undefined, isGetter: boolean): boolean {
+    return !isGetter && !/^(?:create$|draw(?:_|$)|test_)/.test(name ?? "")
+  }
+
+  /** As `ProgramWriter`'s;  a `send` waits only if a handler of its event does (epic `language`, J4). */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    if (call.methodName !== "send") return super.coreCallWaits(call)
+    const eventName = call.args.args?.map(P.quotedText).find(Boolean)
+    return !!eventName && this.project.eventWaits(eventName)
   }
 
   ////////////////
@@ -477,6 +500,7 @@ export class JSWriter extends ProgramWriter {
     const inner = unwrapped(node)
     if (!this.bindsTightly(inner)) return `(${this.write(inner)})`
     const text = String(this.write(inner))
+    if (text.startsWith("await ")) return `(${text})`
     // a `core` helper said with an operator:  `x !== undefined`, `x instanceof Tableau`, `!x`
     return isCoreCall(inner) && LOOSE_CORE_CALL.test(topLevelOf(text)) ? `(${text})` : text
   }
@@ -496,7 +520,7 @@ export class JSWriter extends ProgramWriter {
 
   /** `name(args)`, by our name:  `playFromTheStockPile()`. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
-    return `${this.nameOf(node.methodName)}${this.argsOf(node)}`
+    return `${this.writesAwait(node) ? "await " : ""}${this.nameOf(node.methodName)}${this.argsOf(node)}`
   }
 
   /** A call's `(args)`, for a method or function of the program's own. */
@@ -510,6 +534,27 @@ export class JSWriter extends ProgramWriter {
    * - A `core` helper is written as javascript says it where it can:  see `coreCall()`.
    */
   ASTScopedMethodInvocation(node: P.ASTScopedMethodInvocation): string {
+    const waits = this.writesAwait(node)
+    if (waits && this.project.waitsInTurn(node)) return this.inTurn(node)
+    const written = this.call(node)
+    return waits ? `await ${written}` : written
+  }
+
+  /**
+   * `node`, a loop or a `where` whose function waits, one by one:
+   * - a loop alone on its line, as a plain loop:  see `loop()`
+   * - else `core`'s own:  `await core.forEachSequential(...)`, `await core.filterInTurn(...)`
+   */
+  protected inTurn(node: P.ASTScopedMethodInvocation): string {
+    const loop = this.statements.has(node) ? this.loop(node) : undefined
+    if (loop) return loop
+    const methodName = node.methodName === "filter" ? "filterInTurn" : "forEachSequential"
+    const args = node.args.args ?? []
+    return `await ${this.call(new P.ASTCoreMethodInvocation(node.match, { methodName, args }))}`
+  }
+
+  /** `ASTScopedMethodInvocation()`'s call, before any `await`. */
+  protected call(node: P.ASTScopedMethodInvocation): string {
     if (node.thing instanceof P.ASTCoreExpression) {
       const written = this.coreCall(node)
       if (written !== undefined) return written
@@ -746,14 +791,14 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * A loop whose body waits, `await core.forEachSequential(cards, async (card) => {...})`, as a plain loop:
+   * A loop whose body waits, as a plain loop:
    * `for (const card of cards) {...}`, so the waits happen in turn -- `undefined` if it isn't one.
    * - Over a spell `List` (iterable) or a plain array, when the body takes the item only.
    * - A bare `return` in the body ends that turn only:  `continue`.
    */
   loop(node: P.ASTExpression): string | undefined {
     const call = unwrapped(node)
-    if (!isCoreCall(call) || (call as P.ASTScopedMethodInvocation).methodName !== "forEachSequential") return undefined
+    if (!isCoreCall(call) || !P.CORE_LOOPS.has((call as P.ASTScopedMethodInvocation).methodName)) return undefined
     const [collection, callback] = (call as P.ASTScopedMethodInvocation).args.args ?? []
     const method = callback && unwrapped(callback)
     if (!collection || !(method instanceof P.ASTMethodDefinition) || method.args?.length !== 1) return undefined
@@ -999,7 +1044,8 @@ export class JSWriter extends ProgramWriter {
         if (prefix) lines.splice(docStart, 0, prefix)
       }
       this.statements.add(statement)
-      lines.push(String(this.write(statement)))
+      const written = String(this.write(statement))
+      lines.push(this.project.heldSteps.has(statement) ? `core.holdWhile(() => ${written})` : written)
       docStart = lines.length
     }
     return elseOnItsLine(lines.join(jsText.NEWLINE))
@@ -1346,6 +1392,7 @@ export class JSWriter extends ProgramWriter {
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (value === true) return "true"
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("members" in value && Array.isArray(value.members)) {
@@ -1422,7 +1469,7 @@ export class JSWriter extends ProgramWriter {
     if (!children.length) return `${head})`
     const inline = children.join(", ")
     const lastLine = head.slice(head.lastIndexOf("\n") + 1)
-    const fits = !inline.includes("\n") && lastLine.length + inline.length < JSWriter.DRAWING_LINE
+    const fits = !inline.includes("\n") && P.SourceMarks.widthOf(lastLine + inline) < JSWriter.DRAWING_LINE
     // more than one child, with an element among them:  one a line, as JSX reads
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
     if (fits && isFlat) return `${head}, ${inline})`
@@ -1438,7 +1485,7 @@ export class JSWriter extends ProgramWriter {
     const children = node.childValues.map((child) => String(this.write(child)))
     const inline = children.join(", ")
     const isFlat = children.length === 1 || !node.childValues.some((child) => child instanceof P.ASTJSXElement)
-    if (isFlat && !inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `[${inline}]`
+    if (isFlat && !inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `[${inline}]`
     return `[\n${jsText.indented(children.join(",\n"))}\n]`
   }
 
@@ -1454,13 +1501,24 @@ export class JSWriter extends ProgramWriter {
         const value = attribute.propValue
         const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
-        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${this.write(value)}${error}`
+        const written = this.pressedHandler(key, value) ?? this.write(value)
+        return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${written}${error}`
       })
       .sort((a, b) => Number(b.startsWith("class:")) - Number(a.startsWith("class:")))
     if (!props.length) return ""
     const inline = props.join(", ")
-    if (!inline.includes("\n") && inline.length < JSWriter.DRAWING_LINE) return `{ ${inline} }`
+    if (!inline.includes("\n") && P.SourceMarks.widthOf(inline) < JSWriter.DRAWING_LINE) return `{ ${inline} }`
     return `{\n${jsText.indented(props.join(",\n"))}\n}`
+  }
+
+  /**
+   * `value`, the handler of attribute `key`, if it's a press:  `core.pressed(this, () => this.deal())`, a person's
+   * action, which waits its turn (`ActionQueue`, epic `language`, Q6);  `undefined` for any other.
+   * - `onInput`, `onMouseEnter` ... aren't:  they keep up with the person.
+   */
+  protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
+    if (!PRESS_ATTRIBUTES.test(key) || !(value instanceof P.ASTMethodDefinition)) return undefined
+    return `core.pressed(this, ${this.write(value)})`
   }
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */

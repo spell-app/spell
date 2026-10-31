@@ -831,6 +831,7 @@
       "name": "forEachSequential",
       "of": "core",
       "module": "collection-other",
+      "waits": true,
       "params": [
         {
           "name": "collection"
@@ -873,6 +874,23 @@
       ],
       "section": "iteration",
       "description": "Return new `collection` of only things which match `condition` filter."
+    },
+    {
+      "kind": "method",
+      "name": "filterInTurn",
+      "of": "core",
+      "module": "collection-other",
+      "waits": true,
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "condition"
+        }
+      ],
+      "section": "iteration",
+      "description": "As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for."
     },
     {
       "kind": "method",
@@ -1142,6 +1160,7 @@
       "name": "pauseFor",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "number"
@@ -1158,6 +1177,7 @@
       "name": "notify",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1174,6 +1194,7 @@
       "name": "alert",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1190,6 +1211,7 @@
       "name": "confirm",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1209,6 +1231,7 @@
       "name": "prompt",
       "of": "core",
       "module": "ui",
+      "waits": true,
       "params": [
         {
           "name": "message"
@@ -1879,6 +1902,7 @@
       "name": "remember",
       "of": "core",
       "module": "runtime",
+      "waits": true,
       "params": [
         {
           "name": "name"
@@ -2148,6 +2172,7 @@
       "name": "send",
       "of": "core",
       "module": "sending",
+      "waits": true,
       "params": [
         {
           "name": "target"
@@ -2163,6 +2188,21 @@
         }
       ],
       "description": "Send event `type` to `target`, with `params`:  see the module's docs."
+    },
+    {
+      "kind": "method",
+      "name": "takesEvent",
+      "of": "core",
+      "module": "sending",
+      "params": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "type"
+        }
+      ],
+      "description": "Would anything take event `type` sent to `target`:  a handler up its chain, or one of the program's own listeners?"
     },
     {
       "property": "input",
@@ -2184,9 +2224,109 @@
         },
         {
           "name": "way"
+        },
+        {
+          "name": "args"
         }
       ],
       "description": "Run action `name` on `thing`, the ONE way every key, click and menu item runs one:  see the module's docs."
+    },
+    {
+      "kind": "method",
+      "name": "runPressed",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "run"
+        },
+        {
+          "name": "canRun"
+        }
+      ],
+      "description": "Run `run`, something a person pressed that isn't an action by name, through the queue (`ActionQueue`): a click on a thing, a drop."
+    },
+    {
+      "kind": "method",
+      "name": "pressed",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "handler"
+        }
+      ],
+      "description": "`handler`, a click's in a drawing, as compiled spell writes it:  `onClick: core.pressed(this, () => this.deal())`."
+    },
+    {
+      "kind": "method",
+      "name": "meanwhile",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run` now, not holding the caller up:  it goes on beside whatever comes next, and its failure is said on the program's console, rather than vanishing."
+    },
+    {
+      "kind": "method",
+      "name": "holdWhile",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "run"
+        }
+      ],
+      "description": "Run `run`, one of the program's own top-level steps, as `core.meanwhile()`, with people's actions waiting for it: `core.holdWhile(() => solitaire.startANewGame())`."
+    },
+    {
+      "kind": "method",
+      "name": "cancelActions",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Cancel what a person started that's still running or waiting:  it stops at its next wait, silently (`ActionQueue`)."
+    },
+    {
+      "kind": "method",
+      "name": "runningAction",
+      "of": "core",
+      "module": "acting",
+      "description": "The action a person started that's running now:  its `thing`, its `name`, and a `signal` told if it's canceled."
+    },
+    {
+      "kind": "method",
+      "name": "actionFinishing",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "When action `name` on `thing` ends, or is dropped, if it's running or waiting its turn:  e.g. a button's busy state."
     },
     {
       "kind": "method",

@@ -31,6 +31,7 @@ import inspect
 import json
 import re
 import sys
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from spell_core.core import core
@@ -72,6 +73,31 @@ class PageSession:
         """
         await self.run_async(message)
         return self.writer.patch()
+
+    def is_action(self, message: dict[str, Any]) -> bool:
+        """Is `message` something a person pressed, so it waits its turn?  A drag's moves and a `while` aren't."""
+        return "trigger" in message or not AT_ONCE.match(message.get("call", ""))
+
+    def enter(
+        self, message: dict[str, Any], ended: Callable[[BaseException | None], Awaitable[None]] | None = None
+    ) -> None:
+        """Run `message` through the program's queue (`ActionQueue`), not waiting for it:  it may wait its turn.
+
+        - `ended`:  called once it has run, with what it failed with, if it failed.  Not if it was dropped.
+        """
+        thing = message.get("target", message.get("on"))
+        if thing is None and message.get("details"):
+            thing = next(iter(message["details"].values()))
+        name = message.get("trigger", message.get("call", ""))
+        held = self.read(thing) if thing is not None else None
+        description = core.actions_of(type(held)).get(name) or {} if held is not None else {}
+        core.RUNTIME.actions.enter(
+            held,
+            name,
+            lambda: self.run_async(message),
+            replaces_last=bool(description.get("replaces_last")),
+            ended=ended,
+        )
 
     async def run_async(self, message: dict[str, Any]) -> None:
         """Run `message` to its end, awaiting what's `async def` -- see `handle_async()`."""
@@ -124,6 +150,11 @@ class PageSession:
         if isinstance(value, list):
             return [self.read(item) for item in value]
         return value
+
+
+# What a page sends that keeps up with the person, never waiting its turn:  a `while`, a typed property, a drag's moves,
+# and the mouse's events that aren't a press (epic `language`, J3)
+AT_ONCE = re.compile(r"start_while$|end_while$|set_prop$|move_before$|on_mouse_|on_drag_|when_\w+_dragged_")
 
 
 def python_name(name: str) -> str:

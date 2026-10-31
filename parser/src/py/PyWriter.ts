@@ -2,7 +2,7 @@ import { P } from "spell/parser/parser"
 import { PyBaseWriter } from "./PyBaseWriter"
 import * as pyText from "./pyText"
 
-const { isCoreCall, unwrapped } = P.jsShapes
+const { isCoreCall } = P.jsShapes
 
 /****************
  * ### `PyWriter`
@@ -21,11 +21,9 @@ const { isCoreCall, unwrapped } = P.jsShapes
  *           await self.turn_face_down()
  *   ```
  *
- * - Which functions wait is worked out for the whole project first (`forProject()`):
+ * - Which functions wait is worked out for the whole project first (`P.WriterProject.findWaiting()`):
  *   - any that pauses, or calls one that does
  *   - by NAME:  every method of a name waits if one does, so `await` is never put before a plain value
- *   - Why:  javascript calls them without waiting (`this.turnFaceDown()`),
- *     where Python's call, not awaited, would do nothing at all.
  * - A `create()` that waits is `async def` too, e.g. a deck's, which turns each card face down:
  *   `spell_core` runs it to its end as the thing is made, its pauses not waiting (`core.run_at_once()`),
  *   as javascript's constructor runs it.
@@ -38,102 +36,22 @@ export class PyWriter extends PyBaseWriter {
   /** The writer with no project. */
   static readonly instance = new PyWriter()
 
-  /** The spell names of the functions and methods that wait -- see `forProject()`. */
-  protected waitingNames = new Set<string>()
-
-  /** The functions that wait, as the tree holds them:  each is written `async def`. */
-  protected waitingMethods = new WeakSet<P.ASTMethodDefinition>()
-
   /** Writing the module's top level, where Python can't `await` -- see `statement()`. */
   protected atTopLevel = false
 
   /** The steps lifted out of the top level, for a name each -- see `topLevelStep()`. */
   protected steps = 0
 
-  /** As `PyBaseWriter`'s, then which functions wait -- see the class docs. */
-  forProject(files: P.ASTNode[][], scope?: P.Scope, options?: P.WriterOptions): this {
-    const writer = super.forProject(files, scope, options)
-    writer.importedWaiting(scope)
-    writer.findWaiting(files)
-    return writer
-  }
-
-  /**
-   * SIDE EFFECT:  notes which methods the project IMPORTS wait, from their declarations (`P.ScopeMethod.waits`):
-   * Klondike's `card.turn_face_up()`, from Cards, is awaited too.
-   */
-  protected importedWaiting(scope: P.Scope | undefined): void {
-    const imports = scope?.parentScope
-    if (!(imports instanceof P.ImportScope)) return
-    const methods = [...imports.methods.get(), ...imports.types.get().flatMap((type) => type.methods.get())]
-    for (const method of methods) if (method.waits) this.waitingNames.add(method.name)
-  }
-
-  /**
-   * SIDE EFFECT:  notes which functions in `files` wait:
-   * - any that pauses (`await` in the tree)
-   * - then, until nothing changes, any that calls one by name
-   */
-  protected findWaiting(files: P.ASTNode[][]): void {
-    const named = new Map<P.ASTMethodDefinition, string | undefined>()
-    P.forEachNode(files, (node) => {
-      if (node instanceof P.ASTPropertyDefinition && node.method) named.set(node.method, node.property.value)
-      else if (node instanceof P.ASTStaticMethod) named.set(node.method, node.name)
-      else if (node instanceof P.ASTMethodDefinition && !named.has(node)) named.set(node, node.methodName)
-    })
-    let changed = true
-    while (changed) {
-      changed = false
-      for (const [method, name] of named) {
-        if (this.waitingMethods.has(method)) continue
-        if (!method.isAsync && !this.callsWaiting(method)) continue
-        this.waitingMethods.add(method)
-        if (name) this.waitingNames.add(name)
-        changed = true
-      }
-      // every method of a name waits if one does:  `await` is never put before a plain value
-      for (const [method, name] of named) {
-        if (name && this.waitingNames.has(name) && !this.waitingMethods.has(method)) {
-          this.waitingMethods.add(method)
-          changed = true
-        }
-      }
-    }
-  }
-
-  /** Does `method`'s own body call a function that waits?  Not counting a function inside it, which is its own. */
-  protected callsWaiting(method: P.ASTMethodDefinition): boolean {
-    let found = false
-    const visit = (node: unknown) => {
-      if (found || node === undefined) return
-      if (Array.isArray(node)) return node.forEach(visit)
-      if (!(node instanceof P.ASTNode)) return
-      // a function inside it is its own, e.g. a click's handler:  it waits when it's called, not now
-      if (node instanceof P.ASTMethodDefinition && node !== method) return
-      if (this.isWaitingCall(node)) {
-        found = true
-        return
-      }
-      // ...but a loop runs its function right there, `for card in cards:`:  if that waits, so does this
-      if (isCoreCall(node) && LOOPS.has((node as P.ASTScopedMethodInvocation).methodName)) {
-        const arg = (node as P.ASTScopedMethodInvocation).args.args?.[1]
-        const callback = arg && unwrapped(arg)
-        if (callback instanceof P.ASTMethodDefinition && this.waitingMethods.has(callback)) {
-          found = true
-          return
-        }
-      }
-      for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
-    }
-    visit(method.body)
-    return found
+  /** Does `call`, of `core`, wait?  Spell's pause alone:  Python's `spell_core` has no other that does. */
+  protected coreCallWaits(call: P.ASTScopedMethodInvocation): boolean {
+    return call.methodName === "pauseFor"
   }
 
   /** Is `node` a call of a function that waits, by name, or spell's own pause? */
   isWaitingCall(node: P.ASTNode): boolean {
     if (!(node instanceof P.ASTMethodInvocation)) return false
     if (isCoreCall(node)) return node.methodName === "pauseFor"
-    return this.waitingNames.has(node.methodName)
+    return this.project.waitingNames.has(node.methodName)
   }
 
   ////////////////
@@ -147,12 +65,12 @@ export class PyWriter extends PyBaseWriter {
     how: { name?: string; first?: "self" | "cls"; decorators?: string[] } = {}
   ): string {
     const written = super.methodDefinition(node, doc, how)
-    return this.waitingMethods.has(node) ? written.replace(/^((?:@.*\n)*)def /, "$1async def ") : written
+    return this.project.waitingMethods.has(node) ? written.replace(/^((?:@.*\n)*)def /, "$1async def ") : written
   }
 
   /** As `PyBaseWriter`'s, but one that waits is always a lifted `async def`:  a `lambda` can't `await`. */
   inlineFunction(node: P.ASTMethodDefinition): string {
-    if (!this.waitingMethods.has(node)) return super.inlineFunction(node)
+    if (!this.project.waitingMethods.has(node)) return super.inlineFunction(node)
     const name = `_${this.nameOf(node.methodName ?? "each")}_${this.lifted.length + 1}`
     this.lifted.push(this.methodDefinition(node, undefined, { name }))
     return name
@@ -161,7 +79,7 @@ export class PyWriter extends PyBaseWriter {
   /** `await name(args)` for a function that waits. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
     const written = super.ASTMethodInvocation(node)
-    return this.waitingNames.has(node.methodName) ? `await ${written}` : written
+    return this.project.waitingNames.has(node.methodName) ? `await ${written}` : written
   }
 
   /**
@@ -172,8 +90,11 @@ export class PyWriter extends PyBaseWriter {
     if (isCoreCall(node) && node.methodName === "pauseFor") {
       return `await ${pyText.call("core.pause_for", this.items(node.args.args))}`
     }
+    if (isCoreCall(node) && node.methodName === "filter" && this.project.waitsInTurn(node)) {
+      return `await ${pyText.call("core.filter_in_turn", this.items(node.args.args))}`
+    }
     const written = super.ASTScopedMethodInvocation(node)
-    const waits = !isCoreCall(node) && this.waitingNames.has(node.methodName)
+    const waits = !isCoreCall(node) && this.project.waitingNames.has(node.methodName)
     return waits ? `await ${written}` : written
   }
 
@@ -255,6 +176,3 @@ export class PyWriter extends PyBaseWriter {
     return `${future}import asyncio\n${/^(?:import \w+|from typing import)/.test(rest) ? "" : "\n"}${rest}`
   }
 }
-
-/** `core`'s loops, which call their function for each item right there -- see `PyWriter.callsWaiting()`. */
-const LOOPS = new Set(["map", "forEach", "forEachSequential"])

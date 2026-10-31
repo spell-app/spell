@@ -30,7 +30,7 @@ export class Square extends View {
   draw() {
     return h("button", {
       part: "mark",
-      onClick: () => this.play(),
+      onClick: core.pressed(this, () => this.play()),
       style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
     }, () => this.mark)
   }
@@ -134,7 +134,7 @@ export class TicTacToe extends App {
       () => core.drawThing(this.board),
       h("ui-button", {
         color: "primary",
-        onClick: () => this.startANewGame(),
+        onClick: core.pressed(this, () => this.startANewGame()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "New game")
     )

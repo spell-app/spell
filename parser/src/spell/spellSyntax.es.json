@@ -6573,10 +6573,10 @@
               "example": "advertir \"Yo!\"",
               "outputs": {
                 "js": {
-                  "code": "await core.warn(\"Yo!\")"
+                  "code": "core.warn(\"Yo!\")"
                 },
                 "ts": {
-                  "code": "await core.warn(\"Yo!\")"
+                  "code": "core.warn(\"Yo!\")"
                 },
                 "py": {
                   "code": "core.warn(\"Yo!\")"
@@ -6739,7 +6739,7 @@
           "ruleNames": ["create_animation"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateAnimation.ts",
-          "line": 17,
+          "line": 14,
           "purpose": "Defines an animation method: `animation deal the cards`, or `create animation deal the cards`.",
           "syntaxes": [
             {
@@ -6747,13 +6747,13 @@
               "example": "animación repartir las cartas",
               "outputs": {
                 "js": {
-                  "code": "export async function repartirLasCartas() {\n  if (core.processIsRunning(\"repartir_las_cartas\")) return\n  core.startProcess(\"repartir_las_cartas\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"repartir_las_cartas\")\n  }\n}"
+                  "code": "export async function repartirLasCartas() {}"
                 },
                 "ts": {
-                  "code": "export async function repartirLasCartas() {\n  if (core.processIsRunning(\"repartir_las_cartas\")) return\n  core.startProcess(\"repartir_las_cartas\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"repartir_las_cartas\")\n  }\n}"
+                  "code": "export async function repartirLasCartas() {}"
                 },
                 "py": {
-                  "code": "async def repartir_las_cartas() -> None:\n    if core.process_is_running(\"repartir_las_cartas\"):\n        return\n    core.start_process(\"repartir_las_cartas\", \"EXCLUSIVE\")\n    try:\n        pass\n    finally:\n        core.stop_process(\"repartir_las_cartas\")"
+                  "code": "async def repartir_las_cartas() -> None:\n    pass"
                 }
               }
             }
@@ -6823,7 +6823,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -6849,6 +6849,9 @@
             },
             {
               "syntax": "se deshace como {undoneAs:text}"
+            },
+            {
+              "syntax": "(replacesLast:uno nuevo reemplaza al anterior)"
             },
             {
               "syntax": "icono {icon:text}"

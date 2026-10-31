@@ -280,7 +280,7 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 - Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
   the twin puts it under the details.
-- An animation is an action that may wait (`wait for:`, `pause for`):  `<action "deal the cards" animated>`,
+- An animation is an action written to wait, as any action that pauses already does:  `<action "deal the cards" animated>`,
   the outline's `- animation deal the cards:`;  in Spanish, `<acción "repartir las cartas" animada>`.
   - Run again while it's running, it does nothing.
 

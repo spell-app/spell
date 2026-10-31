@@ -7,7 +7,7 @@ import { type MethodBody } from "./lists.shared"
 /**
  * `list_range_iteration` rule:  number range-specific iteration, e.g. `for each number from 1 to 10:`.
  * - Builds `core.map(core.getRange(start, end), (item) => { ... })`,
- *   or `await core.forEachSequential(...)` if its body contains an `await`.
+ *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
  * - How javascript writes it (`JSWriter`):
  *   - as a list's own method, `core.getRange(1, 10).forEach((number) => {...})`
  *   - as a `for...of` loop, when its body waits
@@ -43,11 +43,9 @@ export class ListRangeIteration extends SpellStatement<"item|start|end|body?"> {
       args: [new P.ASTVariableExpression(item)],
       body: P.matchAST<MethodBody>(this.getBody(match))
     })
-    const expression = new P.ASTCoreMethodInvocation(match, {
-      methodName: method.isAsync ? "forEachSequential" : "map",
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "map",
       args: [getRange, method]
     })
-    if (method.isAsync) return new P.ASTAwaitExpression(match, { expression })
-    return expression
   }
 }

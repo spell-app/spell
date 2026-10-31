@@ -11,6 +11,7 @@ import {
   isCoreCall,
   isTight,
   newListItemName,
+  PRESS_ATTRIBUTES,
   unwrapped
 } from "./jsShapes"
 import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterProject } from "./WriterProject"
@@ -1352,7 +1353,8 @@ export class TSWriter extends JSWriter {
     if (!value) return tag.includes("-") ? `${key}={true}` : key
     if (value instanceof P.ASTMethodDefinition) {
       const handler = this.arrow(value)
-      return `${key}={${this.sharedHandlers.get(handler) ?? handler}}`
+      const written = this.sharedHandlers.get(handler) ?? handler
+      return `${key}={${PRESS_ATTRIBUTES.test(key) ? `core.pressed(this, ${written})` : written}}`
     }
     const inner = unwrapped(value)
     if (inner instanceof P.ASTStringLiteral && inner.quote && !/["\\]/.test(inner.value))

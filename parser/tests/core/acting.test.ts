@@ -78,7 +78,13 @@ describe("core.runAction()", () => {
     const stop = core.onActionRun(heard)
     expect(core.runAction(cards[0]!, "turnOver", "click")).toBe(true)
     expect(cards[0]!.faceUp).toBe(true)
-    expect(heard).toHaveBeenCalledWith({ thing: cards[0], name: "turnOver", title: "turn it over", way: "click" })
+    expect(heard).toHaveBeenCalledWith({
+      thing: cards[0],
+      name: "turnOver",
+      title: "turn it over",
+      way: "click",
+      signal: expect.any(AbortSignal)
+    })
     // `undone as "Turn Card"`:  one step, named so (C11)
     expect(game.undoTitle).toBe("Undo Turn Card")
     expect(core.runAction(game, "undo", "menu")).toBe(true)

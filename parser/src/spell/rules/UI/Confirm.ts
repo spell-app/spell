@@ -18,11 +18,9 @@ export class Confirm extends SpellStatement<"message|okButton?|cancelButton?"> {
     const args: P.ASTExpression[] = [P.asAST<P.ASTExpression>(message.AST)]
     if (okButton) args.push(P.asAST<P.ASTExpression>(okButton.AST))
     if (cancelButton) args.push(P.asAST<P.ASTExpression>(cancelButton.AST))
-    return new P.ASTAwaitExpression(match, {
-      expression: new P.ASTCoreMethodInvocation(match, {
-        methodName: "confirm",
-        args
-      })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "confirm",
+      args
     })
   }
 }

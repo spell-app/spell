@@ -181,7 +181,7 @@ export class ListaDeTareas extends App {
           h("es-elemento", {
             "aria-label": "Todas",
             seleccionado: () => this.tareas.mostrando === "todas",
-            onClick: () => (this.tareas.mostrando = "todas"),
+            onClick: core.pressed(this, () => (this.tareas.mostrando = "todas")),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "list" }),
@@ -190,7 +190,7 @@ export class ListaDeTareas extends App {
           h("es-elemento", {
             "aria-label": "Pendientes",
             seleccionado: () => this.tareas.mostrando === "pendientes",
-            onClick: () => (this.tareas.mostrando = "pendientes"),
+            onClick: core.pressed(this, () => (this.tareas.mostrando = "pendientes")),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "square outline" }),
@@ -199,7 +199,7 @@ export class ListaDeTareas extends App {
           h("es-elemento", {
             "aria-label": "Hechas",
             seleccionado: () => this.tareas.mostrando === "hechas",
-            onClick: () => (this.tareas.mostrando = "hechas"),
+            onClick: core.pressed(this, () => (this.tareas.mostrando = "hechas")),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "check square outline" }),
@@ -207,7 +207,7 @@ export class ListaDeTareas extends App {
           ),
           h("es-elemento", {
             "aria-label": "Quitar las hechas",
-            onClick: () => this.quitarLasTareasHechas(),
+            onClick: core.pressed(this, () => this.quitarLasTareasHechas()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           },
             h("es-icono", { name: "trash alternate outline" }),
@@ -221,7 +221,7 @@ export class ListaDeTareas extends App {
           h("es-boton", {
             color: "primario",
             disabled: () => this.borrador === "",
-            onClick: () => this.agregarElBorrador(),
+            onClick: core.pressed(this, () => this.agregarElBorrador()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Agregar")
         )

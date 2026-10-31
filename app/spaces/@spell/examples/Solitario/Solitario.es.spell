@@ -68,7 +68,9 @@ solitario es una aplicación donde:
 			esperar a: rehacer la reserva
 
 		obtener la última carta de su reserva
-		esperar a: voltear eso boca arriba
+		voltear eso boca arriba
+		// lo que tarda su giro (styles.css), así se voltea antes de moverse
+		pausar 300 mseg
 		agregar eso a los descartes del solitario
 
 	// junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha

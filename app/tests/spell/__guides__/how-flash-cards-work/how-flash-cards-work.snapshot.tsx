@@ -45,7 +45,7 @@ export class FlashCard extends View {
   /** one side at a time:  a click turns it over */
   @drawn draw() {
     return (
-      <div part="card" onClick={() => this.turnOver()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <div part="card" onClick={core.pressed(this, () => this.turnOver())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.isTurnedOver ? this.back : this.front}
       </div>
     )
@@ -100,7 +100,7 @@ export class Quiz extends App {
     return (
       <div class="Quiz">
         {core.drawThing(this.card)}
-        <ui-button color="primary" onClick={() => this.dealACard()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-button color="primary" onClick={core.pressed(this, () => this.dealACard())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           Next card
         </ui-button>
       </div>

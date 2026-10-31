@@ -29,7 +29,7 @@ export class Square extends View {
   /** a click plays it:  the game says whether it can */
   @drawn draw() {
     return (
-      <button part="mark" onClick={() => this.play()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <button part="mark" onClick={core.pressed(this, () => this.play())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         {this.mark}
       </button>
     )
@@ -159,7 +159,7 @@ export class TicTacToe extends App {
       <div class="TicTacToe">
         <h2 class="Message">{this.message}</h2>
         {core.drawThing(this.board)}
-        <ui-button color="primary" onClick={() => this.startANewGame()} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-button color="primary" onClick={core.pressed(this, () => this.startANewGame())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           New game
         </ui-button>
       </div>

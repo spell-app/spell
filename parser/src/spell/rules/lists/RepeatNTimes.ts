@@ -11,7 +11,7 @@ import { type MethodBody } from "./lists.shared"
  *   current iteration number, from 1, is available as `number` (also aliased from `it`):
  *   its name is the language's, `counterName`, e.g. `número` in Spanish.
  * - Compiles to `core.map(core.countTo(number), (number) => { ... })`, or
- *   `await core.forEachSequential(...)` if body contains an `await` (`method.isAsync`).
+ *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
  */
 export class RepeatNTimes extends SpellStatement<"number|body?"> {
   /** A loop:  a markup line in its body draws, in a drawing -- see `SpellStatement.loops`. */
@@ -38,9 +38,7 @@ export class RepeatNTimes extends SpellStatement<"number|body?"> {
   }
 
   /**
-   * Build `map`/`forEachSequential` call over `countTo(number)` -- runs `number` times, NOT one more.
-   * - SIDE EFFECT: switches to `forEachSequential` + wraps result in `AwaitExpression` when body's
-   *   `method.isAsync` -- set by an `await` expression somewhere in body.
+   * Build `map` call over `countTo(number)` -- runs `number` times, NOT one more.
    */
   getAST(match: P.MatchFor<this>): P.ASTExpression {
     const { number } = match.groups
@@ -50,11 +48,9 @@ export class RepeatNTimes extends SpellStatement<"number|body?"> {
       body: P.matchAST<MethodBody>(this.getBody(match))
     })
     const countTo = new P.ASTCoreMethodInvocation(match, { methodName: "countTo", args: [P.matchAST(number)] })
-    const expression = new P.ASTCoreMethodInvocation(match, {
-      methodName: method.isAsync ? "forEachSequential" : "map",
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "map",
       args: [countTo, method]
     })
-    if (method.isAsync) return new P.ASTAwaitExpression(match, { expression })
-    return expression
   }
 }

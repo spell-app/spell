@@ -85,15 +85,37 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
  *     it's set there too, e.g. a task's title typed into a page's form
  *   - the thing's `when <property> changes` handler, once it's made (`onPropertyChange()`, epic `debut` P30)
  * - Nothing if it has that value already.
+ * - What's being read in from where it's kept (`whileReading()`) is heard by the handler alone:  it's no one's write.
  */
 export function noteSetting(target: object, property: string, value: unknown): void {
   const was = peekProp(target, property)
   if (was === value) return
-  const isNoted = recording?.some((change) => change.target === target && change.property === property)
-  if (recording && !isNoted) recording.push({ target, property, was })
-  core.RUNTIME?.history.noteSetting(target, property, was, value)
-  ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+  if (!isReadingIn) {
+    const isNoted = recording?.some((change) => change.target === target && change.property === property)
+    if (recording && !isNoted) recording.push({ target, property, was })
+    core.RUNTIME?.history.noteSetting(target, property, was, value)
+    ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+  }
   if (madeThings.has(target) && !core.isCarryingOver) changeListener?.(target, property, was, value)
+}
+
+/** Is `whileReading()` running? */
+let isReadingIn = false
+
+/**
+ * Run `read`, marking what it changes as READ from where it's kept (epic `data` J11), so it never comes back as a write:
+ * it isn't put back after a `while` handler, joins no undo step, and goes to no program running elsewhere.
+ * - A thing's `when <property> changes` handler still hears:  the value did change.
+ * - What a refresh or a heal runs in;  the undo history stays as it was.
+ */
+export function whileReading<T>(read: () => T): T {
+  const outer = isReadingIn
+  isReadingIn = true
+  try {
+    return read()
+  } finally {
+    isReadingIn = outer
+  }
 }
 
 /**
@@ -130,9 +152,10 @@ let changeListener: PropertyChangeListener | undefined
  * - `List.writeItems()` calls it, for every change to a list.
  * - An undoable action running:  the run's undo history records it (`UndoHistory.noteItems()`, `undoing.ts`).
  * - A `while` handler's put-back leaves lists as they are:  see `recordingSettings()`.
+ * - Not what's being read in:  see `whileReading()`.
  */
 export function noteItems(list: object, before: readonly unknown[], after: readonly unknown[]): void {
-  core.RUNTIME?.history.noteItems(list, before, after)
+  if (!isReadingIn) core.RUNTIME?.history.noteItems(list, before, after)
 }
 
 /**

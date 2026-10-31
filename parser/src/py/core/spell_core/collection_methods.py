@@ -462,6 +462,24 @@ class CollectionMethods:
                     self.set_item_at(results, position, value)
         return results
 
+    async def filter_in_turn(self, collection: object = None, condition: Callback | None = None) -> Any:
+        """As `filter()`, when `condition` waits:  each item asked in turn, its answer waited for.
+
+        - Compiled spell writes it for a `where` whose condition waits.
+        """
+        if not self._is_defined(collection, "filter_in_turn"):
+            return None
+        call = _callback(condition)
+        results = self.new_thing_like(collection)
+        is_list = self.is_array_like(collection)
+        for value, position, coll in self.get_iterator_for(collection):
+            if is_js_truthy(await call(value, position, coll)):
+                if is_list:
+                    self.append(results, value)
+                else:
+                    self.set_item_at(results, position, value)
+        return results
+
     ################
     # ## Copies and merges
     ################
