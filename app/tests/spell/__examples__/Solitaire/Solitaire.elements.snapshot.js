@@ -492,7 +492,7 @@ export class Solitaire extends App {
   get T7() { return this.getProp("T7") }
   set T7(value) { this.setProp("T7", value) }
 
-  /** Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's */
+  /** Every card of the deck into the stock */
   create() {
     this.deck.forEach((card) => this.stock.append(card))
   }

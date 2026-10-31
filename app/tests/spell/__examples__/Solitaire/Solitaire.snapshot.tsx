@@ -732,7 +732,7 @@ export class Solitaire extends App {
   @prop({ init: () => new Tableau({ name: "T7" }), early: true })
   accessor T7!: Tableau
 
-  /** Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's */
+  /** Every card of the deck into the stock */
   create() {
     this.deck.forEach((card) => this.stock.append(card))
   }

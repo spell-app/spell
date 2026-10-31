@@ -467,7 +467,7 @@ describe("SpellLanguageService", () => {
         RESET_CARDS.map((line) => lineOf(solitaire.parseText, line))
       )
       const renamed = applyEdits(solitaire.parseText, edits)
-      expect(renamed).toContain("\t\tset stack to a copy of list (its discards) as a pile\n\t\treverse the stack\n")
+      expect(renamed).toContain("\t\tset stack to a copy of list (the discards) as a pile\n\t\treverse the stack\n")
       await withText(solitaireUri, solitaire.parseText, renamed, () => {
         expect(errorsIn(service, solitaire)).toEqual([])
       })
@@ -499,8 +499,8 @@ describe("SpellLanguageService", () => {
     // a discard pile's `- its cards are draggable when the card is its last card`:  `the card`, after `cards`
     const givesUp = "- its cards are draggable when the card is its last card"
     expect(hover(solitaire, at(solitaire, givesUp, "card", 1))).toContain("variable **card**: Card · argument")
-    // `for each card in the cards` / `add it to the stock of the solitaire`:  the loop's item
-    expect(hover(solitaire, at(solitaire, "add it to the stock of the solitaire", "it"))).toContain(
+    // `for each card in the cards` / `add it to the stock`:  the loop's item
+    expect(hover(solitaire, at(solitaire, "add it to the stock", "it"))).toContain(
       "variable **it**: Card"
     )
     // `- on click play it`

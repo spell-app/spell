@@ -602,7 +602,7 @@ class Solitaire(App):
     t7 = prop(init=lambda: Tableau(name="T7"), early=True)
 
     def create(self) -> None:
-        """Every card of its deck into the stock:  inside the loop `it` is the card, so the stock is the solitaire's"""
+        """Every card of the deck into the stock"""
         for card in self.deck:
             self.stock.append(card)
 

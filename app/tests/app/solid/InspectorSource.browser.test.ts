@@ -111,7 +111,7 @@ describe("eventsInSource()", () => {
   test("the game:  its properties' changes, as written", () => {
     expect(eventsInSource(["solitaire"], SOLITAIRE).map((row) => [row.words, row.code.split("\n")[0]])).toEqual([
       ["when its score changes", "// every card on a foundation:  the game is won"],
-      ["when its moves change", "clear its hint"]
+      ["when its moves change", "clear the hint"]
     ])
   })
 

@@ -125,6 +125,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 | `- it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
 - Inside a template's action, `the X` reads its property too:  `shuffle the stock` for `shuffle its stock`.
+  - The rule of thumb:  `the X` is the thing you're in, `its X` is whatever `it` is now.
   - A local, argument or loop variable of that name comes first.
   - It's always the thing the action runs on:  in a loop, `its X` is the item's, and `the X` still the action's thing's.
   - A bare `stock` never reads a property.
@@ -132,6 +133,8 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
     `set score to 1` makes a local.
   - A local hiding a property is allowed, but warned:  where it's made, and where `the X` reads it.
     An argument or loop variable warns only on that read.
+  - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.
+    A fill-in that doesn't read as anything is an error.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
