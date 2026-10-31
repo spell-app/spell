@@ -615,7 +615,7 @@ class Solitaire(App):
             card.turn_face_down()
 
     async def play_from_the_stock(self) -> None:
-        """turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
+        """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
         if core.process_is_running("play_from_the_stock"):
             return
         core.start_process("play_from_the_stock", "EXCLUSIVE")
@@ -631,7 +631,7 @@ class Solitaire(App):
             core.stop_process("play_from_the_stock")
 
     async def deal_the_cards(self) -> None:
-        """gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"""
+        """Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"""
         if core.process_is_running("deal_the_cards"):
             return
         core.start_process("deal_the_cards", "EXCLUSIVE")

@@ -48,7 +48,7 @@ solitaire is an app:
 		for each card in the cards
 			add it to the stock of the solitaire
 			turn the card face down
-	// turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
+	// Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty
 	- animation play from the stock:
 		if its stock is empty
 			wait for: reset the stock
@@ -57,7 +57,7 @@ solitaire is an app:
 		// as long as its flip takes (styles.css), so it turns over before it moves
 		pause for 300 msec
 		add it to the discards of the solitaire
-	// gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
+	// Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right
 	- animation deal the cards:
 		for each card in its deck
 			set start pile to the pile of the card

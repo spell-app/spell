@@ -608,6 +608,63 @@ describe("spellx:  a third style of spell", () => {
       expect(code).toContain('core.describeAction(Game, "deal", { title: "deal", shortcuts: ["meta+D"] })')
     })
   })
+
+  // epic `debut` I97
+  describe('an animation is an action that may wait:  <action "..." animated>', () => {
+    test("it compiles as the outline's `- animation ...:` does", () => {
+      const spellx = compiledText([
+        '<spell-app "game">',
+        '\t<action "reset" description="Resets it">print "reset"</>',
+        '\t<action "deal" animated description="Deals, slowly">',
+        "\t\twait for: reset",
+        "\t\tpause for 50 msec",
+        "\t</action>",
+        "</spell-app>"
+      ])
+      const spell = compiledText(
+        [
+          "game is an app where:",
+          "\t// Resets it",
+          '\t- to reset: print "reset"',
+          "\t// Deals, slowly",
+          "\t- animation deal:",
+          "\t\twait for: reset",
+          "\t\tpause for 50 msec"
+        ],
+        { path: "/test.spell" }
+      )
+      expect(spellx.errors).toEqual([])
+      expect(spell.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+      expect(spellx.code).toContain("async deal()")
+    })
+
+    test('in Spanish:  <acción "..." animada>, the outline\'s `- animación ...:`', () => {
+      const spellx = compiledText(
+        [
+          '<encanto-aplicación "juego">',
+          '\t<acción "repartir" animada descripción="Reparte, despacio">',
+          "\t\tpausar 50 milisegundos",
+          "\t</acción>",
+          "</encanto-aplicación>"
+        ],
+        { path: "/test.es.spellml" }
+      )
+      const spell = compiledText(
+        [
+          "juego es una aplicación donde:",
+          "\t// Reparte, despacio",
+          "\t- animación repartir:",
+          "\t\tpausar 50 milisegundos"
+        ],
+        { path: "/test.es.spell" }
+      )
+      expect(spellx.errors).toEqual([])
+      expect(spell.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+      expect(spellx.code).toContain("async repartir()")
+    })
+  })
 })
 
 /** Fixture `name`'s compiled code alone, and its errors -- see `compiledText()`. */

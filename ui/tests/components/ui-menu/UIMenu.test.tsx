@@ -893,3 +893,33 @@ describe("<ui-menu> accessibility", () => {
     await expectAccessible(root)
   })
 })
+
+describe("<ui-menu> in a native form (epic debut J166)", () => {
+  const SUITS = `<ui-item value="clubs">Clubs</ui-item><ui-item value="hearts">Hearts</ui-item>`
+
+  it("a named segmented menu submits its value, follows a click, and resets to its first value", async () => {
+    const form = await ElementFixture.render<HTMLFormElement>(
+      `<form><ui-menu aria-label="Suit" appearance="segmented" name="suit" value="clubs">${SUITS}</ui-menu></form>`
+    )
+    const menu = form.querySelector<DOMElement>("ui-menu")!
+    await ElementFixture.settle()
+    expect([...form.elements]).toContain(menu)
+    expect(new FormData(form).get("suit")).toBe("clubs")
+
+    await userEvent.click(form.querySelectorAll("ui-item")[1]!)
+    await ElementFixture.settle()
+    expect(new FormData(form).get("suit")).toBe("hearts")
+
+    form.reset()
+    await ElementFixture.settle()
+    expect(new FormData(form).get("suit")).toBe("clubs")
+  })
+
+  it("any other menu submits nothing", async () => {
+    const form = await ElementFixture.render<HTMLFormElement>(
+      `<form><ui-menu aria-label="Links" name="links">${LINKS}</ui-menu></form>`
+    )
+    await ElementFixture.settle()
+    expect([...new FormData(form).keys()]).toEqual([])
+  })
+})

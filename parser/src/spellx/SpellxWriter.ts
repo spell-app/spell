@@ -310,7 +310,8 @@ export class SpellxWriter {
     if (PROPERTY_RULES.has(rule)) return this.property(text, body, statement, indent)
     if (rule === "declare_event") return this.event(text, body, statement, indent)
     if (rule === "define_group") return this.group(text, body, statement, indent)
-    if (rule === "draw_it" || rule === "to_do_something") return this.action(text, body, statement, indent)
+    if (rule === "draw_it" || rule === "to_do_something" || rule === "create_animation")
+      return this.action(text, body, statement, indent)
     return this.handler(text, body, indent)
   }
 
@@ -421,7 +422,7 @@ export class SpellxWriter {
   /**
    * `- to turn it over:` and its lines => `<action "turn it over">`, its details as attributes;
    * `- to test card setup:` => `<test "card setup">`;  `- to draw it:` => `<draw>`;
-   * `- to draw its front:` => `<draw "front">`.
+   * `- to draw its front:` => `<draw "front">`;  `- animation deal the cards:` => `<action "deal the cards" animated>`.
    */
   private action(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
     const colon = this.colonAt(text)
@@ -431,6 +432,7 @@ export class SpellxWriter {
     const slot = groupText(statement, "slot")
     const signature = groupText(statement, "signature")
     const isTest = !!groupMatch(statement, "asTest")
+    const isAnimation = statement.rule.name === "create_animation"
     let word: string
     let head: string
     let closer: string | undefined
@@ -447,13 +449,15 @@ export class SpellxWriter {
       word = keyFor(this.words.declarations, "draw")
       head = `<${word}`
     } else if (signature !== undefined) {
-      if (lead !== normal(fill(this.twins.action, { words: signature }))) return undefined
+      const shape = isAnimation ? this.twins.animation : this.twins.action
+      if (lead !== normal(fill(shape, { words: signature }))) return undefined
       word = keyFor(this.words.declarations, "action")
       head = `<${word} ${quoted(signature)}`
     } else return undefined
     if (head.split('"').length > 3) return undefined
+    // an action that may wait:  `animated`, its first attribute (epic `debut` I97)
+    const attributes: string[] = isAnimation ? [keyFor(this.words.attributes, "animated")] : []
     // its details (`- shortcut meta+F`, `- enabled when ...`), first in its body:  its attributes
-    const attributes: string[] = []
     const rest: P.Token[] = []
     for (const item of this.itemsOf(body)) {
       const detail = !rest.length && item instanceof P.LineToken ? this.detailOf(item) : undefined

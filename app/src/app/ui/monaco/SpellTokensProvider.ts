@@ -15,6 +15,8 @@ import { monaco } from "./monaco"
  *   - The tag's own words, which its twin never holds:  `property` a keyword, `one-of` an attribute name,
  *     and `<`, `>`, `/>`, `</>` punctuation.
  *   - A line of prose, or a note's, is a comment;  so is each line of a `<!-- ... -->` comment.
+ *     - EXCEPT a `<property-editor>`'s lines:  markup as written, coloured as markup (`markupPieces()`).
+ *     - A note's head alone on its line, `<description>`, colours as any tag does.
  * - Blocks of another language are coloured as that language, by Monaco's own colouring (`EMBEDDED_BLOCKS`):
  *   - a type's `<css>` block as CSS -- see `LSP.SpellCSS`
  *   - a `<markdown>` block as markdown, in a drawing or a type's outline -- see spell's `markdown_block`
@@ -115,15 +117,14 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
         if (token instanceof SP.SpellxTagToken) pieces.push(...this.spellxTagPieces(parser, tokens, token))
         else if (token instanceof SP.SpellxCloserToken)
           pieces.push({ start: token.start, end: token.end, scopes: "delimiter" })
+        else if (token instanceof SP.SpellxProseToken && token.isNoteHead)
+          pieces.push(...this.noteHeadPieces(line, token))
+        else if (token instanceof SP.SpellxProseToken && token.isMarkup)
+          pieces.push(...this.markupPieces(line, token.start, token.end))
         else if (token instanceof SP.SpellxProseToken || token instanceof P.JSXCommentToken)
           pieces.push({ start: token.start, end: token.end, scopes: "comment" })
-        else if (token instanceof P.JSXToken) {
-          const markup = this.markupTokens(line, token.start, token.end)
-          markup.forEach(({ startIndex, scopes }, index) => {
-            const pieceEnd = markup[index + 1]?.startIndex ?? token.end
-            if (scopes) pieces.push({ start: startIndex, end: pieceEnd, scopes })
-          })
-        } else {
+        else if (token instanceof P.JSXToken) pieces.push(...this.markupPieces(line, token.start, token.end))
+        else {
           const scopes = this.scopesFor(token)
           if (scopes) pieces.push({ start: token.start, end: token.end, scopes })
         }
@@ -238,6 +239,32 @@ export class SpellTokensProvider implements monaco.languages.TokensProvider {
       console.warn(`SpellTokensProvider.tokenize():  couldn't tokenize ${language}`, { line, error })
       return []
     }
+  }
+
+  /**
+   * Pieces of a note's own head line, `<description>` or `<property-editor>` alone on its line:
+   * as any spellx tag's, its word a `keyword` between `delimiter`s.
+   */
+  private noteHeadPieces(line: string, head: SP.SpellxProseToken): Piece[] {
+    const pieces: Piece[] = [{ start: head.start, end: head.end, scopes: "delimiter" }]
+    const word = /^<([^\s/>]+)/.exec(line.slice(head.start, head.end))?.[1]
+    if (word) pieces.push({ start: head.start + 1, end: head.start + 1 + word.length, scopes: "keyword" })
+    return pieces
+  }
+
+  /**
+   * Pieces of markup from `start` to `end` of `line`:  a drawing's, or a `<property-editor>`'s lines,
+   * as `markupTokens()` colours them.
+   */
+  private markupPieces(line: string, start: number, end: number): Piece[] {
+    const markup = this.markupTokens(line, start, end)
+    return markup
+      .map(({ startIndex, scopes }, index) => ({
+        start: startIndex,
+        end: markup[index + 1]?.startIndex ?? end,
+        scopes
+      }))
+      .filter((piece) => piece.scopes)
   }
 
   /**

@@ -759,7 +759,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "items",
       "shrinkable",
       "interactive"
-    ]
+    ],
+    formControl: true
   },
   "ui-message": {
     folder: "ui-message",
@@ -1537,7 +1538,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "items",
       "shrinkable",
       "interactive"
-    ]
+    ],
+    formControl: true
   },
   "ui-transition": {
     folder: "ui-transition",

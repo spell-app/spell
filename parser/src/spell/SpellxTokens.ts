@@ -104,9 +104,22 @@ export type SpellxCloserTokenProps = Prettify<P.TokenProps<string>> & {
  * - A note's own head line, `<description>`, is an empty one;  its closer, `</description>`, a closer.
  */
 export class SpellxProseToken extends P.CommentToken {
-  /** The note it's part of, if any:  `description`, `comment`. */
+  /** The note it's part of, if any:  `description`, `comment`, `property editor`. */
   get note(): SpellxNoteKind | undefined {
     return (this.record as SpellxProseTokenProps).note
+  }
+
+  /** Is it a note's own head line, `<description>` alone on its line:  an empty one? */
+  get isNoteHead(): boolean {
+    return !!this.note && !this.value
+  }
+
+  /**
+   * Is its text MARKUP as written, a line of a `<property-editor>`:  `<ui-property name="rank" />`?
+   * - Still a comment, compiled as one;  only its colouring reads it as markup (epic `debut` I96).
+   */
+  get isMarkup(): boolean {
+    return this.note === "property editor" && !!this.value
   }
 }
 /** Extra `record` props for `SpellxProseToken`. */

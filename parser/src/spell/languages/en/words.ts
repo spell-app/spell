@@ -196,6 +196,8 @@ export const englishWords: SP.LanguageWords = {
       icon: "icon",
       "menu-bar": "menu-bar",
       locked: "locked",
+      // an action that may wait:  an animation (epic `debut` I97)
+      animated: "animated",
       draggable: "draggable",
       droppable: "droppable",
       selectable: "selectable",
@@ -227,6 +229,8 @@ export const englishWords: SP.LanguageWords = {
       alias: "it {name}",
       aliasBlock: "it {name} :",
       action: "to {words} :",
+      // an action that may wait, `<action "deal the cards" animated>` (epic `debut` I97)
+      animation: "animation {words} :",
       actionDetails: {
         shortcut: "shortcut {shortcut}",
         "enabled-when": "enabled when {enabled-when}",
