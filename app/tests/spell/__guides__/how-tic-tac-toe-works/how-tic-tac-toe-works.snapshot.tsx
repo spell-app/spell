@@ -32,7 +32,11 @@ export class Square extends View {
 
   /** a click plays it */
   @drawn draw() {
-    return <button part="mark" onClick={() => this.play()} style="cursor:pointer;user-select:none">{this.mark}</button>
+    return (
+      <button part="mark" onClick={core.pressed(this, () => this.play())} style="cursor:pointer;user-select:none">
+        {this.mark}
+      </button>
+    )
   }
 
   //////////////////////

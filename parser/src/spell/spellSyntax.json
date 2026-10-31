@@ -6704,7 +6704,7 @@
           "ruleNames": ["create_animation"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateAnimation.ts",
-          "line": 17,
+          "line": 14,
           "purpose": "Defines an animation method: `animation deal the cards`, or `create animation deal the cards`.",
           "syntaxes": [
             {
@@ -6712,13 +6712,13 @@
               "example": "animation deal the cards",
               "outputs": {
                 "js": {
-                  "code": "export async function dealTheCards() {\n  if (core.processIsRunning(\"deal_the_cards\")) return\n  core.startProcess(\"deal_the_cards\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"deal_the_cards\")\n  }\n}"
+                  "code": "export async function dealTheCards() {}"
                 },
                 "ts": {
-                  "code": "export async function dealTheCards() {\n  if (core.processIsRunning(\"deal_the_cards\")) return\n  core.startProcess(\"deal_the_cards\", \"EXCLUSIVE\")\n  try {}\n  finally {\n    core.stopProcess(\"deal_the_cards\")\n  }\n}"
+                  "code": "export async function dealTheCards() {}"
                 },
                 "py": {
-                  "code": "async def deal_the_cards() -> None:\n    if core.process_is_running(\"deal_the_cards\"):\n        return\n    core.start_process(\"deal_the_cards\", \"EXCLUSIVE\")\n    try:\n        pass\n    finally:\n        core.stop_process(\"deal_the_cards\")"
+                  "code": "async def deal_the_cards() -> None:\n    pass"
                 }
               }
             }
@@ -6788,7 +6788,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -6817,6 +6817,9 @@
             },
             {
               "syntax": "icon {icon:text}"
+            },
+            {
+              "syntax": "(replacesLast:a new one replaces the last one)"
             }
           ],
           "aliases": ["statement"]

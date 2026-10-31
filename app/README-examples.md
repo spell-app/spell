@@ -594,8 +594,8 @@ The deal is a loop with a pause in it, so you watch it happen:
 _From a `<spell>` block in Solitaire.spellml:  plain Spell, in the outline style._
 
 - `pause for 50 msec` lets the page draw before the next line runs:  28 cards dealt, 50 ms apart.
-- Written `animation` instead of `to`, an action runs one at a time:
-  asking for it again while it runs does nothing, so a second Restart can't deal on top of the first.
+- What a person starts runs one at a time:
+  a second Restart during the deal does nothing, so it can't deal on top of the first.
 - A card is in one pile at a time, as [Pile.spellml](spaces/@spell/examples/Solitaire/Pile.spellml) says
   (`a card belongs to one pile`):  adding it to the stock takes it off the pile it was in.
 

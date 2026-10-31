@@ -791,19 +791,12 @@ export class Solitaire extends App {
     defined: "/Solitaire.spellml:2396-2779",
   } */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) await this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
   /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
@@ -814,31 +807,24 @@ export class Solitaire extends App {
     defined: "/Solitaire.spellml:2792-3478",
   } */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */
@@ -857,19 +843,19 @@ export class Solitaire extends App {
           h("ui-item", {
             "aria-label": "Auto play",
             title: "Auto play",
-            onClick: async () => await this.autoPlay(),
+            onClick: core.pressed(this, async () => await this.autoPlay()),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "fast forward" })),
           h("ui-item", {
             "aria-label": "Cheat",
             title: "Cheat",
-            onClick: async () => await this.cheat(),
+            onClick: core.pressed(this, async () => await this.cheat()),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "eye" })),
           h("ui-item", {
             "aria-label": "Restart",
             title: "Restart",
-            onClick: async () => await this.startANewGame(),
+            onClick: core.pressed(this, async () => await this.startANewGame()),
             style: "cursor:pointer;user-select:none"
           }, h("ui-icon", { name: "redo" }))
         )
@@ -1167,7 +1153,7 @@ export function testTheMoves() {
   })
 }
 
-solitaire.startANewGame()
+core.holdWhile(() => solitaire.startANewGame())
 if (!core.isCarryingOver) solitaire.start()",
     "errors": [],
     "path": "/Solitaire.spellml",

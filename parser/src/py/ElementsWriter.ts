@@ -157,6 +157,11 @@ export class ElementsWriter extends P.JSWriter {
     return `sendCall(${name}, [${args}], ${this.bare(node.thing)})`
   }
 
+  /** A press stays as it is:  the program is in Python, whose page session queues it (`PageSession`). */
+  protected pressedHandler(): string | undefined {
+    return undefined
+  }
+
   /** As `JSWriter`'s, noting its event handlers' values (`onClick`'s), written as handlers -- see `write()`. */
   protected jsxProps(node: P.ASTJSXElement): string {
     for (const attribute of node.attrs ?? []) {

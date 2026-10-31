@@ -316,6 +316,7 @@ export const collectionOtherMethods = defineCoreModule({
     let result = iterator.next()
     while (!result.done) {
       const [value, position, coll] = result.value
+      core.RUNTIME?.actions.throwIfCanceled()
       await method(value, position, coll)
       result = iterator.next()
     }

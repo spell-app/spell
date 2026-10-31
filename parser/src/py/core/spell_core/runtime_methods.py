@@ -6,6 +6,7 @@
   - `core.pauses = False` skips them, e.g. in a test run (`python -m spell_core.run --no-pauses`).
 - Processes are names with a flag, "!" (running alone) or a count:  `start exclusive process deal the cards`.
 - A thing's `create()` that waits runs at once, its pauses not waiting:  `run_at_once()`.
+- What a person starts runs one at a time:  `core.RUNTIME.actions` (`action_queue.py`).
 """
 
 import asyncio
@@ -13,6 +14,7 @@ import inspect
 from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any, ClassVar
 
+from spell_core.action_queue import ActionQueue
 from spell_core.events import Eventful, Handler, SpellEvent
 
 
@@ -22,6 +24,8 @@ class SpellRuntime(Eventful):
     def __init__(self) -> None:
         """A program with no handlers yet, and nothing in its state."""
         self.state: dict[str, Any] = {}
+        # what a person starts, one at a time
+        self.actions = ActionQueue()
 
 
 class RuntimeMethods:
@@ -68,6 +72,13 @@ class RuntimeMethods:
             if inspect.isawaitable(result):
                 await result
         await asyncio.sleep(self._milliseconds(number, units) / 1000)
+
+    def cancel_actions(self, thing: object = None, name: str | None = None) -> bool:
+        """Cancel what a person started that's running or waiting;  with `thing`, or its `name` too, only theirs.
+
+        - It stops at its next wait, silently.  What it wrote to properties stays.  True if anything was.
+        """
+        return self.RUNTIME.actions.cancel(thing, name)
 
     def run_at_once[Result](self, coroutine: Coroutine[Any, Any, Result]) -> Result:
         """Run `coroutine` to its end now, its pauses not waiting:  a thing's `create()` that waits.

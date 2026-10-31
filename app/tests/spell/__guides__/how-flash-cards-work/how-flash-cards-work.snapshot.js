@@ -44,9 +44,11 @@ export class FlashCard extends View {
 
   /** one side at a time:  a click turns it over */
   draw() {
-    return h("div", { part: "card", onClick: () => this.turnOver(), style: "cursor:pointer;user-select:none" },
-      () => this.isTurnedOver ? this.back : this.front
-    )
+    return h("div", {
+      part: "card",
+      onClick: core.pressed(this, () => this.turnOver()),
+      style: "cursor:pointer;user-select:none"
+    }, () => this.isTurnedOver ? this.back : this.front)
   }
 }
 
@@ -80,9 +82,11 @@ export class Quiz extends App {
   draw() {
     return h("div", { class: "Quiz" },
       () => core.drawThing(this.card),
-      h("ui-button", { color: "primary", onClick: () => this.dealACard(), style: "cursor:pointer;user-select:none" },
-        "Next card"
-      )
+      h("ui-button", {
+        color: "primary",
+        onClick: core.pressed(this, () => this.dealACard()),
+        style: "cursor:pointer;user-select:none"
+      }, "Next card")
     )
   }
 }

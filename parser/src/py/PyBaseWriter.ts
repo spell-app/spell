@@ -1502,6 +1502,7 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** One field of a type's description as Python -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
+    if (value === true) return "True"
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))

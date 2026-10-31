@@ -64,6 +64,8 @@ Object.assign(core, describedMethods)
  * - `enabledWhen`, `selectedWhen`:  the name of the class's getter that says so, e.g. `turnOverIsEnabled`
  * - `undoneAs`:  its undo's name, e.g. `Turn Card`, as the Edit menu says `Undo Turn Card`
  * - `titleFrom`:  the name of the class's getter whose text is its title NOW, e.g. the app's `undoTitle`
+ * - `replacesLast`:  the newest wins (`- a new one replaces the last one`), where a repeat is otherwise ignored
+ * - `refusedWhileBusy`:  never waits its turn:  does nothing while an action runs, e.g. the app's `undo` (J2)
  */
 export type ActionDescription = {
   title: string
@@ -73,6 +75,8 @@ export type ActionDescription = {
   selectedWhen?: string
   undoneAs?: string
   titleFrom?: string
+  replacesLast?: boolean
+  refusedWhileBusy?: boolean
 }
 
 /**

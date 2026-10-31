@@ -179,7 +179,7 @@ export class HabitTracker extends App {
         <ui-form value={this}>
           <div class="NewHabit">
             <ui-input name="draft" placeholder="A habit to keep, e.g. Read" aria-label="New habit" fluid={true} />
-            <ui-button color="primary" disabled={this.draft === ""} onClick={() => this.addTheDraft()} style="cursor:pointer;user-select:none">
+            <ui-button color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:pointer;user-select:none">
               Add
             </ui-button>
           </div>

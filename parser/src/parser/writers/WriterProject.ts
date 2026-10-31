@@ -110,6 +110,11 @@ export class WriterProject {
   readonly waitingMethods = new WeakSet<P.ASTMethodDefinition>()
   /** The functions the program listens with, `on hit:` at its top level, by event. */
   readonly listeners = new Map<string, P.ASTMethodDefinition[]>()
+  /**
+   * The program's own top-level steps that wait, `solitaire.startANewGame()`:  written `core.holdWhile(...)`, which
+   * doesn't hold the first draw, while people's actions wait for them.
+   */
+  readonly heldSteps = new WeakSet<P.ASTNode>()
   /** The calls written `await`:  each in a function that waits, of something that waits. */
   readonly awaited = new WeakSet<P.ASTNode>()
   /** Has `findWaiting()` run?  With none, e.g. `JSWriter.instance` writing one node, only `core`'s own calls wait. */
@@ -178,11 +183,19 @@ export class WriterProject {
       }
     }
     for (const method of named.keys()) if (method.isAsync) this.noteAwaited(method.body, callWaits)
+    for (const file of files) for (const statement of file) this.noteHeldSteps(statement, callWaits)
     // the top level:  only what `core` itself always waits for
     this.noteAwaited(
       files,
       (node) => isCoreCall(node) && P.CORE_CALLS_THAT_WAIT.has((node as P.ASTMethodInvocation).methodName)
     )
+  }
+
+  /** SIDE EFFECT:  notes `statement`, of a file's top level, or those of its group, if it's a call that waits. */
+  protected noteHeldSteps(statement: P.ASTNode, callWaits: (node: P.ASTNode) => boolean): void {
+    if (statement.constructor === P.ASTStatementGroup) {
+      for (const each of (statement as P.ASTStatementGroup).statements ?? []) this.noteHeldSteps(each, callWaits)
+    } else if (!isCoreCall(statement) && callWaits(statement)) this.heldSteps.add(statement)
   }
 
   /** Does a handler of event `eventName`, dashed, wait?  A thing's `on_hit`, by name, or a listener of the program's. */

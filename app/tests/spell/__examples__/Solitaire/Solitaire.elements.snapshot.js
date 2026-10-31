@@ -509,48 +509,34 @@ export class Solitaire extends App {
 
   /** Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty */
   async playFromTheStock() {
-    if (core.processIsRunning("play_from_the_stock")) return
-    core.startProcess("play_from_the_stock", "EXCLUSIVE")
-    try {
-      if (this.stock.isEmpty) await this.resetTheStock()
-      const it = this.stock.lastItem
-      it?.turnFaceUp()
-      // as long as its flip takes (styles.css), so it turns over before it moves
-      await core.pauseFor(300, "msec")
-      this.discards.append(it)
-    }
-    finally {
-      core.stopProcess("play_from_the_stock")
-    }
+    if (this.stock.isEmpty) await this.resetTheStock()
+    const it = this.stock.lastItem
+    it?.turnFaceUp()
+    // as long as its flip takes (styles.css), so it turns over before it moves
+    await core.pauseFor(300, "msec")
+    this.discards.append(it)
   }
 
   /** Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right */
   async dealTheCards() {
-    if (core.processIsRunning("deal_the_cards")) return
-    core.startProcess("deal_the_cards", "EXCLUSIVE")
-    try {
-      for (const card of this.deck) {
-        const startPile = card.pile
-        card.turnFaceDown()
-        if (startPile !== this.stock) {
-          this.stock.append(card)
-          await core.pauseFor(50, "msec")
-        }
+    for (const card of this.deck) {
+      const startPile = card.pile
+      card.turnFaceDown()
+      if (startPile !== this.stock) {
+        this.stock.append(card)
+        await core.pauseFor(50, "msec")
       }
-      this.stock.randomize()
-      // each row's first card lands face down, then turns up where it lies
-      for (const row of core.getRange(1, 7)) {
-        for (const column of core.getRange(row, 7)) {
-          core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
-          if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
-          await core.pauseFor(50, "msec")
-        }
+    }
+    this.stock.randomize()
+    // each row's first card lands face down, then turns up where it lies
+    for (const row of core.getRange(1, 7)) {
+      for (const column of core.getRange(row, 7)) {
+        core.getItemAt(core.everyThing(Tableau), position(column))?.append(this.stock.lastItem)
+        if (column === row) core.getItemAt(core.everyThing(Tableau), position(column))?.lastItem?.turnFaceUp()
+        await core.pauseFor(50, "msec")
       }
-      await this.playFromTheStock()
     }
-    finally {
-      core.stopProcess("deal_the_cards")
-    }
+    await this.playFromTheStock()
   }
 
   /** Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu */

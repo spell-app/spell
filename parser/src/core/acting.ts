@@ -4,6 +4,7 @@
  *   enabled or selected, what its undo is called (Q33, Q38).
  * - `core.runAction(thing, "turnOver", "key")` is the ONE choke point:
  *   - it runs nothing while the action isn't enabled
+ *   - it runs one at a time (`ActionQueue`, epic `language` Q6):  a repeat is ignored, another waits its turn
  *   - an action `undone as "Turn Card"` runs as one undo step (`undoing.ts`, C11)
  *   - then it tells whoever listens that the person did it, and how (`core.onActionRun()`):  tours, analytics, tests
  * - Shortcuts:  `core.runShortcut(focused, key)` finds the first ENABLED action bound to the key, starting at the
@@ -16,19 +17,31 @@
  *   - `core.menuBarOf(app)`:  the one its app names as its menu bar, `- its menu bar is "game menu"`.
  * - `undo` and `redo` are the app's own actions:  their titles follow the history, `Undo Turn Card`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
+ * - The queue's other doors:  `core.runPressed()` / `core.pressed()`, a click on a thing or in a drawing.
+ *   `core.meanwhile()` and `core.holdWhile()` run what the program starts itself, reporting what fails.
  * - Knows nothing of the page:
  *   the runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
  */
+import { CanceledError } from "spell/util"
+
 import { core } from "./core"
+import { ActionQueue } from "./ActionQueue"
 import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
-import { chainOf } from "./sending"
+import { chainOf, waitOf } from "./sending"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
 
 /** What `core.onActionRun()` listeners hear:  the person did `name` (`title`) on `thing`, by `way`. */
-export type ActionRun = { thing: object; name: string; title: string; way: ActionWay }
+export type ActionRun = {
+  thing: object
+  name: string
+  title: string
+  way: ActionWay
+  /** Told if it's canceled (`core.cancelActions()`):  who started it drops what's theirs. */
+  signal: AbortSignal
+}
 
 /**
  * One item of a menu, ready to draw:  an action on its thing, or a line between groups.
@@ -65,24 +78,103 @@ export const actingMethods = defineCoreModule({
   /**
    * Run action `name` on `thing`, the ONE way every key, click and menu item runs one:  see the module's docs.
    * - Returns false, running nothing, while it isn't enabled, or `thing` has no such method.
+   * - True otherwise, the person's press taken:  it ran, waits its turn, or is ignored as a repeat (`ActionQueue`).
    * - `way`:  how the person ran it, for the listeners.
-   * - A thrown error is thrown on, after the listeners hear nothing of it.
+   * - `args`:  what to call it with, e.g. the Inspector's.
+   * - The listeners hear of it as it starts, not if it fails right there.
+   * - NEVER throws:  a failure is said on the program's console.
    */
-  runAction(thing: object, name: string, way: ActionWay = "code"): boolean {
+  runAction(thing: object, name: string, way: ActionWay = "code", args: unknown[] = []): boolean {
     const method = (thing as Record<string, unknown>)[name]
     if (typeof method !== "function" || !actingMethods.isActionEnabled(thing, name)) return false
-    const result: unknown = method.call(thing)
-    // an action that waits (a deal) is running:  catch its failure, so a key's press doesn't leave it unhandled
-    if (result instanceof Promise) result.catch((error) => console.error(`${name} failed`, error))
-    const run: ActionRun = { thing, name, title: actingMethods.actionTitle(thing, name), way }
-    for (const listener of [...LISTENERS]) {
-      try {
-        listener(run)
-      } catch (error) {
-        console.warn(`core.onActionRun():  a listener failed on ${name}`, error)
-      }
+    const description = describedAction(thing, name)
+    const queue = queueNow()
+    const title = actingMethods.actionTitle(thing, name)
+    const action = {
+      thing,
+      name,
+      title,
+      replacesLast: description?.replacesLast,
+      run: () => method.apply(thing, args) as unknown,
+      canRun: () => actingMethods.isActionEnabled(thing, name),
+      onStart: (signal: AbortSignal) => tellListeners({ thing, name, title, way, signal })
     }
+    if (description?.refusedWhileBusy && queue.isBusy) return true
+    queue.enter(action)
     return true
+  },
+
+  /**
+   * Run `run`, something a person pressed that isn't an action by name, through the queue (`ActionQueue`):
+   * a click on a thing, a drop.
+   * - `thing`, `name`:  a repeat is the same `name` on the same `thing`, e.g. `click`.
+   * - `canRun`:  may it still run, when its turn comes?
+   * - A program running elsewhere (Python, `core.remote`) keeps its own queue, so this only asks it.
+   * - NEVER throws.
+   */
+  runPressed(thing: unknown, name: string, run: () => unknown, canRun?: () => boolean): void {
+    queueNow().enter({ thing, name, title: name, run, canRun })
+  },
+
+  /**
+   * `handler`, a click's in a drawing, as compiled spell writes it:  `onClick: core.pressed(this, () => this.deal())`.
+   * - Pressed, it runs through the queue (`core.runPressed()`).  Its text is its name, so it's a repeat of itself
+   *   however often the drawing is drawn.
+   * - Only a handler written `async` holds the queue:  `() => core.notify("Saved!")` hands back a toast's promise,
+   *   which a click needn't wait for.
+   */
+  pressed(thing: unknown, handler: (event: Event) => unknown): (event: Event) => void {
+    const name = handler.toString()
+    return (event) => actingMethods.runPressed(thing, name, () => waitOf(handler, handler(event)))
+  },
+
+  /**
+   * Run `run` now, not holding the caller up:  it goes on beside whatever comes next, and its failure is said on the
+   * program's console, rather than vanishing.
+   * - Outside the queue:  people's actions don't wait for it.
+   * - Returns when it has ended, however it ended.
+   * - NEVER throws.
+   */
+  meanwhile(run: () => unknown): Promise<void> {
+    const report = (error: unknown) => {
+      if (!(error instanceof CanceledError)) core.console.error(error)
+    }
+    try {
+      return Promise.resolve(run()).then(() => undefined, report)
+    } catch (error) {
+      report(error)
+      return Promise.resolve()
+    }
+  },
+
+  /**
+   * Run `run`, one of the program's own top-level steps, as `core.meanwhile()`, with people's actions waiting for it:
+   * `core.holdWhile(() => solitaire.startANewGame())`.
+   * - So the first draw comes at once, and a click during the opening deal waits its turn.
+   * - Not while a recompiled program loads:  its pauses never end, so it would hold everything back for good.
+   */
+  holdWhile(run: () => unknown): void {
+    const step = actingMethods.meanwhile(run)
+    if (!core.isCarryingOver) core.RUNTIME?.actions.holdFor(step)
+  },
+
+  /**
+   * Cancel what a person started that's still running or waiting:  it stops at its next wait, silently (`ActionQueue`).
+   * - With `thing`, or its action `name` too, only theirs.  True if anything was.
+   * - What it wrote to properties stays.
+   */
+  cancelActions(thing?: object, name?: string): boolean {
+    return queueNow().cancel(thing, name)
+  },
+
+  /** The action a person started that's running now:  its `thing`, its `name`, and a `signal` told if it's canceled. */
+  runningAction() {
+    return core.RUNTIME?.actions.current
+  },
+
+  /** When action `name` on `thing` ends, or is dropped, if it's running or waiting its turn:  e.g. a button's busy state. */
+  actionFinishing(thing: object, name: string): Promise<void> | undefined {
+    return core.RUNTIME?.actions.finishing(thing, name)
   },
 
   /**
@@ -182,6 +274,26 @@ export type ShortcutKey = {
   ctrlKey?: boolean
   shiftKey?: boolean
   altKey?: boolean
+}
+
+/**
+ * This run's queue.
+ * - A throwaway one, so an action simply runs:  before any program runs, and for a program running elsewhere
+ *   (Python, `core.remote`), which keeps its own (`action_queue.py`).
+ */
+function queueNow(): ActionQueue {
+  return (!core.remote && core.RUNTIME?.actions) || new ActionQueue()
+}
+
+/** SIDE EFFECT:  tell who's listening that the person did `run`. */
+function tellListeners(run: ActionRun): void {
+  for (const listener of [...LISTENERS]) {
+    try {
+      listener(run)
+    } catch (error) {
+      console.warn(`core.onActionRun():  a listener failed on ${run.name}`, error)
+    }
+  }
 }
 
 /** Every menu class `Class` describes, its own and its super-classes', by name (a sub-class's wins). */

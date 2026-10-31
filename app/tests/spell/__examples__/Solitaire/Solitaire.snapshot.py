@@ -616,43 +616,31 @@ class Solitaire(App):
 
     async def play_from_the_stock(self) -> None:
         """Turn the stock's next card over, onto the discards:  the discards back into the stock when it's empty"""
-        if core.process_is_running("play_from_the_stock"):
-            return
-        core.start_process("play_from_the_stock", "EXCLUSIVE")
-        try:
-            if not self.stock:
-                self.reset_the_stock()
-            it = self.stock.last_item
-            it.turn_face_up()
-            # as long as its flip takes (styles.css), so it turns over before it moves
-            await core.pause_for(300, "msec")
-            self.discards.append(it)
-        finally:
-            core.stop_process("play_from_the_stock")
+        if not self.stock:
+            self.reset_the_stock()
+        it = self.stock.last_item
+        it.turn_face_up()
+        # as long as its flip takes (styles.css), so it turns over before it moves
+        await core.pause_for(300, "msec")
+        self.discards.append(it)
 
     async def deal_the_cards(self) -> None:
         """Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right"""
-        if core.process_is_running("deal_the_cards"):
-            return
-        core.start_process("deal_the_cards", "EXCLUSIVE")
-        try:
-            for card in self.deck:
-                start_pile = card.pile
-                card.turn_face_down()
-                if start_pile != self.stock:
-                    self.stock.append(card)
-                    await core.pause_for(50, "msec")
-            self.stock.randomize()
-            # each row's first card lands face down, then turns up where it lies
-            for row in range(1, 8):
-                for column in core.get_range(row, 7):
-                    core.get_item_at(core.every_thing(Tableau), position(column)).append(self.stock.last_item)
-                    if column == row:
-                        core.get_item_at(core.every_thing(Tableau), position(column)).last_item.turn_face_up()
-                    await core.pause_for(50, "msec")
-            await self.play_from_the_stock()
-        finally:
-            core.stop_process("deal_the_cards")
+        for card in self.deck:
+            start_pile = card.pile
+            card.turn_face_down()
+            if start_pile != self.stock:
+                self.stock.append(card)
+                await core.pause_for(50, "msec")
+        self.stock.randomize()
+        # each row's first card lands face down, then turns up where it lies
+        for row in range(1, 8):
+            for column in core.get_range(row, 7):
+                core.get_item_at(core.every_thing(Tableau), position(column)).append(self.stock.last_item)
+                if column == row:
+                    core.get_item_at(core.every_thing(Tableau), position(column)).last_item.turn_face_up()
+                await core.pause_for(50, "msec")
+        await self.play_from_the_stock()
 
     def draw(self) -> Any:
         """Its menu, then its piles seven to a line, the third cell empty;  a right click on the board shows the game menu"""
