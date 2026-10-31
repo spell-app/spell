@@ -1,9 +1,11 @@
+import type { LSP } from "spell/app/lsp"
 import type { monaco } from "spell/app/app/ui/monaco"
 
 /**
  * The code editor's popups:  which of Monaco's show by themselves, and when (Owen, epic `debut`:
  * "vscode popup with details about what you are typing is annoying when I'm trying to look at code").
- * - The choices, their defaults, and the Monaco options each one means:  nothing else.
+ * - The choices, their defaults, and what each one means to Monaco:  nothing else.
+ * - By default nothing shows by itself as you type (Owen, epic `editor` P4).
  * - Every Monaco editor starts on the defaults (`SpellMonaco.OPTIONS`), `<spell-editor>`'s too.
  * - The editor app lets people change them, in the code pane's "..." menu, "Settings…" (`CodeSettings`).
  * - Types only from Monaco:  the editor app reads this before Monaco loads, and Monaco is a lazy chunk.
@@ -29,14 +31,20 @@ export type CodePopupChoices = {
   suggestDetails: boolean
   /** Show a call's parameters as you type its arguments? */
   parameterHints: boolean
+  /** Keep the lines that open the current block pinned at the top of the code? */
+  pinnedLines: boolean
+  /** Show the compiler's words in the hover:  what it matches, what it compiles to, the compiled code? */
+  compilerWords: boolean
 }
 
-/** The choices until someone changes them:  hover only with ⌥ held, suggestions only on Ctrl+Space, no details. */
+/** The choices until someone changes them:  hover only with ⌥ held, suggestions only on Ctrl+Space, the rest off. */
 export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   hover: "withAlt",
   suggest: "onCtrlSpace",
   suggestDetails: false,
-  parameterHints: true
+  parameterHints: false,
+  pinnedLines: false,
+  compilerWords: false
 }
 
 /** Monaco's `hover.enabled` for each hover mode. */
@@ -64,9 +72,22 @@ export function monacoOptionsFor(choices: CodePopupChoices): monaco.editor.IEdit
     quickSuggestions: asYouType ? { other: "on", comments: "off", strings: "off" } : false,
     suggestOnTriggerCharacters: asYouType,
     suggest: { showInlineDetails: choices.suggestDetails },
-    parameterHints: { enabled: choices.parameterHints }
+    parameterHints: { enabled: choices.parameterHints },
+    stickyScroll: { enabled: choices.pinnedLines }
   }
 }
+
+/** How much the hover says for `choices`:  Monaco has no option for it. */
+export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
+  return choices.compilerWords ? "full" : "plain"
+}
+
+/**
+ * How much the code editor's hover says now, one for the page.
+ * - `SpellLanguageFeatures` reads it for each hover;  `CodeSettings` changes it.
+ * - An object, since a hover provider is registered once and has no editor to ask.
+ */
+export const codeHover: { detail: LSP.HoverDetail } = { detail: hoverDetailFor(CODE_POPUP_DEFAULTS) }
 
 /** The class on an editor's container that hides the docs pane beside its suggestions. */
 export const SUGGEST_DETAILS_HIDDEN = "suggest-details-hidden"

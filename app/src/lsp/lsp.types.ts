@@ -596,3 +596,10 @@ export function scopeTreeFromPacks(packs: ScopePack[]): { tree: ScopeNode; detai
   const entries = new Map(packs.flatMap((pack) => pack.entries).map((entry) => [entry.path, entry]))
   return { tree: buildScopeTree([...entries.values()]), details: entries }
 }
+
+/**
+ * How much a hover says, for who's reading (`SpellLanguageService.hover()`).
+ * - `"full"`:  the rule, what it matches and compiles to, the compiled code:  for programmers
+ * - `"plain"`:  the sentence and its description, in words anyone can read
+ */
+export type HoverDetail = "full" | "plain"

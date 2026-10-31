@@ -3,6 +3,54 @@
   height: 100%;
 }
 
+/*
+ * The code editor's popups wear a Spell UI popup's look, from the theme:  hover, suggestions, parameter hints.
+ * - Monaco reads its colours from these variables, on `.monaco-editor`:  this selector beats its own.
+ * - Radius, shadow, type and frost have no variable, so the widgets get them directly.
+ */
+.MonacoEditor .monaco-editor {
+  --spell-popup-background: var(--ui-popup-background, var(--ui-surface));
+  --spell-popup-color: var(--ui-popup-color, var(--ui-text-color));
+  --spell-popup-border: var(--ui-popup-border-color, var(--ui-border-color-strong));
+  --vscode-editorHoverWidget-background: var(--spell-popup-background);
+  --vscode-editorHoverWidget-foreground: var(--spell-popup-color);
+  --vscode-editorHoverWidget-border: var(--spell-popup-border);
+  --vscode-editorSuggestWidget-background: var(--spell-popup-background);
+  --vscode-editorSuggestWidget-foreground: var(--spell-popup-color);
+  --vscode-editorSuggestWidget-border: var(--spell-popup-border);
+  --vscode-editorSuggestWidget-selectedBackground: var(--ui-menu-active-background, var(--ui-surface-raised));
+  --vscode-editorSuggestWidget-selectedForeground: var(--ui-menu-active-color, var(--spell-popup-color));
+  --vscode-editorSuggestWidget-highlightForeground: var(--ui-primary-text);
+  --vscode-editorSuggestWidget-focusHighlightForeground: var(--ui-menu-active-color, var(--ui-primary-text));
+  --vscode-textCodeBlock-background: transparent;
+
+  & .monaco-hover,
+  & .suggest-widget,
+  & .suggest-details-container,
+  & .parameter-hints-widget {
+    border-radius: var(--ui-popup-radius, var(--ui-radius));
+    box-shadow: var(--ui-popup-shadow, var(--ui-shadow-floating));
+    font-family: var(--ui-font-family);
+    /* `--glass-blur` only exists in Glass and Fruity:  elsewhere this falls back to no frost */
+    backdrop-filter: var(--glass-blur);
+  }
+
+  & .monaco-hover,
+  & .suggest-widget .monaco-list {
+    overflow: hidden;
+  }
+
+  /* Monaco sizes it to the page, and the code pane then clips its right side */
+  & .monaco-resizable-hover {
+    max-width: min(480px, 100%) !important;
+    background: transparent;
+    & .monaco-hover,
+    & .monaco-scrollable-element {
+      max-width: 100% !important;
+    }
+  }
+}
+
 /* Heading comments -- `#`, `##` ... -- decorated by `SpellHeadings`:  bold, in the theme's comment colour. */
 /* Per level too, e.g. `.spell-heading-1`, should one ever want to differ. */
 .monaco-editor .spell-heading {

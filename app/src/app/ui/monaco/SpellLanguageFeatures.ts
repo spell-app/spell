@@ -1,5 +1,6 @@
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
+import { codeHover } from "spell/app/app/ui/codePopups"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
@@ -132,10 +133,10 @@ export class SpellLanguageFeatures {
     return LspToMonaco.semanticTokens(tokens)
   }
 
-  /** Hover at `position`, e.g. what a word is and its docstring. */
+  /** Hover at `position`, e.g. what a word is and its docstring, saying as much as `codeHover` asks. */
   private hover(model: monaco.editor.ITextModel, position: monaco.Position): monaco.languages.Hover | null {
     const file = this.fileOf(model)
-    const hover = file && this.service.hover(file, LspToMonaco.lspPosition(position))
+    const hover = file && this.service.hover(file, LspToMonaco.lspPosition(position), codeHover.detail)
     return hover ? LspToMonaco.hover(hover) : null
   }
 

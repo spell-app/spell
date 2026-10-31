@@ -379,6 +379,23 @@ describe("SpellLanguageService", () => {
       expect(markdown).toContain("```js\nthis.resetTheStock()\n```")
     })
 
+    test("plain:  the sentence and its description, no compiler words", () => {
+      const markdown = (
+        service.hover(solitaire, at(solitaire, OWN_CALL, "reset"), "plain")!.contents as { value: string }
+      ).value
+      expect(markdown).toContain("action **reset the stock**")
+      expect(markdown).not.toContain("matches")
+      expect(markdown).not.toContain("compiles to")
+      expect(markdown).not.toContain("```")
+    })
+
+    test("plain:  never a rule's name", () => {
+      const line = OWN_CALL.split(" ")[0]!
+      const hover = service.hover(solitaire, at(solitaire, OWN_CALL, line), "plain")
+      const value = hover && (hover.contents as { value: string }).value
+      expect(value ?? "").not.toMatch(/\*\*[a-z]+_[a-z_]+\*\*/)
+    })
+
     test("a declaration's docstring, just under its name", () => {
       // `// A column, ...` is directly above `a "tableau" is a pile:`
       const position = at(solitaire, 'a "tableau" is', "tableau")
