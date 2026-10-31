@@ -226,6 +226,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** The Todos or Questions section's `<epic-new-item>`, as drawn:  Edit on a waiting item opens its form on it. */
   private newItem: (HTMLElement & { open: boolean; editing?: string }) | undefined
 
+  /**
+   * The waiting item its form is open on (Edit on its card):  its card hides until the form closes, so it shows once
+   * (epic `epic-engine` I185;  Owen, 2026-10-30:  "clicked the pencil to edit it -- showing up twice")
+   */
+  @E.state accessor editingNew: string | undefined = undefined
+
   ////////////////
   // ## Derived state
   ////////////////
@@ -782,6 +788,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         const box = this.newItem
         if (!box) return
         box.editing = undefined
+        this.editingNew = undefined
         box.open = true
         E.beforeNextPaint(() => box.scrollIntoView({ block: "nearest" }))
       })
@@ -881,6 +888,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           ref={(element: HTMLElement) => (this.newItem = element as typeof this.newItem)}
           adds={kind}
           part={this.partForName("new-item")}
+          on-epic-new-closed={() => (this.editingNew = undefined)}
         />
       </>
     )
@@ -894,7 +902,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - draws nothing while none waits
    */
   private newItemList(kind: NewKind): JSX.Element {
-    const items = () => this.reviewState.newItems(kind)
+    const items = () => this.reviewState.newItems(kind).filter((item) => item.id !== this.editingNew)
     return (
       <Show when={items().length}>
         <ul class={NEW_LIST} part={this.partForName("new-list")}>
@@ -957,6 +965,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     const box = this.newItem
     if (!box) return
     box.editing = item.id
+    this.editingNew = item.id
     box.open = true
   }
 

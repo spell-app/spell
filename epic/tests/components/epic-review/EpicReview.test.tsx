@@ -1033,7 +1033,8 @@ describe("<epic-section kind=todos | questions> new items", () => {
     expect(deep(host).querySelector("[part~='new-item'] >>> [part~='form']")).toBeNull()
   })
 
-  test("a waiting item:  Edit opens the form on it and saves under its key;  Remove drops it;  only its kind listed", async () => {
+  // epic `epic-engine` I185 (Owen, 2026-10-30:  "clicked the pencil to edit it -- showing up twice")
+  test("a waiting item:  Edit opens the form on it and saves under its key, its card hidden meanwhile;  Remove drops it;  only its kind listed", async () => {
     const at = new Date().toISOString()
     routes.inbox.marks = {
       new1: { action: "new", kind: "todo", title: "pack", at },
@@ -1047,6 +1048,8 @@ describe("<epic-section kind=todos | questions> new items", () => {
     const form = deep(host).querySelector<HTMLFormElement>("[part~='new-item'] >>> [part~='form']")!
     const title = form.querySelector<HTMLInputElement>("[data-field='title']")!
     expect(title.value).toBe("pack")
+    // the form takes the card's place:  it shows once
+    expect(cards(host)).toEqual([])
     title.value = "pack chargers"
     form.requestSubmit()
     await settle()
