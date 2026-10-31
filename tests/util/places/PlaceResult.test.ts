@@ -1,55 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import {
-  MemoryPlace,
-  Places,
-  type ListAnswer,
-  type ListQuery,
-  type Place,
-  type PlaceCapabilities,
-  type PlaceContext
-} from "spell/util/places"
+import { MemoryPlace, Places, type ListQuery, type Place } from "spell/util/places"
 
-/** A place that answers only when the test says so, so a read can be caught while it's waiting. */
-class HeldPlace implements Place {
-  /** Each `list()` so far, oldest first. */
-  asks: {
-    query: ListQuery
-    signal: AbortSignal | undefined
-    answer: (answer: Partial<ListAnswer>) => void
-    fail: (error: Error) => void
-  }[] = []
-
-  constructor(private readonly capabilities: Partial<PlaceCapabilities> = {}) {}
-
-  /** A place that names its ids, and nothing else matters here. */
-  describe(): PlaceCapabilities {
-    return {
-      idOf: "id",
-      filter: "none",
-      sort: "none",
-      select: "none",
-      page: "none",
-      write: "none",
-      atomic: false,
-      live: "none",
-      abort: "soft",
-      ...this.capabilities
-    }
-  }
-
-  /** Waits for the test.  Never looks at `signal`, as a place with a soft abort doesn't. */
-  list(_collection: string, query: ListQuery, { signal }: PlaceContext): Promise<ListAnswer> {
-    return new Promise((resolve, reject) => {
-      this.asks.push({
-        query,
-        signal,
-        answer: (answer) => resolve({ rows: [], handled: {}, ...answer }),
-        fail: reject
-      })
-    })
-  }
-}
+import { HeldPlace } from "./fakePlaces"
 
 /** A result reading `place`, cached as `Recipe`. */
 function readOf(place: Place, query?: ListQuery) {
@@ -144,9 +97,55 @@ describe("PlaceResult.status", () => {
   })
 })
 
+describe("PlaceResult, when a refresh fails (I2)", () => {
+  /** A result showing Soup, its next read about to fail. */
+  async function showingSoup() {
+    const place = new HeldPlace()
+    const result = readOf(place)
+    const loading = result.load()
+    place.asks[0]!.answer({ rows: [{ id: "r-1", title: "Soup" }] })
+    await loading
+    const failing = result.reload()
+    place.asks[1]!.fail(new Error("the place is down"))
+    await expect(failing).rejects.toThrow("the place is down")
+    return { place, result }
+  }
+
+  test("keeps its rows, and says it couldn't update", async () => {
+    const { result } = await showingSoup()
+    expect(result.contents).toMatchObject([{ title: "Soup" }])
+    expect(result.status).toBe("couldn't update")
+    expect(result.loadError?.message).toBe("the place is down")
+    expect(result.isLoaded).toBe(true)
+  })
+
+  test("the next load() tries again, and a success clears the failure", async () => {
+    const { place, result } = await showingSoup()
+    const retrying = result.load()
+    expect(place.asks).toHaveLength(3)
+    expect(result.status).toBe("still waiting")
+    place.asks[2]!.answer({ rows: [{ id: "r-1", title: "Stew" }] })
+    await retrying
+    expect(result.contents).toMatchObject([{ title: "Stew" }])
+    expect(result.status).toBe("complete")
+    expect(result.loadError).toBeUndefined()
+  })
+
+  test("rows from an earlier visit stay too", async () => {
+    const place = new HeldPlace()
+    const result = readOf(place)
+    result.showFromEarlierVisit([{ id: "r-1", title: "Soup" }])
+    const failing = result.reload()
+    place.asks[0]!.fail(new Error("offline"))
+    await expect(failing).rejects.toThrow("offline")
+    expect(result.contents).toMatchObject([{ title: "Soup" }])
+    expect(result.status).toBe("couldn't update")
+  })
+})
+
 describe("PlaceResult.load()", () => {
   test("hands the place its query and says what the place answered", async () => {
-    const place = new HeldPlace()
+    const place = new HeldPlace({ filter: "every field" })
     const query = { filter: { kind: "hot" } }
     const result = readOf(place, query)
     const loading = result.load()

@@ -512,17 +512,19 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### Loading once per key
 
-- **It is:**  `LoadOnce` (`spell/ui/util`, `ui/src/util/LoadOnce.ts`):  `get(key, load)`, every caller the same
+- **It is:**  `LoadOnce` (`spell/util/LoadOnce`, `src/util/LoadOnce.ts`;  Spell UI's `spell/ui/util` re-exports it):  `get(key, load)`, every caller the same
   promise;  a failure `kept`, `forgotten`, or `forgotten offline`
 - **Use it when:**  a family's import, a pack's script, a language, an icon's SVG, a source file:  anything loaded once
   per page.
 - **Flag:**  `Map<string, Promise`
-- **Score:**  `Map<string, Promise` · home `ui/src/util/LoadOnce.ts`
+- **Score:**  `Map<string, Promise` · home `src/util/LoadOnce.ts`
   · not `src/util/persist/PrefStore.ts`, `ui/src/components/ui-components/ComponentPacks.ts`, `epic/src/review/ReviewClient.ts`, `app/src/spaces/server/node/prefs/SpacePrefs.ts`, `app/src/spaces/server/node/routes/ProjectBuild.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Sources, IconPacks, ComponentPacks, RootLoader's two, EmojiData,
   CodeHighlighter)
   - Fine:  `ComponentPacks.defining` (what's running now, not a load), spell-epic's `ReviewClient.asking`,
     the kit's `PrefStore` (writes in flight)
+  - Beside it:  `LoadOnce.abortable()`, one caller's wait ending early while the shared load runs on
+    (`Sources`, `PlaceReads`)
 
 ### Fetching in Spell UI
 

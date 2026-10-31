@@ -67,6 +67,15 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
     return !!this.loadState.isLoaded
   }
 
+  /**
+   * Does a failed `load()` leave the `contents` we have?
+   * - `false`, the default:  a failed load empties them.
+   * - Override with `true` where old contents beside a `loadError` are worth more than none, e.g. a list on screen.
+   */
+  protected get keepsContentsOnFailedLoad(): boolean {
+    return false
+  }
+
   /** Are we currently loading? */
   get isLoading() {
     return !!this.loadState.loader
@@ -188,7 +197,13 @@ export abstract class Loadable<ContentType, SaveResult = unknown> extends Observ
       if (loader === this.loadState.loader) {
         batch(() => {
           this.updateLoadState({ abortController: undefined })
-          this.contents = undefined
+          if (this.keepsContentsOnFailedLoad && this.contents !== undefined) {
+            this.stopInflightLoadOrSave()
+            // not cached:  the next `load()` tries again
+            this.updateLoadState({ lastLoaded: undefined })
+          } else {
+            this.contents = undefined
+          }
           this.updateLoadState({ loadError })
         })
       }

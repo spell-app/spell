@@ -236,6 +236,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A newer file than its type reads as it is.
   - Python's twin is `spell_core.saving`:
     both write [savedById.expected.json5](../../tests/core/savedById.expected.json5), and read it.
+- A PLACE's rows as things ([places.ts](places.ts), epic `data` P2, J11):  `PlaceThings`, ONE thing per type and id.
+  - Reached by file, `spell/parser/core/places`, so a program with no places pays nothing.
+  - A new id is made by the `Loader`'s entry reading, which stays synchronous.
+  - A known id is changed in place, the way `StateMirror.read()` does it:  so what draws it redraws, and undo is kept.
+    NEVER `Loader.load()`:  it forgets the undo history, and hands a known thing back unchanged.
+  - All of it `whileReading()` (`core.ts`):  what it changes joins no undo step and goes to no program elsewhere,
+    so a refresh never comes back as a write.
+  - Places themselves are `spell/util/places`, which knows nothing of things.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

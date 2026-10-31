@@ -1,10 +1,11 @@
+import { rowWithFields, rowsInOrder, rowsMatching } from "./PlaceQuery"
 import {
   PlaceError,
+  canDoAll,
   idOfRow,
   writeAnswerFor,
   type ApplyAnswer,
   type ChangesAnswer,
-  type FieldAbility,
   type ListAnswer,
   type ListHandled,
   type ListQuery,
@@ -86,7 +87,7 @@ export class MemoryPlace implements Place {
         filter.map(([field]) => field)
       )
     ) {
-      rows = rows.filter((row) => filter.every(([field, value]) => row[field] === value))
+      rows = rowsMatching(rows, query.filter!)
       handled.filter = true
     }
 
@@ -98,13 +99,7 @@ export class MemoryPlace implements Place {
         sort.map(({ field }) => field)
       )
     ) {
-      rows.sort((one, other) => {
-        for (const { field, descending } of sort) {
-          const order = compareValues(one[field], other[field])
-          if (order) return descending ? -order : order
-        }
-        return 0
-      })
+      rows = rowsInOrder(rows, sort)
       handled.sort = true
     }
 
@@ -328,22 +323,7 @@ export type MemoryPlaceProps = {
   operations?: Record<string, (input: unknown) => unknown>
 }
 
-/** Can a place with `ability` do this for every one of `fields`? */
-function canDoAll(ability: FieldAbility, fields: readonly string[]): boolean {
-  if (ability === "every field") return true
-  if (ability === "none") return false
-  return fields.every((field) => ability.includes(field))
-}
-
 /** A copy of `row` with only the fields in `select`. */
 function selected(row: PlaceRow, select: readonly string[]): PlaceRow {
-  return structuredClone(Object.fromEntries(select.filter((field) => field in row).map((field) => [field, row[field]])))
-}
-
-/** Which of two field values comes first:  nothing comes after everything. */
-function compareValues(one: unknown, other: unknown): number {
-  if (one === other) return 0
-  if (one === undefined) return 1
-  if (other === undefined) return -1
-  return (one as string) < (other as string) ? -1 : 1
+  return structuredClone(rowWithFields(row, select))
 }

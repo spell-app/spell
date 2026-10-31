@@ -19,6 +19,84 @@ import {
   type WriteQuestion
 } from "spell/util/places"
 
+/****************
+ * ### `HeldPlace`
+ * A place that answers only when the test says so, so a read can be caught while it's waiting.
+ * - Says it can do nothing, but says each answer did everything, unless the test's answer says otherwise.
+ * - Never looks at `signal`, as a place with a soft abort doesn't.
+ ****************/
+export class HeldPlace implements Place {
+  /** Each `list()` so far, oldest first. */
+  asks: {
+    query: ListQuery
+    signal: AbortSignal | undefined
+    answer: (answer: Partial<ListAnswer>) => void
+    fail: (error: Error) => void
+  }[] = []
+
+  constructor(private readonly capabilities: Partial<PlaceCapabilities> = {}) {}
+
+  /** A place that names its ids, and nothing else matters here. */
+  describe(): PlaceCapabilities {
+    return {
+      idOf: "id",
+      filter: "none",
+      sort: "none",
+      select: "none",
+      page: "none",
+      write: "none",
+      atomic: false,
+      live: "none",
+      abort: "soft",
+      ...this.capabilities
+    }
+  }
+
+  /** Waits for the test. */
+  list(_collection: string, query: ListQuery, { signal }: PlaceContext): Promise<ListAnswer> {
+    return new Promise((resolve, reject) => {
+      this.asks.push({
+        query,
+        signal,
+        answer: (answer) => resolve({ rows: [], handled: { filter: true, sort: true, select: true }, ...answer }),
+        fail: reject
+      })
+    })
+  }
+}
+
+/****************
+ * ### `SlowPlace`
+ * A wrapper that holds every `list()` of the place inside until the test calls `letThrough()`.
+ * - Keeps the place's own abort:  a signal aborted by then rejects, as a real request would.
+ ****************/
+export class SlowPlace implements Place {
+  /** How many `list()`s it's been asked for. */
+  listed = 0
+  /** Each `list()` still held back. */
+  private held: (() => void)[] = []
+
+  constructor(private readonly inner: Place) {}
+
+  /** What the place inside can do. */
+  describe(): PlaceCapabilities {
+    return this.inner.describe()
+  }
+
+  /** The place inside's answer, once it's let through. */
+  async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    this.listed++
+    await new Promise<void>((resolve) => this.held.push(resolve))
+    return this.inner.list(collection, query, context)
+  }
+
+  /** Let every `list()` held so far go on, and wait for them to get there. */
+  async letThrough(): Promise<void> {
+    this.held.splice(0).forEach((resolve) => resolve())
+    await new Promise((resolve) => setTimeout(resolve))
+  }
+}
+
 /** The field an owner's name is under, in an owned row. */
 const OWNER_FIELD = "owner"
 

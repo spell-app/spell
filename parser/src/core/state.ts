@@ -157,7 +157,7 @@ export class StateMirror {
       this.ids.set(made, id)
       for (const key of keysOf(made)) if (!(key in fields)) setProp(made, key, undefined)
     }
-    for (const [key, value] of Object.entries(rest)) set(made, key, this.read(value), typeof id === "string")
+    for (const [key, value] of Object.entries(rest)) setField(made, key, this.read(value), typeof id === "string")
     if (made instanceof List) made.items = Array.isArray(items) ? items.map((item) => this.read(item)) : []
     return made
   }
@@ -168,8 +168,9 @@ export class StateMirror {
  * - `fromState`:  read from a state, which holds plain fields too (`StateWriter`):
  *   a key it has no accessor or prop for is one, as its constructor set it (`Foundation({ symbol })`).
  *   `toJSON()`'s JSON holds props only.
+ * - A place's rows take this path too, for a known thing (`PlaceThings`).
  */
-function set(thing: SpellObject, key: string, value: unknown, fromState: boolean): void {
+export function setField(thing: SpellObject, key: string, value: unknown, fromState: boolean): void {
   const proto = Object.getPrototypeOf(thing) as object
   const isField = fromState && !hasAccessor(proto, key) && !keysOf(thing).includes(key)
   if (isField || hasSetter(proto, key)) (thing as unknown as Record<string, unknown>)[key] = value

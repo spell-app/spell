@@ -276,6 +276,11 @@ export class Loader {
    */
   load(ref: string): SpellObject | undefined {
     core.RUNTIME?.history.clear()
+    return this.loadEntry(ref)
+  }
+
+  /** The thing saved under `ref`, as `load()`, leaving the undo history alone:  what a reference reads through. */
+  protected loadEntry(ref: string): SpellObject | undefined {
     const known = this.loaded.get(ref)
     if (known) return known
     const entry = this.inside.has(ref) ? undefined : this.entryFor(ref)
@@ -316,8 +321,8 @@ export class Loader {
   protected follow(json: Record<string, unknown>): SpellObject | undefined {
     const ref = json[REF_KEY] as string
     const where = json[IN_KEY]
-    if (!this.loaded.has(ref) && !this.inside.has(ref) && typeof where === "string") this.load(where)
-    return this.load(ref)
+    if (!this.loaded.has(ref) && !this.inside.has(ref) && typeof where === "string") this.loadEntry(where)
+    return this.loadEntry(ref)
   }
 
   /** Note each thing written whole inside `json` (an entry), by its key, for a reference to it to find:  `inside`. */
@@ -518,7 +523,7 @@ function isReference(json: unknown): json is Record<string, unknown> {
 }
 
 /** `value` as a `Date`, if `Class` declares `key` a date and `value` is its ISO text;  else `value`. */
-function dateIfDeclared(Class: SpellClass, key: string, value: unknown): unknown {
+export function dateIfDeclared(Class: SpellClass, key: string, value: unknown): unknown {
   if (typeof value !== "string" || schemaOf(Class).info(key)?.type !== "date") return value
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? value : date

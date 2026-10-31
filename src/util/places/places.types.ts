@@ -53,6 +53,27 @@ export type AbortKind = (typeof AbortKinds)[number]
 /** What a place does itself for each field:  all of them, none, or the fields named. */
 export type FieldAbility = "every field" | "none" | readonly string[]
 
+/**
+ * Can a place with `ability` do this for every one of `fields`?
+ * - No fields:  there's nothing to do, so yes.
+ */
+export function canDoAll(ability: FieldAbility, fields: readonly string[]): boolean {
+  if (ability === "every field") return true
+  if (ability === "none") return !fields.length
+  return fields.every((field) => ability.includes(field))
+}
+
+/**
+ * How much the engine will load in the browser, for what a place can't do itself.
+ * - Filtering a 2 GB file in the browser looks exactly like asking a server, so it stops here, with an error.
+ */
+export type PlaceCeiling = {
+  /** The most rows it will look at. */
+  rows: number
+  /** About the most bytes:  the length of those rows, as JSON. */
+  bytes: number
+}
+
 /** The request limit a place lives under, e.g. Airtable's 5 requests a second, 10 records in each. */
 export type RateLimit = {
   /** How many requests it takes ... */
@@ -98,6 +119,8 @@ export type PlaceCapabilities = {
   rateLimit?: RateLimit
   /** What aborting one of its requests does. */
   abort: AbortKind
+  /** How much the engine will load for what this place can't do, over the usual `DEFAULT_CEILING`. */
+  ceiling?: Partial<PlaceCeiling>
 }
 
 ////////////////
@@ -302,13 +325,14 @@ export function writeAnswerFor(place: Place, question: WriteQuestion): WriteAnsw
 ////////////////
 
 /** Every reason a `PlaceError` is thrown. */
-export const PlaceErrorKinds = ["refused", "not found", "out of date", "no such place"] as const
+export const PlaceErrorKinds = ["refused", "not found", "out of date", "no such place", "over the ceiling"] as const
 /**
  * Why a `PlaceError` was thrown:
  * - `"refused"`:  the place won't take this write
  * - `"not found"`:  it holds no such thing
  * - `"out of date"`:  the thing has moved on since the change's `version`
  * - `"no such place"`:  no place goes by that name
+ * - `"over the ceiling"`:  doing what the place can't would load too much into the browser
  */
 export type PlaceErrorKind = (typeof PlaceErrorKinds)[number]
 
