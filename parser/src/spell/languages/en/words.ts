@@ -311,6 +311,15 @@ export const englishWords: SP.LanguageWords = {
      */
     propertyListDeclaration:
       /^[ \t]+-[ \t]+(?:(?:its[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)|(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+as)[ \t]+(?:one[ \t]+of|either)\b/iu,
+    /** A body's line declaring a property, its words in group `has` or `is`:  `it has a deck as a deck`, `its "suit" is a suit`. */
+    propertyLine:
+      /^(?:(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<has>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)|(?:its[ \t]+)?["']?(?<is>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)\b)/iu,
+    /** A line at a file's top declaring a property, in groups `type` and `property`. */
+    typePropertyLines: [
+      /^an?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+has[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)/iu,
+      /^(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+have[ \t]+(?:an?[ \t]+(?:property[ \t]+)?)?["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]*(?:$|:|as\b|=)/iu,
+      /^the[ \t]+["']?(?<property>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+of[ \t]+an?[ \t]+(?<type>(?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)[ \t]+(?:is|are)\b/iu
+    ],
     /** A line starting a method:  `to play a card`, `animation deal`. */
     methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */

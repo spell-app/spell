@@ -645,6 +645,18 @@ export type DeclarationPatterns = {
    * - `iu`, never `g`:  it's tried line by line.
    */
   propertyListDeclaration: RegExp
+  /**
+   * A line of a type's body declaring a property, the `-` gone, its words in group `has` or `is`:
+   * `it has a deck as a deck`, `its "suit" is a suit`, `deck is a deck`.
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  propertyLine: RegExp
+  /**
+   * A line at a file's top declaring a property, in groups `type` and `property`:
+   * `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
+   * - `iu`, never `g`:  they're tried line by line.
+   */
+  typePropertyLines: RegExp[]
   /** A line starting a method definition, e.g. `to play a card`. */
   methodLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */

@@ -411,6 +411,16 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       - e.g. `its short rank + its short suit`
     - `its_property`:  the loose word, at `Priority.normal`
       - so `its last card` stays `its_ordinal`'s
+  - `the X` inside an action is [`the_own_property`](rules/properties/TheOwnProperty.ts) (epic `language` P2):
+    - it reads the thing the action runs on (`P.MethodScope.withThing()`, through loops), never `it`
+    - the article is required, in the language's own word (`{definite_article}`), so a bare word never reads a property
+    - it steps aside for a variable of that name, never a constant:  no `the` reads one
+    - `set the X to` writes it (P3):  `Variable` steps aside, so `AssignmentStatement` takes its expression branch
+      - a variable of that name is assigned instead;  `set X to`, with no article, still makes a local
+      - `the X is V` has a syntax of its own, since that form takes only a variable
+      - a rule taking only `{variable}` can't say it with `the`:  `the score 1 to 3 of ...`
+    - the longest run its type declares, or a scan found further down (`P.TypeScope.knowsPropertyAhead()`)
+    - `the_things` (`the cards`) steps aside for a property of that name, by the same walk
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
   - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`
@@ -1368,6 +1378,14 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - An edit which adds or deletes a method re-parses the whole project (`parser.changesMethods()`).
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
+  - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
+    - So an action can read `the X` above the line declaring it, or in a later file.
+    - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
+      a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
+    - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.
+    - An edit which adds or deletes a property re-parses the whole project (`parser.changesProperties()`).
+      With `keepLastGood`, a name being typed doesn't count.
+    - Not yet:  a member `belongs to` declares.
   - `is a <type>` (`is_a`) names a KNOWN type:  built in, imported, declared or stubbed earlier.
     - Else it's a parse error, e.g. `is a crad`.
     - A type first mentioned in an `is a` above its own declaration is one too.

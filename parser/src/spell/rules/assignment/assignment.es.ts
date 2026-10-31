@@ -107,6 +107,10 @@ assignmentEs.addRule(AssignmentStatement, {
   ]
 })
 
+assignmentEs.addRule(AssignmentStatement, {
+  syntax: "{thing:the_own_property} es {value:expression}"
+})
+
 assignmentEs.addRule(WordsAssignment, {
   syntax: "(poner|fijar) {thing:words_variable} (a|al|en) {value:expression}",
   tests: [

@@ -421,7 +421,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
           "syntaxes": [
             {
@@ -1784,6 +1784,20 @@
                   "code": "card.short_rank"
                 }
               }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "TheOwnProperty",
+          "ruleNames": ["the_own_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/TheOwnProperty.ts",
+          "line": 20,
+          "purpose": "`the {member words}` inside an action, reading a property of the thing the action runs on, e.g. `shuffle the stock` => `this.stock.shuffle()` (epic `language`, P2).",
+          "syntaxes": [
+            {
+              "syntax": "{definite_article} {property:member_words}"
             }
           ],
           "aliases": ["expression"]
@@ -3908,7 +3922,7 @@
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 29,
+          "line": 28,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -6327,6 +6341,9 @@
                   "code": "bob = Person(name=\"bob\")"
                 }
               }
+            },
+            {
+              "syntax": "{thing:the_own_property} is {value:expression}"
             }
           ],
           "aliases": ["statement"]

@@ -471,21 +471,83 @@ export class SpellParser extends P.Parser {
    * - Up to its `:`, so its body isn't parsed:  `to cheat at it:  print 1` is `to cheat at it`.
    */
   declaredMethods(text: string): string[] {
+    const found: string[] = []
+    this.eachDeclarationLine(text, (subject, line, bullet) => {
+      if (bullet === undefined) {
+        if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
+      } else if (subject && this.declarations.methodLine.test(bullet)) found.push(`${subject}\t${firstLineOf(bullet)}`)
+    })
+    return found
+  }
+
+  /**
+   * Properties `text` declares, by a scan of its lines:  each `<type>\t<words>`.
+   * - In a type's outline body:  `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`.
+   * - At a file's top:  `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
+   * - Generous:  a line that's no property only names a word `the` may read, on that type, ahead of an error.
+   * - Not yet:  a member `belongs to` declares.
+   */
+  declaredProperties(text: string): string[] {
+    const { methodLine, propertyLine, typePropertyLines } = this.declarations
+    const found: string[] = []
+    this.eachDeclarationLine(text, (subject, line, bullet) => {
+      if (bullet === undefined) {
+        for (const pattern of typePropertyLines) {
+          const groups = pattern.exec(line)?.groups
+          if (groups) found.push(`${groups["type"]}\t${groups["property"]}`)
+        }
+      } else if (subject && !methodLine.test(bullet)) {
+        const words = propertyLine.exec(bullet)?.groups
+        const property = words?.["has"] ?? words?.["is"]
+        if (property) found.push(`${subject}\t${property}`)
+      }
+    })
+    return found
+  }
+
+  /** Note each property `texts` declare on its type, if the type's known -- see `P.Parser.stubDeclaredProperties()`. */
+  stubDeclaredProperties(scope: P.Scope, texts: string[]): void {
+    this.inPlay(() => {
+      for (const found of texts.flatMap((text) => this.declaredProperties(text))) {
+        const [subject = "", words = ""] = found.split("\t")
+        scope.getType(subject)?.declarePropertyAhead(words)
+      }
+    })
+  }
+
+  /** Does `after` declare a property `before` didn't, or the other way round?  See `P.Parser.changesProperties()`. */
+  changesProperties(before: string, after: string, keepEdited = false): boolean {
+    const was = this.declaredProperties(before)
+    const now = this.declaredProperties(after)
+    // keeping what's broken:  a name being typed doesn't count, only a property added or deleted
+    if (keepEdited && now.length === was.length) return false
+    return was.length !== now.length || now.some((found, index) => found !== was[index])
+  }
+
+  /**
+   * Call `visit` with each line of `text` a declaration may be on, and the type it's about:
+   * - a line at a file's top:  `subject` the type it declares or re-opens, if any, and no `bullet`
+   * - a line in that type's outline body, one tab in:  its text after the `-` as `bullet`
+   * - A spellx file reads as its code-spell skeleton.
+   */
+  private eachDeclarationLine(
+    text: string,
+    visit: (subject: string, line: string, bullet: string | undefined) => void
+  ): void {
     if (this.form === "spellx") text = SP.SpellxTwin.skeletonOf(text, this)
     const onlyOnes = new Set(this.oneOfAKindsIn(text))
-    const found: string[] = []
     let subject = ""
     for (const line of text.split("\n")) {
+      // a blank line, or a comment at the left, doesn't end a type's outline
+      if (!line.trim() || line.startsWith("//") || line.startsWith("##")) continue
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line, onlyOnes) ?? ""
-        if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
+        visit(subject, line, undefined)
         continue
       }
       const bullet = /^(?:\t| {2,4})-[ \t]+(.*)$/.exec(line)?.[1]
-      if (subject && bullet && this.declarations.methodLine.test(bullet))
-        found.push(`${subject}\t${firstLineOf(bullet)}`)
+      if (bullet) visit(subject, line, bullet)
     }
-    return found
   }
 
   /**

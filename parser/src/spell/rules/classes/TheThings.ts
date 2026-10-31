@@ -34,10 +34,6 @@ export class TheThings extends EveryThing {
 
   /** Is `words` a property or method of what `this` is, in the method `scope` is in? */
   static memberOfThis(scope: P.Scope, words: string): boolean {
-    for (let current: P.Scope | undefined = scope; current; current = current.parentScope) {
-      if (!(current instanceof P.MethodScope) || !current.thisVar) continue
-      return !!scope.getType(current.itDatatype)?.getMember(words)
-    }
-    return false
+    return !!P.MethodScope.thingTypeOf(scope)?.getMember(words)
   }
 }

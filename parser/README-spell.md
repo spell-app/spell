@@ -124,6 +124,12 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 | `- it "is a face card" if its rank is jack, queen or king` | `a card "is a face card" if its rank is one of jack, queen or king` | `get isAFaceCard()` |
 | `- it "is a (rank)"` | `a card "is a (rank)" for its ranks` | `isARank(rank)` |
 
+- Inside a template's action, `the X` reads its property too:  `shuffle the stock` for `shuffle its stock`.
+  - A local, argument or loop variable of that name comes first.
+  - It's always the thing the action runs on:  in a loop, `its X` is the item's, and `the X` still the action's thing's.
+  - A bare `stock` never reads a property.
+  - `set the score to 1` writes the property, unless a local has that name;
+    `set score to 1` makes a local.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
@@ -145,7 +151,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | constants | words that are values | 3 | `red` | `"red"` |
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
-| properties | `the ... of ...`, `its ...`, object literals | 13 | `the short rank of the card` | `card.shortRank` |
+| properties | `the ... of ...`, `its ...`, `the ...` in an action, object literals | 14 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for each`, `where` | 42 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |

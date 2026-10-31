@@ -1,6 +1,5 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
-import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
@@ -47,12 +46,9 @@ export class DrawSlot extends SpellStatement<"slot", { slot?: string }> {
     return match
   }
 
-  /** The view whose drawing `scope` is in:  what `it` is in its method. */
+  /** The view whose drawing `scope` is in:  what `this` is in its method, through any loop. */
   static viewIn(scope: P.Scope): P.TypeScope | undefined {
-    let current: P.Scope | undefined = scope
-    while (current && !(current instanceof P.MethodScope)) current = current.parentScope
-    const datatype = (current as P.MethodScope | undefined)?.itDatatype
-    return typeof datatype === "string" ? scope.getType(SP.typeName(datatype)) : undefined
+    return P.MethodScope.thingTypeOf(scope)
   }
 
   /** `<slot name="front">{this.drawFront()}</slot>` -- see the class's docs. */

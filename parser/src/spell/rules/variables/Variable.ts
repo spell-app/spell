@@ -6,6 +6,7 @@ import { type IdentifierMatchData } from "./variables.shared"
 /**
  * `variable` rule:  `SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.
  * - `match.data.scopeVar` is set to the scope `ScopeVariable` if known, `NONE` if not.
+ * - Inside an action, `the X` naming only its thing's property is not ours -- see `namesOwnProperty()`.
  */
 export class Variable extends P.Sequence<"identifier", VariableMatchData> {
   parse(scope: P.Scope, tokens: P.Token[]) {
@@ -14,7 +15,20 @@ export class Variable extends P.Sequence<"identifier", VariableMatchData> {
     if (!match) return undefined
     // Remember scope variable for the identifier, if there is one.
     match.data.scopeVar = (match.groups.identifier.data as IdentifierMatchData).scopeVar ?? NONE
+    if (Variable.namesOwnProperty(scope, match)) return undefined
     return match
+  }
+
+  /**
+   * Is this `the X` in an action whose thing has a property `X`, and no variable goes by that name?
+   * - Then we step aside, and `the_own_property` takes it:  `set the side to back` writes `this.side`,
+   *   rather than making a local nobody meant (epic `language`, Q1).
+   * - Said without the article, `set side to back` still makes a local.
+   */
+  private static namesOwnProperty(scope: P.Scope, match: P.MatchFor<Variable>): boolean {
+    const { identifier } = match.groups
+    if (match.data.scopeVar !== NONE || match.length === identifier.length) return false
+    return !!P.MethodScope.thingTypeOf(scope)?.hasProperty(`${identifier.raw}`)
   }
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {

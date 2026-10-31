@@ -9,6 +9,7 @@ import { P } from "spell/parser/parser"
 import { properties } from "./properties.parser"
 import { BodyMemberWords } from "./BodyMemberWords"
 import { ItsKnownProperty } from "./ItsKnownProperty"
+import { TheOwnProperty } from "./TheOwnProperty"
 import { ItsOrdinal } from "./ItsOrdinal"
 import { ItsProperty } from "./ItsProperty"
 import { MemberWords } from "./MemberWords"
@@ -127,6 +128,11 @@ properties.addRule(PropertyExpression, {
       ]
     }
   ]
+})
+
+// its tests:  the table of what a name means inside an action, `NameMeanings.test.ts`
+properties.addRule(TheOwnProperty, {
+  syntax: "{definite_article} {property:member_words}"
 })
 
 properties.addRule(ItsKnownProperty, {

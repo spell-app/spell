@@ -69,7 +69,8 @@ describe("the spell syntax table, spellSyntax.json", () => {
       ["(thing:{variable}|{expression}) = {value:expression}", "unknown-var = yes"],
       ["let (thing:{variable}|{expression}) = {value:expression}", 'let the name of thing = "bob"'],
       ["set (thing:{variable}|{expression}) to {value:expression}", "set unknown-var to yes"],
-      ["{thing:variable} is {value:expression}", 'bob is a new person whose name is "bob"']
+      ["{thing:variable} is {value:expression}", 'bob is a new person whose name is "bob"'],
+      ["{thing:the_own_property} is {value:expression}", undefined]
     ])
   })
 
