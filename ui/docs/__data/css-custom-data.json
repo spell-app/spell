@@ -6015,6 +6015,41 @@
       }
     },
     {
+      "name": "--ui-menu-header-bar-height",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `38px`"
+      }
+    },
+    {
+      "name": "--ui-menu-header-bar-font-size",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `13px`"
+      }
+    },
+    {
+      "name": "--ui-menu-header-bar-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))`"
+      }
+    },
+    {
+      "name": "--ui-menu-header-bar-border",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `1px solid var(--ui-border-color)`"
+      }
+    },
+    {
+      "name": "--ui-menu-header-bar-filter",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-bar-rest-filter, var(--ui-bar-filter, none))`"
+      }
+    },
+    {
       "name": "--ui-message-margin",
       "description": {
         "kind": "markdown",

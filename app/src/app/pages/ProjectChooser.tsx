@@ -43,8 +43,8 @@ export function ProjectChooser() {
 
   return (
     <SpellPage id="ProjectChooser" fillWindow dark scrolling>
+      <ChooserToolbar />
       <div class="Home">
-        <ChooserToolbar />
         <Hero examples={exampleList()} guides={guideList()} />
         <ProjectCards
           id="examples"

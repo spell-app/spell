@@ -24,7 +24,8 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-  padding-bottom: 32px;
+  /* the page has no room of its own, as the top bar runs to its edges */
+  padding: 28px 14px 32px;
   color: var(--ui-text-color);
 
   /* a box:  the hero, a card */

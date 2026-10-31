@@ -17078,7 +17078,7 @@
             "borderless",
             "header"
           ],
-          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
         },
         {
           "name": "name",
@@ -36535,7 +36535,7 @@
             "borderless",
             "header"
           ],
-          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
+          "description": "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`."
         },
         {
           "name": "name",
@@ -45602,6 +45602,31 @@
         {
           "name": "--ui-menu-header-weight",
           "default": "var(--ui-font-weight-bold)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-menu-header-bar-height",
+          "default": "38px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-header-bar-font-size",
+          "default": "13px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-header-bar-background",
+          "default": "var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-menu-header-bar-border",
+          "default": "1px solid var(--ui-border-color)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-menu-header-bar-filter",
+          "default": "var(--ui-bar-rest-filter, var(--ui-bar-filter, none))",
           "type": "other"
         }
       ]

@@ -1038,7 +1038,7 @@
         "shell"
       ],
       "aka": [],
-      "description": "Top-level app menu, attached to the top of the page.",
+      "description": "Top-level app menu, joined to the top of the window:  a `<ui-menu appearance=\"header\">`, which draws the bar.",
       "noun": "AppMenu",
       "attributes": [],
       "slots": [],

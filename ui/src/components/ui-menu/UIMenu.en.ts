@@ -68,7 +68,8 @@ export const menuVocabulary = {
         "`segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, " +
         "else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle " +
         "it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link " +
-        "hover), `borderless` (no dividers between items), `header` (with `segmented`:  the row of a pane's bar, 13px, " +
+        "hover), `borderless` (no dividers between items), `header` (alone:  a whole bar across the top of a window, flat " +
+        "and short, 38px and 13px, over a hairline, in the theme's bar;  with `segmented`:  the row of a pane's bar, 13px, " +
         "with no track of its own, the bar behind it being the track, and its items sharing the row's width).  Old names:  the bare switches `tabular`, `pointing`, " +
         "`secondary`, `text`, `link`, `borderless`."
     },

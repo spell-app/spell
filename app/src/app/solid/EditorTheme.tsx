@@ -22,11 +22,11 @@ import "./EditorTheme.css"
  *   - the menu:  `<ui-theme-menu>` (`<ThemeMenu>`, below)
  * - Glass until the person picks another (`ThemePreference`'s default, epic `debut` Q39).
  * - Every theme dresses the editor's chrome (`EditorTheme.css`):
- *   a floating top bar, panels with gaps and rounded corners,
+ *   a top bar joined to the window, panels with gaps and rounded corners under it,
  *   from the theme's own bar and panel tokens (`--ui-bar-*`, `--ui-panel-*`, epic `debut` J89).
  *   - The theme chosen is marked by its own name:  `<html data-spell-theme="glass">`.
  *   - What's the editor's alone is keyed on that name:
- *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no box.
+ *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no fill or line.
  * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
  *   P25):  picked in the menu like any theme, its base worn, then its sheet.
  * - The code's colours are the theme's own (epic `debut` P22):  Monaco reads them off the page, light or dark,

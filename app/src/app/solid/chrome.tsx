@@ -15,19 +15,15 @@ import "./chrome.css"
 
 /****************
  * ### `<AppMenu>`
- * Top-level app menu, attached to the top of the page.
- * - A plain menu, which the editor's theme shapes (`EditorTheme.css`),
- *   its left section starting with Spell's hat (`<Submenu left mark>`).
+ * Top-level app menu, joined to the top of the window:  a `<ui-menu appearance="header">`, which draws the bar.
+ * - Its left section starts with Spell's hat (`<Submenu left mark>`).
+ * - Goes straight in its page, outside any padding:  the bar runs the window's whole width.
  *   - The violet bar it was under any other theme went in epic `debut` P17:  every theme of the set dresses it.
  * - SEE:  its App UI components page, `app/docs/chrome.html` (`/components/app/chrome.html`).
  ****************/
 export function AppMenu(props: MenuProps) {
   return (
-    <ui-menu
-      attach="both"
-      {...omit(props, "class", "children")}
-      class={["AppMenu", "medium-short", "tight", props.class]}
-    >
+    <ui-menu appearance="header" {...omit(props, "class", "children")} class={["AppMenu", "tight", props.class]}>
       {props.children}
     </ui-menu>
   )

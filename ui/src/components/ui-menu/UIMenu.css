@@ -89,6 +89,7 @@
  * | `--ui-menu-arrow-color`             | arrow fill                            | inverted, coloured                   |
  * | `--ui-menu-header-*`                | header item colour / size / case / margin | text, secondary pointing, inverted |
  * | `--ui-menu-header-padding` / `-font-family` / `-weight` / `-letter-spacing` | header item box and type (the item's padding, inherited family, bold) | -- |
+ * | `--ui-menu-header-bar-*`            | `appearance="header"`:  the bar's `-height`, `-font-size`, `-background`, `-filter`, `-border` | -- |
  * | `--ui-menu-disabled-color`          | disabled item text                    | inverted                             |
  * | `--ui-menu-icon-*`                  | an item's icon margin / opacity / size / display | vertical, icon, labeled icon |
  * | `--ui-menu-title-min`               | `shrinkable`:  the narrowest a title is cut before the row goes to icons only (`50px`) | -- |
@@ -1085,6 +1086,29 @@
     width: 100%;
     margin-block: 0;
     font-size: var(--_ui-menu-segmented-header-font-size);
+  }
+  /*
+   * ## Bar (`appearance="header"`, without `segmented`):  a whole bar across the top of a window or a page.
+   * - Joined to what's around it:  flat, full width, no corners or shadow, and a hairline over what's below.
+   * - Short and quiet, its text the same size as a segmented header's.
+   * - Dressed in the theme's bar:  a bar at rest, as nothing scrolls under one that heads a window.
+   * - Tokens:  `--ui-menu-header-bar-height`, `-font-size`, `-background`, `-filter`, `-border`.
+   */
+  .ui.header.menu:not(.segmented) {
+    width: 100%;
+    min-height: var(--ui-menu-header-bar-height, 38px);
+    margin: 0;
+    font-size: var(--ui-menu-header-bar-font-size, 13px);
+    background: var(
+      --ui-menu-header-bar-background,
+      var(--ui-bar-rest-background, var(--ui-bar-background, var(--ui-surface)))
+    );
+    border: 0;
+    border-bottom: var(--ui-menu-header-bar-border, 1px solid var(--ui-border-color));
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
+    backdrop-filter: var(--ui-menu-header-bar-filter, var(--ui-bar-rest-filter, var(--ui-bar-filter, none)));
   }
   .ui.segmented.toggles.menu {
     --_ui-menu-active-shadow: var(--_ui-menu-segmented-pressed-shadow);

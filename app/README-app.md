@@ -493,9 +493,9 @@ Each one dresses the whole editor:
 | Merlot | flat panels on hairlines, edge to edge, in wine reds;  a warm gold in dark |
 | Spell | white cards with soft shadows on Spell's pale page |
 
-- The top bar floats as a rounded bar, and the code, the Program panel and the app sit in rounded panels
-  with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
-  - Glass and Fruity's bar is a full pill;  Merlot's panels meet edge to edge, and Spell's bar has no box of its own.
+- The top bar joins the top of the window, 38px high, and the code, the Program panel and the app sit in rounded panels
+  under it, with gaps between them;  Spell's hat and name lead the bar, the hat in the theme's primary colour.
+  - Merlot's panels meet edge to edge, and Spell's bar has no fill or line of its own.
 - The bars' and panels' colours, corners and shadows are the theme's own, as the docs pages' bars are.
 - The theme is ONE choice for every Spell place:  pick Merlot dark in the editor, and the epic pages and Spell UI's
   pages draw in it too, open tabs at once;  and the other way round.

@@ -22,9 +22,9 @@ export function ThemeEditorPage() {
     console.error("ThemeEditorPage:  couldn't load the theme editor", error)
   )
   return (
-    <SpellPage id="ThemeEditorPage" fillWindow dark>
+    <SpellPage id="ThemeEditorPage" fillWindow dark rows>
+      <ChooserToolbar isHome={false} />
       <div class="ThemeEditorPage">
-        <ChooserToolbar isHome={false} />
         <ui-theme-editor class="ThemeEditor" pages={previewPages()} />
       </div>
     </SpellPage>

@@ -446,6 +446,37 @@ describe("<ui-menu> tokens from outside", () => {
 ////////////////
 
 // epic `design-system`, I5 / I21 / I35
+describe('<ui-menu appearance="header"> (a window\'s bar)', () => {
+  it("is flat and short:  the whole width, no corners, shadow or margin, a hairline under it", async () => {
+    const { root } = await bar('appearance="header"')
+    const style = getComputedStyle(root)
+    expect(Math.round(root.getBoundingClientRect().height)).toBe(38)
+    expect(root.getBoundingClientRect().width).toBe(WIDTH)
+    expect(style.borderRadius).toBe("0px")
+    expect(style.boxShadow).toBe("none")
+    expect(style.marginTop).toBe("0px")
+    expect(style.borderBottomWidth).toBe("1px")
+    expect(style.borderTopWidth).toBe("0px")
+    expect(style.fontSize).toBe("13px")
+  })
+
+  it("takes its height, fill and line from its tokens", async () => {
+    const { root } = await bar(
+      'appearance="header" style="--ui-menu-header-bar-height: 50px; --ui-menu-header-bar-background: rgb(1, 2, 3); ' +
+        '--ui-menu-header-bar-border: 0 solid transparent"'
+    )
+    const style = getComputedStyle(root)
+    expect(root.getBoundingClientRect().height).toBe(50)
+    expect(style.backgroundColor).toBe("rgb(1, 2, 3)")
+    expect(style.borderBottomWidth).toBe("0px")
+  })
+
+  it("leaves a segmented header alone:  it's the row of a pane's bar", async () => {
+    const { root } = await bar('appearance="segmented header"')
+    expect(getComputedStyle(root).borderBottomWidth).toBe("0px")
+  })
+})
+
 describe("<ui-menu> variation tokens", () => {
   /** Three link items with icons, the second selected. */
   const ICONS =
