@@ -44,6 +44,7 @@
  */
 import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
 // By file:  the rest of `spell/util/places` has no business in the core
+import { NO_NUMBER, NUMBER_AS_TEXT } from "spell/util/places/places.types"
 import { parseRef, refText, type SavedRef } from "spell/util/places/refs"
 
 import { programThings, core } from "./core"
@@ -357,7 +358,7 @@ export class Loader {
     // the file's own keys (`$type`, `$version`, `$schema` ...) are never props
     for (const [key, value] of Object.entries(entry)) {
       if (key.startsWith("$")) continue
-      if (isPlainValue(value)) plain[key] = dateIfDeclared(Class, key, value)
+      if (isPlainValue(value)) plain[key] = valueAsDeclared(Class, key, value)
       else later[key] = value
     }
     const made = new Class(plain)
@@ -522,9 +523,23 @@ function isReference(json: unknown): json is Record<string, unknown> {
   )
 }
 
-/** `value` as a `Date`, if `Class` declares `key` a date and `value` is its ISO text;  else `value`. */
-export function dateIfDeclared(Class: SpellClass, key: string, value: unknown): unknown {
-  if (typeof value !== "string" || schemaOf(Class).info(key)?.type !== "date") return value
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : date
+/**
+ * `value`, a saved row's text, as what `Class` declares `key` to be:
+ * - a date:  a `Date`, from its ISO text
+ * - a number:  a number, from its digits (`"172"`, `"1,358"`), which is how many web servers write them (epic `data` P18);
+ *   a word for no number at all (`NO_NUMBER`) reads as nothing there, which a number shows as its usual 0
+ * - else, and any other text:  `value`, as it is, so a number that's wrong still says so
+ * - a `null` where a property's declared:  nothing, as that's how a row says it has none
+ */
+export function valueAsDeclared(Class: SpellClass, key: string, value: unknown): unknown {
+  if (value === null) return schemaOf(Class).info(key) ? undefined : value
+  if (typeof value !== "string") return value
+  const declared = schemaOf(Class).info(key)?.type
+  if (declared === "date") {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? value : date
+  }
+  if (declared !== "number") return value
+  if (NO_NUMBER.test(value)) return undefined
+  return NUMBER_AS_TEXT.test(value) ? Number(value.replaceAll(",", "")) : value
 }

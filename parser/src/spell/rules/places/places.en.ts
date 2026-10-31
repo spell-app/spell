@@ -25,7 +25,9 @@ import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
 import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
+import { NextPageIn } from "./NextPageIn"
 import { ReloadThings } from "./ReloadThings"
+import { RowsIn } from "./RowsIn"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
@@ -125,11 +127,14 @@ places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
+places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} (second|seconds)?" })
 places.addRule(VersionsIn, { syntax: "{type:subject_its} version is its? {field:text}" })
 places.addRule(IdColumn, { syntax: "{type:subject_its} id is its? {column:text}" })
+places.addRule(RowsIn, { syntax: "{type:subject_its} rows are its? {field:text}" })
+places.addRule(NextPageIn, { syntax: "{type:subject_its} next page is its? {field:text}" })
 places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 

@@ -26,8 +26,12 @@ export type PlaceDetails = {
   checkedEvery?: number
   /** The field holding a row's version, on a web server that has one. */
   versionsIn?: string
-  /** The column holding a row's id, on a sheet or an airtable. */
+  /** The field holding a row's id:  a sheet's or an airtable's column, or a web server's field, for every collection. */
   idColumn?: string
+  /** Where a web server's list keeps its rows in its answer, for every collection. */
+  rowsIn?: string
+  /** Which field of a web server's answer says where its next page is, for every collection. */
+  nextPageIn?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
@@ -56,9 +60,6 @@ export type PlaceMaking = {
 
 /** A row's id, in a place that isn't told otherwise. */
 const ID_FIELD = "id"
-
-/** The id in a Google Sheet's address. */
-const GOOGLE_SHEET_ID = /\/spreadsheets\/d\/([\w-]+)/
 
 /** A place on the far side of a server:  an address with a scheme, or from the top of this server. */
 const IS_SERVER_ADDRESS = /^(?:[a-z][a-z0-9+.-]*:|\/)/i
@@ -93,6 +94,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     new RestPlace({
       url: details.at!,
       collections: restCollections(details),
+      ...restLinesForEveryCollection(details),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
       ...(details.keyNamed !== undefined && { keyNamed: details.keyNamed })
@@ -131,7 +133,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(idColumn !== undefined && { idColumn })
     })
   },
-  "google sheet": ({ details, collection, Class }, { SheetPlace, RemotePlace, isPlaceServerAddress }) => {
+  "google sheet": (
+    { details, collection, Class },
+    { SheetPlace, RemotePlace, isPlaceServerAddress, googleSheetCsvAddress }
+  ) => {
     const at = details.at!
     const { idColumn } = details
     // a server in front:  `GoogleSheetPlace`, which holds the key, and takes writes
@@ -183,17 +188,6 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
 }
 
-/**
- * The address a Google Sheet's first tab is read from as CSV, from the address a browser shows for it.
- * - throws `TypeError` for an address that isn't a Google Sheet's.
- */
-function googleSheetCsvAddress(address: string): string {
-  const id = GOOGLE_SHEET_ID.exec(address)?.[1]
-  if (!id)
-    throw new TypeError(`core.place():  "${address}" isn't a Google Sheet's address:  it has no /spreadsheets/d/<id>`)
-  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`
-}
-
 /** What an atmosphere account's lines call each collection. */
 function atmosphereCollections({ collections = {} }: PlaceDetails): Record<string, string> {
   return Object.fromEntries(Object.entries(collections).flatMap(([name, { at }]) => (at ? [[name, at]] : [])))
@@ -207,6 +201,19 @@ function restCollections({ collections = {} }: PlaceDetails) {
       { ...(at !== undefined && { path: at.includes("{") ? at : `${at}{/id}` }), ...(fields && { fields }) }
     ])
   )
+}
+
+/** What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is. */
+function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDetails) {
+  if (idColumn === undefined && rowsIn === undefined && nextPageIn === undefined) return {}
+  return {
+    everyCollection: {
+      ...(idColumn !== undefined && idColumn !== ID_FIELD && { fields: { [ID_FIELD]: idColumn } }),
+      ...(rowsIn !== undefined && { rowsAt: rowsIn }),
+      ...(nextPageIn !== undefined && { nextAt: nextPageIn })
+    },
+    ...(nextPageIn !== undefined && { can: { page: "cursor" as const } })
+  }
 }
 
 /**

@@ -5904,7 +5904,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 22,
+          "line": 24,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6219,11 +6219,14 @@
           "ruleNames": ["field_called"],
           "internal": false,
           "file": "src/spell/rules/places/FieldCalled.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "What a place calls a property of a type, when its name differs.",
           "syntaxes": [
             {
               "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} se (llama|llaman) {name:text}"
+            },
+            {
+              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} se (llama|llaman) {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6289,11 +6292,39 @@
           "ruleNames": ["id_column"],
           "internal": false,
           "file": "src/spell/rules/places/IdColumn.ts",
-          "line": 9,
-          "purpose": "The column that says which row is which, on a sheet or an airtable.",
+          "line": 10,
+          "purpose": "The field that says which row is which.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} identificador está en {column:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "RowsIn",
+          "ruleNames": ["rows_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/RowsIn.ts",
+          "line": 9,
+          "purpose": "Where a web server's list keeps its rows, when it doesn't answer with the list itself.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} filas están en {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageIn",
+          "ruleNames": ["next_page_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageIn.ts",
+          "line": 10,
+          "purpose": "Which field of a web server's answer says where its next page is.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} página siguiente está en {field:text}"
             }
           ],
           "aliases": ["statement"]

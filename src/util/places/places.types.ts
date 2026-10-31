@@ -10,6 +10,12 @@
 // ## Rows
 ////////////////
 
+/** What a source writes for a number it hasn't got. */
+export const NO_NUMBER = /^\s*(?:|unknown|none|n\/a|na|null|-)\s*$/i
+
+/** A number written as text:  `172`, `-1.5`, `1,358`. */
+export const NUMBER_AS_TEXT = /^\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?\s*$/
+
 /** How long a text is before losing it is worth a notice, in characters:  a title just flips once, a paragraph is kept (J1). */
 const LONG_TEXT_CHARS = 40
 
@@ -539,6 +545,19 @@ export const PLACES_PREFIX = "/api/places"
  */
 export function isPlaceServerAddress(address: string): boolean {
   return address.split(/[?#]/)[0]!.includes(`${PLACES_PREFIX}/`)
+}
+
+/** The id in a Google Sheet's address. */
+const GOOGLE_SHEET_ID = /\/spreadsheets\/d\/([\w-]+)/
+
+/**
+ * The address a Google Sheet's first tab is read from as CSV, from the address a browser shows for it.
+ * - throws `TypeError` for an address that isn't a Google Sheet's.
+ */
+export function googleSheetCsvAddress(address: string): string {
+  const id = GOOGLE_SHEET_ID.exec(address)?.[1]
+  if (!id) throw new TypeError(`"${address}" isn't a Google Sheet's address:  it has no /spreadsheets/d/<id>`)
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`
 }
 
 /** An Airtable base's id, alone or in an address someone copied from their browser. */

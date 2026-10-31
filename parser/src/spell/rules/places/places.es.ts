@@ -34,6 +34,8 @@ import { ThereAreThings } from "./ThereAreThings"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
+import { NextPageIn } from "./NextPageIn"
+import { RowsIn } from "./RowsIn"
 
 /** The Spanish of the `places` rule module. */
 export const placesEs = new SpellParser({ module: "places" })
@@ -116,11 +118,16 @@ placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:member_words} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
+placesEs.addRule(FieldCalled, {
+  syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
+})
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} (segundo|segundos)?" })
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
+placesEs.addRule(RowsIn, { syntax: "{type:subject_its} filas están en {field:text}" })
+placesEs.addRule(NextPageIn, { syntax: "{type:subject_its} página siguiente está en {field:text}" })
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 

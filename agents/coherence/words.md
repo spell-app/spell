@@ -255,7 +255,9 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### the details under a place
 
 - **Say:**  `recipes live at "/dishes"`, `a recipe's title is its? "dish_name"`, `its version is its? "version"`, `its id is its? "id"`,
-  `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`.
+  `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`;
+  a web server's whole answer:  `its rows are its? "results"`, `its next page is its? "next"` (epic `data` P18).
+  - Words the plain form stops at go in quotes:  `a vehicle's "cost in credits" is its "cost_in_credits"`.
 - **Not:**  `are at`, `is called`, `versions are in`, `ids are in`, `is checked every`.
 - **Score:**  `\b(are at "|is called "|versions are in|ids are in|is checked every)` · in `parser/src/spell/rules/`
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.

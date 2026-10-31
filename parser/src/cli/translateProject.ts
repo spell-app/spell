@@ -57,7 +57,7 @@ import { ShapeCheck } from "spell/parser/spell/translate/ShapeCheck"
 import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
 import { Translator } from "spell/parser/spell/translate/Translator"
 import type {
-  AskingPass,
+  TranslatingPass,
   ClaudeEffort,
   ClaudeOptions,
   ClaudeRunner,
@@ -204,7 +204,7 @@ export async function translationOf(
   const chosen: ChosenRunner = run ? { run, via: "claude" } : claudeRunnerFor(process.env, { ai: ai && print })
   // each pass's tier, checked before anything's asked;  with --review, read again before each pass (`steerPass()`)
   const asking = { names: askingFor(options, "names"), fixUps: askingFor(options, "fixUps") }
-  const askFor = (pass: AskingPass) => withTier(chosen.run, () => asking[pass])
+  const askFor = (pass: TranslatingPass) => withTier(chosen.run, () => asking[pass])
   const timeoutMs = options.review ? reviewTimeoutMs(options.reviewTimeout) : 0
 
   // what earlier runs and other projects worked out:  none of it, cold
@@ -859,7 +859,7 @@ const NOT_COPIED =
  */
 export function askingFor(
   options: TranslateOptions,
-  pass: AskingPass
+  pass: TranslatingPass
 ): Required<Pick<ClaudeOptions, "pass" | "tier">> & Pick<ClaudeOptions, "model" | "effort"> {
   const tier = options[`${pass}Effort`] ?? options.effort ?? "balanced"
   if (!TIERS.includes(tier as EffortTier)) {
@@ -895,7 +895,7 @@ function withTier(run: ClaudeRunner, asking: () => ReturnType<typeof askingFor>)
 function steerPass(
   run: ReviewRun,
   options: TranslateOptions,
-  pass: AskingPass,
+  pass: TranslatingPass,
   facts: SRV.RunPassFacts = {}
 ): ReturnType<typeof askingFor> {
   const picked = run.effort
@@ -909,7 +909,7 @@ function steerPass(
 }
 
 /** Each pass that asks Claude, as the page and its flag name it:  `fix-ups`, `--fix-ups-effort`. */
-const PASS_LABELS: Record<AskingPass, string> = { names: "names", fixUps: "fix-ups" }
+const PASS_LABELS: Record<TranslatingPass, string> = { names: "names", fixUps: "fix-ups" }
 
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */
 function glossaryFor(lang: string): string | undefined {

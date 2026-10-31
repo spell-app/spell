@@ -12,6 +12,8 @@ export type PlaceDetailValue = {
   versionsIn?: string
   idColumn?: string
   accounts?: string[]
+  rowsIn?: string
+  nextPageIn?: string
 }
 
 /**

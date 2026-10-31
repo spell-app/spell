@@ -480,6 +480,18 @@ function inProgramWords<Person extends PersonHere>(person: Person): Person {
 /** Each language's word for a person's name, other than English's. */
 const WORDS_FOR_NAME = ["nombre"]
 
+/**
+ * `details`, each collection by the name a type's `savedIn` knows it by:  a compiled object's keys are camelCase,
+ * so `life forms live at "/forms"` arrives as `lifeForms`, and a type looks for `life_forms` (epic `data` P18).
+ */
+function withCollectionNames(details: PlaceDetails): PlaceDetails {
+  if (!details.collections) return details
+  const named = Object.entries(details.collections).map(
+    ([name, collection]) => [name.replace(/\p{Lu}/gu, (letter) => `_${letter.toLowerCase()}`), collection] as const
+  )
+  return { ...details, collections: Object.fromEntries(named) }
+}
+
 /** Where `Class` says it's saved:  its own line, or a parent's. */
 function savedInOf(Class: SavedClass): SavedIn {
   const { savedIn } = Class
@@ -749,7 +761,7 @@ export const savedMethods = defineCoreModule({
    * - Returns `thing`.
    */
   place<T extends Place>(thing: T, details: PlaceDetails): T {
-    programPlaces().declare(thing, details)
+    programPlaces().declare(thing, withCollectionNames(details))
     return thing
   },
 
