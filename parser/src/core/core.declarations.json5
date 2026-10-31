@@ -877,6 +877,22 @@
     },
     {
       "kind": "method",
+      "name": "sortedBy",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "key"
+        }
+      ],
+      "section": "iteration",
+      "description": "Return new `collection` of the same things, in order of what `key` says of each:  smallest first."
+    },
+    {
+      "kind": "method",
       "name": "filterInTurn",
       "of": "core",
       "module": "collection-other",

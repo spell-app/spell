@@ -13,6 +13,28 @@ import { parseSpellProject, runSpellFiles, type RunOptions } from "spell/parser/
  *   and each member rule's `{type:subject_it}` syntax.
  */
 describe("outline style", () => {
+  test("a worked-out value with `its` outranks a stored property's line that reads only its start (epic `data` I1)", () => {
+    const { files } = parseSpellProject([
+      {
+        path: "/test.spell",
+        contents: [
+          "a card is a thing:",
+          '\t- its "rank" is a number',
+          "a deck is a thing:",
+          '\t- its "cards" is a list of cards',
+          '\t- its "high cards" is cards in its cards where its rank > 10',
+          '\t- its "other" is a card'
+        ].join("\n")
+      }
+    ])
+    const [file] = files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain("get highCards() {")
+    expect(file!.compiled).toContain("return core.filter(this.cards, (card) => card.rank > 10)")
+    // what reads the same words either way stays a stored property
+    expect(file!.compiled).toContain('declareProp("other"')
+  })
+
   test("a type's bulleted body compiles as its sentences do", () => {
     const sentences = [
       "a pile is a list of cards",

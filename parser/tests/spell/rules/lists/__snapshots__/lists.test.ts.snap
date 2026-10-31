@@ -28,6 +28,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "list_remove_where": "arg|list|body?",
   "list_reverse": "arg?|list",
   "list_shuffle": "arg?|list",
+  "list_sorted_by": "body?",
   "merge_lists": "expression|type?",
   "number_range": "start|end",
   "ordinal_position_expression": "ordinal|arg|expression",

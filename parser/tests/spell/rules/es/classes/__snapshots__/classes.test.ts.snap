@@ -19,6 +19,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "draw_slot": "slot",
   "drawn_markup": "markup",
   "every_thing": "type",
+  "every_thing_where": "type|body?",
   "has_slots": "type|slots",
   "items_reordered": "type|seconds?|now?",
   "its_quoted_property": "type|property",

@@ -89,6 +89,7 @@ describe("priority and precedence", () => {
         "list_membership_test:  Precedence.comparison",
         "list_move:  Priority.overridable",
         "list_position:  Priority.mostSpecific",
+        "list_sorted_by:  Precedence.ternary",
         "markdown_block:  Priority.preferred",
         "markdown_description:  Priority.declaration",
         "max:  Priority.specific",

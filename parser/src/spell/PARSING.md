@@ -573,6 +573,10 @@ A kind that says so is saved in a file of its own.
   - Both are core's thing references, `Tableau#T1` and `Tableau#1`:  [references.ts](../core/references.ts).
   - The writers read off either with `?.`:  the program may not have made it (`ProgramWriter.ITEM_READS`).
 - And EVERY one of a type (epic `outline-spell` P16):  [`every_thing`](rules/classes/EveryThing.ts).
+  - Some of them, its short form of `list_filter`:  [`every_thing_where`](rules/classes/EveryThingWhere.ts),
+    `every recipe where its title includes the search` (epic `data` P10).
+  - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
+    - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
   - compiles to `core.everyThing(Pile)`, a scratch list:  it takes none of them from the lists holding them
   - its datatype:  `list of piles`
@@ -1095,6 +1099,9 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     as if written after it.  A line that's neither a rule nor an alias warns (`not-a-property-body-line`), and compiles
     the same.
   - The property's comment lists its body lines (`ProgramWriter.spellOf()`), for its list of values too.
+- A stored property's line said with `its` that stops short of its line isn't one (epic `data` I1):
+  `- its "high cards" is cards in its cards where ...` reads `is cards` as well as a getter would, and outranks it.
+  So `define_property_has` turns it down, and `property_value_getter` takes the whole line.
 - A worked-out value from a list of ITS OWN:  `- its "color" is one of red, black:`, then its value lines.
   - `property_value_getter` with a `{specifier:outline_specifier_enum}` and a required `:`;  at `Priority.declaration`,
     so it beats `define_property_has`, which would read all but the colon.

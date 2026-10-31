@@ -36,6 +36,7 @@ import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
+import { EveryThingWhere } from "./EveryThingWhere"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
 import { ListGuard } from "./ListGuard"
@@ -2286,6 +2287,25 @@ classesEs.addRule(EveryThing, {
         )
       },
       tests: [["cada palo de carta", "Carta.Palos"]]
+    }
+  ]
+})
+
+classesEs.addRule(EveryThingWhere, {
+  syntax: "(cada|todo|toda) {type:known_type} donde {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una carta tiene un rango como número"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "cada carta donde su rango es 1",
+          "core.filter(core.everyThing(Carta), (carta) => carta.rango === 1)",
+          "core.filter(core.everyThing(Carta), (carta: Carta) => carta.rango === 1)"
+        ]
+      ]
     }
   ]
 })

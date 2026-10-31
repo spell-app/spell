@@ -21,6 +21,7 @@ core.filter(words, lambda word: len(word) > 3)
   `core.getItemAt()` is `core.get_item_at()`.
 """
 
+import functools
 import inspect
 import math
 from collections.abc import Callable, Iterator, Mapping, MutableMapping, MutableSequence, Sequence, Sized
@@ -463,6 +464,26 @@ class CollectionMethods:
                     self.set_item_at(results, position, value)
         return results
 
+    def sorted_by(self, collection: object = None, key: Callback | None = None) -> Any:
+        """The same things, in a new collection, in order of what `key` says of each:  smallest first.
+
+        - Two with the same key keep their order;  one with no key goes last.
+        - Text compares ignoring case.  As `core.sortedBy()`.
+        - `every card, sorted by its rank`.
+        """
+        if not self._is_defined(collection, "sorted_by"):
+            return None
+        call = _callback(key) if key is not None else None
+        keyed = [
+            (call(value, position, coll) if call else value, value)
+            for value, position, coll in self.get_iterator_for(collection)
+        ]
+        keyed.sort(key=functools.cmp_to_key(lambda one, other: _compare_sort_keys(one[0], other[0])))
+        results = self.new_thing_like(collection) if self.is_array_like(collection) else []
+        for _key, value in keyed:
+            self.append(results, value)
+        return results
+
     def each_together(self, collection: object = None, method: Callback | None = None) -> Any:
         """Call `method` for every item at once:  a loop right in `at the same time:`.  As `core.together()`."""
         if not self._is_defined(collection, "each_together") or method is None:
@@ -678,6 +699,18 @@ class CollectionMethods:
 
         def is_array_like(self, thing: object) -> bool: ...
         def shuffled(self, items: Sequence[Any]) -> list[Any]: ...
+
+
+def _compare_sort_keys(one: Any, other: Any) -> int:
+    """Which of two sort keys goes first:  nothing goes last, and text ignores case.  As the JavaScript core's."""
+    if one is None or other is None:
+        return (one is None) - (other is None)
+    first = one.lower() if isinstance(one, str) else one
+    second = other.lower() if isinstance(other, str) else other
+    try:
+        return (first > second) - (first < second)
+    except TypeError:
+        return 0
 
 
 def _callback(method: Callback | None) -> Callable[[Any, Key, object], Any]:

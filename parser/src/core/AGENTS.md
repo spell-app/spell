@@ -136,7 +136,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Collection helpers' results are SCRATCH, and own nothing:  or filtering a pile would steal its cards.
   - Made by `List.asScratch()`, `core.newScratch()`.
   - The helpers:
-    - `map()`, `filter()`
+    - `map()`, `filter()`, `sortedBy()`
     - ranges
     - `a copy of`, `merge ... into a new pile`
   - Build a new helper's result with `newThingLike()` / `newScratch()`.

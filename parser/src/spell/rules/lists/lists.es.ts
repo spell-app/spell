@@ -27,6 +27,7 @@ import { ListAppend } from "./ListAppend"
 import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
+import { ListSortedBy } from "./ListSortedBy"
 import { ListIteration } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -602,6 +603,24 @@ listsEs.addRule(ListFilter, {
         ],
         ["los items en my-list donde el id del item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["los items en my-list donde su id > 1", "core.filter(myList, (item) => item.id > 1)"]
+      ]
+    }
+  ]
+})
+
+listsEs.addRule(ListSortedBy, {
+  // agrees with its list:  `cada carta, ordenada por ...`, `las cartas, ordenadas por ...`
+  syntax: ",? (ordenado|ordenada|ordenados|ordenadas) por {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      showAll: true,
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("mi-lista")
+      },
+      tests: [
+        ["mi-lista ordenada por su foo", "core.sortedBy(miLista, (item) => item.foo)"],
+        ["mi-lista, ordenadas por su foo", "core.sortedBy(miLista, (item) => item.foo)"]
       ]
     }
   ]

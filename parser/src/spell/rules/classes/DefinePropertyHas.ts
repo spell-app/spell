@@ -74,6 +74,9 @@ export class DefinePropertyHas extends SpellStatement<
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
+    // it stops short of its line, so it isn't what's meant:  a worked-out value, which reads the whole line
+    // (`- its "high cards" is cards in its cards where ...`, not `cards`, then words nothing reads;  epic `data` I1)
+    if (match.groups.type.is(SubjectIts) && match.length < tokens.length) return undefined
     const { specifier } = match.groups
     const valueType = specifier?.datatype ? scope.types?.get(specifier.datatype) : undefined
     if (valueType) match.data.valueType = valueType

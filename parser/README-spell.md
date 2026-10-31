@@ -387,6 +387,8 @@ Its first line is how you call it, with each blank's type in brackets:
 | `remove item 4 of my-list` | `core.removeItemAt(myList, 3)` |
 | `the number of items in my-list where its id > 1` | `core.itemCountOf(core.filter(myList, (item) => item.id > 1))` |
 | `return tasks in its tasks where it is active` | `return core.filter(this.tasks, (task) => task.isActive)` |
+| `every task where it is active` | `core.filter(core.everyThing(Task), (task) => task.isActive)` |
+| `every task, sorted by its title` | `core.sortedBy(core.everyThing(Task), (item) => item.title)` |
 | `move card to tableau` | `core.move(card, tableau)` |
 | `a card belongs to one pile` | `Pile.exclusive = true`, and a `pile` getter on the card |
 
