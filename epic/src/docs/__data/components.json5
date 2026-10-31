@@ -2121,6 +2121,182 @@
       ]
     },
     {
+      "tag": "epic-focus",
+      "name": "epic-focus",
+      "folder": "epic-focus",
+      "mainTag": "epic-focus",
+      "main": true,
+      "page": true,
+      "href": "epic-focus.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "focus mode",
+        "walk through",
+        "one at a time",
+        "review mode",
+        "item walker"
+      ],
+      "description": "Focus mode (epic `epic-engine` P57):  a full-screen overlay over an epic page that walks its OPEN items and phases one at a time -- the ones the page draws red, orange, blue or yellow -- so you make a call on each without scrolling.  A tab per kind (Phases, Questions, Todos, Calls, Issues, Tests), each with its count and the section's own state chips;  the item's id, title and whole text, its own review buttons and note box (the page's marks, the page's Send), then Back and Next (← and →).  Drawn by `<epic-page>` in its shadow root, opened from its header's gear, never written in a page.  It keeps its place (tab, item, chips) in this browser.",
+      "noun": "focus",
+      "attributes": [
+        {
+          "name": "for",
+          "kind": "string",
+          "description": "The id of the element holding the sections it walks, when it isn't drawn by an epic page (a live example on a docs page).  None:  the `<epic-page>` around it."
+        }
+      ],
+      "slots": [
+        {
+          "name": "send",
+          "description": "The page's Send (`<epic-send-buttons countdown>`), at the top bar's right while it's open."
+        }
+      ],
+      "events": [
+        {
+          "name": "epic-focus-toggled",
+          "detail": "{ open }",
+          "description": "It opened or closed:  the page moves its Send into the overlay's bar while it's open, and back."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The full-screen `<ui-modal>`."
+        },
+        {
+          "name": "tabs",
+          "description": "The tabs, one per kind with open items, each with its count."
+        },
+        {
+          "name": "chips",
+          "description": "The tab's state chips (`<epic-state-filter>`)."
+        },
+        {
+          "name": "where",
+          "description": "Where you are:  `3 of 12 · Questions 1 of 3`."
+        },
+        {
+          "name": "item",
+          "description": "The item:  its id chip, title and whole text."
+        },
+        {
+          "name": "body",
+          "description": "The item's text, a copy of its body on the page."
+        },
+        {
+          "name": "note-box",
+          "description": "Its note box, the page's (`<epic-review shows=note>`)."
+        },
+        {
+          "name": "review-buttons",
+          "description": "Its review buttons, the page's (`<epic-review shows=buttons>`)."
+        },
+        {
+          "name": "back",
+          "description": "Back:  the item before."
+        },
+        {
+          "name": "next",
+          "description": "Next:  the item after, the next tab's first after a tab's last."
+        }
+      ],
+      "states": [
+        {
+          "name": "open",
+          "description": "Showing."
+        }
+      ],
+      "texts": [
+        {
+          "key": "heading",
+          "text": "Focus mode",
+          "description": "The overlay's name."
+        },
+        {
+          "key": "phasesTab",
+          "text": "Phases"
+        },
+        {
+          "key": "questionsTab",
+          "text": "Questions"
+        },
+        {
+          "key": "todosTab",
+          "text": "Todos"
+        },
+        {
+          "key": "judgementsTab",
+          "text": "Calls",
+          "description": "Judgement calls' tab."
+        },
+        {
+          "key": "issuesTab",
+          "text": "Issues"
+        },
+        {
+          "key": "testsTab",
+          "text": "Tests"
+        },
+        {
+          "key": "tabsLabel",
+          "text": "Kinds of item",
+          "description": "The tabs' group, for a screen reader."
+        },
+        {
+          "key": "tabTip",
+          "text": "{tab}:  {count} to go through",
+          "description": "A tab's tooltip:  how many of its items show, by its chips."
+        },
+        {
+          "key": "where",
+          "text": "{at} of {total} · {tab} {atTab} of {inTab}",
+          "description": "Where you are:  overall, then in the tab."
+        },
+        {
+          "key": "back",
+          "text": "Back",
+          "description": "Back's words."
+        },
+        {
+          "key": "backTip",
+          "text": "The item before (←)",
+          "description": "Back's tooltip."
+        },
+        {
+          "key": "next",
+          "text": "Next",
+          "description": "Next's words."
+        },
+        {
+          "key": "nextTip",
+          "text": "The next item (→)",
+          "description": "Next's tooltip."
+        },
+        {
+          "key": "nothing",
+          "text": "Nothing open to go through:  every item is done, decided or hidden by the chips.",
+          "description": "No item shows."
+        },
+        {
+          "key": "loading",
+          "text": "Loading its text…",
+          "description": "The item's part file on its way."
+        },
+        {
+          "key": "noText",
+          "text": "Its text couldn't load:  {source}",
+          "description": "The item's part file didn't load."
+        },
+        {
+          "key": "closeTip",
+          "text": "Close Focus mode (Escape)",
+          "description": "The close button's tooltip."
+        }
+      ]
+    },
+    {
       "tag": "epic-hidden-note",
       "name": "epic-hidden-note",
       "folder": "epic-hidden-note",
@@ -2329,7 +2505,7 @@
         {
           "name": "prepared",
           "kind": "string",
-          "description": "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  The Manual tests section opens the prepared tests in that order, and once every open test has it, its button is Next test."
+          "description": "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  Focus mode walks the prepared tests in that order (epic `epic-engine` P57), and once every open test has it, the Manual tests section's button is Focus on the tests."
         },
         {
           "name": "source",
@@ -4026,15 +4202,19 @@
         },
         {
           "name": "gear",
-          "description": "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, Auto Send and Theme."
+          "description": "The header's gear (epic `epic-engine` P53, where the git toggle was):  opens its menu of settings, Focus mode (while the page is reviewed), Auto Send and Theme."
         },
         {
           "name": "gear-menu",
-          "description": "The gear's menu (a `<ui-popup>`):  its two rows, and beside them the sub-menu open."
+          "description": "The gear's menu (a `<ui-popup>`):  its rows, and beside them the sub-menu open."
         },
         {
           "name": "gear-row",
-          "description": "A row of the gear's menu:  `Auto Send · 2 minutes`, `Theme · Paper`."
+          "description": "A row of the gear's menu:  `Focus mode` (while reviewed), `Auto Send · 2 minutes`, `Theme · Paper`."
+        },
+        {
+          "name": "focus",
+          "description": "Focus mode (`<epic-focus>`, epic `epic-engine` P57), while the page is reviewed:  the full-screen overlay that walks the open items one at a time, opened from the gear;  Send rides in its top bar while it's open."
         },
         {
           "name": "auto-send",
@@ -4244,14 +4424,24 @@
           "description": "The header's gear:  its tooltip, and its menu's name."
         },
         {
+          "key": "focusMode",
+          "text": "Focus mode",
+          "description": "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
+        },
+        {
+          "key": "focusModeTip",
+          "text": "Walk through the open items one at a time",
+          "description": "Focus mode's row:  its tooltip."
+        },
+        {
           "key": "autoSend",
           "text": "Auto Send",
-          "description": "The gear's first row, and its sub-menu's name."
+          "description": "The gear's Auto Send row, and its sub-menu's name."
         },
         {
           "key": "theme",
           "text": "Theme",
-          "description": "The gear's second row, and its sub-menu's name."
+          "description": "The gear's Theme row, and its sub-menu's name."
         },
         {
           "key": "autoSendNow",
@@ -5720,7 +5910,7 @@
         },
         {
           "name": "start-testing",
-          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Next test · 3 left\", which opens the next test you haven't answered.  The address's `?test=1` presses it as the page loads."
+          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Focus on the tests · 3 left\", which opens Focus mode on its Tests tab, on the first test you haven't answered (epic `epic-engine` P57, Q65).  The address's `?test=1` presses it as the page loads."
         },
         {
           "name": "next-epic",
@@ -5844,23 +6034,23 @@
           "description": "Preparing tests' tooltip while nobody has taken it yet."
         },
         {
-          "key": "nextTest",
-          "text": "Next test · {count} left",
-          "description": "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered."
+          "key": "focusTests",
+          "text": "Focus on the tests · {count} left",
+          "description": "The Manual tests section's button once every open test is prepared (P51):  how many he hasn't answered;  it opens Focus mode on them (P57, Q65)."
         },
         {
-          "key": "firstTest",
-          "text": "Go through the tests · {count}",
-          "description": "The same, every open test answered already:  it opens the first again."
+          "key": "focusAllTests",
+          "text": "Focus on the tests · {count}",
+          "description": "The same, every open test answered already:  Focus mode on the first again."
         },
         {
-          "key": "nextTestTip",
-          "text": "Open the next test you haven't answered:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
-          "description": "Next test's tooltip."
+          "key": "focusTestsTip",
+          "text": "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+          "description": "The button's tooltip once the tests are prepared."
         },
         {
           "key": "testsReady",
-          "text": "Tests ready:  Next test opens the first",
+          "text": "Tests ready:  Focus on the tests opens the first",
           "description": "The notice when the tests are prepared while you type:  the first test doesn't open under you."
         },
         {
@@ -7530,6 +7720,18 @@
       "docs": false,
       "tags": [
         "epic-field"
+      ],
+      "tokens": []
+    },
+    "epic-focus": {
+      "folder": "epic-focus",
+      "mainTag": "epic-focus",
+      "title": "<epic-focus>",
+      "summary": "The <epic-focus> element: Focus mode, a full-screen overlay that walks an epic page's open items one at a time.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-focus"
       ],
       "tokens": []
     },

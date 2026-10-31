@@ -20,6 +20,9 @@ import "spell/ui/components/ui-toast"
 // the gear's menu and its Theme sub-menu (P53)
 import "spell/ui/components/ui-popup"
 import "spell/ui/components/ui-theme-menu"
+// Focus mode's overlay and its tabs (P57)
+import "spell/ui/components/ui-modal"
+import "spell/ui/components/ui-menu"
 import "spell/epic/components/epic-page"
 import "spell/epic/components/epic-overview"
 import "spell/epic/components/epic-section"
@@ -1433,9 +1436,11 @@ describe("<epic-page> the header (P53)", () => {
   /** The gear's menu:  the button, the popup, its rows' words. */
   function gear(host: Element) {
     const shadow = host.shadowRoot!
-    const rows = () => Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]'))
+    // the settings' rows;  Focus mode's, an action, apart (P57)
+    const rows = () => Array.from(shadow.querySelectorAll<HTMLButtonElement>('[part~="gear-row"]:not(.focus-row)'))
     return {
       button: shadow.querySelector<HTMLButtonElement>('[part~="gear"]')!,
+      focusRow: () => shadow.querySelector<HTMLButtonElement>(".focus-row"),
       menu: shadow.querySelector<HTMLElement>('[part~="gear-menu"]')!,
       rows,
       words: () => rows().map((row) => row.textContent!.replace(/\s+/g, " ").trim()),
@@ -1501,6 +1506,33 @@ describe("<epic-page> the header (P53)", () => {
     key(it.autoSend.querySelector("button")!, "Escape")
     await ElementFixture.tick()
     expect([it.autoSend.hidden, it.menu.matches(":popover-open")]).toEqual([true, true])
+  })
+
+  // epic `epic-engine` P57 (Owen, 2026-10-30:  "In the page 'Gear' menu add option 'Focus Mode'")
+  test("the gear's Focus mode, first while reviewed:  opens the overlay, Send riding in its bar until it closes", async () => {
+    const { host } = await reviewedPage("off")
+    const it = gear(host)
+    it.button.click()
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
+    const row = it.focusRow()!
+    expect([row.textContent, row.parentElement!.firstElementChild]).toEqual(["Focus mode", row])
+    row.click()
+    const focus = host.shadowRoot!.querySelector<HTMLElement & { open: boolean; close(): void }>("epic-focus")!
+    await vi.waitFor(() => expect(focus.open).toBe(true))
+    await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(false))
+    // one Send:  in the overlay's bar, not the header's
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('header [part~="send"]')).toBeNull())
+    expect(focus.querySelector('[slot="send"] [part~="send"]')).not.toBeNull()
+    focus.close()
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector('header [part~="send"]')).not.toBeNull())
+    expect(focus.querySelector('[slot="send"]')).toBeNull()
+  })
+
+  test("not reviewed:  no Focus mode, in the gear or the page", async () => {
+    await adoptClient(new FakeRoutes(), { served: false })
+    const host = await render(page("", ["todo"]))
+    expect(host.shadowRoot!.querySelector(".focus-row")).toBeNull()
+    expect(host.shadowRoot!.querySelector("epic-focus")).toBeNull()
   })
 
   test("the gear's Theme:  Spell UI's theme menu in its menu mode, no bench;  a pick there is the row's", async () => {

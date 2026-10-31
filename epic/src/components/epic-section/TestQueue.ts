@@ -5,7 +5,9 @@ import { TEST_ID, TEST_ITEMS } from "./EpicSection.types"
 /****************
  * ### `TestQueue`
  * The Manual tests section's tests, as Owen goes through them ON the page (epic `epic-engine` P51, Q53):  which are
- * open, in which order, which he hasn't answered yet, and opening one.
+ * open, in which order, which he hasn't answered yet.
+ * - Focus mode opens on them (P57, Q65 A):  its own `<epic-focus>` steps through them;  `open()`, which landed on one
+ *   in the page for the old Next test, went.
  * - Owen, 2026-10-29:  "Transform the 'manual test' thinger to something I do inline within the epic doc, rather
  *   than its own page."
  * - Plain DOM reads, static:  `<epic-section kind="tests">` calls them from its memos (which follow its children and
@@ -48,17 +50,6 @@ export class TestQueue {
     if (!left.length) return open[0]
     const at = current ? open.indexOf(current) : -1
     return left.find((id) => open.indexOf(id) > at) ?? left[0]
-  }
-
-  /**
-   * Open test `id` on the page:  the address becomes `#m3` (replaced, never pushed:  a reload comes back to it), and
-   * the docs runtime lands there as for a link, unfolding the Manual tests section and opening the test.
-   * - SIDE EFFECT:  rewrites the address's hash, and fires `hashchange`
-   */
-  static open(id: string) {
-    const oldURL = location.href
-    history.replaceState(history.state, "", `${location.pathname}${location.search}#${id}`)
-    dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: location.href }))
   }
 
   /** Is Owen typing in a field (the focus in a text box, at any shadow depth)?  Then a test doesn't open under him. */

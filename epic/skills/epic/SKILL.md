@@ -1009,9 +1009,9 @@ want you to just do it").
           (`--example` takes a PNG file)
        5. ORDERS them so tests in the same window come together, and stamps each with its place, 1 first:
           `epic details <name>#M3 --prepared 1` (alone it only stamps;  with `--step` ... it stamps too)
-       6. `epic inbox done <name>#tests`:  the page opens the first test on the person's page
-          (unless they're typing:  then "Tests ready:  Next test opens the first")
-     - His button then reads "Next test · 3 left";  with every test prepared it never asks you again.
+       6. `epic inbox done <name>#tests`:  the page opens Focus mode on its Tests tab, on the first test, in that order
+          (epic `epic-engine` P57, Q65;  unless they're typing:  then "Tests ready:  Focus on the tests opens the first")
+     - His button then reads "Focus on the tests · 3 left";  with every test prepared it never asks you again.
      - Nevermind on it (their click while "Preparing tests") is 1b:  stop the agent, `epic inbox done <name>#tests`.
 3. SENT marks:  `epic inbox apply <name>`.
    - Approvals, picks and todos made or queued land in the doc;  it prints each.

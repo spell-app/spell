@@ -42,6 +42,7 @@ import { epicSectionVocabulary } from "spell/epic/components/epic-section/EpicSe
 import { epicSendVocabulary } from "spell/epic/components/epic-send/EpicSend.en"
 import { epicSendButtonsVocabulary } from "spell/epic/components/epic-send-buttons/EpicSendButtons.en"
 import { epicHiddenNoteVocabulary } from "spell/epic/components/epic-state-filter/EpicHiddenNote.en"
+import { epicFocusVocabulary } from "spell/epic/components/epic-focus/EpicFocus.en"
 import { epicRunVocabulary } from "spell/epic/components/epic-run/EpicRun.en"
 import { epicRunRowVocabulary } from "spell/epic/components/epic-run-row/EpicRunRow.en"
 import { epicStateFilterVocabulary } from "spell/epic/components/epic-state-filter/EpicStateFilter.en"
@@ -123,6 +124,8 @@ export class Definitions {
     // `<epic-page>`'s toolbar and the docs runtime, never written in a doc
     "epic-state-filter": epicStateFilterVocabulary,
     "epic-hidden-note": epicHiddenNoteVocabulary,
+    // Focus mode (epic `epic-engine` P57):  drawn by `<epic-page>` in its shadow root, never written in a doc
+    "epic-focus": epicFocusVocabulary,
     // a test run (epic `epic-engine` P4):  drawn by `<epic-page>` over its blocks, written in a doc only as an example
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,

@@ -1016,6 +1016,11 @@
       "types": "./epic/dist-types/src/tool/migrations/index.d.ts",
       "default": "./epic/src/tool/migrations/index.ts"
     },
+    "./epic/components/epic-focus": {
+      "spell-source": "./epic/src/components/epic-focus/index.ts",
+      "types": "./epic/dist-types/src/components/epic-focus/index.d.ts",
+      "default": "./epic/src/components/epic-focus/index.ts"
+    },
     "./epic/components/epic-send-buttons": {
       "spell-source": "./epic/src/components/epic-send-buttons/index.ts",
       "types": "./epic/dist-types/src/components/epic-send-buttons/index.d.ts",

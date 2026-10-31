@@ -28,6 +28,12 @@ import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/S
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 import { FILTER, FILTER_STATES, type StateFilterEntry } from "spell/epic/components/epic-section/EpicSection.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell/epic/components/epic-send-buttons/EpicSendButtons.types"
+import {
+  FOCUS_ASKED,
+  FOCUS_TOGGLED,
+  type FocusAsk,
+  type FocusToggledDetail
+} from "spell/epic/components/epic-focus/EpicFocus.types"
 
 import { epicPageVocabulary } from "./EpicPage.en"
 import {
@@ -185,6 +191,12 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - in the shadow root:  not a section, so the rail and counts never see it
  * - THE GEAR (epic `epic-engine` P53, `gear()`), at the header's right:  Auto Send and Theme, each a sub-menu.
  *   No page-wide git toggle since:  the Log lists every commit (P52), each phase and item shows its own.
+ *   - while reviewed, Focus mode first (P57):  it opens the overlay
+ * - FOCUS MODE (epic `epic-engine` P57, `<epic-focus>`), while the page is reviewed:  a full-screen overlay walking
+ *   the open items one at a time, drawn here, opened from the gear or asked for by a block (`epic-focus-asked`:  the
+ *   Manual tests section's Start testing, decision Q65)
+ *   - the overlay sits in the browser's top layer, over this header:  so while it's open, Send rides in the overlay's
+ *     top bar instead (the same element, the same countdown), and comes back as it closes (`epic-focus-toggled`)
  * - The page-wide signals its blocks read (`signalsOf()`):
  *   - `layout`
  *   - `top`, where top-level titles stick:
@@ -707,7 +719,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           </h1>
           {/* the header's middle (Owen's comment C7):  Send, then what the session is doing, a bare spinner (T53) */}
           <span class={CENTRE} part={this.partForName("centre")}>
-            <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
+            {/* in Focus mode's bar while it's open:  one Send, one countdown */}
+            <Show when={this.isFocusOpen ? undefined : this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
             {this.isSaga ? undefined : <epic-agents draws="spinner" part={this.partForName("spinner")} />}
           </span>
           <span class={STATUS} part={this.partForName("status")}>
@@ -764,6 +777,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         <Show when={this.planning()}>{this.hungNotice()}</Show>
         <Show when={this.seeAlso.length}>{this.seeAlsoBox()}</Show>
         <slot />
+        <Show when={this.review.reviewing()}>{this.focusMode()}</Show>
       </div>
     )
   }
@@ -1202,6 +1216,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         >
           <div class="gear-panel">
             <div class={GEAR_ROWS} role="menu" aria-label={this.translationForKey("gearTip")} onKeyDown={this.onRowKey}>
+              <Show when={this.review.reviewing()}>
+                <button
+                  type="button"
+                  class={[GEAR_ROW, "focus-row"]}
+                  part={this.partForName("gear-row")}
+                  role="menuitem"
+                  value={FOCUS_ROW}
+                  title={this.translationForKey("focusModeTip")}
+                  tabindex="-1"
+                  onClick={() => this.openFocus()}
+                >
+                  <ui-icon name="bullseye" class="lead" aria-hidden="true" padding="none" />
+                  <span class="name">{this.translationForKey("focusMode")}</span>
+                </button>
+              </Show>
               {this.gearRow("autoSend", this.translationForKey("autoSend"), this.autoSendWords(this.autoSend))}
               {this.gearRow("theme", this.translationForKey("theme"), this.themeTitle)}
             </div>
@@ -1326,6 +1355,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /** The gear's menu:  on opening, every sub-menu closed and the first row focused;  on closing, the sub-menus too. */
   private wireGear(popup: HTMLElement) {
+    this.gearMenu = popup
     popup.addEventListener("toggle", (event) => {
       this.subMenu = undefined
       if ((event as ToggleEvent).newState === "open") this.rows(popup)[0]?.focus()
@@ -1369,7 +1399,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (event.defaultPrevented) return
     const row = (event.target as Element).closest?.(`.${GEAR_ROW}`) as HTMLButtonElement | null
     if (!row) return
-    if (event.key === "ArrowRight") {
+    // Focus mode's row opens no sub-menu:  Enter and Space click it
+    if (event.key === "ArrowRight" && row.value !== FOCUS_ROW) {
       event.preventDefault()
       return this.openSub(row.value as GearSub)
     }
@@ -1391,6 +1422,67 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const box = event.currentTarget as HTMLElement
     if (!box.classList.contains("auto-send")) return
     if (moveFocus(event, [...box.querySelectorAll<HTMLButtonElement>("button")])) event.preventDefault()
+  }
+
+  ////////////////
+  // ## Focus mode (epic `epic-engine` P57)
+  ////////////////
+
+  /** The gear's menu, as drawn:  Focus mode's row closes it. */
+  private gearMenu: (HTMLElement & { visible?: boolean }) | undefined
+
+  /** Focus mode's DOM element, as drawn (only while the page is reviewed). */
+  private focusElement: (HTMLElement & { show?(ask?: FocusAsk): void; ready?: Promise<void> }) | undefined
+
+  /** Focus mode is open:  Send rides in its bar, not the header. */
+  @E.state accessor isFocusOpen = false
+
+  /**
+   * Focus mode (`<epic-focus>`):  the overlay, and, while it's open, the page's Send in its top bar (`slot="send"`),
+   * so Send and its countdown stay in reach over the page (the overlay covers this header).
+   */
+  private focusMode(): JSX.Element {
+    return (
+      <epic-focus ref={(element: HTMLElement) => (this.focusElement = element)} part={this.partForName("focus")}>
+        <Show when={this.isFocusOpen ? this.marks() : undefined}>
+          {(marks) => <span slot="send">{this.sendButtons(marks)}</span>}
+        </Show>
+      </epic-focus>
+    )
+  }
+
+  /** The gear's Focus mode:  its menu closes, the overlay opens where it was left. */
+  @E.untracked
+  private openFocus() {
+    if (this.gearMenu) this.gearMenu.visible = false
+    this.askFocus()
+  }
+
+  /**
+   * Open Focus mode on `ask` (a tab, an item), once its element has drawn and its family loaded.
+   * - NEVER throws:  a page not reviewed (no overlay drawn) does nothing
+   */
+  @E.untracked
+  askFocus(ask?: FocusAsk) {
+    E.afterSolidUpdate(() => {
+      void E.DOMElement.whenAttached("epic-focus")
+        .then(() => this.focusElement?.ready)
+        .then(() => this.focusElement?.show?.(ask))
+        .catch((failure: unknown) => console.error("EpicPage:  Focus mode didn't open", failure))
+    })
+  }
+
+  /** A block asked for Focus mode (the Manual tests section's Start testing, Q65):  it opens on its tab. */
+  @E.on(FOCUS_ASKED)
+  protected onFocusAsked(event: CustomEvent<FocusAsk>) {
+    event.stopPropagation()
+    this.askFocus(event.detail)
+  }
+
+  /** Focus mode opened or closed:  Send follows. */
+  @E.on(FOCUS_TOGGLED, { target: "renderRoot" })
+  protected onFocusToggled(event: CustomEvent<FocusToggledDetail>) {
+    this.isFocusOpen = event.detail.open
   }
 
   /** A doc still planning:  the folded `Plan hung?` aside -- how to restart the session, and the prompt to copy. */
@@ -1622,6 +1714,9 @@ type ThemeMenuElement = HTMLElement & {
 
 /** The gear button's id:  its menu's `for`. */
 const GEAR_ID = "gear"
+
+/** Focus mode's row in the gear's menu, its `value`:  an action, no sub-menu. */
+const FOCUS_ROW = "focus"
 
 /** Each Auto Send choice's text key. */
 const AUTO_SEND_TEXTS = {
