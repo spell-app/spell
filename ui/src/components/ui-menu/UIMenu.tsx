@@ -20,7 +20,8 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
     a.current === b.current &&
     a.shrinkable === b.shrinkable &&
     a.iconsOnly === b.iconsOnly &&
-    a.pressed === b.pressed
+    a.pressed === b.pressed &&
+    a.ticks === b.ticks
   )
 }
 
@@ -171,11 +172,12 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     const isTabs = this.isTabs
     return {
       domElementRole: isInteractive || isTabs ? "none" : undefined,
-      role: isTabs ? "tab" : isInteractive ? "menuitem" : undefined,
+      role: isTabs ? "tab" : isInteractive ? (this.ticks ? "menuitemcheckbox" : "menuitem") : undefined,
       // a form's segmented control (`name`) chooses with a click, as a toggle row does
       interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination || this.choosesMany || this.isAFormValue,
       current: "page",
-      pressed: this.choosesMany && !isInteractive,
+      pressed: (this.choosesMany || this.ticks) && !isInteractive,
+      ticks: this.ticks,
       shrinkable: this.isShrinking,
       iconsOnly: this.isIconsOnly
     }

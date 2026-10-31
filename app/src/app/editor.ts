@@ -427,6 +427,7 @@ export class EditorStore extends Observable {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(lang)
     }
+    const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
     const error = await runtime.runApp(compiled, {
       appRoot,
       coreUrl: runtimeUrl(),
@@ -435,7 +436,8 @@ export class EditorStore extends Observable {
       loadImport: fetchCompiled,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
-      sourceMap: project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
+      sourceMap,
+      placesFrom: sourceMap
     })
     output.groupEnd()
     if (error) output.error(appTexts.text("consoleFailed", words), error)

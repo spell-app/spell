@@ -202,13 +202,13 @@ ui-item.ThemeMenu ui-theme-menu {
 }
 ui-menu.AppMenu,
 ui-menu.PanelMenu,
-.AppPaneHeader {
+.NotebookHeader {
   --spell-bar-group-gap: 60px;
   --spell-bar-icon-gap: 12px;
   --spell-bar-icon-color: var(--ui-text-muted);
 }
 /* every bar's icons:  the top bar's, a pane header's, a pane toolbar's (the code pane's:  upload, reload, new file, "...") */
-:is(ui-menu.AppMenu, ui-menu.PanelMenu, .AppPaneHeader) ui-icon.IconAction {
+:is(ui-menu.AppMenu, ui-menu.PanelMenu, .NotebookHeader) ui-icon.IconAction {
   --ui-icon-width: auto;
   --ui-icon-distance: 0;
   --ui-icon-link-opacity: 1;
@@ -246,7 +246,8 @@ ui-menu.AppMenu ui-item.ModeButtons::part(item) {
 /* ... a header's tabs:  the bar's rule takes every item's block padding, a nested menu's too:  the tabs' own back */
 ui-menu.ModeTabs ui-item::part(item) {
   gap: 0.4em;
-  padding-block: 0.42em;
+  padding-block: var(--ui-menu-segmented-header-bar-item-padding-block, 0.5em);
+  padding-inline: var(--ui-menu-segmented-header-bar-item-padding-inline, 0.9em);
 }
 
 /*

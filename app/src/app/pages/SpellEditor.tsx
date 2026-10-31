@@ -36,6 +36,7 @@ import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
+import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
 import { NotebookMenu } from "spell/app/app/solid/notebook/NotebookCellTools"
@@ -102,7 +103,7 @@ export function SpellEditor(props: { mode: Mode }) {
  * - A NOTEBOOK's project (a `.spellml` file holding a `<spell-notebook>`, epic `elemental-spell` P16) shows its page
  *   instead, editable in place (`<NotebookPage>`):  the program still runs in its mount point, out of sight, its
  *   classes and its notebook what the page's cells draw with.
- *   - It keeps a header of its own:  its title, a menu of the project's notebooks, the lock after it, and what
+ *   - It keeps a header of its own, a pane's one bar:  its title, a menu of the project's notebooks, the lock after it, and what
  *     happened to the last edit (`<NotebookHeader>`);  at the header's right end, its ⋯ menu (`<NotebookMenu>`).
  ****************/
 export function AppPane() {
@@ -114,11 +115,10 @@ export function AppPane() {
     <div class="AppPane">
       <Show when={notebookPage()} keyed>
         {(page) => (
-          <header class="AppPaneHeader">
-            <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />
+          <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()}>
             {/* the notebook's ⋯, last:  Add below, Move, Delete, on the cell last clicked */}
             <NotebookMenu controller={page} />
-          </header>
+          </NotebookHeader>
         )}
       </Show>
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
@@ -298,18 +298,24 @@ export function EditorToolbar(props: { mode: Mode }) {
   const [piece, setPiece] = createSignal<LayoutPiece>()
   const [isBroken, setBroken] = createSignal(false)
   let isGone = false
-  onCleanup(() => (isGone = true))
-  void loadLayoutPiece(editorBarSpell).then(
-    (loaded) => {
-      if (isGone) return
-      Object.assign(loaded.exports.editorBar, parts)
-      setPiece(() => loaded)
-    },
-    (problem: unknown) => {
-      console.error("<EditorToolbar>:  can't load its Spell", problem)
-      setBroken(true)
-    }
-  )
+  const release = PageLoading.hold()
+  onCleanup(() => {
+    isGone = true
+    release()
+  })
+  void loadLayoutPiece(editorBarSpell)
+    .then(
+      (loaded) => {
+        if (isGone) return
+        Object.assign(loaded.exports.editorBar, parts)
+        setPiece(() => loaded)
+      },
+      (problem: unknown) => {
+        console.error("<EditorToolbar>:  can't load its Spell", problem)
+        setBroken(true)
+      }
+    )
+    .finally(release)
   return (
     <div class="EditorBarPlace">
       {piece()?.draw(piece()!.exports.editorBar) as JSX.Element}

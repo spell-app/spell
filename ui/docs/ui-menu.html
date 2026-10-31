@@ -197,6 +197,20 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-types-ticks" label="Ticks" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A menu of things that are on or off:  `ticks` keeps a gutter before every row's words, with a tick there while `selected`, in plain text.  The row under the pointer or keyboard takes the fill."
+                >
+                  <ui-menu direction="vertical" ticks aria-label="View" style="max-width: 240px">
+                    <ui-action>Run</ui-action>
+                    <ui-action selected>Edit</ui-action>
+                    <ui-action kind="divider"></ui-action>
+                    <ui-action selected>Inspector</ui-action>
+                    <ui-action>Line Numbers</ui-action>
+                  </ui-menu>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined."

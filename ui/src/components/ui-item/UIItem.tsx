@@ -141,6 +141,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   /** `aria-current` while selected:  the owner's value on a link (`page`), else `true`. */
   private get ariaCurrent(): UIT.ItemContext["current"] | undefined {
     if (!this.isSelected || this.kind !== UIT.ITEM || this.isAToggle || this.isATab) return undefined
+    if (this.itemContext?.role === "menuitemcheckbox") return undefined
     return this.rootTag === "a" ? (this.itemContext?.current ?? "page") : "true"
   }
 
@@ -152,6 +153,12 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   /** A toggle in its owner (`ItemContext.pressed`):  a button box, pressed while selected. */
   private get isAToggle(): boolean {
     return !!this.itemContext?.pressed && this.kind === UIT.ITEM && this.rootTag === "button"
+  }
+
+  /** A row of a menu of things on or off (`<ui-menu ticks>`):  a gutter, with a tick while selected. */
+  @E.cssState("in-ticks")
+  get isInTicks(): boolean {
+    return !!this.itemContext?.ticks && this.kind === UIT.ITEM
   }
 
   ////////////////
@@ -373,6 +380,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         aria-current={this.ariaCurrent}
         aria-selected={this.isATab ? (this.isSelected ? "true" : "false") : undefined}
         aria-pressed={this.isAToggle ? (this.isSelected ? "true" : "false") : undefined}
+        aria-checked={this.itemContext?.role === "menuitemcheckbox" ? (this.isSelected ? "true" : "false") : undefined}
         aria-label={this.boxLabel}
         title={this.boxTooltip}
         aria-expanded={
@@ -382,6 +390,13 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         }
         data-value={this.value}
       >
+        <Show when={this.isInTicks}>
+          <span class={TICK} part={this.partForName(TICK)} aria-hidden="true">
+            <svg viewBox="0 0 16 16">
+              <path d="M3 8.5 6.5 12 13 4.5" />
+            </svg>
+          </span>
+        </Show>
         <Show when={this.imageUrl}>
           <img
             class={this.itemContext?.imageClass ?? IMAGE_CLASS}
@@ -446,6 +461,8 @@ type RootTag = "a" | "button" | "div"
 /** The `divider` type, and the class of its root. */
 const DIVIDER = "divider"
 
+/** Class word and part of a row's tick (`<ui-menu ticks>`). */
+const TICK = "tick"
 /** The `appearance` word for an interactive item with the link hover. */
 const LINK_LOOK = "link"
 

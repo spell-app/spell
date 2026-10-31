@@ -3943,6 +3943,20 @@
       }
     },
     {
+      "name": "--ui-item-tick-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `1em`"
+      }
+    },
+    {
+      "name": "--ui-item-tick-distance",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `0.5em`"
+      }
+    },
+    {
       "name": "--ui-items-margin",
       "description": {
         "kind": "markdown",
@@ -11348,6 +11362,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-slider>`:  A thumb (`role=slider`)."
+      }
+    },
+    {
+      "name": "::part(tick)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-action>`:  A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`.\n- `<ui-item>`:  A `<ui-menu ticks>`'s item:  the gutter before its words, with a tick while `selected`."
       }
     },
     {

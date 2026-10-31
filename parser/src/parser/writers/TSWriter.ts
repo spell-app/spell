@@ -1166,8 +1166,8 @@ export class TSWriter extends JSWriter {
   }
 
   /** A new list says what it holds too:  `a new list of piles` => `new List<Pile>({ instanceType: "Pile" })`. */
-  ASTNewInstanceExpression(node: P.ASTNewInstanceExpression): string {
-    const text = super.ASTNewInstanceExpression(node)
+  protected override newInstance(node: P.ASTNewInstanceExpression): string {
+    const text = super.newInstance(node)
     const itemType = this.newListItemType(node)
     return itemType ? text.replace(/^new List/, `new List<${itemType}>`) : text
   }

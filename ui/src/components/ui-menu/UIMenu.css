@@ -89,7 +89,7 @@
  * | `--ui-menu-arrow-color`             | arrow fill                            | inverted, coloured                   |
  * | `--ui-menu-header-*`                | header item colour / size / case / margin | text, secondary pointing, inverted |
  * | `--ui-menu-header-padding` / `-font-family` / `-weight` / `-letter-spacing` | header item box and type (the item's padding, inherited family, bold) | -- |
- * | `--ui-menu-active-fill` / `-fill-color` | a plain menu's active item as a solid fill, and its text | a theme;  never text, tabular, secondary, segmented, inverted or coloured
+ * | `--ui-menu-active-fill` / `-fill-color` | a plain menu's active item as a solid fill, and its text;  in a `ticks` menu, the row under the pointer instead | a theme;  never text, tabular, secondary, segmented, inverted or coloured
  * | `--ui-menu-capsule-*`                | `appearance="capsule"`:  its `-background`, `-height`, `-padding`    | themes
  * | `--ui-menu-header-bar-*`            | `appearance="header"`:  the bar's `-height`, `-font-size`, `-background`, `-filter`, `-border` | -- |
  * | `--ui-menu-disabled-color`          | disabled item text                    | inverted                             |
@@ -1527,6 +1527,20 @@
       var(--_ui-menu-active-accent, var(--ui-color-text, var(--_ui-menu-active-hover-color)))
     );
     background: var(--_ui-menu-active-fill, var(--_ui-menu-active-hover-background));
+  }
+  /*
+   * A menu of things on or off (`ticks`):  what's on is its tick, in plain text.
+   * - The row under the pointer or keyboard takes the fill, as a Mac's menus do:  the theme's solid active fill, else its hover.
+   */
+  :host(:state(in-ticks)) > .active.item {
+    color: var(--_ui-menu-item-color, inherit);
+    font-weight: inherit;
+    background: none;
+    box-shadow: none;
+  }
+  :host(:state(in-ticks)) > .item:is(:hover, :focus-visible) {
+    color: var(--_ui-menu-active-fill-color, var(--_ui-menu-hover-color));
+    background: var(--_ui-menu-active-fill, var(--_ui-menu-hover-background));
   }
   .ui.tabular.menu .active.item:hover,
   :host(:state(in-menu)) > .active.item:is(.header):hover {

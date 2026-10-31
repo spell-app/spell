@@ -145,6 +145,8 @@ export const APP_TEXTS = {
   consoleCompiledTo: "Compiled to javascript:",
   consoleExecuting: "Executing {type}",
   consoleFailed: "{Type} failed with error:",
+  inspectorWrittenAt: "Written in {file}, line {line}",
+  inspectorWrittenAtShared: "Written in {file}, line {line}:  {count} of these come from this one place",
   consoleExecuted: "{Type} executed without errors.",
   testResults: "Tests:  {passed} passed, {failed} failed",
   noTests: "No tests -- write one as `to test <something>:`",

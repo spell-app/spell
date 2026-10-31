@@ -79,7 +79,9 @@ export function compiledSpellProject(
 ) {
   const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const sourceMarks = options.sourceMap ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf) : undefined
+  const sourceMarks = options.sourceMap
+    ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
+    : undefined
   const combine = () => SP.SpellProject.combineCompiled(parts)
   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
   const languages = [...new Set(languagesOf(files).map((language) => language.lang))]

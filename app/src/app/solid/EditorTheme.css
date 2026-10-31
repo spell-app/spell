@@ -7,6 +7,7 @@
  * - Its colours, corners, shadows and blur are the THEME's own bar and panel tokens (epic `debut` P17, J89),
  *   the ones the epic pages' bars and Spell UI's panels read:
  *   - a panel:  `--ui-panel-radius`, `--ui-panel-shadow`;  else the theme's large radius and raised shadow
+ *   - float or attach (epic `editor` J11):  `--ui-panel-pane-window-room` and `-window-radius`, the sides on the window's edges
  *   - its glass (Glass's and Fruity's, epic `editor` P5):  `--ui-panel-pane-background`, `-filter`, `-header-background`
  *   - a theme with none of them still dresses the chrome, from its plain tokens
  * - What's the editor's alone is keyed on the theme's name, `<html data-spell-theme>`, which `EditorTheme` sets:
@@ -25,11 +26,17 @@
 *******************************/
 
 :root[data-spell-theme] {
-  /* room round the panels, under the bar, and between panels */
-  --spell-page-padding: 8px;
+  /*
+   * room under the bar and between panels, and along the window's other edges:
+   * a theme attaches its panels to the window with `--ui-panel-pane-window-room: 0` and `-window-radius: 0`, or floats them
+   */
   --spell-gap: 8px;
+  --spell-window-room: var(--ui-panel-pane-window-room, 8px);
+  --spell-page-padding: var(--spell-gap) var(--spell-window-room) var(--spell-window-room);
   /* a panel, and its header (a panel's menu) */
   --spell-pane-radius: var(--ui-panel-radius, var(--ui-radius-l));
+  /* a panel's corners on a window edge:  the same, unless the theme attaches them */
+  --spell-window-radius: var(--ui-panel-pane-window-radius, var(--spell-pane-radius));
   --spell-pane-shadow: var(--ui-panel-shadow, var(--ui-shadow-raised));
   --spell-pane-background: var(--ui-panel-pane-background, var(--ui-surface));
   --spell-pane-border-color: var(--ui-panel-pane-border-color, var(--ui-border-color));
@@ -60,7 +67,7 @@
 }
 /* ... its title bar frosted, as every panel is:  the panel's glass, the header's wash over it (Owen:  "the titlebar should
    be frosted") */
-:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .AppPaneHeader {
+:root[data-spell-theme] .SplitPanel > .SplitPanelPane:has(> .AppPane) .NotebookHeader::part(title) {
   background:
     linear-gradient(var(--spell-header-background), var(--spell-header-background)), var(--spell-pane-background);
   border-start-start-radius: var(--spell-pane-radius);
@@ -147,6 +154,19 @@
     box-shadow: var(--spell-pane-shadow);
     /* its own layer, for its glass below (a z-index under 0 stays inside it) */
     isolation: isolate;
+  }
+  /* ... its corners on the window's edges:  the left and right columns' outer sides, every column's bottom */
+  & .SpellPage > .SplitPanel.spaced > .SplitPanel:first-child .SplitPanelPane {
+    border-start-start-radius: var(--spell-window-radius);
+    border-end-start-radius: var(--spell-window-radius);
+  }
+  & .SpellPage > .SplitPanel.spaced > .SplitPanel:last-child .SplitPanelPane {
+    border-start-end-radius: var(--spell-window-radius);
+    border-end-end-radius: var(--spell-window-radius);
+  }
+  & .SpellPage > .SplitPanel.spaced > .SplitPanel .SplitPanelPane:last-child {
+    border-end-start-radius: var(--spell-window-radius);
+    border-end-end-radius: var(--spell-window-radius);
   }
   /*
    * ... its glass (fill and blur) on a layer of its own, NEVER on the panel itself:  a blur on the panel would make it

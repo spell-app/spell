@@ -14,6 +14,9 @@
  * - `appearance="pane"` (`:state(pane)`):  a whole pane under one flat bar, no box.  `--ui-panel-pane-bar-height`
  *   (default:  the theme's control height and 6px round it, at least 40px),
  *   `--ui-panel-pane-bar-background`, `--ui-panel-pane-bar-padding`.
+ * - `--ui-panel-pane-window-room`, `-window-radius`:  how a window's panes meet its edges, for a theme:  the room left there and
+ *   the corners there, so `0` and `0` attach them;  read by the page that lays the panes out (the editor:  `EditorTheme.css`),
+ *   floating by default.
  * - `--ui-panel-pane-background`, `-border-color`, `-filter`, `-header-background`:  a theme's glass for a window's pane.
  *   An app's own panes read them, and so Glass and Fruity need nothing in the app (the editor's `EditorTheme.css`).
  * - Layers:  `ui.components.panel.*` are declared after the section's, so these rules win without

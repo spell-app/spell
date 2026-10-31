@@ -4,6 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
+import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
 
 import "./FileTabs.css"
@@ -42,6 +43,7 @@ export function FileTabs() {
         const file = known.get(each.path) ?? new File()
         file.path = each.path
         file.name = each.name
+        file.icon = fileIconFor(each.name)
         file.status = each.isDirty ? "changed" : "saved"
         file.place = each.path === path ? "chosen" : "other"
         file.show = () => editor.showEditor(file.path)
@@ -57,6 +59,7 @@ export function FileTabs() {
 type TabFile = {
   path: string
   name: string
+  icon: string
   status: "saved" | "changed"
   place: "chosen" | "other"
   /** Spell's `show it`, which the editor fills in. */

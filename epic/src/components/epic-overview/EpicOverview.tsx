@@ -112,7 +112,9 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
         <>
           {/* under the title row:  a marked note, then the note box once opened */}
           <Show when={this.reviewed}>
-            <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
+            <Show when={this.reviewState.noted() || this.reviewState.takenNote()}>
+              {this.reviewControl("said", "said")}
+            </Show>
             <Show when={this.reviewState.boxOpen()}>{this.reviewControl("note", "note-box")}</Show>
           </Show>
           <slot name={this.slotForName("summary")} />

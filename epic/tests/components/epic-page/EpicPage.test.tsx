@@ -485,6 +485,7 @@ class FakeRoutes {
     sent: null,
     now: [],
     working: {},
+    taken: {},
     listening: null,
     lastListener: null,
     unsentComments: [],

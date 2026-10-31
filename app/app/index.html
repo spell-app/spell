@@ -37,9 +37,52 @@
         background: transparent;
         color: inherit;
       }
+      /* The whole page, until it's ready to show at once (`PageLoading`):  nothing appears piecemeal.
+         Plain markup:  it shows before any script has run, so no `<ui-*>` could draw it yet. */
+      #PageLoading {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: light-dark(#f6f5fb, #16151d);
+        color-scheme: light dark;
+        transition: opacity 0.15s ease-out;
+      }
+      #PageLoading.done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #PageLoading img {
+        width: 56px;
+        height: 56px;
+      }
+      #PageLoading i {
+        width: 18px;
+        height: 18px;
+        border: 2px solid color-mix(in oklab, currentColor 25%, transparent);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        color: light-dark(#5b4bd6, #b9a7ff);
+        animation: PageLoadingTurn 0.7s linear infinite;
+      }
+      @keyframes PageLoadingTurn {
+        to {
+          rotate: 360deg;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #PageLoading i {
+          animation-duration: 2.8s;
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="PageLoading" role="status" aria-label="Spell"><img src="/static/favicon/favicon.svg" alt="" /><i></i></div>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
          Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.
          `semantic.min.css` above is for running PROGRAMS, which draw with Semantic UI's React kit. -->

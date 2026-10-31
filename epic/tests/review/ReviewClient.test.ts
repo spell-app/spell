@@ -698,3 +698,91 @@ describe("ReviewClient's pictures and testing", () => {
     expect(await client.openTests()).toEqual([])
   })
 })
+
+// epic `epic-engine` I190 (Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows in
+// the comment box")
+describe("ReviewClient:  a note Claude TOOK", () => {
+  /** `text` typed into j2's box and saved (Revisit on), then sent;  `now`:  Review Now. */
+  async function sentNote(text: string, { now = false } = {}) {
+    const { client, server } = await started()
+    client.openBox("j2")
+    client.type("j2", text)
+    expect(await client.saveTyped("j2", text)).toBe(true)
+    expect(await client.send({ now })).toBe(true)
+    return { client, server }
+  }
+
+  test("sent but not taken yet:  the box keeps the words, still his to change (as before)", async () => {
+    const { client } = await sentNote("float them")
+    expect([client.typedOf("j2"), client.isBoxOpen("j2"), client.isTaken("j2")]).toEqual(["float them", true, false])
+    expect(client.takenNoteOf("j2")).toBeUndefined()
+  })
+
+  test("taken (its agent at work):  the box empties and closes, the note shows as taken, the mark no longer his", async () => {
+    const { client, server } = await sentNote("float them")
+    server.inbox.setWorking("j2", "revisit")
+    await client.refresh()
+    expect([client.typedOf("j2"), client.isBoxOpen("j2"), client.isTaken("j2")]).toEqual(["", false, true])
+    expect(client.takenNoteOf("j2")?.note).toBe("float them")
+    expect(client.ownMarkOf("j2")).toBeUndefined()
+  })
+
+  test("a NEW note typed then is a new revisit for the next send;  the taken one still shows", async () => {
+    const { client, server } = await sentNote("float them", { now: true })
+    server.inbox.takeWork()
+    await client.refresh()
+    expect(client.typedOf("j2")).toBe("")
+    // a revisit asked now made a draft before:  taken, it's a mark that waits for Send
+    expect(client.typedMark("j2", "attached for some themes")).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "attached for some themes"
+    })
+    // a moment later, as a person types:  the inbox dates marks to the millisecond, and a fast run can share one
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    client.type("j2", "attached for some themes")
+    await client.saveTyped("j2", "attached for some themes")
+    expect(server.inbox.marks.j2).toMatchObject({ action: "revisit", when: "soon", note: "attached for some themes" })
+    expect(server.inbox.taken.j2?.note).toBe("float them")
+    expect([client.isTaken("j2"), client.takenNoteOf("j2")?.note, client.unsentMarkCount]).toEqual([
+      false,
+      "float them",
+      1
+    ])
+    expect(client.ownMarkOf("j2")?.note).toBe("attached for some themes")
+    // the words he typed since are his next note:  a later change of the inbox leaves them in the box
+    await client.refresh()
+    expect(client.typedOf("j2")).toBe("attached for some themes")
+  })
+
+  test("the taken words saved again (a box that had the focus):  nothing new;  an emptied box removes nothing", async () => {
+    const { client, server } = await sentNote("float them")
+    server.inbox.takeMark("j2")
+    await client.refresh()
+    const posts = server.posts.length
+    expect(await client.saveTyped("j2", "float them")).toBe(true)
+    expect(await client.saveTyped("j2", "")).toBe(true)
+    expect(server.posts.slice(posts).filter(([route]) => route === "mark")).toEqual([])
+    expect(server.inbox.marks.j2?.note).toBe("float them")
+  })
+
+  test("Revisit pressed on it opens the box for a new note, never taking the taken one back", async () => {
+    const { client, server } = await sentNote("float them")
+    server.inbox.takeMark("j2")
+    await client.refresh()
+    expect(client.press("j2", "revisit")).toBe("open-box")
+    expect(server.inbox.marks.j2?.note).toBe("float them")
+  })
+
+  test("a page server older than `taken`:  a sent mark Claude works on counts as taken", async () => {
+    const { client, server } = await sentNote("float them")
+    server.inbox.setWorking("j2", "revisit")
+    server.inbox.taken = {}
+    await client.refresh()
+    expect([client.isTaken("j2"), client.typedOf("j2"), client.takenNoteOf("j2")?.note]).toEqual([
+      true,
+      "",
+      "float them"
+    ])
+  })
+})

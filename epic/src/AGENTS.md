@@ -1807,7 +1807,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
     ```text
     setMark()  requestNow()  cancelNow()  markSent()  unsentMarks  sentMarks  takeNow()  takeWork()
-    setWorking()  setListening()  touchListening()  liveListener()  clearMarks()  finishMarks()
+    setWorking()  takeMark()  setListening()  touchListening()  liveListener()  clearMarks()  finishMarks()
     clearApplied()  setDraft()  reviewNow()  unsentComments  sentComments  hasUnsent  claimWake()  recordWake()
     ```
 
@@ -1815,6 +1815,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
     under the file's lock (`SRV.FileLock`), atomic (`updateAsync()` through `SRV.FileOperations.writeAtomic()`).
   - `drafts`:  a note box's text as Owen types it, kept until the mark that uses it.
     - Never sent, counted, or work for a waiting session.
+  - `taken`:  the mark Claude TOOK on an item, whole (`takeMark()`, epic `epic-engine` I190):  its agent started, or a
+    status card was written.
+    - The page shows its note read-only above the status card, and empties the note box:  what Owen types there next
+      is a NEW mark, for the next send;  `inbox done` keeps both notes in the doc.
   - `canceled`:  requests Owen called off ("nevermind", `cancelNow()`).
     - `wait` hands them over once:  stop that item's agent.
     - `epic details` refuses a write for one.
