@@ -41,7 +41,11 @@ export const words = {
     "write-retry": "Reintentar",
     "write-show-me": "Muéstrame",
     "write-merged": "{field} de {thing} también cambió en otro sitio.  Se conservó lo tuyo;  lo otro era:  {theirs}",
-    "write-use-theirs": "Usar lo otro"
+    "write-use-theirs": "Usar lo otro",
+    "write-lost": "Otra persona cambió {field} de {thing} a la vez, y queda lo suyo.  Lo tuyo era:  {mine}",
+    "write-deleted": "Otra persona borró {thing} mientras lo cambiabas.",
+    "write-use-mine": "Usar lo mío",
+    "write-restore": "Restaurar"
   },
   groups: {
     Tarea: [
