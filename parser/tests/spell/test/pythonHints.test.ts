@@ -58,12 +58,12 @@ describe("one type per event name (epic `rust` P2)", () => {
 
   test("what the table of events says:  `key down` holds `key`, a click only what every event does", () => {
     expect(typescript(CARD)).toContain("export type KeyDownEvent = SentEvent & { key: string }")
-    expect(python(CARD)).toMatch(/class KeyDownEvent\(SpellEvent\):\n {4}key: str/)
+    expect(python(CARD)).toMatch(/class KeyDownEvent\(SentEvent\):\n {4}key: str/)
   })
 
   test("what a template declares:  `flipped` holds `side`", () => {
     expect(typescript(CARD)).toContain("export type FlippedEvent = SentEvent & { side: Direction }")
-    expect(python(CARD)).toMatch(/class FlippedEvent\(SpellEvent\):\n {4}side: Direction/)
+    expect(python(CARD)).toMatch(/class FlippedEvent\(SentEvent\):\n {4}side: Direction/)
   })
 
   test("an event nothing says the shape of stays unknown, said out loud", () => {

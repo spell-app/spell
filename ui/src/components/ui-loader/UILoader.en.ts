@@ -22,6 +22,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const loaderVocabulary = {
   tag: "ui-loader",
+  icon: "spinner",
   topics: ["loading", "feedback", "progress", "elements"],
   aka: ["spinner", "loading indicator", "busy", "throbber", "activity indicator"],
   noun: "loader",

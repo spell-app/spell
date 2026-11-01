@@ -3,12 +3,8 @@
  */
 .ThingExplorer {
   /* "Top level" and each type:  just open / close, like a type's member groups. */
-  .ThingTreeGroup {
+  .ThingTreeGroup::part(label) {
     font-weight: bold;
-
-    .body:hover .label {
-      text-decoration: none;
-    }
   }
 
   .TypeChain {

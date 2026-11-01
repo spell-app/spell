@@ -477,6 +477,11 @@
       "types": "./ui/dist-types/src/components/ui-panel/index.d.ts",
       "default": "./ui/src/components/ui-panel/index.ts"
     },
+    "./ui/components/ui-tree": {
+      "spell-source": "./ui/src/components/ui-tree/index.ts",
+      "types": "./ui/dist-types/src/components/ui-tree/index.d.ts",
+      "default": "./ui/src/components/ui-tree/index.ts"
+    },
     "./ui/components/ui-split-panel": {
       "spell-source": "./ui/src/components/ui-split-panel/index.ts",
       "types": "./ui/dist-types/src/components/ui-split-panel/index.d.ts",
@@ -1224,6 +1229,7 @@
     "review": "node tools/repos.ts run review"
   },
   "dependencies": {
+    "@atproto/oauth-client-browser": "0.5.11",
     "@inkjs/ui": "^2",
     "@solidjs/h": "2.0.0-rc.17",
     "@solidjs/router": "2.0.0-next.41",
@@ -1322,7 +1328,8 @@
   "packageManager": "yarn@4.18.0",
   "pageServer": {
     "routes": [
-      "src/server/test/recipeServersRoutes.ts"
+      "src/server/test/recipeServersRoutes.ts",
+      "src/server/places/airtableRoutes.ts"
     ]
   },
   "spell": {

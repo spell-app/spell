@@ -231,19 +231,105 @@ describe("saying not to wait", () => {
     expect(js).toContain("this.score = 2")
   })
 
-  test("a toast waits only when it says how long, and never one that stays", () => {
-    const js = compiled(`to show it:
+  test("a toast carries on, unless it says `and wait`", () => {
+    const spell = `to show it:
 	notify "Aside"
 	notify "Stays" until clicked
 	notify "Stays" with "Got it"
 	notify "A while" for 1 second
-to carry on:
-	meanwhile notify "A while" for 1 second
-`)
+to wait for it:
+	notify "Bye" for 1 second and wait
+to wait its own time:
+	notify "Bye" and wait
+`
+    const js = compiled(spell)
     expect(js).toContain('core.notify("Aside")')
-    expect(js).toContain('await core.notify("A while"')
-    expect(js).toContain("export async function showIt()")
-    expect(js).toContain("export function carryOn()")
+    expect(js).toContain("export function showIt()")
+    expect(js).not.toContain('await core.notify("A while"')
+    expect(js).toContain("export async function waitForIt()")
+    expect(js).toMatch(/await core\.notify\("Bye", \{/)
+    expect(js).toContain('await core.notify("Bye")')
+    expect(compiled(spell, "ts/solid")).toMatch(/await core\.notify\("Bye"/)
+    expect(compiled(spell, "py")).toContain("async def wait_for_it(")
+    expect(compiled(spell, "py")).not.toContain("async def show_it(")
+  })
+
+  test.each([
+    ['notify "Stays" until clicked and wait'],
+    ['notify "Stays" with "Got it" and wait'],
+    ['notify "Stays" for 0 seconds and wait']
+  ])("a toast that stays can't be waited for:  %s", (line) => {
+    const { files } = parseSpellProject([{ path: "/Test.spell", contents: `to show it:\n\t${line}\n` }])
+    expect(files.flatMap((file) => file.errors).join()).toContain("A toast that stays can't be waited for")
+  })
+
+  test("`without waiting` is `meanwhile`, at the end of the line", () => {
+    const line = (body: string) => PROJECT(`	- to go it:\n		${body}\n		rest it`)
+    const noOffsets = (code: string) => code.replace(/\/Test\.spell:\d+-\d+/g, "").replace(/:\d+-\d+/g, "")
+    for (const target of ["js/solid", "ts/solid", "py"]) {
+      const off = compiled(line("bump it without waiting"), target)
+      expect(noOffsets(off)).toEqual(noOffsets(compiled(line("meanwhile bump it"), target)))
+    }
+    const js = compiled(line("bump it without waiting"))
+    expect(js).not.toContain("async go()")
+    expect(js).toContain("core.meanwhile(async () => await this.bump())")
+  })
+
+  test("`without waiting` on an action with no blanks", () => {
+    const js = compiled(
+      `to deal the cards:\n\tpause for 1 sec\nto start:\n\tdeal the cards without waiting\n\tprint 1\n`
+    )
+    expect(js).toContain("core.meanwhile(async () => await dealTheCards())")
+    expect(js).toContain("export function start()")
+  })
+
+  test("`without waiting`:  an `if`'s inline body goes off, the `if` doesn't", () => {
+    const js = compiled(PROJECT(`	- to go it:\n		if the score is 1 then bump it without waiting`))
+    expect(js).toMatch(/if \(this\.score === 1\) \{?\s*core\.meanwhile\(async \(\) => await this\.bump\(\)\)/)
+  })
+
+  test("`without waiting` leaves `without pausing`, and an action's own words, alone", () => {
+    expect(compiled(`to go:\n\tnotify "x" without pausing\n`)).toContain("pauseOnHover: false")
+    expect(compiled(`to go:\n\tnotify "x" without pausing without waiting\n`)).toContain(
+      'core.meanwhile(() => core.notify("x", {'
+    )
+    const own = compiled(PROJECT(`	- to deal without waiting:\n		print 1\n	- to go it:\n		deal without waiting`))
+    expect(own).toContain("this.dealWithoutWaiting()")
+    expect(own).not.toContain("core.meanwhile")
+  })
+
+  test.each([["set x to bump it without waiting"], ["the score is 1 without waiting"]])(
+    "`without waiting` is only for a call:  %s",
+    (line) => {
+      const { files } = parseSpellProject([{ path: "/Test.spell", contents: PROJECT(`	- to go it:\n		${line}`) }])
+      expect(files.flatMap((file) => file.errors).join()).toContain("Only a call can go without waiting")
+    }
+  )
+
+  test("`sin esperar`, `y esperar` in Spanish", () => {
+    const spell = `una carta es una cosa:
+	- para frenarla:
+		pausar 1 seg
+	- para irla:
+		frenar sin esperar
+	- para avisarla:
+		notificar "Adiós" durante 1 segundo y esperar
+	- para decirla:
+		notificar "Adiós" durante 1 segundo
+`
+    const { files } = parseSpellProject([{ path: "/Test.es.spell", contents: spell }])
+    expect(files.flatMap((file) => file.errors)).toEqual([])
+    const js = SP.SpellProject.combineCompiled(
+      files.map(({ match }) => match?.AST as P.ASTStatementGroup),
+      SP.TARGETS["js/solid"]!.writer
+    )
+    expect(js).toContain("core.meanwhile(async () =>")
+    expect(js).toMatch(/async avisar\w*\(\)/)
+    expect(js).not.toMatch(/async decir\w*\(\)/)
+    const { files: stays } = parseSpellProject([
+      { path: "/Test.es.spell", contents: `para decir:\n\tnotificar "Hola" hasta un clic y esperar\n` }
+    ])
+    expect(stays.flatMap((file) => file.errors).join()).toContain("No se puede esperar a un aviso que se queda")
   })
 })
 
@@ -267,7 +353,7 @@ ${lines}
   })
 
   test("what its where reads is followed too:  it runs after the wait, in a function of its own", () => {
-    const code = compiled(`family cookbook is this device
+    const code = compiled(`family cookbook is a database on this device
 
 a "recipe" is a view:
 	- it is saved in the family cookbook
@@ -426,8 +512,7 @@ describe("the old words for waiting, retired", () => {
     ["await slow it", "await", ""],
     ["start animation dealing", "animation", "process"],
     ["stop animation dealing", "animation", "process"],
-    ["if animation dealing is running then print 1", "animation", "process"],
-    ['notify "Bye" for 1 second and wait', "and wait", ""]
+    ["if animation dealing is running then print 1", "animation", "process"]
   ])("English:  %s", (line, words, replacement) => {
     const body = line.startsWith("-") ? [`\t${line}`, "\t\tpause for 1 sec"] : ["\t- to go it:", `\t\t${line}`]
     const { errors, messages } = parsed("/Test.spell", [
@@ -446,8 +531,7 @@ describe("the old words for waiting, retired", () => {
     ["esperar a: frenar", "esperar a", ""],
     ["esperar frenar", "esperar", ""],
     ["iniciar animación repartir", "animación", "proceso"],
-    ["detener animación repartir", "animación", "proceso"],
-    ['notificar "Adiós" durante 1 segundo y esperar', "y esperar", ""]
+    ["detener animación repartir", "animación", "proceso"]
   ])("Spanish:  %s", (line, words, replacement) => {
     const body = line.startsWith("-") ? [`\t${line}`, "\t\tpausar 1 segundo"] : ["\t- para ir:", `\t\t${line}`]
     const lines = ["una carta es una cosa donde:", "\t- para frenar:", "\t\tpausar 1 segundo", ...body]
@@ -456,9 +540,19 @@ describe("the old words for waiting, retired", () => {
     expect(messages[0]).toContain("spell lint --fix")
   })
 
-  test("what stays:  `start process`, `process x is running`", () => {
-    const { errors } = parsed("/Test.spell", ["start process dealing", "if process dealing is running then print 1"])
+  test("what stays:  `start process`, `process x is running`, a toast's `and wait`", () => {
+    const { errors } = parsed("/Test.spell", [
+      "start process dealing",
+      "if process dealing is running then print 1",
+      "to show it:",
+      '\tnotify "Bye" for 1 second and wait'
+    ])
     expect(errors).toEqual([])
+    const { errors: spanish } = parsed("/Prueba.es.spell", [
+      "para decir:",
+      '\tnotificar "Adiós" durante 1 segundo y esperar'
+    ])
+    expect(spanish).toEqual([])
   })
 
   test("a word in a comment or a text is left alone", () => {

@@ -175,11 +175,11 @@ describe("<ThingExplorer> (Solid, live)", () => {
     const host = await mount({}, onStateChange, onSelect)
     expect(host.querySelector(".ScopeDetails.empty")).not.toBeNull()
 
-    host.querySelector<HTMLElement>(".ThingTreeNode .body")!.click()
+    host.querySelector<HTMLElement>(".ThingTreeNode")!.click()
     flush()
     expect(onStateChange).toHaveBeenLastCalledWith({ selected: "#1", open: ["top", "all", "type:Card"] })
     expect(onSelect).toHaveBeenLastCalledWith(queen)
-    expect(host.querySelector(".ThingTreeNode.selected")).not.toBeNull()
+    expect(host.querySelector(".ThingTreeNode[selected]")).not.toBeNull()
     expect(valueOf(host, "rank")).toBe('"queen"')
   })
 
@@ -240,13 +240,13 @@ function valueOf(host: HTMLElement, name: string): string | undefined {
 
 /** Labels of the tree's thing rows. */
 function rowLabels(host: HTMLElement): string[] {
-  return [...host.querySelectorAll(".ThingTreeNode .label")].map((label) => label.textContent ?? "")
+  return [...host.querySelectorAll(".ThingTreeNode")].map((row) => row.getAttribute("label") ?? "")
 }
 
 /** Labels of the tree's group rows, with their counts. */
 function groupLabels(host: HTMLElement): string[] {
-  return [...host.querySelectorAll(".ThingTreeGroup .label")].map((label) =>
-    (label.textContent ?? "").replace(/\s/g, "")
+  return [...host.querySelectorAll(".ThingTreeGroup")].map((row) =>
+    `${row.getAttribute("label") ?? ""}${row.getAttribute("which") ?? ""}`.replace(/\s/g, "")
   )
 }
 

@@ -1,7 +1,7 @@
 import { Thing } from "./Thing"
 
 /**
- * Where a program's data lives, as a thing of the program:  `family cookbook is a web service at "..."` makes one
+ * Where a program's data lives, as a thing of the program:  `family cookbook is a web server at "..."` makes one
  * (epic `data` P11, Q2).
  * - What a kind IS, for a library:  `a supabase project is a place` is a class on this one,
  *   and its `makePlace()` says what's behind it.

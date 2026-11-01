@@ -20,6 +20,8 @@ import type { E } from "spell/ui/core"
  ****************/
 export const textVocabulary = {
   tag: "ui-text",
+  icon: "font",
+  snippet: "<ui-text>Some words</ui-text>",
   topics: ["text", "typography", "basic", "elements"],
   aka: [
     "span",

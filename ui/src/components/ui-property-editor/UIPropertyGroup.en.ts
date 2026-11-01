@@ -29,6 +29,7 @@ const SOURCE_ONLY = [
 export const propertyGroupVocabulary = {
   ...sectionVocabulary,
   tag: "ui-property-group",
+  icon: "layer group",
   topics: ["forms", "layout"],
   aka: ["property group", "fieldset", "settings group", "inspector section"],
   description:

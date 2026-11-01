@@ -529,6 +529,23 @@ What a component, or a page built on Spell UI, reaches for first.
   - Taking it since epic `coherence` P21:  the brand's `BrandColorSet` (Enter / Space stay its own).
   - Not swept yet:  the docs' search (`UIDocsSearch`).
 
+
+### Selecting by clicks in a list
+
+Plain, Command or Control, and Shift, one rule.
+- **It is:**  `ListSelection` (`src/util/ListSelection.ts`):
+  a plain class holding the anchor, handed the list and what's selected.
+- **Used by:**  a program's viewable lists (`SpellElement`), the Inspector's selection and its Views tree.
+- **Instead of:**  a click handler that works out a range itself.
+### A drag of what's on the page
+
+One press, past a few pixels, with Escape to cancel and the closed hand over the page.
+- **It is:**  `Dragging` (`src/util/Dragging.ts`):
+  plain DOM, carrying what its owner says, finding a list to drop on or leaving the place to its owner (`placing`).
+- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`).
+- **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
+- **Instead of:**  pointer listeners and a threshold of its own.
+
 ### The highlighted option of a list
 
 - **It is:**  `F.HighlightedOption` (`ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a
@@ -626,7 +643,7 @@ What a component, or a page built on Spell UI, reaches for first.
 
 - **It is:**  `RateQueue` (`spell/server/places`, `src/server/places/RateQueue.ts`, epic `data` P7):  one queue per NAMED
   limit, in order, spaced over a sliding window;  on a 429 everything waits as it says, and the request goes round again
-- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' now, Airtable's next.
+- **Use it when:**  a place or a tool reaches a service with a limit:  Sheets' and Airtable's.
 - **Flag:**  `status === 429`
 - **Copies:**  `--`
 - **Fine:**  `parser/src/cli/claudeRunners.ts`:  one caller at a time, retrying 429s and 529s, with no limit to space out to
@@ -637,6 +654,7 @@ What a component, or a page built on Spell UI, reaches for first.
   an older one;  no lodash.
 - **Use it when:**  Spell UI's `UI.api`, and any place that reaches a server (`WebPlace`, epic `data` P4).
 - **Copies:**  beside `$fetch()`, until that can sit on it.
+- **Fine:**  `AtProtoPlace`:  its writes go through the official library's own signed `fetch`, which `Api` has no way to take, and a host's no is in its body, not its status.
 
 ### Fetching in Spell UI
 
@@ -1031,6 +1049,13 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **Score:**  `0\.4122214708|0\.2126` · home `src/util/color.ts`
 
 ## Showing and hiding
+
+### A tree of rows
+
+- **It is:**  `<ui-tree>` and `<ui-tree-item>` (Spell UI, `ui/src/components/ui-tree/`;  epic `editor`):
+  rows nested in rows, opening on `Disclosure`, selecting by `ListSelection`, moving by `RovingTabindex`, with a `filter`.
+- **Copies:**  `--`:  the Inspector's Views card, Things and Templates are on it.
+  · home `ui/src/components/ui-tree/UITree.tsx`
 
 ### A disclosure:  open and closed
 

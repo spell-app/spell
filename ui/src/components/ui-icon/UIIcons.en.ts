@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const iconsVocabulary = {
   tag: "ui-icons",
+  icon: "icons",
   topics: ["icons", "elements"],
   aka: ["icon group", "stacked icons", "icon stack"],
   skeleton: "inline 1 x 1",

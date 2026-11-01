@@ -90,7 +90,7 @@ ui-panel.InspectorCard > .InspectorSection {
   min-height: 0;
 }
 .InspectorCard {
-  /* what's picked, as its title:  a blue pill (Owen) */
+  /* what's selected, as its title:  a blue pill (Owen) */
   & .InspectorPartTag {
     min-width: 0;
     overflow: hidden;
@@ -103,7 +103,7 @@ ui-panel.InspectorCard > .InspectorSection {
   }
 }
 
-/* the tip, while nothing's picked:  the Theme Creator's 14px tips */
+/* the tip, while nothing's selected:  the Theme Creator's 14px tips */
 .InspectorTip {
   margin: 0;
   padding: 0;
@@ -111,8 +111,8 @@ ui-panel.InspectorCard > .InspectorSection {
   line-height: 1.35;
   color: var(--ui-text-muted);
 
-  /* the pick button, before the words:  a pick starts here too (I92) */
-  & > .InspectorPick {
+  /* the inspect button, before the words:  a selection starts here too (I92) */
+  & > .InspectAppButton {
     float: left;
     margin: 1px 8px 0 0;
     color: var(--ui-text-color);
@@ -123,16 +123,19 @@ ui-panel.InspectorCard > .InspectorSection {
  * The RINGS (epic `debut` P32):  drawn by the part itself, its `::after`, 3px outside it, pinned to it by CSS anchor
  * positioning:  the browser keeps it there through scrolls and drags, and fixed, no parent that hides its overflow cuts
  * it;  no pointer events, so a click goes where it would
- * - the part under the pointer:  dashed, a little faint;  the part picked:  solid
- * - `Picker` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
+ * - the part under the pointer:  dashed, a little faint;  the part selected:  solid
+ * - `PartSelector` marks them;  a part that can't draw one gets a box over it instead (`.InspectorBox`, below)
  */
 [data-inspect-hover] {
   anchor-name: --inspect-hover;
+  anchor-scope: --inspect-hover;
 }
-[data-inspect-picked] {
-  anchor-name: --inspect-picked;
+/* scoped:  each part's ring finds its own part, however many are selected */
+[data-inspect-selected] {
+  anchor-name: --inspect-selected;
+  anchor-scope: --inspect-selected;
 }
-:is([data-inspect-hover], [data-inspect-picked])::after {
+:is([data-inspect-hover], [data-inspect-selected])::after {
   content: "";
   position: fixed;
   position-anchor: --inspect-hover;
@@ -148,19 +151,19 @@ ui-panel.InspectorCard > .InspectorSection {
   opacity: 0.8;
   pointer-events: none;
 }
-[data-inspect-picked]::after {
-  position-anchor: --inspect-picked;
+[data-inspect-selected]::after {
+  position-anchor: --inspect-selected;
   outline-style: solid;
   background: none;
   opacity: 1;
 }
 /* a part that is its ring's containing block (a transform:  a flipped card) can't anchor to itself:  3px outside
-   its own box (`Picker.ring()`) */
+   its own box (`PartSelector.ring()`) */
 [data-inspect-inset]::after {
   inset: -3px;
 }
 
-/* the boxes over the app, for a part that can't ring itself:  what a click would pick, and what's picked */
+/* the boxes over the app, for a part that can't ring itself:  what a click would select, and what's selected */
 .InspectorBox {
   position: fixed;
   z-index: 2147483000;
@@ -177,13 +180,23 @@ ui-panel.InspectorCard > .InspectorSection {
   outline-offset: 1px;
   background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
 }
-.InspectorPicked {
+.InspectorSelected {
   outline: 2px solid var(--ui-primary);
   outline-offset: 2px;
 }
+/* the rubber band, dragged across the app's background (`PartSelector.startBand()`) */
+.InspectorBand {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-radius: 2px;
+  outline: 1px solid var(--ui-primary);
+  background: color-mix(in oklab, var(--ui-primary) 14%, transparent);
+}
 
 /*
-  * The cards (`<ui-split-panel rows resizable>`):  what's picked, its events, the app's views.
+  * The cards (`<ui-split-panel rows resizable>`):  what's selected, its events, the app's views.
  * - Each a card as the editor's panes are (the look's);  each scrolls by itself, and the bars between them drag.
  * - Narrow seams, the page in them, so they read as a set (Owen:  "less space between these panels").
  * - No white edge, and no shadow under them (Owen:  "lose the white border around panels";
@@ -298,61 +311,16 @@ ui-panel.InspectorCard > .InspectorSection {
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon
    to label");  a part with parts inside, its caret first.
    Plain text in every theme (Owen:  "and inspector tree"):  each title the text's colour, which one it is
-   (`· discards`) and the icons muted, the picked row the theme's picked fill */
+   (`· discards`) and the icons muted, the selected row the theme's selected fill */
 .InspectorTree {
-  /* rows run the card's width:  its padding taken back, then given to each row */
+  /* rows run the card's width:  its padding taken back */
+  display: block;
   margin: -4px -14px 0;
-  padding: 0;
-  list-style: none;
-  color: var(--ui-text-color);
-
-  & li {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 22px;
-    padding-inline: calc(8px + var(--depth, 0) * 12px) 14px;
-    font-size: 13px;
-    white-space: nowrap;
-    cursor: var(--ui-control-cursor);
-
-    &:hover {
-      background: color-mix(in oklab, var(--ui-primary) 6%, transparent);
-    }
-    &.picked {
-      background: var(--ui-primary-background);
-      color: var(--ui-primary-text, var(--ui-text-color));
-    }
-    & > .InspectorTreeTitle {
-      flex: 0 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    /* which one it is:  shortened before the title is */
-    & > .InspectorTreeWhich {
-      flex: 0 10 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--ui-text-muted);
-    }
-    & > ui-icon {
-      margin: 0;
-      color: var(--ui-text-muted);
-      /* the glyph's own width, not the usual 1.18em box:  the label close by */
-      --ui-icon-width: 1em;
-      --ui-icon-distance: 0;
-    }
-    /* the caret, or the room for one */
-    & > .InspectorFold {
-      flex: 0 0 12px;
-      display: inline-flex;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--ui-text-muted);
-    }
-  }
+  font-size: 13px;
+}
+.InspectorFilter {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* the Inspector's button (`<InspectorToggle>`):  its icon, then its arrow, close by, the header's grey */
@@ -380,10 +348,10 @@ ui-dropdown.InspectorAddEvent > ui-icon[slot="trigger"] {
 }
 
 /*
- * Inspect app (`<InspectorPick>`), pressed while inspecting:  held down, in the theme's primary colour, a sunken dip
+ * Inspect app (`<InspectAppButton>`), pressed while inspecting:  held down, in the theme's primary colour, a sunken dip
  * behind the glyph, its size not counted
  */
-ui-icon.InspectorPick.picking {
+ui-icon.InspectAppButton.inspecting {
   border-radius: 6px;
   color: var(--ui-primary);
   background: color-mix(in oklab, var(--ui-primary) 22%, transparent);
@@ -429,7 +397,7 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* the picked part's let-go ✕, inside its pill (I92) */
+  /* the selected part's let-go ✕, inside its pill (I92) */
   & .InspectorLetGo {
     flex: none;
     margin-right: -4px;
@@ -488,7 +456,7 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
 
 /*
  * On a phone, the Inspector's pane (`<InspectorPane>`) is a sheet over the page's lower part, up while something's
- * just been picked (`.up`;  Owen's pick, epic `debut` P17, Q6)
+ * just been selected (`.up`;  Owen's pick, epic `debut` P17, Q6)
  * - the page's own ground behind its cards, as the column's seams show it, and the theme's room round them
  *   (`--spell-gap`:  none in Merlot, whose sheet runs edge to edge under a hairline)
  * - its top corners rounder than its cards' by that room
@@ -496,7 +464,7 @@ ui-popup.InspectHelp ui-icon.InspectHelpClose {
  * - as tall as it was dragged (`--InspectorPane-sheet-height`, `<InspectorPane>`), else a bit over half the screen
  * - it slides up as it comes, and down as it goes;  at once, for people who ask for less motion
  * - its bar (`<InspectorSheetBar>`):  a handle to drag, and Close;  shown only here
- * - the outlines over the app go under it:  the picked part, low on the screen, is outlined under the sheet, not on it
+ * - the outlines over the app go under it:  the selected part, low on the screen, is outlined under the sheet, not on it
  */
 .InspectorSheetBar {
   display: none;

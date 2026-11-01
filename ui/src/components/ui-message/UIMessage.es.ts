@@ -10,6 +10,7 @@ export const messageEs = {
   lang: "es",
   tag: "ui-message",
   name: "mensaje",
+  snippet: "<es-mensaje>Algo que decir</es-mensaje>",
   aka: ["mensaje", "alerta", "aviso", "nota destacada", "mensaje de error"],
   attributes: { dismissible: "descartable" },
   events: { "ui-closing": "cerrando" },

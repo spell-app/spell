@@ -1,0 +1,309 @@
+/**
+ * Types for `spell place ingest`:  looking at one data source for real, and writing what it found (epic `data` P18).
+ * - See `PlaceIngest`, which runs the steps.
+ * - No values but the error:  every step's other half is handed in, so the editor can run the same steps.
+ */
+import type { ClaudeRunner } from "spell/parser/spell/translate/translate.types"
+
+/** Thrown when it can't go on, and only a person can say what to do:  its message says what's wrong, and how to go on. */
+export class IngestStopped extends Error {}
+IngestStopped.prototype.name = "IngestStopped"
+
+////////////////
+// ## What's handed in
+////////////////
+
+/** What it needs to ask someone. */
+export type IngestQuestion = {
+  /** What it's asking for:  a kind of place, or a file to put the Spell in. */
+  asks: "kind" | "file"
+  /** The question, in words for people. */
+  text: string
+  /** The answers there are, if it's one of a few. */
+  choices?: readonly string[]
+}
+
+/**
+ * Ask someone:  the answer, or `undefined` when there's no one to ask, or they gave none.
+ * - The command asks at the terminal;  the editor will ask its own way.
+ */
+export type AskSomeone = (question: IngestQuestion) => Promise<string | undefined>
+
+/** Its files:  a command's disk, or whatever the editor keeps a project in. */
+export type IngestFiles = {
+  /** A file's text;  `undefined` when there's none. */
+  read(path: string): Promise<string | undefined>
+  /** Write a Spell file. */
+  write(path: string, text: string): Promise<void>
+  /** The description there;  `undefined` when there's none. */
+  readDescription(path: string): Promise<PlaceDescription | undefined>
+  /** Write a description, keeping any comments a person put in it. */
+  writeDescription(path: string, description: PlaceDescription): Promise<void>
+  /** Each description beside this Spell file, by its path. */
+  descriptionsBeside(path: string): Promise<string[]>
+  /** The text of every other Spell file beside this one:  what else may use what it declares. */
+  otherSpellBeside(path: string): Promise<string[]>
+}
+
+/** What a read through the Spell needs:  see `ReadThrough`. */
+export type ReadThroughAsk = {
+  /** The Spell:  a place and its types, with no key line. */
+  spell: string
+  /** The class each type compiles to, by its words. */
+  types: Readonly<Record<string, string>>
+  /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
+  fetch: typeof globalThis.fetch
+}
+
+/** What one type's read found. */
+export type ReadOfType = {
+  /** How many rows came back. */
+  rows: number
+  /** Why it couldn't be read. */
+  problem?: string
+}
+
+/**
+ * Compile `spell` and really read each type through it:  what each type found, and whatever the program complained of.
+ * - Handed in because it runs `core`, which only a runner may load.
+ * - NEVER throws for a read that fails:  it says so in that type's `problem`.
+ */
+export type ReadThrough = (
+  ask: ReadThroughAsk
+) => Promise<{ byType: Record<string, ReadOfType>; complaints: readonly string[] }>
+
+/** Everything it's handed. */
+export type IngestSettings = {
+  /** Reaches the source.  A command's also reads a local file, by its `file:` address. */
+  fetch: typeof globalThis.fetch
+  /** Asks someone.  See `AskSomeone`. */
+  ask: AskSomeone
+  /** Its files. */
+  files: IngestFiles
+  /** Reads through the Spell. */
+  readThrough: ReadThrough
+  /** Asks the agent.  Left out:  only what can be worked out with no agent. */
+  claude?: ClaudeRunner
+  /** What the description says asked:  `Claude API`, `claude -p`. */
+  claudeVia?: string
+  /** A key's value by its name:  `undefined` when it isn't there.  Never written anywhere. */
+  keyNamed?: (name: string) => string | undefined
+  /** What time it is:  a test's clock. */
+  now?: () => Date
+  /** Waits:  a test's. */
+  sleep?: (msec: number) => Promise<void>
+  /** Says how it's going, a line at a time. */
+  say?: (line: string) => void
+}
+
+/** What `PlaceIngest.add()` is asked. */
+export type IngestAsk = {
+  /** The source's address. */
+  address: string
+  /** Its kind, in `core.place()`'s words:  left out, it's worked out from the address. */
+  kind?: string
+  /** The Spell file:  left out, it asks. */
+  into?: string
+  /** What the program calls the place:  left out, the agent's word, or the address's. */
+  name?: string
+  /** The NAME of the key it needs. */
+  keySecret?: string
+  /** An address to read its docs at, over those it finds by itself. */
+  docs?: string
+  /** Its collections' paths under the address, for a source that doesn't list them. */
+  collections?: readonly string[]
+}
+
+/** What one run did. */
+export type IngestResult = {
+  /** The Spell file. */
+  file: string
+  /** The description. */
+  descriptionPath: string
+  /** The description, as written. */
+  description: PlaceDescription
+  /** Did anything change:  `false` for a place the file already has. */
+  wrote: boolean
+  /** The Spell added or as it now stands. */
+  spell: string
+  /** What's different from the last look, in words for people. */
+  changes: string[]
+  /** What it couldn't change for them, in words for people:  a person has to. */
+  couldntChange: string[]
+  /** What compiling it said. */
+  warnings: string[]
+}
+
+////////////////
+// ## What it looked at
+////////////////
+
+/** How a source pages through a list, as far as it could see. */
+export type PagingSeen = "none" | "next field" | "link header"
+
+/** One collection, as it came back. */
+export type CollectionLook = {
+  /** Its name there:  the last part of its path, or a GraphQL field's. */
+  name: string
+  /** Its address under the place's, or a GraphQL field's name. */
+  at: string
+  /** Every row it read. */
+  rows: Array<Record<string, unknown>>
+  /** Where its rows are in an answer:  left out, the answer is the list. */
+  rowsAt?: string
+  /** Which field says where the next page is. */
+  nextAt?: string
+  /** How it pages. */
+  paging: PagingSeen
+  /** How many pages it read. */
+  pagesRead: number
+  /** How many rows it says it has in all. */
+  rowsItSays?: number
+  /** It has more than it read. */
+  hasMore: boolean
+}
+
+/** Everything a look at a place found. */
+export type PlaceLook = {
+  /** The place's address, which may be above what was asked for. */
+  address: string
+  /** Its collections. */
+  collections: CollectionLook[]
+  /** Interesting headers of its first answer:  limits, versions, who may read it.  Never a cookie. */
+  headers: Record<string, string>
+  /** Its docs, as text, cut short. */
+  docs?: string
+  /** Where they were. */
+  docsAt?: string
+  /** The version it says it is, and where it said so. */
+  version?: PlaceVersion
+  /** The writes it offers, by name, for a place that lists them:  never tried. */
+  writesOffered?: readonly string[]
+  /** What the look had to say. */
+  notes: string[]
+}
+
+/** A source's own word for its version, and where it said so. */
+export type PlaceVersion = {
+  /** Its version. */
+  says: string
+  /** Where it said so:  `its address`, `the api-version header`, `its docs`. */
+  where: string
+}
+
+////////////////
+// ## The description
+////////////////
+
+/** What a field holds, as far as the samples show. */
+export type FieldKind =
+  | "text"
+  | "number"
+  | "yes or no"
+  | "date"
+  | "link"
+  | "list of links"
+  | "list of text"
+  | "list of numbers"
+  | "inside"
+  | "nothing"
+
+/** One field of a collection. */
+export type FieldDescription = {
+  /** What Spell calls it. */
+  words: string
+  /** What it holds. */
+  type: FieldKind
+  /** A real value. */
+  example?: unknown
+  /** What it means, from the agent's reading. */
+  means?: string
+  /** It's a number, written as text:  `"172"`. */
+  writtenAsText?: boolean
+  /** What it writes for no number:  `"unknown"`. */
+  noNumberWords?: string[]
+  /** The collection it links to, by address. */
+  linksTo?: string
+  /** Why the Spell leaves it out. */
+  leftOut?: string
+  /** The line naming it needs its words in quotes:  they hold one the plain form stops at, like `in`. */
+  wordsInQuotes?: boolean
+}
+
+/** One collection of a place. */
+export type CollectionDescription = {
+  /** Its type's words:  `film`. */
+  type: string
+  /** Its address under the place's. */
+  at: string
+  /** What it holds, from the agent's reading. */
+  about?: string
+  /** How many rows were read, and whether there are more. */
+  rowsSeen: number
+  /** How many it says it has. */
+  rowsItSays?: number
+  /** Which field says which row is which.  Left out:  rows share no identity. */
+  idField?: string
+  /** The id is a whole address. */
+  idIsAnAddress?: boolean
+  /** How it pages. */
+  paging: PagingSeen
+  /** Where its rows are in an answer. */
+  rowsAt?: string
+  /** Which field says where the next page is. */
+  nextAt?: string
+  /** Why the Spell leaves it out. */
+  leftOut?: string
+  /** What a read through the Spell found. */
+  readThrough?: ReadOfType
+  /** Each field, by the source's name for it. */
+  fields: Record<string, FieldDescription>
+}
+
+/** A place's description:  `<File>.<place>.place.json5`, beside the Spell file. */
+export type PlaceDescription = {
+  /** What and where it is, and when it was looked at. */
+  about: {
+    /** What the program calls it. */
+    name: string
+    /** Its kind, in `core.place()`'s words. */
+    kind: string
+    /** Its address. */
+    address: string
+    /** When it was looked at, in ISO. */
+    lookedAt: string
+    /** A short hash of the collections, fields and their types it saw:  what says the shape changed. */
+    fingerprint: string
+    /** The source's own word for its version.  Many name none:  then only the date and the fingerprint say. */
+    version?: PlaceVersion
+    /** The NAME of the key it needs, never the key. */
+    keySecret?: string
+    /** Who read the samples:  `Claude API`, `claude -p`, or nobody. */
+    readBy: string
+    /** Where its docs were. */
+    docsAt?: string
+  }
+  /** What it can do, in plain words. */
+  canDo: {
+    /** Read:  always, as it's been read. */
+    read: string
+    /** Write:  what it seems to offer.  Never tried. */
+    write: string
+    /** Telling what changed. */
+    live: string
+    /** How it limits who asks. */
+    limits: string
+    /** Whether a page in a browser can reach it. */
+    browsers: string
+  }
+  /** Each collection, by what Spell calls it:  `films`. */
+  collections: Record<string, CollectionDescription>
+  /** What a person should know. */
+  notes: string[]
+  /** What Spell has no words for yet. */
+  spellCantSay: string[]
+  /** How often to ask it what changed, in seconds. */
+  checkEverySeconds?: number
+  /** The Spell, a line at a time, as it was last written:  a person's copy may differ. */
+  spell: string[]
+}

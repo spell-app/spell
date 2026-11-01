@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const spaceVocabulary = {
   tag: "ui-space",
+  icon: "arrows alternate vertical",
   topics: ["layout", "basic"],
   aka: ["spacer", "gap", "line break", "br", "spring", "filler", "strut"],
   noun: "space",

@@ -21,7 +21,7 @@ const GRAPH_PAGE_SIZE = 100
 
 /** What it can do, unless it's told otherwise:  it always asks for only the fields wanted. */
 const GRAPH_CAPABILITIES: PlaceCapabilities = {
-  kind: "graph service",
+  kind: "graphql server",
   idOf: "id",
   filter: "none",
   sort: "none",
@@ -48,7 +48,7 @@ const ALIAS = /^\s*(\w+)\s*:\s*(\w+)/
 
 /****************
  * ### `GraphPlace`
- * A GraphQL service as a place:  a plain `POST`, with no library, from a mapping (epic `data` P4).
+ * A GraphQL server as a place:  a plain `POST`, with no library, from a mapping (epic `data` P4).
  *
  * ```ts
  * new GraphPlace({

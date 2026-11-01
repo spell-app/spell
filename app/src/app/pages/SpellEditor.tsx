@@ -13,7 +13,11 @@ import {
   Inspector,
   InspectorPane,
   InspectHelp,
-  InspectorPick,
+  AddPartButton,
+  InspectAppButton,
+  Palette,
+  PalettePane,
+  PartMenu,
   InspectorToggle,
   ModeButtons,
   OutputEditor,
@@ -23,19 +27,22 @@ import {
   ProjectBarMenu,
   SpellPage,
   ThemeMenu,
+  ThingExplorer,
   TreeRoot,
+  TypeExplorer,
   on,
   tracked,
   trackProjectRoot,
   rememberedSizes,
   type Mode
 } from "spell/app/app/solid"
-import { editor } from "spell/app/app/editor"
+import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
 import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
@@ -63,6 +70,7 @@ import "./SpellEditor.css"
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
+ * - The palette, while it's kept open (`Palette.isPinned`), is a pane left of the Inspector.
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
@@ -75,7 +83,7 @@ export function SpellEditor(props: { mode: Mode }) {
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen))
+  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen, Palette.isPinned))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
@@ -106,6 +114,15 @@ export function SpellEditor(props: { mode: Mode }) {
         </div>
       )
     },
+    palette: {
+      draw: () => (
+        <Show when={!isRunning() && Palette.isPinned}>
+          <div class="SplitPane">
+            <PalettePane />
+          </div>
+        </Show>
+      )
+    },
     inspector: {
       draw: () => (
         <Show when={Inspector.isOpen}>
@@ -129,6 +146,7 @@ export function SpellEditor(props: { mode: Mode }) {
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
+      <PartMenu />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
@@ -139,6 +157,7 @@ export function SpellEditor(props: { mode: Mode }) {
               {parts.programPanel.draw()}
             </ui-split-panel>
             {parts.app.draw()}
+            {parts.palette.draw()}
             {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
@@ -235,11 +254,13 @@ export function AppPane() {
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
  * - At the right, whatever tab shows:  Clear Console, on Output only, and Close (`onClose`).
  * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`.
- * - Things and Types (Templates) are the Inspector's now, in its Views card (`<InspectorViews>`):
+ * - Things and Templates, for developers, are tabs here;  the Inspector's Views card is the one tree a person needs.
  *   a tab remembered from before shows Program Output.
  ****************/
 export function ProgramPanel(props: { onClose: () => void }) {
   const remembered = editorPrefs.get(TAB_PREF) as ProgramTabId
+  // the Things tab's state, kept here so it outlives switching tabs
+  let thingsState: ThingExplorerState = {}
   const [tab, setTab] = createSignal<ProgramTabId>(PROGRAM_TABS.includes(remembered) ? remembered : "output")
   // which form the file is in:  its other form is the `spell` tab's view
   const form = tracked(() => (editor.file instanceof SP.SpellFile ? editor.file.form : undefined))
@@ -289,6 +310,31 @@ export function ProgramPanel(props: { onClose: () => void }) {
         <Match when={tab() === "tree"}>
           <TreeRoot showToolbar={false} />
         </Match>
+        <Match when={tab() === "things"}>
+          <Show
+            when={runtimeCore()?.things}
+            keyed
+            fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}
+          >
+            {(things) => (
+              <ThingExplorer
+                things={things}
+                words={editor.programWords}
+                state={thingsState}
+                onStateChange={(changed) => (thingsState = changed)}
+                onSelect={(thing) => Inspector.inspectThing(thing)}
+              />
+            )}
+          </Show>
+        </Match>
+        <Match when={tab() === "templates"}>
+          <TypeExplorer
+            tree={editor.scopeTree}
+            onOpen={editor.openScopeLink}
+            loadDetails={editor.scopeDetails}
+            onRefresh={() => void editor.refreshScopes()}
+          />
+        </Match>
       </Switch>
     </RunnerPane>
   )
@@ -319,14 +365,16 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean): { id: string; sizes: string } {
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting) return { id, sizes: "" }
-  return { id, sizes: isRunning ? "*,380px" : "*,*,380px" }
+function columnsFor(isRunning: boolean, isInspecting: boolean, isPinned: boolean): { id: string; sizes: string } {
+  const hasPalette = isPinned && !isRunning
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${hasPalette ? "-palette" : ""}${isInspecting ? "-inspector" : ""}`
+  if (!isInspecting && !hasPalette) return { id, sizes: "" }
+  const panes = [...(isRunning ? [] : ["*"]), "*", ...(hasPalette ? ["240px"] : []), ...(isInspecting ? ["380px"] : [])]
+  return { id, sizes: panes.join(",") }
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
-const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree"] as const
+const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "things", "templates"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
 /** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key. */
@@ -336,7 +384,9 @@ const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   typescript: { icon: "code", text: "typescriptTab" },
   python: { icon: "python", text: "pythonTab" },
   spell: { icon: "file alternate outline", text: "codeSpellTab" },
-  tree: { icon: "tree", text: "treeTab" }
+  tree: { icon: "tree", text: "treeTab" },
+  things: { icon: "cubes", text: "thingsTab" },
+  templates: { icon: "sitemap", text: "typesTab" }
 }
 /** The preference that remembers which tab `<ProgramPanel>` shows. */
 const TAB_PREF = "programTab"
@@ -374,7 +424,8 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
-            <InspectorPick id={INSPECT_APP_ID} />
+            <AddPartButton />
+            <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
             <InspectorToggle />
             <span class="BarToolsLine" role="separator" />

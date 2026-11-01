@@ -1,9 +1,9 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { setDebugGlobal } from "spell/util"
+import { setDebugGlobal, upperFirst } from "spell/util"
 import { E } from "spell/element"
-import type { P } from "spell/parser/parser"
+import { P } from "spell/parser/parser"
 import { SourceMarks } from "spell/parser/parser/writers/SourceMarks"
 import { SP } from "spell/parser/spell"
 // By file:  the folder's barrel loads the language service
@@ -11,15 +11,19 @@ import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
+// By file:  a click's rule is all this needs
+import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
+import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
-import { InspectorWrites, type NotWritten } from "./InspectorWrites"
+import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
+import { PartEdits } from "./PartEdits"
 import { on } from "./on"
 import { rememberedSizes } from "./rememberedSizes"
 import { ThingMembers, type MemberBand, type ThingMember } from "./ThingMembers"
@@ -28,14 +32,16 @@ import "./Inspector.css"
 
 /****************
  * ### `Inspector`
- * Look inside the running app, and change it (epic `debut` P13):  a part picked in the app, its properties to edit.
+ * Look inside the running app, and change it (epic `debut` P13):  a part selected in the app, its properties to edit.
  * - Open or closed:  `<InspectorToggle>` in the top bar;  remembered in the browser (`OPEN_PREF`).
- * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click picks it:
- *   a drawn thing or a Spell UI control (an input, a button);  Alt-click picks any Spell UI element.
- *   - It starts as the Inspector opens, and stops once something's picked:  the app works as ever again.
+ * - PICKING:  while it's on, pointing at the app outlines the part under the pointer, and a click selects it:
+ *   a drawn thing or a Spell UI control (an input, a button);  Alt-click selects any Spell UI element.
+ *   - It starts as the Inspector opens, and stops once something's selected:  the app works as ever again.
  *   - Its crosshairs button starts it again;  Esc stops it.
- *   - The click goes to the Inspector, never to the app:  picking a button doesn't press it.
- * - What a part is (`Picked`):
+ *   - The click goes to the Inspector, never to the app:  selecting a button doesn't press it.
+ *   - Shift, Command or Control adds to what's selected, and keeps inspecting;  so does dragging across the app's
+ *     background, a rubber band (`PartSelector`).
+ * - What a part is (`SelectedPart`):
  *   - a drawn spell thing (a drawable type's element, `<solitaire-card>`):  its thing, with its class's properties
  *     (`ClassSchemas`)
  *   - a Spell UI element (`<ui-input>`):  the element, with its tag's attributes (its vocabulary)
@@ -43,7 +49,7 @@ import "./Inspector.css"
  *   (`InspectorWrites`;  epic `editor`);  what can't go there says so in the card (`<NotSavedNote>`).
  * - The column is `<InspectorColumn>`, in its pane (`<InspectorPane>`);
  *   the app's area it watches is handed over by `<AppPane>` (`watch()`).
- * - On a phone, the pane is a SHEET over the page's lower part, up while something's just been picked
+ * - On a phone, the pane is a SHEET over the page's lower part, up while something's just been selected
  *   (`isSheetUp`;  Owen's pick, epic `debut` P17, Q6).
  ****************/
 export class Inspector {
@@ -52,42 +58,47 @@ export class Inspector {
     return isOpen()
   }
 
-  /** Is a click in the app a pick (reactive)? */
-  static get isPicking(): boolean {
-    return isPicking()
+  /** Is a click in the app a selection (reactive)? */
+  static get isInspecting(): boolean {
+    return isInspecting()
   }
 
   /**
-   * Does Inspect app's help show (reactive):  while inspecting, until the first pick ever, or until it's closed
+   * Does Inspect app's help show (reactive):  while inspecting, until the first selection ever, or until it's closed
    * (`dismissHelp()`);  remembered in the browser (`inspector:helpSeen`).
    */
   static get isHelpShown(): boolean {
-    return isPicking() && !helpSeen()
+    return isInspecting() && !helpSeen()
   }
 
-  /** Never show Inspect app's help again:  closed, or a part picked. */
+  /** Never show Inspect app's help again:  closed, or a part selected. */
   static dismissHelp(): void {
     if (helpSeen()) return
     setHelpSeen(true)
     editorPrefs.set(HELP_SEEN_PREF, true)
   }
 
-  /** The part picked, if any (reactive). */
-  static get picked(): Picked | undefined {
-    return picked()
+  /** The part selected, if any, the last one clicked when there are several (reactive). */
+  static get selected(): SelectedPart | undefined {
+    return selectedParts().at(-1)
+  }
+
+  /** Every part selected, in the order they were (reactive). */
+  static get allSelected(): readonly SelectedPart[] {
+    return selectedParts()
   }
 
   /**
    * On a phone, is the Inspector up, a sheet over the page's lower part (reactive)?
-   * - A pick in the app puts it up;  its close, Esc, dragging it down, or picking again puts it away.
-   * - Put away, what's picked stays picked, and outlined.
+   * - A selection in the app puts it up;  its close, Esc, dragging it down, or inspecting again puts it away.
+   * - Put away, what's selected stays selected, and outlined.
    * - Read only by a phone's layout (`Inspector.css`):  wider, the Inspector is a column, whatever this says.
    */
   static get isSheetUp(): boolean {
     return isSheetUp()
   }
 
-  /** Put the phone's sheet away:  what's picked stays picked. */
+  /** Put the phone's sheet away:  what's selected stays selected. */
   static putSheetAway(): void {
     setSheetUp(false)
   }
@@ -104,7 +115,7 @@ export class Inspector {
   }
 
   /**
-   * Open the column if closed, else close it;  remember which.  Opening starts picking.
+   * Open the column if closed, else close it;  remember which.  Opening starts inspecting.
    * - It opens with the cards it last showed (`shownPanels`);  every card when none were.
    */
   static toggle(): void {
@@ -112,7 +123,17 @@ export class Inspector {
     if (!shownPanels().length) setPanels(INSPECTOR_PANELS)
     setOpen(true)
     editorPrefs.set(OPEN_PREF, true)
-    Inspector.startPicking()
+    Inspector.startInspecting()
+  }
+
+  /**
+   * Open the column, inspecting, with no help popup:  for a page that says what to do itself.
+   * - SIDE EFFECT:  the help counts as seen.
+   */
+  static openQuietly(): void {
+    Inspector.dismissHelp()
+    if (isOpen()) Inspector.startInspecting()
+    else Inspector.toggle()
   }
 
   /** Is card `panel` showing in the column (reactive)? */
@@ -156,65 +177,116 @@ export class Inspector {
     editorPrefs.set(FOLDED_PANELS_PREF, next)
   }
 
-  /** Close the column:  no picking, nothing picked. */
+  /** Close the column:  no inspecting, nothing selected. */
   static close(): void {
     setOpen(false)
     setSheetUp(false)
     editorPrefs.set(OPEN_PREF, false)
-    Inspector.stopPicking()
-    Inspector.pick(undefined)
+    Inspector.stopInspecting()
+    Inspector.select(undefined)
   }
 
   /**
-   * Start picking:  outline what's pointed at in the app, pick what's clicked.
-   * - On a phone the sheet goes down meanwhile, so the whole app can be picked from.
+   * Start inspecting:  outline what's pointed at in the app, select what's clicked.
+   * - On a phone the sheet goes down meanwhile, so the whole app can be selected from.
    */
-  static startPicking(): void {
-    setPicking(true)
+  static startInspecting(): void {
+    setInspecting(true)
     setSheetUp(false)
     const area = appArea
-    if (area) Picker.listen(area)
+    if (area) PartSelector.listen(area)
   }
 
-  /** Stop picking:  the app gets its clicks back. */
-  static stopPicking(): void {
-    setPicking(false)
-    Picker.stop()
+  /** Stop inspecting:  the app gets its clicks back. */
+  static stopInspecting(): void {
+    setInspecting(false)
+    PartSelector.stop()
   }
 
   /**
-   * Pick `element` (`undefined`:  nothing), outlined while it stays picked.
-   * - A new pick starts the trail afresh (`inspected`);  `trail`, picking it again after a redraw, follows that one.
-   * - NOTE:  the new pick and trail are passed along, never read back:  a signal reads its old value until the next
+   * Select `element` (`undefined`:  nothing), outlined while it stays selected.
+   * - A new selection starts the trail afresh (`inspected`);  `trail`, inspecting it again after a redraw, follows that one.
+   * - NOTE:  the new selection and trail are passed along, never read back:  a signal reads its old value until the next
    *   flush.
    */
-  static pick(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
+  static select(element: Element | undefined, { trail: steps = [] as readonly string[] } = {}): void {
     const part = element && Inspector.partFor(element)
-    setPicked(part)
+    setSelectedParts(part ? [part] : [])
     setTrail(steps)
+    clicks.anchor = element
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), steps)
-    Picker.select((part && Inspector.outlinedElement(steps, part)) || element)
-    const address = element && Inspector.addressOf(element)
-    if (address) editorPrefs.set(Inspector.pickedPref, address)
-  }
-
-  /** Let go of what's picked:  no outline, and the properties card shows its nothing-picked state. */
-  static letGo(): void {
-    Inspector.pick(undefined)
-    editorPrefs.forget(Inspector.pickedPref)
+    PartSelector.markSelected(element ? [(part && Inspector.outlinedElement(steps, part)) || element] : [])
+    if (element) Inspector.rememberSelection([element])
   }
 
   /**
-   * What the properties card shows (reactive):  what's picked, or the thing its TRAIL leads to from it
+   * Select all of `elements` at once:  what isn't a part is left out;  one is as `select()`, none lets go.
+   * - The last is the one the properties card says most about (`selected`).
+   * - Several have no trail:  a trail starts from one thing.
+   */
+  static selectAll(elements: readonly Element[]): void {
+    if (elements.length < 2) return Inspector.select(elements[0])
+    const parts = elements.flatMap((element) => Inspector.partFor(element) ?? [])
+    setSelectedParts(parts)
+    setTrail([])
+    editorPrefs.set(Inspector.projectPref(TRAIL_PREF), [])
+    PartSelector.markSelected(parts.map((part) => part.element))
+    Inspector.rememberSelection(parts.map((part) => part.element))
+  }
+
+  /**
+   * `element` was clicked among `items`, with `keys` held:  the same rule as a program's lists (`ListSelection`).
+   * - NOTE:  `select()` moves the anchor too, so a plain click elsewhere (a link, Things) starts a range;
+   *   here the rule's own anchor stands.
+   */
+  static clicked(element: Element, items: readonly Element[], keys: ListClick<Element>["keys"]): void {
+    const selected = selectedParts().map((part) => part.element)
+    const next = clicks.clicked(element, { items, selected, keys })
+    const { anchor } = clicks
+    Inspector.selectAll(next)
+    clicks.anchor = anchor
+  }
+
+  /** Is `element` one of what's selected, or what a trail from it has reached (reactive)? */
+  static isSelected(element: Element): boolean {
+    const parts = selectedParts()
+    return parts.length > 1 ? parts.some((part) => part.element === element) : Inspector.inspected?.element === element
+  }
+
+  /**
+   * The parts a click in the app can select, in document order:  `PartSelector.partAt()`'s rule.
+   * - Beside `like`, one of the same tag:  only those, so a shift-click across cards isn't their piles too.
+   */
+  static selectableParts(like?: Element): Element[] {
+    const area = appArea
+    if (!area) return []
+    const parts = Inspector.partsIn(area)
+      .map((row) => row.element)
+      .filter(isSelectablePart)
+    const anchor = clicks.anchor
+    if (!like || !anchor || anchor.localName !== like.localName) return parts
+    return parts.filter((part) => part.localName === like.localName)
+  }
+
+  /** Let go of what's selected:  no outline, and the properties card shows its nothing-selected state. */
+  static letGo(): void {
+    Inspector.select(undefined)
+    editorPrefs.forget(Inspector.selectionPref)
+  }
+
+  /**
+   * What the properties card shows (reactive):  what's selected, or the thing its TRAIL leads to from it
    * (Owen:  "I'd expect that the \"new discards\" line would make something that could be inspected").
-   * - The trail:  the steps from the picked part's thing, a property's name (`discards`) or a list's item (`#3`);
-   *   remembered with the project, as the pick is.
+   * - The trail:  the steps from the selected part's thing, a property's name (`discards`) or a list's item (`#3`);
+   *   remembered with the project, as the selection is.
    * - A step that leads nowhere any more (the program changed) ends the trail there.
    * - The thing at its end is drawn when an element in the app draws it (`element`):  else it has none.
    */
   static get inspected(): Inspected | undefined {
-    const base = picked()
+    const parts = selectedParts()
+    const base = parts.at(-1)
     if (!base) return undefined
+    if (parts.length > 1) return inspectedTogether(parts, base)
     const crumbs: Crumb[] = [{ label: base.label, depth: 0 }]
     let value = base.value
     for (const step of trail()) {
@@ -241,8 +313,8 @@ export class Inspector {
   /**
    * Inspect `thing`, one of the program's things, at once (Owen:  "clicking something in the 'views' tab should
    * inspect it"):  the Things view's clicks.
-   * - Drawn:  its element is picked, as a click in the app would.
-   * - Not drawn (a deck, a list of piles):  the drawn part it's reached from is picked, and the trail followed
+   * - Drawn:  its element is selected, as a click in the app would.
+   * - Not drawn (a deck, a list of piles):  the drawn part it's reached from is selected, and the trail followed
    *   to it (`trailTo()`), so its crumbs say how it's reached.
    * - Neither:  nothing changes.
    * - The properties card shows, unfolded.
@@ -261,24 +333,25 @@ export class Inspector {
     if (!found?.trail) return
     if (!Inspector.isShown("properties")) Inspector.setShown("properties", true)
     if (Inspector.isFolded("properties")) Inspector.toggleFolded("properties")
-    Inspector.pick(found.element, { trail: found.trail })
+    Inspector.select(found.element, { trail: found.trail })
   }
 
-  /** Go back along the trail to step `depth` (0:  what's picked). */
+  /** Go back along the trail to step `depth` (0:  what's selected). */
   static backTo(depth: number): void {
     Inspector.followTrail(trail().slice(0, depth))
   }
 
-  /** Follow `steps` from what's picked;  remember them, and outline what they lead to when it's drawn. */
+  /** Follow `steps` from what's selected;  remember them, and outline what they lead to when it's drawn. */
   private static followTrail(steps: readonly string[]): void {
     setTrail(steps)
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), steps)
     // `steps` itself:  the trail signal reads its old value until the next flush
-    Picker.select(Inspector.outlinedElement(steps))
+    const outlined = Inspector.outlinedElement(steps)
+    PartSelector.markSelected(outlined ? [outlined] : [])
   }
 
-  /** The element to outline:  the one drawing what `steps` lead to (the trail), else what's picked. */
-  private static outlinedElement(steps: readonly string[], base = picked()): Element | undefined {
+  /** The element to outline:  the one drawing what `steps` lead to (the trail), else what's selected. */
+  private static outlinedElement(steps: readonly string[], base = Inspector.selected): Element | undefined {
     if (!base) return undefined
     let value = base.value
     for (const step of steps) value = stepInto(value, step) ?? value
@@ -318,21 +391,82 @@ export class Inspector {
   }
 
   /**
-   * Pick again what was picked, once the app's parts are drawn:  after a reload, a restart, a recompile
+   * Select again what was selected, once the app's parts are drawn:  after a reload, a restart, a recompile
    * (Owen:  "keep everything EXACTLY THE SAME across page moves").
    * - `rows`:  the app's parts, as the parts tree walks them (`partsIn()`).
-   * - While what's picked is still in the app, only its outline is put on what the trail leads to again.
-   * - Found by its place among the parts and its tag (`PartAddress`), for this project:  none there, nothing's picked.
+   * - While what's selected is still in the app, only its outline is put on what the trail leads to again.
+   * - Found by its place among the parts and its tag (`PartAddress`), for this project:  none there, nothing's selected.
    */
-  static restorePick(rows: readonly PartRow[]): void {
-    // still there:  only its outline, on what the trail leads to now (a redraw replaces a drawn thing's element)
-    if (picked()?.element.isConnected) return Picker.select(Inspector.outlinedElement(trail()))
-    const address = editorPrefs.get(Inspector.pickedPref) as PartAddress | undefined
-    const row = address && rows[address.index]
+  static restoreSelection(rows: readonly PartRow[]): void {
+    const parts = selectedParts()
+    if (placesToSelect) {
+      const wanted = placesToSelect
+      const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
+      if (found.length) {
+        placesToSelect = undefined
+        Inspector.selectAll(found)
+        if (wordsReadyNext) requestAnimationFrame(() => setTimeout(makeWordsReady, WORDS_READY_DELAY))
+        wordsReadyNext = false
+        return
+      }
+    }
+    // still there:  only their outlines, on what the trail leads to now (a redraw replaces a drawn thing's element)
+    if (parts.length && parts.every((part) => part.element.isConnected)) {
+      const elements = parts.map((part) => part.element)
+      if (parts.length > 1) return PartSelector.markSelected(elements)
+      const outlined = Inspector.outlinedElement(trail())
+      return PartSelector.markSelected(outlined ? [outlined] : elements)
+    }
+    const remembered = editorPrefs.get(Inspector.selectionPref) as SelectionAddress | SelectionAddress[] | undefined
+    const found = [remembered ?? []].flat().flatMap((address) => Inspector.elementAt(address, rows) ?? [])
     // the trail from it too, as it was left
     const steps = (editorPrefs.get(Inspector.projectPref(TRAIL_PREF)) as string[] | undefined) ?? []
-    if (row && row.element.localName === address.tag) Inspector.pick(row.element, { trail: steps })
-    else if (picked()) Inspector.pick(undefined)
+    if (found.length > 1) Inspector.selectAll(found)
+    else if (found.length) Inspector.select(found[0], { trail: steps })
+    else if (parts.length) Inspector.select(undefined)
+  }
+
+  /**
+   * Select what's written at `places` once it's drawn:  what was just added or moved, which the next compile draws.
+   * - Each place is `path:line:column`, as a part's written key is.
+   */
+  static selectWhenDrawn(places: readonly string[]): void {
+    placesToSelect = new Set(places)
+  }
+
+  /** What's selected next is new from the palette:  its words, ready to type over in the properties card. */
+  static readyWordsNext(): void {
+    wordsReadyNext = true
+  }
+
+  /** The element at `address`:  the same place in the source if it has one, else the same place among the parts. */
+  private static elementAt(address: SelectionAddress, rows: readonly PartRow[]): Element | undefined {
+    if (address.place) {
+      const same = rows.filter((row) => writtenKeyOf(row.element) === address.place)
+      const element = same[address.nth ?? 0]?.element
+      if (element?.localName === address.tag) return element
+    }
+    const row = rows[address.index]
+    return row?.element.localName === address.tag ? row.element : undefined
+  }
+
+  /**
+   * Remember what's selected, to find it again:  by where each is written (`SelectionAddress`), so moving a part in
+   * the program doesn't lose it.
+   */
+  private static rememberSelection(elements: readonly Element[]): void {
+    const area = appArea
+    const rows = area ? Inspector.partsIn(area) : []
+    const addresses = elements.flatMap((element): SelectionAddress[] => {
+      const index = rows.findIndex((row) => row.element === element)
+      if (index < 0) return []
+      const place = writtenKeyOf(element)
+      const nth = place
+        ? rows.filter((row) => writtenKeyOf(row.element) === place).findIndex((row) => row.element === element)
+        : 0
+      return [{ index, tag: element.localName, place, nth }]
+    })
+    if (addresses.length) editorPrefs.set(Inspector.selectionPref, addresses)
   }
 
   /** The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through. */
@@ -357,9 +491,9 @@ export class Inspector {
     return index < 0 ? undefined : { index, tag: element.localName }
   }
 
-  /** The pref remembering what's picked, the project's own:  `inspector:picked:@spell/examples/tic-tac-toe`. */
-  private static get pickedPref(): string {
-    return Inspector.projectPref(PICKED_PREF)
+  /** The pref remembering what's selected, the project's own:  `inspector:selected:@spell/examples/tic-tac-toe`. */
+  private static get selectionPref(): string {
+    return Inspector.projectPref(SELECTION_PREF)
   }
 
   /** A pref of the Inspector's that's each project's own:  `start`, then the project's path. */
@@ -369,16 +503,18 @@ export class Inspector {
 
   /**
    * Watch `area`, the element the running app draws in:  `<AppPane>`'s, as it's drawn.
-   * - Picking listens there;  a new area while picking moves the listening to it.
+   * - Inspecting listens there;  a new area while inspecting moves the listening to it.
    * - Returns the cleanup:  forget it, if it's still the one watched.
    */
   static watch(area: HTMLElement): () => void {
     setArea(area)
-    if (isPicking()) Picker.listen(area)
+    if (isInspecting()) PartSelector.listen(area)
+    const stopEditing = PartEdits.watch(area, (event) => PartSelector.partAt(event, area))
     return () => {
+      stopEditing()
       if (appArea !== area) return
       setArea(undefined)
-      Picker.stop()
+      PartSelector.stop()
     }
   }
 
@@ -425,9 +561,37 @@ export class Inspector {
     return { title: thing.constructor.name, which: name ? `· ${name}` : "" }
   }
 
-  /** A part's icon:  a stub for now, one for drawn things and one for Spell UI elements. */
+  /**
+   * A part's words in the views tree, as a person would say them:  `Moves: 0`, `Card · ace of spades`, `Menu`.
+   * - A drawn thing:  its type, then which one (`labelPartsFor()`).
+   * - A Spell UI element:  which one it is, when it says (its `name`, `label` or own words), else what it is.
+   * - `tag`:  how it's written, for the row's tooltip.
+   */
+  static rowWordsFor(element: Element): { label: string; which: string; tag: string } {
+    const tag = Inspector.labelFor(element)
+    if (SpellElement.thingOf(element)) {
+      const { title, which } = Inspector.labelPartsFor(element)
+      return { label: title, which, tag: element.localName }
+    }
+    const words = element.getAttribute("name") || element.getAttribute("label") || element.getAttribute("aria-label")
+    const noun = Inspector.vocabularyOf(element)?.noun
+    return { label: words || ownWords(element) || upperFirst(noun ?? element.localName), which: "", tag }
+  }
+
+  /**
+   * A part's icon, in the views tree.
+   * - A drawn thing:  the type's own, when it has a property `icon`;  else a cube.
+   * - A Spell UI element:  its vocabulary's (`ComponentVocabulary.icon`).
+   */
   static iconFor(element: Element): string {
-    return SpellElement.thingOf(element) ? THING_ICON : CONTROL_ICON
+    const thing = SpellElement.thingOf(element) as { icon?: unknown } | undefined
+    if (thing) return typeof thing.icon === "string" && thing.icon ? thing.icon : THING_ICON
+    return Inspector.vocabularyOf(element)?.icon ?? CONTROL_ICON
+  }
+
+  /** A Spell UI element's vocabulary, once its family has loaded. */
+  private static vocabularyOf(element: Element): E.ComponentVocabulary | undefined {
+    return (element as E.DOMElement).component?.vocabulary as E.ComponentVocabulary | undefined
   }
 
   /**
@@ -556,14 +720,82 @@ export class Inspector {
    * Field `name` of `part` was changed in the properties card:  the same change goes into the program's source.
    * - What can't go there (code, or set while the app runs) says so in the card (`<NotSavedNote>`).
    */
-  static fieldWritten(part: { element?: Element; value: object }, name: string, value: unknown): void {
-    const why = InspectorWrites.written(part, name, value)
+  static fieldWritten(part: Inspected, name: string, value: unknown): void {
+    const each = part.together ?? [part]
+    const whys = editor.history.transaction(
+      InspectorWrites.titleOf(name),
+      () => each.map((one) => InspectorWrites.written(one, name, value, Inspector.scopeOf(one))),
+      `together:${name}`
+    )
+    const why = whys.find((reason) => reason)
     setNotSaved(why && { part, why })
   }
 
   /**
+   * What a change to `part`'s fields applies to:  this one, or all of its type.
+   * - The person's last choice for its type, in this project;  else where it starts (`InspectorWrites.startingScope()`).
+   * - A Spell UI element has no type of its own to change:  always this one.
+   */
+  static scopeOf(part: { value: object }): InspectorScope {
+    if (!isThing(part.value)) return "this"
+    void scopeChoices()
+    const chosen = Inspector.scopesChosen[part.value.constructor.name]
+    return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
+  }
+
+  /** Apply changes to `part`'s fields to `scope`, remembered for its type. */
+  static setScope(part: { value: object }, scope: InspectorScope): void {
+    const key = part.value.constructor.name
+    editorPrefs.set(Inspector.projectPref(SCOPE_PREF), { ...Inspector.scopesChosen, [key]: scope })
+    setScopeChoices((count) => count + 1)
+    setNotSaved(undefined)
+  }
+
+  /** The choices made in this project, by type. */
+  private static get scopesChosen(): Record<string, InspectorScope> {
+    return (editorPrefs.get(Inspector.projectPref(SCOPE_PREF)) as Record<string, InspectorScope> | undefined) ?? {}
+  }
+
+  /** The names of `thing`'s stored properties:  what the side bar can edit. */
+  private static storedNamesOf(thing: object): string[] {
+    return ClassSchemas.fromClass(thing.constructor).attributes.map((attribute) => attribute.name)
+  }
+
+  /** Where each of `part`'s fields comes from, for its `<ui-property-editor>`. */
+  static originsOf(part: Inspected): ReturnType<typeof InspectorWrites.originsOf> {
+    const names = part.layout
+      ? [...part.layout.set, ...part.layout.more].map((field) => field.name)
+      : Inspector.storedNamesOf(part.value)
+    return InspectorWrites.originsOf(part, names, Inspector.scopeOf(part))
+  }
+
+  /** Seen from "all of them", can nothing of `part`'s change?  Each one's values come from the code that makes it. */
+  static isAllFromCode(part: Inspected): boolean {
+    return Object.values(Inspector.originsOf(part)).every((origin) => origin.kind === "worked out")
+  }
+
+  /** The field's reset button:  take it off the source. */
+  static fieldReset(part: Inspected, name: string): void {
+    editor.history.transaction(InspectorWrites.titleOf(name), () => {
+      for (const one of part.together ?? [part]) InspectorWrites.reset(one, name)
+    })
+    setNotSaved(undefined)
+  }
+
+  /** The field's code button:  show where its value comes from. */
+  static fieldCode(part: { element?: Element; value: object }, name: string): void {
+    const why = InspectorWrites.written(
+      part,
+      name,
+      (part.value as Record<string, unknown>)[name],
+      Inspector.scopeOf(part)
+    )
+    if (why?.reason === "expression") void Inspector.showCode(why)
+  }
+
+  /**
    * Add `event` to `element`'s events, remembered with the project;  once:  added again, nothing changes.
-   * - Writing a handler into the code is later (T18), as with property edits.
+   * - Writing a handler into the code is later.
    * - Nothing happens for an element outside the app.
    */
   static addEvent(element: Element, event: string): void {
@@ -587,7 +819,7 @@ export class Inspector {
   }
 
   /** What `element` is, as the Inspector shows it:  a drawn thing, a Spell UI element, else `undefined`. */
-  static partFor(element: Element): Picked | undefined {
+  static partFor(element: Element): SelectedPart | undefined {
     const thing = SpellElement.thingOf(element)
     if (thing) {
       return {
@@ -620,6 +852,76 @@ export class Inspector {
   }
 }
 
+/** What the Inspector shows for several parts selected together. */
+function inspectedTogether(parts: readonly SelectedPart[], main: SelectedPart): Inspected {
+  const label = togetherLabel(parts)
+  return {
+    ...main,
+    label,
+    together: parts,
+    crumbs: [{ label, depth: 0 }],
+    schema: sharedSchema(parts),
+    layout: sharedLayout(parts)
+  }
+}
+
+/** Several parts' title:  `3 cards` when they're one kind, else `3 parts`. */
+function togetherLabel(parts: readonly SelectedPart[]): string {
+  const [first] = parts
+  const count = parts.length
+  if (parts.every((part) => isSameKind(part, first!))) {
+    const kind = isThing(first!.value) ? first!.value.constructor.name : first!.element.localName
+    return appTexts.text("inspectorSelectedMany", {
+      count,
+      kind: P.pluralize(kind.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase())
+    })
+  }
+  return appTexts.text("inspectorSelectedParts", { count })
+}
+
+/** Are `a` and `b` one kind:  things of one type, or Spell UI elements of one tag? */
+function isSameKind(a: SelectedPart, b: SelectedPart): boolean {
+  return isThing(a.value) && isThing(b.value)
+    ? a.value.constructor === b.value.constructor
+    : !isThing(a.value) && !isThing(b.value) && a.element.localName === b.element.localName
+}
+
+/**
+ * What several parts have in common, as the properties editor's schema:  their one schema when they're one kind;
+ * things of several types, the properties they all declare;  anything else, none.
+ */
+function sharedSchema(parts: readonly SelectedPart[]): SelectedPart["schema"] {
+  const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
+  if (parts.every((part) => isSameKind(part, first))) return first.schema
+  const schemas = parts.map((part) => part.schema)
+  if (schemas.some((schema) => typeof schema === "string")) return { name: first.label, attributes: [] }
+  const [one, ...others] = schemas as ReturnType<typeof ClassSchemas.fromClass>[]
+  const attributes = one!.attributes.filter((attribute) =>
+    others.every((other) =>
+      other.attributes.some((each) => each.name === attribute.name && each.type === attribute.type)
+    )
+  )
+  return { name: first.label, attributes }
+}
+
+/** Several Spell UI elements' fields:  one tag's, with nothing set first, and no text field;  else none. */
+function sharedLayout(parts: readonly SelectedPart[]): SelectedPart["layout"] {
+  const [first] = parts as readonly [SelectedPart, ...SelectedPart[]]
+  if (!first.layout || !parts.every((part) => isSameKind(part, first))) return undefined
+  return { hasText: false, set: [], more: [...first.layout.set, ...first.layout.more] }
+}
+
+/** Where a part is written, as a key:  `undefined` when it has no place. */
+function writtenKeyOf(element: Element): string | undefined {
+  const place = placeOfPart(element)
+  return place && placeKey(place)
+}
+
+/** Can a click in the app select `element`, with no Alt held -- see `PartSelector.partAt()`? */
+function isSelectablePart(element: Element): boolean {
+  return !!SpellElement.thingOf(element) || isClickableTag(element) || hasOwnHandler(element)
+}
+
 /** Where a part is written:  its thing's making, else its drawn tag -- see `Inspector.writtenPlaceOf()`. */
 function placeOfPart(element: Element): P.SourcePlace | undefined {
   const thing = SpellElement.thingOf(element)
@@ -631,19 +933,24 @@ function placeKey({ path, line, column }: P.SourcePlace): string {
   return `${path}:${line}:${column}`
 }
 
-/** What the properties card shows:  a pick, or the thing its trail leads to, with the trail to it. */
-export type Inspected = Omit<Picked, "element"> & {
+/** What the properties card shows:  a selection, or the thing its trail leads to, with the trail to it. */
+export type Inspected = Omit<SelectedPart, "element"> & {
   /** The element drawing it, outlined:  none for a thing nothing draws. */
   element?: Element
-  /** The trail from what's picked to it, a step each (what's picked first). */
+  /** The trail from what's selected to it, a step each (what's selected first). */
   crumbs: Crumb[]
+  /**
+   * Every part, when several are selected together:  a change goes to them all, as one step.
+   * - `value`, `element` and the rest are the last one clicked's;  `schema`, `label` and `layout` are theirs together.
+   */
+  together?: readonly SelectedPart[]
 }
 
-/** One step of the trail:  its title, and how far along it is (0:  what's picked). */
+/** One step of the trail:  its title, and how far along it is (0:  what's selected). */
 export type Crumb = { label: string; depth: number }
 
-/** A part of the running app, picked in the Inspector. */
-export type Picked = {
+/** A part of the running app, selected in the Inspector. */
+export type SelectedPart = {
   /** Its element in the app, outlined. */
   element: Element
   /** What the editor binds to:  the thing a drawn element draws, else the element itself. */
@@ -685,8 +992,15 @@ const POSITION_SUFFIX = "-position"
 /** One of the app's parts, as the parts tree lists it:  the part, and how deep it sits. */
 export type PartRow = { element: Element; depth: number }
 
-/** Where a picked part was, to pick it again:  its place among the app's parts (`partsIn()`), and its tag. */
+/** Where a part is among the app's parts (`partsIn()`), and its tag. */
 export type PartAddress = { index: number; tag: string }
+
+/**
+ * Where a selected part was, to select it again.
+ * - By where it's written first (`place`), the `nth` drawn from that place, so a move in the program doesn't lose it.
+ * - Its place among the parts, for what's written nowhere:  something a widget made.
+ */
+type SelectionAddress = PartAddress & { place?: string; nth?: number }
 
 /** `element`'s own words, its text children's, shortened to `WORDS_LENGTH` characters:  `""` for none. */
 function ownWords(element: Element): string {
@@ -722,17 +1036,17 @@ const FOLDED_GROUPS_PREF = "inspector:foldedGroups"
 const FOLDED_PANELS_PREF = "inspector:foldedPanels"
 /** The Inspector's icon:  its toggle's, and its header's. */
 const INSPECTOR_ICON = "sliders horizontal"
-/** The start of the pref remembering what's picked, a project's each (`Inspector.pickedPref`). */
-const PICKED_PREF = "inspector:picked"
+/** The start of the pref remembering what's selected, a project's each (`Inspector.selectionPref`). */
+const SELECTION_PREF = "inspector:selected"
 /** The start of the pref remembering the events added, a project's each (`Inspector.eventsPref`). */
 const EVENTS_PREF = "inspector:events"
-/** The pref remembering that Inspect app's help was seen:  closed, or a part picked (`Inspector.isHelpShown`). */
+/** The pref remembering that Inspect app's help was seen:  closed, or a part selected (`Inspector.isHelpShown`). */
 const HELP_SEEN_PREF = "inspector:helpSeen"
 /** The pref remembering the phone's sheet's height, as dragged (`Inspector.sheetHeight`). */
 const SHEET_HEIGHT_PREF = "inspector:sheetHeight"
 /** Spell UI's tags start so. */
 const UI_PREFIX = "ui-"
-/** Spell UI's controls:  what a plain click picks, beside a drawn thing (Alt-click:  any Spell UI element). */
+/** Spell UI's controls:  what a plain click selects, beside a drawn thing (Alt-click:  any Spell UI element). */
 const CONTROL_TAGS = new Set([
   "ui-button",
   "ui-input",
@@ -748,13 +1062,37 @@ const CONTROL_TAGS = new Set([
   "ui-progress"
 ])
 
+/**
+ * What else a click selects, in the app's own drawing:  what the palette adds, so a click finds it again.
+ * - Not in a drawn thing's shadow root:  there it's how the thing looks, and a click means the thing.
+ */
+const ADDED_TAGS = new Set([
+  "ui-card",
+  "ui-text",
+  "ui-label",
+  "ui-message",
+  "ui-segment",
+  "ui-divider",
+  "ui-list",
+  "ui-menu",
+  "ui-image"
+])
+
+/** Does a click on `element` mean it, by its tag? */
+function isClickableTag(element: Element): boolean {
+  return (
+    CONTROL_TAGS.has(element.localName) ||
+    (ADDED_TAGS.has(element.localName) && !(element.getRootNode() instanceof ShadowRoot))
+  )
+}
+
 editorPrefs.declare(OPEN_PREF, { type: "choice" })
 const [isOpen, setOpen] = createSignal(editorPrefs.get(OPEN_PREF) as boolean)
 editorPrefs.declare(HELP_SEEN_PREF, { type: "choice" })
 const [helpSeen, setHelpSeen] = createSignal(!!editorPrefs.get(HELP_SEEN_PREF))
 
 /**
- * The Inspector's cards, top to bottom:  what's picked, with its events and actions, then the app's views.
+ * The Inspector's cards, top to bottom:  what's selected, with its events and actions, then the app's views.
  * - The Events card is gone (epic `debut` P28):  its events are a band of the properties card.
  */
 export const INSPECTOR_PANELS = ["properties", "views"] as const
@@ -795,13 +1133,35 @@ function setPanels(panels: readonly InspectorPanel[]): void {
   setShownPanels(panels)
   editorPrefs.set(PANELS_PREF, panels)
 }
-const [isPicking, setPicking] = createSignal(false)
-const [picked, setPicked] = createSignal<Picked | undefined>(undefined)
-/** On a phone, is the sheet up (`Inspector.isSheetUp`)?  Down as the page opens:  the app its full size until a pick. */
+const [isInspecting, setInspecting] = createSignal(false)
+/** What's selected, the last one clicked last (`Inspector.allSelected`). */
+const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>([])
+/** Clicks in the app and the views tree:  the last one clicked, where a shift-click's range starts. */
+const clicks = new ListSelection<Element>()
+
+/** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
+let placesToSelect: Set<string> | undefined
+/** Are the words of what's selected next ready to type over?  `Inspector.readyWordsNext()`. */
+let wordsReadyNext = false
+
+/** How long the properties card takes to draw what's just been selected, ms. */
+const WORDS_READY_DELAY = 150
+
+/** The fields that hold a part's words, first found first. */
+const WORDS_FIELDS = 'ui-property[name="textContent"], ui-property[name="heading"]'
+
+/** Focus the words of what's selected, all selected:  what a person changes first about anything new. */
+function makeWordsReady(): void {
+  const field = document.querySelector<HTMLElement>(`.InspectorColumn ${WORDS_FIELDS}`)
+  const input = field?.querySelector<HTMLElement & { select?: () => void }>("ui-input, ui-textarea")
+  input?.focus()
+  input?.select?.()
+}
+/** On a phone, is the sheet up (`Inspector.isSheetUp`)?  Down as the page opens:  the app its full size until a selection. */
 const [isSheetUp, setSheetUp] = createSignal(false)
 /** The phone's sheet's height as dragged, px (remembered:  `SHEET_HEIGHT_PREF`). */
 const [sheetHeight, setSheetHeight] = createSignal(editorPrefs.get(SHEET_HEIGHT_PREF) as number | undefined)
-/** The trail from what's picked (`Inspector.inspected`):  property names and list items (`#3`). */
+/** The trail from what's selected (`Inspector.inspected`):  property names and list items (`#3`). */
 const [trail, setTrail] = createSignal<readonly string[]>([])
 
 /** Where a step leads from `value`:  a property's thing (`discards`), a list's item (`#3`);  `undefined` if nowhere. */
@@ -872,13 +1232,13 @@ export const ITEM_STEP = "#"
 /**
  * Where the running app draws, as `<AppPane>` last handed it over.
  * - Kept through a hot reload of this file:  the pane hands it over only as it's drawn, so without it the reloaded
- *   Inspector had no app (Views empty, the crosshairs picking nothing) until the page was reloaded.
+ *   Inspector had no app (Views empty, the crosshairs inspecting nothing) until the page was reloaded.
  */
 let appArea = import.meta.hot?.data.appArea as HTMLElement | undefined
 /**
  * Counts the area's moves, for its reactive readers (`Inspector.area`).
  * - The area itself is a plain variable:  a signal reads its old value until the next flush,
- *   and picking reads it straight after `watch()`.
+ *   and inspecting reads it straight after `watch()`.
  */
 const [areaMoved, setAreaMoved] = createSignal(0)
 
@@ -918,11 +1278,11 @@ function hasOwnHandler(element: Element): boolean {
   return Object.keys(element).some((key) => SOLID_HANDLER.test(key))
 }
 
-/** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and picked. */
+/** The marks that ring a part, by its own `::after` (`Inspector.css`):  under the pointer, and selected. */
 const HOVER_MARK = "data-inspect-hover"
-const PICKED_MARK = "data-inspect-picked"
+const SELECTED_MARK = "data-inspect-selected"
 /** On the app's area while Inspect app is on:  `Inspector.css` shows its crosshair. */
-const PICKING_MARK = "data-inspecting"
+const INSPECTING_MARK = "data-inspecting"
 /** A ringed part that is its own ring's containing block (a transform):  its ring is inset from its own box. */
 const INSET_MARK = "data-inspect-inset"
 
@@ -931,76 +1291,213 @@ const THING_ICON = "cube"
 const CONTROL_ICON = "square outline"
 
 /****************
- * ### `Picker`
- * The Inspector's hands in the app:  the rings, and the listeners that pick.
+ * ### `PartSelector`
+ * The Inspector's hands in the app:  the rings, and the listeners that select.
  * - Plain DOM, no Solid.
- * - The RINGS are the part's own (epic `debut` P32):  marked `data-inspect-hover` / `data-inspect-picked`, its
+ * - The RINGS are the part's own (epic `debut` P32):  marked `data-inspect-hover` / `data-inspect-selected`, its
  *   `::after` draws a ring 3px outside it, pinned by CSS anchor positioning (`Inspector.css`):
  *   the browser keeps it on the part through scrolls and drags, and no parent that hides its overflow cuts it.
- *   - the HOVER ring:  what a click would pick, dashed
- *   - the PICKED ring:  what's picked, solid
+ *   - the HOVER ring:  what a click would select, dashed
+ *   - the PICKED ring:  what's selected, solid
  * - A part that can't draw one (`canRing()`) gets a box on `<body>` over it instead, as before:
  *   no box of its own (`display: contents`), inside a shadow root the page's sheet can't reach,
- *   or an `::after` of its own;  the picked box follows it each frame
+ *   or an `::after` of its own;  the selected box follows it each frame
  * - The listeners are on the app's area, capturing:  they see a click before the app does, and stop it.
  ****************/
-class Picker {
+class PartSelector {
   /** Start listening on `area`;  stops listening anywhere else first. */
   static listen(area: HTMLElement): void {
-    Picker.stop()
+    PartSelector.stop()
     const stop = new AbortController()
-    Picker.listening = stop
-    Picker.area = area
-    area.setAttribute(PICKING_MARK, "")
+    PartSelector.listening = stop
+    PartSelector.area = area
+    area.setAttribute(INSPECTING_MARK, "")
     const options = { capture: true, signal: stop.signal }
-    area.addEventListener("pointermove", (event) => Picker.hover(Picker.partAt(event, area)), options)
-    area.addEventListener("pointerleave", () => Picker.hover(undefined), options)
+    area.addEventListener(
+      "pointermove",
+      (event) => PartSelector.band || PartSelector.hover(PartSelector.partAt(event, area)),
+      options
+    )
+    area.addEventListener("pointerleave", () => PartSelector.hover(undefined), options)
     area.addEventListener(
       "click",
       (event) => {
-        const part = Picker.partAt(event, area)
-        if (!part) return
-        event.preventDefault()
-        event.stopPropagation()
-        Picker.hover(undefined)
-        Inspector.pick(part)
-        Inspector.stopPicking()
-        Inspector.dismissHelp()
-        // on a phone, the sheet comes up with what's picked
-        setSheetUp(true)
+        if (PartSelector.bandJustEnded) {
+          PartSelector.bandJustEnded = false
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
+        PartSelector.clicked(event, area)
       },
       options
     )
-    // and the presses before a click:  picking a draggable card mustn't start a drag
-    area.addEventListener("pointerdown", (event) => Picker.partAt(event, area) && event.stopPropagation(), options)
+    // Control-click on a Mac is a right click, with no click after it
+    area.addEventListener(
+      "contextmenu",
+      (event) => {
+        if (event.ctrlKey && !event.metaKey) PartSelector.clicked(event, area)
+      },
+      options
+    )
+    // and the presses before a click:  inspecting a draggable card mustn't start a drag
+    area.addEventListener(
+      "pointerdown",
+      (event) => {
+        PartSelector.bandJustEnded = false
+        const part = PartSelector.partAt(event, area)
+        // the app itself is its own background:  a press there may be a band, and still a click on it if it never moves
+        if (part) event.stopPropagation()
+        if (part && PartEdits.startDrag(part, event)) return
+        if (!part || part === Inspector.partsIn(area)[0]?.element) PartSelector.startBand(event, area)
+      },
+      options
+    )
     // Esc is the page's key:  `EDITOR_HOTKEYS.stopInspecting`
+  }
+
+  /**
+   * A click in the app while inspecting, on a part:  it selects it, and the app never hears of it.
+   * - Plain:  it, and inspecting stops:  the app has its clicks back.
+   * - Shift, Command or Control:  it joins what's selected, and inspecting goes on, for more.
+   */
+  private static clicked(event: MouseEvent, area: HTMLElement): void {
+    const part = PartSelector.partAt(event, area)
+    if (!part) return
+    event.preventDefault()
+    event.stopPropagation()
+    PartSelector.hover(undefined)
+    Inspector.clicked(part, Inspector.selectableParts(part), event)
+    if (!event.shiftKey && !event.metaKey && !event.ctrlKey) Inspector.stopInspecting()
+    Inspector.dismissHelp()
+    // on a phone, the sheet comes up with what's selected
+    setSheetUp(true)
+  }
+
+  /**
+   * A press on the app's background:  past `DRAG_START_PX` it draws a rubber band, which selects what it touches.
+   * - Over what's selected with Shift, Command or Control held, else in place of it.
+   * - Only the innermost parts it touches:  cards, not the pile they're in.
+   * - Esc cancels it, and inspecting goes on.
+   */
+  private static startBand(down: PointerEvent, area: HTMLElement): void {
+    if (down.button !== 0) return
+    const stop = new AbortController()
+    const options = { capture: true, signal: stop.signal }
+    const end = () => {
+      stop.abort()
+      PartSelector.band?.remove()
+      PartSelector.band = undefined
+    }
+    window.addEventListener(
+      "pointermove",
+      (move) => {
+        const [dx, dy] = [move.clientX - down.clientX, move.clientY - down.clientY]
+        if (!PartSelector.band) {
+          if (Math.hypot(dx, dy) < DRAG_START_PX) return
+          PartSelector.hover(undefined)
+          PartSelector.band = document.body.appendChild(document.createElement("div"))
+          PartSelector.band.className = "InspectorBand"
+        }
+        const box = new DOMRect(
+          Math.min(down.clientX, move.clientX),
+          Math.min(down.clientY, move.clientY),
+          Math.abs(dx),
+          Math.abs(dy)
+        )
+        Object.assign(PartSelector.band.style, {
+          left: `${box.left}px`,
+          top: `${box.top}px`,
+          width: `${box.width}px`,
+          height: `${box.height}px`
+        })
+      },
+      options
+    )
+    window.addEventListener(
+      "pointerup",
+      (up) => {
+        const box = PartSelector.band?.getBoundingClientRect()
+        end()
+        if (!box) return
+        // the click this press ends in, on whatever's under it, is the band's
+        PartSelector.bandJustEnded = true
+        const touched = PartSelector.partsTouching(box, area)
+        const isAdding = up.shiftKey || up.metaKey || up.ctrlKey
+        const already = isAdding ? Inspector.allSelected.map((part) => part.element) : []
+        Inspector.selectAll([...already.filter((element) => !touched.includes(element)), ...touched])
+        Inspector.dismissHelp()
+      },
+      options
+    )
+    window.addEventListener("pointercancel", end, options)
+    window.addEventListener(
+      "keydown",
+      (key) => {
+        if (key.key !== "Escape" || !PartSelector.band) return
+        key.stopPropagation()
+        key.preventDefault()
+        end()
+        PartSelector.bandJustEnded = true
+      },
+      options
+    )
+  }
+
+  /** The innermost parts `box` touches, never the app itself:  a part with another inside it that it touches is left out. */
+  private static partsTouching(box: DOMRect, area: HTMLElement): Element[] {
+    const background = Inspector.partsIn(area)[0]?.element
+    const touched = Inspector.selectableParts().filter((part) => {
+      const drawn = drawnBox(part)
+      return (
+        part !== background &&
+        (drawn.width || drawn.height) &&
+        drawn.left < box.right &&
+        drawn.right > box.left &&
+        drawn.top < box.bottom &&
+        drawn.bottom > box.top
+      )
+    })
+    return touched.filter((part) => !touched.some((other) => other !== part && part.contains(other)))
   }
 
   /** Stop listening, and hide the hover box. */
   static stop(): void {
-    Picker.listening?.abort()
-    Picker.listening = undefined
-    Picker.area?.removeAttribute(PICKING_MARK)
-    Picker.area = undefined
-    Picker.hover(undefined)
+    PartSelector.listening?.abort()
+    PartSelector.listening = undefined
+    PartSelector.area?.removeAttribute(INSPECTING_MARK)
+    PartSelector.area = undefined
+    PartSelector.hover(undefined)
   }
 
-  /** Ring `element` as the one a click would pick;  `undefined`:  none. */
+  /** Ring `element` as the one a click would select;  `undefined`:  none. */
   static hover(element: Element | undefined): void {
-    const box = Picker.box("InspectorHover")
-    if (Picker.ring(HOVER_MARK, element)) Picker.place(box, undefined)
-    else Picker.place(box, element)
+    const box = PartSelector.box("InspectorHover")
+    if (PartSelector.ring(HOVER_MARK, element)) PartSelector.place(box, undefined)
+    else PartSelector.place(box, element)
   }
 
-  /** Keep `element` ringed as picked (a box following it each frame, if it can't draw a ring);  `undefined`:  none. */
-  static select(element: Element | undefined): void {
-    Picker.selected = element
-    const box = Picker.box("InspectorPicked")
-    if (Picker.ring(PICKED_MARK, element)) return Picker.place(box, undefined)
+  /**
+   * Keep `elements` ringed as selected;  any that can't draw a ring gets a box following it, each frame.
+   * - Each ring is scoped to its own part (`anchor-scope`, `Inspector.css`), so many can show at once.
+   */
+  static markSelected(elements: readonly Element[]): void {
+    PartSelector.selected = elements
+    for (const marked of document.querySelectorAll(`[${SELECTED_MARK}]`)) {
+      if (!elements.includes(marked)) PartSelector.unmark(SELECTED_MARK, marked)
+    }
+    const boxed = elements.filter((element) => !PartSelector.putRing(SELECTED_MARK, element))
+    const boxes = PartSelector.selectedBoxes
+    while (boxes.length < boxed.length) {
+      const box = document.body.appendChild(document.createElement("div"))
+      box.className = "InspectorBox InspectorSelected"
+      boxes.push(box)
+    }
+    boxes.slice(boxed.length).forEach((box) => PartSelector.place(box, undefined))
     const follow = () => {
-      if (Picker.selected !== element) return
-      Picker.place(box, element?.isConnected ? element : undefined)
-      if (element) requestAnimationFrame(follow)
+      if (PartSelector.selected !== elements) return
+      boxed.forEach((element, index) => PartSelector.place(boxes[index]!, element.isConnected ? element : undefined))
+      if (boxed.length) requestAnimationFrame(follow)
     }
     follow()
   }
@@ -1013,15 +1510,24 @@ class Picker {
    */
   private static ring(mark: string, element: Element | undefined): boolean {
     if (element?.hasAttribute(mark)) return true
-    for (const marked of document.querySelectorAll(`[${mark}]`)) {
-      marked.removeAttribute(mark)
-      if (!marked.hasAttribute(HOVER_MARK) && !marked.hasAttribute(PICKED_MARK)) marked.removeAttribute(INSET_MARK)
-    }
-    if (!element || !Picker.canRing(element)) return false
+    for (const marked of document.querySelectorAll(`[${mark}]`)) PartSelector.unmark(mark, marked)
+    return !!element && PartSelector.putRing(mark, element)
+  }
+
+  /** Take ring `mark` off `element`. */
+  private static unmark(mark: string, element: Element): void {
+    element.removeAttribute(mark)
+    if (!element.hasAttribute(HOVER_MARK) && !element.hasAttribute(SELECTED_MARK)) element.removeAttribute(INSET_MARK)
+  }
+
+  /** Put ring `mark` on `element`:  true if it draws it, false if it can't, so a box stands in. */
+  private static putRing(mark: string, element: Element): boolean {
+    if (element.hasAttribute(mark)) return true
+    if (!PartSelector.canRing(element)) return false
     element.setAttribute(mark, "")
-    if (Picker.isRingDrawn(element)) return true
+    if (PartSelector.isRingDrawn(element)) return true
     element.setAttribute(INSET_MARK, "")
-    if (Picker.isRingDrawn(element)) return true
+    if (PartSelector.isRingDrawn(element)) return true
     element.removeAttribute(mark)
     element.removeAttribute(INSET_MARK)
     return false
@@ -1040,7 +1546,7 @@ class Picker {
     if (element.getRootNode() !== document) return false
     if (getComputedStyle(element).display === "contents") return false
     // its own `::after`, unless it's our ring already
-    const isRinged = element.hasAttribute(HOVER_MARK) || element.hasAttribute(PICKED_MARK)
+    const isRinged = element.hasAttribute(HOVER_MARK) || element.hasAttribute(SELECTED_MARK)
     return isRinged || getComputedStyle(element, "::after").content === "none"
   }
 
@@ -1052,15 +1558,14 @@ class Picker {
    * - with Alt held, any Spell UI element:  the text or label inside a card too
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
    */
-  private static partAt(event: Event, area: HTMLElement): Element | undefined {
+  static partAt(event: Event, area: HTMLElement): Element | undefined {
     const anyElement = (event as MouseEvent).altKey
     for (const target of event.composedPath()) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
-      const isPart =
-        SpellElement.thingOf(target) || anyElement || CONTROL_TAGS.has(target.localName) || hasOwnHandler(target)
+      const isPart = SpellElement.thingOf(target) || anyElement || isClickableTag(target) || hasOwnHandler(target)
       if (isPart && Inspector.partFor(target)) return target
     }
     return undefined
@@ -1093,11 +1598,17 @@ class Picker {
     if (box.hidden) box.hidden = false
   }
 
-  /** What's picked now, as `select()` follows it. */
-  private static selected: Element | undefined
+  /** What's selected now, as `markSelected()` follows it. */
+  private static selected: readonly Element[] = []
+  /** The boxes for what can't ring itself:  made as needed, hidden when not. */
+  private static selectedBoxes: HTMLElement[] = []
+  /** The rubber band, while one is being drawn. */
+  private static band: HTMLElement | undefined
+  /** A rubber band just ended:  the click the same press ends in is the band's. */
+  private static bandJustEnded = false
   /** Stops the listeners, while listening. */
   private static listening: AbortController | undefined
-  /** The app's area it's listening on, marked `PICKING_MARK`. */
+  /** The app's area it's listening on, marked `INSPECTING_MARK`. */
   private static area: HTMLElement | undefined
 }
 
@@ -1105,7 +1616,7 @@ class Picker {
  * ### `<InspectorColumn>`
  * The Inspector, a tall column at the page's far right, while it's open (`Inspector.isOpen`):
  * its cards, one above the other, resizable (their sizes remembered, for each set of cards).
- *   - what's picked (`<PropertiesCard>`), its events and actions as bands at its end
+ *   - what's selected (`<PropertiesCard>`), its events and actions as bands at its end
  *   - the app's views, things or templates (`<InspectorViews>`)
  * - Which cards show:  the top bar's Inspector button, held (`<InspectorToggle>`);  each card's Close hides it.
  * - Each card folds to its header (`<InspectorCard>`):  a folded card keeps its header's height, the others share
@@ -1115,7 +1626,7 @@ class Picker {
  * - The cards' insides are the brand's Theme Creator inspector, in the Spell Brand theme whatever the editor
  *   wears:  that theme's tokens, re-declared on `.Inspector` (`UI.themes.scopedTokens()`, J63);
  *   their headers are the panes', in the editor's theme.
- * - The app's parts are walked here (`appParts()`), so what was picked comes back whichever cards show.
+ * - The app's parts are walked here (`appParts()`), so what was selected comes back whichever cards show.
  * - On a phone, its pane is a sheet (`<InspectorPane>`):  a bar to drag or close it heads the cards
  *   (`<InspectorSheetBar>`), and Esc puts it away.
  ****************/
@@ -1136,15 +1647,15 @@ export function InspectorColumn(): JSX.Element {
       return () => window.removeEventListener("keydown", putAway)
     }
   )
-  // Esc lets go of what's picked, when it isn't stopping a pick or putting the sheet away, nor typed in a field
+  // Esc lets go of what's selected, when it isn't stopping a selection or putting the sheet away, nor typed in a field
   createEffect(
-    () => !!Inspector.picked,
-    (hasPick) => {
-      if (!hasPick) return
+    () => !!Inspector.selected,
+    (hasSelection) => {
+      if (!hasSelection) return
       const letGo = (event: KeyboardEvent) => {
         if (event.key !== "Escape" || event.defaultPrevented) return
-        // read before this Esc's own writes land:  picking or a sheet up, this Esc is theirs
-        if (Inspector.isPicking || Inspector.isSheetUp || isEditable(event)) return
+        // read before this Esc's own writes land:  inspecting or a sheet up, this Esc is theirs
+        if (Inspector.isInspecting || Inspector.isSheetUp || isEditable(event)) return
         Inspector.letGo()
       }
       window.addEventListener("keydown", letGo)
@@ -1186,7 +1697,7 @@ export function InspectorColumn(): JSX.Element {
  * ### `<InspectorPane>`
  * The Inspector's pane in the editor's page:  `<InspectorColumn>`, at the page's far right.
  * - On a phone, a SHEET over the page's lower part instead (`Inspector.css`;  Owen's pick, epic `debut` P17, Q6):
- *   - up while something's just been picked (`Inspector.isSheetUp`), the app its full size till then
+ *   - up while something's just been selected (`Inspector.isSheetUp`), the app its full size till then
  *   - as tall as it was last dragged (`Inspector.sheetHeight`), else its usual share of the screen
  * - The caller shows it while the Inspector's open (`Inspector.isOpen`).
  ****************/
@@ -1308,17 +1819,17 @@ const SMALLEST_CARD_BODY = 32
 
 /****************
  * ### `<PropertiesCard>`
- * What's picked:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
+ * What's selected:  its title in the card's header, a blue pill (`<ui-button "20%" />`), then a
  * `<ui-property-editor>` of every property it has, those it sets first
  * (Owen:  "lose that [More]. Show all of the properties").
- * - Picking again is the top bar's Inspect app (`<InspectorPick>`), beside the Inspector's button.
- * - Nothing picked:  the card is titled "Inspector", and says how to pick.
+ * - Inspecting again is the top bar's Inspect app (`<InspectAppButton>`), beside the Inspector's button.
+ * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
  * - Then its Events band (`<EventsBand>`), and a thing's Actions band (`<ActionsBand>`):
  *   what it does when people touch it, then what can be done to it (epic `debut` P28, P29;  Q45 A).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
- *   Following one, the title is the TRAIL from what was picked (`Solitaire › DiscardPile · discards`),
+ *   Following one, the title is the TRAIL from what was selected (`Solitaire › DiscardPile · discards`),
  *   each step a pill that goes back to it (`Inspector.inspected`).
  ****************/
 function PropertiesCard(): JSX.Element {
@@ -1330,31 +1841,34 @@ function PropertiesCard(): JSX.Element {
       bar={
         <Show when={Inspector.inspected} fallback={<span slot="title">{appTexts.text("inspector")}</span>}>
           {(part) => (
-            <span slot="title" class="InspectorTrail">
-              <For each={part().crumbs}>
-                {(crumb) => (
-                  <>
-                    <Show when={crumb.depth}>
-                      <span class="InspectorTrailStep">›</span>
-                    </Show>
-                    <span
-                      class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
-                      title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
-                      onClick={(event: MouseEvent) => {
-                        if (crumb.depth === part().crumbs.length - 1) return
-                        event.stopPropagation()
-                        Inspector.backTo(crumb.depth)
-                      }}
-                    >
-                      <span class="InspectorPartTagText">{crumb.label}</span>
-                      <Show when={!crumb.depth}>
-                        <LetGo label={crumb.label} />
+            <>
+              <span slot="title" class="InspectorTrail">
+                <For each={part().crumbs}>
+                  {(crumb) => (
+                    <>
+                      <Show when={crumb.depth}>
+                        <span class="InspectorTrailStep">›</span>
                       </Show>
-                    </span>
-                  </>
-                )}
-              </For>
-            </span>
+                      <span
+                        class={["InspectorPartTag", { back: crumb.depth < part().crumbs.length - 1 }]}
+                        title={crumb.depth ? undefined : Inspector.writtenPlaceTitle(part().element) || undefined}
+                        onClick={(event: MouseEvent) => {
+                          if (crumb.depth === part().crumbs.length - 1) return
+                          event.stopPropagation()
+                          Inspector.backTo(crumb.depth)
+                        }}
+                      >
+                        <span class="InspectorPartTagText">{crumb.label}</span>
+                        <Show when={!crumb.depth}>
+                          <LetGo label={crumb.label} />
+                        </Show>
+                      </span>
+                    </>
+                  )}
+                </For>
+              </span>
+              <ScopeSwitch part={part()} />
+            </>
           )}
         </Show>
       }
@@ -1364,8 +1878,8 @@ function PropertiesCard(): JSX.Element {
         keyed
         fallback={
           <p class="InspectorTip">
-            <InspectorPick />
-            {appTexts.text(Inspector.isPicking ? "inspectorPicking" : "inspectorTip")}
+            <InspectAppButton />
+            {appTexts.text(Inspector.isInspecting ? "inspectorInspecting" : "inspectorTip")}
           </p>
         }
       >
@@ -1373,14 +1887,25 @@ function PropertiesCard(): JSX.Element {
           // compact:  an inspector's density, Spell UI's own (epic `debut` P31);  a changed value bold
           <ui-property-editor
             schema={part.schema}
-            value={part.value}
+            value={part.together?.map((each) => each.value) ?? part.value}
+            origins={Inspector.originsOf(part)}
             compact=""
             show-defaults=""
-            on-ui-changed={(event: CustomEvent<{ name: string; value: unknown }>) =>
-              Inspector.fieldWritten(part, event.detail.name, event.detail.value)
+            on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
+              // a field's own input says it changed too, with no name:  the field's own event follows
+              event.detail.name && Inspector.fieldWritten(part, event.detail.name, event.detail.value)
             }
+            on-ui-reset={(event: CustomEvent<{ name: string }>) => Inspector.fieldReset(part, event.detail.name)}
+            on-ui-show-code={(event: CustomEvent<{ name: string }>) => Inspector.fieldCode(part, event.detail.name)}
           >
             <NotSavedNote part={part} />
+            <Show
+              when={
+                part.together && !part.layout && !(part.schema as { attributes: readonly unknown[] }).attributes.length
+              }
+            >
+              <p class="InspectorTip">{appTexts.text("inspectorNothingShared")}</p>
+            </Show>
             <Show when={part.layout}>
               {(layout) => (
                 <For each={sectionsFor([...layout().set, ...layout().more], layout().hasText)}>
@@ -1408,14 +1933,18 @@ function PropertiesCard(): JSX.Element {
               <Show
                 when={Inspector.ownEditorOf(part.value)}
                 fallback={
-                  <ThingBands value={part.value} schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>} />
+                  <ThingBands
+                    value={part.value}
+                    schema={part.schema as ReturnType<typeof ClassSchemas.fromClass>}
+                    isTogether={!!part.together}
+                  />
                 }
               >
                 {(markup) => <OwnEditor markup={markup()} />}
               </Show>
             </Show>
-            <Show when={part.element}>{(element) => <EventsBand element={element()} />}</Show>
-            <Show when={!part.layout}>
+            <Show when={!part.together && part.element}>{(element) => <EventsBand element={element()} />}</Show>
+            <Show when={!part.layout && !part.together}>
               <ActionsBand thing={part.value} />
             </Show>
           </ui-property-editor>
@@ -1428,6 +1957,56 @@ function PropertiesCard(): JSX.Element {
 // DEBUG:  `Inspector` at the devtools console
 setDebugGlobal({ Inspector })
 
+/** Bumped as a thing's scope is chosen:  `Inspector.scopeOf()` reads it. */
+const [scopeChoices, setScopeChoices] = createSignal(0)
+
+/** The pref remembering `Inspector.setScope()`, by project. */
+const SCOPE_PREF = "scope"
+
+/****************
+ * ### `<ScopeSwitch>`
+ * `This card | All cards`, in the row that names what's inspected, so it costs no height.
+ * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
+ * - Only for a thing:  a Spell UI element has no type of its own to change.
+ * - Several things:  one switch for them all, the choice remembered for their type;  of several types, none.
+ * - A plain pair of the row's own items, so it collapses with the row when the card is narrow.
+ ****************/
+function ScopeSwitch(props: { part: Inspected }): JSX.Element {
+  const typeWords = () => wordsOfType(props.part.value)
+  const scope = () => Inspector.scopeOf(props.part)
+  const count = () => props.part.together?.length ?? 1
+  // several of one type:  `These 3 | All cards`;  of several types, no one type to change
+  const isOneType = () => {
+    const main = props.part.together?.[0]
+    return !main || props.part.together!.every((each) => each.value.constructor === main.value.constructor)
+  }
+  return (
+    <Show when={isThing(props.part.value) && isOneType()}>
+      <ui-item
+        selected={scope() === "this"}
+        class="InspectorScope"
+        onClick={() => Inspector.setScope(props.part, "this")}
+      >
+        {count() > 1
+          ? appTexts.text("inspectorScopeThese", { count: count() })
+          : appTexts.text("inspectorScopeThis", { type: typeWords() })}
+      </ui-item>
+      <ui-item
+        selected={scope() === "all"}
+        class="InspectorScope"
+        onClick={() => Inspector.setScope(props.part, "all")}
+      >
+        {appTexts.text("inspectorScopeAll", { types: P.pluralize(typeWords()) })}
+      </ui-item>
+    </Show>
+  )
+}
+
+/** A thing's type, in words:  `DiscardPile` => `discard pile`. */
+function wordsOfType(thing: object): string {
+  return thing.constructor.name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()
+}
+
 /** The last change in the properties card that couldn't be written to the source:  `<NotSavedNote>`'s. */
 const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } | undefined>(undefined)
 
@@ -1436,14 +2015,39 @@ const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } |
  * Says the last change only changed the running app, and why, with a way to the code when there's code to see.
  * - No row of its own until a change can't be saved.
  ****************/
-function NotSavedNote(props: { part: object }): JSX.Element {
+function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
-  const why = () => (notSaved()?.part === props.part ? notSaved()?.why : undefined)
+  const why = (): NotWritten | undefined => {
+    // on This, one of many:  said at once, not only after a change
+    if (
+      isThing(props.part.value) &&
+      Inspector.scopeOf(props.part) === "this" &&
+      (props.part.together ?? [props.part]).every((each) => !InspectorWrites.hasOwnLine(each.value))
+    ) {
+      return { reason: "playing" }
+    }
+    if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
+      return { reason: "allFromCode" }
+    }
+    return notSaved()?.part === props.part ? notSaved()?.why : undefined
+  }
+  const words = (reason: NotWritten["reason"]) => {
+    if (reason === "playing" && props.part.together) return appTexts.text("inspectorPlayingMany")
+    if (reason === "playing") return appTexts.text("inspectorPlaying", { type: wordsOfType(props.part.value) })
+    if (reason === "allFromCode") {
+      return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
+    }
+    if (reason === "expression") return appTexts.text("inspectorNotSavedCode")
+    if (reason === "noStart") return appTexts.text("inspectorNotSavedNoStart")
+    if (reason === "typeSets")
+      return appTexts.text("inspectorNotSavedTypeSets", { types: P.pluralize(wordsOfType(props.part.value)) })
+    return appTexts.text("inspectorNotSavedRunning")
+  }
   return (
     <Show when={why()}>
       {(note) => (
         <p class="InspectorTip InspectorNotSaved">
-          {appTexts.text(note().reason === "expression" ? "inspectorNotSavedCode" : "inspectorNotSavedRunning")}
+          {words(note().reason)}
           <Show when={note().reason === "expression"}>
             {" "}
             <a
@@ -1498,9 +2102,9 @@ const SELF_CLOSING_TAG = /<([a-z][\w-]*-[\w-]*)((?:\s[^<>]*?)?)\s*\/>/gi
 
 /****************
  * ### `<LetGo>`
- * The ✕ in the picked part's title pill:  lets go of it (`Inspector.letGo()`), as Esc does.
+ * The ✕ in the selected part's title pill:  lets go of it (`Inspector.letGo()`), as Esc does.
  * - Owen:  "It's unclear how to turn the inspector off for selected thing".
- * - Apart from the card's own hide button, which hides the card, not the pick.
+ * - Apart from the card's own hide button, which hides the card, not the selection.
  ****************/
 function LetGo(props: { label: string }): JSX.Element {
   const tip = () => appTexts.text("inspectorLetGo", { part: props.label })
@@ -1548,15 +2152,29 @@ type InspectorSection = { group: E.AttributeGroup; hasText: boolean; fields: Fie
  * - Each by its words in the program (`is a face card`), when the words file has them.
  * - The built-in `id` last, in a band that starts folded.
  ****************/
-function ThingBands(props: { value: object; schema: ReturnType<typeof ClassSchemas.fromClass> }): JSX.Element {
+function ThingBands(props: {
+  value: object
+  schema: ReturnType<typeof ClassSchemas.fromClass>
+  /** Several are selected, `value` the last:  only the fields they share, no computed values or items. */
+  isTogether: boolean
+}): JSX.Element {
   const holds = (name: string) => (props.value as Record<string, unknown>)[name]
-  const items = () => itemsOf(props.value)?.filter(isThing) ?? []
+  const items = () => (props.isTogether ? [] : (itemsOf(props.value)?.filter(isThing) ?? []))
   const bands = createMemo(
     () => {
       const things = runtimeCore()?.things
       const properties = things && isThing(props.value) ? things.propertiesOf(props.value as never) : []
       const stored = props.schema.attributes.map((attribute) => attribute.name)
-      return ThingMembers.bandsOf(props.value, { stored, properties, words: editor.programWords })
+      const all = ThingMembers.bandsOf(props.value, { stored, properties, words: editor.programWords })
+      if (!props.isTogether) return all
+      return all
+        .map((band) => ({
+          ...band,
+          members: band.members.filter(
+            (member) => member.kind === "stored" && stored.includes(member.name) && !isThing(holds(member.name))
+          )
+        }))
+        .filter((band) => band.members.length)
     },
     // the same bands, the same rows:  a change of keys alone doesn't draw them again
     { equals: (a, b) => bandsKey(a) === bandsKey(b) }
@@ -1779,29 +2397,29 @@ export function InspectorToggle(): JSX.Element {
 }
 
 /****************
- * ### `<InspectorPick>`
+ * ### `<InspectAppButton>`
  * Inspect app, in the top bar beside the Inspector's button (and in the properties card's tip):
- * pick a part of the app.
+ * select a part of the app.
  * - A click starts inspecting, or stops it;  pressed while inspecting.  Esc stops too.
  * - With the Inspector closed, it opens it, which starts inspecting.
  * - `id`:  its element's, for the help popup under it (`<InspectHelp>`).
  ****************/
-export function InspectorPick(props: { id?: string }): JSX.Element {
+export function InspectAppButton(props: { id?: string }): JSX.Element {
   return (
     <ui-icon
       id={props.id}
       name="crosshairs"
       link=""
-      class={["IconAction", "InspectorPick", { picking: Inspector.isPicking }]}
-      label={appTexts.text("inspectorPick")}
-      aria-pressed={Inspector.isPicking ? "true" : "false"}
-      data-tooltip={Inspector.isHelpShown ? undefined : appTexts.text("inspectorPick")}
+      class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
+      label={appTexts.text("inspectorInspect")}
+      aria-pressed={Inspector.isInspecting ? "true" : "false"}
+      data-tooltip={Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect")}
       data-position="bottom right"
       data-inverted=""
       onClick={() => {
         if (!Inspector.isOpen) Inspector.toggle()
-        else if (Inspector.isPicking) Inspector.stopPicking()
-        else Inspector.startPicking()
+        else if (Inspector.isInspecting) Inspector.stopInspecting()
+        else Inspector.startInspecting()
       }}
     />
   )
@@ -1809,10 +2427,10 @@ export function InspectorPick(props: { id?: string }): JSX.Element {
 
 /****************
  * ### `<InspectHelp>`
- * Inspect app's help:  a small popup under its button, while inspecting, until the first pick ever or until it's
+ * Inspect app's help:  a small popup under its button, while inspecting, until the first selection ever or until it's
  * closed (`Inspector.isHelpShown`):  "Click a part of the app to inspect it.  Alt-click for a part inside it.
  * Esc stops."
- * - `for`:  the button's id (`<InspectorPick id>`).
+ * - `for`:  the button's id (`<InspectAppButton id>`).
  ****************/
 export function InspectHelp(props: { for: string }): JSX.Element {
   return (

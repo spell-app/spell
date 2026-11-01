@@ -1,0 +1,126 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Card",
+    "Pile",
+    "play_the_story"
+  ],
+  "statements": [
+    {
+      "type": "Card",
+      "superType": "Thing",
+      "defined": "/SendingEvents.spell:65-1097"
+    },
+    {
+      "property": "name",
+      "of": "Card",
+      "datatype": "text",
+      "defined": "/SendingEvents.spell:95-113"
+    },
+    {
+      "property": "flips",
+      "of": "Card",
+      "datatype": "number",
+      "defined": "/SendingEvents.spell:117-140"
+    },
+    {
+      "property": "locked",
+      "of": "Card",
+      "datatype": "choice",
+      "defined": "/SendingEvents.spell:144-168"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "defined": "/SendingEvents.spell:215-249"
+    },
+    {
+      "syntax": "flip {thisArg:expression}",
+      "output": "flip",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "flip it",
+      "defined": "/SendingEvents.spell:254-359"
+    },
+    {
+      "syntax": "flip {thisArg:expression} slowly",
+      "output": "flip_slowly",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "flip it slowly",
+      "waits": true,
+      "defined": "/SendingEvents.spell:802-875"
+    },
+    {
+      "syntax": "close {thisArg:expression}",
+      "output": "close",
+      "rule": "method_call",
+      "of": "Card",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "close it",
+      "waits": true,
+      "defined": "/SendingEvents.spell:957-1012"
+    },
+    {
+      "type": "Pile",
+      "superType": "List",
+      "itemType": "Card",
+      "defined": "/SendingEvents.spell:1100-1264"
+    },
+    {
+      "property": "pile",
+      "of": "Card",
+      "group": "Events sent to things, which every target must deliver alike",
+      "datatype": "Pile",
+      "exclusive": true,
+      "defined": "/SendingEvents.spell:1266-1292"
+    },
+    {
+      "syntax": "play the story",
+      "output": "play_the_story",
+      "rule": "method_call",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "function",
+      "waits": true,
+      "defined": "/SendingEvents.spell:1386-1746"
+    }
+  ],
+  "codeLines": [
+    5,
+    6,
+    11,
+    16,
+    21,
+    25,
+    53,
+    59,
+    76,
+    95,
+    100
+  ]
+}

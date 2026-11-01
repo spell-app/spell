@@ -333,10 +333,13 @@ Its first line is how you call it, with each blank's type in brackets:
     - A local made in one line belongs to that line.
   - `meanwhile load the scores` starts it and carries on.
     A failure is said on the program's console, and people's clicks don't wait for it.
-  - Spanish:  `al mismo tiempo:`, `mientras tanto`.
-- A toast is an aside:  `notify "Saved!"` shows it and carries on.
-  - It waits only when it says how long, `notify "Bye" for 5 seconds`, which holds clicks that long too.
-  - One that stays until it's closed never waits:  `until clicked`, `with "Got it"`.
+  - `load the scores without waiting` says the same, at the end of the line.
+    It's for a call:  `set x to load the scores without waiting` is an error, as there'd be no value yet to set.
+  - Spanish:  `al mismo tiempo:`, `mientras tanto`, `sin esperar`.
+- A toast is the one slow thing nothing waits for:  `notify "Bye" for 5 seconds` shows it and carries on.
+  - `notify "Bye" for 5 seconds and wait` waits until it's gone, and holds clicks that long too (Spanish `y esperar`).
+  - One that stays until it's closed can't be waited for:  `until clicked`, `with "Got it"`.
+  - Your own actions always wait:  the caller decides, with `without waiting`.
 - What a person starts runs one at a time:  a click, a key, a menu item, a drop.
   - The same action again, on the same thing, is ignored, so a double click on Deal deals once.
   - Another action waits its turn, and only the latest waits:  three clicks during a deal run the third.
@@ -996,8 +999,8 @@ These guides need a checkout with the epic folder beside it, and the page server
 A program says once where its data lives, and which types live there, then writes what it writes for things in memory.
 
 ```spell
-family cookbook is a web service at "https://api.example.com/v1":
-	- it is checked every 30 seconds
+family cookbook is a web server at "https://api.example.com/v1":
+	- check it every 30 seconds
 
 a "recipe" is a view:
 	- it is saved in the family cookbook
@@ -1017,11 +1020,18 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
-- Moving the data changes the first line:  `a graph service at`, `a folder at`, `a file at`, `a live room at`, `a sheet at`, `this device`, `in memory`.
+- Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
+  - `at` and `from` mean the same.  Only where it's read from, never read only.
+- Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
+  - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
+- Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
+  - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
+- The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
   - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
-  - a web service can't announce what changed, so it warns until a line says how often to ask
+  - a web server can't announce what changed, so it warns until a line says how often to ask
+  - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.
 - A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
 

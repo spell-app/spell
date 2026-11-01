@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const commentsVocabulary = {
   tag: "ui-comments",
+  icon: "comments outline",
   topics: ["social", "lists", "data display", "views"],
   aka: ["discussion", "thread", "replies"],
   noun: "comments",

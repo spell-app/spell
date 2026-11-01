@@ -17,6 +17,7 @@ import { SOURCE } from "./UIComponents.types"
  ****************/
 export const componentsVocabulary = {
   tag: "ui-components",
+  icon: "cubes",
   topics: ["loading", "modules"],
   aka: ["component pack", "plugin", "extension", "custom elements", "web components", "element library"],
   noun: "components",

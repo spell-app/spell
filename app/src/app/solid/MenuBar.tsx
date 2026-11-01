@@ -16,6 +16,7 @@ import {
   LineNumbers,
   PANEL_TEXTS,
   PROJECT_ICON,
+  PartMenuItems,
   ProgramPanelShown,
   followTabTitle,
   on,
@@ -242,6 +243,8 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
       <Actions.resetApp menu />
       <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
       <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
+      <Actions.exportApp menu />
+      <Actions.importApp menu />
       <Divider />
       <Actions.showProjectSettings menu title={appTexts.text("menuProjectSettings")} />
       <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
@@ -298,6 +301,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         <Actions.undo menu />
         <Actions.redo menu />
         <Divider />
+        <PartMenuItems />
+        <Divider />
         <Actions.find menu />
         <Divider />
         <Action menu title={appTexts.text("codeSettings")} onClick={() => showCodeSettings()} />
@@ -349,15 +354,15 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
         <Action
           menu
           title={appTexts.text("inspectApp")}
-          disabled={Inspector.isPicking}
+          disabled={Inspector.isInspecting}
           onClick={() => startInspecting()}
         />
         <Action
           menu
           title={appTexts.text("stopInspecting")}
           shortcut={EDITOR_HOTKEYS.stopInspecting.shortcut}
-          disabled={!Inspector.isPicking}
-          onClick={() => Inspector.stopPicking()}
+          disabled={!Inspector.isInspecting}
+          onClick={() => Inspector.stopInspecting()}
         />
         <Divider />
         <Actions.clearConsole menu />
@@ -388,7 +393,7 @@ function toggleProgramPanel(mode: Mode) {
 /** Run › Inspect App:  start inspecting, opening the Inspector if it's closed (which starts it). */
 export function startInspecting() {
   if (!Inspector.isOpen) Inspector.toggle()
-  else Inspector.startPicking()
+  else Inspector.startInspecting()
 }
 
 /** The tag of a menu's items. */

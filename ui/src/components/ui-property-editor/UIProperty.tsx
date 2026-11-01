@@ -1,3 +1,6 @@
+import { Show } from "solid-js"
+import type { JSX } from "@solidjs/web"
+
 import { E, UI } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-form.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines the form family:  a property is a field, in a form)
@@ -13,7 +16,8 @@ import {
   GROUP_SELECTOR,
   GROUP_TAG,
   MADE_ATTRIBUTE,
-  VALUE_FROM_ATTRIBUTE
+  VALUE_FROM_ATTRIBUTE,
+  type PropertyOrigin
 } from "./UIPropertyEditor.types"
 
 import propertyCSS from "./UIProperty.css?inline"
@@ -85,6 +89,9 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  *   - in a `compact` editor (`:state(compact)`):  a yes or no on one line, the box then its label;  its hint at the
  *     label row's end
  *   - `:state(set)`:  its value isn't its default (`default`, else the schema's);  bold under `show-defaults`
+ *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, a dot by its label;
+ *     `:state(inherited)`, a quieter label;  `worked out`, read only;  its label's tooltip says where, and a small
+ *     button at the row's end says it was pressed (`ui-reset`, `ui-show-code`)
  *   - a run of three or more yes-or-no properties in one group is ONE select of pills (`FlagRun`):
  *     the first draws it (`:state(flags)`), the rest hide (`:state(flag)`), each still its own property
  *   - choices carry their icons (`ValueSets.iconsFor()`), a hue its colour's chip;  four or fewer, all with
@@ -210,7 +217,63 @@ export class UIProperty extends UIField {
 
   @E.cssState("readonly")
   get isReadOnly(): boolean {
-    return !!this.readonly || this.isInReadonly
+    return !!this.readonly || this.isInReadonly || this.origin?.kind === WORKED_OUT
+  }
+
+  ////////////////
+  // ## Where its value comes from
+  ////////////////
+
+  /** Where its editor says its value comes from;  `undefined` when it doesn't say. */
+  get origin(): PropertyOrigin | undefined {
+    return this.editor?.currentOrigins?.[this.propertyName]
+  }
+
+  /** `:state(here)`:  its value is set on this thing. */
+  @E.cssState("here")
+  get isSetHere(): boolean {
+    return this.origin?.kind === "here"
+  }
+
+  /** `:state(inherited)`:  its value comes from somewhere else. */
+  @E.cssState("inherited")
+  get isInherited(): boolean {
+    return this.origin?.kind === "inherited"
+  }
+
+  /** The label's tooltip says where. */
+  get labelTitle(): string | undefined {
+    return this.origin?.from
+  }
+
+  /** Glyph of the button its origin offers. */
+  private readonly originGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.origin?.action ? ORIGIN_ACTIONS[this.origin.action].icon : undefined)
+  })
+
+  /** The button its origin offers, at the row's end. */
+  protected rowEnd(): JSX.Element {
+    return (
+      <Show when={this.origin?.action}>
+        {(action) => {
+          const { text, event } = ORIGIN_ACTIONS[action()]
+          const words = () => this.translationForKey(text as never, { label: this.ownLabel ?? "" } as never)
+          return (
+            <button
+              type="button"
+              class={["origin", { reset: action() === "reset" }]}
+              part={this.partForName("origin" as never)}
+              title={words()}
+              aria-label={words()}
+              onClick={() => this.send(event as never, { name: this.propertyName } as never)}
+            >
+              {this.originGlyph.svg}
+            </button>
+          )
+        }}
+      </Show>
+    )
   }
 
   /** `:state(changed)`:  its edit is held, not saved yet. */
@@ -334,12 +397,17 @@ export class UIProperty extends UIField {
     if (spec?.min !== undefined) element.setAttribute("min", String(spec.min))
     if (spec?.max !== undefined) element.setAttribute("max", String(spec.max))
     if (spec?.step !== undefined) element.setAttribute("step", String(spec.step))
-    if (this.isReadOnly) element.setAttribute("readonly", "")
+    if (this.isReadOnly) {
+      element.setAttribute("readonly", "")
+      // a row of buttons has no read-only of its own:  it looks the same, and takes no press
+      if (control.attributes?.appearance === SEGMENTED) element.inert = true
+    }
     if (control.choices === "items") {
       const choices = this.choices ?? []
       const isSegmented = control.attributes?.appearance === SEGMENTED
       // no value and no default:  it reads "none", never blank (a segmented row always shows its choices)
-      if (spec?.default === undefined && !isSegmented)
+      // (drawn again while its things disagree, it keeps saying "Mixed")
+      if (spec?.default === undefined && !isSegmented && !this.domElement.hasAttribute("mixed"))
         element.setAttribute("placeholder", this.translationForKey("none"))
       // every segment an icon:  icons alone, each one's name its tooltip
       const iconsOnly = isSegmented && choices.length > 0 && choices.every(UIProperty.hasIcon)
@@ -462,6 +530,8 @@ export class UIProperty extends UIField {
   get isSet(): boolean {
     void this.valueVersion
     if (this.isMixed || this.isReadOnly) return false
+    // its editor knows better than a comparison:  where it came from, not whether it differs
+    if (this.origin) return this.isSetHere
     const controls = [...this.domElement.children].filter(
       (child) => !child.slot && child.getAttribute(MADE_ATTRIBUTE) !== FLAGS && FormFields.isControl(child)
     )
@@ -649,6 +719,7 @@ export class UIProperty extends UIField {
 /** What a property reads of its editor's DOM element. */
 type DOMEditorLike = HTMLElement & {
   readonly currentSchema?: PropertySchema
+  readonly currentOrigins?: Readonly<Record<string, PropertyOrigin>>
   readonly isCompact?: boolean
   readonly showsDefaults?: boolean
 }
@@ -707,6 +778,15 @@ class FlagRun {
   /** Containers waiting to be arranged. */
   private static readonly pending = new WeakSet<Element>()
 }
+
+/** `PropertyOrigin.kind` of a value that can't be changed here. */
+const WORKED_OUT = "worked out"
+
+/** What each button a `PropertyOrigin` offers shows and says. */
+const ORIGIN_ACTIONS = {
+  reset: { icon: "undo", text: "reset", event: "ui-reset" },
+  "show code": { icon: "code", text: "showCode", event: "ui-show-code" }
+} as const
 
 /** The label of the pills' select:  the property's own text (TypeScript knows only the field's). */
 const FLAGS_TEXT = "flags" as never

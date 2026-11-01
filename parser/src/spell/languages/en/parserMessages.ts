@@ -41,6 +41,8 @@ export const PARSER_MESSAGES = {
   /** A local, argument or loop variable with the name of a property of the action's thing. */
   "reads-after-wait":
     "After its first wait, this value can't follow what it reads off other things:  read them above the wait",
+  "cant-go-without-waiting": "Only a call can go without waiting:  this has a value or a body to wait for",
+  "cant-wait-for-toast-that-stays": "A toast that stays can't be waited for:  clicks would wait until it's closed",
   "cant-wait-in-draw": "A drawing can't wait:  make it a property that waits, and draw that",
   /** A write to a thing saved in a read-only place:  won't compile.  `{place}` is its name, `{kind}` what kind it is. */
   "place-read-only":
@@ -56,7 +58,7 @@ export const PARSER_MESSAGES = {
     'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
-    "A {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- it is checked every 30 seconds\" under it",
+    "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"- check it every 30 seconds\" under it",
   /** `when a recipe changes`, on a type in no place:  won't compile.  `{what}` is the type, with its article. */
   "change-not-saved":
     '{what} isn\'t saved in a place, so this would never run.  Say where it\'s saved, e.g. "- it is saved in the family cookbook";  or "when its title changes:", for one of its properties',
@@ -68,15 +70,15 @@ export const PARSER_MESSAGES = {
     "Nobody else can change what's kept here:  this would never run.  It takes a place other people share",
   /** `when someone else changes it`, on a place nothing tells about:  `{kind}`. */
   "someone-else-not-told":
-    "A {kind} can't announce what's changed, so this would never run:  add \"- it is checked every 30 seconds\" under it",
-  /** `the people here`, with no place that knows. */
-  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a live room",
+    "This {kind} can't announce what's changed, so this would never run:  add \"- check it every 30 seconds\" under it",
+  /** `everyone here`, with no place that knows. */
+  "people-here-only-you": "No place here knows who else is here, so this is only ever you:  that takes a room",
   /** `to publish a recipe is at "..."`, with no place above it. */
   "operation-outside-place":
     "This action reaches a place only on a line under that place, so here it does nothing:  move it under the place",
   /** `to publish a recipe is at "..."`, under a kind of place that has no addresses of its own:  `{kind}`. */
   "operation-not-taken":
-    "A {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web service",
+    "This {kind} takes no action at an address of its own, so this would fail when it runs:  that takes a web server",
   /** A `where` on a saved type that can't go to its place. */
   "where-looks-through":
     "This can't be sent to the place, which only finds exact values:  it reads every {type} and looks through them here, up to a limit",
@@ -86,22 +88,63 @@ export const PARSER_MESSAGES = {
   /** A rider outside a drawing:  won't compile. */
   "rider-only-in-a-drawing":
     "This shows something while a read has nothing to show, so it only goes in a drawing, under the read:  an action just waits",
-  /** `all or nothing:` where a place can't make it so. */
-  "all-or-nothing-not-atomic":
+  /** `in one go:` where a place can't make it so. */
+  "in-one-go-not-atomic":
     "A place here can't apply changes all together:  they go one by one, so others may see some of them for a moment",
   /** `save` of something that's no draft:  `{text}`. */
   "no-save-step":
     '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
   /** A word people bring from elsewhere:  `{word}`. */
   "no-such-data-word":
-    'Spell has no "{word}" for data:  say where it lives once, "x is a web service at ...", and "- it is saved in x", then "every recipe where ..." reads it',
+    'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "- it lives in x", then "every recipe where ..." reads it',
   /** `belongs to one` a saved owner with no list of them. */
   "belongs-to-saved-needs-list":
     'A {owner} keeps them, so it needs a list to keep them in:  add its "{items}" is a list of {items}',
   /** The cloud, before it's built. */
-  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a live room at ..."',
+  "place-cloud-later": 'The cloud isn\'t here yet:  name a place of your own for now, e.g. "x is a room at ..."',
+  /** An atmosphere account's line:  everything saved there is anyone's to read (epic `data` T9). */
+  "atmosphere-public":
+    "Everything saved in this {kind} is public:  anyone can read it, and it's there for good.  Don't keep anything private here",
+  /** An atmosphere account's line:  no referee (epic `data` Q13). */
+  "atmosphere-your-own":
+    "In this {kind} each person changes only their own records:  changing someone else's is refused, and \"everyone here\" means everyone with records here, not who's looking now",
+  /** An atmosphere account's line:  a host hands out pages, and that's all. */
+  "atmosphere-reads-here":
+    'This {kind} only hands out its records a page at a time, so "where" and "sorted by" load them into the browser, up to 50,000;  and it keeps whole numbers only, no decimals',
+  /** An atmosphere account's address, or an account named under one, that isn't one. */
+  "atmosphere-not-an-account": '"{address}" isn\'t an account:  it starts "did:plc:" or "did:web:"',
+  /** A personal atmosphere account's address that isn't the start of a collection's name. */
+  "atmosphere-not-a-corner":
+    '"{address}" isn\'t a corner of an account:  it reads like a domain written backwards, e.g. "com.example.cookbook"',
+  /** A collection's name under an atmosphere account that isn't one. */
+  "atmosphere-not-a-collection":
+    '"{address}" isn\'t a collection there:  it reads like a domain written backwards, then a name of letters and digits, e.g. "com.example.recipe"',
+  /** `a recipe version 2 renames title to name`, on an atmosphere account (epic `data` T10). */
+  "version-step-no-rename-there":
+    "An atmosphere account can't rename what's saved:  each person's old records keep their old names for good.  This line only changes how they read here;  other programs still see the old names, and your new ones the new.  To really start afresh, keep them under a new collection name",
+  /** An Airtable's address that names no base. */
+  "airtable-not-a-base":
+    '"{address}" isn\'t an Airtable base:  its id starts "app", e.g. "appXXXXXXXXXXXXXX", and it\'s in the base\'s address on Airtable',
+  /** An Airtable's line:  no version check (epic `data` T11). */
+  "airtable-last-save-wins":
+    "Airtable can't tell that someone else got there first:  when two people change one field, the last save wins it, with no notice, and that includes edits made in Airtable itself.  Different fields both stand.  For a referee that says who lost, put a room in front of it",
+  /** An Airtable's line:  the compiler can't reach a base to ask which fields it works out. */
+  "airtable-worked-out-fields":
+    "Airtable works out its formulas, lookups, rollups and counts by itself, and they can only be read:  a program that writes one has the change put back when it runs, with a notice saying why",
+  /** An Airtable's line:  requests cost. */
+  "airtable-calls-count":
+    "Every page of 100 rows is one request, and everyone using this base shares 5 a second.  Airtable's free plan also stops at 1,000 requests a month, which checking every 30 seconds uses in about 8 hours",
+  /** An Airtable with no id column (epic `data` I5). */
+  "airtable-no-id-column":
+    'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "- its id is its "spell id"" under this',
+  /** An Airtable at a base, with no key named. */
+  "airtable-needs-key":
+    'Airtable answers nobody without a key:  add "- its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
+  /** `where they are the cook`, of something with no `cook`. */
+  "where-field-unknown":
+    '{AType} has no "{field}":  declare it there, or say "the {field} is them" for the program\'s own',
   /** A rider's word that doesn't agree. */
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',

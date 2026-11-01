@@ -99,6 +99,22 @@ export const spanishWords: SP.LanguageWords = {
   /** Words which end a type's name of several words:  `alias`, as in `una cuenta bancaria alias cuenta es una cosa`. */
   typeNameStopWords: new Set(["alias"]),
 
+  /** What a warning calls each kind of place, by its word in code. */
+  placeKinds: {
+    "web server": "servidor web",
+    "graphql server": "servidor graphql",
+    "data folder": "carpeta de datos",
+    file: "archivo",
+    room: "sala",
+    sheet: "hoja",
+    "google sheet": "hoja de google",
+    airtable: "airtable",
+    "atmosphere account": "cuenta de atmosphere",
+    "personal atmosphere account": "cuenta personal de atmosphere",
+    "database on this device": "base de datos en este dispositivo",
+    "in memory database": "base de datos en memoria"
+  },
+
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
@@ -124,8 +140,7 @@ export const spanishWords: SP.LanguageWords = {
     "crear animación": "para",
     "crear animacion": "para",
     esperar: "",
-    "esperar a": "",
-    "y esperar": ""
+    "esperar a": ""
   },
   retiredRuleWords: {
     start_process: { animación: "proceso", animacion: "proceso" },
@@ -400,6 +415,7 @@ export const spanishTypeWords: P.TypeWords = {
   lista: "list",
   arreglo: "list",
   cosa: "thing",
+  lugar: "Place",
   aplicación: "app",
   aplicacion: "app",
   vista: "view",

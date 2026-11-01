@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const tocVocabulary = {
   tag: "ui-toc",
+  icon: "list ol",
   topics: ["navigation", "documentation"],
   aka: ["table of contents", "on this page", "page index", "scrollspy", "toc", "following menu"],
   skeleton: "short line, 6 line paragraph",

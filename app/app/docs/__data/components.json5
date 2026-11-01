@@ -977,6 +977,10 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "PartMenuItems",
+          "file": "src/app/solid/Palette.tsx"
+        },
+        {
           "name": "ThemeSubMenu",
           "file": "src/app/solid/MenuBar.tsx"
         },
@@ -2988,8 +2992,8 @@
       ],
       "usedIn": [
         {
-          "name": "InspectorViews",
-          "file": "src/app/solid/InspectorParts.tsx"
+          "name": "ProgramPanel",
+          "file": "src/app/pages/SpellEditor.tsx"
         },
         {
           "name": "SpellAppRunner",
@@ -3035,83 +3039,6 @@
         }
       ],
       "href": "TreeViewer.html#TreeRoot"
-    },
-    {
-      "tag": "TreeRow",
-      "name": "TreeRow",
-      "folder": "TypeExplorer",
-      "mainTag": "TypeExplorer",
-      "main": false,
-      "page": false,
-      "topics": [
-        "panes"
-      ],
-      "aka": [],
-      "description": "One row of the \"Scopes\" tree, all of it clickable:  its indent and open / closed arrow `onToggle`, the rest -- `children`, and the space after them -- `onClick`.",
-      "noun": "TreeRow",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "props": [
-        {
-          "name": "class",
-          "type": "JSX.HTMLAttributes<HTMLDivElement>[\"class\"]",
-          "required": true,
-          "description": "Class names -- any form Solid's `class` takes, e.g. `[\"ScopeTreeNode\", { selected }]`."
-        },
-        {
-          "name": "depth",
-          "type": "number",
-          "required": true,
-          "description": "Nesting depth, for indenting."
-        },
-        {
-          "name": "isOpen",
-          "type": "boolean",
-          "description": "Is it open?  `undefined` if there's nothing to open."
-        },
-        {
-          "name": "onToggle",
-          "type": "() => void",
-          "required": true,
-          "description": "Indent or arrow clicked."
-        },
-        {
-          "name": "onClick",
-          "type": "() => void",
-          "required": true,
-          "description": "Anywhere right of the arrow clicked."
-        },
-        {
-          "name": "onElement",
-          "type": "(element: HTMLDivElement) => void",
-          "description": "The row's element is made -- a ref callback, e.g. to scroll it into view. - NOT `rowRef`, as React's was:  the React lint takes a `*Ref` prop for a React ref (`react(refs)`)."
-        },
-        {
-          "name": "children",
-          "type": "JSX.Element",
-          "required": true,
-          "description": "What's in the row."
-        }
-      ],
-      "usedIn": [
-        {
-          "name": "GroupRow",
-          "file": "src/app/solid/ThingExplorer.tsx"
-        },
-        {
-          "name": "ScopeTreeNode",
-          "file": "src/app/solid/TypeExplorer.tsx"
-        },
-        {
-          "name": "ThingRow",
-          "file": "src/app/solid/ThingExplorer.tsx"
-        }
-      ],
-      "href": "TypeExplorer.html#TreeRow"
     },
     {
       "tag": "TreeToolbar",
@@ -3249,8 +3176,8 @@
       ],
       "usedIn": [
         {
-          "name": "InspectorViews",
-          "file": "src/app/solid/InspectorParts.tsx"
+          "name": "ProgramPanel",
+          "file": "src/app/pages/SpellEditor.tsx"
         },
         {
           "name": "SpellAppRunner",
@@ -3388,8 +3315,7 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "TypeExplorer",
-        "TreeRow"
+        "TypeExplorer"
       ],
       "tokens": []
     },

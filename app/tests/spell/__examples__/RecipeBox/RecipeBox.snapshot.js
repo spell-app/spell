@@ -10,17 +10,17 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 625, end: 644 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 639, end: 658 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 648, end: 674 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 662, end: 688 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 678, end: 697 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 692, end: 711 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -57,12 +57,12 @@ export class Recipe extends View {
 /**
  * Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
  * Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
- * family cookbook is a folder at "http://127.0.0.1:4791/api/places/recipes"
- * family cookbook is a live room at "http://127.0.0.1:4791/api/rooms/recipes"
+ * family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"
+ * family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"
  * (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)
  */
 export class FamilyCookbook extends Place {}
-export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "this device" })
+export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "database on this device" })
 
 core.heading("A recipe:  a card you can read and change")
 
@@ -82,7 +82,7 @@ export class RecipeBox extends App {
   set newRecipe(value) { this.setProp("newRecipe", value) }
 
   /** newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1626, end: 1738 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1640, end: 1752 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => recipe.title.includes(this.search))
     core.reverse(found)
@@ -160,7 +160,7 @@ export class RecipeBox extends App {
           h("p", "We can't reach your recipes right now."),
           h("ui-button", {
             class: "again",
-            onClick: core.pressed(this, () => core.refreshSaved()),
+            onClick: core.pressed(this, () => core.reloadSaved()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Try again")
         )

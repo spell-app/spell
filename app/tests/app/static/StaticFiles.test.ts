@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { DatabasePlace, UIError } from "spell/util"
+import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 import "spell/app/spaces"
 import { EDITS_STORE, OLD_STORAGE_PREFIX, StaticFiles } from "spell/app/app/static/StaticFiles"
 
@@ -13,6 +14,9 @@ import { EDITS_STORE, OLD_STORAGE_PREFIX, StaticFiles } from "spell/app/app/stat
 
 /** The project the tests read:  one of the examples. */
 const PROJECT = "@spell/examples/calculator"
+
+/** A project of the visitor's own, in their group (in a test:  this machine's person's). */
+const OWN = "owen@spell/my-app"
 
 /** What the build wrote, by URL. */
 const BUILT: Record<string, string> = {
@@ -90,7 +94,73 @@ describe("StaticFiles", () => {
     expect(await files.fetch({ url: `/spaces/${PROJECT}/Calculator.spell` })).toBe("as built")
   })
 
-  test("refuses what needs a server:  making, renaming, deleting", async () => {
+  test("a visitor's own project:  made, listed, indexed, kept past a reload, and forgotten", async () => {
+    const props = visit()
+    const files = new StaticFiles(props)
+    const list = await files.fetch({
+      url: "/api/projects/create/project",
+      contents: { projectId: OWN, filePath: "MyApp.spellml", contents: "the app" }
+    })
+    expect(list).toEqual([{ path: OWN }])
+    expect(await files.fetch({ url: `/spaces/${OWN}/MyApp.spellml` })).toBe("the app")
+    expect(await files.fetch({ url: `/api/projects/file/${OWN}/MyApp.spellml`, contents: "changed" })).toBe(true)
+
+    // a new visit:  the page reloaded
+    const again = new StaticFiles(props)
+    expect(await again.fetch({ url: "/api/projects/list/owen@spell" })).toEqual([{ path: OWN }])
+    const index = await again.fetch({ url: `/api/projects/index/${OWN}` })
+    expect(Object.keys(index.manifest)).toEqual([`${OWN}/MyApp.spellml`])
+    expect(index.imports).toEqual([{ path: "/MyApp.spellml", active: true, contents: "changed" }])
+
+    expect(
+      await again.fetch({ url: "/api/projects/remove/project", method: "DELETE", contents: { projectId: OWN } })
+    ).toEqual([])
+    expect(await props.place.load(EDITS_STORE, `${OWN}/MyApp.spellml`)).toBeUndefined()
+  })
+
+  test("a visitor's own files:  added, renamed in place, removed", async () => {
+    const files = new StaticFiles(visit())
+    await files.fetch({
+      url: "/api/projects/create/project",
+      contents: { projectId: OWN, filePath: "A.spell", contents: "a" }
+    })
+    const added = { projectId: OWN, filePath: "B.spell", contents: "b" }
+    await files.fetch({ url: "/api/projects/create/file", contents: added })
+    const renamed = await files.fetch({
+      url: "/api/projects/rename/file",
+      contents: { projectId: OWN, filePath: "A.spell", newFilePath: "C.spell" }
+    })
+    expect(renamed.imports.map((each: { path: string }) => each.path)).toEqual(["/C.spell", "/B.spell"])
+    expect(await files.fetch({ url: `/spaces/${OWN}/C.spell` })).toBe("a")
+    const removed = await files.fetch({
+      url: "/api/projects/remove/file",
+      method: "DELETE",
+      contents: { projectId: OWN, filePath: "B.spell" }
+    })
+    expect(removed.imports.map((each: { path: string }) => each.path)).toEqual(["/C.spell"])
+  })
+
+  test("a copy of a built-in project is the visitor's own, with their edits, and the original's untouched", async () => {
+    const files = new StaticFiles(visit())
+    await files.fetch({ url: `/api/projects/index/${PROJECT}` })
+    await files.fetch({ url: `/api/projects/file/${PROJECT}/Calculator.spell`, contents: "edited" })
+    await files.fetch({
+      url: "/api/projects/duplicate/project",
+      contents: { projectId: PROJECT, newProjectId: OWN }
+    })
+    expect(await files.fetch({ url: `/spaces/${OWN}/Calculator.spell` })).toBe("edited")
+    await files.fetch({ url: `/api/projects/file/${OWN}/Calculator.spell`, contents: "mine" })
+    expect(await files.fetch({ url: `/spaces/${PROJECT}/Calculator.spell` })).toBe("edited")
+  })
+
+  test("a file of a visitor's project it doesn't have is missing, with no request to the host", async () => {
+    const files = new StaticFiles(visit())
+    await expect(files.fetch({ url: `/spaces/${OWN}/nothing.js` })).rejects.toBeInstanceOf(MissingResourceError)
+    expect(await files.fetch({ url: `/spaces/${OWN}/nothing.js`, defaultContents: "x" })).toBe("x")
+    expect(fetched).toEqual([])
+  })
+
+  test("refuses changing a built-in project:  making, renaming, deleting", async () => {
     const files = new StaticFiles(visit())
     await expect(
       files.fetch({ url: "/api/projects/create/project", contents: { projectId: `${PROJECT}2` } })

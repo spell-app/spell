@@ -9,7 +9,7 @@
 import _isArrayLike from "lodash/isArrayLike"
 import isEqual from "lodash/isEqual"
 
-import { brokenRule, flushCells, peekProp, ruleWarning, withoutCreate } from "spell/util"
+import { brokenRule, flushCells, onThingMade, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
@@ -171,6 +171,7 @@ export type PropertyChangeListener = (target: object, property: string, was: unk
 
 /** The things whose starting values are set -- see `noteMade()`. */
 const madeThings = new WeakSet<object>()
+onThingMade(noteMade)
 
 /** Who hears a property's change -- see `onPropertyChange()`. */
 let changeListener: PropertyChangeListener | undefined

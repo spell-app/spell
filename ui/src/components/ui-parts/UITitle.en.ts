@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const titleVocabulary = {
   tag: "ui-title",
+  icon: "heading",
   topics: ["content parts", "typography", "containers"],
   aka: ["accordion title", "summary", "toggle header"],
   noun: "title",

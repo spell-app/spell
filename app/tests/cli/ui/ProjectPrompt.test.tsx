@@ -47,7 +47,7 @@ describe("<ProjectPrompt>", () => {
       "recetario",
       "recipe-box",
       "sala-en-vivo",
-      "thing-references"
+      "sending-events"
     ]
     const lines = projects.map((name, at) => `${at ? "  " : "❯ "}@spell/test/${name}/`)
     expect(frame).toContain(["Which project or file?  @spell/test/█", ...lines].join("\n"))

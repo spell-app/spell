@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const sectionsVocabulary = {
   tag: "ui-sections",
+  icon: "list alternate outline",
   topics: ["layout", "containers"],
   aka: ["accordion", "section group", "collapsible group", "outline"],
   noun: "sections",

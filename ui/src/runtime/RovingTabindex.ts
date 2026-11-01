@@ -156,8 +156,9 @@ export class RovingTabindex {
 
   /** Index of the item the event came from (composed path, so events from inside items count). */
   private indexOfEvent(event: Event, items: HTMLElement[]): number {
-    const path = event.composedPath()
-    return items.findIndex((item) => path.includes(item))
+    // innermost first:  in a tree, an item is inside other items
+    const item = event.composedPath().find((target) => items.includes(target as HTMLElement))
+    return items.indexOf(item as HTMLElement)
   }
 
   /** Can focus land on `item`? */

@@ -386,8 +386,8 @@ each explorer reads something the program or its compile left behind.
   - With no words file, each goes by its name:  `move to pile`.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
-  - In the editor, its Types tab has the parser at hand, so it asks the language service in the page instead
-    ([the Inspector's Views card](#run-and-edit--the-app-and-the-program-panel)).
+  - In the editor, its Templates tab has the parser at hand, so it asks the language service in the page instead
+    ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -492,13 +492,16 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Alt-click picks any Spell UI element, the text inside a card too.
 - A change shows in the app at once:  set a card's direction to `up` and it turns over.
 - It also goes into the program's text, touching only those characters, so the file's tab shows its unsaved dot and Save saves it.
-  Where it goes depends on where the value lives:
+  Where it goes depends on where the value lives, and for a thing on the switch beside its name,
+  `This foundation | All foundations`:
 
   | Where the value comes from | What a change does |
   | --- | --- |
   | Written on the drawn tag | Changes it there |
   | Not on the tag yet | Adds it to the tag |
-  | The line that made the thing, `a new foundation with suit = clubs` | Changes it there |
+  | The line that made the thing, `a new foundation with suit = clubs` | This one:  changes it there;  All:  read only, with a link to that line |
+  | Not on that line yet | This one:  adds it there;  All:  read only, the code gives it no starting value |
+  | The type sets it, `its "layout" is stacked` | This one:  writes nothing, it says to use All;  All:  changes it there |
   | The type's default, `set its count to 0` in `to create it` | Changes it there, and every thing still holding the old one |
   | Code:  an expression, or `suit = the suit` in a loop | Writes nothing, and the card says so, with a link to the code |
   | Nothing in the source says:  the program set it | Writes nothing, and the card says so |
@@ -507,8 +510,12 @@ Point at the app and a part of it is outlined;  click, and its properties are th
     In the code, ⌘Z is the code editor's;  in Run, the program's.
   - It works with the code editor not loaded:  a file owns its text, and the code editor only shows it.
   - Save also saves what the side bar changed in files not showing.
-  - Most of a program's values come from code or a loop today, and only `Counter` has a literal default among the built-in examples:
-    so choosing between this one and all of them is still to come.
+  - A thing made in a loop has no line of its own, as a card a deck makes:  "This card" is there to play with,
+    and says "Changes to this card can't be saved."
+    It starts there when nothing can change for all of them, and on "All" otherwise;  a thing with its own line starts on "This".
+  - A type's `to create it` runs after the line that made the thing, so a value it sets can't be given by that line.
+  - Each field shows where its value comes from, in `<ui-property-editor origins>`:  a dot and a reset when it's set here,
+    a quieter label when it comes from somewhere else, read only and a link when it's code;  its label's tooltip says where.
 - Under its properties, its Events:  what it does when people touch it, in the program's own words,
   each with its code under it.
   - A card's `on click` (`play it`);  a tableau's `it can give up a card if` (`the card is face up`).
@@ -516,15 +523,37 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 - Then its Actions:  a button for each thing that can be done to it, `play it`, `turn over`.
   - One that takes something has a field after it:  `put it on a pile` a select of the game's piles.
   - A press does it in the running app;  one that can't run now is dimmed, its tooltip saying why.
-- The click goes to the Inspector, never the app;  picking stops once something's picked,
+- The click goes to the Inspector, never the app;  inspecting stops once something's selected,
   and the crosshairs start it again.  Esc stops it.
+- To select several while inspecting:  Shift takes everything from the last one clicked, Command or Control adds or
+  takes away, and dragging across the app's background draws a rubber band over what it touches.
+  The Views tree takes the same clicks.
+  - The properties card then shows what they share, "Mixed" where they differ, and a change to all of them is one undo step.
+  - `These 3 | All cards` says what a change applies to;  of several types, there's no "All".
+  - What's selected is found again by where it's written, after a recompile, a reload or a move.
 - Hold the mouse over what you selected to see where it is written:
   `Written in Deck.spellml, line 8:  52 of these come from this one place`.
-- The ✕ in the picked part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
+- The ✕ in the selected part's title lets go of it, and so does Esc;  the eye beside a card's title hides that card.
 - It wears a theme of its own, whatever the editor wears:  that theme's tokens, laid on the column alone.
 
-**Not yet:**  a change isn't written back into the code, nor an event's code typed there.
-Restart, and the app is as the code says.
+**Not yet:**  an event's code typed there isn't written back into the code.
+
+### Adding and moving what's on the page
+
+The `+` in the top bar opens a palette of what can be added:  click adds it beside what's selected, drag places it.
+- What it offers is every component whose vocabulary has a `snippet`, the tag it writes, with its Spanish in its dictionary.
+- The pin in its header keeps it open as a pane, remembered.
+
+Dragging a selected part, or a row of the Views tree, moves it.
+A line shows where it would land between its neighbours, or a ring round what it would go in:
+moving goes by the flow, never by x and y, so what's written stays readable.
+
+Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+Each gesture is one undo step, and only its own lines of the program change.
+
+**Its edge:**  only what has a tag of its own in the source can change.
+A card a deck makes in a loop says why it can't, and offers nothing else yet.
+A program written in outline style with no `<draw>` has nowhere to add to, and says so.
 
 ### Themes, and their code colours
 
@@ -583,7 +612,7 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
     (`SpellProject.codeFor()`, in spell-parser)
   - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
   - Sentence Tree:  the Spell tree of the cursor's line
-  - Things and Types are the Inspector's, in its Views card.
+  - Things and Templates, for developers.  The Inspector's Views card is one tree of what's drawn and what isn't, with a filter.
 - At the panel's right:  Clear Console, on Program Output only, and Close, which hides it.
 - It's the same pane VS Code's Run Project panel and `<spell-viewer>` use, `RunnerPane`:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.
@@ -684,6 +713,11 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 
 ## The public preview:  the editor as plain files
 
+Someone can make an app here from nothing, with no server behind the page and no code read:
+the home page offers a blank app with the palette open, a few tiny starters ([starterProjects.ts](src/spaces/models/starterProjects.ts)),
+and Solitaire to change something in.
+A new project everywhere starts as that blank app, with a drawing to drop things into.
+
 ```sh
 spell app preview build
 ```
@@ -737,11 +771,14 @@ How a page with no server reads and saves files:
   - a save:  kept in the browser's database (IndexedDB) as the visitor types, until "Reset Example" asks and forgets it
     - a save the browser refuses, its storage full, still holds until the page closes
     - edits an older preview kept in `localStorage` move into the database once, before the first read or save
-  - creating, renaming or deleting anything:  refused, with an error that says why
+  - a visitor's own projects, in the group `you@spell`:  their list, files and order in that same database,
+    so New, Duplicate, Rename, Delete and every file action work with no server
+    - a copy of an example is theirs to change;  the example itself can't be renamed, deleted or given files
+    - Export and Import move a project out and back as one file (`.spell.json`, text files only)
+    - the first thing they make says once that it lives in this browser, and that clearing the site's data loses it
 - ONE flag hides what needs a server:  `isStaticBuild` in code, `:root.spell-static` in CSS
   ([staticBuild.ts](src/app/static/staticBuild.ts)).
-  Gone in the preview:  the Projects column, the You avatar, Settings, the project's "..." menu,
-  New File and the file's actions (its "..." menu keeps only "Show line numbers"), and the debug globals.
+  Gone in the preview:  the You avatar, Settings, New Example, New Guide, Help, and the debug globals.
 - The build is Vite's, in its `static` mode, so no other build carries any of this.
 - Every unknown page goes to the editor, for the hosts that read these:
   `404.html` (GitHub Pages) and `_redirects` (Netlify, Cloudflare Pages).

@@ -471,10 +471,12 @@ export const AriaNames = {
   colSpan: "ariaColSpan", // aria-colspan
   current: "ariaCurrent", // aria-current
   disabled: "ariaDisabled", // aria-disabled
+  expanded: "ariaExpanded", // aria-expanded
   hidden: "ariaHidden", // aria-hidden
   label: "ariaLabel", // aria-label
   level: "ariaLevel", // aria-level
   live: "ariaLive", // aria-live
+  multiSelectable: "ariaMultiSelectable", // aria-multiselectable
   roleDescription: "ariaRoleDescription", // aria-roledescription
   selected: "ariaSelected", // aria-selected
   valueMin: "ariaValueMin" // aria-valuemin

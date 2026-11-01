@@ -26,6 +26,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const emojiVocabulary = {
   tag: "ui-emoji",
+  icon: "smile outline",
   topics: ["icons", "text", "media", "elements"],
   aka: ["emoticon", "smiley", "unicode emoji"],
   skeleton: "inline 1 x 1",

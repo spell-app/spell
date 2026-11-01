@@ -40,8 +40,8 @@
  * - A write merged over what someone else saved raises one too, holding what was lost:  Use theirs, or Show me.
  * - `draftOf()`:  a copy of a thing that takes changes and sends nothing, until it's saved.
  * - A list's change is a write of that field, the whole list, on a place that can take no more;
- *   on one that takes `edits`, a live room, it's only the items that changed, so two at once both stay (T17).
- * - A live room is followed as its first read's things are made (`PlaceHeal.follow()`):  what others do shows here too.
+ *   on one that takes `edits`, a room, it's only the items that changed, so two at once both stay (T17).
+ * - A room is followed as its first read's things are made (`PlaceHeal.follow()`):  what others do shows here too.
  *   Someone deleting what you're editing raises a notice with Restore;  your long text replaced, one with Use mine.
  * - `saveNew()`:  a thing made here goes to a place, under its own id (`Thing.id`, made in the browser).
  * - Telling the program what changed (epic `data` P13), each thing once, soon after, with the fields:
@@ -96,7 +96,7 @@ import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
-import { dateIfDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
+import { valueAsDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, setField } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -436,7 +436,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /**
-   * Run `run`, what it changes in each place one group, held until it ends:  `all or nothing:`.
+   * Run `run`, what it changes in each place one group, held until it ends:  `in one go:`.
    * - It throws, and they're dropped, and put back.
    * - throws what `run` threw
    */
@@ -454,7 +454,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     for (const group of groups.values()) group.end()
   }
 
-  /** The groups an `all or nothing:` holds its changes in, for each place, while one runs. */
+  /** The groups an `in one go:` holds its changes in, for each place, while one runs. */
   private groupsTogether: Map<PendingChanges, PendingGroup & { number: number }> | undefined
 
   /** A value as a row holds it:  what's kept of a draft. */
@@ -473,7 +473,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
 
   /** `json`, as `Loader` reads it:  what's kept of a draft, brought back. */
   fieldValue(thing: SpellObject, key: string, json: unknown): unknown {
-    return dateIfDeclared(thing.constructor as never, key, this.read(json))
+    return valueAsDeclared(thing.constructor as never, key, this.read(json))
   }
 
   ////////////////
@@ -919,7 +919,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (key === "id" || key.startsWith("$")) continue
       const current = fields[key]
       if (!this.holdsTheSame(current, json)) changed.push(key)
-      const value = dateIfDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
+      const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
       } else if (!isSameDate(current, value)) {

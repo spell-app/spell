@@ -15,6 +15,7 @@ import { Meanwhile } from "./Meanwhile"
 import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
+import { WithoutWaiting } from "./WithoutWaiting"
 
 /** Spanish's `async` rules. */
 export const asyncEs = new SpellParser({ module: "async" })
@@ -107,6 +108,8 @@ asyncEs.addRule(Meanwhile, {
 })
 
 // `exclusivo`, and its negated forms, for `start_process`:  `iniciar animación no exclusiva dealing`
+asyncEs.addRule(WithoutWaiting, { syntax: "{call:statement} sin esperar" })
+
 asyncEs.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {
   syntax: "(exclusivo|exclusiva|(negated:no exclusivo|no exclusiva|no-exclusivo|no-exclusiva))"
 })

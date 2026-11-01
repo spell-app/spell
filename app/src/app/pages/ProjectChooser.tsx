@@ -4,6 +4,7 @@ import type { JSX } from "@solidjs/web"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { editor } from "spell/app/app/editor"
 import {
   Actions,
   AppMark,
@@ -11,6 +12,8 @@ import {
   SpellPage,
   Submenu,
   ThemeMenu,
+  Inspector,
+  Palette,
   openProject,
   trackProjectRoot,
   type ProjectRootState
@@ -47,6 +50,7 @@ export function ProjectChooser() {
       <ChooserToolbar />
       <div class="Home">
         <Hero examples={exampleList()} guides={guideList()} />
+        <StartCards />
         <ProjectCards
           id="examples"
           projectRoot={examples}
@@ -122,6 +126,83 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
         </span>
       </figure>
     </section>
+  )
+}
+
+/****************
+ * ### `<StartCards>`
+ * The ways to start making something, under the hero, in the group of cards the projects use:
+ * - Blank:  an empty app, the palette open, so what it can hold shows at once
+ * - a few tiny starters, each the person's own to change
+ * - Solitaire:  a whole game to change something in, with an invitation to
+ * - Import:  a project they exported, the way back after clearing a browser
+ ****************/
+function StartCards() {
+  return (
+    <section id="start" class="ProjectCards">
+      <header>
+        <h2>
+          {appTexts.text("startTitle")}. <span class="line">{appTexts.text("startLine")}</span>
+        </h2>
+        <Actions.importApp button appearance="basic" size="small" />
+      </header>
+      <div class="cards">
+        <StartCard
+          name={appTexts.text("startBlank")}
+          line={appTexts.text("startBlankLine")}
+          start={() => {
+            Palette.openOnArrival()
+            Inspector.openQuietly()
+            void editor.startFrom("blank")
+          }}
+        />
+        <StartCard
+          name={appTexts.text("startCounter")}
+          line={appTexts.text("startCounterLine")}
+          start={() => void editor.startFrom("counter")}
+        />
+        <StartCard
+          name={appTexts.text("startTaskList")}
+          line={appTexts.text("startTaskListLine")}
+          start={() => void editor.startFromCopy(TASK_LIST)}
+        />
+        <StartCard
+          name={appTexts.text("startDice")}
+          line={appTexts.text("startDiceLine")}
+          start={() => void editor.startFrom("dice")}
+        />
+        <StartCard
+          name={appTexts.text("startSolitaire")}
+          line={appTexts.text("startSolitaireLine")}
+          start={() => {
+            Inspector.openQuietly()
+            openProject(SOLITAIRE)
+            editor.showNotice(appTexts.text("startSolitaireInvite"))
+          }}
+        />
+      </div>
+    </section>
+  )
+}
+
+/** The example the to-do starter copies. */
+const TASK_LIST = "@spell/examples/TaskList"
+
+/** The example the whole-game way in opens. */
+const SOLITAIRE = "@spell/examples/Solitaire"
+
+/** One way to start:  a card like a project's. */
+function StartCard(props: { name: string; line: string; start: () => void }) {
+  return (
+    <button type="button" class="card" onClick={() => props.start()}>
+      <span class="tile" style={{ "--ProjectCards-hue": hueFor(props.name) }} aria-hidden="true">
+        {props.name.charAt(0)}
+      </span>
+      <span class="text">
+        <span class="title">{props.name}</span>
+        <span class="description">{props.line}</span>
+      </span>
+    </button>
   )
 }
 

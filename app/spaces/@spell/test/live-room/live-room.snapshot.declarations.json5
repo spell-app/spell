@@ -10,13 +10,13 @@
     {
       "type": "Recipe",
       "superType": "View",
-      "defined": "/LiveRoom.spell:739-1037"
+      "defined": "/LiveRoom.spell:734-1032"
     },
     {
       "property": "title",
       "of": "Recipe",
       "datatype": "text",
-      "defined": "/LiveRoom.spell:802-821"
+      "defined": "/LiveRoom.spell:797-816"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -29,29 +29,29 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/LiveRoom.spell:927-1037"
+      "defined": "/LiveRoom.spell:922-1032"
     },
     {
       "type": "FamilyCookbook",
       "superType": "Place",
-      "defined": "/LiveRoom.spell:94-148"
+      "defined": "/LiveRoom.spell:94-143"
     },
     {
       "type": "LiveBox",
       "superType": "App",
-      "defined": "/LiveRoom.spell:150-737"
+      "defined": "/LiveRoom.spell:145-732"
     },
     {
       "property": "news",
       "of": "LiveBox",
       "datatype": "text",
-      "defined": "/LiveRoom.spell:173-191"
+      "defined": "/LiveRoom.spell:168-186"
     },
     {
       "property": "changes",
       "of": "LiveBox",
       "datatype": "number",
-      "defined": "/LiveRoom.spell:195-220"
+      "defined": "/LiveRoom.spell:190-215"
     },
     {
       "syntax": "add one (of {thisArg:expression})?",
@@ -64,7 +64,7 @@
       ],
       "kind": "method",
       "name": "add one",
-      "defined": "/LiveRoom.spell:224-290"
+      "defined": "/LiveRoom.spell:219-285"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -77,7 +77,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/LiveRoom.spell:294-737"
+      "defined": "/LiveRoom.spell:289-732"
     }
   ],
   "codeLines": [

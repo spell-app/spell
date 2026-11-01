@@ -19,6 +19,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const calendarVocabulary = {
   tag: "ui-calendar",
+  icon: "calendar alternate outline",
   formControl: true,
   topics: ["date & time", "forms", "inputs", "controls", "modules"],
   aka: ["date picker", "datepicker", "time picker", "datetime", "date range"],

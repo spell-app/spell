@@ -2,7 +2,7 @@ import { createSignal, onSettled } from "solid-js"
 
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
-import { Inspector, uiReady } from "spell/app/app/solid"
+import { Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import type { monaco } from "spell/app/app/solid/monaco"
 
 /**
@@ -15,6 +15,8 @@ import type { monaco } from "spell/app/app/solid/monaco"
  * - Inside the code editor (Monaco) its own commands run them (`addCodeEditorKeys()`):  the page leaves a key typed
  *   there, or into any field, alone, so one press never runs twice.
  * - Find is the code editor's own key:  listed so the menus show it, bound by Monaco itself.
+ * - Cut, Copy, Paste, Duplicate and Delete are on what's selected in the app:  never a key in the code or a field,
+ *   where the page leaves them alone.
  * - Undo and Redo go by focus (`undoWay()`), decided here and nowhere else:
  *   - in the code:  the code editor's own undo
  *   - in the running app, in Run:  the program's own, as ever:  not ours, so the key goes on
@@ -29,7 +31,13 @@ export const EDITOR_HOTKEYS = {
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },
   undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
   redo: { shortcut: "shift+mod+Z", codeEditorAction: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
-  find: { shortcut: "mod+F", codeEditorAction: "actions.find" }
+  find: { shortcut: "mod+F", codeEditorAction: "actions.find" },
+  cutParts: { shortcut: "mod+X", run: () => partsAction("cut"), outsideCode: true },
+  copyParts: { shortcut: "mod+C", run: () => partsAction("copy"), outsideCode: true },
+  pasteParts: { shortcut: "mod+V", run: () => partsAction("paste"), outsideCode: true },
+  duplicateParts: { shortcut: "mod+D", run: () => partsAction("duplicate"), outsideCode: true },
+  deleteParts: { shortcut: "Backspace", run: () => partsAction("remove"), outsideCode: true },
+  deletePartsForward: { shortcut: "Delete", run: () => partsAction("remove"), outsideCode: true }
 } as const satisfies Record<string, Hotkey>
 
 /** One of the editor's shortcuts, by name. */
@@ -130,12 +138,39 @@ export function undoWay(): "code" | "history" | false {
   return focusInCode() ? "code" : "history"
 }
 
+/** Is it showing Run, where a press in the app is the program's? */
+export function isRunningApp(): boolean {
+  return isRunningNow()
+}
+
 /** Undo or redo pressed outside the code, where the code editor binds its own:  `false` in Run, so the key goes on. */
 function undoOutsideCode(action: "undo" | "redo"): unknown {
   if (isRunningNow()) return false
   editor.history[action]()
   return undefined
 }
+
+/**
+ * A part key pressed outside the code:  on what's selected in the app.
+ * - `false`:  not ours, so the key goes on:  in Run, or text is selected on the page, for ⌘C.
+ */
+function partsAction(action: PartAction): unknown {
+  if (isRunningNow() || getSelection()?.toString()) return false
+  return PartEdits.run(action) ? undefined : false
+}
+
+/** Cut, Copy or Paste from a menu:  the code editor's own in the code, else on what's selected in the app. */
+export function cutCopyOrPaste(action: "cut" | "copy" | "paste"): void {
+  if (undoWay() === "code") return runCodeEditorAction(CLIPBOARD_ACTIONS[action])
+  PartEdits.run(action)
+}
+
+/** The code editor's action for each of Cut, Copy and Paste. */
+const CLIPBOARD_ACTIONS = {
+  cut: "editor.action.clipboardCutAction",
+  copy: "editor.action.clipboardCopyAction",
+  paste: "editor.action.clipboardPasteAction"
+} as const
 
 /** Undo or redo from a menu, by `undoWay()`. */
 export function undoOrRedo(action: "undo" | "redo"): void {
@@ -166,8 +201,8 @@ function isInProperties(event: KeyboardEvent): boolean {
 
 /** Esc:  stop inspecting, while inspecting;  otherwise not ours (`false`), so the key goes on. */
 function stopInspecting(): unknown {
-  if (!Inspector.isPicking) return false
-  Inspector.stopPicking()
+  if (!Inspector.isInspecting) return false
+  Inspector.stopInspecting()
   return undefined
 }
 

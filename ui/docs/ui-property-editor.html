@@ -169,6 +169,28 @@
                   </ui-property-editor>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-variations-where-a-value-comes-from" label="Where a value comes from" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="`origins`:  handed in by whoever knows.  Set here shows a dot and a reset, hover to see it;  from somewhere else, a quieter label;  worked out is read only, with a way to its code.  The label's tooltip says where, and a button only says it was pressed (`ui-reset`, `ui-show-code`)."
+                >
+                  <ui-property-editor
+                    compact
+                    show-defaults
+                    style="max-width: 340px"
+                    schema='{"name": "Card", "attributes": [
+                      {"name": "name", "kind": "string", "type": "text", "description": ""},
+                      {"name": "kind", "kind": "enum", "type": "choice", "values": ["gate", "measure"], "description": ""},
+                      {"name": "steps", "kind": "number", "type": "number", "description": ""}
+                    ]}'
+                    value='{"name": "Ace", "kind": "gate", "steps": 3}'
+                    origins='{
+                      "name": {"kind": "here", "from": "Set here", "action": "reset"},
+                      "kind": {"kind": "inherited", "from": "From Card"},
+                      "steps": {"kind": "worked out", "from": "Worked out in the code", "action": "show code"}
+                    }'
+                  ></ui-property-editor>
+                </ui-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-pages" label="Pages" sticky="stack" collapsible dividing>

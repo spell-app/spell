@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const dateVocabulary = {
   tag: "ui-date",
+  icon: "calendar outline",
   topics: ["content parts", "date & time", "social"],
   aka: ["timestamp", "time ago", "posted at"],
   noun: "date",

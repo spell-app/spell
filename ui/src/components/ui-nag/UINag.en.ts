@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const nagVocabulary = {
   tag: "ui-nag",
+  icon: "bell outline",
   topics: ["notifications", "messages", "overlays", "modules"],
   aka: ["banner", "cookie notice", "announcement bar", "sticky banner"],
   noun: "nag",

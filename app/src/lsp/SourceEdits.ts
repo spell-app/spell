@@ -2,7 +2,7 @@ import type { Position, TextEdit } from "vscode-languageserver"
 
 /**
  * The ONE place a program's text is changed by what a person did, rather than typed (epic `editor`):
- * the side bar's fields, the notebook's add, move and delete, and later Add And Move.
+ * the side bar's fields, the notebook's add, move and delete, and the app's parts added, moved and deleted.
  * - Every edit is a list of `TextEdit`s, the shape the language server already speaks:
  *   each changes only its own characters, and the rest of the file stays byte for byte.
  * - Plain text in, edits out:  it loads no parser, no language service and no code editor,
@@ -159,6 +159,169 @@ export class SourceEdits {
     const edit = SourceEdits.replacing(text, { start: at, end: at }, `\n\n${indent}${indented(code, indent)}`)
     return { edit, start: at + 2 + indent.length }
   }
+
+  ////////////////
+  // ## Whole elements
+  ////////////////
+
+  /**
+   * The whole element opening at `opening`, its closing tag and all:  `undefined` when no tag opens there, or it never closes.
+   * - Spell's own closer, `</>`, closes whatever's open.
+   */
+  static elementAt(text: string, opening: number): WrittenElement | undefined {
+    const tag = SourceEdits.tagAt(text, opening)
+    if (!tag) return undefined
+    if (tag.selfClosing) return { tag, start: opening, end: tag.end }
+    let depth = 1
+    let at = tag.end
+    while (depth > 0) {
+      at = text.indexOf("<", at)
+      if (at < 0) return undefined
+      if (text.startsWith("</", at)) {
+        const close = text.indexOf(">", at)
+        if (close < 0) return undefined
+        depth--
+        at = close + 1
+        if (depth === 0)
+          return { tag, start: opening, end: at, bodyStart: tag.end, bodyEnd: text.lastIndexOf("</", at) }
+        continue
+      }
+      const inner = SourceEdits.tagAt(text, at)
+      if (!inner || !/^<[a-zA-Z]/.test(text.slice(at, at + 2))) {
+        at++
+        continue
+      }
+      at = inner.end
+      if (!inner.selfClosing) depth++
+    }
+    return undefined
+  }
+
+  /**
+   * `text` with `code` written at `place`, indented as what's around it is, and each thing kept on its own line.
+   * - Inside a tag closed with `/>`:  it opens to hold it.
+   * - `start`:  where `code` starts in the new text, to find it by.
+   * - throws `TypeError` when no element opens at `place.opening`.
+   */
+  static written(text: string, place: ElementPlace, code: string): { text: string; start: number } {
+    const element = SourceEdits.elementAt(text, place.opening)
+    if (!element)
+      throw new TypeError(`SourceEdits.written():  no element opens at ${place.opening};  find it again first`)
+    const indent = indentAt(text, place.opening)
+    if (place.where === "inside") {
+      const inner = indent + indentStep(text)
+      const block = `${inner}${indented(code, inner)}\n`
+      if (element.bodyStart === undefined) {
+        const name = text.slice(element.start + 1, element.tag.nameEnd)
+        const head = text.slice(element.start, element.end).replace(/\s*\/>$/, ">")
+        const whole = `${head}\n${block}${indent}</${name}>`
+        return {
+          text: replaceSpan(text, element, whole),
+          start: element.start + head.length + 1 + inner.length
+        }
+      }
+      const body = text.slice(element.bodyStart, element.bodyEnd)
+      const start = element.bodyStart + body.trimEnd().length
+      const closed = `\n${block}${indent}`
+      return {
+        text: replaceSpan(text, { start, end: element.bodyEnd! }, closed),
+        start: start + 1 + inner.length
+      }
+    }
+    if (place.where === "before") {
+      const block = `${indented(code, indent)}\n${indent}`
+      return { text: replaceSpan(text, { start: element.start, end: element.start }, block), start: element.start }
+    }
+    const block = `\n${indent}${indented(code, indent)}`
+    return {
+      text: replaceSpan(text, { start: element.end, end: element.end }, block),
+      start: element.end + 1 + indent.length
+    }
+  }
+
+  /** The element at `span`, as code with no indent of its own, to write somewhere else. */
+  static codeOf(text: string, span: TextSpan): string {
+    return dedented(text.slice(span.start, span.end), indentAt(text, span.start))
+  }
+
+  /** `text` without the elements at `spans`, each taking its own line with it when it's alone there. */
+  static without(text: string, spans: readonly TextSpan[]): string {
+    let result = text
+    for (const span of [...spans].sort((one, other) => other.start - one.start)) {
+      result = replaceSpan(result, wholeLinesOf(result, span), "")
+    }
+    return result
+  }
+
+  /**
+   * `text` with the elements at `spans` moved to `place`, in the order they're written.
+   * - Only those characters change:  each keeps its words and its comments, taking the indent of where it lands.
+   * - `start`:  where the first starts in the new text, then where each one does.
+   * - throws `TypeError` when `place` is inside one of `spans`:  nothing can go inside itself.
+   */
+  static moved(text: string, spans: readonly TextSpan[], place: ElementPlace): { text: string; starts: number[] } {
+    const ordered = [...spans].sort((one, other) => one.start - other.start)
+    if (ordered.some((span) => place.opening >= span.start && place.opening < span.end)) {
+      throw new TypeError("SourceEdits.moved():  an element can't go inside itself;  choose a place outside it")
+    }
+    const codes = ordered.map((span) => SourceEdits.codeOf(text, span))
+    // the place's offset, once what's moving has gone from before it
+    const gone = ordered.filter((span) => span.end <= place.opening)
+    const lost = gone.reduce((sum, span) => {
+      const lines = wholeLinesOf(text, span)
+      return sum + lines.end - lines.start
+    }, 0)
+    return SourceEdits.writtenAll(
+      SourceEdits.without(text, ordered),
+      { ...place, opening: place.opening - lost },
+      codes
+    )
+  }
+
+  /**
+   * `text` with each of `codes` written at `place`, in order, each on its own line.
+   * - `starts`:  where each one starts in the new text.
+   */
+  static writtenAll(text: string, place: ElementPlace, codes: readonly string[]): { text: string; starts: number[] } {
+    const joiner = `\n`
+    const indent =
+      place.where === "inside" ? indentAt(text, place.opening) + indentStep(text) : indentAt(text, place.opening)
+    const { text: result, start } = SourceEdits.written(text, place, codes.join(joiner))
+    const starts: number[] = []
+    let at = start
+    for (const code of codes) {
+      starts.push(at)
+      at += indented(code, indent).length + joiner.length + indent.length
+    }
+    return { text: result, starts }
+  }
+
+  /**
+   * The one edit that turns `before` into `after`:  the smallest span that differs, widened to whole lines,
+   * so its text is enough to find again (`EditorHistory`).
+   */
+  static editBetween(before: string, after: string): { edit: TextEdit; span: TextSpan; newText: string } {
+    let start = 0
+    while (start < before.length && start < after.length && before[start] === after[start]) start++
+    let end = 0
+    while (
+      end < before.length - start &&
+      end < after.length - start &&
+      before[before.length - 1 - end] === after[after.length - 1 - end]
+    ) {
+      end++
+    }
+    const lineStart = before.lastIndexOf("\n", start - 1) + 1
+    const foundEnd = before.indexOf("\n", before.length - end)
+    const lineEnd = foundEnd < 0 ? before.length : foundEnd
+    const span = { start: lineStart, end: Math.max(lineEnd, lineStart) }
+    // the line before too, when it'd leave nothing to find again
+    if (lineStart === span.end || lineStart === after.length - (before.length - span.end)) {
+      span.start = Math.max(before.lastIndexOf("\n", lineStart - 2) + 1, 0)
+    }
+    const newText = after.slice(span.start, after.length - (before.length - span.end))
+    return { edit: SourceEdits.replacing(before, span, newText), span, newText }
+  }
 }
 
 ////////////////
@@ -167,6 +330,24 @@ export class SourceEdits {
 
 /** Where something is in a file's text:  character offsets, `end` exclusive. */
 export type TextSpan = { start: number; end: number }
+
+/** A whole element as written:  see `SourceEdits.elementAt()`. */
+export type WrittenElement = TextSpan & {
+  /** its opening tag */
+  tag: WrittenTag
+  /** where what's inside it starts:  none, for a tag closed with `/>` */
+  bodyStart?: number
+  /** where what's inside it ends */
+  bodyEnd?: number
+}
+
+/** Where to write something, beside or inside the element opening at `opening`. */
+export type ElementPlace = {
+  /** offset of that element's `<` */
+  opening: number
+  /** beside it, or last inside it */
+  where: "before" | "after" | "inside"
+}
 
 /** What an attribute can be set to:  see `SourceEdits.settingAttribute()`. */
 export type AttributeValue = string | number | boolean | undefined
@@ -228,6 +409,22 @@ export function indented(code: string, indent: string): string {
     .split("\n")
     .map((line, i) => (i > 0 && line ? indent + line : line))
     .join("\n")
+}
+
+/** How much a block's inside is indented in `text`:  a tab where it uses tabs, else two spaces. */
+function indentStep(text: string): string {
+  return /^\t/m.test(text) ? "\t" : "  "
+}
+
+/** `span` with its whole lines, when nothing else is on them:  else `span`, taking the space before it too. */
+function wholeLinesOf(text: string, span: TextSpan): TextSpan {
+  const lineStart = text.lastIndexOf("\n", span.start - 1) + 1
+  const foundEnd = text.indexOf("\n", span.end)
+  const lineEnd = foundEnd < 0 ? text.length : foundEnd
+  const isAlone = !text.slice(lineStart, span.start).trim() && !text.slice(span.end, lineEnd).trim()
+  if (isAlone) return { start: lineStart, end: foundEnd < 0 ? lineEnd : lineEnd + 1 }
+  const spaces = /[ \t]*$/.exec(text.slice(lineStart, span.start))![0].length
+  return { start: span.start - spaces, end: span.end }
 }
 
 /** `value` in `quote`, a `"` in it written `&quot;`, a `'` as `&#39;`. */

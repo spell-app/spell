@@ -1,0 +1,604 @@
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
+
+import {
+  IngestStopped,
+  type CollectionDescription,
+  type IngestAsk,
+  type IngestResult,
+  type IngestSettings,
+  type PlaceDescription,
+  type PlaceLook
+} from "./ingest.types"
+import { agentRead, renameCollections } from "./PlaceReading"
+import { IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
+import { describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
+import {
+  mergedSpell,
+  nameIsTaken,
+  placeLineAt,
+  spellPartsFor,
+  spellTextOf,
+  type SpellLine,
+  type SpellParts
+} from "./PlaceSpell"
+import { PoliteReader } from "./PoliteReader"
+
+/** How many times it leaves out a line Spell can't read, and tries again. */
+const MOST_COMPILES = 12
+
+/** What a compile says of a line:  `3:12 ...`. */
+const ERROR_LINE = /^(\d+):\d+ (.*)$/s
+
+/** A kind of place, as a person might write it:  `sheet` and `spreadsheet` are one. */
+const KIND_WORDS: Readonly<Record<string, string>> = {
+  spreadsheet: "sheet",
+  csv: "sheet",
+  rest: "web server",
+  graphql: "graphql server"
+}
+
+/** The kinds of place spell knows, for the question. */
+const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
+
+/****************
+ * ### `PlaceIngest`
+ * Looks at one data source for real, and writes what it found:  a description of it, and the Spell to reach it.
+ *
+ * ```ts
+ * const ingest = new PlaceIngest({ fetch, ask, files, readThrough, claude })
+ * await ingest.add({ address: "https://swapi.info/api", into: "StarWars.spell" })
+ * await ingest.update("StarWars.spell")
+ * ```
+ *
+ * - The steps, in order:
+ *   1. which file, and is the place already in it
+ *   2. which kind of place, from `kind`, else the address, else a request, else it asks, else it stops, naming those it tried
+ *   3. a look:  a few pages of each collection, its docs (`lookAtPlace()`, through `PoliteReader`, which can't write)
+ *   4. what the rows show (`describeLook()`), then what the agent reads in samples of them (`agentRead()`)
+ *   5. the Spell (`spellPartsFor()`), which has to compile:  a line Spell can't read is left out, and the description says so
+ *   6. a real read through that Spell (`readThrough`), which has to return rows
+ *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice
+ * - The description goes beside the Spell file, `<File>.<place>.place.json5`:  one per place, as a file can hold several.
+ *   - JSON5, so a person can read it, and the next look can too.
+ *   - A person's own keys in it, and comments, stay when it's written again.
+ * - Knows nothing of a terminal, a disk or `claude`:  every one is handed in (`IngestSettings`), so the editor can run the
+ *   same steps, and ask its own way.
+ * - Imported by path, never through `SP`'s barrel:  `spell/parser/spell/ingest/PlaceIngest`.
+ * - throws `IngestStopped` for whatever only a person can settle, having written nothing
+ ****************/
+export class PlaceIngest {
+  /** What it's handed. */
+  private readonly settings: IngestSettings
+
+  constructor(settings: IngestSettings) {
+    this.settings = settings
+  }
+
+  /**
+   * Add the source at `ask.address` to a Spell file.
+   * - throws `IngestStopped`:  see the class
+   */
+  async add(ask: IngestAsk): Promise<IngestResult> {
+    const { files } = this.settings
+    const address = addressFrom(ask.address)
+    const file = await this.fileFor(ask.into)
+    refuseLanguage(file)
+    const existing = (await files.read(file)) ?? ""
+    const already = placeLineAt(existing, address)
+    if (already) return this.alreadyThere(file, already, existing)
+    const reader = this.readerFor(ask.keySecret)
+    const kind = await this.kindFor(address, ask.kind, reader)
+    this.say(`A ${kind}.  Looking at what it holds ...`)
+    const look = await lookAtPlace(kind, {
+      address,
+      reader,
+      ...withDefined({ docs: ask.docs, collections: ask.collections })
+    })
+    if (!look.collections.length) {
+      throw new IngestStopped(`${address} gave back nothing to describe.  ${look.notes.join("  ")}`)
+    }
+    // the address asked for may be one list of a place, whose own address is above it
+    const alreadyAbove = placeLineAt(existing, look.address)
+    if (alreadyAbove) return this.alreadyThere(file, alreadyAbove, existing)
+    const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
+    if (ask.keySecret) description.about.keySecret = ask.keySecret
+    await this.readWithAgent(description, look, { keepName: !!ask.name })
+    if (nameIsTaken(existing, description.about.name)) {
+      throw new IngestStopped(
+        `${file} already has a place called "${description.about.name}", at another address:  name this one, --name <words>`
+      )
+    }
+    const warnings = this.compileLeavingOut(description, file)
+    this.checkAddedCompiles(existing, description, file)
+    await this.readThroughIt(description, reader)
+    await this.finish(description)
+    const spell = description.spell.join("\n")
+    const text = existing.trim() ? `${existing.trimEnd()}\n\n${spell}\n` : `${spell}\n`
+    const descriptionPath = descriptionPathFor(file, description.about.name)
+    await files.write(file, text)
+    await files.writeDescription(descriptionPath, description)
+    return { file, descriptionPath, description, wrote: true, spell, changes: [], couldntChange: [], warnings }
+  }
+
+  /**
+   * Look again at each place described beside `file`, or only the one at `address`:  say what changed, and change it.
+   * - Keeps what a person wrote, in the Spell and in the description:  see `mergedSpell()`.
+   * - Writes nothing until the merged file compiles, and a read through the new Spell returns rows.
+   * - throws `IngestStopped`:  no description, or nothing compiles or reads
+   */
+  async update(file: string, { address }: { address?: string } = {}): Promise<IngestResult[]> {
+    const { files } = this.settings
+    const paths = await files.descriptionsBeside(file)
+    if (!paths.length) {
+      throw new IngestStopped(
+        `${file} has no description beside it, so there's nothing to look at again:  spell place ingest <address> --into ${file}`
+      )
+    }
+    const results: IngestResult[] = []
+    for (const path of paths) {
+      const old = await files.readDescription(path)
+      if (!old) continue
+      if (address && addressFrom(address) !== old.about.address) continue
+      results.push(await this.updateOne(file, path, old))
+    }
+    if (!results.length) throw new IngestStopped(`${file} has no description of a place at ${address}`)
+    return results
+  }
+
+  /** Look again at one place. */
+  private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
+    const { files } = this.settings
+    const { name, kind, address, keySecret, docsAt } = old.about
+    const reader = this.readerFor(keySecret)
+    this.say(`Looking again at ${address} ...`)
+    const collections = Object.values(old.collections).map(({ at }) => at)
+    const look = await lookAtPlace(kind, {
+      address,
+      reader,
+      collections,
+      addListed: true,
+      ...withDefined({ docs: docsAt })
+    })
+    const description = describeLook(look, { kind, name })
+    if (keySecret) description.about.keySecret = keySecret
+    if (carryOver(description, old)) {
+      // something new, for the agent to read;  what was chosen before still stands
+      await this.readWithAgent(description, look, { keepName: true })
+      carryOver(description, old)
+    }
+    const shapeSame = (await fingerprintOf(description)) === old.about.fingerprint
+    if (shapeSame) {
+      description.canDo = old.canDo
+      description.about.readBy = old.about.readBy
+      if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
+      description.notes = old.notes
+    }
+    const before = spellPartsFor(old)
+    const after = spellPartsFor(description)
+    const text = (await files.read(file)) ?? ""
+    const others = await files.otherSpellBeside(file)
+    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own))
+    const changes = [...saidChanges(old, description), ...merge.changed]
+    const warnings = this.checkFileCompiles(text, merge.text, file)
+    await this.readThroughIt(description, reader)
+    await this.finish(description)
+    await files.write(file, merge.text)
+    await files.writeDescription(descriptionPath, description)
+    return {
+      file,
+      descriptionPath,
+      description,
+      wrote: true,
+      spell: merge.text,
+      changes,
+      couldntChange: merge.couldnt,
+      warnings
+    }
+  }
+
+  ////////////////
+  // ## Which file, which kind
+  ////////////////
+
+  /** The Spell file:  as given, else asked for.  - throws `IngestStopped` with no one to ask */
+  private async fileFor(into: string | undefined): Promise<string> {
+    if (into) return into
+    const answer = await this.settings.ask({ asks: "file", text: "Which .spell file should the place go in?" })
+    if (!answer) throw new IngestStopped("which file should the place go in?  --into <file>")
+    return answer
+  }
+
+  /** The kind:  see the class.  - throws `IngestStopped` for a kind nobody knows, and when it can't tell, with no one to ask */
+  private async kindFor(address: string, named: string | undefined, reader: PoliteReader): Promise<string> {
+    if (named) return kindNamed(named)
+    const read = kindReadFrom(address)
+    if (read) return read
+    const tried: string[] = []
+    const found = await kindFoundAt(address, reader, tried)
+    if (found) return found
+    const answer = await this.settings.ask({
+      asks: "kind",
+      text: `What kind of place is ${address}?  Tried ${tried.join(", ") || "reading its address"}, and couldn't tell.`,
+      choices: KINDS_TO_NAME
+    })
+    if (answer) return kindNamed(answer)
+    throw new IngestStopped(
+      `can't tell what kind of place ${address} is:  tried ${tried.join(", ") || "reading its address"}.  Say which, --kind <kind>:  ${KINDS_TO_NAME.join(", ")}`
+    )
+  }
+
+  /** A reader for this place, with its key.  - throws `IngestStopped` for a key that isn't there */
+  private readerFor(keySecret: string | undefined): PoliteReader {
+    const { fetch, sleep, keyNamed } = this.settings
+    const key = keySecret ? keyNamed?.(keySecret) : undefined
+    if (keySecret && key === undefined) {
+      throw new IngestStopped(
+        `the key named ${keySecret} isn't in the environment:  set it, and it's sent, never written down`
+      )
+    }
+    return new PoliteReader({ fetch, ...withDefined({ key, sleep }) })
+  }
+
+  /** The place is already in the file:  nothing changes. */
+  private async alreadyThere(file: string, name: string, text: string): Promise<IngestResult> {
+    const { files } = this.settings
+    const descriptionPath = descriptionPathFor(file, name)
+    const description = await files.readDescription(descriptionPath)
+    return {
+      file,
+      descriptionPath,
+      description: description ?? ({ about: { name } } as PlaceDescription),
+      wrote: false,
+      spell: text,
+      changes: [],
+      couldntChange: [],
+      warnings: []
+    }
+  }
+
+  ////////////////
+  // ## The agent
+  ////////////////
+
+  /** Have the agent read it, if there is one.  NEVER throws. */
+  private async readWithAgent(
+    description: PlaceDescription,
+    look: PlaceLook,
+    { keepName }: { keepName: boolean }
+  ): Promise<void> {
+    const { claude, claudeVia } = this.settings
+    if (!claude) return
+    this.say("Asking the agent to read samples of it ...")
+    if (await agentRead(description, look, claude, { keepName })) description.about.readBy = claudeVia ?? "an agent"
+    renameCollections(description)
+  }
+
+  ////////////////
+  // ## Compiling
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  the Spell compiles by itself, each line it can't read left out of `description`, with why:  what compiling warned of.
+   * - throws `IngestStopped` for an error on any other line:  the place's own, say
+   */
+  private compileLeavingOut(description: PlaceDescription, file: string): string[] {
+    for (let round = 0; round < MOST_COMPILES; round++) {
+      const parts = spellPartsFor(description)
+      const text = spellTextOf(parts)
+      const { errors, warnings } = compile(text, file)
+      if (!errors.length) return warnings
+      const lines = text.split("\n")
+      let leftOut = 0
+      for (const error of errors) {
+        const [, at, message] = ERROR_LINE.exec(error) ?? []
+        const line = lines[Number(at) - 1]?.trim()
+        if (line && leaveOutLine(description, parts, line, message ?? error)) leftOut++
+      }
+      if (!leftOut) {
+        throw new IngestStopped(`the Spell written for it doesn't compile:\n${errors.join("\n")}\n\n${text}`)
+      }
+    }
+    throw new IngestStopped("the Spell written for it doesn't compile, after leaving out every line it could")
+  }
+
+  /** The file with this place added has no error it hadn't before.  - throws `IngestStopped` if it does */
+  private checkAddedCompiles(existing: string, description: PlaceDescription, file: string): void {
+    if (!existing.trim()) return
+    const added = `${existing.trimEnd()}\n\n${spellTextOf(spellPartsFor(description))}`
+    this.checkFileCompiles(existing, added, file)
+  }
+
+  /** The file as it'll be has no error it hadn't before:  a program may import what no single file can see.  - throws `IngestStopped` if it does */
+  private checkFileCompiles(before: string, after: string, file: string): string[] {
+    const was = new Set(compile(before, file).errors.map(withoutPlaceInFile))
+    const { errors, warnings } = compile(after, file)
+    const added = errors.filter((error) => !was.has(withoutPlaceInFile(error)))
+    if (added.length) throw new IngestStopped(`with this place in it, ${file} doesn't compile:\n${added.join("\n")}`)
+    return warnings
+  }
+
+  ////////////////
+  // ## Reading through it
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  really reads each type through the Spell, and says what it found on `description`.
+   * - throws `IngestStopped` if no type returned any row
+   */
+  private async readThroughIt(description: PlaceDescription, reader: PoliteReader): Promise<void> {
+    const { readThrough } = this.settings
+    reader.startAgain()
+    this.say("Reading through the Spell ...")
+    const types: Record<string, string> = {}
+    const shown = Object.values(description.collections).filter((collection) => !collection.leftOut)
+    for (const { type } of shown) types[type] = classNameFor(type)
+    const spell = spellTextOf(spellPartsFor(description, { withKey: false }))
+    const { byType, complaints } = await readThrough({ spell, types, fetch: reader.fetch })
+    for (const collection of shown) {
+      const read = byType[collection.type]
+      if (read) collection.readThrough = read
+    }
+    description.notes = [...description.notes, ...new Set(complaints)]
+    const rows = shown.reduce((sum, { readThrough: read }) => sum + (read?.rows ?? 0), 0)
+    if (!rows) {
+      const why = shown.map(({ type, readThrough: read }) => `${type}:  ${read?.problem ?? "no rows"}`).join("\n")
+      throw new IngestStopped(`a read through the Spell returned no rows, so nothing was written:\n${why}\n\n${spell}`)
+    }
+  }
+
+  /** SIDE EFFECT:  `description` is finished:  when it was looked at, its fingerprint, what Spell can't say, its Spell. */
+  private async finish(description: PlaceDescription): Promise<void> {
+    description.about.lookedAt = (this.settings.now?.() ?? new Date()).toISOString()
+    description.about.fingerprint = await fingerprintOf(description)
+    description.spellCantSay = whatSpellCantSay(description)
+    description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
+  }
+
+  /** Say how it's going. */
+  private say(line: string): void {
+    this.settings.say?.(line)
+  }
+}
+
+////////////////
+// ## What it knows
+////////////////
+
+/** An address as it's asked for:  no trailing slash, and a web address with its scheme. */
+function addressFrom(address: string): string {
+  const trimmed = address.trim().replace(/\/+$/, "")
+  if (IS_WEB_ADDRESS.test(trimmed) || /^(?:wss?|did):/i.test(trimmed)) return trimmed
+  return /^[\w-]+(?:\.[\w-]+)+\//.test(`${trimmed}/`) && !/\.csv$/i.test(trimmed) ? `https://${trimmed}` : trimmed
+}
+
+/** `kind`, as `core.place()` words it.  - throws `IngestStopped` for one it can't look at */
+function kindNamed(kind: string): string {
+  const named = KIND_WORDS[kind.trim().toLowerCase()] ?? kind.trim().toLowerCase()
+  if (!KINDS_IT_CAN_LOOK_AT.includes(named)) {
+    throw new IngestStopped(`can't look at a "${kind}":  --kind is one of ${KINDS_IT_CAN_LOOK_AT.join(", ")}`)
+  }
+  return named
+}
+
+/** A file in another language can't take this Spell yet:  it's written in English.  - throws `IngestStopped` */
+function refuseLanguage(file: string): void {
+  const language = /\.([a-z]{2})\.spell$/.exec(file)?.[1]
+  if (language && language !== "en") {
+    throw new IngestStopped(
+      `it writes English Spell, and ${file} is in another language:  put it in an English file, then spell translate`
+    )
+  }
+}
+
+/** Where a place's description goes:  beside its Spell file. */
+export function descriptionPathFor(file: string, name: string): string {
+  return `${file.replace(/\.spell$/, "")}.${name.trim().replace(/\s+/g, "-")}.place.json5`
+}
+
+/** The class a type's words compile to:  `life form` => `LifeForm`. */
+function classNameFor(words: string): string {
+  return words
+    .split(" ")
+    .map((word) => `${SP.typeName(word)}`.replace(/^\p{Ll}/u, (first) => first.toUpperCase()))
+    .join("")
+}
+
+/** `values` without what's undefined:  for optional settings. */
+function withDefined<Values extends object>(values: Values): { [Key in keyof Values]?: NonNullable<Values[Key]> } {
+  return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined)) as never
+}
+
+/** Compile `text` as this file, alone. */
+function compile(text: string, file: string): { errors: string[]; warnings: string[] } {
+  const name = file.slice(file.lastIndexOf("/") + 1)
+  const { files } = parseSpellProject([{ path: `/${name}`, contents: text }])
+  return { errors: files[0]!.errors as string[], warnings: files[0]!.warnings as string[] }
+}
+
+/** What an error says, without where:  lines move when a place is added. */
+function withoutPlaceInFile(error: string): string {
+  return error.replace(/^\d+:\d+ /, "")
+}
+
+/**
+ * SIDE EFFECT:  `description` leaves out what this line says, with why:  `false` if it's not a line that can go.
+ * - A field's, by itself;  a type's first lines, the whole collection.
+ */
+function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: string, why: string): boolean {
+  const reason = `Spell couldn't read its line:  ${line} -- ${why}`
+  const key = keyOfLine(parts, line)
+  if (key) {
+    const [kind, collection, field] = key.split(":") as [string, string, string?]
+    const held = description.collections[collection]
+    if (held && field && (kind === "field" || kind === "name")) {
+      const about = held.fields[field]!
+      if (kind === "name" && !about.wordsInQuotes) {
+        about.wordsInQuotes = true
+        return true
+      }
+      about.leftOut = reason
+      description.notes.push(`Left out ${collection}'s "${field}":  ${reason}`)
+      return true
+    }
+    if (held && kind === "lives") return leaveOutCollection(description, collection, reason)
+  }
+  const type = parts.types.find(({ header }) => header === line)
+  return !!type && leaveOutCollection(description, type.collection, reason)
+}
+
+/** SIDE EFFECT:  the Spell leaves out a whole collection. */
+function leaveOutCollection(description: PlaceDescription, collection: string, reason: string): boolean {
+  const held = description.collections[collection]!
+  if (held.leftOut) return false
+  held.leftOut = reason
+  description.notes.push(`Left out the collection "${collection}":  ${reason}`)
+  return true
+}
+
+/** The key of a line the tool wrote. */
+function keyOfLine({ placeLines, types }: SpellParts, line: string): string | undefined {
+  const all: SpellLine[] = [...placeLines, ...types.flatMap((type) => type.lines)]
+  return all.find(({ text }) => text.trim() === line)?.key
+}
+
+/** Are these words used in a line the tool didn't write, here or in another file beside it? */
+function isUsed(words: string, text: string, others: readonly string[], own: ReadonlySet<string>): boolean {
+  const pattern = new RegExp(`\\b${words.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
+  const uses = (line: string) => pattern.test(line.replace(/\/\/.*$/, ""))
+  const hereUses = text.split("\n").some((line) => !own.has(line.trim()) && uses(line))
+  return hereUses || others.some((other) => other.split("\n").some(uses))
+}
+
+////////////////
+// ## Looking again
+////////////////
+
+/**
+ * SIDE EFFECT:  what was chosen last time stays:  each collection's name and words, each field's, and any keys a person added.
+ * - Matched by address and by the source's own name for a field, as those don't change when someone renames a type.
+ * - Returns whether anything new is left for the agent to read.
+ */
+function carryOver(description: PlaceDescription, old: PlaceDescription): boolean {
+  let isNew = false
+  const kept: Record<string, CollectionDescription> = {}
+  for (const [name, collection] of Object.entries(description.collections)) {
+    const was = Object.entries(old.collections).find(([, each]) => each.at === collection.at)
+    if (!was) {
+      kept[name] = collection
+      isNew = true
+      continue
+    }
+    const [oldName, oldCollection] = was
+    for (const [field, about] of Object.entries(collection.fields)) {
+      const wasField = oldCollection.fields[field]
+      if (!wasField) {
+        isNew = true
+        continue
+      }
+      const { leftOut: _recalculated, ...keptField } = wasField
+      collection.fields[field] = {
+        ...keptField,
+        ...about,
+        words: wasField.words,
+        ...(wasField.means && { means: wasField.means }),
+        ...(about.type === wasField.type && wasField.leftOut && { leftOut: wasField.leftOut })
+      }
+    }
+    kept[oldName] = {
+      ...oldCollection,
+      ...collection,
+      type: oldCollection.type,
+      ...(oldCollection.about && { about: oldCollection.about }),
+      ...(oldCollection.idField && oldCollection.idField in collection.fields && { idField: oldCollection.idField }),
+      fields: collection.fields
+    }
+  }
+  description.collections = kept
+  const { about, canDo, collections, notes, spellCantSay, checkEverySeconds, spell, ...personsKeys } = old
+  Object.assign(description, personsKeys)
+  return isNew
+}
+
+/** What's different from the last look, in words for people. */
+function saidChanges(old: PlaceDescription, now: PlaceDescription): string[] {
+  const said: string[] = []
+  const oldVersion = old.about.version?.says
+  const newVersion = now.about.version?.says
+  if (newVersion !== oldVersion) {
+    said.push(`Its version:  ${oldVersion ?? "none named"} => ${newVersion ?? "none named"}.`)
+  }
+  for (const [name, collection] of Object.entries(now.collections)) {
+    const was = old.collections[name]
+    if (!was) continue
+    for (const [field, { type }] of Object.entries(collection.fields)) {
+      const wasField = was.fields[field]
+      if (!wasField) said.push(`${name} has a new field, "${field}" (${type}).`)
+      else if (wasField.type !== type) said.push(`${name}'s "${field}" holds ${type} now, not ${wasField.type}.`)
+    }
+    for (const field of Object.keys(was.fields)) {
+      if (!(field in collection.fields)) said.push(`${name}'s "${field}" is gone.`)
+    }
+  }
+  return said
+}
+
+/** What this source does that Spell has no words for:  each said plainly, in the description, as what a program can't do yet. */
+function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): string[] {
+  const said = new Set<string>()
+  const each = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
+  const links = each.flatMap(([name, { fields, idField }]) =>
+    Object.entries(fields)
+      .filter(([field, { type }]) => field !== idField && (type === "link" || type === "list of links"))
+      .map(([field]) => `${name}.${field}`)
+  )
+  if (links.length) {
+    said.add(
+      `Following a link by its address:  ${links.join(", ")} hold addresses, so they read as text, and a program finds what they name with \`where\`.`
+    )
+  }
+  const pointers = each
+    .filter(([, { fields, idIsAnAddress }]) => idIsAnAddress && Object.keys(fields).length <= 2)
+    .map(([name]) => name)
+  if (pointers.length) {
+    said.add(
+      `A list that only points elsewhere:  the rows of ${pointers.join(", ")} hold little but an address, the rest is at each one, and no line can say to read it there.`
+    )
+  }
+  for (const [name, { fields, paging, rowsAt, nextAt }] of each) {
+    for (const [field, { type }] of Object.entries(fields)) {
+      if (type === "inside")
+        said.add(
+          `What's inside a field:  ${name}.${field} holds objects, and a type's line can't say their shape, so it's left out.`
+        )
+    }
+    if (paging === "link header")
+      said.add(
+        `Paging by a Link header:  ${name} says its next page there, and no line can name it, so a read gets only its first page.`
+      )
+    if (rowsAt && new Set(each.map(([, collection]) => collection.rowsAt)).size > 1)
+      said.add(`Rows kept somewhere different in each collection:  "its rows are" is for the whole place.`)
+    if (nextAt && new Set(each.map(([, collection]) => collection.nextAt)).size > 1)
+      said.add(`A next page kept somewhere different in each collection:  "its next page is" is for the whole place.`)
+  }
+  const { kind } = about
+  if (kind === "web server") {
+    said.add(
+      "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
+    )
+    if (/read only/.test(canDo.write))
+      said.add("That it's read only:  no line says, so a program's write compiles, and fails when it runs.")
+  }
+  if (kind === "sheet" || kind === "google sheet") {
+    if (
+      each.some(([, { fields }]) =>
+        Object.keys(fields).some((field) => /[^a-z0-9_ ]/.test(field) || /[A-Z]/.test(field))
+      )
+    ) {
+      said.add(
+        "A sheet's column by another name:  a sheet reads no `a recipe's title is its \"Title\"` line, so a column named differently stays empty."
+      )
+    }
+  }
+  return [...said]
+}

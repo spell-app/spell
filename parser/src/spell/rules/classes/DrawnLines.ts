@@ -120,7 +120,7 @@ export class DrawnLines {
   }
 
   /**
-   * `unit`, with its riders, or a loop of things saved in a place or of `the people here`, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
+   * `unit`, with its riders, or a loop of things saved in a place or of `everyone here`, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
    * - So it has its own "…", its own Try again, and its items are kept by identity:  typing in one doesn't draw them all again.
    * - A drawn line with riders:  `core.drawRead(() => value, null, { riders })`.
    * - Its function is named as a drawing is:  a drawing never waits, it shows what it has (`P.DRAWING_NAME`).

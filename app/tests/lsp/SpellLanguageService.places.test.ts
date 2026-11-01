@@ -10,7 +10,7 @@ import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 /** A place's words, in an editor (epic `data` P11):  a hover says what it is, and a rename reaches every line. */
 describe("a place's words, in an editor", () => {
-  const SOURCE = `cookbook is in memory
+  const SOURCE = `cookbook is an in memory database
 a recipe is a thing:
 	- it is saved in the cookbook
 	- its "title" is text

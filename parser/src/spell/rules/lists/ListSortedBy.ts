@@ -3,15 +3,14 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { PostfixOperatorSuffix, Precedence, SuffixLeft } from "spell/parser/spell/rules/expressions"
-import { EveryThing } from "spell/parser/spell/rules/classes/EveryThing"
-import { getWhereMethod, isItemScope, itemScope, type ItemVariableData } from "./lists.shared"
+import { getWhereMethod, isItemScope, itemScope, noteSortKeyScope, type ItemVariableData } from "./lists.shared"
 
 /** What a sort key's code calls the item:  in spell, only `it` and `its` name it. */
 const ITEM_VARIABLE = "item"
 
 /**
  * `list_sorted_by` rule:  a list in order of something about each item (epic `data` P10).
- * - e.g. `every recipe, sorted by its title`
+ * - e.g. `every recipe, sorted by its title`, `recipes sorted by title`
  * - e.g. `the cards in the deck where it is red, sorted by its rank`
  * - A postfix suffix, the list before it, binding last:  `every recipe where ...` is sorted whole.
  * - Its key is an `{inline_expression}?`, so it eats the rest of the line, as a `where` does.
@@ -38,7 +37,7 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
 
   /**
    * SIDE EFFECT:  a warning when Spanish's `ordenada` doesn't agree with its list:  `cada receta, ordenada`, `las recetas, ordenadas`.
-   * - `every recipe` is one, `the recipes` many.
+   * - `every recipe` is one, `the recipes` and `all recipes` many:  it's what the type's name says.
    */
   private static warnIfItDoesntAgree(match: P.Match, tokens: P.Token[]): void {
     const left = SuffixLeft.current
@@ -46,7 +45,9 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     const language = SP.Language.of(match.scope)
     const word = tokens.map((token) => `${token.value}`).find((each) => /^ordenad/.test(each))
     if (!word || !type) return
-    const wanted = language.agreedForm(word, type, !left.is(EveryThing) && left.rule.name !== "every_thing_where")
+    const written = (left.groups as { type?: P.Match }).type?.raw
+    const isOne = !!written && SP.singularIn(match.scope, `${written}`.trim()) === `${written}`.trim()
+    const wanted = language.agreedForm(word, type, !isOne)
     if (wanted) SP.SpellWarnings.note(match, language.parserMessage("did-you-mean", { phrase: wanted }))
   }
 
@@ -55,13 +56,15 @@ export class ListSortedBy extends PostfixOperatorSuffix<"body?"> {
     const datatype = match.scope.getItemType(SuffixLeft.current?.datatype)
     const variable = new P.ScopeVariable({ name: ITEM_VARIABLE, datatype, declaredBy: match })
     ;(match.data as ItemVariableData).itemVariable = variable
-    return itemScope({
+    const scope = itemScope({
       parentScope: match.scope,
       args: [variable],
       mapItTo: ITEM_VARIABLE,
       itDatatype: datatype,
       declaredBy: match
     })
+    noteSortKeyScope(scope)
+    return scope
   }
 
   /** The same list, in another order. */

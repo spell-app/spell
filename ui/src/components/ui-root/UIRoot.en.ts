@@ -16,6 +16,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const rootVocabulary = {
   tag: "ui-root",
+  icon: "sitemap",
   topics: ["layout", "containers", "loading", "basic"],
   aka: ["app shell", "app root", "provider", "loader", "lazy loading", "theme provider"],
   noun: "root",

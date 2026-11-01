@@ -14,6 +14,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const termsVocabulary = {
   tag: "ui-terms",
+  icon: "book open",
   topics: ["text", "data display", "collections"],
   aka: ["dl", "definition list", "description list", "key value list", "properties", "details"],
   noun: "terms",

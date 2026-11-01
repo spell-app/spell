@@ -28,6 +28,8 @@ import { ListCount } from "./ListCount"
 import { ListEmpty } from "./ListEmpty"
 import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
+import { SortKeyField } from "./SortKeyField"
+import { AddNewThing } from "./AddNewThing"
 import { ListIteration } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
@@ -606,6 +608,12 @@ listsEs.addRule(ListFilter, {
       ]
     }
   ]
+})
+
+listsEs.addRule(AddNewThing, { syntax: "(añadir|agregar) {thing:expression}" })
+
+listsEs.addRule(SortKeyField, {
+  syntax: "{property:member_words}"
 })
 
 listsEs.addRule(ListSortedBy, {

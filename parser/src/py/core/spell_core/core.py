@@ -29,6 +29,7 @@ from spell_core.numbers import NumberMethods
 from spell_core.reference_methods import ReferenceMethods
 from spell_core.runtime_methods import RuntimeMethods
 from spell_core.seeded_random import DEFAULT_SEED, ParkMiller, RandomMethods
+from spell_core.sending import SendingMethods
 from spell_core.spell_tests import SpellTestMethods
 from spell_core.text_methods import TextMethods
 from spell_core.thing_methods import ThingMethods
@@ -44,6 +45,7 @@ class Core(
     ThingMethods,
     TextMethods,
     RuntimeMethods,
+    SendingMethods,
     WordMethods,
     DrawingMethods,
     ReferenceMethods,

@@ -5,7 +5,9 @@
  * and `spell translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
- * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12).
+ * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
+ * and `spell place ingest`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
+ * as it needs no project.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without the app folder (never, in a checkout), `needHook()` says so and exits 2.
@@ -236,6 +238,40 @@ export default function languageCommands(spell: Command): void {
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) =>
       language("translateTime", projects, command, { needsTo: true })
+    )
+
+  // a program's data sources:  looked at for real, and written up (epic `data` P18)
+  const place = spell.command("place").description("the places a program's data lives in")
+
+  place
+    .command("ingest")
+    .description(
+      "look at a data source for real, and write what it found:  a description of it, its collections, fields, ids, links, " +
+        "paging and limits, beside the Spell file, and the Spell to reach it, in the file -- through the Claude API with " +
+        "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
+        "and that a read through it returns rows.  Exits 1 if something needs a person"
+    )
+    .argument("[address]", "where it is, e.g. https://swapi.info/api, recipes.csv -- with --update, only that place")
+    .option(
+      "--kind <kind>",
+      "its kind:  web server, graphql server, sheet, google sheet -- default worked out from the address, else it asks"
+    )
+    .option(
+      "--into <file>",
+      "the .spell file for its Spell:  added to, never overwritten, the same place never twice -- default it asks"
+    )
+    .option(
+      "--update <file>",
+      "look again at the places described beside this file:  says what changed, updates the description and the Spell, " +
+        "keeps what you wrote, says what it couldn't change"
+    )
+    .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
+    .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
+    .option("--docs <address>", "where its docs are, over those it finds by itself")
+    .option("--collections <paths>", "its collections' paths, comma-separated, for a source that doesn't list them")
+    .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
+    .action((address: string | undefined, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))
     )
 
   // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)

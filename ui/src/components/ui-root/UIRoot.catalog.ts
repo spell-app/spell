@@ -962,6 +962,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "readonly",
       "compact",
       "columns",
+      "origins",
       "show-defaults",
       "output",
       "error",
@@ -1563,7 +1564,17 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled"
     ]
   },
+  "ui-tree": {
+    folder: "ui-tree",
+    skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
+    attributes: ["choose", "filter", "label"]
+  },
   "ui-tree-diagram": { folder: "ui-tree-diagram", skeleton: { height: "12em" }, attributes: ["tree"] },
+  "ui-tree-item": {
+    folder: "ui-tree",
+    skeleton: { parts: [{ shape: "line" }] },
+    attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group"]
+  },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
   "ui-video": {
     folder: "ui-video",

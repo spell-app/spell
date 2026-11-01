@@ -44,7 +44,8 @@ const UTIL_NODE = [
   "time.test.ts",
   "places/RestPlace.test.ts",
   "places/GraphPlace.test.ts",
-  "places/SheetPlace.test.ts"
+  "places/SheetPlace.test.ts",
+  "places/AtProtoPlace.test.ts"
 ]
 
 export default defineConfig({

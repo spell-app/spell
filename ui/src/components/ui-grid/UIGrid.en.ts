@@ -32,6 +32,7 @@ const GRID_REVERSALS = [
  ****************/
 export const gridVocabulary = {
   tag: "ui-grid",
+  icon: "th",
   topics: ["layout", "basic", "collections"],
   aka: ["columns", "row", "flex grid", "layout grid", "responsive grid"],
   noun: "grid",

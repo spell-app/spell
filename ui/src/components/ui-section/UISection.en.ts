@@ -31,6 +31,7 @@ import * as UIT from "spell/ui/components/components.types"
  ****************/
 export const sectionVocabulary = {
   tag: "ui-section",
+  icon: "bookmark outline",
   topics: ["layout", "containers"],
   aka: ["section", "panel", "collapsible", "disclosure", "fieldset", "expander"],
   // a title over its content, as a segment's skeleton

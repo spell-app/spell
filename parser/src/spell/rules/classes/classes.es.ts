@@ -2310,6 +2310,12 @@ classesEs.addRule(EveryThingWhere, {
   ]
 })
 
+classesEs.addRule(EveryThingWhere, {
+  syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} donde {inline_expression}?"
+})
+
+classesEs.addRule(TheThings, { syntax: "(todos|todas) (los|las)? {type:plural_type}" })
+classesEs.addRule(TheThings, { syntax: "{type:plural_type}" })
 classesEs.addRule(TheThings, {
   syntax: "(los|las) {type:plural_type}",
   tests: [
@@ -2356,7 +2362,7 @@ classesEs.addRule(KindValues, {
         ["palos de carta", "Carta.Palos"],
         ["lados de pila de descartes", "PilaDeDescartes.Lados"],
         // un tipo que no es de valores
-        ["cartas", undefined]
+        ["cartas", "core.everyThing(Carta)"]
       ]
     }
   ]

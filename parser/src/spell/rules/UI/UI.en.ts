@@ -92,7 +92,7 @@ UI.addRule(Notify, {
     "notify {kind:notify_kind}? {message:expression} (titled {title:expression})?" +
     " (in (inverted:inverted)? {color:toast_color})? {position:toast_position}?" +
     " ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}?" +
-    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (and wait)?",
+    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (wait:and wait)?",
   tests: [
     {
       compileAs: "statement",
@@ -105,7 +105,8 @@ UI.addRule(Notify, {
         [`notify error "Oops" in black`, `core.notify("Oops", { class: "error black" })`],
         [`notify "Here!" at the top left`, `core.notify("Here!", { position: "top left" })`],
         [`notify "Here!" in the center`, `core.notify("Here!", { position: "centered" })`],
-        [`notify "Bye" for 5 seconds`, `await core.notify("Bye", { time: 5, units: "seconds" })`],
+        [`notify "Bye" for 5 seconds`, `core.notify("Bye", { time: 5, units: "seconds" })`],
+        [`notify "Bye" for 5 seconds and wait`, `await core.notify("Bye", { time: 5, units: "seconds" })`],
         [`notify "Stay" until clicked`, `core.notify("Stay", { time: 0 })`],
         [`notify "Look" with a progress bar`, `core.notify("Look", { showProgress: "bottom" })`],
         {

@@ -105,7 +105,8 @@ describe("the spell syntax table, spellSyntax.json", () => {
       "starts_with_or_not",
       "ends_with_or_not",
       "has_or_has_no",
-      "exclusive_or_not"
+      "exclusive_or_not",
+      "are_or_are_not"
     ])
     expect(row?.syntaxes[0]).toEqual({ syntax: "(is|(negated:is not|isn't|isnt))" })
   })
@@ -198,7 +199,7 @@ describe("Spanish's spell syntax table, spellSyntax.es.json", () => {
   test("a word rule says its Spanish words", () => {
     const row = rows.find((it) => it.className === "Negatable")
     expect(row?.syntaxes[0]).toEqual({
-      syntax: "(es|está|esta|son|están|estan|soy|(negated:no es|no está|no esta|no son|no están|no estan|no soy))"
+      syntax: "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
     })
   })
 

@@ -142,8 +142,7 @@ export const englishWords: SP.LanguageWords = {
     animation: "to",
     "create animation": "to",
     await: "",
-    "wait for": "",
-    "and wait": ""
+    "wait for": ""
   },
   /** A process was once also an animation. */
   retiredRuleWords: {

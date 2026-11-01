@@ -12,6 +12,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const splitPanelVocabulary = {
   tag: "ui-split-panel",
+  icon: "columns",
   topics: ["layout", "containers"],
   aka: ["split view", "split pane", "resizable panes", "panes", "splitter", "sash"],
   noun: "split panel",

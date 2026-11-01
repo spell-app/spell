@@ -5,7 +5,7 @@ export class Receta extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 891, end: 911 } })
+  @prop({ type: "text", declaredAt: { path: "/SalaEnVivo.es.spell", start: 898, end: 918 } })
   accessor título!: string
 
   onSomeoneElseChange(event: any /* spell: type unknown */) {
@@ -44,7 +44,7 @@ core.useElement(Receta, RecetaElement)
 export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
   name: "recetario_familiar",
-  kind: "live room",
+  kind: "room",
   at: "/api/rooms/recipes"
 })
 
@@ -69,7 +69,7 @@ export class CajaEnVivo extends App {
       core.drawRead(() => core.peopleHere(), (persona) => <ui-label class="here">{persona.nombre}</ui-label>),
       <ui-text class="news">{this.noticias}</ui-text>,
       <ui-text class="changes">{this.cambios}</ui-text>,
-      <ui-button class="again" onClick={core.pressed(this, () => core.refreshSaved(Receta))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+      <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved(Receta))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         Revisar ahora
       </ui-button>,
       <ui-button class="add" onClick={core.pressed(this, () => this.agregarUna())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">

@@ -32,8 +32,10 @@ export function thing<C extends new (...args: any[]) => { create(props?: Record<
   const Wrapped = class extends Base {
     constructor(...args: any[]) {
       super(...args)
+      if (!isLastToConstruct(Wrapped, new.target)) return
       // what it was made with, as `Thing` / `List` hand it on
       if (runsCreate(Wrapped, new.target)) this.create(args[0] as Record<string, unknown> | undefined)
+      thingMade?.(this)
     }
   }
   Object.defineProperty(Wrapped, "name", { value: Base.name })
@@ -49,12 +51,31 @@ export function thing<C extends new (...args: any[]) => { create(props?: Record<
  * - `Thing` / `List` call this with themselves:  no `@thing` in the chain => they call `create()`, as before.
  */
 export function runsCreate(ctor: Function, newTarget: Function): boolean {
-  if (copying > 0) return false
+  return copying === 0 && isLastToConstruct(ctor, newTarget)
+}
+
+/**
+ * Is `ctor`'s constructor the last that matters for an instance being built as `newTarget`:
+ * no `@thing` class between `newTarget` (inclusive) and `ctor` (exclusive)?
+ * - So the thing's starting values are set once it ends:  `Thing` / `List` say it's made then, else `@thing` does.
+ */
+export function isLastToConstruct(ctor: Function, newTarget: Function): boolean {
   for (let current = newTarget; current && current !== ctor; current = Object.getPrototypeOf(current)) {
     if (Object.hasOwn(current, THING_CLASS)) return false
   }
   return true
 }
+
+/**
+ * Hear each `@thing` instance once its `create()` has run:  the core's `noteMade()`.
+ * - A listener, not an import:  this file sits below the core.
+ */
+export function onThingMade(listener: (made: object) => void): void {
+  thingMade = listener
+}
+
+/** Who hears a `@thing` instance being made -- see `onThingMade()`. */
+let thingMade: ((made: object) => void) | undefined
 
 /**
  * `make()`'s value, made with NO `create()` run:  a copy, not a new one (epic page `outline-spell`, P24).

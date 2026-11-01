@@ -10,6 +10,7 @@ export const sliderEs = {
   lang: "es",
   tag: "ui-slider",
   name: "deslizador",
+  snippet: "<es-deslizador></es-deslizador>",
   aka: ["control deslizante", "deslizador", "rango", "volumen", "barra de desplazamiento"],
   attributes: {
     hover: "al-pasar",

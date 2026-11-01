@@ -14,35 +14,35 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/SalaEnVivo.es.spell:823-1141"
+      "defined": "/SalaEnVivo.es.spell:830-1148"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/SalaEnVivo.es.spell:891-911"
+      "defined": "/SalaEnVivo.es.spell:898-918"
     },
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
-      "defined": "/SalaEnVivo.es.spell:102-164"
+      "defined": "/SalaEnVivo.es.spell:102-156"
     },
     {
       "type": "CajaEnVivo",
       "superType": "App",
-      "defined": "/SalaEnVivo.es.spell:166-821"
+      "defined": "/SalaEnVivo.es.spell:158-828"
     },
     {
       "property": "noticias",
       "of": "CajaEnVivo",
       "datatype": "text",
-      "defined": "/SalaEnVivo.es.spell:201-224"
+      "defined": "/SalaEnVivo.es.spell:193-216"
     },
     {
       "property": "cambios",
       "of": "CajaEnVivo",
       "datatype": "number",
-      "defined": "/SalaEnVivo.es.spell:228-254"
+      "defined": "/SalaEnVivo.es.spell:220-246"
     },
     {
       "syntax": "agregar una ((de|del) {thisArg:expression})?",
@@ -55,7 +55,7 @@
       ],
       "kind": "method",
       "name": "agregar una",
-      "defined": "/SalaEnVivo.es.spell:258-339"
+      "defined": "/SalaEnVivo.es.spell:250-331"
     }
   ],
   "codeLines": [

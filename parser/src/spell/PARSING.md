@@ -575,6 +575,8 @@ A kind that says so is saved in a file of its own.
 - And EVERY one of a type (epic `outline-spell` P16):  [`every_thing`](rules/classes/EveryThing.ts).
   - Some of them, its short form of `list_filter`:  [`every_thing_where`](rules/classes/EveryThingWhere.ts),
     `every recipe where its title includes the search` (epic `data` P10).
+    - Any `where`, `recipes where they are the cook` ~== `recipes where its cook is them`:  there, [`where_field`](rules/places/WhereField.ts)
+      reads `the cook` as the thing's own, only after [`they_are`](rules/places/TheyAre.ts) (epic `data` T66).
   - In order, any list:  [`list_sorted_by`](rules/lists/ListSortedBy.ts), a suffix, `every recipe, sorted by its title`.
     - It's left alone inside a predicate or a key (`isItemScope()`):  the comma after a `where` belongs to the list.
   - e.g. `every pile`:  every pile the program made, sub-types included, in the order made
@@ -1539,11 +1541,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `SpellType` => `scopeType`
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
-  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, `and wait`, spellx's `animated`) are retired:
+  - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, spellx's `animated`) are retired:
     each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
     (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
   - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
     then adds every function that calls one, by name, until nothing changes.
+  - A `notify` is the one slow thing nothing waits for, unless it says `and wait`.
+  - `meanwhile deal` and `deal without waiting` are a function of their own, so what holds them doesn't wait because of them.
   - It sets `method.waiting` on every compile, and the calls to write `await` in `project.awaited`:
     `method.isAsync` then says `async`, and the project's declarations carry the same answer.
   - Rules don't say which:  a pause is a plain call of `core`, and a loop a plain `core.map()`, written one by one
@@ -1562,7 +1566,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     - `pause`, and old source's `wait for`, in a drawing are parse errors (`refuseWaitInDraw()`);
       a getter reading another thing's member after a wait warns (`reads-after-wait`).
   - Two rules say not to wait, each by running functions of its own:
-    - `meanwhile`, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
+    - `meanwhile`, or `... without waiting` at a line's end, `core.meanwhile(() => ...)`:  a function inside a function, so its caller doesn't wait.
     - `at the same time:`, `core.together(() => ..., () => ...)`:  waits if a line does (`togetherWaits()`);
       a loop right in it is `core.eachTogether()`, never written one by one.
   See `ASTMethodDefinition.isAsync`.
@@ -1571,7 +1575,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 
 What a program's lines about where data lives compile to, and what reads the rest (the `places` rule module, epic `data` P11).
 
-- `family cookbook is a web service at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
+- `family cookbook is a web server at "..."` (`create_place`) declares a type and its one instance, as `solitaire is an app` does.
   - Its kind is a word (`place_kind`), or a type made from `place`, which is how a library adds one.
   - Compiled:  its class, then `core.place(new FamilyCookbook(), { name, kind, at, ...what the lines under it say })`.
   - The lines under it compile to nothing by themselves (`PlaceDetail`):  `create_place` gathers them, walking its body.
@@ -1584,6 +1588,12 @@ What a program's lines about where data lives compile to, and what reads the res
     Anything else stays `core.filter()`, over everything the place holds, with a third argument that checks the ceiling, and a warning.
   - `sorted by`, with a plain field for a key, on a read of a place:  the query's `sort`.
   - `add`, `remove`:  `core.saveThing()`, `core.removeSaved()`, with no list.
+  - By its plural alone (`recipes`, `all recipes`, `recipes where ...`;  epic `data` P15):  the same read, the plural looked up first as what the program has by that name (`ownListOf()`):
+    - its variable reads as a variable;  a property, the word alone reads it, as no other rule does
+    - `caja de recetas` stays a name of several words:  `property_expression` takes no bare plural, `isBare`
+  - `there are less than 2 recipes where ...` (`there_are_things`):  a count of that same read, or of the program's own list, with no type needed.
+    - The rider `if there are none:` is a statement with no noun, under a read:  `none` is never a type, so one never reads as the other.
+  - A drawing can't wait, so a question about a read in one is a waited value (`readableInDrawing()`):  it holds the whole thing, or draws "…", until its answer.
 - `core.savedThings` is in `P.CORE_CALLS_THAT_WAIT`:  so a getter over one is a value that waits, and the waiting pass does the rest.
 - What a project reads from its places is worked out as it's compiled too (`P.ReadGathering`, beside the waiting pass):  by name,
   into `select` on a type's `savedIn`, `firstReads` on a place's line, and `declaredAt` and `readsFrom` on what declares them.
@@ -1596,6 +1606,9 @@ What a program's lines about where data lives compile to, and what reads the res
   `SP.Block.getParseErrors()` reports it among the parse errors, worked out when it's asked.
   - What the compiler knows of a kind is `PLACE_KIND_ABILITIES`, its one table.
   - A sheet is read only at a plain address, and takes writes at a place server's (`isReadOnlyPlace()`):  no word for it, the address says.
+  - An atmosphere account (epic `data` P16) warns at its line of what no referee can promise (`CreatePlace.warnOfNoReferee()`, `hasNoReferee`):  it's public, each person
+    changes only their own, `where` happens in the browser.  An address, an account or a collection the protocol can't read won't compile.
+    `a recipe version 2 renames ...` on one warns too (`VersionStep`):  old records keep their old names, and it only changes how they read here.
 - A target that says `places: false` (Python, a library) refuses a project that names one (`SpellProject.keepsThingsInPlaces()`).
 
 ## Projects

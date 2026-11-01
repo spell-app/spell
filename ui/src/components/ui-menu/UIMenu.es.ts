@@ -10,6 +10,7 @@ export const menuEs = {
   lang: "es",
   tag: "ui-menu",
   name: "menu",
+  snippet: "<es-menu>\n\t<es-elemento>Uno</es-elemento>\n\t<es-elemento>Dos</es-elemento>\n</es-menu>",
   aka: ["menú", "barra de navegación", "navegación", "barra de pestañas", "paginación"],
   attributes: {
     pagination: "paginacion",

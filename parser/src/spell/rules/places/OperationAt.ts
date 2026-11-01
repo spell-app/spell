@@ -12,7 +12,7 @@ import { textIn } from "./PlaceDetail"
  * `operation_at` rule:  an action that happens at a place, by its own address (epic `data` Q14, Q17's C).
  *
  * ```spell
- * family cookbook is a web service at "https://api.example.com/v1":
+ * family cookbook is a web server at "https://api.example.com/v1":
  * 	- to publish a recipe is at "/recipes/publish"
  * 	- to refresh is at "/recipes/refresh"
  *

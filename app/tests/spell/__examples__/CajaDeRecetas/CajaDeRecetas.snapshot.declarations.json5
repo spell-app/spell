@@ -13,54 +13,54 @@
       "type": "Receta",
       "superType": "View",
       "gender": "feminine",
-      "defined": "/CajaDeRecetas.es.spell:624-1450"
+      "defined": "/CajaDeRecetas.es.spell:646-1472"
     },
     {
       "property": "título",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:692-712"
+      "defined": "/CajaDeRecetas.es.spell:714-734"
     },
     {
       "property": "porciones",
       "of": "Receta",
       "datatype": "number",
-      "defined": "/CajaDeRecetas.es.spell:716-744"
+      "defined": "/CajaDeRecetas.es.spell:738-766"
     },
     {
       "property": "notas",
       "of": "Receta",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:748-768"
+      "defined": "/CajaDeRecetas.es.spell:770-790"
     },
     {
       "type": "RecetarioFamiliar",
       "superType": "Place",
-      "defined": "/CajaDeRecetas.es.spell:529-567"
+      "defined": "/CajaDeRecetas.es.spell:530-589"
     },
     {
       "type": "CajaDeRecetas",
       "superType": "App",
-      "defined": "/CajaDeRecetas.es.spell:1534-4208"
+      "defined": "/CajaDeRecetas.es.spell:1556-4230"
     },
     {
       "property": "búsqueda",
       "of": "CajaDeRecetas",
       "datatype": "text",
-      "defined": "/CajaDeRecetas.es.spell:1572-1594"
+      "defined": "/CajaDeRecetas.es.spell:1594-1616"
     },
     {
       "property": "receta_nueva",
       "asWritten": "receta nueva",
       "of": "CajaDeRecetas",
       "datatype": "Receta",
-      "defined": "/CajaDeRecetas.es.spell:1598-1653"
+      "defined": "/CajaDeRecetas.es.spell:1620-1675"
     },
     {
       "property": "coincidencias",
       "of": "CajaDeRecetas",
       "datatype": "list of recetas",
-      "defined": "/CajaDeRecetas.es.spell:1750-1880"
+      "defined": "/CajaDeRecetas.es.spell:1772-1902"
     },
     {
       "syntax": "crear {thisArg:expression}?",
@@ -74,7 +74,7 @@
       "kind": "method",
       "name": "crearla",
       "waits": true,
-      "defined": "/CajaDeRecetas.es.spell:1997-2416"
+      "defined": "/CajaDeRecetas.es.spell:2019-2438"
     },
     {
       "syntax": "agregar la receta nueva ((de|del) {thisArg:expression})?",
@@ -87,7 +87,7 @@
       ],
       "kind": "method",
       "name": "agregar la receta nueva",
-      "defined": "/CajaDeRecetas.es.spell:2421-2551"
+      "defined": "/CajaDeRecetas.es.spell:2443-2573"
     }
   ],
   "codeLines": [

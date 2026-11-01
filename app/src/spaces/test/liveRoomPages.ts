@@ -1,5 +1,5 @@
 /**
- * Pages running the frozen live room projects, on the recipe box's servers (epic `data` P13):  what `tests/spell/liveRoom.test.ts`
+ * Pages running the frozen room projects, on the recipe box's servers (epic `data` P13):  what `tests/spell/liveRoom.test.ts`
  * and `scripts/live-room-demo.ts` stand on.
  * - `@spell/test/live-room`, and its Spanish twin, `sala-en-vivo`, each compiled to the one file a page loads.
  * - Who's at a page is its address's `person`, handed on as its server would:  `window.SPELL_SERVER.person`.

@@ -16,6 +16,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const railVocabulary = {
   tag: "ui-rail",
+  icon: "grip lines vertical",
   topics: ["layout", "containers", "elements"],
   aka: ["side rail", "aside", "gutter", "margin column"],
   noun: "rail",

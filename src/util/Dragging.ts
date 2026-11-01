@@ -1,4 +1,4 @@
-import { E } from "spell/ui/core"
+import { beforeNextPaint, soon } from "./timing"
 
 /****************
  * ### `Dragging`
@@ -29,7 +29,10 @@ import { E } from "spell/ui/core"
  * - A mouse drag covers the whole page with the closed hand, whatever is under it (`DRAG_COVER`).
  *   - A rule can't do that:  nothing in a page's sheets reaches into every shadow root,
  *     and the code editor sets its own cursor.
+ * - A drag can leave finding its place to its owner (`DragOptions.placing`), e.g. the editor's, moving a part:
+ *   no list hears of it, and `placing` is told where the pointer is.
  * - Plain DOM:  no Solid, no core.  Its owner hands it the element and what to do.
+ *   - In util, not Spell UI's runtime:  a runner's build may not reach into `spell/ui/runtime`.
  ****************/
 export class Dragging {
   /** The drag in progress, if any:  a list under the pointer asks it what's coming. */
@@ -113,6 +116,7 @@ export class Dragging {
     if (this.follows) for (const element of this.moving) element.style.translate = `${dx}px ${dy}px`
     event.preventDefault()
     Dragging.send(this.element, "drag", event)
+    if (this.options.placing) return this.options.placing(event.clientX, event.clientY)
     this.moveOver(Dragging.dropTargetAt(this.element, event.clientX, event.clientY), event)
   }
 
@@ -156,14 +160,14 @@ export class Dragging {
     this.listening.abort()
     if (!this.moving.length) return
     Dragging.swallowNextClick()
-    const target = Dragging.dropTargetAt(this.element, event.clientX, event.clientY)
+    const target = this.options.placing ? undefined : Dragging.dropTargetAt(this.element, event.clientX, event.clientY)
     this.moveOver(target, event)
     try {
       if (target) Dragging.send(target, "drop", event)
       this.options.onDrop(target)
     } finally {
       // after the move is drawn:  what's still here wasn't taken, and slides back
-      E.beforeNextPaint(() => this.settle())
+      beforeNextPaint(() => this.settle())
     }
   }
 
@@ -293,7 +297,7 @@ export class Dragging {
     }
     window.addEventListener("click", swallow, { capture: true, once: true })
     // a pointer up off the element makes no click:  stop waiting for one
-    E.soon(() => window.removeEventListener("click", swallow, { capture: true }))
+    soon(() => window.removeEventListener("click", swallow, { capture: true }))
   }
 }
 
@@ -307,10 +311,12 @@ export type DragOptions = {
   carried?: HTMLElement[]
   /** Does what's carried follow the pointer?  Default yes;  `false`:  it stays where it is, dimmed by its owner. */
   follows?: boolean
+  /** Its owner finds the place itself:  told where the pointer is as it moves, and no list hears of the drag. */
+  placing?(x: number, y: number): void
 }
 
 /** How far the pointer moves before a press is a drag, in pixels:  less is a click. */
-const DRAG_START_PX = 6
+export const DRAG_START_PX = 6
 
 /** Above the board while dragged. */
 const DRAGGING_Z_INDEX = "1000"

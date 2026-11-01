@@ -10,6 +10,7 @@ export const listEs = {
   lang: "es",
   tag: "ui-list",
   name: "lista",
+  snippet: "<es-lista>\n\t<es-elemento>Una cosa</es-elemento>\n\t<es-elemento>Otra cosa</es-elemento>\n</es-lista>",
   aka: ["lista", "lista con viñetas", "lista numerada", "vista de lista"],
   attributes: { bulleted: "con-vinetas", suffixed: "con-sufijo" }
 } as const satisfies E.TagDictionary

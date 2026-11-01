@@ -36,7 +36,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
-  - `ReconnectingSocket.ts` -- a websocket that comes back (epic `data` P8):  Spell UI's `ThemePreference` and `LiveRoomPlace` are on it.
+  - `ReconnectingSocket.ts` -- a websocket that comes back (epic `data` P8):  Spell UI's `ThemePreference`, `LiveRoomPlace` and `AtProtoPlace` are on it.
     Taken by file, in no barrel.  NOT `spell/server`'s `liveClient`, sent to pages as one function's text, which can import nothing
   - `retrying.ts` -- `retryAfter()`, `backoffFor()`:  how long to wait before asking a server again.
     Taken by file, in no barrel
@@ -195,7 +195,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - On `LoadOnce`.  The last reader leaving aborts the read, and about ten released ones are kept for a quick return.
     - `newestWins`:  a name for reads where a newer one aborts the older, e.g. a search as you type.
   - `PlaceBatch`:  lists asked in the same moment go in one request, for a place with `listMany()`:  `GraphPlace`'s aliases.
-    A web service has one address per collection, so it can't:  its lists go one each, together.
+    A web server has one address per collection, so it can't:  its lists go one each, together.
   - `PlaceQuery`:  what the place didn't do is filtered, sorted, sliced or hidden here,
     up to a ceiling in rows and bytes, then a `PlaceError` naming the place.
   - `MemoryPlace`:  the place the engine's tests run against, doing only what its capabilities say.
@@ -209,6 +209,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
     - `keyFrom` can wait, for a key that's a token made from another (`GoogleToken`).
+  - [AtProtoPlace](places/AtProtoPlace.ts):  an atmosphere account:  one person's records, or everyone's put together, with no referee (epic `data` P16).
+    - One place across many hosts:  each account's document says which is its.  With no accounts named, whoever a relay says holds the collection,
+      up to `MOST_ACCOUNTS`;  `- it includes the account "did:..."` names them.
+    - A row is its record, `id` (its key, chosen by the browser), and `owner`, where it came from, which a record can't claim.
+    - Only the owner writes (`whoWrites`).  One thing:  `putRecord` with `swapRecord`.  Several:  `applyWrites`, with each record checked first and `swapCommit`.
+    - Live is Jetstream, reached from a browser.  `PlaceEvent.isMine` by its version;  a dropped socket picks up from its cursor.
+    - `currentPerson()` is who's signed in;  `peopleHere()` is everyone with records here, NOT who's looking.
+    - A page can point a program at another network, or sign-in:  `window.SPELL_ATMOSPHERE` (`AtProtoPageSettings`).
+    - Its tests run against [FakeAtmosphere](../server/test/fakeAtmosphere.ts);  with `ATMOSPHERE_REAL=1`, the two that read the real network too.
+  - [AtProtoSignIn](places/AtProtoSignIn.ts):  a person signing in from the browser, on the official library, `@atproto/oauth-client-browser`.
+    - THE one place that imports it, by a dynamic `import()`, and only when someone signs in or comes back signed in:  a program that only reads never loads it.
+    - `Place.signIn` (`PlaceSignIn`):  how a person signs in, for what shows:  core's `showSignIn()`.
+    - A session is two weeks at most, a day on a local address:  it ends as `"ended"`, and what's pending stays.
+    - `atProtoClientMetadata()`:  the file a program on a real address has to serve;  a local address needs none, and must be `127.0.0.1`.
   - `ChunkedPlace`:  a list of summaries, and a body per thing fetched when it's read (epic `data` P5).
     - It holds no format:  what the chunks look like is a `ChunkFormat` handed in (`JsonChunks`:  a list file, one file per
       thing;  an epic page's is spell-epic's), where they are a `ChunkStore` (`WebChunks`:  static hosting, read only;
@@ -220,6 +234,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
+    - A program's lines go with every request (`lines`, `PlaceLines`):  never a key, only its name.  A place that takes them follows them (`Place.withLines()`).
+    - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
     A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with
@@ -272,7 +288,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its tests run in a real browser (project `util`), since `DevicePlace` reads the browser's storage;
   but `RestPlace`, `GraphPlace` and `SheetPlace`'s, in node (`util:node`), since they need a real server.
   - [fakePlaces.ts](../../tests/util/places/fakePlaces.ts):  fakes shaped like Airtable and AT Protocol,
-    which keep the interface honest until those two are built;
+    which keep the engine's own tests honest about those shapes (both are built now, and held to the same interface);
     and `TroubledPlace`, which fails, refuses and swallows answers when a test says so.
 
 ## Decorators

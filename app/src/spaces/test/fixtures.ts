@@ -156,6 +156,7 @@ export const PYTHON_FIXTURES = new Set<TestProjectName>([
   "fizzbuzz",
   "lists-from-zero",
   "people",
+  "sending-events",
   `${EXAMPLES_GROUP}/Solitaire`,
   `${EXAMPLES_GROUP}/TaskList`,
   "thing-references"

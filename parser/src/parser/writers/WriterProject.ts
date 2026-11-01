@@ -252,6 +252,8 @@ export class WriterProject {
 
   /** Is `node` a read of a value that waits, by name?  Not a type's own value, `Card.Suits`. */
   readsWaitingValue(node: P.ASTNode): boolean {
+    // a read of a place in a drawing, as `there are no recipes` compiles to
+    if (isCoreCall(node) && (node as P.ASTMethodInvocation).methodName === "waitedValue") return true
     if (!(node instanceof P.ASTPropertyExpression) || unwrapped(node.object) instanceof P.ASTTypeExpression)
       return false
     return this.waitingValues.has(node.property.value)

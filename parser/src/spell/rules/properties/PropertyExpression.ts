@@ -35,6 +35,8 @@ export class PropertyExpression extends MemberReadExpression<"property|expressio
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { property, expression } = match.groups
+    // `caja de recetas`:  a name of several words, not a `caja` of every recipe
+    if ((expression.data as { isBare?: boolean }).isBare) return undefined
     const ownerType = (match.data.ownerType = scope.getType(expression.datatype))
     if (this.resolveMember(match, ownerType, `${property.raw}`)) return match
     if (!PropertyExpression.isLooseProperty(scope, property)) return undefined

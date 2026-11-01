@@ -67,3 +67,15 @@ describe("UIComponent.describe()", () => {
     expect(library.UIButton.describe().topics).toContain("buttons")
   })
 })
+
+describe("ComponentDefinitions.palette()", () => {
+  it("offers what has a snippet, each opening with its own tag, in both languages", () => {
+    const offered = ComponentDefinitions.palette()
+    expect(offered.length).toBeGreaterThan(10)
+    for (const definition of offered) {
+      expect(definition.snippet!.startsWith(`<${definition.tag}`), definition.tag).toBe(true)
+      expect(definition.icon, definition.tag).toBeTruthy()
+      expect(ComponentDefinitions.snippetIn(definition, "es")!.startsWith("<es-"), definition.tag).toBe(true)
+    }
+  })
+})

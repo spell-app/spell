@@ -12,6 +12,12 @@
     "where": "@spell/guides/how-task-list-works"
   },
   {
+    "spell": "pass",
+    "python": "pass_",
+    "kind": "method",
+    "where": "@spell/test/sending-events"
+  },
+  {
     "spell": "position",
     "python": "position_",
     "kind": "variable",

@@ -101,7 +101,8 @@ export class EditorStore extends Observable {
     if (!path) path = editor.file?.path
     try {
       navigate(new SP.SpellLocation(path!).runnerUrl)
-      void editor.compileApp()
+      // what's running is this program as it is now:  a game in progress goes on
+      if (!editor.isRunningLatest) void editor.compileApp()
     } catch {
       editor.showError(appTexts.text("pathInvalid", { path: String(path) }))
     }
@@ -257,12 +258,12 @@ export class EditorStore extends Observable {
     // NOTE: defaulted here, NOT in the signature:
     // a default referencing `editor` would make `typeof EDITOR_DEFAULTS` circular,
     // since defaults are part of the member's type.
-    projectRoot ??= editor.projectRoot!
+    projectRoot ??= editor.rootForNew
     try {
       const project = await projectRoot.createApp(projectId)
       if (project) {
         editor.showEditor(project.path)
-        editor.showNotice(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
+        editor.showKept(appTexts.text("createdApp", { ...appTexts.groupWords(projectRoot), name: project.title }))
       }
     } catch (e) {
       editor.showError(e)
@@ -272,11 +273,13 @@ export class EditorStore extends Observable {
   /** Duplicate current `project` under `newProjectId` (auto-generated if omitted) and show it. */
   async duplicateApp(newProjectId?: string): Promise<void> {
     try {
-      const newProject = await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
-      // console.warn({ newProject })
+      // the static build:  a copy of a built-in project is the visitor's own
+      const newProject = editor.canChangeProject
+        ? await editor.projectRoot!.duplicateApp(editor.project!.projectId, newProjectId)
+        : await editor.rootForNew.copyHere(editor.project!.projectId)
       if (newProject) {
         editor.showEditor(newProject.path)
-        editor.showNotice(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
+        editor.showKept(appTexts.text("duplicatedApp", appTexts.groupWords(editor.projectRoot)))
       }
     } catch (e) {
       editor.showError(e)
@@ -398,6 +401,21 @@ export class EditorStore extends Observable {
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
 
+  /** The compiled program run last:  `isRunningLatest` compares it. */
+  lastExecutedProgram: string | undefined = undefined
+
+  /** Is the running app the project as it is now, so there's nothing to run again? */
+  get isRunningLatest(): boolean {
+    const { project } = editor
+    const compiled = project?.outputFile.contents ?? project?.compiled
+    return (
+      !!compiled &&
+      !project?.isDirty &&
+      editor.lastExecutedPath === project?.path &&
+      editor.lastExecutedProgram === compiled
+    )
+  }
+
   /**
    * Run current `project`, already `compiled`, on the runtime programs run on.
    * - Logs how it went to `runtimeConsole()`.  See `runCompiled()`.
@@ -421,6 +439,7 @@ export class EditorStore extends Observable {
     const keepThings = !editor.startAfresh && editor.lastExecutedPath === project.path
     editor.startAfresh = false
     editor.lastExecutedPath = project.path
+    editor.lastExecutedProgram = compiled
     // a program in another language draws with that language's tags (`<es-texto>`) and says its tests' lines in it,
     // as `<SpellAppRunner>` runs it:  Spell UI defines the tags first (epic `spanish` P21)
     const lang = project.wordsLanguages[0]
@@ -600,6 +619,103 @@ export class EditorStore extends Observable {
   ////////////////
   // ## Projects actions
   ////////////////
+
+  /**
+   * Where a new project goes:  the current group;
+   * in the static build always the visitor's own, the only one they can add to.
+   */
+  get rootForNew(): SPACES.SpellProjectRoot {
+    return isStaticBuild ? SPACES.SpellProjectRoot.projects : editor.projectRoot!
+  }
+
+  /** Can the current `project` be renamed, deleted or given files?  In the static build, only a visitor's own. */
+  get canChangeProject(): boolean {
+    return !isStaticBuild || editor.projectRoot === SPACES.SpellProjectRoot.projects
+  }
+
+  /** Make a project of the person's own from starter program `starter`, with no question asked, and show it. */
+  async startFrom(starter: SPACES.StarterProgram): Promise<void> {
+    try {
+      const project = await SPACES.SpellProjectRoot.projects.createFrom(starter)
+      editor.showEditor(project.path)
+      editor.showKept()
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /** Make the person's own copy of built-in project `sourceId`, with no question asked, and show it. */
+  async startFromCopy(sourceId: string): Promise<void> {
+    try {
+      const project = await SPACES.SpellProjectRoot.projects.copyHere(sourceId)
+      editor.showEditor(project.path)
+      editor.showKept()
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Save the current `project` as one file, in the browser's downloads:  `importApp()` reads it back.
+   * - NEVER throws:  a failure is shown.
+   */
+  async exportApp(): Promise<void> {
+    const { project, projectRoot } = editor
+    if (!project || !projectRoot) return
+    try {
+      const archive = await projectRoot.exportApp(project)
+      const url = URL.createObjectURL(new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" }))
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `${archive.name}${SPACES.PROJECT_ARCHIVE_EXTENSION}`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Ask for a file `exportApp()` wrote, make a project of the person's own from it, and show it.
+   * - NEVER throws:  a failure is shown;  cancelling the file picker does nothing.
+   */
+  importApp(): Promise<void> {
+    return new Promise((resolve) => {
+      const input = document.createElement("input")
+      input.type = "file"
+      input.accept = `${SPACES.PROJECT_ARCHIVE_EXTENSION},application/json`
+      input.addEventListener("cancel", () => resolve())
+      input.addEventListener("change", () => {
+        void editor.importFile(input.files?.[0]).finally(resolve)
+      })
+      input.click()
+    })
+  }
+
+  /** The file a person chose for `importApp()`.  NEVER throws:  a failure is shown. */
+  private async importFile(file: File | undefined): Promise<void> {
+    if (!file) return
+    try {
+      const archive = JSON.parse(await file.text()) as unknown
+      if (!SPACES.isProjectArchive(archive)) throw new UIError(appTexts.text("notAProjectFile", { file: file.name }))
+      const project = await SPACES.SpellProjectRoot.projects.importApp(archive)
+      editor.showEditor(project.path)
+      editor.showKept(appTexts.text("importedApp", { name: project.projectName! }))
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /**
+   * Say `message`;  the first time a visitor makes something in the static build, say where it's kept instead.
+   * - Once, and not as a banner:  it matters only because clearing the site's data loses the work.
+   */
+  showKept(message?: string): void {
+    if (isStaticBuild && editorPrefs.get(KEPT_NOTE_PREF) !== true) {
+      editorPrefs.set(KEPT_NOTE_PREF, true)
+      editor.showNotice(appTexts.text("keptInBrowser"))
+    } else if (message) editor.showNotice(message)
+  }
   /** Create a new project under `SPACES.SpellProjectRoot.projects`. */
   createProject(projectId?: string): Promise<void> {
     return editor.createApp(SPACES.SpellProjectRoot.projects, projectId)
@@ -997,6 +1113,9 @@ let scopeExplorer: LSP.ScopeExplorer | undefined
  * it was 2).  Cmd / Ctrl+Enter compiles at once.
  */
 const EDIT_COMPILE_DELAY = 10
+
+/** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */
+const KEPT_NOTE_PREF = "toldKeptInBrowser"
 /** Projects imported compiled that `refreshScopes()` has parsed:  once each. */
 const parsedImports = new WeakSet<SP.SpellProject>()
 

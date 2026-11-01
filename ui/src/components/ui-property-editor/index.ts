@@ -15,6 +15,7 @@ UIPropertyEditor.define()
 UIPropertyGroup.define()
 UIProperty.define()
 
+export type { PropertyOrigin } from "./UIPropertyEditor.types"
 export {
   UIPropertyEditor,
   UIPropertyGroup,

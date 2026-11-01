@@ -17,6 +17,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const shapeVocabulary = {
   tag: "ui-shape",
+  icon: "cube",
   topics: ["animation", "media", "modules"],
   aka: ["3d flip", "cube", "flip card", "carousel"],
   noun: "shape",

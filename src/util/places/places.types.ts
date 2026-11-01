@@ -10,6 +10,12 @@
 // ## Rows
 ////////////////
 
+/** What a source writes for a number it hasn't got. */
+export const NO_NUMBER = /^\s*(?:|unknown|none|n\/a|na|null|-)\s*$/i
+
+/** A number written as text:  `172`, `-1.5`, `1,358`. */
+export const NUMBER_AS_TEXT = /^\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?\s*$/
+
 /** How long a text is before losing it is worth a notice, in characters:  a title just flips once, a paragraph is kept (J1). */
 const LONG_TEXT_CHARS = 40
 
@@ -90,6 +96,8 @@ export type RateLimit = {
   perSeconds: number
   /** How many changes one request can hold. */
   changesPerRequest?: number
+  /** How long a limit hit lasts, in seconds, for a service whose answer doesn't say:  Airtable's is 30. */
+  waitAfterHitSeconds?: number
 }
 
 /**
@@ -98,7 +106,7 @@ export type RateLimit = {
  */
 export type PlaceCapabilities = {
   /**
-   * What sort of place it is, in words for people, e.g. `"web service"`:  what the side bar says beside its name.
+   * What sort of place it is, in words for people, e.g. `"web server"`:  what the side bar says beside its name.
    * - Words only, never a thing to branch on:  branch on what it can do.
    * - Left out:  nobody said.
    */
@@ -131,7 +139,7 @@ export type PlaceCapabilities = {
   versionCheck?: boolean
   /**
    * Does it take a change that says what happened, not only the value after it:  an addition (`PlaceChange.adds`), and items
-   * added to or moved in a list (`PlaceChange.list`)?  A live room does, so two at once both count.
+   * added to or moved in a list (`PlaceChange.list`)?  A room does, so two at once both count.
    * - Left out:  `PendingChanges` works out the whole value, and sends that, so the last save wins.
    */
   edits?: boolean
@@ -217,6 +225,22 @@ export type ListHandled = {
   select?: boolean
 }
 
+/**
+ * What a program's lines say about a place on a server side, sent with every request:  the program is the one source of them.
+ * - Never a key:  only the NAME of one the server side already holds, which it checks.
+ * - They rename and choose within what the server side already serves, so they can't reach anything further.
+ */
+export type PlaceLines = {
+  /** Each collection's name there, and its fields' names there, by what the program calls them. */
+  collections?: Record<string, { at?: string; fields?: Record<string, string> }>
+  /** The column holding a row's id. */
+  idColumn?: string
+  /** The NAME of the key the program says it needs. */
+  keyNamed?: string
+  /** How often it's asked what changed, in seconds. */
+  checkedEvery?: number
+}
+
 /** A place's answer to `list()`. */
 export type ListAnswer = {
   /** The rows. */
@@ -233,6 +257,11 @@ export type ListAnswer = {
    * - `PlaceResult.notes` shows them;  `PlaceQuery` adds one of its own for rows that share no identity.
    */
   notes?: string[]
+  /**
+   * The fields that read, and take no write, as far as the place knows:  Airtable's formulas, lookups and rollups.
+   * - For a place behind a server side, whose `canWrite()` a browser can't call:  `RemotePlace` keeps them, and answers from them.
+   */
+  readOnlyFields?: string[]
 }
 
 /** One change to one thing. */
@@ -251,7 +280,7 @@ export type PlaceChange = {
   list?: Record<string, ListEdit[]>
   /**
    * The version this change was made from (`Place.versionOf()`):  a place with `versionCheck` refuses it, `"out of date"`,
-   * if the thing has moved on;  a live room lets it win, and says who it overwrote.
+   * if the thing has moved on;  a room lets it win, and says who it overwrote.
    * Only an update carries one:  a delete wins over what someone's editing.
    */
   version?: string
@@ -298,6 +327,31 @@ export type PersonHere = PlacePerson & {
   page: string
 }
 
+/** Every place a sign-in can stand. */
+export const SignInStatuses = ["signed out", "signing in", "signed in", "ended"] as const
+/**
+ * Where a person's sign-in stands:
+ * - `"signed out"`:  nobody is
+ * - `"signing in"`:  on the way
+ * - `"signed in"`
+ * - `"ended"`:  they were, and it ran out or was taken back:  what they changed is still kept, for when they're back
+ */
+export type SignInStatus = (typeof SignInStatuses)[number]
+
+/** A person signing in to a place, and out.  Who they are is the place's:  `Place.currentPerson()`. */
+export type PlaceSignIn = {
+  /** Where it stands. */
+  readonly status: SignInStatus
+  /** Why the last try failed, in words for people. */
+  readonly problem?: string | undefined
+  /** Sign in as `who`, in the place's own way of naming people.  May leave the page, and come back.  - throws if it can't */
+  signIn(who: string): Promise<void>
+  /** Sign out.  NEVER throws. */
+  signOut(): Promise<void>
+  /** Hear `status` changing.  Returns what stops it. */
+  onChange(listener: () => void): () => void
+}
+
 /** What to watch:  a collection, or one thing in it. */
 export type WatchTarget = {
   /** The collection. */
@@ -316,9 +370,9 @@ export type PlaceEvent = {
   row?: PlaceRow
   /** The thing was removed:  the row as it was, for putting back. */
   was?: PlaceRow
-  /** What of mine this change replaced, without having seen it:  mine lost.  A live room says. */
+  /** What of mine this change replaced, without having seen it:  mine lost.  A room says. */
   lost?: ReplacedValue[]
-  /** What I replaced with a change made while I was offline:  theirs lost.  A live room says. */
+  /** What I replaced with a change made while I was offline:  theirs lost.  A room says. */
   overwrote?: ReplacedValue[]
   /** This page made it, and it's only coming back:  a place that can tell says.  Left out:  someone else did, as far as anyone knows. */
   isMine?: boolean
@@ -389,6 +443,12 @@ export type WriteAnswer = {
 export type Place = {
   /** What it can do. */
   describe(): PlaceCapabilities
+  /**
+   * This place, as a program's lines describe it:  for a place behind a server side, which takes them from each request (`PlaceServer`).
+   * - Left out:  its lines are its own, and a program's make no difference.
+   * - throws `PlaceError` for lines it can't honour
+   */
+  withLines?(lines: PlaceLines): Place
   /** The rows of `collection` that `query` asks for. */
   list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer>
   /**
@@ -414,7 +474,7 @@ export type Place = {
   /** Tell `onEvent` of each change to `target`.  Returns what stops it. */
   watch?(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void
   /**
-   * The row as this place holds it right now, if it can say at once:  a live room's copy.
+   * The row as this place holds it right now, if it can say at once:  a room's copy.
    * - What a list's changes are worked out from, as they have to be made straight away.
    */
   rowKnown?(collection: string, id: string): PlaceRow | undefined
@@ -426,6 +486,8 @@ export type Place = {
   peopleHere?(): readonly PersonHere[]
   /** Hear `peopleHere()` changing.  Returns what stops it. */
   onPeopleHere?(listener: (people: readonly PersonHere[]) => void): () => void
+  /** How a person signs in here, for a place where each person is someone:  what shows says who, and offers it (epic `data` P16). */
+  readonly signIn?: PlaceSignIn
   /** What changed in `collection` since `token`:  a `version`, or an earlier answer's `token`. */
   changesSince?(collection: string, token: string, context: PlaceContext): Promise<ChangesAnswer>
   /**
@@ -483,6 +545,27 @@ export const PLACES_PREFIX = "/api/places"
  */
 export function isPlaceServerAddress(address: string): boolean {
   return address.split(/[?#]/)[0]!.includes(`${PLACES_PREFIX}/`)
+}
+
+/** The id in a Google Sheet's address. */
+const GOOGLE_SHEET_ID = /\/spreadsheets\/d\/([\w-]+)/
+
+/**
+ * The address a Google Sheet's first tab is read from as CSV, from the address a browser shows for it.
+ * - throws `TypeError` for an address that isn't a Google Sheet's.
+ */
+export function googleSheetCsvAddress(address: string): string {
+  const id = GOOGLE_SHEET_ID.exec(address)?.[1]
+  if (!id) throw new TypeError(`"${address}" isn't a Google Sheet's address:  it has no /spreadsheets/d/<id>`)
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`
+}
+
+/** An Airtable base's id, alone or in an address someone copied from their browser. */
+const AIRTABLE_BASE = /(?:^|\/)(app[A-Za-z0-9]+)(?:$|[/?#])/
+
+/** The base `address` names:  `appXXXXXXXXXXXXXX`, or Airtable's address for it.  `undefined` if it names none. */
+export function airtableBaseIn(address: string): string | undefined {
+  return AIRTABLE_BASE.exec(address)?.[1]
 }
 
 ////////////////

@@ -5,12 +5,12 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { abilitiesOf } from "./places.shared"
 
 /**
- * `all_or_nothing` rule:  what's changed in its body goes out as one, or not at all (epic `data` P11).
- * - e.g. `all or nothing:`, then its lines
+ * `in_one_go` rule:  what's changed in its body goes out as one, or not at all (epic `data` P11).
+ * - e.g. `in one go:`, then its lines
  * - As true as the place can make it:  the compiler says so of one that can't, once it knows.
- * - Compiles to `await core.allOrNothing(() => { ... })`.
+ * - Compiles to `await core.inOneGo(() => { ... })`.
  */
-export class AllOrNothing extends SpellStatement<"body?"> {
+export class InOneGo extends SpellStatement<"body?"> {
   @proto static alias = "statement"
 
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
@@ -22,8 +22,8 @@ export class AllOrNothing extends SpellStatement<"body?"> {
     const match = super.parse(scope, tokens)
     if (!match) return undefined
     const language = SP.Language.of(scope)
-    SP.SpellWarnings.noteIf(match, language.parserMessage("all-or-nothing-not-atomic"), () => {
-      const saved = AllOrNothing.typeOfWrites(match, this.getBody(match))?.savedPlace()
+    SP.SpellWarnings.noteIf(match, language.parserMessage("in-one-go-not-atomic"), () => {
+      const saved = InOneGo.typeOfWrites(match, this.getBody(match))?.savedPlace()
       return !!saved && !abilitiesOf(saved)?.isAtomic
     })
     return match
@@ -48,7 +48,7 @@ export class AllOrNothing extends SpellStatement<"body?"> {
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const body = this.getBody(match)
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "allOrNothing",
+      methodName: "inOneGo",
       args: [new P.ASTMethodDefinition(body ?? match, { inline: true, body: P.matchAST(body) })]
     })
   }

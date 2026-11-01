@@ -4,10 +4,12 @@ import { insert, type JSX } from "@solidjs/web"
 import { readsAsImpliedDefault, viewAttributeFor, kebabCase, whileOnlyShowing } from "spell/util"
 import { E, UI } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
+// By file:  a click's rule is all this needs
+import { Dragging } from "spell/util/Dragging"
+import { ListSelection } from "spell/util/ListSelection"
 import type { ElementApi, Core } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
-import { Dragging } from "./Dragging"
 import { ActionMenus } from "./ActionMenus"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
@@ -962,18 +964,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const thing = this.currentThing
     const list = this.ownerList as SelectableList | undefined
     if (!thing || !list?.select || !this.entry?.core.isAble(thing, "selectable")) return
+    let selection = LIST_SELECTIONS.get(list)
+    if (!selection) LIST_SELECTIONS.set(list, (selection = new ListSelection()))
     const items = [...(list as unknown as Iterable<object>)]
-    const selected = [...list.selection]
-    const anchor = SELECTION_ANCHORS.get(list)
-    if (event.shiftKey && anchor && items.includes(anchor)) {
-      const [from, to] = [items.indexOf(anchor), items.indexOf(thing)].sort((a, b) => a - b)
-      list.select(items.slice(from, to! + 1))
-      return
-    }
-    SELECTION_ANCHORS.set(list, thing)
-    if (event.metaKey || event.ctrlKey) {
-      list.select(selected.includes(thing) ? selected.filter((item) => item !== thing) : [...selected, thing])
-    } else list.select([thing])
+    list.select(selection.clicked(thing, { items, selected: [...list.selection], keys: event }))
   }
 
   /** The list `element` draws, if it's a viewable list's element -- `undefined` if not. */
@@ -1569,8 +1563,8 @@ const LINE_GAP_PX = 2
 /** A viewable list, as selecting reads it:  `ViewableList.selection`, `select()`. */
 type SelectableList = { selection: Iterable<object>; select?: (items: Iterable<object>) => void }
 
-/** Each list's last item clicked to select:  where a shift-click's range starts. */
-const SELECTION_ANCHORS = new WeakMap<object, object>()
+/** Each list's clicks to select:  its last item clicked, where a shift-click's range starts. */
+const LIST_SELECTIONS = new WeakMap<object, ListSelection<object>>()
 
 /**
  * The browser's mouse events a view's thing may handle, by spell's name for each (Q30, Q32):

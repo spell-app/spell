@@ -75,7 +75,7 @@ function detailLabels(html: string): string[] {
 /** Labels of the tree's rows in `html`, in order -- group rows with their counts. */
 function treeLines(html: string): string[] {
   const tree = html.slice(html.indexOf("ScopesPane"), html.indexOf("DetailsPane"))
-  const rows = tree.matchAll(/class="label">(?:<ui-icon [^>]*><\/ui-icon>)?([^<]*)(?:<span class="detail">(\d+)<)?/g)
+  const rows = tree.matchAll(/<ui-tree-item [^>]*?label="([^"]*)"(?: which="(\d+)")?/g)
   return [...rows].map(([, label, count]) => (count ? `${label!.trim()} (${count})` : label!))
 }
 
@@ -130,9 +130,9 @@ describe("<ThingExplorer> (Solid)", () => {
     new Card({})
     new Pile({})
     const html = draw("type", undefined, ["type:Card", "type:Pile"])
-    expect(html).toMatch(/<ui-icon name="cube"><\/ui-icon>Card/)
-    expect(html).toMatch(/title="list"[^>]*><\/ui-icon>Pile/)
-    expect(html).toMatch(/title="thing"[^>]*><\/ui-icon>Card/)
+    expect(html).toMatch(/ThingTreeGroup" icon="cube" label="Card"/)
+    expect(html).toMatch(/ThingTreeNode" icon="list" label="Pile/)
+    expect(html).toMatch(/ThingTreeNode" icon="dot circle outline" label="Card/)
   })
 
   test("the button for the order it's in is active", () => {
@@ -144,7 +144,7 @@ describe("<ThingExplorer> (Solid)", () => {
   test("selected:  its row is marked;  nothing selected says so", () => {
     new Card({ rank: "queen" })
     expect(draw("document")).toContain("Select a thing to see its properties.")
-    expect(draw("document", "#1")).toMatch(/class="TreeRow ThingTreeNode selected"/)
+    expect(draw("document", "#1")).toMatch(/<ui-tree-item[^>]*class="ThingTreeNode"[^>]*selected/)
   })
 
   test("details:  properties -- computed ones read unasked -- with a thing as a link", () => {

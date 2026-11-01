@@ -31,9 +31,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "reads-after-wait":
     "Tras su primera espera, este valor no puede seguir lo que lee de otras cosas:  léelas antes de la espera",
+  "cant-go-without-waiting": "Solo una llamada puede ir sin esperar:  esto tiene un valor o un cuerpo que esperar",
+  "cant-wait-for-toast-that-stays":
+    "No se puede esperar a un aviso que se queda:  los clics esperarían hasta que se cierre",
   "cant-wait-in-draw": "Un dibujo no puede esperar:  hazlo una propiedad que espere, y dibuja esa",
   "place-read-only":
-    "El {place} es de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
+    "El {place} es un lugar de tipo {kind}, que aquí es de solo lectura:  esto no puede cambiarlo.  Guarda lo que cambia en otro sitio, o léelo de un lugar que admita escritura",
   "key-written":
     'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":
@@ -41,7 +44,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
   "place-cant-announce":
-    'Un {kind} no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "- se revisa cada 30 segundos" debajo',
   "change-not-saved":
     '{what} no se guarda en un lugar, así que esto nunca se ejecutaría.  Di dónde se guarda, p. ej. "- se guarda en el recetario familiar";  o "cuando su título cambia:", para una de sus propiedades',
   "someone-else-needs-a-type":
@@ -49,13 +52,13 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "someone-else-alone":
     "Nadie más puede cambiar lo que se guarda aquí:  esto nunca se ejecutaría.  Hace falta un lugar que otras personas compartan",
   "someone-else-not-told":
-    'Un {kind} no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
+    'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que esto nunca se ejecutaría:  agrega "- se revisa cada 30 segundos" debajo',
   "people-here-only-you":
-    "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala en vivo",
+    "Ningún lugar aquí sabe quién más está presente, así que esto siempre eres solo tú:  hace falta una sala",
   "operation-outside-place":
     "Esta acción llega a un lugar solo en una línea debajo de ese lugar, así que aquí no hace nada:  muévela debajo del lugar",
   "operation-not-taken":
-    "Un {kind} no acepta una acción en una dirección propia, así que esto fallaría al ejecutarse:  hace falta un servicio web",
+    'Un lugar de tipo "{kind}" no acepta una acción en una dirección propia, así que esto fallaría al ejecutarse:  hace falta un servidor web',
   "draw-items-of-a-thing":
     "Un {type} no es una lista, así que no tiene elementos que dibujar:  un dibujo propio lo dibuja él, en sus propias líneas",
   "type-from-itself":
@@ -66,16 +69,43 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Un orden no puede esperar a su clave:  ordenaría sin ningún orden.  Ordena por un campo propio, o calcula antes la clave",
   "rider-only-in-a-drawing":
     "Esto muestra algo mientras una lectura no tiene nada que mostrar, así que solo va en un dibujo, debajo de la lectura:  una acción simplemente espera",
-  "all-or-nothing-not-atomic":
+  "in-one-go-not-atomic":
     "Un lugar aquí no puede aplicar los cambios todos juntos:  van de uno en uno, así que otros pueden ver algunos por un momento",
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
   "no-such-data-word":
-    'Encanto no tiene "{word}" para datos:  di una vez dónde viven, "x es un servicio web en ...", y "- se guarda en x", y luego "cada receta donde ..." los lee',
+    'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "- vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
     'Un {owner} los guarda, así que necesita una lista donde guardarlos:  agrega su "{items}" es una lista de {items}',
-  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en vivo en ..."',
+  "place-cloud-later": 'La nube aún no está:  nombra un lugar propio por ahora, p. ej. "x es una sala en ..."',
+  "atmosphere-public":
+    "Todo lo que se guarda en esta {kind} es público:  cualquiera puede leerlo, y queda ahí para siempre.  No guardes nada privado aquí",
+  "atmosphere-your-own":
+    'En esta {kind} cada persona cambia solo sus propios registros:  cambiar los de otra se rechaza, y "todos los presentes" son todos los que tienen registros aquí, no quienes miran ahora',
+  "atmosphere-reads-here":
+    'Esta {kind} solo entrega sus registros de página en página, así que "donde" y "ordenado por" los cargan en el navegador, hasta 50.000;  y guarda solo números enteros, sin decimales',
+  "atmosphere-not-an-account": '"{address}" no es una cuenta:  empieza por "did:plc:" o "did:web:"',
+  "atmosphere-not-a-corner":
+    '"{address}" no es un rincón de una cuenta:  se lee como un dominio al revés, p. ej. "com.example.cookbook"',
+  "atmosphere-not-a-collection":
+    '"{address}" no es una colección allí:  se lee como un dominio al revés, y luego un nombre de letras y dígitos, p. ej. "com.example.recipe"',
+  "version-step-no-rename-there":
+    "Una cuenta de atmosphere no puede cambiar el nombre de lo guardado:  los registros antiguos de cada persona conservan sus nombres para siempre.  Esta línea solo cambia cómo se leen aquí;  otros programas siguen viendo los nombres antiguos, y tus registros nuevos los nuevos.  Para empezar de verdad de cero, guárdalos bajo un nombre de colección nuevo",
+  "airtable-not-a-base":
+    '"{address}" no es una base de Airtable:  su id empieza por "app", p. ej. "appXXXXXXXXXXXXXX", y está en la dirección de la base en Airtable',
+  "airtable-last-save-wins":
+    "Airtable no puede saber que otra persona llegó antes:  cuando dos personas cambian un campo, gana el último en guardar, sin aviso, también con lo que se edita en el propio Airtable.  Campos distintos se conservan los dos.  Para un árbitro que diga quién perdió, pon una sala delante",
+  "airtable-worked-out-fields":
+    "Airtable calcula por sí mismo sus fórmulas, búsquedas, resúmenes y recuentos, y solo se pueden leer:  a un programa que escribe uno se le deshace el cambio al ejecutarse, con un aviso que dice por qué",
+  "airtable-calls-count":
+    "Cada página de 100 filas es una petición, y todos los que usan esta base comparten 5 por segundo.  El plan gratuito de Airtable además se detiene en 1.000 peticiones al mes, que revisar cada 30 segundos gasta en unas 8 horas",
+  "airtable-no-id-column":
+    'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "- su id es su "id encanto"" debajo',
+  "airtable-needs-key":
+    'Airtable no responde a nadie sin una clave:  agrega "- su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
+  "where-field-unknown":
+    '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',

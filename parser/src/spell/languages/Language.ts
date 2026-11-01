@@ -160,6 +160,11 @@ export class Language {
   // ## Messages
   ////////////////
 
+  /** What this language calls a kind of place, by its word in code:  `servidor web` for `web server`.  A library's:  as it is. */
+  placeKindWord(kind: string): string {
+    return this.words.placeKinds?.[kind] ?? kind
+  }
+
   /**
    * Parser message `key` in this language, each `{name}` in it filled from `params` (epic `spanish` P17):
    * `SP.Language.of(scope).parserMessage("dont-understand", { text: "x y" })` => `Don't understand "x y"`.
@@ -388,6 +393,8 @@ export type LanguageWords = {
   typeNameStopWords: Set<string>
   /** How a file's raw text declares things, found before it's parsed. */
   declarations: DeclarationPatterns
+  /** What a warning calls each kind of place, by its word in code;  none:  the word itself, English's. */
+  placeKinds?: Readonly<Record<string, string>>
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
   /**

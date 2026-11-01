@@ -25,7 +25,7 @@ const QUEUES = new Map<string, RateQueue>()
  * - One queue per NAMED limit:  everything under one limit shares it, however many places.
  * - It spaces out when requests START, over a sliding window;  they don't wait for each other to finish.
  * - A limit hit anyway (a 429, since someone else spends the same limit):
- *   - everything in the queue waits as long as the answer's `retry-after` says, else backing off
+ *   - everything in the queue waits as long as the answer's `retry-after` says, else as its `RateLimit.waitAfterHitSeconds` says, else backing off
  *   - the request goes round again, up to `TRIES` times, then throws that answer's error, which a place counts as no answer
  * - A request whose `signal` aborts leaves the queue, and those behind it move up.
  * - Any other failure is the caller's, thrown as it is.
@@ -67,9 +67,15 @@ export class RateQueue {
       } catch (error) {
         if (!(error instanceof ApiError) || error.status !== 429 || attempt >= TRIES) throw error
         const wait = retryAfter(error.response!, MOST_WAIT_MS)
-        this.pause(wait ?? backoffFor(attempt, { jitterMs: JITTER_MS, mostMs: MOST_WAIT_MS }))
+        this.pause(wait ?? this.waitAfterHit() ?? backoffFor(attempt, { jitterMs: JITTER_MS, mostMs: MOST_WAIT_MS }))
       }
     }
+  }
+
+  /** How long a hit lasts, for a service that says so in its docs, not in its answer. */
+  private waitAfterHit(): number | undefined {
+    const { waitAfterHitSeconds: seconds } = this.limit
+    return seconds === undefined ? undefined : seconds * 1000
   }
 
   /** Nothing starts for this long. */

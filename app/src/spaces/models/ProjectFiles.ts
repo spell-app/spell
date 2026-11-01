@@ -7,7 +7,7 @@ import { SP } from "spell/parser/spell"
  * - Each asks spaces' server (`/api/projects/create/file` ...), which answers the project's new index,
  *   and sets it as the project's `contents`, so its `files` follow at once.
  * - Asked through `LoadableFile.fetch`, as every file is read:  whoever answers files answers these,
- *   e.g. the editor's static build, which refuses them (`StaticFiles`).
+ *   e.g. the editor's static build, which keeps them in the browser (`StaticFiles`).
  * - Each throws (through `getDier()`) with what it was doing, e.g. "renaming file", for the editor to show.
  * - A prompt you cancel returns `undefined`.
  * - It was `SpellProject`'s, until epic `people-and-orgs` P15.

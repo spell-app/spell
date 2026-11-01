@@ -10,15 +10,18 @@ import {
   type PlaceChange,
   type PlaceContext,
   type PlaceErrorKind,
+  type PlaceLines,
   type PlaceRow,
   type SelectingContext,
-  type WhyNotWritable
+  type WhyNotWritable,
+  type WriteAnswer,
+  type WriteQuestion
 } from "./places.types"
 import { jsonIn, WebPlace } from "./WebPlace"
 
 /** What it assumes a place on a server side does:  it's told what's done on each answer, in `handled`. */
 const REMOTE_CAPABILITIES: PlaceCapabilities = {
-  kind: "web service",
+  kind: "web server",
   idOf: "id",
   filter: "none",
   sort: "none",
@@ -66,6 +69,8 @@ const OUT_OF_DATE_STATUS = 409
  * - Sends this page's write token (`window.SPELL_SERVER.token`) with every request, reads too, since a read can spend a key.
  *   - A token gone stale (the server restarted) is no answer, so a change waits for the reload, and isn't dropped.
  * - Never holds a key, so it takes no `keyNamed`.
+ * - A program's lines about the place go with every request (`lines`):  never a key, only its name.
+ * - A place that says which fields take no write (`ListAnswer.readOnlyFields`) is answered for here (`canWrite()`).
  ****************/
 export class RemotePlace extends WebPlace implements Place {
   /** What it says it can do. */
@@ -74,11 +79,16 @@ export class RemotePlace extends WebPlace implements Place {
   private readonly seenVersions = new Map<string, string>()
   /** The token to send, when it's not the page's. */
   private readonly token: string | undefined
+  /** What a program's lines say about the place, sent with every request. */
+  private readonly lines: PlaceLines | undefined
+  /** The fields each collection takes no write to, as last said. */
+  private readonly readOnlyFields = new Map<string, Set<string>>()
 
-  constructor({ url, can, token }: RemotePlaceProps) {
+  constructor({ url, can, token, lines }: RemotePlaceProps) {
     super({ url, changeIdHeader: false })
     this.capabilities = { ...REMOTE_CAPABILITIES, ...can }
     this.token = token
+    this.lines = lines
   }
 
   /** What it can do:  `can`, since a server's answer can't be waited for here. */
@@ -90,6 +100,7 @@ export class RemotePlace extends WebPlace implements Place {
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     const { versions, ...answer } = await this.ask<ListAnswer & WithVersions>("list", { collection, query }, context)
     this.note(collection, versions)
+    if (answer.readOnlyFields) this.readOnlyFields.set(collection, new Set(answer.readOnlyFields))
     return answer
   }
 
@@ -127,6 +138,13 @@ export class RemotePlace extends WebPlace implements Place {
   /** The version of this thing as it was last shown. */
   versionOf(collection: string, id: string): string | undefined {
     return this.seenVersions.get(`${collection}\n${id}`)
+  }
+
+  /** A field the place last said is read only:  a hint, as anything here is;  it's asked again with each read. */
+  canWrite({ collection, field }: WriteQuestion): WriteAnswer {
+    if (field !== undefined && this.readOnlyFields.get(collection)?.has(field))
+      return { canWrite: false, whyNot: "field" }
+    return { canWrite: true }
   }
 
   /** A server side says "out of date" with a 409, and "too much" with a 413. */
@@ -167,7 +185,7 @@ export class RemotePlace extends WebPlace implements Place {
         url: `${this.url}/${what}`,
         urlData: {},
         method: "POST",
-        data,
+        data: { ...data, ...(this.lines && { lines: this.lines }) },
         ...(token !== undefined && { headers: { [TOKEN_HEADER]: token } })
       },
       context
@@ -189,6 +207,8 @@ export type RemotePlaceProps = {
   can?: Partial<PlaceCapabilities>
   /** The token to send, when it isn't this page's own server's. */
   token?: string
+  /** What a program's lines say about the place:  a place that takes them (`Place.withLines()`) follows them, and any other ignores them. */
+  lines?: PlaceLines
 }
 
 /** The write token of the server that served this page. */

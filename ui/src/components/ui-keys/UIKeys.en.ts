@@ -39,6 +39,7 @@ export type KeyCapText = (typeof keyCapTexts)[number]["key"]
  ****************/
 export const keysVocabulary = {
   tag: "ui-keys",
+  icon: "keyboard outline",
   topics: ["text", "typography"],
   aka: ["kbd", "keyboard shortcut", "key caps", "hotkey", "accelerator"],
   noun: "keys",

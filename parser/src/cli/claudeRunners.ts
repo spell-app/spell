@@ -71,6 +71,12 @@ export const CLAUDE_TIERS: Record<AskingPass, Record<EffortTier, ClaudeSettings>
     fast: { model: "opus", effort: "low" },
     balanced: { model: "opus", effort: "low" },
     best: { model: "opus", effort: "high" }
+  },
+  // `spell place ingest`:  reading samples of one source, one call, untimed so far
+  describePlace: {
+    fast: { model: "opus", effort: "low" },
+    balanced: { model: "opus", effort: "low" },
+    best: { model: "opus", effort: "medium" }
   }
 }
 
@@ -161,7 +167,7 @@ export function claudeApiRunner({
  */
 export function requestFor(
   prompt: string,
-  { effort, schema, context }: ClaudeOptions,
+  { effort, schema, context, system }: ClaudeOptions,
   { model, fallbacks = true }: { model: string; fallbacks?: boolean }
 ): ApiRequest {
   const outputConfig = {
@@ -172,7 +178,7 @@ export function requestFor(
     model,
     max_tokens: MAX_TOKENS,
     system: [
-      { type: "text" as const, text: SYSTEM_PROMPT },
+      { type: "text" as const, text: system ?? SYSTEM_PROMPT },
       ...(context ? [{ type: "text" as const, text: context, cache_control: { type: "ephemeral" as const } }] : [])
     ],
     messages: [{ role: "user", content: prompt }],
@@ -310,12 +316,12 @@ type ApiMessage = {
  * - SIDE EFFECT:  runs `claude`;  it must be on the `PATH`, signed in.
  */
 export function runClaude(prompt: string, options?: ClaudeOptions): Promise<string> {
-  const { effort, model, schema, context } = inClaudeTerms(options)
+  const { effort, model, schema, context, system = SYSTEM_PROMPT } = inClaudeTerms(options)
   return new Promise((done, fail) => {
     const args = [
       "-p",
       ...["--tools", "", "--safe-mode", "--strict-mcp-config", "--no-session-persistence"],
-      ...["--system-prompt", context ? `${SYSTEM_PROMPT}\n\n${context}` : SYSTEM_PROMPT],
+      ...["--system-prompt", context ? `${system}\n\n${context}` : system],
       ...(schema ? ["--json-schema", JSON.stringify(schema)] : []),
       ...(effort ? ["--effort", effort] : []),
       ...(model ? ["--model", model] : [])

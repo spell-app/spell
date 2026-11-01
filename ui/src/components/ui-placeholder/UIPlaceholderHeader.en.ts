@@ -15,6 +15,7 @@ import type { E } from "spell/ui/core"
  ****************/
 export const placeholderHeaderVocabulary = {
   tag: "ui-placeholder-header",
+  icon: "heading",
   topics: ["loading", "content parts", "elements"],
   aka: ["skeleton heading"],
   noun: "header",

@@ -15,6 +15,7 @@ import { rootVocabulary } from "spell/ui/components/ui-root/UIRoot.en"
  ****************/
 const pageOwnVocabulary = {
   tag: "ui-page",
+  icon: "file outline",
   topics: ["layout", "containers", "navigation"],
   aka: ["page", "app shell", "body", "layout", "frame", "landmarks", "holy grail layout"],
   noun: "page",
