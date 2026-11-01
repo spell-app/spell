@@ -188,7 +188,7 @@ a "more button" is a thing:
 
 ## A page of Wikipedia:  not every name has one, and a name may be someone else's (Zolan is a medicine)
 a "wiki page" is a thing:
-	- it lives in the wikipedia
+	- it lives in wikipedia
 	- its "title" is text
 	- its "about" is text
 	- its "summary" is text
@@ -289,7 +289,7 @@ a "record" is a thing:
 
 ## A film
 a "film" is a record:
-	- it lives in the star wars
+	- it lives in star wars
 	- its "title" is text
 	- its "episode id" is a number
 	- its "opening crawl" is text
@@ -348,7 +348,7 @@ a "film" is a record:
 
 ## A person
 a "person" is a record:
-	- it lives in the star wars
+	- it lives in star wars
 	- its "name" is text
 	- its "height" is a number
 	- its "mass" is a number
@@ -394,7 +394,7 @@ a "person" is a record:
 
 ## A planet
 a "planet" is a record:
-	- it lives in the star wars
+	- it lives in star wars
 	- its "name" is text
 	- its "rotation period" is a number
 	- its "orbital period" is a number
@@ -484,15 +484,15 @@ a "craft" is a record:
 			draw the film
 
 a "starship" is a craft:
-	- it lives in the star wars
+	- it lives in star wars
 
 a "vehicle" is a craft:
-	- it lives in the star wars
+	- it lives in star wars
 
 
 ## A species
 a "species" is a record:
-	- it lives in the star wars
+	- it lives in star wars
 	- its "name" is text
 	- its "classification" is text
 	- its "language" is text

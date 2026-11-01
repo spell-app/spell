@@ -1003,7 +1003,7 @@ family cookbook is a web server at "https://api.example.com/v1":
 	- check it every 30 seconds
 
 a "recipe" is a view:
-	- it is saved in the family cookbook
+	- it is saved in family cookbook
 	- its "title" is text
 
 recipe box is an app:

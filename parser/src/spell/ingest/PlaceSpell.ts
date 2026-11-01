@@ -111,7 +111,7 @@ function typeLines(
   place: string,
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
-  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in the ${place}` }]
+  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type)) continue
     const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}`

@@ -103,7 +103,7 @@ const STARS_SPELL = `stars is a web server at "${API}":
 	- a person's hair color is its "hair_color"
 
 a "person" is a view:
-	- it lives in the stars
+	- it lives in stars
 	- its "name" is text
 	- its "height" is a number  // written as text there;  "unknown" reads as nothing
 	- its "mass" is a number  // written as text there
@@ -113,7 +113,7 @@ a "person" is a view:
 	- its "created" is a date
 
 a "planet" is a view:
-	- it lives in the stars
+	- it lives in stars
 	- its "name" is text
 	- its "population" is a number  // written as text there`
 

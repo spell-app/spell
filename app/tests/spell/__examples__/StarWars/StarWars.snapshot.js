@@ -36,36 +36,36 @@ export class MoreButton extends Thing {
 /** A page of Wikipedia:  not every name has one, and a name may be someone else's (Zolan is a medicine) */
 export class WikiPage extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7464, end: 7483 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7460, end: 7479 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "about" is text
-  static { this.declareProp("about", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7487, end: 7506 } }) }
+  static { this.declareProp("about", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7483, end: 7502 } }) }
   get about() { return this.getProp("about") }
   set about(value) { this.setProp("about", value) }
 
   // - its "summary" is text
-  static { this.declareProp("summary", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7510, end: 7531 } }) }
+  static { this.declareProp("summary", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7506, end: 7527 } }) }
   get summary() { return this.getProp("summary") }
   set summary(value) { this.setProp("summary", value) }
 
   // - its "picture" is text
-  static { this.declareProp("picture", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7535, end: 7556 } }) }
+  static { this.declareProp("picture", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7531, end: 7552 } }) }
   get picture() { return this.getProp("picture") }
   set picture(value) { this.setProp("picture", value) }
 
   // - its "address" is text
-  static { this.declareProp("address", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7560, end: 7581 } }) }
+  static { this.declareProp("address", { type: "text", declaredAt: { path: "/StarWars.spell", start: 7556, end: 7577 } }) }
   get address() { return this.getProp("address") }
   set address(value) { this.setProp("address", value) }
 
-  static { this.declareProp("lowerAbout", { declaredAt: { path: "/StarWars.spell", start: 7585, end: 7629 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("lowerAbout", { declaredAt: { path: "/StarWars.spell", start: 7581, end: 7625 }, readsFrom: ["wikipedia"] }) }
   get lowerAbout() {
     return this.about.toLocaleLowerCase()
   }
 
-  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spell", start: 7633, end: 7817 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spell", start: 7629, end: 7813 }, readsFrom: ["wikipedia"] }) }
   get fits() {
     if (this.title.includes("List of")) return false
     return this.lowerAbout.includes("star wars") || this.lowerAbout.includes("fictional") || this.lowerAbout.includes(" film ")
@@ -91,7 +91,7 @@ export class Portrait extends Thing {
   get shape() { return this.getProp("shape") }
   set shape(value) { this.setProp("shape", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 8003, end: 8051 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 7999, end: 8047 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -100,7 +100,7 @@ export class Portrait extends Thing {
     return core.getItemAt(this.name, 0)
   }
 
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 8104, end: 8206 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spell", start: 8100, end: 8202 }, readsFrom: ["wikipedia"] }) }
   get picture() {
     if (this.page && this.page.fits) return this.page.picture
     return ""
@@ -126,7 +126,7 @@ export class WikiNote extends Thing {
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 8754, end: 8802 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spell", start: 8750, end: 8798 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -158,7 +158,7 @@ export class Record extends Thing {
   get shape() { return this.getProp("shape") }
   set shape(value) { this.setProp("shape", value) }
 
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 9325, end: 9366 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 9321, end: 9362 }, readsFrom: ["star_wars"] }) }
   get hue() {
     return this.label.length * 47
   }
@@ -233,56 +233,56 @@ export class Record extends Thing {
 /** A film */
 export class Film extends Record {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10680, end: 10699 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10672, end: 10691 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "episode id" is a number
-  static { this.declareProp("episodeId", { type: "number", declaredAt: { path: "/StarWars.spell", start: 10703, end: 10731 } }) }
+  static { this.declareProp("episodeId", { type: "number", declaredAt: { path: "/StarWars.spell", start: 10695, end: 10723 } }) }
   get episodeId() { return this.getProp("episodeId") }
   set episodeId(value) { this.setProp("episodeId", value) }
 
   // - its "opening crawl" is text
-  static { this.declareProp("openingCrawl", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10735, end: 10762 } }) }
+  static { this.declareProp("openingCrawl", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10727, end: 10754 } }) }
   get openingCrawl() { return this.getProp("openingCrawl") }
   set openingCrawl(value) { this.setProp("openingCrawl", value) }
 
   // - its "director" is text
-  static { this.declareProp("director", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10766, end: 10788 } }) }
+  static { this.declareProp("director", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10758, end: 10780 } }) }
   get director() { return this.getProp("director") }
   set director(value) { this.setProp("director", value) }
 
   // - its "producer" is text
-  static { this.declareProp("producer", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10792, end: 10814 } }) }
+  static { this.declareProp("producer", { type: "text", declaredAt: { path: "/StarWars.spell", start: 10784, end: 10806 } }) }
   get producer() { return this.getProp("producer") }
   set producer(value) { this.setProp("producer", value) }
 
   // - its "release date" is a date
-  static { this.declareProp("releaseDate", { type: "date", declaredAt: { path: "/StarWars.spell", start: 10818, end: 10846 } }) }
+  static { this.declareProp("releaseDate", { type: "date", declaredAt: { path: "/StarWars.spell", start: 10810, end: 10838 } }) }
   get releaseDate() { return this.getProp("releaseDate") }
   set releaseDate(value) { this.setProp("releaseDate", value) }
 
   // - its "characters" is a list of people
-  static { this.declareProp("characters", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 10850, end: 10886 } }) }
+  static { this.declareProp("characters", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 10842, end: 10878 } }) }
   get characters() { return core.linked(this, "characters", Person) }
   set characters(value) { this.setProp("characters", value) }
 
   // - its "planets" is a list of planets
-  static { this.declareProp("planets", { itemType: "Planet", init: () => new List({ instanceType: "Planet" }), declaredAt: { path: "/StarWars.spell", start: 10890, end: 10924 } }) }
+  static { this.declareProp("planets", { itemType: "Planet", init: () => new List({ instanceType: "Planet" }), declaredAt: { path: "/StarWars.spell", start: 10882, end: 10916 } }) }
   get planets() { return core.linked(this, "planets", Planet) }
   set planets(value) { this.setProp("planets", value) }
 
   // - its "starships" is a list of starships
-  static { this.declareProp("starships", { itemType: "Starship", init: () => new List({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.spell", start: 10928, end: 10966 } }) }
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.spell", start: 10920, end: 10958 } }) }
   get starships() { return core.linked(this, "starships", Starship) }
   set starships(value) { this.setProp("starships", value) }
 
-  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 10970, end: 10994 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 10962, end: 10986 }, readsFrom: ["star_wars"] }) }
   get label() {
     return this.title
   }
 
-  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 10998, end: 11039 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 10990, end: 11031 }, readsFrom: ["star_wars"] }) }
   get kind() {
     return `Episode ${this.episodeId}`
   }
@@ -372,71 +372,71 @@ export class Film extends Record {
 /** A person */
 export class Person extends Record {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12589, end: 12607 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12577, end: 12595 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "height" is a number
-  static { this.declareProp("height", { type: "number", declaredAt: { path: "/StarWars.spell", start: 12611, end: 12635 } }) }
+  static { this.declareProp("height", { type: "number", declaredAt: { path: "/StarWars.spell", start: 12599, end: 12623 } }) }
   get height() { return this.getProp("height") }
   set height(value) { this.setProp("height", value) }
 
   // - its "mass" is a number
-  static { this.declareProp("mass", { type: "number", declaredAt: { path: "/StarWars.spell", start: 12639, end: 12661 } }) }
+  static { this.declareProp("mass", { type: "number", declaredAt: { path: "/StarWars.spell", start: 12627, end: 12649 } }) }
   get mass() { return this.getProp("mass") }
   set mass(value) { this.setProp("mass", value) }
 
   // - its "hair color" is text
-  static { this.declareProp("hairColor", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12665, end: 12689 } }) }
+  static { this.declareProp("hairColor", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12653, end: 12677 } }) }
   get hairColor() { return this.getProp("hairColor") }
   set hairColor(value) { this.setProp("hairColor", value) }
 
   // - its "eye color" is text
-  static { this.declareProp("eyeColor", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12693, end: 12716 } }) }
+  static { this.declareProp("eyeColor", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12681, end: 12704 } }) }
   get eyeColor() { return this.getProp("eyeColor") }
   set eyeColor(value) { this.setProp("eyeColor", value) }
 
   // - its "birth year" is text
-  static { this.declareProp("birthYear", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12720, end: 12744 } }) }
+  static { this.declareProp("birthYear", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12708, end: 12732 } }) }
   get birthYear() { return this.getProp("birthYear") }
   set birthYear(value) { this.setProp("birthYear", value) }
 
   // - its "gender" is text
-  static { this.declareProp("gender", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12748, end: 12768 } }) }
+  static { this.declareProp("gender", { type: "text", declaredAt: { path: "/StarWars.spell", start: 12736, end: 12756 } }) }
   get gender() { return this.getProp("gender") }
   set gender(value) { this.setProp("gender", value) }
 
   // - its "homeworld" is a planet
-  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.spell", start: 12772, end: 12799 } }) }
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.spell", start: 12760, end: 12787 } }) }
   get homeworld() { return core.linked(this, "homeworld", Planet) }
   set homeworld(value) { this.setProp("homeworld", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List({ instanceType: "Film" }), declaredAt: { path: "/StarWars.spell", start: 12803, end: 12833 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List({ instanceType: "Film" }), declaredAt: { path: "/StarWars.spell", start: 12791, end: 12821 } }) }
   get films() { return core.linked(this, "films", Film) }
   set films(value) { this.setProp("films", value) }
 
   // - its "species" is a list of species
-  static { this.declareProp("species", { itemType: "Species", init: () => new List({ instanceType: "Species" }), declaredAt: { path: "/StarWars.spell", start: 12837, end: 12871 } }) }
+  static { this.declareProp("species", { itemType: "Species", init: () => new List({ instanceType: "Species" }), declaredAt: { path: "/StarWars.spell", start: 12825, end: 12859 } }) }
   get species() { return core.linked(this, "species", Species) }
   set species(value) { this.setProp("species", value) }
 
   // - its "vehicles" is a list of vehicles
-  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.spell", start: 12875, end: 12911 } }) }
+  static { this.declareProp("vehicles", { itemType: "Vehicle", init: () => new List({ instanceType: "Vehicle" }), declaredAt: { path: "/StarWars.spell", start: 12863, end: 12899 } }) }
   get vehicles() { return core.linked(this, "vehicles", Vehicle) }
   set vehicles(value) { this.setProp("vehicles", value) }
 
   // - its "starships" is a list of starships
-  static { this.declareProp("starships", { itemType: "Starship", init: () => new List({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.spell", start: 12915, end: 12953 } }) }
+  static { this.declareProp("starships", { itemType: "Starship", init: () => new List({ instanceType: "Starship" }), declaredAt: { path: "/StarWars.spell", start: 12903, end: 12941 } }) }
   get starships() { return core.linked(this, "starships", Starship) }
   set starships(value) { this.setProp("starships", value) }
 
-  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 12957, end: 12980 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 12945, end: 12968 }, readsFrom: ["star_wars"] }) }
   get label() {
     return this.name
   }
 
-  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 12984, end: 13022 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 12972, end: 13010 }, readsFrom: ["star_wars"] }) }
   get kind() {
     return `Born ${this.birthYear}`
   }
@@ -491,77 +491,77 @@ export class Person extends Record {
 /** A planet */
 export class Planet extends Record {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14027, end: 14045 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14011, end: 14029 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "rotation period" is a number
-  static { this.declareProp("rotationPeriod", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14049, end: 14082 } }) }
+  static { this.declareProp("rotationPeriod", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14033, end: 14066 } }) }
   get rotationPeriod() { return this.getProp("rotationPeriod") }
   set rotationPeriod(value) { this.setProp("rotationPeriod", value) }
 
   // - its "orbital period" is a number
-  static { this.declareProp("orbitalPeriod", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14086, end: 14118 } }) }
+  static { this.declareProp("orbitalPeriod", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14070, end: 14102 } }) }
   get orbitalPeriod() { return this.getProp("orbitalPeriod") }
   set orbitalPeriod(value) { this.setProp("orbitalPeriod", value) }
 
   // - its "diameter" is a number
-  static { this.declareProp("diameter", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14122, end: 14148 } }) }
+  static { this.declareProp("diameter", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14106, end: 14132 } }) }
   get diameter() { return this.getProp("diameter") }
   set diameter(value) { this.setProp("diameter", value) }
 
   // - its "climate" is text
-  static { this.declareProp("climate", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14152, end: 14173 } }) }
+  static { this.declareProp("climate", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14136, end: 14157 } }) }
   get climate() { return this.getProp("climate") }
   set climate(value) { this.setProp("climate", value) }
 
   // - its "gravity" is text
-  static { this.declareProp("gravity", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14177, end: 14198 } }) }
+  static { this.declareProp("gravity", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14161, end: 14182 } }) }
   get gravity() { return this.getProp("gravity") }
   set gravity(value) { this.setProp("gravity", value) }
 
   // - its "terrain" is text
-  static { this.declareProp("terrain", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14202, end: 14223 } }) }
+  static { this.declareProp("terrain", { type: "text", declaredAt: { path: "/StarWars.spell", start: 14186, end: 14207 } }) }
   get terrain() { return this.getProp("terrain") }
   set terrain(value) { this.setProp("terrain", value) }
 
   // - its "surface water" is a number
-  static { this.declareProp("surfaceWater", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14227, end: 14258 } }) }
+  static { this.declareProp("surfaceWater", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14211, end: 14242 } }) }
   get surfaceWater() { return this.getProp("surfaceWater") }
   set surfaceWater(value) { this.setProp("surfaceWater", value) }
 
   // - its "population" is a number
-  static { this.declareProp("population", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14262, end: 14290 } }) }
+  static { this.declareProp("population", { type: "number", declaredAt: { path: "/StarWars.spell", start: 14246, end: 14274 } }) }
   get population() { return this.getProp("population") }
   set population(value) { this.setProp("population", value) }
 
   // - its "residents" is a list of people
-  static { this.declareProp("residents", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 14294, end: 14329 } }) }
+  static { this.declareProp("residents", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 14278, end: 14313 } }) }
   get residents() { return core.linked(this, "residents", Person) }
   set residents(value) { this.setProp("residents", value) }
 
   // - its "films" is a list of films
-  static { this.declareProp("films", { itemType: "Film", init: () => new List({ instanceType: "Film" }), declaredAt: { path: "/StarWars.spell", start: 14333, end: 14363 } }) }
+  static { this.declareProp("films", { itemType: "Film", init: () => new List({ instanceType: "Film" }), declaredAt: { path: "/StarWars.spell", start: 14317, end: 14347 } }) }
   get films() { return core.linked(this, "films", Film) }
   set films(value) { this.setProp("films", value) }
 
-  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 14367, end: 14390 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 14351, end: 14374 }, readsFrom: ["star_wars"] }) }
   get label() {
     return this.name
   }
 
-  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 14394, end: 14419 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 14378, end: 14403 }, readsFrom: ["star_wars"] }) }
   get kind() {
     return this.climate
   }
 
-  static { this.declareProp("shape", { declaredAt: { path: "/StarWars.spell", start: 14423, end: 14445 } }) }
+  static { this.declareProp("shape", { declaredAt: { path: "/StarWars.spell", start: 14407, end: 14429 } }) }
   get shape() {
     return "world"
   }
 
   /** what colour a world is, from its weather */
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 14494, end: 14814 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spell", start: 14478, end: 14798 }, readsFrom: ["star_wars"] }) }
   get hue() {
     if (this.climate.includes("frozen")) return 200
     if (this.climate.includes("arid")) return 38
@@ -735,41 +735,41 @@ export class Vehicle extends Craft {
 /** A species */
 export class Species extends Record {
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17335, end: 17353 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17307, end: 17325 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "classification" is text
-  static { this.declareProp("classification", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17357, end: 17385 } }) }
+  static { this.declareProp("classification", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17329, end: 17357 } }) }
   get classification() { return this.getProp("classification") }
   set classification(value) { this.setProp("classification", value) }
 
   // - its "language" is text
-  static { this.declareProp("language", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17389, end: 17411 } }) }
+  static { this.declareProp("language", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17361, end: 17383 } }) }
   get language() { return this.getProp("language") }
   set language(value) { this.setProp("language", value) }
 
   // - its "average lifespan" is text
-  static { this.declareProp("averageLifespan", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17415, end: 17445 } }) }
+  static { this.declareProp("averageLifespan", { type: "text", declaredAt: { path: "/StarWars.spell", start: 17387, end: 17417 } }) }
   get averageLifespan() { return this.getProp("averageLifespan") }
   set averageLifespan(value) { this.setProp("averageLifespan", value) }
 
   // - its "homeworld" is a planet
-  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.spell", start: 17449, end: 17476 } }) }
+  static { this.declareProp("homeworld", { type: "Planet", link: true, declaredAt: { path: "/StarWars.spell", start: 17421, end: 17448 } }) }
   get homeworld() { return core.linked(this, "homeworld", Planet) }
   set homeworld(value) { this.setProp("homeworld", value) }
 
   // - its "people" is a list of people
-  static { this.declareProp("people", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 17480, end: 17512 } }) }
+  static { this.declareProp("people", { itemType: "Person", init: () => new List({ instanceType: "Person" }), declaredAt: { path: "/StarWars.spell", start: 17452, end: 17484 } }) }
   get people() { return core.linked(this, "people", Person) }
   set people(value) { this.setProp("people", value) }
 
-  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 17516, end: 17539 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("label", { declaredAt: { path: "/StarWars.spell", start: 17488, end: 17511 }, readsFrom: ["star_wars"] }) }
   get label() {
     return this.name
   }
 
-  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 17543, end: 17575 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("kind", { declaredAt: { path: "/StarWars.spell", start: 17515, end: 17547 }, readsFrom: ["star_wars"] }) }
   get kind() {
     return this.classification
   }

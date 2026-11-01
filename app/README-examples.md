@@ -552,7 +552,7 @@ Say what a field links to, and reading it follows the link:
 
 ```spell
 a "person" is a record:
-	- it lives in the star wars
+	- it lives in star wars
 	- its "homeworld" is a planet
 	- its "films" is a list of films
 ```

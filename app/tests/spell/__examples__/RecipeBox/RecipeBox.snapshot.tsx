@@ -11,15 +11,15 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 639, end: 658 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 635, end: 654 } })
   accessor title!: string
 
   // - its "servings" is a number
-  @prop({ type: "number", declaredAt: { path: "/RecipeBox.spell", start: 662, end: 688 } })
+  @prop({ type: "number", declaredAt: { path: "/RecipeBox.spell", start: 658, end: 684 } })
   accessor servings!: number
 
   // - its "notes" is text
-  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 692, end: 711 } })
+  @prop({ type: "text", declaredAt: { path: "/RecipeBox.spell", start: 688, end: 707 } })
   accessor notes!: string
 
   @drawn draw() {
@@ -87,7 +87,7 @@ export class RecipeBox extends App {
   accessor newRecipe!: Recipe
 
   /** newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1640, end: 1752 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1636, end: 1748 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search))
     core.reverse(found)
