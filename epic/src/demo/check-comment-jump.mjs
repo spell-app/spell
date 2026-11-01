@@ -23,7 +23,7 @@
  *   - Cmd-K lists the two waiting threads under its box, `C1 · ...` then `C3 · ...`;  `C99` says it isn't there and
  *     stays open;  the old spelling `cm3` lands on C3's thread, opened (and Enter doesn't fold it again)
  *   - no page errors
- * - and with no thread waiting:  no bullhorn
+ * - and with no thread waiting:  the bullhorn, no count
  * - screenshots (outDir, default a temporary folder):  `<page>-top.png`, `<page>-landed.png`, `<page>-jump.png`
  * - exits 1 on any miss
  * - re-runs itself under `tsx` (the page server is TypeScript)
@@ -171,6 +171,7 @@ async function checkPage(name, url, anchors) {
   check(`${name}:  the toolbar's bullhorn shows, counting 2`, now.shown && now.count === "2", `count ${now.count}`)
   check(`${name}:  each thread shows its id, C1 ...`, now.ids.join(" ") === "C1 C2 C3", now.ids.join(" "))
   await page.screenshot({ path: join(out, `${name}-top.png`) })
+  if (name === "guide") await checkFoldAll(page)
   const order = await page.evaluate(() =>
     [...document.querySelectorAll("epic-thread")].filter((each) => each.comment?.turn === "person").map((each) => each.id)
   )
@@ -219,7 +220,21 @@ async function checkPage(name, url, anchors) {
   await page.close()
 }
 
-/** With no thread waiting on Owen, no bullhorn. */
+/** A guide's toolbar:  Expand all opens every section, Collapse all folds them, both at the row's right, before the bullhorn. */
+async function checkFoldAll(page) {
+  const openCount = () =>
+    page.evaluate(() => [...document.querySelectorAll("main ui-section[collapsible]")].filter((each) => each.open).length)
+  const row = await page.$$eval(".spell-toolbar > :not([data-rail])", (each) => each.map((item) => item.getAttribute("aria-label")?.split(":")[0]))
+  check("guide:  the toolbar's right holds Expand all, Collapse all, then the bullhorn", row[0] === "Expand all" && row[1] === "Collapse all" && /^2 threads/.test(row[2]), row.join(" | "))
+  await page.$eval('.spell-toolbar-fold[icon="angles down"]', (each) => each.click())
+  await page.waitForTimeout(200)
+  const opened = await openCount()
+  await page.$eval('.spell-toolbar-fold[icon="angles up"]', (each) => each.click())
+  await page.waitForTimeout(200)
+  check("guide:  Expand all opens every section, Collapse all folds them", opened > 3 && (await openCount()) === 0, `${opened} open`)
+}
+
+/** With no thread waiting on Owen:  the bullhorn, no count (it goes through the open threads). */
 async function checkNoneWaiting(url) {
   const page = await stubbedPage(
     url,
@@ -229,6 +244,6 @@ async function checkNoneWaiting(url) {
   await page.waitForSelector("epic-thread", { timeout: 20_000 }).catch(() => {})
   await page.waitForTimeout(500)
   const now = await state(page)
-  check("none waiting:  threads drawn, no bullhorn", now.ids.length === 3 && !now.shown, JSON.stringify(now))
+  check("none waiting:  threads drawn, bullhorn with no count", now.ids.length === 3 && now.shown, JSON.stringify(now))
   await page.close()
 }

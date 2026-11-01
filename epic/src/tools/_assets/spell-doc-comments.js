@@ -91,7 +91,7 @@ const HOLDS_INSIDE = /^(li|dt|dd|td|th)$/
 const QUOTE_HIGHLIGHT = "spell-comment-quote"
 
 /**
- * The one a comment's quote is drawn with while it WAITS for Claude (its turn `claude`):  purple, Owen's comments
+ * The one a comment's quote is drawn with while it WAITS for Claude (its turn `agent`):  purple, Owen's comments
  * not taken in yet (Owen, 2026-10-25:  "highlight bullhorn items still-to-be-processed ... purple for my comments")
  */
 const QUOTE_WAITING_HIGHLIGHT = "spell-comment-quote-waiting"
@@ -186,7 +186,8 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     manual test's
  * - JUMPING to the threads waiting on Owen (Claude spoke last;
  *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
- *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
+ *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;
+ *     none waiting:  no count, and it goes through the open threads;  no open thread:  hidden
  *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
  *       opened, below the stuck titles
  *   - Cmd / Ctrl + K takes a comment's id, and lists them (`openJumpPrompt()`)
@@ -352,7 +353,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "owen" && !!ThreadFacts.latestClaudeAt(comment)
+    return comment.turn === "person" && !!ThreadFacts.latestAgentAt(comment)
   }
 
   /**
@@ -364,7 +365,7 @@ class PageComments {
     if (!comment || !this.unseen(comment)) return
     const read = readJSON(this.readKey)
     // read already:  nothing to change (the thread stays orange until Owen answers, so the watcher fires again)
-    const latest = ThreadFacts.latestClaudeAt(comment)
+    const latest = ThreadFacts.latestAgentAt(comment)
     if ((read[id] ?? "") >= latest) return
     read[id] = latest
     writeJSON(this.readKey, read)
@@ -574,7 +575,7 @@ class PageComments {
       const at = block ?? head
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
-      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "claude" })
+      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "agent" })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])
@@ -621,14 +622,25 @@ class PageComments {
   // ## Jumping to the threads waiting on Owen
   ////////////////
 
-  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `owen`). */
+  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `person`). */
   get waitingOnOwen() {
-    return this.list.filter((comment) => comment.turn === "owen")
+    return this.list.filter((comment) => comment.turn === "person")
   }
 
   /** The comments waiting on Owen whose threads are drawn, in page order. */
   waitingInPageOrder() {
-    return this.waitingOnOwen
+    return this.inPageOrder(this.waitingOnOwen)
+  }
+
+  /** What the toolbar's bullhorn goes through:  the threads waiting on Owen, else every open one, in page order. */
+  jumpTargets() {
+    const waiting = this.waitingInPageOrder()
+    return waiting.length ? waiting : this.inPageOrder(this.list.filter((comment) => !comment.done))
+  }
+
+  /** `comments` whose threads are drawn, folded sections' too, in page order. */
+  inPageOrder(comments) {
+    return comments
       .map((comment) => ({ comment, thread: this.threadOf(comment.id) }))
       .filter((each) => each.thread)
       .sort((a, b) => (a.thread.compareDocumentPosition(b.thread) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
@@ -648,7 +660,9 @@ class PageComments {
 
   /**
    * The toolbar's BULLHORN:  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a guide's alike),
-   * an orange count of the threads waiting on Owen;  hidden when none.
+   * an orange count of the threads waiting on Owen;  none waiting, no count, and it jumps through the open threads;
+   * no open thread, hidden.
+   * - Owen, 2026-11-01:  "jump to next comment", in the toolbar
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
@@ -670,13 +684,18 @@ class PageComments {
     }
     if (home.lastElementChild !== bullhorn) home.append(bullhorn)
     const count = this.waitingInPageOrder().length
-    const tip = `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
-    bullhorn.querySelector(".spell-toolbar-count").textContent = String(count)
+    const open = this.jumpTargets().length
+    const tip = count
+      ? `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
+      : `${open} ${open === 1 ? "comment" : "comments"}:  jump to the next`
+    const badge = bullhorn.querySelector(".spell-toolbar-count")
+    badge.textContent = String(count)
+    badge.hidden = !count
     bullhorn.title = tip
     bullhorn.setAttribute("aria-label", tip)
     titleInside(bullhorn, "item")
     // a guide's titles share the row with it:  its menu fits them again (`<ui-toolbar shrinkable>`)
-    bullhorn.hidden = !count
+    bullhorn.hidden = !open
   }
 
   /**
@@ -688,11 +707,12 @@ class PageComments {
   }
 
   /**
-   * The toolbar's bullhorn, clicked:  land on the next thread waiting on Owen after the one it last landed on, in
+   * The toolbar's bullhorn, clicked:  land on the next of `jumpTargets()` after the one it last landed on, in
    * page order;  after the last, the first again.
+   * - a thread in a folded section:  landing unfolds it (`landOn()`)
    */
   nextWaiting() {
-    const waiting = this.waitingInPageOrder()
+    const waiting = this.jumpTargets()
     if (!waiting.length) return
     const at = waiting.findIndex((each) => each.id === this.lastWaiting)
     void this.landOn(waiting[(at + 1) % waiting.length].id)
@@ -1015,7 +1035,7 @@ class PageComments {
     const writing = !!replying && (replying.busy() || !!editing)
     if (comment.turn === "done") this.replyBoxes.delete(comment.id)
     const thinking = !!comment.working && comment.turn !== "done"
-    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "owen" || thinking))
+    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "person" || thinking))
     thread.comment = comment
     thread.toggleAttribute("open", open)
     // orange while it has a reply from Claude Owen hasn't answered (`unseen()`):  the whole thread, that reply stronger

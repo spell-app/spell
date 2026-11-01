@@ -1349,8 +1349,9 @@ In `tools/`:
       - Guides, details pages and Epic UI's band all fit their titles so (I132, I133);
         only the segmented toolbar under Spell UI's page tabs keeps its titles whole and scrolls (epic `debut`).
       - The menu watches its own row:  nothing refits it by hand (the bullhorn showing, the fonts loading).
-    - The spell syntax guide adds Expand all and Collapse all at the band's right (`spell-syntax.js`, Owen 2026-10-12):
-      appended to the menu, after its items, which scroll under them;  kept when the toolbar is built anew.
+    - Expand all and Collapse all at the band's right (`addFoldAll()`, Owen 2026-11-01):
+      appended to the menu, after its items;  kept when the toolbar is built anew.
+    - Last, the bullhorn:  jumps to the next thread waiting on Owen, else the next open one, unfolding what hides it.
     - A page without a sticky page header:  the last row of its filter bar.
       Else a sticky bar of its own, before its first section (`.spell-toolbar-alone`:  the saga pages).
   - An EPIC PAGE (`body.plan-doc`) has its own toolbar (`buildToolbar()`).

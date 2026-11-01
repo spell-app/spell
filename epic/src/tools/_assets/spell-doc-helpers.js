@@ -64,7 +64,7 @@ export function addHeadTool(head, tool, kind) {
 }
 
 /** The page header's tools, in their order (`addHeadTool()`). */
-const HEAD_TOOLS = ["folds", "send", "page", "comment"]
+const HEAD_TOOLS = ["send", "page", "comment"]
 
 /**
  * A block's ACTIONS ROW (epic `epic-engine` I26):  the ONE row of a block's own controls,

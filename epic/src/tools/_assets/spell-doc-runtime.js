@@ -2114,28 +2114,32 @@ function buildToolbar(page, outline, counts) {
  *   a heading that has its chevron keeps it
  */
 /**
- * EXPAND ALL and COLLAPSE ALL, in the page header of every docs page with folding sections:
- * details, choice and review pages, guides, the spell syntax guide.
- * - Owen, 2026-10-24, urgent:  "add expand all / collapse all to page header on these and all similar pages"
- * - two icon buttons, first in the header's tools row (`addHeadTool()`, "folds"),
- *   each opens or folds every section and sub-section (`wireFolds()`' `foldAll()`)
- * - not an epic page:  its own header has collapse-all and expand-all (`<epic-page>`)
- * - drawn once:  a live update leaves the header's tools in place
+ * Expand all and Collapse all, at the right of the page's toolbar, before the comments' jump button.
+ * - Owen, 2026-11-01:  "need an expand all / collapse all in the right of that toolbar"
+ * - two icon items of the toolbar's menu, each opens or folds every section and sub-section (`wireFolds()`' `foldAll()`)
+ * - not an epic page:  its own toolbar has them (`<epic-page>`)
+ * - added once:  a toolbar built anew keeps them (`removeToolbar()`)
  */
 function addFoldAll(main, folds) {
-  const head = main.querySelector(".spell-page-head")
-  if (!head || document.body.classList.contains("plan-doc") || head.querySelector('[data-head-tool="folds"]')) return
+  const toolbar = main.querySelector(".spell-toolbar")
+  if (!toolbar || document.body.classList.contains("plan-doc") || toolbar.querySelector(".spell-toolbar-fold")) return
   if (!main.querySelector("ui-section[collapsible]")) return
-  const buttons = FOLD_ALL.map(([isFolded, icon, tip]) => {
-    const button = el("ui-button", { appearance: "circular basic", size: "mini", icon, title: tip, "aria-label": tip })
-    titleInside(button)
-    button.addEventListener("click", () => folds.foldAll(isFolded))
-    return button
+  const items = FOLD_ALL.map(([isFolded, icon, tip]) => {
+    const item = el("ui-item", {
+      class: "spell-toolbar-item spell-toolbar-fold",
+      appearance: "link",
+      icon,
+      title: tip,
+      "aria-label": tip
+    })
+    titleInside(item, "item")
+    item.addEventListener("click", () => folds.foldAll(isFolded))
+    return item
   })
-  addHeadTool(head, el("span", { class: "spell-fold-all", "data-spell-added": true }, ...buttons), "folds")
+  toolbar.append(...items)
 }
 
-/** The header's fold buttons (`addFoldAll()`):  folds every section?, its icon, its tooltip. */
+/** The toolbar's fold items (`addFoldAll()`):  folds every section?, its icon, its tooltip. */
 const FOLD_ALL = [
   [false, "angles down", "Expand all"],
   [true, "angles up", "Collapse all"]
@@ -2153,7 +2157,7 @@ function wireFolds(main, outline, kept) {
 
   /**
    * Fold (`isFolded`) or open every section and sub-section at once, without their height animation, remembered as
-   * the reader's folds:  the page header's Collapse all / Expand all (`addFoldAll()`).
+   * the reader's folds:  the toolbar's Collapse all / Expand all (`addFoldAll()`).
    * - folding them all shows the page from its top:  every title, folded, fits in a window or two
    */
   function foldAll(isFolded) {
