@@ -525,7 +525,7 @@ describe("<ui-card> takes a click anywhere", () => {
           h("span", { id: "words" }, "Words"),
           h("ui-button", { id: "b", onClick: onButton }, "Go"),
           h("a", { id: "a", href: "#inner" }, "In")
-        ]),
+        ]) as unknown as Element,
       box
     )
     await ElementFixture.settle(box)
