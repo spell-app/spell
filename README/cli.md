@@ -128,7 +128,6 @@ spell lint --all @spell/examples
 ✓ @spell/examples/StarWars  6 warnings
 ✓ @spell/examples/TaskList
 ✓ @spell/examples/tic-tac-toe
-app/spaces/@spell/examples/StarWars/StarWarsCrawl.spellml:6:51  on-ui-closed= is HTML's habit:  in spellx, handle it in the template, with <on ui closed>...</>
 ```
 
 </details>

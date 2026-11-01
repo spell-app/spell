@@ -429,6 +429,13 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
       SOURCE.replace("<ui-button>Go</ui-button>", "<button>Go</button>").replace("<ui-text", "<text")
     )
   }, 30_000)
+
+  test("a component's own event stays on its element:  no <on ...> hears it", () => {
+    const source = SOURCE.replace("<ui-text on-click={flip it}>face</>", "<modal on-ui-closed={flip it}>face</modal>")
+    const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELLML_SUFFIX))
+    expect(stdout).not.toContain("HTML's habit")
+    expect(status).toBe(0)
+  }, 30_000)
 })
 
 describe("spell lint:  editor pages (epic property-editor P6, Q17)", () => {
