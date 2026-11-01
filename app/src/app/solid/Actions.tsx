@@ -34,7 +34,7 @@ import {
  * - SEE:  its App UI components page, `app/docs/Actions.html` (`/components/app/Actions.html`).
  ****************/
 export function Action(props: ActionProps) {
-  const rest = omit(props, "title", "button", "iconOnly", "icon", "active", "menu", "shortcut")
+  const rest = omit(props, "title", "button", "iconOnly", "icon", "active", "menu", "shortcut", "tip")
   return (
     <Switch
       fallback={
@@ -44,7 +44,7 @@ export function Action(props: ActionProps) {
       }
     >
       <Match when={props.menu}>
-        <ui-action shortcut={props.shortcut} selected={props.active} {...omit(rest, "color")}>
+        <ui-action shortcut={props.shortcut} selected={props.active} title={props.tip} {...omit(rest, "color")}>
           {props.title}
         </ui-action>
       </Match>
@@ -87,6 +87,8 @@ export type ActionProps = {
   iconOnly?: boolean
   /** An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon. */
   menu?: boolean
+  /** Why it's greyed, as a tooltip:  a `menu` item's. */
+  tip?: string
   /** Its key, in Spell UI's words (`mod+S`), shown by a `menu` item:  the entry's own, from `EDITOR_HOTKEYS`. */
   shortcut?: string
   /** Highlighted:  the item's `selected`, the button's `selected`. */

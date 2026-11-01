@@ -165,7 +165,8 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     )
     const menu = document.querySelector("ui-menu[data-spell-action-menu]") as HTMLElement
     expect(menu).not.toBeNull()
-    expect(menu.style.left).toBe("40px")
+    const popup = menu.closest("ui-popup") as HTMLElement
+    expect(JSON.parse(popup.getAttribute("at")!).x).toBe(40)
     expect(await titlesIn(menu)).toEqual(["deal", "-", "Undo", "Redo"])
     boxOf(menu.querySelector("ui-action")!).click()
     expect(game.card.faceUp).toBe(false)

@@ -899,7 +899,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "hoverable",
       "show-delay",
       "hide-delay",
-      "target"
+      "target",
+      "at"
     ]
   },
   "ui-progress": {

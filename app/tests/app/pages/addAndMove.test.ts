@@ -129,6 +129,8 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     // the one route:  Playwright asks the last one added first, and a second could let a save through
     await context.route(/\/api\/projects\/file\/|\.(spellml|spell)(\?.*)?$/, (route) => {
       const request = route.request()
+      // Show in Code puts the file's name in the page's address:  a reload is the page, not the file
+      if (request.isNavigationRequest()) return route.continue()
       if (request.method() !== "GET") {
         saved = request.postData() ?? ""
         return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
@@ -244,6 +246,134 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await written()).toEqual(before)
   })
 
+  /** The part menu's rows on `on`:  each one's words, and whether it's greyed, with why. */
+  const menuRows = (on: Page) =>
+    on.evaluate(() =>
+      [...document.querySelectorAll(".PartMenu ui-action")].map((row) => ({
+        title: row.getAttribute("kind") === "divider" ? "-" : (row.textContent ?? "").trim(),
+        grey: row.hasAttribute("disabled"),
+        why: row.getAttribute("title") ?? ""
+      }))
+    )
+
+  test("the menu's rows, in order, and each of them on a drawn part", async () => {
+    const [card] = await drawn("ui-card")
+    await page.mouse.click(card!.x, card!.y, { button: "right" })
+    await page.waitForTimeout(500)
+    const rows = await menuRows(page)
+    expect(rows.map((row) => row.title)).toEqual([
+      "Cut",
+      "Copy",
+      "Paste",
+      "Duplicate",
+      "Delete",
+      "-",
+      "Show in Code",
+      "Inspect"
+    ])
+    expect(rows.filter((row) => row.grey).map((row) => row.title)).toEqual([])
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(300)
+    expect(await page.locator(".PartMenu").count()).toBe(0)
+  })
+
+  test("the keys:  focus goes in, the arrows move, Enter runs, and focus comes back", async () => {
+    const [card] = await drawn("ui-card")
+    await page.mouse.click(card!.x, card!.y, { button: "right" })
+    await page.waitForTimeout(500)
+    const focused = () =>
+      page.evaluate(() => {
+        let at = document.activeElement
+        while (at?.shadowRoot?.activeElement) at = at.shadowRoot.activeElement
+        const host = (at?.getRootNode() as ShadowRoot | undefined)?.host
+        return (host ?? at)?.textContent?.trim() ?? ""
+      })
+    expect(await focused()).toMatch(/^Cut/)
+    await page.keyboard.press("ArrowDown")
+    expect(await focused()).toMatch(/^Copy/)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(300)
+    expect(await page.locator(".PartMenu").count()).toBe(0)
+    expect(await focused()).not.toMatch(/^Copy/)
+  })
+
+  test("Show in Code goes to the line;  Inspect opens the Inspector, with Inspect app off", async () => {
+    await page.evaluate(() => {
+      const inspector = (window as unknown as { Inspector: { isOpen: boolean; close(): void } }).Inspector
+      if (inspector.isOpen) inspector.close()
+    })
+    await page.waitForTimeout(500)
+    const [card] = await drawn("ui-card")
+    await page.mouse.click(card!.x, card!.y, { button: "right" })
+    await page.waitForTimeout(500)
+    await page.locator('.PartMenu ui-action:has-text("Show in Code")').click()
+    await page.waitForTimeout(800)
+    const line = await page.evaluate(() => document.querySelector(".monaco-editor .current-line") !== null)
+    expect(line).toBe(true)
+
+    await page.mouse.click(card!.x, card!.y, { button: "right" })
+    await page.waitForTimeout(500)
+    await page.locator('.PartMenu ui-action:has-text("Inspect")').click()
+    await page.waitForTimeout(800)
+    const state = await page.evaluate(() => {
+      const { Inspector } = window as unknown as {
+        Inspector: { isOpen: boolean; isInspecting: boolean; allSelected: unknown[] }
+      }
+      return { isOpen: Inspector.isOpen, isInspecting: Inspector.isInspecting, count: Inspector.allSelected.length }
+    })
+    expect(state).toEqual({ isOpen: true, isInspecting: false, count: 1 })
+  })
+
+  test("the background is the app:  only Copy, Paste, Show in Code and Inspect;  its tooltips say why", async () => {
+    const area = (await page.locator(".AppPaneBody").boundingBox())!
+    await page.mouse.click(area.x + area.width - 12, area.y + area.height - 12, { button: "right" })
+    await page.waitForTimeout(500)
+    const rows = await menuRows(page)
+    const grey = rows.filter((row) => row.grey)
+    expect(grey.map((row) => row.title)).toEqual(expect.arrayContaining(["Cut", "Duplicate", "Delete"]))
+    expect(grey.find((row) => row.title === "Cut")!.why).toMatch(/app itself/)
+    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(300)
+  })
+
+  test("a menu opened in each corner stays inside the window", async () => {
+    const area = (await page.locator(".AppPaneBody").boundingBox())!
+    const size = page.viewportSize()!
+    const open = async (x: number, y: number) => {
+      // straight at the corner of the window:  the app's area stops short of it
+      await page.evaluate(
+        ({ x, y }) => {
+          const { PartEdits } = window as unknown as { PartEdits: { onMenu(x: number, y: number): void } }
+          PartEdits.onMenu(x, y)
+        },
+        { x, y }
+      )
+      await page.waitForTimeout(500)
+      const box = await page.locator(".PartMenu").evaluate((popup) => {
+        const { x, y, right, bottom, width } = popup.shadowRoot!.querySelector("[part~=popup]")!.getBoundingClientRect()
+        return { x, y, right, bottom, width }
+      })
+      await page.keyboard.press("Escape")
+      await page.waitForTimeout(300)
+      return box
+    }
+    expect(area.width).toBeGreaterThan(0)
+    for (const [x, y] of [
+      [2, 2],
+      [size.width - 2, 2],
+      [2, size.height - 2],
+      [size.width - 2, size.height - 2]
+    ]) {
+      const box = await open(x!, y!)
+      expect(box.width).toBeGreaterThan(50)
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.y).toBeGreaterThanOrEqual(0)
+      expect(box.right).toBeLessThanOrEqual(size.width)
+      expect(box.bottom).toBeLessThanOrEqual(size.height)
+    }
+  })
+
   test("in the code editor, ⌘C copies its own text, and nothing happens to the parts", async () => {
     const before = await text()
     await page.locator(".monaco-editor .view-line").first().click()
@@ -288,6 +418,86 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.waitForTimeout(500)
     expect(await notice()).toMatch(/one place in the code/)
     expect(await source()).toBe(before)
+
+    // its right click:  what would act on it alone is greyed, saying why;  the rest isn't
+    await other.mouse.click(box.x, box.y, { button: "right" })
+    await other.waitForTimeout(500)
+    const rows = await menuRows(other)
+    const cut = rows.find((row) => row.title === "Cut")!
+    expect(cut.grey).toBe(true)
+    expect(cut.why).toMatch(/one place in the code/)
+    expect(rows.find((row) => row.title === "Show in Code")!.grey).toBe(false)
+    expect(rows.find((row) => row.title === "Inspect")!.grey).toBe(false)
+    await other.keyboard.press("Escape")
+    await other.waitForTimeout(300)
+    await other.close()
+  })
+
+  test("cards are a list, so Shift takes a run;  and in Run a program keeps its right click", async () => {
+    const other = await context.newPage()
+    await other.goto(`${EDITOR}edit/@spell/examples/Solitaire`, { timeout: 60_000 })
+    await other.waitForSelector(".InspectorToggle ui-icon", { timeout: 60_000 })
+    await other.waitForTimeout(7000)
+    // the last test's right click is remembered with the project
+    await other.evaluate(() => {
+      const { Inspector } = window as unknown as { Inspector: { letGo(): void; startInspecting(): void } }
+      Inspector.letGo()
+      Inspector.startInspecting()
+    })
+    await other.waitForTimeout(300)
+    const cards = await other.evaluate(() => {
+      const found: { x: number; y: number }[] = []
+      const walk = (root: Document | ShadowRoot) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-card" && !element.nextElementSibling) {
+            const { x, y, width, height } = element.getBoundingClientRect()
+            found.push({ x: x + width / 2, y: y + height / 2 })
+          }
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      return found.filter((card) => card.y > 0)
+    })
+    expect(cards.length).toBeGreaterThan(3)
+    const count = () =>
+      other.evaluate(
+        () => (window as unknown as { Inspector: { allSelected: unknown[] } }).Inspector.allSelected.length
+      )
+    await other.keyboard.down("Meta")
+    await other.mouse.click(cards[0]!.x, cards[0]!.y)
+    await other.keyboard.up("Meta")
+    await other.waitForTimeout(300)
+    expect(await count()).toBe(1)
+    await other.keyboard.down("Shift")
+    await other.mouse.click(cards[1]!.x, cards[1]!.y)
+    await other.keyboard.up("Shift")
+    await other.waitForTimeout(300)
+    const run = await count()
+    expect(run).toBeGreaterThan(1)
+
+    await other.keyboard.press("Escape")
+    await other.locator('.ModeTabs ui-item:has-text("Run")').first().click()
+    await other.waitForTimeout(1500)
+    const grid = await other.evaluate(() => {
+      const walk = (root: Document | ShadowRoot): Element | undefined => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.getAttribute("context-menu")) return element
+          const inside = element.shadowRoot && walk(element.shadowRoot)
+          if (inside) return inside
+        }
+        return undefined
+      }
+      const { x, y, width } = walk(document)!.getBoundingClientRect()
+      return { x: x + width / 2, y: y + 6 }
+    })
+    await other.mouse.click(grid.x, grid.y, { button: "right" })
+    await other.waitForTimeout(600)
+    expect(await other.locator(".PartMenu").count()).toBe(0)
+    expect(await other.locator("ui-popup[data-spell-action-menu]").count()).toBe(1)
+    await other.keyboard.press("Escape")
+    await other.waitForTimeout(400)
+    expect(await other.locator("ui-popup[data-spell-action-menu]").count()).toBe(0)
     await other.close()
   })
 

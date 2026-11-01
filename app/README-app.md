@@ -549,6 +549,8 @@ A line shows where it would land between its neighbours, or a ring round what it
 moving goes by the flow, never by x and y, so what's written stays readable.
 
 Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+A right click on a part, or its row in the Views tree, also offers Show in Code and Inspect:  what can't be done is greyed, and its tooltip says why.
+In Run the program has every right click, and with Shift held the browser does.
 Each gesture is one undo step, and only its own lines of the program change.
 
 **Its edge:**  only what has a tag of its own in the source can change.

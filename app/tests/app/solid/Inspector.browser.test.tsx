@@ -151,8 +151,12 @@ describe("inspecting", () => {
     expect(Inspector.allSelected.map((part) => part.element)).toEqual([c])
     Inspector.clicked(b, items, { ...keys, shiftKey: true })
     flush()
-    // the anchor is the last plain or ⌘ click, a
-    expect(Inspector.allSelected.map((part) => part.element)).toEqual([a, b])
+    // the pivot:  ⌘ moved it to c, and taking a away left it
+    expect(Inspector.allSelected.map((part) => part.element)).toEqual([b, c])
+    // not in a list, Shift toggles
+    Inspector.clicked(a, undefined, { ...keys, shiftKey: true })
+    flush()
+    expect(Inspector.allSelected.map((part) => part.element)).toEqual([b, c, a])
   })
 
   test("the pill's ✕ lets go of what's selected, and so does Esc;  Esc in a field doesn't (I92)", async () => {

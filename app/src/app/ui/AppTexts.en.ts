@@ -47,6 +47,11 @@ export const APP_TEXTS = {
     "These all come from one place in the code, so one can't change on its own.  Select what holds them, or change the code.",
   partNotWritten:
     "This isn't written as its own tag in your program, so it can't be moved or removed here.  Change the code instead.",
+  menuShowInCode: "Show in Code",
+  menuInspect: "Inspect",
+  partIsApp: "That's the app itself:  it can't be cut, duplicated or deleted.",
+  partNothingCopied: "Nothing's been copied yet.",
+  partNothingSelected: "Nothing's selected.",
   partBusy: "One moment:  the app is catching up with your last change.",
   partAcrossFiles: "These are written in different files, so they can't be moved together yet.",
   partNoDrawing: "This program has no drawing to add to:  add a <draw> to it first.",

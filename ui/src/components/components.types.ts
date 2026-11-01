@@ -658,6 +658,14 @@ export type CardSharedVariation = "size" | "color" | "direction" | "appearance" 
  * - A const object (the `Key` shape), so the element compares `trigger === UIT.PopupTrigger.click`.
  */
 export const PopupTrigger = { hover: "hover", focus: "focus", click: "click", manual: "manual" } as const
+/** A point in the window, where a `<ui-popup at>` opens. */
+export type PopupPoint = {
+  /** from the window's left, in pixels */
+  x: number
+  /** from the window's top, in pixels */
+  y: number
+}
+
 /** One of `PopupTrigger`'s values, e.g. `"click"`. */
 export type PopupTrigger = (typeof PopupTrigger)[keyof typeof PopupTrigger]
 

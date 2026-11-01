@@ -78,7 +78,10 @@
     border: 0;
     background: transparent;
     color: inherit;
-    position-try-fallbacks: flip-block, flip-inline;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
     container-type: anchored;
     transition-property: display, overlay;
     transition-duration: var(--_ui-popup-duration);

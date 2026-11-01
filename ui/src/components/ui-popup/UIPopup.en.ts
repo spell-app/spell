@@ -154,6 +154,14 @@ export const popupVocabulary = {
       kind: "json",
       reflect: false,
       description: "The target as a PROPERTY (an `Element`);  wins over `for`."
+    },
+    {
+      name: "at",
+      group: "behaviour",
+      kind: "json",
+      reflect: false,
+      description:
+        'A point in the window, `{ x, y }`, to open at instead of a target:  a right click\'s menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.'
     }
   ],
   events: [

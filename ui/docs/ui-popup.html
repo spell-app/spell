@@ -797,6 +797,14 @@
               >
             </ui-section>
 
+            <ui-section id="usage-at-a-point" label="At a point" sticky="stack" collapsible dividing open="false">
+              <p>
+                For a right click's menu:  <code>at</code>, a point in the window, in place of a target.  It stays inside
+                the window, takes focus, and gives it back when it closes.
+              </p>
+              <ui-code language="js">popup.at = { x: event.clientX, y: event.clientY }
+popup.visible = true</ui-code>
+            </ui-section>
             <ui-section id="usage-invoker-commands" label="Invoker commands" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">

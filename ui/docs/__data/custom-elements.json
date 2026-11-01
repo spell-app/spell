@@ -23096,6 +23096,14 @@
               "type": {
                 "text": "unknown"
               }
+            },
+            {
+              "kind": "field",
+              "name": "at",
+              "description": "A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on=\"manual\"` and `visible`;  it stays inside the window, takes focus and gives it back.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
             }
           ],
           "events": [

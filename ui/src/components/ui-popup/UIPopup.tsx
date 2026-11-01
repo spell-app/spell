@@ -26,6 +26,11 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *     `hoverable="false"` gives Fomantic's behaviour back:
  *     it hides as the pointer leaves the target, after `hide-delay`.
  *
+ * - `at`, a point in the window (`{ x, y }`), in place of a target:  a right click's menu.
+ *   - It opens with its corner there, staying inside the window, and takes focus, which goes back when it closes.
+ *   - The point is a box the popup puts on the page while it's open (`placeAtPoint()`):  anchor positioning needs one.
+ *   - Written with `open-on="manual"`, and with `visible` to open:  it has no target to listen to.
+ *
  * - Invoker commands (`<button commandfor="id" command="--toggle">`, `UIT.ToggleCommands`)
  *   are a person's actions too:  the popup opens at ITS target, whichever button sent the command.
  *
@@ -40,7 +45,8 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *     the component follows (with a `ui-closing` that can no longer veto).
  *
  * - Accessibility, by `open-on`:
- *   - `hover` / `focus` / `manual`:  the DOM element is `role=tooltip`;  the target is `aria-describedby` it
+ *   - `hover` / `focus` / `manual`:  the DOM element is `role=tooltip`;  the target is `aria-describedby` it;
+ *     `at` is interactive, as `click`
  *   - `click`:  the DOM element is `role=dialog` (non-modal, named by `header` or its `aria-label`);
  *     the target gets `aria-haspopup=dialog`, `aria-expanded`, `aria-controls`
  *   - the ARIA goes on the element that takes focus:  a `delegatesFocus` target's (`<ui-button>`'s) first focusable,
@@ -115,6 +121,8 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
       await target?.ready
       if (!this.isVisible || !this.isConnected) return
       this.show()
+      // no ring for a mouse's right click:  the arrow keys show it
+      if (this.point) E.beforeNextPaint(() => UI.focus.first(this.domElement)?.focus(QUIET_FOCUS))
       if (keyframes && box) await UI.transitions.animate({ element: box, name: keyframes, direction: UIT.IN })
       return
     }
@@ -150,6 +158,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   private show() {
     const { domElement } = this
     if (this.box) UI.transitions.reveal(this.box)
+    this.placeAtPoint()
     const target = this.targetElement
     const anchor = target ? UIPopup.anchorBoxFor(target) : undefined
     domElement.popover ||= this.popoverMode
@@ -167,6 +176,53 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     this.delayTimer?.cancel()
     if (this.domElement.matches(":popover-open")) this.domElement.hidePopover()
     UI.overlays.close(this.overlay)
+    this.removePointBox()
+  }
+
+  ////////////////
+  // ## A point
+  ////////////////
+
+  /** `at`, when it's a point. */
+  get point(): UIT.PopupPoint | undefined {
+    const at = this.at as UIT.PopupPoint | undefined
+    return typeof at?.x === "number" && typeof at.y === "number" ? at : undefined
+  }
+
+  /** The box at `point`, while it's open:  what it's anchored to. */
+  @E.state accessor pointBox: HTMLElement | undefined = undefined
+
+  /**
+   * Put the box at `point`, and make it the target, its anchor name on it already:  `bind()` comes a moment later.
+   * - In the popup's own tree:  an anchor name reaches only there.
+   * - SIDE EFFECT:  no pointing arrow and no gap;  `removePointBox()` undoes it.
+   */
+  private placeAtPoint() {
+    const { point, domElement } = this
+    if (!point) return this.removePointBox()
+    const root = domElement.getRootNode() as Document | ShadowRoot
+    const box = this.pointBox ?? (domElement.ownerDocument.createElement("div") as HTMLElement)
+    box.style.cssText = `position:fixed;left:${point.x}px;top:${point.y}px;width:0;height:0`
+    box.setAttribute("aria-hidden", "true")
+    if (!box.isConnected) ("body" in root ? root.body : root).append(box)
+    this.anchorName ||= `--${UI.ids.next(ID_PREFIX)}`
+    UIPopup.addAnchorName(box, this.anchorName)
+    domElement.style.setProperty(DISTANCE_TOKEN, "0px")
+    this.pointBox = box
+  }
+
+  /** Take the box away. */
+  private removePointBox() {
+    if (!this.pointBox) return
+    this.pointBox.remove()
+    this.pointBox = undefined
+    this.domElement.style.removeProperty(DISTANCE_TOKEN)
+  }
+
+  /** Told of a new point while it's open:  it moves there. */
+  @E.onChange("at", { defer: true })
+  protected onPointChanged() {
+    if (this.isVisible && this.isConnected) this.placeAtPoint()
   }
 
   /**
@@ -197,6 +253,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   @E.derived
   get targetElement(): Element | undefined {
     if (!this.isConnected) return undefined
+    if (this.pointBox) return this.pointBox
     const property = this.target
     if (UIPopup.isElement(property)) return property
     const id = this.for
@@ -209,9 +266,9 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     return this.openOn ?? DEFAULT_TRIGGER
   }
 
-  /** A click popup:  a non-modal dialog with interactive content, not a tooltip. */
+  /** A click popup, or one at a point:  a non-modal dialog with interactive content, not a tooltip. */
   get isInteractive(): boolean {
-    return this.trigger === UIT.PopupTrigger.click
+    return this.trigger === UIT.PopupTrigger.click || !!this.point
   }
 
   /** Element carrying the target's ARIA (see class docs), while bound. */
@@ -371,9 +428,10 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   }
 
   /** SIDE EFFECT:  the DOM element's `position-area` follows `position`. */
-  @E.onChange("position", { writesDOMElement: true })
-  protected onPositionChanged(position: string | undefined) {
-    this.domElement.style.setProperty("position-area", POSITION_AREAS[position ?? DEFAULT_POSITION])
+  @E.onChange("position", "point", { writesDOMElement: true })
+  protected onPositionChanged(position: string | undefined, point: UIT.PopupPoint | undefined) {
+    const area = point ? AT_POINT_POSITION : (position ?? DEFAULT_POSITION)
+    this.domElement.style.setProperty("position-area", POSITION_AREAS[area])
   }
 
   /**
@@ -417,7 +475,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
    * - After the position:  a phrase rule (`[class*="left top"]`) needs its words side by side.
    */
   protected get extraClass(): string | undefined {
-    const position = this.position ?? DEFAULT_POSITION
+    const position = this.point ? `${BASIC_CLASS} ${AT_POINT_POSITION}` : (this.position ?? DEFAULT_POSITION)
     return this.isVisible ? `${position} ${SHOWN_CLASS}` : position
   }
 
@@ -629,6 +687,18 @@ type AriaRelationProps = {
 
 /** Fomantic's default position:  the popup's class words before its noun, `ui top left popup`. */
 const DEFAULT_POSITION = "top left"
+
+/** Focus with no ring and no scrolling. */
+const QUIET_FOCUS = { preventScroll: true, focusVisible: false } as FocusOptions
+
+/** Where a popup at a point opens:  below it and to its right, until the window's edge flips it. */
+const AT_POINT_POSITION = "bottom left"
+
+/** The class word for no pointing arrow. */
+const BASIC_CLASS = "basic"
+
+/** The token for the gap between a popup and its target. */
+const DISTANCE_TOKEN = "--ui-popup-distance"
 
 /** Fomantic's class word of a shown popup. */
 const SHOWN_CLASS = "visible"

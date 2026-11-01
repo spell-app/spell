@@ -21072,6 +21072,17 @@ export interface UIPopupAttributes {
    */
   "prop:target"?: unknown
   /**
+   * A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  at?: unknown
+  /**
+   * A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `at` -- `prop:` stays only for compiled spell
+   */
+  "prop:at"?: unknown
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

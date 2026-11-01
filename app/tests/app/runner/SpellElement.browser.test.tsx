@@ -718,8 +718,18 @@ describe("SpellElement", () => {
         await click(elements[1]!, { ctrlKey: true })
         expect(selected()).toEqual(["d"])
         expect(elements[1]!.matches(":state(selected)")).toBe(false)
-        // from the last one clicked, b, to a:  in the list's order
-        await click(elements[0]!, { shiftKey: true })
+        // from the pivot, which command moved to d and taking b away left there, to b:  in the list's order
+        await click(elements[1]!, { shiftKey: true })
+        expect(selected()).toEqual(["b", "c", "d"])
+        // another shift-click swaps the run;  the pivot stays
+        await click(elements[2]!, { shiftKey: true })
+        expect(selected()).toEqual(["c", "d"])
+        // what command adds outside the run stays, and is the new pivot
+        await click(elements[0]!, { metaKey: true })
+        await click(elements[1]!, { shiftKey: true })
+        expect(selected()).toEqual(["c", "d", "a", "b"].sort())
+        await click(elements[0]!)
+        await click(elements[1]!, { shiftKey: true })
         expect(selected()).toEqual(["a", "b"])
         // a thing whose type doesn't say `can be selected`:  its click selects nothing
         await click(root.querySelector("game-pebble") as HTMLElement)

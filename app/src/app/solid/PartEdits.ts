@@ -1,3 +1,4 @@
+import { setDebugGlobal } from "spell/util"
 import { Dragging } from "spell/util/Dragging"
 
 import { SP } from "spell/parser/spell"
@@ -6,6 +7,7 @@ import { SourceEdits, type ElementPlace, type WrittenElement } from "spell/app/l
 import { editor } from "spell/app/app/editor"
 import { isRunningApp } from "spell/app/app/pages/editorHotkeys"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { Inspector } from "./Inspector"
 import { InspectorWrites } from "./InspectorWrites"
@@ -41,6 +43,10 @@ export class PartEdits {
       return true
     }
     if (!elements.length) return false
+    if (action !== "copy" && elements.some(isTheApp)) {
+      editor.showNotice(appTexts.text("partIsApp"))
+      return true
+    }
     const written = PartEdits.writtenAll(elements)
     if (!written) return true
     if (action === "copy" || action === "cut") {
@@ -66,6 +72,31 @@ export class PartEdits {
     PartEdits.applyText(file, after, appTexts.text(action === "cut" ? "partStepCut" : "partStepDelete"), [])
     Inspector.letGo()
     return true
+  }
+
+  /**
+   * Why `action` can't be done to what's selected, in words:  what a menu greys it for;  `undefined` if it can.
+   * - Catching up with the last change isn't a reason:  that's over in a moment.
+   */
+  static whyNot(action: PartAction): string | undefined {
+    if (action === "paste") {
+      if (!clipboard) return appTexts.text("partNothingCopied")
+      return PartEdits.placeForNew() ? undefined : appTexts.text("partNoDrawing")
+    }
+    const elements = Inspector.allSelected.flatMap((part) => part.element ?? [])
+    if (!elements.length) return appTexts.text("partNothingSelected")
+    if (action !== "copy" && elements.some(isTheApp)) return appTexts.text("partIsApp")
+    for (const element of elements) {
+      const written = PartEdits.writtenOf(element)
+      if ("reason" in written && written.reason !== "partBusy") return appTexts.text(written.reason)
+    }
+    return undefined
+  }
+
+  /** Why what's selected can't be shown in the code, in words;  `undefined` if it can. */
+  static get whyNoCode(): string | undefined {
+    const element = Inspector.allSelected.at(-1)?.element
+    return element && Inspector.writtenPlaceOf(element) ? undefined : appTexts.text("partNotWritten")
   }
 
   /**
@@ -345,8 +376,8 @@ export class PartEdits {
       PartEdits.startDrag(element, event as PointerEvent, { saysWhy: true })
     })
     row.addEventListener("contextmenu", (event) => {
-      if (isRunningApp()) return
-      const { clientX, clientY } = event as MouseEvent
+      const { clientX, clientY, shiftKey } = event as MouseEvent
+      if (isRunningApp() || shiftKey) return
       event.preventDefault()
       event.stopPropagation()
       if (!Inspector.isSelected(element)) Inspector.select(element)
@@ -403,7 +434,9 @@ export class PartEdits {
   /**
    * Listen on `area`, in Edit, while it's the app's:  answers how to stop.
    * - A press on what's selected drags it, inspecting or not.
-   * - A right click on a part selects it, if it isn't, and opens the part menu.
+   * - A right click on a part selects it, if it isn't, and opens the part menu;  on the background, the app itself.
+   * - In Run the program has every right click;  with Shift held, the browser does, for its Inspect Element.
+   * - The Menu key and Shift+F10 open the menu on what's selected.
    */
   static watch(area: HTMLElement, partAt: (event: Event) => Element | undefined): () => void {
     const stop = new AbortController()
@@ -420,9 +453,8 @@ export class PartEdits {
     area.addEventListener(
       "contextmenu",
       (event) => {
-        // Control-click on a Mac adds to what's selected:  a right click is the button alone
-        if (isRunningApp() || event.ctrlKey) return
-        const part = partAt(event)
+        if (isRunningApp() || event.shiftKey) return
+        const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
         if (!part) return
         event.preventDefault()
         event.stopPropagation()
@@ -430,6 +462,19 @@ export class PartEdits {
         PartEdits.onMenu?.(event.clientX, event.clientY)
       },
       options
+    )
+    window.addEventListener(
+      "keydown",
+      (event) => {
+        const isMenuKey = event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")
+        if (!isMenuKey || isRunningApp() || ActionMenus.isTypedIn(event.composedPath()[0])) return
+        const selected = Inspector.allSelected.at(-1)?.element
+        if (!selected) return
+        event.preventDefault()
+        const { left, bottom } = boxOf(selected)
+        PartEdits.onMenu?.(left, bottom)
+      },
+      { signal: stop.signal }
     )
     return () => stop.abort()
   }
@@ -530,6 +575,12 @@ function placeKeyAt(file: SP.AnySpellFile, text: string, offset: number): string
   return `${SP.SpellLocation.filePathOf(file.path)?.replace(/^\//, "") ?? file.path}:${line}:${character}`
 }
 
+/** Is `element` the app itself, the first of the app's parts? */
+function isTheApp(element: Element): boolean {
+  const area = Inspector.area
+  return !!area && Inspector.partsIn(area)[0]?.element === element
+}
+
 /** Does this element hold other things?  A closing tag, and not one that holds only words. */
 function holdsThings(written: WrittenElement, element: Element): boolean {
   return written.bodyStart !== undefined && !LEAF_TAGS.test(element.localName)
@@ -596,3 +647,5 @@ function isTreeRow(target: EventTarget): boolean {
 function isOnTriangle(event: Event): boolean {
   return event.composedPath().some((target) => target instanceof Element && target.classList.contains("toggle"))
 }
+
+setDebugGlobal({ PartEdits })
