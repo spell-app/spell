@@ -67,10 +67,7 @@ export default function appCommands(spell: Command): void {
     .command("wait")
     .description("listen until a request comes, then print it:  exit 2 at the timeout")
     .option("--timeout <seconds>", "how long to wait -- default an hour", (value) => Number(value))
-    .action(async (_options, command: Command) => {
-      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
-      process.exit(await changesCommand(["wait"], command.optsWithGlobals()))
-    })
+    .action((_options, command: Command) => runChanges(["wait"], command))
 
   changes
     .command("done")
@@ -78,18 +75,14 @@ export default function appCommands(spell: Command): void {
     .argument("<id>", "the request, c3")
     .argument("[summary...]", "what changed, in a few plain words;  or, with --failed, why it couldn't")
     .option("--failed", "it couldn't be done")
-    .action(async (id: string, summary: string[], _options, command: Command) => {
-      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
-      process.exit(await changesCommand(["done", id, ...summary], command.optsWithGlobals()))
-    })
+    .action((id: string, summary: string[], _options, command: Command) =>
+      runChanges(["done", id, ...summary], command)
+    )
 
   changes
     .command("list")
     .description("every request kept")
-    .action(async (_options, command: Command) => {
-      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
-      process.exit(await changesCommand(["list"], command.optsWithGlobals()))
-    })
+    .action((_options, command: Command) => runChanges(["list"], command))
 
   const preview = app
     .command("preview")
@@ -192,4 +185,12 @@ function contentCheckCommand(options: { bless?: boolean }): Promise<never> {
 /** `spell app vscode [verb]`:  loads no spell (`vscodeCommand.ts`). */
 function vscodeCommand(verb: string | undefined, options: { force?: boolean }): Promise<never> {
   return CLI.runCommand(async () => (await import("spell/app/cli/commands/vscodeCommand")).vscodeCommand(verb, options))
+}
+
+/** Run a `spell app changes` verb:  no `loadApp()`, since it needs no spell, so a session's wait starts at once. */
+function runChanges(args: string[], command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
+    return changesCommand(args, command.optsWithGlobals())
+  })
 }

@@ -335,7 +335,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
 
 /**
  * The ONE right-click menu on the app's parts, in the app and the Views tree:
- * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect.
+ * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect, a line, then Change This.
  * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - `PartEdits.onMenu` opens it, having selected what was clicked.
@@ -373,17 +373,6 @@ export function PartMenu(): JSX.Element {
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
-              <Show when={ChangeThis.isAvailable}>
-                <Action
-                  menu
-                  title={appTexts.text("menuChangeThis")}
-                  shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
-                  disabled={!!PartEdits.whyNoCode}
-                  tip={PartEdits.whyNoCode}
-                  onClick={() => ChangeThis.open()}
-                />
-                <ui-action kind="divider" />
-              </Show>
               <PartMenuItems whyNot={(action) => PartEdits.whyNot(action)} />
               <ui-action kind="divider" />
               <Action
@@ -394,6 +383,17 @@ export function PartMenu(): JSX.Element {
                 onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
               />
               <Action menu title={appTexts.text("menuInspect")} onClick={() => Inspector.showSelected()} />
+              <Show when={ChangeThis.isAvailable}>
+                <ui-action kind="divider" />
+                <Action
+                  menu
+                  title={appTexts.text("menuChangeThis")}
+                  shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
+                  disabled={!!PartEdits.whyNoCode}
+                  tip={PartEdits.whyNoCode}
+                  onClick={() => ChangeThis.open()}
+                />
+              </Show>
             </ui-menu>
           </div>
         </ui-popup>

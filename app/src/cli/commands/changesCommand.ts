@@ -1,3 +1,4 @@
+import { CLI } from "spell/cli"
 import { ChangeRequests } from "spell/app/spaces/server/node/changes/ChangeRequests"
 import type { SPACES } from "spell/app/spaces"
 
@@ -15,6 +16,7 @@ export async function changesCommand(args: string[], options: ChangesOptions): P
   const [verb, id, ...words] = args
   const inbox = ChangeRequests.here
   if (verb === "done") {
+    if (!inbox.of(id!)) throw new CLI.CliError(`there's no request ${id};  'spell app changes list' shows them`)
     const summary = words.join(" ")
     const { status } = inbox.finish(id!, options.failed ? "failed" : "done", summary)
     console.log(`${id} ${status}`)

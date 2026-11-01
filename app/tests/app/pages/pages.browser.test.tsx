@@ -226,6 +226,7 @@ function spyOnHotkeys() {
     "compileApp",
     "createFile",
     "stopInspecting",
+    "changeThis",
     "undo",
     "redo",
     "find",
