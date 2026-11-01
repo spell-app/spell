@@ -9,7 +9,7 @@ family cookbook is a database on this device
 
 ## A recipe:  a card you can read and change
 a "recipe" is a view:
-	- it is saved in the family cookbook
+	- it is saved in family cookbook
 	- its "title" is text
 	- its "servings" is a number
 	- its "notes" is text

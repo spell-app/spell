@@ -29,6 +29,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "their_field": "field",
   "there_are_things": "compare?|one?|count?|type?|list?|body?",
   "they_are": "operator|expression",
+  "thing_with_id": "type|id",
   "total_of": "list",
   "versions_in": "type|field",
   "where_field": "property",

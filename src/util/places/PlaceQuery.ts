@@ -2,6 +2,7 @@ import type { PlaceBatch } from "./PlaceBatch"
 import {
   PlaceError,
   canDoAll,
+  idOfRow,
   type ListAnswer,
   type ListHandled,
   type ListQuery,
@@ -27,6 +28,7 @@ export const DEFAULT_CEILING: PlaceCeiling = { rows: 50_000, bytes: 50 * 1024 * 
  * - The ceiling is `PlaceCapabilities.ceiling`, over `DEFAULT_CEILING`:  past it, a `PlaceError` naming the place.
  * - A row keeps its id field through `select`:  it's what makes it one row, in `PlaceCache`.
  * - Rows with no id:  it says so on every answer (`ListAnswer.notes`).
+ * - `ids`:  only those rows, asked for one by one where the place can (`Place.getMany()`), else picked from the whole list.
  * - Stops between pages when `signal` aborts, even for a place that ignores it.
  * - Knows nothing of readers or the cache:  `PlaceReads` runs one of these per request.
  ****************/
@@ -59,6 +61,7 @@ export class PlaceQuery {
    *   `PlaceError` over the ceiling, or `TypeError` for a page that isn't a place in the filtered list
    */
   async answer(signal: AbortSignal): Promise<ListAnswer> {
+    if (this.query.ids) return this.rowsWithIds(this.query.ids, signal)
     let first = await this.list(this.ask, signal)
     const { filter, sort, page } = this.query
     const { handled } = first
@@ -101,6 +104,23 @@ export class PlaceQuery {
       ...this.notesOn(first),
       handled
     }
+  }
+
+  /** Only the rows with `ids`, however the place can find them.  - throws as `answer()` does */
+  private async rowsWithIds(ids: readonly string[], signal: AbortSignal): Promise<ListAnswer> {
+    const { place, placeName, collection, batch } = this
+    if (place.getMany) {
+      const rows = await place.getMany(collection, ids, { signal })
+      signal.throwIfAborted()
+      return { rows, handled: {} }
+    }
+    const { ids: _ids, ...rest } = this.query
+    const whole = await new PlaceQuery({ placeName, place, collection, query: rest, ...(batch && { batch }) }).answer(
+      signal
+    )
+    const { idOf } = place.describe()
+    const wanted = new Set(ids)
+    return { ...whole, rows: whole.rows.filter((row) => wanted.has(`${idOfRow(row, idOf)}`)) }
   }
 
   /** What `answer` said about its rows, and, for rows with no id, that they share no identity:  the same for every place. */

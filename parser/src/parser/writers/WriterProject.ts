@@ -183,6 +183,12 @@ export class WriterProject {
       else if (node instanceof P.ASTMethodDefinition && !named.has(node)) named.set(node, node.methodName)
       else if (isCoreCall(node) && (node as P.ASTMethodInvocation).methodName === "on") this.noteListener(node)
     })
+    // reading a field that follows an address waits, on Solid;  anywhere else a place can't be read yet
+    if (how.readsThroughSolid) {
+      forEachNode(files, (node) => {
+        if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
+      })
+    }
     const allowed = new Map<P.ASTMethodDefinition, boolean>()
     for (const [method, name] of named) {
       method.waiting = false
@@ -305,7 +311,11 @@ export class WriterProject {
       if (Array.isArray(node)) return node.forEach(visit)
       if (!(node instanceof P.ASTNode) || (node instanceof P.ASTMethodDefinition && !node.inline)) return
       if (node instanceof P.ASTPropertyExpression && !this.readsWaitingValue(node)) {
-        if (unwrapped(node.object) instanceof P.ASTSelfLiteral) found.set(node.property.value, node)
+        // `its how many`, in a getter, is a variable named `this`:  the same thing read
+        const object = unwrapped(node.object)
+        const isOwn =
+          object instanceof P.ASTSelfLiteral || (object instanceof P.ASTVariableExpression && object.name === "this")
+        if (isOwn) found.set(node.property.value, node)
       }
       for (const [key, value] of Object.entries(node)) if (key !== "match") visit(value)
     }

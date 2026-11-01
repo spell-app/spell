@@ -19,6 +19,7 @@ export {
   type TestProjectName,
   FIXTURES_GROUP,
   fixtureProjectNames,
+  readsOtherPeoplesServers,
   compiledFixture,
   compiledFixtureWithMap,
   fixtureDeclarations,

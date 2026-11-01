@@ -2309,6 +2309,9 @@ function wireFolds(main, outline, kept) {
    * - `self: false`:  only what's AROUND it -- a folded section, or an item's closed panel, stays as it is
    */
   function reveal(element, { self = true } = {}) {
+    // on an epic page:  shown even where its page's stage, or its section's state filter, hides it (epic `epic-engine`
+    // I191:  a To review chip's J2, in the Judgement calls a page still agreeing its phases hides)
+    const shown = !!element.closest("epic-section")?.showLinked?.(element)
     let unfolded = false
     if (outline.sections) {
       const folds = `ui-section, ${EPIC_OPENERS}`
@@ -2354,7 +2357,7 @@ function wireFolds(main, outline, kept) {
       setPanel(title, true)
       unfolded = true
     }
-    return unfolded
+    return unfolded || shown
   }
 }
 

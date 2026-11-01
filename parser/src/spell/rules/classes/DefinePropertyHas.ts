@@ -25,6 +25,9 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  */
 export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
 
+/** The kind of place whose rows link to each other by address. */
+const WEB_SERVER = "web server"
+
 /**
  * `define_property_has` rule:  declares an instance property on `type`,
  * optionally constrained/initialized by a `type_specifier`.
@@ -359,12 +362,16 @@ export class DefinePropertyHas extends SpellStatement<
       check.addProp("rules", new P.ASTArrayLiteral(match, { items }))
     }
 
+    const linksTo = DefinePropertyHas.linkedTypeOf(match)
+    if (linksTo && !(specifier instanceof P.ASTNewInstanceExpression))
+      check.addProp("link", new P.ASTBooleanLiteral(match, { value: true }))
     statements.push(
       new P.ASTReactiveProperty(match, {
         type: typeAST,
         property: DefinePropertyHas.propertyName(match),
         check: check.properties.length ? check : undefined,
-        initializer
+        initializer,
+        ...(linksTo && { linksTo: new P.ASTTypeExpression(match, { name: linksTo }) })
       })
     )
     // what its body says besides its rules, e.g. its aliases (epic `elemental-spell` Q13):  compiled after it,
@@ -378,6 +385,23 @@ export class DefinePropertyHas extends SpellStatement<
       if (ast) statements.push(ast as P.ASTStatement)
     }
     return new P.ASTStatementGroup(match, { statements })
+  }
+
+  /**
+   * The name of the saved type this property holds the address of, or a list of:  `undefined` if it doesn't (epic `data` I33).
+   * - e.g. `its "homeworld" is a planet`, `its "films" is a list of films`, on a type on a web server:
+   *   such a server's rows link to each other by address, and a read of one follows it.
+   * - Read when compiling, as a kind's list is:  the line saying where the other type lives may be further down.
+   * - Only a web server, for now:  what other places hold is a reference, or the thing itself, read at once.
+   */
+  private static linkedTypeOf(match: P.MatchFor<DefinePropertyHas>): string | undefined {
+    const { scope } = match
+    const ownSaved = scope.types?.get(`${match.groups.type.value}`)?.savedPlace()
+    if (ownSaved?.placeType.placeKind !== WEB_SERVER) return undefined
+    const datatype = match.groups.specifier?.datatype
+    const name = P.itemTypeOf(datatype) ?? datatype
+    const target = name && scope.types?.get(name)
+    return target && target.savedPlace() ? target.name : undefined
   }
 
   /**

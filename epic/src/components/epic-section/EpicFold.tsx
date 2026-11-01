@@ -341,6 +341,12 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     return page ? EpicPage.signalsOf(page).layout.get() : 0
   }
 
+  /** What a link last landed on, on its page (`EpicPage`'s `linked`);  `undefined` outside one. */
+  get pageLinked(): E.Cell<Element | null> | undefined {
+    const page = this.page
+    return page ? EpicPage.signalsOf(page).linked : undefined
+  }
+
   ////////////////
   // ## Source (`DOMLoadableBodyElement`)
   ////////////////

@@ -31,6 +31,7 @@ import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { ThereAreThings } from "./ThereAreThings"
+import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
@@ -161,6 +162,7 @@ placesEs.addRule(TryAgain, {
   tests: [{ compileAs: "statement", tests: [["reintentar", "core.reloadSaved()"]] }]
 })
 
+placesEs.addRule(ThingWithId, { syntax: "(el|la) {type:known_type} cuyo identificador es {id:expression}" })
 placesEs.addRule(FirstFewWhere, {
   syntax: `(los|las) (primeros|primeras) {number} {type:plural_type} donde {inline_expression}?`
 })

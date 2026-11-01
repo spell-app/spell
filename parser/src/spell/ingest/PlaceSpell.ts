@@ -8,6 +8,7 @@ const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> =
   number: "a number",
   "yes or no": "yes or no",
   date: "a date",
+  // what isn't one of the place's own types:  its address, as text
   link: "text",
   "list of links": "a list of text",
   "list of text": "a list of text",
@@ -110,10 +111,10 @@ function typeLines(
   place: string,
   collections: Readonly<Record<string, CollectionDescription>>
 ): TypeLines {
-  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in the ${place}` }]
+  const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type)) continue
-    const line = `- its "${about.words}" is ${SPELL_TYPES[about.type]}`
+    const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   return {
@@ -133,16 +134,33 @@ function isLeftOut(
   return field === idField || !!leftOut || !SPELL_TYPES[type]
 }
 
+/**
+ * What a field is, in a type's line.
+ * - A link to one of the place's own types is that type:  `a planet`, `a list of films`, so reading it follows the address (`core.linked()`).
+ *   Anywhere else, it's only an address:  text.
+ */
+function typeWordsFor(
+  { type, linksTo }: FieldDescription,
+  collections: Readonly<Record<string, CollectionDescription>>
+): string {
+  const target = linksTo === undefined ? undefined : collections[linksTo]
+  if (!target || target.leftOut) return SPELL_TYPES[type]!
+  if (type === "link") return articled(target.type)
+  if (type === "list of links") return `a list of ${linksTo!.replace(/_/g, " ")}`
+  return SPELL_TYPES[type]!
+}
+
 /** What a person should know, on the line:  what Spell reads differently from what's there. */
 function commentFor(
   { type, linksTo, writtenAsText, noNumberWords }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
-  const target = linksTo && collections[linksTo]?.type
-  if (type === "link") return `  // ${target ? `${articled(target)}'s` : "an"} address`
-  if (type === "list of links") return `  // each ${target ? `${articled(target)}'s` : "an"} address`
+  const target = linksTo === undefined ? undefined : collections[linksTo]
+  if (target && !target.leftOut && (type === "link" || type === "list of links")) return ""
+  if (type === "link") return "  // an address"
+  if (type === "list of links") return "  // each an address"
   if (!writtenAsText) return ""
-  const none = noNumberWords?.length ? `;  ${noNumberWords.map((word) => `"${word}"`).join(", ")} reads as 0` : ""
+  const none = noNumberWords?.length ? `;  ${noNumberWords.map((word) => `"${word}"`).join(", ")} reads as nothing` : ""
   return `  // written as text there${none}`
 }
 

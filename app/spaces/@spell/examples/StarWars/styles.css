@@ -1,0 +1,556 @@
+/* File styles.css:  how the guide looks, its own look, whichever scheme the page is in:  deep space, a starfield,
+   and the yellow of the title.
+   - `color-scheme: dark` here is what turns the Spell UI elements dark too.
+   - Every animation is under "no preference" for motion:  with reduced motion the stars stand still,
+     and the opening is a page you read at your own speed. */
+
+star-wars-app {
+  --space: #05060f;
+  --space-low: #0d1330;
+  --ink: #eef1ff;
+  --ink-muted: #a7aecb;
+  --yellow: #ffe81f;
+  --panel: rgb(255 255 255 / 6%);
+  --panel-hover: rgb(255 255 255 / 12%);
+  --edge: rgb(255 255 255 / 14%);
+  --glow: rgb(255 232 31 / 30%);
+  --title-font: "Arial Black", "Helvetica Neue", Impact, sans-serif;
+
+  color-scheme: dark;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  min-height: 100vh;
+  overflow: clip;
+  padding: 1em clamp(1em, 4vw, 3em) 2em;
+  background: linear-gradient(var(--space), var(--space-low));
+  color: var(--ink);
+  font-size: 15px;
+}
+
+/****************
+ * The stars:  a few layers of dots, which drift
+ ****************/
+
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 140px 80px, #dfe6ff, transparent),
+    radial-gradient(1.5px 1.5px at 240px 180px, #fff, transparent),
+    radial-gradient(1px 1px at 70px 210px, #ffe9c9, transparent),
+    radial-gradient(2px 2px at 290px 40px, #cfe0ff, transparent);
+  background-size:
+    310px 270px,
+    250px 310px,
+    370px 290px,
+    230px 340px,
+    430px 390px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stars {
+    animation: drift 240s linear infinite;
+  }
+}
+
+@keyframes drift {
+  to {
+    background-position:
+      -310px 135px,
+      -500px 155px,
+      -370px 145px,
+      -460px 170px,
+      -430px 195px;
+  }
+}
+
+/****************
+ * Across the top:  the name, the search, and Punch it
+ ****************/
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75em 1.5em;
+}
+
+.logo {
+  flex: none;
+
+  &::part(button) {
+    padding: 0;
+    background: none;
+    color: var(--yellow);
+    font: 900 1.9em / 1 var(--title-font);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+}
+
+.find {
+  --ui-form-row-distance: 0;
+
+  flex: 1 1 14em;
+  max-width: 28em;
+  margin-inline-start: auto;
+}
+
+.punch {
+  flex: none;
+
+  &::part(button) {
+    background: var(--yellow);
+    color: var(--space);
+    font-weight: 800;
+  }
+}
+
+/****************
+ * The tabs
+ ****************/
+
+.tabs {
+  --ui-primary: var(--yellow);
+
+  margin-block: 1em;
+}
+
+/****************
+ * The shelf:  cards in a grid;  anything else across the whole of it
+ ****************/
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13em), 1fr));
+  gap: 0.75em;
+  min-height: 20em;
+
+  .back,
+  .hero,
+  .facts,
+  .heading,
+  h3,
+  .none,
+  .wide {
+    grid-column: 1 / -1;
+  }
+
+  .back {
+    justify-self: start;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+    color: var(--yellow);
+  }
+
+  h3 {
+    margin-block-start: 1em;
+    font-size: 1.05em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .none {
+    margin: 0;
+    color: var(--ink-muted);
+  }
+}
+
+/****************
+ * A card:  a picture, a name, what kind.  Its name is the button, and fills the card.
+ ****************/
+
+.card {
+  --ui-card-margin-block: 0;
+
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.6em;
+  background: var(--panel);
+  box-shadow: 0 0 0 1px var(--edge);
+  transition:
+    background 120ms,
+    box-shadow 120ms,
+    translate 120ms;
+
+  &:hover,
+  &:focus-within {
+    background: var(--panel-hover);
+    box-shadow:
+      0 0 0 1px var(--yellow),
+      0 0 1.5em var(--glow);
+    translate: 0 -2px;
+  }
+
+  .words {
+    padding: 0.5em 0.75em 0.7em;
+  }
+
+  .open::part(button) {
+    padding: 0;
+    background: none;
+    color: var(--ink);
+    font-weight: 700;
+    text-align: start;
+    white-space: normal;
+  }
+
+  .open::part(button)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  small {
+    display: block;
+    color: var(--ink-muted);
+  }
+}
+
+/****************
+ * A picture, over an initial on a colour, so nothing's ever a broken image.  A world is a world.
+ ****************/
+
+.portrait {
+  --hue: 200;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 70% 58%), hsl(var(--hue) 60% 18%));
+
+  .initial {
+    color: rgb(255 255 255 / 85%);
+    font: 900 3.4em / 1 var(--title-font);
+  }
+
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 20%;
+  }
+
+  &.world {
+    background: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 5%), transparent 70%);
+
+    &::before {
+      content: "";
+      position: absolute;
+      height: 78%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 75% 62%), hsl(var(--hue) 60% 14%) 75%);
+      box-shadow: 0 0 2em hsl(var(--hue) 70% 50% / 35%);
+    }
+
+    .initial {
+      position: relative;
+    }
+  }
+}
+
+/****************
+ * A whole page
+ ****************/
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em 1.5em;
+  align-items: start;
+
+  star-wars-portrait,
+  > .portrait {
+    flex: 1 1 16em;
+    max-width: 22em;
+  }
+
+  .about {
+    flex: 999 1 20em;
+    min-width: 0;
+  }
+
+  h2 {
+    font: 900 clamp(1.6em, 5vw, 2.8em) / 1.05 var(--title-font);
+    text-transform: uppercase;
+  }
+
+  .kind {
+    margin: 0.25em 0 0;
+    color: var(--ink-muted);
+  }
+
+  .note {
+    margin: 0.75em 0 0;
+    max-width: 44em;
+  }
+
+  .note.waiting {
+    color: var(--ink-muted);
+  }
+
+  .note a {
+    margin-inline-start: 0.25em;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+
+  .portrait {
+    border-radius: 0.6em;
+    box-shadow: 0 0 0 1px var(--edge);
+  }
+}
+
+.play {
+  display: block;
+  margin-block-start: 0.75em;
+
+  &::part(button) {
+    background: var(--yellow);
+    color: var(--space);
+    font-weight: 800;
+  }
+}
+
+.facts {
+  display: block;
+  max-width: 30em;
+
+  td {
+    color: var(--ink);
+  }
+
+  th {
+    width: 8em;
+    color: var(--ink-muted);
+    font-weight: 500;
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  td.number {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+}
+
+.credits {
+  margin-block-start: 2.5em;
+  color: var(--ink-muted);
+  font-size: 0.85em;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+/****************
+ * The jump to light speed:  the stars stretch into lines, then you're there
+ ****************/
+
+.jump {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    repeating-conic-gradient(from 3deg at 50% 45vh, #dfe6ff 0 0.15deg, transparent 0.15deg 3deg),
+    var(--space);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .jump {
+    animation: jump 900ms ease-in both;
+  }
+}
+
+@keyframes jump {
+  from {
+    opacity: 0;
+    scale: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    scale: 3;
+  }
+}
+
+/****************
+ * The opening:  yellow words going away, over deep space.  A modal the whole window high, so it's a cinema, and Escape ends it.
+ ****************/
+
+.crawl {
+  color-scheme: dark;
+}
+
+.crawl::part(modal) {
+  background: #05060f;
+  padding: 0;
+}
+
+.cinema {
+  --space: #05060f;
+  --yellow: #ffe81f;
+
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--space);
+  color: var(--yellow);
+
+  .stars {
+    z-index: 0;
+  }
+
+  .stop {
+    position: absolute;
+    inset: 1em 1em auto auto;
+    z-index: 1;
+  }
+
+  .long-ago {
+    position: absolute;
+    inset: 38% 0 auto;
+    margin: 0 auto;
+    max-width: 22em;
+    padding-inline: 1em;
+    color: #4bd5ee;
+    font-size: 1.4em;
+    opacity: 0;
+  }
+
+  .stage {
+    position: absolute;
+    inset: 0;
+    perspective: 340px;
+    perspective-origin: 50% 40%;
+  }
+
+  .words {
+    position: absolute;
+    inset: auto 0 0;
+    margin-inline: auto;
+    width: min(88%, 30em);
+    font: 700 clamp(1.3em, 3.2vw, 2.8em) / 1.45 "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+    text-align: justify;
+    transform-origin: 50% 100%;
+    transform: rotateX(24deg);
+  }
+
+  h2,
+  .episode {
+    margin: 0 0 0.6em;
+    color: inherit;
+    text-align: center;
+  }
+
+  h2 {
+    font: inherit;
+    font-size: 1.6em;
+    text-transform: uppercase;
+  }
+
+  /* its lines are the film's own, so it's they that are centred, not each word */
+  .text {
+    width: fit-content;
+    margin: 0 auto;
+    text-align: start;
+    white-space: pre-line;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cinema {
+    .long-ago {
+      animation: long-ago 5s ease-in-out both;
+    }
+
+    .words {
+      animation: crawl 70s linear 5s both;
+    }
+  }
+}
+
+/* with reduced motion:  no tilt, no movement, the whole of it to read */
+@media (prefers-reduced-motion: reduce) {
+  .cinema {
+    overflow: auto;
+
+    .long-ago,
+    .stage,
+    .words {
+      position: static;
+      opacity: 1;
+      transform: none;
+    }
+
+    .stage {
+      padding: 1em;
+    }
+  }
+}
+
+@keyframes long-ago {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+
+@keyframes crawl {
+  from {
+    transform: rotateX(24deg) translateY(100%);
+  }
+  to {
+    transform: rotateX(24deg) translateY(-160%) translateZ(-900px);
+  }
+}
+
+/****************
+ * On a phone:  everything stacks, and there's room for two cards across
+ ****************/
+
+@media (max-width: 34em) {
+  .find {
+    flex-basis: 100%;
+    order: 3;
+    max-width: none;
+    margin: 0;
+  }
+
+  .logo::part(button) {
+    font-size: 1.45em;
+  }
+
+  .punch {
+    margin-inline-start: auto;
+  }
+
+  .shelf {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -304,7 +304,7 @@
       "kind": "method",
       "name": "jugar una carta",
       "waits": true,
-      "defined": "/Solitario.es.spell:7797-8056"
+      "defined": "/Solitario.es.spell:7625-7884"
     },
     {
       "syntax": "poner {thisArg:expression} en {callArgs:expression}",
@@ -326,7 +326,7 @@
       ],
       "returns": "choice",
       "waits": true,
-      "defined": "/Solitario.es.spell:8264-9163"
+      "defined": "/Solitario.es.spell:8092-8991"
     },
     {
       "syntax": "contar los puntos (de|del) {thisArg:expression} en {callArgs:expression}",
@@ -347,7 +347,7 @@
         }
       ],
       "returns": "number",
-      "defined": "/Solitario.es.spell:9263-9426"
+      "defined": "/Solitario.es.spell:9091-9254"
     },
     {
       "type": "Comodín",
@@ -538,56 +538,56 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10948-11356"
+      "defined": "/Solitario.es.spell:10776-11184"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:10992-11017"
+      "defined": "/Solitario.es.spell:10820-10845"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11426-11640"
+      "defined": "/Solitario.es.spell:11254-11468"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:11472-11497"
+      "defined": "/Solitario.es.spell:11300-11325"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11698-12274"
+      "defined": "/Solitario.es.spell:11526-12102"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:11736-11761"
+      "defined": "/Solitario.es.spell:11564-11589"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:11765-11794"
+      "defined": "/Solitario.es.spell:11593-11622"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:12353-12768"
+      "defined": "/Solitario.es.spell:12181-12596"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:12389-12415"
+      "defined": "/Solitario.es.spell:12217-12243"
     },
     {
       "type": "Solitario",
       "superType": "App",
-      "defined": "/Solitario.es.spell:676-7579"
+      "defined": "/Solitario.es.spell:676-7407"
     },
     {
       "property": "puntuación",
@@ -702,7 +702,7 @@
       ],
       "kind": "method",
       "name": "crearlo",
-      "defined": "/Solitario.es.spell:2665-2749"
+      "defined": "/Solitario.es.spell:2577-2647"
     },
     {
       "syntax": "depurar {thisArg:expression}?",
@@ -715,7 +715,7 @@
       ],
       "kind": "method",
       "name": "depurarlo",
-      "defined": "/Solitario.es.spell:2817-2895"
+      "defined": "/Solitario.es.spell:2715-2793"
     },
     {
       "syntax": "rehacer la reserva ((de|del) {thisArg:expression})?",
@@ -728,7 +728,7 @@
       ],
       "kind": "method",
       "name": "rehacer la reserva",
-      "defined": "/Solitario.es.spell:2953-3178"
+      "defined": "/Solitario.es.spell:2851-3062"
     },
     {
       "syntax": "robar de la reserva ((de|del) {thisArg:expression})?",
@@ -742,7 +742,7 @@
       "kind": "method",
       "name": "robar de la reserva",
       "waits": true,
-      "defined": "/Solitario.es.spell:3248-3522"
+      "defined": "/Solitario.es.spell:3132-3392"
     },
     {
       "syntax": "repartir las cartas ((de|del) {thisArg:expression})?",
@@ -756,7 +756,7 @@
       "kind": "method",
       "name": "repartir las cartas",
       "waits": true,
-      "defined": "/Solitario.es.spell:3665-4288"
+      "defined": "/Solitario.es.spell:3535-4130"
     },
     {
       "syntax": "empezar el juego ((de|del) {thisArg:expression})?",
@@ -770,7 +770,7 @@
       "kind": "method",
       "name": "empezar el juego",
       "waits": true,
-      "defined": "/Solitario.es.spell:4293-4406"
+      "defined": "/Solitario.es.spell:4135-4248"
     },
     {
       "syntax": "hacer trampa ((de|del) {thisArg:expression})?",
@@ -785,7 +785,7 @@
       "name": "hacer trampa",
       "returns": "nothing",
       "waits": true,
-      "defined": "/Solitario.es.spell:4488-4938"
+      "defined": "/Solitario.es.spell:4330-4766"
     },
     {
       "syntax": "jugar solo ((de|del) {thisArg:expression})?",
@@ -799,7 +799,7 @@
       "kind": "method",
       "name": "jugar solo",
       "waits": true,
-      "defined": "/Solitario.es.spell:5015-6051"
+      "defined": "/Solitario.es.spell:4843-5879"
     },
     {
       "syntax": "probar los movimientos",
@@ -808,7 +808,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:12782-14365"
+      "defined": "/Solitario.es.spell:12610-14193"
     }
   ],
   "codeLines": [
@@ -887,14 +887,14 @@
     750,
     755,
     760,
-    770,
-    775,
-    780,
-    790,
-    801,
-    824,
-    832,
-    844,
-    965
+    769,
+    774,
+    779,
+    789,
+    800,
+    823,
+    831,
+    843,
+    964
   ]
 }

@@ -107,6 +107,14 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
     this.section?.showStates(states)
   }
 
+  /**
+   * A link is landing on `target`, in this page:  show it, whatever the page's stage or a state filter hides
+   * (`EpicSection.showLinked()`).  Returns whether that showed something hidden.
+   */
+  showLinked(target: Element): boolean {
+    return this.section?.showLinked(target) ?? false
+  }
+
   /** Its component, as a section. */
   private get section(): EpicSection | undefined {
     return this.component as EpicSection | undefined
@@ -137,6 +145,8 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *     the only one showing, everything again
  *   - an ⌥-click (epic `epic-engine` I166):  only that state, whatever showed
  *   - a filtered list says `3 hidden · show all` under it
+ *   - a link landing on an item it hides shows that item anyway, until the reader picks a chip again
+ *     (`showLinked()`, epic `epic-engine` I191);  so does a section the page's stage hides
  *   - each item it hides is marked `data-epic-filtered` (page state, never in the file:  the live patch keeps it),
  *     which the page sheet hides (`EpicSection.runs.css`;  a `::slotted(#id)` rule per item before epic `epic-engine`
  *     P45)
@@ -347,8 +357,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return new Set(this.chosen ? this.chosen.filter((state) => present.includes(state)) : present)
   })
 
-  /** The items the filter hides (`StateFilter.hides()`):  never a marked one, nor one Claude is on (blue). */
-  readonly hidden = createMemo(() => this.unmarked().filter((it) => StateFilter.hides(it.state, this.showing())))
+  /**
+   * The items the filter hides (`StateFilter.hides()`):  never a marked one, nor one Claude is on (blue), nor the one a
+   * link just landed on, or in (`linkedHere`).
+   */
+  readonly hidden = createMemo(() => {
+    const linked = this.linkedHere
+    return this.unmarked().filter(
+      (it) => StateFilter.hides(it.state, this.showing()) && !(linked && it.item.contains(linked))
+    )
+  })
 
   /** The items the filter hides, as elements:  each marked `data-epic-filtered` (`onFiltered()`). */
   get filteredItems(): readonly Element[] {
@@ -367,7 +385,33 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.cssState("offstage")
   get isOffStage(): boolean {
     void this.layout
-    return this.isConnected && PageStages.hides(this.domElement)
+    return this.isConnected && PageStages.hides(this.domElement) && !this.linkedHere
+  }
+
+  /**
+   * What a link last landed on (the page's `linked`), when it's this section or inside it:  shown, whatever its page's
+   * stage or its filter hides (epic `epic-engine` I191).
+   * - Owen, 2026-10-31, on the rust epic's P2 To review chips:  "Clicking J2 is broken" -- J2 was in the Judgement
+   *   calls, which the page's `phases` stage hides
+   */
+  get linkedHere(): Element | null {
+    const linked = this.pageLinked?.get() ?? null
+    return linked && this.domElement.contains(linked) ? linked : null
+  }
+
+  /**
+   * A link is landing on `target`, on this section's page (the docs runtime's `reveal()`):  the page remembers it, so
+   * the section holding it shows it (`linkedHere`), until the reader filters that section again or a link lands
+   * elsewhere.
+   * - returns whether it was hidden:  the lander then waits for it to draw before measuring
+   */
+  @E.untracked
+  showLinked(target: Element): boolean {
+    const linked = this.pageLinked
+    if (!linked) return false
+    const hidden = !!target.closest("[data-epic-filtered]") || PageStages.hides(target)
+    linked.set(target)
+    return hidden
   }
 
   /** Its title has tools:  the Phases gear, or a state filter with chips (or the marked badge alone). */
@@ -1023,6 +1067,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.untracked
   showStates(states: readonly string[] | undefined) {
     this.chosen = states ? [...states] : undefined
+    // the reader filtered again:  a linked item here no longer stays in sight
+    if (this.linkedHere) this.pageLinked?.set(null)
     this.send("epic-filter-changed", { states: states ? [...states] : undefined })
     const id = this.id
     if (!id) return

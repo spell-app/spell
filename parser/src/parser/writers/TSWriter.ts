@@ -695,7 +695,9 @@ export class TSWriter extends JSWriter {
   ASTReactivePropertyAsMember(node: P.ASTReactiveProperty): string {
     // one that replaces a member of a class above, e.g. a joker's `color` property for a card's `color` getter:
     // TypeScript won't let an `accessor` do that, so the pair javascript writes
-    if (this.project.isInherited(node.typeName, node.property.value)) return super.ASTReactivePropertyAsMember(node)
+    // one that follows an address has a getter of its own to write
+    if (node.linksTo || this.project.isInherited(node.typeName, node.property.value))
+      return super.ASTReactivePropertyAsMember(node)
     const info = this.propInfo(node)
     // a decorator with arguments on its own line, one without on its member's (Owen, epic `people-and-orgs` P19)
     const decorator = info ? `@prop(${info})${jsText.NEWLINE}` : "@prop() "
@@ -756,7 +758,7 @@ export class TSWriter extends JSWriter {
   getterBody(node: P.ASTReactiveProperty): string {
     const type = this.propertyType(node)
     if (!type) return super.getterBody(node)
-    return `{ return this.getProp(${this.propertyKey(node)}) as ${type} }`
+    return `{ return ${this.propertyRead(node)} as ${type} }`
   }
 
   /** `: type`, e.g. `: string`, `: (typeof Card.Suits)[number]`. */

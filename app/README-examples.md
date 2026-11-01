@@ -20,11 +20,11 @@ a king on an empty one, and after that, one card lower, in the other color.
 That isn't a comment above the code that checks a move.
 It IS the check:  click a card, and the game moves it to the first pile that says it can take it.
 
-Eleven example apps ship with the Spell editor, from FizzBuzz up to that solitaire, and two libraries to build on.
+Fourteen example apps ship with the Spell editor, from FizzBuzz up to that solitaire, and two libraries to build on.
 Each one is a real project:  open it, and its app runs beside its text;  change a line, and the app follows.
 Here to make your own?  [Skip to the ideas](#ideas-for-your-own).
 
-## Eleven apps, simplest first
+## Fourteen apps, simplest first
 
 Open them in this order:  each one adds an idea or two to the one before.
 Each picture is the example open in the editor:
@@ -48,6 +48,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  One line says where they're kept | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -527,6 +528,46 @@ _A task, in Spanish:  the seven lines of Task List's task, as an outline, their 
 <img src="docs/images/examples/ListaDeTareas.png" width="640" alt="Lista de tareas open in the Spell editor:  Tarea.es.spell on the left;  on the right, the same task list in Spanish, 3 pendientes, Algo por hacer, Agregar">
 
 _Lista de tareas in the editor:  the same list, its words in Spanish._
+
+## Star Wars:  two servers other people run, in one program
+
+[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.info](https://swapi.info/) for the films, people, planets and ships,
+and Wikipedia for their pictures.
+Each is one line, and its rows' fields:
+
+```spell
+star wars is a web server at "https://swapi.info/api":
+	- its id is its "url"
+
+wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+	- wiki pages live at "/page/summary"
+	- a wiki page's id is its "pageid"
+	- a wiki page's picture is its "thumbnail.source"
+```
+
+_From [its program](spaces/@spell/examples/StarWars/StarWars.spell), shortened._
+
+swapi.info's rows link to each other by address:  a person says `"homeworld": "https://swapi.info/api/planets/1"`.
+Say what a field links to, and reading it follows the link:
+
+```spell
+a "person" is a record:
+	- it lives in star wars
+	- its "homeworld" is a planet
+	- its "films" is a list of films
+```
+
+_From the same program, shortened._
+
+Then `the name of its homeworld` is the planet's name, and `for each film in its films` is the films.
+- One read per address, shared, and none for a thing another read has already brought.
+- A drawing that leaves gives up the reads it was waiting on.
+- It's only for a web server:  elsewhere a field holds the thing itself.
+
+`spell place ingest https://swapi.info/api --into StarWars.spell --name "star wars"` wrote those lines by looking at the server.
+
+Its pictures come from Wikipedia as it runs, and not every name has a page:
+about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.
 
 ## Solitaire:  a game in spellx, and things that draw themselves
 

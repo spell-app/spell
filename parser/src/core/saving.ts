@@ -540,6 +540,7 @@ export function valueAsDeclared(Class: SpellClass, key: string, value: unknown):
     return Number.isNaN(date.getTime()) ? value : date
   }
   if (declared !== "number") return value
-  if (NO_NUMBER.test(value)) return undefined
+  // nothing, not 0:  a height nobody knows isn't a height of 0
+  if (NO_NUMBER.test(value)) return null
   return NUMBER_AS_TEXT.test(value) ? Number(value.replaceAll(",", "")) : value
 }

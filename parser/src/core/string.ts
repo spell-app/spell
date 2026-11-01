@@ -27,6 +27,24 @@ export const stringMethods = defineCoreModule({
     return `${string as string}`.toUpperCase()
   },
   /**
+   * A date for people to read:  `May 25, 1977`.
+   * - What a date in a drawing compiles to, `<td>{its release date}</td>`.
+   * - Nothing, or anything that isn't a date, stays as it is.
+   */
+  dateShown(date: unknown): unknown {
+    return date instanceof Date ? date.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }) : date
+  },
+
+  /**
+   * A number for people to read:  `1,000,000`.
+   * - Compiles from spell `{expression} with commas` (see `rules/expressions/WithCommas.ts`).
+   * - Nothing stays nothing, and what isn't a number stays as it is.
+   */
+  withCommas(number: unknown): unknown {
+    return typeof number === "number" ? number.toLocaleString("en-US") : number
+  },
+
+  /**
    * Stringify and convert to lowercase.
    * - Compiles from spell `{expression} as lower case` / `as lowercase` (see `rules/expressions/AsLowercase.ts`).
    */

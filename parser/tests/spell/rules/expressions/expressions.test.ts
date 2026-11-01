@@ -69,6 +69,7 @@ describe("priority and precedence", () => {
         "draw_it:  Priority.declaration",
         "draw_items:  Priority.specific",
         "draw_slot:  Priority.specific",
+        "draw_slot_of:  Priority.specific",
         "draw_thing:  Priority.preferred",
         "drawn_markup:  Priority.specific",
         "else_if:  Priority.preferred",
@@ -153,6 +154,7 @@ describe("priority and precedence", () => {
         "when_someone_else_changes:  Priority.specific",
         "when_thing_changes:  Priority.specific",
         "while_waiting:  Priority.declaration",
+        "with_commas:  Precedence.comparison",
         "without_waiting:  Priority.specific",
       ]
     `)

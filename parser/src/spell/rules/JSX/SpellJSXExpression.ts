@@ -34,8 +34,13 @@ export class SpellJSXExpression extends SpellJSXContent {
   }
   getAST(match: P.MatchFor<this>) {
     const { expression, error } = match.data
+    const value = expression?.AST as P.ASTExpression | undefined
     return new P.ASTJSXExpression(match, {
-      expression: expression?.AST as P.ASTExpression | undefined,
+      // a date on a page says itself in words:  a `Date` is nothing a page can hold
+      expression:
+        value && expression?.datatype === "date"
+          ? new P.ASTCoreMethodInvocation(match, { methodName: "dateShown", args: [value] })
+          : value,
       error: error?.AST as P.ASTParseError | undefined
     })
   }

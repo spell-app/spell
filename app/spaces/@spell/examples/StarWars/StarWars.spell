@@ -1,0 +1,520 @@
+## Star Wars
+// A guide to the galaxy, from two servers other people run, in one program:
+//   swapi.info knows the films, people, planets and ships, and links them to each other by address
+//   Wikipedia has the pictures, one page at a time
+// Say what a field links to, and reading it follows the link:  `the name of its homeworld`.
+// `star wars` and its types' fields are what this wrote, from looking at the server, cut down to what's used here:
+//   spell place ingest https://swapi.info/api --into StarWars.spell --name "star wars"
+//
+// Star Wars and its pictures belong to Lucasfilm and Disney, the words to Wikipedia's writers.
+// They're asked for as it runs, never kept here, and the page says where they come from.
+
+
+## Where it all lives
+star wars is a web server at "https://swapi.info/api":
+	- its id is its "url"
+	- check it every 86400 seconds
+	- films live at "/films"
+	- people live at "/people"
+	- planets live at "/planets"
+	- species live at "/species"
+	- vehicles live at "/vehicles"
+	- starships live at "/starships"
+	- a film's episode id is its "episode_id"
+	- a film's opening crawl is its "opening_crawl"
+	- a film's release date is its "release_date"
+	- a person's hair color is its "hair_color"
+	- a person's eye color is its "eye_color"
+	- a person's birth year is its "birth_year"
+	- a planet's rotation period is its "rotation_period"
+	- a planet's orbital period is its "orbital_period"
+	- a planet's surface water is its "surface_water"
+	- a species's average lifespan is its "average_lifespan"
+	- a vehicle's "cost in credits" is its "cost_in_credits"
+	- a vehicle's craft class is its "vehicle_class"
+	- a starship's "cost in credits" is its "cost_in_credits"
+	- a starship's craft class is its "starship_class"
+
+wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+	- check it every 86400 seconds
+	- wiki pages live at "/page/summary"
+	- a wiki page's id is its "pageid"
+	- a wiki page's picture is its "thumbnail.source"
+	- a wiki page's about is its "description"
+	- a wiki page's summary is its "extract"
+	- a wiki page's address is its "content_urls.desktop.page"
+
+
+## The app:  what's showing, and how you get about
+guide is an app:
+	- its "tab" is text
+	- its "search" is text
+	- its "showing" is a record
+	- its "trail" is a new list of records
+	- its "playing" is a film
+	- its "jumping" is yes or no
+	- its "how many" is a number
+	- its "looking for" is its search as lower case
+
+	// What the shelf lists:  whatever's found, else its tab's, a few at a time
+	- its "listed" is:
+		if its search is not ""
+			return its found
+		if its tab is "films"
+			return every film
+		if its tab is "people"
+			return top (its how many) items of (every person)
+		if its tab is "planets"
+			return top (its how many) items of (every planet)
+		if its tab is "vehicles"
+			return top (its how many) items of (every vehicle)
+		if its tab is "species"
+			return top (its how many) items of (every species)
+		return top (its how many) items of (every starship)
+
+	- its "found" is:
+		set matches to a new list of records
+		for each film in every film where (its title as lower case) includes the looking for of the guide
+			add the film to matches
+		for each person in every person where (its name as lower case) includes the looking for of the guide
+			add the person to matches
+		for each planet in every planet where (its name as lower case) includes the looking for of the guide
+			add the planet to matches
+		for each starship in every starship where (its name as lower case) includes the looking for of the guide
+			add the starship to matches
+		for each vehicle in every vehicle where (its name as lower case) includes the looking for of the guide
+			add the vehicle to matches
+		for each one in every species where (its name as lower case) includes the looking for of the guide
+			add the one to matches
+		return matches
+
+	- to create it:
+		set its tab to "films"
+		set its how many to 12
+
+	- to go back:
+		if its trail is empty
+			set its showing to nothing
+			return
+		set its showing to the last item of its trail
+		remove the last item of its trail
+		scroll to the top
+
+	- to go to (where as text):
+		set its tab to where
+		set its search to ""
+		set its showing to nothing
+		clear its trail
+		set its how many to 12
+		scroll to the top
+
+	- to show more:
+		set its how many to its how many + 12
+
+	// Punch it:  a jump to light speed, and wherever it lands
+	- to punch it:
+		set its jumping to yes
+		set landing to a random person in (every person)
+		pause for 900 msec
+		open landing
+		set its jumping to no
+
+	- to draw it:
+		<div class="stars" aria-hidden="true"></div>
+		if its jumping
+			<div class="jump" aria-hidden="true"></div>
+		<header class="top">
+			<ui-button class="logo" appearance="transparent" onClick={go to "films"}>Star Wars</ui-button>
+			<ui-form value={it} class="find">
+				<ui-field label="Search the galaxy">
+					<ui-input name="search" icon="search" placeholder="Luke, Hoth, Falcon"/>
+				</ui-field>
+			</ui-form>
+			<ui-button class="punch" color="primary" onClick={punch it} title="Jump to light speed, and land on someone">Punch it</ui-button>
+		</header>
+		<ui-toolbar class="tabs" appearance="secondary pointing" aria-label="Browse">
+			<ui-item active={its tab is "films"} onClick={go to "films"}>Films</ui-item>
+			<ui-item active={its tab is "people"} onClick={go to "people"}>People</ui-item>
+			<ui-item active={its tab is "planets"} onClick={go to "planets"}>Planets</ui-item>
+			<ui-item active={its tab is "ships"} onClick={go to "ships"}>Ships</ui-item>
+			<ui-item active={its tab is "vehicles"} onClick={go to "vehicles"}>Vehicles</ui-item>
+			<ui-item active={its tab is "species"} onClick={go to "species"}>Species</ui-item>
+		</ui-toolbar>
+		<main class="shelf">
+			{draw its shelf}
+		</main>
+		<footer class="credits">
+			Films, people, planets and ships from <a href="https://swapi.info/">swapi.info</a>.
+			Pictures and what they're of from <a href="https://en.wikipedia.org/">Wikipedia</a>, asked for as you look.
+			Star Wars belongs to Lucasfilm and Disney.
+		</footer>
+		if its playing
+			draw the crawl of its playing
+
+	- to draw its shelf:
+		if its showing and its search is ""
+			draw the page of its showing
+		otherwise
+			if its search is not ""
+				<h2 class="heading">Searching for “{its search}”</h2>
+			for each record in its listed
+				draw the record
+			while waiting:
+				<div class="wide"><ui-loader visible inline text>Waiting for a signal from swapi.info</ui-loader></div>
+			if there are none:
+				<p class="none">Nobody and nothing by that name, in this galaxy.</p>
+			if that fails:
+				<div class="wide">
+					<ui-message color="red">
+						<p>The signal from swapi.info is lost.</p>
+						<ui-button onClick={try again}>Try again</ui-button>
+					</ui-message>
+				</div>
+			draw (a new more button)
+
+
+## Show more:  only for a list with more to show, so it isn't all asked of Wikipedia at once
+a "more button" is a thing:
+	- its "full" is (the number of items in the listed of the guide) is the how many of the guide
+	- to draw it:
+		<div class={"wide" if its full otherwise "hidden"}>
+			<ui-button class="more" onClick={show more of the guide}>Show more</ui-button>
+		</div>
+		while waiting:
+			<div class="hidden"></div>
+		if that fails:
+			<div class="hidden"></div>
+
+
+## A page of Wikipedia:  not every name has one, and a name may be someone else's (Zolan is a medicine)
+a "wiki page" is a thing:
+	- it lives in wikipedia
+	- its "title" is text
+	- its "about" is text
+	- its "summary" is text
+	- its "picture" is text
+	- its "address" is text
+	- its "lower about" is its about as lower case
+	- its "fits" is:
+		if its title includes "List of"
+			return no
+		return its lower about includes "star wars" or its lower about includes "fictional" or its lower about includes " film "
+
+
+## A picture:  its own page on Wikipedia, if it has one, else an initial on a colour
+a "portrait" is a thing:
+	- its "name" is text
+	- its "hue" is a number
+	- its "shape" is text
+	- its "page" is the wiki page whose id is its name
+	- its "initial" is the first letter of its name
+	- its "picture" is:
+		if its page and the fits of its page
+			return the picture of its page
+		return ""
+	- to draw it:
+		<span class={"portrait " + its shape} style={"--hue: " + its hue}>
+			<span class="initial">{its initial}</span>
+			{draw its photo}
+		</span>
+	// Waiting for it, or if Wikipedia can't be reached, the initial stays
+	- to draw its photo:
+		<img class={"hidden" if its picture is "" otherwise ""} src={its picture} alt=""/>
+		while waiting:
+			<span class="hidden"></span>
+		if that fails:
+			<span class="hidden"></span>
+
+
+## What Wikipedia says of it, and where to read the rest
+a "wiki note" is a thing:
+	- its "name" is text
+	- its "page" is the wiki page whose id is its name
+	- to draw it:
+		<p class={"note" if its page and the fits of its page otherwise "hidden"}>{the summary of its page} <a href={the address of its page} target="_blank" rel="noopener">Read the rest on Wikipedia</a></p>
+		while waiting:
+			<p class="note waiting">Asking Wikipedia</p>
+		if that fails:
+			<p class="note waiting">Wikipedia can't be reached just now.</p>
+
+
+## What they all have:  a card to click, a picture, a page
+a "record" is a thing:
+	- its "label" is text
+	- its "kind" is text
+	- its "shape" is text
+	- its "hue" is the length of its label * 47
+
+	// A number for people to read, or that nobody knows
+	- to measure (amount as a number) in (unit as text):
+		if amount is nothing
+			return "unknown"
+		return amount with commas + " " + unit
+
+	- to open it:
+		if the showing of the guide
+			add the showing of the guide to the trail of the guide
+		set the search of the guide to ""
+		set the showing of the guide to it
+		scroll to the top
+
+	- to draw it:
+		<ui-card class="card" appearance="link">
+			{draw (a new portrait with name = its label, hue = its hue, shape = its shape)}
+			<div class="words">
+				<ui-button class="open" appearance="transparent" onClick={open it}>{its label}</ui-button>
+				<small>{its kind}</small>
+			</div>
+		</ui-card>
+
+	- to draw its page:
+		<div></div>
+
+	// What a page can do besides read:  nothing, unless it says
+	- to draw its actions:
+		<span></span>
+
+	- to draw its top:
+		<ui-button class="back" appearance="transparent" icon="arrow left" onClick={go back}>Back</ui-button>
+		<div class="hero">
+			{draw (a new portrait with name = its label, hue = its hue, shape = its shape)}
+			<div class="about">
+				<h2>{its label}</h2>
+				<p class="kind">{its kind}</p>
+				{draw its actions}
+				{draw (a new wiki note with name = its label)}
+			</div>
+		</div>
+
+
+## A film
+a "film" is a record:
+	- it lives in star wars
+	- its "title" is text
+	- its "episode id" is a number
+	- its "opening crawl" is text
+	- its "director" is text
+	- its "producer" is text
+	- its "release date" is a date
+	- its "characters" is a list of people
+	- its "planets" is a list of planets
+	- its "starships" is a list of starships
+	- its "label" is its title
+	- its "kind" is "Episode " + its episode id
+
+	- to play it:
+		set the playing of the guide to it
+
+	- to end it:
+		set the playing of the guide to nothing
+
+	- to draw its actions:
+		<ui-button class="play" onClick={play it}>Play the opening</ui-button>
+
+	- to draw its page:
+		draw its top
+		<ui-table class="facts" appearance="very-basic" unstackable><table><tbody>
+			<tr><th>Directed by</th><td>{its director}</td></tr>
+			<tr><th>Produced by</th><td>{its producer}</td></tr>
+			<tr><th>Released</th><td>{its release date}</td></tr>
+		</tbody></table></ui-table>
+		<h3>Who's in it</h3>
+		for each person in its characters
+			draw the person
+		while waiting:
+			<ui-loader class="waiting" visible inline text>Following the links</ui-loader>
+		<h3>Where it happens</h3>
+		for each planet in its planets
+			draw the planet
+		<h3>What they fly</h3>
+		for each starship in its starships
+			draw the starship
+
+	// The opening:  yellow, receding, and it stops when you say
+	- to draw its crawl:
+		<ui-modal class="crawl" visible overlay fullscreen on-ui-closed={end it} aria-label={"The opening of " + its title}><div class="cinema">
+			<div class="stars" aria-hidden="true"></div>
+			<p class="long-ago">A long time ago in a galaxy far, far away....</p>
+			<div class="stage">
+				<div class="words">
+					<p class="episode">Episode {its episode id}</p>
+					<h2>{its title}</h2>
+					<p class="text">{its opening crawl}</p>
+				</div>
+			</div>
+			<ui-button class="stop" onClick={end it}>Stop</ui-button>
+		</div></ui-modal>
+
+
+## A person
+a "person" is a record:
+	- it lives in star wars
+	- its "name" is text
+	- its "height" is a number
+	- its "mass" is a number
+	- its "hair color" is text
+	- its "eye color" is text
+	- its "birth year" is text
+	- its "gender" is text
+	- its "homeworld" is a planet
+	- its "films" is a list of films
+	- its "species" is a list of species
+	- its "vehicles" is a list of vehicles
+	- its "starships" is a list of starships
+	- its "label" is its name
+	- its "kind" is "Born " + its birth year
+
+	- to draw its page:
+		draw its top
+		<ui-table class="facts" appearance="very-basic" unstackable><table><tbody>
+			<tr><th>Height</th><td class="number">{measure its height in "cm"}</td></tr>
+			<tr><th>Mass</th><td class="number">{measure its mass in "kg"}</td></tr>
+			<tr><th>Born</th><td>{its birth year}</td></tr>
+			<tr><th>Hair</th><td>{its hair color}</td></tr>
+			<tr><th>Eyes</th><td>{its eye color}</td></tr>
+		</tbody></table></ui-table>
+		<h3>Home</h3>
+		draw its homeworld
+		<h3>Films</h3>
+		for each film in its films
+			draw the film
+		while waiting:
+			<ui-loader class="waiting" visible inline text>Following the links</ui-loader>
+		<h3>What they are</h3>
+		for each one in its species
+			draw the one
+		if there are none:
+			<p class="none">Human, as far as anyone says.</p>
+		<h3>What they fly</h3>
+		for each starship in its starships
+			draw the starship
+		for each vehicle in its vehicles
+			draw the vehicle
+
+
+## A planet
+a "planet" is a record:
+	- it lives in star wars
+	- its "name" is text
+	- its "rotation period" is a number
+	- its "orbital period" is a number
+	- its "diameter" is a number
+	- its "climate" is text
+	- its "gravity" is text
+	- its "terrain" is text
+	- its "surface water" is a number
+	- its "population" is a number
+	- its "residents" is a list of people
+	- its "films" is a list of films
+	- its "label" is its name
+	- its "kind" is its climate
+	- its "shape" is "world"
+	// what colour a world is, from its weather
+	- its "hue" is:
+		if its climate includes "frozen"
+			return 200
+		if its climate includes "arid"
+			return 38
+		if its climate includes "murky" or its climate includes "polluted"
+			return 95
+		if its climate includes "tropical" or its climate includes "temperate"
+			return 130 + the length of its label * 9
+		return 280
+
+	- to draw its page:
+		draw its top
+		<ui-table class="facts" appearance="very-basic" unstackable><table><tbody>
+			<tr><th>Climate</th><td>{its climate}</td></tr>
+			<tr><th>Terrain</th><td>{its terrain}</td></tr>
+			<tr><th>Diameter</th><td class="number">{measure its diameter in "km"}</td></tr>
+			<tr><th>Population</th><td class="number">{measure its population in "people"}</td></tr>
+			<tr><th>A day</th><td class="number">{measure its rotation period in "hours"}</td></tr>
+			<tr><th>A year</th><td class="number">{measure its orbital period in "days"}</td></tr>
+		</tbody></table></ui-table>
+		<h3>Who's from here</h3>
+		for each person in its residents
+			draw the person
+		if there are none:
+			<p class="none">Nobody we know of.</p>
+		<h3>Seen in</h3>
+		for each film in its films
+			draw the film
+		if there are none:
+			<p class="none">No film.</p>
+
+
+## A ship, or a vehicle:  much the same to look at
+a "craft" is a record:
+	- its "name" is text
+	- its "model" is text
+	- its "manufacturer" is text
+	- its "cost in credits" is a number
+	- its "length" is a number
+	- its "crew" is text
+	- its "passengers" is a number
+	- its "craft class" is text
+	- its "pilots" is a list of people
+	- its "films" is a list of films
+	- its "label" is its name
+	- its "kind" is its craft class
+	// how long it is, in something you can picture:  an X-wing is 12.5 metres
+	- its "x-wings long" is:
+		if its length is nothing
+			return nothing
+		return round (its length / 12.5)
+
+	- to draw its page:
+		draw its top
+		<ui-table class="facts" appearance="very-basic" unstackable><table><tbody>
+			<tr><th>Model</th><td>{its model}</td></tr>
+			<tr><th>Made by</th><td>{its manufacturer}</td></tr>
+			<tr><th>Length</th><td class="number">{measure its length in "m"}</td></tr>
+			<tr><th>As long as</th><td class="number">{measure its x-wings long in "X-wings"}</td></tr>
+			<tr><th>Crew</th><td class="number">{its crew}</td></tr>
+			<tr><th>Passengers</th><td class="number">{measure its passengers in "people"}</td></tr>
+			<tr><th>Costs</th><td class="number">{measure its cost in credits in "credits"}</td></tr>
+		</tbody></table></ui-table>
+		<h3>Who flew it</h3>
+		for each person in its pilots
+			draw the person
+		if there are none:
+			<p class="none">Nobody named.</p>
+		<h3>Seen in</h3>
+		for each film in its films
+			draw the film
+
+a "starship" is a craft:
+	- it lives in star wars
+
+a "vehicle" is a craft:
+	- it lives in star wars
+
+
+## A species
+a "species" is a record:
+	- it lives in star wars
+	- its "name" is text
+	- its "classification" is text
+	- its "language" is text
+	- its "average lifespan" is text
+	- its "homeworld" is a planet
+	- its "people" is a list of people
+	- its "label" is its name
+	- its "kind" is its classification
+
+	- to draw its page:
+		draw its top
+		<ui-table class="facts" appearance="very-basic" unstackable><table><tbody>
+			<tr><th>Language</th><td>{its language}</td></tr>
+			<tr><th>Lives for</th><td>{its average lifespan}</td></tr>
+		</tbody></table></ui-table>
+		<h3>Home</h3>
+		draw its homeworld
+		<h3>Who's one</h3>
+		for each person in its people
+			draw the person
+		if there are none:
+			<p class="none">Nobody we know of.</p>
+
+
+start the guide

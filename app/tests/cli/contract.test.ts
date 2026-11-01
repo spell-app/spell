@@ -17,7 +17,8 @@ import {
   fixtureImports,
   fixtureLanguages,
   fixtureProjectId,
-  fixtureProjectNames
+  fixtureProjectNames,
+  readsOtherPeoplesServers
 } from "spell/app/spaces/test"
 import { CLI } from "spell/app/cli"
 
@@ -129,7 +130,7 @@ describe("the core contract:  every target prints the same", () => {
     expect([...RUNNING_TARGETS].sort()).toEqual(Object.keys(TARGET_FILES).sort())
   })
 
-  for (const name of fixtureProjectNames()) {
+  for (const name of fixtureProjectNames().filter((project) => !readsOtherPeoplesServers(project))) {
     test(
       name,
       async () => {

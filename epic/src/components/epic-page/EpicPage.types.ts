@@ -26,6 +26,11 @@ export type PageSignals = {
   top: E.Cell<number>
   /** Bumped when blocks come or go, or a phase's status or title changes:  numbers and the step label follow. */
   layout: E.Cell<number>
+  /**
+   * What a link last landed on (an item, a phase, a section):  it shows, whatever hides it, until the reader
+   * filters its section again or a link lands elsewhere (`EpicSection.showLinked()`, epic `epic-engine` I191)
+   */
+  linked: E.Cell<Element | null>
 }
 
 /** One phase, as the step label reads it. */

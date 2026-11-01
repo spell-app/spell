@@ -12,6 +12,7 @@ import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
 import { AsLowercase } from "./AsLowercase"
+import { WithCommas } from "./WithCommas"
 import { AsUppercase } from "./AsUppercase"
 import { CompoundExpression } from "./CompoundExpression"
 import { DoesNotInclude } from "./DoesNotInclude"
@@ -492,6 +493,10 @@ expressions.addRule(AsUppercase, {
   ]
 })
 
+expressions.addRule(WithCommas, {
+  syntax: "with commas",
+  tests: [{ compileAs: "expression", tests: [["1000 with commas", "core.withCommas(1000)"]] }]
+})
 expressions.addRule(AsLowercase, {
   syntax: "as (lower case|lowercase)",
   tests: [

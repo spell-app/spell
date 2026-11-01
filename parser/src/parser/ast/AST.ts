@@ -1673,12 +1673,15 @@ export type ASTReactivePropertyProps = Prettify<{
   property: string | ASTPropertyLiteral
   check?: ASTObjectLiteral
   initializer?: ASTExpression
+  linksTo?: ASTTypeExpression
 }>
 
 export class ASTReactiveProperty extends ASTClassMember {
   declare property: ASTPropertyLiteral
   declare check: ASTObjectLiteral | undefined
   declare initializer: ASTExpression | undefined
+  /** The saved type whose thing it holds the address of:  so reading it follows the address, `core.linked()` (epic `data` I33). */
+  declare linksTo: ASTTypeExpression | undefined
   constructor(match: P.AnyMatch, props: ASTReactivePropertyProps) {
     super(match, props)
     if (typeof this.property === "string") this.property = new ASTPropertyLiteral(this.match, this.property)
@@ -2245,6 +2248,7 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "prompt",
   "savedThings",
   "savedThingAt",
+  "savedThingWithId",
   "inOneGo",
   "callPlace"
 ])

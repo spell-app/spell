@@ -20,11 +20,11 @@ solitario es una aplicación donde:
 	// el cambio de una propiedad es un evento:  cada uno corre justo después del cambio
 	- cuando su puntuación cambia:
 		// cada carta en una fundación:  el juego está ganado
-		poner colocadas a el número de cartas en sus tréboles + el número de cartas en sus diamantes
-		poner colocadas a colocadas + el número de cartas en sus corazones + el número de cartas en sus espadas
-		si colocadas es 52: poner su pista a " -- ¡Ganaste!"
+		poner colocadas a el número de cartas en los tréboles + el número de cartas en los diamantes
+		poner colocadas a colocadas + el número de cartas en los corazones + el número de cartas en las espadas
+		si colocadas es 52: poner la pista a " -- ¡Ganaste!"
 	// una carta jugada:  la última pista se va
-	- al cambiar sus movimientos: limpiar su pista
+	- al cambiar sus movimientos: limpiar la pista
 	- su "mazo" es un nuevo mazo
 
 	// una de cada pila, hecha con el solitario
@@ -44,10 +44,9 @@ solitario es una aplicación donde:
 
 	// una vez, al hacerse el solitario:  cada carta del mazo a la reserva
 	// - su mazo y sus pilas se hacen con él, antes de que esto corra
-	// - dentro del bucle `eso` es la carta:  así la reserva es `la reserva del solitario`
 	- para crearlo:
-		para cada carta en su mazo
-			agregar eso a la reserva del solitario
+		para cada carta en el mazo
+			agregar eso a la reserva
 
 	// imprime las cartas de cada pila, p. ej. "reserva: D♠↓ 7♥↓"
 	- para depurarlo:
@@ -56,37 +55,37 @@ solitario es una aplicación donde:
 
 	// los descartes, volteados, de vuelta a la reserva
 	- para rehacer la reserva:
-		poner cartas a una copia de la lista (sus descartes) como una pila
+		poner cartas a una copia de la lista (los descartes) como una pila
 		invertir las cartas
 		para cada carta en las cartas
-			agregar la carta a la reserva del solitario
+			agregar la carta a la reserva
 			voltear la carta boca abajo
 
 	// voltea la siguiente carta de la reserva, sobre los descartes
 	- para robar de la reserva:
-		si su reserva está vacía
+		si la reserva está vacía
 			rehacer la reserva
 
-		obtener la última carta de su reserva
+		obtener la última carta de la reserva
 		voltear eso boca arriba
 		// lo que tarda su giro (styles.css), así se voltea antes de moverse
 		pausar 300 mseg
-		agregar eso a los descartes del solitario
+		agregar eso a los descartes
 
 	// junta todas las cartas de su mazo en la reserva, barájala, y reparte las columnas:  una carta más en cada una, de izquierda a derecha
 	- para repartir las cartas:
-		para cada carta en su mazo
+		para cada carta en el mazo
 			poner pila inicial a la pila de la carta
 			voltear la carta boca abajo
-			si pila inicial no es la reserva del solitario
-				agregar la carta a la reserva del solitario
+			si pila inicial no es la reserva
+				agregar la carta a la reserva
 				pausar 50 mseg
-		barajar su reserva
+		barajar la reserva
 
 		// la primera carta de cada fila cae boca abajo, y se voltea donde queda
 		para fila desde 1 hasta 7
 			para lugar desde fila hasta 7
-				agregar la última carta de su reserva al elemento lugar de las columnas
+				agregar la última carta de la reserva al elemento lugar de las columnas
 				si lugar es fila
 					voltear la última carta de (el elemento lugar de las columnas) boca arriba
 				pausar 50 mseg
@@ -94,9 +93,9 @@ solitario es una aplicación donde:
 		robar de la reserva
 
 	- para empezar el juego:
-		limpiar su puntuación
-		limpiar sus movimientos
-		limpiar su pista
+		limpiar la puntuación
+		limpiar los movimientos
+		limpiar la pista
 		repartir las cartas
 
 	// voltea una carta boca abajo de una columna, al azar, sobre los descartes
@@ -108,13 +107,13 @@ solitario es una aplicación donde:
 		poner la carta a una carta al azar de cartas ocultas
 		voltear la carta boca arriba
 		pausar 30 tics
-		agregar la carta a los descartes del solitario
+		agregar la carta a los descartes
 
 	// juega cada carta que puede ir a algún lado, hasta que ninguna pueda
 	- para jugar solo:
 		poner hubo cambios a no
-		si sus descartes no está vacía
-			poner candidata a la última carta de sus descartes
+		si los descartes no está vacía
+			poner candidata a la última carta de los descartes
 			si jugar candidata
 				poner hubo cambios a sí
 				pausar 500 mseg
@@ -148,8 +147,8 @@ solitario es una aplicación donde:
 		devolver <es-contenedor>
 			<es-menu>
 				<es-elemento clase="encabezado">Solitario Klondike</es-elemento>
-				<es-elemento>{"Movimientos: " + sus movimientos}</es-elemento>
-				<es-elemento>{"Puntos: " + su puntuación + su pista}</es-elemento>
+				<es-elemento>{"Movimientos: " + los movimientos}</es-elemento>
+				<es-elemento>{"Puntos: " + la puntuación + la pista}</es-elemento>
 				<es-menu posicion="derecha">
 					<es-elemento aria-label="Jugar solo" onClick={jugar solo}>
 						<es-icono name="fast forward"/>
@@ -166,20 +165,20 @@ solitario es una aplicación donde:
 				</es-menu>
 			</es-menu>
 			<es-cuadricula class="Board" columnas="7">
-				{dibujar su reserva}
-				{dibujar sus descartes}
+				{dibujar la reserva}
+				{dibujar los descartes}
 				<div/>
-				{dibujar sus tréboles}
-				{dibujar sus diamantes}
-				{dibujar sus corazones}
-				{dibujar sus espadas}
-				{dibujar su C1}
-				{dibujar su C2}
-				{dibujar su C3}
-				{dibujar su C4}
-				{dibujar su C5}
-				{dibujar su C6}
-				{dibujar su C7}
+				{dibujar los tréboles}
+				{dibujar los diamantes}
+				{dibujar los corazones}
+				{dibujar las espadas}
+				{dibujar la C1}
+				{dibujar la C2}
+				{dibujar la C3}
+				{dibujar la C4}
+				{dibujar la C5}
+				{dibujar la C6}
+				{dibujar la C7}
 			</es-cuadricula>
 		</es-contenedor>
 

@@ -12,7 +12,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import JSON5 from "json5"
 
 import { json5Edited } from "spell/util/node/json5"
-import { schemaOf } from "spell/util/reactive"
+import { schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
@@ -214,7 +214,14 @@ function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[])
     return value !== usual[field] && value !== undefined
   }
   return [...schemaOf(Class).declared.keys()].filter(
-    (field) => !things.some((thing) => isFilled((thing as Record<string, unknown>)[field], field))
+    // only looking:  a field holding an address isn't following it
+    (field) =>
+      !things.some((thing) =>
+        isFilled(
+          whileOnlyShowing(() => (thing as Record<string, unknown>)[field]),
+          field
+        )
+      )
   )
 }
 

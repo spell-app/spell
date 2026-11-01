@@ -258,6 +258,9 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`;
   a web server's whole answer:  `its rows are its? "results"`, `its next page is its? "next"` (epic `data` P18).
   - Words the plain form stops at go in quotes:  `a vehicle's "cost in credits" is its "cost_in_credits"`.
+  - A field inside another, with a dot:  `a wiki page's picture is its "thumbnail.source"`.
+  - A field holding another thing's address says what it links to:  `its "homeworld" is a planet`, `its "films" is a list of films`,
+    and reading it follows the link.  The word's `link`, in code too:  `core.linked()`.
 - **Not:**  `are at`, `is called`, `versions are in`, `ids are in`, `is checked every`.
 - **Score:**  `\b(are at "|is called "|versions are in|ids are in|is checked every)` · in `parser/src/spell/rules/`
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.
@@ -272,6 +275,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 
 - **Say:**  `every recipe`, `all recipes`, `recipes`;  `recipes where it is quick`;  `sorted by title`, `, sorted by its title`;
   `the (total|sum) of its prices`;  `(get|load|fetch) the recipes`;  `there are (no|less than 2|fewer than 2|more than 2|at least 2|at most 2|2) recipes`, `there is one recipe`.
+  - One thing, by an id the program knows:  `the wiki page whose id is its name`.
 - **Not:**  `if the number of (every recipe) is 0`, where the words above say it.
 - What the program has by that name wins, each time:  its `recipes` property, variable or argument, its `to load the recipes` action.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.

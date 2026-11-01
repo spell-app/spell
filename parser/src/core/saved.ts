@@ -20,6 +20,9 @@
  *     Whoever read it follows the field, so it appears.
  * - `leave()`:  each computation reading one holds it until it's disposed (`onCleanup()`):  a draw leaving lets it go,
  *   and the last one letting go aborts its request.  A read from an action holds it only until its answer.
+ * - A field holding another thing's address (epic `data` I33, `core.linked()`):  `the name of its homeworld`.
+ *   - One quiet read per address, shared by whoever follows it, and none when a read has already brought that thing.
+ *   - Whoever's drawing it holds the read:  the last to leave aborts it, as with any other.
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
@@ -49,7 +52,7 @@ import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
 import { showSignIn } from "./signInBar"
-import { standInFor } from "./waiting"
+import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Place } from "./classes/Place"
@@ -94,6 +97,24 @@ const KEEP_THEIR_OWN_NAME = new Set([
   "personal atmosphere account",
   "airtable"
 ])
+
+/** What a link's read asks for:  the one row at this address. */
+function linkQuery(address: string): ListQuery {
+  return { ids: [address] }
+}
+
+/** What a field holding a link says it's a link to, or `undefined`:  an address, or a server's `{ name, url }`. */
+function addressIn(value: unknown): string | undefined {
+  if (typeof value === "string") return value || undefined
+  if (!value || Object.getPrototypeOf(value) !== Object.prototype) return undefined
+  const { url } = value as { url?: unknown }
+  return typeof url === "string" ? url : undefined
+}
+
+/** A read given up on because nobody's waiting for it any more. */
+function isAbandoned(error: unknown): boolean {
+  return (error as Error | undefined)?.name === "AbortError"
+}
 
 /** The kinds of place that know who's here, among those spell knows by itself. */
 const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
@@ -344,6 +365,60 @@ class ProgramPlaces {
   /** Each place whose first reads have gone. */
   private readonly askedFirst = new Set<string>()
 
+  /** What each link was found to be, by type and address:  `null` when the place holds nothing there. */
+  private readonly linksFound = new Map<string, Thing | null>()
+  /** Each thing's list of what its links name, so it stays one list while they're the same. */
+  private readonly linkedLists = new WeakMap<object, Map<string, { addresses: string; list: List }>>()
+
+  /** The thing at `address`, if it's known already:  `null` if the place holds nothing there, `undefined` if nobody knows yet. */
+  linkKnown(Class: SavedClass, address: string): Thing | null | undefined {
+    const found = this.linksFound.get(`${Class.name}\n${address}`)
+    return found !== undefined ? found : (this.things?.thingKnownAs(Class.name, address) as Thing | undefined)
+  }
+
+  /** The computation running now is drawing what's at `address`:  the read stays until it's disposed. */
+  holdLink(Class: SavedClass, address: string): void {
+    this.readOf(Class, linkQuery(address)).hold()
+  }
+
+  /**
+   * The thing at `address`:  `undefined` if the place holds nothing there.
+   * - A read of all of them going already:  its answer, and no request of its own.
+   * - Rejects with an `AbortError` if everyone waiting left first:  nothing's learned from that.
+   * - throws what the read threw
+   */
+  async follow(Class: SavedClass, address: string): Promise<Thing | undefined> {
+    await this.load()
+    this.noteClass(Class)
+    const asked = () => this.linkKnown(Class, address)
+    const whole = this.reads.get(`${Class.name}\n${JSON.stringify({})}`)
+    if (asked() === undefined && whole?.isGoing) await whole.answer().catch(() => undefined)
+    if (asked() === undefined) {
+      const read = this.readOf(Class, linkQuery(address))
+      const [thing] = (await read.answer()).items as Thing[]
+      if (read.isLeft) throw new DOMException("Nobody's waiting for this link any more", "AbortError")
+      this.linksFound.set(`${Class.name}\n${address}`, thing ?? null)
+    }
+    return asked() ?? undefined
+  }
+
+  /** One list for `owner`'s `field`, holding `things`, the same one while `addresses` are. */
+  linkedList(owner: object, field: string, addresses: readonly string[], things: readonly unknown[]): List {
+    let lists = this.linkedLists.get(owner)
+    if (!lists) this.linkedLists.set(owner, (lists = new Map()))
+    const said = addresses.join("\n")
+    const kept = lists.get(field)
+    if (kept?.addresses === said) return kept.list
+    const list = core.newScratch(List) as List
+    untrackCells(() => {
+      whileReading(() => {
+        list.items = [...things]
+      })
+    })
+    lists.set(field, { addresses: said, list })
+    return list
+  }
+
   /** Make what `start()` needs of a read:  a result, read by nobody yet. */
   newResult(Class: SavedClass, query: ListQuery): PlaceResult {
     const { name, collection, behind } = this.placeFor(Class)
@@ -534,6 +609,16 @@ class SavedRead {
     private readonly query: ListQuery
   ) {}
 
+  /** Is a read of it under way, or has it its answer, with someone holding it? */
+  get isGoing(): boolean {
+    return !this.isIdle && !!this.answered
+  }
+
+  /** Nothing's holding it any more. */
+  get isLeft(): boolean {
+    return this.isIdle
+  }
+
   /** Hold it until the computation running now is disposed;  with none running, until its answer. */
   hold(): void {
     if (!getOwner()) {
@@ -626,8 +711,8 @@ class SavedRead {
   /** Ask the place what changed, as often as its line says. */
   private startPolling(): void {
     const { checkedEvery } = this.program.detailsOf(this.Class)
-    // under node, asking again would keep the program running
-    if (!checkedEvery || typeof document === "undefined") return
+    // under node, asking again would keep the program running;  what's followed by a link shows what its list says
+    if (!checkedEvery || typeof document === "undefined" || this.query.ids) return
     this.stopPolling?.()
     this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh())
   }
@@ -795,6 +880,82 @@ export const savedMethods = defineCoreModule({
   ): Promise<InstanceType<Class> | undefined> {
     const { items } = await savedMethods.savedThings(Class)
     return items[place < 0 ? items.length + place : place - 1] as InstanceType<Class> | undefined
+  },
+
+  /**
+   * The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to.
+   * - One read per id, shared, and none for a thing already read.
+   * - Waits for the answer, as any read does.
+   * - `undefined` if the place holds nothing by that id, or no id's given:  nothing was asked.
+   * - throws what the read threw
+   */
+  async savedThingWithId<Class extends new () => unknown>(
+    Class: Class,
+    id: unknown
+  ): Promise<InstanceType<Class> | undefined> {
+    if (id === undefined || id === null || id === "") return undefined
+    const program = programPlaces()
+    const saved = Class as unknown as SavedClass
+    program.holdLink(saved, `${id as string}`)
+    return (await program.follow(saved, `${id as string}`)) as InstanceType<Class> | undefined
+  },
+
+  /**
+   * `thing`'s field `name`, of a type saved in a place:  the thing or things its address names (epic `data` I33).
+   * - What `its "homeworld" is a planet` compiles to, on a type on a web server, whose rows hold `"homeworld": "https://..."`.
+   * - A list of addresses is a list of things, the same list while the addresses are the same.  One the place doesn't hold is left out.
+   * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
+   * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
+   * - Each read of it holds what it follows, so a drawing leaving stops its requests.
+   * - throws what the read threw, which an `if that fails:` catches
+   */
+  linked(thing: unknown, name: string, Class: Function): unknown {
+    const owner = thing as Thing
+    const program = programPlaces()
+    const saved = Class as SavedClass
+    const read = () => (owner as unknown as { getProp(field: string): unknown }).getProp(name)
+    const held = read()
+    // what's only being shown or read in isn't asking for it:  an element mirroring its thing, a row changing it
+    if (isOnlyShowing() || isWhileReading()) return held
+    const addresses = (): string[] | undefined => {
+      const now = read()
+      if (!(now instanceof List)) return undefined
+      return now.items.flatMap((item) => addressIn(item) ?? [])
+    }
+    if (held instanceof List) {
+      const said = addresses()!
+      if (!said.length) return held
+      const known = said.map((address) => program.linkKnown(saved, address))
+      if (known.every((one) => one !== undefined)) {
+        const things = known.filter(Boolean)
+        return untrackCells(() => program.linkedList(owner, name, said, things))
+      }
+      for (const address of said) program.holdLink(saved, address)
+      return core.waitedValue(owner, name, async () => {
+        const now = addresses() ?? []
+        try {
+          const things = await Promise.all(now.map((address) => program.follow(saved, address)))
+          return program.linkedList(owner, name, now, things.filter(Boolean))
+        } catch (error) {
+          if (isAbandoned(error)) forgetWaitedValue(owner, name)
+          throw error
+        }
+      })
+    }
+    const address = addressIn(held)
+    if (address === undefined) return held
+    const known = program.linkKnown(saved, address)
+    if (known !== undefined) return known ?? undefined
+    program.holdLink(saved, address)
+    return core.waitedValue(owner, name, async () => {
+      const now = addressIn(read())
+      try {
+        return now === undefined ? undefined : await program.follow(saved, now)
+      } catch (error) {
+        if (isAbandoned(error)) forgetWaitedValue(owner, name)
+        throw error
+      }
+    })
   },
 
   /** A rider with no read above it to go on:  nothing to do, and it says nothing. */

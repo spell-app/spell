@@ -10,17 +10,17 @@ export class Recipe extends View {
   static elementTag = core.defineElement(this, "test-project")
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 639, end: 658 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 635, end: 654 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 662, end: 688 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 658, end: 684 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 692, end: 711 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 688, end: 707 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -82,7 +82,7 @@ export class RecipeBox extends App {
   set newRecipe(value) { this.setProp("newRecipe", value) }
 
   /** newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1640, end: 1752 }, readsFrom: ["family_cookbook"] }) }
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1636, end: 1748 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
     const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => recipe.title.includes(this.search))
     core.reverse(found)

@@ -500,7 +500,7 @@ lists.addRule(RangeStartingWithExpression, {
 })
 
 lists.addRule(RangeCountExpression, {
-  syntax: "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}",
+  syntax: "{ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (of|in|from) {list:operand}",
   tests: [
     {
       compileAs: "expression",
