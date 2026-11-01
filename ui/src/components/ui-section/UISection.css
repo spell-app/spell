@@ -457,6 +457,38 @@
     opacity: 1;
     visibility: visible;
   }
+  /* a hover waits;  keyboard focus shows it at once */
+  .ui.section > .title > :is(.heading:hover, .fold.icon:hover) ~ .tip {
+    transition-delay: var(--ui-hover-delay, 0s);
+  }
+  .ui.section > .title > .heading:has(:focus-visible) ~ .tip {
+    transition-delay: 0s;
+  }
+  /* In the top layer while it shows (`TopLayerTip`):  under the bar's start edge, flipping to stay in the window. */
+  .ui.section > .title:has(> .tip) {
+    anchor-name: --ui-section-title;
+  }
+  .ui.section > .title > .tip:popover-open {
+    position: fixed;
+    position-anchor: --ui-section-title;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    inset: auto;
+    max-width: min(var(--_ui-section-tip-width), calc(100vw - 1em));
+    height: fit-content;
+    margin: 0.5em 0;
+    border: 0;
+    overflow: visible;
+  }
+  .ui.section > .title > :is(.heading:hover, .heading:has(:focus-visible), .fold.icon:hover) ~ .tip:popover-open {
+    @starting-style {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
 
   /* Badge:  a small pill after the heading. */
   .ui.section > .title > .badge {

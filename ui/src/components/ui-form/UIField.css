@@ -137,6 +137,31 @@
   .field > .row > .info:focus-visible > .tip {
     transition-delay: 0s;
   }
+  /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
+  .field > .row > .info {
+    anchor-name: --ui-field-info;
+  }
+  .field > .row > .info > .tip:popover-open {
+    position: fixed;
+    position-anchor: --ui-field-info;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    inset: auto;
+    max-width: calc(100vw - 1em);
+    height: fit-content;
+    margin: 0.5em 0;
+    border: 0;
+    overflow: visible;
+  }
+  .field > .row > .info:is(:hover, :focus-visible) > .tip:popover-open {
+    @starting-style {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
 
   /* ## The hint and the errors:  lines under the control */
   .field > :is(.hint, .error.prompt) {

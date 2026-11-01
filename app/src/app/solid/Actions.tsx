@@ -23,7 +23,7 @@ import {
  * - `menu`:  an item of the top bar's menus (`MenuBar.tsx`), a `<ui-action>`:  its title and its key
  *   (`shortcut`, from `EDITOR_HOTKEYS`), no icon, ticked while `active`.
  * - `iconOnly`:  just its icon, a plain `<ui-icon link>`, with `title` as its tooltip, below it, after a pause
- *   (`[data-tooltip]`, Spell UI's CSS-only tooltip;  the pause is the editor's, `chrome.css`).
+ *   (the browser's own `title`, which no parent frame can cut off).
  *   - A `<ui-icon>`, not an item:  an item's box is `display: contents`, which draws no tooltip.
  * - `active` highlights it:  the item's `selected`, the button's `selected`, the icon's `color`.
  * - Everything else goes to the element as is:  `onClick`, `color`, `disabled`, `value`, `class` ...
@@ -53,9 +53,7 @@ export function Action(props: ActionProps) {
           link=""
           name={props.icon}
           label={tipFor(props.title)}
-          data-tooltip={tipFor(props.title)}
-          data-position="bottom center"
-          data-inverted=""
+          title={tipFor(props.title)}
           {...omit(rest, "class", "color")}
           class={["IconAction", props.class, { active: !!props.active }]}
           color={props.active ? props.color : undefined}
@@ -156,9 +154,7 @@ export const Actions = {
       type="button"
       class="YouAvatar"
       aria-label={appTexts.text("you")}
-      data-tooltip={appTexts.text("you")}
-      data-position="bottom right"
-      data-inverted=""
+      title={appTexts.text("you")}
       onClick={() => editor.showYou()}
     >
       <span class="YouLetter" aria-hidden="true">

@@ -45,7 +45,8 @@ import sectionCSS from "./UISection.css?inline"
  *   (around it, or around an enclosing section).
  *   - The group owns `section` parts too, so `enclosingSection` climbs through it.
  *
- * - `description` / `slot="description"`:  a CSS tooltip under the title bar (`role="tooltip"`).
+ * - `description` / `slot="description"`:  a tooltip under the title bar (`role="tooltip"`),
+ *   in the browser's top layer so no parent frame cuts it off (`TopLayerTip`).
  *   - Shown while the pointer is on the heading or the end chevron, or the fold button has keyboard focus.
  *   - It describes the fold button (`aria-describedby`), else the heading.
  *
@@ -642,7 +643,10 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   private titleBar(): JSX.Element {
     return (
       <header
-        ref={(element) => (this.title = element)}
+        ref={(element) => {
+          this.title = element
+          E.TopLayerTip.showIn(element, TIP_TRIGGERS)
+        }}
         class={UIT.TITLE}
         part={this.partForName("title")}
         style={this.titleStyle}
@@ -852,6 +856,9 @@ const TIP = "tip"
 
 /** Class word `height` adds before the noun when `scrolling` isn't set:  `height` implies scrolling. */
 const SCROLLING = "scrolling"
+
+/** What shows the description's tip:  the heading, and a chevron at the bar's end. */
+const TIP_TRIGGERS = ".heading, .fold.icon"
 
 /** `id` of the description's tip, which the fold button (else the heading) is described by. */
 const TIP_ID = "tip"
