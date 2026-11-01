@@ -396,21 +396,13 @@ export function toggleCode() {
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(
-  isRunning: boolean,
-  isInspecting: boolean,
-  hasOutput: boolean
-): { id: string; sizes: string } {
+function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolean): { id: string; sizes: string } {
   const isWide = hasOutput && !isRunning
   const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
   if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
-  const panes = [
-    ...(isRunning ? [] : [code]),
-    "*",
-    ...(isInspecting ? ["380px"] : [])
-  ]
+  const panes = [...(isRunning ? [] : [code]), "*", ...(isInspecting ? ["380px"] : [])]
   return { id, sizes: panes.join(",") }
 }
 
@@ -458,7 +450,7 @@ function tabFor(id: ProgramTabId, form: SP.SpellForm | undefined): RunnerTab<Pro
  ****************/
 export function EditorToolbar(props: { mode: Mode }) {
   const parts = {
-    projectMenu: { draw: () => <ProjectBarMenu useRunner={props.mode === "run"} /> },
+    projectMenu: { draw: () => <ProjectBarMenu /> },
     appMenus: { draw: () => <AppBarMenus mode={props.mode} /> },
     modeButtons: { draw: () => <ModeButtons current={props.mode} /> },
     tools: {

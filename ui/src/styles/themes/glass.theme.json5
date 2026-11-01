@@ -290,7 +290,8 @@
     },
     "popup": {
       "radius": "{radii.m}",
-      "background": "{own.glass-surface-strong}",
+      // nearly opaque:  what's under it mustn't show through its words
+      "background": { "light": "#fffffff2", "dark": "#1e1c26f2" },
       "border-color": "{own.glass-edge}",
       "shadow": "{shadows.floating}"
     },

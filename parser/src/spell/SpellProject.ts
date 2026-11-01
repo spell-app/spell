@@ -792,7 +792,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         return String(projectWriter.write(new P.ASTStatementGroup(part.match, { statements: hoisted[index] })))
       })
       .join(projectWriter.fileSeparator)
-    const starts = [SpellProject.startedByItself(hoisted, mainFile), SpellProject.testRuns(hoisted)].filter((it) => !!it)
+    const starts = [SpellProject.startedByItself(hoisted, mainFile), SpellProject.testRuns(hoisted)].filter(
+      (it) => !!it
+    )
     const startCode = starts.map((it) => projectWriter.fileSeparator + String(projectWriter.write(it))).join("")
     return projectWriter.module(header + code + startCode)
   }

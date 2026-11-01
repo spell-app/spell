@@ -51,8 +51,11 @@ export class Palette {
   /** Open the menu, with its search:  the strip's glass. */
   static openMenu(): void {
     Palette.load()
-    showMenu?.()
+    Palette.showMenu?.()
   }
+
+  /** Shows the menu:  `<AddPartButton>`'s, while it's drawn. */
+  static showMenu: (() => void) | undefined
 
   /** Load what it offers, the first time. */
   static load(): void {
@@ -92,9 +95,6 @@ const PINNED_PREF = "palettePinned"
 const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF) === true)
 const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 
-/** Shows the menu:  `<AddPartButton>`'s, while it's drawn. */
-let showMenu: (() => void) | undefined
-
 /** One topic of what's offered. */
 type PaletteGroup = {
   /** Its name in the vocabularies' `topics`. */
@@ -120,7 +120,7 @@ export function AddPartButton(): JSX.Element {
     PartEdits.onPaletteDrag = () => {
       if (popup) popup.visible = false
     }
-    showMenu = () => {
+    Palette.showMenu = () => {
       if (popup) popup.visible = true
     }
     if (Palette.takeOpenOnArrival() && popup) popup.visible = true

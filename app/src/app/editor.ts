@@ -17,6 +17,7 @@ import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
 import { EditorHistory } from "spell/app/app/EditorHistory"
+import { StartingPoints } from "spell/app/app/StartingPoints"
 // By file:  the folder's barrel loads the language service
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
@@ -227,6 +228,7 @@ export class EditorStore extends Observable {
     editor.project = project
     editor.file = file
     await file.load(undefined)
+    startingPoints.note(project.path, project.files)
     // If we switched projects, recompile
     if (!sameProject) void editor.compileApp()
   }
@@ -327,6 +329,9 @@ export class EditorStore extends Observable {
 
       editor.clearCompileAppSoon()
       await project.compile()
+      // every file's loaded now, whichever was shown first
+      startingPoints.note(project.path, project.files)
+      editor.edits++
       // the Types tab:  its tree follows the code, compiled or not
       await editor.refreshScopes()
       const { compiled } = project
@@ -385,14 +390,28 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Keep `file`'s edit at once, in the static build:  its visitors never press Save, and a reload keeps their edit.
-   * - Saved through `LoadableFile.fetch`, which keeps it in the browser (`StaticFiles`).
-   * - Elsewhere it waits for Save, as ever.
+   * Keep `file`'s edit at once, while AutoSave is on (`isAutoSaving`):  on in the preview, whose visitors never press Save,
+   * and off locally.
+   * - Saved through `LoadableFile.fetch`:  in the static build, that keeps it in the browser (`StaticFiles`).
+   * - Off:  it waits for Save.
    * - NEVER throws:  a failure is logged.
    */
   keepEdit(file: SP.AnySpellFile): void {
-    if (!isStaticBuild) return
+    if (!editor.isAutoSaving) return
     void file.save(undefined)?.catch((error) => console.error(`couldn't keep the edit to ${file.path}:`, error))
+  }
+
+  /**
+   * Is each edit kept as it's made?  File › AutoSave;  remembered.
+   * - On in the preview, off locally, until a person says.
+   */
+  @prop({ type: "choice", init: () => editorPrefs.get(AUTO_SAVE_PREF) === true })
+  accessor isAutoSaving!: boolean
+
+  /** Turn AutoSave on or off, and remember which. */
+  toggleAutoSave(): void {
+    editor.isAutoSaving = !editor.isAutoSaving
+    editorPrefs.set(AUTO_SAVE_PREF, editor.isAutoSaving)
   }
 
   /** Does the next run start afresh?  Set by `restartApp()`, and cleared as the run starts. */
@@ -778,17 +797,37 @@ export class EditorStore extends Observable {
   /** The files the side bar has changed since the last Save:  see `saveSideBarEdits()`. */
   private readonly filesEditedFromSideBar = new Set<SP.AnySpellFile>()
   /**
-   * Revert current `file`:  read it from the server again, dropping its unsaved changes, and recompile
-   * ("Revert File", ⌘⇧R).
+   * "Discard Changes" (⌘⇧R):  current `file` goes back to where it was when this project was opened (`StartingPoints`).
+   * - One step of `editor.history`, so ⌘Z brings the changes back:  discarding can't lose work.
+   * - Reading the file again would do nothing:  with AutoSave on, what's saved is the latest.
+   * - Drawn as any other edit is:  the running app stays up.
    */
-  async revertFile(): Promise<void> {
-    editor.clearCompileAppSoon()
+  discardChanges(): void {
     const { file } = editor
-    if (file) {
-      await file.reload()
-      void editor.compileApp()
-    }
+    const start = file && startingPoints.of(file.path)
+    if (!file || start === undefined || start === file.contents) return
+    const before = file.contents ?? ""
+    const { span, newText } = SourceEdits.editBetween(before, start)
+    editor.clearCompileAppSoon()
+    editor.history.change(
+      { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
+      { title: appTexts.text("discardChanges"), live: () => void editor.compileApp().catch(editor.showError) }
+    )
+    void editor.compileApp().catch(editor.showError)
   }
+
+  /** How many edits have reached a file's text:  a file's text isn't spell state, so a reader of it reads this too. */
+  @prop({ type: "number", default: 0 })
+  accessor edits!: number
+
+  /** Does current `file` differ from where it started (`discardChanges()`)?  Follows its text. */
+  get canDiscardChanges(): boolean {
+    void editor.edits
+    const { file } = editor
+    const start = file && startingPoints.of(file.path)
+    return start !== undefined && start !== file?.contents
+  }
+
   /** Create `filePath` (with optional `contents`) in current `project` and show it. */
   async createFile(filePath?: string, contents?: string): Promise<void> {
     editor.clearCompileAppSoon()
@@ -1049,6 +1088,7 @@ export class EditorStore extends Observable {
    * - The static build keeps the edit at once (`keepEdit()`).
    */
   onFileEdited(file: SP.AnySpellFile): void {
+    editor.edits++
     editor.keepEdit(file)
     // by path:  cheap, and the same however the project was reached
     if (file.project.path === editor.project?.path) editor.compileAppSoon(EDIT_COMPILE_DELAY)
@@ -1089,6 +1129,7 @@ export class EditorStore extends Observable {
       file.contents = value
       file.project.updatedContentsFor(file)
     }
+    editor.edits++
     editor.keepEdit(file)
     // auto-compile 2 seconds after input settles
     editor.compileAppSoon(2)
@@ -1165,6 +1206,13 @@ let scopeExplorer: LSP.ScopeExplorer | undefined
  * it was 2).  Cmd / Ctrl+Enter compiles at once.
  */
 const EDIT_COMPILE_DELAY = 10
+
+/** The preference that remembers AutoSave. */
+const AUTO_SAVE_PREF = "autoSave"
+editorPrefs.declare(AUTO_SAVE_PREF, { type: "choice", default: isStaticBuild })
+
+/** Where each file started, for Discard Changes. */
+const startingPoints = new StartingPoints()
 
 /** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */
 const KEPT_NOTE_PREF = "toldKeptInBrowser"

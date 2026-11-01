@@ -346,12 +346,77 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     await counting.close()
   })
 
-  test.each(["Counter", "ListaDeTareas", "Solitario"])("%s starts by itself, with no line saying to", async (project) => {
-    const opened = await context.newPage()
-    await opened.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
-    await opened.waitForTimeout(6000)
-    const drawn = await opened.evaluate(() => document.querySelector(".AppPaneBody")!.querySelectorAll("*").length)
-    expect(drawn).toBeGreaterThan(3)
-    await opened.close()
+  test.each(["Counter", "ListaDeTareas", "Solitario"])(
+    "%s starts by itself, with no line saying to",
+    async (project) => {
+      const opened = await context.newPage()
+      await opened.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
+      await opened.waitForTimeout(6000)
+      const drawn = await opened.evaluate(() => document.querySelector(".AppPaneBody")!.querySelectorAll("*").length)
+      expect(drawn).toBeGreaterThan(3)
+      await opened.close()
+    }
+  )
+
+  test("Discard Changes goes back to where you started, and ⌘Z brings the changes back;  the game goes on", async () => {
+    const discarding = await context.newPage()
+    await discarding.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
+    await discarding.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await discarding.waitForTimeout(2500)
+    const contents = () =>
+      discarding.evaluate(() => {
+        const { project } = window as unknown as { project: { spellFiles: { contents: string }[] } }
+        return project.spellFiles[0]!.contents
+      })
+    const start = await contents()
+    await discarding.evaluate(async () => {
+      const { project, editor } = window as unknown as {
+        project: { spellFiles: { contents: string }[] }
+        editor: { compileApp(): Promise<void>; history: { change(change: object, step: { title: string }): void } }
+      }
+      const file = project.spellFiles[0]!
+      const before = file.contents
+      editor.history.change({ file, at: 0, before, after: before.replace("Clicked ", "Pressed ") }, { title: "Typed" })
+      await editor.compileApp()
+    })
+    const changed = await contents()
+    expect(changed).not.toBe(start)
+    await discarding.locator("#FileBarMenu").click()
+    await discarding.waitForTimeout(400)
+    await discarding.locator('ui-popup[for=FileBarMenu] ui-action:has-text("Discard Changes")').click()
+    await discarding.waitForTimeout(800)
+    expect(await contents()).toBe(start)
+    // greyed now:  nothing to go back to
+    await discarding.locator("#FileBarMenu").click()
+    await discarding.waitForTimeout(400)
+    expect(
+      await discarding
+        .locator('ui-popup[for=FileBarMenu] ui-action:has-text("Discard Changes")')
+        .getAttribute("disabled")
+    ).not.toBeNull()
+    await discarding.keyboard.press("Escape")
+    await discarding.mouse.click(900, 700)
+    await discarding.keyboard.press("ControlOrMeta+z")
+    await discarding.waitForTimeout(800)
+    expect(await contents()).toBe(changed)
+    await discarding.close()
+  })
+
+  test("the File menu ticks AutoSave, and it's remembered", async () => {
+    const menu = await context.newPage()
+    await menu.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
+    await menu.waitForSelector("#FileBarMenu", { timeout: 60_000 })
+    await menu.waitForTimeout(2500)
+    const autoSave = menu.locator('ui-popup[for=FileBarMenu] ui-action:has-text("AutoSave")')
+    await menu.locator("#FileBarMenu").click()
+    await menu.waitForTimeout(400)
+    expect(await autoSave.getAttribute("selected")).toBeNull()
+    await autoSave.click()
+    await menu.waitForTimeout(400)
+    await menu.locator("#FileBarMenu").click()
+    await menu.waitForTimeout(400)
+    expect(await autoSave.getAttribute("selected")).not.toBeNull()
+    await autoSave.click()
+    await menu.close()
   })
 })

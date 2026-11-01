@@ -982,6 +982,10 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
+          "name": "FileBarMenu",
+          "file": "src/app/solid/MenuBar.tsx"
+        },
+        {
           "name": "PartMenu",
           "file": "src/app/solid/Palette.tsx"
         },

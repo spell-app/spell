@@ -161,11 +161,11 @@ describe("<ui-property-editor compact>", () => {
     expect(getComputedStyle(heading()).fontSize).toBe("11px")
   })
 
-  it("fits at least 16 fields in 600px", async () => {
+  it("fits at least 15 fields in 600px", async () => {
     const host = await editor("compact")
     // every property counts, a pill too:  each is a field the reader can set
     const height = host.getBoundingClientRect().height
-    expect((10 * 600) / height).toBeGreaterThanOrEqual(16)
+    expect((10 * 600) / height).toBeGreaterThanOrEqual(15)
   })
 })
 

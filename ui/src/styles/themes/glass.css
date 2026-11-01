@@ -179,7 +179,7 @@
     --ui-toast-background: var(--glass-surface-strong);
     --ui-toast-shadow: var(--ui-shadow-floating);
     --ui-popup-radius: var(--ui-radius-m);
-    --ui-popup-background: var(--glass-surface-strong);
+    --ui-popup-background: light-dark(#fffffff2, #1e1c26f2);
     --ui-popup-border-color: var(--glass-edge);
     --ui-popup-shadow: var(--ui-shadow-floating);
     --ui-modal-radius: 18px;

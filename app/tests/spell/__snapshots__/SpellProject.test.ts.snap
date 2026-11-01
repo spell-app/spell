@@ -1153,8 +1153,7 @@ export function testTheMoves() {
   })
 }
 
-core.holdWhile(() => solitaire.startANewGame())
-if (!core.isCarryingOver) solitaire.start()",
+core.holdWhile(() => solitaire.startANewGame())",
     "errors": [],
     "path": "/Solitaire.spellml",
     "warnings": [],
