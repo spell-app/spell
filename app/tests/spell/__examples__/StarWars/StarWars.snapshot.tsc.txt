@@ -1,22 +1,22 @@
 31:13 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
-103:31 TS2322 Type 'unknown' is not assignable to type 'Element'.
-111:124 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
-128:8 TS2532 Object is possibly 'undefined'.
-129:16 TS2532 Object is possibly 'undefined'.
-130:11 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
-273:5 TS2322 Type 'undefined' is not assignable to type 'Film'.
-300:19 TS2322 Type 'unknown' is not assignable to type 'Element'.
-370:60 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
-640:60 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
-692:60 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
-840:35 TS2345 Argument of type 'List<Species>' is not assignable to parameter of type 'string | number | undefined'.
-840:219 TS2345 Argument of type 'unknown' is not assignable to parameter of type 'Record'.
-851:7 TS2322 Type 'undefined' is not assignable to type 'Record'.
-854:5 TS2322 Type 'Record | undefined' is not assignable to type 'Record'.
-862:5 TS2322 Type 'undefined' is not assignable to type 'Record'.
+98:31 TS2322 Type 'unknown' is not assignable to type 'Element'.
+106:124 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
+123:8 TS2532 Object is possibly 'undefined'.
+124:16 TS2532 Object is possibly 'undefined'.
+125:11 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
+268:5 TS2322 Type 'undefined' is not assignable to type 'Film'.
+295:19 TS2322 Type 'unknown' is not assignable to type 'Element'.
+365:60 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+635:60 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+687:60 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
+831:35 TS2345 Argument of type 'List<Species>' is not assignable to parameter of type 'string | number | undefined'.
+831:201 TS2345 Argument of type 'unknown' is not assignable to parameter of type 'Record'.
+842:7 TS2322 Type 'undefined' is not assignable to type 'Record'.
+845:5 TS2322 Type 'Record | undefined' is not assignable to type 'Record'.
+853:5 TS2322 Type 'undefined' is not assignable to type 'Record'.
+890:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+893:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
+896:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 899:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 902:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 905:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-908:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-911:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
-914:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.

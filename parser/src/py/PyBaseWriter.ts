@@ -568,7 +568,9 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (name === "append" && rest.length === 1 && kind === "array") {
       return `${this.tight(first)}.append(${this.bare(rest[0]!)})`
     }
-    if (name === "includes" && rest.length === 1 && (kind === "array" || kind === "text" || this.isList(first))) {
+    const inPython =
+      kind === "text" ? this.isExactSearch(name, rest) : name === "includes" && (kind === "array" || this.isList(first))
+    if (inPython && rest.length === 1) {
       return `${this.operand(rest[0]!, "equals", "lhs")} in ${this.tight(first)}`
     }
     if ((name === "upperCase" || name === "lowerCase") && kind === "text") {

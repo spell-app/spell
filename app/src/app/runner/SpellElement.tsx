@@ -81,6 +81,7 @@ const STATES_CSS = `
  *
  * - A Spell UI component like any `ui-*` one:  its own shadow root, with the page's theme and base styles.
  *   Then its type's own `<css>`, its class's `static css`, after its super-types' (`cssOf()`).
+ *   Then the project's stylesheet, so `.card .title` reaches inside it (`core.projectSheet()`).
  * - It draws its `thing`, through the program's runtime:  `core.drawOwn()`, in the thing's error boundary.
  * - Its outside is its type's (epic `drawable-thing` P8), named as Spell UI names its own elements' API:
  *   - each property its type declares is an attribute and a property:  `<game-card rank="1">`, `card.rank = 12`
@@ -263,6 +264,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   Each is what its `to draw each item` draws (`core.drawItems()`), by default the item's own element.
    */
   onMount() {
+    this.adoptProjectStyles()
     createEffect(
       () => !this.handedThing && !this.idName && !this.isInLayout,
       (isOnItsOwn) => {
@@ -307,6 +309,19 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const owner = this.typeProperties.find((property) => property.reference === "owner")
     const list = owner && thing?.[owner.name]
     return list && typeof list === "object" ? list : undefined
+  }
+
+  /**
+   * The project's stylesheet reaches inside us, as a shadow root otherwise wouldn't let it (epic `language`, Q13).
+   * - After our type's own, so a person's rule wins a tie;  `UI.styles` keeps it when it adopts its own again.
+   * - An app draws in its children, where the project's styles already reach.
+   */
+  private adoptProjectStyles(): void {
+    const { entry, domElement } = this
+    const sheet = entry?.core.projectSheet()
+    if (!sheet || drawsInItsChildren(entry!.Class)) return
+    const root = domElement.renderRoot
+    if (!root.adoptedStyleSheets.includes(sheet)) root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
   }
 
   /**

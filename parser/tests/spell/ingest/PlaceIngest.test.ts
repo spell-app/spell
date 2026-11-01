@@ -47,7 +47,10 @@ const STARS: Record<string, unknown> = {
 function fakeFetch(routes: Record<string, unknown>) {
   const asked: Array<{ url: string; method: string; headers: Headers; body?: string }> = []
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`.replace(/[?#].*$/, "")
+    const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`.replace(
+      /[?#].*$/,
+      ""
+    )
     asked.push({
       url,
       method: init?.method ?? "GET",

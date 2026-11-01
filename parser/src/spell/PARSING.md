@@ -1313,6 +1313,17 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
 
+## What reads wrong on purpose:  warnings and refusals (epic `language`, r2)
+
+- A line in an element that reads whole as a loop or a draw warns, as it only shows as text:  [`SpellJSXText`](rules/JSX/SpellJSXText.ts).
+  A sentence that starts the same way doesn't.
+- `it is empty`, where `it` is a type that holds no items, warns:  it can never be true ([`IsEmpty`](rules/expressions/IsEmpty.ts)).
+- Types whose `a new ...` properties make each other are refused, naming the circle:
+  `DefinePropertyHas.refuseCircle()`, asked when errors are gathered, as the other half may be in another file.
+- `- to it:` names no action, and is refused:  `MethodDefinition.getRule()`.
+- `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
+  [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
+
 ## Scope:  what's stored where
 
 - All scope collections are [`ScopeList`s](../parser/scope/ScopeList.ts):
@@ -2000,7 +2011,10 @@ What a program's lines about where data lives compile to, and what reads the res
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
       where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
-  - Not the Python target, yet.
+  - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
+    by statement, so an editor's panes can follow each other.
+  - A compile writes no map for the Python target.
+    `SP.SpellProject.codeWithMapFor()` makes one on asking, for any target, Python's too:  its writer takes the same marks.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:
     `set the stock to a new stock pile` above `a stock pile is a pile`.

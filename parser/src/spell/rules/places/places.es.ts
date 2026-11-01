@@ -191,6 +191,8 @@ placesEs.addRule(WhereField, { syntax: `${THE} {property:member_words}` })
 placesEs.addRule(TheyAre, {
   syntax: "{operator:are_or_are_not} {expression:where_field}"
 })
+// `la persona no es el cocinero`, by the word every comparison reads:  as English does (epic `language`, Q15)
+placesEs.addRule(TheyAre, { syntax: "{operator:is_or_is_not} {expression:where_field}" })
 placesEs.addRule(TheyAre, { syntax: "{operator:are_or_are_not} {expression:operand}" })
 placesEs.addRule(CurrentPerson, {
   syntax: "(esa persona|la persona)",

@@ -77,6 +77,22 @@ ${loose.replace(/^/gm, "\t")}
 const ENGLISH: NameRow[] = [
   // an own property
   { title: "own property:  the X reads it", spell: "set v to the score", js: "v = this.score" },
+  // in a `where`, after the person:  the item's own (Q15)
+  {
+    title: "after the person, in a where:  the X is the item's",
+    spell: "set v to every card where the person is the rank",
+    js: "core.isCurrentPerson(card.rank)"
+  },
+  {
+    title: "after the person, in a where:  a field the item hasn't got says so",
+    spell: "set v to every card where the person is the score",
+    js: ERROR
+  },
+  {
+    title: "after the person, in a where:  the X of Y is Y's",
+    spell: "set v to every card where the person is the score of the game",
+    js: "core.isCurrentPerson(this.score)"
+  },
   {
     title: "own property:  the X as an argument",
     spell: "shuffle the stock",
@@ -449,6 +465,11 @@ const SPANISH: NameRow[] = [
     js: "v = carta.rango"
   },
   { title: "tipo plural:  las X son todas", spell: "poner v a las cartas", js: "core.everyThing(Carta)" },
+  {
+    title: "tras la persona, en un donde:  la X es del elemento",
+    spell: "poner v a cada carta donde la persona es el rango",
+    js: "core.isCurrentPerson(carta.rango)"
+  },
   {
     title: "propiedad con nombre de tipo:  la X es la propiedad",
     spell: "poner v a la pila",

@@ -3,7 +3,7 @@ import { flush } from "solid-js"
 import h from "@solidjs/h"
 
 import { peekProp } from "spell/util"
-import { core, App, View, ViewableList, Thing } from "spell/parser/core"
+import { core, App, List, View, ViewableList, Thing } from "spell/parser/core"
 import { P } from "spell/parser/parser"
 import { E } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
@@ -53,6 +53,70 @@ describe("SpellElement", () => {
     card.rank = "king"
     core.flush()
     expect(element.shadowRoot!.querySelector(".rank")?.textContent).toBe("king")
+  })
+
+  test("the project's stylesheet reaches inside a view, and one installed later too (epic `language`, Q13)", async () => {
+    class Shelf extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("p", { class: "inside-a-view" }, "hi") as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Shelf, "Styled")
+    await Promise.resolve()
+    core.installStyles("project-a", ".inside-a-view { color: rgb(1, 2, 3) }")
+    const element = await ElementFixture.render<HTMLElement & { thing?: Shelf }>("<styled-shelf></styled-shelf>")
+    element.thing = new Shelf()
+    flush()
+    const inside = element.shadowRoot!.querySelector(".inside-a-view")!
+    expect(getComputedStyle(inside).color).toBe("rgb(1, 2, 3)")
+    core.installStyles("project-b", ".inside-a-view { background-color: rgb(4, 5, 6) }")
+    expect(getComputedStyle(inside).backgroundColor).toBe("rgb(4, 5, 6)")
+  })
+
+  test("a loop in a live value draws its items, and follows them (epic `language`, r2)", async () => {
+    class Books extends View {
+      get names() {
+        return this.getProp("names") as List<string>
+      }
+      set names(value) {
+        this.setProp("names", value)
+      }
+      draw(): ReturnType<View["draw"]> {
+        // as compiled:  `{for each name in its names: <span>...}`
+        const live = () => core.listDrawn(core.map(this.names, (name: string) => h("span", { class: "book" }, name)))
+        return (h("div", { class: "x" }, live) as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Books, "Looped")
+    await Promise.resolve()
+    const books = new Books()
+    books.names = new List<string>().append("a", "b")
+    const element = await ElementFixture.render<HTMLElement & { thing?: Books }>("<looped-books></looped-books>")
+    element.thing = books
+    flush()
+    const shown = () => [...element.shadowRoot!.querySelectorAll(".book")].map((it) => it.textContent)
+    expect(shown()).toEqual(["a", "b"])
+    books.names = new List<string>().append("c")
+    core.flush()
+    expect(shown()).toEqual(["c"])
+  })
+
+  test("a live value holding a listener reaches the element's own event (Star Wars' modal)", async () => {
+    let closed = 0
+    class Crawl extends View {
+      draw(): ReturnType<View["draw"]> {
+        return (h("ui-modal", { "on-ui-closed": () => () => closed++ }) as unknown as () => ReturnType<View["draw"]>)()
+      }
+    }
+    core.defineElement(Crawl, "Listened")
+    await Promise.resolve()
+    const element = await ElementFixture.render<HTMLElement & { thing?: Crawl }>("<listened-crawl></listened-crawl>")
+    element.thing = new Crawl()
+    flush()
+    const modal = element.shadowRoot!.querySelector("ui-modal")!
+    expect(closed).toBe(0)
+    modal.dispatchEvent(new CustomEvent("ui-closed"))
+    expect(closed).toBe(1)
   })
 
   test("its type's own <css> is adopted after the page's, its super-types' first", async () => {

@@ -1044,11 +1044,11 @@
           "ruleNames": ["includes"],
           "internal": false,
           "file": "src/spell/rules/expressions/Includes.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "`{lhs} includes`/`contains {rhs}`, e.g. `theList includes thing`.",
           "syntaxes": [
             {
-              "syntax": "(operator:incluye|contiene) {expression:operand}",
+              "syntax": "(operator:incluye|contiene) (exactly:exactamente)? {expression:operand}",
               "example": "theList incluye thing",
               "outputs": {
                 "js": {
@@ -1074,7 +1074,7 @@
           "purpose": "`{lhs} does not include`/`contain {rhs}`, e.g. `theList does not include thing`.",
           "syntaxes": [
             {
-              "syntax": "(operator:no (incluye|contiene)) {expression:operand}",
+              "syntax": "(operator:no (incluye|contiene)) (exactly:exactamente)? {expression:operand}",
               "example": "theList no incluye thing",
               "outputs": {
                 "js": {
@@ -1148,7 +1148,7 @@
           "ruleNames": ["is_empty"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEmpty.ts",
-          "line": 10,
+          "line": 14,
           "purpose": "`{lhs} is [not] empty` postfix, e.g. `thing is empty`.",
           "syntaxes": [
             {
@@ -3194,7 +3194,7 @@
           "purpose": "Does list start with some value, e.g. `my-list starts with thing` => `core.startsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "{operator:starts_with_or_not} {expression:operand}",
+              "syntax": "{operator:starts_with_or_not} (exactly:exactamente)? {expression:operand}",
               "example": "my-list empieza con thing",
               "outputs": {
                 "js": {
@@ -3220,7 +3220,7 @@
           "purpose": "Does list end with some value, e.g. `my-list ends with thing` => `core.endsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "{operator:ends_with_or_not} {expression:operand}",
+              "syntax": "{operator:ends_with_or_not} (exactly:exactamente)? {expression:operand}",
               "example": "my-list termina con thing",
               "outputs": {
                 "js": {
@@ -6568,11 +6568,14 @@
           "ruleNames": ["they_are"],
           "internal": false,
           "file": "src/spell/rules/places/TheyAre.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "`they are`, as `is` after the person using the program (epic `data` P15, T66).",
           "syntaxes": [
             {
               "syntax": "{operator:are_or_are_not} {expression:where_field}"
+            },
+            {
+              "syntax": "{operator:is_or_is_not} {expression:where_field}"
             },
             {
               "syntax": "{operator:are_or_are_not} {expression:operand}"
@@ -6714,7 +6717,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 15,
+          "line": 17,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]

@@ -64,8 +64,7 @@
               <ui-section id="examples-types-popup-element" label="Popup element" sticky="stack" collapsible dividing>
                 <ui-message size="small" state="info"
                   >Popup comes as an element, <code>&lt;ui-popup&gt;</code>, with the full feature set (any markup,
-                  triggers, events, flipping), and as a CSS-only <code>data-tooltip</code> attribute, which needs no
-                  script and suits pages with many short hints.</ui-message
+                  triggers, events, flipping), and as a <code>data-tooltip</code> attribute, which needs no script of its own and suits pages with many short hints.</ui-message
                 >
 
                 <ui-section id="examples-types-popup-element-popup" label="Popup" sticky="stack" collapsible dividing>
@@ -182,14 +181,12 @@
                 <ui-section id="examples-types-no-javascript-tooltip" label="Tooltip" sticky="stack" collapsible dividing>
                   <ui-example>
                     <p slot="description">
-                      An element can specify a simple tooltip that can appear without JavaScript via the
+                      An element can specify a simple tooltip via the
                       <code>data-tooltip</code> attribute. If the tooltip should be shown inverted, also add the
                       <code>data-inverted</code> attribute.
                     </p>
                     <ui-message slot="description" size="small" state="warning"
-                      >Tooltips use an element's <code>::before</code> and <code>::after</code> pseudo-elements, and
-                      screen readers don't reliably announce them. Use them for hints only, and a
-                      <code>&lt;ui-popup&gt;</code> for anything that matters.</ui-message
+                      >Once Spell UI's runtime has loaded, a tooltip shows in the browser's top layer, so no parent frame can cut it off, and it flips to stay in the window. With no script, or with <code>data-variation="visible"</code>, it's the element's <code>::before</code> and <code>::after</code>, which a frame can cut off. Screen readers don't reliably announce a tooltip either way: use them for hints only, and a <code>&lt;ui-popup&gt;</code> for anything that matters.</ui-message
                     >
                     <ui-button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed"></ui-button>
                     <ui-button

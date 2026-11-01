@@ -10,7 +10,7 @@ import { compiledFixture, compiledFixtureWithMap, fixtureProjectNames } from "sp
  */
 describe("source maps change no compiled code", () => {
   for (const name of fixtureProjectNames()) {
-    for (const target of ["js/solid", "ts/solid"]) {
+    for (const target of ["js/solid", "ts/solid", "py"]) {
       // a big project's compile takes its time, under a full run's load
       test(`${name} (${target})`, { timeout: 30_000 }, () => {
         const { code, map } = compiledFixtureWithMap(name, target)

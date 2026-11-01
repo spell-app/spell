@@ -11,6 +11,7 @@ import { WhereField } from "./WhereField"
  * `they_are` rule:  `they are`, as `is` after the person using the program (epic `data` P15, T66).
  * - e.g. `if they are the cook of it`
  * - e.g. `recipes where they are the cook`:  in a `where`, `the cook` is the thing's own (`where_field`).
+ *   - `recipes where the person is the cook` too, in both languages (epic `language`, Q15).
  *   - So it means, and compiles to, exactly what `recipes where its cook is them` does.
  *   - It beats `is_equal`, Spanish's reading of the same words, and through it a program's own `cook`.
  *   - A program's own `they` wins, as it does everywhere:  then it's a plain comparison, whatever `the cook` is.

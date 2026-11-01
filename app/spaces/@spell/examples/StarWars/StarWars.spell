@@ -54,7 +54,6 @@ guide is an app:
 	- its "playing" is a film
 	- its "jumping" is yes or no
 	- its "how many" is a number
-	- its "looking for" is its search as lower case
 
 	// What the shelf lists:  whatever's found, else its tab's, a few at a time
 	- its "listed" is:
@@ -74,17 +73,17 @@ guide is an app:
 
 	- its "found" is:
 		set matches to a new list of records
-		for each film in every film where (its title as lower case) includes the looking for of the guide
+		for each film in every film where its title includes the search of the guide
 			add the film to matches
-		for each person in every person where (its name as lower case) includes the looking for of the guide
+		for each person in every person where its name includes the search of the guide
 			add the person to matches
-		for each planet in every planet where (its name as lower case) includes the looking for of the guide
+		for each planet in every planet where its name includes the search of the guide
 			add the planet to matches
-		for each starship in every starship where (its name as lower case) includes the looking for of the guide
+		for each starship in every starship where its name includes the search of the guide
 			add the starship to matches
-		for each vehicle in every vehicle where (its name as lower case) includes the looking for of the guide
+		for each vehicle in every vehicle where its name includes the search of the guide
 			add the vehicle to matches
-		for each one in every species where (its name as lower case) includes the looking for of the guide
+		for each one in every species where its name includes the search of the guide
 			add the one to matches
 		return matches
 
@@ -194,11 +193,10 @@ a "wiki page" is a thing:
 	- its "summary" is text
 	- its "picture" is text
 	- its "address" is text
-	- its "lower about" is its about as lower case
 	- its "fits" is:
 		if its title includes "List of"
 			return no
-		return its lower about includes "star wars" or its lower about includes "fictional" or its lower about includes " film "
+		return its about includes "star wars" or its about includes "fictional" or its about includes " film "
 
 
 ## A picture:  its own page on Wikipedia, if it has one, else an initial on a colour

@@ -45,6 +45,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
+import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/solid/CodeOutput"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
 import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
 import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
@@ -55,6 +56,9 @@ import { followRoute } from "./followRoute"
 import type { EditorPage } from "./pages.types"
 
 import "./SpellEditor.css"
+
+/** The least width of the code's column, px, that holds the code and compiled code side by side. */
+const OUTPUT_ROOM = 440
 
 /****************
  * ### `<SpellEditor>`
@@ -67,6 +71,7 @@ import "./SpellEditor.css"
  * - The Program panel (`<ProgramPanel>`), while View › Program Panel shows it (`ProgramPanelShown`), sits under
  *   the code:  its output and compiled code.  Its Close hides it.
  * - Showing or hiding the panel never redraws the code or the program:  a pane that comes or goes moves no other.
+ * - The compiled code, while someone's asked for it (`CodeOutputShown`) and there's room, sits beside the code.
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
@@ -83,17 +88,42 @@ export function SpellEditor(props: { mode: Mode }) {
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
   const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() => columnsFor(isRunning(), Inspector.isOpen, Palette.isPinned))
+  const columns = rememberedSizes(() =>
+    columnsFor(isRunning(), Inspector.isOpen, Palette.isPinned, !!CodeOutputShown.target)
+  )
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
   }))
+  // the compiled code beside the code, while there's room:  a narrow column keeps the code
+  const [codeWidth, setCodeWidth] = createSignal(0)
+  const watchCodeWidth = (column: Element) => {
+    const watcher = new ResizeObserver(([entry]) => setCodeWidth(entry!.contentRect.width))
+    watcher.observe(column)
+    onCleanup(() => watcher.disconnect())
+  }
+  const outputTarget = () => (codeWidth() >= OUTPUT_ROOM ? CodeOutputShown.target : undefined)
+  const codeColumns = rememberedSizes(() => ({
+    id: "spellEditor-code-output",
+    sizes: outputTarget() ? "50%,50%" : "100%"
+  }))
   const parts = {
     code: {
       draw: () => (
-        <div class="SplitPane">
+        <div class="SplitPane" ref={watchCodeWidth}>
           <Show when={!isRunning()}>
-            <InputRoot />
+            <ui-split-panel class="EditorCodeOutput" columns={codeColumns.sizes()} resizable>
+              <div class="SplitPane">
+                <InputRoot />
+              </div>
+              <Show when={outputTarget()} keyed>
+                {(target) => (
+                  <div class="SplitPane">
+                    <CodeOutputPane target={target} />
+                  </div>
+                )}
+              </Show>
+            </ui-split-panel>
           </Show>
         </div>
       )
@@ -142,11 +172,13 @@ export function SpellEditor(props: { mode: Mode }) {
     const panel = event.target as Element
     if (panel.matches(".EditorColumns")) columns.save(event.detail.sizes)
     else if (panel.matches(".EditorCode")) codeRows.save(event.detail.sizes)
+    else if (panel.matches(".EditorCodeOutput")) codeColumns.save(event.detail.sizes)
   }
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
       <PartMenu />
+      <FollowAlong />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
         {layout.drawing()}
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
@@ -365,11 +397,24 @@ function notebookOf(
  * code or not (Run), the Inspector or not.
  * - The Inspector starts 380px wide, as the Theme Creator's;  never narrower than 300px (`SpellEditor.css`).
  */
-function columnsFor(isRunning: boolean, isInspecting: boolean, isPinned: boolean): { id: string; sizes: string } {
+function columnsFor(
+  isRunning: boolean,
+  isInspecting: boolean,
+  isPinned: boolean,
+  hasOutput: boolean
+): { id: string; sizes: string } {
   const hasPalette = isPinned && !isRunning
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${hasPalette ? "-palette" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting && !hasPalette) return { id, sizes: "" }
-  const panes = [...(isRunning ? [] : ["*"]), "*", ...(hasPalette ? ["240px"] : []), ...(isInspecting ? ["380px"] : [])]
+  const isWide = hasOutput && !isRunning
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${hasPalette ? "-palette" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  if (!isInspecting && !hasPalette && !isWide) return { id, sizes: "" }
+  // with compiled code beside it, the code's column takes room from the app's, so both can be read
+  const code = isWide ? "65%" : "*"
+  const panes = [
+    ...(isRunning ? [] : [code]),
+    "*",
+    ...(hasPalette ? ["240px"] : []),
+    ...(isInspecting ? ["380px"] : [])
+  ]
   return { id, sizes: panes.join(",") }
 }
 
