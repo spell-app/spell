@@ -16,7 +16,8 @@ import {
   AddPartButton,
   InspectAppButton,
   Palette,
-  PalettePane,
+  PaletteStrip,
+  CodeShown,
   PartMenu,
   InspectorToggle,
   ModeButtons,
@@ -75,7 +76,7 @@ const OUTPUT_ROOM = 440
  * - The panes are `<ui-split-panel>`s, their sizes remembered as dragged (`rememberedSizes()`).
  *   - How they're arranged is Spell, `EditorLayout.spellml`;  what's in each is still the editor's, handed over here,
  *     each a thing that draws itself.
- * - The palette, while it's kept open (`Palette.isPinned`), is a pane left of the Inspector.
+ * - The palette, while it's kept open (`Palette.isPinned`), is a strip across the top of the panes.
  * - The Inspector, while it's open, is a pane at the far right (`<InspectorPane>`, epic `debut` P13):
  *   a pane of the same panel, so the same room round it as the app, and a bar to drag it wider or narrower.
  *   - Its own remembered sizes (`spellEditor-columns-inspector`):  three panes, not two.
@@ -87,10 +88,10 @@ export function SpellEditor(props: { mode: Mode }) {
   const mode = (): Mode => (isPhone() ? "run" : props.mode)
   const isRunning = () => mode() === "run"
   editorHotkeys(isRunning)
-  const showsProgramPanel = () => !isRunning() && ProgramPanelShown.isShowing
-  const columns = rememberedSizes(() =>
-    columnsFor(isRunning(), Inspector.isOpen, Palette.isPinned, !!CodeOutputShown.target)
-  )
+  // the code's column:  hidden in Run, and for a project with its code closed
+  const hidesCode = () => isRunning() || CodeShown.isClosed(editor.project?.path)
+  const showsProgramPanel = () => !hidesCode() && ProgramPanelShown.isShowing
+  const columns = rememberedSizes(() => columnsFor(hidesCode(), Inspector.isOpen, !!CodeOutputShown.target))
   const codeRows = rememberedSizes(() => ({
     id: "spellEditor-left",
     sizes: showsProgramPanel() ? "65%" : "100%"
@@ -111,7 +112,7 @@ export function SpellEditor(props: { mode: Mode }) {
     code: {
       draw: () => (
         <div class="SplitPane" ref={watchCodeWidth}>
-          <Show when={!isRunning()}>
+          <Show when={!hidesCode()}>
             <ui-split-panel class="EditorCodeOutput" columns={codeColumns.sizes()} resizable>
               <div class="SplitPane">
                 <InputRoot />
@@ -144,15 +145,6 @@ export function SpellEditor(props: { mode: Mode }) {
         </div>
       )
     },
-    palette: {
-      draw: () => (
-        <Show when={!isRunning() && Palette.isPinned}>
-          <div class="SplitPane">
-            <PalettePane />
-          </div>
-        </Show>
-      )
-    },
     inspector: {
       draw: () => (
         <Show when={Inspector.isOpen}>
@@ -161,7 +153,7 @@ export function SpellEditor(props: { mode: Mode }) {
       )
     }
   }
-  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: mode() })
+  const settings = () => ({ columns: columns.sizes(), codeRows: codeRows.sizes(), mode: hidesCode() ? "run" : "edit" })
   const layout = drawnPiece(editorLayoutSpell, "editorLayout", () => ({ ...parts, ...settings() }))
   createEffect(settings, (changed) => {
     const thing = layout.thing()
@@ -177,6 +169,9 @@ export function SpellEditor(props: { mode: Mode }) {
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
+      <Show when={!isRunning() && Palette.isPinned}>
+        <PaletteStrip />
+      </Show>
       <PartMenu />
       <FollowAlong />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
@@ -184,12 +179,11 @@ export function SpellEditor(props: { mode: Mode }) {
         {/* no Spell:  every pane still, arranged the same, so a person can go on */}
         <Show when={layout.isBroken()}>
           <ui-split-panel class="EditorColumns" columns={columns.sizes()} resizable>
-            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={isRunning()}>
+            <ui-split-panel class="EditorCode" rows={codeRows.sizes()} resizable hidden={hidesCode()}>
               {parts.code.draw()}
               {parts.programPanel.draw()}
             </ui-split-panel>
             {parts.app.draw()}
-            {parts.palette.draw()}
             {parts.inspector.draw()}
           </ui-split-panel>
         </Show>
@@ -266,6 +260,7 @@ export function AppPane() {
       <div class="AppPaneBody ui-content-size" ref={(area) => onCleanup(Inspector.watch(area))}>
         <div class={["AppPaneProgram", { hidden: !!notebook() }]}>
           <AppRoot showToolbar={false} />
+          <div class="EmptyAppPrompt">{appTexts.text("emptyAppPrompt")}</div>
         </div>
         <Show when={notebook()} keyed>
           {(file) => <NotebookPage file={file} project={editor.project!} onController={setNotebookPage} />}
@@ -312,9 +307,7 @@ export function ProgramPanel(props: { onClose: () => void }) {
             link=""
             class="IconAction close"
             label={appTexts.text("closeProgram")}
-            data-tooltip={appTexts.text("closeProgram")}
-            data-position="bottom right"
-            data-inverted=""
+            title={appTexts.text("closeProgram")}
             onClick={() => props.onClose()}
           />
         </>
@@ -392,6 +385,12 @@ function notebookOf(
   return notebooks.find((file) => file.path === open?.path) ?? notebooks[0]
 }
 
+/** Show the current project's code, or close it. */
+export function toggleCode() {
+  const path = editor.project?.path
+  CodeShown.set(path, CodeShown.isClosed(path))
+}
+
 /**
  * The page's columns and the preference that remembers their sizes, for each set of panes:
  * code or not (Run), the Inspector or not.
@@ -400,19 +399,16 @@ function notebookOf(
 function columnsFor(
   isRunning: boolean,
   isInspecting: boolean,
-  isPinned: boolean,
   hasOutput: boolean
 ): { id: string; sizes: string } {
-  const hasPalette = isPinned && !isRunning
   const isWide = hasOutput && !isRunning
-  const id = `spellEditor-columns${isRunning ? "-run" : ""}${hasPalette ? "-palette" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
-  if (!isInspecting && !hasPalette && !isWide) return { id, sizes: "" }
+  const id = `spellEditor-columns${isRunning ? "-run" : ""}${isWide ? "-output" : ""}${isInspecting ? "-inspector" : ""}`
+  if (!isInspecting && !isWide) return { id, sizes: "" }
   // with compiled code beside it, the code's column takes room from the app's, so both can be read
   const code = isWide ? "65%" : "*"
   const panes = [
     ...(isRunning ? [] : [code]),
     "*",
-    ...(hasPalette ? ["240px"] : []),
     ...(isInspecting ? ["380px"] : [])
   ]
   return { id, sizes: panes.join(",") }
@@ -469,6 +465,14 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
+            <ui-icon
+              name="code"
+              link=""
+              class={["IconAction", { active: !CodeShown.isClosed(editor.project?.path) }]}
+              label={appTexts.text("menuCode")}
+              title={appTexts.text("menuCode")}
+              onClick={() => toggleCode()}
+            />
             <AddPartButton />
             <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />

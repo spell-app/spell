@@ -26,6 +26,8 @@ export const APP_TEXTS = {
   deleteApp: "Delete {Type}",
   restart: "Restart",
   takesEffectOnRestart: "This takes effect on restart",
+  menuCode: "Code",
+  emptyAppPrompt: "Drag something here from the + menu, or click one there to add it.",
   modes: "Run, edit or debug",
   runMode: "Run",
   editMode: "Edit",

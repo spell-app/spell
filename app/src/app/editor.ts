@@ -643,14 +643,21 @@ export class EditorStore extends Observable {
   }
 
   /** Make a project of the person's own from starter program `starter`, with no question asked, and show it. */
-  async startFrom(starter: SPACES.StarterProgram): Promise<void> {
+  async startFrom(starter: SPACES.StarterProgram, { codeClosed = false } = {}): Promise<void> {
     try {
       const project = await SPACES.SpellProjectRoot.projects.createFrom(starter)
+      if (codeClosed) await editor.closeCodeOf(project.path)
       editor.showEditor(project.path)
       editor.showKept()
     } catch (error) {
       editor.showError(error)
     }
+  }
+
+  /** Close project `path`'s code:  loaded with the page's UI, which `editor` stays free of until it needs it. */
+  private async closeCodeOf(path: string): Promise<void> {
+    const { CodeShown } = await import("spell/app/app/solid/EditorMode")
+    CodeShown.set(path, false)
   }
 
   /** Make the person's own copy of built-in project `sourceId`, with no question asked, and show it. */

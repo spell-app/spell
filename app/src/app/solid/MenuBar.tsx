@@ -8,7 +8,9 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Action,
   Actions,
+  AppMark,
   CodeSettings,
+  CodeShown,
   EditorMode,
   EditorTheme,
   INSPECTOR_PANELS,
@@ -182,7 +184,8 @@ function Divider(): JSX.Element {
 
 /****************
  * ### `<ProjectBarMenu>`
- * The top bar's first menu, the PROJECT's:  Spell's own hat, then the project's name, bold, a caret after it.
+ * The top bar's first menu, the PROJECT's, after Spell's hat and name (`<AppMark>`, our major branding):
+ * the project's name, bold, a caret after it.
  * - New Example, Duplicate Solitaire, ─, Reset to Saved, Rename Solitaire…, Delete Solitaire…, ─,
  *   Project Settings, Theme:  Fruity ›, ─, More Examples ›, ─, Home.
  * - The words follow the project's group:  New Guide, More Guides ...
@@ -201,13 +204,14 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
   }))
   const project = () => ({ project: shown().title })
   return (
+    <>
+    <AppMark />
     <BarMenu
       id="ProjectBarMenu"
       class="ProjectBarMenu"
       name={appTexts.text("projectMenu", project())}
       label={
         <span class="ProjectBarLabel">
-          <span class="hat" />
           <span class="ProjectName">{shown().title}</span>
           <ui-icon name="dropdown" class="ProjectCaret" />
         </span>
@@ -253,6 +257,7 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
       <Divider />
       <Actions.showProjectChooser menu />
     </BarMenu>
+    </>
   )
 }
 
@@ -321,6 +326,15 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
           onClick={() => EditorMode.show("edit")}
         />
         <Divider />
+        <Action
+          menu
+          title={appTexts.text("menuCode")}
+          active={props.mode === "edit" && !CodeShown.isClosed(editor.project?.path)}
+          onClick={() => {
+            EditorMode.show("edit")
+            CodeShown.set(editor.project?.path, CodeShown.isClosed(editor.project?.path))
+          }}
+        />
         <Action
           menu
           title={appTexts.text("programPanel")}

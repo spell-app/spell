@@ -58,8 +58,10 @@
     --_ui-panel-gap: var(--_ui-property-editor-row-gap, 8px);
   }
   /* its properties at the editor's size, not a sub-panel's smaller one */
+  /* room under its last property, before the next band */
   :host(:state(compact)) .ui.section.panel.sub > .content {
     font-size: var(--_ui-property-editor-font-size, 1em);
+    padding-block-end: var(--_ui-property-editor-row-gap, 8px);
   }
   :host(:state(compact)) .ui.section.panel.sub > .title {
     padding-block: 4px;

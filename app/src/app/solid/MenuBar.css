@@ -40,14 +40,6 @@ ui-item.ProjectBarMenu::part(item) {
   font-weight: var(--ui-font-weight-bold, 700);
   color: var(--ui-text-color);
 
-  /* Spell's own hat, in the theme's primary colour:  the favicon's, without its dark square (as `<AppMark>`'s) */
-  & > .hat {
-    flex: none;
-    width: 22px;
-    height: 22px;
-    background: var(--ui-primary, currentColor);
-    mask: url("/static/favicon/hat.svg") center / contain no-repeat;
-  }
   & > .ProjectName {
     white-space: nowrap;
   }

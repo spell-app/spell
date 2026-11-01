@@ -94,6 +94,22 @@ export class ComponentDefinitions {
     return ComponentDefinitions.all.filter((definition) => definition.snippet?.startsWith(`<${definition.tag}`))
   }
 
+  /**
+   * What the palette offers, by topic, in `ValueSets.topics` order:  each component once, under its first topic,
+   * the topics with something in them only.
+   */
+  static paletteByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
+    const offered = ComponentDefinitions.palette()
+    const topics = new Map<ComponentTopic, ComponentDefinition[]>()
+    for (const topic of ValueSets.topics) {
+      const list = offered.filter((definition) => definition.topics[0] === topic)
+      if (list.length) topics.set(topic, list)
+    }
+    const other = offered.filter((definition) => !definition.topics.length)
+    if (other.length) topics.set(ValueSets.topics[0]!, [...(topics.get(ValueSets.topics[0]!) ?? []), ...other])
+    return topics
+  }
+
   /** What `definition`'s palette entry adds to a program written in `language`:  English when it has no words for it. */
   static snippetIn(definition: ComponentDefinition, language: string): string | undefined {
     if (language !== "es") return definition.snippet

@@ -31,6 +31,8 @@ const APP_TEXTS_ES: AppTextPack = {
   deleteApp: "Borrar {type}",
   restart: "Reiniciar",
   takesEffectOnRestart: "Esto se aplica al reiniciar",
+  menuCode: "Código",
+  emptyAppPrompt: "Arrastra algo aquí desde el menú +, o haz clic en uno para añadirlo.",
   modes: "Ejecutar, editar o depurar",
   runMode: "Ejecutar",
   editMode: "Editar",

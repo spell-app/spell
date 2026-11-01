@@ -36,6 +36,36 @@ const MODE_LOOKS: Record<Mode, { icon: string; text: AppTextKey }> = {
 }
 
 /****************
+ * ### `CodeShown`
+ * Does Edit show the code, for a project?  Yes, unless it was started blank, or closed here (epic `editor`, Q17).
+ * - Someone who has never seen code starts with the app, the palette and the Inspector.
+ * - View › Code, or the bar's button, shows or hides it;  Show in Code shows it.
+ * - Remembered per project, in the browser.
+ ****************/
+export class CodeShown {
+  /** Is the code closed for project `path` (reactive)? */
+  static isClosed(path: string | undefined): boolean {
+    return !!path && closedProjects().includes(path)
+  }
+
+  /** Show it or close it, for project `path`;  remember which. */
+  static set(path: string | undefined, shown: boolean): void {
+    if (!path || CodeShown.isClosed(path) !== shown) return
+    const others = closedProjects().filter((each) => each !== path)
+    const closed = shown ? others : [...others, path]
+    setClosedProjects(closed)
+    editorPrefs.set(CLOSED_PREF, closed)
+  }
+}
+
+/** The preference that remembers the projects whose code is closed. */
+const CLOSED_PREF = "codeClosed"
+editorPrefs.declare(CLOSED_PREF, { default: [] })
+const [closedProjects, setClosedProjects] = createSignal<string[]>(
+  (editorPrefs.get(CLOSED_PREF) as string[] | undefined) ?? []
+)
+
+/****************
  * ### `ProgramPanelShown`
  * Does Edit show the Program panel under the code (the program's output, its compiled code)?
  * - View › Program Panel shows or hides it;  its own Close hides it.
