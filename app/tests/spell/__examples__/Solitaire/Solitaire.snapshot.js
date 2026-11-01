@@ -229,18 +229,107 @@ export function testCardSetup() {
 }
 
 // -----------
+core.heading("Jokers")
+////////////
+// ## Jokers
+////////////
+// A joker is a card, with what makes it a joker on top:  a subclass of `card`.
+// - It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
+// - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
+// - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
+
+export class Joker extends Card {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "color" is one of red or black
+  static Colors = ["red", "black"]
+  static { this.declareProp("color", { oneOf: Joker.Colors }) }
+  get color() { return this.getProp("color") }
+  set color(value) { this.setProp("color", value) }
+
+  static isTheColorJoker(card, color) {
+    return card instanceof Joker && card.color === color
+  }
+
+  get value() {
+    if (Joker.isTheColorJoker(this, "red")) return 53
+    return 54
+  }
+
+  get picture() {
+    return "🃟"
+  }
+
+  get name() {
+    return `${this.color} joker`
+  }
+
+  /** Its short name:  *R↑ is the red joker, face up */
+  get state() {
+    const letter = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return `*${letter}${arrow}`
+  }
+}
+// A joker comes red or black
+
+// A card's own, written again for a joker
+
+export function testJokers() {
+  return core.test("test jokers", function testJokers() {
+    const it = new Joker()
+    core.echoTestAction(`get a new joker whose color is red and direction is up`)
+    const it2 = new Joker({ color: "red", direction: "up" })
+    core.expect(it2 instanceof Card, `it is a card`, true, `yes`)
+    core.expect(it2 instanceof Joker, `it is a joker`, true, `yes`)
+    core.expect(it2.color, `its color`, "red", `red`)
+    core.expect(it2.name, `its name`, "red joker", `"red joker"`)
+    core.expect(it2.state, `its state`, "*R↑", `"*R↑"`)
+    core.expect(it2.picture, `its picture`, "🃟", `"🃟"`)
+    core.expect(Joker.isTheColorJoker(it2, "red"), `it is the red joker`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(it2, "black"), `it is the black joker`, false, `no`)
+    core.expect(!Joker.isTheColorJoker(it2, "black"), `it is not the black joker`, true, `yes`)
+
+    // what it gets from card
+    core.expect(it2.isFaceDirection("up"), `it is face up`, true, `yes`)
+    core.echoTestAction(`turn it over`)
+    it2.turnOver()
+    core.expect(it2.isFaceDirection("down"), `it is face down`, true, `yes`)
+
+    core.echoTestAction(`set black joker to a new joker whose color is black`)
+    const blackJoker = new Joker({ color: "black" })
+    core.expect(blackJoker.picture, `the picture of black joker`, "🃟", `"🃟"`)
+
+    core.echoTestAction(`set the card to a new card whose rank is queen and suit is spades`)
+    const card = new Card({ rank: "queen", suit: "spades" })
+    core.expect(card instanceof Joker, `the card is a joker`, false, `no`)
+    core.expect(!(card instanceof Joker), `the card is not a joker`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(card, "red"), `the card is the red joker`, false, `no`)
+  })
+}
+// -----------
 core.heading("A deck")
 ////////////
 // ## A deck
 ////////////
-// The 52 cards of a standard deck, ace of clubs first.
+// The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
 export class Deck extends List {
   static instanceType = Card
 
-  /** One of each card, ace of clubs first:  each starts face down, as every two sided view does */
+  /** No jokers, unless it's made `with jokers` */
+  // - its "jokers" is yes or no
+  static { this.declareProp("jokers", { type: "choice" }) }
+  get jokers() { return this.getProp("jokers") }
+  set jokers(value) { this.setProp("jokers", value) }
+
+  /** One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does */
   create() {
     Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+    if (this.jokers) {
+      this.append(new Joker({ color: "red" }))
+      this.append(new Joker({ color: "black" }))
+    }
   }
 
   /** Its cards' short names, top to bottom */
@@ -260,9 +349,25 @@ export function testANewDeck() {
     core.expect(deck.filter((card) => card.isARank("queen")).length, `the number of (cards in the deck where it is a queen)`, 4, `4`)
     core.expect(deck.firstItem?.state, `the state of the first card of the deck`, "A♣↓", `"A♣↓"`)
     core.expect(deck.lastItem?.name, `the name of the last card of the deck`, "king of spades", `"king of spades"`)
+    core.expect(deck.randomItem() instanceof Joker, `a random card of the deck is a joker`, false, `no`)
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
+
+export function testTwoJokers() {
+  return core.test("test two jokers", function testTwoJokers() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck with jokers`)
+    const deck = new Deck({ jokers: true })
+    core.expect(deck.length, `the number of cards in the deck`, 54, `54`)
+    core.echoTestAction(`set wild cards to the cards in the deck where it is a joker`)
+    const wildCards = deck.filter((card) => card instanceof Joker)
+    core.expect(wildCards.length, `the number of cards in wild cards`, 2, `2`)
+    core.expect(deck.firstItem?.isTheRankOfSuit("ace", "clubs"), `the first card of the deck is the ace of clubs`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(deck.lastItem, "black"), `the last card of the deck is the black joker`, true, `yes`)
+    core.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "black joker", `"black joker"`)
   })
 }
 // -----------
@@ -828,6 +933,8 @@ core.installStyles(undefined, `/* File styles.css:  how the board looks -- each 
 if (!core.isCarryingOver) solitaire.start()
 // -----------
 if (!core.isCarryingOver) testCardSetup()
+if (!core.isCarryingOver) testJokers()
 if (!core.isCarryingOver) testANewDeck()
+if (!core.isCarryingOver) testTwoJokers()
 if (!core.isCarryingOver) testPiles()
 if (!core.isCarryingOver) testTheMoves()

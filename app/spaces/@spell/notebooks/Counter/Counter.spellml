@@ -4,6 +4,12 @@
 		<header>A button that counts its clicks.</header>
 	</header>
 
+	<spell-view "counter">
+		<property "count" type="number">0</property>
+		<action "count up">set its count to its count + 1</>
+		<draw><ui-button onClick={count up}>Clicked {its count} times</ui-button></draw>
+	</spell-view>
+
 	<section label="Counter">
 		<text>A counter starts at 0, and adds one each time it's clicked.</text>
 		<example "One counter">

@@ -291,6 +291,11 @@ it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `
 - A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
 - Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
 
+**Types and start values:**  `<property "count" type="number">0</property>` is a stored number, starting at 0.
+- It reads as `its "count" is a number starting at 0`;  Spanish, `<propiedad "cuenta" tipo="número">0</>`, `su "cuenta" es un número empezando en 0`.
+- `<property "count" type="number" />` with no body starts at its type's own, 0 for a number.
+- Without `type=`, the body is worked out each time it's read:  `<property "name">its rank + " of " + its suit</>`.
+
 **Groups:**  `<group "direction" description="Face up or face down"/>` is a heading over the members after it, up to
 the next, as text sits under a `##` heading;  a member before any group is in none.
 - A member written away from its group says so, `group="direction"`.
@@ -330,8 +335,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 	A button that counts its clicks.
 
 	<spell-view "counter">
-		<property "count">a number</>
-		<action "create it">set its count to 0</>
+		<property "count" type="number">0</property>
 		<action "count up">set its count to its count + 1</>
 		<draw><button onClick={count up}>Clicked {its count} times</button></draw>
 	</spell-view>

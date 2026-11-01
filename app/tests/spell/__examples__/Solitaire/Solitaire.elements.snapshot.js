@@ -196,16 +196,75 @@ export function testCardSetup(...args) {
 
 // -----------
 ////////////
+// ## Jokers
+////////////
+// A joker is a card, with what makes it a joker on top:  a subclass of `card`.
+// - It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
+// - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
+// - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
+
+export class Joker extends Card {
+  static elementTag = core.defineElement(this, "test-project")
+
+  // - its "color" is one of red or black
+  static Colors = ["red", "black"]
+  static { this.declareProp("color", { oneOf: Joker.Colors }) }
+  get color() { return this.getProp("color") }
+  set color(value) { this.setProp("color", value) }
+
+  static isTheColorJoker(card, color) {
+    return card instanceof Joker && card.color === color
+  }
+
+  get value() {
+    if (Joker.isTheColorJoker(this, "red")) return 53
+    return 54
+  }
+
+  get picture() {
+    return "🃟"
+  }
+
+  get name() {
+    return `${this.color} joker`
+  }
+
+  /** Its short name:  *R↑ is the red joker, face up */
+  get state() {
+    const letter = `${core.getItemAt(this.color, 0) ?? ""}`.toLocaleUpperCase()
+    const arrow = this.isFaceDirection("up") ? "↑" : "↓"
+    return `*${letter}${arrow}`
+  }
+}
+// A joker comes red or black
+
+// A card's own, written again for a joker
+
+export function testJokers(...args) {
+  return sendCall("test_jokers", args)
+}
+// -----------
+////////////
 // ## A deck
 ////////////
-// The 52 cards of a standard deck, ace of clubs first.
+// The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
 export class Deck extends List {
   static instanceType = Card
 
-  /** One of each card, ace of clubs first:  each starts face down, as every two sided view does */
+  /** No jokers, unless it's made `with jokers` */
+  // - its "jokers" is yes or no
+  static { this.declareProp("jokers", { type: "choice" }) }
+  get jokers() { return this.getProp("jokers") }
+  set jokers(value) { this.setProp("jokers", value) }
+
+  /** One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does */
   create() {
     Card.Ranks.forEach((rank) => Card.Suits.forEach((suit) => this.append(new Card({ rank: rank, suit: suit }))))
+    if (this.jokers) {
+      this.append(new Joker({ color: "red" }))
+      this.append(new Joker({ color: "black" }))
+    }
   }
 
   /** Its cards' short names, top to bottom */
@@ -218,6 +277,10 @@ export class Deck extends List {
 
 export function testANewDeck(...args) {
   return sendCall("test_a_new_deck", args)
+}
+
+export function testTwoJokers(...args) {
+  return sendCall("test_two_jokers", args)
 }
 // -----------
 /////////////////////

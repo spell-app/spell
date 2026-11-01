@@ -551,6 +551,10 @@ export type SpellxTwinWords = {
     body: string
     /** its value on the tag's own line:  `<property "deck">a new deck</>` */
     value: string
+    /** its type, `type=`, and nothing inside:  `<property "count" type="number" />` */
+    typed: string
+    /** its type, and the value it starts at on the tag's own line:  `<property "count" type="number">0</>` */
+    typedValue: string
     /** nothing but its name */
     bare: string
   }

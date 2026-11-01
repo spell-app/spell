@@ -308,6 +308,35 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
     }
   )
 
+  test("what's typed in the code undoes after a click on the app (J116)", { timeout: 90_000 }, async () => {
+    const page = await context.newPage()
+    await page.goto(`${EDITOR}edit/@spell/examples/Solitaire/Card.spellml`, { timeout: 60_000 })
+    await page.waitForSelector(".monaco-editor .view-line", { timeout: 60_000 })
+    await page.waitForTimeout(5000)
+    const { text: before } = await fileState(page, "Card.spellml")
+    await page.locator(".monaco-editor .view-line").nth(1).click()
+    await page.keyboard.press("Home")
+    await page.keyboard.type("Q")
+    await page.waitForTimeout(500)
+    const { text: typed } = await fileState(page, "Card.spellml")
+    expect(typed).not.toBe(before)
+
+    // in the code:  the code editor's own
+    await press(page, "ControlOrMeta+z")
+    expect((await fileState(page, "Card.spellml")).text).toBe(before)
+    await press(page, "Shift+ControlOrMeta+z")
+    expect((await fileState(page, "Card.spellml")).text).toBe(typed)
+
+    // a click on a card moves the focus out of the code:  the key still reaches what was typed
+    await select(page, "solitaire-card").catch(() => undefined)
+    expect(await page.evaluate(() => document.activeElement?.closest(".monaco-editor"))).toBeNull()
+    await press(page, "ControlOrMeta+z")
+    expect((await fileState(page, "Card.spellml")).text).toBe(before)
+    await press(page, "Shift+ControlOrMeta+z")
+    expect((await fileState(page, "Card.spellml")).text).toBe(typed)
+    await page.close()
+  })
+
   test("a notebook's lock is a step of the same history", { timeout: 90_000 }, async () => {
     const page = await context.newPage()
     await page.goto(`${EDITOR}edit/@spell/notebooks/Counter`, { timeout: 60_000 })

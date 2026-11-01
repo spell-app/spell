@@ -8,9 +8,9 @@
 
 ## A counter -- in the outline style:  its name, then what's true of it
 // A view:  each counter is its own element on the page.
-// The Counter notebook, `@spell/notebooks/Counter`, imports it, and tries it out.
+// The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
 <spell-view "counter">
-	<property "count">a number</>
+	<property "count" type="number" />
 	// a new counter starts at 0
 	<action "create it">set its count to 0</>
 	<action "count up">set its count to its count + 1</>

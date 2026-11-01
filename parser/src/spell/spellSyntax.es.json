@@ -4922,11 +4922,26 @@
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierDatatype.ts",
           "line": 5,
-          "purpose": "`a number` -- see `outline_specifier_enum`.",
+          "purpose": "`a number`, `a number starting at 0` -- see `outline_specifier_enum`.",
           "syntaxes": [
             {
               "syntax": "(un|una) {datatype:singular_type}",
               "example": "un número",
+              "outputs": {
+                "js": {
+                  "code": "number"
+                },
+                "ts": {
+                  "code": "number"
+                },
+                "py": {
+                  "code": "number"
+                }
+              }
+            },
+            {
+              "syntax": "(un|una) {datatype:singular_type} empezando en {start:expression}",
+              "example": "un número empezando en 0",
               "outputs": {
                 "js": {
                   "code": "number"

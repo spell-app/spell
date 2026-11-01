@@ -71,7 +71,13 @@ describe("SpellLanguageService", () => {
     card = workspace.fileFor(cardUri)!
     deck = workspace.fileFor(deckUri)!
     solitaire = workspace.fileFor(solitaireUri)!
-    expect(changed.map((file) => file.file)).toEqual(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
+    expect(changed.map((file) => file.file)).toEqual([
+      "Card.spell",
+      "Jokers.spell",
+      "Deck.spell",
+      "Pile.spell",
+      "Solitaire.spell"
+    ])
   })
 
   test("opening a file parses its whole project, cleanly -- bar warnings of what it never says", () => {
@@ -148,6 +154,7 @@ describe("SpellLanguageService", () => {
         (changed) => {
           expect(changed.map((file) => file.file)).toEqual([
             "Card.spell",
+            "Jokers.spell",
             "Deck.spell",
             "Pile.spell",
             "Solitaire.spell"
@@ -455,7 +462,9 @@ describe("SpellLanguageService", () => {
       // the card's rank, set in Deck.spell;  Pile's and Solitaire's tests make cards `whose rank is ...`
       const read = at(deck, "add a new card with rank", "rank")
       const files = service.references(deck, read).map(({ uri }) => uri.split("/").pop())
-      expect(new Set(files)).toEqual(new Set(["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]))
+      expect(new Set(files)).toEqual(
+        new Set(["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"])
+      )
     })
 
     test("document highlights:  the declaration writes, the rest read", () => {
@@ -886,7 +895,7 @@ describe("SpellLanguageService", () => {
     const tabs = { tabSize: 4, insertSpaces: false }
 
     test("every Solitaire file compiles the same after formatting, and a second format changes nothing", async () => {
-      for (const name of ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]) {
+      for (const name of ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]) {
         const uri = pathToFileURL(resolve(dir, "Solitaire", name)).href
         const file = workspace.fileFor(uri)!
         const original = file.contents!
@@ -1032,6 +1041,7 @@ describe("SpellLanguageService", () => {
     expect(service.compiled(card)).toBe(service.compiled(card, "js"))
     expect(service.projectInfo(card).files.map(({ file, errors }) => `${file} ${errors}`)).toEqual([
       "Card.spell 0",
+      "Jokers.spell 0",
       "Deck.spell 0",
       "Pile.spell 0",
       "Solitaire.spell 0"
@@ -1343,7 +1353,7 @@ const SOLITAIRE_CODE_SPELL = resolve(environment.repoDir, "tests", "spell", "__s
  */
 function copySolitaireAsCodeSpell(dir: string): void {
   mkdirSync(dir, { recursive: true })
-  const files = ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
+  const files = ["Card.spell", "Jokers.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
   for (const file of files) copyFileSync(resolve(SOLITAIRE_CODE_SPELL, file), resolve(dir, file))
   copyFileSync(fixtureFolder("@spell/examples/Solitaire", "styles.css"), resolve(dir, "styles.css"))
   const imports = [...files, "styles.css"].map((file) => ({ path: `/${file}`, active: true }))

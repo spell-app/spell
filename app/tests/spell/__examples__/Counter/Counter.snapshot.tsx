@@ -17,7 +17,7 @@ core.heading("A counter -- in the outline style:  its name, then what's true of 
 //////////////////////////////////////////////////////////////////////////
 /**
  * A view:  each counter is its own element on the page.
- * The Counter notebook, `@spell/notebooks/Counter`, imports it, and tries it out.
+ * The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
  */
 @thing
 export class Counter extends View {
