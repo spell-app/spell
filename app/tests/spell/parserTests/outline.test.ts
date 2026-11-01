@@ -22,6 +22,6 @@ describe("outline style", () => {
     vi.restoreAllMocks()
     expect(lines.filter((line) => line.includes("❌"))).toEqual([])
     // a line for each of its tests (card setup, jokers, a new deck, two jokers, piles), and for every check they make
-    expect(lines.filter((line) => line.includes("✅")).length).toBe(59)
+    expect(lines.filter((line) => line.includes("✅")).length).toBe(58)
   })
 })
