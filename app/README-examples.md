@@ -584,7 +584,7 @@ about one in five of its 260 names has a picture that's really of it, and the re
 
 ## Solitaire:  a game in spellx, and things that draw themselves
 
-Klondike in four files, written in spellx, as Task List is.
+Klondike in five files, written in spellx, as Task List is.
 Its cards, its deck and its piles are its own files, before the game, in its project file's order:
 
 ```json5
@@ -679,11 +679,13 @@ spell test @spell/examples/Solitaire
 ```text
 ✓ Compiling @spell/examples/Solitaire
 ✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test jokers  (15 checks)
+✓ test a new deck  (6 checks)
+✓ test two jokers  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+6 passed
 ```
 
 </details>

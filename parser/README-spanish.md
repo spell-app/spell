@@ -85,6 +85,10 @@ spell explain si --in @spell/examples/Solitario
 if  si {condition:expression} (entonces|:)? {statement_body}?
 e.g. si x
 
+if_there_are_none  si no hay (ninguno|ninguna) :? {statement_body}?
+
+if_that_fails  si falla :? {statement_body}?
+
 backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
 e.g. imprimir 1 si bar si no 2
 ```
@@ -342,7 +346,7 @@ spell translate check es
 <summary>Output</summary>
 
 ```text
-Spanish (es):  complete, 19 modules
+Spanish (es):  complete, 20 modules
 ```
 
 </details>

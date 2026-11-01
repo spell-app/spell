@@ -197,7 +197,7 @@ All of this runs now, on your own machine.
 - **Learn by changing a guide.**  Twelve guides are Spell programs that read as prose:
   a first walkthrough, A tour of Spell, and how each example works ([the guides](README-examples.md#guides--programs-that-read-as-prose)).
 - **Pick a theme.**  Glass, frosted panels over a wallpaper, is the default;  Studio and Spell's own are the other looks,
-  among 28 themes, each light or dark, and the code is always Shades of Purple ([themes](README-app.md#themes-and-purple-code)).
+  among 28 themes, each light or dark, and the code is always Shades of Purple ([themes](README-app.md#themes-and-their-code-colours)).
 - **Turn it into other programming languages:**  JavaScript always, and TypeScript or Python when the project asks
   ([spell-parser's targets](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 - **Put a running program on any web page**, with two lines of HTML, the code web pages are written in:

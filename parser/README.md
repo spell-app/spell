@@ -332,6 +332,10 @@ e.g. if a
 
 backwards_if  if {operator:expression} (else|otherwise) (it is)? {expression}
 e.g. print 1 if bar else 2
+
+if_there_are_none  if there are none :? {statement_body}?
+
+if_that_fails  if that fails :? {statement_body}?
 ```
 
 </details>
