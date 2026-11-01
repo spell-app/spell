@@ -960,15 +960,15 @@ describe("<epic-section> title, folded and open", () => {
 
 // epic `epic-engine` I191 (Owen, 2026-10-31, the rust epic's P2 To review chips:  "Clicking J2 is broken")
 describe("<epic-section> a link's target shows, whatever hides it", () => {
-  /** Two sections in an `<epic-page>` still agreeing its phases:  its Judgement calls hidden by the stage. */
+  /** Two sections in an `<epic-page>` still agreeing its phases:  its Tests hidden by the stage. */
   const PAGE = `<epic-page stage="phases">
     <epic-section id="todos" kind="todos"
       ><epic-item id="t1" title="T 1" status="open" state="open"></epic-item
       ><epic-item id="t2" title="T 2" status="open" state="attention"></epic-item
     ></epic-section>
-    <epic-section id="judgements" kind="judgements"
-      ><epic-item id="j1" title="J 1" status="open" state="open" calm></epic-item
-      ><epic-item id="j2" title="J 2" status="open" state="open" calm></epic-item
+    <epic-section id="tests" kind="tests"
+      ><epic-item id="m1" title="M 1" status="open" state="open" calm></epic-item
+      ><epic-item id="m2" title="M 2" status="open" state="open" calm></epic-item
     ></epic-section>
   </epic-page>`
 
@@ -979,21 +979,21 @@ describe("<epic-section> a link's target shows, whatever hides it", () => {
 
   test("a section the page's stage hides shows while it holds the link's target;  a link elsewhere hides it again", async () => {
     await render(PAGE)
-    const judgements = section("judgements")
-    expect(judgements.matches(":state(offstage)")).toBe(true)
-    expect(judgements.getBoundingClientRect().height).toBe(0)
+    const tests = section("tests")
+    expect(tests.matches(":state(offstage)")).toBe(true)
+    expect(tests.getBoundingClientRect().height).toBe(0)
 
-    expect(judgements.showLinked(document.getElementById("j2")!)).toBe(true)
+    expect(tests.showLinked(document.getElementById("m2")!)).toBe(true)
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(judgements.matches(":state(offstage)")).toBe(false)
-    expect(judgements.getBoundingClientRect().height).toBeGreaterThan(0)
+    expect(tests.matches(":state(offstage)")).toBe(false)
+    expect(tests.getBoundingClientRect().height).toBeGreaterThan(0)
 
-    // a link to a section the stage shows:  nothing was hidden, and the judgements go again
+    // a link to a section the stage shows:  nothing was hidden, and the tests go again
     expect(section("todos").showLinked(document.getElementById("t1")!)).toBe(false)
     await ElementFixture.tick()
     await ElementFixture.tick()
-    expect(judgements.matches(":state(offstage)")).toBe(true)
+    expect(tests.matches(":state(offstage)")).toBe(true)
   })
 
   test("an item the state filter hides shows while a link lands on it;  filtering again hides it", async () => {

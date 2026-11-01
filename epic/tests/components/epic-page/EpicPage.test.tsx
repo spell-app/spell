@@ -1605,21 +1605,21 @@ describe("<epic-page> stages", () => {
     ReviewClient.adopt(undefined)
   })
 
-  test("overview:  only the Overview, Questions and Caveats show, numbered as they show;  the toolbar's chips count only them", async () => {
+  test("overview:  only the Overview, Questions and Caveats show, numbered as they show (the Judgement calls too, holding an item:  I191);  the toolbar's chips count only them", async () => {
     const host = await render(stagedPage("overview"))
-    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Todo"]))
+    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Judgement calls", "4. Todo"]))
     // the step label says the stage, not a phase that doesn't show
     expect(step(host)?.words).toBe("OVERVIEW")
     // the file still holds them:  only a view
     expect(host.querySelectorAll(":scope > epic-section")).toHaveLength(5)
     await vi.waitFor(() =>
-      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(3)
+      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(4)
     )
   })
 
   test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
     const phases = await render(stagedPage("phases"))
-    await vi.waitFor(() => expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Todo"]))
+    await vi.waitFor(() => expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Judgement calls", "5. Todo"]))
     expect(step(phases)?.words).toBe("PHASES")
     for (const stage of ["building", ""]) {
       const host = await render(stagedPage(stage))
