@@ -210,9 +210,9 @@ export class SiteDataBuilder {
     return topic.charAt(0).toUpperCase() + topic.slice(1)
   }
 
-  /** `ui-breadcrumb` => `Breadcrumb section`;  `ui-example` => `Docs example`. */
+  /** `ui-breadcrumb` => `Breadcrumb section`;  `ui-example` => `Docs example`;  `ui-json` => `JSON`. */
   static nameFor(tag: string): string {
-    const words = tag.replace(/^ui-/, "").replace(/-/g, " ")
+    const words = tag.replace(/^ui-/, "").replace(/-/g, " ").replace(/^json$/, "JSON")
     return words.charAt(0).toUpperCase() + words.slice(1)
   }
 

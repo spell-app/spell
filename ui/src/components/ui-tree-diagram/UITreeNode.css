@@ -1,0 +1,27 @@
+/*
+ * The style sheet of `<ui-tree-node>`:  ours, not Fomantic's.
+ * - The node's label and box are drawn by its `<ui-tree-diagram>`, in its `<svg>`:  this sheet only places what the
+ *   node HOLDS over that box.
+ * - `:host` is `display: contents`, as are the `<slot>`s in between:  so the content box's containing block is the
+ *   diagram's canvas, and its `left` / `top` percentages are of the drawing.
+ * - `--_ui-tree-diagram-scale` comes down from the canvas:  how far the drawing shrank to fit.
+ */
+
+@layer ui.components.tree-node.types, ui.components.tree-node.content, ui.components.tree-node.variations, ui.components.tree-node.states;
+
+@layer ui.components.tree-node.types {
+  :host {
+    display: contents;
+  }
+
+  .ui.tree.node {
+    position: absolute;
+    width: max-content;
+    transform: translate(-50%, -50%) scale(var(--_ui-tree-diagram-scale, 1));
+    visibility: hidden;
+
+    &.placed {
+      visibility: visible;
+    }
+  }
+}

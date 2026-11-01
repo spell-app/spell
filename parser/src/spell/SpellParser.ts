@@ -38,8 +38,16 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // and data, whose `{` and `[` are JSON's, not spell's (`<json>` is `<ui-json>`, P31)
   rawTextTags: ["css", "json", "ui-json", "es-json", "markdown", "script", "style"],
   // a notebook's example, named as spellx names its tags:  `<example "one counter">` (`example_block`, epic
-  // `elemental-spell` P16);  each language's word
-  quotedNameTags: ["example", "ejemplo"],
+  // `elemental-spell` P16);  and a tree diagram's node, by its label:  `<tree-node "If">` (P32);  each language's word
+  quotedNameTags: {
+    example: "name",
+    ejemplo: "name",
+    "tree-node": "label",
+    "ui-tree-node": "label",
+    "nodo-arbol": "etiqueta",
+    "nodo-árbol": "etiqueta",
+    "es-nodo-arbol": "etiqueta"
+  },
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
   // `spellx.controls` say them (`SpellParser.test.ts` checks)

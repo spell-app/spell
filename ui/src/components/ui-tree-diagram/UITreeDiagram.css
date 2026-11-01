@@ -1,10 +1,12 @@
 /*
  * The style sheet of `<ui-tree-diagram>`:  ours, not Fomantic's.
  * - It styles the component's shadow DOM, in class names on an `<svg>`:
+ *   `<div class="canvas">`, around the drawing and the content its nodes hold:
  *   `<svg class="ui tree diagram [empty]" part="diagram" role="img" aria-label viewBox style="--_ui-tree-diagram-natural-width: N">`
+ *     `<defs>` holding a text of each kind, never drawn, for their fonts (`TreeMeasure`)
  *     `<path class="edge" part="edge">` per parent => child line,
- *     then its `<text class="slot" part="slot-label">` `<g class="node [root]" part="node [root-node]">` per node:
- *     `[<title>]`, `<rect class="box">`, `<text class="label">`, `[<text class="detail">]`
+ *     then its `<text class="edge-label" part="edge-label">` `<g class="node [root]" part="node [root-node]">` per node:
+ *     `[<title>]`, `<rect class="box">`, `<text class="label">`, `[<text class="detail">]`, `[<g class="toggle">]`
  *   - positions and sizes are the layout's (`TreeLayout`), in user units
  *   - text sizes are `font-size` ATTRIBUTES (user units the layout sized the boxes for):
  *     NEVER set `font-size` on the texts here
@@ -31,16 +33,37 @@
     overflow-x: auto;
   }
 
+  /* As wide as the drawing:  the content its nodes hold is placed in percent of it. */
+  .canvas {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    min-width: min-content;
+  }
+
+  /* A line of label text no one sees:  it changes size when the font does, and the drawing measures again. */
+  .font-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    pointer-events: none;
+    font-family: var(--_ui-tree-diagram-font-family);
+    font-size: 14px;
+    line-height: 1;
+  }
+
   /*
    * Tokens:  each read through its private alias.
    * Declared on the root AND on each part (`node`, `edge`, `slot-label`):  a part is NESTED in the root,
    * so a token set through `::part(node)` is only seen from the node down.
    */
+  .font-sentinel,
   .ui.tree.diagram,
-  .ui.tree.diagram :is(.node, .edge, .slot) {
-    --_ui-tree-diagram-font-family: var(--ui-tree-diagram-font-family, var(--ui-font-family-mono));
+  .ui.tree.diagram :is(.node, .edge, .edge-label) {
+    --_ui-tree-diagram-font-family: var(--ui-tree-diagram-font-family, var(--ui-font-family));
     --_ui-tree-diagram-font-size: var(--ui-tree-diagram-font-size, 0.8125em);
-    --_ui-tree-diagram-slot-font-family: var(--ui-tree-diagram-slot-font-family, var(--ui-font-family));
+    --_ui-tree-diagram-edge-label-font-family: var(--ui-tree-diagram-edge-label-font-family, var(--ui-font-family));
     --_ui-tree-diagram-min-scale: var(--ui-tree-diagram-min-scale, 0.75);
     --_ui-tree-diagram-radius: var(--ui-tree-diagram-radius, var(--ui-radius-m));
     --_ui-tree-diagram-node-background: var(--ui-tree-diagram-node-background, var(--ui-surface-muted));
@@ -50,7 +73,8 @@
     --_ui-tree-diagram-label-color: var(--ui-tree-diagram-label-color, var(--ui-text-color));
     --_ui-tree-diagram-detail-color: var(--ui-tree-diagram-detail-color, var(--ui-text-muted));
     --_ui-tree-diagram-edge-color: var(--ui-tree-diagram-edge-color, var(--ui-text-light));
-    --_ui-tree-diagram-slot-color: var(--ui-tree-diagram-slot-color, var(--ui-text-muted));
+    --_ui-tree-diagram-edge-label-color: var(--ui-tree-diagram-edge-label-color, var(--ui-text-muted));
+    --_ui-tree-diagram-focus-color: var(--ui-tree-diagram-focus-color, var(--ui-primary));
   }
 
   /* The drawing:  natural size in em, shrinking to fit down to the minimum scale. */
@@ -79,7 +103,7 @@
       stroke: var(--_ui-tree-diagram-root-border-color);
       stroke-width: 2;
     }
-    :is(.label, .detail, .slot) {
+    :is(.label, .detail, .edge-label) {
       text-anchor: middle;
       dominant-baseline: central;
     }
@@ -98,10 +122,46 @@
       stroke-width: 1.5;
       stroke-linecap: round;
     }
-    .slot {
-      fill: var(--_ui-tree-diagram-slot-color);
-      font-family: var(--_ui-tree-diagram-slot-font-family);
+    .edge-label {
+      fill: var(--_ui-tree-diagram-edge-label-color);
+      font-family: var(--_ui-tree-diagram-edge-label-font-family);
       font-style: italic;
+    }
+    .label,
+    .detail {
+      font-family: var(--_ui-tree-diagram-font-family);
+    }
+    .toggle {
+      cursor: var(--ui-control-cursor, pointer);
+    }
+    .toggle-target {
+      fill: transparent;
+    }
+    .toggle-circle {
+      fill: var(--_ui-tree-diagram-edge-color);
+    }
+    .toggle-mark {
+      fill: none;
+      stroke: var(--ui-text-inverted-color);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    .clickable {
+      cursor: var(--ui-control-cursor, pointer);
+    }
+    .clickable:hover .box {
+      stroke: var(--_ui-tree-diagram-focus-color);
+    }
+    :is(.clickable, .toggle):focus {
+      outline: none;
+    }
+    .clickable:focus-visible .box,
+    .toggle:focus-visible .toggle-circle {
+      stroke: var(--_ui-tree-diagram-focus-color);
+      stroke-width: 2.5;
+    }
+    .toggle:hover .toggle-circle {
+      fill: var(--_ui-tree-diagram-focus-color);
     }
   }
 }

@@ -196,10 +196,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - the project's own view of that name first:  `card` => `solitaire-card`, as its element is named
    * - else the first of the project's packs that has it (`SP.ComponentPacks`):  `button` => `ui-button`,
    *   `botón` in a Spanish file => `es-boton`
-   * - `undefined`:  not a bare name (`ui-text`, `solitaire-card`, `slot` are left as written), or nobody has it
+   * - a name with a dash is a pack's too, when it has one:  `tree-diagram` => `ui-tree-diagram` (P32)
+   * - `undefined`:  nobody has it;  a name with a dash (`ui-text`, `solitaire-card`) is then left as written, as a tag
    */
   static componentTagFor(scope: P.Scope, word: string): string | undefined {
-    if (!isBareComponentName(word)) return undefined
+    if (!isBareComponentName(word)) {
+      return word.includes("-")
+        ? SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+        : undefined
+    }
     const type = scope.getType(SP.typeName(word))
     if (type?.isA("View")) {
       const project = projectScopeOf(scope)

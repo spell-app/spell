@@ -1218,7 +1218,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
       each run of markup lines joined into one implicit fragment.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
-    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
+    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
