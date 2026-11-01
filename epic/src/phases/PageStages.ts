@@ -30,6 +30,13 @@ export class PageStages {
     phases: ["phases", "questions", "todos", "issues"]
   }
 
+  /**
+   * The section kinds every stage shows once they hold an item:  a judgement call or an issue made while planning is
+   * news, never hidden behind the stage (Owen, 2026-10-31, epic `epic-engine` I191:  "If Js or Is have been created,
+   * show them even if we are in planning mode").
+   */
+  static readonly SHOWN_WHEN_HELD: readonly string[] = ["judgements", "issues"]
+
   /** Is `value` one of the stages? */
   static isStage(value: unknown): value is PageStage {
     return (PageStages.ALL as readonly unknown[]).includes(value)
@@ -73,11 +80,14 @@ export class PageStages {
    * Is `element` hidden by its page's stage?  True for a top-level `<epic-section>` its page's stage doesn't show,
    * and for anything inside one.
    * - the Overview and its sub-sections never are;  outside an `<epic-page>`, nothing is
+   * - nor the Judgement calls or Issues once they hold an item, at any stage (`SHOWN_WHEN_HELD`)
    */
   static hides(element: Element): boolean {
     const section = element.closest("epic-page > epic-section")
     if (!section) return false
-    return !PageStages.shows(PageStages.of(section.parentElement), section.getAttribute("kind"))
+    const kind = section.getAttribute("kind")
+    if (PageStages.SHOWN_WHEN_HELD.includes(kind ?? "") && section.querySelector(":scope > epic-item")) return false
+    return !PageStages.shows(PageStages.of(section.parentElement), kind)
   }
 }
 

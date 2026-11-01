@@ -306,6 +306,7 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 - In Codex:  nothing to avoid:  Codex has no plan mode.
 - The epic is agreed ON THE PAGE, from its first minute:  `epic create` starts it in the OVERVIEW STAGE, which shows
   only the Overview, Questions and Todo until the person presses Accept Overview.
+  - Judgement calls and Issues show at ANY stage once they hold an item (epic `epic-engine` I191).
 - Three stages, each ended by the person's Accept on the title row of what it accepts (epic `epic-engine` I180;  the page
   header's before;  `epic stage <name>` prints and sets it):  Accept Overview on the Overview's, Accept Phases on the
   Phases section's, before its gear;  the header's Send stays the paper plane
