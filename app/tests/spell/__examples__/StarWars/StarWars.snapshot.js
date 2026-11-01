@@ -90,7 +90,7 @@ export class Person extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 12188, end: 12284 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 11923, end: 12019 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -99,13 +99,13 @@ export class Person extends Thing {
     })
   }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 12297, end: 12348 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 12032, end: 12083 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
 
   /** Their own picture on Wikipedia, or nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 12361, end: 12569 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 12096, end: 12304 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail.source
     return ""
@@ -115,7 +115,7 @@ export class Person extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12619, end: 13070 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12354, end: 12805 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Height", value: measureAmountInUnit(this.height, "cm") }))
@@ -219,7 +219,7 @@ export class Planet extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 13730, end: 13848 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 13465, end: 13583 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -231,7 +231,7 @@ export class Planet extends Thing {
   }
 
   /** What colour a world is, from its weather */
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 13861, end: 14238 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 13596, end: 13973 }, readsFrom: ["star_wars"] }) }
   get hue() {
     if (core.includes(this.climate, "frozen")) return 200
     if (core.includes(this.climate, "arid")) return 38
@@ -244,7 +244,7 @@ export class Planet extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 14288, end: 14881 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 14023, end: 14616 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Climate", value: this.climate }))
@@ -341,7 +341,7 @@ export class Film extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10999, end: 11099 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10734, end: 10834 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.title,
@@ -362,7 +362,7 @@ export class Film extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11287, end: 11586 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11022, end: 11321 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Directed by", value: this.director }))
@@ -495,7 +495,7 @@ export class Species extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 17943, end: 18047 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 17678, end: 17782 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -506,7 +506,7 @@ export class Species extends Thing {
   }
 
   /** Its first person's picture:  asking for everyone at once costs one read, and each link then asks nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 18060, end: 18356 }, readsFrom: ["star_wars", "wikipedia"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 17795, end: 18091 }, readsFrom: ["star_wars", "wikipedia"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     const everyone = await core.savedThings(Person)
     let found = ""
@@ -520,7 +520,7 @@ export class Species extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 18405, end: 18630 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 18140, end: 18365 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Language", value: this.language }))
@@ -629,7 +629,7 @@ export class Vehicle extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 17200, end: 17289 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16935, end: 17024 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -760,7 +760,7 @@ export class Starship extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16539, end: 16629 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16274, end: 16364 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -825,15 +825,10 @@ export class WikiPage extends Thing {
   get contentUrls() { return this.getProp("contentUrls") }
   set contentUrls(value) { this.setProp("contentUrls", value) }
 
-  static { this.declareProp("lowerAbout", { declaredAt: { path: "/StarWars.spellml", start: 8678, end: 8725 }, readsFrom: ["wikipedia"] }) }
-  get lowerAbout() {
-    return this.about.toLocaleLowerCase()
-  }
-
-  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 8738, end: 8925 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 8491, end: 8660 }, readsFrom: ["wikipedia"] }) }
   get fits() {
     if (core.includes(this.title, "List of")) return false
-    return core.includes(this.lowerAbout, "star wars") || core.includes(this.lowerAbout, "fictional") || core.includes(this.lowerAbout, " film ")
+    return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
   }
 
   static savedIn = { place: "wikipedia", collection: "wiki_pages" }
@@ -1018,7 +1013,7 @@ export class WikiNote extends Thing {
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 9005, end: 9056 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 8740, end: 8791 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1075,7 +1070,7 @@ export class FactTable extends Thing {
   get facts() { return this.getProp("facts") }
   set facts(value) { this.setProp("facts", value) }
 
-  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 10225, end: 10283 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 9960, end: 10018 }, readsFrom: ["star_wars"] }) }
   get shown() {
     return core.filter(this.facts, (fact) => fact.isKnown)
   }
@@ -1170,10 +1165,6 @@ export class CraftPage extends Thing {
 export class Guide extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
-  get lookingFor() {
-    return this.search.toLocaleLowerCase()
-  }
-
   // - its "tab" is text
   static { this.declareProp("tab", { type: "text" }) }
   get tab() { return this.getProp("tab") }
@@ -1210,17 +1201,17 @@ export class Guide extends App {
   set jumping(value) { this.setProp("jumping", value) }
 
   /** Whatever's found:  the film, person, planet, ship or anything else with that in its name */
-  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 701, end: 1668 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 640, end: 1481 }, readsFrom: ["star_wars"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const matches = new List({ instanceType: "Thing" })
-    core.map(core.filter(await core.savedThings(Film, {}, "looks through"), (film) => core.includes(film.title.toLocaleLowerCase(), this.lookingFor)), (film) => matches.append(film))
-    core.map(core.filter(await core.savedThings(Person, {}, "looks through"), (person) => core.includes(person.name.toLocaleLowerCase(), this.lookingFor)), (person) => matches.append(person))
-    core.map(core.filter(await core.savedThings(Planet, {}, "looks through"), (planet) => core.includes(planet.name.toLocaleLowerCase(), this.lookingFor)), (planet) => matches.append(planet))
-    core.map(core.filter(await core.savedThings(Starship, {}, "looks through"), (starship) => core.includes(starship.name.toLocaleLowerCase(), this.lookingFor)), (starship) => matches.append(starship))
-    core.map(core.filter(await core.savedThings(Vehicle, {}, "looks through"), (vehicle) => core.includes(vehicle.name.toLocaleLowerCase(), this.lookingFor)), (vehicle) => matches.append(vehicle))
-    core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, {}, "looks through"), (species) => core.includes(species.name.toLocaleLowerCase(), this.lookingFor)))), (one) => matches.append(one))
+    core.map(core.filter(await core.savedThings(Film, {}, "looks through"), (film) => core.includes(film.title, this.search)), (film) => matches.append(film))
+    core.map(core.filter(await core.savedThings(Person, {}, "looks through"), (person) => core.includes(person.name, this.search)), (person) => matches.append(person))
+    core.map(core.filter(await core.savedThings(Planet, {}, "looks through"), (planet) => core.includes(planet.name, this.search)), (planet) => matches.append(planet))
+    core.map(core.filter(await core.savedThings(Starship, {}, "looks through"), (starship) => core.includes(starship.name, this.search)), (starship) => matches.append(starship))
+    core.map(core.filter(await core.savedThings(Vehicle, {}, "looks through"), (vehicle) => core.includes(vehicle.name, this.search)), (vehicle) => matches.append(vehicle))
+    core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, {}, "looks through"), (species) => core.includes(species.name, this.search)))), (one) => matches.append(one))
     return matches
-  }, () => [this.lookingFor]) }
+  }, () => [this.search]) }
 
   goBack() {
     if (core.isEmpty(this.trail)) {

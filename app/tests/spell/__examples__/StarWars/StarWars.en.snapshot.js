@@ -129,7 +129,6 @@ export const words = {
       summary: "summary",
       thumbnail: "thumbnail",
       contentUrls: "content urls",
-      lowerAbout: "lower about",
       fits: "fits"
     },
     Thumbnail: {
@@ -186,7 +185,6 @@ export const words = {
       draw: "draw it"
     },
     Guide: {
-      lookingFor: "looking for",
       tab: "tab",
       search: "search",
       create: "create it",

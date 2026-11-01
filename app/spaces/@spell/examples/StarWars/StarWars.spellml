@@ -4,7 +4,6 @@ say what a field links to, and reading it follows the link, `the name of its hom
 Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
 
 <spell-app "guide">
-	<property "looking for">its search as lower case</property>
 	<spell>
 		- its "tab" is text
 		- its "search" is text
@@ -19,17 +18,17 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<property "found" description="Whatever's found:  the film, person, planet, ship or anything else with that in its name">
 		set matches to a new list of things
-		for each film in every film where (its title as lower case) includes the looking for of the guide
+		for each film in every film where its title includes the search of the guide
 			add the film to matches
-		for each person in every person where (its name as lower case) includes the looking for of the guide
+		for each person in every person where its name includes the search of the guide
 			add the person to matches
-		for each planet in every planet where (its name as lower case) includes the looking for of the guide
+		for each planet in every planet where its name includes the search of the guide
 			add the planet to matches
-		for each starship in every starship where (its name as lower case) includes the looking for of the guide
+		for each starship in every starship where its name includes the search of the guide
 			add the starship to matches
-		for each vehicle in every vehicle where (its name as lower case) includes the looking for of the guide
+		for each vehicle in every vehicle where its name includes the search of the guide
 			add the vehicle to matches
-		for each one in every species where (its name as lower case) includes the looking for of the guide
+		for each one in every species where its name includes the search of the guide
 			add the one to matches
 		return matches
 	</property>
@@ -268,11 +267,10 @@ Every type holds one of these, with its own words.
 Not every name has a page, and a name may be someone else's:  Zolan is a medicine.
 
 <spell-more-of "wiki page">
-	<property "lower about">its about as lower case</property>
 	<property "fits">
 		if its title includes "List of"
 			return no
-		return its lower about includes "star wars" or its lower about includes "fictional" or its lower about includes " film "
+		return its about includes "star wars" or its about includes "fictional" or its about includes " film "
 	</property>
 </spell-more-of>
 
