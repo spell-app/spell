@@ -1532,6 +1532,12 @@ classes.addRule(OutlineSpecifierDatatype, {
   tests: [{ tests: [["a number", "number"]] }]
 })
 
+// a stored value and where it starts:  `its "count" is a number starting at 0`, `<property "count" type="number">0</>`
+classes.addRule(OutlineSpecifierDatatype, {
+  syntax: "(a|an) {datatype:singular_type} starting at {start:expression}",
+  tests: [{ tests: [["a number starting at 0", "number"]] }]
+})
+
 // `a suit of its deck`:  a value kind, saying where its list is kept -- for the reader;  the kind says it already
 classes.addRule(OutlineSpecifierDatatype, {
   syntax: "(a|an) {datatype:singular_type} of its {owner:member_words}",

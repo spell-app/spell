@@ -17,20 +17,16 @@ core.heading("A counter -- in the outline style:  its name, then what's true of 
 //////////////////////////////////////////////////////////////////////////
 /**
  * A view:  each counter is its own element on the page.
- * The Counter notebook, `@spell/notebooks/Counter`, imports it, and tries it out.
+ * The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
  */
 export class Counter extends View {
   static elementTag = core.defineElement(this, "test-project")
 
-  // - its "count" is a number
-  static { this.declareProp("count", { type: "number" }) }
+  /** a new counter starts at 0 */
+  // - its "count" is a number starting at 0
+  static { this.declareProp("count", { type: "number", init: () => 0 }) }
   get count() { return this.getProp("count") }
   set count(value) { this.setProp("count", value) }
-
-  /** a new counter starts at 0 */
-  create() {
-    this.count = 0
-  }
 
   countUp() {
     this.count = this.count + 1

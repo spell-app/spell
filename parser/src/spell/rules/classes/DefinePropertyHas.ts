@@ -406,6 +406,10 @@ export class DefinePropertyHas extends SpellStatement<
       // a type's name as text, so a writer can read the type:  `P.TSWriter` types the property from it.
       // Checked at runtime by its class's name:  see `P.ASTTypeExpression.runtimeName`.
       check.addProp("type", new P.ASTTypeNameLiteral(match, { value: typeExpression.runtimeName, quote: "'" }))
+      // where it starts:  `a number starting at 0`, made once per instance
+      initializer = (match.groups.specifier?.groups as { start?: P.Match } | undefined)?.start?.AST as
+        | P.ASTExpression
+        | undefined
     }
     // its rules, what its value must be (epic `property-editor` P9)
     const rules = DefinePropertyHas.rulesOf(match)

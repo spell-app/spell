@@ -1236,6 +1236,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Then the twin parses with the ordinary rules:  the SAME match, AST and code as the code-spell line.
   - A tag body on the head's own line (`<action "go">print 1</>`) is the twin's inline body;
     an indented one, its nested block.
+  - A property's `type=` is its stored type, its body the value it starts at:  `its {name} is {a type} {type} starting at`.
   - A repeated `alias=` adds a line per alias in the property's body;  an action's details, a line each.
   - A `description=`, or a leading `<description>` note, becomes trailing comments on the twin line:
     `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.

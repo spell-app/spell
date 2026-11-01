@@ -9,26 +9,13 @@
     {
       "type": "Counter",
       "superType": "View",
-      "defined": "/Counter.spell:434-773"
+      "defined": "/Counter.spell:436-751"
     },
     {
       "property": "count",
       "of": "Counter",
       "datatype": "number",
-      "defined": "/Counter.spell:466-489"
-    },
-    {
-      "syntax": "create {thisArg:expression}",
-      "output": "create",
-      "rule": "method_call",
-      "of": "Counter",
-      "alias": [
-        "statement",
-        "expression"
-      ],
-      "kind": "method",
-      "name": "create it",
-      "defined": "/Counter.spell:523-557"
+      "defined": "/Counter.spell:498-535"
     },
     {
       "syntax": "count up (of {thisArg:expression})?",
@@ -41,7 +28,7 @@
       ],
       "kind": "method",
       "name": "count up",
-      "defined": "/Counter.spell:562-607"
+      "defined": "/Counter.spell:540-585"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -54,18 +41,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:685-773"
+      "defined": "/Counter.spell:663-751"
     },
     {
       "type": "CounterApp",
       "superType": "App",
-      "defined": "/Counter.spell:808-941"
+      "defined": "/Counter.spell:786-919"
     },
     {
       "property": "counter",
       "of": "CounterApp",
       "datatype": "Counter",
-      "defined": "/Counter.spell:840-870"
+      "defined": "/Counter.spell:818-848"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -78,7 +65,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:875-941"
+      "defined": "/Counter.spell:853-919"
     },
     {
       "syntax": "test counting",
@@ -87,18 +74,17 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting",
-      "defined": "/Counter.spell:982-1158"
+      "defined": "/Counter.spell:960-1136"
     }
   ],
   "codeLines": [
     21,
-    24,
+    25,
     30,
-    34,
-    39,
-    49,
-    52,
-    57,
-    69
+    35,
+    45,
+    48,
+    53,
+    65
   ]
 }
