@@ -89,6 +89,7 @@ await checkPage("epic", `${served.base}/epics/${epic}/${epic}.plan.html`, () =>
   [...document.querySelectorAll("epic-item[id]")].map((each) => each.id)
 )
 await checkPromoted(`${served.base}/${guide}`)
+await checkMarkdown(`${served.base}/${guide}`)
 await checkNoneWaiting(`${served.base}/${guide}`)
 
 await browser.close()
@@ -107,7 +108,7 @@ function check(what, ok, extra = "") {
  * A new page at `url`, its comments stubbed:  on the first three anchors `anchors()` finds in it, Claude having
  * answered the first and the third (`answered`:  which of the three);  every POST to the page server's API aborted.
  */
-async function stubbedPage(url, anchors, answered = [true, false, true]) {
+async function stubbedPage(url, anchors, answered = [true, false, true], { quote } = {}) {
   const errors = []
   const page = await BrowserPage.newPage(browser, {
     viewport: { width: 1200, height: 900 },
@@ -126,6 +127,7 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
       kind: "section",
       label: "",
       excerpt: "",
+      ...(quote && index === 0 && { quote }),
       text: `Comment ${index + 1}:  what about this?`,
       at,
       status: answered[index] ? "answered" : "new",
@@ -244,6 +246,62 @@ async function checkPromoted(url) {
   await page.screenshot({ path: join(out, "guide-promoted-shown.png") })
   check("guide:  a row's click shows its thread where the row was, one section open", Math.abs(now.top - before) < 6 && now.open === 1 && now.left === 2, JSON.stringify({ before, ...now }))
   await page.close()
+}
+
+/**
+ * Text drawn by a `<ui-markdown>` takes comments:  selected text opens the pane with its quote;
+ * a thread on it shows under its paragraph, its quote highlighted.
+ */
+async function checkMarkdown(url) {
+  const page = await stubbedPage(url, () => [...document.querySelectorAll("main ui-section[id]")].slice(0, 3).map((each) => each.id))
+  await page.waitForSelector("ui-markdown", { state: "attached", timeout: 20_000 }).catch(() => {})
+  await page.evaluate(() => [...document.querySelectorAll("main ui-section[collapsible]")].forEach((each) => each.removeAttribute("open")))
+  await page.waitForTimeout(800)
+  const has = await page.evaluate(() => !!document.querySelector("ui-markdown")?.shadowRoot?.querySelector("p"))
+  if (!has) return page.close(), check("markdown:  the guide has a <ui-markdown> paragraph", false)
+  const quote = await page.evaluate(() => document.querySelector("ui-markdown").shadowRoot.querySelectorAll("p")[1].textContent.slice(0, 30).trim())
+  const paragraph = page.locator("ui-markdown p").first()
+  const box = await paragraph.boundingBox()
+  await paragraph.scrollIntoViewIfNeeded()
+  const at = await paragraph.boundingBox()
+  await page.mouse.move(at.x + 5, at.y + at.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(at.x + 150, at.y + at.height / 2, { steps: 6 })
+  await page.mouse.up()
+  await page.waitForTimeout(400)
+  const floating = await page.evaluate(() => !!getSelection().toString())
+  await page.keyboard.press("Meta+i")
+  await page.waitForTimeout(300)
+  const pane = await page.evaluate(() => {
+    const pane = document.querySelector("epic-comment-pane")
+    return { open: !!pane, quote: pane?.place?.quote ?? pane?.quote ?? "" }
+  })
+  await page.screenshot({ path: join(out, "markdown-pane.png") })
+  check("markdown:  selected text opens the comment pane", pane.open, JSON.stringify({ floating, ...pane, box: !!box }))
+  await page.close()
+
+  const quoted = await stubbedPage(url, () => [...document.querySelectorAll("main ui-section[id]")].slice(0, 3).map((each) => each.id), [true, false, true], { quote })
+  await quoted.waitForSelector("epic-thread", { state: "attached", timeout: 20_000 }).catch(() => {})
+  await quoted.waitForTimeout(1500)
+  await quoted.evaluate(() => document.querySelector("#comment-c1")?.closest("ui-section")?.removeAttribute("open"))
+  await quoted.waitForTimeout(500)
+  const placed = await quoted.evaluate(() => {
+    const thread = document.querySelector("#comment-c1")
+    const box = thread?.parentElement
+    const slot = box?.assignedSlot
+    return {
+      inMarkdown: box?.parentElement?.localName,
+      afterText: slot?.previousElementSibling?.localName ?? slot?.parentElement?.localName,
+      highlighted: CSS.highlights?.get("spell-comment-quote-waiting")?.size + CSS.highlights?.get("spell-comment-quote")?.size,
+      top: thread?.getBoundingClientRect().height
+    }
+  })
+  await quoted.$eval("#comment-c1", (each) => each.scrollIntoView({ block: "center" }))
+  await quoted.waitForTimeout(200)
+  await quoted.screenshot({ path: join(out, "markdown-thread.png") })
+  check("markdown:  a quote's thread shows under its paragraph", placed.inMarkdown === "ui-markdown" && placed.afterText === "p" && placed.top > 0, JSON.stringify(placed))
+  check("markdown:  its quote is highlighted", placed.highlighted >= 1, JSON.stringify(placed))
+  await quoted.close()
 }
 
 /** A guide's tools:  one button, Expand all while any section is folded, else Collapse all, then the bullhorn. */

@@ -35,6 +35,7 @@ export const BLOCK_KINDS = [
   ["update", "epic-update[at]"],
   ["summary", "epic-summary"],
   ["prose", "epic-section > p, epic-overview > p"],
+  ["markdown", "ui-markdown"],
   ["table", "ui-table, table"],
   ["aside", "ui-accordion.spell-aside, epic-aside"],
   ["code", "ui-accordion.spell-code, ui-code, epic-code, pre"],
@@ -99,9 +100,20 @@ export function blocksIn(main) {
 /** The block `node` is in (a text node too):  the innermost of `blocks` holding it;  `null` for none. */
 export function blockAround(node, blocks) {
   const inside = new Set(blocks)
-  for (let at = node.nodeType === 1 ? node : node.parentElement; at; at = at.parentElement)
+  for (let at = node.nodeType === 1 ? node : node.parentElement; at; at = at.parentElement ?? hostOf(at))
     if (inside.has(at)) return at
   return null
+}
+
+/** The element whose shadow root holds `node`;  `undefined` for a node in the page itself. */
+export function hostOf(node) {
+  return node.getRootNode().host
+}
+
+/** Does `outer` hold `node`, a `<ui-markdown>`'s rendered text (in its shadow root) too? */
+export function holds(outer, node) {
+  for (let at = node; at; at = hostOf(at)) if (outer.contains(at)) return true
+  return false
 }
 
 /**
@@ -251,7 +263,9 @@ function textRuns(block) {
   const walk = (node) => {
     if (node.nodeType === 3) return runs.push({ node, text: node.textContent })
     if (node.nodeType !== 1 || (node !== block && node.matches(NOT_CONTENT))) return
-    for (const child of node.childNodes) walk(child)
+    // a `<ui-markdown>`'s text is what it drew, in its shadow root;  its own children are the source
+    const drawn = node.localName === "ui-markdown" ? node.shadowRoot?.querySelector('[part~="body"]') : null
+    for (const child of (drawn ?? node).childNodes) walk(child)
     runs.push({ node: null, text: " " })
   }
   walk(block)

@@ -27,6 +27,8 @@ import {
   blocksIn,
   excerptOf,
   findBlock,
+  holds,
+  hostOf,
   kindOf,
   offsetIn,
   pageHeadIn,
@@ -871,6 +873,15 @@ class PageComments {
       clearTimeout(timer)
       timer = setTimeout(() => this.draw(), REDRAW_MS)
     }).observe(this.main, { childList: true, subtree: true })
+    // a `<ui-markdown>` drew its text:  the quotes in it can be found now
+    this.main.addEventListener(
+      "ui-drawn",
+      () => {
+        clearTimeout(timer)
+        timer = setTimeout(() => this.draw(), REDRAW_MS)
+      },
+      { signal: this.signal }
+    )
     this.signal?.addEventListener("abort", () => clearTimeout(timer), { once: true })
   }
 
@@ -964,6 +975,7 @@ class PageComments {
    * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
    */
   boxFor(under) {
+    if (hostOf(under)?.localName === "ui-markdown") return this.boxInMarkdown(under)
     const where = THREADS_FIRST.test(under.localName) ? "first" : HOLDS_INSIDE.test(under.localName) ? "last" : "after"
     const next =
       where === "first"
@@ -978,6 +990,29 @@ class PageComments {
     else if (next) next.before(box)
     else under.append(box)
     return box
+  }
+
+  /**
+   * The box of threads under `under`, text a `<ui-markdown>` drew in its shadow root.
+   * - the box is the element's light child, so the page finds its threads as any others;
+   *   a `<slot>` beside `under` shows it right there
+   * - a render takes the slots away:  `ui-drawn` draws the comments again (`watchContent()`)
+   */
+  boxInMarkdown(under) {
+    const host = hostOf(under)
+    const inside = HOLDS_INSIDE.test(under.localName)
+    const next = inside ? under.lastElementChild : under.nextElementSibling
+    let slot = next?.matches("slot[data-spell-added]") ? next : null
+    if (!slot) {
+      slot = el("slot", { name: `spell-threads-${++threadSlots}`, "data-spell-added": true })
+      if (inside) under.append(slot)
+      else under.after(slot)
+    }
+    const box = host.querySelector(`:scope > [slot="${slot.name}"]`)
+    if (box) return box
+    const made = el(THREADS_TAG, { slot: slot.name, "data-spell-added": true })
+    host.append(made)
+    return made
   }
 
   ////////////////
@@ -1044,16 +1079,33 @@ class PageComments {
   /** The selection, when it's text in one of the page's blocks:  `{ block, quote, offset, range }`;  else `null`. */
   selected() {
     const selection = getSelection()
-    if (!selection || selection.isCollapsed || !selection.rangeCount) return null
-    const range = selection.getRangeAt(0)
+    const range = selection && this.selectedRange(selection)
+    if (!range || range.collapsed) return null
     const start = range.startContainer
-    if (!this.main.contains(start)) return null
+    if (!holds(this.main, start)) return null
     const element = start.nodeType === 1 ? start : start.parentElement
     if (element?.closest("[data-spell-added], textarea, input")) return null
     const block = blockAround(start, blocksIn(this.main))
-    const quote = selection.toString().trim()
+    const quote = (selection.toString() || range.toString()).trim()
     if (!block || !quote) return null
     return { block, quote, offset: offsetIn(block, start, range.startOffset), range }
+  }
+
+  /**
+   * The selection's range, its real nodes:  inside a `<ui-markdown>`'s shadow root too, which `getRangeAt()` hides.
+   * - across two shadow roots:  `null`, no one block holds it
+   */
+  selectedRange(selection) {
+    if (!selection.rangeCount) return null
+    if (!selection.getComposedRanges) return selection.getRangeAt(0)
+    const shadowRoots = [...this.main.querySelectorAll("ui-markdown")].flatMap((each) => each.shadowRoot ?? [])
+    const [picked] = selection.getComposedRanges({ shadowRoots })
+    if (!picked) return null
+    if (picked.startContainer.getRootNode() !== picked.endContainer.getRootNode()) return null
+    const range = document.createRange()
+    range.setStart(picked.startContainer, picked.startOffset)
+    range.setEnd(picked.endContainer, picked.endOffset)
+    return range
   }
 
   /** Open the comment pane on the selection's block, its text quoted, just under the selection. */
@@ -1766,7 +1818,7 @@ function holderOf(block, { start, end }) {
     range.setEnd(...end)
     const node = range.commonAncestorContainer
     const holder = (node.nodeType === 1 ? node : node.parentElement)?.closest(TEXT_HOLDERS)
-    if (!holder || holder === block || !block.contains(holder)) return block
+    if (!holder || holder === block || !holds(block, holder)) return block
     const shadow = holder.parentElement?.shadowRoot
     if (shadow && !shadow.querySelector("slot:not([name])")) return block
     return holder
@@ -1792,12 +1844,32 @@ function highlightQuotes(quotes) {
     }
   })
   if (globalThis.Highlight && globalThis.CSS?.highlights) {
+    for (const { range } of found) addQuoteSheet(range.startContainer.getRootNode())
     const ranges = (waiting) => found.filter((each) => !!each.waiting === waiting).map(({ range }) => range)
     CSS.highlights.set(QUOTE_HIGHLIGHT, new Highlight(...ranges(false)))
     CSS.highlights.set(QUOTE_WAITING_HIGHLIGHT, new Highlight(...ranges(true)))
   }
   return found
 }
+
+/**
+ * Page rules don't reach text in a shadow root:  a `<ui-markdown>`'s gets its quotes' look here, once;
+ * their colours are `spell-comments.css`'s.
+ */
+function addQuoteSheet(root) {
+  if (root === document || root.querySelector("style[data-spell-quotes]")) return
+  root.append(
+    el(
+      "style",
+      { "data-spell-quotes": true },
+      `::highlight(${QUOTE_HIGHLIGHT}) { background-color: var(--spell-quote-color); }
+::highlight(${QUOTE_WAITING_HIGHLIGHT}) { background-color: var(--spell-quote-waiting-color); }`
+    )
+  )
+}
+
+/** The slots made so far, for their unique names (`boxInMarkdown()`). */
+let threadSlots = 0
 
 /** How long the toast saying a comment was deleted offers Undo, ms. */
 const UNDO_MS = 6000

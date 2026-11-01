@@ -2558,9 +2558,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - Its site bundle couldn't load a pack until then:
         `SitePacks` (`globalThis.SpellUI`'s `registerPack` and `packModules`) was the other sets' own build of the site
         alone;  it's the one bundle now, every set's.
-      - Its prose is `<ui-markdown>`'s, in a shadow root:
-        a text comment there doesn't open (the selection isn't in the page's `main`);
-        the page, each section and a live example's light-DOM text take comments.
+      - Its prose is `<ui-markdown>`'s, in a shadow root:  a text comment there works as anywhere (`selectedRange()`),
+        its thread under the paragraph (`boxInMarkdown()`).
     - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):
       the toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
