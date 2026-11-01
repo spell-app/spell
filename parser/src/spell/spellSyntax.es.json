@@ -1148,7 +1148,7 @@
           "ruleNames": ["is_empty"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEmpty.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`{lhs} is [not] empty` postfix, e.g. `thing is empty`.",
           "syntaxes": [
             {
