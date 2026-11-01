@@ -60,6 +60,11 @@ export function samePage(a: string, b: string): boolean {
   return first.href === second.href
 }
 
+/** The `base` URL in what `epic server ensure` printed (JSON, after any other lines);  `undefined`:  it didn't come up. */
+export function serverBaseIn(output: string): string | undefined {
+  return output.match(/"base":\s*"([^"]+)"/)?.[1]
+}
+
 /** Whether `url` is plain http on this machine (`127.0.0.1` / `localhost`):  never open anything else. */
 export function isLoopback(url: string): boolean {
   try {
