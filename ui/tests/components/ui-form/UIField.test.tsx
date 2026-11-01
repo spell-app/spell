@@ -197,4 +197,20 @@ describe("<ui-field> tip", () => {
     await userEvent.keyboard("{Escape}")
     await expect.poll(() => tip.matches(":popover-open")).toBe(false)
   })
+
+  it("shows at once on a click on the icon, with no hover delay, until focus leaves", async () => {
+    const host = await ElementFixture.render<HTMLElement>(`<ui-field label="L" description="Why."><input></ui-field>`)
+    const info = part(host, "info")!
+    const tip = host.shadowRoot!.getElementById(info.getAttribute("aria-describedby")!)!
+
+    await userEvent.click(info)
+    await expect.poll(() => tip.matches(":popover-open")).toBe(true)
+    expect(getComputedStyle(tip).transitionDelay).toBe("0s")
+    await expect.poll(() => getComputedStyle(tip).visibility, { timeout: 500 }).toBe("visible")
+
+    await userEvent.unhover(info)
+    expect(tip.matches(":popover-open")).toBe(true)
+    info.blur()
+    await expect.poll(() => tip.matches(":popover-open")).toBe(false)
+  })
 })

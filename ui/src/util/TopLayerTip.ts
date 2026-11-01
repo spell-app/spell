@@ -15,10 +15,16 @@ export class TopLayerTip {
    * Show the tip inside `container` while the pointer's on a `trigger`, or one has keyboard focus.
    * - `container`:  an element holding the tip and every trigger;  a tip that comes and goes is found each time.
    * - `trigger`:  a selector inside the same shadow root.
+   * - `showOnClick`:  a click on a trigger shows it at once, for as long as it keeps focus:  an info icon's, whose click does nothing else.
+   *   Not for a trigger whose click does something, e.g. a section's title:  there, only keyboard focus shows it.
    * - Escape hides it, until the pointer or the focus comes back.
    * - NEVER throws.
    */
-  static showIn(container: HTMLElement, trigger: string): void {
+  static showIn(
+    container: HTMLElement,
+    trigger: string,
+    { showOnClick = false }: { showOnClick?: boolean } = {}
+  ): void {
     const isOnTrigger = (event: Event) => event.composedPath().some((target) => (target as Element).matches?.(trigger))
     let isHovering = false
     let isFocused = false
@@ -36,7 +42,7 @@ export class TopLayerTip {
       update()
     })
     container.addEventListener("focusin", (event) => {
-      isFocused = isOnTrigger(event) && (event.composedPath()[0] as Element).matches(":focus-visible")
+      isFocused = isOnTrigger(event) && (showOnClick || (event.composedPath()[0] as Element).matches(":focus-visible"))
       update()
     })
     container.addEventListener("focusout", () => {

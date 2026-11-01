@@ -127,14 +127,14 @@
       visibility var(--ui-duration-fast);
   }
   /* shown:  no longer faded with the icon */
-  .field > .row > .info:is(:hover, :focus-visible) > .tip {
+  .field > .row > .info:is(:hover, :focus) > .tip {
     opacity: 1;
     visibility: visible;
   }
   .field > .row > .info:hover > .tip {
     transition-delay: var(--_ui-field-tip-delay);
   }
-  .field > .row > .info:focus-visible > .tip {
+  .field > .row > .info:focus > .tip {
     transition-delay: 0s;
   }
   /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
@@ -156,7 +156,7 @@
     border: 0;
     overflow: visible;
   }
-  .field > .row > .info:is(:hover, :focus-visible) > .tip:popover-open {
+  .field > .row > .info:is(:hover, :focus) > .tip:popover-open {
     @starting-style {
       opacity: 0;
       visibility: hidden;
