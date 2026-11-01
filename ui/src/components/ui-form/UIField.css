@@ -20,7 +20,7 @@
     --_ui-field-hint-color: var(--ui-field-hint-color, var(--ui-text-muted));
     --_ui-field-error-color: var(--ui-field-error-color, var(--ui-negative-text));
     --_ui-field-tip-background: var(--ui-field-tip-background, var(--ui-text-dark));
-    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-surface));
+    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-text-inverted-color));
     --_ui-field-tip-width: var(--ui-field-tip-width, 16.25em);
     /* how long a hover waits before the tip shows;  keyboard focus shows it at once */
     --_ui-field-tip-delay: var(--ui-field-tip-delay, var(--ui-hover-delay, 0s));

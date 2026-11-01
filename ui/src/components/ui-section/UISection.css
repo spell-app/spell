@@ -161,7 +161,7 @@
     --_ui-section-fold-icon-rotate: var(--ui-section-fold-icon-rotate, 0deg);
     --_ui-section-fold-icon-folded-rotate: var(--ui-section-fold-icon-folded-rotate, -90deg);
     --_ui-section-tip-background: var(--ui-section-tip-background, var(--ui-ink));
-    --_ui-section-tip-color: var(--ui-section-tip-color, var(--ui-surface));
+    --_ui-section-tip-color: var(--ui-section-tip-color, var(--ui-text-inverted-color));
     --_ui-section-tip-width: var(--ui-section-tip-width, 16.25em);
     --_ui-section-z-index: var(--ui-section-z-index, var(--ui-z-sticky));
     --_ui-section-sticky-background: var(--ui-section-sticky-background, var(--ui-surface));
