@@ -203,6 +203,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       what the rest of its top level sets going, e.g. a new deal, stops there
   - `carryProblems()` says first which things can't come over:
     then the runner starts afresh instead.
+- An edit taken while the program runs, for an app on the page (epic `editor`, Edit Without Redraw):
+  nothing is carried, as nothing is new.
+  - The runner loads the edited program with its top-level code left out, each variable the running one's
+    (`core.keptTopLevel()`, `loadOverRunning()`;  app's `LiveEdit`).
+  - `takeNewClasses()`:  each old class empties, and sits on the new one, so every thing reads the new code,
+    still the same object;  a family of exclusive lists keeps who holds what (`carryListFamily()`).
+  - `drawAgain()`:  only the types that changed draw again, each thing they hold keeping its element.
 - A program's STATE, for a page that mirrors it ([state.ts](state.ts), epic `python-target` P17).
   - The same JSON, each thing and list with an `"$id"` after its `"$type"`.
   - `StateWriter.stateOf()` writes a thing whole the first time, then `{ "$id": "3" }` alone:

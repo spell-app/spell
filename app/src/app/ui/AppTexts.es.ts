@@ -30,6 +30,7 @@ const APP_TEXTS_ES: AppTextPack = {
   renameApp: "Renombrar {type}",
   deleteApp: "Borrar {type}",
   restart: "Reiniciar",
+  takesEffectOnRestart: "Esto se aplica al reiniciar",
   modes: "Ejecutar, editar o depurar",
   runMode: "Ejecutar",
   editMode: "Editar",

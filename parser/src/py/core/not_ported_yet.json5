@@ -80,6 +80,10 @@
       "names": [
         "isCarryingOver",
         "carryOver",
+        "drawAgain",
+        "keptTopLevel",
+        "loadOverRunning",
+        "takeNewClasses",
         "carryProblems"
       ]
     },

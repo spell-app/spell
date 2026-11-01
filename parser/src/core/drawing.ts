@@ -23,8 +23,10 @@
  */
 
 import h from "@solidjs/h"
-import { createComponent, render, type JSX } from "@solidjs/web"
+import { createComponent, insert, render, type JSX } from "@solidjs/web"
 import { Errored, For, createMemo, runWithOwner } from "solid-js"
+
+import { Cell } from "spell/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -79,10 +81,36 @@ export const drawingMethods = defineCoreModule({
         : thing instanceof ViewableList
           ? [() => core.drawItems(thing)]
           : []
+      // an edit drawing it again:  its own element, its children bound to this drawing (`drawAgain()`)
+      const kept = keptElementFor(thing, tag)
+      if (kept) {
+        for (const child of children) insert(kept, child, undefined, [...kept.childNodes] as unknown as JSX.Element)
+        return kept as unknown as Drawing
+      }
       // made NOW:  the thing is a plain value, set once
       return (h(tag, { "prop:thing": thing }, ...children) as unknown as () => Drawing)()
     }
     return core.drawOwn(thing)
+  },
+
+  /**
+   * Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`,
+   * Edit Without Redraw):  each view that draws again finds the element each thing it holds already has.
+   * - So a board drawn again keeps its 52 cards:  the same elements, with what they hold, moved to the new drawing.
+   * - `everything`:  every view.
+   * - Done by the time it returns.
+   * - A drawing changing for any other reason makes its elements as usual:  this is only for an edit.
+   */
+  drawAgain(types: readonly string[] | "everything"): void {
+    keptElements = new Map()
+    noteElementsIn(core.appElement())
+    try {
+      if (types === "everything") everyDrawing.changed()
+      else for (const type of types) drawingOfType(type).changed()
+      core.flush()
+    } finally {
+      keptElements = undefined
+    }
   },
 
   /**
@@ -233,12 +261,61 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
   return createComponent(Errored, {
     fallback: (error: () => unknown) => drawingFailed(thing, error()),
     get children() {
-      const drawing = () => createMemo(() => madeOnce(draw())) as unknown as Drawing
+      const drawing = () =>
+        createMemo(() => {
+          // an edit to its type draws it again (`drawAgain()`)
+          everyDrawing.read()
+          drawingOfType(thing.constructor.name).read()
+          return madeOnce(draw())
+        }) as unknown as Drawing
       if (!drawsWaiting(thing)) return drawing()
       if (drawsInItsChildren(thing)) warnOfWholeAppHeld(thing)
       return standInFor(drawing)
     }
   })
+}
+
+////////////////
+// ## Drawing again after an edit (`core.drawAgain()`)
+////////////////
+
+/** Read by every drawing:  an edit that changes them all changes it. */
+const everyDrawing = new Cell()
+
+/** Read by each type's drawings, by the type's name:  it outlives the type's class, which an edit replaces. */
+const DRAWINGS_OF_TYPES = new Map<string, Cell>()
+
+/** The cell the drawings of type `name` read. */
+function drawingOfType(name: string): Cell {
+  let cell = DRAWINGS_OF_TYPES.get(name)
+  if (!cell) DRAWINGS_OF_TYPES.set(name, (cell = new Cell()))
+  return cell
+}
+
+/** While an edit draws again:  each element on the page drawing a thing, not yet taken by the new drawing. */
+let keptElements: Map<object, HTMLElement[]> | undefined
+
+/** Note what's in `root`, through shadow roots:  a card's element is in its pile's light DOM, a pile's in the app's. */
+function noteElementsIn(root: Element | ShadowRoot | null | undefined): void {
+  if (!root) return
+  for (const element of root.children as HTMLCollectionOf<HTMLElement>) {
+    const { thing } = element as HTMLElement & { thing?: unknown }
+    if (thing && typeof thing === "object") {
+      const elements = keptElements!.get(thing)
+      if (elements) elements.push(element)
+      else keptElements!.set(thing, [element])
+    }
+    noteElementsIn(element)
+    noteElementsIn(element.shadowRoot)
+  }
+}
+
+/** `thing`'s element with tag `tag`, as the page has it now, if an edit is drawing again and none has taken it. */
+function keptElementFor(thing: object, tag: string): HTMLElement | undefined {
+  const elements = keptElements?.get(thing)
+  if (!elements) return undefined
+  const at = elements.findIndex((element) => element.localName === tag)
+  return at < 0 ? undefined : elements.splice(at, 1)[0]
 }
 
 /**

@@ -2321,6 +2321,33 @@
       "href": "ProjectDropdown.html#ProjectMenu"
     },
     {
+      "tag": "RestartNeeded",
+      "name": "RestartNeeded",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "Says the program's last edit takes effect on restart, with a Restart button:  the app keeps running as it was.",
+      "noun": "RestartNeeded",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "Notice.html#RestartNeeded"
+    },
+    {
       "tag": "RunnerConsole",
       "name": "RunnerConsole",
       "folder": "RunnerConsole",
@@ -3514,7 +3541,8 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "Notice"
+        "Notice",
+        "RestartNeeded"
       ],
       "tokens": []
     },

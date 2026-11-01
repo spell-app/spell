@@ -398,6 +398,14 @@ export class EditorStore extends Observable {
   /** Does the next run start afresh?  Set by `restartApp()`, and cleared as the run starts. */
   startAfresh = false
 
+  /**
+   * Why the program's last edit needs a restart to show, for the console's sake:  `undefined`:  no edit's waiting.
+   * - The running app stays as it is meanwhile:  never a surprise reload (epic `editor`, Edit Without Redraw).
+   * - `<RestartNeeded>` shows it, with a Restart button.
+   */
+  @prop()
+  accessor restartNeededBecause: string | undefined
+
   /** Path of the project run last:  a compile of the same project keeps its things. */
   lastExecutedPath: string | undefined = undefined
 
@@ -456,6 +464,7 @@ export class EditorStore extends Observable {
       coreUrl: runtimeUrl(),
       keepConsole: true,
       keepThings,
+      onRestartNeeded: (reason) => (editor.restartNeededBecause = reason),
       loadImport: fetchCompiled,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,

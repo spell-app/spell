@@ -25,6 +25,7 @@ export const APP_TEXTS = {
   renameApp: "Rename {Type}",
   deleteApp: "Delete {Type}",
   restart: "Restart",
+  takesEffectOnRestart: "This takes effect on restart",
   modes: "Run, edit or debug",
   runMode: "Run",
   editMode: "Edit",

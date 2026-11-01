@@ -763,7 +763,7 @@ describe("compiled spell draws with Solid", () => {
     expect(consoleText()).not.toContain("Kept")
   })
 
-  test("a program's tests and its app's start don't run again on an edit;  its other lines do, a print too (P17)", async () => {
+  test("an edit with its app on the page runs nothing again:  its tests, its app's start, a print (epic `editor`)", async () => {
     let controls: SpellAppControls | undefined
     const { host, setSource } = await mountSettable(source(TESTED_COUNTER), (it) => (controls = it))
     ;(await waitFor(() => host.querySelector<HTMLButtonElement>("button.count"))).click()
@@ -774,9 +774,8 @@ describe("compiled spell draws with Solid", () => {
     setSource(source(TESTED_COUNTER.replace('"Count: "', '"Clicks: "')))
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 2")
     const printed = consoleText()
-    expect(printed).toContain("printed at the top")
-    expect(printed).toContain("Kept counter")
-    expect(printed).not.toContain("testing the counter")
+    expect(printed.split("printed at the top")).toHaveLength(2)
+    expect(printed.split("testing the counter")).toHaveLength(2)
 
     controls!.restart()
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 1")

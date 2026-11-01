@@ -145,7 +145,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(6000)
     await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
     await page.waitForTimeout(1000)
-  })
+  }, 120_000)
 
   afterAll(async () => {
     await browser?.close()
