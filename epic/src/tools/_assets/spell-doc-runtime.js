@@ -346,6 +346,7 @@ async function start() {
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
   void wireComments(main, { go, pageFolds: folds })
+  stackWrappedSteps(main)
   wireNewEpic(main)
   wireEpicSort(main)
   // the docs index tool rewrites this page after a new epic:  its header comes back without the pill and the sort
@@ -1969,6 +1970,36 @@ function showItems({ section, lists, notes, chips, states }, shown) {
 /** A filterable list's items:  its `[data-status]` children. */
 function itemsOf(list) {
   return Array.from(list.querySelectorAll(":scope > [data-status]"))
+}
+
+////////////////
+// ## Steps
+////////////////
+
+/**
+ * A `<ui-steps>` too long for one row goes vertical, one step per row, as wide as the column, with no arrows.
+ * - horizontal, its steps wrap, each with the arrow pointing at the next step, over nothing, and its text wherever
+ *   its number's width leaves it
+ * - measured as each shows and changes width:  a folded section's has no size until it opens
+ * - a page's own `direction` is left alone
+ */
+function stackWrappedSteps(main) {
+  const widths = new WeakMap()
+  const watch = new ResizeObserver(async (entries) => {
+    for (const { target, contentRect } of entries) {
+      if (!contentRect.width || widths.get(target) === contentRect.width) continue
+      widths.set(target, contentRect.width)
+      target.removeAttribute("direction")
+      target.removeAttribute("fluid")
+      await nextFrame(1)
+      const tops = [...target.children].map((step) => step.shadowRoot?.querySelector('[part~="step"]'))
+      const rows = new Set(tops.map((each) => each?.getBoundingClientRect().top))
+      if (rows.size < 2) continue
+      target.setAttribute("direction", "vertical")
+      target.setAttribute("fluid", "")
+    }
+  })
+  for (const steps of main.querySelectorAll("ui-steps:not([direction])")) watch.observe(steps)
 }
 
 ////////////////
