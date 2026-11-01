@@ -1,4 +1,4 @@
-import { core, App, View, prop, drawn } from "@spell/core"
+import { core, App, View, prop, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 core.heading("Counter")
@@ -20,13 +20,18 @@ core.heading("A counter -- in the outline style:  its name, then what's true of 
  * A view:  each counter is its own element on the page.
  * The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
  */
+@thing
 export class Counter extends View {
   static elementTag = core.defineElement(this, "test-project")
 
-  /** a new counter starts at 0 */
-  // - its "count" is a number starting at 0
-  @prop({ type: "number", init: () => 0 })
+  // - its "count" is a number
+  @prop({ type: "number" })
   accessor count!: number
+
+  /** a new counter starts at 0 */
+  create() {
+    this.count = 0
+  }
 
   countUp() {
     this.count = this.count + 1
@@ -54,6 +59,10 @@ export class CounterElement extends SpellElement<Counter> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-counter", "counter", [
     { name: "count", kind: "number", description: "Its count." }
   ])
+
+  create() {
+    return this.currentThing?.create()
+  }
 
   countUp() {
     return this.currentThing?.countUp()

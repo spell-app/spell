@@ -21,12 +21,33 @@
   ✅ As expected `the picture of seven` is `"🂷"`
   ✅ As expected `the picture of a new card whose rank is ace and suit is clubs` is `"🃑"`
   ✅ As expected `the picture of a new card whose rank is king and suit is diamonds` is `"🃎"`
+✅ test jokers
+  ▶️ Executing   `get a new joker whose color is red and direction is up`
+  ✅ As expected `it is a card` is `yes`
+  ✅ As expected `it is a joker` is `yes`
+  ✅ As expected `its color` is `red`
+  ✅ As expected `its name` is `"red joker"`
+  ✅ As expected `its state` is `"*R↑"`
+  ✅ As expected `its picture` is `"🃟"`
+  ✅ As expected `it is the red joker` is `yes`
+  ✅ As expected `it is the black joker` is `no`
+  ✅ As expected `it is not the black joker` is `yes`
+  ✅ As expected `it is face up` is `yes`
+  ▶️ Executing   `turn it over`
+  ✅ As expected `it is face down` is `yes`
+  ▶️ Executing   `set black joker to a new joker whose color is black`
+  ✅ As expected `the picture of black joker` is `"🃟"`
+  ▶️ Executing   `set the card to a new card whose rank is queen and suit is spades`
+  ✅ As expected `the card is a joker` is `no`
+  ✅ As expected `the card is not a joker` is `yes`
+  ✅ As expected `the card is the red joker` is `no`
 ✅ test a new deck
   ▶️ Executing   `the deck is a new deck`
   ✅ As expected `the number of cards in the deck` is `52`
   ✅ As expected `the number of (cards in the deck where it is a queen)` is `4`
   ✅ As expected `the state of the first card of the deck` is `"A♣↓"`
   ✅ As expected `the name of the last card of the deck` is `"king of spades"`
+  ✅ As expected `a random card of the deck is a joker` is `no`
   ▶️ Executing   `shuffle the deck`
   ✅ As expected `the number of cards in the deck` is `52`
 ✅ test piles
