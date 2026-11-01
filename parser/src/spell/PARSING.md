@@ -1312,6 +1312,17 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
 
+## What reads wrong on purpose:  warnings and refusals (epic `language`, r2)
+
+- A line in an element that reads whole as a loop or a draw warns, as it only shows as text:  [`SpellJSXText`](rules/JSX/SpellJSXText.ts).
+  A sentence that starts the same way doesn't.
+- `it is empty`, where `it` is a type that holds no items, warns:  it can never be true ([`IsEmpty`](rules/expressions/IsEmpty.ts)).
+- Types whose `a new ...` properties make each other are refused, naming the circle:
+  `DefinePropertyHas.refuseCircle()`, asked when errors are gathered, as the other half may be in another file.
+- `- to it:` names no action, and is refused:  `MethodDefinition.getRule()`.
+- `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
+  [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
+
 ## Scope:  what's stored where
 
 - All scope collections are [`ScopeList`s](../parser/scope/ScopeList.ts):

@@ -17,6 +17,22 @@ import pytest
 from spell_core import Core, List
 from spell_core import core as program_core
 
+
+def test_text_searches_ignore_capitals_and_exactly_counts_them() -> None:
+    core = Core()
+    assert core.includes("Hello there", "hello", "THERE")
+    assert not core.includes("Hello", "bye")
+    assert core.starts_with("Hello", "he")
+    assert core.ends_with("Hello", "LO")
+    assert not core.includes_exactly("Hello", "hello")
+    assert core.includes_exactly("Hello", "Hell")
+    assert not core.starts_with_exactly("Hello", "he")
+    assert core.ends_with_exactly("Hello", "lo")
+    # a list's items are compared exactly
+    assert not core.includes(["Hello"], "hello")
+    assert core.includes(["Hello"], "Hello")
+
+
 # What each seed must give:  shared with the JavaScript core's tests.
 EXPECTED: dict[str, Any] = json.loads(
     (Path(__file__).parents[3] / "core" / "seededRandom.expected.json5").read_text(encoding="utf-8")

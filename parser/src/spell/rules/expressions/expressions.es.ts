@@ -388,7 +388,7 @@ expressionsEs.addRule(IsIn, {
 })
 
 expressionsEs.addRule(Includes, {
-  syntax: "(operator:incluye|contiene) {expression:operand}",
+  syntax: "(operator:incluye|contiene) (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -405,7 +405,7 @@ expressionsEs.addRule(Includes, {
 })
 
 expressionsEs.addRule(DoesNotInclude, {
-  syntax: "(operator:no (incluye|contiene)) {expression:operand}",
+  syntax: "(operator:no (incluye|contiene)) (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",

@@ -157,6 +157,8 @@ export const uiMethods = defineCoreModule({
     newElement.id = id
     newElement.type = "text/css"
     newElement.appendChild(document.createTextNode(css))
+    projectCss.set(name, css)
+    uiMethods.projectSheet()?.replaceSync([...projectCss.values()].join("\n"))
     const root = core.domRoot()
     const oldElement = root.getElementById(id)
     if (oldElement) {
@@ -165,6 +167,17 @@ export const uiMethods = defineCoreModule({
       const parent = root === document ? (document.head ?? document.body) : root
       parent.appendChild(newElement)
     }
+  },
+
+  /**
+   * The project's `.css` as one sheet, which each view adopts into its shadow root, so a person's stylesheet styles
+   * what they drew, wherever they drew it (epic `language`, Q13).
+   * - ONE sheet per program, changed in place as its files install:  a view gets what's installed later too.
+   * - `undefined` with no `CSSStyleSheet`, as under node.
+   */
+  projectSheet(): CSSStyleSheet | undefined {
+    if (typeof CSSStyleSheet === "undefined") return undefined
+    return (projectSheet ??= new CSSStyleSheet())
   }
 })
 Object.assign(core, uiMethods)
@@ -172,6 +185,12 @@ Object.assign(core, uiMethods)
 ////////////////
 // ## Undo keys
 ////////////////
+
+/** The project's `.css` so far, by file:  `core.installStyles()`, for `core.projectSheet()`. */
+const projectCss = new Map<string, string>()
+
+/** The sheet of `projectCss`, made when first asked for. */
+let projectSheet: CSSStyleSheet | undefined
 
 /** The keys that undo and redo, as Spell UI's keyboard names them:  `Mod` is ⌘ on a Mac, Ctrl elsewhere. */
 const UNDO_KEYS = [

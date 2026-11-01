@@ -12,7 +12,6 @@ export const words = {
       summary: "summary",
       picture: "picture",
       address: "address",
-      lowerAbout: "lower about",
       fits: "fits"
     },
     Portrait: {
@@ -119,7 +118,6 @@ export const words = {
       playing: "playing",
       jumping: "jumping",
       howMany: "how many",
-      lookingFor: "looking for",
       listed: "listed",
       found: "found",
       create: "create it",

@@ -90,7 +90,7 @@ export class CajaDeRecetas extends App {
   /** las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
   static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1772, end: 1902 }, readsFrom: ["recetario_familiar"] }) }
   get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
-    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => receta.título.includes(this.búsqueda))
+    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda))
     core.reverse(halladas)
     return halladas
   }, () => [this.búsqueda]) }
