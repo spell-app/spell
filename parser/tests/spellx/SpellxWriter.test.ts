@@ -60,6 +60,13 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     expect(compiled("/Counter.spellml", owen).code).toContain("init: () => 0")
   })
 
+  test("a typed property with only a comment after it has no start value", () => {
+    const lines = ['a "person" is a view where:', '\t- its "age" is a number   // in years']
+    const spell = compiled("/Person.spell", lines.join("\n"))
+    expect(compiled("/Person.spellml", converted("/Person.spell", lines))).toEqual(spell)
+    expect(spell.errors).toEqual([])
+  })
+
   test("a stored property in Spanish reads the same", () => {
     const spellx = '<encanto-vista "contador">\n\t<propiedad "cuenta" tipo="número">0</>\n</encanto-vista>'
     const spell = 'un "contador" es una vista donde:\n\t- su "cuenta" es un número empezando en 0'
