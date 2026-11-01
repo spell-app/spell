@@ -213,7 +213,7 @@ export class Inspector {
     const part = element && Inspector.partFor(element)
     setSelectedParts(part ? [part] : [])
     setTrail(steps)
-    clicks.anchor = element
+    clicks.pivot = element
     editorPrefs.set(Inspector.projectPref(TRAIL_PREF), steps)
     PartSelector.markSelected(element ? [(part && Inspector.outlinedElement(steps, part)) || element] : [])
     if (element) Inspector.rememberSelection([element])
@@ -236,15 +236,36 @@ export class Inspector {
 
   /**
    * `element` was clicked among `items`, with `keys` held:  the same rule as a program's lists (`ListSelection`).
-   * - NOTE:  `select()` moves the anchor too, so a plain click elsewhere (a link, Things) starts a range;
-   *   here the rule's own anchor stands.
+   * - `items` `undefined`:  it isn't in a list, so Shift toggles it.
+   * - NOTE:  `select()` moves the pivot too, so a plain click elsewhere (a link, Things) starts a range;
+   *   here the rule's own pivot stands.
    */
-  static clicked(element: Element, items: readonly Element[], keys: ListClick<Element>["keys"]): void {
+  static clicked(element: Element, items: readonly Element[] | undefined, keys: ListClick<Element>["keys"]): void {
     const selected = selectedParts().map((part) => part.element)
     const next = clicks.clicked(element, { items, selected, keys })
-    const { anchor } = clicks
+    const { pivot } = clicks
     Inspector.selectAll(next)
-    clicks.anchor = anchor
+    clicks.pivot = pivot
+    const place = Inspector.writtenPlaceOf(element)?.place
+    if (place) editor.followed = { path: place.path, line: place.line, from: "parts" }
+  }
+
+  /**
+   * Select the parts line `line`, from 0, of the file named `path` draws or makes:  a click on that line of code.
+   * - Every card, for the line that makes them all.
+   * - None:  what's selected stays as it was, as most lines draw nothing.
+   * - NEVER throws.
+   */
+  static selectWrittenAt(path: string, line: number): void {
+    const area = appArea
+    if (!area) return
+    const written = Inspector.partsIn(area)
+      .map((row) => row.element)
+      .filter((element) => {
+        const place = placeOfPart(element)
+        return place?.path === path && place.line === line
+      })
+    if (written.length) Inspector.selectAll(written)
   }
 
   /** Is `element` one of what's selected, or what a trail from it has reached (reactive)? */
@@ -255,17 +276,54 @@ export class Inspector {
 
   /**
    * The parts a click in the app can select, in document order:  `PartSelector.partAt()`'s rule.
-   * - Beside `like`, one of the same tag:  only those, so a shift-click across cards isn't their piles too.
    */
-  static selectableParts(like?: Element): Element[] {
+  static selectableParts(): Element[] {
     const area = appArea
     if (!area) return []
-    const parts = Inspector.partsIn(area)
+    return Inspector.partsIn(area)
       .map((row) => row.element)
       .filter(isSelectablePart)
-    const anchor = clicks.anchor
-    if (!like || !anchor || anchor.localName !== like.localName) return parts
-    return parts.filter((part) => part.localName === like.localName)
+  }
+
+  /**
+   * The list `part` is in, on the page:  the parts written in the same place as it, made in a loop.
+   * - `undefined` when it's the only one:  it isn't in a list, so Shift toggles it, as Owen asked.
+   */
+  static listAround(part: Element): Element[] | undefined {
+    const key = writtenKeyOf(part)
+    if (!key) return undefined
+    const list = Inspector.selectableParts().filter((each) => writtenKeyOf(each) === key)
+    return list.length > 1 ? list : undefined
+  }
+
+  /**
+   * Show what's selected in the properties card, with Inspect app off and staying off:  a right click's Inspect.
+   * - SIDE EFFECT:  opens the column and the card if they're closed;  the help counts as seen.
+   */
+  static showSelected(): void {
+    Inspector.dismissHelp()
+    if (!shownPanels().includes("properties")) setPanels([...shownPanels(), "properties"])
+    if (foldedPanels().includes("properties")) Inspector.toggleFolded("properties")
+    if (!isOpen()) {
+      setOpen(true)
+      editorPrefs.set(OPEN_PREF, true)
+    }
+    setSheetUp(true)
+  }
+
+  /**
+   * Go to where `element` is written, in the code:  a right click's Show in Code.
+   * - Answers whether it's written anywhere.  NEVER throws.
+   */
+  static showWritten(element: Element): boolean {
+    const place = Inspector.writtenPlaceOf(element)?.place
+    const file = place && InspectorWrites.fileNamed(place.path)
+    if (!place || !file) return false
+    const at = { line: place.line, ch: place.column }
+    void editor
+      .showFileAt(file.path, { anchor: at, head: at })
+      .catch((error: unknown) => editor.showError(error as Error))
+    return true
   }
 
   /** Let go of what's selected:  no outline, and the properties card shows its nothing-selected state. */
@@ -1136,7 +1194,7 @@ function setPanels(panels: readonly InspectorPanel[]): void {
 const [isInspecting, setInspecting] = createSignal(false)
 /** What's selected, the last one clicked last (`Inspector.allSelected`). */
 const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>([])
-/** Clicks in the app and the views tree:  the last one clicked, where a shift-click's range starts. */
+/** Clicks in the app and the views tree:  the pivot, where a shift-click's range starts. */
 const clicks = new ListSelection<Element>()
 
 /** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
@@ -1332,14 +1390,6 @@ class PartSelector {
       },
       options
     )
-    // Control-click on a Mac is a right click, with no click after it
-    area.addEventListener(
-      "contextmenu",
-      (event) => {
-        if (event.ctrlKey && !event.metaKey) PartSelector.clicked(event, area)
-      },
-      options
-    )
     // and the presses before a click:  inspecting a draggable card mustn't start a drag
     area.addEventListener(
       "pointerdown",
@@ -1359,7 +1409,8 @@ class PartSelector {
   /**
    * A click in the app while inspecting, on a part:  it selects it, and the app never hears of it.
    * - Plain:  it, and inspecting stops:  the app has its clicks back.
-   * - Shift, Command or Control:  it joins what's selected, and inspecting goes on, for more.
+   * - Shift, Command or Control:  it joins what's selected, or leaves;  in a list, Shift takes a run (`ListSelection`).
+   *   Inspecting goes on, for more.
    */
   private static clicked(event: MouseEvent, area: HTMLElement): void {
     const part = PartSelector.partAt(event, area)
@@ -1367,7 +1418,7 @@ class PartSelector {
     event.preventDefault()
     event.stopPropagation()
     PartSelector.hover(undefined)
-    Inspector.clicked(part, Inspector.selectableParts(part), event)
+    Inspector.clicked(part, Inspector.listAround(part), event)
     if (!event.shiftKey && !event.metaKey && !event.ctrlKey) Inspector.stopInspecting()
     Inspector.dismissHelp()
     // on a phone, the sheet comes up with what's selected

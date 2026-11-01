@@ -14969,6 +14969,266 @@ export interface UIItemsAttributes {
 export interface UIItemsJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIItemsAttributes>, UIItemsAttributes {}
 
+/** `<ui-json>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIJsonEventMap {
+  /**
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * - `event.detail`:  `{ source?: string, content: string }`
+   */
+  "ui-loaded": CustomEvent<{ source?: string; content: string }>
+  /**
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * - `event.detail`:  `{ value: unknown, content: string }`
+   */
+  "ui-changed": CustomEvent<{ value: unknown; content: string }>
+  /**
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-saving": CustomEvent<{ source?: string; content: string; etag?: string }>
+  /**
+   * `ui-saved`:  Saved;  `etag` is the file's new version.
+   * - `event.detail`:  `{ source?: string, etag?: string }`
+   */
+  "ui-saved": CustomEvent<{ source?: string; etag?: string }>
+  /**
+   * `ui-error`:  Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.
+   * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-error": CustomEvent<{
+    kind: "load" | "cross-origin" | "file-protocol" | "save" | "conflict" | "no-saver" | "render"
+    source?: string
+    error: unknown
+  }>
+}
+
+/** `<ui-json>`'s own attributes, from its vocabulary. */
+export interface UIJsonAttributes {
+  /**
+   * URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content.
+   * - takes:  text
+   */
+  source?: string
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
+  "prop:source"?: string
+  /**
+   * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
+   * - takes:  `eager` · `visible` · `idle`
+   * - default:  `eager`
+   */
+  load?: "eager" | "visible" | "idle"
+  /**
+   * `load`, as the DOM element's property.
+   * @deprecated write `load` -- `prop:` stays only for compiled spell
+   */
+  "prop:load"?: "eager" | "visible" | "idle"
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  content?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
+  "prop:content"?: string
+  /**
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * - `event.detail`:  `{ source?: string, content: string }`
+   */
+  "on-ui-loaded"?: (event: UIJsonEventMap["ui-loaded"]) => void
+  /**
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * - `event.detail`:  `{ value: unknown, content: string }`
+   */
+  "on-ui-changed"?: (event: UIJsonEventMap["ui-changed"]) => void
+  /**
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-saving"?: (event: UIJsonEventMap["ui-saving"]) => void
+  /**
+   * `ui-saved`:  Saved;  `etag` is the file's new version.
+   * - `event.detail`:  `{ source?: string, etag?: string }`
+   */
+  "on-ui-saved"?: (event: UIJsonEventMap["ui-saved"]) => void
+  /**
+   * `ui-error`:  Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.
+   * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-error"?: (event: UIJsonEventMap["ui-error"]) => void
+}
+
+/** `<ui-json>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIJsonJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIJsonEventMap>>, keyof UIJsonAttributes>, UIJsonAttributes {}
+
 /** `<ui-keys>`'s own attributes, from its vocabulary. */
 export interface UIKeysAttributes {
   /**
@@ -21071,6 +21331,17 @@ export interface UIPopupAttributes {
    * @deprecated write `target` -- `prop:` stays only for compiled spell
    */
   "prop:target"?: unknown
+  /**
+   * A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  at?: unknown
+  /**
+   * A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on="manual"` and `visible`;  it stays inside the window, takes focus and gives it back.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `at` -- `prop:` stays only for compiled spell
+   */
+  "prop:at"?: unknown
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -36659,19 +36930,69 @@ export interface UITreeAttributes {
 export interface UITreeJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UITreeEventMap>>, keyof UITreeAttributes>, UITreeAttributes {}
 
+/** `<ui-tree-diagram>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UITreeDiagramEventMap {
+  /**
+   * `ui-node-clicked`:  A node was clicked, with or without `clickable`.  `path` is its place, its child index at each depth:  `0.2.1`.  A nested tag's node has its `element`.
+   * - `event.detail`:  `{ node: { label: string, element?: Element }, path: string, originalEvent: Event }`
+   */
+  "ui-node-clicked": CustomEvent<{ node: { label: string; element?: Element }; path: string; originalEvent: Event }>
+  /**
+   * `ui-node-toggled`:  A person folded a node, or opened it again.
+   * - `event.detail`:  `{ node: { label: string, element?: Element }, path: string, folded: boolean, originalEvent: Event }`
+   */
+  "ui-node-toggled": CustomEvent<{
+    node: { label: string; element?: Element }
+    path: string
+    folded: boolean
+    originalEvent: Event
+  }>
+}
+
 /** `<ui-tree-diagram>`'s own attributes, from its vocabulary. */
 export interface UITreeDiagramAttributes {
   /**
-   * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type="application/json">` child.  Set a NEW tree to redraw.
+   * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `edgeLabel`, `title`, `color`, `kind`, `folded` and `children`.  A JS property (JSON in the attribute);  wins over `<ui-tree-node>`, `<ui-json>` or `<script type="application/json">` children.  Set a NEW tree to redraw.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   tree?: unknown
   /**
-   * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type="application/json">` child.  Set a NEW tree to redraw.
+   * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `edgeLabel`, `title`, `color`, `kind`, `folded` and `children`.  A JS property (JSON in the attribute);  wins over `<ui-tree-node>`, `<ui-json>` or `<script type="application/json">` children.  Set a NEW tree to redraw.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `tree` -- `prop:` stays only for compiled spell
    */
   "prop:tree"?: unknown
+  /**
+   * Which way it grows:  `top-down`, children under their parent, or `left-right`, children after it.
+   * - takes:  `top-down` · `left-right`
+   * - default:  `top-down`
+   */
+  direction?: "top-down" | "left-right"
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
+  "prop:direction"?: "top-down" | "left-right"
+  /**
+   * A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so.
+   * - takes:  flag (present / absent)
+   */
+  foldable?: boolean | ""
+  /**
+   * `foldable`, as the DOM element's property.
+   * @deprecated write `foldable` -- `prop:` stays only for compiled spell
+   */
+  "prop:foldable"?: boolean | ""
+  /**
+   * Its nodes look clickable and can be reached by keyboard:  Enter or Space sends `ui-node-clicked`, as a click does.
+   * - takes:  flag (present / absent)
+   */
+  clickable?: boolean | ""
+  /**
+   * `clickable`, as the DOM element's property.
+   * @deprecated write `clickable` -- `prop:` stays only for compiled spell
+   */
+  "prop:clickable"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -36832,11 +37153,23 @@ export interface UITreeDiagramAttributes {
    * @deprecated write `label` -- `prop:` stays only for compiled spell
    */
   "prop:label"?: string
+  /**
+   * `ui-node-clicked`:  A node was clicked, with or without `clickable`.  `path` is its place, its child index at each depth:  `0.2.1`.  A nested tag's node has its `element`.
+   * - `event.detail`:  `{ node: { label: string, element?: Element }, path: string, originalEvent: Event }`
+   */
+  "on-ui-node-clicked"?: (event: UITreeDiagramEventMap["ui-node-clicked"]) => void
+  /**
+   * `ui-node-toggled`:  A person folded a node, or opened it again.
+   * - `event.detail`:  `{ node: { label: string, element?: Element }, path: string, folded: boolean, originalEvent: Event }`
+   */
+  "on-ui-node-toggled"?: (event: UITreeDiagramEventMap["ui-node-toggled"]) => void
 }
 
 /** `<ui-tree-diagram>` in JSX:  its own attributes, and HTML's global ones. */
 export interface UITreeDiagramJSXAttributes
-  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UITreeDiagramAttributes>, UITreeDiagramAttributes {}
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UITreeDiagramEventMap>>, keyof UITreeDiagramAttributes>,
+    UITreeDiagramAttributes {}
 
 /** `<ui-tree-item>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITreeItemEventMap {
@@ -37105,6 +37438,268 @@ export interface UITreeItemJSXAttributes
   extends
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UITreeItemEventMap>>, keyof UITreeItemAttributes>,
     UITreeItemAttributes {}
+
+/** `<ui-tree-node>`'s own attributes, from its vocabulary. */
+export interface UITreeNodeAttributes {
+  /**
+   * The box's text.  None:  the node's own text.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * A second, smaller, muted line under the label, e.g. a datatype.
+   * - takes:  text
+   */
+  detail?: string
+  /**
+   * `detail`, as the DOM element's property.
+   * @deprecated write `detail` -- `prop:` stays only for compiled spell
+   */
+  "prop:detail"?: string
+  /**
+   * Text on the line from its parent, e.g. `condition`:  which part of its parent it is.
+   * - takes:  text
+   */
+  "edge-label"?: string
+  /**
+   * `edge-label`, as the DOM element's property.
+   * @deprecated write `edge-label` -- `prop:` stays only for compiled spell
+   */
+  "prop:edgeLabel"?: string
+  /**
+   * What shows when the pointer rests on its box, e.g. the source it came from.
+   * - takes:  text
+   */
+  "hover-text"?: string
+  /**
+   * `hover-text`, as the DOM element's property.
+   * @deprecated write `hover-text` -- `prop:` stays only for compiled spell
+   */
+  "prop:hoverText"?: string
+  /**
+   * The box's colour:  its fill and border, in that hue.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * A word for what sort of node it is, for a page's own style:  its box is also part `kind-<word>`, so `::part(kind-call)` reaches every node of that kind.
+   * - takes:  text
+   */
+  kind?: string
+  /**
+   * `kind`, as the DOM element's property.
+   * @deprecated write `kind` -- `prop:` stays only for compiled spell
+   */
+  "prop:kind"?: string
+  /**
+   * Starts folded:  the nodes under it don't show.  A `foldable` diagram can open it again.
+   * - takes:  flag (present / absent)
+   */
+  folded?: boolean | ""
+  /**
+   * `folded`, as the DOM element's property.
+   * @deprecated write `folded` -- `prop:` stays only for compiled spell
+   */
+  "prop:folded"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+}
+
+/** `<ui-tree-node>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UITreeNodeJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UITreeNodeAttributes>, UITreeNodeAttributes {}
 
 /** `<ui-value>`'s own attributes, from its vocabulary. */
 export interface UIValueAttributes {
@@ -38490,6 +39085,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-items": UIItemsJSXAttributes
       /**
+       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.
+       * - also known as:  data, data island, json script, application/json, data block, datos
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`
+       */
+      "ui-json": UIJsonJSXAttributes
+      /**
        * `<ui-keys>`:  Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.
        * - also known as:  kbd, keyboard shortcut, key caps, hotkey, accelerator
        */
@@ -39051,8 +39652,11 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-tree": UITreeJSXAttributes
       /**
-       * `<ui-tree-diagram>`:  A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.
+       * `<ui-tree-diagram>`:  A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.
        * - also known as:  tree, tree chart, hierarchy, hierarchy diagram, org chart, parse tree, syntax tree, AST, dendrogram
+       * - slots:
+       *   - default:  The tree's root, a `<ui-tree-node>`, with the nodes under it inside it.
+       * - events:  `ui-node-clicked`, `ui-node-toggled`
        */
       "ui-tree-diagram": UITreeDiagramJSXAttributes
       /**
@@ -39066,6 +39670,13 @@ declare module "@solidjs/web/types/jsx.js" {
        * - events:  `ui-opening`, `ui-closing`
        */
       "ui-tree-item": UITreeItemJSXAttributes
+      /**
+       * `<ui-tree-node>`:  A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its label;  any other element inside it shows in its box.
+       * - also known as:  diagram node, tree diagram node, org chart box, node
+       * - slots:
+       *   - default:  What shows in its box, besides its label;  and the `<ui-tree-node>`s under it.
+       */
+      "ui-tree-node": UITreeNodeJSXAttributes
       /**
        * `<ui-value>`:  A statistic's value;  a search result's price.
        * - also known as:  statistic value, number, metric value
@@ -39154,6 +39765,8 @@ export interface UIEventMap {
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>
+  "ui-node-clicked": CustomEvent<unknown>
+  "ui-node-toggled": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
   "ui-top-in-view": CustomEvent<unknown>
@@ -39217,6 +39830,7 @@ declare global {
     "ui-input": UIHTMLElement<UIInputEventMap>
     "ui-item": HTMLElement
     "ui-items": HTMLElement
+    "ui-json": UIHTMLElement<UIJsonEventMap>
     "ui-keys": HTMLElement
     "ui-label": UIHTMLElement<UILabelEventMap>
     "ui-labels": HTMLElement
@@ -39288,8 +39902,9 @@ declare global {
     "ui-toolbar": UIHTMLElement<UIToolbarEventMap>
     "ui-transition": UIHTMLElement<UITransitionEventMap>
     "ui-tree": UIHTMLElement<UITreeEventMap>
-    "ui-tree-diagram": HTMLElement
+    "ui-tree-diagram": UIHTMLElement<UITreeDiagramEventMap>
     "ui-tree-item": UIHTMLElement<UITreeItemEventMap>
+    "ui-tree-node": HTMLElement
     "ui-value": HTMLElement
     "ui-video": UIHTMLElement<UIVideoEventMap>
     "ui-visibility": UIHTMLElement<UIVisibilityEventMap>

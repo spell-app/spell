@@ -23,6 +23,7 @@
  *   - the kit's timing helpers (`spell/util/timing`), to run a function later:
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and to wait:  `waitUntil()`, `within()`
  *   - `Warnings` -- `ui`'s console warnings, its own
+ *   - `TopLayerTip` -- a tooltip in the top layer, so no frame cuts it off
  *   - `LoadOnce` (`spell/util/LoadOnce`) -- a load per key, once per page, with a choice of what a failure does
  */
 
@@ -34,6 +35,7 @@ export * from "spell/util/string"
 export * from "spell/util/util.types"
 
 export * from "spell/util/timing"
+export * from "./TopLayerTip"
 export * from "./Warnings"
 export * from "spell/util/LoadOnce"
 export * from "spell/util/ListSelection"

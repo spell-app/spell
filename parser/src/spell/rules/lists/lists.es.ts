@@ -343,7 +343,7 @@ listsEs.addRule(ListPosition, {
 })
 
 listsEs.addRule(StartsWith, {
-  syntax: "{operator:starts_with_or_not} {expression:operand}",
+  syntax: "{operator:starts_with_or_not} (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -362,7 +362,7 @@ listsEs.addRule(StartsWith, {
 })
 
 listsEs.addRule(EndsWith, {
-  syntax: "{operator:ends_with_or_not} {expression:operand}",
+  syntax: "{operator:ends_with_or_not} (exactly:exactamente)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",

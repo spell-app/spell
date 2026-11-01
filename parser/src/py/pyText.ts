@@ -25,7 +25,9 @@ export function indented(text: string): string {
  * - An empty body:  `pass`, as Python needs a statement there.
  */
 export function block(header: string, body: string): string {
-  return `${header}:${NEWLINE}${indented(body.trim() ? body : "pass")}`
+  // comments alone are no body to Python:  `pass` follows them
+  const hasCode = body.split(NEWLINE).some((line) => line.trim() && !line.trimStart().startsWith("#"))
+  return `${header}:${NEWLINE}${indented(hasCode ? body : body.trim() ? `${body}${NEWLINE}pass` : "pass")}`
 }
 
 /**

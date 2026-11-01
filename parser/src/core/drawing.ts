@@ -104,6 +104,16 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * What a loop in a live value answered, as Solid can draw it:  a spell `List`'s items, or anything else as it is.
+   * - e.g. `h("div", () => core.listDrawn(core.map(this.books, ...)))`:  Solid draws an array, never a `List`,
+   *   so the loop's items would silently show nothing (epic `language`, r2).
+   * - Reads its items, in the live value:  so it follows them.
+   */
+  listDrawn(value: unknown): Drawing {
+    return (value instanceof List ? value.items : value) as Drawing
+  },
+
+  /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
    *   And what a viewable list's element holds as its children -- see `drawThing()`.

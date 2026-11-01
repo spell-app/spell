@@ -94,7 +94,7 @@ describe("chrome + Actions", () => {
     const host = await mount(() => <Actions.saveFile iconOnly />)
     const icon = host.querySelector<HTMLElement>("ui-icon.IconAction")!
     expect(host.querySelector("ui-item")).toBeNull()
-    expect([icon.getAttribute("name"), icon.getAttribute("label"), icon.dataset.tooltip]).toEqual([
+    expect([icon.getAttribute("name"), icon.getAttribute("label"), icon.getAttribute("title")]).toEqual([
       "cloud upload",
       "Save",
       "Save"

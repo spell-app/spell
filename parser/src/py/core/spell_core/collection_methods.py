@@ -216,7 +216,18 @@ class CollectionMethods:
         """Does `collection` hold EVERY one of `values`?  `the hand includes the queen`.
 
         - `False` for none.
+        - Text ignores capitals:  `"Hello" includes "hello"`.  `includes_exactly()` doesn't;  a list's items are exact.
         """
+        if not isinstance(collection, str):
+            return self.includes_exactly(collection, *values)
+        if not values:
+            return False
+        return all(_as_text(value).casefold() in collection.casefold() for value in values)
+
+    def includes_exactly(self, collection: object = None, *values: object) -> bool:
+        """`includes()`, capitals counting:  `its code includes exactly "A"`."""
+        if isinstance(collection, str) and values:
+            return all(_as_text(value) in collection for value in values)
         if not self._is_defined(collection, "includes"):
             return False
         if not values:
@@ -230,13 +241,29 @@ class CollectionMethods:
         return any(self.position_of(collection, value) is not None for value in values)
 
     def starts_with(self, collection: object = None, thing: object = None) -> bool:
-        """Is `thing` the first item of a list?  `False` for `None`."""
+        """Is `thing` the first item of a list, or how text starts, ignoring capitals?  `False` for `None`."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.casefold().startswith(_as_text(thing).casefold())
+        return self.starts_with_exactly(collection, thing)
+
+    def starts_with_exactly(self, collection: object = None, thing: object = None) -> bool:
+        """`starts_with()`, capitals counting."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.startswith(_as_text(thing))
         if not self._is_array_like(collection, "starts_with"):
             return False
         return thing is not None and is_same(self.get_item_at(collection, 0), thing)
 
     def ends_with(self, collection: object = None, thing: object = None) -> bool:
-        """Is `thing` the last item of a list?  `False` for `None`."""
+        """Is `thing` the last item of a list, or how text ends, ignoring capitals?  `False` for `None`."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.casefold().endswith(_as_text(thing).casefold())
+        return self.ends_with_exactly(collection, thing)
+
+    def ends_with_exactly(self, collection: object = None, thing: object = None) -> bool:
+        """`ends_with()`, capitals counting."""
+        if isinstance(collection, str) and thing is not None:
+            return collection.endswith(_as_text(thing))
         if not self._is_array_like(collection, "ends_with"):
             return False
         return thing is not None and is_same(self.get_item_at(collection, self.item_count_of(collection) - 1), thing)
@@ -700,6 +727,11 @@ class CollectionMethods:
 
         def is_array_like(self, thing: object) -> bool: ...
         def shuffled(self, items: Sequence[Any]) -> list[Any]: ...
+
+
+def _as_text(value: object) -> str:
+    """`value` as text, for looking for it in text:  `"x5" includes 5`."""
+    return value if isinstance(value, str) else str(value)
 
 
 def _plain_text(text: str) -> str:

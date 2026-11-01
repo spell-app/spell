@@ -1,0 +1,9 @@
+/*
+ * The style sheet of `<ui-json>`:  it draws nothing, so nothing shows, not even its text.
+ */
+
+@layer ui.components.json.types {
+  :host {
+    display: none;
+  }
+}

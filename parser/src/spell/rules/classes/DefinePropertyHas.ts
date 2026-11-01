@@ -100,6 +100,53 @@ export class DefinePropertyHas extends SpellStatement<
   }
 
   /**
+   * Refuse a type which, by a chain of `a new ...` properties, makes itself:  it could never finish being made.
+   * - e.g. `a chicken has an egg as a new egg`, `an egg has a chicken as a new chicken` (epic `language`, r2).
+   * - Asked when errors are gathered:  the other half may be further down, or in another file.
+   * - A property holding one, with no `new`, breaks the chain:  nothing's made until an action makes it.
+   */
+  private static refuseCircle(match: P.MatchFor<DefinePropertyHas>, type: P.TypeScope): void {
+    const circle = () => DefinePropertyHas.circleFrom(type)
+    const language = SP.Language.of(match.scope)
+    const nameOf = (it: P.TypeScope) => SP.SpellWarnings.exampleNoun(match.scope, it, "definite")
+    const message = () =>
+      language.parserMessage("made-from-each-other", {
+        circle: upperFirst((circle() ?? [type]).map(nameOf).join(" => "))
+      })
+    SP.SpellWarnings.refuseIf(match, message, () => !!circle())
+  }
+
+  /** The chain of types `start` makes as it's made, back to `start`:  `[chicken, egg, chicken]`, or `undefined`. */
+  private static circleFrom(start: P.TypeScope): P.TypeScope[] | undefined {
+    const seen = new Set<P.TypeScope>()
+    const walk = (type: P.TypeScope, path: P.TypeScope[]): P.TypeScope[] | undefined => {
+      for (const next of DefinePropertyHas.typesMadeBy(type)) {
+        if (next.isA(start)) return [...path, next]
+        if (seen.has(next)) continue
+        seen.add(next)
+        const found = walk(next, [...path, next])
+        if (found) return found
+      }
+      return undefined
+    }
+    return walk(start, [start])
+  }
+
+  /** The types `type`, or a type it's built on, makes as it's made:  each property that's `a new ...`. */
+  private static typesMadeBy(type: P.TypeScope): P.TypeScope[] {
+    return type.chain().flatMap((each) =>
+      each.variables
+        .get()
+        .filter(
+          (variable) =>
+            (variable.declaredBy?.groups as { specifier?: P.Match } | undefined)?.specifier?.AST instanceof
+            P.ASTNewInstanceExpression
+        )
+        .flatMap((variable) => each.parentScope?.types?.get(`${variable.datatype}`) ?? [])
+    )
+  }
+
+  /**
    * Ask for a type it doesn't say (epic `output-targets`, Q24):  a warning, the property compiles as it is.
    * - none at all, e.g. `a calculator has an input` => `Say what "input" is, e.g. "a calculator has an input as text"`
    * - a list of nothing said, e.g. `a todos-app has tasks as a new list` =>
@@ -118,7 +165,11 @@ export class DefinePropertyHas extends SpellStatement<
       const items = SP.SpellWarnings.exampleItemType(match.scope, words)
       // the line up to its specifier:  `a todos-app has tasks`
       const line = said.slice(0, said.length - specifier.inputText.trim().length).trimEnd()
-      SP.SpellWarnings.note(match, language.parserMessage("untyped-list-property", { name: words, line, items }))
+      // `its "books" is a new list`:  the verb's said already, and `is as a new list` wouldn't parse
+      const message = /\bas$|\bcomo$/.test(specifier.inputText.trim().split(/\s+/)[0]!)
+        ? "untyped-list-property"
+        : "untyped-list-property-is"
+      SP.SpellWarnings.note(match, language.parserMessage(message, { name: words, line, items }))
     }
   }
 
@@ -164,6 +215,7 @@ export class DefinePropertyHas extends SpellStatement<
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
     const name = DefinePropertyHas.propertyName(match)
     typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    if (specifierAST instanceof P.ASTNewInstanceExpression) DefinePropertyHas.refuseCircle(match, typeScope)
     const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
     if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)
 

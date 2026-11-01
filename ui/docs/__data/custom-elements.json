@@ -14097,6 +14097,220 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-json/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIJson",
+          "tagName": "ui-json",
+          "customElement": true,
+          "summary": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",
+          "description": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, datos.",
+          "attributes": [
+            {
+              "name": "source",
+              "description": "URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "source"
+            },
+            {
+              "name": "load",
+              "description": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.",
+              "type": {
+                "text": "\"eager\" | \"visible\" | \"idle\""
+              },
+              "default": "\"eager\"",
+              "fieldName": "load"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-loaded",
+              "description": "Content arrived:  fetched from `source`, or read from the element's own content.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, content: string }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
+              "type": {
+                "text": "CustomEvent<{ value: unknown, content: string }>"
+              }
+            },
+            {
+              "name": "ui-saving",
+              "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, content: string, etag?: string }>"
+              }
+            },
+            {
+              "name": "ui-saved",
+              "description": "Saved;  `etag` is the file's new version.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, etag?: string }>"
+              }
+            },
+            {
+              "name": "ui-error",
+              "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [],
+          "cssStates": [
+            {
+              "name": "loading",
+              "description": "Fetching `source`."
+            },
+            {
+              "name": "error",
+              "description": "Loading or showing failed:  the error message shows."
+            },
+            {
+              "name": "saving",
+              "description": "`save()` is in progress."
+            },
+            {
+              "name": "dirty",
+              "description": "`content` changed since it was loaded or saved."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIJson",
+          "declaration": {
+            "name": "UIJson",
+            "module": "src/components/ui-json/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-json",
+          "declaration": {
+            "name": "UIJson",
+            "module": "src/components/ui-json/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-keys/index.ts",
       "declarations": [
         {
@@ -23096,6 +23310,14 @@
               "type": {
                 "text": "unknown"
               }
+            },
+            {
+              "kind": "field",
+              "name": "at",
+              "description": "A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on=\"manual\"` and `visible`;  it stays inside the window, takes focus and gives it back.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
             }
           ],
           "events": [
@@ -28147,7 +28369,7 @@
             },
             {
               "name": "--ui-section-tip-color",
-              "default": "var(--ui-surface)"
+              "default": "var(--ui-text-inverted-color)"
             },
             {
               "name": "--ui-section-tip-width",
@@ -38475,9 +38697,34 @@
           "name": "UITreeDiagram",
           "tagName": "ui-tree-diagram",
           "customElement": true,
-          "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
-          "description": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.\n\nAlso known as:  tree, tree chart, hierarchy, hierarchy diagram, org chart, parse tree, syntax tree, AST, dendrogram.",
+          "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.",
+          "description": "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.\n\nAlso known as:  tree, tree chart, hierarchy, hierarchy diagram, org chart, parse tree, syntax tree, AST, dendrogram.",
           "attributes": [
+            {
+              "name": "direction",
+              "description": "Which way it grows:  `top-down`, children under their parent, or `left-right`, children after it.",
+              "type": {
+                "text": "\"top-down\" | \"left-right\""
+              },
+              "default": "\"top-down\"",
+              "fieldName": "direction"
+            },
+            {
+              "name": "foldable",
+              "description": "A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "foldable"
+            },
+            {
+              "name": "clickable",
+              "description": "Its nodes look clickable and can be reached by keyboard:  Enter or Space sends `ui-node-clicked`, as a click does.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "clickable"
+            },
             {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
@@ -38555,14 +38802,34 @@
             {
               "kind": "field",
               "name": "tree",
-              "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type=\"application/json\">` child.  Set a NEW tree to redraw.  A JS property (rich data), not an attribute.",
+              "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `edgeLabel`, `title`, `color`, `kind`, `folded` and `children`.  A JS property (JSON in the attribute);  wins over `<ui-tree-node>`, `<ui-json>` or `<script type=\"application/json\">` children.  Set a NEW tree to redraw.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
             }
           ],
-          "events": [],
-          "slots": [],
+          "events": [
+            {
+              "name": "ui-node-clicked",
+              "description": "A node was clicked, with or without `clickable`.  `path` is its place, its child index at each depth:  `0.2.1`.  A nested tag's node has its `element`.",
+              "type": {
+                "text": "CustomEvent<{ node: { label: string, element?: Element }, path: string, originalEvent: Event }>"
+              }
+            },
+            {
+              "name": "ui-node-toggled",
+              "description": "A person folded a node, or opened it again.",
+              "type": {
+                "text": "CustomEvent<{ node: { label: string, element?: Element }, path: string, folded: boolean, originalEvent: Event }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "The tree's root, a `<ui-tree-node>`, with the nodes under it inside it."
+            }
+          ],
           "cssParts": [
             {
               "name": "diagram",
@@ -38581,8 +38848,12 @@
               "description": "Each line from a parent to a child."
             },
             {
-              "name": "slot-label",
-              "description": "Each slot label, on its line."
+              "name": "edge-label",
+              "description": "Each edge label, on its line."
+            },
+            {
+              "name": "toggle",
+              "description": "Each fold button, with `foldable`."
             }
           ],
           "cssStates": [
@@ -38626,14 +38897,14 @@
           "cssProperties": [
             {
               "name": "--ui-tree-diagram-font-family",
-              "default": "var(--ui-font-family-mono)"
+              "default": "var(--ui-font-family)"
             },
             {
               "name": "--ui-tree-diagram-font-size",
               "default": "0.8125em"
             },
             {
-              "name": "--ui-tree-diagram-slot-font-family",
+              "name": "--ui-tree-diagram-edge-label-font-family",
               "default": "var(--ui-font-family)"
             },
             {
@@ -38673,10 +38944,197 @@
               "default": "var(--ui-text-light)"
             },
             {
-              "name": "--ui-tree-diagram-slot-color",
+              "name": "--ui-tree-diagram-edge-label-color",
               "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-tree-diagram-focus-color",
+              "default": "var(--ui-primary)"
             }
           ]
+        },
+        {
+          "kind": "class",
+          "name": "UITreeNode",
+          "tagName": "ui-tree-node",
+          "customElement": true,
+          "summary": "A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its label;  any other element inside it shows in its box.",
+          "description": "A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its label;  any other element inside it shows in its box.\n\nAlso known as:  diagram node, tree diagram node, org chart box, node.",
+          "attributes": [
+            {
+              "name": "label",
+              "description": "The box's text.  None:  the node's own text.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "detail",
+              "description": "A second, smaller, muted line under the label, e.g. a datatype.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "detail"
+            },
+            {
+              "name": "edge-label",
+              "description": "Text on the line from its parent, e.g. `condition`:  which part of its parent it is.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "edgeLabel"
+            },
+            {
+              "name": "hover-text",
+              "description": "What shows when the pointer rests on its box, e.g. the source it came from.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "hoverText"
+            },
+            {
+              "name": "color",
+              "description": "The box's colour:  its fill and border, in that hue.",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "color"
+            },
+            {
+              "name": "kind",
+              "description": "A word for what sort of node it is, for a page's own style:  its box is also part `kind-<word>`, so `::part(kind-call)` reaches every node of that kind.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "kind"
+            },
+            {
+              "name": "folded",
+              "description": "Starts folded:  the nodes under it don't show.  A `foldable` diagram can open it again.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "folded"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "What shows in its box, besides its label;  and the `<ui-tree-node>`s under it."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "content",
+              "description": "The box around what it holds, placed over the node's box in the drawing."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
         }
       ],
       "exports": [
@@ -38693,6 +39151,22 @@
           "name": "ui-tree-diagram",
           "declaration": {
             "name": "UITreeDiagram",
+            "module": "src/components/ui-tree-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UITreeNode",
+          "declaration": {
+            "name": "UITreeNode",
+            "module": "src/components/ui-tree-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tree-node",
+          "declaration": {
+            "name": "UITreeNode",
             "module": "src/components/ui-tree-diagram/index.ts"
           }
         }

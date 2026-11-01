@@ -919,6 +919,11 @@
           "description": "An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon."
         },
         {
+          "name": "tip",
+          "type": "string",
+          "description": "Why it's greyed, as a tooltip:  a `menu` item's."
+        },
+        {
           "name": "shortcut",
           "type": "string",
           "description": "Its key, in Spell UI's words (`mod+S`), shown by a `menu` item:  the entry's own, from `EDITOR_HOTKEYS`."
@@ -975,6 +980,10 @@
         {
           "name": "DialogAction",
           "file": "src/app/solid/Actions.tsx"
+        },
+        {
+          "name": "PartMenu",
+          "file": "src/app/solid/Palette.tsx"
         },
         {
           "name": "PartMenuItems",
@@ -1557,6 +1566,10 @@
       ],
       "usedIn": [
         {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
           "name": "ConsoleViewer",
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
@@ -1989,6 +2002,10 @@
         {
           "name": "CellEditor",
           "file": "src/app/solid/notebook/NotebookCell.tsx"
+        },
+        {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
         },
         {
           "name": "FallbackEditor",

@@ -81,8 +81,24 @@ export const collectionOtherMethods = defineCoreModule({
    * - If more than one value specified, all must be included.
    * - Compiles from `theList includes thing` / `thing is in theList` / `thing is either red or green`
    *   -- see `rules/expressions/`.
+   * - Text ignores capitals:  `"Hello" includes "hello"`, what a person searching expects (epic `language`, Q12).
+   *   `core.includesExactly()` doesn't.  A list's items are always compared exactly.
    */
   includes(collection?: unknown, ...values: unknown[]): boolean {
+    if (typeof collection !== "string") return core.includesExactly(collection, ...values)
+    if (!values.length) return false
+    const text = collection.toLocaleLowerCase()
+    return values.every((value) => text.includes(asText(value).toLocaleLowerCase()))
+  },
+
+  /**
+   * `core.includes()`, capitals counting:  `its code includes exactly "A"`.
+   * - Compiles from `includes exactly`.
+   */
+  includesExactly(collection?: unknown, ...values: unknown[]): boolean {
+    if (typeof collection === "string" && values.length) {
+      return values.every((value) => collection.includes(asText(value)))
+    }
     if (!assert.isDefined(collection, "core.includes(collection)")) return false
     if (!values.length) return false
     return core.all(values, (value) => core.positionOf(collection, value) !== undefined)
@@ -147,20 +163,38 @@ export const collectionOtherMethods = defineCoreModule({
   ////////////////
 
   /**
-   * Is `thing` the first thing in `collection`?  Array only.
+   * Is `thing` the first thing in `collection`?  Or, for text, how it starts, ignoring capitals (`language` Q12).
    * - Compiles from `my-list starts with thing` -- see `rules/lists/StartsWith.ts`.
    */
   startsWith(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) {
+      return collection.toLocaleLowerCase().startsWith(asText(thing).toLocaleLowerCase())
+    }
+    return core.startsWithExactly(collection, thing)
+  },
+
+  /** `core.startsWith()`, capitals counting:  compiles from `starts with exactly`. */
+  startsWithExactly(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) return collection.startsWith(asText(thing))
     if (!assert.isArrayLike(collection, "core.startsWith(collection)")) return false
     if (thing == null) return false
     return core.getItemAt(collection, 0) === thing
   },
 
   /**
-   * Is `thing` the last thing in `collection`?  Array only.
+   * Is `thing` the last thing in `collection`?  Or, for text, how it ends, ignoring capitals (`language` Q12).
    * - Compiles from `my-list ends with thing` -- see `rules/lists/EndsWith.ts`.
    */
   endsWith(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) {
+      return collection.toLocaleLowerCase().endsWith(asText(thing).toLocaleLowerCase())
+    }
+    return core.endsWithExactly(collection, thing)
+  },
+
+  /** `core.endsWith()`, capitals counting:  compiles from `ends with exactly`. */
+  endsWithExactly(collection?: unknown, thing?: unknown): boolean {
+    if (typeof collection === "string" && thing != null) return collection.endsWith(asText(thing))
     if (!assert.isArrayLike(collection, "core.endsWith(collection)")) return false
     if (thing == null) return false
     return core.getItemAt(collection, core.itemCountOf(collection) - 1) === thing
@@ -675,4 +709,9 @@ Object.assign(core, collectionOtherMethods)
  */
 function emptyRangeOf(collection: unknown): unknown {
   return collection instanceof List ? core.newThingLike(collection) : []
+}
+
+/** `value` as text, to look for it in text:  `"x5" includes 5`. */
+function asText(value: unknown): string {
+  return typeof value === "string" ? value : String(value as number)
 }

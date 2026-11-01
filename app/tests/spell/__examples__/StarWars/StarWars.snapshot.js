@@ -233,10 +233,10 @@ export class Planet extends Thing {
   /** What colour a world is, from its weather */
   static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 13861, end: 14238 }, readsFrom: ["star_wars"] }) }
   get hue() {
-    if (this.climate.includes("frozen")) return 200
-    if (this.climate.includes("arid")) return 38
-    if (this.climate.includes("murky") || this.climate.includes("polluted")) return 95
-    if (this.climate.includes("tropical") || this.climate.includes("temperate")) return 130 + this.name.length * 9
+    if (core.includes(this.climate, "frozen")) return 200
+    if (core.includes(this.climate, "arid")) return 38
+    if (core.includes(this.climate, "murky") || core.includes(this.climate, "polluted")) return 95
+    if (core.includes(this.climate, "tropical") || core.includes(this.climate, "temperate")) return 130 + this.name.length * 9
     return 280
   }
 
@@ -832,8 +832,8 @@ export class WikiPage extends Thing {
 
   static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 8738, end: 8925 }, readsFrom: ["wikipedia"] }) }
   get fits() {
-    if (this.title.includes("List of")) return false
-    return this.lowerAbout.includes("star wars") || this.lowerAbout.includes("fictional") || this.lowerAbout.includes(" film ")
+    if (core.includes(this.title, "List of")) return false
+    return core.includes(this.lowerAbout, "star wars") || core.includes(this.lowerAbout, "fictional") || core.includes(this.lowerAbout, " film ")
   }
 
   static savedIn = { place: "wikipedia", collection: "wiki_pages" }
@@ -1213,12 +1213,12 @@ export class Guide extends App {
   static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 701, end: 1668 }, readsFrom: ["star_wars"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const matches = new List({ instanceType: "Thing" })
-    core.map(core.filter(await core.savedThings(Film, {}, "looks through"), (film) => film.title.toLocaleLowerCase().includes(this.lookingFor)), (film) => matches.append(film))
-    core.map(core.filter(await core.savedThings(Person, {}, "looks through"), (person) => person.name.toLocaleLowerCase().includes(this.lookingFor)), (person) => matches.append(person))
-    core.map(core.filter(await core.savedThings(Planet, {}, "looks through"), (planet) => planet.name.toLocaleLowerCase().includes(this.lookingFor)), (planet) => matches.append(planet))
-    core.map(core.filter(await core.savedThings(Starship, {}, "looks through"), (starship) => starship.name.toLocaleLowerCase().includes(this.lookingFor)), (starship) => matches.append(starship))
-    core.map(core.filter(await core.savedThings(Vehicle, {}, "looks through"), (vehicle) => vehicle.name.toLocaleLowerCase().includes(this.lookingFor)), (vehicle) => matches.append(vehicle))
-    core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, {}, "looks through"), (species) => species.name.toLocaleLowerCase().includes(this.lookingFor)))), (one) => matches.append(one))
+    core.map(core.filter(await core.savedThings(Film, {}, "looks through"), (film) => core.includes(film.title.toLocaleLowerCase(), this.lookingFor)), (film) => matches.append(film))
+    core.map(core.filter(await core.savedThings(Person, {}, "looks through"), (person) => core.includes(person.name.toLocaleLowerCase(), this.lookingFor)), (person) => matches.append(person))
+    core.map(core.filter(await core.savedThings(Planet, {}, "looks through"), (planet) => core.includes(planet.name.toLocaleLowerCase(), this.lookingFor)), (planet) => matches.append(planet))
+    core.map(core.filter(await core.savedThings(Starship, {}, "looks through"), (starship) => core.includes(starship.name.toLocaleLowerCase(), this.lookingFor)), (starship) => matches.append(starship))
+    core.map(core.filter(await core.savedThings(Vehicle, {}, "looks through"), (vehicle) => core.includes(vehicle.name.toLocaleLowerCase(), this.lookingFor)), (vehicle) => matches.append(vehicle))
+    core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, {}, "looks through"), (species) => core.includes(species.name.toLocaleLowerCase(), this.lookingFor)))), (one) => matches.append(one))
     return matches
   }, () => [this.lookingFor]) }
 

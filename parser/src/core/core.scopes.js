@@ -109,8 +109,8 @@
       path: "type:List/method:(a list) starts with (a thing)",
       description: "Is `thing` its first item, e.g. `the pile starts with the king`?\n- `ends with` for its last.\n- `does not start with` etc for the opposite.",
       rules: [
-        { name: "starts_with", syntax: "{operator:starts_with_or_not} {expression:operand}" },
-        { name: "ends_with", syntax: "{operator:ends_with_or_not} {expression:operand}" }
+        { name: "starts_with", syntax: "{operator:starts_with_or_not} (exactly:exactly)? {expression:operand}" },
+        { name: "ends_with", syntax: "{operator:ends_with_or_not} (exactly:exactly)? {expression:operand}" }
       ]
     },
     {
@@ -285,15 +285,15 @@
     {
       path: "type:TwoSidedView", line: [4, 23],
       super: "type:View",
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/property:direction", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:TwoSidedView/enumeration:Directions", line: 7,
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/TwoSidedView.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/TwoSidedView.spell"
     },
     {
       path: "type:ViewableList",
@@ -370,15 +370,15 @@
     {
       path: "type:Notebook", line: [5, 11],
       super: "type:Page",
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/property:lock", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
     },
     {
       path: "type:Notebook/enumeration:Locks", line: 8,
-      uri: "file:///Users/owen/www/spell.worktrees/data/parser/src/core/templates/Notebook.spell"
+      uri: "file:///Users/owen/www/spell.worktrees/language/parser/src/core/templates/Notebook.spell"
     }
   ]
 }

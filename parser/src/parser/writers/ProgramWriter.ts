@@ -11,6 +11,7 @@ import {
   newListItemName,
   PLAIN_KINDS,
   readsMember,
+  textValue,
   unwrapped
 } from "./jsShapes"
 import { WriterProject, forEachNode, typeCaseOf, type ProgramPlace } from "./WriterProject"
@@ -317,6 +318,25 @@ export abstract class ProgramWriter extends Writer {
       return String(n > 0 ? n - 1 : n)
     }
     return `${this.positionHelper("position")}(${this.bare(node)})`
+  }
+
+  /** `written`, a live value's words:  a loop's, in `core.listDrawn()`, as its answer may be a `List`. */
+  loopDrawn(node: P.ASTExpression, written: string): string {
+    const inner = unwrapped(node)
+    const isLoop = inner instanceof P.ASTScopedMethodInvocation && isCoreCall(inner) && inner.methodName === "map"
+    return isLoop ? `core.listDrawn(${written})` : written
+  }
+
+  /**
+   * Is this search of text one its language's own can do:  capitals count, or there's no letter for them to matter?
+   * - `text includes exactly x`, `text includes "."`:  as `text.includes(x)`, `x in text`.
+   * - Any other `includes` ignores capitals, so it's `core.includes()` (epic `language`, Q12).
+   */
+  isExactSearch(name: string, rest: P.ASTExpression[]): boolean {
+    if (rest.length !== 1) return false
+    if (name === "includesExactly") return true
+    const looking = textValue(rest[0]!)
+    return name === "includes" && looking !== undefined && !/\p{L}/u.test(looking)
   }
 
   /**
@@ -784,6 +804,11 @@ export abstract class ProgramWriter extends Writer {
         return "number"
       case "isEmpty":
       case "includes":
+      case "includesExactly":
+      case "startsWith":
+      case "startsWithExactly":
+      case "endsWith":
+      case "endsWithExactly":
       case "isOfType":
       case "isDefined":
         return "choice"

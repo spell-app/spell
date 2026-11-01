@@ -14914,6 +14914,237 @@
       "href": "ui-items.html"
     },
     {
+      "tag": "ui-json",
+      "name": "JSON",
+      "folder": "ui-json",
+      "topics": [
+        "data display",
+        "modules"
+      ],
+      "aka": [
+        "data",
+        "data island",
+        "json script",
+        "application/json",
+        "data block",
+        "datos"
+      ],
+      "description": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",
+      "noun": "JSON data",
+      "attributes": [
+        {
+          "name": "source",
+          "kind": "string",
+          "description": "URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content."
+        },
+        {
+          "name": "load",
+          "kind": "enum",
+          "values": [
+            "eager",
+            "visible",
+            "idle"
+          ],
+          "default": "eager",
+          "description": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-loaded",
+          "detail": "{ source?: string, content: string }",
+          "description": "Content arrived:  fetched from `source`, or read from the element's own content."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: unknown, content: string }",
+          "description": "The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON."
+        },
+        {
+          "name": "ui-saving",
+          "detail": "{ source?: string, content: string, etag?: string }",
+          "cancelable": true,
+          "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere)."
+        },
+        {
+          "name": "ui-saved",
+          "detail": "{ source?: string, etag?: string }",
+          "description": "Saved;  `etag` is the file's new version."
+        },
+        {
+          "name": "ui-error",
+          "detail": "{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }",
+          "cancelable": true,
+          "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is."
+        }
+      ],
+      "parts": [],
+      "states": [
+        {
+          "name": "loading",
+          "description": "Fetching `source`."
+        },
+        {
+          "name": "error",
+          "description": "Loading or showing failed:  the error message shows."
+        },
+        {
+          "name": "saving",
+          "description": "`save()` is in progress."
+        },
+        {
+          "name": "dirty",
+          "description": "`content` changed since it was loaded or saved."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-json",
+      "main": true,
+      "page": true,
+      "href": "ui-json.html"
+    },
+    {
       "tag": "ui-keys",
       "name": "Keys",
       "folder": "ui-keys",
@@ -20980,6 +21211,12 @@
           "kind": "json",
           "reflect": false,
           "description": "The target as a PROPERTY (an `Element`);  wins over `for`."
+        },
+        {
+          "name": "at",
+          "kind": "json",
+          "reflect": false,
+          "description": "A point in the window, `{ x, y }`, to open at instead of a target:  a right click's menu.  With `open-on=\"manual\"` and `visible`;  it stays inside the window, takes focus and gives it back."
         },
         {
           "name": "disabled",
@@ -37812,14 +38049,34 @@
         "AST",
         "dendrogram"
       ],
-      "description": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "description": "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.",
       "noun": "tree diagram",
       "attributes": [
         {
           "name": "tree",
           "kind": "json",
           "reflect": false,
-          "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type=\"application/json\">` child.  Set a NEW tree to redraw."
+          "description": "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `edgeLabel`, `title`, `color`, `kind`, `folded` and `children`.  A JS property (JSON in the attribute);  wins over `<ui-tree-node>`, `<ui-json>` or `<script type=\"application/json\">` children.  Set a NEW tree to redraw."
+        },
+        {
+          "name": "direction",
+          "kind": "enum",
+          "values": [
+            "top-down",
+            "left-right"
+          ],
+          "default": "top-down",
+          "description": "Which way it grows:  `top-down`, children under their parent, or `left-right`, children after it."
+        },
+        {
+          "name": "foldable",
+          "kind": "boolean",
+          "description": "A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so."
+        },
+        {
+          "name": "clickable",
+          "kind": "boolean",
+          "description": "Its nodes look clickable and can be reached by keyboard:  Enter or Space sends `ui-node-clicked`, as a click does."
         },
         {
           "name": "disabled",
@@ -37930,8 +38187,24 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
-      "events": [],
+      "slots": [
+        {
+          "name": "",
+          "description": "The tree's root, a `<ui-tree-node>`, with the nodes under it inside it."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-node-clicked",
+          "detail": "{ node: { label: string, element?: Element }, path: string, originalEvent: Event }",
+          "description": "A node was clicked, with or without `clickable`.  `path` is its place, its child index at each depth:  `0.2.1`.  A nested tag's node has its `element`."
+        },
+        {
+          "name": "ui-node-toggled",
+          "detail": "{ node: { label: string, element?: Element }, path: string, folded: boolean, originalEvent: Event }",
+          "description": "A person folded a node, or opened it again."
+        }
+      ],
       "parts": [
         {
           "name": "diagram",
@@ -37950,8 +38223,12 @@
           "description": "Each line from a parent to a child."
         },
         {
-          "name": "slot-label",
-          "description": "Each slot label, on its line."
+          "name": "edge-label",
+          "description": "Each edge label, on its line."
+        },
+        {
+          "name": "toggle",
+          "description": "Each fold button, with `foldable`."
         }
       ],
       "states": [
@@ -38007,6 +38284,16 @@
           "key": "summaryLeaf",
           "text": "Tree:  {label}",
           "description": "Name of a tree of one node."
+        },
+        {
+          "key": "foldNode",
+          "text": "Fold {label}",
+          "description": "A fold button's name, while the node's open."
+        },
+        {
+          "key": "unfoldNode",
+          "text": "Open {label}",
+          "description": "A fold button's name, while the node's folded."
         }
       ],
       "mainTag": "ui-tree-diagram",
@@ -38293,6 +38580,240 @@
       "main": false,
       "page": false,
       "href": "ui-tree.html#ui-tree-item"
+    },
+    {
+      "tag": "ui-tree-node",
+      "name": "Tree node",
+      "folder": "ui-tree-diagram",
+      "topics": [
+        "data display",
+        "images"
+      ],
+      "aka": [
+        "diagram node",
+        "tree diagram node",
+        "org chart box",
+        "node"
+      ],
+      "description": "A tree node is one box of a tree diagram:  its label, and the nodes under it as its children.  Its text is its label;  any other element inside it shows in its box.",
+      "noun": "tree node",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "The box's text.  None:  the node's own text."
+        },
+        {
+          "name": "detail",
+          "kind": "string",
+          "description": "A second, smaller, muted line under the label, e.g. a datatype."
+        },
+        {
+          "name": "edge-label",
+          "kind": "string",
+          "property": "edgeLabel",
+          "description": "Text on the line from its parent, e.g. `condition`:  which part of its parent it is."
+        },
+        {
+          "name": "hover-text",
+          "kind": "string",
+          "property": "hoverText",
+          "description": "What shows when the pointer rests on its box, e.g. the source it came from."
+        },
+        {
+          "name": "color",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "The box's colour:  its fill and border, in that hue."
+        },
+        {
+          "name": "kind",
+          "kind": "string",
+          "description": "A word for what sort of node it is, for a page's own style:  its box is also part `kind-<word>`, so `::part(kind-call)` reaches every node of that kind."
+        },
+        {
+          "name": "folded",
+          "kind": "boolean",
+          "description": "Starts folded:  the nodes under it don't show.  A `foldable` diagram can open it again."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "What shows in its box, besides its label;  and the `<ui-tree-node>`s under it."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "content",
+          "description": "The box around what it holds, placed over the node's box in the drawing."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-tree-diagram",
+      "main": false,
+      "page": false,
+      "href": "ui-tree-diagram.html#ui-tree-node"
     },
     {
       "tag": "ui-value",
@@ -44947,6 +45468,18 @@
         }
       ]
     },
+    "ui-json": {
+      "folder": "ui-json",
+      "mainTag": "ui-json",
+      "title": "JSON data",
+      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-json"
+      ],
+      "tokens": []
+    },
     "ui-keys": {
       "folder": "ui-keys",
       "mainTag": "ui-keys",
@@ -48279,7 +48812,7 @@
         },
         {
           "name": "--ui-section-tip-color",
-          "default": "var(--ui-surface)",
+          "default": "var(--ui-text-inverted-color)",
           "type": "color"
         },
         {
@@ -50237,16 +50770,17 @@
       "folder": "ui-tree-diagram",
       "mainTag": "ui-tree-diagram",
       "title": "Tree diagram",
-      "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.",
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-tree-diagram"
+        "ui-tree-diagram",
+        "ui-tree-node"
       ],
       "tokens": [
         {
           "name": "--ui-tree-diagram-font-family",
-          "default": "var(--ui-font-family-mono)",
+          "default": "var(--ui-font-family)",
           "type": "other"
         },
         {
@@ -50255,7 +50789,7 @@
           "type": "length"
         },
         {
-          "name": "--ui-tree-diagram-slot-font-family",
+          "name": "--ui-tree-diagram-edge-label-font-family",
           "default": "var(--ui-font-family)",
           "type": "other"
         },
@@ -50305,8 +50839,13 @@
           "type": "color"
         },
         {
-          "name": "--ui-tree-diagram-slot-color",
+          "name": "--ui-tree-diagram-edge-label-color",
           "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-diagram-focus-color",
+          "default": "var(--ui-primary)",
           "type": "color"
         }
       ]

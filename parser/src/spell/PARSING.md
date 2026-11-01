@@ -1220,7 +1220,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
       each run of markup lines joined into one implicit fragment.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
-    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
+    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
@@ -1249,6 +1249,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - A spellx DRAWING's markup (epic `elemental-spell` P7):
   - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
     name may hold any letter (`<botón>`).
+  - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
   - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
     carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
@@ -1313,6 +1314,17 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - A fill-in's warnings go on the text or markup it's in (`noteFillInWarnings()`).
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
+
+## What reads wrong on purpose:  warnings and refusals (epic `language`, r2)
+
+- A line in an element that reads whole as a loop or a draw warns, as it only shows as text:  [`SpellJSXText`](rules/JSX/SpellJSXText.ts).
+  A sentence that starts the same way doesn't.
+- `it is empty`, where `it` is a type that holds no items, warns:  it can never be true ([`IsEmpty`](rules/expressions/IsEmpty.ts)).
+- Types whose `a new ...` properties make each other are refused, naming the circle:
+  `DefinePropertyHas.refuseCircle()`, asked when errors are gathered, as the other half may be in another file.
+- `- to it:` names no action, and is refused:  `MethodDefinition.getRule()`.
+- `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
+  [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
 
 ## Scope:  what's stored where
 
@@ -2001,7 +2013,10 @@ What a program's lines about where data lives compile to, and what reads the res
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
       where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
-  - Not the Python target, yet.
+  - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
+    by statement, so an editor's panes can follow each other.
+  - A compile writes no map for the Python target.
+    `SP.SpellProject.codeWithMapFor()` makes one on asking, for any target, Python's too:  its writer takes the same marks.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:
     `set the stock to a new stock pile` above `a stock pile is a pile`.
@@ -2143,6 +2158,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - spell's own colouring skips the block
   - editors colour it as CSS themselves:
     VS Code through the grammar's embedded CSS, the app's Monaco through its own (`SpellTokensProvider`)
+- A `<json>` element's text is JSON, not spell:  read as raw text too (`rawTextTags`), so its `{` and `[` stay as written.
 - A `<markdown>` block is markdown, not spell:  read as raw text too (`rawTextTags`), its common indent taken off.
   - in a drawing:  [`markdown_block`](rules/JSX/MarkdownBlock.ts)
     - drawn by Spell UI's `<ui-markdown>`, the markdown as its text

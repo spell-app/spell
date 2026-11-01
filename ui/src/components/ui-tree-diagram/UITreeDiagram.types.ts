@@ -16,10 +16,18 @@ export type TreeDiagramNode = {
   label: string
   /** A second, smaller, muted line under the label, e.g. a datatype `number`;  none:  one line. */
   detail?: string
-  /** Text on the line from its parent, e.g. `condition`, `body`, `otherwise`. */
-  slot?: string
+  /** Text on the line from its parent, e.g. `condition`, `body`, `otherwise`.  JSON may say `slot`, its old name. */
+  edgeLabel?: string
   /** Hover text (an SVG `<title>`), e.g. the source it came from. */
   title?: string
+  /** Its box's colour, a hue of the theme's:  `green`, `blue` ... */
+  color?: string
+  /** A word for what sort of node it is:  its box is also part `kind-<word>`, for a page's own style. */
+  kind?: string
+  /** Starts folded:  the nodes under it don't show. */
+  folded?: boolean
+  /** The `<ui-tree-node>` that wrote it;  none for a tree from JSON. */
+  element?: Element
   /** Its children, left to right. */
   children?: TreeDiagramNode[]
 }
@@ -40,19 +48,29 @@ export type TreeDiagramBox = {
   readonly node: TreeDiagramNode
   /** Its depth:  `0` for the root. */
   readonly depth: number
+  /** Where it is in the tree:  its child index at each depth, `0.2.1`;  `0` for the root. */
+  readonly path: string
   readonly x: number
   readonly y: number
   readonly width: number
-  /** The row's height:  every box in a row is as tall as its tallest, so edges leave a row at one height. */
+  /** Every box in a level is as long along the tree as its longest, so edges leave a level at one place. */
   readonly height: number
+  /** Where its lines leave it, and its fold button sits. */
+  readonly exit: TreeDiagramPoint
   /** Where the label's line is centred (`dominant-baseline: central`). */
   readonly label: TreeDiagramPoint
   /** Where the detail's line is centred;  none without a `detail`. */
   readonly detail?: TreeDiagramPoint
+  /** What the node holds besides its text, centred at `x`, `y`;  none when nothing. */
+  readonly content?: TreeDiagramPoint & { readonly width: number; readonly height: number }
+  /** How many children its node has, folded or not;  none for a leaf. */
+  readonly childCount?: number
+  /** It's folded:  the nodes under it aren't drawn. */
+  readonly isFolded?: boolean
 }
 
-/** A slot label, placed:  centred on its edge's midpoint, `width` x `height` the box the edge leaves clear. */
-export type TreeDiagramSlot = {
+/** An edge label, placed:  centred on its edge's midpoint, `width` x `height` the box the edge leaves clear. */
+export type TreeDiagramEdgeLabel = {
   readonly text: string
   /** Centre. */
   readonly x: number
@@ -61,14 +79,14 @@ export type TreeDiagramSlot = {
   readonly height: number
 }
 
-/** One parent => child line, from the parent's bottom centre to the child's top centre. */
+/** One parent => child line, from where it leaves the parent to where it reaches the child. */
 export type TreeDiagramEdge = {
   readonly from: TreeDiagramPoint
   readonly to: TreeDiagramPoint
-  /** The child's `slot`, at the line's midpoint. */
-  readonly slot?: TreeDiagramSlot
+  /** The child's `edgeLabel`, at the line's midpoint. */
+  readonly label?: TreeDiagramEdgeLabel
   /**
-   * The stretch of the line NOT drawn, under the slot label:  the line stops at `gap.from`, starts again at `gap.to`.
+   * The stretch of the line NOT drawn, under the edge label:  the line stops at `gap.from`, starts again at `gap.to`.
    */
   readonly gap?: { readonly from: TreeDiagramPoint; readonly to: TreeDiagramPoint }
 }
@@ -84,24 +102,52 @@ export type TreeDiagramLayout = {
   readonly edges: readonly TreeDiagramEdge[]
 }
 
+/** Which way a tree grows.  Above the options:  the vocabulary lists them. */
+export const TreeDiagramDirections = ["top-down", "left-right"] as const
+
+/** One of `TreeDiagramDirections`. */
+export type TreeDiagramDirection = (typeof TreeDiagramDirections)[number]
+
+/** A node's sizes, in user units, as measured (`TreeMeasure`):  what's left out, `TreeLayout` estimates. */
+export type TreeDiagramNodeSize = {
+  readonly labelWidth?: number
+  readonly detailWidth?: number
+  readonly edgeLabelWidth?: number
+  /** What it holds besides its text. */
+  readonly contentWidth?: number
+  readonly contentHeight?: number
+}
+
+/** What `TreeLayout` is told besides the tree. */
+export type TreeDiagramLayoutOptions = {
+  /** Sizes it works in.  Default:  `TREE_DIAGRAM_METRICS`. */
+  metrics?: TreeDiagramMetrics
+  /** Which way it grows.  Default:  `top-down`. */
+  direction?: TreeDiagramDirection
+  /** Each node's measured sizes, by the node.  Default:  all estimated. */
+  sizes?: ReadonlyMap<TreeDiagramNode, TreeDiagramNodeSize>
+  /** The nodes drawn as leaves.  Default:  none. */
+  folded?: ReadonlySet<TreeDiagramNode>
+}
+
 /**
  * Sizes the layout works in, in USER UNITS (the `viewBox`'s):  the label font is `fontSize` units,
  * and the sheet sets the `<svg>`'s width to `width / fontSize` em, so one label `em` on the page is `fontSize` units
  * here.
- * - Text widths are ESTIMATED from character counts (`charWidth`, `slotCharWidth`), not measured:  the label font is
- *   monospace, so a count is near exact;  slot labels (sans, italic) are over-estimated on purpose.
+ * - Text widths are measured in a browser (`TreeMeasure`).  `charWidth` and `edgeLabelCharWidth` are only for a static
+ *   server render, with nothing to measure with:  over-estimates, so labels never overflow or collide.
  */
 export const TREE_DIAGRAM_METRICS = {
   /** The label's font size;  1em on the page. */
   fontSize: 12,
   /** The detail line's font size. */
   detailFontSize: 10,
-  /** The slot label's font size. */
-  slotFontSize: 10,
-  /** Advance of one monospace character, per font size:  0.6 for SF Mono, Menlo, Courier, DejaVu (Consolas 0.55). */
+  /** The edge label's font size. */
+  edgeLabelFontSize: 10,
+  /** Estimated advance of one label character, per font size:  a monospace font's, wider than a proportional one's. */
   charWidth: 0.6,
-  /** Average advance of one sans italic character, per font size:  generous, so labels never collide. */
-  slotCharWidth: 0.56,
+  /** Estimated advance of one edge label character, per font size. */
+  edgeLabelCharWidth: 0.56,
   /** Line height, per font size. */
   lineHeight: 1.25,
   /** Space left and right of a box's text. */
@@ -112,12 +158,12 @@ export const TREE_DIAGRAM_METRICS = {
   minBoxWidth: 32,
   /** Space between one row's boxes and the next row's. */
   levelGap: 36,
-  /** Least space between two boxes (or slot labels) side by side. */
+  /** Least space between two boxes (or edge labels) side by side. */
   siblingGap: 14,
-  /** Space kept clear left and right of a slot label's text. */
-  slotPaddingX: 4,
-  /** Space kept clear above and below a slot label's text. */
-  slotPaddingY: 2,
+  /** Space kept clear left and right of an edge label's text. */
+  edgeLabelPaddingX: 4,
+  /** Space kept clear above and below an edge label's text. */
+  edgeLabelPaddingY: 2,
   /** Space around the whole drawing:  room for the root's thicker border. */
   margin: 2
 } as const

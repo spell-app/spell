@@ -128,6 +128,7 @@ import { stickyEs } from "spell/ui/components/ui-sticky/UISticky.es"
 import { tabEs } from "spell/ui/components/ui-tab/UITab.es"
 import { tabsEs } from "spell/ui/components/ui-tab/UITabs.es"
 import { quoteEs } from "spell/ui/components/ui-quote/UIQuote.es"
+import { jsonEs } from "spell/ui/components/ui-json/UIJson.es"
 import { keysEs } from "spell/ui/components/ui-keys/UIKeys.es"
 import { pageEs } from "spell/ui/components/ui-page/UIPage.es"
 import { videoEs } from "spell/ui/components/ui-video/UIVideo.es"
@@ -149,6 +150,7 @@ import { exampleEs } from "spell/ui/components/ui-example/UIExample.es"
 import { toastEs } from "spell/ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell/ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell/ui/components/ui-transition/UITransition.es"
+import { treeNodeEs } from "spell/ui/components/ui-tree-diagram/UITreeNode.es"
 import { treeDiagramEs } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.es"
 import { visibilityEs } from "spell/ui/components/ui-visibility/UIVisibility.es"
 
@@ -772,6 +774,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   spaceEs,
   stackEs,
   quoteEs,
+  jsonEs,
   keysEs,
   pageEs,
   videoEs,
@@ -792,5 +795,6 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   toolbarEs,
   transitionEs,
   treeDiagramEs,
+  treeNodeEs,
   visibilityEs
 ])

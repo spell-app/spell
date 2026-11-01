@@ -56,33 +56,67 @@
         opacity: 0;
         pointer-events: none;
       }
+      #PageLoading section {
+        box-sizing: border-box;
+        width: 100%;
+        padding: clamp(32px, 8vh, 72px) 24px;
+        border-block: 1px solid light-dark(#5b4bd626, #b9a7ff26);
+        background: light-dark(#ffffffb3, #ffffff0a);
+        color: light-dark(#1d1a2e, #f4f2ff);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif;
+        text-align: center;
+      }
+      /* the hat and "Spell":  the hat's height set by the word's, on one line */
+      #PageLoading h1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.18em;
+        margin: 0;
+        font-family: inherit;
+        font-size: clamp(64px, 15vmin, 148px);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
       #PageLoading img {
-        width: 56px;
-        height: 56px;
+        width: 1.05em;
+        height: 1.05em;
       }
-      #PageLoading i {
-        width: 18px;
-        height: 18px;
-        border: 2px solid color-mix(in oklab, currentColor 25%, transparent);
-        border-top-color: currentColor;
-        border-radius: 50%;
+      #PageLoading p {
+        margin: 0.6em 0 0;
         color: light-dark(#5b4bd6, #b9a7ff);
-        animation: PageLoadingTurn 0.7s linear infinite;
+        font-size: clamp(20px, 3.6vmin, 36px);
+        font-weight: 500;
+        line-height: 1.2;
+        animation: PageLoadingBreathe 1.6s ease-in-out infinite alternate;
       }
-      @keyframes PageLoadingTurn {
-        to {
-          rotate: 360deg;
+      @keyframes PageLoadingBreathe {
+        from {
+          opacity: 0.55;
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        #PageLoading i {
-          animation-duration: 2.8s;
+        #PageLoading p {
+          animation: none;
         }
       }
     </style>
   </head>
   <body>
-    <div id="PageLoading" role="status" aria-label="Spell"><img src="/static/favicon/favicon.svg" alt="" /><i></i></div>
+    <div id="PageLoading" role="status">
+      <section>
+        <h1><img src="/static/favicon/favicon.svg" alt="" /><span>Spell</span></h1>
+        <p>Making magic...</p>
+      </section>
+    </div>
+    <!-- Spell's name and the line in Spanish:  before any script of the app's has run, so no `AppTexts` yet -->
+    <script>
+      if (/^es\b/i.test(navigator.language)) {
+        document.querySelector("#PageLoading span").textContent = "Encanto"
+        document.querySelector("#PageLoading p").textContent = "Haciendo magia..."
+      }
+    </script>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
          Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.
          `semantic.min.css` above is for running PROGRAMS, which draw with Semantic UI's React kit. -->

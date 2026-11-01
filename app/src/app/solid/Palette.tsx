@@ -205,44 +205,51 @@ function PaletteRow(props: { definition: ComponentDefinition }): JSX.Element {
  * Edit › Cut, Copy, Paste, Duplicate and Delete, and the same in a right click's menu.
  * - In the code, Cut, Copy and Paste are the code editor's own:  Duplicate and Delete are only for what's selected.
  */
-export function PartMenuItems(): JSX.Element {
+export function PartMenuItems(props: { whyNot?: (action: PartAction) => string | undefined }): JSX.Element {
   const hasSelection = () => Inspector.allSelected.length > 0
   const inCode = () => undoWay() === "code"
   const part = (action: PartAction) => () => void PartEdits.run(action)
+  const why = (action: PartAction) => props.whyNot?.(action)
   return (
     <>
       <Action
         menu
         title={appTexts.text("menuCut")}
         shortcut={EDITOR_HOTKEYS.cutParts.shortcut}
-        disabled={!inCode() && !hasSelection()}
+        disabled={(!inCode() && !hasSelection()) || !!why("cut")}
+        tip={why("cut")}
         onClick={() => cutCopyOrPaste("cut")}
       />
       <Action
         menu
         title={appTexts.text("menuCopy")}
         shortcut={EDITOR_HOTKEYS.copyParts.shortcut}
-        disabled={!inCode() && !hasSelection()}
+        disabled={(!inCode() && !hasSelection()) || !!why("copy")}
+        tip={why("copy")}
         onClick={() => cutCopyOrPaste("copy")}
       />
       <Action
         menu
         title={appTexts.text("menuPaste")}
         shortcut={EDITOR_HOTKEYS.pasteParts.shortcut}
+        disabled={!!why("paste")}
+        tip={why("paste")}
         onClick={() => cutCopyOrPaste("paste")}
       />
       <Action
         menu
         title={appTexts.text("menuDuplicate")}
         shortcut={EDITOR_HOTKEYS.duplicateParts.shortcut}
-        disabled={inCode() || !hasSelection()}
+        disabled={inCode() || !hasSelection() || !!why("duplicate")}
+        tip={why("duplicate")}
         onClick={part("duplicate")}
       />
       <Action
         menu
         title={appTexts.text("menuDelete")}
         shortcut={EDITOR_HOTKEYS.deleteParts.shortcut}
-        disabled={inCode() || !hasSelection()}
+        disabled={inCode() || !hasSelection() || !!why("remove")}
+        tip={why("remove")}
         onClick={part("remove")}
       />
     </>
@@ -250,48 +257,62 @@ export function PartMenuItems(): JSX.Element {
 }
 
 /**
- * The ONE right-click menu on the app's parts, in the app and the Views tree:  `PartMenuItems`, the same as the Edit menu's.
- * - A Spell UI popup and menu, opened at the click:  what else a right click should offer is added to `PartMenuItems`,
- *   or here for what only a right click offers.
+ * The ONE right-click menu on the app's parts, in the app and the Views tree:
+ * `PartMenuItems`, the same as the Edit menu's, a line, then Show in Code and Inspect.
+ * - A `<ui-popup>` at the click, holding a `<ui-menu>`:  it stays inside the window, with arrow keys, Enter and Esc.
+ * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - `PartEdits.onMenu` opens it, having selected what was clicked.
  */
 export function PartMenu(): JSX.Element {
   const [at, setAt] = createSignal<{ x: number; y: number }>()
   onSettled(() => {
     PartEdits.onMenu = (x, y) => setAt({ x, y })
-    const close = (event: Event) => {
-      if (!event.composedPath().some((target) => target instanceof Element && target.classList.contains(PART_MENU))) {
-        setAt(undefined)
-      }
-    }
-    window.addEventListener("pointerdown", close, true)
-    return () => window.removeEventListener("pointerdown", close, true)
   })
+  const isAnItem = (event: Event) =>
+    event.composedPath().some((target) => {
+      return (
+        target instanceof Element &&
+        target.localName === "ui-action" &&
+        !target.hasAttribute("disabled") &&
+        !target.hasAttribute("kind")
+      )
+    })
   return (
     <Show when={at()}>
       {(where) => (
-        <>
-          <div id={PART_MENU_AT} class="PartMenuAt" style={{ left: `${where().x}px`, top: `${where().y}px` }} />
-          <ui-popup
-            for={PART_MENU_AT}
-            open-on="manual"
-            visible
-            position="bottom left"
-            class={["BarMenuPopup", PART_MENU]}
-            aria-label={appTexts.text("menuEdit")}
-          >
-            <div class="BarMenuPanel" onClick={() => setAt(undefined)}>
-              <ui-menu direction="vertical" size="small" class="BarMenuItems" aria-label={appTexts.text("menuEdit")}>
-                <PartMenuItems />
-              </ui-menu>
-            </div>
-          </ui-popup>
-        </>
+        <ui-popup
+          at={where()}
+          open-on="manual"
+          visible=""
+          class={["BarMenuPopup", PART_MENU]}
+          aria-label={appTexts.text("menuEdit")}
+          on-ui-closing={() => setAt(undefined)}
+        >
+          <div class="BarMenuPanel" onClick={(event) => isAnItem(event) && setAt(undefined)}>
+            <ui-menu
+              direction="vertical"
+              size="small"
+              interactive=""
+              class="BarMenuItems"
+              aria-label={appTexts.text("menuEdit")}
+            >
+              <PartMenuItems whyNot={(action) => PartEdits.whyNot(action)} />
+              <ui-action kind="divider" />
+              <Action
+                menu
+                title={appTexts.text("menuShowInCode")}
+                disabled={!!PartEdits.whyNoCode}
+                tip={PartEdits.whyNoCode}
+                onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
+              />
+              <Action menu title={appTexts.text("menuInspect")} onClick={() => Inspector.showSelected()} />
+            </ui-menu>
+          </div>
+        </ui-popup>
       )}
     </Show>
   )
 }
 
-/** The class of the part menu's popup, and the id of the spot it opens at. */
+/** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
-const PART_MENU_AT = "PartMenuAt"

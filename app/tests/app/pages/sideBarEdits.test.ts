@@ -556,7 +556,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
   }
 
   test(
-    "several in the app:  a plain click, then ⌘ adds and takes away, Shift a range;  the tree follows",
+    "several in the app:  a plain click, then ⌘ adds and takes away, Shift toggles what's not in a list;  the tree follows",
     { timeout: 120_000 },
     async () => {
       const page = await context.newPage()
@@ -586,13 +586,13 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
       await page.waitForTimeout(300)
       expect(await selection(page)).toMatchObject({ count: 1, treeRows: 1 })
 
-      // Shift:  from the last one clicked, among those of the same tag:  no piles or cards between
+      // Shift:  each foundation has a line of its own, so it isn't in a list, and it toggles
       await page.keyboard.down("Shift")
       await page.mouse.click(foundations[3]!.x, foundations[3]!.y)
       await page.keyboard.up("Shift")
       await page.waitForTimeout(300)
       expect((await selection(page)).labels).toEqual(expect.arrayContaining([expect.stringMatching(/Foundation/)]))
-      expect((await selection(page)).count).toBe(4)
+      expect((await selection(page)).count).toBe(2)
 
       // the views tree takes the same clicks
       await page
@@ -602,7 +602,7 @@ describe.skipIf(!SERVING)("the side bar writes the source", () => {
         .first()
         .click({ modifiers: ["Meta"] })
       await page.waitForTimeout(300)
-      expect((await selection(page)).count).toBe(5)
+      expect((await selection(page)).count).toBe(3)
 
       expect(await gameState(page)).toEqual(before)
       await page.close()

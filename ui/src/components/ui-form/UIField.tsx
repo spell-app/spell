@@ -62,7 +62,8 @@ export class DOMFieldElement extends E.DOMElement<UIField> {
  *   gets `aria-label` = `label`.
  *   - Why:  a `<label for>` can't reach across the shadow boundary.
  *   - A click on the label focuses it.
- * - The tip:  a CSS tooltip under the info icon, shown on hover and keyboard focus.
+ * - The tip:  a tooltip under the info icon, shown on hover and keyboard focus, and at once on a click,
+ *   in the browser's top layer so no parent frame cuts it off (`TopLayerTip`).
  *   The icon is described by it.
  *
  * - Errors:  what `<ui-form>` asked for through `showErrors()`, else `error`.
@@ -286,6 +287,7 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
         </Show>
         <Show when={this.hasDescription}>
           <span
+            ref={(info) => E.TopLayerTip.showIn(info, `.${CLASSES.info}`, { showOnClick: true })}
             class={CLASSES.info}
             part={this.partForName("info")}
             tabindex="0"

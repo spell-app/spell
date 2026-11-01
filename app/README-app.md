@@ -549,6 +549,8 @@ A line shows where it would land between its neighbours, or a ring round what it
 moving goes by the flow, never by x and y, so what's written stays readable.
 
 Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+A right click on a part, or its row in the Views tree, also offers Show in Code and Inspect:  what can't be done is greyed, and its tooltip says why.
+In Run the program has every right click, and with Shift held the browser does.
 Each gesture is one undo step, and only its own lines of the program change.
 
 **Its edge:**  only what has a tag of its own in the source can change.
@@ -590,6 +592,21 @@ Each one dresses the whole editor:
 - All of it is [EditorTheme.tsx](src/app/solid/EditorTheme.tsx) and [the code themes](src/app/ui/monaco/themes/).
 - **Not yet:**  a menu entry for that kept theme, and a design pass on Merlot and Spell,
   which were built to their first drawings with no round of polish.
+
+### Code follows along
+
+Click a line of the code, a line of compiled code, a row of the Views tree or a thing on the screen, and the others show the same place.
+
+- It's by statement, as a source map is:  a compiled line with no place of its own belongs to the last one above it.
+- A line that draws or makes something selects it, every card for the line that makes them all.
+  Most lines don't, and leave what's selected as it was.
+- It never takes the keyboard's focus, scrolls only what's out of view, and leaves the code alone while you're typing in it.
+  It marks the line in the margin, and a thing in another file shows that file.
+- The compiled code is off until you ask:  the code pane's ⋯ shows JavaScript, TypeScript or Python beside the code, and remembers.
+  - The code's column takes room from the app's while it shows.
+  - Under 440px, the code keeps the column.
+
+`P.SourceMapLines` reads the one map back, and `editor.followed` holds the place in focus.
 
 ### Run and Edit:  the app, and the Program panel
 

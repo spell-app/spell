@@ -20,10 +20,11 @@
  *   2. the MAIN checkout's page server, for a worktree's file, when it serves worktrees (`SRV.mainServerUrl()`)
  *   3. the file's page server (`spell server`, a `.spell-server.json` at its root):  in a kit, the kit's, for a file of
  *      any repo in it (`pageServerRoot()`, epic `repo-split` P16);  else its checkout's
- *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
- *      the same `spell/server` `WebServer`, with live reload and the engine's routes, but no route modules
- *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.
- *     The scripts that open docs start one first (`epic hub ensure`, `pages.js` `ensurePageServer()`).
+ *   4. none running:  it starts the file's page server (`ensurePageServer()`), as the scripts that open docs do
+ *      - e.g. a window opened after a restart, before anything else started one (epic `epic-engine` I192)
+ *   5. else, when that can't start (not a kit ...), a server of our own, in-process, on `127.0.0.1`, one per root, for
+ *      as long as the extension runs:  the same `spell/server` `WebServer`, with live reload and the engine's routes,
+ *      but no route modules and NO epic folder:  `/epics/...` answers "Not found" there
  * - Served from the ROOT, not the doc's folder:  docs link to source files all over the repo.
  * - Or by `WindowBridge`'s `show-doc`:  a session asks ITS window (not the focused one) to show the doc.
  * - ONE place per view (its side bar tab, or Simple Browser's one tab).
@@ -44,7 +45,7 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { RepoList } from "spell/epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
-import { DocView, docsIndex } from "./DocView"
+import { DocView, docsIndex, ensurePageServer } from "./DocView"
 import { PREVIEW_PATH, type DocViewName, docViewFor, isDocView, isLoopback, stamped } from "./docUrls"
 
 /****************
@@ -54,6 +55,9 @@ import { PREVIEW_PATH, type DocViewName, docViewFor, isDocView, isLoopback, stam
 export class DocPreview {
   /** Our own server for each git root without a page server, once listening. */
   static readonly servers = new Map<string, Promise<WebServer>>()
+
+  /** The page servers being started now, by root:  several pages asking at once start one. */
+  static readonly starting = new Map<string, Promise<string | undefined>>()
 
   /**
    * Set up the URI handler -- call once, first thing in `activate()`.
@@ -129,8 +133,25 @@ export class DocPreview {
     const inRoot =
       componentSetAddressOf(root, file) ?? file.slice(root.length).split(sep).map(encodeURIComponent).join("/")
     const running = await new PidFile(root).status()
-    const base = running?.base ?? (await DocPreview.serverFor(root)).url
+    const base = running?.base ?? (await DocPreview.startedServer(root)) ?? (await DocPreview.serverFor(root)).url
     return `${base}${inRoot}`
+  }
+
+  /**
+   * The page server of `root`, started now, one try at a time:  its `base` URL;  `undefined`:  it can't start.
+   * - it can take a while after a restart:  the window's status bar says so
+   */
+  static startedServer(root: string): Promise<string | undefined> {
+    let starting = DocPreview.starting.get(root)
+    if (!starting) {
+      starting = Promise.resolve(
+        vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: STARTING_SERVER }, () =>
+          ensurePageServer(root)
+        )
+      ).finally(() => DocPreview.starting.delete(root))
+      DocPreview.starting.set(root, starting)
+    }
+    return starting
   }
 
   /**
@@ -176,6 +197,9 @@ export class DocPreview {
     })
   }
 }
+
+/** What the status bar says while a page server starts. */
+const STARTING_SERVER = "Starting the page server"
 
 /**
  * `file`'s URL path on the epic server (`/epics/...` for the default repo, `/r/<repo>/...` for another);

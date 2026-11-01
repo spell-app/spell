@@ -56,6 +56,8 @@
         "appLayout",
         "pageUndoKey",
         "domRoot",
+        "projectSheet",
+        "listDrawn",
         "useElement",
         "elementClassOf",
         "css"

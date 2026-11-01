@@ -95,6 +95,7 @@ import {
   planDocsIn,
   planDocsOf,
   samePage,
+  serverBaseIn,
   stamped,
   windowEpic
 } from "./docUrls"
@@ -510,7 +511,7 @@ export class DocView implements vscode.WebviewViewProvider {
       { location: { viewId: this.id }, title: "Restarting the page server" },
       () => run(process.env.SHELL || "/bin/zsh", ["-lc", command], root)
     )
-    const base = output.match(/"base":\s*"([^"]+)"/)?.[1]
+    const base = serverBaseIn(output)
     if (!base) {
       void vscode.window.showErrorMessage(
         `Epic Docs:  the page server for ${root} didn't come back:  ${output.slice(-300)}`
@@ -904,6 +905,15 @@ export class DocView implements vscode.WebviewViewProvider {
 export function docsIndex(): string | undefined {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
   return root && join(EpicConfig.contentOf(root), "pages", "index.html")
+}
+
+/**
+ * Start the page server of the checkout at `root`, if it isn't running;  resolves to its `base` URL.
+ * - in a LOGIN shell:  a GUI VS Code's own `PATH` may have no `node`
+ * - `undefined`:  it didn't come up (not a kit, no `node` ...);  never rejects
+ */
+export async function ensurePageServer(root: string): Promise<string | undefined> {
+  return serverBaseIn(await run(process.env.SHELL || "/bin/zsh", ["-lc", `${ENGINE_EPIC} server ensure`], root))
 }
 
 /**

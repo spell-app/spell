@@ -1,3 +1,4 @@
+import { userEvent } from "vite-plus/test/browser"
 import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -166,5 +167,50 @@ describe("<ui-field> naming and errors", () => {
     host.removeAttribute("mixed")
     await ElementFixture.tick()
     expect(host.matches(":state(mixed)")).toBe(false)
+  })
+})
+
+describe("<ui-field> tip", () => {
+  it("shows in the top layer on hover and keyboard focus, so no parent frame cuts it off", async () => {
+    const frame = await ElementFixture.render<HTMLElement>(`<div style="width: 80px; height: 60px; overflow: hidden">
+      <ui-field label="L" description="A tip far wider than the frame around it."><input></ui-field>
+    </div>`)
+    const host = frame.querySelector("ui-field")!
+    const info = part(host, "info")!
+    const tip = host.shadowRoot!.getElementById(info.getAttribute("aria-describedby")!)!
+    expect(tip.matches(":popover-open")).toBe(false)
+
+    await userEvent.hover(info)
+    await expect.poll(() => tip.matches(":popover-open")).toBe(true)
+    const box = tip.getBoundingClientRect()
+    expect(box.width).toBeGreaterThan(frame.getBoundingClientRect().width)
+    expect(box.right - box.left).toBeGreaterThan(100)
+    expect(getComputedStyle(tip).position).toBe("fixed")
+
+    await userEvent.unhover(info)
+    await expect.poll(() => tip.matches(":popover-open")).toBe(false)
+
+    info.focus()
+    await userEvent.tab({ shift: true })
+    await userEvent.tab()
+    await expect.poll(() => tip.matches(":popover-open")).toBe(true)
+    await userEvent.keyboard("{Escape}")
+    await expect.poll(() => tip.matches(":popover-open")).toBe(false)
+  })
+
+  it("shows at once on a click on the icon, with no hover delay, until focus leaves", async () => {
+    const host = await ElementFixture.render<HTMLElement>(`<ui-field label="L" description="Why."><input></ui-field>`)
+    const info = part(host, "info")!
+    const tip = host.shadowRoot!.getElementById(info.getAttribute("aria-describedby")!)!
+
+    await userEvent.click(info)
+    await expect.poll(() => tip.matches(":popover-open")).toBe(true)
+    expect(getComputedStyle(tip).visibility).toBe("visible")
+    expect(getComputedStyle(tip).opacity).toBe("1")
+
+    await userEvent.unhover(info)
+    expect(tip.matches(":popover-open")).toBe(true)
+    info.blur()
+    await expect.poll(() => tip.matches(":popover-open")).toBe(false)
   })
 })

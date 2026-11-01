@@ -1028,6 +1028,7 @@ export class TSWriter extends JSWriter {
    */
   static readonly ELEMENT_MEMBERS = new Set<string>([
     "$",
+    "adoptProjectStyles",
     "adoptStyleSheets",
     "agree",
     "animationToRun",
@@ -1367,7 +1368,7 @@ export class TSWriter extends JSWriter {
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
     if (this.project.spotsThatWait.has(node)) return `core.whileWaiting(() => ${this.bare(node.expression)})`
-    return this.bare(node.expression)
+    return this.loopDrawn(node.expression, this.bare(node.expression))
   }
 
   /**

@@ -24,12 +24,12 @@ export class Tokenizer {
   rawTextTags: string[] = []
 
   /**
-   * JSX tags whose first attribute may be a bare quoted NAME, as spellx names its tags:  `<example "one counter">`
-   * reads as `<example name="one counter">` (epic `elemental-spell` P16).
-   * - e.g. spell's `["example", "ejemplo"]`.
+   * JSX tags that take a bare quoted string as an attribute, by the attribute it is:
+   * `<example "one counter">` is `name="one counter"` with `{ example: "name" }`.
+   * - e.g. spell's `{ example: "name", "tree-node": "label" }`.
    * - None by default:  anywhere else a bare string in a tag is no attribute.
    */
-  quotedNameTags: string[] = []
+  quotedNameTags: Record<string, string> = {}
 
   /**
    * Does `</>` close the innermost open JSX element, as in a spellx drawing (`<text>{its rank}</>`;  epic
@@ -590,15 +590,16 @@ export class Tokenizer {
   }
 
   /**
-   * A tag's bare quoted name at `start`, `"one counter"` in `<example "one counter">`, as its `name` attribute --
-   * only for one of `quotedNameTags`.
+   * A tag's bare quoted name at `start`, `"one counter"` in `<example "one counter">`, as the attribute
+   * `quotedNameTags` says -- only for one of them.
    */
   matchJSXQuotedName(tagName: string, text: string, start: number, end: number): P.JSXAttributeToken | undefined {
-    if (!this.quotedNameTags.includes(tagName)) return undefined
+    const name = this.quotedNameTags[tagName]
+    if (!name) return undefined
     const value = this.matchText(text, start, end)
     if (!value) return undefined
     const next = this.eatWhitespace(text, value.next, end)
-    return new P.JSXAttributeToken({ name: "name", start, value, raw: text.slice(start, next) })
+    return new P.JSXAttributeToken({ name, start, value, raw: text.slice(start, next) })
   }
 
   /**
@@ -1281,7 +1282,7 @@ export type TokenizerProps = {
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
   /** See `Tokenizer.quotedNameTags`. */
-  quotedNameTags?: string[]
+  quotedNameTags?: Record<string, string>
   /** See `Tokenizer.emptyEndTagCloses`. */
   emptyEndTagCloses?: boolean
   /** See `Tokenizer.chainTags`. */

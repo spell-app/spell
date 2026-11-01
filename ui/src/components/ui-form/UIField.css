@@ -20,7 +20,7 @@
     --_ui-field-hint-color: var(--ui-field-hint-color, var(--ui-text-muted));
     --_ui-field-error-color: var(--ui-field-error-color, var(--ui-negative-text));
     --_ui-field-tip-background: var(--ui-field-tip-background, var(--ui-text-dark));
-    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-surface));
+    --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-text-inverted-color));
     --_ui-field-tip-width: var(--ui-field-tip-width, 16.25em);
     /* how long a hover waits before the tip shows;  keyboard focus shows it at once */
     --_ui-field-tip-delay: var(--ui-field-tip-delay, var(--ui-hover-delay, 0s));
@@ -127,15 +127,41 @@
       visibility var(--ui-duration-fast);
   }
   /* shown:  no longer faded with the icon */
-  .field > .row > .info:is(:hover, :focus-visible) > .tip {
+  .field > .row > .info:is(:hover, :focus) > .tip {
     opacity: 1;
     visibility: visible;
   }
   .field > .row > .info:hover > .tip {
     transition-delay: var(--_ui-field-tip-delay);
   }
-  .field > .row > .info:focus-visible > .tip {
-    transition-delay: 0s;
+  /* focus shows it at once:  none, not a delay of 0, which would leave a hover already waiting to run on */
+  .field > .row > .info:focus > .tip {
+    transition: none;
+  }
+  /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
+  .field > .row > .info {
+    anchor-name: --ui-field-info;
+  }
+  .field > .row > .info > .tip:popover-open {
+    position: fixed;
+    position-anchor: --ui-field-info;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    inset: auto;
+    max-width: calc(100vw - 1em);
+    height: fit-content;
+    margin: 0.5em 0;
+    border: 0;
+    overflow: visible;
+  }
+  .field > .row > .info:is(:hover, :focus) > .tip:popover-open {
+    @starting-style {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   /* ## The hint and the errors:  lines under the control */

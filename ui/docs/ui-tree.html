@@ -159,6 +159,10 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="tags"></ui-docs-api>
+            </ui-section>
+
             <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree" only="attributes"></ui-docs-api>
             </ui-section>

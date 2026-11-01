@@ -93,6 +93,8 @@ describe("foundationCSS", () => {
 
   it("renders the CSS-only tooltip, coloured by data-variation", () => {
     adoptIntoPage(pageCSS)
+    // what a page with no script gets:  the runtime has it stand down (`DataTooltips`)
+    document.documentElement.removeAttribute("data-ui-top-layer-tooltips")
     const button = Fixture.render(`<button data-tooltip="Add users" data-variation="red">+</button>`)
     const bubble = getComputedStyle(button, "::after")
     expect(bubble.content).not.toBe("none")

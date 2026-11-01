@@ -5,14 +5,15 @@ import { Precedence, type OperatorOperands } from "./expressions.shared"
 
 /**
  * `includes` rule:  `{lhs} includes`/`contains {rhs}`, e.g. `theList includes thing`.
- * - Compiles to `core.includes(lhs, rhs)`.
+ * - Compiles to `core.includes(lhs, rhs)`:  text ignores capitals, a list's items don't.
+ * - `includes exactly`:  capitals count, `core.includesExactly(lhs, rhs)`.
  */
-export class Includes extends InfixOperatorSuffix<"operator|expression"> {
+export class Includes extends InfixOperatorSuffix<"operator|exactly?|expression"> {
   @proto static precedence = Precedence.comparison
 
   compileASTExpression(match: P.MatchFor<this>, { lhs, rhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "includes",
+      methodName: match.groups.exactly ? "includesExactly" : "includes",
       args: [lhs!, rhs!]
     })
   }

@@ -26,6 +26,14 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
+  "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
+  "made-from-each-other":
+    '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
+  "statement-in-markup":
+    '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para cada libro en sus libros: dibujar libro}"',
+  "never-empty":
+    '{AType} no es una lista, así que no tiene nada que vaciar:  di cuál, como en "si sus libros está vacío"',
+  "untyped-list-property-is": 'Di qué contiene "{name}", p. ej. "{line} una lista de {items}"',
   "untyped-list-variable": 'Di qué contiene "{name}", p. ej. "poner {name} a una nueva lista de {items}"',
   "untyped-set-property": 'Di qué es "{name}":  decláralo, p. ej. "{aType} tiene {aName} como {type}"',
   "undeclared-member": '{AType} nunca dice que tiene {aName}:  decláralo, p. ej. "{aType} tiene {aName} como {type}"',

@@ -138,16 +138,21 @@
    * - Text on a coloured bubble is the colour's `-on` foreground (`--ui-variation-color-on`, picked by contrast);
    *   on a plain one, black or white by the bubble's lightness.
    * - For anything interactive or long, use `<ui-popup>`:  pseudo-element text is not reliably announced.
+   * - These rules are what a page with no script gets:  once the runtime loads, `DataTooltips` shows the shared
+   *   `.ui-tooltip-bubble` in the top layer instead (below, "In the top layer"), and they stand down.
    */
-  [data-tooltip] {
+  [data-tooltip],
+  .ui-tooltip-bubble {
     --ui-tooltip-background: var(--ui-variation-color, var(--ui-surface));
     --ui-tooltip-edge: var(--ui-variation-color, var(--ui-border-color-strong));
     --ui-tooltip-color: var(
       --ui-variation-color-on,
-      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0)
+      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0 / 1)
     );
     --ui-tooltip-arrow-size: 0.714em;
     --ui-tooltip-distance: 0.5em;
+  }
+  [data-tooltip] {
     position: relative;
   }
 
@@ -165,7 +170,8 @@
   }
 
   /* Bubble */
-  [data-tooltip]::after {
+  [data-tooltip]::after,
+  .ui-tooltip-bubble {
     content: attr(data-tooltip);
     position: absolute;
     z-index: var(--ui-z-popup);
@@ -309,25 +315,31 @@
   }
 
   /* Fixed width, wrapping */
-  [data-tooltip][data-variation~="fixed"]::after {
+  [data-tooltip][data-variation~="fixed"]::after,
+  .ui-tooltip-bubble[data-variation~="fixed"] {
     inline-size: 250px;
     white-space: normal;
   }
-  [data-tooltip][data-variation*="wide fixed"]::after {
+  [data-tooltip][data-variation*="wide fixed"]::after,
+  .ui-tooltip-bubble[data-variation*="wide fixed"] {
     inline-size: 350px;
   }
-  [data-tooltip][data-variation*="very wide fixed"]::after {
+  [data-tooltip][data-variation*="very wide fixed"]::after,
+  .ui-tooltip-bubble[data-variation*="very wide fixed"] {
     inline-size: 550px;
   }
   @media (--ui-mobile) {
-    [data-tooltip][data-variation~="fixed"]::after {
+    [data-tooltip][data-variation~="fixed"]::after,
+    .ui-tooltip-bubble[data-variation~="fixed"] {
       inline-size: 250px;
     }
   }
-  [data-tooltip][data-variation~="multiline"]::after {
+  [data-tooltip][data-variation~="multiline"]::after,
+  .ui-tooltip-bubble[data-variation~="multiline"] {
     white-space: pre-line;
   }
-  [data-tooltip][data-variation~="basic"]::before {
+  [data-tooltip][data-variation~="basic"]::before,
+  .ui-tooltip-bubble[data-variation~="basic"]::before {
     display: none;
   }
 
@@ -335,15 +347,17 @@
    * Inverted:  ink bubble, no visible edge or shadow.  Colour variations (`data-variation="red"`) come from the
    * variable fallbacks above;  inverted + colour uses the hue's light (`-inverted`) variant, as in Fomantic.
    */
-  [data-tooltip][data-inverted] {
+  [data-tooltip][data-inverted],
+  .ui-tooltip-bubble[data-inverted] {
     --ui-tooltip-background: var(--ui-variation-color-inverted, var(--ui-ink));
     --ui-tooltip-color: var(
       --ui-variation-color-inverted-on,
-      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0)
+      oklch(from var(--ui-tooltip-background) clamp(0, (0.6 - l) * 1000, 1) 0 0 / 1)
     );
     --ui-tooltip-edge: transparent;
   }
-  [data-tooltip][data-inverted]::after {
+  [data-tooltip][data-inverted]::after,
+  .ui-tooltip-bubble[data-inverted] {
     box-shadow: none;
   }
 
@@ -506,6 +520,137 @@
   }
   [data-tooltip][data-position="right bottom"]::before {
     inset: auto auto 1em 100%;
+  }
+
+  /*******************************
+        In the top layer
+  *******************************/
+
+  /*
+   * What `DataTooltips` shows once the runtime has loaded:  ONE bubble, and a box over its target, at the end of
+   * `<body>`, so no parent frame can cut a tooltip off.
+   * - `!important`:  a page's own unlayered tooltip rules (the editor still loads Semantic UI's) must stand down too.
+   * - `visible` stays as it was:  it's always showing, and there's one bubble.
+   */
+  :root[data-ui-top-layer-tooltips] [data-tooltip]:not([data-variation~="visible"])::before,
+  :root[data-ui-top-layer-tooltips] [data-tooltip]:not([data-variation~="visible"])::after {
+    display: none !important;
+  }
+  .ui-tooltip-target {
+    position: fixed;
+    anchor-name: --ui-tooltip-target;
+    pointer-events: none;
+  }
+  .ui-tooltip-bubble {
+    position: fixed;
+    position-anchor: --ui-tooltip-target;
+    /* `top`, not `top center`:  a narrow target's center column can never fit its tip, so it would never flip */
+    position-area: top;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+    inset: auto;
+    box-sizing: border-box;
+    width: max-content;
+    max-inline-size: calc(100vw - 1em);
+    height: fit-content;
+    margin-block: var(--ui-tooltip-distance);
+    margin-inline: 0;
+    overflow: visible;
+    white-space: normal;
+    opacity: 0;
+    scale: 0.8;
+    transition:
+      opacity var(--ui-duration-normal) var(--ui-ease),
+      scale var(--ui-duration-normal) var(--ui-ease),
+      overlay var(--ui-duration-normal) allow-discrete,
+      display var(--ui-duration-normal) allow-discrete;
+  }
+  .ui-tooltip-bubble:popover-open {
+    opacity: 1;
+    scale: 1;
+    @starting-style {
+      opacity: 0;
+      scale: 0.8;
+    }
+  }
+  .ui-tooltip-bubble[data-position="top left"] {
+    position-area: top span-right;
+  }
+  .ui-tooltip-bubble[data-position="top right"] {
+    position-area: top span-left;
+  }
+  .ui-tooltip-bubble[data-position="bottom left"] {
+    position-area: bottom span-right;
+  }
+  .ui-tooltip-bubble[data-position="bottom center"] {
+    position-area: bottom;
+  }
+  .ui-tooltip-bubble[data-position="bottom right"] {
+    position-area: bottom span-left;
+  }
+  .ui-tooltip-bubble:is([data-position^="left"], [data-position^="right"]) {
+    margin-block: 0;
+    margin-inline: var(--ui-tooltip-distance);
+  }
+  .ui-tooltip-bubble[data-position="left center"] {
+    position-area: left;
+  }
+  .ui-tooltip-bubble[data-position="left top"] {
+    position-area: left span-bottom;
+  }
+  .ui-tooltip-bubble[data-position="left bottom"] {
+    position-area: left span-top;
+  }
+  .ui-tooltip-bubble[data-position="right center"] {
+    position-area: right;
+  }
+  .ui-tooltip-bubble[data-position="right top"] {
+    position-area: right span-bottom;
+  }
+  .ui-tooltip-bubble[data-position="right bottom"] {
+    position-area: right span-top;
+  }
+
+  /* Its arrow:  on the side it ended up on, as measured (`data-side`) */
+  .ui-tooltip-bubble::before {
+    content: "";
+    position: absolute;
+    inline-size: var(--ui-tooltip-arrow-size);
+    block-size: var(--ui-tooltip-arrow-size);
+    background: var(--ui-tooltip-background);
+    rotate: 45deg;
+    translate: -50% -50%;
+    pointer-events: none;
+  }
+  .ui-tooltip-bubble[data-side="top"] {
+    transform-origin: center bottom;
+  }
+  .ui-tooltip-bubble[data-side="top"]::before {
+    inset: 100% auto auto var(--ui-tooltip-arrow-at, 50%);
+    box-shadow: 1px 1px 0 0 var(--ui-tooltip-edge);
+  }
+  .ui-tooltip-bubble[data-side="bottom"] {
+    transform-origin: center top;
+  }
+  .ui-tooltip-bubble[data-side="bottom"]::before {
+    inset: 0 auto auto var(--ui-tooltip-arrow-at, 50%);
+    box-shadow: -1px -1px 0 0 var(--ui-tooltip-edge);
+  }
+  .ui-tooltip-bubble[data-side="left"] {
+    transform-origin: right center;
+  }
+  .ui-tooltip-bubble[data-side="left"]::before {
+    inset: var(--ui-tooltip-arrow-at, 50%) auto auto 100%;
+    box-shadow: 1px -1px 0 0 var(--ui-tooltip-edge);
+  }
+  .ui-tooltip-bubble[data-side="right"] {
+    transform-origin: left center;
+  }
+  .ui-tooltip-bubble[data-side="right"]::before {
+    inset: var(--ui-tooltip-arrow-at, 50%) auto auto 0;
+    box-shadow: -1px 1px 0 0 var(--ui-tooltip-edge);
   }
 
   /*******************************

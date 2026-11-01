@@ -49,6 +49,7 @@
   .ui.popup,
   .ui.dropdown .menu[role="listbox"],
   .overflow-menu,
+  .ui-tooltip-bubble,
   .panel[popover],
   .ui.modal,
   .ui.toast {

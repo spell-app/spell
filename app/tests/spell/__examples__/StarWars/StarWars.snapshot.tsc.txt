@@ -15,7 +15,7 @@
 930:36 TS2532 Object is possibly 'undefined'.
 1048:77 TS2345 Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
 1106:35 TS2345 Argument of type 'List<Species>' is not assignable to parameter of type 'string | number | undefined'.
-1106:219 TS2345 Argument of type 'unknown' is not assignable to parameter of type 'Thing'.
+1106:225 TS2345 Argument of type 'unknown' is not assignable to parameter of type 'Thing'.
 1112:7 TS2322 Type 'undefined' is not assignable to type 'Thing'.
 1115:5 TS2322 Type 'Thing | undefined' is not assignable to type 'Thing'.
 1123:5 TS2322 Type 'undefined' is not assignable to type 'Thing'.

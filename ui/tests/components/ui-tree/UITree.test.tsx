@@ -114,6 +114,17 @@ describe("<ui-tree>", () => {
     expect(selected(host)).toEqual(["c"])
   })
 
+  it('in `choose="many"`, a second Shift swaps the run;  what Command added outside it stays', async () => {
+    const host = await tree('choose="many"')
+    click(host, "a")
+    click(host, "e", { metaKey: true })
+    expect(selected(host)).toEqual(["a", "e"])
+    click(host, "c", { shiftKey: true })
+    expect(selected(host)).toEqual(["a", "c", "e"])
+    click(host, "e", { shiftKey: true })
+    expect(selected(host)).toEqual(["a", "e"])
+  })
+
   it("asks first:  cancelling `ui-selecting` leaves the choice to the page", async () => {
     const host = await tree()
     host.addEventListener("ui-selecting", (event) => event.preventDefault())

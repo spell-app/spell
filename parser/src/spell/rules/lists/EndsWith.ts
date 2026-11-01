@@ -8,14 +8,14 @@ import { InfixOperatorSuffix, Precedence } from "spell/parser/spell/rules/expres
  * e.g. `my-list ends with thing` => `core.endsWith(myList, thing)`.
  * - Negated by its word rule's `negated` forms, e.g. `does not end with` -- see `Negatable`, `ends_with_or_not`.
  */
-export class EndsWith extends InfixOperatorSuffix<"operator|expression"> {
+export class EndsWith extends InfixOperatorSuffix<"operator|exactly?|expression"> {
   @proto static precedence = Precedence.comparison
   compileASTExpression(
-    match: P.Match,
+    match: P.MatchFor<this>,
     { lhs, rhs }: { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
   ): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "endsWith",
+      methodName: match.groups.exactly ? "endsWithExactly" : "endsWith",
       args: [lhs!, rhs!]
     })
   }

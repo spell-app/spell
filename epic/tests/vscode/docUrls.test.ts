@@ -20,6 +20,7 @@ import {
   planDocsIn,
   planDocsOf,
   samePage,
+  serverBaseIn,
   stamped,
   tabShows,
   windowEpic,
@@ -181,4 +182,12 @@ test("folderIndex():  a window's folder by any spelling -- one reopened from the
   equal(folderIndex(folders, "/repo/"), 0)
   equal(folderIndex(folders, join(real, "..", "other")), -1)
   rmSync(moved, { recursive: true, force: true })
+})
+
+test("serverBaseIn():  the base in what `epic server ensure` printed;  nothing, when it didn't come up (I192)", () => {
+  equal(
+    serverBaseIn('bundles:  current\n{\n  "port": 4747,\n  "base": "http://127.0.0.1:4747"\n}\n'),
+    "http://127.0.0.1:4747"
+  )
+  equal(serverBaseIn("zsh: command not found: node"), undefined)
 })
