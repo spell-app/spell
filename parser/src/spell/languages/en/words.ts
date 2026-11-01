@@ -165,7 +165,9 @@ export const englishWords: SP.LanguageWords = {
       "page-template": "page template",
       "app-template": "app template",
       // a page of prose, examples and its own templates (epic `elemental-spell` P16)
-      notebook: "notebook"
+      notebook: "notebook",
+      // more of a type declared in another file:  its fields in a place's file, its drawing in this one (epic `data` T76)
+      "more-of": "more of"
     },
     declarations: {
       property: "property",
@@ -225,6 +227,7 @@ export const englishWords: SP.LanguageWords = {
       template: "{a name} {name} is {a super} {super} :",
       templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
       singleton: "{words} is {a super} {super} :",
+      moreOf: "{a words} {words} :",
       supers: {
         view: "view",
         thing: "thing",

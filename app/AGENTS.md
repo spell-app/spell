@@ -267,6 +267,14 @@ The app's part of the page server's settings (its `package.json`'s `"pageServer"
 - The kit's server reads every part from the kit's root, so every folder is inside it (`/ui/docs/`):
   no `/_beside/` mounts any more (epic `repo-split` P16).
 
+## Writing an example
+
+Examples are what people and agents copy, so each one shows the current way (Owen, 2026-10-31, epic `data`).
+- Always spellml, with all of the latest language and UI features.
+  - No HTML.  Minimal CSS.
+- Separate concerns:  API, UI and custom widgets each in their own files.
+- Avoid custom widgets:  research what the `ui-*` widgets offer, and use those whenever possible.
+
 ## Words, worktrees, the epic repo, changelog
 
 The kit's, for every folder:  its [AGENTS.md](../AGENTS.md), "Words", "Worktrees", "The epic repo", "Changelog".

@@ -2926,7 +2926,7 @@
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
-              "syntax": "{ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (of|in|from) {list:operand}",
+              "syntax": "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}",
               "example": "top 2 items of my-list",
               "outputs": {
                 "js": {
@@ -5922,7 +5922,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 24,
+          "line": 25,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6338,11 +6338,11 @@
           "ruleNames": ["rows_in"],
           "internal": false,
           "file": "src/spell/rules/places/RowsIn.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Where a web server's list keeps its rows, when it doesn't answer with the list itself.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} rows are its? {field:text}"
+              "syntax": "{type:subject_its} rows are (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
             }
           ],
           "aliases": ["statement"]
@@ -6352,11 +6352,11 @@
           "ruleNames": ["next_page_in"],
           "internal": false,
           "file": "src/spell/rules/places/NextPageIn.ts",
-          "line": 10,
+          "line": 11,
           "purpose": "Which field of a web server's answer says where its next page is.",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} next page is its? {field:text}"
+              "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
             }
           ],
           "aliases": ["statement"]

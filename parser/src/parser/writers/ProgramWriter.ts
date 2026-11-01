@@ -288,7 +288,7 @@ export abstract class ProgramWriter extends Writer {
   static POSITION_RESULTS = new Set(["positionOf"])
 
   /** `core`'s loops, which hand their function the position too -- see `positionedCallback()`. */
-  static POSITION_LOOPS = new Set(["map", "forEach", "forEachSequential"])
+  static POSITION_LOOPS = new Set(["map", "forEach", "forEachSequential", "drawEach"])
 
   /** How our language says nothing, for a range with no end:  javascript's `undefined`. */
   nothing = "undefined"

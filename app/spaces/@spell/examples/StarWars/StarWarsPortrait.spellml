@@ -1,0 +1,36 @@
+# A picture:  its own page on Wikipedia, if it has one, else an initial on a colour
+A widget of its own, as no `ui-image` falls back on anything:  an initial shows until a picture comes, and stays if none does.
+A species with no picture of its own takes the first of its people who has one:  Hutt, Jabba.
+
+<spell-thing "portrait">
+	<property "name" />
+	<property "hue" />
+	<property "shape" />
+	<spell>
+		- its "species" is a species
+	</spell>
+	<property "page">the wiki page whose id is its name</property>
+	<property "initial">the first letter of its name</property>
+	<property "picture">
+		if its page and the fits of its page and the thumbnail of its page
+			return the source of the thumbnail of its page
+		if its species
+			return the picture of its species
+		return ""
+	</property>
+	<draw>
+		<segment class={"portrait " + its shape} style={"--hue: " + its hue} appearance="basic">
+			<header class="initial">{its initial}</header>
+			{draw its photo}
+		</segment>
+	</draw>
+	<draw "photo" description="Waiting for it, or if Wikipedia can't be reached, the initial stays">
+		<if its picture is not "">
+			<image src={its picture} alt="" />
+		</if>
+		while waiting:
+			<space />
+		if that fails:
+			<space />
+	</draw>
+</spell-thing>

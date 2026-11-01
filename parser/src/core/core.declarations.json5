@@ -1399,6 +1399,22 @@
     },
     {
       "kind": "method",
+      "name": "drawEach",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "each"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A loop's drawing, one for each item of `list`:  what `for each ... draw` compiles to, in a drawing."
+    },
+    {
+      "kind": "method",
       "name": "startDrawing",
       "of": "core",
       "module": "drawing",

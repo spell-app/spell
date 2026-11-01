@@ -75,7 +75,7 @@ export class CajaEnVivo extends App {
       <ui-button class="add" onClick={core.pressed(this, () => this.agregarUna())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
         Agregar una
       </ui-button>,
-      core.drawRead(async () => await core.savedThings(Receta), (receta: Receta) => core.drawThing(receta))
+      core.drawRead(async () => await core.savedThings(Receta, {}, "as drawn"), (receta: Receta) => core.drawThing(receta))
     ]
   }
 }

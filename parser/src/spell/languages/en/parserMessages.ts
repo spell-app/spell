@@ -248,6 +248,9 @@ export const PARSER_MESSAGES = {
     "A {type} isn't a list, so it has no items to draw:  a drawing of its own is drawn by it, in its own lines",
   "type-from-itself":
     'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
+  /** A dot in a field's name, under a place. */
+  "no-dotted-field":
+    'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",

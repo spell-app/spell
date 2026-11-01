@@ -237,26 +237,59 @@ describe("the wiki page whose id is its name", () => {
     `wiki is a web server at "${WIKI}":`,
     `\t- check it every 3600 seconds`,
     `\t- wiki pages live at "/page/summary"`,
-    `\t- a wiki page's picture is its "thumbnail.source"`,
+    `\t- a wiki page's "content urls" is its "content_urls"`,
+    `a "thumbnail" is a thing:`,
+    `\t- its "source" is text`,
+    `a "link set" is a thing:`,
+    `\t- its "desktop" is a web link`,
+    `a "web link" is a thing:`,
+    `\t- its "page" is text`,
     `a "wiki page" is a thing:`,
     `\t- it lives in the wiki`,
     `\t- its "title" is text`,
-    `\t- its "picture" is text`,
+    `\t- its "thumbnail" is a thumbnail`,
+    `\t- its "content urls" is a link set`,
+    `\t- its "picture" is the source of its thumbnail`,
+    `\t- its "address" is the page of the desktop of its content urls`,
     `a "person" is a thing:`,
     `\t- its "name" is text`,
     `\t- its "page" is the wiki page whose id is its name`
   ]
 
-  test("asks the place for that one row, reading what's inside a field", async () => {
+  test("a dot in a field's name is refused, saying what to write", () => {
+    const contents = [
+      `wiki is a web server at "${WIKI}":`,
+      `\t- a wiki page's picture is its "thumbnail.source"`,
+      `a "wiki page" is a thing:`,
+      `\t- it lives in the wiki`,
+      `\t- its "picture" is text`
+    ].join("\n")
+    const { errors } = parseSpellProject([{ path: "/T.spell", contents: `${contents}\n` }]).files[0]!
+    expect(errors.join("\n")).toContain(`read as "source of its thumbnail"`)
+  })
+
+  test("asks the place for that one row, reading what's inside a field in words", async () => {
     const asked = serve({
-      [`${WIKI}/page/summary/Luke`]: { id: "Luke", title: "Luke", thumbnail: { source: "https://img.test/luke.jpg" } }
+      [`${WIKI}/page/summary/Luke`]: {
+        id: "Luke",
+        title: "Luke",
+        thumbnail: { source: "https://img.test/luke.jpg" },
+        content_urls: { desktop: { page: "https://wiki.test/Luke" } }
+      }
     })
     core.resetRuntime()
     const { Person } = runSpell(lines)("Person") as { Person: new (props: object) => { page: unknown } }
     const luke = new Person({ name: "Luke" })
-    const page = (await core.answerOf(luke, "page")) as { title: string; picture: string }
+    const page = (await core.answerOf(luke, "page")) as {
+      title: string
+      picture: string
+      address: string
+      thumbnail: object
+    }
     expect(page.title).toBe("Luke")
     expect(page.picture).toBe("https://img.test/luke.jpg")
+    expect(page.address).toBe("https://wiki.test/Luke")
+    expect(page.thumbnail.constructor.name).toBe("Thumbnail")
     expect(asked).toEqual([`${WIKI}/page/summary/Luke`])
   })
 
@@ -327,9 +360,59 @@ describe("what the Star Wars example needed", () => {
       `\t- it lives in the sky`,
       `a "guide" is a thing:`,
       `\t- its "how many" is a number`,
-      `\t- its "some" is top (its how many) items of (every star)`
+      `\t- its "some" is (the number of items in (every star)) + its how many`
     ])
     expect(code).toContain("() => [this.howMany]")
+  })
+})
+
+describe("reading as it's drawn", () => {
+  const STARS = `${HOST}/stars`
+  const lines = [
+    `sky is a web server at "${HOST}":`,
+    `\t- its id is its "url"`,
+    `\t- its rows are the "items" of its "data"`,
+    `\t- its next page is the "next" of its "links"`,
+    `\t- check it every 3600 seconds`,
+    `\t- stars live at "/stars"`,
+    `a "star" is a thing:`,
+    `\t- it lives in the sky`,
+    `\t- its "name" is text`,
+    `a "guide" is a view:`,
+    `\t- to draw it:`,
+    `\t\tfor each star in every star`,
+    `\t\t\tdraw the star`,
+    `\t- to count them:`,
+    `\t\treturn the number of items in every star`
+  ]
+  const pageOf = (names: string[], next: string | null) => ({
+    data: { items: names.map((name) => ({ url: `${STARS}/${name}`, name })) },
+    links: { next }
+  })
+  const ROWS = {
+    [STARS]: pageOf(["vega"], `${STARS}?page=2`),
+    [`${STARS}?page=2`]: pageOf(["rigel"], null)
+  }
+
+  test("a loop that only draws says so;  further in is words", () => {
+    const { compiled, errors } = parseSpellProject([{ path: "/T.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
+    expect(errors).toEqual([])
+    expect(compiled).toContain(`core.savedThings(Star, {}, "as drawn")`)
+    expect(compiled).toContain(`rowsIn: "data.items"`)
+    expect(compiled).toContain(`nextPageIn: "links.next"`)
+    expect(compiled).toContain(`core.savedThings(Star)`)
+  })
+
+  test("drawn, its later pages wait;  anything else reads them all", async () => {
+    const asked = serve(ROWS)
+    core.resetRuntime()
+    const { Star } = runSpell(lines)("Star") as { Star: new () => unknown }
+    const drawn = await core.savedThings(Star, {}, "as drawn")
+    expect(drawn.items.map((star) => (star as { name: string }).name)).toEqual(["vega"])
+    expect(asked).toEqual([STARS])
+    const all = await core.savedThings(Star)
+    expect(all.items.map((star) => (star as { name: string }).name)).toEqual(["vega", "rigel"])
+    expect(asked.at(-1)).toBe(`${STARS}?page=2`)
   })
 })
 

@@ -798,6 +798,8 @@ A kind that says so is saved in a file of its own.
   - The colon stays required:  a lone `a game` is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
+  - In a `.spellml` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
+    so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.

@@ -62,6 +62,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `h()` returns a thunk:  the error boundary makes it, once, and a throw while it's made shows the stand-in.
     - `core.element()`, what it called before, is gone (epic `output-targets` P22):
       every committed example is recompiled, and a program compiled before P20 no longer draws.
+- A long list draws what fits, and more as you scroll ([drawnWindow.ts](drawnWindow.ts), epic `data` T76):
+  every loop in a drawing (`core.drawEach()`), `draw each ...` (`drawItems()`) and a read of a place (`drawRead()`).
+  - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
+  - Find and printing draw the rest first, up to 5,000.  Going back to the same list draws as many, and scrolls where it was.
+  - A read of a place that only draws:  `core.savedThings(Recipe, {}, "as drawn")`, its later pages read as they're needed.
 - A view's own element, e.g. `<solitaire-card>`:
   - [elements.ts](elements.ts) names its tag.
   - The page makes the element, through `core.elementDefiner`:

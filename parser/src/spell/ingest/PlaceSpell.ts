@@ -1,3 +1,4 @@
+import { P } from "spell/parser/parser"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
@@ -67,9 +68,9 @@ export function spellPartsFor(
   const isSheet = kind === "sheet" || kind === "google sheet"
   if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `- its id is its "${sameId}"` })
   const rowsAt = sameOfEvery(every, (collection) => collection.rowsAt)
-  if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are its "${rowsAt}"` })
+  if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(every, (collection) => collection.nextAt) : undefined
-  if (nextAt) placeLines.push({ key: "next", text: `- its next page is its "${nextAt}"` })
+  if (nextAt) placeLines.push({ key: "next", text: `- its next page is ${fieldInWords(nextAt)}` })
   if (every.length && every.every(({ fields }) => fields[VERSION_FIELD]?.type === "number")) {
     placeLines.push({ key: "version", text: `- its version is its "${VERSION_FIELD}"` })
   }
@@ -90,14 +91,60 @@ export function spellPartsFor(
   return {
     header: `${name} is ${articled(kind)} at "${address}":`,
     placeLines,
-    types: shown.map(([collection, description]) => typeLines(collection, description, name, collections))
+    types: [
+      ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
+      ...typesInside(shown)
+    ]
   }
+}
+
+/**
+ * Where a field is that's inside others, in words, never with a dot:  `links.next` => `the "next" of its "links"`.
+ * - The grammar refuses a dot in a field's name, so it's never suggested here.
+ */
+function fieldInWords(path: string): string {
+  const [own, ...outer] = path.split(".").reverse()
+  if (!outer.length) return `its "${own}"`
+  const last = outer.pop()!
+  return [own, ...outer].map((name) => `the "${name}" of`).join(" ") + ` its "${last}"`
+}
+
+/** What a type holding a field's object is called:  one of it, `parts` => `part`. */
+function typeInside(words: string): string {
+  const parts = words.split(" ")
+  parts[parts.length - 1] = P.singularize(parts[parts.length - 1]!)
+  return parts.join(" ")
+}
+
+/**
+ * A type for each object a field holds, its fields read in words:  `its "thumbnail" is a thumbnail`, `the source of its thumbnail`.
+ * - Plain things, nowhere of their own:  each is inside the row it came in.
+ * - The first with its name stands for all of them, and one inside it gets its own.
+ */
+function typesInside(shown: ReadonlyArray<readonly [string, CollectionDescription]>): TypeLines[] {
+  const types = new Map<string, TypeLines>()
+  const own = new Set(shown.map(([, { type }]) => type))
+  const add = (collection: string, fields: Readonly<Record<string, FieldDescription>>) => {
+    for (const { words: field, inside } of Object.values(fields)) {
+      const words = typeInside(field)
+      if (!inside || types.has(words) || own.has(words)) continue
+      const lines = Object.values(inside).flatMap((about) => {
+        const what = about.inside ? articled(typeInside(about.words)) : SPELL_TYPES[about.type]
+        return what ? [{ key: `inside:${words}:${about.words}`, text: `- its "${about.words}" is ${what}` }] : []
+      })
+      types.set(words, { collection, header: `${articled(words).replace(words, `"${words}"`)} is a thing:`, lines })
+      add(collection, inside)
+    }
+  }
+  for (const [collection, { fields }] of shown) add(collection, fields)
+  return [...types.values()]
 }
 
 /** The lines that say what the source calls a field, when Spell's name for it isn't that. */
 function fieldNameLines(collection: string, description: CollectionDescription): SpellLine[] {
-  return Object.entries(description.fields).flatMap(([field, { words, leftOut, type, wordsInQuotes }]) => {
-    if (isLeftOut(field, description, leftOut, type) || fieldNamed(words) === field) return []
+  return Object.entries(description.fields).flatMap(([field, about]) => {
+    const { words, leftOut, type, wordsInQuotes } = about
+    if (isLeftOut(field, description, leftOut, type, about) || fieldNamed(words) === field) return []
     const named = wordsInQuotes ? `"${words}"` : words
     const text = `- ${articled(description.type)}'s ${named} is its "${field}"`
     return [{ key: `name:${collection}:${field}`, text }]
@@ -113,13 +160,13 @@ function typeLines(
 ): TypeLines {
   const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
   for (const [field, about] of Object.entries(description.fields)) {
-    if (isLeftOut(field, description, about.leftOut, about.type)) continue
+    if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   return {
     collection,
-    header: `${/^[aeiou]/i.test(description.type) ? "an" : "a"} "${description.type}" is a view:`,
+    header: `${/^[aeiou]/i.test(description.type) ? "an" : "a"} "${description.type}" is a thing:`,
     lines
   }
 }
@@ -129,9 +176,10 @@ function isLeftOut(
   field: string,
   { idField }: CollectionDescription,
   leftOut: string | undefined,
-  type: FieldDescription["type"]
+  type: FieldDescription["type"],
+  about: FieldDescription
 ): boolean {
-  return field === idField || !!leftOut || !SPELL_TYPES[type]
+  return field === idField || !!leftOut || (!SPELL_TYPES[type] && !about.inside)
 }
 
 /**
@@ -140,9 +188,10 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo }: FieldDescription,
+  { type, linksTo, inside, words }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
+  if (inside) return articled(typeInside(words))
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (!target || target.leftOut) return SPELL_TYPES[type]!
   if (type === "link") return articled(target.type)

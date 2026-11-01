@@ -1,6 +1,17 @@
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 
+/** The program said `scroll to the top`, this moment. */
+let wentToTheTop = false
+
+/**
+ * Did the program just say `scroll to the top`?  A long list drawn now stays there, rather than going back to where it was.
+ * - True until the current task's done, as what it changes draws straight after it.
+ */
+export function isGoingToTheTop(): boolean {
+  return wentToTheTop
+}
+
 /**
  * Assembled `core` UI-interaction methods:
  * - time (`pauseFor`)
@@ -23,6 +34,10 @@ export const uiMethods = defineCoreModule({
    * - Under node, or before the app's drawn:  nothing.
    */
   scrollToTop(): void {
+    wentToTheTop = true
+    setTimeout(() => {
+      wentToTheTop = false
+    }, 0)
     ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
   },
 

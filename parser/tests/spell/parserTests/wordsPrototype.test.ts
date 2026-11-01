@@ -828,8 +828,8 @@ describe("the recipe box, whole", () => {
   it("compiles in English with the rules, and draws from its loop (I14)", () => {
     const { errors, code } = compile(`${KINDS[0]}${RECIPE_BOX[0]}`, 0, true)
     expect(errors).toEqual([])
-    expect(code).toContain("core.map(this.matches, (recipe) => core.drawThing(recipe))")
-    expect(code).toContain("return core.map(this.matches")
+    expect(code).toContain("core.drawEach(this.matches, (recipe) => core.drawThing(recipe))")
+    expect(code).toContain("return core.drawEach(this.matches")
   })
 
   it("compiles in Spanish with the rules", () => {

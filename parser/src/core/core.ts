@@ -52,6 +52,12 @@ export function randomNumber(min?: number, max?: number): number | undefined {
 export const core = new (class core {})() as Core
 
 /**
+ * Each class that declares a property, by its name, as it's made:  so a place's row can make the thing held inside it (`PlaceThings`).
+ * - One per page's copy of the core:  a recompile's class of the same name replaces the last.
+ */
+export const CLASSES_DECLARED = new Map<string, Function>()
+
+/**
  * The running program's things, `core.things` (`things.ts`), for the Thing Explorer.
  * - `undefined` under `spell/parser/core/model`, which leaves them out:
  *   a thing made there, e.g. a `Person` the server loads, belongs to no running program.

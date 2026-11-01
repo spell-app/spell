@@ -226,7 +226,7 @@ describe("a markup line in a drawing IS the drawing (Q14)", () => {
         "    return [",
         '      h("ui-text", "top"),',
         '      h("ui-text", "bottom"),',
-        '      core.map(this.cards, (card) => h("ui-segment", () => core.drawThing(card))),',
+        '      core.drawEach(this.cards, (card) => h("ui-segment", () => core.drawThing(card))),',
         '      this.title === "Klondike" ? h("ui-text", "K") : h("ui-text", "?")',
         "    ]"
       ].join("\n")
@@ -251,9 +251,9 @@ describe("a markup line in a drawing IS the drawing (Q14)", () => {
       "\t\t\tfor each card in its cards",
       "\t\t\t\t<ui-text>{the card}</ui-text>"
     ])
-    expect(compiled).toContain('return core.map(this.cards, (card) => h("ui-text", () => card))')
+    expect(compiled).toContain('return core.drawEach(this.cards, (card) => h("ui-text", () => card))')
     expect(compiled).toMatch(
-      /else \{\s+return \[\s+h\("ui-text", "cards:"\),\s+core\.map\(this\.cards, \(card\) => h\("ui-text", \(\) => card\)\)\s+\]/
+      /else \{\s+return \[\s+h\("ui-text", "cards:"\),\s+core\.drawEach\(this\.cards, \(card\) => h\("ui-text", \(\) => card\)\)\s+\]/
     )
   })
 
@@ -304,7 +304,7 @@ describe("a markup line in a drawing IS the drawing (Q14)", () => {
       ],
       "/test.es.spell"
     )
-    expect(compiled).toContain('core.map(this.cartas, (carta) => h("ui-text", () => carta))')
+    expect(compiled).toContain('core.drawEach(this.cartas, (carta) => h("ui-text", () => carta))')
     expect(compiled).toMatch(/return \[\s+h\("ui-text", "arriba"\),/)
   })
 

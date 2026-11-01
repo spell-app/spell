@@ -2,7 +2,7 @@
  * Base classes for spell.
  */
 import { isLastToConstruct, Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
-import { registerThing, noteMade, noteSetting, core } from "spell/parser/core/core"
+import { CLASSES_DECLARED, registerThing, noteMade, noteSetting, core } from "spell/parser/core/core"
 import type { Drawing } from "spell/parser/core/drawing"
 import { Eventful } from "spell/parser/core/SpellEvent"
 import type { PropCheck } from "spell/parser/core/core.types"
@@ -95,6 +95,16 @@ export class Thing extends Eventful(Observable) {
       initializer = rememberedStartFor(this, property, () => this.rememberedKeyFor(property)) as (() => T) | undefined
     }
     return super.getProp(property, initializer)
+  }
+
+  /**
+   * Declare a prop -- see `Observable.declareProp()`.
+   * - SIDE EFFECT:  the class can be found by its name, before any of its things is made:
+   *   so a place's row can make the thing held inside it, `its "thumbnail" is a thumbnail` (`PlaceThings`).
+   */
+  static declareProp(name: string, info: PropInfo): void {
+    super.declareProp(name, info)
+    CLASSES_DECLARED.set(this.name, this)
   }
 
   /**

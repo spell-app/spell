@@ -506,6 +506,151 @@ describe("<ui-card> keyboard", () => {
 })
 
 ////////////////
+// ## Clicks
+////////////////
+
+describe("<ui-card> takes a click anywhere", () => {
+  it("Solid's onClick:  anywhere on it is the card's, a button or link inside never, and its look says so", async () => {
+    const { render: mount } = await import("@solidjs/web")
+    const { default: h } = await import("@solidjs/h")
+    const box = document.createElement("div")
+    document.body.append(box)
+    let clicks = 0
+    let pressed = 0
+    const onCard = (_event: Event) => clicks++
+    const onButton = (_event: Event) => pressed++
+    const dispose = mount(
+      () =>
+        h("ui-card", { onClick: onCard }, [
+          h("span", { id: "words" }, "Words"),
+          h("ui-button", { id: "b", onClick: onButton }, "Go"),
+          h("a", { id: "a", href: "#inner" }, "In")
+        ]),
+      box
+    )
+    await ElementFixture.settle(box)
+    const card = box.querySelector("ui-card")!
+    await userEvent.click(box.querySelector("#words")!)
+    expect(clicks).toBe(1)
+    await userEvent.click(box.querySelector("#b")!)
+    expect([clicks, pressed]).toEqual([1, 1])
+    await userEvent.click(box.querySelector("#a")!)
+    expect(clicks).toBe(1)
+    expect(rootOf(card).className).toContain("link")
+    dispose()
+    box.remove()
+    location.hash = ""
+  })
+
+  it("a handler added with addEventListener only hears the card's own", async () => {
+    const card = await render(`<ui-card><ui-content>Words</ui-content><button id="b">Go</button></ui-card>`)
+    let heard = 0
+    const listener = () => heard++
+    card.addEventListener("click", listener)
+    await ElementFixture.settle()
+    await userEvent.click(card.querySelector("ui-content")!)
+    await userEvent.click(card.querySelector("#b")!)
+    expect(heard).toBe(1)
+    card.removeEventListener("click", listener)
+    await userEvent.click(card.querySelector("ui-content")!)
+    expect(heard).toBe(1)
+  })
+
+  it("shows the pointer over all of it, and rises", async () => {
+    const card = await render(`<ui-card heading="Hover me"></ui-card>`)
+    card.addEventListener("click", () => undefined)
+    await ElementFixture.settle()
+    await userEvent.hover(rootOf(card))
+    await expect.poll(() => style(rootOf(card)).cursor).toBe("pointer")
+    await expect.poll(() => style(rootOf(card)).transform).toBe("matrix(1, 0, 0, 1, 0, -3)")
+    await userEvent.unhover(rootOf(card))
+  })
+
+  it("is one Tab stop, and Enter clicks it;  a plain card is none", async () => {
+    const wrapper = await ElementFixture.render(
+      `<div><button>Before</button><ui-card heading="Kristy"></ui-card><button>After</button></div>`
+    )
+    const card = wrapper.querySelector("ui-card")!
+    const before = wrapper.querySelector("button")!
+    await ElementFixture.settle(wrapper)
+    expect(rootOf(card).hasAttribute("tabindex")).toBe(false)
+    let pressed = 0
+    card.addEventListener("click", () => pressed++)
+    await ElementFixture.settle(wrapper)
+    expect(rootOf(card).getAttribute("tabindex")).toBe("0")
+    expect(rootOf(card).getAttribute("role")).toBe("link")
+    before.focus()
+    await Keys.tab()
+    expect(card.shadowRoot!.activeElement).toBe(rootOf(card))
+    expect(style(rootOf(card)).outlineStyle).toBe("solid")
+    await userEvent.keyboard("{Enter}")
+    expect(pressed).toBe(1)
+    await Keys.tab()
+    expect(document.activeElement).toBe(wrapper.querySelectorAll("button")[1])
+  })
+
+  it("Enter on a button inside is the button's", async () => {
+    const card = await render(`<ui-card><button id="b">Go</button></ui-card>`)
+    let heard = 0
+    card.addEventListener("click", () => heard++)
+    card.querySelector<HTMLButtonElement>("#b")!.focus()
+    await userEvent.keyboard("{Enter}")
+    expect(heard).toBe(0)
+  })
+
+  it("selecting its text doesn't open it", async () => {
+    const card = await render(`<ui-card><ui-content><p id="words">Some words to select</p></ui-content></ui-card>`)
+    let heard = 0
+    card.addEventListener("click", () => heard++)
+    getSelection()!.selectAllChildren(card.querySelector("#words")!)
+    card.querySelector<HTMLElement>("#words")!.click()
+    expect(heard).toBe(0)
+    getSelection()!.removeAllRanges()
+    card.querySelector<HTMLElement>("#words")!.click()
+    expect(heard).toBe(1)
+  })
+
+  it("a link card follows from anywhere;  a control inside doesn't make it follow", async () => {
+    const card = await render(`<ui-card link="#card"><ui-content id="words">Words</ui-content><input id="i"></ui-card>`)
+    const prevented = (target: HTMLElement) => {
+      let was: boolean | undefined
+      card.parentElement!.addEventListener(
+        "click",
+        (event) => {
+          was = event.defaultPrevented
+          event.preventDefault()
+        },
+        { once: true }
+      )
+      target.click()
+      return was
+    }
+    expect(prevented(card.querySelector<HTMLElement>("#words")!)).toBe(false)
+    expect(prevented(card.querySelector<HTMLElement>("#i")!)).toBe(true)
+  })
+
+  it("a nested link in a link card keeps its own click:  nothing prevents it", async () => {
+    const card = await render(`<ui-card link="#card"><a id="a" href="#inner">In</a></ui-card>`)
+    let prevented: boolean | undefined
+    card.parentElement!.addEventListener(
+      "click",
+      (event) => {
+        prevented = event.defaultPrevented
+        event.preventDefault()
+      },
+      { once: true }
+    )
+    card.querySelector<HTMLElement>("#a")!.click()
+    expect(prevented).toBe(false)
+  })
+
+  it("keeps what's inside to its rounded corners", async () => {
+    const card = await render(`<ui-card image="${PHOTO}" heading="Poster"></ui-card>`)
+    expect(style(rootOf(card)).overflow).toBe("clip")
+  })
+})
+
+////////////////
 // ## Accessibility
 ////////////////
 

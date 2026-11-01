@@ -366,16 +366,9 @@ export class RestPlace extends WebPlace implements Place {
     return this.mappingOf(collection).fields?.[field] ?? field
   }
 
-  /**
-   * `row` from the server, named our way, its version noted.  `response`:  where an `ETag` may be.
-   * - A field named with a dot is inside another:  `a page's picture is its "thumbnail.source"`.
-   */
+  /** `row` from the server, named our way, its version noted.  `response`:  where an `ETag` may be. */
   private noted(collection: string, wireRow: PlaceRow, response?: Response): PlaceRow {
-    const names = this.mappingOf(collection).fields ?? {}
-    const row = renamed(wireRow, turnedRound(names))
-    for (const [ours, theirs] of Object.entries(names)) {
-      if (theirs.includes(".")) row[ours] = valueAt(wireRow, theirs) as PlaceRow[string]
-    }
+    const row = renamed(wireRow, turnedRound(this.mappingOf(collection).fields ?? {}))
     const id = idOfRow(row, this.capabilities.idOf)
     if (id !== undefined) this.noteVersion(collection, id, row, response)
     return row
