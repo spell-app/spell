@@ -212,6 +212,11 @@
       "summary": "A group of items presents a set of site content for display, each an image beside its text.",
       "status": "done"
     },
+    "ui-json": {
+      "title": "JSON data",
+      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "status": "done"
+    },
     "ui-keys": {
       "title": "Keys",
       "summary": "Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.",

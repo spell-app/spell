@@ -215,7 +215,8 @@
 
                   - The `tree` property, from script or a framework. It redraws whenever `tree` is set again: set a NEW
                     tree, since a tree changed in place isn't seen.
-                  - A `<script type="application/json">` child holding the tree as JSON, for a static page with no script
+                  - A `<ui-json>` child holding the tree as JSON, its text or a `source` file;  or the older
+                    `<script type="application/json">` child, for a static page with no script
                     of its own (it works from `file://` too). The diagram follows the child if the page changes it.
 
                   The property wins when both are there; setting it back to `undefined` shows the child's tree again. With

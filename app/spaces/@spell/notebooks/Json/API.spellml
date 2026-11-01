@@ -1,0 +1,33 @@
+<spell-notebook "json api">
+	<header level="1">
+		JSON data
+		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
+	</>
+	<json-tab-bar showing="api"/>
+	<section>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#events">Events</>
+			<item link="#states">States</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-json" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-json" only="events"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-json" only="states"></>
+		</>
+	</>
+</spell-notebook>

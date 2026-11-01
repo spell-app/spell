@@ -3,7 +3,7 @@ import type { TreeDiagramNode } from "./UITreeDiagram.types"
 /****************
  * ### `TreeData`
  * Where a `<ui-tree-diagram>`'s tree comes from, made safe to lay out:
- * the `tree` property, or the JSON in a `<script type="application/json">` child.
+ * the `tree` property, or the JSON in a `<ui-json>` or `<script type="application/json">` child (`JsonChild`).
  * - STATIC, plain DOM, no Solid:  the component reads the tree through it, and names the diagram with `summary()`;
  *   tests drive it directly.
  * - Lenient:  data from a page is checked, not trusted.
@@ -35,27 +35,6 @@ export class TreeData {
       if (children.length) node.children = children
     }
     return node
-  }
-
-  /**
-   * JSON text of `domElement`'s first `<script type="application/json">` child;  `undefined` without one.
-   * - By `localName`, not `instanceof`:  a static server render's children are linkedom elements.
-   */
-  static scriptText(domElement: Element): string | undefined {
-    for (const child of domElement.children) {
-      if (child.localName === "script" && child.getAttribute("type")?.trim() === "application/json")
-        return child.textContent ?? ""
-    }
-    return undefined
-  }
-
-  /**
-   * `text` (a script child's JSON) as a tree;  `undefined` for none (no text, blank, or not a node).
-   * - throws `SyntaxError` when `text` isn't JSON:  the caller warns.
-   */
-  static parse(text: string | undefined): TreeDiagramNode | undefined {
-    if (!text?.trim()) return undefined
-    return TreeData.node(JSON.parse(text))
   }
 
   /**

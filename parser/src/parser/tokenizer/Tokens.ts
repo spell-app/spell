@@ -321,7 +321,7 @@ export type JSXAttributeTokenProps = Prettify<P.TokenProps<JSXAttributeValue>> &
 export class JSXTextToken extends JSXToken<string> {}
 
 /**
- * A raw-text element's contents, read as written:  `<style>`, `<script>`, `<css>`, `<markdown>` (`Tokenizer.rawTextTags`).
+ * A raw-text element's contents, read as written:  `<style>`, `<script>`, `<css>`, `<markdown>`, `<json>` (`Tokenizer.rawTextTags`).
  * - Text like any other (`instanceof JSXTextToken`), but its `{`, `[` and line breaks are its own:
  *   a rule drawing it takes it whole, as the web does a `<script>`'s.
  */
