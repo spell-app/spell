@@ -205,8 +205,8 @@ describe("<ui-field> tip", () => {
 
     await userEvent.click(info)
     await expect.poll(() => tip.matches(":popover-open")).toBe(true)
-    expect(getComputedStyle(tip).transitionDelay).toBe("0s")
-    await expect.poll(() => getComputedStyle(tip).visibility, { timeout: 500 }).toBe("visible")
+    expect(getComputedStyle(tip).visibility).toBe("visible")
+    expect(getComputedStyle(tip).opacity).toBe("1")
 
     await userEvent.unhover(info)
     expect(tip.matches(":popover-open")).toBe(true)

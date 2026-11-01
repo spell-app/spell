@@ -134,8 +134,9 @@
   .field > .row > .info:hover > .tip {
     transition-delay: var(--_ui-field-tip-delay);
   }
+  /* focus shows it at once:  none, not a delay of 0, which would leave a hover already waiting to run on */
   .field > .row > .info:focus > .tip {
-    transition-delay: 0s;
+    transition: none;
   }
   /* In the top layer while it shows (`TopLayerTip`):  under the icon, flipping to stay in the window. */
   .field > .row > .info {
