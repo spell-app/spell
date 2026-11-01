@@ -3,7 +3,6 @@
 // What's where, top to bottom:
 //   a counter:  its count, counting up, and its drawing
 //   the app:  one counter, drawn
-//   start
 //   tests
 
 
@@ -30,12 +29,6 @@
 			return <div class="Counter">{draw its counter}</div>
 	</spell>
 </spell-app>
-
-
-## Start
-<spell>
-	start counter app
-</spell>
 
 
 ## Tests

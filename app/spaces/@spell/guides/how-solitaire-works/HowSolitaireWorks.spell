@@ -74,7 +74,6 @@ add (a new card with rank = queen, suit = spades) to the hand of table
 add (a new card with rank = queen, suit = hearts) to the hand of table
 add (a new card with rank = jack, suit = clubs) to the hand of table
 add (a new card with rank = 10, suit = diamonds) to the hand of table
-start table
 
 
 ## A check:  the rule, card by card

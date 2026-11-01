@@ -75,7 +75,6 @@ agregar (una nueva carta con rango = dama, palo = espadas) a la mano de mesa
 agregar (una nueva carta con rango = dama, palo = corazones) a la mano de mesa
 agregar (una nueva carta con rango = jota, palo = tréboles) a la mano de mesa
 agregar (una nueva carta con rango = 10, palo = diamantes) a la mano de mesa
-iniciar mesa
 
 
 ## Una prueba:  la regla, carta por carta

@@ -7,49 +7,49 @@
     {
       "type": "Calculator",
       "superType": "App",
-      "defined": "/Calculator.spell:341-363"
+      "defined": "/Calculator.spell:330-352"
     },
     {
       "property": "input",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:364-397"
+      "defined": "/Calculator.spell:353-386"
     },
     {
       "property": "output",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:398-432"
+      "defined": "/Calculator.spell:387-421"
     },
     {
       "property": "left",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:433-464"
+      "defined": "/Calculator.spell:422-453"
     },
     {
       "property": "right",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:465-497"
+      "defined": "/Calculator.spell:454-486"
     },
     {
       "property": "total",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "number",
-      "defined": "/Calculator.spell:498-534"
+      "defined": "/Calculator.spell:487-523"
     },
     {
       "property": "operator",
       "of": "Calculator",
       "group": "What it keeps",
       "datatype": "text",
-      "defined": "/Calculator.spell:535-571"
+      "defined": "/Calculator.spell:524-560"
     },
     {
       "syntax": "clear {thisArg:expression}",
@@ -63,7 +63,7 @@
       "group": "What its keys do",
       "kind": "method",
       "name": "clear (a calculator)",
-      "defined": "/Calculator.spell:594-746"
+      "defined": "/Calculator.spell:583-735"
     },
     {
       "syntax": "update the total of {thisArg:expression}",
@@ -77,7 +77,7 @@
       "group": "What its keys do",
       "kind": "method",
       "name": "update the total of (a calculator)",
-      "defined": "/Calculator.spell:748-1175"
+      "defined": "/Calculator.spell:737-1164"
     },
     {
       "syntax": "append {callArgs:expression} to {thisArg:expression}",
@@ -97,7 +97,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/Calculator.spell:1280-1653"
+      "defined": "/Calculator.spell:1269-1642"
     },
     {
       "syntax": "apply {callArgs:expression} to {thisArg:expression}",
@@ -117,7 +117,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/Calculator.spell:1742-1882"
+      "defined": "/Calculator.spell:1731-1871"
     },
     {
       "syntax": "finish {thisArg:expression}",
@@ -132,7 +132,7 @@
       "kind": "method",
       "name": "finish (a calculator)",
       "returns": "nothing",
-      "defined": "/Calculator.spell:1959-2137"
+      "defined": "/Calculator.spell:1948-2126"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -146,22 +146,22 @@
       "group": "How it draws:  the display, then the keypad, four keys a row",
       "kind": "method",
       "name": "draw (a calculator)",
-      "defined": "/Calculator.spell:2204-3701"
+      "defined": "/Calculator.spell:2193-3690"
     }
   ],
   "codeLines": [
-    15,
-    18,
-    23,
-    28,
-    33,
-    38,
-    43,
-    49,
-    58,
-    72,
-    83,
-    90,
-    100
+    14,
+    17,
+    22,
+    27,
+    32,
+    37,
+    42,
+    48,
+    57,
+    71,
+    82,
+    89,
+    99
   ]
 }

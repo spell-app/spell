@@ -144,10 +144,6 @@ export function testWavingBack() {
   })
 }
 
-core.heading("Start:  show the sign on the right")
-//## Start:  show the sign on the right
-if (!core.isCarryingOver) helloSign.start()
-
 core.heading("If something went wrong")
 /////////////////////////////
 // ## If something went wrong
@@ -170,5 +166,7 @@ core.heading("Where next")
 // - Tic-Tac-Toe, in the Examples:  a small game to change, once the tour has shown you around.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the sign looks -- centred, the greeting big. */¬¬.Sign {¬  max-width: 28em;¬  margin-inline: auto;¬  padding-block: 2em;¬  text-align: center;¬}¬¬.Sign h1 {¬  font-size: 2.5em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) helloSign.start()
 // -----------
 if (!core.isCarryingOver) testWavingBack()

@@ -10,7 +10,6 @@ core.heading("Bill Splitter")
 //   money:  an amount written as dollars and cents
 //   the bill splitter:  its diners, the tip, the sums, and its drawing
 //   a diner:  their name, what they ordered, and what they owe
-//   start
 //   tests
 
 core.heading("Money:  an amount as dollars and cents, e.g. 12.5 => \"$12.50\"")
@@ -196,7 +195,6 @@ billSplitter.percent = 18
 billSplitter.diners.append(new Diner({ name: "Ana", amount: 24 }))
 billSplitter.diners.append(new Diner({ name: "Ben", amount: 18.5 }))
 billSplitter.diners.append(new Diner({ name: "Cleo", amount: 31.25 }))
-if (!core.isCarryingOver) billSplitter.start()
 
 core.heading("Tests")
 /** Tests */
@@ -209,5 +207,7 @@ export function testMoney() {
 }
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the bill splitter looks.¬   - The table, <bill-splitter-table>, holds a <bill-splitter-diner> a row.¬   - Inside a diner, by its parts:  its row, ::part(row);  its name, amount, share and remove button. */¬¬.BillSplitter {¬  max-width: 36em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬/* the tip:  its field, then three quick picks */¬.Tip {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  margin-block: 1em;¬}¬¬.Tip > label {¬  font-weight: bold;¬}¬¬.Tip > ui-input {¬  width: 7em;¬}¬¬/****************¬ * The diners:  name, amount, what they owe, remove¬ ****************/¬¬bill-splitter-table {¬  display: flex;¬  flex-direction: column;¬  gap: 0.5em;¬  margin-block: 1em;¬}¬¬bill-splitter-table::part(placeholder) {¬  padding: 1em;¬  opacity: 0.6;¬  text-align: center;¬}¬¬bill-splitter-diner::part(row) {¬  display: grid;¬  grid-template-columns: 1fr 9em 6em auto;¬  align-items: center;¬  gap: 0.5em;¬}¬¬bill-splitter-diner::part(share) {¬  font-weight: bold;¬  font-variant-numeric: tabular-nums;¬  text-align: right;¬}¬¬/****************¬ * The sums:  two columns, the total in bold¬ ****************/¬¬.Sums {¬  display: grid;¬  grid-template-columns: 1fr auto;¬  row-gap: 0.25em;¬  font-variant-numeric: tabular-nums;¬}¬¬.Sums > :nth-child(even) {¬  text-align: right;¬}¬¬.Sums > .Total {¬  padding-top: 0.25em;¬  font-size: 1.2em;¬  font-weight: bold;¬}¬`)
+// -----------
+if (!core.isCarryingOver) billSplitter.start()
 // -----------
 if (!core.isCarryingOver) testMoney()

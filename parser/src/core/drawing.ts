@@ -170,8 +170,10 @@ export const drawingMethods = defineCoreModule({
    * - Starting again replaces what's drawn there.
    * - SIDE EFFECT: appends a `div` to `document.body` the first time it's called, if the host set no `appRoot`.
    * - With `core.appLayout` (a `<spell-viewer>` with markup inside it):  draws nothing, saying so on the console.
+   * - With no page at all, e.g. a program run in node:  nothing, as an app starts by itself (`startedByItself()`).
    */
   startDrawing(view: CanDraw): void {
+    if (typeof document === "undefined") return
     if (core.appLayout) {
       core.console.log(`${view.constructor.name}:  its page's markup draws it, not its \`to draw\``)
       return

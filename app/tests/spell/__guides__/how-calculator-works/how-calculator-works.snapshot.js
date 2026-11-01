@@ -113,7 +113,6 @@ core.heading("Start")
 /** Start */
 export const adder = new AddingMachine()
 adder.clear()
-if (!core.isCarryingOver) adder.start()
 
 core.heading("A check:  12 and 5 make 17")
 /** A check:  12 and 5 make 17 */
@@ -150,5 +149,7 @@ core.heading("Try it")
 // so it can do all four sums.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the adding machine looks -- the display over a row of keys. */¬¬.Adder {¬  max-width: 20em;¬  margin: 2em auto;¬}¬¬.Display {¬  padding: 0.5em;¬  font-size: 2em;¬  text-align: right;¬  font-variant-numeric: tabular-nums;¬}¬¬.Keys {¬  display: grid;¬  grid-template-columns: repeat(5, 1fr);¬  gap: 0.4em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) adder.start()
 // -----------
 if (!core.isCarryingOver) testAddingUp()

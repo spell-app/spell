@@ -11,31 +11,31 @@
     {
       "type": "Diner",
       "superType": "View",
-      "defined": "/BillSplitter.spell:2355-3173"
+      "defined": "/BillSplitter.spell:2344-3162"
     },
     {
       "property": "name",
       "of": "Diner",
       "datatype": "text",
-      "defined": "/BillSplitter.spell:2385-2403"
+      "defined": "/BillSplitter.spell:2374-2392"
     },
     {
       "property": "amount",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:2445-2469"
+      "defined": "/BillSplitter.spell:2434-2458"
     },
     {
       "property": "tip",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:2548-2608"
+      "defined": "/BillSplitter.spell:2537-2597"
     },
     {
       "property": "share",
       "of": "Diner",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:2612-2647"
+      "defined": "/BillSplitter.spell:2601-2636"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -48,7 +48,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:2734-3173"
+      "defined": "/BillSplitter.spell:2723-3162"
     },
     {
       "syntax": "remove {thisArg:expression}",
@@ -62,13 +62,13 @@
       "group": "The table:  the diners, one a row",
       "kind": "method",
       "name": "remove (a diner)",
-      "defined": "/BillSplitter.spell:3437-3508"
+      "defined": "/BillSplitter.spell:3426-3497"
     },
     {
       "type": "Table",
       "superType": "ViewableList",
       "itemType": "Diner",
-      "defined": "/BillSplitter.spell:3212-3349"
+      "defined": "/BillSplitter.spell:3201-3338"
     },
     {
       "syntax": "write {callArgs:expression} as money",
@@ -87,42 +87,42 @@
         }
       ],
       "returns": "text",
-      "defined": "/BillSplitter.spell:489-746"
+      "defined": "/BillSplitter.spell:478-735"
     },
     {
       "type": "BillSplitter",
       "superType": "App",
-      "defined": "/BillSplitter.spell:770-2290"
+      "defined": "/BillSplitter.spell:759-2279"
     },
     {
       "property": "diners",
       "of": "BillSplitter",
       "datatype": "Table",
-      "defined": "/BillSplitter.spell:804-831"
+      "defined": "/BillSplitter.spell:793-820"
     },
     {
       "property": "percent",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:890-915"
+      "defined": "/BillSplitter.spell:879-904"
     },
     {
       "property": "subtotal",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:956-1097"
+      "defined": "/BillSplitter.spell:945-1086"
     },
     {
       "property": "tip",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:1101-1146"
+      "defined": "/BillSplitter.spell:1090-1135"
     },
     {
       "property": "total",
       "of": "BillSplitter",
       "datatype": "number",
-      "defined": "/BillSplitter.spell:1150-1187"
+      "defined": "/BillSplitter.spell:1139-1176"
     },
     {
       "syntax": "add someone (of {thisArg:expression})?",
@@ -135,7 +135,7 @@
       ],
       "kind": "method",
       "name": "add someone",
-      "defined": "/BillSplitter.spell:1230-1306"
+      "defined": "/BillSplitter.spell:1219-1295"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -148,7 +148,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/BillSplitter.spell:1350-2290"
+      "defined": "/BillSplitter.spell:1339-2279"
     },
     {
       "property": "table",
@@ -156,7 +156,7 @@
       "group": "The table:  the diners, one a row",
       "datatype": "Table",
       "exclusive": true,
-      "defined": "/BillSplitter.spell:3380-3408"
+      "defined": "/BillSplitter.spell:3369-3397"
     },
     {
       "syntax": "test money",
@@ -165,28 +165,28 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/BillSplitter.spell:3836-3964"
+      "defined": "/BillSplitter.spell:3805-3933"
     }
   ],
   "codeLines": [
-    17,
-    20,
-    26,
-    32,
-    36,
-    41,
-    69,
-    79,
-    91,
-    101,
-    104,
-    110,
-    116,
-    122,
-    126,
-    131,
-    136,
-    191,
-    202
+    16,
+    19,
+    25,
+    31,
+    35,
+    40,
+    68,
+    78,
+    90,
+    100,
+    103,
+    109,
+    115,
+    121,
+    125,
+    130,
+    135,
+    190,
+    200
   ]
 }

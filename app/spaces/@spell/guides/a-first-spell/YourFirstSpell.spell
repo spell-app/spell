@@ -89,10 +89,6 @@ to test waving back
 	set the waves of hello sign to 0
 
 
-## Start:  show the sign on the right
-start hello sign
-
-
 ## If something went wrong
 // - The app on the right didn't change:  look for a wavy red line, and point at it.
 //   A missing quote mark, or a line pushed left or right, are the usual reasons.

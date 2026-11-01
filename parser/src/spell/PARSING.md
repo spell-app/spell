@@ -2048,6 +2048,8 @@ What a program's lines about where data lives compile to, and what reads the res
   - Why:  when an edit keeps the last run's things, the runner loads the program with its start skipped,
     so its tests don't print again, and the game in progress isn't started again.
   - NOT in a method, nor in a plain block, e.g. a rule test's.
+  - A program whose own code never calls `start` needs no such line:  its app or page starts by itself, the one in the
+    file named for the project, else the first (`SpellProject.startedByItself()`, epic `editor`).
 - Classes compile as a hand-written class would:  each MEMBER in its class's body, wherever it was declared.
   - A member is a `P.ASTClassMember`.
     It knows its class (`typeName`), and compiles two ways:

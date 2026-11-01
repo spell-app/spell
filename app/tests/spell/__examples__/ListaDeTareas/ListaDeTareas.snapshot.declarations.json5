@@ -177,7 +177,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "el filtro",
-      "defined": "/ListaDeTareas.es.spell:4965-5212"
+      "defined": "/ListaDeTareas.es.spell:4938-5185"
     }
   ],
   "codeLines": [
@@ -201,6 +201,6 @@
     155,
     160,
     166,
-    261
+    260
   ]
 }

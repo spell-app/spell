@@ -134,7 +134,7 @@ The Calculator shows them plainest, in 113 lines, because it keeps each part in 
 | what its things are | `a calculator has a total as a number`, one of its six properties | the component's state |
 | what they do | `to clear (a calculator):`, and four more actions | its event handlers |
 | how they draw | `to draw (a calculator)`:  a keypad of Spell UI buttons, each with a click like `onClick={append "7" to it}` | its JSX |
-| the start | `start the calculator`, which puts its drawing on the page | `createRoot(root).render(<App />)` |
+| the start | `clear the calculator`:  the app then starts by itself, which puts its drawing on the page | `createRoot(root).render(<App />)` |
 
 <details>
 <summary>The four parts, in the Calculator's own lines</summary>
@@ -174,7 +174,6 @@ to draw (a calculator)
 ```spell
 set calculator to a new calculator
 clear the calculator
-start the calculator
 ```
 
 - The whole program, its other four actions too:

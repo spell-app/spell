@@ -97,6 +97,3 @@ recipe box is an app:
 				<p>We can't reach your recipes right now.</p>
 				<ui-button class="again" onClick={try again}>Try again</ui-button>
 			</ui-message>
-
-
-start the recipe box

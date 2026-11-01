@@ -164,9 +164,12 @@ export type RunAppOptions = RunCompiledOptions & {
  */
 export async function importCompiled(compiled: string, coreUrl: string): Promise<Record<string, unknown>> {
   const url = URL.createObjectURL(new Blob([linkModule(compiled, coreUrl)], { type: "text/javascript" }))
+  // an app in it never starts by itself:  whoever imports it draws what it holds
+  core.isCarryingOver = true
   try {
     return (await import(/* @vite-ignore */ url)) as Record<string, unknown>
   } finally {
+    core.isCarryingOver = false
     URL.revokeObjectURL(url)
   }
 }

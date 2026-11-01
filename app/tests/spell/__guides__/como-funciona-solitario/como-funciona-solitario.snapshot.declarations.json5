@@ -144,7 +144,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la columna",
-      "defined": "/ComoFuncionaSolitario.es.spell:3301-3607"
+      "defined": "/ComoFuncionaSolitario.es.spell:3288-3594"
     }
   ],
   "codeLines": [
@@ -164,6 +164,6 @@
     103,
     108,
     113,
-    141
+    140
   ]
 }

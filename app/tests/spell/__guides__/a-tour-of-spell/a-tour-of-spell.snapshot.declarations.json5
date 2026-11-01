@@ -139,7 +139,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "thirst",
-      "defined": "/TourOfSpell.spell:3310-3553"
+      "defined": "/TourOfSpell.spell:3297-3540"
     }
   ],
   "codeLines": [
@@ -157,6 +157,6 @@
     117,
     123,
     127,
-    164
+    163
   ]
 }

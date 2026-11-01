@@ -285,7 +285,7 @@ It starts afresh instead, and says why on the console, when:
 - you press Restart:  a new deal, on purpose
 - the edit changed the program's start
   - in a project of several files:  the file that starts its app, like Solitaire's,
-    which ends `start the game`;  an edit to a file of templates, like the card's, keeps the game
+    if it has a `start the game` line;  an edit to a file of templates, like the card's, keeps the game
   - in a project of one file:  the lines that start its app or run its tests
   - either way, a file more or less
 - one of the last run's things can't come over:  its template changed, say

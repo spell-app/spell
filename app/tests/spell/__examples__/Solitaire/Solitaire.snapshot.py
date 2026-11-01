@@ -897,7 +897,6 @@ def test_the_moves() -> None:
 
 
 asyncio.run(solitaire.start_a_new_game())
-solitaire.start()
 
 
 # -----------
@@ -1117,6 +1116,12 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   rotate: calc((var(--index) - (var(--count) - 1) / 2) * var(--card-turn));
 }
 """)
+
+
+# -----------
+
+
+solitaire.start()
 
 
 # -----------

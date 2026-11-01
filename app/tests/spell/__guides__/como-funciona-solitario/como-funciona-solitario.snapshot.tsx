@@ -194,7 +194,6 @@ mesa.mano.append(new Carta({ rango: "dama", palo: "espadas" }))
 mesa.mano.append(new Carta({ rango: "dama", palo: "corazones" }))
 mesa.mano.append(new Carta({ rango: "jota", palo: "tréboles" }))
 mesa.mano.append(new Carta({ rango: 10, palo: "diamantes" }))
-if (!core.isCarryingOver) mesa.start()
 
 core.heading("Una prueba:  la regla, carta por carta")
 /** Una prueba:  la regla, carta por carta */
@@ -227,6 +226,8 @@ core.heading("Pruébalo")
 // tienen sus propias reglas, escritas igual.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the table looks -- the column, then the hand, each a row of cards. */¬¬.Mesa {¬  max-width: 34em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬como-funciona-solitario-columna,¬como-funciona-solitario-pila {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) mesa.start()
 // -----------
 if (!core.isCarryingOver) testLaColumna()
 

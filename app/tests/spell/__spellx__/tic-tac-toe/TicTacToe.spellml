@@ -4,7 +4,6 @@
 // What's where, top to bottom:
 //   a square, and the board:  nine squares in a grid
 //   the game:  whose turn it is, the rules for a win, and its drawing
-//   start
 //   tests
 
 
@@ -100,7 +99,6 @@
 
 	## Start
 	start a new game
-	start tic tac toe
 
 
 	## Tests

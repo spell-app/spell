@@ -584,9 +584,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       ? new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
                       : undefined
                   const combine = () =>
-                    SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
-                      listsStartAt: this.contents?.listsStartAt
-                    })
+                    SpellProject.combineCompiled(
+                      parts,
+                      target.writer,
+                      header,
+                      this.scope,
+                      { listsStartAt: this.contents?.listsStartAt },
+                      this.mainFileIn(files)
+                    )
                   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
                   // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
                   const split = SP.SpellDeclarations.split(marked, this.scope!, {
@@ -628,9 +633,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       writer,
                       this.importHeader(writer),
                       this.scope,
-                      {
-                        listsStartAt: this.contents?.listsStartAt
-                      }
+                      { listsStartAt: this.contents?.listsStartAt },
+                      this.mainFileIn(files)
                     )
                     const drawing = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
                     // the language it speaks, if not English:  its page turns Spell UI's on before it draws (`<es-texto>`)
@@ -707,9 +711,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const files = [...this.sourceImportFiles, ...this.activeImports]
     const parts = files.map((file) => (file.AST instanceof P.ASTStatementGroup ? file.AST : file.compiled))
     return this.scope!.parser!.inPlay(() => {
-      const marked = SpellProject.combineCompiled(parts, target.writer, this.importHeader(target.writer), this.scope, {
-        listsStartAt: this.contents?.listsStartAt
-      })
+      const marked = SpellProject.combineCompiled(
+        parts,
+        target.writer,
+        this.importHeader(target.writer),
+        this.scope,
+        { listsStartAt: this.contents?.listsStartAt },
+        this.mainFileIn(files)
+      )
       return SP.SpellDeclarations.stripComments(marked)
     })
   }
@@ -727,9 +736,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const marks = new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
     return this.scope!.parser!.inPlay(() => {
       const marked = P.SourceMarks.during(marks, () =>
-        SpellProject.combineCompiled(parts, target.writer, this.importHeader(target.writer), this.scope, {
-          listsStartAt: this.contents?.listsStartAt
-        })
+        SpellProject.combineCompiled(
+          parts,
+          target.writer,
+          this.importHeader(target.writer),
+          this.scope,
+          { listsStartAt: this.contents?.listsStartAt },
+          this.mainFileIn(files)
+        )
       )
       return marks.extract(SP.SpellDeclarations.stripComments(marked), {
         file: this.outputFileFor(target).location.file,
@@ -757,15 +771,18 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - `header`:  what the module starts with, e.g. `importHeaderFor()`'s imports.
    * - `scope`:  the project's, which the writer may read what it imports from (`P.ProgramWriter.forProject()`).
    * - `options`:  what its project file says that changes the code, e.g. where its lists start (`P.WriterOptions`).
+   * - Near its end, its app or page starts by itself, if nothing in it says `start` (`startedByItself()`).
    * - Last, a call of each of its `to test ...` methods, the first time it loads (epic page `outline-spell`, P17):
    *   `if (!core.isCarryingOver) testCardSetup()` -- see `testRuns()`.
+   * - `mainFile`:  which of `parts` is the file named for the project:  its app is the one that starts.
    */
   static combineCompiled(
     parts: Array<P.ASTStatementGroup | string | undefined>,
     writer: P.ProgramWriter = P.JSWriter.instance,
     header = "",
     scope?: P.Scope,
-    options?: P.WriterOptions
+    options?: P.WriterOptions,
+    mainFile?: number
   ): string {
     const hoisted = SP.hoistClassMembers(parts.map((part) => (typeof part === "object" ? (part.statements ?? []) : [])))
     const projectWriter = writer.forProject(hoisted, scope, { ...options, noteForAuthor: SP.SpellWarnings.noteRead })
@@ -775,9 +792,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
         return String(projectWriter.write(new P.ASTStatementGroup(part.match, { statements: hoisted[index] })))
       })
       .join(projectWriter.fileSeparator)
-    const tests = SpellProject.testRuns(hoisted)
-    const testCode = tests ? projectWriter.fileSeparator + String(projectWriter.write(tests)) : ""
-    return projectWriter.module(header + code + testCode)
+    const starts = [SpellProject.startedByItself(hoisted, mainFile), SpellProject.testRuns(hoisted)].filter((it) => !!it)
+    const startCode = starts.map((it) => projectWriter.fileSeparator + String(projectWriter.write(it))).join("")
+    return projectWriter.module(header + code + startCode)
   }
 
   /**
@@ -883,6 +900,48 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * The line that starts the project's app or page, when nothing in it says to:  `if (!core.isCarryingOver) game.start()`
+   * (epic `editor`, Edit Without Redraw).
+   * - So a program needs no `start the game` line, in any language, and no edit can change how it starts.
+   * - `undefined` when anything in the program calls `start`:  a written line wins, or a method that does more.
+   * - Its top-level things whose type is an app or a page, by the project's own types:
+   *   the one in `mainFile` if it has one, else the first.
+   * - `undefined` for none, e.g. a library.
+   */
+  private static startedByItself(files: SP.HoistableStatement[][], mainFile?: number): P.ASTStatementGroup | undefined {
+    let isWritten = false
+    P.forEachNode(files, (node) => {
+      if (node instanceof P.ASTScopedMethodInvocation && node.methodName === "start") isWritten = true
+    })
+    if (isWritten) return undefined
+    const baseOf = new Map<string, string | undefined>()
+    const made: { file: number; statement: P.ASTAssignmentStatement; type: string }[] = []
+    const visit = (file: number, statement: SP.HoistableStatement) => {
+      if (statement instanceof P.ASTStatementGroup) statement.statements?.forEach((it) => visit(file, it))
+      else if (statement instanceof P.ASTClassDeclaration) baseOf.set(statement.type.name, statement.superType?.name)
+      else if (
+        statement instanceof P.ASTAssignmentStatement &&
+        statement.isNewVariable &&
+        statement.value instanceof P.ASTNewInstanceExpression
+      ) {
+        made.push({ file, statement, type: statement.value.type.name })
+      }
+    }
+    files.forEach((statements, file) => statements.forEach((it) => visit(file, it)))
+    const startsAPage = (type: string | undefined): boolean => {
+      for (let at = type; at; at = baseOf.get(at)) if (STARTING_TYPES.has(at)) return true
+      return false
+    }
+    const apps = made.filter(({ type }) => startsAPage(type))
+    const { statement } = apps.find(({ file }) => file === mainFile) ?? apps[0] ?? {}
+    if (!statement) return undefined
+    const start = new P.ASTScopedMethodInvocation(statement.match, { thing: statement.thing, methodName: "start" })
+    return new P.ASTStatementGroup(statement.match, {
+      statements: [new P.ASTProgramStart(statement.match, { statement: start })]
+    })
+  }
+
+  /**
    * A call of each `to test ...` method the project's files declare at their top level, in order:
    * `if (!core.isCarryingOver) testCardSetup()` (epic page `outline-spell`, P17).
    * - So a program runs its own tests the first time it loads, never on a hot reload (`core.isCarryingOver`).
@@ -920,6 +979,16 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     let [first] = body instanceof P.ASTStatementBlock ? (body.statements ?? []) : [body]
     if (first instanceof P.ASTReturnStatement) first = first.value
     return first instanceof P.ASTCoreMethodInvocation && first.methodName === "test"
+  }
+
+  /** Which of `files` is named for the project, e.g. `Solitaire.spellml` in `Solitaire`:  `undefined` if none is. */
+  private mainFileIn(files: readonly { path: string }[]): number | undefined {
+    const name = this.projectName?.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")
+    const at = files.findIndex(({ path }) => {
+      const stem = path.split("/").at(-1)?.split(".")[0]
+      return stem?.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "") === name
+    })
+    return at < 0 ? undefined : at
   }
 
   /** Does a program made of `parts` name a place?  A target that says `places: false` can't write one. */
@@ -1385,3 +1454,6 @@ function containsJSX(node: unknown): boolean {
   if (!(node instanceof P.ASTNode)) return false
   return Object.entries(node).some(([key, value]) => key !== "match" && containsJSX(value))
 }
+
+/** The built-in types that start by themselves, whichever language's words made them. */
+const STARTING_TYPES = new Set(["App", "Page"])

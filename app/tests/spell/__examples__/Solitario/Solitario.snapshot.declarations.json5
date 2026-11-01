@@ -538,51 +538,51 @@
       "type": "PilaDeReserva",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:10776-11184"
+      "defined": "/Solitario.es.spell:10758-11166"
     },
     {
       "property": "disposición",
       "of": "PilaDeReserva",
-      "defined": "/Solitario.es.spell:10820-10845"
+      "defined": "/Solitario.es.spell:10802-10827"
     },
     {
       "type": "PilaDeDescartes",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11254-11468"
+      "defined": "/Solitario.es.spell:11236-11450"
     },
     {
       "property": "disposición",
       "of": "PilaDeDescartes",
-      "defined": "/Solitario.es.spell:11300-11325"
+      "defined": "/Solitario.es.spell:11282-11307"
     },
     {
       "type": "Fundación",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:11526-12102"
+      "defined": "/Solitario.es.spell:11508-12084"
     },
     {
       "property": "disposición",
       "of": "Fundación",
-      "defined": "/Solitario.es.spell:11564-11589"
+      "defined": "/Solitario.es.spell:11546-11571"
     },
     {
       "property": "palo",
       "of": "Fundación",
       "datatype": "PaloDeCarta",
-      "defined": "/Solitario.es.spell:11593-11622"
+      "defined": "/Solitario.es.spell:11575-11604"
     },
     {
       "type": "Columna",
       "superType": "Pila",
       "gender": "feminine",
-      "defined": "/Solitario.es.spell:12181-12596"
+      "defined": "/Solitario.es.spell:12163-12578"
     },
     {
       "property": "disposición",
       "of": "Columna",
-      "defined": "/Solitario.es.spell:12217-12243"
+      "defined": "/Solitario.es.spell:12199-12225"
     },
     {
       "type": "Solitario",
@@ -808,7 +808,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "los movimientos",
-      "defined": "/Solitario.es.spell:12610-14193"
+      "defined": "/Solitario.es.spell:12592-14175"
     }
   ],
   "codeLines": [
@@ -895,6 +895,6 @@
     823,
     831,
     843,
-    964
+    963
   ]
 }

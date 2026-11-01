@@ -164,7 +164,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the column",
-      "defined": "/HowSolitaireWorks.spell:3045-3396"
+      "defined": "/HowSolitaireWorks.spell:3033-3384"
     }
   ],
   "codeLines": [
@@ -186,6 +186,6 @@
     107,
     112,
     117,
-    140
+    139
   ]
 }

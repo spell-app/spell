@@ -345,4 +345,13 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect(shown).toEqual({ isConnected: true, count: 3, label: "Clicked 3 times now" })
     await counting.close()
   })
+
+  test.each(["Counter", "ListaDeTareas", "Solitario"])("%s starts by itself, with no line saying to", async (project) => {
+    const opened = await context.newPage()
+    await opened.goto(`${EDITOR}edit/@spell/examples/${project}`, { timeout: 60_000 })
+    await opened.waitForTimeout(6000)
+    const drawn = await opened.evaluate(() => document.querySelector(".AppPaneBody")!.querySelectorAll("*").length)
+    expect(drawn).toBeGreaterThan(3)
+    await opened.close()
+  })
 })
