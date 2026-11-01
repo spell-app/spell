@@ -1,11 +1,15 @@
 # A deck
-The 52 cards of a standard deck, ace of clubs first.
+The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
 <spell-thing "deck" template="list of cards">
-	<action "create it" description="One of each card, ace of clubs first:  each starts face down, as every two sided view does">
+	<property "jokers" description="No jokers, unless it's made `with jokers`">yes or no</>
+	<action "create it" description="One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does">
 		for each rank in card ranks
 			for each suit in card suits
 				add a new card with rank = the rank, suit = the suit to the deck
+		if its jokers is yes
+			add a new joker with color = red to the deck
+			add a new joker with color = black to the deck
 	</action>
 	<property "state" description="Its cards' short names, top to bottom">
 		set card names to a new list of text
@@ -20,7 +24,18 @@ The 52 cards of a standard deck, ace of clubs first.
 		the number of (cards in the deck where it is a queen) should be 4
 		the state of the first card of the deck should be "A♣↓"
 		the name of the last card of the deck should be "king of spades"
+		a random card of the deck is a joker should be no
 		shuffle the deck
 		the number of cards in the deck should be 52
+	</test>
+
+	<test "a deck with jokers">
+		the deck is a new deck with jokers
+		the number of cards in the deck should be 54
+		set wild cards to the cards in the deck where it is a joker
+		the number of cards in wild cards should be 2
+		the first card of the deck is the ace of clubs should be yes
+		the last card of the deck is the black joker should be yes
+		the name of the bottom card of the deck should be "black joker"
 	</test>
 </spell-thing>

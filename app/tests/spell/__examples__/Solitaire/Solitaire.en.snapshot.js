@@ -22,9 +22,19 @@ export const words = {
       countThePointsForCardOnPile: "count the points for a card on a pile",
       pile: "pile"
     },
-    Deck: {
-      create: "create it",
+    Joker: {
+      color: "color",
+      isTheColorJoker: "is the (color) joker",
+      value: "value",
+      picture: "picture",
+      name: "name",
       state: "state"
+    },
+    Deck: {
+      jokers: "jokers",
+      create: "create it",
+      state: "state",
+      testWithJokers: "a deck with jokers"
     },
     Pile: {
       name: "name",
@@ -82,6 +92,10 @@ export const words = {
       { name: "drawing", description: "One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css", members: ["draw", "picture"] },
       { name: "Playing a card", members: ["play", "putOnPile", "countThePointsForCardOnPile"] },
       { name: "A pile of cards", members: ["pile"] }
+    ],
+    Joker: [
+      { name: "what's different", description: "A joker comes red or black", members: ["color", "isTheColorJoker"] },
+      { name: "what it changes", description: "A card's own, written again for a joker", members: ["value", "picture", "name", "state"] }
     ],
     Solitaire: [
       { name: "piles", description: "One of each, made with the solitaire", members: ["stock", "discards", "clubs", "diamonds", "hearts", "spades", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "create"] },
