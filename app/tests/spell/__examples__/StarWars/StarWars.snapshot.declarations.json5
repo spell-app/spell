@@ -1,0 +1,980 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Guide",
+    "MoreButton",
+    "WikiPage",
+    "Portrait",
+    "WikiNote",
+    "Record",
+    "Film",
+    "Person",
+    "Planet",
+    "Craft",
+    "Starship",
+    "Vehicle",
+    "Species",
+    "StarWar",
+    "Wikipedia"
+  ],
+  "statements": [
+    {
+      "type": "MoreButton",
+      "superType": "Thing",
+      "defined": "/StarWars.spell:6923-7299"
+    },
+    {
+      "property": "full",
+      "of": "MoreButton",
+      "datatype": "choice",
+      "defined": "/StarWars.spell:6954-7045"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "MoreButton",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWars.spell:7049-7299"
+    },
+    {
+      "type": "WikiPage",
+      "superType": "Thing",
+      "defined": "/StarWars.spell:7406-7817"
+    },
+    {
+      "property": "title",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7464-7483"
+    },
+    {
+      "property": "about",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7487-7506"
+    },
+    {
+      "property": "summary",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7510-7531"
+    },
+    {
+      "property": "picture",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7535-7556"
+    },
+    {
+      "property": "address",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7560-7581"
+    },
+    {
+      "property": "lower_about",
+      "asWritten": "lower about",
+      "of": "WikiPage",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7585-7629"
+    },
+    {
+      "property": "fits",
+      "of": "WikiPage",
+      "datatype": "choice",
+      "defined": "/StarWars.spell:7633-7817"
+    },
+    {
+      "type": "Portrait",
+      "superType": "Thing",
+      "defined": "/StarWars.spell:7905-8643"
+    },
+    {
+      "property": "name",
+      "of": "Portrait",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7933-7951"
+    },
+    {
+      "property": "hue",
+      "of": "Portrait",
+      "datatype": "number",
+      "defined": "/StarWars.spell:7955-7976"
+    },
+    {
+      "property": "shape",
+      "of": "Portrait",
+      "datatype": "text",
+      "defined": "/StarWars.spell:7980-7999"
+    },
+    {
+      "property": "page",
+      "of": "Portrait",
+      "datatype": "WikiPage",
+      "defined": "/StarWars.spell:8003-8051"
+    },
+    {
+      "property": "initial",
+      "of": "Portrait",
+      "datatype": "character",
+      "defined": "/StarWars.spell:8055-8100"
+    },
+    {
+      "property": "picture",
+      "of": "Portrait",
+      "datatype": "text",
+      "defined": "/StarWars.spell:8104-8206"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Portrait",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWars.spell:8210-8366"
+    },
+    {
+      "type": "WikiNote",
+      "superType": "Thing",
+      "defined": "/StarWars.spell:8703-9169"
+    },
+    {
+      "property": "name",
+      "of": "WikiNote",
+      "datatype": "text",
+      "defined": "/StarWars.spell:8732-8750"
+    },
+    {
+      "property": "page",
+      "of": "WikiNote",
+      "datatype": "WikiPage",
+      "defined": "/StarWars.spell:8754-8802"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "WikiNote",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWars.spell:8806-9169"
+    },
+    {
+      "type": "Record",
+      "superType": "Thing",
+      "defined": "/StarWars.spell:9231-10613"
+    },
+    {
+      "property": "label",
+      "of": "Record",
+      "datatype": "text",
+      "defined": "/StarWars.spell:9257-9276"
+    },
+    {
+      "property": "kind",
+      "of": "Record",
+      "datatype": "text",
+      "defined": "/StarWars.spell:9280-9298"
+    },
+    {
+      "property": "shape",
+      "of": "Record",
+      "datatype": "text",
+      "defined": "/StarWars.spell:9302-9321"
+    },
+    {
+      "property": "hue",
+      "of": "Record",
+      "datatype": "number",
+      "defined": "/StarWars.spell:9325-9366"
+    },
+    {
+      "syntax": "measure {callArgs:expression} in {callArgs:expression} (of {thisArg:expression})?",
+      "output": "measure_$amount_in_$unit",
+      "rule": "method_call",
+      "of": "Record",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "measure (amount as a number) in (unit as text)",
+      "params": [
+        {
+          "name": "amount",
+          "datatype": "number"
+        },
+        {
+          "name": "unit",
+          "datatype": "text"
+        }
+      ],
+      "returns": "text",
+      "defined": "/StarWars.spell:9425-9559"
+    },
+    {
+      "syntax": "open {thisArg:expression}",
+      "output": "open",
+      "rule": "method_call",
+      "of": "Record",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "open it",
+      "defined": "/StarWars.spell:9564-9756"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Record",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWars.spell:9761-10069"
+    },
+    {
+      "type": "Film",
+      "superType": "Record",
+      "defined": "/StarWars.spell:10626-12518"
+    },
+    {
+      "property": "title",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10680-10699"
+    },
+    {
+      "property": "episode_id",
+      "asWritten": "episode id",
+      "of": "Film",
+      "datatype": "number",
+      "defined": "/StarWars.spell:10703-10731"
+    },
+    {
+      "property": "opening_crawl",
+      "asWritten": "opening crawl",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10735-10762"
+    },
+    {
+      "property": "director",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10766-10788"
+    },
+    {
+      "property": "producer",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10792-10814"
+    },
+    {
+      "property": "release_date",
+      "asWritten": "release date",
+      "of": "Film",
+      "datatype": "date",
+      "defined": "/StarWars.spell:10818-10846"
+    },
+    {
+      "property": "characters",
+      "of": "Film",
+      "datatype": "list of people",
+      "defined": "/StarWars.spell:10850-10886"
+    },
+    {
+      "property": "planets",
+      "of": "Film",
+      "datatype": "list of planets",
+      "defined": "/StarWars.spell:10890-10924"
+    },
+    {
+      "property": "starships",
+      "of": "Film",
+      "datatype": "list of starships",
+      "defined": "/StarWars.spell:10928-10966"
+    },
+    {
+      "property": "label",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10970-10994"
+    },
+    {
+      "property": "kind",
+      "of": "Film",
+      "datatype": "text",
+      "defined": "/StarWars.spell:10998-11039"
+    },
+    {
+      "syntax": "play {thisArg:expression}",
+      "output": "play",
+      "rule": "method_call",
+      "of": "Film",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "play it",
+      "defined": "/StarWars.spell:11044-11092"
+    },
+    {
+      "syntax": "end {thisArg:expression}",
+      "output": "end",
+      "rule": "method_call",
+      "of": "Film",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "end it",
+      "defined": "/StarWars.spell:11097-11149"
+    },
+    {
+      "type": "Person",
+      "superType": "Record",
+      "defined": "/StarWars.spell:12533-13956"
+    },
+    {
+      "property": "name",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12589-12607"
+    },
+    {
+      "property": "height",
+      "of": "Person",
+      "datatype": "number",
+      "defined": "/StarWars.spell:12611-12635"
+    },
+    {
+      "property": "mass",
+      "of": "Person",
+      "datatype": "number",
+      "defined": "/StarWars.spell:12639-12661"
+    },
+    {
+      "property": "hair_color",
+      "asWritten": "hair color",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12665-12689"
+    },
+    {
+      "property": "eye_color",
+      "asWritten": "eye color",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12693-12716"
+    },
+    {
+      "property": "birth_year",
+      "asWritten": "birth year",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12720-12744"
+    },
+    {
+      "property": "gender",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12748-12768"
+    },
+    {
+      "property": "homeworld",
+      "of": "Person",
+      "datatype": "Planet",
+      "defined": "/StarWars.spell:12772-12799"
+    },
+    {
+      "property": "films",
+      "of": "Person",
+      "datatype": "list of films",
+      "defined": "/StarWars.spell:12803-12833"
+    },
+    {
+      "property": "species",
+      "of": "Person",
+      "datatype": "list of species",
+      "defined": "/StarWars.spell:12837-12871"
+    },
+    {
+      "property": "vehicles",
+      "of": "Person",
+      "datatype": "list of vehicles",
+      "defined": "/StarWars.spell:12875-12911"
+    },
+    {
+      "property": "starships",
+      "of": "Person",
+      "datatype": "list of starships",
+      "defined": "/StarWars.spell:12915-12953"
+    },
+    {
+      "property": "label",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12957-12980"
+    },
+    {
+      "property": "kind",
+      "of": "Person",
+      "datatype": "text",
+      "defined": "/StarWars.spell:12984-13022"
+    },
+    {
+      "type": "Planet",
+      "superType": "Record",
+      "defined": "/StarWars.spell:13971-15679"
+    },
+    {
+      "property": "name",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14027-14045"
+    },
+    {
+      "property": "rotation_period",
+      "asWritten": "rotation period",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14049-14082"
+    },
+    {
+      "property": "orbital_period",
+      "asWritten": "orbital period",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14086-14118"
+    },
+    {
+      "property": "diameter",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14122-14148"
+    },
+    {
+      "property": "climate",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14152-14173"
+    },
+    {
+      "property": "gravity",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14177-14198"
+    },
+    {
+      "property": "terrain",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14202-14223"
+    },
+    {
+      "property": "surface_water",
+      "asWritten": "surface water",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14227-14258"
+    },
+    {
+      "property": "population",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14262-14290"
+    },
+    {
+      "property": "residents",
+      "of": "Planet",
+      "datatype": "list of people",
+      "defined": "/StarWars.spell:14294-14329"
+    },
+    {
+      "property": "films",
+      "of": "Planet",
+      "datatype": "list of films",
+      "defined": "/StarWars.spell:14333-14363"
+    },
+    {
+      "property": "label",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14367-14390"
+    },
+    {
+      "property": "kind",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14394-14419"
+    },
+    {
+      "property": "shape",
+      "of": "Planet",
+      "datatype": "text",
+      "defined": "/StarWars.spell:14423-14445"
+    },
+    {
+      "property": "hue",
+      "of": "Planet",
+      "datatype": "number",
+      "defined": "/StarWars.spell:14494-14814"
+    },
+    {
+      "type": "Craft",
+      "superType": "Record",
+      "defined": "/StarWars.spell:15733-17153"
+    },
+    {
+      "property": "name",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:15759-15777"
+    },
+    {
+      "property": "model",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:15781-15800"
+    },
+    {
+      "property": "manufacturer",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:15804-15830"
+    },
+    {
+      "property": "cost_in_credits",
+      "asWritten": "cost in credits",
+      "of": "Craft",
+      "datatype": "number",
+      "defined": "/StarWars.spell:15834-15867"
+    },
+    {
+      "property": "length",
+      "of": "Craft",
+      "datatype": "number",
+      "defined": "/StarWars.spell:15871-15895"
+    },
+    {
+      "property": "crew",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:15899-15917"
+    },
+    {
+      "property": "passengers",
+      "of": "Craft",
+      "datatype": "number",
+      "defined": "/StarWars.spell:15921-15949"
+    },
+    {
+      "property": "craft_class",
+      "asWritten": "craft class",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:15953-15978"
+    },
+    {
+      "property": "pilots",
+      "of": "Craft",
+      "datatype": "list of people",
+      "defined": "/StarWars.spell:15982-16014"
+    },
+    {
+      "property": "films",
+      "of": "Craft",
+      "datatype": "list of films",
+      "defined": "/StarWars.spell:16018-16048"
+    },
+    {
+      "property": "label",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:16052-16075"
+    },
+    {
+      "property": "kind",
+      "of": "Craft",
+      "datatype": "text",
+      "defined": "/StarWars.spell:16079-16108"
+    },
+    {
+      "property": "x_wings_long",
+      "asWritten": "x-wings long",
+      "of": "Craft",
+      "defined": "/StarWars.spell:16188-16290"
+    },
+    {
+      "type": "Starship",
+      "superType": "Craft",
+      "defined": "/StarWars.spell:17155-17208"
+    },
+    {
+      "type": "Vehicle",
+      "superType": "Craft",
+      "defined": "/StarWars.spell:17210-17262"
+    },
+    {
+      "type": "Species",
+      "superType": "Record",
+      "defined": "/StarWars.spell:17278-18006"
+    },
+    {
+      "property": "name",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17335-17353"
+    },
+    {
+      "property": "classification",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17357-17385"
+    },
+    {
+      "property": "language",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17389-17411"
+    },
+    {
+      "property": "average_lifespan",
+      "asWritten": "average lifespan",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17415-17445"
+    },
+    {
+      "property": "homeworld",
+      "of": "Species",
+      "datatype": "Planet",
+      "defined": "/StarWars.spell:17449-17476"
+    },
+    {
+      "property": "people",
+      "of": "Species",
+      "datatype": "list of people",
+      "defined": "/StarWars.spell:17480-17512"
+    },
+    {
+      "property": "label",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17516-17539"
+    },
+    {
+      "property": "kind",
+      "of": "Species",
+      "datatype": "text",
+      "defined": "/StarWars.spell:17543-17575"
+    },
+    {
+      "type": "StarWar",
+      "superType": "Place",
+      "defined": "/StarWars.spell:752-1749"
+    },
+    {
+      "type": "Wikipedia",
+      "superType": "Place",
+      "defined": "/StarWars.spell:1751-2122"
+    },
+    {
+      "type": "Guide",
+      "superType": "App",
+      "defined": "/StarWars.spell:2176-6827"
+    },
+    {
+      "property": "tab",
+      "of": "Guide",
+      "datatype": "text",
+      "defined": "/StarWars.spell:2196-2213"
+    },
+    {
+      "property": "search",
+      "of": "Guide",
+      "datatype": "text",
+      "defined": "/StarWars.spell:2217-2237"
+    },
+    {
+      "property": "showing",
+      "of": "Guide",
+      "datatype": "Record",
+      "defined": "/StarWars.spell:2241-2266"
+    },
+    {
+      "property": "trail",
+      "of": "Guide",
+      "datatype": "list of records",
+      "defined": "/StarWars.spell:2270-2306"
+    },
+    {
+      "property": "playing",
+      "of": "Guide",
+      "datatype": "Film",
+      "defined": "/StarWars.spell:2310-2333"
+    },
+    {
+      "property": "jumping",
+      "of": "Guide",
+      "datatype": "choice",
+      "defined": "/StarWars.spell:2337-2363"
+    },
+    {
+      "property": "how_many",
+      "asWritten": "how many",
+      "of": "Guide",
+      "datatype": "number",
+      "defined": "/StarWars.spell:2367-2393"
+    },
+    {
+      "property": "looking_for",
+      "asWritten": "looking for",
+      "of": "Guide",
+      "datatype": "text",
+      "defined": "/StarWars.spell:2397-2442"
+    },
+    {
+      "property": "listed",
+      "of": "Guide",
+      "defined": "/StarWars.spell:2524-3003"
+    },
+    {
+      "property": "found",
+      "of": "Guide",
+      "datatype": "list of records",
+      "defined": "/StarWars.spell:3008-3870"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "defined": "/StarWars.spell:3875-3938"
+    },
+    {
+      "syntax": "go back (of {thisArg:expression})?",
+      "output": "go_back",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "go back",
+      "returns": "nothing",
+      "defined": "/StarWars.spell:3943-4122"
+    },
+    {
+      "syntax": "go to {callArgs:expression} (of {thisArg:expression})?",
+      "output": "go_to_$where",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "go to (where as text)",
+      "params": [
+        {
+          "name": "where",
+          "datatype": "text"
+        }
+      ],
+      "defined": "/StarWars.spell:4127-4290"
+    },
+    {
+      "syntax": "show more (of {thisArg:expression})?",
+      "output": "show_more",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "show more",
+      "defined": "/StarWars.spell:4295-4348"
+    },
+    {
+      "syntax": "punch {thisArg:expression}",
+      "output": "punch",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "punch it",
+      "waits": true,
+      "defined": "/StarWars.spell:4413-4561"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Guide",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/StarWars.spell:4566-6126"
+    }
+  ],
+  "codeLines": [
+    18,
+    19,
+    24,
+    36,
+    37,
+    42,
+    47,
+    52,
+    57,
+    62,
+    67,
+    77,
+    78,
+    83,
+    88,
+    93,
+    98,
+    102,
+    108,
+    122,
+    123,
+    128,
+    133,
+    144,
+    145,
+    150,
+    155,
+    160,
+    166,
+    171,
+    178,
+    233,
+    234,
+    239,
+    244,
+    249,
+    254,
+    259,
+    264,
+    269,
+    274,
+    279,
+    284,
+    289,
+    293,
+    372,
+    373,
+    378,
+    383,
+    388,
+    393,
+    398,
+    403,
+    408,
+    413,
+    418,
+    423,
+    428,
+    433,
+    438,
+    491,
+    492,
+    497,
+    502,
+    507,
+    512,
+    517,
+    522,
+    527,
+    532,
+    537,
+    542,
+    547,
+    552,
+    557,
+    563,
+    616,
+    617,
+    622,
+    627,
+    632,
+    637,
+    642,
+    647,
+    652,
+    657,
+    662,
+    667,
+    671,
+    676,
+    726,
+    730,
+    735,
+    736,
+    741,
+    746,
+    751,
+    756,
+    761,
+    766,
+    771,
+    805,
+    833,
+    850,
+    853,
+    858,
+    863,
+    868,
+    873,
+    878,
+    883,
+    888,
+    893,
+    904,
+    916,
+    921,
+    931,
+    940,
+    945,
+    953
+  ]
+}

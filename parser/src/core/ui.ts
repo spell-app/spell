@@ -18,6 +18,14 @@ export const uiMethods = defineCoreModule({
    */
   pageUndoKey: undefined as ((action: "undo" | "redo") => boolean) | undefined,
 
+  /**
+   * Bring the top of the app back into view:  what `scroll to the top` compiles to.
+   * - Under node, or before the app's drawn:  nothing.
+   */
+  scrollToTop(): void {
+    ;(core as { appRoot?: Element }).appRoot?.scrollIntoView?.({ block: "start" })
+  },
+
   ////////////////
   // ## Time
   ////////////////

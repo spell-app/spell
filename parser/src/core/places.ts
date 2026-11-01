@@ -803,6 +803,11 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     void core.notify(message, { class: "warning", actions })
   }
 
+  /** The thing of `type` with this id, if a read has already made it. */
+  thingKnownAs(type: string, id: string): SpellObject | undefined {
+    return this.loaded.get(`${type}#${id}`)
+  }
+
   /** A place named the thing we knew as `from`:  it goes by `to` now. */
   private renameThing(type: string, from: string, to: string): void {
     const thing = this.loaded.get(`${type}#${from}`)

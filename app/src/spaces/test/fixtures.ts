@@ -222,6 +222,20 @@ export function fixtureDeclarations(projectName: TestProjectName): string {
 }
 
 /**
+ * Does test project `projectName` read servers other people run:  its project file's `"readsOtherPeoplesServers": true`.
+ * - Nothing that runs it as a test may:  a test isn't to ask them, and what it prints would follow what they say.
+ *   So the core contract leaves it out;  its compiled snapshots are still checked.
+ */
+export function readsOtherPeoplesServers(projectName: TestProjectName): boolean {
+  const { readsOtherPeoplesServers: says } = JSON5.parse(
+    readFileSync(projectFileFor(fixtureFolder(projectName)), "utf8")
+  ) as {
+    readsOtherPeoplesServers?: boolean
+  }
+  return !!says
+}
+
+/**
  * The human languages fixture `projectName`'s files are written in, by their names, the one it speaks first:
  * `["es"]` for `Solitario`, whose files are `Carta.es.spell` ... -- see `SP.SpellDeclarations.languagesOf()`.
  * - It has a words file in each:  `fixtureWords()`.

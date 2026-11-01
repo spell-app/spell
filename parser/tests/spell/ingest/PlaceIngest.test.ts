@@ -105,10 +105,10 @@ const STARS_SPELL = `stars is a web server at "${API}":
 a "person" is a view:
 	- it lives in the stars
 	- its "name" is text
-	- its "height" is a number  // written as text there;  "unknown" reads as 0
+	- its "height" is a number  // written as text there;  "unknown" reads as nothing
 	- its "mass" is a number  // written as text there
 	- its "hair color" is text
-	- its "homeworld" is text  // a planet's address
+	- its "homeworld" is a planet
 	- its "films" is a list of text  // each an address
 	- its "created" is a date
 
@@ -137,7 +137,8 @@ describe("adding a source", () => {
     })
     expect(description.collections.people!.readThrough).toEqual({ rows: 2 })
     expect(description.canDo.write).toMatch(/read only/)
-    expect(description.spellCantSay.join("\n")).toMatch(/Following a link by its address:  .*people\.homeworld/)
+    expect(description.spellCantSay.join("\n")).not.toMatch(/people\.homeworld/)
+    expect(description.spellCantSay.join("\n")).toMatch(/A link to somewhere else:  .*people\.films/)
     expect(description.spell.join("\n")).toBe(STARS_SPELL)
   })
 

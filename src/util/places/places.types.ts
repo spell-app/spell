@@ -197,6 +197,12 @@ export type PageAsk = {
 
 /** What to list. */
 export type ListQuery = {
+  /**
+   * Only the rows with these ids:  each an id, or a whole address on a server whose rows name themselves.
+   * - What following a link reads (`core.linked()`):  a place with `getMany()` asks for just those.
+   * - One it doesn't hold is left out.
+   */
+  ids?: readonly string[]
   /** Only rows whose field holds this value, for every field named. */
   filter?: Record<string, unknown>
   /** The order, the first field first. */

@@ -17,6 +17,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "drag_handler": "item?|moment?|body?",
   "draw_it": "alias?|body?|phrase?|slot?",
   "draw_slot": "slot",
+  "draw_slot_of": "slot|thing",
   "drawn_markup": "markup",
   "every_thing": "type",
   "every_thing_where": "type|body?",

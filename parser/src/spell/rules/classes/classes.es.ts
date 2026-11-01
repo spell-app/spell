@@ -30,7 +30,7 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawSlot } from "./DrawSlot"
+import { DrawSlot, DrawSlotOf } from "./DrawSlot"
 import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
@@ -2042,6 +2042,8 @@ classesEs.addRule(MenuBar, {
   ]
 })
 
+classesEs.addRule(DrawSlotOf, { syntax: "dibujar (el|la) {slot:member_words} de {thing:expression}" })
+
 // poner una ranura en un dibujo:  `dibujar su frente`
 classesEs.addRule(DrawSlot, {
   syntax: "dibujar su {slot:member_words}"
@@ -2067,6 +2069,10 @@ classesEs.addRule(DrawnMarkup, {
 
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:draw_slot}"
+})
+
+classesEs.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_slot_of}"
 })
 
 classesEs.addRule(QuotedPropertyFormula, {

@@ -1329,7 +1329,13 @@ export class JSWriter extends ProgramWriter {
 
   /** `{ return this.getProp("name") }`:  its default, if any, is in its class's schema -- see `declaration()`. */
   getterBody(node: P.ASTReactiveProperty): string {
-    return `{ return this.getProp(${this.propertyKey(node)}) }`
+    return `{ return ${this.propertyRead(node)} }`
+  }
+
+  /** How `node` reads:  its stored value, or what its address names (`core.linked()`). */
+  propertyRead(node: P.ASTReactiveProperty): string {
+    const key = this.propertyKey(node)
+    return node.linksTo ? `core.linked(this, ${key}, ${this.write(node.linksTo)})` : `this.getProp(${key})`
   }
 
   /** `: type` after its getter's parens:  javascript has none -- see `TSWriter`. */
@@ -1616,7 +1622,7 @@ export class JSWriter extends ProgramWriter {
         const value = attribute.propValue
         const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
-        const written = this.pressedHandler(key, value) ?? this.write(value)
+        const written = this.pressedHandler(key, value) ?? this.elementListener(node.tagName, key, value) ?? this.write(value)
         return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${written}${error}`
       })
       .sort((a, b) => Number(b.startsWith("class:")) - Number(a.startsWith("class:")))
@@ -1634,6 +1640,17 @@ export class JSWriter extends ProgramWriter {
   protected pressedHandler(key: string, value: P.ASTNode | undefined): string | undefined {
     if (!PRESS_ATTRIBUTES.test(key) || !(value instanceof P.ASTMethodDefinition)) return undefined
     return `core.pressed(this, ${this.write(value)})`
+  }
+
+  /**
+   * `value`, the listener of an element's own event, `on-ui-closed`, as a live value holding it:  `() => () => this.end()`.
+   * - `h()` calls a function it's handed for any attribute but `onXxx`, to find the value:
+   *   so a listener written plainly ran as the drawing drew, and the element never got it.
+   * - `undefined` for any other.
+   */
+  protected elementListener(tag: string, key: string, value: P.ASTNode | undefined): string | undefined {
+    if (!tag.includes("-") || !key.startsWith("on-") || !(value instanceof P.ASTMethodDefinition)) return undefined
+    return `() => ${this.write(value)}`
   }
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */

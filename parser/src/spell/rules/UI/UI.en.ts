@@ -13,6 +13,7 @@ import { CSSStyles } from "./CSSStyles"
 import { EndPrintGroup } from "./EndPrintGroup"
 import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
+import { ScrollToTop } from "./ScrollToTop"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
@@ -75,6 +76,11 @@ UI.addRule(Print, {
       ]
     }
   ]
+})
+
+UI.addRule(ScrollToTop, {
+  syntax: "scroll to the top",
+  tests: [{ compileAs: "statement", tests: [["scroll to the top", "core.scrollToTop()"]] }]
 })
 
 UI.addRule(EndPrintGroup, {
@@ -189,6 +195,8 @@ UI.addRule(CSSStyles, {
       title: "correctly matches css",
       tests: [
         [`""`, `core.installStyles(undefined, \`""\`)`],
+        // a backtick in a comment, or `${`, mustn't end the template it's written in
+        ['"/* `a` ${b} */"', 'core.installStyles(undefined, `"/* \\`a\\` \\${b} */"`)'],
         [`".Card {\\n\\theight:30px;\\n}\\n"`, `core.installStyles(undefined, \`".Card {\\n\\theight:30px;\\n}\\n"\`)`]
       ]
     }

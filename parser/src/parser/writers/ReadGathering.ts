@@ -15,7 +15,7 @@ const FORM_TAG = "ui-form"
 const HANDLER_ATTRIBUTE = /^on[-A-Z]/
 
 /** `core`'s calls that read a saved type from its place. */
-const SAVED_READS = new Set(["savedThings", "savedThingAt"])
+const SAVED_READS = new Set(["savedThings", "savedThingAt", "savedThingWithId"])
 
 /** `core`'s calls whose first value is a list, and whose answer is a list of the same things. */
 const SAME_ITEMS = new Set(["filter", "sortedBy", "firstFew", "reversed", "filterInTurn"])
@@ -583,7 +583,7 @@ export class ReadGathering {
         const type = first && unwrapped(first)
         if (type instanceof P.ASTTypeExpression) return { item: type.name }
       }
-      if (methodName === "savedThingAt" || methodName === "thingAtPlace") {
+      if (methodName === "savedThingAt" || methodName === "savedThingWithId" || methodName === "thingAtPlace") {
         const type = first && unwrapped(first)
         if (type instanceof P.ASTTypeExpression) return { type: type.name }
       }

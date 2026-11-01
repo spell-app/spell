@@ -1196,6 +1196,32 @@
           "aliases": ["expression_suffix"]
         },
         {
+          "className": "WithCommas",
+          "ruleNames": ["with_commas"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/WithCommas.ts",
+          "line": 11,
+          "purpose": "A number for people to read, e.g. `its population with commas`, `1,000,000` (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "con comas",
+              "example": "1000 con comas",
+              "outputs": {
+                "js": {
+                  "code": "core.withCommas(1000)"
+                },
+                "ts": {
+                  "code": "core.withCommas(1000)"
+                },
+                "py": {
+                  "code": "core.with_commas(1000)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression_suffix"]
+        },
+        {
           "className": "AsLowercase",
           "ruleNames": ["as_lowercase"],
           "internal": false,
@@ -2928,7 +2954,7 @@
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
-              "syntax": "(los|las)? {ordinal} {number} {arg:plural_identifier} (de|del|en|desde) {list:operand}",
+              "syntax": "(los|las)? {ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (de|del|en|desde) {list:operand}",
               "example": "arriba 2 items de my-list",
               "outputs": {
                 "js": {
@@ -3858,11 +3884,25 @@
           "aliases": ["expression"]
         },
         {
+          "className": "DrawSlotOf",
+          "ruleNames": ["draw_slot_of"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DrawSlot.ts",
+          "line": 16,
+          "purpose": "Draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "dibujar (el|la) {slot:member_words} de {thing:expression}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "DrawSlot",
           "ruleNames": ["draw_slot"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSlot.ts",
-          "line": 28,
+          "line": 59,
           "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
@@ -4775,7 +4815,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 56,
+          "line": 59,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -5567,6 +5607,9 @@
             },
             {
               "syntax": "{markup:draw_slot}"
+            },
+            {
+              "syntax": "{markup:draw_slot_of}"
             }
           ],
           "aliases": ["statement"]
@@ -5972,6 +6015,20 @@
             }
           ],
           "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ThingWithId",
+          "ruleNames": ["thing_with_id"],
+          "internal": false,
+          "file": "src/spell/rules/places/ThingWithId.ts",
+          "line": 13,
+          "purpose": "One thing of a saved type, by its id, when the program knows the id (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la) {type:known_type} cuyo identificador es {id:expression}"
+            }
+          ],
+          "aliases": ["expression"]
         },
         {
           "className": "FirstFewWhere",
@@ -7320,6 +7377,32 @@
                 },
                 "py": {
                   "code": "print(\"Yo!\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ScrollToTop",
+          "ruleNames": ["scroll_to_top"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ScrollToTop.ts",
+          "line": 11,
+          "purpose": "Bring the top of the app back into view, as a new page of it opens (epic `data` P19).",
+          "syntaxes": [
+            {
+              "syntax": "desplazarse hasta arriba",
+              "example": "desplazarse hasta arriba",
+              "outputs": {
+                "js": {
+                  "code": "core.scrollToTop()"
+                },
+                "ts": {
+                  "code": "core.scrollToTop()"
+                },
+                "py": {
+                  "code": "core.scroll_to_top()"
                 }
               }
             }

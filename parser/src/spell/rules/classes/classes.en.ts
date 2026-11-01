@@ -21,7 +21,7 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawSlot } from "./DrawSlot"
+import { DrawSlot, DrawSlotOf } from "./DrawSlot"
 import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
@@ -2025,6 +2025,8 @@ classes.addRule(MenuBar, {
   ]
 })
 
+classes.addRule(DrawSlotOf, { syntax: "draw the {slot:member_words} of {thing:expression}" })
+
 // placing a slot in a drawing:  `draw its front`
 classes.addRule(DrawSlot, {
   syntax: "draw its {slot:member_words}"
@@ -2050,6 +2052,10 @@ classes.addRule(DrawnMarkup, {
 
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:draw_slot}"
+})
+
+classes.addRule(DrawnMarkup, {
+  syntax: "{markup:draw_slot_of}"
 })
 
 classes.addRule(QuotedPropertyFormula, {

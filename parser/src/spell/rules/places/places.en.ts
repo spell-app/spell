@@ -32,6 +32,7 @@ import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { ThereAreThings } from "./ThereAreThings"
+import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
@@ -168,6 +169,7 @@ places.addRule(TryAgain, {
   tests: [{ compileAs: "statement", tests: [["try again", "core.reloadSaved()"]] }]
 })
 
+places.addRule(ThingWithId, { syntax: "the {type:known_type} whose id is {id:expression}" })
 places.addRule(FirstFewWhere, { syntax: "the first {number} {type:plural_type} where {inline_expression}?" })
 places.addRule(NumberOfThingsWhere, { syntax: "the number of {type:plural_type} where {inline_expression}?" })
 places.addRule(

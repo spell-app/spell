@@ -73,7 +73,7 @@ describe("the lines", () => {
     expect(asked).toHaveLength(2)
   })
 
-  test("a number written as text reads as a number, a word for none as 0;  anything else stays;  a null is no value", async () => {
+  test("a number written as text reads as a number, a word for none as nothing;  anything else stays;  a null is no value", async () => {
     serve({
       [`${HOST}/people`]: [
         { id: 1, height: "172", mass: "1,358", weird: "30-165", planet: null },
@@ -93,42 +93,12 @@ describe("the lines", () => {
     ])("Person")
     const [first, second] = await read(Person)
     expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, "30-165"])
-    expect([second!.height, second!.mass]).toEqual([0, 0])
+    expect([second!.height, second!.mass]).toEqual([null, null])
     expect(first!.planet).toBe("")
     expect(second!.planet).toBe("Tatooine")
     expect(warn.mock.calls.flat().join("\n")).toMatch(/weird/)
     expect(warn.mock.calls.flat().join("\n")).not.toMatch(/planet/)
     warn.mockRestore()
-  })
-
-  test("no line follows a link, so a program finds what it names by its id", async () => {
-    serve({
-      [`${HOST}/people`]: [{ url: `${HOST}/people/1`, homeworld: `${HOST}/planets/1` }],
-      [`${HOST}/planets`]: [
-        { url: `${HOST}/planets/2`, name: "Alderaan" },
-        { url: `${HOST}/planets/1`, name: "Tatooine" }
-      ]
-    })
-    core.resetRuntime()
-    const { Person } = runSpell([
-      `stars is a web server at "${HOST}":`,
-      `\t- its id is its "url"`,
-      `a "person" is a thing:`,
-      `\t- it lives in the stars`,
-      `\t- its "homeworld" is text`,
-      `\t- to find its home:`,
-      `\t\tget its homeworld`,
-      `\t\tset the_home to it`,
-      `\t\treturn the first 1 planets where its id is the_home`,
-      `a "planet" is a thing:`,
-      `\t- it lives in the stars`,
-      `\t- its "name" is text`
-    ])("Person")
-    const [person] = await read(Person)
-    const home = (
-      await (person as unknown as { findItsHome(): Promise<{ items: Array<{ name: string }> }> }).findItsHome()
-    ).items
-    expect(home.map(({ name }) => name)).toEqual(["Tatooine"])
   })
 
   test("a type of several words finds what its line says", async () => {

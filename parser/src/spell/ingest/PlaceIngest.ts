@@ -547,14 +547,19 @@ function saidChanges(old: PlaceDescription, now: PlaceDescription): string[] {
 function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): string[] {
   const said = new Set<string>()
   const each = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
+  // a link to one of its own collections is followed:  `its "homeworld" is a planet`
+  const shown = new Set(each.map(([name]) => name))
   const links = each.flatMap(([name, { fields, idField }]) =>
     Object.entries(fields)
-      .filter(([field, { type }]) => field !== idField && (type === "link" || type === "list of links"))
+      .filter(
+        ([field, { type, linksTo }]) =>
+          field !== idField && (type === "link" || type === "list of links") && !(linksTo && shown.has(linksTo))
+      )
       .map(([field]) => `${name}.${field}`)
   )
   if (links.length) {
     said.add(
-      `Following a link by its address:  ${links.join(", ")} hold addresses, so they read as text, and a program finds what they name with \`where\`.`
+      `A link to somewhere else:  ${links.join(", ")} hold addresses of nothing described here, so they read as text.`
     )
   }
   const pointers = each

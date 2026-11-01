@@ -1171,6 +1171,30 @@
     },
     {
       "kind": "method",
+      "name": "dateShown",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "date"
+        }
+      ],
+      "description": "A date for people to read:  `May 25, 1977`."
+    },
+    {
+      "kind": "method",
+      "name": "withCommas",
+      "of": "core",
+      "module": "string",
+      "params": [
+        {
+          "name": "number"
+        }
+      ],
+      "description": "A number for people to read:  `1,000,000`."
+    },
+    {
+      "kind": "method",
       "name": "lowerCase",
       "of": "core",
       "module": "string",
@@ -1198,6 +1222,13 @@
       "of": "core",
       "module": "ui",
       "description": "The page's say over ⌘Z and ⇧⌘Z, asked before the program's history (`listenForUndoKeys()`): true if it took the key."
+    },
+    {
+      "kind": "method",
+      "name": "scrollToTop",
+      "of": "core",
+      "module": "ui",
+      "description": "Bring the top of the app back into view:  what `scroll to the top` compiles to."
     },
     {
       "property": "TIME_UNITS_MAP",
@@ -2653,6 +2684,40 @@
         }
       ],
       "description": "The thing at `place` in `Class`'s place's order, counting from 1, `-1` the last:  what `the first recipe` compiles to, for a saved type."
+    },
+    {
+      "kind": "method",
+      "name": "savedThingWithId",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "id"
+        }
+      ],
+      "description": "The thing of `Class` with this id, from the place it's saved in:  what `the wiki page whose id is its name` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "linked",
+      "of": "core",
+      "module": "saved",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "`thing`'s field `name`, of a type saved in a place:  the thing or things its address names (epic `data` I33)."
     },
     {
       "kind": "method",

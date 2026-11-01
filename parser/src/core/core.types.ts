@@ -250,6 +250,8 @@ export type PropCheck = {
   oneOf?: readonly unknown[] | (() => readonly unknown[])
   /** what its value must be, beyond its type, e.g. `[{ type: "empty" }]` -- see `PropRule` (epic `property-editor` P9) */
   rules?: readonly PropRule[]
+  /** it may hold the address of a thing of `type`, until something follows it -- see `core.linked()` */
+  link?: boolean
 }
 
 // ## Modules

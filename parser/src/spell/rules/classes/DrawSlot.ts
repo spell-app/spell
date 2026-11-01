@@ -8,6 +8,37 @@ import { DrawIt } from "spell/parser/spell/rules/classes"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
+ * `draw_slot_of` rule:  draw ANOTHER thing's slot, in place of its usual drawing (epic `data` P19).
+ * - e.g. `draw the page of its showing`, for a thing that draws as a card here, and as a whole page there.
+ * - Compiles to `showing.drawPage()`:  in the drawing of whatever's placing it, so it has no element of its own.
+ * - A property of that name is `draw_thing`'s:  `draw the card of the player` draws the player's card.
+ */
+export class DrawSlotOf extends SpellStatement<"slot|thing"> {
+  @proto static alias = "expression"
+  @proto static priority = Priority.specific
+
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match || !DrawIt.drawingIn(scope)) return undefined
+    const { slot, thing } = match.groups
+    const type = scope.getType(thing.datatype)
+    // a word for many is `draw_items`'s:  `draw the items of the pile`
+    const word = `${slot.value}`
+    if (!type || type.getMember(word) || P.pluralize(word) === word) return undefined
+    return match
+  }
+
+  /** `thing.drawPage()`. */
+  getAST(match: P.MatchFor<this>): P.ASTScopedMethodInvocation {
+    const { slot, thing } = match.groups
+    return new P.ASTScopedMethodInvocation(match, {
+      thing: P.matchAST(thing),
+      methodName: DrawIt.slotMethodName(DrawIt.slotName(`${slot.value}`))
+    })
+  }
+}
+
+/**
  * `draw_slot` rule:  PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56;  P27).
  * - e.g. `draw its front`, Spanish's `dibujar su frente`;  spellx's `<draw "front" />`.
  * - Compiles to the web's own slot, holding the slot's drawing (`to draw its front:`, `draw_it`):

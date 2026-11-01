@@ -105,6 +105,11 @@ export const waitingMethods = defineCoreModule({
 })
 Object.assign(core, waitingMethods)
 
+/** Forget `thing`'s value `name`:  the next read works it out afresh, as a value nobody's waiting for any more. */
+export function forgetWaitedValue(thing: object, name: string): void {
+  WAITED_VALUES.get(thing)?.delete(name)
+}
+
 /** `read`'s drawing, or the "…" until its first answer. */
 export function standInFor(read: () => Drawing): Drawing {
   return createComponent(Loading, {

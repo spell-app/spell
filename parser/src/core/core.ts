@@ -238,7 +238,9 @@ export const coreMethods = defineCoreModule({
    *   `set title(value) { this.setProp('title', value, { type: 'text' }) }`.
    */
   checkProp(property: string, value: unknown, check?: PropCheck): boolean {
-    if (check?.type && !core.isOfType(value, check.type)) {
+    // nothing is what a place says of a number nobody knows;  an address, what a link holds until it's followed
+    const isAddress = check?.link && typeof value === "string"
+    if (check?.type && value !== null && !isAddress && !core.isOfType(value, check.type)) {
       core.console.warn(`Expected ${property} to be type '${check.type}', got:`, value)
       return false
     }

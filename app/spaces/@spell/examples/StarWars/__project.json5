@@ -1,0 +1,15 @@
+{
+  "title": "Star Wars",
+  "description": "A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  pictures from a second place;  waiting, failing, and an opening crawl",
+  "readsOtherPeoplesServers": true,
+  "imports": [
+    {
+      "path": "/StarWars.spell",
+      "active": true
+    },
+    {
+      "path": "/styles.css",
+      "active": true
+    }
+  ]
+}

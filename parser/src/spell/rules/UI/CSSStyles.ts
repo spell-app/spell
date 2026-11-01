@@ -17,8 +17,8 @@ export class CSSStyles extends P.TokenType<never, CSSMatchData> {
     // HACK: `file` is meant to come from `SpellCSSFile` -- see `CSSMatchData`.
     const { value } = match
     const { file } = match.data
-    // munge returns to `¬`
-    const safeValue = value.replace(/\n/g, "¬")
+    // munge returns to `¬`, and what would end the template, a backtick in a comment, or fill it in
+    const safeValue = value.replace(/\n/g, "¬").replace(/`/g, "\\`").replace(/\$\{/g, "\\${")
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "installStyles",
       args: [
