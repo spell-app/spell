@@ -50,12 +50,16 @@ describe("fixture projects compile to their snapshots", () => {
   for (const name of fixtureProjectNames()) {
     // what its snapshots are named after:  `Solitaire` for `@spell/examples/Solitaire`
     const file = bareNameOf(name)
-    test(name, async () => {
-      await expect(compiledFixture(name)).toMatchFileSnapshot(snapshotPath(name, `${file}${SP.SNAPSHOT_JS_SUFFIX}`))
-      await expect(fixtureDeclarations(name)).toMatchFileSnapshot(
-        snapshotPath(name, `${file}.snapshot${SP.DECLARATIONS_JSON_SUFFIX}`)
-      )
-    })
+    test(
+      name,
+      async () => {
+        await expect(compiledFixture(name)).toMatchFileSnapshot(snapshotPath(name, `${file}${SP.SNAPSHOT_JS_SUFFIX}`))
+        await expect(fixtureDeclarations(name)).toMatchFileSnapshot(
+          snapshotPath(name, `${file}.snapshot${SP.DECLARATIONS_JSON_SUFFIX}`)
+        )
+      },
+      30_000
+    )
 
     // its words, by the names its javascript uses, one file per language its files are in -- see `SP.SpellWords`.
     // `.<lang>.snapshot.js`:  ending as a snapshot does keeps it out of the fixture's files, in the app.

@@ -32,6 +32,18 @@ export const PARSER_MESSAGES = {
   "untyped-property": 'Say what "{name}" is, e.g. "{line} as {type}"',
   /** A property declared as a list of nothing said:  `{line}` is the line up to its `as`. */
   "untyped-list-property": 'Say what "{name}" holds, e.g. "{line} as a new list of {items}"',
+  /** `- to it:`, nothing but its thing. */
+  "action-without-a-name": '"{text}" doesn\'t name an action:  say what it does, as in "to shuffle it"',
+  /** Two types whose new things make each other, for good. */
+  "made-from-each-other":
+    '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
+  /** A loop or a draw on its own line in an element, which shows as text. */
+  "statement-in-markup":
+    '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for each book in its books: draw book}"',
+  /** `if it is empty`, `it` a thing that holds no items. */
+  "never-empty": "{AType} isn't a list, so it's never empty:  say which, as in \"if its books is empty\"",
+  /** `its "books" is a new list`, the `is` already said. */
+  "untyped-list-property-is": 'Say what "{name}" holds, e.g. "{line} a list of {items}"',
   /** A new variable set to a list of nothing said, `set state to []`. */
   "untyped-list-variable": 'Say what "{name}" holds, e.g. "set {name} to a new list of {items}"',
   /** A property a `set` declares, from a value that doesn't say what it is. */
@@ -248,6 +260,9 @@ export const PARSER_MESSAGES = {
     "A {type} isn't a list, so it has no items to draw:  a drawing of its own is drawn by it, in its own lines",
   "type-from-itself":
     'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
+  /** A dot in a field's name, under a place. */
+  "no-dotted-field":
+    'A field\'s name has no dot:  what\'s inside "{field}" is a thing of its own, a type with its own fields, read as "{words}"',
   "cant-save-built-in-inline": "Can't save {type} inline:  it's built in, and every project shares it",
   /** `a thing is saved in its own file`. */
   "cant-save-built-in-in-file": "Can't save {type} in its own file:  it's built in, and every project shares it",

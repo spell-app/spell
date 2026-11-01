@@ -89,7 +89,7 @@ export class RecipeBox extends App {
   /** newest first:  a new one joins the end, so they're shown the other way round */
   static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1636, end: 1748 }, readsFrom: ["family_cookbook"] }) }
   get matches() { return core.waitedValue(this, "matches", async () => {
-    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => recipe.title.includes(this.search))
+    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe: Recipe) => core.includes(recipe.title, this.search))
     core.reverse(found)
     return found
   }, () => [this.search]) }

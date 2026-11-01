@@ -37,7 +37,7 @@ function serve(text: string) {
 
 /** The labels a diagram draws. */
 function labels(diagram: Element): string[] {
-  return [...diagram.shadowRoot!.querySelectorAll("text.label")].map((text) => text.textContent ?? "")
+  return [...diagram.shadowRoot!.querySelectorAll("g[part~=node] text.label")].map((text) => text.textContent ?? "")
 }
 
 beforeEach(async () => {

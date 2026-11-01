@@ -627,6 +627,7 @@ export class JSWriter extends ProgramWriter {
    * `undefined` where it can't, for `core.<name>()`.
    * - `is defined`:  `x !== undefined`
    * - text spell knows is text:  `!this.right`, `this.input.includes(".")`, `x.toLocaleUpperCase()`
+   *   - `includes` only where capitals can't matter:  `includes exactly`, or text with no letters to look for
    * - a list written out:  `["diamonds", "hearts"].includes(this.suit)`
    * - a type test:  `x instanceof Tableau`, `typeof x === "number"`
    * - one of spell's `List`s:  its own method, see `listCall()`
@@ -648,12 +649,16 @@ export class JSWriter extends ProgramWriter {
       // text that may be nothing, e.g. the first character of an empty name:  `?.`, as spell reads off nothing
       const text = `${this.tight(first)}${this.mayBeNothing(first) ? "?." : "."}`
       if (name === "isEmpty") return `!${this.tight(first)}`
-      if (name === "includes" && rest.length === 1) return `${text}includes(${this.bare(rest[0]!)})`
+      if (this.isExactSearch(name, rest)) return `${text}includes(${this.bare(rest[0]!)})`
       if (name === "upperCase") return `${text}toLocaleUpperCase()`
       if (name === "lowerCase") return `${text}toLocaleLowerCase()`
     }
     if (name === "upperCase") return `\`\${${this.bare(first)} ?? ${this.quoted("")}}\`.toLocaleUpperCase()`
-    if (name === "includes" && rest.length === 1 && unwrapped(first) instanceof P.ASTArrayLiteral) {
+    if (
+      (name === "includes" || name === "includesExactly") &&
+      rest.length === 1 &&
+      unwrapped(first) instanceof P.ASTArrayLiteral
+    ) {
       return `${this.write(unwrapped(first))}.includes(${this.bare(rest[0]!)})`
     }
     if (name === "isOfType" && rest.length === 1) {
@@ -742,6 +747,8 @@ export class JSWriter extends ProgramWriter {
         return rest.length === 1 ? super.positionOut(`${self}.positionOf(${found(second!)})`) : undefined
       case "remove":
         return rest.length === 1 ? `${self}.remove(${found(second!)})` : undefined
+      case "includesExactly":
+        return rest.length === 1 ? `${self}.includes(${found(second!)})` : undefined
       case "includes":
       case "includesAny":
       case "append":
@@ -1100,7 +1107,10 @@ export class JSWriter extends ProgramWriter {
     for (const statement of statements) this.statements.add(statement)
     const children = this.inBlock(() => elseOnItsLine(this.list(statements, jsText.NEWLINE)))
     if (!children) return jsText.EMPTY_BLOCK
-    if (!node.wrap && !children.includes(jsText.NEWLINE)) return `{ ${children} }`
+    // a comment last, on one line, would swallow the closing brace
+    const endsInComment =
+      statements.at(-1) instanceof P.ASTComment || statements.at(-1) instanceof P.ASTExpressionWithComment
+    if (!node.wrap && !endsInComment && !children.includes(jsText.NEWLINE)) return `{ ${children} }`
     return `{\n${jsText.indented(children)}\n}`
   }
 
@@ -1622,7 +1632,8 @@ export class JSWriter extends ProgramWriter {
         const value = attribute.propValue
         const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
-        const written = this.pressedHandler(key, value) ?? this.elementListener(node.tagName, key, value) ?? this.write(value)
+        const written =
+          this.pressedHandler(key, value) ?? this.elementListener(node.tagName, key, value) ?? this.write(value)
         return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${written}${error}`
       })
       .sort((a, b) => Number(b.startsWith("class:")) - Number(a.startsWith("class:")))
@@ -1655,7 +1666,7 @@ export class JSWriter extends ProgramWriter {
 
   /** A function the drawing calls for the value:  `() => this.shortSuit`;  an object literal in parens. */
   ASTJSXLiveValue(node: P.ASTJSXLiveValue): string {
-    const value = this.bare(node.expression)
+    const value = this.loopDrawn(node.expression, this.bare(node.expression))
     if (this.project.spotsThatWait.has(node)) return `() => core.whileWaiting(() => ${value})`
     return unwrapped(node.expression) instanceof P.ASTObjectLiteral ? `() => (${value})` : `() => ${value}`
   }

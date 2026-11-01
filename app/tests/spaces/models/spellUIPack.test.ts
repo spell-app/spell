@@ -44,6 +44,27 @@ describe("SPELL_UI_PACK", () => {
     expect(file!.compiled).toContain("/data.json")
   })
 
+  test('<tree-node "If"> is ui-tree-node (P32):  a bare quoted name is its label;  <nodo-arbol> in Spanish', () => {
+    expect(SPACES.SPELL_UI_PACK.tagFor("tree-node", "en")).toBe("ui-tree-node")
+    expect(SPACES.SPELL_UI_PACK.tagFor("nodo-arbol", "es")).toBe("es-nodo-arbol")
+    expect(SPACES.SPELL_UI_PACK.tagFor("nodo-árbol", "es")).toBe("es-nodo-arbol")
+    const contents = [
+      '<spell-view "card">',
+      "\t<draw>",
+      "\t\t<tree-diagram>",
+      '\t\t\t<tree-node "If" edge-label="body">',
+      '\t\t\t\t<tree-node "Print"/>',
+      "\t\t\t</tree-node>",
+      "\t\t</tree-diagram>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/card.spellml", contents }]).files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain('h("ui-tree-node"')
+    expect(file!.compiled).toMatch(/label: "If"/)
+  })
+
   test("<space/> is ui-space (<espacio/> in Spanish):  a drawing's line break (P28)", () => {
     expect(SPACES.SPELL_UI_PACK.tagFor("space", "en")).toBe("ui-space")
     expect(SPACES.SPELL_UI_PACK.tagFor("espacio", "es")).toBe("es-espacio")

@@ -7,7 +7,7 @@
     <title>Tree diagram | Spell UI</title>
     <meta
       name="description"
-      content="A tree diagram draws a tree top-down:  a box for each node, a line to each of its children."
+      content="A tree diagram draws a tree:  a box for each node, a line to each of its children."
     />
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -41,7 +41,7 @@
           </ui-menu>
           <ui-header level="1" class="site-title">
             Tree diagram
-            <ui-header>A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.</ui-header>
+            <ui-header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</ui-header>
           </ui-header>
           <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
@@ -52,48 +52,28 @@
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  ours only, no Fomantic page (2026-10-05, epic `output-targets` P4).  Every example gives its tree
-              as a `<script type="application/json">` child, so the code shown IS the data;  the `tree` property is on
+              as nested `<ui-tree-node>`s, so the code shown IS the data;  the `tree` property is on
               the Usage tab.
             -->
             <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-section id="examples-types-tree-diagram" label="Tree diagram" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`."
+                  description="A tree diagram draws a tree, its nodes nested tags:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`."
                 >
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      {
-                        "label": "If",
-                        "title": "if number / 15 is an integer",
-                        "children": [
-                          {
-                            "label": "IsA · integer",
-                            "detail": "boolean",
-                            "slot": "condition",
-                            "children": [
-                              {
-                                "label": "Divide",
-                                "detail": "number",
-                                "slot": "value",
-                                "children": [
-                                  { "label": "Variable number", "detail": "number" },
-                                  { "label": "Number 15", "detail": "number" }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "label": "Print",
-                            "slot": "body",
-                            "children": [
-                              { "label": "Variable number", "detail": "number" },
-                              { "label": "Text \"fizzbuzz\"", "detail": "text" }
-                            ]
-                          },
-                          { "label": "If …", "slot": "otherwise" }
-                        ]
-                      }
-                    </script>
+                    <ui-tree-node label="If" hover-text="if number / 15 is an integer">
+                      <ui-tree-node label="IsA · integer" detail="boolean" edge-label="condition">
+                        <ui-tree-node label="Divide" detail="number" edge-label="value">
+                          <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                          <ui-tree-node label="Number 15" detail="number"></ui-tree-node>
+                        </ui-tree-node>
+                      </ui-tree-node>
+                      <ui-tree-node label="Print" edge-label="body">
+                        <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                        <ui-tree-node label="Text &quot;fizzbuzz&quot;" detail="text"></ui-tree-node>
+                      </ui-tree-node>
+                      <ui-tree-node label="If …" edge-label="otherwise"></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
@@ -101,9 +81,17 @@
               <ui-section id="examples-types-labels-only" label="Labels only" sticky="stack" collapsible dividing>
                 <ui-example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      { "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
-                    </script>
+                    <ui-tree-node label="Add">
+                      <ui-tree-node label="Number 1"></ui-tree-node>
+                      <ui-tree-node label="Number 2"></ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-from-json" label="From JSON" sticky="stack" collapsible dividing>
+                <ui-example description="The same tree as data:  a `&lt;ui-json&gt;` child holds it, as its text or from a `source` file.">
+                  <ui-tree-diagram>
+                    <ui-json>{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</ui-json>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
@@ -115,80 +103,131 @@
                   description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest."
                 >
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      {
-                        "label": "Divide",
-                        "detail": "number",
-                        "children": [
-                          { "label": "Variable number", "detail": "number" },
-                          { "label": "Number 15" }
-                        ]
-                      }
-                    </script>
+                    <ui-tree-node label="Divide" detail="number">
+                      <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                      <ui-tree-node label="Number 15"></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-slot-labels" label="Slot labels" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-edge-labels" label="Edge labels" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills."
+                  description="A node's `edge-label` is written on the line from its parent, at its middle:  which part of the parent it fills."
                 >
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      {
-                        "label": "Repeat",
-                        "children": [
-                          { "label": "Range 1 to 100", "slot": "over" },
-                          { "label": "Variable number", "slot": "each" },
-                          { "label": "Block", "slot": "body" }
-                        ]
-                      }
-                    </script>
+                    <ui-tree-node label="Repeat">
+                      <ui-tree-node label="Range 1 to 100" edge-label="over"></ui-tree-node>
+                      <ui-tree-node label="Variable number" edge-label="each"></ui-tree-node>
+                      <ui-tree-node label="Block" edge-label="body"></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-hover-text" label="Hover text" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from."
+                  description="A node's `hover-text` shows when the pointer rests on its box, e.g. the source it came from."
                 >
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      {
-                        "label": "Print",
-                        "title": "print number, \"fizz\"",
-                        "children": [
-                          { "label": "Variable number", "title": "number" },
-                          { "label": "Text \"fizz\"", "title": "\"fizz\"" }
-                        ]
-                      }
-                    </script>
+                    <ui-tree-node label="Print" hover-text="print number, &quot;fizz&quot;">
+                      <ui-tree-node label="Variable number" hover-text="number"></ui-tree-node>
+                      <ui-tree-node label="Text &quot;fizz&quot;" hover-text="&quot;fizz&quot;"></ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-content-any-content" label="Any content" sticky="stack" collapsible dividing>
+                <ui-example description="Anything else inside a node shows in its box, measured so the box fits it.  It's a real element, so it keeps working.">
+                  <ui-tree-diagram>
+                    <ui-tree-node label="Team">
+                      <ui-tree-node><ui-button size="small" color="primary">Join</ui-button></ui-tree-node>
+                      <ui-tree-node label="Rating"><ui-rating value="3" max-rating="5"></ui-rating></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
             </ui-section>
 
+
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-foldable" label="Foldable" sticky="stack" collapsible dividing>
+                <ui-example description="`foldable`:  a button on each node with children folds them away, and opens them again.  `folded` starts one folded.">
+                  <ui-tree-diagram foldable>
+                    <ui-tree-node label="If">
+                      <ui-tree-node label="Divide" edge-label="condition">
+                        <ui-tree-node label="Variable number"></ui-tree-node>
+                        <ui-tree-node label="Number 15"></ui-tree-node>
+                      </ui-tree-node>
+                      <ui-tree-node label="Print" edge-label="body" folded>
+                        <ui-tree-node label="Variable number"></ui-tree-node>
+                        <ui-tree-node label="Text"></ui-tree-node>
+                      </ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-states-clickable" label="Clickable" sticky="stack" collapsible dividing>
+                <ui-example description="`clickable`:  nodes show they can be clicked, and take the keyboard.  A click sends `ui-node-clicked` with or without it.">
+                  <ui-tree-diagram clickable>
+                    <ui-tree-node label="Home">
+                      <ui-tree-node label="About"></ui-tree-node>
+                      <ui-tree-node label="Pricing"></ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
             <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
               <ui-section id="examples-variations-wide-trees" label="Wide trees" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does)."
                 >
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      {
-                        "label": "List",
-                        "detail": "list of number",
-                        "children": [
-                          { "label": "Number 1" },
-                          { "label": "Number 2" },
-                          { "label": "Number 3" },
-                          { "label": "Number 5" },
-                          { "label": "Number 8" },
-                          { "label": "Number 13" },
-                          { "label": "Number 21" }
-                        ]
-                      }
-                    </script>
+                    <ui-tree-node label="List" detail="list of number">
+                      <ui-tree-node label="Number 1"></ui-tree-node>
+                      <ui-tree-node label="Number 2"></ui-tree-node>
+                      <ui-tree-node label="Number 3"></ui-tree-node>
+                      <ui-tree-node label="Number 5"></ui-tree-node>
+                      <ui-tree-node label="Number 8"></ui-tree-node>
+                      <ui-tree-node label="Number 13"></ui-tree-node>
+                      <ui-tree-node label="Number 21"></ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-left-to-right" label="Left to right" sticky="stack" collapsible dividing>
+                <ui-example description="`direction=&quot;left-right&quot;`:  children after their parent, not under it.  Long labels read better this way.">
+                  <ui-tree-diagram direction="left-right">
+                    <ui-tree-node label="Repeat">
+                      <ui-tree-node label="Range 1 to 100" edge-label="over"></ui-tree-node>
+                      <ui-tree-node label="Variable number" edge-label="each"></ui-tree-node>
+                      <ui-tree-node label="Block" edge-label="body">
+                        <ui-tree-node label="Print"></ui-tree-node>
+                        <ui-tree-node label="Add"></ui-tree-node>
+                      </ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-color" label="Color" sticky="stack" collapsible dividing>
+                <ui-example description="`color` paints a box in a hue of the theme's.  `kind` names what sort of node it is, for your own style:  `::part(kind-call)`.">
+                  <ui-tree-diagram>
+                    <ui-tree-node label="Start" color="blue">
+                      <ui-tree-node label="Passed" color="green"></ui-tree-node>
+                      <ui-tree-node label="Warned" color="yellow"></ui-tree-node>
+                      <ui-tree-node label="Failed" color="red"></ui-tree-node>
+                    </ui-tree-node>
+                  </ui-tree-diagram>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-a-monospace-font" label="A monospace font" sticky="stack" collapsible dividing>
+                <ui-example description="Any font works, as each label is measured in its own.  This one sets `--ui-tree-diagram-font-family`.">
+                  <ui-tree-diagram style="--ui-tree-diagram-font-family: var(--ui-font-family-mono)">
+                    <ui-tree-node label="Divide" detail="number">
+                      <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                      <ui-tree-node label="Number 15"></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
@@ -200,37 +239,47 @@
             <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A tree diagram draws any tree from plain data: it knows nothing about where the tree came from. Each
-                  node is a `TreeDiagramNode` (exported by `spell-ui`):
+                  A tree diagram draws any tree:  it knows nothing about where the tree came from.
+                  Write it as nested tags:  a `<ui-tree-node>` inside the diagram, the nodes under it inside that.
+                  In Spell it's `<tree-node "If">`, its label a bare quoted name.
 
-                  | Field | What it is |
+                  | Attribute | What it is |
                   |---|---|
-                  | `label` | The box's text, e.g. `If`, `Variable number`, `Number 15`. Required. |
+                  | `label` | The box's text, e.g. `If`, `Variable number`, `Number 15`.  None:  the node's own text. |
                   | `detail` | A second, smaller, muted line under the label, e.g. a datatype `number`. |
-                  | `slot` | Text on the line from its parent, e.g. `condition`, `body`, `otherwise`. |
-                  | `title` | Hover text on its box, e.g. the source it came from. |
-                  | `children` | Its children, left to right. |
+                  | `edge-label` | Text on the line from its parent, e.g. `condition`, `body`, `otherwise`. |
+                  | `hover-text` | What shows when the pointer rests on its box, e.g. the source it came from. |
+                  | `color` | The box's colour, a hue of the theme's:  `green`, `blue` ... |
+                  | `kind` | A word for what sort of node it is:  its box is also part `kind-<word>`, for your own style. |
+                  | `folded` | It starts folded:  the nodes under it don't show. |
 
-                  Give the tree one of two ways:
+                  Anything else inside a node shows in its box:  an icon, a button, an image.
+                  It's a real element on the page, measured so the box fits it, and it keeps its state and events.
 
-                  - The `tree` property, from script or a framework. It redraws whenever `tree` is set again: set a NEW
+                  Or give the tree as data, the same fields in a `TreeDiagramNode` (exported by `spell-ui`):
+                  `edgeLabel` for `edge-label`, `title` for `hover-text`, and `children`, left to right.
+
+                  - The `tree` property, from script or a framework.  It redraws whenever `tree` is set again:  set a NEW
                     tree, since a tree changed in place isn't seen.
-                  - A `<ui-json>` child holding the tree as JSON, its text or a `source` file;  or the older
-                    `<script type="application/json">` child, for a static page with no script
-                    of its own (it works from `file://` too). The diagram follows the child if the page changes it.
+                  - A `<ui-json>` child, holding it as JSON in its text or in a `source` file.
+                  - A `<script type="application/json">` child, the older way, for a static page with no script of its own
+                    (it works from `file://` too).
 
-                  The property wins when both are there; setting it back to `undefined` shows the child's tree again. With
-                  no tree, or JSON that doesn't parse, it draws nothing and takes no room; bad JSON also logs one console
-                  warning. Data is checked, not trusted: a node without a `label` gets an empty box, and anything that
+                  The property wins;  then nested tags;  then JSON.  The diagram follows its children as the page changes them.
+                  Setting the property back to `undefined` shows the children's tree again.
+
+                  With no tree, or JSON that doesn't parse, it draws nothing and takes no room;  bad JSON also logs one console
+                  warning.  Data is checked, not trusted:  a node without a `label` gets an empty box, and anything that
                   isn't a node is left out.
                 </script>
               </ui-markdown>
               <ui-code language="html">
                 <template>
                   <ui-tree-diagram>
-                    <script type="application/json">
-                      { "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
-                    </script>
+                    <ui-tree-node label="Add">
+                      <ui-tree-node label="Number 1"></ui-tree-node>
+                      <ui-tree-node label="Number 2"></ui-tree-node>
+                    </ui-tree-node>
                   </ui-tree-diagram>
                 </template>
               </ui-code>
@@ -251,8 +300,8 @@
                   diagram.tree = {
                     label: "If",
                     children: [
-                      { label: "IsA · integer", slot: "condition", detail: "boolean" },
-                      { label: "Print", slot: "body" }
+                      { label: "IsA · integer", edgeLabel: "condition", detail: "boolean" },
+                      { label: "Print", edgeLabel: "body" }
                     ]
                   }
                 </script>
@@ -268,14 +317,30 @@
               </ui-code>
             </ui-section>
 
+            <ui-section id="usage-clicks-and-folding" label="Clicks and folding" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A click on a node sends `ui-node-clicked`, with its `node` and its `path`, its child index at each depth (`0.2.1`).
+                  `clickable` makes that clear to the reader:  a pointer cursor, a hover look, and keys.
+
+                  `foldable` gives each node with children a button;  `ui-node-toggled` says which, and `folded`.
+                  A folded node stays folded when the tree changes around it.
+                </script>
+              </ui-markdown>
+            </ui-section>
+
             <ui-section id="usage-size" label="Size" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A tree is laid out tidy: each depth a row, each parent centred over its children, no two boxes or
-                  slot labels overlapping. Boxes are sized to their text, in a monospace font.
+                  A tree is laid out tidy:  each depth a row (a column, `left-right`), each parent centred over its children,
+                  small subtrees spread evenly between big ones, and no two boxes or edge labels overlapping.
+
+                  Boxes fit their text, measured in its real font, so any font works.
+                  It's the page's by default;  `--ui-tree-diagram-font-family` sets another.
+                  A static server render has nothing to measure with, and estimates from the number of characters.
 
                   It draws at its natural size, `--ui-tree-diagram-font-size` (13px in 16px text) for labels, and never
-                  larger. In a narrower column it shrinks to fit, down to `--ui-tree-diagram-min-scale` (three quarters);
+                  larger.  In a narrower column it shrinks to fit, down to `--ui-tree-diagram-min-scale` (three quarters);
                   a tree wider than that scrolls sideways inside the element instead of shrinking past readable.
                 </script>
               </ui-markdown>
@@ -284,8 +349,12 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Nothing in a tree diagram takes focus: it's a picture. A tree wide enough to scroll scrolls with the
-                  scrollbar or a trackpad; browsers that make scrolling boxes focusable also let the arrow keys scroll it.
+                  A plain tree diagram is a picture, and nothing in it takes focus.
+                  A tree wide enough to scroll scrolls with the scrollbar or a trackpad;  browsers that make scrolling boxes
+                  focusable also let the arrow keys scroll it.
+
+                  - `foldable`:  Tab reaches each fold button;  Enter or Space folds or opens it.
+                  - `clickable`:  Tab reaches each node too;  Enter or Space sends `ui-node-clicked`, as a click does.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -293,13 +362,12 @@
             <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - The drawing is one `<svg role="img">`, named by a summary of its root: "Tree: If, with 3 children"
+                  - The drawing is one `<svg role="img">`, named by a summary of its root:  "Tree:  If, with 3 children"
                     (translatable).
-                  - A node's `title` is its box's `<title>`: hover text for a pointer.
-                  - The summary doesn't read out the whole tree. Where its shape matters to a reader, say it in the
+                  - `foldable` or `clickable` make it `role="group"`, as it holds buttons then:  each named by its node.
+                  - A node's `hover-text` is its box's `<title>`:  hover text for a pointer.
+                  - The summary doesn't read out the whole tree.  Where its shape matters to a reader, say it in the
                     text around the diagram too.
-                  - If drawing fails, the element shows the tree as nested lists instead, which a screen reader reads in
-                    full.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -307,12 +375,24 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree-diagram" only="tags"></ui-docs-api>
+            </ui-section>
+
             <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="attributes"></ui-docs-api>
             </ui-section>
 
             <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree-diagram" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree-diagram" only="slots"></ui-docs-api>
             </ui-section>
 
             <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
@@ -335,7 +415,7 @@
                 <script type="text/markdown">
                   Theme with the public `--ui-tree-diagram-*` tokens: set one on the element, on any ancestor (`:root`
                   for every diagram), or on one piece through `::part()`: `diagram` (the `<svg>`), `node` (each node),
-                  `root-node` (the root, also a `node`), `edge` (each line) and `slot-label`. Never set the
+                  `root-node` (the root, also a `node`), `edge` (each line) and `edge-label`. Never set the
                   `--_ui-tree-diagram-*` names: they're the sheet's private plumbing.
 
                   Colours default to Spell UI's own tokens (the root in `primary`, the other boxes on the muted
@@ -361,39 +441,19 @@
               <ui-docs-tokens family="ui-tree-diagram" playground>
                 <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
                 <ui-tree-diagram>
-                  <script type="application/json">
-                    {
-                      "label": "If",
-                      "title": "if number / 15 is an integer",
-                      "children": [
-                        {
-                          "label": "IsA · integer",
-                          "detail": "boolean",
-                          "slot": "condition",
-                          "children": [
-                            {
-                              "label": "Divide",
-                              "detail": "number",
-                              "slot": "value",
-                              "children": [
-                                { "label": "Variable number", "detail": "number" },
-                                { "label": "Number 15", "detail": "number" }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "label": "Print",
-                          "slot": "body",
-                          "children": [
-                            { "label": "Variable number", "detail": "number" },
-                            { "label": "Text \"fizzbuzz\"", "detail": "text" }
-                          ]
-                        },
-                        { "label": "If …", "slot": "otherwise" }
-                      ]
-                    }
-                  </script>
+                  <ui-tree-node label="If" hover-text="if number / 15 is an integer">
+                    <ui-tree-node label="IsA · integer" detail="boolean" edge-label="condition">
+                      <ui-tree-node label="Divide" detail="number" edge-label="value">
+                        <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                        <ui-tree-node label="Number 15" detail="number"></ui-tree-node>
+                      </ui-tree-node>
+                    </ui-tree-node>
+                    <ui-tree-node label="Print" edge-label="body">
+                      <ui-tree-node label="Variable number" detail="number"></ui-tree-node>
+                      <ui-tree-node label="Text &quot;fizzbuzz&quot;" detail="text"></ui-tree-node>
+                    </ui-tree-node>
+                    <ui-tree-node label="If …" edge-label="otherwise"></ui-tree-node>
+                  </ui-tree-node>
                 </ui-tree-diagram>
                 <!-- playground:end -->
               </ui-docs-tokens>

@@ -1,5 +1,6 @@
 import { proto, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -25,10 +26,25 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
   @proto static alias = "statement"
   @proto static priority = Priority.declaration
 
-  /** Only under a place. */
+  /**
+   * Only under a place.
+   * - Refuses a dot in a field's name:  what's inside a field is its own thing, read in words, so nobody ever reaches for a path.
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     if (!P.SubjectScope.of(scope)?.subjectType?.isA("Place")) return undefined
-    return super.parse(scope, tokens)
+    const match = super.parse(scope, tokens)
+    if (!match) return undefined
+    const groups = match.groups as Record<string, P.Match | P.Match[] | undefined>
+    for (const group of FIELD_GROUPS) {
+      const field = textIn(groups[group] as P.Match | undefined)
+      if (field.includes(".")) {
+        const [first, ...rest] = field.split(".").reverse()
+        const words = `${first} of its ${rest.reverse().join(" of its ")}`
+        const message = SP.Language.of(scope).parserMessage("no-dotted-field", { field, words })
+        return SpellStatement.refuse(match, message)
+      }
+    }
+    return match
   }
 
   /** What this line says. */
@@ -40,9 +56,21 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
   }
 }
 
+/** The groups that name a field of the place's answer. */
+const FIELD_GROUPS = ["name", "field", "inner", "outer"]
+
 /** A text's words, without its quotes. */
 export function textIn(text: P.Match | undefined): string {
   return `${text?.raw ?? ""}`.trim().replace(/^["'`]|["'`]$/g, "")
+}
+
+/**
+ * Where a field is that's inside others, as the engine reads it:  `the "items" of its "data"` => `data.items`.
+ * - The dots stop here:  a program never writes one (`PlaceDetail.parse()`).
+ */
+export function fieldPathOf(groups: { field: P.Match; inner?: P.Match; outer?: P.Match }): string {
+  const { field, inner, outer } = groups
+  return [field, outer, inner].flatMap((each) => (each ? [textIn(each)] : [])).join(".")
 }
 
 /** A property's name as its row calls it, from its words:  what compiled code names it. */

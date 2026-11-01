@@ -557,6 +557,22 @@
     },
     {
       "kind": "method",
+      "name": "includesExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "...values"
+        }
+      ],
+      "section": "composite accessors",
+      "description": "`core.includes()`, capitals counting:  `its code includes exactly \"A\"`."
+    },
+    {
+      "kind": "method",
       "name": "includesAny",
       "of": "core",
       "module": "collection-other",
@@ -633,7 +649,23 @@
         }
       ],
       "section": "numeric iteration -- arrays only",
-      "description": "Is `thing` the first thing in `collection`?  Array only."
+      "description": "Is `thing` the first thing in `collection`?  Or, for text, how it starts, ignoring capitals (`language` Q12)."
+    },
+    {
+      "kind": "method",
+      "name": "startsWithExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "section": "numeric iteration -- arrays only",
+      "description": "`core.startsWith()`, capitals counting:  compiles from `starts with exactly`."
     },
     {
       "kind": "method",
@@ -649,7 +681,23 @@
         }
       ],
       "section": "numeric iteration -- arrays only",
-      "description": "Is `thing` the last thing in `collection`?  Array only."
+      "description": "Is `thing` the last thing in `collection`?  Or, for text, how it ends, ignoring capitals (`language` Q12)."
+    },
+    {
+      "kind": "method",
+      "name": "endsWithExactly",
+      "of": "core",
+      "module": "collection-other",
+      "params": [
+        {
+          "name": "collection"
+        },
+        {
+          "name": "thing"
+        }
+      ],
+      "section": "numeric iteration -- arrays only",
+      "description": "`core.endsWith()`, capitals counting:  compiles from `ends with exactly`."
     },
     {
       "kind": "method",
@@ -1360,6 +1408,14 @@
     },
     {
       "kind": "method",
+      "name": "projectSheet",
+      "of": "core",
+      "module": "ui",
+      "section": "Styles",
+      "description": "The project's `.css` as one sheet, which each view adopts into its shadow root, so a person's stylesheet styles what they drew, wherever they drew it (epic `language`, Q13)."
+    },
+    {
+      "kind": "method",
       "name": "drawThing",
       "of": "core",
       "module": "drawing",
@@ -1399,6 +1455,19 @@
     },
     {
       "kind": "method",
+      "name": "listDrawn",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "value"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "What a loop in a live value answered, as Solid can draw it:  a spell `List`'s items, or anything else as it is."
+    },
+    {
+      "kind": "method",
       "name": "drawItems",
       "of": "core",
       "module": "drawing",
@@ -1409,6 +1478,22 @@
       ],
       "section": "Drawing things",
       "description": "Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw."
+    },
+    {
+      "kind": "method",
+      "name": "drawEach",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "each"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "A loop's drawing, one for each item of `list`:  what `for each ... draw` compiles to, in a drawing."
     },
     {
       "kind": "method",

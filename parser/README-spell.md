@@ -336,6 +336,8 @@ Its first line is how you call it, with each blank's type in brackets:
   - `load the scores without waiting` says the same, at the end of the line.
     It's for a call:  `set x to load the scores without waiting` is an error, as there'd be no value yet to set.
   - Spanish:  `al mismo tiempo:`, `mientras tanto`, `sin esperar`.
+- A search in text ignores capitals:  `"Hello" includes "hello"`, and `starts with` and `ends with` the same.
+  - `includes exactly` (`incluye exactamente`) counts them.  A list's items are always compared exactly.
 - A toast is the one slow thing nothing waits for:  `notify "Bye" for 5 seconds` shows it and carries on.
   - `notify "Bye" for 5 seconds and wait` waits until it's gone, and holds clicks that long too (Spanish `y esperar`).
   - One that stays until it's closed can't be waited for:  `until clicked`, `with "Got it"`.
@@ -404,6 +406,7 @@ Its first line is how you call it, with each blank's type in brackets:
 
 A view is a web component of its own, with its own styles:
 the card at the top draws as `<solitaire-card>`.
+A project's stylesheet reaches inside it too, so `.card .title` styles what the card draws.
 
 ```spell
 a "tableau" is a pile where:

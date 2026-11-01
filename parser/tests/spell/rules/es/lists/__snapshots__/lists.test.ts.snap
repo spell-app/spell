@@ -7,7 +7,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "can_give_up": "operator|expression",
   "can_take": "operator|expression",
   "copy_list": "expression|type?",
-  "ends_with": "operator|expression",
+  "ends_with": "operator|exactly?|expression",
   "list_add": "thing|method?|list",
   "list_add_relative": "thing|list|operator|item",
   "list_append": "thing|list",
@@ -42,6 +42,6 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "range_starting_with_expression": "arg|list|thing",
   "repeat_n_times": "number|body?",
   "sort_key_field": "property",
-  "starts_with": "operator|expression",
+  "starts_with": "operator|exactly?|expression",
 }
 `;

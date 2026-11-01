@@ -7,7 +7,7 @@ import { Precedence, type OperatorOperands } from "./expressions.shared"
  * `does_not_include` rule:  `{lhs} does not include`/`contain {rhs}`, e.g. `theList does not include thing`.
  * - Always negates via `shouldNegateOutput()`, then delegates to same `core.includes()` as `includes`.
  */
-export class DoesNotInclude extends InfixOperatorSuffix<"operator|expression"> {
+export class DoesNotInclude extends InfixOperatorSuffix<"operator|exactly?|expression"> {
   @proto static precedence = Precedence.comparison
 
   shouldNegateOutput(): boolean {
@@ -15,7 +15,7 @@ export class DoesNotInclude extends InfixOperatorSuffix<"operator|expression"> {
   }
   compileASTExpression(match: P.MatchFor<this>, { lhs, rhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
-      methodName: "includes",
+      methodName: match.groups.exactly ? "includesExactly" : "includes",
       args: [lhs!, rhs!]
     })
   }

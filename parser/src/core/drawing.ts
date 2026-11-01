@@ -24,7 +24,7 @@
 
 import h from "@solidjs/h"
 import { createComponent, insert, render, type JSX } from "@solidjs/web"
-import { Errored, For, createMemo, runWithOwner } from "solid-js"
+import { Errored, createMemo, runWithOwner } from "solid-js"
 
 import { Cell } from "spell/util"
 
@@ -32,6 +32,7 @@ import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
+import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
 import { listenForUndoKeys } from "./ui"
 import { standInFor } from "./waiting"
 
@@ -131,6 +132,16 @@ export const drawingMethods = defineCoreModule({
   },
 
   /**
+   * What a loop in a live value answered, as Solid can draw it:  a spell `List`'s items, or anything else as it is.
+   * - e.g. `h("div", () => core.listDrawn(core.map(this.books, ...)))`:  Solid draws an array, never a `List`,
+   *   so the loop's items would silently show nothing (epic `language`, r2).
+   * - Reads its items, in the live value:  so it follows them.
+   */
+  listDrawn(value: unknown): Drawing {
+    return (value instanceof List ? value.items : value) as Drawing
+  },
+
+  /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
    *   And what a viewable list's element holds as its children -- see `drawThing()`.
@@ -139,6 +150,7 @@ export const drawingMethods = defineCoreModule({
    *   - A viewable list's default draws the item itself, in the item's own boundary:  no second one around it.
    * - Any other list's item draws as itself (`drawThing()`).
    * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
+   * - A long list draws what fits, and more as you scroll:  `drawnInWindow()`.
    */
   drawItems(list: unknown): Drawing | null {
     // NOT `list.items` here:  read in the caller's drawing, every change to the list would draw it all again
@@ -150,11 +162,25 @@ export const drawingMethods = defineCoreModule({
         : drawEachItem === DEFAULT_DRAW_EACH_ITEM
           ? (item: unknown) => drawEachItem.call(list, item)
           : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
-    return createComponent(For as unknown as ForByIdentity, {
-      get each() {
-        return (list as { items: unknown[] }).items
-      },
-      children: drawItem
+    return drawnInWindow({ items: () => (list as { items: unknown[] }).items, drawItem, key: () => list as object })
+  },
+
+  /**
+   * A loop's drawing, one for each item of `list`:  what `for each ... draw` compiles to, in a drawing.
+   * - Up to `MOST_AT_ONCE` items, or on a page that can't watch them come near the view:  `core.map()`, drawn together.
+   * - A long list draws what fits, and more as you scroll, however the program wrote it:  `drawnInWindow()`.
+   * - Reads the list here, as `core.map()` does:  what draws it follows it.
+   */
+  drawEach(list: unknown, each: (item: unknown, position: number, list: unknown) => Drawing): Drawing {
+    const items = () => (Array.isArray(list) ? list : (list as { items?: unknown[] } | undefined)?.items)
+    const all = items()
+    if (!all || all.length <= MOST_AT_ONCE || !canDrawInWindows()) {
+      return core.map(list as never, each as never) as unknown as Drawing
+    }
+    return drawnInWindow({
+      items: () => items() ?? [],
+      key: () => list as object,
+      drawItem: (item, position) => madeOnce(each(item, position(), list))
     })
   },
 
@@ -365,9 +391,6 @@ type DrawsEachItem = {
 
 /** A viewable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
 const DEFAULT_DRAW_EACH_ITEM = ViewableList.prototype.drawEachItem
-
-/** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
-type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing
 
 /** The DOM event a drawing that failed sends -- the same name as Spell UI's. */
 const ERROR_EVENT = "ui-error"

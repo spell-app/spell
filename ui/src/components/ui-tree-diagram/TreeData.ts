@@ -8,7 +8,8 @@ import type { TreeDiagramNode } from "./UITreeDiagram.types"
  *   tests drive it directly.
  * - Lenient:  data from a page is checked, not trusted.
  *   - Anything that isn't an object is no node.
- *   - A missing `label` is `""`;  a `detail` / `slot` / `title` that isn't a string is dropped.
+ *   - A missing `label` is `""`;  a `detail` / `edgeLabel` / `title` / `color` / `kind` that isn't a string is dropped.
+ *   - `slot` is `edgeLabel`'s old name:  spell's parse trees still write it (`P.TreeWriter`).
  *   - `children` keeps only nodes.
  ****************/
 export class TreeData {
@@ -25,11 +26,16 @@ export class TreeData {
     const raw = value as Record<string, unknown>
     const node: TreeDiagramNode = { label: TreeData.text(raw.label) ?? "" }
     const detail = TreeData.text(raw.detail)
-    const slot = TreeData.text(raw.slot)
+    const edgeLabel = TreeData.text(raw.edgeLabel) ?? TreeData.text(raw.slot)
     const title = TreeData.text(raw.title)
+    const color = TreeData.text(raw.color)
+    const kind = TreeData.text(raw.kind)
     if (detail) node.detail = detail
-    if (slot) node.slot = slot
+    if (edgeLabel) node.edgeLabel = edgeLabel
     if (title) node.title = title
+    if (color) node.color = color
+    if (kind) node.kind = kind
+    if (raw.folded === true) node.folded = true
     if (Array.isArray(raw.children)) {
       const children = raw.children.flatMap((child) => TreeData.node(child, seen) ?? [])
       if (children.length) node.children = children

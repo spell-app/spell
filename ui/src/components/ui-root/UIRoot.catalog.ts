@@ -1571,11 +1571,19 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
     attributes: ["choose", "filter", "label"]
   },
-  "ui-tree-diagram": { folder: "ui-tree-diagram", skeleton: { height: "12em" }, attributes: ["tree"] },
+  "ui-tree-diagram": {
+    folder: "ui-tree-diagram",
+    skeleton: { height: "12em" },
+    attributes: ["tree", "direction", "foldable", "clickable"]
+  },
   "ui-tree-item": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "line" }] },
     attributes: ["label", "which", "icon", "value", "open", "selected", "expandable", "group"]
+  },
+  "ui-tree-node": {
+    folder: "ui-tree-diagram",
+    attributes: ["label", "detail", "edge-label", "hover-text", "color", "kind", "folded"]
   },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
   "ui-video": {

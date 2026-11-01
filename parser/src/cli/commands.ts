@@ -246,7 +246,7 @@ export default function languageCommands(spell: Command): void {
   place
     .command("ingest")
     .description(
-      "look at a data source for real, and write what it found:  a description of it, its collections, fields, ids, links, " +
+      "look at a data source for real, and write what it found, best in a .spell file of its own:  a description of it, its collections, fields, ids, links, " +
         "paging and limits, beside the Spell file, and the Spell to reach it, in the file -- through the Claude API with " +
         "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
         "and that a read through it returns rows.  Exits 1 if something needs a person"
@@ -258,7 +258,8 @@ export default function languageCommands(spell: Command): void {
     )
     .option(
       "--into <file>",
-      "the .spell file for its Spell:  added to, never overwritten, the same place never twice -- default it asks"
+      "the .spell file for its Spell:  give it one of its own, your program in another, so --update never touches what you drew;  " +
+        "added to, never overwritten, the same place never twice -- default it asks"
     )
     .option(
       "--update <file>",

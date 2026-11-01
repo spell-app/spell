@@ -445,6 +445,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "can_give_up",
       "they_are",
       "they_are",
+      "they_are",
     ],
     "field_called": [
       "field_called",
@@ -984,6 +985,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "they_are": [
       "they_are",
       "they_are",
+      "they_are",
     ],
     "trigger": [
       "trigger",
@@ -1318,7 +1320,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "there_are_things · places · 2",
     "there_is_a · expressions · 1",
     "there_is_or_is_not · expressions · 1",
-    "they_are · places · 2",
+    "they_are · places · 3",
     "thing_at_place · classes · 1",
     "thing_name · classes · 1",
     "thing_with_id · places · 1",

@@ -434,6 +434,13 @@ export class MethodDefinition<
     const { asTest } = match.groups as { asTest?: P.Match }
     const signature = this.getSignature(match)!
     const { methodName = "", syntax = "", asPostfixExpression, asInfixExpression, valueKindOf } = signature
+    // `- to it:`, nothing but its thing:  there's nothing to call it by
+    if (!methodName) {
+      const message = SP.Language.of(match.scope).parserMessage("action-without-a-name", {
+        text: match.inputText.trim()
+      })
+      return SP.SpellWarnings.refuseIf(match as unknown as P.Match, message, () => true)
+    }
     const { scope } = match
     // Generic `Groups` keeps `MatchFor<this>` from narrowing to a plain `P.Match` -- cast once.
     const declaredBy = match as P.Match

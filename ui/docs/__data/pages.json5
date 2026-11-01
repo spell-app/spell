@@ -594,7 +594,7 @@
     },
     "ui-tree-diagram": {
       "title": "Tree diagram",
-      "summary": "A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.",
+      "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.",
       "status": "done"
     },
     "ui-video": {

@@ -8,7 +8,7 @@ describe("TreeData.node()", () => {
     const tree = {
       label: "If",
       detail: "number",
-      slot: "body",
+      edgeLabel: "body",
       title: "if x",
       children: [{ label: "Print" }]
     }

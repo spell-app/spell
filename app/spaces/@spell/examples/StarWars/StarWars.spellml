@@ -1,0 +1,590 @@
+# Star Wars
+A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWarsApi.spell, as `spell place ingest` wrote it:
+say what a field links to, and reading it follows the link, `the name of its homeworld`.
+Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
+
+<spell-app "guide">
+	<spell>
+		- its "tab" is text
+		- its "search" is text
+		- to create it:
+			set its tab to "films"
+			set its search to ""
+		- its "showing" is a thing
+		- its "trail" is a new list of things
+		- its "playing" is a film
+		- its "jumping" is yes or no
+	</spell>
+
+	<property "found" description="Whatever's found:  the film, person, planet, ship or anything else with that in its name">
+		set matches to a new list of things
+		for each film in every film where its title includes the search of the guide
+			add the film to matches
+		for each person in every person where its name includes the search of the guide
+			add the person to matches
+		for each planet in every planet where its name includes the search of the guide
+			add the planet to matches
+		for each starship in every starship where its name includes the search of the guide
+			add the starship to matches
+		for each vehicle in every vehicle where its name includes the search of the guide
+			add the vehicle to matches
+		for each one in every species where its name includes the search of the guide
+			add the one to matches
+		return matches
+	</property>
+
+	<action "go back">
+		if its trail is empty
+			set its showing to nothing
+			return
+		set its showing to the last item of its trail
+		remove the last item of its trail
+		scroll to the top
+	</action>
+
+	<action "go to (where as text)">
+		set its tab to where
+		set its search to ""
+		set its showing to nothing
+		clear its trail
+		scroll to the top
+	</action>
+
+	<action "play the opening">
+		set its playing to the first film
+	</action>
+
+	<action "punch it" description="A jump to light speed, and wherever it lands">
+		set its jumping to yes
+		set landing to a random person in (every person)
+		pause for 2600 msec
+		open landing
+		set its jumping to no
+	</action>
+
+	<draw>
+		<if its jumping>
+			draw (a new jump)
+		</if>
+		<stack class="top" direction="horizontal" wrap="wrap" align="end" justify="between">
+			<button class="logo" appearance="transparent" onClick={go to "films"}>Star Wars</button>
+			<form value={it} class="find">
+				<field label="Search the galaxy">
+					<input name="search" icon="search" placeholder="Luke, Hoth, Falcon"/>
+				</field>
+			</form>
+			<button class="punch" color="primary" onClick={punch it} title="Jump to light speed, and land on someone">Punch it</button>
+		</stack>
+		<toolbar class="tabs" appearance="secondary pointing" aria-label="Browse">
+			<item active={its tab is "films"} onClick={go to "films"}>Films</item>
+			<item active={its tab is "people"} onClick={go to "people"}>People</item>
+			<item active={its tab is "planets"} onClick={go to "planets"}>Planets</item>
+			<item active={its tab is "ships"} onClick={go to "ships"}>Ships</item>
+			<item active={its tab is "vehicles"} onClick={go to "vehicles"}>Vehicles</item>
+			<item active={its tab is "species"} onClick={go to "species"}>Species</item>
+		</toolbar>
+		draw its shelf
+		<text class="credits" size="small">
+			Films, people, planets and ships from <link link="https://swapi.py4e.com/">swapi.py4e.com</link>.
+			Pictures and what they're of from <link link="https://en.wikipedia.org/">Wikipedia</link>, asked for as you look.
+			Star Wars belongs to Lucasfilm and Disney.
+		</text>
+		<if its playing>
+			draw the crawl of its playing
+		</if>
+	</draw>
+
+	<draw "shelf" description="Each tab's list says nothing of how long it is:  a long one draws what fits, and more as you scroll">
+		<if its showing and its search is "">
+			draw the page of its showing
+		<otherwise if its search is not "">
+			<header size="medium">Searching for “{its search}”</header>
+			<cards columns="4" doubling>{draw its search list}</cards>
+		<otherwise if its tab is "films">
+			<segment class="opening" inverted align="center">
+				<text class="long-ago" size="large">A long time ago in a galaxy far, far away....</text>
+				<button class="play-opening" size="massive" onClick={play the opening of the guide}>Play the opening</button>
+			</segment>
+			<cards columns="4" doubling>{draw its films list}</cards>
+		<otherwise if its tab is "people">
+			<cards columns="4" doubling>{draw its people list}</cards>
+		<otherwise if its tab is "planets">
+			<cards columns="4" doubling>{draw its planets list}</cards>
+		<otherwise if its tab is "vehicles">
+			<cards columns="4" doubling>{draw its vehicles list}</cards>
+		<otherwise if its tab is "species">
+			<cards columns="4" doubling>{draw its species list}</cards>
+		<otherwise>
+			<cards columns="4" doubling>{draw its ships list}</cards>
+		</>
+	</draw>
+
+	<draw "search list">
+		for each one in its found
+			draw the one
+		while waiting:
+			draw its signal
+		if there are none:
+			<text>Nobody and nothing by that name, in this galaxy.</text>
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "films list">
+		for each film in every film
+			draw the film
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "people list">
+		for each person in every person
+			draw the person
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "planets list">
+		for each planet in every planet
+			draw the planet
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "vehicles list">
+		for each vehicle in every vehicle
+			draw the vehicle
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "species list">
+		for each one in every species
+			draw the one
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "ships list">
+		for each starship in every starship
+			draw the starship
+		while waiting:
+			draw its signal
+		if that fails:
+			draw its lost signal
+	</draw>
+
+	<draw "signal">
+		<loader visible inline text>Waiting for a signal from the galaxy</loader>
+	</draw>
+
+	<draw "lost signal">
+		<message color="red">
+			<text paragraph>The signal from swapi.py4e.com is lost.</text>
+			<button onClick={try again}>Try again</button>
+		</message>
+	</draw>
+</spell-app>
+
+
+# What everything here can do
+It's on `a thing`, not a base type of the program's own:  each type below is simply `a thing`.
+Spell has no mixins yet (epic `mixins`), and a thing here shares by HOLDING a card, and drawing it.
+
+<spell>
+	to open (a thing):
+		if the showing of the guide
+			add the showing of the guide to the trail of the guide
+		set the search of the guide to ""
+		set the showing of the guide to it
+		scroll to the top
+
+	// A number for people to read:  with none, nothing, so its row doesn't show
+	to measure (amount as a number) in (unit as text):
+		if amount is nothing
+			return ""
+		return amount with commas + " " + unit
+</spell>
+
+
+# A card:  a picture, a name, what kind, and a click anywhere on it opens the thing
+Every type holds one of these, with its own words.
+
+<spell-thing "card">
+	<property "label" />
+	<property "kind" />
+	<property "shape" />
+	<property "colour" description="What colour a picture's background is:  from its name, unless it says" />
+	<property "hue">
+		if its colour is not nothing
+			return its colour
+		return the length of its label * 47
+	</property>
+	<spell>
+		- its "subject" is a thing
+		- its "species" is a species
+	</spell>
+
+	<draw>
+		<ui-card class="card" onClick={open its subject}>
+			{draw its portrait}
+			<content>
+				<header>{its label}</header>
+				<meta>{its kind}</meta>
+			</content>
+		</ui-card>
+	</draw>
+
+	<draw "portrait">
+		draw (a new portrait with name = its label, hue = its hue, shape = its shape, species = its species)
+	</draw>
+
+	<draw "top">
+		<button class="back" appearance="transparent" icon="arrow left" onClick={go back}>Back</button>
+		<stack class="hero" direction="horizontal" wrap="wrap">
+			{draw its portrait}
+			<stack class="about">
+				<header class="title">{its label}</header>
+				<text class="kind">{its kind}</text>
+				{draw (a new wiki note with name = its label)}
+			</stack>
+		</stack>
+	</draw>
+</spell-thing>
+
+
+# What Wikipedia says of it, and where to read the rest
+Not every name has a page, and a name may be someone else's:  Zolan is a medicine.
+
+<spell-more-of "wiki page">
+	<property "fits">
+		if its title includes "List of"
+			return no
+		return its about includes "star wars" or its about includes "fictional" or its about includes " film "
+	</property>
+</spell-more-of>
+
+<spell-thing "wiki note">
+	<property "name" />
+	<property "page">the wiki page whose id is its name</property>
+	<draw>
+		draw its words
+		while waiting:
+			<text class="kind">Asking Wikipedia</text>
+		if that fails:
+			<text class="kind">Wikipedia can't be reached just now.</text>
+	</draw>
+	<draw "words">
+		<if its page and the fits of its page>
+			<text paragraph>{the summary of its page} <link link={the page of the desktop of the content urls of its page} target="_blank">Read the rest on Wikipedia</link></text>
+		</if>
+	</draw>
+</spell-thing>
+
+
+# A page's parts
+A table of what's known, leaving out what isn't;  a list under its heading, or nothing if it's empty.
+
+<spell-thing "fact">
+	<property "label" />
+	<property "value" />
+	<spell>
+		- its "date" is a date
+	</spell>
+	<alias "is known" description="What a server writes when nothing's known isn't worth a row">
+		if its date
+			return yes
+		if its value is nothing or its value is ""
+			return no
+		return its value is not "unknown" and its value is not "n/a" and its value is not "none"
+	</alias>
+	<draw>
+		<row>
+			<cell header>{its label}</cell>
+			<cell>{its value}{its date}</cell>
+		</row>
+	</draw>
+</spell-thing>
+
+<spell-thing "fact table">
+	<spell>
+		- its "facts" is a list of facts
+	</spell>
+	<property "shown">the facts in its facts where it is known</property>
+	<draw>
+		<if its shown is not empty>
+			<table class="facts" appearance="very-basic" inverted unstackable>
+				{draw each fact in its shown}
+			</table>
+		</if>
+	</draw>
+</spell-thing>
+
+<spell-thing "section">
+	<property "heading" />
+	<spell>
+		- its "things" is a list of things
+		- its "single" is a thing
+	</spell>
+	<draw>
+		<if its single>
+			<header class="section" size="small">{its heading}</header>
+			<cards columns="4" doubling>{draw its single}</cards>
+		<otherwise if its things is not empty>
+			<header class="section" size="small">{its heading}</header>
+			<cards columns="4" doubling>{draw each one in its things}</cards>
+		</>
+	</draw>
+</spell-thing>
+
+
+# A film
+
+<spell-more-of "film">
+	<property "card">a new card with label = its title, kind = "Episode " + its episode id, subject = it</property>
+	<action "play it">
+		set the playing of the guide to it
+	</action>
+	<action "end it">
+		set the playing of the guide to nothing
+	</action>
+
+	<draw>
+		draw its card
+	</draw>
+
+	<property "facts">
+		set known to a new list of facts
+		add (a new fact with label = "Directed by", value = its director) to known
+		add (a new fact with label = "Produced by", value = its producer) to known
+		add (a new fact with label = "Released", date = its release date) to known
+		return known
+	</property>
+
+	<draw "page">
+		draw the top of its card
+		<button class="play-opening" onClick={play it}>Play the opening</button>
+		draw (a new fact table with facts = its facts)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+
+	<draw "links">
+		draw (a new section with heading = "Who's in it", things = its characters)
+		draw (a new section with heading = "Where it happens", things = its planets)
+		draw (a new section with heading = "What they fly", things = its starships)
+	</draw>
+
+</spell-more-of>
+
+
+# A person
+
+<spell-more-of "person">
+	<property "card">a new card with label = its name, kind = "Born " + its birth year, subject = it</property>
+	<property "page">the wiki page whose id is its name</property>
+	<property "picture" description="Their own picture on Wikipedia, or nothing">
+		if its page and the fits of its page and the thumbnail of its page
+			return the source of the thumbnail of its page
+		return ""
+	</property>
+
+	<draw>
+		draw its card
+	</draw>
+
+	<property "facts">
+		set known to a new list of facts
+		add (a new fact with label = "Height", value = measure its height in "cm") to known
+		add (a new fact with label = "Mass", value = measure its mass in "kg") to known
+		add (a new fact with label = "Born", value = its birth year) to known
+		add (a new fact with label = "Hair", value = its hair color) to known
+		add (a new fact with label = "Eyes", value = its eye color) to known
+		return known
+	</property>
+
+	<draw "page">
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+
+	<draw "links">
+		draw (a new section with heading = "Home", single = its homeworld)
+		draw (a new section with heading = "Films", things = its films)
+		draw (a new section with heading = "What they are", things = its species)
+		draw (a new section with heading = "What they fly", things = its starships)
+		draw (a new section with heading = "What they drive", things = its vehicles)
+	</draw>
+</spell-more-of>
+
+
+# A planet
+
+<spell-more-of "planet">
+	<property "card">a new card with label = its name, kind = its climate, shape = "world", colour = its hue, subject = it</property>
+	<property "hue" description="What colour a world is, from its weather">
+		if its climate includes "frozen"
+			return 200
+		if its climate includes "arid"
+			return 38
+		if its climate includes "murky" or its climate includes "polluted"
+			return 95
+		if its climate includes "tropical" or its climate includes "temperate"
+			return 130 + the length of its name * 9
+		return 280
+	</property>
+
+	<draw>
+		draw its card
+	</draw>
+
+	<property "facts">
+		set known to a new list of facts
+		add (a new fact with label = "Climate", value = its climate) to known
+		add (a new fact with label = "Terrain", value = its terrain) to known
+		add (a new fact with label = "Diameter", value = measure its diameter in "km") to known
+		add (a new fact with label = "Population", value = measure its population in "people") to known
+		add (a new fact with label = "A day", value = measure its rotation period in "hours") to known
+		add (a new fact with label = "A year", value = measure its orbital period in "days") to known
+		return known
+	</property>
+
+	<draw "page">
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+
+	<draw "links">
+		draw (a new section with heading = "Who's from here", things = its residents)
+		draw (a new section with heading = "Seen in", things = its films)
+	</draw>
+</spell-more-of>
+
+
+# A ship, and a vehicle:  much the same to look at
+Their pages share `to draw a craft`'s words, handed what differs.
+
+<spell-thing "craft page">
+	<property "model" />
+	<property "maker" />
+	<property "length" />
+	<property "crew" />
+	<property "passengers" />
+	<property "cost" />
+	<property "x-wings long" description="How long it is, in something you can picture:  an X-wing is 12.5 metres">
+		if its length is nothing
+			return nothing
+		return round (its length / 12.5)
+	</property>
+	<property "facts">
+		set known to a new list of facts
+		add (a new fact with label = "Model", value = its model) to known
+		add (a new fact with label = "Made by", value = its maker) to known
+		add (a new fact with label = "Length", value = measure its length in "m") to known
+		add (a new fact with label = "As long as", value = measure its x-wings long in "X-wings") to known
+		add (a new fact with label = "Crew", value = its crew) to known
+		add (a new fact with label = "Passengers", value = measure its passengers in "people") to known
+		add (a new fact with label = "Costs", value = measure its cost in "credits") to known
+		return known
+	</property>
+	<draw>
+		draw (a new fact table with facts = its facts)
+	</draw>
+</spell-thing>
+
+<spell-more-of "starship">
+	<property "card">a new card with label = its name, kind = its starship class, subject = it</property>
+	<draw>
+		draw its card
+	</draw>
+	<draw "page">
+		draw the top of its card
+		draw (a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+	<draw "links">
+		draw (a new section with heading = "Who flew it", things = its pilots)
+		draw (a new section with heading = "Seen in", things = its films)
+	</draw>
+</spell-more-of>
+
+<spell-more-of "vehicle">
+	<property "card">a new card with label = its name, kind = its vehicle class, subject = it</property>
+	<draw>
+		draw its card
+	</draw>
+	<draw "page">
+		draw the top of its card
+		draw (a new craft page with model = its model, maker = its manufacturer, length = its length, crew = its crew, passengers = its passengers, cost = its cost in credits)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+	<draw "links">
+		draw (a new section with heading = "Who flew it", things = its pilots)
+		draw (a new section with heading = "Seen in", things = its films)
+	</draw>
+</spell-more-of>
+
+
+# A species
+A species with no picture takes the first of its people who has one.
+
+<spell-more-of "species">
+	<property "card">a new card with label = its name, kind = its classification, subject = it, species = it</property>
+	<property "picture" description="Its first person's picture:  asking for everyone at once costs one read, and each link then asks nothing">
+		set everyone to every person
+		set found to ""
+		for each person in its people
+			if found is ""
+				set found to the picture of the person
+		return found
+	</property>
+	<draw>
+		draw its card
+	</draw>
+
+	<property "facts">
+		set known to a new list of facts
+		add (a new fact with label = "Language", value = its language) to known
+		add (a new fact with label = "Lives for", value = its average lifespan) to known
+		return known
+	</property>
+
+	<draw "page">
+		draw the top of its card
+		draw (a new fact table with facts = its facts)
+		draw its links
+		while waiting:
+			<loader visible inline text>Following the links</loader>
+	</draw>
+
+	<draw "links">
+		draw (a new section with heading = "Home", single = its homeworld)
+		draw (a new section with heading = "Who's one", things = its people)
+	</draw>
+</spell-more-of>
+
+
+<spell>
+	start the guide
+</spell>

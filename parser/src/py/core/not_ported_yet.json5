@@ -5,7 +5,7 @@
       "why": "What's saved in a place (epic data P11, J10):  browser work first, and a Python project with a saved type doesn't compile yet, saying why",
       "names": [
         "place", "savedThings", "savedThingAt", "savedThingWithId", "linked", "readRider", "saveThing", "removeSaved", "draftOf", "saveDraft", "discardDraft",
-        "inOneGo", "reloadSaved", "currentPerson", "isCurrentPerson", "peopleHere", "ownerOfSaved", "savedWithOwner", "callPlace", "drawRead", "firstFew", "totalOf", "withCommas", "dateShown", "scrollToTop"
+        "inOneGo", "reloadSaved", "currentPerson", "isCurrentPerson", "peopleHere", "ownerOfSaved", "savedWithOwner", "callPlace", "drawRead", "drawEach", "firstFew", "totalOf", "withCommas", "dateShown", "scrollToTop"
       ]
     },
     {
@@ -56,6 +56,8 @@
         "appLayout",
         "pageUndoKey",
         "domRoot",
+        "projectSheet",
+        "listDrawn",
         "useElement",
         "elementClassOf",
         "css"

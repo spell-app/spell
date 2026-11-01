@@ -96,7 +96,7 @@ reversible:`, and reads to the same tree as the English card.
 
 | What it is | English | Spanish |
 | --- | --- | --- |
-| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` |
+| A template's tag, with the prefix | `<spell-view>` `<spell-thing>` `<spell-page>` `<spell-app>` `<spell-page-template>` `<spell-app-template>` `<spell-notebook>` `<spell-more-of>` | `<encanto-vista>` `<encanto-cosa>` `<encanto-página>` `<encanto-aplicación>` `<encanto-plantilla-de-página>` `<encanto-plantilla-de-aplicación>` `<encanto-cuaderno>` `<encanto-más-de>` |
 | A member that declares something | `<property>` `<alias>` `<action>` `<draw>` `<event>` `<test>` `<menu>` `<group>` | `<propiedad>` `<frase>` `<acción>` `<dibujar>` `<evento>` `<probar>` `<menú>` `<grupo>` |
 | A notebook's example, in a drawing | `<example "...">` | `<ejemplo "...">` |
 | A block of markup drawn as written | `<html>` | `<html>` |
@@ -109,6 +109,8 @@ reversible:`, and reads to the same tree as the English card.
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
 - In a drawing, a tag that isn't a Spell word is a component's:  `<text>`, `<image>`, `<solitaire-card>`.
+- `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
+  so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
 
 </details>
 

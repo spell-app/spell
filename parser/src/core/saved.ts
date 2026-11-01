@@ -33,7 +33,7 @@
  */
 import h from "@solidjs/h"
 import { createComponent } from "@solidjs/web"
-import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
+import { Errored, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { pollWhileVisible } from "spell/util/polling"
 
@@ -46,7 +46,8 @@ import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spel
 import type { PlaceRowsChange } from "spell/util/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
-import { core, isWhileReading, whileReading } from "./core"
+import { drawnInWindow } from "./drawnWindow"
+import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
@@ -115,6 +116,9 @@ function addressIn(value: unknown): string | undefined {
 function isAbandoned(error: unknown): boolean {
   return (error as Error | undefined)?.name === "AbortError"
 }
+
+/** Each read's list, for what draws it to ask for its next page. */
+const MORE_PAGES = new WeakMap<object, SavedRead>()
 
 /** The kinds of place that know who's here, among those spell knows by itself. */
 const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
@@ -215,7 +219,7 @@ class ProgramPlaces {
 
   /** The class called `name`:  the program's own, by what's been read or saved, else what the program knows. */
   private classNamed(name: string): ReturnType<typeof core.things.classNamed> {
-    return (this.classes.get(name) as never) ?? core.things.classNamed(name)
+    return (this.classes.get(name) as never) ?? core.things.classNamed(name) ?? (CLASSES_DECLARED.get(name) as never)
   }
 
   /** Every class read or saved, by its name. */
@@ -392,7 +396,7 @@ class ProgramPlaces {
     this.noteClass(Class)
     const asked = () => this.linkKnown(Class, address)
     const whole = this.reads.get(`${Class.name}\n${JSON.stringify({})}`)
-    if (asked() === undefined && whole?.isGoing) await whole.answer().catch(() => undefined)
+    if (asked() === undefined && whole?.isGoing) await whole.firstPage().catch(() => undefined)
     if (asked() === undefined) {
       const read = this.readOf(Class, linkQuery(address))
       const [thing] = (await read.answer()).items as Thing[]
@@ -594,6 +598,14 @@ class SavedRead {
   private result: PlaceResult | undefined
   /** Under way, or done:  what a reader waits for. */
   private answered: Promise<void> | undefined
+  /** Where its next page is:  only ever left for later by what only needs to draw it. */
+  private nextPage: string | undefined
+  /** How many pages it's read. */
+  private pagesRead = 0
+  /** Reads a page when something's drawn near the end of what it has, rather than every page first. */
+  private readsPagesWhenDrawn = false
+  /** The page it's reading now. */
+  private readingPage: Promise<void> | undefined
   /** What's holding it. */
   private holders = 0
   /** Stops asking what changed. */
@@ -607,7 +619,29 @@ class SavedRead {
     private readonly program: ProgramPlaces,
     readonly Class: SavedClass,
     private readonly query: ListQuery
-  ) {}
+  ) {
+    MORE_PAGES.set(this.list, this)
+  }
+
+  /** Is there another page it hasn't read? */
+  get hasMorePages(): boolean {
+    return this.nextPage !== undefined
+  }
+
+  /** Read the next page, for what's drawing it:  its things join the list.  NEVER rejects:  the next time it's near the view asks again. */
+  readNextPage(): Promise<void> {
+    return (this.readingPage ??= this.readPage()
+      .catch((ignored) => console.error(`core.drawRead():  couldn't read the next page of ${this.Class.name}`, ignored))
+      .finally(() => {
+        this.readingPage = undefined
+      }))
+  }
+
+  /** The next page's things join the list.  - throws what the read threw */
+  private async readPage(): Promise<void> {
+    const things = await this.pagesAfter(this.pagesRead + 1)
+    this.fill(this.inOrder([...(this.list.items as Thing[]), ...things]))
+  }
 
   /** Is a read of it under way, or has it its answer, with someone holding it? */
   get isGoing(): boolean {
@@ -619,12 +653,12 @@ class SavedRead {
     return this.isIdle
   }
 
-  /** Hold it until the computation running now is disposed;  with none running, until its answer. */
-  hold(): void {
+  /** Hold it until the computation running now is disposed;  with none running, until `answering`, its answer unless it says. */
+  hold(answering?: Promise<unknown>): void {
     if (!getOwner()) {
       this.holders++
       const letGo = () => this.letGo()
-      void this.answer().then(letGo, letGo)
+      void (answering ?? this.answer()).then(letGo, letGo)
       return
     }
     this.holders++
@@ -638,7 +672,7 @@ class SavedRead {
   askAhead(): void {
     this.holders++
     const letGo = () => void setTimeout(() => this.letGo(), FIRST_READ_WAITS)
-    void this.answer().then(letGo, letGo)
+    void this.firstPage().then(letGo, letGo)
   }
 
   /** It was asked with some fields left out, and something read another:  ask again for the whole thing.  NEVER throws. */
@@ -675,11 +709,31 @@ class SavedRead {
     this.answered = undefined
   }
 
-  /** Its list, once it has an answer.  - throws what the read threw */
+  /** Its list, once it has an answer:  every page of it.  - throws what the read threw */
   async answer(): Promise<List> {
     this.isIdle = false
     await (this.answered ??= this.start())
+    if (this.nextPage !== undefined) await this.readTheRest()
     return this.list
+  }
+
+  /**
+   * Its list, once it has its first page:  what only needs to draw it.
+   * - The rest is read as it's drawn (`readNextPage()`), unless it has to be in order, here, first.
+   * - throws what the read threw
+   */
+  async firstPage(): Promise<List> {
+    this.isIdle = false
+    if (!this.answered && !this.query.sort?.length) this.readsPagesWhenDrawn = true
+    await (this.answered ??= this.start())
+    return this.list
+  }
+
+  /** Every page it hasn't read yet. */
+  private async readTheRest(): Promise<void> {
+    this.readsPagesWhenDrawn = false
+    await this.readingPage
+    while (this.nextPage !== undefined) await this.readPage()
   }
 
   /** Read it for the first time. */
@@ -689,20 +743,31 @@ class SavedRead {
     const result = (this.result ??= this.program.newResult(Class, query))
     await (result.contents ? result.reload() : result.load())
     if (this.isIdle) return
-    this.fill(this.inOrder(await this.withOtherPages(result)))
+    this.fill(this.inOrder(await this.withOtherPages(result, this.readsPagesWhenDrawn ? 1 : Infinity)))
     this.startPolling()
   }
 
-  /** `result`'s rows, and its later pages':  `every recipe` means every one of them, unless the query says how many. */
-  private async withOtherPages(result: PlaceResult): Promise<Thing[]> {
-    const quietly = { quietly: this.isAskingWhole }
-    const things = this.program.thingsOf(result, quietly)
-    if (this.query.page?.size !== undefined) return things
-    for (let at = result.nextPage; at !== undefined;) {
-      const more = this.program.newResult(this.Class, { ...this.query, page: { at } })
+  /**
+   * `result`'s rows, and its later pages' up to `pages`:  `every recipe` means every one of them, unless the query says how many,
+   * or what's reading it only draws it, and asks for the next when it's needed.
+   */
+  private async withOtherPages(result: PlaceResult, pages: number): Promise<Thing[]> {
+    const things = this.program.thingsOf(result, { quietly: this.isAskingWhole })
+    this.nextPage = this.query.page?.size === undefined ? result.nextPage : undefined
+    this.pagesRead = 1
+    things.push(...(await this.pagesAfter(pages)))
+    return things
+  }
+
+  /** The things on the pages after what it's read, up to `pages` in all. */
+  private async pagesAfter(pages: number): Promise<Thing[]> {
+    const things: Thing[] = []
+    while (this.nextPage !== undefined && this.pagesRead < pages) {
+      const more = this.program.newResult(this.Class, { ...this.query, page: { at: this.nextPage } })
       await more.load()
-      things.push(...this.program.thingsOf(more, quietly))
-      at = more.nextPage
+      things.push(...this.program.thingsOf(more, { quietly: this.isAskingWhole }))
+      this.nextPage = more.nextPage
+      this.pagesRead++
       more.leave()
     }
     return things
@@ -739,7 +804,8 @@ class SavedRead {
     try {
       await (this.answered = result.reload().then(() => undefined))
       const before = new Set(this.list.items as Thing[])
-      const things = this.inOrder(await this.withOtherPages(result))
+      const pages = this.readsPagesWhenDrawn ? this.pagesRead : Infinity
+      const things = this.inOrder(await this.withOtherPages(result, pages))
       this.noteJoinedAndLeft(before, things)
       this.fill(things)
     } catch (ignored) {
@@ -856,20 +922,22 @@ export const savedMethods = defineCoreModule({
    * - The same list each time:  it follows the place.
    * - `query`:  what's handed to the place, which does what it says it can;  the engine the rest, up to its ceiling.
    * - `how`:  `"looks through"`, when a `where` goes through all of it here:  so it stops at the place's ceiling.
+   *   `"as drawn"`, when all that's done with it is draw it:  so its later pages wait until they're near the view.
    * - throws what the read threw:  a `PlaceError`, for a read a place refused or couldn't answer
    */
   async savedThings<Class extends new () => unknown>(
     Class: Class,
     query: ListQuery = {},
-    how?: "looks through"
+    how?: "looks through" | "as drawn"
   ): Promise<List<InstanceType<Class>>> {
     const program = programPlaces()
     program.askFirstReads(Class as unknown as SavedClass)
     const read = program.readOf(Class as unknown as SavedClass, query)
     read.changes.read()
-    read.hold()
-    const list = await read.answer()
-    if (how) read.checkCeiling()
+    const answering = how === "as drawn" ? read.firstPage() : read.answer()
+    read.hold(answering)
+    const list = await answering
+    if (how === "looks through") read.checkCeiling()
     return list as unknown as List<InstanceType<Class>>
   },
 
@@ -1126,15 +1194,16 @@ export const savedMethods = defineCoreModule({
     const drawn = () => {
       if (!drawEach) return current() as Drawing
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
-      const list = createComponent(
-        For as never,
-        {
-          get each() {
-            return items()
-          },
-          children: (item: Item, position: () => number) => drawEach(item, position() + 1)
-        } as never
-      ) as Drawing
+      const list = drawnInWindow({
+        items,
+        drawItem: (item, position) => drawEach(item, position() + 1),
+        // the same read draws the same list, so coming back finds it as it was
+        key: () => {
+          const list = current()
+          return list instanceof List ? list : undefined
+        },
+        more: () => MORE_PAGES.get(current() as object)
+      })
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : list)) as unknown as Drawing
     }

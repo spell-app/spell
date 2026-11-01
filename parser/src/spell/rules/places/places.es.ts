@@ -127,8 +127,12 @@ placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" 
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} (segundo|segundos)?" })
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
-placesEs.addRule(RowsIn, { syntax: "{type:subject_its} filas están en {field:text}" })
-placesEs.addRule(NextPageIn, { syntax: "{type:subject_its} página siguiente está en {field:text}" })
+placesEs.addRule(RowsIn, {
+  syntax: "{type:subject_its} filas están en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+})
+placesEs.addRule(NextPageIn, {
+  syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+})
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
@@ -191,6 +195,8 @@ placesEs.addRule(WhereField, { syntax: `${THE} {property:member_words}` })
 placesEs.addRule(TheyAre, {
   syntax: "{operator:are_or_are_not} {expression:where_field}"
 })
+// `la persona no es el cocinero`, by the word every comparison reads:  as English does (epic `language`, Q15)
+placesEs.addRule(TheyAre, { syntax: "{operator:is_or_is_not} {expression:where_field}" })
 placesEs.addRule(TheyAre, { syntax: "{operator:are_or_are_not} {expression:operand}" })
 placesEs.addRule(CurrentPerson, {
   syntax: "(esa persona|la persona)",

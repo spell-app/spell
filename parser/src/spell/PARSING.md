@@ -798,6 +798,8 @@ A kind that says so is saved in a file of its own.
   - The colon stays required:  a lone `a game` is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
+  - In a `.spellml` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
+    so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.
@@ -1218,7 +1220,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       `- to draw its content :`:  markup as written, each run of prose a `<markdown>` element (a new one at each `##`),
       each run of markup lines joined into one implicit fragment.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
-    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
+    the parser's tokenizer reads it as `name="..."` (`quotedNameTags`);  `<tree-node "If">` as `label="If"`.
   - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
     line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
     - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
@@ -1247,6 +1249,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - A spellx DRAWING's markup (epic `elemental-spell` P7):
   - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
     name may hold any letter (`<botón>`).
+  - A name with a dash is a pack's too, when it has one (`<tree-diagram>` is `<ui-tree-diagram>`);  else it's left as written.
   - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
     its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
     carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
@@ -1311,6 +1314,17 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
 - A fill-in's warnings go on the text or markup it's in (`noteFillInWarnings()`).
 - Each fill-in parses on its own, so its tokens don't map back onto the file:
   no hover or go-to inside one yet.
+
+## What reads wrong on purpose:  warnings and refusals (epic `language`, r2)
+
+- A line in an element that reads whole as a loop or a draw warns, as it only shows as text:  [`SpellJSXText`](rules/JSX/SpellJSXText.ts).
+  A sentence that starts the same way doesn't.
+- `it is empty`, where `it` is a type that holds no items, warns:  it can never be true ([`IsEmpty`](rules/expressions/IsEmpty.ts)).
+- Types whose `a new ...` properties make each other are refused, naming the circle:
+  `DefinePropertyHas.refuseCircle()`, asked when errors are gathered, as the other half may be in another file.
+- `- to it:` names no action, and is refused:  `MethodDefinition.getRule()`.
+- `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
+  [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
 
 ## Scope:  what's stored where
 

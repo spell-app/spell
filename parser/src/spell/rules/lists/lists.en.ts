@@ -282,7 +282,7 @@ lists.addRule(ListPosition, {
 })
 
 lists.addRule(StartsWith, {
-  syntax: "{operator:starts_with_or_not} {expression:operand}",
+  syntax: "{operator:starts_with_or_not} (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -302,7 +302,7 @@ lists.addRule(StartsWith, {
 })
 
 lists.addRule(EndsWith, {
-  syntax: "{operator:ends_with_or_not} {expression:operand}",
+  syntax: "{operator:ends_with_or_not} (exactly:exactly)? {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -500,7 +500,7 @@ lists.addRule(RangeStartingWithExpression, {
 })
 
 lists.addRule(RangeCountExpression, {
-  syntax: "{ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (of|in|from) {list:operand}",
+  syntax: "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}",
   tests: [
     {
       compileAs: "expression",
