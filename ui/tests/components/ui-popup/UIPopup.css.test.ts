@@ -1,4 +1,4 @@
-import { describe, expect, it, onTestFinished } from "vite-plus/test"
+import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
 import { Keys } from "spell/ui/test-helpers/Keys"
 
@@ -244,6 +244,8 @@ describe("UIPopup.css examples", () => {
 ////////////////
 
 describe("native.css tooltip", () => {
+  beforeEach(cssTooltipOn)
+
   it("draws the bubble and arrow on hover-able elements, hidden until hovered", () => {
     const root = example("types")
     const button = root.querySelector<HTMLElement>("[data-tooltip]:not([data-position])")!
@@ -282,6 +284,8 @@ describe("native.css tooltip", () => {
 ////////////////
 
 describe("native.css tooltip shown states", () => {
+  beforeEach(cssTooltipOn)
+
   /** Scale factor of a computed `matrix(a, ...)` transform (`none` ~== 1). */
   function scaleOf(transform: string): number {
     return transform === "none" ? 1 : parseFloat(transform.replace(/^matrix\(/, ""))
@@ -307,6 +311,7 @@ describe("native.css tooltip shown states", () => {
     Sheets.adopt([...foundationCSS, nativeCSS])
     const host = await ElementFixture.render<DOMElement>(`<ui-button data-tooltip="Add users">Top center</ui-button>`)
     await ElementFixture.settle(host)
+    cssTooltipOn()
     expect(getComputedStyle(host, "::after").opacity).toBe("0")
     await Keys.tab()
     expect(document.activeElement, "focus landed on the host").toBe(host)
@@ -330,6 +335,11 @@ describe("native.css tooltip shown states", () => {
     await expect.poll(() => getComputedStyle(button, "::after").opacity).toBe("0")
   })
 })
+
+/** What a page with no script gets:  the runtime has the CSS tooltip stand down (`DataTooltips`). */
+function cssTooltipOn() {
+  document.documentElement.removeAttribute("data-ui-top-layer-tooltips")
+}
 
 /** Set the viewport to `width` for this test (Fomantic's breakpoints are the viewport's). */
 async function resize(width: number) {

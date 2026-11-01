@@ -27,6 +27,7 @@ import {
 } from "./runtime.types"
 import { Browser } from "./Browser"
 import { CodeLanguages } from "./CodeLanguages"
+import { DataTooltips } from "./DataTooltips"
 import { Focus } from "./Focus"
 import { I18n } from "./I18n"
 import { IconPacks } from "./IconPacks"
@@ -112,11 +113,15 @@ export class UIRuntime {
   /** what `<ui-property-editor>` draws and reads by name:  control kinds, choice sources, rules, schemas */
   readonly propertyControls = new PropertyControls()
 
+  /** `data-tooltip`, shown in the top layer so no parent frame cuts it off */
+  readonly dataTooltips = new DataTooltips({ browser: this.browser })
+
   /** Resolves once every service is constructed and the runtime is published on `globalThis`. */
   readonly ready: Promise<void>
 
   constructor() {
     this.registerFoundation()
+    this.dataTooltips.start()
     this.ready = Promise.resolve()
   }
 
