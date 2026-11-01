@@ -109,6 +109,7 @@ export const COMPONENTS = [
   "ui-action",
   "ui-property-editor",
   "ui-include",
+  "ui-json",
   "ui-code",
   "ui-example",
   "ui-toc",

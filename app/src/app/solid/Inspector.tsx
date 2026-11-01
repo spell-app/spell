@@ -246,6 +246,26 @@ export class Inspector {
     const { pivot } = clicks
     Inspector.selectAll(next)
     clicks.pivot = pivot
+    const place = Inspector.writtenPlaceOf(element)?.place
+    if (place) editor.followed = { path: place.path, line: place.line, from: "parts" }
+  }
+
+  /**
+   * Select the parts line `line`, from 0, of the file named `path` draws or makes:  a click on that line of code.
+   * - Every card, for the line that makes them all.
+   * - None:  what's selected stays as it was, as most lines draw nothing.
+   * - NEVER throws.
+   */
+  static selectWrittenAt(path: string, line: number): void {
+    const area = appArea
+    if (!area) return
+    const written = Inspector.partsIn(area)
+      .map((row) => row.element)
+      .filter((element) => {
+        const place = placeOfPart(element)
+        return place?.path === path && place.line === line
+      })
+    if (written.length) Inspector.selectAll(written)
   }
 
   /** Is `element` one of what's selected, or what a trail from it has reached (reactive)? */

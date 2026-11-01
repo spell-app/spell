@@ -422,6 +422,11 @@
       "types": "./ui/dist-types/src/components/ui-items/index.d.ts",
       "default": "./ui/src/components/ui-items/index.ts"
     },
+    "./ui/components/ui-json": {
+      "spell-source": "./ui/src/components/ui-json/index.ts",
+      "types": "./ui/dist-types/src/components/ui-json/index.d.ts",
+      "default": "./ui/src/components/ui-json/index.ts"
+    },
     "./ui/components/ui-keys": {
       "spell-source": "./ui/src/components/ui-keys/index.ts",
       "types": "./ui/dist-types/src/components/ui-keys/index.d.ts",

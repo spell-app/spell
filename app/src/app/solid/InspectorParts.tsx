@@ -201,6 +201,13 @@ export function InspectorViews(props: {
  ****************/
 function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
   const shown = () => shownRows(props.rows, foldedKeys()).map((row) => row.element)
+  // what's selected, however it came to be:  the rows around it open, so its row can be seen
+  createEffect(
+    () => Inspector.selected?.element,
+    (element) => {
+      if (element) openRowsAround(props.nodes, element)
+    }
+  )
   const notDrawn = createMemo(() => {
     const drawn = new Set(props.rows.map((row) => SpellElement.thingOf(row.element)))
     return (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
@@ -243,6 +250,16 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   )
 }
 
+/** Open the rows around `element`'s, among `nodes`:  answers whether it's in them. */
+function openRowsAround(nodes: readonly PartNode[], element: Element): boolean {
+  return nodes.some((node) => {
+    if (node.element === element) return true
+    if (!openRowsAround(node.children, element)) return false
+    if (isFolded(node.key)) toggleFold(node.key)
+    return true
+  })
+}
+
 /** One part's row, with the parts inside it. */
 function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Element {
   const words = () => Inspector.rowWordsFor(props.node.element)
@@ -258,6 +275,13 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         PartEdits.rememberRow(row, props.node.element)
         whenRowToggled(() => toggleFold(props.node.key))(row)
         chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
+        // selected from elsewhere, a click in the code or the app:  its row comes into view
+        createEffect(
+          () => Inspector.selected?.element === props.node.element,
+          (isLast) => {
+            if (isLast) row.scrollIntoView({ block: "nearest" })
+          }
+        )
       }}
     >
       <For each={props.node.children} keyed={(child) => child.element}>

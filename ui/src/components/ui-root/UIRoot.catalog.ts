@@ -654,6 +654,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["size", "divided", "spacing", "appearance", "unstackable", "stack-with", "inverted", "disabled"]
   },
+  "ui-json": { folder: "ui-json", attributes: ["source", "load"] },
   "ui-keys": { folder: "ui-keys", attributes: ["shortcut", "platform"] },
   "ui-label": {
     folder: "ui-label",

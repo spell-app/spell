@@ -1,0 +1,11 @@
+{
+  "label": "From a file",
+  "children": [
+    {
+      "label": "Its first child"
+    },
+    {
+      "label": "Its second child"
+    }
+  ]
+}

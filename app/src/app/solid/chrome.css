@@ -79,6 +79,7 @@ ui-icon.IconAction {
   --ui-field-tip-background: var(--spell-tooltip-background);
   --ui-field-tip-color: white;
   --ui-field-tip-delay: 2s;
+  --ui-tooltip-delay: 2s;
 }
 #app-root [data-tooltip][data-inverted] {
   --ui-tooltip-background: var(--spell-tooltip-background);

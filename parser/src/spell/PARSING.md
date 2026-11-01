@@ -2010,7 +2010,10 @@ What a program's lines about where data lives compile to, and what reads the res
     - The editor stamps them into the copy it runs (`P.SourceMarks.stamped()`), so a part of the running app says
       where it's written:  `data-spell-at="Card.spellml:12:4"` on an element, `Symbol.for("spell.madeAt")` on a thing.
     - All of a list's rows point at their one tag, and all of a loop's things at their one statement.
-  - Not the Python target, yet.
+  - Read back by `P.SourceMapLines` (epic `editor`):  which source line a compiled line came from, and the reverse,
+    by statement, so an editor's panes can follow each other.
+  - A compile writes no map for the Python target.
+    `SP.SpellProject.codeWithMapFor()` makes one on asking, for any target, Python's too:  its writer takes the same marks.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:
     `set the stock to a new stock pile` above `a stock pile is a pile`.
@@ -2152,6 +2155,7 @@ What a program's lines about where data lives compile to, and what reads the res
   - spell's own colouring skips the block
   - editors colour it as CSS themselves:
     VS Code through the grammar's embedded CSS, the app's Monaco through its own (`SpellTokensProvider`)
+- A `<json>` element's text is JSON, not spell:  read as raw text too (`rawTextTags`), so its `{` and `[` stay as written.
 - A `<markdown>` block is markdown, not spell:  read as raw text too (`rawTextTags`), its common indent taken off.
   - in a drawing:  [`markdown_block`](rules/JSX/MarkdownBlock.ts)
     - drawn by Spell UI's `<ui-markdown>`, the markdown as its text

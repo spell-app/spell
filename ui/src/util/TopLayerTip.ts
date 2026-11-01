@@ -57,7 +57,7 @@ export class TopLayerTip {
   }
 
   /** Put `tip` in the top layer, or take it out.  NEVER throws:  one the browser can't show stays in its frame. */
-  private static setShown(tip: HTMLElement, isShown: boolean): void {
+  static setShown(tip: HTMLElement, isShown: boolean): void {
     if (!tip.isConnected || !("popover" in tip)) return
     const isOpen = tip.matches(":popover-open")
     if (isShown === isOpen) return

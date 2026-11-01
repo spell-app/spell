@@ -14,6 +14,7 @@
 export * from "./writers.types"
 export * from "./Writer"
 export * from "./SourceMarks"
+export * from "./SourceMapLines"
 export * from "./ProgramWriter"
 export * from "./JSWriter"
 export * from "./WriterProject"
