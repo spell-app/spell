@@ -38,6 +38,7 @@ import toolbarCSS from "./UIToolbar.css?inline"
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
  * - `shrinkable` (the menu's):  it never scrolls with `‹` / `›`;  its titles fit the row instead, down to the menu's
  *   overflow button (epic `epic-engine` Q38).  Only a row too narrow for even that button scrolls, with no keys.
+ *   - `scroll-first`, without a `segmented` look:  once only its icons are left, it scrolls with them, no overflow button.
  *   - `scroll-first`, with a `segmented` look:  it does scroll with them while the row has `--ui-toolbar-scroll-min`
  *     (200px) to show, then it's the dropdown:  a row of many files stays a row for as long as it can.
  * - A BAR's slots around the items, for a site's top bar:

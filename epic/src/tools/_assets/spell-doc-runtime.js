@@ -100,7 +100,15 @@ import {
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
-import { removeToolbar, shortLabel, titledItems, toolbarItem, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
+import {
+  removeToolbar,
+  shortLabel,
+  titledItems,
+  toolbarItem,
+  toolbarMenu,
+  toolbarTools,
+  wireJumpKey
+} from "./spell-doc-toolbar.js"
 import { readingTime } from "spell/epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell/epic/links"
 import { PageStages } from "spell/epic/phases"
@@ -337,7 +345,7 @@ async function start() {
   void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
-  void wireComments(main, { go })
+  void wireComments(main, { go, pageFolds: folds })
   wireNewEpic(main)
   wireEpicSort(main)
   // the docs index tool rewrites this page after a new epic:  its header comes back without the pill and the sort
@@ -2114,32 +2122,30 @@ function buildToolbar(page, outline, counts) {
  *   a heading that has its chevron keeps it
  */
 /**
- * EXPAND ALL and COLLAPSE ALL, in the page header of every docs page with folding sections:
- * details, choice and review pages, guides, the spell syntax guide.
- * - Owen, 2026-10-24, urgent:  "add expand all / collapse all to page header on these and all similar pages"
- * - two icon buttons, first in the header's tools row (`addHeadTool()`, "folds"),
- *   each opens or folds every section and sub-section (`wireFolds()`' `foldAll()`)
- * - not an epic page:  its own header has collapse-all and expand-all (`<epic-page>`)
- * - drawn once:  a live update leaves the header's tools in place
+ * ONE button that opens or folds every section and sub-section, first in the toolbar's tools (`toolbarTools()`).
+ * - Owen, 2026-11-01:  "single expand/collapse button"
+ * - any section folded:  double chevron down, Expand all;  all open:  up, Collapse all (`wireFolds()`' `foldAll()`)
+ * - not an epic page:  its own toolbar has one (`<epic-page>`)
+ * - added once:  a toolbar built anew keeps it
  */
 function addFoldAll(main, folds) {
-  const head = main.querySelector(".spell-page-head")
-  if (!head || document.body.classList.contains("plan-doc") || head.querySelector('[data-head-tool="folds"]')) return
+  const tools = toolbarTools(main.querySelector(".spell-toolbar"))
+  if (!tools || document.body.classList.contains("plan-doc") || tools.querySelector(".spell-toolbar-fold")) return
   if (!main.querySelector("ui-section[collapsible]")) return
-  const buttons = FOLD_ALL.map(([isFolded, icon, tip]) => {
-    const button = el("ui-button", { appearance: "circular basic", size: "mini", icon, title: tip, "aria-label": tip })
-    titleInside(button)
-    button.addEventListener("click", () => folds.foldAll(isFolded))
-    return button
-  })
-  addHeadTool(head, el("span", { class: "spell-fold-all", "data-spell-added": true }, ...buttons), "folds")
+  const anyFolded = () => [...main.querySelectorAll("ui-section[collapsible]")].some(isCollapsed)
+  const item = el("ui-button", { class: "spell-toolbar-fold", appearance: "circular basic", size: "mini" })
+  const show = () => {
+    const tip = anyFolded() ? "Expand all" : "Collapse all"
+    item.setAttribute("icon", anyFolded() ? "angles down" : "angles up")
+    item.title = tip
+    item.setAttribute("aria-label", tip)
+    titleInside(item)
+  }
+  item.addEventListener("click", () => folds.foldAll(!anyFolded()))
+  new MutationObserver(show).observe(main, { attributes: true, attributeFilter: ["open"], subtree: true })
+  show()
+  tools.prepend(item)
 }
-
-/** The header's fold buttons (`addFoldAll()`):  folds every section?, its icon, its tooltip. */
-const FOLD_ALL = [
-  [false, "angles down", "Expand all"],
-  [true, "angles up", "Collapse all"]
-]
 
 function wireFolds(main, outline, kept) {
   foldWiring?.abort()
@@ -2149,11 +2155,22 @@ function wireFolds(main, outline, kept) {
   const saved = readJSON(key)
   if (outline.sections) wireSectionFolds()
   else wireHeadingFolds()
-  return { reveal, foldAll }
+  return { reveal, foldAll, outermostFolded }
+
+  /**
+   * The outermost fold hiding `element`, if any:  its comments show after that fold's title (`drawPromoted()`).
+   */
+  function outermostFolded(element) {
+    const folds = outline.sections ? `ui-section, ${EPIC_OPENERS}` : "section.spell-folded"
+    let found
+    for (let section = element.closest(folds); section; section = section.parentElement?.closest(folds))
+      if (!outline.sections || isCollapsed(section)) found = section
+    return found
+  }
 
   /**
    * Fold (`isFolded`) or open every section and sub-section at once, without their height animation, remembered as
-   * the reader's folds:  the page header's Collapse all / Expand all (`addFoldAll()`).
+   * the reader's folds:  the toolbar's Collapse all / Expand all (`addFoldAll()`).
    * - folding them all shows the page from its top:  every title, folded, fits in a window or two
    */
   function foldAll(isFolded) {

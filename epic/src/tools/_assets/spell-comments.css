@@ -190,7 +190,7 @@ ui-button[title]::part(icon) {
 }
 /* a comment's quoted text, on the page:  soft, under the text (`highlightQuotes()`) */
 ::highlight(spell-comment-quote) {
-  background-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
+  background-color: var(--spell-quote-color);
 }
 /*
  * ... in an agent's voice while it waits for one:  the person's words not taken in yet (`QUOTE_WAITING_HIGHLIGHT`;
@@ -198,7 +198,14 @@ ui-button[title]::part(icon) {
  * (`--epic-voice-agent`, which its text inherits), else the docs pages' (`--spell-voice-agent`), else terracotta
  */
 ::highlight(spell-comment-quote-waiting) {
-  background-color: color-mix(
+  background-color: var(--spell-quote-waiting-color);
+}
+/* their colours, where the voice token is set;  a `<ui-markdown>`'s shadow root has its own rules (`addQuoteSheet()`) */
+:root,
+epic-page,
+ui-markdown {
+  --spell-quote-color: color-mix(in srgb, var(--ui-yellow, #fbbd08) 28%, transparent);
+  --spell-quote-waiting-color: color-mix(
     in srgb,
     var(--epic-voice-agent, var(--spell-voice-agent, light-dark(#c96442, #d97757))) 24%,
     transparent
@@ -280,4 +287,41 @@ ui-button[title]::part(icon) {
 }
 .site-main > .site-masthead + epic-threads {
   margin: 0 var(--_spell-site-column);
+}
+
+/*
+ * A comment PROMOTED past a folded section (`drawPromoted()`, `spell-doc-comments.js`):  a row in the reading column,
+ * right under the section's title;  orange while it waits on the person
+ */
+.spell-promoted {
+  display: grid;
+  gap: 2px;
+  padding-block: 6px;
+}
+.spell-promoted-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--ui-border-color, color-mix(in srgb, currentColor 18%, transparent));
+  border-radius: 6px;
+  background: var(--ui-surface, Canvas);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: start;
+  cursor: pointer;
+}
+.spell-promoted-row > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spell-promoted-row:hover {
+  background: color-mix(in srgb, currentColor 6%, var(--ui-surface, Canvas));
+}
+.spell-promoted-row.waiting {
+  border-color: var(--ui-orange-border, #e8a15b);
+  background: var(--ui-orange-background, #fdf1e3);
 }

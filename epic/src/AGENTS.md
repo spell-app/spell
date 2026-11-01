@@ -1349,8 +1349,11 @@ In `tools/`:
       - Guides, details pages and Epic UI's band all fit their titles so (I132, I133);
         only the segmented toolbar under Spell UI's page tabs keeps its titles whole and scrolls (epic `debut`).
       - The menu watches its own row:  nothing refits it by hand (the bullhorn showing, the fonts loading).
-    - The spell syntax guide adds Expand all and Collapse all at the band's right (`spell-syntax.js`, Owen 2026-10-12):
-      appended to the menu, after its items, which scroll under them;  kept when the toolbar is built anew.
+    - Expand all and Collapse all at the band's right (`addFoldAll()`, Owen 2026-11-01):
+      appended to the menu, after its items;  kept when the toolbar is built anew.
+    - A comment in a folded section shows as a row under the outermost fold hiding it (`drawPromoted()`);
+      a click opens only the sections it needs, the thread where the row was, with no visible scroll.
+    - Last, the bullhorn:  jumps to the next thread waiting on Owen, else the next open one, unfolding what hides it.
     - A page without a sticky page header:  the last row of its filter bar.
       Else a sticky bar of its own, before its first section (`.spell-toolbar-alone`:  the saga pages).
   - An EPIC PAGE (`body.plan-doc`) has its own toolbar (`buildToolbar()`).
@@ -2555,9 +2558,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
       - Its site bundle couldn't load a pack until then:
         `SitePacks` (`globalThis.SpellUI`'s `registerPack` and `packModules`) was the other sets' own build of the site
         alone;  it's the one bundle now, every set's.
-      - Its prose is `<ui-markdown>`'s, in a shadow root:
-        a text comment there doesn't open (the selection isn't in the page's `main`);
-        the page, each section and a live example's light-DOM text take comments.
+      - Its prose is `<ui-markdown>`'s, in a shadow root:  a text comment there works as anywhere (`selectedRange()`),
+        its thread under the paragraph (`boxInMarkdown()`).
     - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):
       the toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:

@@ -36205,7 +36205,7 @@ export interface UIToolbarAttributes {
    */
   "prop:interactive"?: boolean | ""
   /**
-   * With `shrinkable` and a `segmented` look:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files.
+   * With `shrinkable`:  once only its icons are left, they scroll with `‹` / `›`, no overflow button.  With a `segmented` look too:  when its items don't fit, they scroll with `‹` / `›` while there's `--ui-toolbar-scroll-min` (200px) to show them in;  only then the dropdown.  For a row of many, such as files.
    * - takes:  flag (present / absent)
    */
   "scroll-first"?: boolean | ""

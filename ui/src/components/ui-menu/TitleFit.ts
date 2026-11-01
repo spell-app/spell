@@ -117,11 +117,13 @@ export class TitleFit {
       if (TitleFit.cap(sizes.titles, titlesRoom) === undefined) return WHOLE
       return this.setup.scrollsFirst?.() && sizes.room >= sizes.scrollMin ? WHOLE : OVERFLOW
     }
-    return TitleFit.fit(sizes.titles, titlesRoom, sizes.titleMin, {
+    const fitted = TitleFit.fit(sizes.titles, titlesRoom, sizes.titleMin, {
       widths: sizes.icons,
       room: sizes.room,
       min: sizes.itemMin
     })
+    // a row that scrolls first stops at its icons:  its `‹` / `›` show the rest, no overflow button
+    return fitted === OVERFLOW && this.setup.scrollsFirst?.() ? ICONS : fitted
   }
 
   /**

@@ -129,6 +129,7 @@ export function toolbarMenu(items, { titled, segmented = false }) {
       .join(" "),
     ...(segmented ? { appearance: "segmented" } : { appearance: "secondary" }),
     shrinkable: titled && !segmented,
+    "scroll-first": titled && !segmented,
     "aria-label": "Sections",
     "data-spell-added": true
   })
@@ -141,6 +142,23 @@ export function toolbarMenu(items, { titled, segmented = false }) {
     for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
   }).observe(toolbar, { attributeFilter: ["selected"], subtree: true })
   return toolbar
+}
+
+/**
+ * A titled toolbar's own small toolbar, made on first use:  a separate box in its `right` slot, beside the sections,
+ * never scrolling with them, so a badge on it isn't cut off:  the page's Expand / Collapse, the comments' bullhorn.
+ * - Owen, 2026-11-01:  "single expand/collapse button and bullhorn, in a separate toolbar"
+ * - kept when the toolbar is built anew (`removeToolbar()`)
+ * - `undefined` for a toolbar with no titles (an epic page's, whose tools are `<epic-page>`'s)
+ */
+export function toolbarTools(toolbar) {
+  if (!toolbar?.classList.contains("spell-toolbar-titled")) return undefined
+  let tools = toolbar.querySelector(":scope > .spell-toolbar-tools")
+  if (!tools) {
+    tools = el("span", { class: "spell-toolbar-tools", slot: "right" })
+    toolbar.append(tools)
+  }
+  return tools
 }
 
 /**
