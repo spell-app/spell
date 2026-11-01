@@ -16,6 +16,7 @@ describe("Solitaire project", () => {
   test("loads files in import order", () => {
     expect(files.map(({ path }) => path)).toEqual([
       "/Card.spellml",
+      "/Jokers.spellml",
       "/Deck.spellml",
       "/Pile.spellml",
       "/Solitaire.spellml"
