@@ -1,20 +1,18 @@
-/* File styles.css:  how the guide looks, its own look, whichever scheme the page is in:  deep space, a starfield,
-   and the yellow of the title.
+/* File styles.css:  only the look no `ui-*` attribute gives:  deep space, the title's yellow, the opening and the jump.
    - `color-scheme: dark` here is what turns the Spell UI elements dark too.
-   - Every animation is under "no preference" for motion:  with reduced motion the stars stand still,
+   - Every animation is under "no preference" for motion:  with reduced motion the stars hold still,
      and the opening is a page you read at your own speed. */
 
 star-wars-app {
-  --space: #05060f;
-  --space-low: #0d1330;
-  --ink: #eef1ff;
-  --ink-muted: #a7aecb;
   --yellow: #ffe81f;
-  --panel: rgb(255 255 255 / 6%);
-  --panel-hover: rgb(255 255 255 / 12%);
-  --edge: rgb(255 255 255 / 14%);
-  --glow: rgb(255 232 31 / 30%);
-  --title-font: "Arial Black", "Helvetica Neue", Impact, sans-serif;
+  --space: #05060f;
+  --ui-primary: var(--yellow);
+  --ui-text-color: #eef1ff;
+  --ui-card-background: rgb(255 255 255 / 6%);
+  --ui-card-border-color: rgb(255 255 255 / 14%);
+  --ui-card-hover-border-color: var(--yellow);
+  --ui-card-margin-block: 0;
+  --title: 900 1em / 1.1 "Arial Black", Impact, sans-serif;
 
   color-scheme: dark;
   position: relative;
@@ -23,375 +21,220 @@ star-wars-app {
   min-height: 100vh;
   overflow: clip;
   padding: 1em clamp(1em, 4vw, 3em) 2em;
-  background: linear-gradient(var(--space), var(--space-low));
-  color: var(--ink);
-  font-size: 15px;
+  background: var(--space) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='310' height='270'%3E%3Cg fill='%23dfe6ff'%3E%3Ccircle cx='20' cy='30' r='.7'/%3E%3Ccircle cx='140' cy='80' r='.6'/%3E%3Ccircle cx='240' cy='180' r='.9'/%3E%3Ccircle cx='70' cy='210' r='.6'/%3E%3Ccircle cx='290' cy='40' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/****************
- * The stars:  a few layers of dots, which drift
- ****************/
-
-.stars {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
-    radial-gradient(1px 1px at 140px 80px, #dfe6ff, transparent),
-    radial-gradient(1.5px 1.5px at 240px 180px, #fff, transparent),
-    radial-gradient(1px 1px at 70px 210px, #ffe9c9, transparent),
-    radial-gradient(2px 2px at 290px 40px, #cfe0ff, transparent);
-  background-size:
-    310px 270px,
-    250px 310px,
-    370px 290px,
-    230px 340px,
-    430px 390px;
+star-wars-app ui-text::part(text) {
+  color: #eef1ff;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .stars {
-    animation: drift 240s linear infinite;
-  }
+.logo::part(button),
+.punch::part(button),
+.play-opening::part(button) {
+  font: var(--title);
+  text-transform: uppercase;
 }
 
-@keyframes drift {
-  to {
-    background-position:
-      -310px 135px,
-      -500px 155px,
-      -370px 145px,
-      -460px 170px,
-      -430px 195px;
-  }
+.logo::part(button) {
+  padding: 0;
+  background: none;
+  color: var(--yellow);
+  font-size: 1.9em;
 }
 
-/****************
- * Across the top:  the name, the search, and Punch it
- ****************/
-
-.top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 0.75em 1.5em;
+.punch::part(button),
+.play-opening::part(button) {
+  background: var(--yellow);
+  color: var(--space);
 }
 
-.logo {
-  flex: none;
-
-  &::part(button) {
-    padding: 0;
-    background: none;
-    color: var(--yellow);
-    font: 900 1.9em / 1 var(--title-font);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
+.opening .play-opening::part(button) {
+  padding: 0.7em 1.6em;
+  font-size: clamp(1.2em, 3.4vw, 1.9em);
 }
 
 .find {
-  --ui-form-row-distance: 0;
-
   flex: 1 1 14em;
   max-width: 28em;
-  margin-inline-start: auto;
 }
 
-.punch {
-  flex: none;
+/* the opening's button, the first thing on the Films tab */
+.opening::part(segment) {
+  --ui-segment-background: radial-gradient(ellipse at 50% 120%, #1c2a6b, var(--space) 70%);
 
-  &::part(button) {
-    background: var(--yellow);
-    color: var(--space);
-    font-weight: 800;
-  }
-}
-
-/****************
- * The tabs
- ****************/
-
-.tabs {
-  --ui-primary: var(--yellow);
-
-  margin-block: 1em;
-}
-
-/****************
- * The shelf:  cards in a grid;  anything else across the whole of it
- ****************/
-
-.shelf {
+  padding: clamp(1.5em, 6vw, 3.5em) 1em;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13em), 1fr));
-  gap: 0.75em;
-  min-height: 20em;
-
-  .back,
-  .hero,
-  .facts,
-  .heading,
-  h3,
-  .none,
-  .wide {
-    grid-column: 1 / -1;
-  }
-
-  .back {
-    justify-self: start;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  h2,
-  h3 {
-    margin: 0;
-    color: var(--yellow);
-  }
-
-  h3 {
-    margin-block-start: 1em;
-    font-size: 1.05em;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .none {
-    margin: 0;
-    color: var(--ink-muted);
-  }
+  justify-items: center;
+  gap: 1em;
 }
 
-/****************
- * A card:  a picture, a name, what kind.  Its name is the button, and fills the card.
- ****************/
-
-.card {
-  --ui-card-margin-block: 0;
-
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.6em;
-  background: var(--panel);
-  box-shadow: 0 0 0 1px var(--edge);
-  transition:
-    background 120ms,
-    box-shadow 120ms,
-    translate 120ms;
-
-  &:hover,
-  &:focus-within {
-    background: var(--panel-hover);
-    box-shadow:
-      0 0 0 1px var(--yellow),
-      0 0 1.5em var(--glow);
-    translate: 0 -2px;
-  }
-
-  .words {
-    padding: 0.5em 0.75em 0.7em;
-  }
-
-  .open::part(button) {
-    padding: 0;
-    background: none;
-    color: var(--ink);
-    font-weight: 700;
-    text-align: start;
-    white-space: normal;
-  }
-
-  .open::part(button)::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-
-  small {
-    display: block;
-    color: var(--ink-muted);
-  }
+star-wars-app .long-ago::part(text) {
+  color: #4bd5ee;
 }
 
-/****************
- * A picture, over an initial on a colour, so nothing's ever a broken image.  A world is a world.
- ****************/
-
-.portrait {
-  --hue: 200;
-
-  position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 70% 58%), hsl(var(--hue) 60% 18%));
-
-  .initial {
-    color: rgb(255 255 255 / 85%);
-    font: 900 3.4em / 1 var(--title-font);
-  }
-
-  img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 20%;
-  }
-
-  &.world {
-    background: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 5%), transparent 70%);
-
-    &::before {
-      content: "";
-      position: absolute;
-      height: 78%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 75% 62%), hsl(var(--hue) 60% 14%) 75%);
-      box-shadow: 0 0 2em hsl(var(--hue) 70% 50% / 35%);
-    }
-
-    .initial {
-      position: relative;
-    }
-  }
+.section::part(header),
+.credits::part(text) {
+  margin-block-start: 1em;
 }
 
-/****************
- * A whole page
- ****************/
-
-.hero {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1em 1.5em;
-  align-items: start;
-
-  star-wars-portrait,
-  > .portrait {
-    flex: 1 1 16em;
-    max-width: 22em;
-  }
-
-  .about {
-    flex: 999 1 20em;
-    min-width: 0;
-  }
-
-  h2 {
-    font: 900 clamp(1.6em, 5vw, 2.8em) / 1.05 var(--title-font);
-    text-transform: uppercase;
-  }
-
-  .kind {
-    margin: 0.25em 0 0;
-    color: var(--ink-muted);
-  }
-
-  .note {
-    margin: 0.75em 0 0;
-    max-width: 44em;
-  }
-
-  .note.waiting {
-    color: var(--ink-muted);
-  }
-
-  .note a {
-    margin-inline-start: 0.25em;
-    color: var(--yellow);
-    white-space: nowrap;
-  }
-
-  .portrait {
-    border-radius: 0.6em;
-    box-shadow: 0 0 0 1px var(--edge);
-  }
+.section::part(header) {
+  color: var(--yellow);
+  text-transform: uppercase;
 }
 
-.play {
-  display: block;
-  margin-block-start: 0.75em;
-
-  &::part(button) {
-    background: var(--yellow);
-    color: var(--space);
-    font-weight: 800;
-  }
+.title::part(header) {
+  color: var(--yellow);
+  font: var(--title);
+  font-size: clamp(1.6em, 5vw, 2.8em);
+  text-transform: uppercase;
 }
 
 .facts {
-  display: block;
   max-width: 30em;
-
-  td {
-    color: var(--ink);
-  }
-
-  th {
-    width: 8em;
-    color: var(--ink-muted);
-    font-weight: 500;
-    text-align: start;
-    white-space: nowrap;
-  }
-
-  td.number {
-    font-variant-numeric: tabular-nums;
-    text-align: end;
-  }
 }
 
-.credits {
-  margin-block-start: 2.5em;
-  color: var(--ink-muted);
-  font-size: 0.85em;
-
-  a {
-    color: inherit;
-    text-decoration: underline;
-  }
+.kind::part(text) {
+  opacity: 0.7;
 }
 
 /****************
- * The jump to light speed:  the stars stretch into lines, then you're there
+ * A picture:  a picture over an initial on a colour, so nothing's ever a broken image.  A world is a world.
  ****************/
 
-.jump {
+.portrait::part(segment) {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 70% 58%), hsl(var(--hue) 60% 18%));
+}
+
+.portrait.world::part(segment) {
+  background: radial-gradient(circle at 35% 30%, hsl(var(--hue) 75% 62%), hsl(var(--hue) 60% 14%) 60%, transparent 61%);
+}
+
+.initial::part(header) {
+  font: var(--title);
+  font-size: 3.4em;
+}
+
+.portrait ui-image::part(image) {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.hero {
+  align-items: start;
+}
+
+.hero .portrait::part(segment) {
+  width: min(22em, 100%);
+}
+
+.about {
+  flex: 1 1 20em;
+}
+
+/****************
+ * The jump to light speed, as the films show it:
+ *   the stars still, a beat;  each stays where it is and stretches straight out from the middle of the view,
+ *   slowly then all at once, thin near the middle and bright at the edges;  a white flash;
+ *   the mottled blue tunnel;  a sudden stop.
+ ****************/
+
+.jump::part(segment) {
+  position: fixed;
+  inset: 0;
   z-index: 5;
+  margin: 0;
+  overflow: hidden;
+  background: var(--space);
   pointer-events: none;
+}
+
+.streak {
+  --angle: calc(var(--n) * 137.508deg);
+  --distance: mod(calc(var(--n) * var(--n) * 0.7549), 100);
+  --place: rotate(var(--angle)) translateX(calc(var(--distance) * 0.75vmax));
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  inline-size: 3px;
+  block-size: calc(1px + var(--distance) * 0.03px);
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgb(120 160 255 / 0%), #bcd4ff 35%, #fff);
+  opacity: calc(0.55 + var(--distance) / 200);
+  transform-origin: 0 50%;
+  transform: var(--place);
+}
+
+.jump-tunnel,
+.jump-flash {
+  position: absolute;
+  inset-block: -30%;
+  inset-inline: -30%;
+  inline-size: auto;
+  block-size: auto;
+  opacity: 0;
+}
+
+.jump-flash {
+  background: #fff;
+}
+
+/* mottled:  layers whose streaks repeat at different lengths, so they never line up;  dark at the middle, as the film's is */
+.jump-tunnel {
   background:
-    repeating-conic-gradient(from 3deg at 50% 45vh, #dfe6ff 0 0.15deg, transparent 0.15deg 3deg),
-    var(--space);
+    radial-gradient(circle, #041033 0 5%, rgb(4 16 51 / 0%) 22%),
+    repeating-conic-gradient(from 11deg, rgb(205 225 255 / 0%) 0 3.7deg, rgb(205 225 255 / 55%) 4.1deg, rgb(205 225 255 / 0%) 4.6deg 11.3deg),
+    repeating-conic-gradient(from 3deg, rgb(96 150 255 / 0%) 0 1.9deg, rgb(96 150 255 / 60%) 3.1deg, rgb(96 150 255 / 0%) 4.3deg 7.9deg),
+    repeating-conic-gradient(from 29deg, #0a2470 0 6.1deg, #143a9e 8.3deg, #0c2a80 10.7deg 13.1deg, #1b49b8 15.2deg, #0a2470 17.3deg);
+  filter: blur(2.5px);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .jump {
-    animation: jump 900ms ease-in both;
+  .streak {
+    animation: stretch 1050ms cubic-bezier(0.75, 0, 1, 0.55) 300ms both;
+  }
+
+  .jump-flash {
+    animation: flash 300ms linear 1250ms forwards;
+  }
+
+  .jump-tunnel {
+    animation: tunnel 1050ms linear 1400ms forwards;
   }
 }
 
-@keyframes jump {
-  from {
-    opacity: 0;
-    scale: 0.2;
+@keyframes stretch {
+  to {
+    transform: var(--place) scaleX(calc(var(--distance) * 8));
   }
+}
+
+@keyframes flash {
   40% {
     opacity: 1;
   }
-  to {
+}
+
+@keyframes tunnel {
+  0%,
+  98% {
     opacity: 1;
-    scale: 3;
+  }
+  to {
+    scale: 1.8;
+    rotate: 14deg;
+    opacity: 0;
   }
 }
 
@@ -401,120 +244,88 @@ star-wars-app {
 
 .crawl {
   color-scheme: dark;
+  --yellow: #ffe81f;
 }
 
 .crawl::part(modal) {
-  background: #05060f;
+  overflow: hidden;
   padding: 0;
+  background: #05060f;
 }
 
-.cinema {
-  --space: #05060f;
-  --yellow: #ffe81f;
+.crawl .long-ago::part(text) {
+  position: absolute;
+  inset: 38% 0 auto;
+  text-align: center;
+  opacity: 0;
+}
 
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--space);
+.stop {
+  position: absolute;
+  inset: 1em 1em auto auto;
+  z-index: 1;
+}
+
+.stage::part(segment) {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  perspective: 340px;
+  perspective-origin: 50% 40%;
+}
+
+.words::part(segment) {
+  position: absolute;
+  inset: auto 0 0;
+  margin-inline: auto;
+  width: min(88%, 30em);
   color: var(--yellow);
+  font: 700 clamp(1.3em, 3.2vw, 2.8em) / 1.45 "Arial Narrow", Arial, sans-serif;
+  transform-origin: 50% 100%;
+  transform: rotateX(24deg);
+}
 
-  .stars {
-    z-index: 0;
-  }
+.episode::part(header),
+.crawl-title::part(header) {
+  color: var(--yellow);
+  font: inherit;
+  text-align: center;
+  text-transform: uppercase;
+}
 
-  .stop {
-    position: absolute;
-    inset: 1em 1em auto auto;
-    z-index: 1;
-  }
-
-  .long-ago {
-    position: absolute;
-    inset: 38% 0 auto;
-    margin: 0 auto;
-    max-width: 22em;
-    padding-inline: 1em;
-    color: #4bd5ee;
-    font-size: 1.4em;
-    opacity: 0;
-  }
-
-  .stage {
-    position: absolute;
-    inset: 0;
-    perspective: 340px;
-    perspective-origin: 50% 40%;
-  }
-
-  .words {
-    position: absolute;
-    inset: auto 0 0;
-    margin-inline: auto;
-    width: min(88%, 30em);
-    font: 700 clamp(1.3em, 3.2vw, 2.8em) / 1.45 "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-    text-align: justify;
-    transform-origin: 50% 100%;
-    transform: rotateX(24deg);
-  }
-
-  h2,
-  .episode {
-    margin: 0 0 0.6em;
-    color: inherit;
-    text-align: center;
-  }
-
-  h2 {
-    font: inherit;
-    font-size: 1.6em;
-    text-transform: uppercase;
-  }
-
-  /* its lines are the film's own, so it's they that are centred, not each word */
-  .text {
-    width: fit-content;
-    margin: 0 auto;
-    text-align: start;
-    white-space: pre-line;
-  }
+/* its lines are the film's own */
+star-wars-app .crawl-text::part(text) {
+  color: var(--yellow);
+  font: inherit;
+  white-space: pre-line;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .cinema {
-    .long-ago {
-      animation: long-ago 5s ease-in-out both;
-    }
+  .crawl .long-ago::part(text) {
+    animation: long-ago 5s ease-in-out both;
+  }
 
-    .words {
-      animation: crawl 70s linear 5s both;
-    }
+  .words::part(segment) {
+    animation: crawl 70s linear 5s both;
   }
 }
 
 /* with reduced motion:  no tilt, no movement, the whole of it to read */
 @media (prefers-reduced-motion: reduce) {
-  .cinema {
+  .crawl .long-ago::part(text),
+  .stage::part(segment),
+  .words::part(segment) {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
+
+  .crawl::part(modal) {
     overflow: auto;
-
-    .long-ago,
-    .stage,
-    .words {
-      position: static;
-      opacity: 1;
-      transform: none;
-    }
-
-    .stage {
-      padding: 1em;
-    }
   }
 }
 
 @keyframes long-ago {
-  0%,
-  100% {
-    opacity: 0;
-  }
   20%,
   80% {
     opacity: 1;
@@ -527,30 +338,5 @@ star-wars-app {
   }
   to {
     transform: rotateX(24deg) translateY(-160%) translateZ(-900px);
-  }
-}
-
-/****************
- * On a phone:  everything stacks, and there's room for two cards across
- ****************/
-
-@media (max-width: 34em) {
-  .find {
-    flex-basis: 100%;
-    order: 3;
-    max-width: none;
-    margin: 0;
-  }
-
-  .logo::part(button) {
-    font-size: 1.45em;
-  }
-
-  .punch {
-    margin-inline-start: auto;
-  }
-
-  .shelf {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

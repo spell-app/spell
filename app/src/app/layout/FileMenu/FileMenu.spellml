@@ -1,0 +1,39 @@
+# The editor's File menu
+Its items and their order, a line at each break, each one's key, when it's greyed and when it's ticked.
+What each item does, and what it's called, is still the editor's own:  `FileBarMenu` in `MenuBar.tsx` fills them in, by name.
+
+<spell-app "file menu">
+	<property "can discard" description="The file differs from where it started">yes or no</>
+	<property "auto saving" description="AutoSave is on">yes or no</>
+
+	<action "more examples"/>
+	<action "new file" shortcut="meta+N"/>
+	<action "new example"/>
+	<action "save" shortcut="meta+S"/>
+	<action "discard changes" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
+	<action "duplicate project"/>
+	<action "project settings"/>
+	<action "auto save" selected-when="its auto saving is yes"/>
+	<action "export project"/>
+	<action "import project"/>
+	<action "home"/>
+
+	<menu "file menu">
+		<action "more examples"/>
+		<action "-"/>
+		<action "new file"/>
+		<action "new example"/>
+		<action "-"/>
+		<action "save"/>
+		<action "discard changes"/>
+		<action "duplicate project"/>
+		<action "-"/>
+		<action "project settings"/>
+		<action "auto save"/>
+		<action "-"/>
+		<action "export project"/>
+		<action "import project"/>
+		<action "-"/>
+		<action "home"/>
+	</menu>
+</spell-app>

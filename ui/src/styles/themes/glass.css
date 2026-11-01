@@ -167,16 +167,19 @@
     --ui-section-sticky-background: var(--glass-surface-strong);
     --ui-panel-radius: var(--ui-radius-l);
     --ui-panel-shadow: var(--ui-shadow-raised);
-    --ui-panel-pane-background: var(--glass-surface);
+    --ui-panel-pane-background: light-dark(#ffffff38, var(--glass-surface));
     --ui-panel-pane-border-color: var(--glass-edge);
     --ui-panel-pane-filter: var(--glass-blur);
-    --ui-panel-pane-header-background: color-mix(in oklab, var(--glass-accent-wash) 50%, transparent);
+    --ui-panel-pane-header-background: light-dark(
+      #ffffff99,
+      color-mix(in oklab, var(--glass-accent-wash) 50%, transparent)
+    );
     --ui-message-radius: var(--ui-radius-m);
     --ui-toast-radius: var(--ui-radius-l);
     --ui-toast-background: var(--glass-surface-strong);
     --ui-toast-shadow: var(--ui-shadow-floating);
     --ui-popup-radius: var(--ui-radius-m);
-    --ui-popup-background: var(--glass-surface-strong);
+    --ui-popup-background: light-dark(#fffffff2, #1e1c26f2);
     --ui-popup-border-color: var(--glass-edge);
     --ui-popup-shadow: var(--ui-shadow-floating);
     --ui-modal-radius: 18px;

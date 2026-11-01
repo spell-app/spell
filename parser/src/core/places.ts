@@ -97,7 +97,7 @@ import { BrowserCopy } from "spell/util/places/SaveQueue"
 
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
 import { valueAsDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
-import { fieldsOf, hasSetter, setField } from "./state"
+import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
@@ -217,18 +217,32 @@ function noteWriteToHeld(
   home.things.noteHeldChange(home, field, list.items, thing, property, value)
 }
 
+/** Marks a thing written inside a row, for `PlaceThings.make()`:  a key with a dollar, so it's never a prop. */
+const INSIDE_KEY = "$inside"
+
+/** Things made from a plain object inside a row:  `PlaceThings.withThingsInside()`. */
+const THINGS_INSIDE_ROWS = new WeakSet<SpellObject>()
+
+/** The name `schema` declares for `field`:  a place's `display_title`, as `displayTitle`.  None declared:  `field` itself. */
+function nameDeclaredIn(schema: ReturnType<typeof schemaOf>, field: string): string {
+  if (schema.info(field)) return field
+  const camel = field.replace(/_(\p{L})/gu, (_, letter: string) => letter.toUpperCase())
+  return schema.info(camel) ? camel : field
+}
+
 /**
  * A value as a row holds it:  a date as text, a list as an array, a thing as a reference to it.
  * - On `Saver`'s writing, which is the same but for a thing it would write whole.
  */
 class RowWriter extends Saver {
-  /** `value` as a row holds it. */
+  /** `value` as a row holds it:  a thing inside the row is plain fields again, as the place holds them. */
   jsonFor(value: unknown): unknown {
-    return this.write(value, (thing) =>
-      isSavedWithOwner(thing)
+    return this.write(value, (thing) => {
+      if (THINGS_INSIDE_ROWS.has(thing)) return this.rowFor(thing)
+      return isSavedWithOwner(thing)
         ? { [TYPE_KEY]: thing.constructor.name, id: thing.id, ...this.rowFor(thing) }
         : { [REF_KEY]: `${thing.constructor.name}#${thing.id}` }
-    )
+    })
   }
 
   /** Every field `thing` holds, but its id. */
@@ -889,13 +903,50 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       return known
     }
     const { [POSITIONS_KEY]: _positions, ...fields } = row
-    const made = this.make({ ...fields, [TYPE_KEY]: type, ...(id !== undefined && { id }) }, ref) as SpellObject
+    const entry = { ...this.withThingsInside(type, fields), [TYPE_KEY]: type, ...(id !== undefined && { id }) }
+    const made = this.make(entry, ref) as SpellObject
     if (id === undefined) this.loaded.delete(ref)
     return made
   }
 
   /** How many rows with no id it's seen:  a name for each, while it's made. */
   private rowsWithNoId = 0
+
+  /**
+   * `fields`, of a thing of `type`, each plain object in a field declared as a type no place holds marked to be made as that thing.
+   * - What `its "thumbnail" is a thumbnail` reads, for `"thumbnail": { "source": "..." }`:  so `the source of its thumbnail` is a thing's field,
+   *   and the words need no path.
+   * - Inside such a thing, a field goes by the name the type declares, `display_title` as `displayTitle`:  nothing else maps it.
+   * - A type a place holds is a link, `core.linked()`'s.  A type nobody can find stays a plain object, read the same way.
+   */
+  private withThingsInside(type: string, fields: Record<string, unknown>, isInside = false): Record<string, unknown> {
+    const Class = this.classNamed(type)
+    if (!Class) return fields
+    const schema = schemaOf(Class)
+    const entries = Object.entries(fields).map(([field, value]) => {
+      const name = isInside ? nameDeclaredIn(schema, field) : field
+      const info = schema.info(name)
+      const held = info?.itemType ?? info?.type
+      return [name, typeof held === "string" ? this.markedInside(held, value) : value]
+    })
+    return Object.fromEntries(entries)
+  }
+
+  /** `value`, each plain object in it to be made as a thing of `type`, if `type` is one no place holds. */
+  private markedInside(type: string, value: unknown): unknown {
+    const Class = this.classNamed(type) as (Function & { savedIn?: unknown }) | undefined
+    if (!Class || Class.savedIn) return value
+    if (Array.isArray(value)) return value.map((item) => this.markedInside(type, item))
+    if (!isPlainObject(value) || TYPE_KEY in value || REF_KEY in value) return value
+    return { ...this.withThingsInside(type, value, true), [TYPE_KEY]: type, [INSIDE_KEY]: true }
+  }
+
+  /** A thing made inside a row is known as one, so it's written back as plain fields. */
+  protected make(json: Record<string, unknown>, ref?: string): unknown {
+    const made = super.make(json, ref)
+    if (json[INSIDE_KEY]) THINGS_INSIDE_ROWS.add(made as SpellObject)
+    return made
+  }
 
   /**
    * `json`, with each thing saved inside its owner that's already known here changed in place, and said by reference:
@@ -924,7 +975,12 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       if (key === "id" || key.startsWith("$")) continue
       const current = fields[key]
       if (!this.holdsTheSame(current, json)) changed.push(key)
-      const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(json)))
+      // what's inside and says the same stays the same thing:  what shows it has nothing to do
+      if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
+      const declared = schemaOf(thing.constructor as never).info(key)
+      const held = declared?.itemType ?? declared?.type
+      const inside = typeof held === "string" ? this.markedInside(held, json) : json
+      const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))
       if (current instanceof List && Array.isArray(value)) {
         if (!isSameItems(current.items, value)) current.items = value
       } else if (!isSameDate(current, value)) {
@@ -945,6 +1001,12 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   /** Does `current`, a field's value, say the same as `json`, what a row holds for it? */
   private holdsTheSame(current: unknown, json: unknown): boolean {
     if (current === json || (current == null && json == null)) return true
+    if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && isPlainObject(json)) {
+      const schema = schemaOf(current.constructor as never)
+      return Object.entries(json).every(([field, value]) =>
+        this.holdsTheSame((current as Record<string, unknown>)[nameDeclaredIn(schema, field)], value)
+      )
+    }
     return JSON.stringify(this.writer.jsonFor(current)) === JSON.stringify(json)
   }
 }

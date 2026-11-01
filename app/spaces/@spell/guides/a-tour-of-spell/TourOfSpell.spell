@@ -73,7 +73,6 @@ garden is an app where:
 add (a new plant with name = "Basil", days between waterings = 2, days since watered = 2) to the sill of garden
 add (a new plant with name = "Cactus", days between waterings = 14, days since watered = 3) to the sill of garden
 add (a new plant with name = "Fern", days between waterings = 3, days since watered = 1) to the sill of garden
-start garden
 
 
 ## Tests:  the rule, checked

@@ -85,9 +85,16 @@ export function fieldsOf(rows: ReadonlyArray<Record<string, unknown>>): Record<s
   return Object.fromEntries(
     [...names].map((name) => {
       const values = rows.map((row) => row[name]).filter((value) => value !== null && value !== undefined)
-      return [name, { words: wordsFor(name), ...kindOf(values), ...exampleOf(values) }]
+      const inside =
+        values.length && values.every(isObject) ? { inside: fieldsOf(values as Record<string, unknown>[]) } : {}
+      return [name, { words: wordsFor(name), ...kindOf(values), ...exampleOf(values), ...inside }]
     })
   )
+}
+
+/** Is this one object, of fields? */
+function isObject(value: unknown): boolean {
+  return !!value && typeof value === "object" && !Array.isArray(value)
 }
 
 /** A real value, kept short. */

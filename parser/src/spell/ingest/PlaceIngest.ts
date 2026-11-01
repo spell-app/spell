@@ -571,10 +571,10 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     )
   }
   for (const [name, { fields, paging, rowsAt, nextAt }] of each) {
-    for (const [field, { type }] of Object.entries(fields)) {
-      if (type === "inside")
+    for (const [field, { type, inside }] of Object.entries(fields)) {
+      if (type === "inside" && !inside)
         said.add(
-          `What's inside a field:  ${name}.${field} holds objects, and a type's line can't say their shape, so it's left out.`
+          `A list of objects inside a field:  ${field} of ${name} holds them, and a type's line can't say their shape yet, so it's left out.`
         )
     }
     if (paging === "link header")

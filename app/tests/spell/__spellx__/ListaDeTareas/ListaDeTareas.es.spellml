@@ -106,7 +106,6 @@
 	agregar (una nueva tarea con título = "Enseñarle a dibujar", prioridad = normal) a las tareas de la lista de tareas
 	agregar (una nueva tarea con título = "Seleccionar unas tareas, y editarlas juntas", prioridad = normal) a las tareas de la lista de tareas
 	agregar (una nueva tarea con título = "Arrastrar tareas para reordenarlas", prioridad = baja) a las tareas de la lista de tareas
-	iniciar la lista de tareas
 
 
 	## Pruebas

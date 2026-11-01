@@ -124,7 +124,6 @@ listaDeTareas.tareas.mostrando = "todas"
 listaDeTareas.tareas.append(new Tarea({ título: "Leer esta guía", hecha: true }))
 listaDeTareas.tareas.append(new Tarea({ título: "Marcar una casilla a la derecha" }))
 listaDeTareas.tareas.append(new Tarea({ título: "Probar el filtro Pendientes" }))
-if (!core.isCarryingOver) listaDeTareas.start()
 
 core.heading("Una prueba")
 /** Una prueba */
@@ -152,5 +151,7 @@ core.heading("Pruébalo")
 // y seleccionas varias para cambiarlas todas a la vez.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the list looks -- a menu over the tasks, each a row:  its checkbox, then its title. */¬¬.ListaDeTareas {¬  max-width: 30em;¬  padding-block: 1.5em;¬}¬¬como-funciona-lista-de-tareas-tarea::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  padding-block: 0.4em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) listaDeTareas.start()
 // -----------
 if (!core.isCarryingOver) testLaCuentaPendiente()

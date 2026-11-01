@@ -26,19 +26,30 @@ describe("<AppBarMenus>", () => {
     expect(names).toEqual(["File", "Edit", "View", "Run", "Help"])
 
     const file = host.querySelector("ui-popup[for=FileBarMenu] ui-menu.BarMenuItems")!
+    // its items are Spell's:  loaded a moment after the bar
+    await waitForCondition(() => file.children.length > 0)
     const items = [...file.children].map((item) =>
       item.getAttribute("kind") === "divider"
         ? "─"
         : `${item.textContent?.trim()} ${item.getAttribute("shortcut") ?? ""}`
     )
     expect(items.map((item) => item.trim())).toEqual([
-      `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
-      `Revert File ${EDITOR_HOTKEYS.revertFile.shortcut}`,
+      expect.stringMatching(/^More /),
       "─",
       `New File ${EDITOR_HOTKEYS.createFile.shortcut}`,
-      "Duplicate File",
-      "Rename File",
-      "Delete File"
+      expect.stringMatching(/^New /),
+      "─",
+      `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
+      `Discard Changes ${EDITOR_HOTKEYS.discardChanges.shortcut}`,
+      expect.stringMatching(/^Duplicate/),
+      "─",
+      "Project Settings",
+      "AutoSave",
+      "─",
+      expect.stringMatching(/^Export/),
+      expect.stringMatching(/^Import/),
+      "─",
+      "Home"
     ])
   })
 
@@ -48,6 +59,7 @@ describe("<AppBarMenus>", () => {
     const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=FileBarMenu]")!
     popup.visible = true
     flush()
+    await waitForCondition(() => !!popup.querySelector("ui-action"))
     const save = [...popup.querySelectorAll<HTMLElement>("ui-action")].find(
       (item) => item.textContent?.trim() === "Save"
     )!
@@ -98,4 +110,14 @@ function spyOnEditor<K extends keyof EditorStore>(key: K, implementation?: (...a
   editor[key] = spy as unknown as EditorStore[K]
   cleanups.push(() => (editor[key] = before))
   return spy
+}
+
+/** Wait for `condition`, as a layout piece in Spell loads:  throws after 10s. */
+async function waitForCondition(condition: () => boolean): Promise<void> {
+  const started = Date.now()
+  while (!condition()) {
+    if (Date.now() - started > 10_000) throw new Error("waitForCondition():  timed out")
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    flush()
+  }
 }

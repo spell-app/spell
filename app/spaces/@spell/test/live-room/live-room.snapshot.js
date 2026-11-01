@@ -62,7 +62,7 @@ export class LiveBox extends App {
         onClick: core.pressed(this, () => this.addOne()),
         style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
       }, "Add one"),
-      core.drawRead(async () => await core.savedThings(Recipe), (recipe) => core.drawThing(recipe))
+      core.drawRead(async () => await core.savedThings(Recipe, {}, "as drawn"), (recipe) => core.drawThing(recipe))
     ]
   }
 }

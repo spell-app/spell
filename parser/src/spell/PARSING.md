@@ -798,6 +798,8 @@ A kind that says so is saved in a file of its own.
   - The colon stays required:  a lone `a game` is a fragment.
   - A type nobody declares is refused, saying how to declare it.
   - A type declared a SECOND time is refused, naming the first and saying to write `a game:` (issue I13).
+  - In a `.spellml` file its tag is `<spell-more-of "game">`, its members inside (epic `data` T76):
+    so a place's fields can stay in one plain `.spell` file, and what's drawn in a `.spellml` file beside it.
     That's `TypeDeclaration.refuseTakenNames()`.
 - `subject_it` / `subject_its`:  `it` / `its` as a line's SUBJECT.
   - Their class:  `SubjectRule`, in `types/`.
@@ -2061,6 +2063,8 @@ What a program's lines about where data lives compile to, and what reads the res
   - Why:  when an edit keeps the last run's things, the runner loads the program with its start skipped,
     so its tests don't print again, and the game in progress isn't started again.
   - NOT in a method, nor in a plain block, e.g. a rule test's.
+  - A program whose own code never calls `start` needs no such line:  its app or page starts by itself, the one in the
+    file named for the project, else the first (`SpellProject.startedByItself()`, epic `editor`).
 - Classes compile as a hand-written class would:  each MEMBER in its class's body, wherever it was declared.
   - A member is a `P.ASTClassMember`.
     It knows its class (`typeName`), and compiles two ways:

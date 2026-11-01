@@ -134,7 +134,6 @@ table.hand.append(new Card({ rank: "queen", suit: "spades" }))
 table.hand.append(new Card({ rank: "queen", suit: "hearts" }))
 table.hand.append(new Card({ rank: "jack", suit: "clubs" }))
 table.hand.append(new Card({ rank: 10, suit: "diamonds" }))
-if (!core.isCarryingOver) table.start()
 
 core.heading("A check:  the rule, card by card")
 /** A check:  the rule, card by card */
@@ -166,5 +165,7 @@ core.heading("Try it")
 // each have rules of their own, written the same way.  Solitario is the same game, in Spanish.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the table looks -- the column, then the hand, each a row of cards. */¬¬.Table {¬  max-width: 34em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬how-solitaire-works-column,¬how-solitaire-works-pile {¬  display: flex;¬  flex-wrap: wrap;¬  gap: 0.5em;¬  min-height: 2.5em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) table.start()
 // -----------
 if (!core.isCarryingOver) testTheColumn()

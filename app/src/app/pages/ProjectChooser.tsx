@@ -153,7 +153,7 @@ function StartCards() {
           start={() => {
             Palette.openOnArrival()
             Inspector.openQuietly()
-            void editor.startFrom("blank")
+            void editor.startFrom("blank", { codeClosed: true })
           }}
         />
         <StartCard

@@ -48,7 +48,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  One line says where they're kept | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  its API in a file of its own, as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -134,7 +134,7 @@ The Calculator shows them plainest, in 113 lines, because it keeps each part in 
 | what its things are | `a calculator has a total as a number`, one of its six properties | the component's state |
 | what they do | `to clear (a calculator):`, and four more actions | its event handlers |
 | how they draw | `to draw (a calculator)`:  a keypad of Spell UI buttons, each with a click like `onClick={append "7" to it}` | its JSX |
-| the start | `start the calculator`, which puts its drawing on the page | `createRoot(root).render(<App />)` |
+| the start | `clear the calculator`:  the app then starts by itself, which puts its drawing on the page | `createRoot(root).render(<App />)` |
 
 <details>
 <summary>The four parts, in the Calculator's own lines</summary>
@@ -174,7 +174,6 @@ to draw (a calculator)
 ```spell
 set calculator to a new calculator
 clear the calculator
-start the calculator
 ```
 
 - The whole program, its other four actions too:
@@ -531,33 +530,47 @@ _Lista de tareas in the editor:  the same list, its words in Spanish._
 
 ## Star Wars:  two servers other people run, in one program
 
-[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.info](https://swapi.info/) for the films, people, planets and ships,
+[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.py4e.com](https://swapi.py4e.com/) for the films, people, planets and ships,
 and Wikipedia for their pictures.
-Each is one line, and its rows' fields:
+Each is one line, and its rows' fields, in a file of their own, as `spell place ingest` wrote them:
 
 ```spell
-star wars is a web server at "https://swapi.info/api":
+star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
+	- its rows are its "results"
+	- its next page is its "next"
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- wiki pages live at "/page/summary"
 	- a wiki page's id is its "pageid"
-	- a wiki page's picture is its "thumbnail.source"
 ```
 
-_From [its program](spaces/@spell/examples/StarWars/StarWars.spell), shortened._
+_From [its API](spaces/@spell/examples/StarWars/StarWarsApi.spell), shortened._
 
-swapi.info's rows link to each other by address:  a person says `"homeworld": "https://swapi.info/api/planets/1"`.
-Say what a field links to, and reading it follows the link:
+Its rows link to each other by address:  a person says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
+Say what a field links to, and reading it follows the link.
+What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
 
 ```spell
-a "person" is a record:
+a "person" is a thing:
 	- it lives in star wars
 	- its "homeworld" is a planet
 	- its "films" is a list of films
+
+a "wiki page" is a thing:
+	- it lives in wikipedia
+	- its "thumbnail" is a thumbnail
+
+a "thumbnail" is a thing:
+	- its "source" is text
 ```
 
-_From the same program, shortened._
+_From the same file, shortened._
+
+What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
+`<spell-more-of "person">`.
+So looking at the server again never touches a line of it.
+A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
 
 Then `the name of its homeworld` is the planet's name, and `for each film in its films` is the films.
 - One read per address, shared, and none for a thing another read has already brought.

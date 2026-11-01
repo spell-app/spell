@@ -145,7 +145,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(6000)
     await page.locator(".InspectorToggle ui-icon").first().click({ force: true })
     await page.waitForTimeout(1000)
-  })
+  }, 120_000)
 
   afterAll(async () => {
     await browser?.close()
@@ -155,7 +155,12 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const area = (await page.locator(".AppPaneBody").boundingBox())!
     const middle = area.x + area.width / 2
 
+    // an empty app says what to do, until something's in it
+    const promptShows = () =>
+      page.locator(".EmptyAppPrompt").evaluate((prompt) => getComputedStyle(prompt).display !== "none")
+    expect(await promptShows()).toBe(true)
     await fromPalette("Button", middle, area.y + 60)
+    expect(await promptShows()).toBe(false)
     expect(await written()).toEqual(["<ui-button>Click me</ui-button>"])
 
     await fromPalette("Card", middle, area.y + area.height - 40)
@@ -308,8 +313,12 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await page.waitForTimeout(500)
     await page.locator('.PartMenu ui-action:has-text("Show in Code")').click()
     await page.waitForTimeout(800)
-    const line = await page.evaluate(() => document.querySelector(".monaco-editor .current-line") !== null)
-    expect(line).toBe(true)
+    const line = await page.evaluate(() => {
+      const code = (window as unknown as { editor: { shownCodeEditor: { getPosition(): { lineNumber: number } } } })
+        .editor.shownCodeEditor
+      return code.getPosition().lineNumber
+    })
+    expect(line).toBeGreaterThan(1)
 
     await page.mouse.click(card!.x, card!.y, { button: "right" })
     await page.waitForTimeout(500)
@@ -501,16 +510,26 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     await other.close()
   })
 
+  test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
+    const code = page.locator(".InputEditor .monaco-editor")
+    expect(await code.count()).toBe(1)
+    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.waitForTimeout(800)
+    expect(await code.count()).toBe(0)
+    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.waitForSelector(".InputEditor .monaco-editor", { timeout: 30_000 })
+  })
+
   test("the palette stays pinned across a reload", async () => {
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(600)
     await page.locator(".PalettePopup .PalettePin").click()
     await page.waitForTimeout(600)
-    expect(await page.locator(".PalettePane").count()).toBe(1)
+    expect(await page.locator(".PaletteStrip").count()).toBe(1)
     await page.reload()
-    await page.waitForSelector(".PalettePane", { timeout: 60_000 })
-    await page.locator(".PalettePane .PalettePin").click()
+    await page.waitForSelector(".PaletteStrip", { timeout: 60_000 })
+    await page.locator(".PaletteStrip .PalettePin").click()
     await page.waitForTimeout(600)
-    expect(await page.locator(".PalettePane").count()).toBe(0)
+    expect(await page.locator(".PaletteStrip").count()).toBe(0)
   })
 })

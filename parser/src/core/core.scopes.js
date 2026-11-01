@@ -174,7 +174,7 @@
       description: "Several items in a row, as a new list of the same type -- the list itself doesn't change.\n- `card 1 to 3 of the deck`\n- `top 2 cards of the deck`, `last two cards of the deck`\n- `cards in the deck starting with the ace`",
       rules: [
         { name: "range_between_expression", syntax: "{arg:variable} {start:expression} to {end:expression} (of|in|from) {list:operand}" },
-        { name: "range_count_expression", syntax: "{ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (of|in|from) {list:operand}" },
+        { name: "range_count_expression", syntax: "{ordinal} {number} {arg:plural_identifier} (of|in|from) {list:operand}" },
         { name: "range_starting_with_expression", syntax: "{arg:plural_identifier} (in|of) {list:expression} starting with {thing:operand}" }
       ]
     },

@@ -809,6 +809,15 @@ class ListFamily {
   }
 }
 
+/**
+ * `New`, a new version of class `Old`, keeps its family's owners, if `Old` roots a family:  a card still knows its pile.
+ * - For a program edited as it runs (`core.takeNewClasses()`).
+ */
+export function carryListFamily(Old: typeof List, New: typeof List): void {
+  const family = FAMILIES.get(Old)
+  if (family) FAMILIES.set(New, family)
+}
+
 /** Each item's last exclusive list, of any family:  where an event sent to it goes next -- see `holderOf()`. */
 const HOLDERS = new WeakMap<object, List>()
 

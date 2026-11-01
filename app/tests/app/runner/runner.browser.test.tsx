@@ -735,7 +735,7 @@ describe("compiled spell draws with Solid", () => {
     expect(consoleText()).not.toContain("failed")
   })
 
-  test("`Solitaire` played, then its app's own file edited:  a fresh game, as Restart deals (P17)", async () => {
+  test("`Solitaire` played, then a line at its top level edited, in a runner with no way to say Restart:  the game's kept (epic `editor`)", async () => {
     const solitaire = await solitaireSource()
     const { host, setSource } = await mountSettable(solitaire)
     type Element = HTMLElement & { ready: Promise<void> }
@@ -756,14 +756,12 @@ describe("compiled spell draws with Solid", () => {
     )
     expect(edited).not.toBe(solitaire.compiled)
     setSource({ ...solitaire, compiled: edited })
-    await waitFor(() => consoleText().includes("Started afresh:  the program's start changed"))
-    // dealt again:  the tests print again, and the deal ends with one card turned onto the discards
-    await waitFor(() => tableaus()[6]?.children.length === 7 && discards().children.length === 1, 10_000)
-    expect(consoleText()).toContain("test the moves")
-    expect(consoleText()).not.toContain("Kept")
+    // nothing in it says `start`, so nothing's changed how it starts:  carried over, and not dealt again
+    await waitFor(() => consoleText().includes("Kept solitaire"))
+    await waitFor(() => discards().children.length === 2)
   })
 
-  test("a program's tests and its app's start don't run again on an edit;  its other lines do, a print too (P17)", async () => {
+  test("an edit with its app on the page runs nothing again:  its tests, its app's start, a print (epic `editor`)", async () => {
     let controls: SpellAppControls | undefined
     const { host, setSource } = await mountSettable(source(TESTED_COUNTER), (it) => (controls = it))
     ;(await waitFor(() => host.querySelector<HTMLButtonElement>("button.count"))).click()
@@ -774,9 +772,8 @@ describe("compiled spell draws with Solid", () => {
     setSource(source(TESTED_COUNTER.replace('"Count: "', '"Clicks: "')))
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 2")
     const printed = consoleText()
-    expect(printed).toContain("printed at the top")
-    expect(printed).toContain("Kept counter")
-    expect(printed).not.toContain("testing the counter")
+    expect(printed.split("printed at the top")).toHaveLength(2)
+    expect(printed.split("testing the counter")).toHaveLength(2)
 
     controls!.restart()
     await waitFor(() => host.querySelector("button.count")?.textContent === "Clicks: 1")

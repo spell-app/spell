@@ -53,6 +53,8 @@ export class SpellMonaco {
     fontSize: 17,
     lineNumbers: "off",
     minimap: { enabled: false },
+    // no band across the current line, in any theme (Owen:  "Lose the line highlight in monaco in all themes")
+    renderLineHighlight: "none",
     scrollBeyondLastLine: false,
     overviewRulerBorder: false,
     hideCursorInOverviewRuler: true,

@@ -23,13 +23,16 @@
  */
 
 import h from "@solidjs/h"
-import { createComponent, render, type JSX } from "@solidjs/web"
-import { Errored, For, createMemo, runWithOwner } from "solid-js"
+import { createComponent, insert, render, type JSX } from "@solidjs/web"
+import { Errored, createMemo, runWithOwner } from "solid-js"
+
+import { Cell } from "spell/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
+import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
 import { listenForUndoKeys } from "./ui"
 import { standInFor } from "./waiting"
 
@@ -79,10 +82,36 @@ export const drawingMethods = defineCoreModule({
         : thing instanceof ViewableList
           ? [() => core.drawItems(thing)]
           : []
+      // an edit drawing it again:  its own element, its children bound to this drawing (`drawAgain()`)
+      const kept = keptElementFor(thing, tag)
+      if (kept) {
+        for (const child of children) insert(kept, child, undefined, [...kept.childNodes] as unknown as JSX.Element)
+        return kept as unknown as Drawing
+      }
       // made NOW:  the thing is a plain value, set once
       return (h(tag, { "prop:thing": thing }, ...children) as unknown as () => Drawing)()
     }
     return core.drawOwn(thing)
+  },
+
+  /**
+   * Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`,
+   * Edit Without Redraw):  each view that draws again finds the element each thing it holds already has.
+   * - So a board drawn again keeps its 52 cards:  the same elements, with what they hold, moved to the new drawing.
+   * - `everything`:  every view.
+   * - Done by the time it returns.
+   * - A drawing changing for any other reason makes its elements as usual:  this is only for an edit.
+   */
+  drawAgain(types: readonly string[] | "everything"): void {
+    keptElements = new Map()
+    noteElementsIn(core.appElement())
+    try {
+      if (types === "everything") everyDrawing.changed()
+      else for (const type of types) drawingOfType(type).changed()
+      core.flush()
+    } finally {
+      keptElements = undefined
+    }
   },
 
   /**
@@ -121,6 +150,7 @@ export const drawingMethods = defineCoreModule({
    *   - A viewable list's default draws the item itself, in the item's own boundary:  no second one around it.
    * - Any other list's item draws as itself (`drawThing()`).
    * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
+   * - A long list draws what fits, and more as you scroll:  `drawnInWindow()`.
    */
   drawItems(list: unknown): Drawing | null {
     // NOT `list.items` here:  read in the caller's drawing, every change to the list would draw it all again
@@ -132,11 +162,25 @@ export const drawingMethods = defineCoreModule({
         : drawEachItem === DEFAULT_DRAW_EACH_ITEM
           ? (item: unknown) => drawEachItem.call(list, item)
           : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
-    return createComponent(For as unknown as ForByIdentity, {
-      get each() {
-        return (list as { items: unknown[] }).items
-      },
-      children: drawItem
+    return drawnInWindow({ items: () => (list as { items: unknown[] }).items, drawItem, key: () => list as object })
+  },
+
+  /**
+   * A loop's drawing, one for each item of `list`:  what `for each ... draw` compiles to, in a drawing.
+   * - Up to `MOST_AT_ONCE` items, or on a page that can't watch them come near the view:  `core.map()`, drawn together.
+   * - A long list draws what fits, and more as you scroll, however the program wrote it:  `drawnInWindow()`.
+   * - Reads the list here, as `core.map()` does:  what draws it follows it.
+   */
+  drawEach(list: unknown, each: (item: unknown, position: number, list: unknown) => Drawing): Drawing {
+    const items = () => (Array.isArray(list) ? list : (list as { items?: unknown[] } | undefined)?.items)
+    const all = items()
+    if (!all || all.length <= MOST_AT_ONCE || !canDrawInWindows()) {
+      return core.map(list as never, each as never) as unknown as Drawing
+    }
+    return drawnInWindow({
+      items: () => items() ?? [],
+      key: () => list as object,
+      drawItem: (item, position) => madeOnce(each(item, position(), list))
     })
   },
 
@@ -152,8 +196,10 @@ export const drawingMethods = defineCoreModule({
    * - Starting again replaces what's drawn there.
    * - SIDE EFFECT: appends a `div` to `document.body` the first time it's called, if the host set no `appRoot`.
    * - With `core.appLayout` (a `<spell-viewer>` with markup inside it):  draws nothing, saying so on the console.
+   * - With no page at all, e.g. a program run in node:  nothing, as an app starts by itself (`startedByItself()`).
    */
   startDrawing(view: CanDraw): void {
+    if (typeof document === "undefined") return
     if (core.appLayout) {
       core.console.log(`${view.constructor.name}:  its page's markup draws it, not its \`to draw\``)
       return
@@ -243,12 +289,61 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
   return createComponent(Errored, {
     fallback: (error: () => unknown) => drawingFailed(thing, error()),
     get children() {
-      const drawing = () => createMemo(() => madeOnce(draw())) as unknown as Drawing
+      const drawing = () =>
+        createMemo(() => {
+          // an edit to its type draws it again (`drawAgain()`)
+          everyDrawing.read()
+          drawingOfType(thing.constructor.name).read()
+          return madeOnce(draw())
+        }) as unknown as Drawing
       if (!drawsWaiting(thing)) return drawing()
       if (drawsInItsChildren(thing)) warnOfWholeAppHeld(thing)
       return standInFor(drawing)
     }
   })
+}
+
+////////////////
+// ## Drawing again after an edit (`core.drawAgain()`)
+////////////////
+
+/** Read by every drawing:  an edit that changes them all changes it. */
+const everyDrawing = new Cell()
+
+/** Read by each type's drawings, by the type's name:  it outlives the type's class, which an edit replaces. */
+const DRAWINGS_OF_TYPES = new Map<string, Cell>()
+
+/** The cell the drawings of type `name` read. */
+function drawingOfType(name: string): Cell {
+  let cell = DRAWINGS_OF_TYPES.get(name)
+  if (!cell) DRAWINGS_OF_TYPES.set(name, (cell = new Cell()))
+  return cell
+}
+
+/** While an edit draws again:  each element on the page drawing a thing, not yet taken by the new drawing. */
+let keptElements: Map<object, HTMLElement[]> | undefined
+
+/** Note what's in `root`, through shadow roots:  a card's element is in its pile's light DOM, a pile's in the app's. */
+function noteElementsIn(root: Element | ShadowRoot | null | undefined): void {
+  if (!root) return
+  for (const element of root.children as HTMLCollectionOf<HTMLElement>) {
+    const { thing } = element as HTMLElement & { thing?: unknown }
+    if (thing && typeof thing === "object") {
+      const elements = keptElements!.get(thing)
+      if (elements) elements.push(element)
+      else keptElements!.set(thing, [element])
+    }
+    noteElementsIn(element)
+    noteElementsIn(element.shadowRoot)
+  }
+}
+
+/** `thing`'s element with tag `tag`, as the page has it now, if an edit is drawing again and none has taken it. */
+function keptElementFor(thing: object, tag: string): HTMLElement | undefined {
+  const elements = keptElements?.get(thing)
+  if (!elements) return undefined
+  const at = elements.findIndex((element) => element.localName === tag)
+  return at < 0 ? undefined : elements.splice(at, 1)[0]
 }
 
 /**
@@ -296,9 +391,6 @@ type DrawsEachItem = {
 
 /** A viewable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
 const DEFAULT_DRAW_EACH_ITEM = ViewableList.prototype.drawEachItem
-
-/** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
-type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing
 
 /** The DOM event a drawing that failed sends -- the same name as Spell UI's. */
 const ERROR_EVENT = "ui-error"

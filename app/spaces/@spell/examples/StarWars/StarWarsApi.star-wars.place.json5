@@ -4,152 +4,35 @@
   "about": {
     "name": "star wars",
     "kind": "web server",
-    "address": "https://swapi.info/api",
-    "lookedAt": "2026-10-31T20:17:00.576Z",
+    "address": "https://swapi.py4e.com/api",
+    "lookedAt": "2026-11-01T02:44:56.951Z",
     "fingerprint": "5177353c7e1596cb",
-    "readBy": "claude -p",
-    "docsAt": "https://swapi.info/documentation"
+    "readBy": "nobody:  worked out from what came back",
+    "docsAt": "https://swapi.py4e.com/documentation"
   },
   "canDo": {
     "read": "Yes:  it's been read.",
-    "write": "It says it takes only GET, OPTIONS, so it seems read only.  Never tried.",
+    "write": "It says it takes only GET, HEAD, OPTIONS, so it seems read only.  Never tried.",
     "live": "It doesn't say what changed:  a program asks again, as often as its line says.",
     "limits": "It named none in its answers.",
-    "browsers": "Yes:  it says any page may read it."
+    "browsers": "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."
   },
   "collections": {
-    "films": {
-      "type": "film",
-      "at": "/films",
-      "rowsSeen": 6,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "none",
-      "fields": {
-        "title": {
-          "words": "title",
-          "type": "text",
-          "example": "A New Hope",
-          "means": "film title"
-        },
-        "episode_id": {
-          "words": "episode id",
-          "type": "number",
-          "example": 4,
-          "means": "episode number"
-        },
-        "opening_crawl": {
-          "words": "opening crawl",
-          "type": "text",
-          "example": "It is a period of civil war.\r\nRebel spaceships, striking\r\nfrom a hidden base, ha",
-          "means": "opening crawl text"
-        },
-        "director": {
-          "words": "director",
-          "type": "text",
-          "example": "George Lucas",
-          "means": "director's name"
-        },
-        "producer": {
-          "words": "producer",
-          "type": "text",
-          "example": "Gary Kurtz, Rick McCallum",
-          "means": "comma-separated producer names"
-        },
-        "release_date": {
-          "words": "release date",
-          "type": "date",
-          "example": "1977-05-25",
-          "means": "date of release"
-        },
-        "characters": {
-          "words": "characters",
-          "type": "list of links",
-          "example": [
-            "https://swapi.info/api/people/1",
-            "https://swapi.info/api/people/2"
-          ],
-          "linksTo": "people",
-          "means": "links to people"
-        },
-        "planets": {
-          "words": "planets",
-          "type": "list of links",
-          "example": [
-            "https://swapi.info/api/planets/1",
-            "https://swapi.info/api/planets/2"
-          ],
-          "linksTo": "planets",
-          "means": "links to planets"
-        },
-        "starships": {
-          "words": "starships",
-          "type": "list of links",
-          "example": [
-            "https://swapi.info/api/starships/2",
-            "https://swapi.info/api/starships/3"
-          ],
-          "linksTo": "starships",
-          "means": "links to starships"
-        },
-        "vehicles": {
-          "words": "vehicles",
-          "type": "list of links",
-          "example": [
-            "https://swapi.info/api/vehicles/4",
-            "https://swapi.info/api/vehicles/6"
-          ],
-          "linksTo": "vehicles",
-          "means": "links to vehicles"
-        },
-        "species": {
-          "words": "species",
-          "type": "list of links",
-          "example": [
-            "https://swapi.info/api/species/1",
-            "https://swapi.info/api/species/2"
-          ],
-          "linksTo": "species",
-          "means": "links to species"
-        },
-        "created": {
-          "words": "created",
-          "type": "date",
-          "example": "2014-12-10T14:23:31.880000Z",
-          "means": "when the row was created"
-        },
-        "edited": {
-          "words": "edited",
-          "type": "date",
-          "example": "2014-12-20T19:49:45.256000Z",
-          "means": "when the row was edited"
-        },
-        "url": {
-          "words": "url",
-          "type": "link",
-          "example": "https://swapi.info/api/films/1",
-          "linksTo": "films",
-          "means": "this row's own link"
-        }
-      },
-      "about": "Each Star Wars film.",
-      "readThrough": {
-        "rows": 5
-      }
-    },
     "people": {
       "type": "person",
       "at": "/people",
-      "rowsSeen": 82,
+      "rowsSeen": 30,
+      "rowsItSays": 87,
       "idField": "url",
       "idIsAnAddress": true,
-      "paging": "none",
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
           "type": "text",
-          "example": "Luke Skywalker",
-          "means": "person's name"
+          "example": "Luke Skywalker"
         },
         "height": {
           "words": "height",
@@ -158,8 +41,7 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "172",
-          "means": "height in centimeters"
+          "example": "172"
         },
         "mass": {
           "words": "mass",
@@ -168,106 +50,91 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "77",
-          "means": "mass in kilograms"
+          "example": "77"
         },
         "hair_color": {
           "words": "hair color",
           "type": "text",
-          "example": "blond",
-          "means": "hair color, or n/a or unknown"
+          "example": "blond"
         },
         "skin_color": {
           "words": "skin color",
           "type": "text",
-          "example": "fair",
-          "means": "skin color"
+          "example": "fair"
         },
         "eye_color": {
           "words": "eye color",
           "type": "text",
-          "example": "blue",
-          "means": "eye color, or n/a or unknown"
+          "example": "blue"
         },
         "birth_year": {
           "words": "birth year",
           "type": "text",
-          "example": "19BBY",
-          "means": "birth year in BBY or ABY"
+          "example": "19BBY"
         },
         "gender": {
           "words": "gender",
           "type": "text",
-          "example": "male",
-          "means": "gender, or n/a or unknown"
+          "example": "male"
         },
         "homeworld": {
           "words": "homeworld",
           "type": "link",
-          "example": "https://swapi.info/api/planets/1",
-          "linksTo": "planets",
-          "means": "link to home planet"
+          "example": "https://swapi.py4e.com/api/planets/1/",
+          "linksTo": "planets"
         },
         "films": {
           "words": "films",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/films/1",
-            "https://swapi.info/api/films/2"
+            "https://swapi.py4e.com/api/films/1/",
+            "https://swapi.py4e.com/api/films/2/"
           ],
-          "linksTo": "films",
-          "means": "links to films appeared in"
+          "linksTo": "films"
         },
         "species": {
           "words": "species",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/species/2"
+            "https://swapi.py4e.com/api/species/1/"
           ],
-          "linksTo": "species",
-          "means": "links to species belonged to"
+          "linksTo": "species"
         },
         "vehicles": {
           "words": "vehicles",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/vehicles/14",
-            "https://swapi.info/api/vehicles/30"
+            "https://swapi.py4e.com/api/vehicles/14/",
+            "https://swapi.py4e.com/api/vehicles/30/"
           ],
-          "linksTo": "vehicles",
-          "means": "links to vehicles piloted"
+          "linksTo": "vehicles"
         },
         "starships": {
           "words": "starships",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/starships/12",
-            "https://swapi.info/api/starships/22"
+            "https://swapi.py4e.com/api/starships/12/",
+            "https://swapi.py4e.com/api/starships/22/"
           ],
-          "linksTo": "starships",
-          "means": "links to starships piloted"
+          "linksTo": "starships"
         },
         "created": {
           "words": "created",
           "type": "date",
-          "example": "2014-12-09T13:50:51.644000Z",
-          "means": "when the row was created"
+          "example": "2014-12-09T13:50:51.644000Z"
         },
         "edited": {
           "words": "edited",
           "type": "date",
-          "example": "2014-12-20T21:17:56.891000Z",
-          "means": "when the row was edited"
+          "example": "2014-12-20T21:17:56.891000Z"
         },
         "url": {
           "words": "url",
           "type": "link",
-          "example": "https://swapi.info/api/people/1",
-          "linksTo": "people",
-          "means": "this row's own link"
+          "example": "https://swapi.py4e.com/api/people/1/",
+          "linksTo": "people"
         }
       },
-      "about": "Each person or character in the Star Wars universe.",
       "readThrough": {
         "rows": 5
       }
@@ -275,16 +142,18 @@
     "planets": {
       "type": "planet",
       "at": "/planets",
-      "rowsSeen": 60,
+      "rowsSeen": 30,
+      "rowsItSays": 61,
       "idField": "url",
       "idIsAnAddress": true,
-      "paging": "none",
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
           "type": "text",
-          "example": "Tatooine",
-          "means": "planet's name"
+          "example": "Tatooine"
         },
         "rotation_period": {
           "words": "rotation period",
@@ -293,8 +162,7 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "23",
-          "means": "rotation period, as a number"
+          "example": "23"
         },
         "orbital_period": {
           "words": "orbital period",
@@ -303,36 +171,28 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "304",
-          "means": "orbital period, as a number"
+          "example": "304"
         },
         "diameter": {
           "words": "diameter",
           "type": "number",
           "writtenAsText": true,
-          "noNumberWords": [
-            "unknown"
-          ],
-          "example": "10465",
-          "means": "planet's diameter"
+          "example": "10465"
         },
         "climate": {
           "words": "climate",
           "type": "text",
-          "example": "arid",
-          "means": "comma-separated climates"
+          "example": "arid"
         },
         "gravity": {
           "words": "gravity",
           "type": "text",
-          "example": "1 standard",
-          "means": "gravity description"
+          "example": "1 standard"
         },
         "terrain": {
           "words": "terrain",
           "type": "text",
-          "example": "desert",
-          "means": "comma-separated terrains"
+          "example": "desert"
         },
         "surface_water": {
           "words": "surface water",
@@ -341,8 +201,7 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "1",
-          "means": "surface water figure"
+          "example": "1"
         },
         "population": {
           "words": "population",
@@ -351,50 +210,150 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "200000",
-          "means": "number of inhabitants"
+          "example": "200000"
         },
         "residents": {
           "words": "residents",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/people/1",
-            "https://swapi.info/api/people/2"
+            "https://swapi.py4e.com/api/people/1/",
+            "https://swapi.py4e.com/api/people/2/"
           ],
-          "linksTo": "people",
-          "means": "links to people"
+          "linksTo": "people"
         },
         "films": {
           "words": "films",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/films/1",
-            "https://swapi.info/api/films/3"
+            "https://swapi.py4e.com/api/films/1/",
+            "https://swapi.py4e.com/api/films/3/"
           ],
-          "linksTo": "films",
-          "means": "links to films"
+          "linksTo": "films"
         },
         "created": {
           "words": "created",
           "type": "date",
-          "example": "2014-12-09T13:50:49.641000Z",
-          "means": "when the row was created"
+          "example": "2014-12-09T13:50:49.641000Z"
         },
         "edited": {
           "words": "edited",
           "type": "date",
-          "example": "2014-12-20T20:58:18.411000Z",
-          "means": "when the row was edited"
+          "example": "2014-12-20T20:58:18.411000Z"
         },
         "url": {
           "words": "url",
           "type": "link",
-          "example": "https://swapi.info/api/planets/1",
-          "linksTo": "planets",
-          "means": "this row's own link"
+          "example": "https://swapi.py4e.com/api/planets/1/",
+          "linksTo": "planets"
         }
       },
-      "about": "Each planet in the Star Wars universe.",
+      "readThrough": {
+        "rows": 5
+      }
+    },
+    "films": {
+      "type": "film",
+      "at": "/films",
+      "rowsSeen": 7,
+      "rowsItSays": 7,
+      "idField": "url",
+      "idIsAnAddress": true,
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
+      "fields": {
+        "title": {
+          "words": "title",
+          "type": "text",
+          "example": "A New Hope"
+        },
+        "episode_id": {
+          "words": "episode id",
+          "type": "number",
+          "example": 4
+        },
+        "opening_crawl": {
+          "words": "opening crawl",
+          "type": "text",
+          "example": "It is a period of civil war.\r\nRebel spaceships, striking\r\nfrom a hidden base, ha"
+        },
+        "director": {
+          "words": "director",
+          "type": "text",
+          "example": "George Lucas"
+        },
+        "producer": {
+          "words": "producer",
+          "type": "text",
+          "example": "Gary Kurtz, Rick McCallum"
+        },
+        "release_date": {
+          "words": "release date",
+          "type": "date",
+          "example": "1977-05-25"
+        },
+        "characters": {
+          "words": "characters",
+          "type": "list of links",
+          "example": [
+            "https://swapi.py4e.com/api/people/1/",
+            "https://swapi.py4e.com/api/people/2/"
+          ],
+          "linksTo": "people"
+        },
+        "planets": {
+          "words": "planets",
+          "type": "list of links",
+          "example": [
+            "https://swapi.py4e.com/api/planets/1/",
+            "https://swapi.py4e.com/api/planets/2/"
+          ],
+          "linksTo": "planets"
+        },
+        "starships": {
+          "words": "starships",
+          "type": "list of links",
+          "example": [
+            "https://swapi.py4e.com/api/starships/2/",
+            "https://swapi.py4e.com/api/starships/3/"
+          ],
+          "linksTo": "starships"
+        },
+        "vehicles": {
+          "words": "vehicles",
+          "type": "list of links",
+          "example": [
+            "https://swapi.py4e.com/api/vehicles/4/",
+            "https://swapi.py4e.com/api/vehicles/6/"
+          ],
+          "linksTo": "vehicles"
+        },
+        "species": {
+          "words": "species",
+          "type": "list of links",
+          "example": [
+            "https://swapi.py4e.com/api/species/1/",
+            "https://swapi.py4e.com/api/species/2/"
+          ],
+          "linksTo": "species"
+        },
+        "created": {
+          "words": "created",
+          "type": "date",
+          "example": "2014-12-10T14:23:31.880000Z"
+        },
+        "edited": {
+          "words": "edited",
+          "type": "date",
+          "example": "2014-12-20T19:49:45.256000Z"
+        },
+        "url": {
+          "words": "url",
+          "type": "link",
+          "example": "https://swapi.py4e.com/api/films/1/",
+          "linksTo": "films"
+        }
+      },
       "readThrough": {
         "rows": 5
       }
@@ -402,28 +361,28 @@
     "species": {
       "type": "species",
       "at": "/species",
-      "rowsSeen": 37,
+      "rowsSeen": 30,
+      "rowsItSays": 37,
       "idField": "url",
       "idIsAnAddress": true,
-      "paging": "none",
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
           "type": "text",
-          "example": "Human",
-          "means": "species name"
+          "example": "Human"
         },
         "classification": {
           "words": "classification",
           "type": "text",
-          "example": "mammal",
-          "means": "kind, such as mammal"
+          "example": "mammal"
         },
         "designation": {
           "words": "designation",
           "type": "text",
-          "example": "sentient",
-          "means": "designation, such as sentient"
+          "example": "sentient"
         },
         "average_height": {
           "words": "average height",
@@ -433,87 +392,74 @@
             "n/a",
             "unknown"
           ],
-          "example": "180",
-          "means": "average height, or n/a"
+          "example": "180"
         },
         "skin_colors": {
           "words": "skin colors",
           "type": "text",
-          "example": "caucasian, black, asian, hispanic",
-          "means": "comma-separated skin colors"
+          "example": "caucasian, black, asian, hispanic"
         },
         "hair_colors": {
           "words": "hair colors",
           "type": "text",
-          "example": "blonde, brown, black, red",
-          "means": "comma-separated hair colors"
+          "example": "blonde, brown, black, red"
         },
         "eye_colors": {
           "words": "eye colors",
           "type": "text",
-          "example": "brown, blue, green, hazel, grey, amber",
-          "means": "comma-separated eye colors"
+          "example": "brown, blue, green, hazel, grey, amber"
         },
         "average_lifespan": {
           "words": "average lifespan",
           "type": "text",
-          "example": "120",
-          "means": "lifespan figure, or indefinite"
+          "example": "120"
         },
         "homeworld": {
           "words": "homeworld",
           "type": "link",
-          "example": "https://swapi.info/api/planets/9",
-          "linksTo": "planets",
-          "means": "link to home planet, or null"
+          "example": "https://swapi.py4e.com/api/planets/9/",
+          "linksTo": "planets"
         },
         "language": {
           "words": "language",
           "type": "text",
-          "example": "Galactic Basic",
-          "means": "language spoken, or n/a"
+          "example": "Galactic Basic"
         },
         "people": {
           "words": "people",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/people/66",
-            "https://swapi.info/api/people/67"
+            "https://swapi.py4e.com/api/people/1/",
+            "https://swapi.py4e.com/api/people/4/"
           ],
-          "linksTo": "people",
-          "means": "links to people"
+          "linksTo": "people"
         },
         "films": {
           "words": "films",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/films/1",
-            "https://swapi.info/api/films/2"
+            "https://swapi.py4e.com/api/films/1/",
+            "https://swapi.py4e.com/api/films/2/"
           ],
-          "linksTo": "films",
-          "means": "links to films"
+          "linksTo": "films"
         },
         "created": {
           "words": "created",
           "type": "date",
-          "example": "2014-12-10T13:52:11.567000Z",
-          "means": "when the row was created"
+          "example": "2014-12-10T13:52:11.567000Z"
         },
         "edited": {
           "words": "edited",
           "type": "date",
-          "example": "2014-12-20T21:36:42.136000Z",
-          "means": "when the row was edited"
+          "example": "2014-12-20T21:36:42.136000Z"
         },
         "url": {
           "words": "url",
           "type": "link",
-          "example": "https://swapi.info/api/species/1",
-          "linksTo": "species",
-          "means": "this row's own link"
+          "example": "https://swapi.py4e.com/api/species/1/",
+          "linksTo": "species"
         }
       },
-      "about": "Each species in the Star Wars universe.",
       "readThrough": {
         "rows": 5
       }
@@ -521,28 +467,28 @@
     "vehicles": {
       "type": "vehicle",
       "at": "/vehicles",
-      "rowsSeen": 39,
+      "rowsSeen": 30,
+      "rowsItSays": 39,
       "idField": "url",
       "idIsAnAddress": true,
-      "paging": "none",
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
           "type": "text",
-          "example": "Sand Crawler",
-          "means": "vehicle's name"
+          "example": "Sand Crawler"
         },
         "model": {
           "words": "model",
           "type": "text",
-          "example": "Digger Crawler",
-          "means": "vehicle model"
+          "example": "Digger Crawler"
         },
         "manufacturer": {
           "words": "manufacturer",
           "type": "text",
-          "example": "Corellia Mining Corporation",
-          "means": "maker's name"
+          "example": "Corellia Mining Corporation"
         },
         "cost_in_credits": {
           "words": "cost in credits",
@@ -552,45 +498,31 @@
             "unknown"
           ],
           "example": "150000",
-          "means": "cost in credits",
           "wordsInQuotes": true
         },
         "length": {
           "words": "length",
           "type": "number",
           "writtenAsText": true,
-          "noNumberWords": [
-            "unknown"
-          ],
-          "example": "36.8 ",
-          "means": "vehicle's length"
+          "example": "36.8 "
         },
         "max_atmosphering_speed": {
           "words": "max atmosphering speed",
           "type": "number",
           "writtenAsText": true,
-          "noNumberWords": [
-            "unknown"
-          ],
-          "example": "30",
-          "means": "top speed in atmosphere"
+          "example": "30"
         },
         "crew": {
           "words": "crew",
           "type": "number",
           "writtenAsText": true,
-          "example": "46",
-          "means": "crew count"
+          "example": "46"
         },
         "passengers": {
           "words": "passengers",
           "type": "number",
           "writtenAsText": true,
-          "noNumberWords": [
-            "unknown"
-          ],
-          "example": "30",
-          "means": "passenger count"
+          "example": "30"
         },
         "cargo_capacity": {
           "words": "cargo capacity",
@@ -600,62 +532,53 @@
             "none",
             "unknown"
           ],
-          "example": "50000",
-          "means": "cargo capacity"
+          "example": "50000"
         },
         "consumables": {
           "words": "consumables",
           "type": "text",
-          "example": "2 months",
-          "means": "duration, 0, or unknown"
+          "example": "2 months"
         },
         "vehicle_class": {
           "words": "vehicle class",
           "type": "text",
-          "example": "wheeled",
-          "means": "class, such as wheeled"
+          "example": "wheeled"
         },
         "pilots": {
           "words": "pilots",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/people/1",
-            "https://swapi.info/api/people/18"
+            "https://swapi.py4e.com/api/people/1/",
+            "https://swapi.py4e.com/api/people/18/"
           ],
-          "linksTo": "people",
-          "means": "links to people"
+          "linksTo": "people"
         },
         "films": {
           "words": "films",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/films/1",
-            "https://swapi.info/api/films/5"
+            "https://swapi.py4e.com/api/films/1/",
+            "https://swapi.py4e.com/api/films/5/"
           ],
-          "linksTo": "films",
-          "means": "links to films"
+          "linksTo": "films"
         },
         "created": {
           "words": "created",
           "type": "date",
-          "example": "2014-12-10T15:36:25.724000Z",
-          "means": "when the row was created"
+          "example": "2014-12-10T15:36:25.724000Z"
         },
         "edited": {
           "words": "edited",
           "type": "date",
-          "example": "2014-12-20T21:30:21.661000Z",
-          "means": "when the row was edited"
+          "example": "2014-12-20T21:30:21.661000Z"
         },
         "url": {
           "words": "url",
           "type": "link",
-          "example": "https://swapi.info/api/vehicles/4",
-          "linksTo": "vehicles",
-          "means": "this row's own link"
+          "example": "https://swapi.py4e.com/api/vehicles/4/",
+          "linksTo": "vehicles"
         }
       },
-      "about": "Each vehicle in the Star Wars universe.",
       "readThrough": {
         "rows": 5
       }
@@ -663,28 +586,28 @@
     "starships": {
       "type": "starship",
       "at": "/starships",
-      "rowsSeen": 36,
+      "rowsSeen": 30,
+      "rowsItSays": 37,
       "idField": "url",
       "idIsAnAddress": true,
-      "paging": "none",
+      "paging": "next field",
+      "rowsAt": "results",
+      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
           "type": "text",
-          "example": "CR90 corvette",
-          "means": "starship's name"
+          "example": "CR90 corvette"
         },
         "model": {
           "words": "model",
           "type": "text",
-          "example": "CR90 corvette",
-          "means": "starship model"
+          "example": "CR90 corvette"
         },
         "manufacturer": {
           "words": "manufacturer",
           "type": "text",
-          "example": "Corellian Engineering Corporation",
-          "means": "comma-separated maker names"
+          "example": "Corellian Engineering Corporation"
         },
         "cost_in_credits": {
           "words": "cost in credits",
@@ -694,27 +617,23 @@
             "unknown"
           ],
           "example": "3500000",
-          "means": "cost in credits",
           "wordsInQuotes": true
         },
         "length": {
           "words": "length",
           "type": "number",
           "writtenAsText": true,
-          "example": "150",
-          "means": "length, may contain commas"
+          "example": "150"
         },
         "max_atmosphering_speed": {
           "words": "max atmosphering speed",
           "type": "text",
-          "example": "950",
-          "means": "top speed in atmosphere"
+          "example": "950"
         },
         "crew": {
           "words": "crew",
           "type": "text",
-          "example": "30-165",
-          "means": "crew count or range"
+          "example": "30-165"
         },
         "passengers": {
           "words": "passengers",
@@ -724,8 +643,7 @@
             "n/a",
             "unknown"
           ],
-          "example": "600",
-          "means": "passenger count, or n/a"
+          "example": "600"
         },
         "cargo_capacity": {
           "words": "cargo capacity",
@@ -734,14 +652,12 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "3000000",
-          "means": "cargo capacity"
+          "example": "3000000"
         },
         "consumables": {
           "words": "consumables",
           "type": "text",
-          "example": "1 year",
-          "means": "duration, such as 2 years"
+          "example": "1 year"
         },
         "hyperdrive_rating": {
           "words": "hyperdrive rating",
@@ -750,8 +666,7 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "2.0",
-          "means": "hyperdrive rating"
+          "example": "2.0"
         },
         "MGLT": {
           "words": "mglt",
@@ -760,89 +675,71 @@
           "noNumberWords": [
             "unknown"
           ],
-          "example": "60",
-          "means": "MGLT figure"
+          "example": "60"
         },
         "starship_class": {
           "words": "starship class",
           "type": "text",
-          "example": "corvette",
-          "means": "class, such as corvette"
+          "example": "corvette"
         },
         "pilots": {
           "words": "pilots",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/people/13",
-            "https://swapi.info/api/people/14"
+            "https://swapi.py4e.com/api/people/13/",
+            "https://swapi.py4e.com/api/people/14/"
           ],
-          "linksTo": "people",
-          "means": "links to people"
+          "linksTo": "people"
         },
         "films": {
           "words": "films",
           "type": "list of links",
           "example": [
-            "https://swapi.info/api/films/1",
-            "https://swapi.info/api/films/3"
+            "https://swapi.py4e.com/api/films/1/",
+            "https://swapi.py4e.com/api/films/3/"
           ],
-          "linksTo": "films",
-          "means": "links to films"
+          "linksTo": "films"
         },
         "created": {
           "words": "created",
           "type": "date",
-          "example": "2014-12-10T14:20:33.369000Z",
-          "means": "when the row was created"
+          "example": "2014-12-10T14:20:33.369000Z"
         },
         "edited": {
           "words": "edited",
           "type": "date",
-          "example": "2014-12-20T21:23:49.867000Z",
-          "means": "when the row was edited"
+          "example": "2014-12-20T21:23:49.867000Z"
         },
         "url": {
           "words": "url",
           "type": "link",
-          "example": "https://swapi.info/api/starships/2",
-          "linksTo": "starships",
-          "means": "this row's own link"
+          "example": "https://swapi.py4e.com/api/starships/2/",
+          "linksTo": "starships"
         }
       },
-      "about": "Each starship in the Star Wars universe.",
       "readThrough": {
         "rows": 5
       }
     }
   },
-  "notes": [
-    "No authentication is required.",
-    "Each collection is read whole at /name, and one row at /name/:id.",
-    "Most numeric fields arrive as text and may hold \"n/a\" or \"unknown\", commas (\"1,600\"), trailing spaces (\"36.8 \") or ranges (\"30-165\").",
-    "Links between collections are full URLs, matching the url field of the row they point to.",
-    "A species homeworld can be null.",
-    "Row ids can have gaps: the first vehicles are 4, 6 and 7.",
-    "Film opening_crawl text contains line breaks.",
-    "Each collection has a JSON schema at /name/schema."
-  ],
+  "notes": [],
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling.",
     "That it's read only:  no line says, so a program's write compiles, and fails when it runs."
   ],
-  "checkEverySeconds": 86400,
+  "checkEverySeconds": 30,
   "spell": [
-    "star wars is a web server at \"https://swapi.info/api\":",
+    "star wars is a web server at \"https://swapi.py4e.com/api\":",
     "\t- its id is its \"url\"",
-    "\t- check it every 86400 seconds",
-    "\t- films live at \"/films\"",
+    "\t- its rows are its \"results\"",
+    "\t- its next page is its \"next\"",
+    "\t- check it every 30 seconds",
     "\t- people live at \"/people\"",
     "\t- planets live at \"/planets\"",
+    "\t- films live at \"/films\"",
     "\t- species live at \"/species\"",
     "\t- vehicles live at \"/vehicles\"",
     "\t- starships live at \"/starships\"",
-    "\t- a film's episode id is its \"episode_id\"",
-    "\t- a film's opening crawl is its \"opening_crawl\"",
-    "\t- a film's release date is its \"release_date\"",
     "\t- a person's hair color is its \"hair_color\"",
     "\t- a person's skin color is its \"skin_color\"",
     "\t- a person's eye color is its \"eye_color\"",
@@ -850,6 +747,9 @@
     "\t- a planet's rotation period is its \"rotation_period\"",
     "\t- a planet's orbital period is its \"orbital_period\"",
     "\t- a planet's surface water is its \"surface_water\"",
+    "\t- a film's episode id is its \"episode_id\"",
+    "\t- a film's opening crawl is its \"opening_crawl\"",
+    "\t- a film's release date is its \"release_date\"",
     "\t- a species's average height is its \"average_height\"",
     "\t- a species's skin colors is its \"skin_colors\"",
     "\t- a species's hair colors is its \"hair_colors\"",
@@ -866,23 +766,7 @@
     "\t- a starship's mglt is its \"MGLT\"",
     "\t- a starship's starship class is its \"starship_class\"",
     "",
-    "a \"film\" is a view:",
-    "\t- it lives in star wars",
-    "\t- its \"title\" is text",
-    "\t- its \"episode id\" is a number",
-    "\t- its \"opening crawl\" is text",
-    "\t- its \"director\" is text",
-    "\t- its \"producer\" is text",
-    "\t- its \"release date\" is a date",
-    "\t- its \"characters\" is a list of people",
-    "\t- its \"planets\" is a list of planets",
-    "\t- its \"starships\" is a list of starships",
-    "\t- its \"vehicles\" is a list of vehicles",
-    "\t- its \"species\" is a list of species",
-    "\t- its \"created\" is a date",
-    "\t- its \"edited\" is a date",
-    "",
-    "a \"person\" is a view:",
+    "a \"person\" is a thing:",
     "\t- it lives in star wars",
     "\t- its \"name\" is text",
     "\t- its \"height\" is a number  // written as text there;  \"unknown\" reads as nothing",
@@ -900,12 +784,12 @@
     "\t- its \"created\" is a date",
     "\t- its \"edited\" is a date",
     "",
-    "a \"planet\" is a view:",
+    "a \"planet\" is a thing:",
     "\t- it lives in star wars",
     "\t- its \"name\" is text",
     "\t- its \"rotation period\" is a number  // written as text there;  \"unknown\" reads as nothing",
     "\t- its \"orbital period\" is a number  // written as text there;  \"unknown\" reads as nothing",
-    "\t- its \"diameter\" is a number  // written as text there;  \"unknown\" reads as nothing",
+    "\t- its \"diameter\" is a number  // written as text there",
     "\t- its \"climate\" is text",
     "\t- its \"gravity\" is text",
     "\t- its \"terrain\" is text",
@@ -916,7 +800,23 @@
     "\t- its \"created\" is a date",
     "\t- its \"edited\" is a date",
     "",
-    "a \"species\" is a view:",
+    "a \"film\" is a thing:",
+    "\t- it lives in star wars",
+    "\t- its \"title\" is text",
+    "\t- its \"episode id\" is a number",
+    "\t- its \"opening crawl\" is text",
+    "\t- its \"director\" is text",
+    "\t- its \"producer\" is text",
+    "\t- its \"release date\" is a date",
+    "\t- its \"characters\" is a list of people",
+    "\t- its \"planets\" is a list of planets",
+    "\t- its \"starships\" is a list of starships",
+    "\t- its \"vehicles\" is a list of vehicles",
+    "\t- its \"species\" is a list of species",
+    "\t- its \"created\" is a date",
+    "\t- its \"edited\" is a date",
+    "",
+    "a \"species\" is a thing:",
     "\t- it lives in star wars",
     "\t- its \"name\" is text",
     "\t- its \"classification\" is text",
@@ -933,16 +833,16 @@
     "\t- its \"created\" is a date",
     "\t- its \"edited\" is a date",
     "",
-    "a \"vehicle\" is a view:",
+    "a \"vehicle\" is a thing:",
     "\t- it lives in star wars",
     "\t- its \"name\" is text",
     "\t- its \"model\" is text",
     "\t- its \"manufacturer\" is text",
     "\t- its \"cost in credits\" is a number  // written as text there;  \"unknown\" reads as nothing",
-    "\t- its \"length\" is a number  // written as text there;  \"unknown\" reads as nothing",
-    "\t- its \"max atmosphering speed\" is a number  // written as text there;  \"unknown\" reads as nothing",
+    "\t- its \"length\" is a number  // written as text there",
+    "\t- its \"max atmosphering speed\" is a number  // written as text there",
     "\t- its \"crew\" is a number  // written as text there",
-    "\t- its \"passengers\" is a number  // written as text there;  \"unknown\" reads as nothing",
+    "\t- its \"passengers\" is a number  // written as text there",
     "\t- its \"cargo capacity\" is a number  // written as text there;  \"none\", \"unknown\" reads as nothing",
     "\t- its \"consumables\" is text",
     "\t- its \"vehicle class\" is text",
@@ -951,7 +851,7 @@
     "\t- its \"created\" is a date",
     "\t- its \"edited\" is a date",
     "",
-    "a \"starship\" is a view:",
+    "a \"starship\" is a thing:",
     "\t- it lives in star wars",
     "\t- its \"name\" is text",
     "\t- its \"model\" is text",

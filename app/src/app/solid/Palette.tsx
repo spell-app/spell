@@ -1,6 +1,7 @@
 import { For, Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { SP } from "spell/parser/spell"
 import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/editorHotkeys"
@@ -15,13 +16,14 @@ import { chooseRow, treeChoosesRows } from "./treeRows"
 import "./Palette.css"
 
 /**
- * What can be added to the app, and whether it's kept open:  the top bar's popup, or a pane.
+ * What can be added to the app, and whether it's kept open:  the top bar's popup, a menu in columns by topic,
+ * or kept open, a strip of icons across the top of the panes.
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise.
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
  */
 export class Palette {
-  /** Is it kept open as a pane (reactive)? */
+  /** Is it kept open as a strip (reactive)? */
   static get isPinned(): boolean {
     return isPinned()
   }
@@ -46,12 +48,21 @@ export class Palette {
     editorPrefs.set(PINNED_PREF, pinned)
   }
 
+  /** Open the menu, with its search:  the strip's glass. */
+  static openMenu(): void {
+    Palette.load()
+    Palette.showMenu?.()
+  }
+
+  /** Shows the menu:  `<AddPartButton>`'s, while it's drawn. */
+  static showMenu: (() => void) | undefined
+
   /** Load what it offers, the first time. */
   static load(): void {
     loading ??= import("spell/ui/components/ComponentDefinitions")
       .then(({ ComponentDefinitions }) => {
         definitions = ComponentDefinitions
-        setOffered(ComponentDefinitions.palette())
+        setOffered([...ComponentDefinitions.paletteByTopic()].map(([topic, parts]) => ({ topic, parts })))
       })
       .catch((error: unknown) => console.error("Palette.load():  couldn't load what it offers", error))
   }
@@ -82,7 +93,15 @@ function snippetFor(definition: ComponentDefinition, file: SP.AnySpellFile | und
 const PINNED_PREF = "palettePinned"
 
 const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF) === true)
-const [offered, setOffered] = createSignal<readonly ComponentDefinition[]>([])
+const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
+
+/** One topic of what's offered. */
+type PaletteGroup = {
+  /** Its name in the vocabularies' `topics`. */
+  topic: string
+  /** What's filed under it, by name. */
+  parts: readonly ComponentDefinition[]
+}
 
 /** The language `file` is written in. */
 function languageOf(file: SP.AnySpellFile | undefined): string {
@@ -94,12 +113,15 @@ function stepTitle(definition: ComponentDefinition): string {
   return appTexts.text("partStepAdd", { part: definition.name })
 }
 
-/** The top bar's `+`:  opens the palette as a popup, unless it's kept open as a pane. */
+/** The top bar's `+`:  opens the palette, a menu.  Kept open, it's the strip's glass that opens it too. */
 export function AddPartButton(): JSX.Element {
   let popup: (HTMLElement & { visible?: boolean }) | undefined
   onSettled(() => {
     PartEdits.onPaletteDrag = () => {
       if (popup) popup.visible = false
+    }
+    Palette.showMenu = () => {
+      if (popup) popup.visible = true
     }
     if (Palette.takeOpenOnArrival() && popup) popup.visible = true
   })
@@ -115,21 +137,18 @@ export function AddPartButton(): JSX.Element {
         onPointerEnter={() => Palette.load()}
         onClick={() => Palette.load()}
       />
-      <Show when={!Palette.isPinned}>
-        {/* a popup's own click on the +;  a pinned palette needs none */}
-        <ui-popup
-          for={ADD_BUTTON_ID}
-          open-on="click"
-          position="bottom right"
-          class="PalettePopup"
-          aria-label={appTexts.text("addPart")}
-          ref={(element: HTMLElement) => {
-            popup = element
-          }}
-        >
-          <PaletteBody />
-        </ui-popup>
-      </Show>
+      <ui-popup
+        for={ADD_BUTTON_ID}
+        open-on="click"
+        position="bottom right"
+        class="PalettePopup"
+        aria-label={appTexts.text("addPart")}
+        ref={(element: HTMLElement) => {
+          popup = element
+        }}
+      >
+        <PaletteMenu />
+      </ui-popup>
     </>
   )
 }
@@ -137,19 +156,69 @@ export function AddPartButton(): JSX.Element {
 /** The `+`'s id, which its popup points at. */
 const ADD_BUTTON_ID = "AddPartButton"
 
-/** The palette as a pane, while it's kept open. */
-export function PalettePane(): JSX.Element {
+/**
+ * The palette kept open:  a strip of icons, a row of one 40px bar above the panes, scrolling with its ‹ ›.
+ * - Each a tooltip;  a click adds it, and a drag places it, as from the menu.
+ * - Its search is a glass that opens the menu;  the pin at its end closes it.
+ */
+export function PaletteStrip(): JSX.Element {
   onSettled(() => Palette.load())
   return (
-    <div class="PalettePane">
-      <PaletteBody />
+    <div class="PaletteStrip">
+      <ui-toolbar class="PaletteStripItems" aria-label={appTexts.text("addPart")}>
+        <For each={offered().flatMap((group) => group.parts)}>
+          {(definition) => (
+            <ui-item
+              title={definition.name}
+              aria-label={definition.name}
+              onClick={() => Palette.add(definition)}
+              ref={(item: Element) => startsDrag(item, definition)}
+            >
+              <ui-icon name={definition.icon ?? "square outline"} />
+            </ui-item>
+          )}
+        </For>
+      </ui-toolbar>
+      <ui-icon
+        name="search"
+        link=""
+        class="IconAction"
+        label={appTexts.text("paletteSearch")}
+        title={appTexts.text("paletteSearch")}
+        onClick={() => Palette.openMenu()}
+      />
+      <PinIcon />
     </div>
   )
 }
 
-/** What the palette shows:  its search and pin, then what can be added. */
-function PaletteBody(): JSX.Element {
+/** Keeps the palette open, or stops. */
+function PinIcon(): JSX.Element {
+  return (
+    <ui-icon
+      name="thumbtack"
+      link=""
+      class={["IconAction", "PalettePin", { pinned: Palette.isPinned }]}
+      label={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
+      title={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
+      onClick={() => Palette.togglePinned()}
+    />
+  )
+}
+
+/** The palette as a menu:  its search and pin, then every part, by topic, in columns. */
+function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
+  const shown = () => {
+    const words = filter().trim().toLowerCase()
+    if (!words) return offered()
+    return offered()
+      .map(({ topic, parts }) => ({
+        topic,
+        parts: parts.filter((part) => `${part.name} ${part.description ?? ""}`.toLowerCase().includes(words))
+      }))
+      .filter(({ parts }) => parts.length)
+  }
   return (
     <div class="PaletteBody">
       <div class="PaletteHead">
@@ -160,19 +229,36 @@ function PaletteBody(): JSX.Element {
           placeholder={appTexts.text("paletteSearch")}
           ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
         />
-        <ui-icon
-          name="thumbtack"
-          link=""
-          class={["IconAction", "PalettePin", { pinned: Palette.isPinned }]}
-          label={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
-          title={appTexts.text(Palette.isPinned ? "paletteUnpin" : "palettePin")}
-          onClick={() => Palette.togglePinned()}
-        />
+        <PinIcon />
       </div>
-      <ui-tree class="PaletteTree" label={appTexts.text("addPart")} filter={filter()} ref={treeChoosesRows}>
-        <For each={offered()}>{(definition) => <PaletteRow definition={definition} />}</For>
-      </ui-tree>
+      <div class="PaletteGroups">
+        <For each={shown()}>
+          {(group) => (
+            <section class="PaletteGroup">
+              <h4>{upperFirst(group.topic)}</h4>
+              <ui-tree class="PaletteTree" label={group.topic} ref={treeChoosesRows}>
+                <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+              </ui-tree>
+            </section>
+          )}
+        </For>
+      </div>
     </div>
+  )
+}
+
+/** A press on `element`, dragged:  places `definition`. */
+function startsDrag(element: Element, definition: ComponentDefinition): void {
+  element.addEventListener("pointerdown", (event) =>
+    PartEdits.startPaletteDrag(
+      event as PointerEvent,
+      definition.name,
+      (file) => {
+        Inspector.readyWordsNext()
+        return [snippetFor(definition, file)]
+      },
+      stepTitle(definition)
+    )
   )
 }
 
@@ -185,17 +271,7 @@ function PaletteRow(props: { definition: ComponentDefinition }): JSX.Element {
       title={props.definition.description}
       ref={(row: Element) => {
         chooseRow(() => Palette.add(props.definition))(row)
-        row.addEventListener("pointerdown", (event) =>
-          PartEdits.startPaletteDrag(
-            event as PointerEvent,
-            props.definition.name,
-            (file) => {
-              Inspector.readyWordsNext()
-              return [snippetFor(props.definition, file)]
-            },
-            stepTitle(props.definition)
-          )
-        )
+        startsDrag(row, props.definition)
       }}
     />
   )

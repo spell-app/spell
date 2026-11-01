@@ -163,7 +163,6 @@ taskList.tasks.showing = "all"
 taskList.tasks.append(new Task({ title: "Read this guide", done: true }))
 taskList.tasks.append(new Task({ title: "Tick a box on the right" }))
 taskList.tasks.append(new Task({ title: "Try the To do filter" }))
-if (!core.isCarryingOver) taskList.start()
 
 core.heading("A check")
 /** A check */
@@ -194,6 +193,8 @@ core.heading("Try it")
 // and select a few to change them all at once.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the list looks -- a menu over the tasks, each a row:  its checkbox, then its title. */¬¬.TaskList {¬  max-width: 30em;¬  padding-block: 1.5em;¬}¬¬how-task-list-works-task::part(row) {¬  display: flex;¬  align-items: center;¬  gap: 0.75em;¬  padding-block: 0.4em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) taskList.start()
 // -----------
 if (!core.isCarryingOver) testCountingTheTasksToDo()
 

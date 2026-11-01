@@ -258,10 +258,13 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`;
   a web server's whole answer:  `its rows are its? "results"`, `its next page is its? "next"` (epic `data` P18).
   - Words the plain form stops at go in quotes:  `a vehicle's "cost in credits" is its "cost_in_credits"`.
-  - A field inside another, with a dot:  `a wiki page's picture is its "thumbnail.source"`.
+  - A field inside another is a thing of its own, read in words, NEVER a dot:
+    `its "thumbnail" is a thumbnail`, `a "thumbnail" is a thing:`, `- its "source" is text`, then `the source of its thumbnail`.
+    The compiler refuses a dot in a field's name, and `spell place ingest` never writes one.
+    Where an answer keeps its rows or its next page further in, words too:  `its next page is the "next" of its "links"`.
   - A field holding another thing's address says what it links to:  `its "homeworld" is a planet`, `its "films" is a list of films`,
     and reading it follows the link.  The word's `link`, in code too:  `core.linked()`.
-- **Not:**  `are at`, `is called`, `versions are in`, `ids are in`, `is checked every`.
+- **Not:**  `are at`, `is called`, `versions are in`, `ids are in`, `is checked every`;  a dotted field, `its "thumbnail.source"` (Owen, 2026-10-31, epic `data` Q21:  "a complete no-no -- if we have them, programmers and agents will reach for them").
 - **Score:**  `\b(are at "|is called "|versions are in|ids are in|is checked every)` · in `parser/src/spell/rules/`
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.
 

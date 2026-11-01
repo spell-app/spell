@@ -4,7 +4,6 @@
 //   what it keeps:  the two numbers, the operator and the total
 //   what its keys do:  clear, a digit, an operator, equals
 //   how it draws:  the display, then the keypad
-//   start
 
 
 ## What it keeps
@@ -113,5 +112,4 @@
 	## Start
 	set calculator to a new calculator
 	clear the calculator
-	start the calculator
 </spell>

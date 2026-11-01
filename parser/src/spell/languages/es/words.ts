@@ -159,6 +159,8 @@ export const spanishWords: SP.LanguageWords = {
     prefix: "encanto",
     templates: {
       vista: "view",
+      "más-de": "more of",
+      "mas-de": "more of",
       cosa: "thing",
       página: "page",
       pagina: "page",
@@ -240,6 +242,7 @@ export const spanishWords: SP.LanguageWords = {
     twins: {
       template: "{a name} {name} es {a super} {super} :",
       templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
+      moreOf: "{a words} {words} :",
       singleton: "{words} es {a super} {super} :",
       supers: {
         view: "vista",

@@ -94,7 +94,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "adding up",
-      "defined": "/HowCalculatorWorks.spell:2563-2813"
+      "defined": "/HowCalculatorWorks.spell:2547-2797"
     }
   ],
   "codeLines": [
@@ -105,6 +105,6 @@
     53,
     61,
     73,
-    119
+    118
   ]
 }

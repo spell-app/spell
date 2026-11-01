@@ -234,7 +234,7 @@ describe("what compiles", () => {
       "\t\tfor each card in its cards",
       "\t\t\tdraw the card"
     ).compiled
-    expect(plain).toContain("core.map(this.cards, (card) => core.drawThing(card))")
+    expect(plain).toContain("core.drawEach(this.cards, (card) => core.drawThing(card))")
   })
 })
 

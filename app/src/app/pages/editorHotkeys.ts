@@ -26,7 +26,7 @@ import type { monaco } from "spell/app/app/solid/monaco"
  */
 export const EDITOR_HOTKEYS = {
   saveFile: { shortcut: "mod+S", run: () => editor.saveFile() },
-  revertFile: { shortcut: "shift+mod+R", run: () => editor.revertFile() },
+  discardChanges: { shortcut: "shift+mod+R", run: () => editor.discardChanges() },
   compileApp: { shortcut: "mod+Enter", run: () => editor.compileApp() },
   createFile: { shortcut: "mod+N", run: () => editor.createFile() },
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },

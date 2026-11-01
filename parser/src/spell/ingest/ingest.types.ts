@@ -228,6 +228,8 @@ export type FieldDescription = {
   leftOut?: string
   /** The line naming it needs its words in quotes:  they hold one the plain form stops at, like `in`. */
   wordsInQuotes?: boolean
+  /** A field holding one object each:  the fields inside it, a type of their own in the Spell, never a path with dots. */
+  inside?: Record<string, FieldDescription>
 }
 
 /** One collection of a place. */

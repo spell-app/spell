@@ -120,7 +120,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting the tasks to do",
-      "defined": "/HowTaskListWorks.spell:2777-3014"
+      "defined": "/HowTaskListWorks.spell:2757-2994"
     }
   ],
   "codeLines": [
@@ -137,6 +137,6 @@
     83,
     89,
     93,
-    129
+    128
   ]
 }

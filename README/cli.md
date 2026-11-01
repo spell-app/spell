@@ -845,7 +845,7 @@ without saying why.
 what it holds, how it pages, what it can do, and the Spell to reach it.
 
 ```sh
-spell place ingest https://swapi.info/api --into StarWars.spell
+spell place ingest https://swapi.py4e.com/api --into StarWarsApi.spell
 ```
 
 - It reads a few pages of each collection, politely, naming itself, and stops at a size.
@@ -853,14 +853,16 @@ spell place ingest https://swapi.info/api --into StarWars.spell
 - An agent reads samples and any docs, through the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`.
 - It checks the Spell compiles, and that a read through it really returns rows, before it writes a thing.
 - The Spell goes in the file:  added to, never overwritten, and the same place never twice.
-- The description goes beside it, `StarWars.star-wars.place.json5`, one per place:
+  Give it a file of its own, `StarWarsApi.spell`, with your program in another:
+  so `--update` rewrites what a place holds, and never touches what you drew.
+- The description goes beside it, `StarWarsApi.star-wars.place.json5`, one per place:
   its collections, fields and types, ids, links, paging and limits, what Spell can't say about it,
   the version where the source names one, and always the date and a fingerprint of the shape, as many name none.
 
 | Flag | What it does |
 | --- | --- |
 | `--kind <kind>` | `web server`, `graphql server`, `sheet`, `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
-| `--into <file>` | the `.spell` file.  With none, it asks;  with no one to ask, it stops |
+| `--into <file>` | the `.spell` file:  one of its own, with your program in another, so `--update` touches only it.  With none, it asks;  with no one to ask, it stops |
 | `--update <file>` | looks again at each place described beside the file:  says what changed, updates both, keeps every line you wrote or changed, says what it couldn't change for you, and exits 1 if there's any |
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |

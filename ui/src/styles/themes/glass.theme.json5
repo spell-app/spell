@@ -268,12 +268,17 @@
       "shadow": "{shadows.raised}",
       // a window's pane:  frosted, its body clearer than its header
       // (Owen:  "The panel bodies used to be less opaque than the header, I liked that");
+      // in light, the header lighter than the body, the body near the page's background
+      // (Owen:  "I'd expect header to be lighter, and the panel to be closer to the bg color");
       // the header a wash of the accent:  the blur draws a pane's top edge whiter than the rest,
       // so a see-through header stood out near-white (Owen, epic `elemental-spell` C39)
-      "pane-background": "{own.glass-surface}",
+      "pane-background": { "light": "#ffffff38", "dark": "{own.glass-surface}" },
       "pane-border-color": "{own.glass-edge}",
       "pane-filter": "{own.glass-blur}",
-      "pane-header-background": "color-mix(in oklab, {own.glass-accent-wash} 50%, transparent)"
+      "pane-header-background": {
+        "light": "#ffffff99",
+        "dark": "color-mix(in oklab, {own.glass-accent-wash} 50%, transparent)"
+      }
     },
     "message": {
       "radius": "{radii.m}"
@@ -285,7 +290,8 @@
     },
     "popup": {
       "radius": "{radii.m}",
-      "background": "{own.glass-surface-strong}",
+      // nearly opaque:  what's under it mustn't show through its words
+      "background": { "light": "#fffffff2", "dark": "#1e1c26f2" },
       "border-color": "{own.glass-edge}",
       "shadow": "{shadows.floating}"
     },

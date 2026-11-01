@@ -96,7 +96,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "streaks",
-      "defined": "/HowHabitTrackerWorks.spell:2377-2625"
+      "defined": "/HowHabitTrackerWorks.spell:2365-2613"
     }
   ],
   "codeLines": [
@@ -113,6 +113,6 @@
     64,
     73,
     86,
-    118
+    117
   ]
 }

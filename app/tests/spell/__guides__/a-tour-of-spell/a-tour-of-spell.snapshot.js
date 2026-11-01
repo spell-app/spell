@@ -155,7 +155,6 @@ garden.sill.append(new Plant({
   daysBetweenWaterings: 3,
   daysSinceWatered: 1
 }))
-if (!core.isCarryingOver) garden.start()
 
 core.heading("Tests:  the rule, checked")
 ///////////////////////////////
@@ -199,5 +198,7 @@ core.heading("What it means for you")
 // Where next:  the Examples.  Each has a "how it works" guide beside this one.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the windowsill looks -- the plants side by side. */¬¬.Garden {¬  max-width: 40em;¬  margin-inline: auto;¬  padding-block: 1.5em;¬}¬¬.Garden > ui-button {¬  margin-block-end: 1em;¬}¬¬/* the windowsill, <a-tour-of-spell-windowsill>:  its plants side by side */¬a-tour-of-spell-windowsill {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(10em, 1fr));¬  gap: 1em;¬}¬`)
+// -----------
+if (!core.isCarryingOver) garden.start()
 // -----------
 if (!core.isCarryingOver) testThirst()

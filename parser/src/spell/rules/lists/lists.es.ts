@@ -569,8 +569,7 @@ listsEs.addRule(RangeStartingWithExpression, {
 })
 
 listsEs.addRule(RangeCountExpression, {
-  syntax:
-    "(los|las)? {ordinal} ({number}|{number:parenthesized_expression}) {arg:plural_identifier} (de|del|en|desde) {list:operand}",
+  syntax: "(los|las)? {ordinal} {number} {arg:plural_identifier} (de|del|en|desde) {list:operand}",
   tests: [
     {
       compileAs: "expression",

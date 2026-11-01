@@ -285,7 +285,7 @@ It starts afresh instead, and says why on the console, when:
 - you press Restart:  a new deal, on purpose
 - the edit changed the program's start
   - in a project of several files:  the file that starts its app, like Solitaire's,
-    which ends `start the game`;  an edit to a file of templates, like the card's, keeps the game
+    if it has a `start the game` line;  an edit to a file of templates, like the card's, keeps the game
   - in a project of one file:  the lines that start its app or run its tests
   - either way, a file more or less
 - one of the last run's things can't come over:  its template changed, say
@@ -465,6 +465,8 @@ app/src/app/solid/FileTabs.tsx                   the editor's side:  which files
 app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
 app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
 app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
+app/src/app/layout/FileMenu/FileMenu.spellml     the File menu:  its items, order, keys, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and is called
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -650,7 +652,7 @@ a puzzle piece for libraries, a flask for tests ([projectGroups.ts](src/spaces/m
 The code column:
 - every file of the project as a tab, none closing, a dot on one not saved;
   too many, ‹ › scroll them;  too narrow for two tabs, a file dropdown instead
-- Save, Revert File and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
+- Save, Discard Changes and New File are the File menu's;  line numbers, View's;  the code editor's settings, Edit's
 - There's no Compile button:  the editor compiles two seconds after typing stops, and on `Mod+Enter`.
 - The code is 17px, with no line numbers until you turn them on;  the browser remembers that choice.
 

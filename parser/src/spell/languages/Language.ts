@@ -537,6 +537,8 @@ export type SpellxTwinWords = {
   templateAka: string
   /** A one-of-a-kind template, `<spell-app>` or `<spell-page>`:  `{words} is {a super} {super} :`. */
   singleton: string
+  /** More of a type declared in another file, `<spell-more-of "card">`:  `{a words} {words} :`, what `reopen_type` reads. */
+  moreOf: string
   /** What each kind of template extends, when it names no `template=`:  `{ view: "view", "page template": "page" }`. */
   supers: Record<string, string>
   /** A property's twin, by what the tag holds. */
@@ -617,7 +619,7 @@ export type SpellxTwinWords = {
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook"
+export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook" | "more of"
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"

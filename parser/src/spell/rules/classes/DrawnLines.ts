@@ -141,7 +141,8 @@ export class DrawnLines {
       const isPeopleHere = list instanceof P.ASTCoreMethodInvocation && list.methodName === "peopleHere"
       if (!riders?.length && !itemType?.savedPlace() && !isPeopleHere) return
       DrawnLines.gatherLoop(loop)
-      unit.lines = [DrawnLines.drawRead(loop.match, list as P.ASTExpression, each as P.ASTExpression, riders)]
+      const read = DrawnLines.readAsDrawn(list as P.ASTExpression)
+      unit.lines = [DrawnLines.drawRead(loop.match, read, each as P.ASTExpression, riders)]
       unit.kind = "drawn value"
     } else if (unit.kind === "drawn" && riders?.length) {
       const value = DrawnLines.isDrawCall(statement) ? statement : (statement as P.ASTReturnStatement).value
@@ -151,6 +152,26 @@ export class DrawnLines {
       ]
       unit.kind = "drawn value"
     }
+  }
+
+  /**
+   * `list`, when all that's done with it is draw it:  a plain read of a place says so, `core.savedThings(Recipe, {}, "as drawn")`,
+   * so its later pages wait until they're near the view.
+   * - Not a read that says how to look (`"looks through"`), or anything that goes on from the read.
+   */
+  private static readAsDrawn(list: P.ASTExpression): P.ASTExpression {
+    if (!(list instanceof P.ASTCoreMethodInvocation) || list.methodName !== "savedThings") return list
+    const { match, args } = list
+    const [type, query, how] = args?.args ?? []
+    if (how) return list
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "savedThings",
+      args: [
+        type as P.ASTExpression,
+        (query as P.ASTExpression | undefined) ?? new P.ASTObjectLiteral(match, { properties: [] }),
+        new P.ASTStringLiteral(match, { value: JSON.stringify("as drawn") })
+      ]
+    })
   }
 
   /** `core.drawRead(() => read, each, { riders })`. */
@@ -174,9 +195,14 @@ export class DrawnLines {
     })
   }
 
-  /** A loop's body, gathered:  the loop's `core.map(...)` then makes one drawing per time round. */
+  /**
+   * A loop's body, gathered:  it then makes one drawing per time round.
+   * - As a drawing it's `core.drawEach(...)`, not `core.map(...)`:  a long list draws what fits, and more as you scroll.
+   */
   private static gatherLoop(loop: P.ASTCoreMethodInvocation) {
     const body = DrawnLines.callbackOf(loop)?.body
+    // asked first:  gathered, its lines are `return`s
+    if (DrawnLines.draws(body?.statements)) loop.methodName = "drawEach"
     if (body?.statements) body.statements = DrawnLines.gather(body.statements)
   }
 
@@ -311,7 +337,8 @@ export class DrawnLines {
 
   /** Is `statement` a loop, `core.map(list, (item) => ...)` -- see `SpellStatement.loops`? */
   private static isLoop(statement: Line | undefined): statement is P.ASTCoreMethodInvocation {
-    if (!(statement instanceof P.ASTCoreMethodInvocation) || statement.methodName !== "map") return false
+    if (!(statement instanceof P.ASTCoreMethodInvocation)) return false
+    if (statement.methodName !== "map" && statement.methodName !== "drawEach") return false
     const rule = statement.match?.rule as { loops?: boolean } | undefined
     return rule?.loops === true && !!DrawnLines.callbackOf(statement)
   }

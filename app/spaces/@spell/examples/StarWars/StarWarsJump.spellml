@@ -1,0 +1,18 @@
+# The jump to light speed
+Each star stays where it is and stretches straight out from the middle of the view, faster and faster;  a white flash;  the blue tunnel;  a sudden stop.
+A widget of its own, as no `ui-*` stretches a star:  `ui-space` is the bare box each star is drawn on, and the rest is in styles.css.
+
+<spell-thing "jump">
+	<draw>
+		<segment class="jump" appearance="basic" aria-hidden="true">
+			<space class="jump-tunnel" />
+			{draw its stars}
+			<space class="jump-flash" />
+		</segment>
+	</draw>
+	<draw "stars">
+		<for each star from 1 to 240>
+			<space class="streak" style={"--n: " + star} />
+		</for>
+	</draw>
+</spell-thing>

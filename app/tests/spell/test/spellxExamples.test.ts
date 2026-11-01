@@ -49,9 +49,16 @@ describe("every example converts to spellx, and compiles to the same javascript"
   const examples = readdirSync(EXAMPLES_DIR, { withFileTypes: true }).filter((it) => it.isDirectory())
   for (const { name } of examples) {
     const known = KNOWN_GAPS[name]
-    ;(known ? test.fails : test)(known ? `${name} -- known gap, ${known}` : name, () => convertsTheSame(name))
+    ;(known ? test.fails : test)(
+      known ? `${name} -- known gap, ${known}` : name,
+      () => convertsTheSame(name),
+      SLOWEST_EXAMPLE_MSEC
+    )
   }
 })
+
+/** Long enough for the biggest example under load:  Star Wars alone compiles in about 4 s. */
+const SLOWEST_EXAMPLE_MSEC = 30_000
 
 /** Example `name`, converted, compiles to the same javascript, file by file, with no errors. */
 function convertsTheSame(name: string) {

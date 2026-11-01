@@ -1,6 +1,7 @@
 import { Show, createEffect } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import { FLOATING_MESSAGE_STYLE, on, tracked } from "spell/app/app/solid"
 
 /****************
@@ -33,6 +34,29 @@ export function Notice(props: NoticeProps) {
       {(notice) => (
         <div class="Notice" style={FLOATING_MESSAGE_STYLE}>
           <ui-message state="success" heading={notice()} dismissible="" ref={on("ui-closing", dismiss)} />
+        </div>
+      )}
+    </Show>
+  )
+}
+
+/****************
+ * ### `<RestartNeeded>`
+ * Says the program's last edit takes effect on restart, with a Restart button:  the app keeps running as it was.
+ * - While `editor.restartNeededBecause` is set:  it clears as the program restarts, or the edit's taken back.
+ * - The reason is on the console, and in the tooltip, for whoever wants to know.
+ ****************/
+export function RestartNeeded() {
+  const reason = tracked(() => editor.restartNeededBecause)
+  return (
+    <Show when={reason()}>
+      {(why) => (
+        <div class="RestartNeeded" style={FLOATING_MESSAGE_STYLE}>
+          <ui-message state="info" heading={appTexts.text("takesEffectOnRestart")} title={why()}>
+            <ui-button size="small" onClick={() => void editor.restartApp().catch(editor.showError)}>
+              {appTexts.text("restart")}
+            </ui-button>
+          </ui-message>
         </div>
       )}
     </Show>

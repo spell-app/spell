@@ -169,11 +169,14 @@ export class SpellxTwin {
     const { kind } = this.tag
     if (kind === "notebook") return this.notebook()
     const singleton = kind === "page" || kind === "app"
-    const shape = singleton
-      ? this.words.singleton
-      : this.attribute("aka")
-        ? this.words.templateAka
-        : this.words.template
+    const shape =
+      kind === "more of"
+        ? this.words.moreOf
+        : singleton
+          ? this.words.singleton
+          : this.attribute("aka")
+            ? this.words.templateAka
+            : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
     const flags = Object.entries(this.words.viewFlags)
       .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
@@ -460,7 +463,7 @@ export class SpellxTwin {
         this.language.parserMessage("spellx-typed-body", { name: this.tag.name?.text ?? "" })
       )
     const shape = type
-      ? this.inlineBody.length
+      ? this.inlineBody.some((token) => !(token instanceof P.CommentToken))
         ? shapes.typedValue
         : shapes.typed
       : this.inlineBody.length
