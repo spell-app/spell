@@ -35,6 +35,7 @@ import {
   sectionTitle
 } from "spell/epic/tools/BlockAnchors.js"
 import { nextFrame } from "spell/util/dom"
+import { toolbarTools } from "./spell-doc-toolbar.js"
 import { ThreadFacts } from "spell/epic/comments"
 import { DraftSaver } from "spell/epic/answers"
 import { ServerLink } from "spell/epic/review"
@@ -89,6 +90,12 @@ const HOLDS_INSIDE = /^(li|dt|dd|td|th)$/
 
 /** The CSS highlight the quoted text of every comment is drawn with (`::highlight()` in `spell-comments.css`). */
 const QUOTE_HIGHLIGHT = "spell-comment-quote"
+
+/** The class of the rows of comments shown past a folded section (`drawPromoted()`). */
+const PROMOTED = "spell-promoted"
+
+/** How many frames a promoted comment is held where its row was (`showPromoted()`), while what opened settles. */
+const SHOW_FRAMES = 8
 
 /**
  * The one a comment's quote is drawn with while it WAITS for Claude (its turn `agent`):  purple, Owen's comments
@@ -207,9 +214,9 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     - every listener, observer and timer, the floating bullhorn
  *     - what's typed and not saved yet is sent first, as on leaving the page
  */
-export async function wireComments(main, { go, signal } = {}) {
+export async function wireComments(main, { go, pageFolds, signal } = {}) {
   if (!ServerLink.isServed()) return
-  const comments = new PageComments(main, { go, signal })
+  const comments = new PageComments(main, { go, pageFolds, signal })
   if (!(await comments.load()) || signal?.aborted) return
   pageComments = comments
   comments.draw()
@@ -235,6 +242,7 @@ export async function wireComments(main, { go, signal } = {}) {
   const sizes = typeof ResizeObserver === "function" ? new ResizeObserver(() => comments.makeRoom()) : null
   sizes?.observe(main)
   comments.watchContent()
+  comments.watchFolds()
   comments.wireSelection()
   signal?.addEventListener(
     "abort",
@@ -274,11 +282,13 @@ class PageComments {
    * - `go(id)`:  lands on the element with `id` as a link to it does (`wireAnchors()`), resolving once landed
    * - `signal`:  as `wireComments()` takes it
    */
-  constructor(main, { go, signal } = {}) {
+  constructor(main, { go, pageFolds, signal } = {}) {
     /** the page's `main` */
     this.main = main
     /** lands on an id as a link does */
     this.go = go
+    /** the page's folds, for threads inside folded sections (`drawPromoted()`):  none on Epic UI's pages */
+    this.pageFolds = pageFolds
     /** takes it all down again (`stop()`):  every listener added with it */
     this.signal = signal
     /** what `watchContent()` watches the page's content with */
@@ -605,6 +615,7 @@ class PageComments {
     this.makeRoom()
     this.watchSeen()
     this.drawWaiting()
+    this.drawPromoted()
     // grown to their words once shown:  a thread just opened draws its box on the next frame
     requestAnimationFrame(() => this.growFields())
     if (onFold?.isConnected && !onFold.isFoldFocused) onFold.focusFold()
@@ -675,11 +686,24 @@ class PageComments {
     if (!home) return
     let bullhorn = home.querySelector(":scope > .spell-toolbar-waiting")
     if (!bullhorn) {
-      bullhorn = el(
-        "ui-item",
-        { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
-        el("ui-label", { class: "spell-toolbar-count replied", slot: "badge", appearance: "circular", size: "mini" })
-      )
+      const count = el("ui-label", {
+        class: "spell-toolbar-count replied",
+        slot: "badge",
+        appearance: "circular",
+        size: "mini"
+      })
+      bullhorn = home.matches(".spell-toolbar-tools")
+        ? el(
+            "span",
+            { class: "spell-toolbar-waiting", hidden: true },
+            el("ui-button", { appearance: "circular basic", size: "mini", icon: "bullhorn" }),
+            count
+          )
+        : el(
+            "ui-item",
+            { class: "spell-toolbar-item spell-toolbar-waiting", appearance: "link", icon: "bullhorn", hidden: true },
+            count
+          )
       bullhorn.addEventListener("click", () => this.nextWaiting())
     }
     if (home.lastElementChild !== bullhorn) home.append(bullhorn)
@@ -693,7 +717,7 @@ class PageComments {
     badge.hidden = !count
     bullhorn.title = tip
     bullhorn.setAttribute("aria-label", tip)
-    titleInside(bullhorn, "item")
+    if (bullhorn.localName === "ui-item") titleInside(bullhorn, "item")
     // a guide's titles share the row with it:  its menu fits them again (`<ui-toolbar shrinkable>`)
     bullhorn.hidden = !open
   }
@@ -703,7 +727,8 @@ class PageComments {
    * after a page's own tools there (the spell syntax guide's Expand all and Collapse all);  none without a toolbar.
    */
   waitingHome() {
-    return document.querySelector(".spell-toolbar")
+    const toolbar = document.querySelector(".spell-toolbar")
+    return toolbarTools(toolbar) ?? toolbar
   }
 
   /**
@@ -734,6 +759,93 @@ class PageComments {
     if (this.go) await this.go(anchor)
     else document.getElementById(anchor)?.scrollIntoView({ block: "start" })
     this.threadOf(id)?.focusFold?.()
+  }
+
+  ////////////////
+  // ## Comments promoted past their folds
+  ////////////////
+
+  /**
+   * Each open comment in a folded section, PROMOTED:  a row right after the outermost fold hiding it, so it shows.
+   * - Owen, 2026-11-01:  "Comments should be promoted to be visible when their sections are collapsed"
+   * - orange while it waits on Owen;  a click shows it (`showPromoted()`)
+   * - rows are redrawn only when what they say changes
+   */
+  drawPromoted() {
+    if (!this.pageFolds) return
+    const wanted = new Map()
+    for (const comment of this.inPageOrder(this.list.filter((each) => !each.done))) {
+      const fold = this.pageFolds.outermostFolded(this.threadOf(comment.id))
+      if (!fold) continue
+      if (!wanted.has(fold)) wanted.set(fold, [])
+      wanted.get(fold).push(comment)
+    }
+    for (const old of this.main.querySelectorAll(`.${PROMOTED}`))
+      if (!wanted.has(old.previousElementSibling)) old.remove()
+    for (const [fold, comments] of wanted) {
+      let box = fold.nextElementSibling
+      if (!box?.classList.contains(PROMOTED)) {
+        box = el("div", { class: PROMOTED, "data-spell-added": true })
+        fold.after(box)
+      }
+      const key = comments.map((each) => `${each.id}:${each.turn}:${ThreadFacts.headline(each)}`).join("|")
+      if (box.dataset.shows !== key) {
+        box.dataset.shows = key
+        box.replaceChildren(...comments.map((each) => this.promotedRow(each)))
+      }
+    }
+  }
+
+  /** One comment's row:  a button with its bullhorn, its id and its first words. */
+  promotedRow(comment) {
+    const id = `C${ThreadFacts.numberOf(comment.id)}`
+    const row = el(
+      "button",
+      { type: "button", class: `${PROMOTED}-row`, title: `${id}:  show this comment` },
+      el("ui-icon", { name: "bullhorn" }),
+      el("b", {}, id),
+      el("span", {}, ThreadFacts.headline(comment))
+    )
+    row.classList.toggle("waiting", comment.turn === "person")
+    row.addEventListener("click", () => this.showPromoted(comment.id, row))
+    return row
+  }
+
+  /**
+   * A promoted row clicked:  open the sections its thread needs, and only those, with the thread where the row was.
+   * - no visible scroll:  the folds open at once, and the page moves in the same frame
+   * - held for a few frames, as what's opened settles
+   */
+  async showPromoted(id, row) {
+    const top = row.getBoundingClientRect().top
+    this.lastWaiting = id
+    this.folds.set(id, true)
+    this.draw()
+    this.markSeen(id)
+    const thread = this.threadOf(id)
+    if (!thread) return
+    this.pageFolds.reveal(thread, { self: true })
+    for (let frame = 0; frame < SHOW_FRAMES; frame++) {
+      scrollBy({ top: thread.getBoundingClientRect().top - top, behavior: "instant" })
+      await nextFrame(1)
+    }
+    history.replaceState(history.state, "", `#comment-${id}`)
+    thread.focusFold?.()
+  }
+
+  /** Promoted rows follow the folds:  a section opened or folded, by any route. */
+  watchFolds() {
+    if (!this.pageFolds) return
+    let queued = false
+    this.foldWatch = new MutationObserver((records) => {
+      if (queued || records.every((record) => record.target.localName === THREAD_TAG)) return
+      queued = true
+      requestAnimationFrame(() => {
+        queued = false
+        this.drawPromoted()
+      })
+    })
+    this.foldWatch.observe(this.main, { attributes: true, attributeFilter: ["open", "class"], subtree: true })
   }
 
   /** Every reply box there is:  each thread's (`replyBoxes`), and the pen's (`editing`). */
@@ -769,6 +881,7 @@ class PageComments {
    */
   stop() {
     this.contentWatch?.disconnect()
+    this.foldWatch?.disconnect()
     this.seenWatch?.disconnect()
     for (const timer of this.seenTimers.values()) clearTimeout(timer)
     this.seenTimers.clear()

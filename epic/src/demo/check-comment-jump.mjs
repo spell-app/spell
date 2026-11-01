@@ -23,6 +23,7 @@
  *   - Cmd-K lists the two waiting threads under its box, `C1 · ...` then `C3 · ...`;  `C99` says it isn't there and
  *     stays open;  the old spelling `cm3` lands on C3's thread, opened (and Enter doesn't fold it again)
  *   - no page errors
+ * - a guide's folded sections show their comments as rows;  a click opens only that section, the thread where the row was
  * - and with no thread waiting:  the bullhorn, no count
  * - screenshots (outDir, default a temporary folder):  `<page>-top.png`, `<page>-landed.png`, `<page>-jump.png`
  * - exits 1 on any miss
@@ -87,6 +88,7 @@ await checkPage("guide", `${served.base}/${guide}`, () =>
 await checkPage("epic", `${served.base}/epics/${epic}/${epic}.plan.html`, () =>
   [...document.querySelectorAll("epic-item[id]")].map((each) => each.id)
 )
+await checkPromoted(`${served.base}/${guide}`)
 await checkNoneWaiting(`${served.base}/${guide}`)
 
 await browser.close()
@@ -139,7 +141,7 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
 /** Where the page stands:  the bullhorn, the thread the focus is in, the thread ids drawn. */
 function state(page) {
   return page.evaluate(() => {
-    const box = document.querySelector(".spell-toolbar > .spell-toolbar-waiting")
+    const box = document.querySelector(".spell-toolbar-waiting")
     // a thread is an `<epic-thread>`:  the focus on its fold, in its shadow root, is the thread's
     const thread = document.activeElement?.closest?.("epic-thread") ?? null
     const rect = thread?.getBoundingClientRect()
@@ -161,7 +163,7 @@ async function checkPage(name, url, anchors) {
   const page = await stubbedPage(url, anchors)
   try {
     // the toolbar's menu item:  its host has no box of its own (`display: contents`), so attached, not visible
-    await page.waitForSelector(".spell-toolbar > .spell-toolbar-waiting:not([hidden])", { state: "attached", timeout: 20_000 })
+    await page.waitForSelector(".spell-toolbar-waiting:not([hidden])", { state: "attached", timeout: 20_000 })
   } catch {
     check(`${name}:  the toolbar's bullhorn shows`, false)
     await page.screenshot({ path: join(out, `${name}-top.png`) })
@@ -181,7 +183,7 @@ async function checkPage(name, url, anchors) {
     ["comes round to the first again", order[0]]
   ]) {
     // the button the `<ui-item>` draws, in its shadow root
-    await page.click('.spell-toolbar > .spell-toolbar-waiting [part~="item"]')
+    await page.click('.spell-toolbar-waiting ui-button, .spell-toolbar-waiting [part~="item"]')
     await page.waitForTimeout(900)
     now = await state(page)
     check(
@@ -220,18 +222,57 @@ async function checkPage(name, url, anchors) {
   await page.close()
 }
 
-/** A guide's toolbar:  Expand all opens every section, Collapse all folds them, both at the row's right, before the bullhorn. */
+/** A folded section's comments show as rows under its title;  a click opens only its section, the thread where the row was. */
+async function checkPromoted(url) {
+  const page = await stubbedPage(url, () => [...document.querySelectorAll("main ui-section[id]")].slice(0, 3).map((each) => each.id))
+  await page.waitForSelector(".spell-promoted-row", { state: "attached", timeout: 20_000 }).catch(() => {})
+  await page.waitForTimeout(300)
+  const rows = await page.$$eval(".spell-promoted-row b", (each) => each.map((id) => id.textContent))
+  check("guide:  folded sections' comments show as rows", rows.join(" ") === "C1 C2 C3", rows.join(" "))
+  const before = await page.$eval(".spell-promoted-row:nth-child(1)", (row) => row.getBoundingClientRect().top)
+  await page.screenshot({ path: join(out, "guide-promoted.png") })
+  await page.click(".spell-promoted-row")
+  await page.waitForTimeout(400)
+  const now = await page.evaluate(() => {
+    const thread = document.querySelector("#comment-c1")
+    return {
+      top: thread.getBoundingClientRect().top,
+      open: [...document.querySelectorAll("main > * ui-section[collapsible], main ui-section[collapsible]")].filter((each) => each.open).length,
+      left: document.querySelectorAll(".spell-promoted-row").length
+    }
+  })
+  await page.screenshot({ path: join(out, "guide-promoted-shown.png") })
+  check("guide:  a row's click shows its thread where the row was, one section open", Math.abs(now.top - before) < 6 && now.open === 1 && now.left === 2, JSON.stringify({ before, ...now }))
+  await page.close()
+}
+
+/** A guide's tools:  one button, Expand all while any section is folded, else Collapse all, then the bullhorn. */
 async function checkFoldAll(page) {
+  const tip = () => page.$eval(".spell-toolbar-fold", (each) => each.getAttribute("aria-label"))
   const openCount = () =>
     page.evaluate(() => [...document.querySelectorAll("main ui-section[collapsible]")].filter((each) => each.open).length)
-  const row = await page.$$eval(".spell-toolbar > :not([data-rail])", (each) => each.map((item) => item.getAttribute("aria-label")?.split(":")[0]))
-  check("guide:  the toolbar's right holds Expand all, Collapse all, then the bullhorn", row[0] === "Expand all" && row[1] === "Collapse all" && /^2 threads/.test(row[2]), row.join(" | "))
-  await page.$eval('.spell-toolbar-fold[icon="angles down"]', (each) => each.click())
+  const row = await page.$$eval(".spell-toolbar-tools > *", (each) => each.map((item) => item.className))
+  check("guide:  the tools hold the fold button, then the bullhorn", /fold/.test(row[0]) && /waiting/.test(row[1]) && row.length === 2, row.join(" | "))
+  check("guide:  it says Expand all while a section is folded", (await tip()) === "Expand all", await tip())
+  await page.$eval(".spell-toolbar-fold", (each) => each.click())
   await page.waitForTimeout(200)
   const opened = await openCount()
-  await page.$eval('.spell-toolbar-fold[icon="angles up"]', (each) => each.click())
+  check("guide:  it opens everything, then says Collapse all", opened > 3 && (await tip()) === "Collapse all", `${opened} open`)
+  await page.$eval(".spell-toolbar-fold", (each) => each.click())
   await page.waitForTimeout(200)
-  check("guide:  Expand all opens every section, Collapse all folds them", opened > 3 && (await openCount()) === 0, `${opened} open`)
+  await page.setViewportSize({ width: 560, height: 700 })
+  await page.waitForTimeout(400)
+  const narrow = await page.evaluate(() => {
+    const bar = document.querySelector(".spell-toolbar")
+    const shown = (each) => each && !each.hidden && each.getClientRects().length > 0
+    const keys = [...bar.shadowRoot.querySelectorAll("button, ui-button")].filter(shown).length
+    return { keys, overflow: bar.matches(":state(overflow)"), scrolling: bar.matches(":state(overflowing)") }
+  })
+  await page.screenshot({ path: join(out, "guide-narrow.png") })
+  await page.setViewportSize({ width: 1200, height: 900 })
+  await page.waitForTimeout(300)
+  check("guide:  too narrow, the sections scroll with arrows, no overflow button", narrow.scrolling && !narrow.overflow && narrow.keys > 0, JSON.stringify(narrow))
+  check("guide:  it folds everything", (await openCount()) === 0, `${await openCount()} open`)
 }
 
 /** With no thread waiting on Owen:  the bullhorn, no count (it goes through the open threads). */

@@ -1351,6 +1351,8 @@ In `tools/`:
       - The menu watches its own row:  nothing refits it by hand (the bullhorn showing, the fonts loading).
     - Expand all and Collapse all at the band's right (`addFoldAll()`, Owen 2026-11-01):
       appended to the menu, after its items;  kept when the toolbar is built anew.
+    - A comment in a folded section shows as a row under the outermost fold hiding it (`drawPromoted()`);
+      a click opens only the sections it needs, the thread where the row was, with no visible scroll.
     - Last, the bullhorn:  jumps to the next thread waiting on Owen, else the next open one, unfolding what hides it.
     - A page without a sticky page header:  the last row of its filter bar.
       Else a sticky bar of its own, before its first section (`.spell-toolbar-alone`:  the saga pages).
