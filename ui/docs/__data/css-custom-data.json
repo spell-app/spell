@@ -7880,7 +7880,7 @@
       "name": "--ui-section-tip-color",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-section>`'s token.  Default:  `var(--ui-surface)`"
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-text-inverted-color)`"
       }
     },
     {

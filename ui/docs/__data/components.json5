@@ -48285,7 +48285,7 @@
         },
         {
           "name": "--ui-section-tip-color",
-          "default": "var(--ui-surface)",
+          "default": "var(--ui-text-inverted-color)",
           "type": "color"
         },
         {
