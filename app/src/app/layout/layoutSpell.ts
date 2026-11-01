@@ -35,6 +35,8 @@ let loading: ReturnType<typeof layoutRuntime> | undefined
  */
 export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
   const { runtime, coreUrl } = await layoutRuntime()
+  // The editor draws each piece where it belongs:  an app in one must not start itself, as a program's does
+  runtime.core.appLayout = true
   return {
     exports: await runtime.importCompiled(compiled, coreUrl),
     draw: (thing) => runtime.core.drawThing(thing),

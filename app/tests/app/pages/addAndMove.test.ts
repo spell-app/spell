@@ -274,7 +274,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       "Delete",
       "-",
       "Show in Code",
-      "Inspect"
+      "Inspect",
+      "-",
+      "Change This..."
     ])
     expect(rows.filter((row) => row.grey).map((row) => row.title)).toEqual([])
     await page.keyboard.press("Escape")

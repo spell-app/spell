@@ -303,6 +303,19 @@ describe.skipIf(!SERVING)("editing without redrawing", { timeout: 240_000 }, () 
     expect((await whatsKept()).sameCards).toBe(0)
   })
 
+  test("the editor's own pieces in Spell never start themselves", async () => {
+    const opened = await context.newPage()
+    const failures: string[] = []
+    opened.on("console", (message) => {
+      if (message.text().includes("draw() failed")) failures.push(message.text())
+    })
+    await opened.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })
+    await opened.waitForSelector(".InputEditor .monaco-editor .view-line", { timeout: 60_000 })
+    await opened.waitForTimeout(3000)
+    await opened.close()
+    expect(failures).toEqual([])
+  })
+
   test("real typing in a drawing keeps the page:  Counter", async () => {
     const counting = await context.newPage()
     await counting.goto(`${EDITOR}edit/@spell/examples/Counter`, { timeout: 60_000 })

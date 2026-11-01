@@ -55,6 +55,13 @@ const APP_TEXTS_ES: AppTextPack = {
     "Todos estos salen de un mismo lugar del código, así que uno no puede cambiar por sí solo.  Selecciona lo que los contiene, o cambia el código.",
   partNotWritten:
     "Esto no está escrito como una etiqueta propia en tu programa, así que no se puede mover ni quitar aquí.  Cambia el código.",
+  menuChangeThis: "Cambiar esto...",
+  changeThisPrompt: "¿Qué debería cambiar?",
+  changeThisNobody: "Esto espera una sesión de Claude en esta máquina.  En una, pídele que ejecute esto en segundo plano, y que haga lo que diga:",
+  changeThisWorking: "Claude está trabajando en ello...",
+  changeThisDone: "Claude cambió el código.",
+  changeThisNoChange: "Claude terminó, y ningún archivo cambió.",
+  changeThisFailed: "Claude no pudo hacerlo:  {summary}",
   menuShowInCode: "Mostrar en el código",
   menuInspect: "Inspeccionar",
   partIsApp: "Es la aplicación misma:  no se puede cortar, duplicar ni borrar.",

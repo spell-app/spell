@@ -632,6 +632,34 @@ describe("every URL spell builds is answered by the server and by spaces' disk r
 // ## People (epic `people-and-orgs` P9)
 ////////////////
 
+describe("/api/changes:  a change asked for on what's selected, for a Claude session", () => {
+  const ASKED = {
+    projectId: PROJECT,
+    filePath: "/Proj.spell",
+    line: 1,
+    column: 0,
+    kind: "ui-button",
+    excerpt: "x",
+    text: "say Stop"
+  }
+
+  it("POST adds it, and answers where its file is on this machine", async () => {
+    const post = await request("POST", "/api/changes", JSON.stringify(ASKED), "application/json")
+    expect(post.status).toBe(200)
+    const made = JSON.parse(post.text)
+    expect(made).toMatchObject({ status: "waiting", listening: false, text: "say Stop" })
+    expect(made.diskPath).toContain("Proj.spell")
+    const get = await request("GET", `/api/changes?id=${made.id}`)
+    expect(JSON.parse(get.text)).toMatchObject({ id: made.id, status: "waiting" })
+  })
+
+  it("no words, no request:  400;  no such request:  404", async () => {
+    const noWords = await request("POST", "/api/changes", JSON.stringify({ ...ASKED, text: "  " }), "application/json")
+    expect(noWords.status).toBe(400)
+    expect((await request("GET", "/api/changes?id=c999")).status).toBe(404)
+  })
+})
+
 describe("GET and POST /api/people/me", () => {
   it("GET:  this machine's person, their starter file written the first time;  their orgs;  no problems", async () => {
     const reply = await request("GET", "/api/people/me")

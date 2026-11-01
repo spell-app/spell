@@ -18,6 +18,7 @@ import {
   Palette,
   PaletteStrip,
   CodeShown,
+  ChangeThisBox,
   PartMenu,
   InspectorToggle,
   ModeButtons,
@@ -173,6 +174,7 @@ export function SpellEditor(props: { mode: Mode }) {
         <PaletteStrip />
       </Show>
       <PartMenu />
+      <ChangeThisBox />
       <FollowAlong />
       <div class="EditorLayoutPlace" ref={on("ui-changed", keepSizes)}>
         {layout.drawing()}

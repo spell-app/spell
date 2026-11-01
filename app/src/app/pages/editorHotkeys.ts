@@ -2,7 +2,7 @@ import { createSignal, onSettled } from "solid-js"
 
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
-import { Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
+import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import type { monaco } from "spell/app/app/solid/monaco"
 
 /**
@@ -30,6 +30,7 @@ export const EDITOR_HOTKEYS = {
   compileApp: { shortcut: "mod+Enter", run: () => editor.compileApp() },
   createFile: { shortcut: "mod+N", run: () => editor.createFile() },
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },
+  changeThis: { shortcut: "mod+K", run: () => ChangeThis.open(), outsideCode: true },
   undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
   redo: { shortcut: "shift+mod+Z", codeEditorAction: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
   find: { shortcut: "mod+F", codeEditorAction: "actions.find" },

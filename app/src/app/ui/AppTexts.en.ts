@@ -50,6 +50,13 @@ export const APP_TEXTS = {
     "These all come from one place in the code, so one can't change on its own.  Select what holds them, or change the code.",
   partNotWritten:
     "This isn't written as its own tag in your program, so it can't be moved or removed here.  Change the code instead.",
+  menuChangeThis: "Change This...",
+  changeThisPrompt: "What should change?",
+  changeThisNobody: "This is waiting for a Claude session on this machine.  In one, ask it to run this in the background, and do what it says:",
+  changeThisWorking: "Claude is working on it...",
+  changeThisDone: "Claude changed the code.",
+  changeThisNoChange: "Claude finished, and no file changed.",
+  changeThisFailed: "Claude couldn't do that:  {summary}",
   menuShowInCode: "Show in Code",
   menuInspect: "Inspect",
   partIsApp: "That's the app itself:  it can't be cut, duplicated or deleted.",
