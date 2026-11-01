@@ -2,6 +2,8 @@ import { For, Show, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
+// Import directly:  a leaf of the JSON family, what it takes to read a child (WWOD §4 › "The barrel")
+import { JSON_CHANGED, JsonChild } from "spell/ui/components/ui-json/JsonChild"
 import { treeDiagramVocabulary } from "./UITreeDiagram.en"
 import { TreeData } from "./TreeData"
 import { TreeLayout } from "./TreeLayout"
@@ -23,8 +25,8 @@ import treeDiagramCSS from "./UITreeDiagram.css?inline"
  * - GENERIC:  it draws any tree from plain data (`TreeDiagramNode`).
  *   It was first drawn for spell's parse trees, but `ui` never imports spell or the parser.
  * - The tree:  the `tree` property (`tree={tree}` in Solid),
- *   else the JSON of a `<script type="application/json">` child (static pages, `file://` too),
- *   which it follows as it changes.
+ *   else the JSON of a `<ui-json>` child, or of a `<script type="application/json">` child (static pages, `file://`
+ *   too), which it follows as it changes;  a `<ui-json source>` once it loads.
  *   - The property wins.
  *   - Invalid JSON draws nothing, and warns once.
  *   - It redraws when `tree` is set again:  set a NEW tree (one changed in place isn't seen).
@@ -43,30 +45,42 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
   } satisfies Partial<E.ElementSetup>
 
   /**
-   * JSON text of the `<script type="application/json">` child;  `undefined` without one.
-   * - Follows the script child as the page changes it.
+   * Text of the JSON child, `<ui-json>` or `<script type="application/json">`;  `undefined` without one.
+   * - Follows it as the page changes it.
    */
   @E.watches({ childList: true, characterData: true, subtree: true })
-  get scriptText(): string | undefined {
-    return isServer ? undefined : TreeData.scriptText(this.domElement)
+  get childText(): string | undefined {
+    return isServer ? undefined : JsonChild.textOf(this.domElement)
+  }
+
+  /** Bumped when a `<ui-json>` child's data changes with no change in the page:  its `source` loaded. */
+  @E.state accessor childDataVersion = 0
+
+  /** A `<ui-json>` child says its data changed. */
+  @E.on(JSON_CHANGED)
+  protected onChildDataChanged() {
+    this.childDataVersion++
   }
 
   /**
-   * The script child's tree;  `undefined` without one, or when its JSON is invalid (warned once).
+   * The JSON child's tree;  `undefined` without one, or when its JSON is invalid (warned once).
    * - `@derived`:  parses JSON.
    */
   @E.derived
-  get scriptTree(): TreeDiagramNode | undefined {
-    return this.parseScript(this.scriptText)
+  get childTree(): TreeDiagramNode | undefined {
+    const text = this.childText
+    void this.childDataVersion
+    if (text === undefined || isServer) return undefined
+    return this.readChild(text)
   }
 
   /**
-   * The tree drawn:  `tree` when it's a node, else the script child's;  `undefined`:  nothing to draw.
+   * The tree drawn:  `tree` when it's a node, else the JSON child's;  `undefined`:  nothing to draw.
    * - `@derived`:  `TreeData.node()` copies the tree, checking every node.
    */
   @E.derived
   get drawnTree(): TreeDiagramNode | undefined {
-    return TreeData.node(this.tree) ?? this.scriptTree
+    return TreeData.node(this.tree) ?? this.childTree
   }
 
   /**
@@ -88,7 +102,7 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
    *   as `ElementFixture.breakRender()` needs (the only attribute is a non-class one).
    */
   protected override get extraClass(): string | undefined {
-    return TreeData.node(this.tree) || this.scriptTree ? undefined : EMPTY
+    return TreeData.node(this.tree) || this.childTree ? undefined : EMPTY
   }
 
   render(): JSX.Element {
@@ -188,10 +202,10 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
   // ## Data
   ////////////////
 
-  /** `text` as a tree;  invalid JSON warns (once per text) and draws nothing. */
-  private parseScript(text: string | undefined): TreeDiagramNode | undefined {
+  /** The JSON child's tree;  invalid JSON warns (once per `text`, its text) and draws nothing. */
+  private readChild(text: string): TreeDiagramNode | undefined {
     try {
-      return TreeData.parse(text)
+      return TreeData.node(JsonChild.valueOf(this.domElement))
     } catch (error) {
       if (text !== this.warnedText)
         console.warn(`<${this.domElement.localName}>:  invalid JSON in its script child`, error)

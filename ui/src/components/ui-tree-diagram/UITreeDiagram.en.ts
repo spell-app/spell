@@ -4,7 +4,7 @@
  *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Ours, not Fomantic's:  first drawn for spell's parse trees, but GENERIC.
  * - One rich property, `tree` (a `TreeDiagramNode`, `UITreeDiagram.types.ts`);
- *   a static page gives it as a `<script type="application/json">` child instead.
+ *   a static page gives it as a `<ui-json>` or `<script type="application/json">` child instead.
  * - No class words:  the class grammar is `ui tree diagram`, plus `empty` with nothing to draw.
  */
 
@@ -41,7 +41,7 @@ export const treeDiagramVocabulary = {
       reflect: false,
       description:
         "The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A " +
-        'JS property (JSON in the attribute);  wins over a `<script type="application/json">` child.  Set a NEW ' +
+        'JS property (JSON in the attribute);  wins over a `<ui-json>` or `<script type="application/json">` child.  Set a NEW ' +
         "tree to redraw."
     }
   ],

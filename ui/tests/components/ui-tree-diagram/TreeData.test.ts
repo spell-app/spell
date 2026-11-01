@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 
 import { TreeData } from "spell/ui/components/ui-tree-diagram/TreeData"
 
@@ -36,33 +35,6 @@ describe("TreeData.node()", () => {
     const shared = { label: "shared" }
     root.children = [shared, shared, root]
     expect(TreeData.node(root)).toEqual({ label: "root", children: [{ label: "shared" }] })
-  })
-})
-
-describe("TreeData.parse()", () => {
-  test("parses a tree;  no text, blank text or a non-node is no tree", () => {
-    expect(TreeData.parse('{"label": "If", "children": [{"label": "Print"}]}')).toEqual({
-      label: "If",
-      children: [{ label: "Print" }]
-    })
-    expect(TreeData.parse(undefined)).toBeUndefined()
-    expect(TreeData.parse("  \n ")).toBeUndefined()
-    expect(TreeData.parse("[1, 2]")).toBeUndefined()
-  })
-
-  test("throws SyntaxError on invalid JSON", () => {
-    expect(() => TreeData.parse("{label: If}")).toThrow(SyntaxError)
-  })
-})
-
-describe("TreeData.scriptText()", () => {
-  test("reads the first application/json script child, and nothing else", () => {
-    const host = Fixture.render(
-      `<div><script type="text/plain">no</script><script type=" application/json ">{"label": "a"}</script>` +
-        `<script type="application/json">{"label": "b"}</script></div>`
-    )
-    expect(TreeData.scriptText(host)).toBe('{"label": "a"}')
-    expect(TreeData.scriptText(Fixture.render(`<div><p>{"label": "a"}</p></div>`))).toBeUndefined()
   })
 })
 
