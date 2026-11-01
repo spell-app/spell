@@ -3,6 +3,7 @@
  * - `spell app create <name>`:  a new spell project, in your space
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
+ * - `spell app changes wait | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
@@ -57,6 +58,38 @@ export default function appCommands(spell: Command): void {
         (await loadApp()).appCommands.serve(project ? [project] : [], command.optsWithGlobals())
       )
     )
+
+  const changes = app
+    .command("changes")
+    .description("the changes people ask for in the editor (select, right click, Change This), for a Claude session")
+
+  changes
+    .command("wait")
+    .description("listen until a request comes, then print it:  exit 2 at the timeout")
+    .option("--timeout <seconds>", "how long to wait -- default an hour", (value) => Number(value))
+    .action(async (_options, command: Command) => {
+      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
+      process.exit(await changesCommand(["wait"], command.optsWithGlobals()))
+    })
+
+  changes
+    .command("done")
+    .description("a request is finished:  the editor shows the new files and this line")
+    .argument("<id>", "the request, c3")
+    .argument("[summary...]", "what changed, in a few plain words;  or, with --failed, why it couldn't")
+    .option("--failed", "it couldn't be done")
+    .action(async (id: string, summary: string[], _options, command: Command) => {
+      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
+      process.exit(await changesCommand(["done", id, ...summary], command.optsWithGlobals()))
+    })
+
+  changes
+    .command("list")
+    .description("every request kept")
+    .action(async (_options, command: Command) => {
+      const { changesCommand } = await import("spell/app/cli/commands/changesCommand")
+      process.exit(await changesCommand(["list"], command.optsWithGlobals()))
+    })
 
   const preview = app
     .command("preview")

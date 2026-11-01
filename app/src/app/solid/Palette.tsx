@@ -8,6 +8,7 @@ import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/edi
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Action } from "./Actions"
+import { ChangeThis } from "./ChangeThis"
 import { Inspector } from "./Inspector"
 import { on } from "./on"
 import { PartEdits, type PartAction } from "./PartEdits"
@@ -372,6 +373,17 @@ export function PartMenu(): JSX.Element {
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
+              <Show when={ChangeThis.isAvailable}>
+                <Action
+                  menu
+                  title={appTexts.text("menuChangeThis")}
+                  shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
+                  disabled={!!PartEdits.whyNoCode}
+                  tip={PartEdits.whyNoCode}
+                  onClick={() => ChangeThis.open()}
+                />
+                <ui-action kind="divider" />
+              </Show>
               <PartMenuItems whyNot={(action) => PartEdits.whyNot(action)} />
               <ui-action kind="divider" />
               <Action

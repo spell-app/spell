@@ -16,6 +16,7 @@ import { SRV } from "spell/server"
 import * as peopleRoutes from "spell/app/spaces/server/node/people/peopleRoutes"
 import * as themesRoutes from "spell/app/spaces/server/node/themes/themesRoutes"
 import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
+import * as changesRoutes from "spell/app/spaces/server/node/changes/changesRoutes"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { ProjectBuild } from "./ProjectBuild"
@@ -85,6 +86,10 @@ api.get("/compile/file", projectUtils.request_compileFile)
 // this machine's person, and their orgs -- see `peopleRoutes.ts`.
 api.get("/people/me", peopleRoutes.request_getMe)
 api.post("/people/me", peopleRoutes.request_saveMe)
+
+// A change asked for on what's selected, for a Claude session on this machine -- see `changesRoutes.ts` (epic `editor` P18)
+api.post("/changes", changesRoutes.request_askForChange)
+api.get("/changes", changesRoutes.request_getChange)
 
 // Save into Spell UI, a Spell admin's -- see `themesRoutes.ts` (epic `debut` P25)
 api.get("/themes/spell-ui", themesRoutes.request_canSaveIntoSpellUi)

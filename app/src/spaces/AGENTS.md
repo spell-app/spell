@@ -38,6 +38,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
     - [prefs/](server/node/prefs/):  see "Preferences" below
+    - [changes/](server/node/changes/):  the inbox of changes people ask for in the editor, for a Claude session
+      (`ChangeRequests`, `/api/changes`, `spell app changes`;  epic `editor` P18)
     - [routes/](server/node/routes/):  the editor's server (below)
   - [the Python side](server/py/pyproject.toml):  `spell_quart`, Python's web server, a uv project (below)
 - Tests live in the app folder's `tests/spaces/`, at the same paths as the code they test:

@@ -559,6 +559,24 @@ Each gesture is one undo step, and only its own lines of the program change.
 A card a deck makes in a loop says why it can't, and offers nothing else yet.
 A program written in outline style with no `<draw>` has nowhere to add to, and says so.
 
+### Asking for a change
+
+On your own machine, select something in the app, press ⌘K (or right click, Change This...), and say what should change.
+A Claude session you leave open makes the change, and the app shows it with its state kept:
+the count stays at 3, and only the words on the button move.
+
+```sh
+spell app changes wait    # in the session, in the background:  it prints the next request, and what to do with it
+spell app changes done c3 "the button says Pressed now"
+```
+
+- The request is a small file in your spaces folder, so it waits if no session is listening, and the box says what to run.
+- The result is one step of the editor's history, so ⌘Z takes it back.
+- What it doesn't do:
+  - It's hidden in the public preview, which has no server.
+  - One request at a time.
+  - A new file the session makes shows only when the project is opened again.
+
 ### Themes, and their code colours
 
 The palette button at the top bar's right picks light, dark or auto, and one of Spell's four themes:
