@@ -33,8 +33,7 @@ export const words = {
     Deck: {
       jokers: "jokers",
       create: "create it",
-      state: "state",
-      testWithJokers: "a deck with jokers"
+      state: "state"
     },
     Pile: {
       name: "name",

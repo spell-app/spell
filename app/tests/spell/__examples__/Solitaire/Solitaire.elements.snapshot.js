@@ -273,22 +273,14 @@ export class Deck extends List {
     this.forEach((card) => cardNames.append(card.state))
     return `deck: ${cardNames}`
   }
-
-  testWithJokers() {
-    core.echoTestAction(`the deck is a new deck with jokers`)
-    const deck = new Deck({ jokers: true })
-    core.expect(deck.length, `the number of cards in the deck`, 54, `54`)
-    core.echoTestAction(`set wild cards to the cards in the deck where it is a joker`)
-    const wildCards = deck.filter((card) => card instanceof Joker)
-    core.expect(wildCards.length, `the number of cards in wild cards`, 2, `2`)
-    core.expect(deck.firstItem?.isTheRankOfSuit("ace", "clubs"), `the first card of the deck is the ace of clubs`, true, `yes`)
-    core.expect(Joker.isTheColorJoker(deck.lastItem, "black"), `the last card of the deck is the black joker`, true, `yes`)
-    core.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "black joker", `"black joker"`)
-  }
 }
 
 export function testANewDeck(...args) {
   return sendCall("test_a_new_deck", args)
+}
+
+export function testTwoJokers(...args) {
+  return sendCall("test_two_jokers", args)
 }
 // -----------
 /////////////////////

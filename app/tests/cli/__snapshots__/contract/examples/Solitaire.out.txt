@@ -50,6 +50,14 @@
   ✅ As expected `a random card of the deck is a joker` is `no`
   ▶️ Executing   `shuffle the deck`
   ✅ As expected `the number of cards in the deck` is `52`
+✅ test two jokers
+  ▶️ Executing   `the deck is a new deck with jokers`
+  ✅ As expected `the number of cards in the deck` is `54`
+  ▶️ Executing   `set wild cards to the cards in the deck where it is a joker`
+  ✅ As expected `the number of cards in wild cards` is `2`
+  ✅ As expected `the first card of the deck is the ace of clubs` is `yes`
+  ✅ As expected `the last card of the deck is the black joker` is `yes`
+  ✅ As expected `the name of the bottom card of the deck` is `"black joker"`
 ✅ test piles
   ▶️ Executing   `set the stock to a new pile with name = "stock"`
   ✅ As expected `the color of the stock` is `"none"`

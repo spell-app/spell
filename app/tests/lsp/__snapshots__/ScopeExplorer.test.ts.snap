@@ -116,9 +116,13 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spellml
+      type Joker (is a Card)
+      function test jokers
     file Deck.spellml
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spellml
       type Pile (is a ViewableList)
       function test piles
@@ -190,9 +194,13 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spellml
+      type Joker (is a Card)
+      function test jokers
     file Deck.spellml
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spellml
       type Pile (is a ViewableList)
       function test piles

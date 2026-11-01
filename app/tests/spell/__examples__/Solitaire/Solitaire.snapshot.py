@@ -403,32 +403,6 @@ class Deck(List):
             card_names.append(card.state)
         return f"deck: {card_names}"
 
-    def test_with_jokers(self) -> None:
-        core.echo_test_action("the deck is a new deck with jokers")
-        deck = Deck(jokers=True)
-        core.expect(len(deck), "the number of cards in the deck", 54, "54")
-        core.echo_test_action("set wild cards to the cards in the deck where it is a joker")
-        wild_cards = deck.filter(lambda card: isinstance(card, Joker))
-        core.expect(len(wild_cards), "the number of cards in wild cards", 2, "2")
-        core.expect(
-            deck.first_item.is_the_rank_of_suit("ace", "clubs"),
-            "the first card of the deck is the ace of clubs",
-            True,
-            "yes",
-        )
-        core.expect(
-            Joker.is_the_color_joker(deck.last_item, "black"),
-            "the last card of the deck is the black joker",
-            True,
-            "yes",
-        )
-        core.expect(
-            getattr(deck.last_item, "name", None),
-            "the name of the bottom card of the deck",
-            "black joker",
-            "\"black joker\"",
-        )
-
 
 def test_a_new_deck() -> None:
     with core.test("test a new deck"):
@@ -463,6 +437,35 @@ def test_a_new_deck() -> None:
         core.echo_test_action("shuffle the deck")
         deck.randomize()
         core.expect(len(deck), "the number of cards in the deck", 52, "52")
+
+
+def test_two_jokers() -> None:
+    with core.test("test two jokers"):
+        it = Deck()
+        core.echo_test_action("the deck is a new deck with jokers")
+        deck = Deck(jokers=True)
+        core.expect(len(deck), "the number of cards in the deck", 54, "54")
+        core.echo_test_action("set wild cards to the cards in the deck where it is a joker")
+        wild_cards = deck.filter(lambda card: isinstance(card, Joker))
+        core.expect(len(wild_cards), "the number of cards in wild cards", 2, "2")
+        core.expect(
+            deck.first_item.is_the_rank_of_suit("ace", "clubs"),
+            "the first card of the deck is the ace of clubs",
+            True,
+            "yes",
+        )
+        core.expect(
+            Joker.is_the_color_joker(deck.last_item, "black"),
+            "the last card of the deck is the black joker",
+            True,
+            "yes",
+        )
+        core.expect(
+            getattr(deck.last_item, "name", None),
+            "the name of the bottom card of the deck",
+            "black joker",
+            "\"black joker\"",
+        )
 
 
 # -----------
@@ -1266,6 +1269,7 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 test_card_setup()
 test_jokers()
 test_a_new_deck()
+test_two_jokers()
 test_piles()
 test_the_moves()
 

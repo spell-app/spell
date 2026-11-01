@@ -29,7 +29,7 @@ a "deck" is a list of cards:
 		shuffle the deck
 		the number of cards in the deck should be 52
 
-	- to test a deck with jokers:
+	- to test two jokers:
 		the deck is a new deck with jokers
 		the number of cards in the deck should be 54
 		set wild cards to the cards in the deck where it is a joker

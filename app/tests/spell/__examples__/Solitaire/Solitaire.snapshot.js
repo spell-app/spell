@@ -338,18 +338,6 @@ export class Deck extends List {
     this.forEach((card) => cardNames.append(card.state))
     return `deck: ${cardNames}`
   }
-
-  testWithJokers() {
-    core.echoTestAction(`the deck is a new deck with jokers`)
-    const deck = new Deck({ jokers: true })
-    core.expect(deck.length, `the number of cards in the deck`, 54, `54`)
-    core.echoTestAction(`set wild cards to the cards in the deck where it is a joker`)
-    const wildCards = deck.filter((card) => card instanceof Joker)
-    core.expect(wildCards.length, `the number of cards in wild cards`, 2, `2`)
-    core.expect(deck.firstItem?.isTheRankOfSuit("ace", "clubs"), `the first card of the deck is the ace of clubs`, true, `yes`)
-    core.expect(Joker.isTheColorJoker(deck.lastItem, "black"), `the last card of the deck is the black joker`, true, `yes`)
-    core.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "black joker", `"black joker"`)
-  }
 }
 
 export function testANewDeck() {
@@ -365,6 +353,21 @@ export function testANewDeck() {
     core.echoTestAction(`shuffle the deck`)
     deck.randomize()
     core.expect(deck.length, `the number of cards in the deck`, 52, `52`)
+  })
+}
+
+export function testTwoJokers() {
+  return core.test("test two jokers", function testTwoJokers() {
+    const it = new Deck()
+    core.echoTestAction(`the deck is a new deck with jokers`)
+    const deck = new Deck({ jokers: true })
+    core.expect(deck.length, `the number of cards in the deck`, 54, `54`)
+    core.echoTestAction(`set wild cards to the cards in the deck where it is a joker`)
+    const wildCards = deck.filter((card) => card instanceof Joker)
+    core.expect(wildCards.length, `the number of cards in wild cards`, 2, `2`)
+    core.expect(deck.firstItem?.isTheRankOfSuit("ace", "clubs"), `the first card of the deck is the ace of clubs`, true, `yes`)
+    core.expect(Joker.isTheColorJoker(deck.lastItem, "black"), `the last card of the deck is the black joker`, true, `yes`)
+    core.expect(deck.lastItem?.name, `the name of the bottom card of the deck`, "black joker", `"black joker"`)
   })
 }
 // -----------
@@ -931,5 +934,6 @@ core.installStyles(undefined, `/* File styles.css:  how the board looks -- each 
 if (!core.isCarryingOver) testCardSetup()
 if (!core.isCarryingOver) testJokers()
 if (!core.isCarryingOver) testANewDeck()
+if (!core.isCarryingOver) testTwoJokers()
 if (!core.isCarryingOver) testPiles()
 if (!core.isCarryingOver) testTheMoves()
