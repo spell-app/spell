@@ -1566,6 +1566,10 @@
       ],
       "usedIn": [
         {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
           "name": "ConsoleViewer",
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
@@ -1998,6 +2002,10 @@
         {
           "name": "CellEditor",
           "file": "src/app/solid/notebook/NotebookCell.tsx"
+        },
+        {
+          "name": "CodeOutputPane",
+          "file": "src/app/solid/CodeOutput.tsx"
         },
         {
           "name": "FallbackEditor",

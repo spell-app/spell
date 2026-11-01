@@ -942,19 +942,47 @@ export class EditorStore extends Observable {
   onInputDidMount(inputEditor: monaco.editor.IStandaloneCodeEditor, api: typeof monaco): void {
     inputEditorInstance = inputEditor
     inputEditorPath = editor.file?.path
-    inputEditor.onDidChangeCursorSelection(() => editor.onInputCursor("cursor"))
+    inputEditor.onDidChangeCursorSelection((event) => {
+      editor.onInputCursor("cursor")
+      if (event.source === "mouse" && event.selection.isEmpty())
+        editor.followCodeLine(event.selection.positionLineNumber)
+    })
+    editor.shownCodeEditor = inputEditor
     inputEditor.onDidScrollChange((event) => {
       if (event.scrollTopChanged) editor.onInputCursor("scroll")
     })
   }
   /** Forget `inputEditor` in our `<InputEditor onUnmount />` event. */
   onInputWillUnmount(inputEditor: monaco.editor.IStandaloneCodeEditor): void {
-    if (inputEditorInstance === inputEditor) inputEditorInstance = undefined
+    if (inputEditorInstance === inputEditor) {
+      inputEditorInstance = undefined
+      editor.shownCodeEditor = undefined
+    }
   }
 
   /** Cursor, selection and scroll in `inputEditor`, kept by `onInputCursor()`. */
   @prop()
   accessor selection: UIT.EditorSelection | undefined
+
+  /** The code editor showing `file`, once it's made:  `<FollowAlong>` reads it. */
+  @prop()
+  accessor shownCodeEditor: monaco.editor.IStandaloneCodeEditor | undefined
+
+  /**
+   * The place in the program in focus:  a line of it last clicked, in the code, in compiled code or by way of a part.
+   * - The panes show it, each by itself, the one it came from excepted (`<FollowAlong>`, `<CodeOutputPane>`).
+   * - A new object per click, so a second click on one line brings it back into view.
+   */
+  @prop()
+  accessor followed: FollowedPlace | undefined
+
+  /** A click on line `lineNumber`, from 1, of the file showing:  the place in focus, if it's spell. */
+  followCodeLine(lineNumber: number): void {
+    const { file } = editor
+    if (file instanceof SP.SpellFile) {
+      editor.followed = { path: SP.SpellProject.sourceNameOf(file.path), line: lineNumber - 1, from: "code" }
+    }
+  }
   /** Track cursor/scroll position in `inputEditor` -- see `onInputCursor()` below. */
   onInputCursor = onInputCursor
 
@@ -989,7 +1017,7 @@ export class EditorStore extends Observable {
       inputEditor.setSelection(selection)
       inputEditor.revealRangeInCenterIfOutsideViewport(inputEditor.getSelection()!)
     }
-    inputEditor.focus()
+    if (!initialSelection.quiet) inputEditor.focus()
 
     /** Monaco position of `position` in `model`:  by `offset` if it has one, else `line` / `ch`. */
     function positionIn(textModel: monaco.editor.ITextModel, position: UIT.EditorPosition): monaco.IPosition {
@@ -1018,6 +1046,14 @@ export class EditorStore extends Observable {
     await editor.selectPath(path, selection)
     navigate(new SP.SpellLocation(path).editorUrl)
     editor.onInputEffect()
+  }
+
+  /**
+   * Show the file at `path` where it was last left, for following along:  the keyboard's focus stays where it is.
+   * - throws as `showFileAt()` does
+   */
+  showFileQuietly(path: string): Promise<void> {
+    return editor.showFileAt(path, { ...editor.lastSelectionForFile(path), quiet: true })
   }
 
   /**
@@ -1180,6 +1216,16 @@ function lastSelectionForFile(filePath: string, selection: UIT.EditorSelection):
 function lastSelectionForFile(filePath: string, selection?: UIT.EditorSelection): UIT.EditorSelection | undefined {
   if (arguments.length === 1) return editorPrefs.get<UIT.EditorSelection>(filePath)
   return editorPrefs.set(filePath, selection)
+}
+
+/** The place in the program in focus -- see `editor.followed`. */
+export type FollowedPlace = {
+  /** Its file, by its name in the project, as a source map says it, e.g. `Card.spellml` */
+  path: string
+  /** Its line, from 0 */
+  line: number
+  /** Where the click was:  that one needn't follow itself. */
+  from: "code" | "output" | "parts"
 }
 
 /**

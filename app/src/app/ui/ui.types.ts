@@ -12,6 +12,8 @@ export type EditorSelection = {
   anchor?: EditorPosition
   /** Selection end -- same as `anchor` for a plain cursor (no range selected). */
   head?: EditorPosition
+  /** Show it without taking the keyboard's focus:  following along, not going there. */
+  quiet?: boolean
 }
 
 /**

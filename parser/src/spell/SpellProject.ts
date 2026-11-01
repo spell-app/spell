@@ -602,7 +602,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       file: outputFile.location.file,
                       sources: this.sourceTexts,
                       // each source by its name in the project, e.g. `Card.spell`:  its text is in the map
-                      nameOf: (path) => SP.SpellLocation.filePathOf(path)?.replace(/^\//, "") || path
+                      nameOf: SpellProject.sourceNameOf
                     })
                     code = mapped.code
                     this.sourceMapFileFor(target).contents = JSON.stringify(mapped.map)
@@ -712,6 +712,36 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       })
       return SP.SpellDeclarations.stripComments(marked)
     })
+  }
+
+  /**
+   * `codeFor()`, with the source map it was written with, so an editor can say where each of its lines came from
+   * (epic `editor`, Code Follows Along).
+   * - The code is EXACTLY `codeFor()`'s:  its marks come out as a compile's do (`P.SourceMarks`).
+   * - throws as `codeFor()` does
+   */
+  codeWithMapFor(name: string): { code: string; map: P.SourceMapV3 } {
+    const target = SP.targetFor(name)
+    const files = [...this.sourceImportFiles, ...this.activeImports]
+    const parts = files.map((file) => (file.AST instanceof P.ASTStatementGroup ? file.AST : file.compiled))
+    const marks = new P.SourceMarks(SpellProject.sourcePlaceOf, SpellProject.partPlaceOf)
+    return this.scope!.parser!.inPlay(() => {
+      const marked = P.SourceMarks.during(marks, () =>
+        SpellProject.combineCompiled(parts, target.writer, this.importHeader(target.writer), this.scope, {
+          listsStartAt: this.contents?.listsStartAt
+        })
+      )
+      return marks.extract(SP.SpellDeclarations.stripComments(marked), {
+        file: this.outputFileFor(target).location.file,
+        sources: this.sourceTexts,
+        nameOf: SpellProject.sourceNameOf
+      })
+    })
+  }
+
+  /** A source file's name in a map, its name in the project:  `Card.spell` for its path. */
+  static sourceNameOf(path: string): string {
+    return SP.SpellLocation.filePathOf(path)?.replace(/^\//, "") || path
   }
 
   /**

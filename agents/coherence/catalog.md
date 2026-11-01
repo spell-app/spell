@@ -94,6 +94,13 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   · home `parser/src/parser/rules/`
 - **Copies:**  `--`  (P13 moved the translator, the parser's statement words and the language server onto it)
 
+### Which source line a compiled line came from
+
+- **It is:**  `P.SourceMapLines`:  a source map read back, by statement, either way.
+  - The map itself:  `P.SourceMarks`.
+  - The place in focus across the editor's panes:  `editor.followed`, shown by `<FollowAlong>`.
+- **Copies:**  none.
+
 ### A change to a program's text, from anything but typing
 
 - **It is:**  `SourceEdits`:  `spell/app/lsp/SourceEdits`:  `TextEdit`s, one span changed and the rest byte for byte
