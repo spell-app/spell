@@ -19,6 +19,7 @@ import type { E } from "spell/ui/core"
 export const segmentVocabulary = {
   tag: "ui-segment",
   icon: "square outline",
+  snippet: "<ui-segment>A box for things</ui-segment>",
   topics: ["containers", "layout", "basic", "elements"],
   aka: ["panel", "box", "section", "well", "paper", "card"],
   skeleton: "header, paragraph",

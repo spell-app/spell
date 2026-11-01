@@ -1,4 +1,4 @@
-import { Match, Switch, omit } from "solid-js"
+import { Match, Show, Switch, omit } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import type { UIButtonAttributes } from "spell/ui/jsx"
@@ -173,7 +173,7 @@ export const Actions = {
     const groupWords = trackGroupWords()
     return (
       <Action
-        title={appTexts.text("createApp", groupWords())}
+        title={isStaticBuild ? appTexts.text("newProject") : appTexts.text("createApp", groupWords())}
         icon="pencil"
         onClick={() => editor.createApp()}
         {...props}
@@ -213,6 +213,14 @@ export const Actions = {
       />
     )
   },
+  /** Save the project as one file, in the browser's downloads (`editor.exportApp()`). */
+  exportApp: (props: ActionProps) => (
+    <Action title={appTexts.text("exportApp")} icon="download" onClick={() => void editor.exportApp()} {...props} />
+  ),
+  /** Make a project from a file `exportApp` wrote (`editor.importApp()`). */
+  importApp: (props: ActionProps) => (
+    <Action title={appTexts.text("importApp")} icon="upload" onClick={() => void editor.importApp()} {...props} />
+  ),
   appSettings: (props: ActionProps) => (
     <Action title={appTexts.text("settings")} icon="setting" onClick={() => editor.showProjectSettings()} {...props} />
   ),
@@ -400,7 +408,7 @@ export const Actions = {
 
 /**
  * The actions the static build (the public preview, `isStaticBuild`) leaves out:  each draws nothing there.
- * - what needs a server:  making, copying, renaming and deleting projects and files, their settings, the You panel
+ * - what needs a server, or a person:  making examples and guides, a project's settings, the You panel
  * - what does nothing yet:  Help
  * - the console's test buttons (the dialogs)
  * - The groups too, so a dropdown of them is empty:  `<FileDropdown>` leaves out its divider, and the "..." menus
@@ -411,17 +419,8 @@ const HIDDEN_IN_STATIC_BUILD = [
   "you",
   "showProjectSettings",
   "appSettings",
-  "createApp",
-  "duplicateApp",
-  "renameApp",
-  "deleteApp",
-  "createProject",
   "createExample",
   "createGuide",
-  "createFile",
-  "duplicateFile",
-  "renameFile",
-  "deleteFile",
   "alert",
   "confirm",
   "prompt",
@@ -431,6 +430,33 @@ const HIDDEN_IN_STATIC_BUILD = [
 ] as const satisfies ReadonlyArray<keyof typeof Actions>
 
 if (isStaticBuild) for (const name of HIDDEN_IN_STATIC_BUILD) Object.assign(Actions, { [name]: () => null })
+
+/** What the static build offers only on a visitor's own project:  a built-in one can be copied, not changed. */
+const OWN_PROJECT_ONLY_IN_STATIC_BUILD = [
+  "renameApp",
+  "deleteApp",
+  "createFile",
+  "duplicateFile",
+  "renameFile",
+  "deleteFile"
+] as const satisfies ReadonlyArray<keyof typeof Actions>
+
+/** What the static build offers only on a built-in project:  a visitor's own edits are all it has, so never forgotten. */
+const BUILT_IN_ONLY_IN_STATIC_BUILD = ["resetApp"] as const satisfies ReadonlyArray<keyof typeof Actions>
+
+if (isStaticBuild) {
+  const drawnWhen = (name: keyof typeof Actions, condition: () => boolean) => {
+    const Drawn = Actions[name] as (props: ActionProps) => JSX.Element
+    Object.assign(Actions, {
+      [name]: (props: ActionProps) => {
+        const shows = tracked(condition)
+        return <Show when={shows()}>{Drawn(props)}</Show>
+      }
+    })
+  }
+  for (const name of OWN_PROJECT_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => editor.canChangeProject)
+  for (const name of BUILT_IN_ONLY_IN_STATIC_BUILD) drawnWhen(name, () => !editor.canChangeProject)
+}
 
 /** Props shared by the dialog actions (`alert`, `confirm`, `prompt`, `promptForNumber`, `choose`). */
 export type DialogActionProps<P> = P & {

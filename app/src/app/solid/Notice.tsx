@@ -18,9 +18,12 @@ export function Notice(props: NoticeProps) {
     () => [notice(), props.autoHide ?? true] as const,
     ([shown, autoHide]) => {
       if (!autoHide || !shown) return
-      const timer = setTimeout(() => {
-        if (editor.notice === shown) editor.hideNotice()
-      }, NOTICE_DELAY)
+      const timer = setTimeout(
+        () => {
+          if (editor.notice === shown) editor.hideNotice()
+        },
+        Math.max(NOTICE_DELAY, shown.length * NOTICE_PER_CHARACTER)
+      )
       return () => clearTimeout(timer)
     }
   )
@@ -43,8 +46,11 @@ export type NoticeProps = {
   autoHide?: boolean
 }
 
-/** How long a notice shows, ms. */
+/** How long a notice shows, ms, at least. */
 const NOTICE_DELAY = 3000
+
+/** How long each character of a long notice keeps it up, ms:  so it can be read. */
+const NOTICE_PER_CHARACTER = 70
 
 /** The close button:  keep the message (`<Show>` removes it), clear `editor.notice`. */
 function dismiss(event: Event) {

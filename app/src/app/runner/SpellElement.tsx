@@ -5,11 +5,11 @@ import { readsAsImpliedDefault, viewAttributeFor, kebabCase, whileOnlyShowing } 
 import { E, UI } from "spell/ui/core"
 import { RootLoader } from "spell/ui/components/ui-root"
 // By file:  a click's rule is all this needs
+import { Dragging } from "spell/util/Dragging"
 import { ListSelection } from "spell/util/ListSelection"
 import type { ElementApi, Core } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
-import { Dragging } from "./Dragging"
 import { ActionMenus } from "./ActionMenus"
 
 // Above the class:  its `elementSetup` reads it while the class is defined

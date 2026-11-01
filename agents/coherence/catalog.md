@@ -537,6 +537,15 @@ Plain, Command or Control, and Shift, one rule.
   a plain class holding the anchor, handed the list and what's selected.
 - **Used by:**  a program's viewable lists (`SpellElement`), the Inspector's selection and its Views tree.
 - **Instead of:**  a click handler that works out a range itself.
+### A drag of what's on the page
+
+One press, past a few pixels, with Escape to cancel and the closed hand over the page.
+- **It is:**  `Dragging` (`src/util/Dragging.ts`):
+  plain DOM, carrying what its owner says, finding a list to drop on or leaving the place to its owner (`placing`).
+- **Used by:**  a program's views and lists (`SpellElement`), the editor's parts and palette (`PartEdits`).
+- **Copies:**  `PhaseDrag` (`epic/src/components/epic-section/PhaseDrag.ts`), a smaller one for an epic page's phases.
+- **Instead of:**  pointer listeners and a threshold of its own.
+
 ### The highlighted option of a list
 
 - **It is:**  `F.HighlightedOption` (`ui/src/elements/HighlightedOption.ts`):  the ONE highlighted option a

@@ -8,8 +8,9 @@ import { SpellSetup } from "spell/parser/spell/SpellSetup"
  * - Their own file is `@spell/owen@/__me.json5`:
  *   the people store reads it, and the app's "You" panel changes it (epic `people-and-orgs` P9).
  * - WHO they are is still this name, until a machine can have more than one person.
+ * - In the editor's static build, the public preview, it's `you`:  a visitor's projects are kept in their browser.
  */
-export const LOCAL_PERSON = "owen"
+export const LOCAL_PERSON = import.meta.env?.MODE === "static" ? "you" : "owen"
 
 /**
  * The org every person on this machine is in, for now:

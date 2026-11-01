@@ -17,6 +17,7 @@ import * as UIT from "spell/ui/components/components.types"
 export const sliderVocabulary = {
   tag: "ui-slider",
   icon: "sliders horizontal",
+  snippet: "<ui-slider></ui-slider>",
   formControl: true,
   topics: ["inputs", "forms", "controls", "modules"],
   aka: ["range", "range slider", "volume", "scrubber", "track bar"],

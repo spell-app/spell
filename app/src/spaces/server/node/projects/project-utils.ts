@@ -636,7 +636,7 @@ export const request_duplicateApp = respondWithJSON(async (request) => {
   const { projectId, newProjectId, title } = request.body
   await duplicateApp(projectId, newProjectId)
   await setProjectTitle(newProjectId, title)
-  return await getProjectList(projectId)
+  return await getProjectList(newProjectId)
 })
 
 /**

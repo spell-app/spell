@@ -10,6 +10,7 @@ export const labelEs = {
   lang: "es",
   tag: "ui-label",
   name: "etiqueta",
+  snippet: "<es-etiqueta>Una etiqueta</es-etiqueta>",
   aka: ["etiqueta", "insignia", "chip", "distintivo", "contador"],
   attributes: { ribbon: "cinta", empty: "vacio", prompt: "aviso", detail: "detalle", removable: "quitable" },
   parts: { delete: "eliminar" },

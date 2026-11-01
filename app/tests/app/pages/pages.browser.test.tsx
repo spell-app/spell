@@ -228,7 +228,13 @@ function spyOnHotkeys() {
     "stopInspecting",
     "undo",
     "redo",
-    "find"
+    "find",
+    "cutParts",
+    "copyParts",
+    "pasteParts",
+    "duplicateParts",
+    "deleteParts",
+    "deletePartsForward"
   ])
   return {
     saveFile: spyOnEditor("saveFile", () => Promise.resolve()),

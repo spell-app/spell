@@ -8,6 +8,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { Inspector, addressKey, isThing, type InspectorBand, type InspectorPanel, type PartRow } from "./Inspector"
 import { InspectorActions, type ActionParameter, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, type WrittenEvent } from "./InspectorSource"
+import { PartEdits } from "./PartEdits"
 import { chooseRow, treeChoosesRows, whenRowToggled } from "./treeRows"
 import { on } from "./on"
 
@@ -254,6 +255,7 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
       selected={Inspector.isSelected(props.node.element)}
       open={isFolded(props.node.key) ? undefined : ""}
       ref={(row: Element) => {
+        PartEdits.rememberRow(row, props.node.element)
         whenRowToggled(() => toggleFold(props.node.key))(row)
         chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
       }}

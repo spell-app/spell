@@ -42,7 +42,8 @@ and in the app's build folder, `app/` at the app folder's root.
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
   - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
-    `solid/InspectorWrites.ts` writes the Inspector's changes through it
+    `solid/InspectorWrites.ts` writes the Inspector's changes through it;
+    `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
   - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
@@ -86,6 +87,8 @@ and in the app's build folder, `app/` at the app folder's root.
       ([static/](static/));  the actions it leaves out are `HIDDEN_IN_STATIC_BUILD` (`Actions.tsx`)
     - Files load through `LoadableFile.fetch`, answered by `StaticFiles`:
       - the build's copies
+      - a visitor's own projects, in the group `you@spell` (`LOCAL_PERSON`, in this build):
+        the store `spell-static-projects`, their files' text with the edits
       - a visitor's edits, kept in their browser's database (`DatabasePlace`, the store `spell-static`):
         "Reset Example" forgets them
         - edits kept in `localStorage` before epic `prefs-and-undo` P3 move over once;  every read waits for that

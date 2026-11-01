@@ -10,6 +10,7 @@ export const segmentEs = {
   lang: "es",
   tag: "ui-segment",
   name: "segmento",
+  snippet: "<es-segmento>Una caja para cosas</es-segmento>",
   aka: ["segmento", "panel", "caja", "sección", "recuadro"],
   parts: { segment: "segmento" },
   texts: { loading: "Cargando…" }

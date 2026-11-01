@@ -295,7 +295,7 @@ export class InspectorWrites {
   }
 
   /** The program's spell file the compiler's marks call `path`. */
-  private static fileNamed(path: string): SP.AnySpellFile | undefined {
+  static fileNamed(path: string): SP.AnySpellFile | undefined {
     return editor.project?.spellFiles.find((file) => pathOf(file) === path)
   }
 }

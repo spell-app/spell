@@ -16,6 +16,7 @@ import {
   LineNumbers,
   PANEL_TEXTS,
   PROJECT_ICON,
+  PartMenuItems,
   ProgramPanelShown,
   followTabTitle,
   on,
@@ -242,6 +243,8 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
       <Actions.resetApp menu />
       <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
       <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
+      <Actions.exportApp menu />
+      <Actions.importApp menu />
       <Divider />
       <Actions.showProjectSettings menu title={appTexts.text("menuProjectSettings")} />
       <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
@@ -297,6 +300,8 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
       <BarMenu id="EditBarMenu" label={appTexts.text("menuEdit")} name={appTexts.text("menuEdit")}>
         <Actions.undo menu />
         <Actions.redo menu />
+        <Divider />
+        <PartMenuItems />
         <Divider />
         <Actions.find menu />
         <Divider />

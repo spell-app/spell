@@ -258,3 +258,15 @@
     }
   }
 }
+
+/* A way to start is a button, drawn as a project's card */
+.Home button.card {
+  font: inherit;
+  text-align: start;
+  cursor: var(--ui-control-cursor, pointer);
+}
+
+/* The ways to start share one row on a wide window */
+.Home #start .cards {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}

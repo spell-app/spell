@@ -10,6 +10,7 @@ export const buttonEs = {
   lang: "es",
   tag: "ui-button",
   name: "boton",
+  snippet: "<es-boton>Haz clic</es-boton>",
   aka: ["botón", "acción", "enviar", "botón de enlace"],
   attributes: {
     "active-text": "texto-activo",

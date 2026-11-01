@@ -1682,7 +1682,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   static signalsOf(page: Element): PageSignals {
     let signals = EpicPage.pageSignals.get(page)
     if (!signals) {
-      signals = { top: new E.Cell(0), layout: new E.Cell(0) }
+      signals = { top: new E.Cell(0), layout: new E.Cell(0), linked: new E.Cell<Element | null>(null) }
       EpicPage.pageSignals.set(page, signals)
     }
     return signals

@@ -11,7 +11,13 @@
   display: none;
 }
 
-/* The landing page's own projects:  a visitor has none, and can't make one */
-:root.spell-static .ProjectCards#projects {
-  display: none;
+/* A visitor's own projects come right after the ways to start */
+:root.spell-static .Home {
+  .Hero,
+  #start {
+    order: -2;
+  }
+  #projects {
+    order: -1;
+  }
 }

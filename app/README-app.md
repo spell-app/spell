@@ -538,6 +538,23 @@ Point at the app and a part of it is outlined;  click, and its properties are th
 
 **Not yet:**  an event's code typed there isn't written back into the code.
 
+### Adding and moving what's on the page
+
+The `+` in the top bar opens a palette of what can be added:  click adds it beside what's selected, drag places it.
+- What it offers is every component whose vocabulary has a `snippet`, the tag it writes, with its Spanish in its dictionary.
+- The pin in its header keeps it open as a pane, remembered.
+
+Dragging a selected part, or a row of the Views tree, moves it.
+A line shows where it would land between its neighbours, or a ring round what it would go in:
+moving goes by the flow, never by x and y, so what's written stays readable.
+
+Cut, Copy, Paste, Duplicate and Delete work on what's selected, by their keys, the Edit menu and a right click.
+Each gesture is one undo step, and only its own lines of the program change.
+
+**Its edge:**  only what has a tag of its own in the source can change.
+A card a deck makes in a loop says why it can't, and offers nothing else yet.
+A program written in outline style with no `<draw>` has nowhere to add to, and says so.
+
 ### Themes, and their code colours
 
 The palette button at the top bar's right picks light, dark or auto, and one of Spell's four themes:
@@ -696,6 +713,11 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 
 ## The public preview:  the editor as plain files
 
+Someone can make an app here from nothing, with no server behind the page and no code read:
+the home page offers a blank app with the palette open, a few tiny starters ([starterProjects.ts](src/spaces/models/starterProjects.ts)),
+and Solitaire to change something in.
+A new project everywhere starts as that blank app, with a drawing to drop things into.
+
 ```sh
 spell app preview build
 ```
@@ -749,11 +771,14 @@ How a page with no server reads and saves files:
   - a save:  kept in the browser's database (IndexedDB) as the visitor types, until "Reset Example" asks and forgets it
     - a save the browser refuses, its storage full, still holds until the page closes
     - edits an older preview kept in `localStorage` move into the database once, before the first read or save
-  - creating, renaming or deleting anything:  refused, with an error that says why
+  - a visitor's own projects, in the group `you@spell`:  their list, files and order in that same database,
+    so New, Duplicate, Rename, Delete and every file action work with no server
+    - a copy of an example is theirs to change;  the example itself can't be renamed, deleted or given files
+    - Export and Import move a project out and back as one file (`.spell.json`, text files only)
+    - the first thing they make says once that it lives in this browser, and that clearing the site's data loses it
 - ONE flag hides what needs a server:  `isStaticBuild` in code, `:root.spell-static` in CSS
   ([staticBuild.ts](src/app/static/staticBuild.ts)).
-  Gone in the preview:  the Projects column, the You avatar, Settings, the project's "..." menu,
-  New File and the file's actions (its "..." menu keeps only "Show line numbers"), and the debug globals.
+  Gone in the preview:  the You avatar, Settings, New Example, New Guide, Help, and the debug globals.
 - The build is Vite's, in its `static` mode, so no other build carries any of this.
 - Every unknown page goes to the editor, for the hosts that read these:
   `404.html` (GitHub Pages) and `_redirects` (Netlify, Cloudflare Pages).

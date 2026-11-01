@@ -946,7 +946,6 @@ export class Solitario extends App {
   /**
    * una vez, al hacerse el solitario:  cada carta del mazo a la reserva
    * - su mazo y sus pilas se hacen con él, antes de que esto corra
-   * - dentro del bucle `eso` es la carta:  así la reserva es `la reserva del solitario`
    */
   create() {
     this.mazo.forEach((carta) => this.reserva.append(carta))
