@@ -38,6 +38,7 @@ import { EpicTargets } from "spell/epic/tool/EpicTargets"
 import { ServedFolders } from "spell/epic/tool/ServedFolders"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 
+import { markdownTagsOnOneLine } from "./MarkdownTags.js"
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
 
 /**
@@ -95,13 +96,14 @@ let targets = new EpicTargets(CHECKOUT)
 ////////////////
 
 /**
- * Link the code spans of the page at `path` and target its links, IN PLACE;  prints a summary line, then each
+ * Link the code spans of the page at `path` and target its links, IN PLACE, its `<ui-markdown>` tags on one line each
+ * (`markdownTagsOnOneLine()`);  prints a summary line, then each
  * unresolved path-like span on its own line (they may hold `, `).
  * - SIDE EFFECT:  always rewrites the file, changed or not
  */
 export function linkify(path) {
   const { text, linked, unresolved } = linkText(readFileSync(path, "utf8"), dirname(resolvePath(path)))
-  writeFileSync(path, text)
+  writeFileSync(path, markdownTagsOnOneLine(text))
   console.log(`${basename(path)}:  linked ${linked} code spans, ${unresolved.length} unresolved path-like`)
   for (const span of unresolved) console.log(`    ${span}`)
 }

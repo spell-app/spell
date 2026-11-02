@@ -2729,6 +2729,8 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
 In this order, from `epic/` (a page by its path in the checkout it's in):
 
 1. `yarn tsx src/tools/doc-links.js <page>`
+   - it also keeps each `<ui-markdown>`'s start and end tags on one line each, with the formatter's ignore comment
+     above the block ([MarkdownTags.js](tools/MarkdownTags.js);  epic `epic-engine` r52)
 2. `yarn vp fmt <page>` (`yarn format` would reformat it anyway)
 3. `yarn tsx src/tools/doc-links.js --check <page>`
 4. `node src/tools/check-spell.js <page>` must pass, and LOOK at its four screenshots:
