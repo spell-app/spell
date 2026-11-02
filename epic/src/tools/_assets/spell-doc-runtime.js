@@ -1230,12 +1230,17 @@ function wireLiveCounts(main, refresh) {
   })
 }
 
+/** A script Spell UI adds to a page as it needs it (`bundle-spell-ui.js`):  it only defines data, never reads the markup. */
+const LAZY_SCRIPT = /\/assets\/(lazy|emoji)\//
+
 /**
  * Can this page be patched in place?
  * - `<ui-section>` markup (or an epic page in `<epic-*>` markup:  its `<epic-page>`)
  * - no CHEATSHEET filter
  * - no script but the bundle, highlight.js, what the page server injects,
- *   component packs (`<ui-components source="x.pack.js">`'s script, which only defines elements)
+ *   component packs (`<ui-components source="x.pack.js">`'s script, which only defines elements),
+ *   the engines and emoji names Spell UI loads as it needs them (`LAZY_SCRIPT`;  without them, a page with a
+ *   `<ui-markdown>` reloaded on every edit, Owen 2026-11-01:  in the side bar, back to its top)
  *   and inert data blocks (`PagePatch.isInert()`:  epic pages' "Plan hung?" notice keeps its prompt in one)
  */
 function canPatch(main) {
@@ -1247,7 +1252,11 @@ function canPatch(main) {
     if (script.hasAttribute("data-spell-page-script")) return true
     const src = script.getAttribute("src")
     if (!src) return PagePatch.isInert(script) || script.textContent.includes("SPELL_SERVER")
-    return /^\/api\/server\//.test(src) || /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src)
+    return (
+      /^\/api\/server\//.test(src) ||
+      /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src) ||
+      LAZY_SCRIPT.test(src)
+    )
   })
 }
 
