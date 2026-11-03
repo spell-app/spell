@@ -524,7 +524,7 @@ the second box on the left of the picture above.
 Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
 
 ```spell
-una "carta" es una cosa dibujable donde:
+una "carta" es una vista donde:
 	# rango de la carta
 	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
 	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13

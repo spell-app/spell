@@ -1,9 +1,12 @@
 import { For, Show, createSignal, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { upperFirst } from "spell/util"
+import { kebabCase, upperFirst } from "spell/util"
 import type { ComponentDefinition } from "spell/ui/components/ComponentDefinitions"
 import { SP } from "spell/parser/spell"
+// Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
+import type { ScopeNode } from "spell/app/lsp/lsp.types"
+import { editor } from "spell/app/app/editor"
 import { cutCopyOrPaste, EDITOR_HOTKEYS, undoWay } from "spell/app/app/pages/editorHotkeys"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -22,6 +25,7 @@ import "./Palette.css"
  * - It reads the components' own descriptions (`ComponentDefinitions`), loaded the first time it opens:
  *   every vocabulary, which the page never needs otherwise.
  * - What's offered is what has a `snippet`:  a new component is offered by saying what it adds.
+ * - First, This app:  the app's own views, each added as `{draw a new card}` (`Palette.ownViews`, epic `editor` P19).
  */
 export class Palette {
   /** Is it kept open as a strip (reactive)? */
@@ -68,6 +72,22 @@ export class Palette {
       .catch((error: unknown) => console.error("Palette.load():  couldn't load what it offers", error))
   }
 
+  /**
+   * The app's own views, by name (reactive):  This app, first in the palette.
+   * - Its templates that are views, from the editor's scope tree (`editor.scopeTree`), but its app or page.
+   * - Only in an English file for now:  what it writes is English.
+   */
+  static get ownViews(): readonly OwnView[] {
+    return ownViewsIn(editor.scopeTree)
+  }
+
+  /** Add `view`, one of the app's own, beside what's selected, else at the end of the drawing. */
+  static addOwn(view: OwnView): void {
+    const place = PartEdits.placeForNew()
+    Inspector.readyWordsNext()
+    PartEdits.add([view.snippet], appTexts.text("partStepAdd", { part: view.name }), place)
+  }
+
   /** Add `definition` beside what's selected, else at the end of the drawing. */
   static add(definition: ComponentDefinition): void {
     const place = PartEdits.placeForNew()
@@ -102,6 +122,63 @@ type PaletteGroup = {
   topic: string
   /** What's filed under it, by name. */
   parts: readonly ComponentDefinition[]
+}
+
+/** One of the app's own views, as the palette offers it. */
+type OwnView = {
+  /** Its name, as a person reads it, e.g. `Stock pile`. */
+  name: string
+  /** What adding it writes:  `{draw a new card}`. */
+  snippet: string
+}
+
+/** Types an app draws on its page, the built-ins every view of an app's own extends. */
+const DRAWN_TYPES = new Set(["View", "TwoSidedView", "ViewableList"])
+
+/** Types that start a page of their own:  never drawn inside one. */
+const PAGE_TYPES = new Set(["App", "Page"])
+
+/**
+ * The app's own views in `tree`, by name:  each of its project's types that extends a view, but its app or page.
+ * - The project is the tree's last child (`LSP.ScopeExplorer`).
+ */
+function ownViewsIn(tree: ScopeNode | undefined): OwnView[] {
+  const app = tree?.children.filter((child) => child.kind === "project").at(-1)
+  if (!tree || !app) return []
+  const byPath = new Map<string, ScopeNode>()
+  const visit = (node: ScopeNode) => {
+    byPath.set(node.path, node)
+    node.children.forEach(visit)
+  }
+  visit(tree)
+  const bases = (node: ScopeNode) => {
+    const names: string[] = []
+    // a type can name itself, or one that names it back:  each once
+    const seen = new Set<ScopeNode>([node])
+    for (let at = byPath.get(node.super ?? ""); at && !seen.has(at); at = byPath.get(at.super ?? "")) {
+      seen.add(at)
+      names.push(at.name)
+    }
+    return names
+  }
+  return app.children
+    .flatMap((file) => file.children)
+    .filter((node) => node.kind === "type")
+    .filter(
+      (node) => bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
+    )
+    .map((node) => ({ name: upperFirst(wordsOf(node.name)), snippet: `{draw a new ${wordsOf(node.name)}}` }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/** A type's name as spell writes it:  `StockPile` => `stock pile`. */
+function wordsOf(name: string): string {
+  return kebabCase(name).replace(/^-/, "").replaceAll("-", " ")
+}
+
+/** The app's own views to offer in `file`:  none outside English yet. */
+function ownViewsFor(file: SP.AnySpellFile | undefined): readonly OwnView[] {
+  return languageOf(file) === "en" ? Palette.ownViews : []
 }
 
 /** The language `file` is written in. */
@@ -167,6 +244,18 @@ export function PaletteStrip(): JSX.Element {
   return (
     <div class="PaletteStrip">
       <ui-toolbar class="PaletteStripItems" aria-label={appTexts.text("addPart")}>
+        <For each={ownViewsFor(editor.file)}>
+          {(view) => (
+            <ui-item
+              title={view.name}
+              aria-label={view.name}
+              onClick={() => Palette.addOwn(view)}
+              ref={(item: Element) => startsOwnDrag(item, view)}
+            >
+              <ui-icon name={OWN_VIEW_ICON} />
+            </ui-item>
+          )}
+        </For>
         <For each={offered().flatMap((group) => group.parts)}>
           {(definition) => (
             <ui-item
@@ -207,7 +296,7 @@ function PinIcon(): JSX.Element {
   )
 }
 
-/** The palette as a menu:  its search and pin, then every part, by topic, in columns. */
+/** The palette as a menu:  its search and pin, then This app, the app's own views, then every part, by topic, in columns. */
 function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
   const shown = () => {
@@ -219,6 +308,10 @@ function PaletteMenu(): JSX.Element {
         parts: parts.filter((part) => `${part.name} ${part.description ?? ""}`.toLowerCase().includes(words))
       }))
       .filter(({ parts }) => parts.length)
+  }
+  const own = () => {
+    const words = filter().trim().toLowerCase()
+    return ownViewsFor(editor.file).filter((view) => view.name.toLowerCase().includes(words))
   }
   return (
     <div class="PaletteBody">
@@ -233,6 +326,25 @@ function PaletteMenu(): JSX.Element {
         <PinIcon />
       </div>
       <div class="PaletteGroups">
+        <Show when={own().length}>
+          <section class="PaletteGroup ThisApp">
+            <h4>{appTexts.text("thisApp")}</h4>
+            <ui-tree class="PaletteTree" label={appTexts.text("thisApp")} ref={treeChoosesRows}>
+              <For each={own()}>
+                {(view) => (
+                  <ui-tree-item
+                    icon={OWN_VIEW_ICON}
+                    label={view.name}
+                    ref={(row: Element) => {
+                      chooseRow(() => Palette.addOwn(view))(row)
+                      startsOwnDrag(row, view)
+                    }}
+                  />
+                )}
+              </For>
+            </ui-tree>
+          </section>
+        </Show>
         <For each={shown()}>
           {(group) => (
             <section class="PaletteGroup">
@@ -262,6 +374,24 @@ function startsDrag(element: Element, definition: ComponentDefinition): void {
     )
   )
 }
+
+/** A press on `element`, dragged:  places `view`, one of the app's own. */
+function startsOwnDrag(element: Element, view: OwnView): void {
+  element.addEventListener("pointerdown", (event) =>
+    PartEdits.startPaletteDrag(
+      event as PointerEvent,
+      view.name,
+      () => {
+        Inspector.readyWordsNext()
+        return [view.snippet]
+      },
+      appTexts.text("partStepAdd", { part: view.name })
+    )
+  )
+}
+
+/** The icon of the app's own views, in the palette. */
+const OWN_VIEW_ICON = "cube"
 
 /** One thing that can be added:  a click adds it, a drag places it. */
 function PaletteRow(props: { definition: ComponentDefinition }): JSX.Element {

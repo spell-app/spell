@@ -121,6 +121,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "its-not-it-is": '"it\'s" quiere decir "it is":  para su {property}, escribe "its {property}"',
   "possessive-needs-s":
     'Un apóstrofo solo sigue a una palabra que acaba en "s", como en "the cards\' names":  escribe "{owner}\'s {property}"',
+  "possessive-declaration-plural":
+    'Escribe "{aType}\'s {property} is ...":  una declaración habla de uno solo, {aType}',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
@@ -190,7 +192,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "belongs-to-not-a-list": "No se puede decir {sentence}:  {aList} no es una lista",
   "markdown-outside-outline":
     "Un bloque <markdown> va en el esquema de un tipo, como su descripción, o en un dibujo:  devolver <markdown>...</markdown>",
-  "retired-type-word": '"{words}" ahora es "{replacement}":  di "{replacement}", o ejecuta `spell lint --fix`',
+  "retired-word": '"{words}" ahora es "{replacement}":  di "{replacement}", o ejecuta `spell lint --fix`',
   "retired-word-gone":
     'Ya no hace falta "{words}", pues spell espera por sí solo:  quítalo, o ejecuta `spell lint --fix`',
   "css-not-a-view": 'Solo una vista tiene su propio <css>:  "{type}" no es una vista:  di "una ... es una vista"',

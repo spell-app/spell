@@ -1846,7 +1846,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveProperty.ts",
-          "line": 35,
+          "line": 36,
           "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
           "syntaxes": [],
           "aliases": []
@@ -4340,11 +4340,11 @@
           "ruleNames": ["create_viewable_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateViewableListType.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista (visible|dibujable) (de|del) {instanceType:type} {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista visible (de|del) {instanceType:type} {with_nested_statements}?",
               "example": "una pile es una lista visible de cartas",
               "outputs": {
                 "js": {
@@ -4359,7 +4359,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) lista (visible|dibujable) (de|del) {instanceType:type} {with_nested_statements}?"
+              "syntax": "(un|una) {type:quoted_type} es (un|una) lista visible (de|del) {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -5150,7 +5150,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 46,
+          "line": 47,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5722,7 +5722,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {

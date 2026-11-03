@@ -124,14 +124,6 @@ export const spanishWords: SP.LanguageWords = {
   // el ejemplo de un cuaderno, en un dibujo (`example_block`, épica `elemental-spell` P16)
   exampleTag: "ejemplo",
 
-  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  retiredTypeWords: {
-    dibujable: "vista",
-    "cosa dibujable": "vista",
-    "cosa-dibujable": "vista",
-    "lista dibujable": "lista visible",
-    "lista-dibujable": "lista visible"
-  },
   /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
   retiredWords: {
     partes: "ranuras",
@@ -475,12 +467,6 @@ export const spanishTypeWords: P.TypeWords = {
   "vista-reversible": "two sided view",
   // a page of prose, examples and its own templates (epic `elemental-spell` P16)
   cuaderno: "notebook",
-  // the old words, still read so a line keeps its meaning:  each an error naming its new word -- see `retiredTypeWords`
-  dibujable: "view",
-  "cosa dibujable": "view",
-  "cosa-dibujable": "view",
-  "lista dibujable": "viewable list",
-  "lista-dibujable": "viewable list",
   nada: "nothing",
   indefinido: "nothing",
   nulo: "nothing"

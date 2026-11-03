@@ -27,6 +27,7 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  *   `the value of a card is its name` => `get value() { return this.name }`.
  * - Or as a possessive, in English (epic `language` T24):  `a card's value is its name`, the same getter.
  *   `a card' value is ...` is refused, saying to write `a card's value`.
+ *   A plural with no article, `cards' value is ...`, is the same getter, warning to write `a card's value` (T26).
  * - A worked-out value from a list of its own (epic `elemental-spell` P5, Q13):
  *
  *   ```spell
@@ -61,7 +62,8 @@ export class PropertyValueGetter extends SpellStatement<
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (!match) return undefined
+    // a possessive with no article, its owner singular:  not ours (epic `language` T26)
+    if (!match || !PossessiveProperty.warnIfNoArticle(match)) return undefined
     if (getKnownType(match.groups.type).valueKind) match.data.valueKind = true
     // ... once its body parsed:  `- color is red if ... otherwise it is black` is `property_value_either`'s
     const bodyParsed = !!this.getBody(match) || match.length === tokens.length

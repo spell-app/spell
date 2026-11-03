@@ -386,8 +386,8 @@ each explorer reads something the program or its compile left behind.
   - With no words file, each goes by its name:  `move to pile`.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
-  - In the editor, its Templates tab has the parser at hand, so it asks the language service in the page instead
-    ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
+  - The editor shows none:  its Reference tab reads the same tree from the language service in the page, which has
+    the parser at hand ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -471,7 +471,7 @@ app/src/app/solid/MenuBar.tsx                    the editor's side:  what each i
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
 - It runs on the layout's own copy of the runtime, so a program's run never touches it.
-  A program's things stay the only ones in the Things tab, and its console stays its own.
+  A program's things stay the only ones in the Views card, and its console stays its own.
 - It costs a second copy of the 84 KB runtime on the first load, on the page's one Solid:  about 1% more script.
   The tabs show no later:  they already wait for the project's files.
   The top bar does:  about 170 to 300 ms on a local server.
@@ -649,7 +649,11 @@ The top bar's Run | Edit buttons pick how much of the editor shows:
     (`SpellProject.codeFor()`, in spell-parser)
   - the file's other form:  Code Spell on a `.spellml` file, Spellx on a `.spell` file
   - Sentence Tree:  the Spell tree of the cursor's line
-  - Things and Templates, for developers.  The Inspector's Views card is one tree of what's drawn and what isn't, with a filter.
+  - Reference:  what you can use, your app's templates and Spell's, each with what it holds, searchable from the
+    panel's header;  a click says what it is, and Show in Code for your own
+- What the app made is the Inspector's Views card:  one tree of what's drawn, then what isn't (the deck),
+  with a filter, and a sort by document order, name or type.
+- The add menu (the top bar's `+`) starts with This app:  the app's own views, added as `{draw a new card}`.
 - At the panel's right:  Clear Console, on Program Output only, and Close, which hides it.
 - It's the same pane VS Code's Run Project panel and `<spell-viewer>` use, `RunnerPane`:
   in a narrow pane its tabs scroll sideways with ‹ › keys instead of wrapping.

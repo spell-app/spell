@@ -1896,6 +1896,10 @@
         {
           "name": "Description",
           "file": "src/app/solid/ScopeDetailsPane.tsx"
+        },
+        {
+          "name": "ReferenceDetails",
+          "file": "src/app/solid/SpellReference.tsx"
         }
       ],
       "href": "Markdown.html"
@@ -3040,10 +3044,6 @@
       ],
       "usedIn": [
         {
-          "name": "ProgramPanel",
-          "file": "src/app/pages/SpellEditor.tsx"
-        },
-        {
           "name": "SpellAppRunner",
           "file": "src/app/runner/SpellAppRunner.tsx"
         },
@@ -3223,10 +3223,6 @@
         }
       ],
       "usedIn": [
-        {
-          "name": "ProgramPanel",
-          "file": "src/app/pages/SpellEditor.tsx"
-        },
         {
           "name": "SpellAppRunner",
           "file": "src/app/runner/SpellAppRunner.tsx"
