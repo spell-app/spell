@@ -373,12 +373,6 @@ function notebookOf(
   return notebooks.find((file) => file.path === open?.path) ?? notebooks[0]
 }
 
-/** Show the current project's code, or close it. */
-export function toggleCode() {
-  const path = editor.project?.path
-  CodeShown.set(path, CodeShown.isClosed(path))
-}
-
 /**
  * The page's columns and the preference that remembers their sizes, for each set of panes:
  * code or not (Run), the Inspector or not.
@@ -444,14 +438,6 @@ export function EditorToolbar(props: { mode: Mode }) {
       draw: () => (
         <>
           <Show when={props.mode === "edit"}>
-            <ui-icon
-              name="code"
-              link=""
-              class={["IconAction", { active: !CodeShown.isClosed(editor.project?.path) }]}
-              label={appTexts.text("menuCode")}
-              title={appTexts.text("menuCode")}
-              onClick={() => toggleCode()}
-            />
             <AddPartButton />
             <InspectAppButton id={INSPECT_APP_ID} />
             <InspectHelp for={INSPECT_APP_ID} />
