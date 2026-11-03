@@ -788,6 +788,7 @@ export const starWars = core.place(new StarWar(), {
   idColumn: "url",
   rowsIn: "results",
   nextPageIn: "next",
+  namesLike: "hair_color",
   checkedEvery: 86400,
   checkedAt: { hour: 5, minute: 0 },
   collections: {
@@ -797,8 +798,7 @@ export const starWars = core.place(new StarWar(), {
     species: { at: "/species" },
     vehicles: { at: "/vehicles" },
     starships: { at: "/starships" }
-  },
-  namesLike: "hair_color", firstReads: () => [[Film], [Character], [Planet], [Vehicle], [Species], [Starship]] })
+  }, firstReads: () => [[Film], [Character], [Planet], [Vehicle], [Species], [Starship]] })
 
 // -----------
 core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
