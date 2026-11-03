@@ -27,9 +27,9 @@ function write(path: string, text: string, when?: number): string {
   return file
 }
 
-/** A page titled `title`, changed at `when`. */
-function page(path: string, title: string, when: number): string {
-  return write(path, `<!doctype html><html><head><title>${title}</title></head><body></body></html>`, when)
+/** A page titled `title` with something to answer (`body`), changed at `when`. */
+function page(path: string, title: string, when: number, body = "<epic-send></epic-send>"): string {
+  return write(path, `<!doctype html><html><head><title>${title}</title></head><body>${body}</body></html>`, when)
 }
 
 beforeAll(() => {
@@ -61,6 +61,15 @@ test("isWaiting():  no answer for its round now, or a session waiting on it", ()
   DataFile.write(DataFile.besidePage(file, "answer"), { rounds: [{ round: 1 }] })
   expect(DetailsPages.isWaiting(file)).toBe(true)
   expect(DetailsPages.answerOf(file)).toBeUndefined()
+})
+
+test("isWaiting():  a picture page, with nothing to answer, never waits (I201)", () => {
+  const file = page("epics/other/details/picture.html", "A picture", 800, "<ui-section id=box></ui-section>")
+  expect(DetailsPages.takesAnswers(file)).toBe(false)
+  expect(DetailsPages.isWaiting(file)).toBe(false)
+  // a choice page's rows are something to answer
+  const choice = page("epics/other/details/rows.html", "Rows", 800, "<epic-choice-rows><epic-choice-row>")
+  expect(DetailsPages.isWaiting(choice)).toBe(true)
 })
 
 test("isWaiting():  a page that won't read never holds the tab", () => {
