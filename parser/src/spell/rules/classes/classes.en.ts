@@ -388,7 +388,7 @@ classes.addRule(ReopenType, {
 
 classes.addRule(CreateViewableListType, {
   syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?",
+    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
   tests: [
     {
       compileAs: "statement",
@@ -457,8 +457,7 @@ classes.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `a "pile" is a viewable list of cards where:`
 classes.addRule(CreateViewableListType, {
-  syntax:
-    "(a|an) {type:quoted_type} is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?"
+  syntax: "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
 })
 
 classes.addRule(CSSBlock, {

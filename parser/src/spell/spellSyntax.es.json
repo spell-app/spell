@@ -4326,11 +4326,11 @@
           "ruleNames": ["create_viewable_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateViewableListType.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista (visible|dibujable) (de|del) {instanceType:type} {with_nested_statements}?",
+              "syntax": "(un|una) {type:type_words} (alias {aka:singular_type})? es (un|una) lista visible (de|del) {instanceType:type} {with_nested_statements}?",
               "example": "una pile es una lista visible de cartas",
               "outputs": {
                 "js": {
@@ -4345,7 +4345,7 @@
               }
             },
             {
-              "syntax": "(un|una) {type:quoted_type} es (un|una) lista (visible|dibujable) (de|del) {instanceType:type} {with_nested_statements}?"
+              "syntax": "(un|una) {type:quoted_type} es (un|una) lista visible (de|del) {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]

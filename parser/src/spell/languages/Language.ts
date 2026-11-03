@@ -446,21 +446,15 @@ export type LanguageWords = {
    */
   builtInMembers?: Record<string, string[]>
   /**
-   * Words for built-in types the language no longer takes, each with the words that replaced it (epic `elemental-spell`):
-   * English's `{ "drawable thing": "view" }`.
-   * - Still read, so the line keeps its meaning;  but each is a parse error naming its replacement,
-   *   which a quick fix can put in its place -- see `SpellType.retiredWordErrorsIn()`.
-   * - None:  nothing retired.
-   */
-  retiredTypeWords?: Record<string, string>
-  /**
-   * Spell's own words, outside its type words, the language no longer takes, each with the word that replaced it:
+   * Spell's own words the language no longer takes, each with the word that replaced it:
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
    * - Two words at most:  `wait for`.
    * - A replacement of nothing, `""`:  the word is simply gone, e.g. `wait for: deal` is now `deal` (epic `language` P13).
    * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
    *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
    * - None:  nothing retired.
+   * - NOT a type's word:  the old words for views (`drawable thing`, `dibujable`) are gone,
+   *   free for a program's own names (epic `language` T25).
    */
   retiredWords?: Record<string, string>
   /**

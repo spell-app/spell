@@ -124,14 +124,6 @@ export const englishWords: SP.LanguageWords = {
   // a notebook's example, in a drawing (`example_block`, epic `elemental-spell` P16)
   exampleTag: "example",
 
-  /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  retiredTypeWords: {
-    drawable: "view",
-    "drawable thing": "view",
-    "drawable-thing": "view",
-    "drawable list": "viewable list",
-    "drawable-list": "viewable list"
-  },
   /**
    * Spell's own old words, each an error naming its new one:
    * - a view's parts are slots (epic `elemental-spell` P27)

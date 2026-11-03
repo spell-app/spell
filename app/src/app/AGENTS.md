@@ -185,10 +185,10 @@ and in the app's build folder, `app/` at the app folder's root.
     - The program finds its elements through `core.domRoot()`, never `document`.
     - SEE [core's AGENTS.md](../../../parser/src/core/AGENTS.md), "Who may value-import it".
     - Mind barrels:  `spell/app/app/runner` holds `runCompiled()`, so a bundle's entry imports its runner's file directly.
-  - A drawable thing draws as its own Spell UI element (epic `drawable-thing`).
-    - e.g. `a card is a drawable thing` draws as `<solitaire-card>`.
+  - A view draws as its own Spell UI element (epic `drawable-thing`).
+    - e.g. `a card is a view` draws as `<solitaire-card>`.
     - The element:  [SpellElement.tsx](runner/SpellElement.tsx).
-    - A drawable class names its tag as it's declared:
+    - A view's class names its tag as it's declared:
       `static elementTag = core.defineElement(this, ...)`.
       - Core asks `core.elementDefiner` once the class is whole.
       - `installSpellElements()` fills that in, per runtime copy.
@@ -196,7 +196,7 @@ and in the app's build folder, `app/` at the app folder's root.
       Its `thing` is the card, which the element draws inside it (`drawOwn()`).
       - It loads the Spell UI families its drawing uses itself (`loadSpellUIFamilies()`):
         no root sees into its shadow root.  A Spanish program's `<es-texto>` too (epic `spanish` J96).
-    - A drawable LIST's element holds its items as its children (`core.drawItems()`), shown through its drawing's slot.
+    - A viewable LIST's element holds its items as its children (`core.drawItems()`), shown through its drawing's slot.
       - Its `to draw it` is the wrapper in its shadow root;  each child is what its `to draw each item` draws,
         by default the item's own element (epic `spanish` P20).
     - The example:  `@spell/examples/Solitaire`, each card its own element, each pile styled by its `<css>`.
@@ -240,7 +240,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - `spell/app/app/components/<tag>` imports one.
   - `<spell-viewer>` is a ROOT (`SpellViewer extends UIRoot`, J37):  a page needs nothing around it.
     - It loads each Spell UI family the runner draws, the first time one appears (in its shadow root too).
-      A drawable thing's element loads its own:  a root never sees into another element's shadow root.
+      A view's element loads its own:  a root never sees into another element's shadow root.
     - It never loads all of `spell-ui`:  `loadUI.ts` is the editor app's and VS Code's, not its.
     - A spell tag inside it loads from beside its script (`spell-editor` => `spell-editor.js`).
       So a page with only `<spell-viewer>`s never downloads the editor.
@@ -303,7 +303,7 @@ and in the app's build folder, `app/` at the app folder's root.
       - its exported components with a banner (`### `<Name>``)
       - their props types ([ComponentSource](tools/ComponentSource.ts))
       - and every JSX use in the app
-    - The web components and the drawable thing's element:  their vocabularies, by Spell UI's own builder.
+    - The web components and a view's element:  their vocabularies, by Spell UI's own builder.
     - It writes the set's data, COMMITTED:  `components.json5` and `search.json5`, in `__data/`.
     - [Its test](../../tests/app/tools/AppUIDataBuilder.test.ts) fails while:
       - they're stale

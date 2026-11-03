@@ -404,7 +404,7 @@ classesEs.addRule(ReopenType, {
 })
 
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -437,7 +437,7 @@ classesEs.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`
+  syntax: `${A} {type:quoted_type} es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {

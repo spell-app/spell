@@ -188,24 +188,24 @@ describe("testing spell module classes", () => {
       expect(code).toContain("export class Pile extends ViewableList {")
     })
 
-    test("an old word is an error naming its new word, and the line still means the same", () => {
-      const { code, errors } = parsed("old-words", ["a card is a drawable thing", "a pile is a drawable list of cards"])
-      expect(errors.map((error) => error.message)).toEqual([
-        '"drawable thing" is now "view":  say "view" instead, or run `spell lint --fix`',
-        '"drawable list" is now "viewable list":  say "viewable list" instead, or run `spell lint --fix`'
+    test("the old words for views are gone, free for a program's own names (epic `language` T25)", () => {
+      const { code, errors } = parsed("old-words-free", [
+        "a drawable is a thing",
+        "a card is a drawable",
+        "a drawable thing is a thing",
+        "a pile is a drawable thing"
       ])
-      // what a quick fix puts in the old words' place, and where they are
-      expect(errors.map((error) => [error.inputText.trim(), error.data.replacement])).toEqual([
-        ["drawable thing", "view"],
-        ["drawable list", "viewable list"]
-      ])
-      expect(code).toContain("export class Card extends View {")
-      expect(code).toContain("export class Pile extends ViewableList {")
+      expect(errors).toEqual([])
+      expect(code).toContain("export class Drawable extends Thing {}")
+      expect(code).toContain("export class Card extends Drawable {}")
+      expect(code).toContain("export class DrawableThing extends Thing {}")
+      expect(code).toContain("export class Pile extends DrawableThing {}")
     })
 
-    test("a plural old word's new word is plural too", () => {
-      const { errors } = parsed("old-plural", ["a deck is a list of drawable things"])
-      expect(errors.map((error) => error.data.replacement)).toEqual(["views"])
+    test("an old word for a view, undeclared, no longer means a view:  no error naming `view`", () => {
+      const { code } = parsed("old-words-gone", ["a card is a drawable thing"])
+      expect(code).not.toContain("extends View")
+      expect(code).not.toContain('is now "view"')
     })
   })
 

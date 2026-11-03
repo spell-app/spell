@@ -342,19 +342,18 @@ describe("spell lint", () => {
   })
 })
 
-describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)", () => {
+describe("spell lint:  retired words (epic elemental-spell P27's parts;  epic language P13's animation)", () => {
   const SOURCE =
-    'a "card" is a drawable thing where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
-    'a "pile" is a drawable list of cards\n'
+    'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
+    "\t- animation flip it:\n\t\tpause for 1 sec\n"
 
   test("each one is an error naming its new word, exit 1;  writes nothing", () => {
     const retired = tempProject("Retired", SOURCE)
     const { status, stdout } = spell(["lint", "."], retired)
     expect(stdout).toBe(
       [
-        'Retired.spell:1:15  "drawable thing" is now "view":  say "view" instead, or run `spell lint --fix`',
         'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead, or run `spell lint --fix`',
-        'Retired.spell:4:15  "drawable list" is now "viewable list":  say "viewable list" instead, or run `spell lint --fix`',
+        'Retired.spell:4:4  "animation" is now "to":  say "to" instead, or run `spell lint --fix`',
         ""
       ].join("\n")
     )
@@ -367,18 +366,22 @@ describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)",
     const { status, stdout } = spell(["lint", ".", "--fix"], fixing)
     expect(stdout).toBe(
       [
-        'Fixing.spell:1:15  fixed:  "drawable thing" is now "view"',
         'Fixing.spell:3:11  fixed:  "parts" is now "slots"',
-        'Fixing.spell:4:15  fixed:  "drawable list" is now "viewable list"',
+        'Fixing.spell:4:4  fixed:  "animation" is now "to"',
         ""
       ].join("\n")
     )
     expect(status).toBe(0)
     expect(readFileSync(resolve(fixing, "Fixing.spell"), "utf8")).toBe(
       'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has slots "front" and "back"\n' +
-        'a "pile" is a viewable list of cards\n'
+        "\t- to flip it:\n\t\tpause for 1 sec\n"
     )
     expect(spell(["lint", "."], fixing).status).toBe(0)
+  }, 30_000)
+
+  test("the old words for views are gone (epic language T25):  `drawable` is a program's own name", () => {
+    const own = tempProject("Own", 'a "drawable" is a thing where:\n\t- its "rank" is a number\n')
+    expect(spell(["lint", "."], own).status).toBe(0)
   }, 30_000)
 })
 

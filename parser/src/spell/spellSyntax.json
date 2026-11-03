@@ -4320,11 +4320,11 @@
           "ruleNames": ["create_viewable_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateViewableListType.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "`a pile is a viewable list of cards` -- `create_list_type`, extending `ViewableList`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?",
+              "syntax": "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) viewable list of {instanceType:type} {with_nested_statements}?",
               "example": "a pile is a viewable list of cards",
               "outputs": {
                 "js": {
@@ -4339,7 +4339,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:quoted_type} is (a|an) (viewable|drawable) list of {instanceType:type} {with_nested_statements}?"
+              "syntax": "(a|an) {type:quoted_type} is (a|an) viewable list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
