@@ -8,9 +8,9 @@
  */
 import { existsSync, readFileSync } from "fs"
 import escapeRegExp from "lodash/escapeRegExp"
-import { basename, dirname, isAbsolute, relative, resolve, sep } from "path"
+import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from "path"
 
-import type { SRV } from "spell/server"
+import { SRV } from "spell/server"
 import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
 import environment from "spell/app/spaces/server/node/environment"
 
@@ -20,6 +20,7 @@ import { SPACES } from "spell/app/spaces"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
+import { ProjectDrafts } from "./ProjectDrafts"
 import type { ManifestJSON, ProjectFileJSON, ProjectIndexJSON } from "./server.types"
 
 const { respondWithJSON } = responseUtils
@@ -378,6 +379,12 @@ export type GetIndexOptions = {
    * - `"if it has one"`:  only into a project file that's already there
    */
   saving?: "always" | "if it has one"
+  /**
+   * Whose text it lists (epic `editor` P24):
+   * - `"your drafts"` (the default):  the editor's, which edits your drafts
+   * - `"published"`:  the disk reader's, so the language server and `spell compile` read what's published
+   */
+  reading?: "your drafts" | "published"
 }
 
 /**
@@ -392,7 +399,7 @@ export type GetIndexOptions = {
  */
 export const getIndex = async (
   projectId: string,
-  { saving = "always" }: GetIndexOptions = {}
+  { saving = "always", reading = "your drafts" }: GetIndexOptions = {}
 ): Promise<ProjectIndexJSON> => {
   const location = SP.SpellLocation.getProjectLocation(projectId)
 
@@ -402,6 +409,12 @@ export const getIndex = async (
     .filter((name) => isManifestFile(name, location.projectName))
   const isWords = await Promise.all(listed.map((name) => isWordsFileOnDisk(location.serverPath, name)))
   let fileNames = listed.filter((_name, index) => !isWords[index])
+  // a file only drafted so far, e.g. a new document before its first Publish (Q23), is the project's too
+  const drafts = reading === "your drafts" ? new ProjectDrafts(projectId) : undefined
+  for (const filePath of (await drafts?.draftedFiles()) ?? []) {
+    const name = filePath.replace(/^\/+/, "")
+    if (!fileNames.includes(name) && isManifestFile(name, location.projectName)) fileNames.push(name)
+  }
 
   // HACKY: make sure we have at least one valid file by creating a default file
   if (!fileNames.length) {
@@ -415,6 +428,8 @@ export const getIndex = async (
   const entries = await Promise.all(
     fileNames.map(async (name) => {
       const location = SP.SpellLocation.getFileLocation(projectId, name)
+      // only drafted so far:  nothing on disk to say
+      if (!(await fileUtils.pathExists(location.serverPath))) return [location.path, { created: 0, modified: 0, size: 0 }] as const
       const { created, modified, size } = await fileUtils.getPathInfo(location.serverPath)
       return [location.path, { created, modified, size }] as const
     })
@@ -464,7 +479,7 @@ export const getIndex = async (
       const { path, active } = entry
       if (!active || !isPreloadFile(path)) return
       const location = SP.SpellLocation.getFileLocation(projectId, path)
-      entry.contents = await fileUtils.loadFile(location.serverPath)
+      entry.contents = (await drafts?.read(location.filePath!)) ?? (await fileUtils.loadFile(location.serverPath))
     })
   )
 
@@ -553,7 +568,13 @@ export const request_getFile = async (request: Request, response: Response) => {
   } catch (error) {
     return responseUtils.sendError(response, 400, error as Error)
   }
+  if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
+    return responseUtils.sendError(response, 404, new Error(`${location.path} not found`))
+  }
   try {
+    const draft = isDraftable(location) ? await new ProjectDrafts(location.projectId).read(location.filePath!) : undefined
+    // its own type, by its extension:  a `.js` draft still imports as a script
+    if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
     await responseUtils.sendFile(response, fileOrOldName(location.serverPath), { dotfiles: "allow" })
   } catch (error) {
     // Can't send an error body once the file has started streaming -- the client sees a truncated response.
@@ -584,8 +605,25 @@ export const saveFile = async (projectId: string, filePath: string, contents: an
  */
 export const request_saveFile = respondWithJSON(async (request) => {
   const location = locationForUrl(request.originalUrl)
-  return await saveFile(location.projectId, location.filePath!, request.body)
+  if (location.filePath && ProjectDrafts.isPrivatePath(location.filePath)) {
+    throw new SRV.HttpError(400, `${location.path}:  a project's private folders are written by Publish alone`)
+  }
+  if (!isDraftable(location) || typeof request.body !== "string") {
+    return await saveFile(location.projectId, location.filePath!, request.body)
+  }
+  await new ProjectDrafts(location.projectId).save(location.filePath!, request.body)
+  return true
 })
+
+/**
+ * Is file `location` saved as your DRAFT (`ProjectDrafts`, epic `editor` P24), not straight to its public file?
+ * - A project's own file a person edits (`isManifestFile()`):  its spell, spellml, css, scripts.
+ * - Never what spell builds, nor any other file (a `.txt`, a data file):  those are written as they are.
+ */
+export function isDraftable(location: SP.SpellLocation): boolean {
+  if (!location.filePath || isBuiltFile(location)) return false
+  return isManifestFile(location.file ?? "", location.projectName)
+}
 
 ////////////////
 // ## Project manipulation
@@ -808,9 +846,61 @@ export const createFile = async (projectId: string, filePath: string, contents: 
  */
 export const request_createFile = respondWithJSON(async (request) => {
   const { projectId, filePath, contents } = request.body
-  await createFile(projectId, filePath, contents)
+  const location = SP.SpellLocation.getFileLocation(projectId, filePath)
+  // a new document is your draft until its first Publish (Q23):  nothing public before then
+  if (isDraftable(location) && typeof contents === "string") {
+    await new ProjectDrafts(projectId).save(location.filePath!, contents)
+  } else await createFile(projectId, filePath, contents)
   return await getIndex(projectId)
 })
+
+////////////////
+// ## Drafts, Publish and versions -- see `ProjectDrafts` (epic `editor` P24)
+////////////////
+
+/**
+ * `GET /api/projects/drafts/<project>` -- your drafts of a project, and its versions.
+ * - Returns `{ drafts: DraftJSON[], versions: VersionJSON[], mayPublish }`.
+ */
+export const request_getDrafts = respondWithJSON(async (request) => {
+  const drafts = new ProjectDrafts(SP.SpellUrls.projectIdFor(tailOf(request, DRAFTS_URL)))
+  return { drafts: await drafts.drafts(), versions: await drafts.versions(), mayPublish: drafts.mayPublish() }
+})
+
+/**
+ * `POST /api/projects/publish` -- publish your drafts of a project, keeping it as a new version.
+ * - Client sends body:  `{ projectId, anyway? }`.
+ * - Returns:  `PublishJSON`.
+ * - Failure:  409 when a published file changed since your draft of it began, unless `anyway`;  403 if you may not.
+ */
+export const request_publish = respondWithJSON(async (request) => {
+  const { projectId, anyway } = request.body
+  return await new ProjectDrafts(projectId).publish({ anyway: !!anyway })
+})
+
+/**
+ * `POST /api/projects/discard` -- delete your draft of a file, back to what's published.
+ * - Client sends body:  `{ projectId, filePath }`.
+ */
+export const request_discard = respondWithJSON(async (request) => {
+  const { projectId, filePath } = request.body
+  const location = SP.SpellLocation.getFileLocation(projectId, filePath)
+  await new ProjectDrafts(projectId).discard(location.filePath!)
+  return true
+})
+
+/**
+ * `POST /api/projects/restore` -- make drafts of a version's files.
+ * - Client sends body:  `{ projectId, version }`, the version's name.
+ * - Returns:  the files drafted.
+ */
+export const request_restore = respondWithJSON(async (request) => {
+  const { projectId, version } = request.body
+  return await new ProjectDrafts(projectId).restore(version)
+})
+
+/** `/api/projects/drafts/`:  where a project's drafts and versions are listed. */
+export const DRAFTS_URL = "/api/projects/drafts/"
 
 /**
  * Rename a project file, keeping its position in `imports` (rewriting its `path` entry in place)

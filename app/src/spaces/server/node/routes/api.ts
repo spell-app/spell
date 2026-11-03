@@ -75,6 +75,12 @@ api.delete("/projects/remove/file", projectUtils.request_deleteFile)
 api.get("/projects/index/*", projectUtils.request_getIndex)
 api.post("/projects/file/*", projectUtils.request_saveFile)
 
+// your drafts, Publish and versions:  see `projectUtils.request_getDrafts` ... and `ProjectDrafts` (epic `editor` P24)
+api.get("/projects/drafts/*", projectUtils.request_getDrafts)
+api.post("/projects/publish", projectUtils.request_publish)
+api.post("/projects/discard", projectUtils.request_discard)
+api.post("/projects/restore", projectUtils.request_restore)
+
 // Compile random source file, not tied to a project -- see `projectUtils.request_compileFile`.
 api.post("/compile/file", projectUtils.request_compileFile)
 api.get("/compile/file", projectUtils.request_compileFile)
