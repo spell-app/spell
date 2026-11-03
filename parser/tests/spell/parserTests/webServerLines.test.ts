@@ -129,7 +129,7 @@ describe("the lines", () => {
 describe("RestPlace", () => {
   test("a thing whose id is an address is at that address", async () => {
     const asked = serve({ [`${HOST}/people/1`]: { url: `${HOST}/people/1`, name: "Luke" } })
-    const place = new RestPlace({ url: HOST, everyCollection: { fields: { id: "url" } } })
+    const place = new RestPlace({ url: HOST, allCollections: { fields: { id: "url" } } })
     const rows = await place.getMany("people", [`${HOST}/people/1`], {})
     expect(rows).toEqual([{ id: `${HOST}/people/1`, name: "Luke" }])
     expect(asked).toEqual([`${HOST}/people/1`])
@@ -139,7 +139,7 @@ describe("RestPlace", () => {
     serve({ [`${HOST}/a`]: { rows: [{ key: 1 }] }, [`${HOST}/b`]: { inside: [{ key: 2, name: "x" }] } })
     const place = new RestPlace({
       url: HOST,
-      everyCollection: { rowsAt: "rows", fields: { id: "key" } },
+      allCollections: { rowsAt: "rows", fields: { id: "key" } },
       collections: { b: { rowsAt: "inside", fields: { title: "name" } } }
     })
     expect((await place.list("a", {}, {})).rows).toEqual([{ id: 1 }])

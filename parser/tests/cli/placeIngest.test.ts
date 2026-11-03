@@ -4,8 +4,8 @@ import { join } from "node:path"
 
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { diskFiles, fetchWithFiles, placeIngest, readThroughSpell } from "spell/parser/cli/placeIngest"
-import type { PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
+import { diskFiles, fetchWithFiles, placeUpdate, readThroughSpell } from "spell/parser/cli/placeIngest"
+import type { PlaceDescriptionOnDisk } from "spell/parser/spell/ingest/ingest.types"
 
 /**
  * `spell place ingest`'s disk and terminal half (epic `data` P18).
@@ -19,9 +19,23 @@ beforeEach(() => {
 afterEach(() => rmSync(folder, { recursive: true, force: true }))
 
 describe("diskFiles", () => {
+  test("names a description in the project's file once, keeping its comments;  with no project's file, nothing", async () => {
+    const projectFile = join(folder, "__project.json5")
+    writeFileSync(projectFile, `{\n  // mine\n  "imports": []\n}\n`)
+    await diskFiles.listInProject!(join(folder, "A.api.spell"), join(folder, "A.api.json5"))
+    await diskFiles.listInProject!(join(folder, "A.api.spell"), join(folder, "A.api.json5"))
+    const text = readFileSync(projectFile, "utf8")
+    expect(text).toContain("// mine")
+    expect(JSON.parse(text.replace(/\/\/.*\n/, ""))).toEqual({ imports: [], development: { apis: ["A.api.json5"] } })
+    const elsewhere = mkdtempSync(join(tmpdir(), "place-no-project-"))
+    await diskFiles.listInProject!(join(elsewhere, "B.api.spell"), join(elsewhere, "B.api.json5"))
+    expect(() => readFileSync(join(elsewhere, "__project.json5"))).toThrow()
+    rmSync(elsewhere, { recursive: true, force: true })
+  })
+
   test("a description written again keeps a person's comment and their own key", async () => {
-    const path = join(folder, "A.box.place.json5")
-    const description = { about: { name: "box" }, notes: [] } as unknown as PlaceDescription
+    const path = join(folder, "A.api.json5")
+    const description = { about: { name: "box" }, notes: [] } as unknown as PlaceDescriptionOnDisk
     await diskFiles.writeDescription(path, description)
     expect(readFileSync(path, "utf8")).toContain("What `spell place ingest` found")
     const text = readFileSync(path, "utf8").replace(`"notes"`, `// mine\n  "notes"`)
@@ -31,13 +45,11 @@ describe("diskFiles", () => {
     expect((await diskFiles.readDescription(path))!.notes).toEqual(["new"])
   })
 
-  test("finds the descriptions and other Spell files beside a file, no others", async () => {
-    const spell = join(folder, "A.spell")
-    writeFileSync(join(folder, "A.box.place.json5"), "{}")
-    writeFileSync(join(folder, "AB.box.place.json5"), "{}")
+  test("finds the other Spell files beside a file, no others", async () => {
+    const spell = join(folder, "A.api.spell")
+    writeFileSync(join(folder, "A.api.json5"), "{}")
     writeFileSync(join(folder, "B.spell"), "print 1")
     writeFileSync(spell, "print 2")
-    expect(await diskFiles.descriptionsBeside(spell)).toEqual([join(folder, "A.box.place.json5")])
     expect(await diskFiles.otherSpellBeside(spell)).toEqual(["print 1"])
     expect(await diskFiles.read(join(folder, "nope.spell"))).toBeUndefined()
   })
@@ -76,6 +88,8 @@ describe("readThroughSpell", () => {
   })
 })
 
-test("the command says what to do with no address", async () => {
-  await expect(placeIngest(undefined, { ai: false })).rejects.toThrow(/which source/)
+test("update says what to do with no description beside the file", async () => {
+  await expect(placeUpdate(join(folder, "A.api.spell"), { ai: false })).rejects.toThrow(
+    /A\.api\.json5, so there's nothing to look at again:  spell place ingest <address> --into/
+  )
 })

@@ -1,5 +1,5 @@
 /**
- * `spell place ingest`:  the terminal's and the disk's half of looking at a data source (epic `data` P18).
+ * `spell place ingest` and `spell place update`:  the terminal's and the disk's half of looking at a data source (epic `data` P18).
  * - The steps are spell's `PlaceIngest`, which knows nothing of either:  here, only what it's handed, and what's printed.
  * - It asks at a terminal, and with none, it stops:  `askAtTerminal()`.
  * - Node only;  loaded when the command runs, as it loads all of spell.
@@ -21,6 +21,7 @@ import {
   type IngestFiles,
   type IngestResult,
   type PlaceDescription,
+  type PlaceDescriptionOnDisk,
   type ReadOfType,
   type ReadThrough
 } from "spell/parser/spell/ingest/ingest.types"
@@ -31,15 +32,18 @@ import { claudeRunnerFor } from "./claudeRunners"
 const READ_ROWS = 5
 
 /** What's at the top of a description, the first time it's written. */
-const DESCRIPTION_HEAD = `// What \`spell place ingest\` found.  \`spell place ingest --update\` looks again, and changes what it wrote.
+const DESCRIPTION_HEAD = `// What \`spell place ingest\` found.  \`spell place update\` looks again, and changes what it wrote.
 // A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in \`allCollections\`;  a collection's own setting wins.
 `
+
+/** The project's file:  see \`SP.PROJECT_FILE\`. */
+const PROJECT_FILE = "__project.json5"
 
 /** `spell place ingest`'s flags. */
 export type PlaceIngestOptions = {
   kind?: string
   into?: string
-  update?: string
   name?: string
   keySecret?: string
   docs?: string
@@ -52,10 +56,36 @@ export type PlaceIngestOptions = {
  * - `EXIT.ERRORS` when something needs a person:  it couldn't change a line for them.
  * - throws `CliError` for whatever stopped it, having written nothing
  */
-export async function placeIngest(address: string | undefined, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, update, name, keySecret, docs, collections, ai = true } = options
+export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
+  const { kind, into, name, keySecret, docs, collections, ai = true } = options
+  return stoppedAsCliError(async () => {
+    const result = await ingestFor(ai).add({
+      address,
+      ...withValues({ kind, into, name, keySecret, docs }),
+      ...(collections && { collections: collections.split(",").map((each) => each.trim()) })
+    })
+    printAdded(result)
+    return CLI.EXIT.OK
+  })
+}
+
+/**
+ * `spell place update <file>`:  look again at the place described beside it.  Its exit code.
+ * - `EXIT.ERRORS` when it couldn't change a line for someone.
+ * - throws `CliError` for whatever stopped it, having written nothing
+ */
+export async function placeUpdate(file: string, { ai = true }: { ai?: boolean }): Promise<number> {
+  return stoppedAsCliError(async () => {
+    const result = await ingestFor(ai).update(file)
+    printUpdate(result)
+    return result.couldntChange.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+  })
+}
+
+/** The steps, with the terminal and the disk:  asking an agent unless `ai` is off. */
+function ingestFor(ai: boolean): PlaceIngest {
   const chosen = ai ? claudeRunnerFor(process.env, { ai }) : undefined
-  const ingest = new PlaceIngest({
+  return new PlaceIngest({
     fetch: fetchWithFiles(globalThis.fetch),
     ask: askAtTerminal,
     files: diskFiles,
@@ -64,20 +94,12 @@ export async function placeIngest(address: string | undefined, options: PlaceIng
     say: (line) => CLI.err(line),
     ...(chosen && { claude: chosen.run, claudeVia: chosen.via })
   })
+}
+
+/** `run`'s exit code, its `IngestStopped` a `CliError`.  - throws `CliError`, and whatever else `run` throws */
+async function stoppedAsCliError(run: () => Promise<number>): Promise<number> {
   try {
-    if (update) {
-      const results = await ingest.update(update, { ...(address && { address }) })
-      results.forEach(printUpdate)
-      return results.some(({ couldntChange }) => couldntChange.length) ? CLI.EXIT.ERRORS : CLI.EXIT.OK
-    }
-    if (!address) throw new CLI.CliError("which source?  spell place ingest <address>, or --update <file>")
-    const result = await ingest.add({
-      address,
-      ...withValues({ kind, into, name, keySecret, docs }),
-      ...(collections && { collections: collections.split(",").map((each) => each.trim()) })
-    })
-    printAdded(result)
-    return CLI.EXIT.OK
+    return await run()
   } catch (error) {
     if (error instanceof IngestStopped) throw new CLI.CliError(error.message)
     throw error
@@ -123,18 +145,23 @@ export const diskFiles: IngestFiles = {
   read: async (path) => (existsSync(path) ? readFileSync(path, "utf8") : undefined),
   write: async (path, text) => writeFileSync(path, text),
   readDescription: async (path) =>
-    existsSync(path) ? (JSON5.parse(readFileSync(path, "utf8")) as PlaceDescription) : undefined,
+    existsSync(path) ? (JSON5.parse(readFileSync(path, "utf8")) as PlaceDescriptionOnDisk) : undefined,
   writeDescription: async (path, description) => {
     const text = existsSync(path)
       ? json5Edited(readFileSync(path, "utf8"), description)
       : `${DESCRIPTION_HEAD}${JSON.stringify(description, null, 2)}\n`
     writeFileSync(path, text)
   },
-  descriptionsBeside: async (path) => {
-    const start = `${basename(path).replace(/\.spell$/, "")}.`
-    return filesBeside(path)
-      .filter((name) => name.startsWith(start) && name.endsWith(".place.json5"))
-      .map((name) => join(dirname(path), name))
+  listInProject: async (file, path) => {
+    const projectFile = join(dirname(file), PROJECT_FILE)
+    if (!existsSync(projectFile)) return
+    const text = readFileSync(projectFile, "utf8")
+    const project = JSON5.parse(text) as { development?: { apis?: string[] } }
+    const named = basename(path)
+    const apis = project.development?.apis ?? []
+    if (apis.some((each) => basename(each) === named)) return
+    project.development = { ...project.development, apis: [...apis, named] }
+    writeFileSync(projectFile, json5Edited(text, project))
   },
   otherSpellBeside: async (path) =>
     filesBeside(path)
@@ -233,7 +260,7 @@ function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[])
 function printAdded({ wrote, file, descriptionPath, description, spell, warnings }: IngestResult): void {
   if (!wrote) {
     CLI.out(
-      `${file} already has ${description.about.name}:  nothing changed.  To look again:  spell place ingest --update ${file}`
+      `${file} already has ${description.about.name}:  nothing changed.  To look again:  spell place update ${file}`
     )
     return
   }

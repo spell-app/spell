@@ -35,12 +35,15 @@ export type IngestFiles = {
   read(path: string): Promise<string | undefined>
   /** Write a Spell file. */
   write(path: string, text: string): Promise<void>
-  /** The description there;  `undefined` when there's none. */
-  readDescription(path: string): Promise<PlaceDescription | undefined>
+  /** The description there, as it's kept on disk;  `undefined` when there's none. */
+  readDescription(path: string): Promise<PlaceDescriptionOnDisk | undefined>
   /** Write a description, keeping any comments a person put in it. */
-  writeDescription(path: string, description: PlaceDescription): Promise<void>
-  /** Each description beside this Spell file, by its path. */
-  descriptionsBeside(path: string): Promise<string[]>
+  writeDescription(path: string, description: PlaceDescriptionOnDisk): Promise<void>
+  /**
+   * Name the description at `path` in the project's file of the Spell file `file`, `development.apis`, if it isn't there.
+   * - Left out, or no project's file:  nothing's named.
+   */
+  listInProject?(file: string, path: string): Promise<void>
   /** The text of every other Spell file beside this one:  what else may use what it declares. */
   otherSpellBeside(path: string): Promise<string[]>
 }
@@ -264,7 +267,7 @@ export type CollectionDescription = {
   fields: Record<string, FieldDescription>
 }
 
-/** A place's description:  `<File>.<place>.place.json5`, beside the Spell file. */
+/** A place's description:  `<Name>.api.json5`, beside its Spell file, `<Name>.api.spell`. */
 export type PlaceDescription = {
   /** What and where it is, and when it was looked at. */
   about: {
@@ -310,4 +313,15 @@ export type PlaceDescription = {
   checkEverySeconds?: number
   /** The Spell, a line at a time, as it was last written:  a person's copy may differ. */
   spell: string[]
+}
+
+/**
+ * A description as it's written:  what every collection agrees on, once, in `allCollections`;
+ * each collection only what differs.  `descriptionOnDisk()` and `descriptionFromDisk()` turn one into the other.
+ */
+export type PlaceDescriptionOnDisk = Omit<PlaceDescription, "collections"> & {
+  /** Each collection's settings, when every one has the same:  its id's field, how it pages, where its rows are ... */
+  allCollections?: Partial<CollectionDescription>
+  /** Each collection, by what Spell calls it, without what `allCollections` says. */
+  collections: Record<string, Partial<CollectionDescription>>
 }

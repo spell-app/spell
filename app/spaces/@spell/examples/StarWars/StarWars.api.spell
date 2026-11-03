@@ -1,11 +1,12 @@
 ## Star Wars:  where it all lives
-// Two servers other people run, and what each holds.  What's drawn and done with them is in StarWars.spellml.
+// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spellml;
+// the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.
 // `star wars` is what this wrote, from looking at the server:
 //   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
-// `spell place ingest --update StarWars.api.spell` looks again, and changes only this file.
+// `spell place update StarWars.api.spell` looks again, and changes only this file and StarWars.api.json5.
 //
-// Star Wars and its pictures belong to Lucasfilm and Disney, the words to Wikipedia's writers.
-// They're asked for as it runs, never kept here, and the page says where they come from.
+// Star Wars belongs to Lucasfilm and Disney.
+// It's asked for as it runs, never kept here, and the page says where it comes from.
 
 star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
@@ -124,28 +125,3 @@ a "starship" is a thing:
 	- its "films" is a list of films
 	- its "created" is a date
 	- its "edited" is a date
-
-
-## Wikipedia:  a page each, by its name.  Not every name has one
-wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
-	- check it every day
-	- wiki pages live at "/page/summary"
-	- a wiki page's id is its "pageid"
-
-a "wiki page" is a thing:
-	- it lives in wikipedia
-	- its "title" is text
-	- its "about" is text, stored as "description"
-	- its "summary" is text, stored as "extract"
-	- its "thumbnail" is a thumbnail
-	- its "content urls" is a page address book
-
-// What's inside a page's answer, read in words:  `the source of its thumbnail`
-a "thumbnail" is a thing:
-	- its "source" is text
-
-a "page address book" is a thing:
-	- its "desktop" is a page address
-
-a "page address" is a thing:
-	- its "page" is text

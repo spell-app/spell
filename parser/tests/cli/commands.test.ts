@@ -36,7 +36,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
     const translate = spell.commands.find((command) => command.name() === "translate")!
     expect(translate.commands.map((command) => command.name())).toEqual(["check", "fix", "speedtest"])
     const place = spell.commands.find((command) => command.name() === "place")!
-    expect(place.commands.map((command) => command.name())).toEqual(["ingest"])
+    expect(place.commands.map((command) => command.name())).toEqual(["ingest", "update"])
   })
 
   test("translating a project:  spell translate --to (epic spanish P24)", () => {

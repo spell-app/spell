@@ -48,7 +48,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  its API in a file of its own, as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  each server's API in a file of its own, Star Wars' as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -532,7 +532,8 @@ _Lista de tareas in the editor:  the same list, its words in Spanish._
 
 [Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.py4e.com](https://swapi.py4e.com/) for the films, characters, planets and ships,
 and Wikipedia for their pictures.
-Each is one line, and its rows' fields, in a file of their own, as `spell place ingest` wrote them:
+Each is one line, and its rows' fields, in a file of its own:
+Star Wars' as `spell place ingest` wrote it, Wikipedia's by hand.
 
 ```spell
 star wars is a web server at "https://swapi.py4e.com/api":
@@ -546,7 +547,7 @@ wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- a wiki page's id is its "pageid"
 ```
 
-_From [its API](spaces/@spell/examples/StarWars/StarWars.api.spell), shortened._
+_From [StarWars.api.spell](spaces/@spell/examples/StarWars/StarWars.api.spell) and [Wikipedia.api.spell](spaces/@spell/examples/StarWars/Wikipedia.api.spell), shortened._
 
 Its rows link to each other by address:  a character says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
 Say what a field links to, and reading it follows the link.
@@ -582,7 +583,8 @@ and `"172"` reads as a number, `"unknown"` as nothing.
 - A drawing that leaves gives up the reads it was waiting on.
 - It's only for a web server:  elsewhere a field holds the thing itself.
 
-`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server.
+`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server,
+and its description beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
 
 Its pictures come from Wikipedia as it runs, and not every name has a page:
 about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.

@@ -82,7 +82,7 @@ export class RestPlace extends WebPlace implements Place {
   /** Each collection's mapping. */
   private readonly collections: Readonly<Record<string, RestCollection>>
   /** What's the same of every collection. */
-  private readonly everyCollection: RestCollection | undefined
+  private readonly allCollections: RestCollection | undefined
   /** How it knows versions. */
   private readonly versions: RestVersions | undefined
   /** How it updates. */
@@ -104,7 +104,7 @@ export class RestPlace extends WebPlace implements Place {
 
   constructor({
     collections = {},
-    everyCollection,
+    allCollections,
     can,
     versions,
     update = "PATCH",
@@ -118,7 +118,7 @@ export class RestPlace extends WebPlace implements Place {
     this.namesLike = namesLike
     this.operations = operations ?? {}
     this.collections = collections
-    this.everyCollection = everyCollection
+    this.allCollections = allCollections
     this.versions = versions
     this.updateMethod = update
     this.params = { ...REST_PARAMS, ...params }
@@ -363,8 +363,8 @@ export class RestPlace extends WebPlace implements Place {
   private mappingOf(collection: string): RestCollection {
     const own = this.collections[collection]
     const added = this.addedFields.get(collection)
-    const fields = { ...this.everyCollection?.fields, ...own?.fields, ...added }
-    return { ...this.everyCollection, ...own, fields }
+    const fields = { ...this.allCollections?.fields, ...own?.fields, ...added }
+    return { ...this.allCollections, ...own, fields }
   }
 
   /** Where the thing with this id is:  an id that's a whole address is where it is, as on a server whose rows name themselves. */
@@ -425,7 +425,7 @@ export type RestPlaceProps = WebPlaceProps & {
   /** Each collection's mapping, by the name we call it.  One not named:  `/<name>{/id}`, and the same field names. */
   collections?: Readonly<Record<string, RestCollection>>
   /** What's the same of every collection:  each one's own mapping wins, field by field. */
-  everyCollection?: RestCollection
+  allCollections?: RestCollection
   /** What this API does for itself, over a plain one that does nothing.  Declared per API:  they vary. */
   can?: Partial<Omit<PlaceCapabilities, "page">> & { page?: Exclude<PageKind, "range"> }
   /** Each named operation's address under `url`, by its name:  `{ publish: "/recipes/publish" }`, for `call()`. */

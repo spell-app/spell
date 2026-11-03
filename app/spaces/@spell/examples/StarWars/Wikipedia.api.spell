@@ -1,0 +1,27 @@
+## Wikipedia:  a page each, by its name.  Not every name has one
+// A server other people run:  what Star Wars shows of a character, a planet or a ship, and its picture.
+// Written by hand:  Wikipedia's page summaries are found by a name, so there's no list to look at.
+// Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
+
+wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
+	- check it every day
+	- wiki pages live at "/page/summary"
+	- a wiki page's id is its "pageid"
+
+a "wiki page" is a thing:
+	- it lives in wikipedia
+	- its "title" is text
+	- its "about" is text, stored as "description"
+	- its "summary" is text, stored as "extract"
+	- its "thumbnail" is a thumbnail
+	- its "content urls" is a page address book
+
+// What's inside a page's answer, read in words:  `the source of its thumbnail`
+a "thumbnail" is a thing:
+	- its "source" is text
+
+a "page address book" is a thing:
+	- its "desktop" is a page address
+
+a "page address" is a thing:
+	- its "page" is text

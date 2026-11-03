@@ -1,11 +1,12 @@
-// What `spell place ingest` found.  `spell place ingest --update` looks again, and changes what it wrote.
+// What `spell place ingest` found.  `spell place update` looks again, and changes what it wrote.
 // A key of your own here, and a comment, stays;  so do the words a field or a collection goes by.
+// What every collection has the same is in `allCollections`;  a collection's own setting wins.
 {
   "about": {
     "name": "star wars",
     "kind": "web server",
     "address": "https://swapi.py4e.com/api",
-    "lookedAt": "2026-11-03T02:55:22.296Z",
+    "lookedAt": "2026-11-03T15:10:54.638Z",
     "fingerprint": "5177353c7e1596cb",
     "readBy": "nobody:  worked out from what came back",
     "docsAt": "https://swapi.py4e.com/documentation"
@@ -17,17 +18,19 @@
     "limits": "It named none in its answers.",
     "browsers": "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."
   },
+  "allCollections": {
+    "idField": "url",
+    "idIsAnAddress": true,
+    "paging": "next field",
+    "rowsAt": "results",
+    "nextAt": "next"
+  },
   "collections": {
     "people": {
       "type": "character",
       "at": "/people",
       "rowsSeen": 30,
       "rowsItSays": 87,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
@@ -144,11 +147,6 @@
       "at": "/planets",
       "rowsSeen": 30,
       "rowsItSays": 61,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
@@ -256,11 +254,6 @@
       "at": "/films",
       "rowsSeen": 7,
       "rowsItSays": 7,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "title": {
           "words": "title",
@@ -363,11 +356,6 @@
       "at": "/species",
       "rowsSeen": 30,
       "rowsItSays": 37,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
@@ -469,11 +457,6 @@
       "at": "/vehicles",
       "rowsSeen": 30,
       "rowsItSays": 39,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",
@@ -588,11 +571,6 @@
       "at": "/starships",
       "rowsSeen": 30,
       "rowsItSays": 37,
-      "idField": "url",
-      "idIsAnAddress": true,
-      "paging": "next field",
-      "rowsAt": "results",
-      "nextAt": "next",
       "fields": {
         "name": {
           "words": "name",

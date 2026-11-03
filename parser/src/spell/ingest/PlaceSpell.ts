@@ -271,13 +271,8 @@ export function placeLineAt(text: string, address: string): string | undefined {
   return placesIn(text).find((place) => sameAddress(place.address, address))?.name
 }
 
-/** Is the place's name taken in `text` by another address? */
-export function nameIsTaken(text: string, name: string): boolean {
-  return placesIn(text).some((place) => place.name === name)
-}
-
-/** Every place's line in `text`. */
-function placesIn(text: string): Array<{ name: string; address: string }> {
+/** Every place's line in `text`:  its name and address. */
+export function placesIn(text: string): Array<{ name: string; address: string }> {
   return [...text.matchAll(PLACE_LINE)].map((match) => ({ name: match[1]!.trim(), address: match[2]! }))
 }
 

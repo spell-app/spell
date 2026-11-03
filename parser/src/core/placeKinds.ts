@@ -238,7 +238,7 @@ function storedAsIn(Class: Function): Record<string, string> {
 function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDetails) {
   if (idColumn === undefined && rowsIn === undefined && nextPageIn === undefined) return {}
   return {
-    everyCollection: {
+    allCollections: {
       ...(idColumn !== undefined && idColumn !== ID_FIELD && { fields: { [ID_FIELD]: idColumn } }),
       ...(rowsIn !== undefined && { rowsAt: rowsIn }),
       ...(nextPageIn !== undefined && { nextAt: nextPageIn })

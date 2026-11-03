@@ -80,6 +80,23 @@ export type ProjectFileJSON = {
   listsStartAt?: 0 | 1
   /** Files it compiles, in order -- and other projects it imports. */
   imports: ImportEntryJSON[]
+  /** What's there for working on it, not for running it:  see `ProjectDevelopmentJSON`. */
+  development?: ProjectDevelopmentJSON
+}
+
+/**
+ * A project file's `development`:  files for working on the project, never compiled or shown in its file list.
+ * - e.g. `{ apis: ["StarWars.api.json5"] }`
+ */
+export type ProjectDevelopmentJSON = {
+  /**
+   * Each server's description, beside the `.api.spell` that reaches it, by its name in the project's folder:
+   * what `spell place ingest` found, and what `spell place update` changes (epic `data`).
+   * - The ingest and the update add theirs here.
+   * - A `.json5` file is never in a project's file list (`isManifestFile()`), so the editor shows none of them;
+   *   a page for looking at a server again would find them here.
+   */
+  apis?: string[]
 }
 
 /**
@@ -97,7 +114,7 @@ export type ManifestJSON = Record<string, ManifestEntryJSON>
  * - And for other project-file routes that return the updated index.
  * - `manifest` -- current on-disk manifest:  NOT persisted, always freshly computed from file system.
  * - `imports` -- import list, synced with `manifest` and persisted back to the project file when it changes.
- * - `title` / `version` / `exports` / `targets` / `listsStartAt` -- straight from the project file (`ProjectFileJSON`).
+ * - `title` / `version` / `exports` / `targets` / `listsStartAt` / `development` -- straight from the project file (`ProjectFileJSON`).
  * - `buildFolder` -- where its compiled output goes, inside the checkout's `build/`:  `project-utils.buildFolderInBuild()`.
  */
 export type ProjectIndexJSON = {
@@ -108,5 +125,6 @@ export type ProjectIndexJSON = {
   exports?: string[]
   targets?: string[]
   listsStartAt?: 0 | 1
+  development?: ProjectDevelopmentJSON
   buildFolder?: string
 }
