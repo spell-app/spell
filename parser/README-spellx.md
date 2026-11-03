@@ -103,7 +103,7 @@ reversible:`, and reads to the same tree as the English card.
 | A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
-| A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
+| A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for ...>`, and in a `<for>`, `<loading>` `<empty>` `<failed>`;  `else` for `otherwise`, `<for each ...>` for `<for ...>` | `<si ...>` `<si no si ...>` `<si no>` `<para ...>`, `<cargando>` `<vacío>` `<fallo>`;  `sino`, `de lo contrario` too, `<para cada ...>` |
 | An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
@@ -195,7 +195,7 @@ for (const { node, depth } of file.walk()) ...
 | `element` | a component in a drawing, `<text>`, `<button>` | markup |
 | `text`, `hole` | markup text;  a `{spell expression}` | -- |
 | `choice`, `branch` | an `<if>` chain and its branches | each branch's markup |
-| `loop` | `<for each ...>` | markup |
+| `loop` | `<for ...>` | markup |
 | `place` | `<draw "front" />`, where a slot goes | -- |
 
 </details>
@@ -307,6 +307,48 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   together, and `SX.SpellxFile.groupsOf(template)` lists them.
 - A property's aliases with no body are its `alias=`, as many as it has:
   `<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>`.
+
+**A list of data, `<for>`:**  one tag shows a list, waits for it, says when it's empty or failed, and pages it.
+
+```html
+<for every film title="The Films" as="cards" columns="4" doubling loading="Scanning..." />
+
+<for its characters as="table" celled paging="pages" empty="Nobody here">
+	<cell "Name">{its name}</cell>
+	<cell "Born">{its birth year}</cell>
+	<failed><text>Lost the signal</text></failed>
+</for>
+
+<for stars from 1 to 240>
+	<space class="streak" style={"--n: " + star} />
+</for>
+```
+
+- It's the loop every drawing already had:  with no attributes and nothing to wait for, it adds nothing to the page,
+  so `<for stars from 1 to 240>` is the plain loop it always was.
+- Its item is named for the list:  `<for films>`, `<for every film where ...>` and `<for its films>` each give `film`;
+  `it` works too.  `each` isn't written any more, but `<for each film in films>` still reads.
+- With no body, each item draws itself, as `draw the film` does;  in a body, `<film/>` is this film.
+- Read from a place, it shows a loader while it waits, and a message with Try again if the read fails, by itself.
+- Its own attributes, in English and Spanish:
+  - `title="..."` (`título`):  a `<ui-section>` around it, titled
+  - `as="cards"` (`como`):  what's around its items, `cards`, `list`, `table` or any component;
+    every other attribute goes on it (`columns="4" doubling`, `celled`)
+  - `loading` (`cargando`):  `loading="Scanning..."` adds words to the loader, `loading={no}` shows none
+  - `empty` (`vacío`):  bare says "Nothing found", `empty="..."` your own words;  with neither, an empty list shows nothing
+  - `hide-empty` (`ocultar-vacío`):  hides the title too, while there's nothing in it
+  - `failed="..."` (`fallo`):  your own words when the read fails, Try again kept;  `failed={no}` shows nothing
+  - `paging=` (`paginación`):  `infinite`, the default, draws more as you scroll;  `pages` (`páginas`) draws a page at
+    a time, with Previous and Next;  `none` (`ninguna`) draws them all
+- `<loading>`, `<empty>` and `<failed>` in its body are your own drawings in their places.
+- A table's `<cell "Name">` names its column:  the header row comes from the first row's cells.
+- Its attributes and those three read as the drawing around it does:  `title={its heading}` is the drawing's heading,
+  not the item's.
+- A flag written before its attributes, `<for films doubling as="cards">`, reads as part of the list:  an error says to
+  move it.
+- Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
+  `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
+  `the message if that fails is "..."`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 

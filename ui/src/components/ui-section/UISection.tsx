@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { Show, onSettled } from "solid-js"
 import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell/ui/core"
@@ -447,6 +447,21 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** Which named slots have light-DOM content:  icon, badge, hint, actions. */
   readonly slots = new E.SlotContent(this.domElement)
 
+  /** What `hide-empty="<selector>"` finds in it, as its content changes. */
+  readonly selected = new ContentMatch(this.domElement, () => this.hideEmpty)
+
+  /**
+   * `hide-empty`, and nothing in it to see:  hidden (`:state(empty)`).
+   * - Its content:  the default slot's children, as `SlotContent` reads them, so Solid's markers and blank text don't count.
+   * - `hide-empty="<selector>"`:  only what matches counts.
+   */
+  @E.cssState("empty")
+  get isEmpty(): boolean {
+    const hideEmpty = this.hideEmpty
+    if (hideEmpty == null) return false
+    return isSelector(hideEmpty) ? !this.selected.matches : !this.slots.hasContent("")
+  }
+
   /** Glyph of the `icon` shorthand. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
 
@@ -877,3 +892,36 @@ const HEIGHT_PROPERTY = "--_ui-section-height"
  * the top-level `offset`, or the stack of enclosing sticky titles above it, in pixels.
  */
 const STICK_TOP_PROPERTY = "--_ui-section-top"
+
+/** Is `hide-empty`'s value a selector, not just there (`""`, `"true"`)? */
+function isSelector(value: string): boolean {
+  return !!value && value !== "true"
+}
+
+/****************
+ * ### `ContentMatch`
+ * Does anything in a DOM element match a selector, as its content changes:  `<ui-section hide-empty="ui-card">`.
+ * - Watches only while the selector is one:  a plain `hide-empty` reads `SlotContent` instead.
+ * - MUST be created under the component's owner;  the observer is disconnected when that owner is disposed.
+ ****************/
+class ContentMatch {
+  /** Is something in it matching?  Tracked. */
+  @E.state accessor matches = false
+
+  constructor(
+    private readonly domElement: HTMLElement,
+    private readonly selector: () => string | null | undefined
+  ) {
+    if (isServer) return
+    onSettled(() => {
+      const scan = () => {
+        const selector = this.selector()
+        this.matches = !!selector && isSelector(selector) && !!this.domElement.querySelector(selector)
+      }
+      const observer = new MutationObserver(scan)
+      observer.observe(this.domElement, { childList: true, subtree: true })
+      scan()
+      return () => observer.disconnect()
+    })
+  }
+}

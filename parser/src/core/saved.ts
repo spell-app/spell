@@ -85,7 +85,7 @@ export type ReadRiders = {
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
   failed?: () => Drawing
-  /** `if that fails say "..."`:  the message that shows, Try again kept. */
+  /** `the message if that fails is "..."`:  the message that shows, Try again kept. */
   failedSay?: () => unknown
   /** `show them in:`:  the element the items go in, the loader and messages staying outside it. */
   items?: () => unknown
@@ -1207,7 +1207,7 @@ export const savedMethods = defineCoreModule({
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
       const more = () => MORE_PAGES.get(current() as object)
       const paging = riders.paging?.()
-      const around = riders.items?.() as Element | undefined
+      const around = elementOf(riders.items?.())
       const row = around?.firstElementChild ?? undefined
       const drawItem = (item: Item, position: () => number) => {
         const drawing = drawEach(item, position() + 1)
@@ -1257,7 +1257,7 @@ export const savedMethods = defineCoreModule({
         return body()
       }
     }) as Drawing
-    const section = riders.whole?.() as Element | undefined
+    const section = elementOf(riders.whole?.())
     return section ? (drawnIn(section, whole as JSX.Element) as Drawing) : whole
   }
 })
@@ -1293,6 +1293,22 @@ function drawnLoader(): Drawing {
   return h("ui-loader", { visible: true, inline: true }) as unknown as Drawing
 }
 
+/**
+ * What a drawing of one element made:  `h()` hands back a function that makes it, called here.
+ * - Only for markup a rider names, `<ui-cards>`:  never a value that changes, which a function would follow.
+ */
+function made(drawing: unknown): unknown {
+  let value = drawing
+  while (typeof value === "function") value = (value as () => unknown)()
+  return value
+}
+
+/** The element a rider's markup made, or `undefined`. */
+function elementOf(drawing: unknown): Element | undefined {
+  const value = made(drawing)
+  return value instanceof Element ? value : undefined
+}
+
 /** `drawing`, inside `element`:  what's around a list's items, or its section. */
 function drawnIn(element: Element, drawing: JSX.Element): JSX.Element {
   insert(element, () => drawing)
@@ -1305,7 +1321,8 @@ function drawnIn(element: Element, drawing: JSX.Element): JSX.Element {
  */
 function rowOf(row: Element, table: Element, cells: Drawing): JSX.Element {
   const drawn = row.cloneNode(false) as Element
-  insert(drawn, () => cells as JSX.Element)
+  // made now, so the header can read what each cell's named
+  insert(drawn, made(cells) as JSX.Element)
   const named = [...drawn.children].filter((cell) => cell.hasAttribute(COLUMN_NAME))
   if (named.length && !table.querySelector(`:scope > [${HEADER_ROW}]`)) {
     const header = row.cloneNode(false) as Element

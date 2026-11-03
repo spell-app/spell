@@ -338,7 +338,7 @@ export const spanishWords: SP.LanguageWords = {
         waiting: "mientras espera :",
         none: "si no hay nada :",
         failed: "si falla :",
-        failedSay: "si falla di",
+        failedSay: "el mensaje si falla es",
         items: "mostrarlos en :",
         whole: "mostrar todo en :",
         inPages: "mostrarlos en páginas",

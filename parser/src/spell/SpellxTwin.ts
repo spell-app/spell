@@ -685,7 +685,7 @@ export class SpellxTwin {
     const title = own("title")
     if (title?.value) {
       const hidden = hideEmpty ? " hide-empty" : ""
-      lines.push(`${words.whole} <ui-section header={${said(title)}}${hidden}></ui-section>`)
+      lines.push(`${words.whole} <ui-section label={${said(title)}}${hidden}></ui-section>`)
     }
     const paging = own("paging")?.value?.text
     if (paging === words.pages) lines.push(words.inPages)

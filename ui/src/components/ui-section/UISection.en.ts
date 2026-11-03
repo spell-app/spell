@@ -90,6 +90,15 @@ export const sectionVocabulary = {
         "breaks)."
     },
     {
+      name: "hide-empty",
+      group: "behaviour",
+      kind: "string",
+      description:
+        "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  " +
+        'A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  ' +
+        '`hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.'
+    },
+    {
       name: "collapsible",
       group: "behaviour",
       kind: "boolean",
@@ -299,6 +308,7 @@ export const sectionVocabulary = {
   ],
   states: [
     { name: "collapsed", description: "Closed." },
+    { name: "empty", description: "With `hide-empty`:  nothing in it to see, so it's hidden." },
     { name: "stuck", description: "With `sticky`:  the title bar is stuck to the top." },
     {
       name: "stacked",

@@ -44,8 +44,9 @@ export class ReadRider extends SpellStatement<"body?"> {
     return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("rider-only-in-a-drawing"))
   }
 
+  /** Its body reads as the drawing around the loop does:  in a `<for>`'s body, `its` is still the drawing's, not the item's. */
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
-    return new P.MethodScope({ parentScope: match.scope, declaredBy: match })
+    return new P.MethodScope({ parentScope: outsideTheLoop(match.scope), declaredBy: match })
   }
 
   /** `core.readRider("waiting", () => ...)`, until `DrawnLines` takes it into its read.  With no read above it:  nothing draws it. */
@@ -62,7 +63,7 @@ export class ReadRider extends SpellStatement<"body?"> {
 }
 
 /**
- * `if that fails say "Lost the signal"`:  the failure's own words, its Try again kept -- see `core.drawRead()`.
+ * `the message if that fails is "Lost the signal"`:  the failure's own words, its Try again kept -- see `core.drawRead()`.
  */
 export class IfThatFailsSay extends SpellStatement<"text"> {
   @proto static alias = "statement"
@@ -71,6 +72,11 @@ export class IfThatFailsSay extends SpellStatement<"text"> {
   @proto static loops = true
   @proto static kind: RiderKind = "failedSay"
   declare kind: RiderKind
+
+  /** Its words read as the drawing around the loop does -- see `ReadRider.getNestedScopeForMatch()`. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    return super.parse(outsideTheLoop(scope), tokens)
+  }
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     return riderSaying(match, this.kind, P.matchAST(match.groups.text))
@@ -98,6 +104,15 @@ export class ShowThemPaged extends SpellStatement {
 /** `show them all` -- see `ShowThemPaged`. */
 export class ShowThemAll extends ShowThemPaged {
   @proto static paging: "pages" | "all" = "all"
+}
+
+/**
+ * The scope a rider written in a loop's body reads in:  the loop's own, outside it.
+ * - So `<for its films loading={its signal}>` and its `<failed>` mean the drawing's `its`, as a rider under the loop would.
+ */
+function outsideTheLoop(scope: P.Scope): P.Scope {
+  const rule = (scope as P.MethodScope).declaredBy?.rule as { loops?: boolean; kind?: unknown } | undefined
+  return rule?.loops && rule.kind === undefined && scope.parentScope ? scope.parentScope : scope
 }
 
 /** `core.readRider(kind, () => value)`, until `DrawnLines` takes it into its read. */

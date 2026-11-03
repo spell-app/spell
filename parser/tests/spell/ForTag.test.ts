@@ -137,3 +137,35 @@ describe("<for>", () => {
     expect(code).toContain("core.drawThing(film)")
   })
 })
+
+describe("<for>'s attributes and slots read as the drawing does", () => {
+  beforeAll(registerTestComponentPack)
+
+  test("its, in a title or a <failed>, is the drawing's, not the item's", () => {
+    const contents = [
+      '<spell-thing "film">',
+      "\t<spell>",
+      '\t\t- its "title" is text',
+      "\t</spell>",
+      "\t<draw><text>{its title}</text></draw>",
+      "</spell-thing>",
+      '<spell-view "shelf">',
+      "\t<spell>",
+      '\t\t- its "films" is a list of films',
+      '\t\t- its "heading" is text',
+      "\t</spell>",
+      "\t<draw>",
+      "\t\t<for its films title={its heading}>",
+      "\t\t\t<text>{its title}</text>",
+      "\t\t\t<failed><text>{its heading}</text></failed>",
+      "\t\t</for>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Shelf.spellml", contents }]).files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain("film.title")
+    expect(file!.compiled).toContain("label: () => this.heading")
+    expect(file!.compiled).toContain('h("ui-text", () => this.heading)')
+  })
+})

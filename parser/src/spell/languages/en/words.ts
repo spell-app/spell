@@ -308,7 +308,7 @@ export const englishWords: SP.LanguageWords = {
         if: "if {phrase}",
         "otherwise if": "otherwise if {phrase}",
         otherwise: "otherwise",
-        "for each": "for each {phrase}",
+        "for each": "for {phrase}",
         "for waiting": "while waiting :",
         "for none": "if there are none :",
         "for failed": "if that fails :"
@@ -317,7 +317,7 @@ export const englishWords: SP.LanguageWords = {
         waiting: "while waiting :",
         none: "if there are none :",
         failed: "if that fails :",
-        failedSay: "if that fails say",
+        failedSay: "the message if that fails is",
         items: "show them in :",
         whole: "show it all in :",
         inPages: "show them in pages",
