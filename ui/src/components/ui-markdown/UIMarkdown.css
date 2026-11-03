@@ -363,6 +363,11 @@
   }
 
   [part~="edit-bar"] {
+    /* a popover (the top layer):  the browser's own popover box undone */
+    inset: auto;
+    margin-inline: 0;
+    overflow: visible;
+    color: inherit;
     position: fixed;
     position-anchor: --ui-markdown-box;
     position-area: block-start span-inline-end;
@@ -378,11 +383,12 @@
     background: var(--_ui-markdown-bar-background);
     /* a theme's see-through ground still reads:  what's under it blurred away */
     backdrop-filter: blur(12px);
+    /* its shape menu opens on the bar's own ground:  a theme's see-through surface let the page show through */
+    --ui-select-picker-background: var(--_ui-markdown-bar-background);
     box-shadow: 0 2px 8px color-mix(in oklch, black 12%, transparent);
     font-size: 0.875em;
   }
 
-  [part~="edit-bar"] select,
   [part~="edit-bar"] input {
     font: inherit;
     padding: 0.2em 0.4em;

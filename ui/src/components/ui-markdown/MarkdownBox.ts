@@ -38,8 +38,8 @@ export class MarkdownBox {
   /** The bar's buttons, by what they do. */
   private readonly buttons = new Map<BarAction, HTMLElement>()
 
-  /** The shape menu. */
-  private readonly shapes: HTMLSelectElement
+  /** The shape menu:  Spell UI's `<ui-select>`, so it looks as every dropdown on the page does (Owen's C1 on J196). */
+  private readonly shapes: HTMLElement
 
   /** The link's address field, while it's asked for. */
   private readonly address: HTMLInputElement
@@ -63,7 +63,7 @@ export class MarkdownBox {
     this.field.addEventListener("paste", this.onPaste)
     this.field.addEventListener("focusout", props.onLeave)
     this.field.ownerDocument.addEventListener("selectionchange", this.onSelectionChange)
-    this.shapes = document.createElement("select")
+    this.shapes = document.createElement("ui-select")
     this.address = document.createElement("input")
     this.bar = this.drawBar()
     this.draw(props.raw)
@@ -134,7 +134,7 @@ export class MarkdownBox {
   reshape(shape: Shape) {
     if (!this.shape) return
     this.shape = shape
-    this.shapes.value = shape.startsWith("h") ? shape : "paragraph"
+    this.shapes.setAttribute("value", shape.startsWith("h") ? shape : "paragraph")
     this.changed()
   }
 
@@ -266,10 +266,12 @@ export class MarkdownBox {
     const bar = document.createElement("span")
     bar.setAttribute("part", parts.bar)
     bar.setAttribute("role", "toolbar")
+    // a popover the owner shows:  the top layer, so nothing on the page (a stuck title) covers it
+    bar.popover = "manual"
     bar.setAttribute("aria-label", texts("formatBar"))
     // a press never takes the focus from the box:  its cursor and selection stay (the menu and field excepted)
     bar.addEventListener("mousedown", (event) => {
-      if (event.target !== this.shapes && event.target !== this.address) event.preventDefault()
+      if (!event.composedPath().includes(this.shapes) && event.target !== this.address) event.preventDefault()
     })
     for (const action of BAR_ACTIONS) {
       if (action === "shape") {
@@ -299,19 +301,22 @@ export class MarkdownBox {
   }
 
   /** The shape menu:  Paragraph, H2, H3, H4 (a list is the list buttons'). */
-  private drawShapes(): HTMLSelectElement {
+  private drawShapes(): HTMLElement {
     const { document, texts } = this.props
     for (const shape of MENU_SHAPES) {
-      const option = document.createElement("option")
-      option.value = shape
-      option.textContent = texts(SHAPE_TEXTS[shape as MenuShape])
-      this.shapes.append(option)
+      const item = document.createElement("ui-item")
+      item.setAttribute("value", shape)
+      item.textContent = texts(SHAPE_TEXTS[shape as MenuShape])
+      this.shapes.append(item)
     }
-    this.shapes.value = this.shape?.startsWith("h") ? this.shape : "paragraph"
+    this.shapes.setAttribute("size", "small")
+    this.shapes.setAttribute("value", this.shape?.startsWith("h") ? this.shape : "paragraph")
     this.shapes.setAttribute("aria-label", texts("shape"))
     this.shapes.title = texts("shape")
-    this.shapes.addEventListener("change", () => {
-      this.reshape(this.shapes.value as Shape)
+    this.shapes.addEventListener("ui-changed", (event) => {
+      const { value } = (event as CustomEvent<{ value: string }>).detail
+      if (value === this.shape) return
+      this.reshape(value as Shape)
       this.field.focus()
     })
     return this.shapes

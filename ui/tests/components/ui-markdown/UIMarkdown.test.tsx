@@ -627,10 +627,12 @@ describe("<ui-markdown editable> formatting", () => {
     await open(host, "words here")
     const icons = [...bar(host).querySelectorAll("ui-button")].map((button) => button.getAttribute("icon"))
     expect(icons).toEqual(["bold", "italic", "strikethrough", "link", "list ul", "list ol", "eraser", "eye"])
-    expect(bar(host).querySelector("select")).toBeTruthy()
+    // Spell UI's own dropdown, never the browser's (Owen's C1 on J196)
+    expect(bar(host).querySelector("ui-select")).toBeTruthy()
+    expect(bar(host).querySelector("select")).toBeNull()
     await enter(host)
     await open(host, "b")
-    expect(bar(host).querySelector("select")).toBeNull()
+    expect(bar(host).querySelector("ui-select")).toBeNull()
     expect(bar(host).querySelectorAll("ui-button").length).toBe(6)
   })
 
@@ -652,9 +654,9 @@ describe("<ui-markdown editable> formatting", () => {
   it("the shape menu makes a paragraph a heading;  the list button makes it a list", async () => {
     const host = await editable("first\n\nsecond")
     await open(host, "first")
-    const menu = bar(host).querySelector("select")!
-    menu.value = "h2"
-    menu.dispatchEvent(new Event("change"))
+    // a pick, as <ui-select> says it:  ui-changed with the item's value
+    const menu = bar(host).querySelector("ui-select")!
+    menu.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "h2" } }))
     await enter(host)
     expect(host.content).toBe("## first\n\nsecond")
     await open(host, "second")
