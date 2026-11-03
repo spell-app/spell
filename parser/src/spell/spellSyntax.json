@@ -1853,7 +1853,7 @@
           "ruleNames": ["possessive_property"],
           "internal": false,
           "file": "src/spell/rules/properties/PossessiveProperty.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
           "syntaxes": [
             {
@@ -2146,8 +2146,8 @@
           "ruleNames": ["possessive_mark"],
           "internal": false,
           "file": "src/spell/rules/properties/PossessiveMark.ts",
-          "line": 10,
-          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16).",
+          "line": 16,
+          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16) -- or a plural's apostrophe alone, `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
         },
@@ -2157,7 +2157,7 @@
           "internal": false,
           "file": "src/spell/rules/properties/PossessiveOwner.ts",
           "line": 15,
-          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16).",
+          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
         }
@@ -2838,7 +2838,7 @@
           "ruleNames": ["possessive_ordinal"],
           "internal": false,
           "file": "src/spell/rules/lists/PossessiveOrdinal.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "`the deck's first card` ~== `the first card of the deck` (epic `language`, P16).",
           "syntaxes": [
             {
@@ -3115,7 +3115,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 25,
+          "line": 26,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -3147,6 +3147,20 @@
                   "code": "for card_rank in Card.RANKS:\n    core.console.log(card_rank)"
                 }
               }
+            }
+          ],
+          "aliases": ["statement", "expression"]
+        },
+        {
+          "className": "ListIterationNamedForList",
+          "ruleNames": ["list_iteration_named_for_list"],
+          "internal": false,
+          "file": "src/spell/rules/lists/ListIteration.ts",
+          "line": 91,
+          "purpose": "`for films`, `for every film where ...`, `for its films`: a loop with its item named for what's in the list -- `film`.",
+          "syntaxes": [
+            {
+              "syntax": "for each? {list:expression} :? {statement_body}?"
             }
           ],
           "aliases": ["statement", "expression"]
@@ -3753,11 +3767,11 @@
           "ruleNames": ["list_range_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRangeIteration.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
-              "syntax": "for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+              "syntax": "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
               "example": "for each number from 1 to 10:",
               "outputs": {
                 "js": {
@@ -5115,7 +5129,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 44,
+          "line": 46,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5130,6 +5144,21 @@
                 },
                 "py": {
                   "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> None:\n    pass"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+              "example": "a card's value is its rank * 2",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"value\", {\n  get() {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly value: number }\nObject.defineProperty(Card.prototype, \"value\", {\n  get(this: Card) {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> float:\n    return self.rank * 2"
                 }
               }
             },
@@ -5156,6 +5185,12 @@
             },
             {
               "syntax": "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5687,7 +5722,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {
@@ -5695,6 +5730,9 @@
             },
             {
               "syntax": "the {property:quoted_member} of (a|an) {type}"
+            },
+            {
+              "syntax": "(a|an) {type} {possessive_mark} {property:member_words}"
             }
           ],
           "aliases": ["type_property"]
@@ -6501,7 +6539,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 65,
+          "line": 149,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6515,7 +6553,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 73,
+          "line": 157,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6525,11 +6563,81 @@
           "aliases": ["statement"]
         },
         {
+          "className": "IfThatFailsSay",
+          "ruleNames": ["if_that_fails_say"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 68,
+          "purpose": "`the message if that fails is \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()`.",
+          "syntaxes": [
+            {
+              "syntax": "the message if that fails is {text:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemPaged",
+          "ruleNames": ["show_them_paged"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 89,
+          "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
+          "syntaxes": [
+            {
+              "syntax": "show them in pages"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemAll",
+          "ruleNames": ["show_them_all"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 105,
+          "purpose": "`show them all` -- see `ShowThemPaged`.",
+          "syntaxes": [
+            {
+              "syntax": "show them all"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowThemIn",
+          "ruleNames": ["show_them_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 139,
+          "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
+          "syntaxes": [
+            {
+              "syntax": "show them in :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowItAllIn",
+          "ruleNames": ["show_it_all_in"],
+          "internal": false,
+          "file": "src/spell/rules/places/ReadRider.ts",
+          "line": 144,
+          "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
+          "syntaxes": [
+            {
+              "syntax": "show it all in :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "IfThatFails",
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 88,
+          "line": 172,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {

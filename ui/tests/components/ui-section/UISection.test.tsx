@@ -1209,3 +1209,30 @@ async function joined(page: Element) {
   await ElementFixture.settle(page)
   await ElementFixture.tick()
 }
+
+describe("<ui-section hide-empty>", () => {
+  afterEach(() => Fixture.cleanup?.())
+
+  it("hides while nothing's in it to see, and shows as soon as something is", async () => {
+    const { host } = await section(`<ui-section label="Films" hide-empty> </ui-section>`)
+    expect(host.matches(":state(empty)")).toBe(true)
+    expect(getComputedStyle(host).display).toBe("none")
+    host.append(document.createElement("ui-loader"))
+    await vi.waitFor(() => expect(host.matches(":state(empty)")).toBe(false))
+    expect(getComputedStyle(host).display).not.toBe("none")
+    host.replaceChildren(document.createComment(""), document.createTextNode("  "))
+    await vi.waitFor(() => expect(host.matches(":state(empty)")).toBe(true))
+  })
+
+  it("a selector narrows what counts", async () => {
+    const { host } = await section(`<ui-section label="Films" hide-empty="ui-label"><p>nothing yet</p></ui-section>`)
+    await vi.waitFor(() => expect(host.matches(":state(empty)")).toBe(true))
+    host.querySelector("p")!.append(document.createElement("ui-label"))
+    await vi.waitFor(() => expect(host.matches(":state(empty)")).toBe(false))
+  })
+
+  it("without hide-empty, an empty section shows", async () => {
+    const { host } = await section(`<ui-section label="Films"></ui-section>`)
+    expect(host.matches(":state(empty)")).toBe(false)
+  })
+})

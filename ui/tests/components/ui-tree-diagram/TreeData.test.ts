@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vite-plus/test"
 
-
 import { TreeData } from "spell/ui/components/ui-tree-diagram/TreeData"
 
 describe("TreeData.node()", () => {

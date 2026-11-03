@@ -142,7 +142,7 @@ export class SpellxTwin {
         return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :", { items }))
       }
       case "control":
-        return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"))
+        return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"), this.forLines())
       case "start":
         return {
           line: new P.LineToken({ ...this.line.record, tokens: this.expand(this.words.start) }),
@@ -654,6 +654,53 @@ export class SpellxTwin {
     return tokens
   }
 
+  /**
+   * A `<for>`'s attributes, as lines of code spell at the top of its body:  a rider each, as `while waiting:` is.
+   * - `loading={no}`:  a rider with nothing in it.
+   * - `hide-empty` goes on the section, so nothing but a title needs it;  with it, no "nothing found" either.
+   * - Whatever isn't its own goes on what's around its items:  `<for films as="cards" columns="4" />`.
+   */
+  private forLines(): P.Token[][] {
+    const { tag } = this
+    if (tag.kind !== "for each" || !tag.attributes.length) return []
+    const words = this.words.forTag
+    const own = (name: string) => tag.attributes.find((attribute) => attribute.name === name)
+    const isNo = (attribute: SP.SpellxAttribute) =>
+      !attribute.value?.quoted && attribute.value?.text.trim() === words.no
+    const said = (attribute: SP.SpellxAttribute) =>
+      attribute.value?.quoted ? `"${attribute.value.text}"` : attribute.value!.text.trim()
+    const lines: string[] = []
+    const loading = own("loading")
+    if (loading && isNo(loading)) lines.push(words.waiting)
+    else if (loading?.value)
+      lines.push(`${words.waiting} <ui-loader visible inline text>{${said(loading)}}</ui-loader>`)
+    const empty = own("empty")
+    const hideEmpty = own("hide-empty")
+    if (empty && !hideEmpty && !isNo(empty)) {
+      const text = empty.value ? said(empty) : `"${words.nothingFound}"`
+      lines.push(`${words.none} <ui-text>{${text}}</ui-text>`)
+    }
+    const failed = own("failed")
+    if (failed && isNo(failed)) lines.push(words.failed)
+    else if (failed?.value) lines.push(`${words.failedSay} ${said(failed)}`)
+    const title = own("title")
+    if (title?.value) {
+      const hidden = hideEmpty ? ' hide-empty=""' : ""
+      lines.push(`${words.whole} <ui-section label={${said(title)}}${hidden}></ui-section>`)
+    }
+    const paging = own("paging")?.value?.text
+    if (paging === words.pages) lines.push(words.inPages)
+    else if (paging === words.none_) lines.push(words.allAtOnce)
+    const layout = own("as")?.value?.text
+    if (layout) {
+      const handedOn = tag.attributes.filter((attribute) => !FOR_OWN_ATTRIBUTES.has(attribute.name))
+      const head = [layout, ...handedOn.map((attribute) => attribute.raw)].join(" ")
+      const row = layout === words.table ? `<${words.row}></${words.row}>` : ""
+      lines.push(`${words.items} <${head}>${row}</${layout}>`)
+    }
+    return lines.map((line) => this.synthetic(line))
+  }
+
   /** The text for slot `name`:  from `slots`, else the tag's own. */
   private slot(name: string, slots: Record<string, SP.SpellxText | undefined>): SP.SpellxText | undefined {
     if (name in slots) return slots[name]
@@ -775,3 +822,6 @@ const MARKDOWN = "markdown"
 
 /** A tag's attributes that are never an event's parameters. */
 const NOT_PARAMS = new Set(["name", "description", "group"])
+
+/** `<for>`'s own attributes, by their English names:  any other goes on what's around its items. */
+const FOR_OWN_ATTRIBUTES = new Set(["title", "loading", "empty", "hide-empty", "failed", "paging", "as"])

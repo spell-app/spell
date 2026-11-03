@@ -290,6 +290,18 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   - "All or nothing" stays as plain words for what a place promises:  `PlaceCapabilities.atomic`'s docs.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15.
 
+### for, a list of data
+
+- **Say:**  `for films`, `for film in films`, `for stars from 1 to 240`;  in a drawing, `<for films ... />`, which also
+  waits, says when it's empty or failed, and pages:  `title`, `as`, `loading`, `empty`, `hide-empty`, `failed`, `paging`.
+  - Spanish:  `para películas`, `<para ...>`;  `para cada` where it reads better.
+  - Its item is named for the list, made singular;  `it` too.
+  - `hide-empty` on `<ui-section>` as well:  hidden while nothing's in it to see.
+- **Not:**  `for each` in what we write (still read, as people will type it);  `<each>`, a widget of its own.
+- **Decided:**  Owen, 2026-10-31, epic `data` P22:  "`<for film in films` should do all of the above", "maybe we don't
+  need the `each` at all?", "`loading={no}` should turn off loading indicator".
+- **Score:**  `^\s*<?for each\b` · in `app/spaces/@spell/examples`, `app/spaces/@spell/guides`, `app/spaces/@spell/notebooks`
+
 ### the person using the program
 
 - **Say:**  `they`, `them`, `their name`, and `the person` when things are ambiguous:  the person using the program, who may not be whoever wrote it.
@@ -299,7 +311,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
   - In code:  `core.currentPerson()`, `core.isCurrentPerson()`.
   - Spanish:  `esa persona`, `la persona`, `el nombre de esa persona`:  no `su`, which already means its.
 - **Not:**  me, my, the current person, the user.
-- A program's own wins:  in `for each person in everyone here`, `the person` is the loop's, and `them` still the one using it.
+- A program's own wins:  in `for person in everyone here`, `the person` is the loop's, and `them` still the one using it.
 - **Decided:**  Owen, 2026-10-31, epic `data` P15:  "you are speaking about the person using the program, which may not be 'you'".
   `where they are the cook`:  Owen, 2026-10-31, epic `data` T66.
 

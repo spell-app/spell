@@ -212,7 +212,10 @@ export class SiteDataBuilder {
 
   /** `ui-breadcrumb` => `Breadcrumb section`;  `ui-example` => `Docs example`;  `ui-json` => `JSON`. */
   static nameFor(tag: string): string {
-    const words = tag.replace(/^ui-/, "").replace(/-/g, " ").replace(/^json$/, "JSON")
+    const words = tag
+      .replace(/^ui-/, "")
+      .replace(/-/g, " ")
+      .replace(/^json$/, "JSON")
     return words.charAt(0).toUpperCase() + words.slice(1)
   }
 

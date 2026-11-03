@@ -41,6 +41,8 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // `elemental-spell` P16);  and a tree diagram's node, by its label:  `<tree-node "If">` (P32);  each language's word
   quotedNameTags: {
     example: "name",
+    cell: "data-column",
+    celda: "data-column",
     ejemplo: "name",
     "tree-node": "label",
     "ui-tree-node": "label",

@@ -166,6 +166,7 @@ export const sharedEs = {
     compact: "compacto",
     tree: "arbol",
     collapsible: "plegable",
+    "hide-empty": "ocultar-vacia",
     open: "abierto",
     source: "fuente",
     parent: "padre",

@@ -30,7 +30,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "made-from-each-other":
     '{circle}:  cada uno hace el siguiente al hacerse, así que ninguno puede hacerse nunca.  Guarda uno sin "nuevo", y hazlo en una acción',
   "statement-in-markup":
-    '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para cada libro en sus libros: dibujar libro}"',
+    '"{line}" se muestra como texto:  no puede ir dentro de un elemento en una línea propia.  Escríbelo entre llaves, como en "{para libro en sus libros: dibujar libro}"',
   "never-empty":
     '{AType} no es una lista, así que no tiene nada que vaciar:  di cuál, como en "si sus libros está vacío"',
   "untyped-list-property-is": 'Di qué contiene "{name}", p. ej. "{line} una lista de {items}"',
@@ -119,6 +119,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "possessive-either":
     'Se lee como {property} de {owner};  {whole} también tiene {property}:  para ese, escribe "{property} de {whole}"',
   "its-not-it-is": '"it\'s" quiere decir "it is":  para su {property}, escribe "its {property}"',
+  "possessive-needs-s":
+    'Un apóstrofo solo sigue a una palabra que acaba en "s", como en "the cards\' names":  escribe "{owner}\'s {property}"',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
@@ -219,6 +221,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '{tag} elige lo que muestra un elemento, así que va dentro de uno:  para elegir todo el dibujo, escribe "{if} ..." en una línea propia',
   "spellx-otherwise-without-if": '{tag} necesita un "{if}" antes',
   "spellx-otherwise-after-closed-if": '{tag} sigue el "{if}" de arriba, pero un "</>" lo cerró:  quita el "</>"',
+  "spellx-for-flag-first":
+    'Mueve "{flag}" después de los atributos de {tag}:  escrito primero, se lee como parte de la lista',
+  "spellx-for-needs-as": '"{attribute}" en {tag} va en lo que rodea a sus elementos:  di cuál, con {as}="tarjetas"',
+  "spellx-for-table-needs-cells":
+    '{tag} dibuja una fila por elemento:  nombra sus columnas, <celda "Nombre">{su nombre}</celda>',
   "spellx-missing-phrase": '{tag} necesita palabras después de su "{word}"',
   "spellx-indented-less": "Esta línea tiene menos sangría que el resto de {tag}:  dale un paso más que {tag}",
   "spellx-nested-template": '{tag} no puede ir dentro de {outer}:  cierra {outer} primero, con "</>"',

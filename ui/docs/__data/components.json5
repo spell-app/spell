@@ -19567,6 +19567,11 @@
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
+        },
+        {
           "name": "collapsible",
           "kind": "boolean",
           "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
@@ -19954,6 +19959,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -22460,6 +22469,11 @@
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
+        },
+        {
           "name": "collapsible",
           "kind": "boolean",
           "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
@@ -22941,6 +22955,10 @@
           "description": "Closed."
         },
         {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
+        },
+        {
           "name": "stuck",
           "description": "With `sticky`:  the title bar is stuck to the top."
         },
@@ -23196,6 +23214,11 @@
           "name": "description",
           "kind": "string",
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
+        },
+        {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
         },
         {
           "name": "collapsible",
@@ -23611,6 +23634,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",
@@ -26782,6 +26809,11 @@
           "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks)."
         },
         {
+          "name": "hide-empty",
+          "kind": "string",
+          "description": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes."
+        },
+        {
           "name": "collapsible",
           "kind": "boolean",
           "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there."
@@ -27168,6 +27200,10 @@
         {
           "name": "collapsed",
           "description": "Closed."
+        },
+        {
+          "name": "empty",
+          "description": "With `hide-empty`:  nothing in it to see, so it's hidden."
         },
         {
           "name": "stuck",

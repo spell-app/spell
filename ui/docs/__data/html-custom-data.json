@@ -23629,6 +23629,13 @@
           }
         },
         {
+          "name": "hide-empty",
+          "description": {
+            "kind": "markdown",
+            "value": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
@@ -26951,6 +26958,13 @@
           }
         },
         {
+          "name": "hide-empty",
+          "description": {
+            "kind": "markdown",
+            "value": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "collapsible",
           "description": {
             "kind": "markdown",
@@ -27521,6 +27535,13 @@
           "description": {
             "kind": "markdown",
             "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "hide-empty",
+          "description": {
+            "kind": "markdown",
+            "value": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes.\n\nTakes:  text"
           }
         },
         {
@@ -31769,6 +31790,13 @@
           "description": {
             "kind": "markdown",
             "value": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "hide-empty",
+          "description": {
+            "kind": "markdown",
+            "value": "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty=\"ui-card\"` hides it until a card is in it.  Follows its content as it changes.\n\nTakes:  text"
           }
         },
         {

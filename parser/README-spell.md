@@ -141,6 +141,9 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
     - `the first card of the deck's suit`:  the first card's suit, as a deck has no suit
     - when both would work, the nearest name's, with a warning saying how to write the other
   - `it's name` is an error:  `it's` means "it is".
+  - A plural's apostrophe alone:  `the cards' names` is `the names of the cards`;  any word ending in `s`, `the boss' name`.
+    `the card' name` is an error, saying to write `the card's name`.
+  - A declaration too:  `a card's color is red if ...` is `the color of a card is red if ...`.
 - One letter of text is a `letter` (or `char`):  `character` is free for a program's own type, Star Wars's say.
   - `the first character of the name` and `the characters of the name` still read its letters.
   - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.
@@ -281,7 +284,7 @@ Its first line is how you call it, with each blank's type in brackets:
 | --- | --- |
 | `to start the game` | `export function startTheGame() {}` |
 | `to move (a card) to (a pile)` | `async moveToPile(pile) { ... }`, a method of the card |
-| `for each card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
+| `for card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
 | `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
 - An action may be written in any file, yet be a method of a template another file declares:
@@ -453,7 +456,7 @@ export class Tableau extends Pile {
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
     `if it is face up`, then markup, `otherwise`, then other markup.
   - Several such lines draw all of them, in order;  so does a loop, one each time round:
-    `<ui-text>Scores</ui-text>`, then `for each score in its scores` with `<ui-text>{the score}</ui-text>` under it.
+    `<ui-text>Scores</ui-text>`, then `for score in its scores` with `<ui-text>{the score}</ui-text>` under it.
 - A view can have SLOTS, named drawings it places:
   - `- it has slots "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
     (Spanish:  `- tiene las ranuras "frente" y "dorso"`)
@@ -1023,7 +1026,7 @@ recipe box is an app:
 	- its "search" is text
 	- its "matches" is every recipe where its title includes the search, sorted by its title
 	- to draw it:
-		for each recipe in the matches
+		for recipe in the matches
 			draw the recipe
 		while waiting:
 			<ui-loader/>

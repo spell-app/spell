@@ -123,7 +123,10 @@ export class UITreeNode extends E.UIComponent<typeof treeNodeVocabulary> {
   static isNode(child: Node): child is Element {
     if (child.nodeType !== ELEMENT_NODE) return false
     const name = (child as Element).localName
-    return name === treeNodeVocabulary.tag || ("vocabulary" in UI && UI.vocabulary.canonicalTagFor(name) === treeNodeVocabulary.tag)
+    return (
+      name === treeNodeVocabulary.tag ||
+      ("vocabulary" in UI && UI.vocabulary.canonicalTagFor(name) === treeNodeVocabulary.tag)
+    )
   }
 
   /** The first `<ui-tree-node>` child of `domElement`:  a diagram's root. */

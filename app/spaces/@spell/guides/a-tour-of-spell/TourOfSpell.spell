@@ -61,7 +61,7 @@ garden is an app where:
 	// a day goes by:  every plant is one day drier
 	// (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
 	- to wait a day:
-		for each plant in its sill
+		for plant in its sill
 			set the plant's days since watered to the plant's days since watered + 1
 	- to draw it:
 		return <div class="Garden">

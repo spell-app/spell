@@ -26,7 +26,7 @@ bill splitter is an app where:
 	// what everyone ordered, added up
 	- its "subtotal" is:
 		set added up to 0
-		for each diner in its diners
+		for diner in its diners
 			set added up to added up + the amount of the diner
 		return added up
 	- its "tip" is its subtotal * its percent / 100

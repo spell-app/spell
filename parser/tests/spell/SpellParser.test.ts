@@ -8,7 +8,7 @@ describe("SpellParser's tokenizer", () => {
     const words: Record<string, string> = {}
     for (const lang of ["en", "es"]) {
       for (const [word, kind] of Object.entries(SP.Language.for(lang).words.spellx?.controls ?? {})) {
-        if (kind !== "for each") words[word] = kind
+        if (kind !== "for each" && !kind.startsWith("for ")) words[word] = kind
       }
     }
     expect(SP.CHAIN_TAGS).toEqual(words)

@@ -30,6 +30,8 @@ type NameRow = {
   action?: string
   /** `spell` is in a loose action, not one of the type's */
   outside?: boolean
+  /** a piece of the error it should give, when `js` is `ERROR` */
+  says?: string
   /** a piece of the warning it should give;  no `warns`:  it should give none */
   warns?: string
   /** the phase that makes this row true */
@@ -421,6 +423,54 @@ const ENGLISH: NameRow[] = [
     warns: "has a score too"
   },
 
+  // a plural's apostrophe alone, `the X' Y` ~== `the Y of the X` (T23)
+  {
+    title: "plural possessive:  the X' Y reads Y of the X",
+    spell: "set v to the rounds' length",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  as the Y of the X",
+    spell: "set v to the length of the rounds",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  a curly apostrophe too",
+    spell: "set v to the rounds’ length",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  every thing's",
+    spell: "set v to the piles' names",
+    js: "v = core.everyThing(Pile).names"
+  },
+  {
+    title: "plural possessive:  as the names of every thing",
+    spell: "set v to the names of the piles",
+    js: "v = core.everyThing(Pile).names"
+  },
+  {
+    title: "plural possessive:  an ordinal",
+    spell: "set v to the rounds' first round",
+    js: "v = this.rounds.firstItem"
+  },
+  {
+    title: "plural possessive:  as the ordinal of",
+    spell: "set v to the first round of the rounds",
+    js: "v = this.rounds.firstItem"
+  },
+  {
+    title: "plural possessive:  [the X' Y] in a text",
+    spell: 'set v to "[the rounds\' length]"',
+    js: "this.rounds.length}"
+  },
+  {
+    title: "plural possessive:  an apostrophe alone after no s is an error, saying so",
+    spell: "set v to the stock' name",
+    js: ERROR,
+    says: 'write "the stock\'s name"'
+  },
+
   // an action's own words
   { title: "action phrase:  a literal action name wins", spell: "reset the stock", js: "this.resetTheStock()" },
 
@@ -530,6 +580,7 @@ function checkRow(row: NameRow, path: string, project: typeof ENGLISH_PROJECT, a
   const { compiled, errors, warnings } = parseSpellProject([{ path, contents }]).files[0]!
   if (row.js === ERROR) {
     expect(errors).not.toEqual([])
+    if (row.says) expect(errors.filter((error) => `${error}`.includes(row.says!))).not.toEqual([])
     return
   }
   expect(errors).toEqual([])
