@@ -1601,6 +1601,11 @@ classes.addRule(ThePropertyOfAThing, {
   syntax: "the {property:quoted_member} of (a|an) {type}"
 })
 
+// a possessive (epic `language` T24):  `a card's color is red if ...` -- Spanish says `el color de una carta`
+classes.addRule(ThePropertyOfAThing, {
+  syntax: "(a|an) {type} {possessive_mark} {property:member_words}"
+})
+
 classes.addRule(AThingsProperty, {
   syntax: "(a|an) {type:plural_type} {property:member_words}"
 })
@@ -1656,6 +1661,29 @@ classes.addRule(PropertyValueEither, {
         ],
         [
           "a cards color is black if its suit is either clubs or spades otherwise it is red",
+          [
+            'Object.defineProperty(Card.prototype, "color", {',
+            "  get() {",
+            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
+            '    return "red"',
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          [
+            "export interface Card { readonly color: string }",
+            'Object.defineProperty(Card.prototype, "color", {',
+            "  get(this: Card) {",
+            '    if (core.includes(["clubs", "spades"], this.suit)) return "black"',
+            '    return "red"',
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        ],
+        // a possessive (epic `language` T24)
+        [
+          "a card's color is black if its suit is either clubs or spades otherwise it is red",
           [
             'Object.defineProperty(Card.prototype, "color", {',
             "  get() {",
@@ -1809,6 +1837,72 @@ classes.addRule(PropertyValueGetter, {
 classes.addRule(PropertyValueGetter, {
   syntax:
     "the {property:member_words} of (a|an) {type:known_type} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
+// ... and as a possessive (epic `language` T24):  `a card's value is its rank * 2`, `a card's "short name" is:`,
+// `a card's color is one of red, black:` -- last, so a translation finds Spanish's `el valor de una carta es` first
+classes.addRule(PropertyValueGetter, {
+  syntax: "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na card has a rank as a number")
+      },
+      tests: [
+        {
+          input: "a card's value is its rank * 2",
+          js: [
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get() {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly value: number }",
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get(this: Card) {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        },
+        {
+          title: "a curly apostrophe, a name of two words, a body",
+          input: ["a card’s short name is:", "\treturn its rank"],
+          js: [
+            'Object.defineProperty(Card.prototype, "shortName", {',
+            "  get() {",
+            "    return this.rank",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly shortName: number }",
+            'Object.defineProperty(Card.prototype, "shortName", {',
+            "  get(this: Card) {",
+            "    return this.rank",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax: "(a|an) {type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`

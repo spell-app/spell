@@ -175,6 +175,33 @@ properties.addRule(PossessiveProperty, {
       ]
     },
     {
+      title: "a plural's apostrophe alone (T23):  as `the X of Y`",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a suit as one of clubs, diamonds",
+            "a boss is a thing",
+            "a boss has a name as text",
+            "a deck is a list of cards",
+            "the cards is a new deck",
+            "the boss is a new boss"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["the cards' length", "cards.length"],
+        ["the cards’ length", "cards.length"],
+        ["the cards' names", "cards.names"],
+        ["the boss' name", "boss.name"],
+        ["the boss' name's length", "boss.name.length"],
+        ["the length of the boss' name", "boss.name.length"],
+        { title: "a word touching it after:  a contraction, not a possessive", input: "the cards'n suit", js: "cards" }
+      ]
+    },
+    {
       title: "loose:  one word, nothing need declare",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {

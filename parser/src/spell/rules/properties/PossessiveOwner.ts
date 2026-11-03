@@ -3,7 +3,7 @@ import { PossessiveMark } from "./PossessiveMark"
 
 /**
  * `possessive_owner` rule:  what comes before a possessive's `'s`, e.g. `the character` in `the character's name`
- * (epic `language`, P16).
+ * (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).
  * - Any operand, which must END at an `'s`:  so the possessive isn't its own first operand, forever.
  * - The LAST `'s` it can reach first, so a chain reads left to right:
  *   `the character's friend` owns `name` in `the character's friend's name`.

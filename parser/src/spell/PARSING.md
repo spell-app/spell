@@ -427,6 +427,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `possessive_owner` is any operand ending at an `'s`, parsed on the tokens cut there, the last `'s` first:
       so a chain reads left to right, and the rule is never its own first operand
     - `possessive_mark`:  an apostrophe (`'` or `’`) and `s`, touching each other and the owner
+      - or a plural's apostrophe alone (T23):  touching an owner WORD, a space after, `the cards' names`;
+        an owner not ending in `s` (`the card' name`) is read, and refused (`possessive-needs-s`);
+        a word touching it after (`doesn't`), or a lone `s` (`the card' s`), isn't one
     - it reads as `the X of Y` does:  the longest run declared (`Priority.mostSpecific`), else one loose word
       (`Priority.preferred`, so `the deck's first card` stays `possessive_ordinal`'s, at `Priority.specific`)
     - after an `of` (`SpellExpression.ofObject()`), the types say whose `'s` it is:
@@ -434,6 +437,10 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       both:  the nearest, and the `of` phrase warns (`PossessiveProperty.warnIfEitherReading()`)
     - never after a call:  `double the card's rank` doubles the rank
     - a translation writes it as `the X of Y`:  the rule's `writtenAs`
+  - A possessive DECLARATION (T24), `a card's color is red if ...`, is `the color of a card is ...`:
+    `property_value_getter` (registered last, so a translation finds Spanish's `el color de una carta es` first)
+    and `type_property` (`the_property_of_a_thing`) each have a syntax with `{possessive_mark}`;
+    a misspelled one is refused (`PossessiveProperty.refuseIfDeclarationMisspelled()`)
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
   - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`

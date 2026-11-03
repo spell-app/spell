@@ -8,6 +8,8 @@ import { PossessiveMark } from "./PossessiveMark"
 
 /**
  * `possessive_property` rule:  `the character's name` ~== `the name of the character` (epic `language`, P16).
+ * - A plural's apostrophe alone too (T23):  `the cards' names` ~== `the names of the cards`, whatever that reads,
+ *   e.g. a list's own `names`, loose -- never each card's name.  Any word ending in `s`:  `the boss' name`.
  * - Reads a member as `property_expression` does:
  *   - the LONGEST run of words its owner's type declares, e.g. `the card's short rank + 1`
  *   - a built-in type's member, e.g. `the deck's length`
@@ -17,6 +19,7 @@ import { PossessiveMark } from "./PossessiveMark"
  *   `double the card's rank` doubles the card's rank.
  *   - So a chain reads left to right:  `the character's friend's name`.
  *   - `it's name` is refused, saying `it's` means "it is" (`its-not-it-is`):  it still reads `its name`.
+ *   - `the card' name` is refused, saying to write `the card's name` (`possessive-needs-s`):  it still reads it.
  * - After an `of`, the TYPES say which name the `'s` belongs to (Q16):
  *   - the nearest one when its type has the member, e.g. `the name of [the character's friend]`
  *   - else the whole phrase, when its type is known and has it, e.g. `[the first card of the deck]'s suit`:  a deck has no suit
@@ -43,12 +46,8 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    const { expression: owner, property } = match.groups
-    const saysItIs = PossessiveProperty.isIt(scope, owner)
-    if (saysItIs) {
-      const message = SP.Language.of(scope).parserMessage("its-not-it-is", { property: `${property.raw}` })
-      SP.SpellWarnings.refuseIf(match, message, () => true, owner)
-    }
+    const { expression: owner, possessive_mark: mark, property } = match.groups
+    const misspelled = PossessiveProperty.refuseIfMisspelled(match, owner, mark, `${property.raw}`)
     if (!PossessiveProperty.belongsToWhole(scope, owner, property)) return undefined
     const ownerType = scope.getType(owner.datatype)
     const ownerPriority = owner.priority ?? owner.rule.priority
@@ -65,7 +64,7 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
     if (!PossessiveProperty.isLoose(scope, property)) return undefined
     match.priority = Math.max(Priority.preferred, ownerPriority)
     match.data.member = ownerType?.getMember(`${property.value}`)
-    if (!match.data.member && !saysItIs) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
+    if (!match.data.member && !misspelled) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
     return match
   }
 
@@ -93,12 +92,13 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
   static warnIfEitherReading(scope: P.Scope, tokens: P.Token[], phrase: P.Match): void {
     const read = (phrase.rule as SpellExpression).ofObject(phrase)
     if (!read?.is(PossessiveProperty) || !read.data.member) return
-    const { expression: owner, property } = read.groups
+    const { expression: owner, possessive_mark: mark, property } = read.groups
     const wholeLength = phrase.length - (read.length - owner.length)
     const whole = phrase.rule.parse(scope, tokens.slice(0, wholeLength))
     if (whole?.length !== wholeLength || !scope.getType(whole.datatype)?.hasProperty(`${property.raw}`)) return
     const message = SP.Language.of(scope).parserMessage("possessive-either", {
       owner: P.Tokenizer.join(owner.tokens),
+      possessive: P.Tokenizer.join([...owner.tokens, ...mark.tokens]),
       property: `${property.raw}`,
       whole: P.Tokenizer.join(whole.tokens)
     })
@@ -139,6 +139,42 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
     const type = scope.getType(match.datatype)
     if (!type) return undefined
     return declaredPrefix(property, (words) => type.hasProperty(words)) > 0
+  }
+
+  /**
+   * Refuse a possessive misspelled, saying how to write it -- `true` if it is:
+   * - `it's name`:  `it's` means "it is" (`its-not-it-is`)
+   * - `the card' name`:  an apostrophe alone after a word not ending in `s` (`possessive-needs-s`)
+   * - `property`:  the words after it, for the message;  `ownerWords`:  the words before it, when not `owner`'s.
+   * - SIDE EFFECT:  refuses `match`, at `owner`.  The line still parses as the possessive it means.
+   */
+  static refuseIfMisspelled(
+    match: P.Match,
+    owner: P.Match,
+    mark: P.Match,
+    property: string,
+    ownerWords = P.Tokenizer.join(owner.tokens)
+  ): boolean {
+    const language = SP.Language.of(match.scope)
+    let message: string | undefined
+    if (PossessiveProperty.isIt(match.scope, owner)) message = language.parserMessage("its-not-it-is", { property })
+    else if (PossessiveMark.needsS(owner, mark)) {
+      message = language.parserMessage("possessive-needs-s", { owner: ownerWords, property })
+    }
+    if (message) SP.SpellWarnings.refuseIf(match, message, () => true, owner)
+    return !!message
+  }
+
+  /**
+   * Refuse a possessive DECLARATION misspelled, e.g. `a card' value is ...` (T24) -- see `refuseIfMisspelled()`.
+   * - `match`:  a declaration's, with groups `type`, `property` and, when it's a possessive, `possessive_mark`.
+   * - SIDE EFFECT:  refuses `match`.
+   */
+  static refuseIfDeclarationMisspelled(match: P.Match): void {
+    const { type, possessive_mark: mark, property } = match.groups as Partial<Record<string, P.Match>>
+    if (!mark || !type || !property) return
+    const before = match.tokens.slice(0, match.tokens.indexOf(mark.tokens[0]!))
+    PossessiveProperty.refuseIfMisspelled(match, type, mark, `${property.raw}`, P.Tokenizer.join(before))
   }
 
   /** Is `owner` the word `it`, alone:  `it's name`? */
