@@ -121,14 +121,15 @@ export function appParts(): () => PartRow[] {
  * - The header's magnifying glass opens a filter in that same row:  no new row until you ask for it.
  *   Esc or the glass again closes it, and the tree is as it was (`filter`).
  * - The header's double chevron closes every row, or opens them all.
- * - Things and Templates, for developers, are in the Program panel.
+ * - The header's sort puts each row's parts in document order, by name or by type, remembered (`ViewsOrder`).
+ * - What the app made but doesn't draw, the deck say, is its own group:  a click shows it in the Inspector.
  ****************/
 export function InspectorViews(props: {
   /** The app's parts (`appParts()`). */
   rows: readonly PartRow[]
 }): JSX.Element {
   const [filter, setFilter] = createSignal<string>()
-  const nodes = createMemo(() => nodesFor(props.rows))
+  const nodes = createMemo(() => sortedNodes(nodesFor(props.rows), viewsOrder()))
   const parents = () => {
     const walk = (list: readonly PartNode[]): PartNode[] =>
       list.flatMap((node) => (node.children.length ? [node, ...walk(node.children)] : []))
@@ -164,6 +165,7 @@ export function InspectorViews(props: {
       }
       actions={
         <>
+          <ViewsSort />
           <ui-icon
             slot="right"
             name="search"
@@ -200,7 +202,7 @@ export function InspectorViews(props: {
  * - What's not drawn:  a group of its own, closed to start.  A click inspects the thing (`Inspector.inspectThing()`).
  ****************/
 function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]; filter?: string }): JSX.Element {
-  const shown = () => shownRows(props.rows, foldedKeys()).map((row) => row.element)
+  const shown = () => shownIn(props.nodes, foldedKeys())
   // what's selected, however it came to be:  the rows around it open, so its row can be seen
   createEffect(
     () => Inspector.selected?.element,
@@ -210,7 +212,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   )
   const notDrawn = createMemo(() => {
     const drawn = new Set(props.rows.map((row) => SpellElement.thingOf(row.element)))
-    return (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
+    const things = (runtimeCore()?.things.all() ?? []).filter((thing) => !drawn.has(thing))
+    return sortedThings(things, viewsOrder())
   })
   return (
     <Show when={props.rows.length} fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}>
@@ -307,18 +310,92 @@ function nodesFor(rows: readonly PartRow[]): PartNode[] {
   return top
 }
 
-/** A row of the tree as shown:  its part, and whether parts inside it are on screen. */
-function shownRows(rows: readonly PartRow[], folded: ReadonlySet<string>): PartRow[] {
-  const shown: PartRow[] = []
-  // rows deeper than this are inside a closed part
-  let hiddenBelow = Infinity
-  rows.forEach((row, index) => {
-    if (row.depth > hiddenBelow) return
-    hiddenBelow = Infinity
-    if (folded.has(addressKey({ index, tag: row.element.localName }))) hiddenBelow = row.depth
-    shown.push(row)
-  })
-  return shown
+/** The parts on screen in the tree, in its order:  a closed part's own parts aren't. */
+function shownIn(nodes: readonly PartNode[], folded: ReadonlySet<string>): Element[] {
+  return nodes.flatMap((node) => [node.element, ...(folded.has(node.key) ? [] : shownIn(node.children, folded))])
+}
+
+/****************
+ * ### `<ViewsSort>`
+ * The Views card's sort, at the right of its header:  a dropdown showing only its icon, the order in use ticked.
+ ****************/
+function ViewsSort(): JSX.Element {
+  return (
+    <ui-dropdown
+      slot="right"
+      class="ViewsSort"
+      direction="left"
+      title={appTexts.text("inspectorSort")}
+      aria-label={appTexts.text("inspectorSort")}
+      ref={on<{ value: string }>("ui-changed", (event) => {
+        const { value } = event.detail
+        if (VIEWS_ORDERS.some((it) => it.id === value)) setViewsOrder(value as ViewsOrder)
+        // chosen again next time:  a dropdown tells only of a new value
+        const dropdown = event.currentTarget as HTMLElement & { value: string }
+        queueMicrotask(() => (dropdown.value = ""))
+      })}
+    >
+      <ui-icon slot="icon" name="sort amount down" />
+      <For each={VIEWS_ORDERS}>
+        {(it) => (
+          <ui-item value={it.id} icon={viewsOrder() === it.id ? "check" : it.icon}>
+            {appTexts.text(it.text)}
+          </ui-item>
+        )}
+      </For>
+    </ui-dropdown>
+  )
+}
+
+/**
+ * How the Views tree lists each row's parts:
+ * - `document`:  as the app draws them
+ * - `name`:  by what a row says, ignoring case
+ * - `type`:  by what each is, its tag, then by name
+ */
+type ViewsOrder = "document" | "name" | "type"
+
+/** Each order, as a row of `<ViewsSort>`;  `text` its words' key. */
+const VIEWS_ORDERS: Array<{ id: ViewsOrder; icon: string; text: AppTextKey }> = [
+  { id: "document", icon: "list ol", text: "inspectorSortDocument" },
+  { id: "name", icon: "sort alphabet down", text: "inspectorSortName" },
+  { id: "type", icon: "cubes", text: "inspectorSortType" }
+]
+
+/** The pref remembering the order, the same for every project. */
+const ORDER_PREF = "inspector:order"
+editorPrefs.declare(ORDER_PREF, { oneOf: VIEWS_ORDERS.map((it) => it.id) })
+
+const [viewsOrder, setOrder] = createSignal<ViewsOrder>((editorPrefs.get(ORDER_PREF) as ViewsOrder) ?? "document")
+
+/** Sort the tree by `order`;  remembered. */
+function setViewsOrder(order: ViewsOrder): void {
+  setOrder(order)
+  editorPrefs.set(ORDER_PREF, order)
+}
+
+/** `nodes` in `order`, each row's own parts too. */
+function sortedNodes(nodes: PartNode[], order: ViewsOrder): PartNode[] {
+  if (order === "document") return nodes
+  const words = (node: PartNode) => Inspector.rowWordsFor(node.element).label
+  const typeOf = (node: PartNode) => (order === "type" ? node.element.localName : "")
+  return nodes
+    .map((node) => ({ ...node, children: sortedNodes(node.children, order) }))
+    .sort((a, b) => typeOf(a).localeCompare(typeOf(b)) || byWords(words(a), words(b)))
+}
+
+/** The things not drawn, in `order`:  as they were made, by name, or by type, then name. */
+function sortedThings(things: object[], order: ViewsOrder): object[] {
+  if (order === "document") return things
+  const typeOf = (thing: object) => (order === "type" ? thing.constructor.name : "")
+  return [...things].sort(
+    (a, b) => typeOf(a).localeCompare(typeOf(b)) || byWords(Inspector.thingLabel(a), Inspector.thingLabel(b))
+  )
+}
+
+/** Compares two labels as people would:  ignoring case, and with numbers in order, `T2` before `T10`. */
+function byWords(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
 }
 
 /** The parts closed in the tree, by key (reactive):  this project's, remembered. */

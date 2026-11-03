@@ -316,11 +316,14 @@ export class InboxCommands {
     const seconds = timeoutOf(timeout)
     const end = Date.now() + seconds * 1000
     const guides = new GuideSends(this.owner.files.root, name)
+    // where a revisit's note to talk over goes as a comment (I200):  the doc read once, only when one's handed over
+    let plan: PlanDoc | undefined
+    const asComment = (mark: { id: string }) => (plan ??= this.owner.read(file)).commentPlaceOf(mark.id)
     listen()
     let beat = 0
     for (;;) {
       let work = null as TakenWork | null
-      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork()))
+      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork(undefined, asComment)))
       const sent = guides.take()
       if (work || sent.length) return this.printWork(name, this.owner.read(file), work ?? NO_WORK, sent, Boolean(json))
       if (Date.now() >= end) break
@@ -458,7 +461,11 @@ export class InboxCommands {
       if (sent.urgency.length) lines.push(`  urgency, from the id chips (${sent.urgency.length}):`)
       for (const entry of sent.urgency) lines.push(`    - ${line(entry)}  · ${calmWords(entry.calm)}`)
       if (sent.comments.length) lines.push(`  comments, to answer on their threads (${sent.comments.length}):`)
-      for (const comment of sent.comments) lines.push(...commentLines(comment, "    "))
+      for (const comment of sent.comments) {
+        lines.push(...commentLines(comment, "    "))
+        // a revisit's note, made a comment as it was taken (I200):  answered on its thread, never in the chat
+        if (comment.fromNote) lines.push(`      his revisit note on ${shown(comment.fromNote)}, made a comment`)
+      }
       const talk = sent.marks.filter((mark) => mark.action === "revisit")
       const fold = sent.marks.filter((mark) => mark.action === "approve" && mark.inlineComments?.length)
       if (sent.marks.length || sent.urgency.length)
@@ -594,6 +601,9 @@ export class InboxCommands {
    * - `done` keeps a mark Owen changed while the agent worked (`finishMarks()`);  `clear` drops it
    * - a mark leaving with Owen's note in it:  the note is kept IN the item first, as his own reply card
    *   (`PlanDoc.keepNote()`, epic `windows-and-review` P1):  what he wrote is never lost from the page
+   *   - a revisit's note to talk over (`ReviewInbox.isNoteToTalkOver()`) no `wait` made a comment yet (`/airplane
+   *     land` lists marks without taking them):  a comment on the item instead, answered (talked over in the chat),
+   *     as `wait` makes one (epic `epic-engine` I200)
    * - a request taken care of is recorded as handled that way
    *   (`review-as`;  the page's buttons clear, the chip shows the result):
    *   - an immediate one (Do Now:  Add Details, revisit now) as `now`
@@ -616,6 +626,9 @@ export class InboxCommands {
     let had: string[] = []
     let kept: string[] = []
     let notes: { id: string; mark: KeptNote }[] = []
+    // a revisit's note to talk over that no `wait` made a comment (`/airplane land`):  made one now (I200)
+    const made: string[] = []
+    let plan: PlanDoc | undefined
     let handled: { id: string; as: "now" | "revisit" }[] = []
     let picks: { id: string; pick: string; choices?: number }[] = []
     ReviewInbox.update(path, (box) => {
@@ -626,6 +639,16 @@ export class InboxCommands {
       notes = had
         .filter((id) => before[id]?.note && before[id]?.action !== "new")
         .map((id) => ({ id, mark: before[id] as KeptNote }))
+      // a note to talk over becomes a comment, answered:  it was talked over in the chat (I200)
+      notes = notes.filter(({ id }) => {
+        const mark = before[id]!
+        const place = ReviewInbox.isNoteToTalkOver(mark) ? (plan ??= this.owner.read(file)).commentPlaceOf(id) : null
+        if (!place) return true
+        const comment = box.commentFromNote(mark, place)
+        box.commentList.answer(comment, "")
+        made.push(comment)
+        return false
+      })
       // the note Claude took, where Owen marked the item again meanwhile (I190):  kept in the doc too, as it's answered
       for (const id of kept) {
         const taken = box.taken[id]
@@ -664,7 +687,8 @@ export class InboxCommands {
     const extras = [
       none.length ? `no mark:  ${upper(none)}` : "",
       kept.length ? `changed since, kept for the next send:  ${upper(kept)}` : "",
-      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
+      notes.length ? `the person's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : "",
+      made.length ? `the person's note made a comment:  ${upper(made)}` : ""
     ].filter(Boolean)
     this.owner.print(`${label}:  ${upper(keys)}${extras.length ? `  (${extras.join(";  ")})` : ""}`)
   }

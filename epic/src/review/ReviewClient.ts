@@ -119,6 +119,12 @@ export class ReviewClient extends PageStore {
    */
   private readonly taken = new Map<string, PickFields>()
 
+  /** Notes of sent marks the last inbox read no longer has, id -> words:  `changed()` lets their boxes go of them. */
+  private readonly goneNotes = new Map<string, string>()
+
+  /** The words each box let go of last, id -> words (`releasedOf()`):  Claude has them. */
+  private readonly released = new Map<string, string>()
+
   /** Writes in flight:  a poll's answer can't overwrite what they're about to. */
   private writing = 0
 
@@ -888,16 +894,41 @@ export class ReviewClient extends PageStore {
    * Something changed:  first, a note box still holding the words of a mark Claude has now TAKEN lets go of them
    * (`isTaken()`, epic `epic-engine` I190), its backup and its open box too, so it's empty for a new note.
    * - Owen, 2026-10-31:  "I typed the comment in at a previous send, but the text still shows in the comment box"
-   * - words typed since (not the taken note) stay:  they're his next note
+   * - so does one whose sent mark LEFT the inbox (`goneNotes`, epic `epic-engine` I200):  made a comment as Claude took
+   *   it, or cleared once talked over (Owen, 2026-11-02:  "You are still leaving e.g. this after you have processed it")
+   * - words typed since (after the taken note) stay:  they're his next note
    */
   protected changed() {
     for (const [id, text] of this.typed) {
-      if (!this.isTaken(id) || text.trim() !== (this.inbox.marks[id]?.note ?? "").trim()) continue
-      this.typed.delete(id)
-      this.backup(id, "")
-      this.boxes.delete(id)
+      const words = this.isTaken(id) ? this.inbox.marks[id]?.note : this.goneNotes.get(id)
+      if (words) this.letGo(id, text, words)
     }
+    this.goneNotes.clear()
     super.changed()
+  }
+
+  /**
+   * `id`'s box holds `text`:  when it starts with `words` (a note Claude has), let go of them (`released`), keeping
+   * what comes after;  nothing after:  the box empties and closes, its backup gone.
+   */
+  private letGo(id: string, text: string, words: string) {
+    const said = words.trim()
+    const typed = text.trim()
+    if (!said || !typed.startsWith(said)) return
+    const rest = typed.slice(said.length).trim()
+    this.released.set(id, said)
+    this.backup(id, rest)
+    if (rest) return void this.typed.set(id, rest)
+    this.typed.delete(id)
+    this.boxes.delete(id)
+  }
+
+  /**
+   * The words `id`'s box let go of last (`letGo()`):  Claude has them;  `""` for none.
+   * - so a box with the focus still drops them (`<epic-review>`'s `onTypedElsewhere()`)
+   */
+  releasedOf(id: string): string {
+    return this.released.get(id) ?? ""
   }
 
   ////////////////
@@ -994,6 +1025,9 @@ export class ReviewClient extends PageStore {
   private replaceInbox(next: Inbox) {
     for (const [id, mark] of Object.entries(this.inbox.marks))
       if (mark.pick && !next.marks[id] && this.isSent(mark)) this.taken.set(id, pickOf(mark))
+    // a sent note that left (I200):  its box lets go of it (`changed()`)
+    for (const [id, mark] of Object.entries(this.inbox.marks))
+      if (mark.note && !next.marks[id] && this.isSent(mark)) this.goneNotes.set(id, mark.note)
     for (const id of Object.keys(next.marks)) this.taken.delete(id)
     this.inbox = next
   }

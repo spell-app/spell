@@ -502,13 +502,18 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /**
    * What's typed changed elsewhere (a request called off, Edit):  put back in the box, unless it's being typed in.
-   * - emptied as Claude took the note it held (I190):  emptied even while it has the focus, its floppy gone
+   * - emptied as Claude took the note it held (I190), or made it a comment (I200):  emptied even while it has the
+   *   focus, its floppy gone;  words typed after the note stay (`ReviewClient.letGo()`)
    */
   @E.onChange("typed")
   protected onTypedElsewhere(text: string) {
     const note = this.noteInput
     if (!note || note.value === text) return
-    const taken = !text && note.value.trim() === (this.review.takenNote()?.note ?? "").trim()
+    const value = note.value.trim()
+    const released = this.review.released()
+    const taken =
+      (!text && value === (this.review.takenNote()?.note ?? "").trim()) ||
+      (!!released && value.startsWith(released) && value.slice(released.length).trim() === text)
     if (!note.value || !note.matches(":focus") || taken) note.value = text
     if (taken) this.saved = undefined
   }
