@@ -67,7 +67,7 @@ export class Palette {
     loading ??= import("spell/ui/components/ComponentDefinitions")
       .then(({ ComponentDefinitions }) => {
         definitions = ComponentDefinitions
-        setOffered([...ComponentDefinitions.paletteByTopic()].map(([topic, parts]) => ({ topic, parts })))
+        setOffered(ComponentDefinitions.paletteGroups())
       })
       .catch((error: unknown) => console.error("Palette.load():  couldn't load what it offers", error))
   }
@@ -107,7 +107,11 @@ let opensOnArrival = false
 
 /** What `definition` adds to `file`, in its language. */
 function snippetFor(definition: ComponentDefinition, file: SP.AnySpellFile | undefined): string {
-  return definitions?.snippetIn(definition, languageOf(file)) ?? definition.snippet!
+  return (
+    definitions?.snippetIn(definition, languageOf(file)) ??
+    definition.snippet ??
+    `<${definition.tag}></${definition.tag}>`
+  )
 }
 
 /** The preference that remembers whether it's kept open. */
@@ -117,12 +121,9 @@ const [isPinned, setPinned] = createSignal<boolean>(editorPrefs.get(PINNED_PREF)
 const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 
 /** One topic of what's offered. */
-type PaletteGroup = {
-  /** Its name in the vocabularies' `topics`. */
-  topic: string
-  /** What's filed under it, by name. */
-  parts: readonly ComponentDefinition[]
-}
+type PaletteGroup = ReturnType<
+  typeof import("spell/ui/components/ComponentDefinitions").ComponentDefinitions.paletteGroups
+>[number]
 
 /** One of the app's own views, as the palette offers it. */
 type OwnView = {
@@ -296,17 +297,26 @@ function PinIcon(): JSX.Element {
   )
 }
 
-/** The palette as a menu:  its search and pin, then This app, the app's own views, then every part, by topic, in columns. */
+/**
+ * The palette as a menu:  what to do and its search, then This app, the app's own views, then every part, by topic,
+ * in columns.
+ * - Each topic shows its few ready-made parts;  its "N more" opens every other component filed under it.
+ * - A search looks through all of them, by name, other names and description.
+ */
 function PaletteMenu(): JSX.Element {
   const [filter, setFilter] = createSignal("")
-  const shown = () => {
+  const [opened, setOpened] = createSignal<ReadonlySet<string>>(new Set())
+  const open = (topic: string) => setOpened((topics) => new Set([...topics, topic]))
+  const shown = (): PaletteGroup[] => {
     const words = filter().trim().toLowerCase()
-    if (!words) return offered()
+    if (!words)
+      return offered().map((group) =>
+        opened().has(group.topic) ? { ...group, parts: [...group.parts, ...group.more], more: [] } : group
+      )
+    const matches = (part: ComponentDefinition) =>
+      `${part.name} ${part.aka.join(" ")} ${part.description ?? ""}`.toLowerCase().includes(words)
     return offered()
-      .map(({ topic, parts }) => ({
-        topic,
-        parts: parts.filter((part) => `${part.name} ${part.description ?? ""}`.toLowerCase().includes(words))
-      }))
+      .map(({ topic, parts, more }) => ({ topic, parts: [...parts, ...more].filter(matches), more: [] }))
       .filter(({ parts }) => parts.length)
   }
   const own = () => {
@@ -316,6 +326,7 @@ function PaletteMenu(): JSX.Element {
   return (
     <div class="PaletteBody">
       <div class="PaletteHead">
+        <span class="PaletteHint">{appTexts.text("paletteHint")}</span>
         <ui-input
           class="PaletteSearch"
           size="small"
@@ -348,10 +359,26 @@ function PaletteMenu(): JSX.Element {
         <For each={shown()}>
           {(group) => (
             <section class="PaletteGroup">
-              <h4>{upperFirst(group.topic)}</h4>
-              <ui-tree class="PaletteTree" label={group.topic} ref={treeChoosesRows}>
-                <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
-              </ui-tree>
+              <div class="PaletteGroupHead">
+                <h4>{upperFirst(group.topic)}</h4>
+                <Show when={group.more.length}>
+                  <ui-button
+                    appearance="tertiary"
+                    size="tiny"
+                    padding="none"
+                    class="PaletteMore"
+                    title={appTexts.text("paletteMoreTip", { topic: group.topic })}
+                    onClick={() => open(group.topic)}
+                  >
+                    {appTexts.text("paletteMore", { count: group.more.length })}
+                  </ui-button>
+                </Show>
+              </div>
+              <Show when={group.parts.length}>
+                <ui-tree class="PaletteTree" label={group.topic} ref={treeChoosesRows}>
+                  <For each={group.parts}>{(definition) => <PaletteRow definition={definition} />}</For>
+                </ui-tree>
+              </Show>
             </section>
           )}
         </For>
