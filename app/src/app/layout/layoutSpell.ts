@@ -40,7 +40,8 @@ export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
   return {
     exports: await runtime.importCompiled(compiled, coreUrl),
     draw: (thing) => runtime.core.drawThing(thing),
-    menu: (thing, name) => runtime.core.menuOf(thing, name) ?? []
+    menu: (thing, name) => runtime.core.menuOf(thing, name) ?? [],
+    useTitles: (titles) => runtime.core.useTitles(titles)
   }
 }
 
@@ -52,4 +53,6 @@ export type LayoutPiece = {
   draw: (thing: unknown) => unknown
   /** The items of `thing`'s menu `name`, in order. */
   menu: (thing: object, name: string) => MenuItem[]
+  /** Show its titles in the page's language:  each English title's text in it (`appTexts.titles`). */
+  useTitles: (titles: Record<string, string>) => void
 }
