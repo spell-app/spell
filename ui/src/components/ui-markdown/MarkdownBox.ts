@@ -310,6 +310,9 @@ export class MarkdownBox {
       this.shapes.append(item)
     }
     this.shapes.setAttribute("size", "small")
+    // its menu opens on the bar's own ground:  a theme's see-through surface let the page show through.  Set on the
+    // element, as a page sets a component's token:  a component's sheet never declares another's (epic `epic-engine` r55)
+    this.shapes.style.setProperty("--ui-select-picker-background", "var(--_ui-markdown-bar-background)")
     this.shapes.setAttribute("value", this.shape?.startsWith("h") ? this.shape : "paragraph")
     this.shapes.setAttribute("aria-label", texts("shape"))
     this.shapes.title = texts("shape")
