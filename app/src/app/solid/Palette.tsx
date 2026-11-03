@@ -448,6 +448,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
     <>
       <Action
         menu
+        icon="cut"
         title={appTexts.text("menuCut")}
         shortcut={EDITOR_HOTKEYS.cutParts.shortcut}
         disabled={(!inCode() && !hasSelection()) || !!why("cut")}
@@ -456,6 +457,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
       />
       <Action
         menu
+        icon="copy outline"
         title={appTexts.text("menuCopy")}
         shortcut={EDITOR_HOTKEYS.copyParts.shortcut}
         disabled={(!inCode() && !hasSelection()) || !!why("copy")}
@@ -464,6 +466,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
       />
       <Action
         menu
+        icon="paste"
         title={appTexts.text("menuPaste")}
         shortcut={EDITOR_HOTKEYS.pasteParts.shortcut}
         disabled={!!why("paste")}
@@ -472,6 +475,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
       />
       <Action
         menu
+        icon="clone outline"
         title={appTexts.text("menuDuplicate")}
         shortcut={EDITOR_HOTKEYS.duplicateParts.shortcut}
         disabled={inCode() || !hasSelection() || !!why("duplicate")}
@@ -480,6 +484,7 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
       />
       <Action
         menu
+        icon="trash alternate outline"
         title={appTexts.text("menuDelete")}
         shortcut={EDITOR_HOTKEYS.deleteParts.shortcut}
         disabled={inCode() || !hasSelection() || !!why("remove")}
@@ -535,6 +540,7 @@ export function PartMenu(): JSX.Element {
               direction="vertical"
               size="small"
               interactive=""
+              icon-column=""
               class="BarMenuItems"
               aria-label={appTexts.text("menuEdit")}
             >
@@ -542,16 +548,23 @@ export function PartMenu(): JSX.Element {
               <ui-action kind="divider" />
               <Action
                 menu
+                icon="code"
                 title={appTexts.text("menuShowInCode")}
                 disabled={!!PartEdits.whyNoCode}
                 tip={PartEdits.whyNoCode}
                 onClick={() => void Inspector.showWritten(Inspector.allSelected.at(-1)!.element!)}
               />
-              <Action menu title={appTexts.text("menuInspect")} onClick={() => Inspector.showSelected()} />
+              <Action
+                menu
+                icon="crosshairs"
+                title={appTexts.text("menuInspect")}
+                onClick={() => Inspector.showSelected()}
+              />
               <Show when={ChangeThis.isAvailable}>
                 <ui-action kind="divider" />
                 <Action
                   menu
+                  icon="magic"
                   title={appTexts.text("menuChangeThis")}
                   shortcut={EDITOR_HOTKEYS.changeThis.shortcut}
                   disabled={!!PartEdits.whyNoCode}

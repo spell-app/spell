@@ -7,7 +7,7 @@ import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
-import { SpellMenuRows, type SpellMenuAction } from "./MenuBar"
+import { SpellMenuRows, titled, type SpellMenuAction } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
 
@@ -85,8 +85,8 @@ export function FileTabs() {
             on-ui-closing={() => setMenuAt(undefined)}
           >
             <div class="BarMenuPanel" onClick={() => setMenuAt(undefined)}>
-              <ui-menu direction="vertical" size="small" interactive="" class="BarMenuItems">
-                <SpellMenuRows items={piece()!.menu(bar()!, "tab menu")} itemFor={tabMenuItem} />
+              <ui-menu direction="vertical" size="small" interactive="" icon-column="" class="BarMenuItems">
+                <SpellMenuRows items={tabMenu(piece()!, bar()!)} itemFor={tabMenuItem} />
               </ui-menu>
             </div>
           </ui-popup>
@@ -96,15 +96,21 @@ export function FileTabs() {
   )
 }
 
-/** An item of a tab's right-click menu, by its name in `FileTabs.spellml`. */
+/** The tab menu's items, `FileTabs.spellml`'s `tab menu` on `bar`, their titles in the page's language. */
+function tabMenu(piece: LayoutPiece, bar: object) {
+  piece.useTitles(appTexts.titles)
+  return piece.menu(bar, "tab menu")
+}
+
+/** An item of a tab's right-click menu, by its name in `FileTabs.spellml`:  its title the Spell's. */
 function tabMenuItem(item: SpellMenuAction): JSX.Element {
   switch (item.name) {
     case "duplicateFile":
-      return <Actions.duplicateFile menu />
+      return <Actions.duplicateFile {...titled(item)} />
     case "renameFile":
-      return <Actions.renameFile menu />
+      return <Actions.renameFile {...titled(item)} />
     case "deleteFile":
-      return <Actions.deleteFile menu />
+      return <Actions.deleteFile {...titled(item)} />
     default:
       return null
   }

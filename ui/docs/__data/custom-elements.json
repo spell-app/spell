@@ -13792,6 +13792,14 @@
             {
               "name": "--ui-item-tick-distance",
               "default": "0.5em"
+            },
+            {
+              "name": "--ui-item-icon-column-width",
+              "default": "1.25em"
+            },
+            {
+              "name": "--ui-item-icon-column-distance",
+              "default": "0.5em"
             }
           ]
         }
@@ -16833,6 +16841,14 @@
                 "text": "boolean"
               },
               "fieldName": "ticks"
+            },
+            {
+              "name": "icon-column",
+              "description": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "iconColumn"
             },
             {
               "name": "tabs",
@@ -37707,6 +37723,14 @@
                 "text": "boolean"
               },
               "fieldName": "ticks"
+            },
+            {
+              "name": "icon-column",
+              "description": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "iconColumn"
             },
             {
               "name": "tabs",

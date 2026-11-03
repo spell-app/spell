@@ -22,11 +22,12 @@ afterEach(() => {
 describe("<AppBarMenus>", () => {
   test("File · Edit · View · Run · Help, each a button;  File's items, their keys from EDITOR_HOTKEYS", async () => {
     const host = await mount(() => <AppBarMenus mode="edit" />)
-    const names = [...host.querySelectorAll("ui-item.BarMenu")].map((item) => item.textContent?.trim())
-    expect(names).toEqual(["File", "Edit", "View", "Run", "Help"])
+    // the bar is Spell's, AppMenus.spellml's bar menu:  loaded a moment after the page, Help after it
+    const names = () => [...host.querySelectorAll("ui-item.BarMenu")].map((item) => item.textContent?.trim())
+    await waitForCondition(() => names().length === 5)
+    expect(names()).toEqual(["File", "Edit", "View", "Run", "Help"])
 
     const file = host.querySelector("ui-popup[for=FileBarMenu] ui-menu.BarMenuItems")!
-    // its items are Spell's:  loaded a moment after the bar
     await waitForCondition(() => file.children.length > 0)
     const items = [...file.children].map((item) =>
       item.getAttribute("kind") === "divider"

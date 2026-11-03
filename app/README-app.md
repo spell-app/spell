@@ -465,8 +465,8 @@ app/src/app/solid/FileTabs.tsx                   the editor's side:  which files
 app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
 app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
 app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
-app/src/app/layout/AppMenus/AppMenus.spellml     the File, Edit, View and Run menus:  their items, order, keys, greyed and ticked, in Spell
-app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and is called
+app/src/app/layout/AppMenus/AppMenus.spellml     the menu bar, File · Edit · View · Run:  every title, item, key, icon, greyed and ticked, in Spell
+app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and titles that follow its state (Undo's)
 ```
 
 - A `.spellml` file the editor imports is compiled as it builds, by `spell compile`, in a small Vite step.
@@ -481,6 +481,8 @@ app/src/app/solid/MenuBar.tsx                    the editor's side:  what each i
 - The page's loading hero stays up until they're drawn:  about 60ms later on a local server, 670ms instead of 610ms,
   with the running app at the same time as before.
 - What Spell can't reach yet, it's handed, by the small piece of TypeScript beside it.
+- The menus' titles are written in English in the Spell, and shown in the page's language:
+  the editor hands the layout the same texts in that language, by each English title (`appTexts.titles`).
 
 ### The Inspector:  look inside the running app
 

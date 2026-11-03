@@ -28,6 +28,27 @@ export function handlersInSource(element: Element, sources: ReadonlyMap<string, 
   return handlers
 }
 
+/**
+ * Where each handler `element` was written with is:  the line holding its `onClick={...}`, by event.
+ * - As `handlersInSource()` finds them;  `{}` for none.
+ */
+export function handlerPlacesInSource(
+  element: Element,
+  sources: ReadonlyMap<string, string>
+): Record<string, CodePlace> {
+  const place = SourceMarks.placeOfDrawn(element)
+  const source = place && sources.get(place.path)
+  if (!place || source === undefined) return {}
+  const opening = SourceEdits.offsetAt(source, { line: place.line, character: place.column })
+  const places: Record<string, CodePlace> = {}
+  for (const { name, quote, valueSpan } of SourceEdits.tagAt(source, opening)?.attributes ?? []) {
+    if (quote !== "{" || !HANDLER.test(name) || !valueSpan) continue
+    const line = SourceEdits.positionAt(source, valueSpan.start).line + 1
+    places[name.slice(2).toLowerCase()] = { path: place.path, from: line, to: line }
+  }
+  return places
+}
+
 /** An event handler's attribute:  `onClick`. */
 const HANDLER = /^on[A-Z]/
 
@@ -101,6 +122,196 @@ export type WrittenEvent = {
   words: string
   /** Its code, its lines as written under it:  `""` for none. */
   code: string
+}
+
+////////////////
+// ## Where each one's code is
+////////////////
+
+/**
+ * Where an event's, ability's or action's code is written:  its file, and its lines (epic `editor`, Events In Code).
+ * - `from` and `to`:  1-based, both in.
+ * - Its body's lines when it has some (`<on click>` ... `</on>`, a `- on card dropped:` line's lines under it);
+ *   else its own line, words and code together (`- on click play it`).
+ */
+export type CodePlace = {
+  /** The file's path, as `files` named it. */
+  path: string
+  /** Its first line. */
+  from: number
+  /** Its last line. */
+  to: number
+}
+
+/** A program's spell file, as the places read it:  its path and text. */
+export type SourceFile = { path: string; text: string }
+
+/**
+ * Where `row` (an event or ability of a type named in `typeNames`, its own first) is written, in `files`.
+ * - Looked for inside each type's tag and under its outline headers, as `eventsInSource()` reads them;
+ *   the first type that has it wins, as there.
+ * - `undefined`:  not found by its words, e.g. a bare ability attribute (`<spell-view "card" draggable>`).
+ */
+export function placeOfWritten(
+  row: Pick<WrittenEvent, "words">,
+  typeNames: readonly string[],
+  files: readonly SourceFile[]
+): CodePlace | undefined {
+  const words = wordsPattern(row.words)
+  for (const name of typeNames) {
+    for (const file of files) {
+      const lines = file.text.split("\n")
+      for (const [first, last] of typeLineRanges(file.text, name)) {
+        for (let at = first; at <= last; at++) {
+          const said = lines[at]!.trim().replace(/^(?:-\s+|<)/, "")
+          if (words.test(said)) return { path: file.path, ...bodyLines(lines, at, last) }
+        }
+      }
+    }
+  }
+  return undefined
+}
+
+/**
+ * Where action `words` (`deal the cards`) is written in `files`:  `<action "deal the cards">`, or a `to deal the cards`
+ * line;  in a type named in `typeNames` first, else anywhere.
+ * - `name`:  its method's name (`dealTheCards`), matched too, as its words may say the thing as `it`.
+ */
+export function placeOfAction(
+  action: { words: string; name: string },
+  typeNames: readonly string[],
+  files: readonly SourceFile[]
+): CodePlace | undefined {
+  const keys = new Set([letters(action.words), letters(action.name)])
+  const isIt = (written: string) =>
+    keys.has(letters(written)) || keys.has(letters(written.replace(/\b(?:an?|the)\s+\w+/i, "it")))
+  const find = (file: SourceFile, first: number, last: number) => {
+    const lines = file.text.split("\n")
+    for (let at = first; at <= last; at++) {
+      const said = ACTION_LINE.exec(lines[at]!)
+      if (said && isIt(said[1] ?? said[2]!)) return { path: file.path, ...bodyLines(lines, at, last) }
+    }
+    return undefined
+  }
+  for (const name of typeNames) {
+    for (const file of files) {
+      for (const [first, last] of typeLineRanges(file.text, name)) {
+        const found = find(file, first, last)
+        if (found) return found
+      }
+    }
+  }
+  for (const file of files) {
+    const found = find(file, 0, file.text.split("\n").length - 1)
+    if (found) return found
+  }
+  return undefined
+}
+
+/**
+ * Where a new event `words` (`on double click`) goes in the first type of `typeNames` written in `files`, and its code:
+ * - under an outline header for it (`a card:`):  `- on double click:` after its last line, at its rows' indent
+ * - else inside its tag:  `<on double click>`, an empty line, `</on>`, just before the tag's end
+ * - `at`:  its offset in the file's text, where `code` is inserted;  `undefined` when the type isn't written in `files`.
+ */
+export function newEventIn(
+  typeNames: readonly string[],
+  files: readonly SourceFile[],
+  words: string
+): { path: string; at: number; code: string } | undefined {
+  const name = typeNames[0]
+  if (!name) return undefined
+  const read = files.map((file) => {
+    const lines = file.text.split("\n")
+    const offsetOfLine = (line: number) => lines.slice(0, line).reduce((sum, each) => sum + each.length + 1, 0)
+    return { file, lines, offsetOfLine, ranges: typeLineRanges(file.text, name) }
+  })
+  // an outline header first, in any file:  its rows are where a type's events are listed
+  for (const { file, lines, offsetOfLine, ranges } of read) {
+    const header = ranges.find(([first]) => !lines[first]!.trim().startsWith("<"))
+    if (!header) continue
+    const [first, last] = header
+    const row = lines.slice(first + 1, last + 1).find((line) => /^\s*- /.test(line))
+    const indent = row ? /^\s*/.exec(row)![0] : `${/^\s*/.exec(lines[first]!)![0]}\t`
+    let end = last
+    while (end > first && !lines[end]!.trim()) end--
+    return { path: file.path, at: offsetOfLine(end) + lines[end]!.length, code: `\n${indent}- ${words}:` }
+  }
+  for (const { file, lines, offsetOfLine, ranges } of read) {
+    const tag = ranges[0]
+    if (!tag) continue
+    const indent = `${/^\s*/.exec(lines[tag[0]]!)![0]}\t`
+    return { path: file.path, at: offsetOfLine(tag[1]), code: `${indent}<${words}>\n${indent}\t\n${indent}</on>\n` }
+  }
+  return undefined
+}
+
+/** An action's line:  `<action "deal the cards" ...>` (its words), or `to deal the cards` (`- ` and `:` allowed). */
+const ACTION_LINE = /^\s*(?:<action\s+"([^"]+)"|(?:-\s+)?to\s+([^:(]+?)\s*(?:\(|:|$))/i
+
+/** `text`'s letters alone, lower case:  how an action's words and its method's name are matched. */
+function letters(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}]/gu, "")
+}
+
+/** A line starting with `words`, whatever the spacing and case. */
+function wordsPattern(words: string): RegExp {
+  return new RegExp(`^${escapeForRegExp(words.trim()).replace(/\s+/g, "\\s+")}(?![\\p{L}\\p{N}])`, "iu")
+}
+
+/**
+ * The 0-based line ranges, both ends in, where type `name` is written in `text`:
+ * each `<spell-* "name"> ... </spell-*>`, and each outline header for it (`a card:`) with the lines under it.
+ */
+function typeLineRanges(text: string, name: string): [number, number][] {
+  const ranges: [number, number][] = []
+  const lineOf = (offset: number) => text.slice(0, offset).split("\n").length - 1
+  const opening = new RegExp(`<spell-([\\w-]+)\\s+"${escapeForRegExp(name)}"`, "gi")
+  let match: RegExpExecArray | null
+  while ((match = opening.exec(text))) {
+    const close = text.indexOf(`</spell-${match[1]}>`, match.index)
+    ranges.push([lineOf(match.index), lineOf(close < 0 ? text.length : close)])
+  }
+  const lines = text.split("\n")
+  const header = new RegExp(
+    `^(\\s*)(?:an?|una?)\\s+"?${escapeForRegExp(name)}"?(?:\\s.*\\b(?:where|donde))?\\s*:\\s*$`,
+    "i"
+  )
+  lines.forEach((line, index) => {
+    const found = header.exec(line)
+    if (!found) return
+    let last = index
+    for (let at = index + 1; at < lines.length; at++) {
+      if (lines[at]!.trim() && indentOf(lines[at]!) <= found[1]!.length) break
+      last = at
+    }
+    ranges.push([index, last])
+  })
+  return ranges
+}
+
+/**
+ * The lines of the code starting on line `at` (0-based), as 1-based `from` and `to`:  no further than `last`.
+ * - A tag (`<on click>`, `<action "x">`):  the lines between it and its closing tag;  its own line when it closes there.
+ * - A line (`- on card dropped:`, `to count the points`):  the lines indented under it;  its own line when there are none,
+ *   or its code follows it on the line.
+ */
+function bodyLines(lines: readonly string[], at: number, last: number): { from: number; to: number } {
+  const line = lines[at]!
+  if (line.trim().startsWith("<")) {
+    if (/\/>\s*$|<\/[^>]*>\s*$/.test(line)) return { from: at + 1, to: at + 1 }
+    for (let end = at + 1; end <= last; end++) {
+      if (/^\s*<\//.test(lines[end]!)) return end > at + 1 ? { from: at + 2, to: end } : { from: at + 1, to: at + 1 }
+    }
+    return { from: at + 1, to: at + 1 }
+  }
+  let end = at
+  for (let next = at + 1; next <= last; next++) {
+    if (lines[next]!.trim() && indentOf(lines[next]!) <= indentOf(line)) break
+    if (lines[next]!.trim()) end = next
+  }
+  const hasCodeAfter = colonIn(line) >= 0 && line.slice(colonIn(line) + 1).trim() !== ""
+  return end === at || hasCodeAfter ? { from: at + 1, to: end + 1 } : { from: at + 2, to: end + 1 }
 }
 
 /**

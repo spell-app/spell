@@ -916,7 +916,7 @@
         {
           "name": "menu",
           "type": "boolean",
-          "description": "An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon."
+          "description": "An item of the top bar's menus:  a `<ui-action>`, its icon, title and `shortcut`, in the menu's icon column."
         },
         {
           "name": "tip",
@@ -2014,6 +2014,10 @@
         {
           "name": "CodeOutputPane",
           "file": "src/app/solid/CodeOutput.tsx"
+        },
+        {
+          "name": "CodeSlice",
+          "file": "src/app/solid/monaco/CodeSlice.tsx"
         },
         {
           "name": "FallbackEditor",

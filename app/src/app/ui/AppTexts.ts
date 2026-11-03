@@ -35,6 +35,21 @@ export class AppTexts extends Observable {
   private i18n: I18n | undefined
 
   /**
+   * Every English text with no fill-in, and the same text in the page's language:  `{ Save: "Guardar" }`.
+   * - What the editor's own Spell titles are looked up by (`core.useTitles()`):  its menus, written in English
+   *   (`AppMenus.spellml`), show in the page's language.
+   * - Reactive, as `text()` is.
+   */
+  get titles(): Record<string, string> {
+    const titles: Record<string, string> = {}
+    for (const key of Object.keys(APP_TEXTS) as AppTextKey[]) {
+      const english: string = APP_TEXTS[key]
+      if (!english.includes("{")) titles[english] = this.text(key)
+    }
+    return titles
+  }
+
+  /**
    * Text `key` in the page's language, each `{name}` in it filled from `params`.
    * - A placeholder with no param stays as written, `{name}`, so the gap shows.
    * - SIDE EFFECT:  the first call starts `load()`.

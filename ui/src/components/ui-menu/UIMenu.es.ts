@@ -17,6 +17,7 @@ export const menuEs = {
     interactive: "interactivo",
     shrinkable: "encogible",
     ticks: "marcas",
+    "icon-column": "columna-de-iconos",
     tabs: "pestanas"
   },
   slots: { overflow: "desborde" },

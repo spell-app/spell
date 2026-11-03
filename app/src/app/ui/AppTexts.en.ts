@@ -408,7 +408,8 @@ export const APP_TEXTS = {
   "inspectorGroup.behaviour": "Behaviour",
   "inspectorGroup.advanced": "Advanced",
   inspectorNone: "none",
-  inspectorEvents: "Events",
+  // the Inspector's band of a part's events, abilities and actions, each with its code (`<CodeBand>`)
+  inspectorCode: "Code",
   // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
@@ -418,12 +419,6 @@ export const APP_TEXTS = {
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",
   inspectorEventHeading: "on {event}",
-  // `{event}`:  an event's words, as written (`on click`)
-  inspectorEventCode: "What happens {event}",
-  // `{event}`:  an ability's words, as written (`it can give up a card if`)
-  inspectorConditionCode: "Its condition:  {event} ...",
-  // the properties card's Actions band (`<ActionsBand>`, epic `debut` P29)
-  inspectorActions: "Actions",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
   inspectorActionOnlyWhen: "Only when {condition}",
   inspectorActionNotNow: "Can't be done now",
