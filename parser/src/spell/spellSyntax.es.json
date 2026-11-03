@@ -1896,7 +1896,7 @@
           "ruleNames": ["its_known_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsKnownProperty.ts",
-          "line": 17,
+          "line": 19,
           "purpose": "`its {member words}`, where the words name a PROPERTY `it`'s type declares: the LONGEST run of them that does, e.g. `short rank` in `its short rank + its short suit`.",
           "syntaxes": [
             {
@@ -6522,7 +6522,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 149,
+          "line": 151,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6536,7 +6536,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 157,
+          "line": 159,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6550,11 +6550,14 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 68,
+          "line": 70,
           "purpose": "`the message if that fails is \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()`.",
           "syntaxes": [
             {
               "syntax": "el mensaje si falla es {text:expression}"
+            },
+            {
+              "syntax": "si falla decir {text:expression}"
             }
           ],
           "aliases": ["statement"]
@@ -6564,7 +6567,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 89,
+          "line": 91,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -6578,7 +6581,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 105,
+          "line": 107,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -6592,7 +6595,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 139,
+          "line": 141,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -6606,7 +6609,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 144,
+          "line": 146,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -6620,7 +6623,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 172,
+          "line": 174,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {
