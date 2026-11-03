@@ -45,7 +45,8 @@ export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
   name: "recetario_familiar",
   kind: "room",
-  at: "/api/rooms/recipes"
+  at: "/api/rooms/recipes",
+  unclearNumbers: ","
 })
 
 export class CajaEnVivo extends App {

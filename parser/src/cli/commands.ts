@@ -6,7 +6,7 @@
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
  * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12);
- * and `spell place ingest`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
+ * and `spell place ingest` / `update`, a data source looked at and described (epic `data` P18):  its work is here, `placeIngest.ts`,
  * as it needs no project.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
@@ -246,33 +246,42 @@ export default function languageCommands(spell: Command): void {
   place
     .command("ingest")
     .description(
-      "look at a data source for real, and write what it found, best in a .spell file of its own:  a description of it, its collections, fields, ids, links, " +
-        "paging and limits, beside the Spell file, and the Spell to reach it, in the file -- through the Claude API with " +
+      "look at a data source for real, and write what it found, in a .spell file of its own:  the Spell to reach it, in " +
+        "<Name>.api.spell, and a description of it beside that, <Name>.api.json5 -- its collections, fields, ids, links, " +
+        "paging and limits -- named in the project's file, development.apis;  through the Claude API with " +
         "ANTHROPIC_API_KEY set, else claude -p.  It reads a few pages, politely, never writes, and checks the Spell compiles " +
         "and that a read through it returns rows.  Exits 1 if something needs a person"
     )
-    .argument("[address]", "where it is, e.g. https://swapi.info/api, recipes.csv -- with --update, only that place")
+    .argument("<address>", "where it is, e.g. https://swapi.info/api, recipes.csv")
     .option(
       "--kind <kind>",
       "its kind:  web server, graphql server, sheet, google sheet -- default worked out from the address, else it asks"
     )
     .option(
       "--into <file>",
-      "the .spell file for its Spell:  give it one of its own, your program in another, so --update never touches what you drew;  " +
-        "added to, never overwritten, the same place never twice -- default it asks"
-    )
-    .option(
-      "--update <file>",
-      "look again at the places described beside this file:  says what changed, updates the description and the Spell, " +
-        "keeps what you wrote, says what it couldn't change"
+      "the .spell file for its Spell, one server to a file, e.g. StarWars.api.spell:  your program in another, so " +
+        "spell place update never touches what you drew;  added to, never overwritten -- default it asks"
     )
     .option("--name <words>", "what the program calls the place -- default the agent's word, else from its address")
     .option("--key-secret <NAME>", "the NAME of the key it needs, read from the environment:  never written down")
     .option("--docs <address>", "where its docs are, over those it finds by itself")
     .option("--collections <paths>", "its collections' paths, comma-separated, for a source that doesn't list them")
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
-    .action((address: string | undefined, _options, command: Command) =>
+    .action((address: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))
+    )
+
+  place
+    .command("update")
+    .description(
+      "look again at the place a .spell file reaches, described beside it in <Name>.api.json5:  says what changed, " +
+        "updates the description and the Spell, keeps what you wrote, says what it couldn't change.  Exits 1 if " +
+        "something needs a person"
+    )
+    .argument("<file>", "the place's .spell file, e.g. StarWars.api.spell")
+    .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
+    .action((file: string, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./placeIngest")).placeUpdate(file, command.optsWithGlobals()))
     )
 
   // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)

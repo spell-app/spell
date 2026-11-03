@@ -1,26 +1,23 @@
-import { core, App, View, Place, h } from "@spell/core"
+import { core, Thing, App, Place, h } from "@spell/core"
 
-core.heading("Caja de recetas")
-/////////////////////
-// ## Caja de recetas
-/////////////////////
+core.heading("Caja de recetas:  dónde se guardan las recetas")
+////////////////////////////////////////////////////
+// ## Caja de recetas:  dónde se guardan las recetas
+////////////////////////////////////////////////////
 
-/** Una receta:  una tarjeta que puedes leer y cambiar */
-export class Receta extends View {
-  static elementTag = core.defineElement(this, "test-project")
-
+export class Receta extends Thing {
   // su "título" es texto
-  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 714, end: 734 } }) }
+  static { this.declareProp("título", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 642, end: 662 } }) }
   get título() { return this.getProp("título") }
   set título(value) { this.setProp("título", value) }
 
   // sus "porciones" es un número
-  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 738, end: 766 } }) }
+  static { this.declareProp("porciones", { type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 666, end: 694 } }) }
   get porciones() { return this.getProp("porciones") }
   set porciones(value) { this.setProp("porciones", value) }
 
   // sus "notas" es texto
-  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 770, end: 790 } }) }
+  static { this.declareProp("notas", { type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 698, end: 718 } }) }
   get notas() { return this.getProp("notas") }
   set notas(value) { this.setProp("notas", value) }
 
@@ -55,19 +52,33 @@ export class Receta extends View {
 }
 
 /**
- * Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
  * Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
  * recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
  * recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
+ * Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spellml.
  */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "database on this device" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
+  name: "recetario_familiar",
+  kind: "database on this device",
+  unclearNumbers: ","
+})
+
+// -----------
+core.heading("Caja de recetas")
+/////////////////////
+// ## Caja de recetas
+/////////////////////
+// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+// Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
+//## Una receta:  una tarjeta que puedes leer y cambiar
 
 core.heading("La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta")
-/** La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta */
+//## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
+
 export class CajaDeRecetas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -80,14 +91,6 @@ export class CajaDeRecetas extends App {
   static { this.declareProp("recetaNueva", { init: () => new Receta({ porciones: 4 }), early: true }) }
   get recetaNueva() { return this.getProp("recetaNueva") }
   set recetaNueva(value) { this.setProp("recetaNueva", value) }
-
-  /** las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1772, end: 1902 }, readsFrom: ["recetario_familiar"] }) }
-  get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
-    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda))
-    core.reverse(halladas)
-    return halladas
-  }, () => [this.búsqueda]) }
 
   /** Si todavía no hay nada guardado, unas cuantas para empezar */
   async create() {
@@ -110,6 +113,14 @@ export class CajaDeRecetas extends App {
     }
   }
 
+  /** Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1761, end: 1998 }, readsFrom: ["recetario_familiar"] }) }
+  get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
+    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta) => core.includes(receta.título, this.búsqueda))
+    core.reverse(halladas)
+    return halladas
+  }, () => [this.búsqueda]) }
+
   agregarLaRecetaNueva() {
     core.saveThing(this.recetaNueva)
     this.recetaNueva = new Receta({ porciones: 4 })
@@ -117,13 +128,13 @@ export class CajaDeRecetas extends App {
 
   draw() {
     return [
-      h("header", { class: "top" },
-        h("div", { class: "heading" },
-          h("h1", "Caja de recetas"),
-          h("p", "Todo lo que escribes se guarda al instante.")
+      h("ui-stack", { class: "top", direction: "horizontal", wrap: true, align: "end", justify: "between" },
+        h("ui-stack", { align: "start" },
+          h("ui-header", { size: "large" }, "Caja de recetas"),
+          h("ui-text", { color: "grey" }, "Todo lo que escribes se guarda al instante.")
         ),
         h("ui-toolbar", { class: "undo", menu: "menú de la caja", "aria-label": "Recetas" }),
-        h("ui-form", { value: this },
+        h("ui-form", { class: "find", value: this },
           h("ui-field", { label: "Buscar" },
             h("ui-input", { class: "search", name: "búsqueda", icon: "search" })
           )
@@ -132,7 +143,7 @@ export class CajaDeRecetas extends App {
       h("ui-card", { class: "new", fluid: true },
         h("ui-content",
           h("ui-form", { "prop:value": () => this.recetaNueva },
-            h("h2", "Agrega una receta"),
+            h("ui-header", { size: "small" }, "Agrega una receta"),
             h("ui-field", { label: "Nombre de la receta" },
               h("ui-input", { class: "draft", name: "título", size: "large" })
             ),
@@ -154,12 +165,12 @@ export class CajaDeRecetas extends App {
         )
       ),
       core.drawRead(() => this.coincidencias, (receta) => core.drawThing(receta), {
-        waiting: () => h("ui-loader", { class: "waiting", visible: true, inline: true, text: true }, "Buscando tus recetas"),
-        none: () => h("ui-text", { class: "none" },
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Buscando tus recetas"),
+        none: () => h("ui-text", { class: "none", color: "grey" },
           () => this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."
         ),
         failed: () => h("ui-message", { class: "failed", color: "red" },
-          h("p", "No podemos llegar a tus recetas ahora mismo."),
+          "No podemos llegar a tus recetas ahora mismo.",
           h("ui-button", {
             class: "again",
             onClick: core.pressed(this, () => core.reloadSaved()),
@@ -174,6 +185,6 @@ export const cajaDeRecetas = new CajaDeRecetas()
 // su "menú de la caja" es un menú de "deshacer"
 core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the recipe box looks (the same as Recipe Box, its twin).¬   - The box is one grid, <caja-de-recetas-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <caja-de-recetas-receta>, an element of its own:  its insides are reached by their parts. */¬¬caja-de-recetas-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬caja-de-recetas-receta {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* Add, at the foot of its card, on the right */¬.new ui-extra {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <caja-de-recetas-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬caja-de-recetas-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) cajaDeRecetas.start()

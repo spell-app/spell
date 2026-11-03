@@ -220,6 +220,10 @@ export const englishWords: SP.LanguageWords = {
       "selected-when": "selected-when",
       "undone-as": "undone-as",
       icon: "icon",
+      title: "title",
+      // a menu filled from a list (epic `language` P19, Q21):  `<menu "more examples" for-each={...} action="...">`
+      "for-each": "for-each",
+      action: "action",
       "menu-bar": "menu-bar",
       locked: "locked",
       // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
@@ -263,7 +267,8 @@ export const englishWords: SP.LanguageWords = {
         "enabled-when": "enabled when {enabled-when}",
         "selected-when": "selected when {selected-when}",
         "undone-as": "undone as {quoted undone-as}",
-        icon: "icon {quoted icon}"
+        icon: "icon {quoted icon}",
+        title: "titled {quoted title}"
       },
       test: "to test {words} :",
       event: "it sends {name}",
@@ -275,6 +280,8 @@ export const englishWords: SP.LanguageWords = {
       placeSlot: "draw its {words}",
       menu: "its {name} is a menu of",
       menuAnd: "and",
+      menuTitled: "titled {quoted title}",
+      menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
       notebookContent: "to draw its content :",
@@ -309,7 +316,7 @@ export const englishWords: SP.LanguageWords = {
         waiting: "while waiting :",
         none: "if there are none :",
         failed: "if that fails :",
-        failedSay: "the message if that fails is",
+        failedSay: "if that fails say",
         items: "show them in :",
         whole: "show it all in :",
         inPages: "show them in pages",

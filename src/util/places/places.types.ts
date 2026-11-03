@@ -13,8 +13,68 @@
 /** What a source writes for a number it hasn't got. */
 export const NO_NUMBER = /^\s*(?:|unknown|none|n\/a|na|null|-)\s*$/i
 
-/** A number written as text:  `172`, `-1.5`, `1,358`. */
-export const NUMBER_AS_TEXT = /^\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?\s*$/
+/** Which mark a source writes between a number's whole part and its fraction:  `1,200.5` or `1.200,5`. */
+export type DecimalMark = "." | ","
+
+/** A space between digit groups, `1 200`:  a plain one, or either of the ones that don't break. */
+const GROUP_SPACE = /(\d)[   ](?=\d{3}(?:\D|$))/g
+
+/** What's left of a number written as text once its group spaces go:  a sign, digits, dots and commas. */
+const DIGITS_AND_MARKS = /^[+-]?(?=[\d.,]*\d)[\d.,]+$/
+
+/** Whole groups of three after the first:  `1,200,000` by commas, `1.200.000` by dots. */
+const GROUPED = { ",": /^\d{1,3}(?:,\d{3})+$/, ".": /^\d{1,3}(?:\.\d{3})+$/ }
+
+/**
+ * The number `text` writes, or `undefined` if it isn't one:  `"172"`, `"-1.5"`, `"1,200"`, `"1 200"`, `"1.200,5"`.
+ * - Which mark is the fraction's:  `decimalMark`, what the source is known to write;  else the text says, when it can;
+ *   else `unclear`, how the program's language writes one (a comma in Spanish);  else a dot:
+ *   - both marks:  the last one, `1,200.5`, `1.200,5`
+ *   - one comma, every group after it 3 digits:  thousands, `1,200` is 1200;  else the fraction, `1,5` is 1.5
+ *   - dots:  the fraction, unless there's more than one, `1.200.000`
+ * - A mark between groups must have 3 digits after it, every time:  `1,20,0` isn't a number.
+ * - NEVER throws.
+ */
+export function numberInText(text: string, decimalMark?: DecimalMark, unclear?: DecimalMark): number | undefined {
+  const written = text.trim().replace(GROUP_SPACE, "$1")
+  if (!DIGITS_AND_MARKS.test(written)) return undefined
+  const mark = decimalMark ?? decimalMarkOf(written) ?? unclear ?? "."
+  const group = mark === "." ? "," : "."
+  const [whole = "", fraction, extra] = written.replace(/^[+-]/, "").split(mark)
+  if (extra !== undefined || (fraction !== undefined && !/^\d+$/.test(fraction))) return undefined
+  if (whole.includes(group) && !GROUPED[group].test(whole)) return undefined
+  if (!whole && fraction === undefined) return undefined
+  const sign = written.startsWith("-") ? "-" : ""
+  const number = Number(`${sign}${whole.replaceAll(group, "") || "0"}.${fraction ?? "0"}`)
+  return Number.isNaN(number) ? undefined : number
+}
+
+/**
+ * Which mark is the fraction's, as `texts` show it:  `undefined` when none of them says.
+ * - `1,5`, `3,75`, `1.200,5`:  a comma.  `1.5`, `1,200.5`:  a dot.  `1,200` or `172` alone says nothing.
+ * - Some say one and some the other:  a dot, the usual.
+ */
+export function decimalMarkIn(texts: readonly string[]): DecimalMark | undefined {
+  const said = new Set<DecimalMark>()
+  for (const text of texts) {
+    const written = text.trim().replace(GROUP_SPACE, "$1")
+    const mark = DIGITS_AND_MARKS.test(written) ? decimalMarkOf(written) : undefined
+    if (mark) said.add(mark)
+  }
+  if (said.size > 1) return "."
+  return [...said][0]
+}
+
+/** The fraction's mark, if `written` alone shows it. */
+function decimalMarkOf(written: string): DecimalMark | undefined {
+  const comma = written.lastIndexOf(",")
+  const dot = written.lastIndexOf(".")
+  const unsigned = written.replace(/^[+-]/, "")
+  if (comma >= 0 && dot >= 0) return comma > dot ? "," : "."
+  if (comma >= 0) return GROUPED[","].test(unsigned) ? undefined : ","
+  if (dot >= 0) return GROUPED["."].test(unsigned) && unsigned.split(".").length > 2 ? "," : "."
+  return undefined
+}
 
 /** How long a text is before losing it is worth a notice, in characters:  a title just flips once, a paragraph is kept (J1). */
 const LONG_TEXT_CHARS = 40

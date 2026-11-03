@@ -177,9 +177,49 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     })
   }
 
-  /** Our words files, one per language in `wordsLanguages`, the one our program speaks first -- see `wordsFileFor()`. */
+  /**
+   * Our words files, one per language in `wordsLanguages`, the one our program speaks first -- see `wordsFileFor()`;
+   * then one per language we have action titles in, but aren't written in (`titleLanguages`).
+   */
   get wordsFiles(): SP.SpellJSFile[] {
-    return this.wordsLanguages.map((lang) => this.wordsFileFor(lang))
+    return [...this.wordsLanguages, ...this.titleLanguages].map((lang) => this.wordsFileFor(lang))
+  }
+
+  /**
+   * Languages our last compile found action titles in, from a names dictionary beside us, which our files aren't
+   * written in:  each a words file of titles alone (epic `language` P18, Q20) -- see `writeTitleWords()`.
+   */
+  titleLanguages: string[] = []
+
+  /**
+   * SIDE EFFECT:  a words file of titles alone for each language we have a names dictionary in
+   * (`<Project>.es.names.json5`, `spell translate`'s) but aren't written in -- see `SP.SpellWordsData.titles`.
+   * - e.g. the editor's English menus, `AppMenus.es.js`:  `{ "Compile and Run": "Compilar y ejecutar" }`.
+   * - A language whose dictionary has words for none of our titles, or that we have none for:  no file.
+   * - NEVER throws:  a dictionary it can't read is left out.
+   */
+  protected async writeTitleWords(): Promise<void> {
+    this.titleLanguages = []
+    const declarations = SP.SpellDeclarations.read(this.declarationsFile.contents ?? "")
+    if (!declarations?.statements.some((statement) => statement.title)) return
+    for (const lang of SP.Language.all.keys()) {
+      if (this.wordsLanguages.includes(lang)) continue
+      const location = this.getFileLocation(`${this.projectName}.${lang}.names.json5`)
+      if (!location) continue
+      let text: string | undefined
+      try {
+        text = (await new SP.SpellJSFile(location.path).load(undefined)) as string | undefined
+      } catch {
+        continue
+      }
+      const titles = SP.SpellWords.titlesFrom(declarations, SP.SpellWords.textsOfNames(text))
+      if (!titles) continue
+      this.wordsFileFor(lang).contents = SP.SpellWords.script(
+        { lang, types: {}, titles },
+        this.projectName ?? this.projectId
+      )
+      this.titleLanguages.push(lang)
+    }
   }
 
   /** Our words file in the language our program speaks to the person running it:  the first of `wordsFiles`. */
@@ -679,6 +719,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
               // and our words, for a runner's Thing Explorer.  Our compiled code goes in our build folder.
               if (!this.saveCompiled) return this.outputFile.contents
               await this.declarationsFile.save(undefined)
+              await this.writeTitleWords()
               for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
               for (const target of this.targets) {
                 const map = this.sourceMapFileFor(target)

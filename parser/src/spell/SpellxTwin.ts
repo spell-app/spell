@@ -425,21 +425,31 @@ export class SpellxTwin {
    * A menu, ONE line naming its actions (Q34, Q41).
    * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
    *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
+   * - A `<menu "file menu" />` inside it is a sub-menu;  `title="File"` its title, `titled "File"` (epic `language` P19).
+   * - `<menu "more examples" for-each={its examples} action="open example" />`:  filled from a list (Q21).
    * - Its block is the line's:  nothing left to parse under it.
    * - Its `description=` is its docstring, as every member's is.
    */
   private menu(): SpellxTwinLine {
-    const tokens = this.expand(this.words.menu)
+    const filled = this.attribute("for-each") && this.attribute("action")
+    const tokens = this.expand(filled ? this.words.menuEach : this.words.menu)
+    // each `<action>`, and each `<menu>` inside it:  a sub-menu (epic `language` P19)
     const items = (this.block?.tokens ?? []).flatMap((item) => {
       const head = item instanceof P.LineToken ? item.tokens[0] : undefined
-      if (!(head instanceof SP.SpellxTagToken) || head.tag.kind !== "action" || !head.tag.name) return []
+      if (!(head instanceof SP.SpellxTagToken) || !head.tag.name) return []
+      if (head.tag.kind !== "action" && head.tag.kind !== "menu") return []
       return [head.tag.name.quoted ?? this.quote(head.tag.name)]
     })
-    items.forEach((item, index) => {
-      if (index) tokens.push(...this.synthetic(index === items.length - 1 ? this.words.menuAnd : ","))
-      tokens.push(item)
-      spaceAfter(tokens)
-    })
+    if (!filled)
+      items.forEach((item, index) => {
+        if (index) tokens.push(...this.synthetic(index === items.length - 1 ? this.words.menuAnd : ","))
+        tokens.push(item)
+        spaceAfter(tokens)
+      })
+    if (this.attribute("title")) {
+      if (filled) tokens.push(...this.synthetic(","))
+      tokens.push(...this.expand(this.words.menuTitled))
+    }
     // its description, `description="..."`, as comments ending its line:  its docstring
     const { description } = this.descriptionOf(this.block)
     const line = new P.LineToken({ ...this.line.record, tokens: [...tokens, ...description] })

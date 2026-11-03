@@ -46,6 +46,7 @@ import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
 import { RowsIn } from "./RowsIn"
+import { WritesLike } from "./WritesLike"
 
 /** The Spanish of the `places` rule module. */
 export const placesEs = new SpellParser({ module: "places" })
@@ -106,7 +107,8 @@ placesEs.addRule(CreatePlace, {
             "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
             '  name: "recetario_familiar",',
             '  kind: "web server",',
-            '  at: "https://api.example.com/v1"',
+            '  at: "https://api.example.com/v1",',
+            '  unclearNumbers: ","',
             "})"
           ]
         ]
@@ -133,7 +135,11 @@ placesEs.addRule(FieldCalled, {
 })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
-placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} (segundo|segundos)?" })
+placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
+  syntax: "((second:segundo|segundos)|(minute:minuto|minutos)|(hour:hora|horas)|(day:día|días|dia|dias))"
+})
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} {unit:check_unit}?" })
+placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {unit:check_unit}" })
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
 placesEs.addRule(RowsIn, {
@@ -142,6 +148,10 @@ placesEs.addRule(RowsIn, {
 placesEs.addRule(NextPageIn, {
   syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
+placesEs.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
+  syntax: "((numbers:los números)|(names:los nombres))"
+})
+placesEs.addRule(WritesLike, { syntax: "{type:subject_implied} escribe {what:numbers_or_names} como {example:text}" })
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
@@ -151,7 +161,6 @@ placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive
 
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })
-placesEs.addRule(IfThatFailsSay, { syntax: "el mensaje si falla es {text:expression}" })
 placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })
 placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
 placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })

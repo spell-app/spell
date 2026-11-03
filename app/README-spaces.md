@@ -296,6 +296,7 @@ in [server.types.ts](src/spaces/server/node/projects/server.types.ts)):
 | `exports` | the names it offers projects that import it | everything it declares |
 | `targets` | the languages it compiles to, besides JavaScript:  `["ts/solid"]`, `["py"]`, `["ts/lib"]` | `["js/solid"]` |
 | `listsStartAt` | where its lists start counting:  `1`, or `0` as JavaScript and Python do | `1` |
+| `development` | files for working on it, never compiled or listed:  `{ "apis": ["StarWars.api.json5"] }`, each server's description, which `spell place ingest` and `update` add | none |
 
 Each entry of `imports`:
 

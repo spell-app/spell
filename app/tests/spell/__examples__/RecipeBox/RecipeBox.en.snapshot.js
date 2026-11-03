@@ -11,8 +11,8 @@ export const words = {
     RecipeBox: {
       search: "search",
       newRecipe: "new recipe",
-      matches: "matches",
       create: "create it",
+      matches: "matches",
       addTheNewRecipe: "add the new recipe",
       draw: "draw it"
     }

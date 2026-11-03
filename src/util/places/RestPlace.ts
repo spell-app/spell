@@ -16,7 +16,8 @@ import {
   type PlaceRow,
   type SelectingContext
 } from "./places.types"
-import { jsonIn, renamed, turnedRound, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
+import { FieldNames, type NameStyle } from "./FieldNames"
+import { jsonIn, valueAt, WebPlace, type WebPlaceProps } from "./WebPlace"
 
 /** How many rows it asks for at a time on a place that pages, when nobody says. */
 const REST_PAGE_SIZE = 100
@@ -72,6 +73,8 @@ const IS_ADDRESS = /^(https?:)?\/\//
  * - With none, the last save wins the whole record:  `versionCheck` is off, and the compiler can warn of that.
  * - A key is named, never written:  `WebPlace`.
  * - Rows have OUR field names everywhere but on the wire.
+ *   A server's field matches ours by its words (`FieldNames`):  `hair_color` is our `hairColor`, with nothing said.
+ *   `fields` names only what differs, and `namesLike` how the server spells a name it hasn't sent yet.
  ****************/
 export class RestPlace extends WebPlace implements Place {
   /** What it says it can do. */
@@ -79,7 +82,7 @@ export class RestPlace extends WebPlace implements Place {
   /** Each collection's mapping. */
   private readonly collections: Readonly<Record<string, RestCollection>>
   /** What's the same of every collection. */
-  private readonly everyCollection: RestCollection | undefined
+  private readonly allCollections: RestCollection | undefined
   /** How it knows versions. */
   private readonly versions: RestVersions | undefined
   /** How it updates. */
@@ -92,22 +95,30 @@ export class RestPlace extends WebPlace implements Place {
   private readonly seenVersions = new Map<string, string>()
   /** Each named operation's address. */
   private readonly operations: Readonly<Record<string, string>>
+  /** How the server spells a field's name, for one it hasn't sent yet. */
+  private readonly namesLike: NameStyle | undefined
+  /** Each collection's field names, made when it's first used. */
+  private readonly fieldNames = new Map<string, FieldNames>()
+  /** Fields a program named for a collection after it was made:  `addFields()`. */
+  private readonly addedFields = new Map<string, Record<string, string>>()
 
   constructor({
     collections = {},
-    everyCollection,
+    allCollections,
     can,
     versions,
     update = "PATCH",
     params,
     pageSize,
     operations,
+    namesLike,
     ...rest
   }: RestPlaceProps) {
     super(rest)
+    this.namesLike = namesLike
     this.operations = operations ?? {}
     this.collections = collections
-    this.everyCollection = everyCollection
+    this.allCollections = allCollections
     this.versions = versions
     this.updateMethod = update
     this.params = { ...REST_PARAMS, ...params }
@@ -118,6 +129,16 @@ export class RestPlace extends WebPlace implements Place {
   /** What it can do. */
   describe(): PlaceCapabilities {
     return this.capabilities
+  }
+
+  /**
+   * SIDE EFFECT:  `collection`'s fields are also named `fields`, ours to the server's:  a type's `stored as`, known once it's read.
+   * - A spelling already read stays:  only one that's new joins.
+   */
+  addFields(collection: string, fields: Readonly<Record<string, string>>): void {
+    if (!Object.keys(fields).length) return
+    this.addedFields.set(collection, { ...this.addedFields.get(collection), ...fields })
+    this.fieldNames.delete(collection)
   }
 
   /**
@@ -341,9 +362,9 @@ export class RestPlace extends WebPlace implements Place {
   /** `collection`'s mapping:  what it says, over what's said of every collection;  all defaults if neither says. */
   private mappingOf(collection: string): RestCollection {
     const own = this.collections[collection]
-    if (!this.everyCollection) return own ?? {}
-    const fields = { ...this.everyCollection.fields, ...own?.fields }
-    return { ...this.everyCollection, ...own, fields }
+    const added = this.addedFields.get(collection)
+    const fields = { ...this.allCollections?.fields, ...own?.fields, ...added }
+    return { ...this.allCollections, ...own, fields }
   }
 
   /** Where the thing with this id is:  an id that's a whole address is where it is, as on a server whose rows name themselves. */
@@ -358,17 +379,27 @@ export class RestPlace extends WebPlace implements Place {
 
   /** `row`'s fields, named as the server names them. */
   private onTheWire(collection: string, row: PlaceRow): PlaceRow {
-    return renamed(row, this.mappingOf(collection).fields ?? {})
+    return this.namesOf(collection).toServer(row)
   }
 
   /** What the server calls this field. */
   private wireName(collection: string, field: string): string {
-    return this.mappingOf(collection).fields?.[field] ?? field
+    return this.namesOf(collection).serverName(field)
+  }
+
+  /** `collection`'s field names:  what's named, and what it's read. */
+  private namesOf(collection: string): FieldNames {
+    let names = this.fieldNames.get(collection)
+    if (!names) {
+      names = new FieldNames(this.mappingOf(collection).fields, this.namesLike)
+      this.fieldNames.set(collection, names)
+    }
+    return names
   }
 
   /** `row` from the server, named our way, its version noted.  `response`:  where an `ETag` may be. */
   private noted(collection: string, wireRow: PlaceRow, response?: Response): PlaceRow {
-    const row = renamed(wireRow, turnedRound(this.mappingOf(collection).fields ?? {}))
+    const row = this.namesOf(collection).fromServer(wireRow)
     const id = idOfRow(row, this.capabilities.idOf)
     if (id !== undefined) this.noteVersion(collection, id, row, response)
     return row
@@ -394,7 +425,7 @@ export type RestPlaceProps = WebPlaceProps & {
   /** Each collection's mapping, by the name we call it.  One not named:  `/<name>{/id}`, and the same field names. */
   collections?: Readonly<Record<string, RestCollection>>
   /** What's the same of every collection:  each one's own mapping wins, field by field. */
-  everyCollection?: RestCollection
+  allCollections?: RestCollection
   /** What this API does for itself, over a plain one that does nothing.  Declared per API:  they vary. */
   can?: Partial<Omit<PlaceCapabilities, "page">> & { page?: Exclude<PageKind, "range"> }
   /** Each named operation's address under `url`, by its name:  `{ publish: "/recipes/publish" }`, for `call()`. */
@@ -407,13 +438,15 @@ export type RestPlaceProps = WebPlaceProps & {
   params?: Partial<RestParams>
   /** How many rows it asks for at a time on a place that pages by offset, when nobody says;  default 100. */
   pageSize?: number
+  /** How the server spells a field's name it hasn't sent yet, for a write or a query:  `snake` for `hair_color`.  Left out:  ours. */
+  namesLike?: NameStyle
 }
 
 /** How one collection maps onto the server. */
 export type RestCollection = {
   /** Its address under `url`, a template (`Api.url()`):  `/meals{/id}`.  Left out:  `/<name>{/id}`. */
   path?: string
-  /** Each field's name on the server, by ours:  `{ title: "name" }`.  One not named:  the same on both. */
+  /** Each field's name on the server, by ours:  `{ title: "name" }`.  One not named:  matched by its words (`FieldNames`). */
   fields?: Readonly<Record<string, string>>
   /** Where a list's rows are in its answer, a dotted path:  `data.items`.  Left out:  the answer is the list. */
   rowsAt?: string

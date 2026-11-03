@@ -73,7 +73,7 @@ describe("the lines", () => {
     expect(asked).toHaveLength(2)
   })
 
-  test("a number written as text reads as a number, a word for none as nothing;  anything else stays;  a null is no value", async () => {
+  test("a number written as text reads as a number, a word for none as nothing;  anything else is nothing, warned of once;  a null is nothing (epic `data` P23)", async () => {
     serve({
       [`${HOST}/people`]: [
         { id: 1, height: "172", mass: "1,358", weird: "30-165", planet: null },
@@ -92,8 +92,8 @@ describe("the lines", () => {
       `\t- its "planet" is text`
     ])("Person")
     const [first, second] = await read(Person)
-    expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, "30-165"])
-    expect([second!.height, second!.mass]).toEqual([null, null])
+    expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, undefined])
+    expect([second!.height, second!.mass, second!.weird]).toEqual([undefined, undefined, 4])
     expect(first!.planet).toBe("")
     expect(second!.planet).toBe("Tatooine")
     expect(warn.mock.calls.flat().join("\n")).toMatch(/weird/)
@@ -129,7 +129,7 @@ describe("the lines", () => {
 describe("RestPlace", () => {
   test("a thing whose id is an address is at that address", async () => {
     const asked = serve({ [`${HOST}/people/1`]: { url: `${HOST}/people/1`, name: "Luke" } })
-    const place = new RestPlace({ url: HOST, everyCollection: { fields: { id: "url" } } })
+    const place = new RestPlace({ url: HOST, allCollections: { fields: { id: "url" } } })
     const rows = await place.getMany("people", [`${HOST}/people/1`], {})
     expect(rows).toEqual([{ id: `${HOST}/people/1`, name: "Luke" }])
     expect(asked).toEqual([`${HOST}/people/1`])
@@ -139,7 +139,7 @@ describe("RestPlace", () => {
     serve({ [`${HOST}/a`]: { rows: [{ key: 1 }] }, [`${HOST}/b`]: { inside: [{ key: 2, name: "x" }] } })
     const place = new RestPlace({
       url: HOST,
-      everyCollection: { rowsAt: "rows", fields: { id: "key" } },
+      allCollections: { rowsAt: "rows", fields: { id: "key" } },
       collections: { b: { rowsAt: "inside", fields: { title: "name" } } }
     })
     expect((await place.list("a", {}, {})).rows).toEqual([{ id: 1 }])

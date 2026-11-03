@@ -171,7 +171,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
-| lists | positions, ranges, adding, removing, `for each`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
+| lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
@@ -228,7 +228,7 @@ and the JavaScript they become.
     then its aliases, bulleted, under those.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
-  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
+  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for card rank in card ranks`.
   - It holds plain text and numbers, so it has no properties or aliases of its own:  Spell says so if you give it one.
   - Spanish puts the words in its own order:  `palo de carta`, plural `palos de carta`.
 - A card's value is its rank's position, so an ace is 1 and a queen is 12:  the Solitaire example's card test checks the queen.
@@ -379,8 +379,13 @@ Its first line is how you call it, with each blank's type in brackets:
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon` and `a new one replaces the last one` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
+  - `- titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
+    a fill-in follows the program, `- titled "Duplicate [the project name]…"`.
+    - In another language:  its words there come from the program's names dictionary in that language,
+      `spell translate`'s, written into a words file of titles (`Editor.es.js`), which a host hands the core
+      (`core.useTitles()`).
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
@@ -390,12 +395,28 @@ Its first line is how you call it, with each blank's type in brackets:
 
     ```spell
     solitaire is an app where:
-    	- its "game menu" is a menu of "deal", "-", "undo" and "redo"
+    	- its "game" menu has actions "deal", "-", "undo" and "redo"
     	- its menu bar is "game menu"
     ```
 
+    - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
     - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
       click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
+    - A menu may hold other menus, its sub-menus, after its actions, so a menu bar is a menu of menus;
+      a menu's own title comes last, `titled "File"`:
+
+      ```spell
+      editor is an app where:
+      	- its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
+      	- its "more examples" menu has its examples, each running "open (an example)"
+      	- its "bar" menu has menus "file" and "edit"
+      	- its menu bar is "bar menu"
+      ```
+
+    - The same menus, said the older way, each item quoted by its full name, sub-menus among the actions:
+      `its "file menu" is a menu of "save", "-" and "more examples", titled "File"`.
+    - A menu filled from a list, `each running`, has an item per thing in it, titled with its title (else its name),
+      which runs the action with that thing.
 
 ### Lists count from 1, and `where`
 
@@ -1019,8 +1040,8 @@ A program says once where its data lives, and which types live there, then write
 family cookbook is a web server at "https://api.example.com/v1":
 	- check it every 30 seconds
 
-a "recipe" is a view:
-	- it is saved in family cookbook
+a "recipe" is a thing:
+	- it lives in family cookbook
 	- its "title" is text
 
 recipe box is an app:
@@ -1037,14 +1058,21 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
+- In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
+  with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
-- A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`,
-  or `the message if that fails is ...`;  `if that fails:` with lines under it draws them instead.
+- A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
+  `if that fails:` with lines under it draws them instead.
+- A field finds the server's own spelling by its words:  `its "cook name" is text` reads `cook_name`, `cookName` or `Cook Name`.
+  - Only a name that really differs says so, on its own line:  `its "title" is text, stored as "dish_name"`.
+  - A number written as text reads as one, `"172"`, `"1,200"`, `"1,5"`;  a field the server didn't send is nothing, not 0.
+  - The server's word for none:  `its "servings" is a number or "unknown"`, quiet, and what saving nothing writes back.
+  - Rarely needed, as the ingest writes them when it sees it:  `it writes numbers like "1.200,5"`, `it writes names like "cook_name"`.
 - The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile

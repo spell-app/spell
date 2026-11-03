@@ -851,32 +851,43 @@ without saying why.
 
 `spell place ingest` looks at a data source for real, and writes down what it found:
 what it holds, how it pages, what it can do, and the Spell to reach it.
+`spell place update` looks again later.
 
 ```sh
-spell place ingest https://swapi.py4e.com/api --into StarWarsApi.spell
+spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell
+spell place update StarWars.api.spell
 ```
 
 - It reads a few pages of each collection, politely, naming itself, and stops at a size.
   It never sends a write:  everything goes through one reader that refuses to.
 - An agent reads samples and any docs, through the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`.
 - It checks the Spell compiles, and that a read through it really returns rows, before it writes a thing.
-- The Spell goes in the file:  added to, never overwritten, and the same place never twice.
-  Give it a file of its own, `StarWarsApi.spell`, with your program in another:
-  so `--update` rewrites what a place holds, and never touches what you drew.
-- The description goes beside it, `StarWarsApi.star-wars.place.json5`, one per place:
+- One server to a file:  the Spell goes in `StarWars.api.spell`, with your program in another,
+  so `spell place update` rewrites what the server holds, and never touches what you drew.
+  - Added to, never overwritten;  the same place never twice;  a second server stops, asking for a file of its own.
+- The description goes beside it, `StarWars.api.json5`:
   its collections, fields and types, ids, links, paging and limits, what Spell can't say about it,
   the version where the source names one, and always the date and a fingerprint of the shape, as many name none.
+  - What every collection has the same (its id's field, how it pages, where its rows are) is written once,
+    in `allCollections`;  a collection's own setting wins.
+  - The project's file names it, in `development.apis`.
+
+`spell place ingest <address>`:
 
 | Flag | What it does |
 | --- | --- |
 | `--kind <kind>` | `web server`, `graphql server`, `sheet`, `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
-| `--into <file>` | the `.spell` file:  one of its own, with your program in another, so `--update` touches only it.  With none, it asks;  with no one to ask, it stops |
-| `--update <file>` | looks again at each place described beside the file:  says what changed, updates both, keeps every line you wrote or changed, says what it couldn't change for you, and exits 1 if there's any |
+| `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
 | `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
 | `--collections <paths>` | its collections' paths, for a source that doesn't list them |
 | `--no-ai` | asks no agent:  only what can be worked out from what comes back |
+
+`spell place update <file>` looks again at the place described beside the file:
+it says what changed, updates both, keeps every line you wrote or changed,
+says what it couldn't change for you, and exits 1 if there's any.
+`--no-ai` works the same as the ingest's.
 
 ## spell-ui
 

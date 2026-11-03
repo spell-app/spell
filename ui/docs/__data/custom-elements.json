@@ -16409,6 +16409,10 @@
               "description": "`editable=\"tabs\"`:  the `<textarea>` holding the markdown."
             },
             {
+              "name": "edit-bar",
+              "description": "`editable`:  the formatting bar above the open box."
+            },
+            {
               "name": "edit-box",
               "description": "`editable`:  the box a piece becomes while it's edited in place, holding its markdown."
             }
@@ -16590,6 +16594,11 @@
             {
               "name": "--ui-markdown-edit-color",
               "default": "var(--ui-primary)"
+            },
+            {
+              "name": "--ui-markdown-bar-background",
+              "default": "var(--ui-background)",
+              "description": "the bar's own ground: solid, over the text it sits on (a page may make the editor's clear)"
             }
           ]
         }

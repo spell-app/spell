@@ -1,26 +1,23 @@
-import { core, App, View, Place, h } from "@spell/core"
+import { core, Thing, App, Place, h } from "@spell/core"
 
-core.heading("Recipe Box")
-////////////////
-// ## Recipe Box
-////////////////
+core.heading("Recipe Box:  where the recipes are kept")
+/////////////////////////////////////////////
+// ## Recipe Box:  where the recipes are kept
+/////////////////////////////////////////////
 
-/** A recipe:  a card you can read and change */
-export class Recipe extends View {
-  static elementTag = core.defineElement(this, "test-project")
-
+export class Recipe extends Thing {
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 635, end: 654 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 581, end: 600 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "servings" is a number
-  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.spell", start: 658, end: 684 } }) }
+  static { this.declareProp("servings", { type: "number", declaredAt: { path: "/RecipeBox.api.spell", start: 604, end: 630 } }) }
   get servings() { return this.getProp("servings") }
   set servings(value) { this.setProp("servings", value) }
 
   // - its "notes" is text
-  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.spell", start: 688, end: 707 } }) }
+  static { this.declareProp("notes", { type: "text", declaredAt: { path: "/RecipeBox.api.spell", start: 634, end: 653 } }) }
   get notes() { return this.getProp("notes") }
   set notes(value) { this.setProp("notes", value) }
 
@@ -55,19 +52,29 @@ export class Recipe extends View {
 }
 
 /**
- * Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
  * Where they're kept is the next line, and only that line knows.  Change it to keep them somewhere else:
  * family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"
  * family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"
  * (Both are served on your computer by "yarn tsx scripts/recipe-servers.ts", at the top of Spell's folder.)
+ * What's drawn and done with them is in RecipeBox.spellml.
  */
 export class FamilyCookbook extends Place {}
 export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "database on this device" })
 
+// -----------
+core.heading("Recipe Box")
+////////////////
+// ## Recipe Box
+////////////////
+// Your recipes, on cards:  find one, add one, change one as you type, remove one and undo it.
+// Where they're kept is in RecipeBox.api.spell, and only its first line knows.
+
 core.heading("A recipe:  a card you can read and change")
+//## A recipe:  a card you can read and change
 
 core.heading("The box:  the card for a new recipe, then a card for each one you have")
-/** The box:  the card for a new recipe, then a card for each one you have */
+//## The box:  the card for a new recipe, then a card for each one you have
+
 export class RecipeBox extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
 
@@ -80,14 +87,6 @@ export class RecipeBox extends App {
   static { this.declareProp("newRecipe", { init: () => new Recipe({ servings: 4 }), early: true }) }
   get newRecipe() { return this.getProp("newRecipe") }
   set newRecipe(value) { this.setProp("newRecipe", value) }
-
-  /** newest first:  a new one joins the end, so they're shown the other way round */
-  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spell", start: 1636, end: 1748 }, readsFrom: ["family_cookbook"] }) }
-  get matches() { return core.waitedValue(this, "matches", async () => {
-    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search))
-    core.reverse(found)
-    return found
-  }, () => [this.search]) }
 
   /** With nothing kept yet, a few to start from */
   async create() {
@@ -110,6 +109,14 @@ export class RecipeBox extends App {
     }
   }
 
+  /** Newest first:  a new one joins the end, so they're shown the other way round */
+  static { this.declareProp("matches", { declaredAt: { path: "/RecipeBox.spellml", start: 1560, end: 1766 }, readsFrom: ["family_cookbook"] }) }
+  get matches() { return core.waitedValue(this, "matches", async () => {
+    const found = core.filter(await core.savedThings(Recipe, {}, "looks through"), (recipe) => core.includes(recipe.title, this.search))
+    core.reverse(found)
+    return found
+  }, () => [this.search]) }
+
   addTheNewRecipe() {
     core.saveThing(this.newRecipe)
     this.newRecipe = new Recipe({ servings: 4 })
@@ -117,20 +124,20 @@ export class RecipeBox extends App {
 
   draw() {
     return [
-      h("header", { class: "top" },
-        h("div", { class: "heading" },
-          h("h1", "Recipe Box"),
-          h("p", "Everything you type is saved as you go.")
+      h("ui-stack", { class: "top", direction: "horizontal", wrap: true, align: "end", justify: "between" },
+        h("ui-stack", { align: "start" },
+          h("ui-header", { size: "large" }, "Recipe Box"),
+          h("ui-text", { color: "grey" }, "Everything you type is saved as you go.")
         ),
         h("ui-toolbar", { class: "undo", menu: "box menu", "aria-label": "Recipes" }),
-        h("ui-form", { value: this },
+        h("ui-form", { class: "find", value: this },
           h("ui-field", { label: "Search" }, h("ui-input", { class: "search", name: "search", icon: "search" }))
         )
       ),
       h("ui-card", { class: "new", fluid: true },
         h("ui-content",
           h("ui-form", { "prop:value": () => this.newRecipe },
-            h("h2", "Add a recipe"),
+            h("ui-header", { size: "small" }, "Add a recipe"),
             h("ui-field", { label: "Recipe name" },
               h("ui-input", { class: "draft", name: "title", size: "large" })
             ),
@@ -152,12 +159,12 @@ export class RecipeBox extends App {
         )
       ),
       core.drawRead(() => this.matches, (recipe) => core.drawThing(recipe), {
-        waiting: () => h("ui-loader", { class: "waiting", visible: true, inline: true, text: true }, "Finding your recipes"),
-        none: () => h("ui-text", { class: "none" },
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Finding your recipes"),
+        none: () => h("ui-text", { class: "none", color: "grey" },
           () => this.search === "" ? "No recipes yet. Add your first one." : "No recipes match your search."
         ),
         failed: () => h("ui-message", { class: "failed", color: "red" },
-          h("p", "We can't reach your recipes right now."),
+          "We can't reach your recipes right now.",
           h("ui-button", {
             class: "again",
             onClick: core.pressed(this, () => core.reloadSaved()),
@@ -172,6 +179,6 @@ export const recipeBox = new RecipeBox()
 // - its "box menu" is a menu of "undo"
 core.describeMenu(RecipeBox, "boxMenu", { items: ["undo"] })
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the recipe box looks.¬   - The box is one grid, <recipe-box-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <recipe-box-recipe>, an element of its own:  its insides are reached by their parts. */¬¬recipe-box-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬recipe-box-recipe {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* Add, at the foot of its card, on the right */¬.new ui-extra {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <recipe-box-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬recipe-box-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) recipeBox.start()

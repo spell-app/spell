@@ -8,6 +8,7 @@ import {
   type IngestResult,
   type IngestSettings,
   type PlaceDescription,
+  type PlaceDescriptionOnDisk,
   type PlaceLook
 } from "./ingest.types"
 import { agentRead, renameCollections } from "./PlaceReading"
@@ -15,8 +16,8 @@ import { IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAt
 import { describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
 import {
   mergedSpell,
-  nameIsTaken,
   placeLineAt,
+  placesIn,
   spellPartsFor,
   spellTextOf,
   type SpellLine,
@@ -47,8 +48,8 @@ const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
  *
  * ```ts
  * const ingest = new PlaceIngest({ fetch, ask, files, readThrough, claude })
- * await ingest.add({ address: "https://swapi.info/api", into: "StarWars.spell" })
- * await ingest.update("StarWars.spell")
+ * await ingest.add({ address: "https://swapi.info/api", into: "StarWars.api.spell" })
+ * await ingest.update("StarWars.api.spell")
  * ```
  *
  * - The steps, in order:
@@ -59,9 +60,12 @@ const KINDS_TO_NAME = [...KINDS_IT_CAN_LOOK_AT]
  *   5. the Spell (`spellPartsFor()`), which has to compile:  a line Spell can't read is left out, and the description says so
  *   6. a real read through that Spell (`readThrough`), which has to return rows
  *   7. only then, the files:  a file is added to, never overwritten, and the same place isn't added twice
- * - The description goes beside the Spell file, `<File>.<place>.place.json5`:  one per place, as a file can hold several.
+ * - One server per Spell file, `<Name>.api.spell`;  its description goes beside it, `<Name>.api.json5`.
  *   - JSON5, so a person can read it, and the next look can too.
+ *   - What every collection agrees on is written once, in `allCollections`;  each collection keeps only what differs
+ *     (`descriptionOnDisk()`).
  *   - A person's own keys in it, and comments, stay when it's written again.
+ *   - The project's file names it, in `development.apis` (`IngestFiles.listInProject`).
  * - Knows nothing of a terminal, a disk or `claude`:  every one is handed in (`IngestSettings`), so the editor can run the
  *   same steps, and ask its own way.
  * - Imported by path, never through `SP`'s barrel:  `spell/parser/spell/ingest/PlaceIngest`.
@@ -101,49 +105,37 @@ export class PlaceIngest {
     // the address asked for may be one list of a place, whose own address is above it
     const alreadyAbove = placeLineAt(existing, look.address)
     if (alreadyAbove) return this.alreadyThere(file, alreadyAbove, existing)
+    refuseSecondServer(file, existing)
     const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
     await this.readWithAgent(description, look, { keepName: !!ask.name })
-    if (nameIsTaken(existing, description.about.name)) {
-      throw new IngestStopped(
-        `${file} already has a place called "${description.about.name}", at another address:  name this one, --name <words>`
-      )
-    }
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
     await this.readThroughIt(description, reader)
     await this.finish(description)
     const spell = description.spell.join("\n")
     const text = existing.trim() ? `${existing.trimEnd()}\n\n${spell}\n` : `${spell}\n`
-    const descriptionPath = descriptionPathFor(file, description.about.name)
+    const descriptionPath = descriptionPathFor(file)
     await files.write(file, text)
-    await files.writeDescription(descriptionPath, description)
+    await this.writeDescription(file, descriptionPath, description)
     return { file, descriptionPath, description, wrote: true, spell, changes: [], couldntChange: [], warnings }
   }
 
   /**
-   * Look again at each place described beside `file`, or only the one at `address`:  say what changed, and change it.
+   * Look again at the place described beside `file`:  say what changed, and change it.
    * - Keeps what a person wrote, in the Spell and in the description:  see `mergedSpell()`.
    * - Writes nothing until the merged file compiles, and a read through the new Spell returns rows.
    * - throws `IngestStopped`:  no description, or nothing compiles or reads
    */
-  async update(file: string, { address }: { address?: string } = {}): Promise<IngestResult[]> {
-    const { files } = this.settings
-    const paths = await files.descriptionsBeside(file)
-    if (!paths.length) {
+  async update(file: string): Promise<IngestResult> {
+    const descriptionPath = descriptionPathFor(file)
+    const onDisk = await this.settings.files.readDescription(descriptionPath)
+    if (!onDisk) {
       throw new IngestStopped(
-        `${file} has no description beside it, so there's nothing to look at again:  spell place ingest <address> --into ${file}`
+        `${file} has no description beside it, ${descriptionPath}, so there's nothing to look at again:  spell place ingest <address> --into ${file}`
       )
     }
-    const results: IngestResult[] = []
-    for (const path of paths) {
-      const old = await files.readDescription(path)
-      if (!old) continue
-      if (address && addressFrom(address) !== old.about.address) continue
-      results.push(await this.updateOne(file, path, old))
-    }
-    if (!results.length) throw new IngestStopped(`${file} has no description of a place at ${address}`)
-    return results
+    return this.updateOne(file, descriptionPath, descriptionFromDisk(onDisk))
   }
 
   /** Look again at one place. */
@@ -174,17 +166,17 @@ export class PlaceIngest {
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
       description.notes = old.notes
     }
-    const before = spellPartsFor(old)
+    const before = writtenOf(spellPartsFor(old), old.spell)
     const after = spellPartsFor(description)
     const text = (await files.read(file)) ?? ""
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own))
+    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
     await this.readThroughIt(description, reader)
     await this.finish(description)
     await files.write(file, merge.text)
-    await files.writeDescription(descriptionPath, description)
+    await this.writeDescription(file, descriptionPath, description)
     return {
       file,
       descriptionPath,
@@ -243,12 +235,12 @@ export class PlaceIngest {
   /** The place is already in the file:  nothing changes. */
   private async alreadyThere(file: string, name: string, text: string): Promise<IngestResult> {
     const { files } = this.settings
-    const descriptionPath = descriptionPathFor(file, name)
-    const description = await files.readDescription(descriptionPath)
+    const descriptionPath = descriptionPathFor(file)
+    const onDisk = await files.readDescription(descriptionPath)
     return {
       file,
       descriptionPath,
-      description: description ?? ({ about: { name } } as PlaceDescription),
+      description: onDisk ? descriptionFromDisk(onDisk) : ({ about: { name } } as PlaceDescription),
       wrote: false,
       spell: text,
       changes: [],
@@ -355,6 +347,13 @@ export class PlaceIngest {
     description.spell = spellTextOf(spellPartsFor(description)).trimEnd().split("\n")
   }
 
+  /** SIDE EFFECT:  `description` written beside `file`, as it's kept on disk, and named in the project's file. */
+  private async writeDescription(file: string, path: string, description: PlaceDescription): Promise<void> {
+    const { files } = this.settings
+    await files.writeDescription(path, descriptionOnDisk(description))
+    await files.listInProject?.(file, path)
+  }
+
   /** Say how it's going. */
   private say(line: string): void {
     this.settings.say?.(line)
@@ -391,9 +390,68 @@ function refuseLanguage(file: string): void {
   }
 }
 
-/** Where a place's description goes:  beside its Spell file. */
-export function descriptionPathFor(file: string, name: string): string {
-  return `${file.replace(/\.spell$/, "")}.${name.trim().replace(/\s+/g, "-")}.place.json5`
+/** Where a place's description goes:  beside its Spell file, `StarWars.api.spell` => `StarWars.api.json5`. */
+export function descriptionPathFor(file: string): string {
+  return `${file.replace(/\.spell$/, "")}.json5`
+}
+
+/** One server per Spell file:  `file` holds a place already.  - throws `IngestStopped` if it does */
+function refuseSecondServer(file: string, existing: string): void {
+  const [held] = placesIn(existing)
+  if (!held) return
+  throw new IngestStopped(
+    `${file} already holds ${held.name}, and a server gets a file of its own:  --into <Name>.api.spell`
+  )
+}
+
+////////////////
+// ## On disk
+////////////////
+
+/** A collection's settings that are often the same in every one, written once in `allCollections` when they are. */
+const SHARED_SETTINGS = ["idField", "idIsAnAddress", "paging", "rowsAt", "nextAt"] as const
+
+/**
+ * `description` as it's written:  what every collection agrees on, once, in `allCollections`;  each collection only what differs.
+ * - Only for two collections or more:  one has nothing to share.
+ */
+export function descriptionOnDisk(description: PlaceDescription): PlaceDescriptionOnDisk {
+  const { collections, ...rest } = description
+  const each = Object.values(collections)
+  const allCollections: Partial<CollectionDescription> = {}
+  if (each.length > 1) {
+    for (const setting of SHARED_SETTINGS) {
+      const values = new Set(each.map((collection) => JSON.stringify(collection[setting])))
+      const [only] = values
+      if (values.size === 1 && only !== undefined) Object.assign(allCollections, { [setting]: JSON.parse(only) })
+    }
+  }
+  const shared = Object.keys(allCollections)
+  const own = Object.fromEntries(
+    Object.entries(collections).map(([name, collection]) => [
+      name,
+      Object.fromEntries(Object.entries(collection).filter(([key]) => !shared.includes(key)))
+    ])
+  )
+  // what it is and what it holds first, as a person reads it;  the rest after
+  const { about, canDo, ...after } = rest
+  return {
+    about,
+    canDo,
+    ...(shared.length && { allCollections }),
+    collections: own,
+    ...after
+  } as PlaceDescriptionOnDisk
+}
+
+/** A description as it's read:  each collection with what `allCollections` says, its own settings winning. */
+export function descriptionFromDisk({
+  allCollections,
+  collections,
+  ...rest
+}: PlaceDescriptionOnDisk): PlaceDescription {
+  const each = Object.entries(collections).map(([name, collection]) => [name, { ...allCollections, ...collection }])
+  return { ...rest, collections: Object.fromEntries(each) } as PlaceDescription
 }
 
 /** The class a type's words compile to:  `life form` => `LifeForm`. */
@@ -606,4 +664,21 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     }
   }
   return [...said]
+}
+
+/**
+ * `parts`, only the lines the tool really wrote last time, `written`:  an older version wrote other words.
+ * - So a line today's version writes and that one didn't is new, and is added;  and one it wrote in older words is
+ *   `mergedSpell()`'s to put in today's.
+ * - No record of what was written:  `parts` as they are.
+ */
+function writtenOf(parts: SpellParts, written: readonly string[] | undefined): SpellParts {
+  if (!written?.length) return parts
+  const wrote = new Set(written.map((line) => line.trim()))
+  const kept = (lines: readonly SpellLine[]) => lines.filter(({ text }) => wrote.has(text))
+  return {
+    ...parts,
+    placeLines: kept(parts.placeLines),
+    types: parts.types.map((type) => ({ ...type, lines: kept(type.lines) }))
+  }
 }

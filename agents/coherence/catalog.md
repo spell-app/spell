@@ -347,6 +347,25 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
     instead ("In Spell UI", below)
 
+### Data that lives somewhere else:  a server, a folder, a sheet, a room
+
+- **It is:**  a place (`spell/util/places`, epic `data`):  `Place` says what it can do, `Places` reads and writes them,
+  `PlaceCache` keeps rows by type and id, `PlaceResult` says whether a read is waiting, complete or from an earlier visit.
+  - One kind each:  `RestPlace`, `GraphPlace`, `ChunkedPlace` (a folder or one file), `SheetPlace`, `LiveRoomPlace`,
+    `AtProtoPlace`, `DevicePlace`, `MemoryPlace`;  their server side in `spell/server/places` (`PlaceServer`, `Referee`).
+  - Writes go through `PendingChanges` and `SaveQueue`;  `PlaceHeal` fetches, then replays.
+  - A Spell program says it in one line, `family cookbook is a web server at "..."`;  `spell place ingest` writes it.
+- **Use it when:**  anything a page reads from or saves to somewhere other than memory.
+  Never a hand-written fetch-and-cache, poller or retry loop for a page's data.
+
+### A long list, drawn as you scroll
+
+- **It is:**  `drawnInWindow()` (`spell/parser/core`'s `drawnWindow.ts`, epic `data` T76):  draws `MOST_AT_ONCE` items,
+  then more as a sentinel nears the view, reading a place's next page;  what's drawn stays drawn.
+  - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
+    pages and a title.
+- **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
+
 ### Remembering a preference
 
 - **It is:**  `PrefStore` (`spell/util`, `persist/`), with a place to keep it:  the browser's storage, the page

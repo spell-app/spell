@@ -1103,3 +1103,68 @@ methodsEs.addRule(ActionDetail, { syntax: "seleccionada cuando {selected:express
 methodsEs.addRule(ActionDetail, { syntax: "se deshace como {undoneAs:text}" })
 methodsEs.addRule(ActionDetail, { syntax: "(replacesLast:uno nuevo reemplaza al anterior)" })
 methodsEs.addRule(ActionDetail, { syntax: "icono {icon:text}" })
+methodsEs.addRule(ActionDetail, {
+  syntax: "titulada {title:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un título propio:  los menús, los atajos y el Inspector lo muestran",
+          input: ["un juego es una cosa donde:", "\t- para compilar:", '\t\t- titulada "Código"', "\t\timprimir 1"],
+          js: [
+            "export class Juego extends Thing {",
+            "  compilar() {",
+            "    core.console.log(1)",
+            "  }",
+            "}",
+            'core.describeAction(Juego, "compilar", { title: "Código" })'
+          ]
+        },
+        {
+          title: "un hueco:  un getter, al que sigue el título",
+          input: [
+            "un juego es una cosa donde:",
+            '\t- su "nombre" es texto',
+            "\t- para duplicarlo:",
+            '\t\t- titulada "Duplicar [su nombre]…"',
+            "\t\timprimir 1"
+          ],
+          js: [
+            "export class Juego extends Thing {",
+            '  // su "nombre" es texto',
+            '  static { this.declareProp("nombre", { type: "text" }) }',
+            '  get nombre() { return this.getProp("nombre") }',
+            '  set nombre(value) { this.setProp("nombre", value) }',
+            "",
+            "  duplicar() {",
+            "    core.console.log(1)",
+            "  }",
+            "",
+            "  get duplicarTitle() {",
+            "    return `Duplicar ${this.nombre}…`",
+            "  }",
+            "}",
+            'core.describeAction(Juego, "duplicar", { title: "duplicarlo", titleFrom: "duplicarTitle" })'
+          ],
+          ts: [
+            "export class Juego extends Thing {",
+            '  // su "nombre" es texto',
+            '  @prop({ type: "text" })',
+            "  accessor nombre!: string",
+            "",
+            "  duplicar() {",
+            "    core.console.log(1)",
+            "  }",
+            "",
+            "  get duplicarTitle() {",
+            "    return `Duplicar ${this.nombre}…`",
+            "  }",
+            "}",
+            'core.describeAction(Juego, "duplicar", { title: "duplicarlo", titleFrom: "duplicarTitle" })'
+          ]
+        }
+      ]
+    }
+  ]
+})

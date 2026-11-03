@@ -63,9 +63,8 @@ export class ReadRider extends SpellStatement<"body?"> {
 }
 
 /**
- * `the message if that fails is "Lost the signal"`:  the failure's own words, its Try again kept -- see `core.drawRead()`.
- * - Or, shorter, `if that fails say "Lost the signal"` (epic `language` P17):  a block `if that fails:` is still
- *   `IfThatFails`, which draws its own body instead.
+ * `if that fails say "Lost the signal"`:  the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).
+ * - A block `if that fails:` is `IfThatFails`, which draws its own body instead.
  */
 export class IfThatFailsSay extends SpellStatement<"text"> {
   @proto static alias = "statement"

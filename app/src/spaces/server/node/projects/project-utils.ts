@@ -469,7 +469,7 @@ export const getIndex = async (
   )
 
   // return manifest and imports
-  const { title, version, exports, targets, listsStartAt } = importsFile
+  const { title, version, exports, targets, listsStartAt, development } = importsFile
   const buildFolder = buildFolderInBuild(projectId)
   return {
     imports: importsFile.imports,
@@ -479,6 +479,7 @@ export const getIndex = async (
     exports,
     targets,
     listsStartAt,
+    development,
     buildFolder
   }
 }

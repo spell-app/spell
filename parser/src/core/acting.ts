@@ -64,9 +64,26 @@ export type MenuItem =
       run(way?: ActionWay): boolean
     }
   | { kind: "separator" }
+  | {
+      kind: "menu"
+      /** the menu's name as described, e.g. `fileMenu` */
+      name: string
+      /** the thing its items run on */
+      thing: object
+      readonly title: string
+      /** its items, read afresh each time:  a menu filled from a list follows the list */
+      readonly items: MenuItem[]
+    }
 
-/** A menu's description, as compiled spell writes it:  its items' method names, `-` for a line between groups. */
-export type MenuDescription = { items: string[] }
+/**
+ * A menu's description, as compiled spell writes it.
+ * - `items`:  its items' names, `-` for a line between groups;  a name that's another of the class's menus is a
+ *   sub-menu (epic `language` P19), e.g. a menu bar's `["fileMenu", "editMenu"]`
+ * - `title`, `titleFrom`:  its title, as an action's (`- titled "File"`);  else its name in words, `file menu`
+ * - `each`, `action`:  a menu filled from a list (Q21):  the getter whose list it shows, and the action each
+ *   item runs with it, e.g. `{ each: "moreExamplesItems", action: "openExample" }`;  then `items` is empty
+ */
+export type MenuDescription = { items: string[]; title?: string; titleFrom?: string; each?: string; action?: string }
 
 /** What's listening for actions run:  `core.onActionRun()`. */
 const LISTENERS = new Set<(run: ActionRun) => void>()
@@ -211,6 +228,8 @@ export const actingMethods = defineCoreModule({
   /**
    * Action `name`'s title on `thing`, as people read it:  its description's, its live title's (`Undo Turn Card`),
    * else its method's name in words.
+   * - In the page's language, when a host gave the core that language's titles (`useTitles()`):
+   *   `Compilar y ejecutar` for `Compile and Run`;  a live title (a fill-in) stays as the program says it.
    */
   actionTitle(thing: object, name: string): string {
     const description = describedAction(thing, name)
@@ -218,7 +237,22 @@ export const actingMethods = defineCoreModule({
       const title = (thing as Record<string, unknown>)[description.titleFrom]
       if (typeof title === "string") return title
     }
-    return description?.title ?? wordsOf(name)
+    const title = description?.title ?? wordsOf(name)
+    return core._titles?.[title] ?? title
+  },
+
+  /** The page's language's word for each action title, by its title as written:  `undefined` for none -- see `useTitles()`. */
+  _titles: undefined as Partial<Record<string, string>> | undefined,
+
+  /**
+   * Show action titles in the page's language (epic `language` P18, Q20):
+   * `titles` from the program's words file in that language (`words.titles`), by each title as written.
+   * - e.g. the editor, in Spanish, running its English menus:  `{ "Compile and Run": "Compilar y ejecutar" }`.
+   * - `undefined`:  each title as the program writes it.
+   * - A title it has no words for stays as written.
+   */
+  useTitles(titles?: Partial<Record<string, string>>): void {
+    core._titles = titles
   },
 
   /** Listen for every action run through `runAction()`.  Returns how to stop. */
@@ -263,13 +297,16 @@ export const actingMethods = defineCoreModule({
    * Menu `name` (`game menu`, `gameMenu` or `GameMenu`) for `thing`:  the first of `thing`, then up its chain to the
    * app (Q41:  a card's context menu may be its game's), that has it.  Its items ready to draw (`MenuItem`), each on
    * the thing that has the menu;  `undefined` if none has it.
-   * - An item naming no method of that thing is left out, with a warning.
+   * - An item naming another of its menus is a sub-menu, `{ kind: "menu", title, items }` (epic `language` P19):
+   *   so a menu bar is a menu of menus.
+   * - A menu filled from a list gives an item per thing in it, its title the thing's (Q21).
+   * - An item naming no method or menu of that thing is left out, with a warning.
    */
   menuOf(thing: object | undefined, name: string): MenuItem[] | undefined {
     const key = menuKey(name)
     for (const holder of chainOf(thing)) {
       const description = menusOf(holder.constructor).get(key)
-      if (description) return description.items.flatMap((item) => menuItem(holder, item))
+      if (description) return menuItems(holder, description, new Set([key]))
     }
     return undefined
   },
@@ -331,9 +368,80 @@ function menuKey(name: string): string {
   return name.replace(/[\s_-]+/g, "").toLowerCase()
 }
 
-/** A menu's item `name` on `holder`:  a separator for `-`, else its action;  none for a name it has no method for. */
-function menuItem(holder: object, name: string): MenuItem[] {
+/**
+ * Menu `key`'s items on `holder`, as its description says:  each name's item, or one per item of its list.
+ * - `seen`:  the menus it's inside, so a menu inside itself is left out, with a warning, not drawn forever.
+ */
+function menuItems(holder: object, description: MenuDescription, seen: Set<string>): MenuItem[] {
+  if (description.each) return listItems(holder, description)
+  return description.items.flatMap((item) => menuItem(holder, item, seen))
+}
+
+/** A menu filled from a list (Q21):  an item per thing in `holder`'s `each` list, running its `action` with it. */
+function listItems(holder: object, { each, action }: MenuDescription): MenuItem[] {
+  const list = (holder as Record<string, unknown>)[each!]
+  const things = Array.isArray(list) ? list : list && typeof list === "object" ? [...(list as Iterable<unknown>)] : []
+  return things.map((it) => ({
+    kind: "action",
+    name: action!,
+    thing: holder,
+    get title() {
+      return titleOfThing(it)
+    },
+    get isEnabled() {
+      return actingMethods.isActionEnabled(holder, action!)
+    },
+    isSelected: false,
+    run: (way: ActionWay = "menu") => actingMethods.runAction(holder, action!, way, [it])
+  }))
+}
+
+/** What a list's item says it's called:  its `title`, else its `name`, else itself as text. */
+function titleOfThing(thing: unknown): string {
+  const named = thing as { title?: unknown; name?: unknown } | undefined
+  if (typeof named?.title === "string") return named.title
+  if (typeof named?.name === "string") return named.name
+  return String(thing)
+}
+
+/** Menu `name`'s title on `holder`:  its live title, its written one, else its name in words -- as an action's. */
+function menuTitle(holder: object, name: string, description: MenuDescription): string {
+  if (description.titleFrom) {
+    const title = (holder as Record<string, unknown>)[description.titleFrom]
+    if (typeof title === "string") return title
+  }
+  const title = description.title ?? wordsOf(name)
+  return core._titles?.[title] ?? title
+}
+
+/**
+ * A menu's item `name` on `holder`:  a separator for `-`, a sub-menu for one of its menus, else its action;
+ * none for a name it has no method or menu for.
+ */
+function menuItem(holder: object, name: string, seen: Set<string>): MenuItem[] {
   if (name === "-") return [{ kind: "separator" }]
+  const key = menuKey(name)
+  const menu = menusOf(holder.constructor).get(key)
+  if (menu && typeof (holder as Record<string, unknown>)[name] !== "function") {
+    if (seen.has(key)) {
+      console.warn(`menu:  ${holder.constructor.name}'s \`${name}\` is inside itself`)
+      return []
+    }
+    const inside = new Set([...seen, key])
+    return [
+      {
+        kind: "menu",
+        name,
+        thing: holder,
+        get title() {
+          return menuTitle(holder, name, menu)
+        },
+        get items() {
+          return menuItems(holder, menu, inside)
+        }
+      }
+    ]
+  }
   if (typeof (holder as Record<string, unknown>)[name] !== "function") {
     console.warn(`menu:  ${holder.constructor.name} has no action \`${name}\``)
     return []

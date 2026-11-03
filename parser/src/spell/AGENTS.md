@@ -105,7 +105,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     - Each pass hands the runner its answer's JSON schema (`ClaudeOptions.schema`), so the answer can only be that,
       and the glossary as `context`, for the system prompt (the API caches it).
   - Imported by path, never through the barrel:  `spell/parser/spell/translate/Translator`.
-- `ingest/` (epic `data` P18):  looking at a data source for real, and writing what it found (`spell place ingest`).
+- `ingest/` (epic `data` P18):  looking at a data source for real, and writing what it found (`spell place ingest`, `spell place update`).
   - `PlaceIngest` runs the steps;  `PlaceLook`, a look per kind of place;  `PoliteReader`, everything it sends, which can't write;
     `PlaceShape`, what rows show;  `PlaceReading`, what the agent reads in samples;  `PlaceSpell`, the Spell, and merging a later look.
   - Everything else is handed in (`IngestSettings`):  `fetch`, `ClaudeRunner`, files, the question, the read through the Spell.

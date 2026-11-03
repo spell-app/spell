@@ -109,6 +109,34 @@ export class SpellWords {
   }
 
   /**
+   * The titles of a program with `declarations` in another language, from its names dictionary's `texts` there
+   * (epic `language` P18, Q20):  `{ "Compile and Run": "Compilar y ejecutar" }` -- see `SP.SpellWordsData.titles`.
+   * - Each action's own title (`- titled "..."`) the dictionary has words for;  one it lacks shows as written.
+   * - `undefined` when it has words for none.
+   */
+  static titlesFrom(
+    declarations: SP.SpellDeclarationsData,
+    texts: Record<string, string | undefined> | undefined
+  ): Record<string, string> | undefined {
+    const titles: Record<string, string> = {}
+    for (const { title } of declarations.statements) {
+      const words = title && texts?.[title]
+      if (words) titles[title] = words
+    }
+    return Object.keys(titles).length ? titles : undefined
+  }
+
+  /** The `texts` of a names dictionary, `<Project>.es.names.json5`'s text -- `undefined` if it has none, or isn't one. */
+  static textsOfNames(text: string | undefined): Record<string, string | undefined> | undefined {
+    try {
+      const texts = text ? JSON5.parse<{ texts?: unknown }>(text).texts : undefined
+      return texts && typeof texts === "object" ? (texts as Record<string, string | undefined>) : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
    * The member `statement` declares on its type, by its compiled name, with its words -- `undefined` if none.
    * - Every member by the name the writer gives it, stored properties too (Q56).
    * - A name that isn't an identifier is as spell has it:  the writer quotes it.
@@ -149,6 +177,7 @@ export class SpellWords {
     const sections = [
       types.length ? `  types: {\n${types.join(",\n")}\n  }` : "  types: {}",
       ...(words.messages ? [`  messages: {\n${literalLines(words.messages, "    ").join(",\n")}\n  }`] : []),
+      ...(words.titles ? [`  titles: {\n${literalLines(words.titles, "    ").join(",\n")}\n  }`] : []),
       ...(words.groups ? [`  groups: {\n${groupLines(words.groups).join(",\n")}\n  }`] : [])
     ]
     return [

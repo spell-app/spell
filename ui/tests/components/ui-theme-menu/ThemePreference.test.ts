@@ -166,6 +166,16 @@ describe("ThemePreference:  ONE choice, kept in the person's space", () => {
     expect(UI.themes.current).toBe("pop")
   })
 
+  test("a page keeping its own store (the editor's) hears only its own picks, not the docs pages' (I204)", async () => {
+    fakeSpace()
+    ThemePreference.keepIn("space", "spell-app")
+    await ThemePreference.restore()
+    await ThemePreference.heard({ store: "spell-app", key: "theme", value: "pop" })
+    expect(UI.themes.current).toBe("pop")
+    await ThemePreference.heard({ store: THEME_STORE, key: "theme", value: "paper" })
+    expect(UI.themes.current).toBe("pop")
+  })
+
   test("the address still wins over the space, for this visit", async () => {
     const before = location.href
     history.replaceState(null, "", `${location.pathname}?theme=glass`)

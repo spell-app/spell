@@ -34,7 +34,11 @@ export class Receta extends View {
 
 /** La línea que cambia otro servidor:  tests/spell/recipeBox.test.ts solo cambia esta, para cada uno que prueba */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "in memory database" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
+  name: "recetario_familiar",
+  kind: "in memory database",
+  unclearNumbers: ","
+})
 
 core.describeAction(Receta, "quitarEso", { title: "quitar eso", undoneAs: "Quitar receta" })
 

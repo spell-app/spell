@@ -104,7 +104,7 @@ reversible:`, and reads to the same tree as the English card.
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | An ability, its condition after it | `<draggable ...>` `<clickable ...>` `<selectable ...>` `<droppable ...>` `<cards draggable ...>` | `<arrastrable ...>` `<pulsable ...>` `<seleccionable ...>` `<soltable ...>` `<cartas arrastrables ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for ...>`, and in a `<for>`, `<loading>` `<empty>` `<failed>`;  `else` for `otherwise`, `<for each ...>` for `<for ...>` | `<si ...>` `<si no si ...>` `<si no>` `<para ...>`, `<cargando>` `<vacío>` `<fallo>`;  `sino`, `de lo contrario` too, `<para cada ...>` |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `title` `menu-bar` `group` `locked`;  a template's `draggable` `clickable` `selectable` `droppable` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `título` `barra-de-menú` `grupo` `bloqueado`;  `arrastrable` `pulsable` `seleccionable` `soltable` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
@@ -291,6 +291,11 @@ its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as
 `- its menu bar is "GameMenu"`.
 - A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
+- A `<menu "FileMenu" />` inside a menu is a sub-menu, so a menu bar is a menu of menus;
+  `title="File"` is a menu's title, `titled "File"`.
+- `<menu "MoreExamples" for-each={its examples} action="open example" />` is filled from a list:
+  an item per thing in it, titled with its title (else its name), running the action with it.
+  - Its twin:  `its "MoreExamples" is a menu of its examples, each running "open example"`.
 - Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
 
 **Types and start values:**  `<property "count" type="number">0</property>` is a stored number, starting at 0.
@@ -348,7 +353,7 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   move it.
 - Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
   `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
-  `the message if that fails is "..."`.
+  `if that fails say "..."`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 

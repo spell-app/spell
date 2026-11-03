@@ -46,9 +46,9 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Lista de tareas | [`@spell/examples/ListaDeTareas`](spaces/@spell/examples/ListaDeTareas/) | Task List's Spanish twin:  a to-do list in the outline style, in Spanish, each task its own element with Spell UI's controls, a click selecting tasks for a property editor that changes them all at once | <a href="docs/images/examples/ListaDeTareas.png"><img src="docs/images/examples/ListaDeTareas.png" width="360" alt="Lista de tareas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitaire | [`@spell/examples/Solitaire`](spaces/@spell/examples/Solitaire/) | Klondike solitaire in spellx, Spell in tags:  its own cards, deck and piles, each its own element;  the card a two sided view, the game's moves its actions, with keys and a right-click menu;  `pause for` animates the deal | <a href="docs/images/examples/Solitaire.png"><img src="docs/images/examples/Solitaire.png" width="360" alt="Solitaire open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Solitario | [`@spell/examples/Solitario`](spaces/@spell/examples/Solitario/) | Solitaire's Spanish twin:  Klondike in the outline style, in Spanish, with its own cards, deck and piles (`Carta`, `Mazo`, `Pila`), as Solitaire has | <a href="docs/images/examples/Solitario.png"><img src="docs/images/examples/Solitario.png" width="360" alt="Solitario open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  One line says where they're kept | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  its API in a file of its own, as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Caja de recetas | [`@spell/examples/CajaDeRecetas`](spaces/@spell/examples/CajaDeRecetas/) | Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell | <a href="docs/images/examples/CajaDeRecetas.png"><img src="docs/images/examples/CajaDeRecetas.png" width="360" alt="Caja de recetas open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Recipe Box | [`@spell/examples/RecipeBox`](spaces/@spell/examples/RecipeBox/) | Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell | <a href="docs/images/examples/RecipeBox.png"><img src="docs/images/examples/RecipeBox.png" width="360" alt="Recipe Box open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Star Wars | [`@spell/examples/StarWars`](spaces/@spell/examples/StarWars/) | A guide to the galaxy from two servers other people run:  a place's rows linked by address, followed by saying what a field links to;  each server's API in a file of its own, Star Wars' as `spell place ingest` wrote it;  a long list that draws as you scroll;  pictures from a second place;  waiting, failing, and an opening crawl | <a href="docs/images/examples/StarWars.png"><img src="docs/images/examples/StarWars.png" width="360" alt="Star Wars open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | People | [`@spell/library/people`](spaces/@spell/library/people/) | People, orgs, notes and relationships, each saved in a readable JSON5 file;  compiled to TypeScript for the app's "You" panel and the people store | a library:  no app of its own |
 
 <!-- examples:end -->
@@ -210,7 +210,7 @@ Here's all of [FizzBuzz.spell](spaces/@spell/examples/fizzbuzz/FizzBuzz.spell), 
 ```spell
 ## File FizzBuzz.spell
 to play fizzbuzz
-	for each number from 1 to 100
+	for number from 1 to 100
 		if the number divided by 15 is an integer: print the number, "fizzbuzz"
 		otherwise if the number divided by 3 is an integer: print the number, "fizz"
 		otherwise if the number divided by 5 is an integer: print the number, "buzz"
@@ -220,7 +220,7 @@ play fizzbuzz
 ```
 
 - It's a program in two parts, not four:  `to play fizzbuzz` defines a new phrase, and `play fizzbuzz` says it.
-- `for each number from 1 to 100` names its loop variable, `number`, and later lines call it "the number".
+- `for number from 1 to 100` names its loop variable, `number`, and later lines call it "the number".
 - It draws nothing, so the editor's App pane stays empty (the picture below):
   what it prints goes to the program's output, under the text, or to your terminal.
 
@@ -283,7 +283,7 @@ Each is one file of Spell and a stylesheet, and each shows one thing the languag
 | [Tic-Tac-Toe](spaces/@spell/examples/tic-tac-toe/TicTacToe.spell) | the rule for a win, eight sentences:  `check the line from square 1 through 2 to 3` | inside `repeat 9 times`, `its` is the count, so the board is `the board of tic tac toe` there |
 | [Bill Splitter](spaces/@spell/examples/bill-splitter/BillSplitter.spell) | worked-out values a form changes:  `- its "share" is its amount + its tip`, each sum following every keystroke | no word adds up a list, nor writes money:  a loop adds the amounts, and `to write (amount as a number) as money` makes "$12.50" |
 | [Flash Cards](spaces/@spell/examples/flash-cards/FlashCards.spell) | a random card, never the one just shown:  `cards in its deck where it is not the card of quiz` | `a random card in ...` reads;  `a random flash card in ...`, two words, doesn't yet |
-| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for each day in its days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
+| [Habit Tracker](spaces/@spell/examples/habit-tracker/HabitTracker.spell) | a streak, worked out from a week of yes and no:  `for day in its days` | no dates:  the week is seven properties, Monday to Sunday, with no "today" |
 
 ```spell
 // the same mark in all three squares wins
@@ -530,30 +530,34 @@ _Lista de tareas in the editor:  the same list, its words in Spanish._
 
 ## Star Wars:  two servers other people run, in one program
 
-[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.py4e.com](https://swapi.py4e.com/) for the films, people, planets and ships,
+[Star Wars](spaces/@spell/examples/StarWars/) reads [swapi.py4e.com](https://swapi.py4e.com/) for the films, characters, planets and ships,
 and Wikipedia for their pictures.
-Each is one line, and its rows' fields, in a file of their own, as `spell place ingest` wrote them:
+Each is one line, and its rows' fields, in a file of its own:
+Star Wars' as `spell place ingest` wrote it, Wikipedia's by hand.
 
 ```spell
 star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
+	- check it every day
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- wiki pages live at "/page/summary"
 	- a wiki page's id is its "pageid"
 ```
 
-_From [its API](spaces/@spell/examples/StarWars/StarWarsApi.spell), shortened._
+_From [StarWars.api.spell](spaces/@spell/examples/StarWars/StarWars.api.spell) and [Wikipedia.api.spell](spaces/@spell/examples/StarWars/Wikipedia.api.spell), shortened._
 
-Its rows link to each other by address:  a person says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
+Its rows link to each other by address:  a character says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
 Say what a field links to, and reading it follows the link.
 What's inside a field is a thing of its own, read in words, `the source of its thumbnail`:
 
 ```spell
-a "person" is a thing:
+a "character" is a thing:
 	- it lives in star wars
+	- its "height" is a number or "unknown"
+	- its "hair color" is text
 	- its "homeworld" is a planet
 	- its "films" is a list of films
 
@@ -568,16 +572,19 @@ a "thumbnail" is a thing:
 _From the same file, shortened._
 
 What's drawn is in [its own file](spaces/@spell/examples/StarWars/StarWars.spellml), in Spell UI's elements, adding to those types:
-`<spell-more-of "person">`.
+`<spell-more-of "character">`.
 So looking at the server again never touches a line of it.
 A long list says nothing of how long it is:  it draws what fits, and more as you scroll.
 
-Then `the name of its homeworld` is the planet's name, and `for each film in its films` is the films.
+Then `the name of its homeworld` is the planet's name, and `<for its films />` draws the films.
+Each field finds the server's own spelling by its words:  `its "hair color"` reads `hair_color`,
+and `"172"` reads as a number, `"unknown"` as nothing.
 - One read per address, shared, and none for a thing another read has already brought.
 - A drawing that leaves gives up the reads it was waiting on.
 - It's only for a web server:  elsewhere a field holds the thing itself.
 
-`spell place ingest https://swapi.info/api --into StarWars.spell --name "star wars"` wrote those lines by looking at the server.
+`spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"` wrote those lines by looking at the server,
+and its description beside them, `StarWars.api.json5`;  `spell place update StarWars.api.spell` looks again.
 
 Its pictures come from Wikipedia as it runs, and not every name has a page:
 about one in five of its 260 names has a picture that's really of it, and the rest are an initial on a colour.
@@ -630,7 +637,7 @@ The deal is a loop with a pause in it, so you watch it happen:
 
 ```spell
 - to deal the cards:
-	for each card in its deck
+	for card in its deck
 		set start pile to the pile of the card
 		turn the card face down
 		if start pile is not the stock of the solitaire

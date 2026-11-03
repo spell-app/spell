@@ -1,5 +1,5 @@
 # Star Wars
-A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWarsApi.spell, as `spell place ingest` wrote it:
+A guide to the galaxy, what it draws and does.  Every thing it shows is in StarWars.api.spell, as `spell place ingest` wrote it:
 say what a field links to, and reading it follows the link, `the name of its homeworld`.
 Each type below adds to its type there, with `<spell-more-of>`:  so looking again at the server never touches a line of this.
 
@@ -32,9 +32,6 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 			add the one to matches
 		return matches
 	</property>
-
-	<property "signal">"Waiting for a signal from the galaxy"</property>
-	<property "lost signal">"The signal from swapi.py4e.com is lost."</property>
 
 	<action "go back">
 		if its trail is empty
@@ -122,6 +119,8 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 		</>
 	</draw>
 
+	<property "signal">"Waiting for a signal from the galaxy"</property>
+	<property "lost signal">"The signal from swapi.py4e.com is lost."</property>
 </spell-app>
 
 

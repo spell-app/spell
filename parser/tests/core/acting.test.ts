@@ -157,6 +157,78 @@ describe("core.menuOf()", () => {
     expect(core.menuBarOf(new App())).toBeUndefined()
   })
 
+  test("an item's title:  written, live, and in the page's language (epic `language` P18)", () => {
+    class Editor extends App {
+      projectName = "Solitaire"
+      compileAndRun(): void {}
+      duplicate(): void {}
+      /** `- titled "Duplicate [the project name]…"` */
+      get duplicateTitle(): string {
+        return `Duplicate ${this.projectName}…`
+      }
+    }
+    core.describeAction(Editor, "compileAndRun", { title: "Compile and Run" })
+    core.describeAction(Editor, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })
+    core.describeMenu(Editor, "runMenu", { items: ["compileAndRun", "duplicate"] })
+    const editor = new Editor()
+    const titles = () => core.menuOf(editor, "run menu")!.map((item) => (item.kind === "action" ? item.title : "-"))
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Solitaire…"])
+    editor.projectName = "Cards"
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Cards…"])
+    core.useTitles({ "Compile and Run": "Compilar y ejecutar" })
+    try {
+      expect(titles()).toEqual(["Compilar y ejecutar", "Duplicate Cards…"])
+    } finally {
+      core.useTitles(undefined)
+    }
+    expect(titles()[0]).toBe("Compile and Run")
+  })
+
+  test("a menu of menus, and a menu filled from a list (epic `language` P19)", () => {
+    class Desk extends App {
+      examples = [{ title: "Solitaire" }, { name: "Cards" }]
+      opened: unknown[] = []
+      save(): void {}
+      openExample(example: unknown): void {
+        this.opened.push(example)
+      }
+      get moreExamplesItems(): unknown[] {
+        return this.examples
+      }
+    }
+    core.describeMenu(Desk, "fileMenu", { items: ["save", "-", "moreExamples"], title: "File" })
+    core.describeMenu(Desk, "moreExamples", { items: [], each: "moreExamplesItems", action: "openExample" })
+    core.describeMenu(Desk, "editMenu", { items: ["undo"] })
+    core.describeMenu(Desk, "menuBar", { items: ["fileMenu", "editMenu", "menuBar"] })
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const desk = new Desk()
+    const bar = core.menuOf(desk, "menu bar")!
+    // a menu inside itself is left out, with a warning
+    expect(bar.map((item) => item.kind)).toEqual(["menu", "menu"])
+    expect(warn).toHaveBeenCalledWith("menu:  Desk's `menuBar` is inside itself")
+    warn.mockRestore()
+    const [file, edit] = bar
+    if (file?.kind !== "menu" || edit?.kind !== "menu") throw new Error("expected menus")
+    expect([file.title, edit.title]).toEqual(["File", "edit menu"])
+    const [, , more] = file.items
+    if (more?.kind !== "menu") throw new Error("expected a sub-menu")
+    expect(more.items.map((item) => (item.kind === "action" ? item.title : "-"))).toEqual(["Solitaire", "Cards"])
+    // live:  the list's items follow the list
+    desk.examples = [...desk.examples, { title: "Hearts" }]
+    expect(more.items).toHaveLength(3)
+    const [first] = more.items
+    if (first?.kind !== "action") throw new Error("expected an action")
+    expect(first.run()).toBe(true)
+    expect(desk.opened).toEqual([{ title: "Solitaire" }])
+    // in the page's language
+    core.useTitles({ File: "Archivo" })
+    try {
+      expect(file.title).toBe("Archivo")
+    } finally {
+      core.useTitles(undefined)
+    }
+  })
+
   test("an item naming no action of its thing is left out, with a warning", () => {
     class Table extends App {}
     core.describeMenu(Table, "tableMenu", { items: ["wipe", "undo"] })

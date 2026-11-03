@@ -46,9 +46,15 @@ export class Language {
   readonly parserMessages: Partial<ParserMessages>
   /** How its articles agree with their noun, e.g. `an apple`, `la carta` -- see `agreement()`;  none:  never warns. */
   readonly articles: ArticleAgreement | undefined
+  /**
+   * The mark its people write between a number's whole part and its fraction:  `.` in English, `,` in Spanish.
+   * - How a place's number reads when its text can't say, `"1,200"`, and its line doesn't (epic `data` P23).
+   */
+  readonly decimalMark: "." | ","
 
   constructor(props: LanguageProps) {
     this.articles = props.articles
+    this.decimalMark = props.decimalMark ?? "."
     this.lang = props.lang
     this.name = props.name
     this.parser = props.parser
@@ -332,6 +338,8 @@ export type LanguageProps = {
   /** None:  every message in English. */
   parserMessages?: Partial<ParserMessages>
   articles?: ArticleAgreement
+  /** None:  a dot. */
+  decimalMark?: "." | ","
 }
 
 /** One of the parser's messages, e.g. `dont-understand` -- see `PARSER_MESSAGES`, English's. */
@@ -623,6 +631,13 @@ export type SpellxTwinWords = {
   menu: string
   /** The words between a menu's items:  the last pair's, `and`. */
   menuAnd: string
+  /** A menu's own title, its `title=`, after its items (epic `language` P19):  `titled {quoted title}`. */
+  menuTitled: string
+  /**
+   * A menu filled from a list, its `for-each=` and `action=` (Q21):
+   * `its {name} is a menu of {for-each} , each running {quoted action}`.
+   */
+  menuEach: string
   /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
   menuBar: string
   /**
