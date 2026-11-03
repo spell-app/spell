@@ -14,6 +14,9 @@ import { ItsOrdinal } from "./ItsOrdinal"
 import { ItsProperty } from "./ItsProperty"
 import { MemberWords } from "./MemberWords"
 import { ObjectLiteralProperties } from "./ObjectLiteralProperties"
+import { PossessiveMark } from "./PossessiveMark"
+import { PossessiveOwner } from "./PossessiveOwner"
+import { PossessiveProperty } from "./PossessiveProperty"
 import { ObjectLiteralProperty, NamedObjectLiteralProperty, FlagObjectLiteralProperty } from "./ObjectLiteralProperty"
 import { Property } from "./Property"
 import { PropertyExpression } from "./PropertyExpression"
@@ -133,6 +136,84 @@ properties.addRule(PropertyExpression, {
 // its tests:  the table of what a name means inside an action, `NameMeanings.test.ts`
 properties.addRule(TheOwnProperty, {
   syntax: "{definite_article} {property:member_words}"
+})
+
+properties.addRule(PossessiveMark)
+properties.addRule(PossessiveOwner)
+
+// more tests:  `NameMeanings.test.ts`, inside an action
+properties.addRule(PossessiveProperty, {
+  syntax: "{expression:possessive_owner} {possessive_mark} {property:member_words}",
+  tests: [
+    {
+      title: "resolved:  what the type declares, as `the X of Y`",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a suit as one of clubs, diamonds",
+            "a card has a friend as a card",
+            "the short rank of a card is: 1",
+            "a deck is a list of cards",
+            "the card is a new card",
+            "the deck is a new deck"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["the card's short rank", "card.shortRank"],
+        ["the card’s short rank", "card.shortRank"],
+        ["the card's suit", "card.suit"],
+        ["the card's friend's short rank", "card.friend.shortRank"],
+        ["the short rank of the card's friend", "card.friend.shortRank"],
+        ["the deck's length", "deck.length"],
+        ["the first card of the deck's suit", "deck.firstItem?.suit"],
+        { title: "spaced apart:  not a possessive, so only `the card`", input: "the card 's suit", js: "card" },
+        { title: "the s not touching:  only `the card`", input: "the card' s suit", js: "card" }
+      ]
+    },
+    {
+      title: "a plural's apostrophe alone (T23):  as `the X of Y`",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a suit as one of clubs, diamonds",
+            "a boss is a thing",
+            "a boss has a name as text",
+            "a deck is a list of cards",
+            "the cards is a new deck",
+            "the boss is a new boss"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["the cards' length", "cards.length"],
+        ["the cards’ length", "cards.length"],
+        ["the cards' names", "cards.names"],
+        ["the boss' name", "boss.name"],
+        ["the boss' name's length", "boss.name.length"],
+        ["the length of the boss' name", "boss.name.length"],
+        { title: "a word touching it after:  a contraction, not a possessive", input: "the cards'n suit", js: "cards" }
+      ]
+    },
+    {
+      title: "loose:  one word, nothing need declare",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("bar")
+      },
+      tests: [
+        ["bar's foo", "bar.foo"],
+        ["the bar's foo", "bar.foo"],
+        ["bar's foo's baz", "bar.foo.baz"]
+      ]
+    }
+  ]
 })
 
 properties.addRule(ItsKnownProperty, {

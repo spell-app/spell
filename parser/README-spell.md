@@ -133,6 +133,19 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
     `set score to 1` makes a local.
   - A local hiding a property is allowed, but warned:  where it's made, and where `the X` reads it.
     An argument or loop variable warns only on that read.
+- `the character's name` is `the name of the character`, said the other way, in English (the curly `’` too).
+  - `its friend's name`, `the deck's length`, `the deck's first card` and `set the character's name to "Luke"` work too.
+  - A chain reads left to right:  `the character's friend's name`.
+  - After an `of`, the types decide what the `'s` belongs to:
+    - `the name of the character's friend`:  the character's friend's name, as a character has a friend
+    - `the first card of the deck's suit`:  the first card's suit, as a deck has no suit
+    - when both would work, the nearest name's, with a warning saying how to write the other
+  - `it's name` is an error:  `it's` means "it is".
+  - A plural's apostrophe alone:  `the cards' names` is `the names of the cards`;  any word ending in `s`, `the boss' name`.
+    `the card' name` is an error, saying to write `the card's name`.
+  - A declaration too:  `a card's color is red if ...` is `the color of a card is red if ...`.
+- One letter of text is a `letter` (or `char`):  `character` is free for a program's own type, Star Wars's say.
+  - `the first character of the name` and `the characters of the name` still read its letters.
   - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.
     A fill-in that doesn't read as anything is an error.
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
@@ -156,8 +169,8 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | constants | words that are values | 3 | `red` | `"red"` |
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
-| properties | `the ... of ...`, `its ...`, `the ...` in an action, object literals | 14 | `the short rank of the card` | `card.shortRank` |
-| lists | positions, ranges, adding, removing, `for each`, `where` | 42 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
+| properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
+| lists | positions, ranges, adding, removing, `for each`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |

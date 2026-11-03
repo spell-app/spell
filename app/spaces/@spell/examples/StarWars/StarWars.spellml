@@ -16,12 +16,12 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 		- its "jumping" is yes or no
 	</spell>
 
-	<property "found" description="Whatever's found:  the film, person, planet, ship or anything else with that in its name">
+	<property "found" description="Whatever's found:  the film, character, planet, ship or anything else with that in its name">
 		set matches to a new list of things
 		for each film in every film where its title includes the search of the guide
 			add the film to matches
-		for each person in every person where its name includes the search of the guide
-			add the person to matches
+		for each character in every character where its name includes the search of the guide
+			add the character to matches
 		for each planet in every planet where its name includes the search of the guide
 			add the planet to matches
 		for each starship in every starship where its name includes the search of the guide
@@ -56,7 +56,7 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<action "punch it" description="A jump to light speed, and wherever it lands">
 		set its jumping to yes
-		set landing to a random person in (every person)
+		set landing to a random character in (every character)
 		pause for 2600 msec
 		open landing
 		set its jumping to no
@@ -77,7 +77,7 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 		</stack>
 		<toolbar class="tabs" appearance="secondary pointing" aria-label="Browse">
 			<item active={its tab is "films"} onClick={go to "films"}>Films</item>
-			<item active={its tab is "people"} onClick={go to "people"}>People</item>
+			<item active={its tab is "characters"} onClick={go to "characters"}>Characters</item>
 			<item active={its tab is "planets"} onClick={go to "planets"}>Planets</item>
 			<item active={its tab is "ships"} onClick={go to "ships"}>Ships</item>
 			<item active={its tab is "vehicles"} onClick={go to "vehicles"}>Vehicles</item>
@@ -85,7 +85,7 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 		</toolbar>
 		draw its shelf
 		<text class="credits" size="small">
-			Films, people, planets and ships from <link link="https://swapi.py4e.com/">swapi.py4e.com</link>.
+			Films, characters, planets and ships from <link link="https://swapi.py4e.com/">swapi.py4e.com</link>.
 			Pictures and what they're of from <link link="https://en.wikipedia.org/">Wikipedia</link>, asked for as you look.
 			Star Wars belongs to Lucasfilm and Disney.
 		</text>
@@ -106,8 +106,8 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 				<button class="play-opening" size="massive" onClick={play the opening of the guide}>Play the opening</button>
 			</segment>
 			<cards columns="4" doubling>{draw its films list}</cards>
-		<otherwise if its tab is "people">
-			<cards columns="4" doubling>{draw its people list}</cards>
+		<otherwise if its tab is "characters">
+			<cards columns="4" doubling>{draw its characters list}</cards>
 		<otherwise if its tab is "planets">
 			<cards columns="4" doubling>{draw its planets list}</cards>
 		<otherwise if its tab is "vehicles">
@@ -139,9 +139,9 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 			draw its lost signal
 	</draw>
 
-	<draw "people list">
-		for each person in every person
-			draw the person
+	<draw "characters list">
+		for each character in every character
+			draw the character
 		while waiting:
 			draw its signal
 		if that fails:
@@ -389,9 +389,9 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 </spell-more-of>
 
 
-# A person
+# A character
 
-<spell-more-of "person">
+<spell-more-of "character">
 	<property "card">a new card with label = its name, kind = "Born " + its birth year, subject = it</property>
 	<property "page">the wiki page whose id is its name</property>
 	<property "picture" description="Their own picture on Wikipedia, or nothing">
@@ -551,12 +551,12 @@ A species with no picture takes the first of its people who has one.
 
 <spell-more-of "species">
 	<property "card">a new card with label = its name, kind = its classification, subject = it, species = it</property>
-	<property "picture" description="Its first person's picture:  asking for everyone at once costs one read, and each link then asks nothing">
-		set everyone to every person
+	<property "picture" description="Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing">
+		set everyone to every character
 		set found to ""
-		for each person in its people
+		for each character in its people
 			if found is ""
-				set found to the picture of the person
+				set found to the character's picture
 		return found
 	</property>
 	<draw>

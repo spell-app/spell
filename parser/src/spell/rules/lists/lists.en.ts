@@ -42,6 +42,7 @@ import { MergeLists } from "./MergeLists"
 import { NumberRange } from "./NumberRange"
 import { Ordinal } from "./Ordinal"
 import { OrdinalPositionExpression } from "./OrdinalPositionExpression"
+import { PossessiveOrdinal } from "./PossessiveOrdinal"
 import { OrdinalWhereExpression } from "./OrdinalWhereExpression"
 import { PositionExpression } from "./PositionExpression"
 import { RandomItemExpression } from "./RandomItemExpression"
@@ -402,6 +403,23 @@ lists.addRule(OrdinalPositionExpression, {
         ["the first item of my-list", "core.getItemAt(myList, 0)"],
         ["the tenth card of deck", "core.getItemAt(deck, 9)"],
         ["the penultimate word in words", "core.getItemAt(words, -2)"]
+      ]
+    }
+  ]
+})
+
+// more tests:  `possessive_property`'s, beside it
+lists.addRule(PossessiveOrdinal, {
+  syntax: "{expression:possessive_owner} {possessive_mark} {ordinal} {arg:singular_identifier}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("deck")
+      },
+      tests: [
+        ["deck's first card", "core.getItemAt(deck, 0)"],
+        ["the deck's last card", "core.getItemAt(deck, -1)"]
       ]
     }
   ]

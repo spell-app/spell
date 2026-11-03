@@ -1666,6 +1666,7 @@ classesEs.addRule(ThePropertyOfAThing, {
 // NOTE:  no `a_things_property`:  English's `a cards color` has no Spanish,
 // which says `el color de una carta`
 // packs: none AThingsProperty -- Spanish has no "a card's color"
+// packs: none ThePropertyOfAThing -- Spanish has no "a card's color" (epic `language` T24)
 
 classesEs.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_its} {property:quoted_member}"
@@ -1869,6 +1870,11 @@ classesEs.addRule(PropertyValueGetter, {
 classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:member_words} ${OF} ${A} {type:known_type} es {specifier:outline_specifier_enum} : {expression_body}?`
 })
+
+// NOTE:  no possessive (epic `language` T24):  English's `a card's value is ...` is `el valor de una carta es ...`
+// packs: none PropertyValueGetter -- Spanish has no "a card's value is"
+// packs: none PropertyValueGetter -- Spanish has no "a card's \"short name\" is"
+// packs: none PropertyValueGetter -- Spanish has no "a card's color is one of"
 
 // quoted:  its body is markup, which IS the drawing -- `- para "dibujarla": <div>[rango]</div>`
 classesEs.addRule(DrawIt, {

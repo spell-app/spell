@@ -98,7 +98,7 @@
     {
       "type": "Garden",
       "superType": "App",
-      "defined": "/TourOfSpell.spell:2386-2775"
+      "defined": "/TourOfSpell.spell:2386-2865"
     },
     {
       "property": "sill",
@@ -117,7 +117,7 @@
       ],
       "kind": "method",
       "name": "wait a day",
-      "defined": "/TourOfSpell.spell:2496-2625"
+      "defined": "/TourOfSpell.spell:2596-2715"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -130,7 +130,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TourOfSpell.spell:2629-2775"
+      "defined": "/TourOfSpell.spell:2719-2865"
     },
     {
       "syntax": "test thirst",
@@ -139,7 +139,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "thirst",
-      "defined": "/TourOfSpell.spell:3297-3540"
+      "defined": "/TourOfSpell.spell:3387-3630"
     }
   ],
   "codeLines": [
@@ -155,8 +155,8 @@
     112,
     114,
     117,
-    123,
-    127,
-    163
+    126,
+    130,
+    166
   ]
 }

@@ -104,7 +104,7 @@ export function newListItemName(node: P.ASTNewInstanceExpression): string | unde
  */
 export function kindFromDatatype(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   if (typeof datatype !== "string" || !datatype || datatype.startsWith("list")) return undefined
-  if (datatype === "text" || datatype === "character") return "text"
+  if (datatype === "text" || datatype === "letter") return "text"
   if (datatype === "number" || datatype === "integer") return "number"
   if (datatype === "choice") return "choice"
   return /^\p{Lu}/u.test(datatype) ? datatype : undefined
@@ -134,7 +134,7 @@ export function isKnownType(datatype: P.Datatype | RegExpConstructor | undefined
 /** What each of spell's built-in datatypes holds, as `kindOfType()` says it. */
 const BUILT_IN_KINDS: Record<P.Datatype, string | undefined> = {
   text: "text",
-  character: "text",
+  letter: "text",
   number: "number",
   integer: "number",
   choice: "choice",

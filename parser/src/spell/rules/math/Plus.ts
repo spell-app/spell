@@ -29,9 +29,9 @@ export class Plus extends InfixOperatorSuffix {
     return "plus"
   }
 
-  /** Is `datatype` text, or one character of it? */
+  /** Is `datatype` text, or one letter of it? */
   private static isTextual(datatype: P.Datatype | undefined): boolean {
-    return datatype === "text" || datatype === "character"
+    return datatype === "text" || datatype === "letter"
   }
 
   /** Is `datatype` a number, or an integer? */

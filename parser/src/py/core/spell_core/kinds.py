@@ -7,7 +7,7 @@ Spell's type names for Python's values:
 | `None`, not-a-number       | `unknown`                          |
 | `True`, `False`            | `choice`                           |
 | `3`, `3.5`                 | `number`, and `integer` for `3`    |
-| `"queen"`                  | `text`, and `character` for `"q"`  |
+| `"queen"`                  | `text`, and `letter` for `"q"`     |
 | a list or a tuple          | `list`                             |
 | a dict                     | `object`                           |
 | a function or a class      | `function`                         |
@@ -75,7 +75,7 @@ class TypeMethods:
         - Any case:  `"Card"` and `"card"` are the same.
         - Three names are checked, not looked up:
           - `integer`:  a whole number (`is_an_integer()`)
-          - `character`, or `char`:  text one character long
+          - `letter`, or `char`:  text one character long
         """
         type_name = type_name.lower()
         special = IS_OF_TYPE_SPECIALS.get(type_name)
@@ -221,7 +221,7 @@ def _is_an_integer(core: TypeMethods, thing: object) -> bool:
     return is_an_integer(thing)
 
 
-def _is_character(core: TypeMethods, thing: object) -> bool:
+def _is_letter(core: TypeMethods, thing: object) -> bool:
     """Is `thing` text one character long, as JavaScript counts it?  An emoji like 🂡 counts 2."""
     return isinstance(thing, str) and js_length(thing) == 1
 
@@ -229,6 +229,6 @@ def _is_character(core: TypeMethods, thing: object) -> bool:
 # Type names `is_of_type()` checks with a test of their own, rather than looking for it in `types_of()`.
 IS_OF_TYPE_SPECIALS: dict[str, Callable[[TypeMethods, object], bool]] = {
     "integer": _is_an_integer,
-    "character": _is_character,
-    "char": _is_character,
+    "letter": _is_letter,
+    "char": _is_letter,
 }

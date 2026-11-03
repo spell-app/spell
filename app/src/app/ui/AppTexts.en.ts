@@ -52,7 +52,8 @@ export const APP_TEXTS = {
     "This isn't written as its own tag in your program, so it can't be moved or removed here.  Change the code instead.",
   menuChangeThis: "Change This...",
   changeThisPrompt: "What should change?",
-  changeThisNobody: "This is waiting for a Claude session on this machine.  In one, ask it to run this in the background, and do what it says:",
+  changeThisNobody:
+    "This is waiting for a Claude session on this machine.  In one, ask it to run this in the background, and do what it says:",
   changeThisWorking: "Claude is working on it...",
   changeThisDone: "Claude changed the code.",
   changeThisNoChange: "Claude finished, and no file changed.",

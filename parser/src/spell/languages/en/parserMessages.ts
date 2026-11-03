@@ -160,6 +160,14 @@ export const PARSER_MESSAGES = {
   /** A rider's word that doesn't agree. */
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
+  /** `the name of the character's friend`, when the name of the character has a `friend` too (epic `language` Q16). */
+  "possessive-either":
+    'Read as {possessive} {property};  {whole} has a {property} too:  for that one, write "the {property} of {whole}"',
+  /** `it's name`, which says "it is name". */
+  "its-not-it-is": '"it\'s" means "it is":  for its {property}, write "its {property}"',
+  /** `the card' name`:  an apostrophe alone, after a word not ending in "s" (epic `language` T23). */
+  "possessive-needs-s":
+    'An apostrophe alone follows a word ending in "s", as in "the cards\' names":  write "{owner}\'s {property}"',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */

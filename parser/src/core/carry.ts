@@ -368,7 +368,7 @@ function hasChangedType(Old: Function, Class: ThingClass, name: string, value: u
 /** What `typeof` says of a value of each of spell's plain types:  `text` is a `string`. */
 const PLAIN_TYPES: Record<string, string> = {
   text: "string",
-  character: "string",
+  letter: "string",
   number: "number",
   integer: "number",
   choice: "boolean"

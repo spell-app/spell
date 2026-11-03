@@ -12,16 +12,16 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- its rows are its "results"
 	- its next page is its "next"
 	- check it every 86400 seconds
-	- people live at "/people"
+	- characters live at "/people"
 	- planets live at "/planets"
 	- films live at "/films"
 	- species live at "/species"
 	- vehicles live at "/vehicles"
 	- starships live at "/starships"
-	- a person's hair color is its "hair_color"
-	- a person's skin color is its "skin_color"
-	- a person's eye color is its "eye_color"
-	- a person's birth year is its "birth_year"
+	- a character's hair color is its "hair_color"
+	- a character's skin color is its "skin_color"
+	- a character's eye color is its "eye_color"
+	- a character's birth year is its "birth_year"
 	- a planet's rotation period is its "rotation_period"
 	- a planet's orbital period is its "orbital_period"
 	- a planet's surface water is its "surface_water"
@@ -44,7 +44,7 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- a starship's mglt is its "MGLT"
 	- a starship's starship class is its "starship_class"
 
-a "person" is a thing:
+a "character" is a thing:
 	- it lives in star wars
 	- its "name" is text
 	- its "height" is a number  // written as text there;  "unknown" reads as nothing
@@ -73,7 +73,7 @@ a "planet" is a thing:
 	- its "terrain" is text
 	- its "surface water" is a number  // written as text there;  "unknown" reads as nothing
 	- its "population" is a number  // written as text there;  "unknown" reads as nothing
-	- its "residents" is a list of people
+	- its "residents" is a list of characters
 	- its "films" is a list of films
 	- its "created" is a date
 	- its "edited" is a date
@@ -86,7 +86,7 @@ a "film" is a thing:
 	- its "director" is text
 	- its "producer" is text
 	- its "release date" is a date
-	- its "characters" is a list of people
+	- its "characters" is a list of characters
 	- its "planets" is a list of planets
 	- its "starships" is a list of starships
 	- its "vehicles" is a list of vehicles
@@ -106,7 +106,7 @@ a "species" is a thing:
 	- its "average lifespan" is text
 	- its "homeworld" is a planet
 	- its "language" is text
-	- its "people" is a list of people
+	- its "people" is a list of characters
 	- its "films" is a list of films
 	- its "created" is a date
 	- its "edited" is a date
@@ -124,7 +124,7 @@ a "vehicle" is a thing:
 	- its "cargo capacity" is a number  // written as text there;  "none", "unknown" reads as nothing
 	- its "consumables" is text
 	- its "vehicle class" is text
-	- its "pilots" is a list of people
+	- its "pilots" is a list of characters
 	- its "films" is a list of films
 	- its "created" is a date
 	- its "edited" is a date
@@ -144,7 +144,7 @@ a "starship" is a thing:
 	- its "hyperdrive rating" is a number  // written as text there;  "unknown" reads as nothing
 	- its "mglt" is a number  // written as text there;  "unknown" reads as nothing
 	- its "starship class" is text
-	- its "pilots" is a list of people
+	- its "pilots" is a list of characters
 	- its "films" is a list of films
 	- its "created" is a date
 	- its "edited" is a date

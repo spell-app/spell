@@ -306,7 +306,7 @@
     },
     {
       path: "type:Text",
-      description: "Words, letters -- anything in quotes, e.g. `\"hello\"`.\n- Counts from 1, as a list does:  `the first character of the name` is its first letter.\n- `+` joins two:  `\"total: \" + x`.\n\n```spell\nset the name to \"Ada\"\nprint the length of the name\nprint the last character of the name\n```"
+      description: "Words, letters -- anything in quotes, e.g. `\"hello\"`.\n- Counts from 1, as a list does:  `the first character of the name` is its first letter, as is `the first letter of the name`.\n- One letter of it is a `letter` (or `char`):  `character` is free for a program's own type.\n- `+` joins two:  `\"total: \" + x`.\n\n```spell\nset the name to \"Ada\"\nprint the length of the name\nprint the last character of the name\n```"
     },
     {
       path: "type:Text/property:length",
@@ -315,8 +315,13 @@
     },
     {
       path: "type:Text/property:characters",
-      detail: "list of characters",
+      detail: "list of letters",
       description: "Its characters, one by one, as a new list, e.g. `the characters of the name`."
+    },
+    {
+      path: "type:Text/property:letters",
+      detail: "list of letters",
+      description: "Its letters, one by one, as a new list, e.g. `the letters of the name` -- its `characters`."
     },
     {
       path: "type:Text/method:character (n) of (a text)",

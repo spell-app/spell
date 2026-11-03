@@ -57,7 +57,8 @@ const APP_TEXTS_ES: AppTextPack = {
     "Esto no está escrito como una etiqueta propia en tu programa, así que no se puede mover ni quitar aquí.  Cambia el código.",
   menuChangeThis: "Cambiar esto...",
   changeThisPrompt: "¿Qué debería cambiar?",
-  changeThisNobody: "Esto espera una sesión de Claude en esta máquina.  En una, pídele que ejecute esto en segundo plano, y que haga lo que diga:",
+  changeThisNobody:
+    "Esto espera una sesión de Claude en esta máquina.  En una, pídele que ejecute esto en segundo plano, y que haga lo que diga:",
   changeThisWorking: "Claude está trabajando en ello...",
   changeThisDone: "Claude cambió el código.",
   changeThisNoChange: "Claude terminó, y ningún archivo cambió.",

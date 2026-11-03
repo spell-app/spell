@@ -5,12 +5,12 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { getKnownType } from "spell/parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
 import { DefinePropertyHas } from "spell/parser/spell/rules/classes"
+import { PossessiveProperty } from "spell/parser/spell/rules/properties"
 // Import directly to avoid circular import
 import { BlockLine } from "spell/parser/spell/rules/BlockLine"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
-/** The words for a literal's type, by its rule, e.g. `a number` for `0` -- see `warnIfAlwaysTheSame()`. */
 /** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
 const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
   number: "example-number",
@@ -25,6 +25,8 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  *   `return the first word of the name` instead of repeating `of the card`.
  * - Compiles to a getter in its class running the parsed body, e.g.
  *   `the value of a card is its name` => `get value() { return this.name }`.
+ * - Or as a possessive, in English (epic `language` T24):  `a card's value is its name`, the same getter.
+ *   `a card' value is ...` is refused, saying to write `a card's value`.
  * - A worked-out value from a list of its own (epic `elemental-spell` P5, Q13):
  *
  *   ```spell
@@ -70,6 +72,8 @@ export class PropertyValueGetter extends SpellStatement<
     match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
     this.warnIfReadsAfterWait(match)
+    // a possessive misspelled, `a card' value is ...` (epic `language` T24)
+    PossessiveProperty.refuseIfDeclarationMisspelled(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
   }
 

@@ -10,6 +10,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
  * - `set the X to` follows that order too;  `set X to` makes a local.
  * - `its X` follows `it`, so in a loop it's the item;  `the X` never is.
  * - A bare `X` never reads a property.
+ * - `the X's Y` reads as `the Y of the X` (P16);  after an `of`, the types say which name the `'s` is (Q16).
  * - A local that hides a property warns where it's made and where `the X` reads it;
  *   an argument or loop variable warns only on that read.
  *
@@ -29,6 +30,8 @@ type NameRow = {
   action?: string
   /** `spell` is in a loose action, not one of the type's */
   outside?: boolean
+  /** a piece of the error it should give, when `js` is `ERROR` */
+  says?: string
   /** a piece of the warning it should give;  no `warns`:  it should give none */
   warns?: string
   /** the phase that makes this row true */
@@ -47,6 +50,7 @@ const PLAY = "to play it:"
 
 const ENGLISH_PROJECT = (action: string, lines: string, loose = "set x to 1") => `a pile is a thing:
 	- it has a name as text
+	- it has a score as a number
 	- to shuffle it:
 		set x to 1
 a stock is a pile
@@ -378,6 +382,95 @@ const ENGLISH: NameRow[] = [
     js: "positionOf(Game.Colors, this.color)"
   },
 
+  // a possessive, `the X's Y` ~== `the Y of the X` (P16)
+  { title: "possessive:  the X's Y reads Y of the X", spell: "set v to the stock's name", js: "v = this.stock.name" },
+  { title: "possessive:  a curly apostrophe too", spell: "set v to the stock’s name", js: "v = this.stock.name" },
+  { title: "possessive:  its X's Y", spell: "set v to its stock's name", js: "v = this.stock.name" },
+  {
+    title: "possessive:  a chain reads left to right",
+    spell: "set v to the stock's name's length",
+    js: "v = this.stock.name.length"
+  },
+  { title: "possessive:  set the X's Y writes it", spell: 'set the stock\'s name to "s"', js: 'this.stock.name = "s"' },
+  { title: "possessive:  a local's Y", spell: "set p to the pile\nset v to p's name", js: "v = p.name" },
+  { title: "possessive:  a bare X's Y does NOT read the property", spell: "set v to stock's name", js: ERROR },
+  {
+    title: "possessive:  in a loop, the X's Y is still the action's thing",
+    spell: "for each card in the cards\n\tset v to the stock's name",
+    js: "v = this.stock.name"
+  },
+  {
+    title: "possessive:  a loop variable's Y",
+    spell: "for each card in the cards\n\tset v to card's rank",
+    js: "v = card.rank"
+  },
+  { title: "possessive:  [the X's Y] in a text", spell: 'set v to "[the stock\'s name]"', js: "this.stock.name" },
+  { title: 'possessive:  it\'s Y is an error, saying "its"', spell: "set v to it's score", js: ERROR },
+  {
+    title: "possessive after an of:  the nearest name's, when it has it",
+    spell: "set v to the name of the game's stock",
+    js: "v = this.stock.name"
+  },
+  {
+    title: "possessive after an of:  the whole phrase's, when only it has it",
+    spell: "set v to the pile of the game's name",
+    js: "v = this.pile.name"
+  },
+  {
+    title: "possessive after an of:  both have it, the nearest's, and warns",
+    spell: "set v to the pile of the game's score",
+    js: "this.score.pile",
+    warns: "has a score too"
+  },
+
+  // a plural's apostrophe alone, `the X' Y` ~== `the Y of the X` (T23)
+  {
+    title: "plural possessive:  the X' Y reads Y of the X",
+    spell: "set v to the rounds' length",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  as the Y of the X",
+    spell: "set v to the length of the rounds",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  a curly apostrophe too",
+    spell: "set v to the rounds’ length",
+    js: "v = this.rounds.length"
+  },
+  {
+    title: "plural possessive:  every thing's",
+    spell: "set v to the piles' names",
+    js: "v = core.everyThing(Pile).names"
+  },
+  {
+    title: "plural possessive:  as the names of every thing",
+    spell: "set v to the names of the piles",
+    js: "v = core.everyThing(Pile).names"
+  },
+  {
+    title: "plural possessive:  an ordinal",
+    spell: "set v to the rounds' first round",
+    js: "v = this.rounds.firstItem"
+  },
+  {
+    title: "plural possessive:  as the ordinal of",
+    spell: "set v to the first round of the rounds",
+    js: "v = this.rounds.firstItem"
+  },
+  {
+    title: "plural possessive:  [the X' Y] in a text",
+    spell: 'set v to "[the rounds\' length]"',
+    js: "this.rounds.length}"
+  },
+  {
+    title: "plural possessive:  an apostrophe alone after no s is an error, saying so",
+    spell: "set v to the stock' name",
+    js: ERROR,
+    says: 'write "the stock\'s name"'
+  },
+
   // an action's own words
   { title: "action phrase:  a literal action name wins", spell: "reset the stock", js: "this.resetTheStock()" },
 
@@ -487,12 +580,13 @@ function checkRow(row: NameRow, path: string, project: typeof ENGLISH_PROJECT, a
   const { compiled, errors, warnings } = parseSpellProject([{ path, contents }]).files[0]!
   if (row.js === ERROR) {
     expect(errors).not.toEqual([])
+    if (row.says) expect(errors.filter((error) => `${error}`.includes(row.says!))).not.toEqual([])
     return
   }
   expect(errors).toEqual([])
   expect(compiled).toContain(row.js)
   const hiding = warnings.filter((warning) => warning.includes(HIDES) || warning.includes(OCULTA))
-  if (row.warns) expect(hiding).not.toEqual([])
+  if (row.warns) expect(warnings.filter((warning) => warning.includes(row.warns!))).not.toEqual([])
   else expect(hiding).toEqual([])
 }
 

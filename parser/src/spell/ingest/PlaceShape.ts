@@ -237,7 +237,7 @@ export function wordsFor(name: string): string {
 
 /**
  * A collection's name, as a type's words:  `life_forms` => `life form`, `people` => `person`.
- * - Where that's one of Spell's own types, it says whose:  `characters` of `swapi` => `swapi character`, as `character` is a letter.
+ * - Where that's one of Spell's own types, it says whose:  `dates` of `swapi` => `swapi date`, as `date` is Spell's.
  */
 export function typeWordsFor(name: string, placeName: string): string {
   const words = wordsFor(name).split(" ")
@@ -246,7 +246,7 @@ export function typeWordsFor(name: string, placeName: string): string {
   return isSpellsOwnType(type) ? `${placeName} ${type}` : type
 }
 
-/** Is this one of the types Spell has by itself, which a program can't declare:  `character`, `date`, `view`? */
+/** Is this one of the types Spell has by itself, which a program can't declare:  `letter`, `date`, `view`? */
 export function isSpellsOwnType(words: string): boolean {
   return /^\p{Ll}/u.test(`${SP.typeName(words)}`)
 }

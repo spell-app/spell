@@ -121,6 +121,8 @@ describe("priority and precedence", () => {
         "ordinal_where_expression:  Priority.specific",
         "outline_specifier_text_kind:  Priority.specific",
         "plus:  Precedence.sum",
+        "possessive_ordinal:  Priority.specific",
+        "possessive_property:  Priority.mostSpecific",
         "property_body_must:  Priority.declaration",
         "property_expression:  Priority.preferred",
         "property_must:  Priority.declaration",
