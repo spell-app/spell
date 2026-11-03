@@ -141,6 +141,9 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
     - `the first card of the deck's suit`:  the first card's suit, as a deck has no suit
     - when both would work, the nearest name's, with a warning saying how to write the other
   - `it's name` is an error:  `it's` means "it is".
+  - A plural's apostrophe alone:  `the cards' names` is `the names of the cards`;  any word ending in `s`, `the boss' name`.
+    `the card' name` is an error, saying to write `the card's name`.
+  - A declaration too:  `a card's color is red if ...` is `the color of a card is red if ...`.
 - One letter of text is a `letter` (or `char`):  `character` is free for a program's own type, Star Wars's say.
   - `the first character of the name` and `the characters of the name` still read its letters.
   - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.

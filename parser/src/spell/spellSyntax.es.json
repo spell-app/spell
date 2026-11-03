@@ -1826,8 +1826,8 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveMark.ts",
-          "line": 10,
-          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16).",
+          "line": 16,
+          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16) -- or a plural's apostrophe alone, `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
         },
@@ -1837,7 +1837,7 @@
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveOwner.ts",
           "line": 15,
-          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16).",
+          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16) -- or before a plural's apostrophe alone, `the cards` in `the cards' names` (T23).",
           "syntaxes": [],
           "aliases": []
         },
@@ -1846,7 +1846,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveProperty.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
           "syntaxes": [],
           "aliases": []
@@ -2597,7 +2597,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/lists/PossessiveOrdinal.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "`the deck's first card` ~== `the first card of the deck` (epic `language`, P16).",
           "syntaxes": [],
           "aliases": []
@@ -5150,7 +5150,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 44,
+          "line": 46,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5722,7 +5722,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 9,
+          "line": 12,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {

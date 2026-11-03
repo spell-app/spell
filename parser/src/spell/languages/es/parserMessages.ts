@@ -119,6 +119,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "possessive-either":
     'Se lee como {property} de {owner};  {whole} también tiene {property}:  para ese, escribe "{property} de {whole}"',
   "its-not-it-is": '"it\'s" quiere decir "it is":  para su {property}, escribe "its {property}"',
+  "possessive-needs-s":
+    'Un apóstrofo solo sigue a una palabra que acaba en "s", como en "the cards\' names":  escribe "{owner}\'s {property}"',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
