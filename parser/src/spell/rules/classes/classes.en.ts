@@ -1605,6 +1605,11 @@ classes.addRule(ThePropertyOfAThing, {
   syntax: "(a|an) {type} {possessive_mark} {property:member_words}"
 })
 
+// ... a plural with no article (T26):  `cards' color is red if ...`, read as `a card's color`, warning to write that
+classes.addRule(ThePropertyOfAThing, {
+  syntax: "{type:known_type} {possessive_mark} {property:member_words}"
+})
+
 classes.addRule(AThingsProperty, {
   syntax: "(a|an) {type:plural_type} {property:member_words}"
 })
@@ -1902,6 +1907,51 @@ classes.addRule(PropertyValueGetter, {
 classes.addRule(PropertyValueGetter, {
   syntax:
     "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+})
+
+// ... a plural with no article (T26):  `cards' value is ...`, the same getter as `a card's value is ...`,
+// warning to write that -- a singular one, `card's value is`, isn't read
+classes.addRule(PropertyValueGetter, {
+  syntax: "{type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile("a card is a thing\na card has a rank as a number")
+      },
+      tests: [
+        {
+          input: "cards' value is its rank * 2",
+          js: [
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get() {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ],
+          ts: [
+            "export interface Card { readonly value: number }",
+            'Object.defineProperty(Card.prototype, "value", {',
+            "  get(this: Card) {",
+            "    return this.rank * 2",
+            "  },",
+            "  configurable: true",
+            "})"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax: "{type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+})
+
+classes.addRule(PropertyValueGetter, {
+  syntax:
+    "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
 })
 
 // quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`

@@ -168,6 +168,8 @@ export const PARSER_MESSAGES = {
   /** `the card' name`:  an apostrophe alone, after a word not ending in "s" (epic `language` T23). */
   "possessive-needs-s":
     'An apostrophe alone follows a word ending in "s", as in "the cards\' names":  write "{owner}\'s {property}"',
+  /** `cards' color is ...`:  a declaration's owner plural, with no article (epic `language` T26). */
+  "possessive-declaration-plural": 'Write "{aType}\'s {property} is ...":  a declaration names one {type}',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */

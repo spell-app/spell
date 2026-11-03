@@ -1846,7 +1846,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/properties/PossessiveProperty.ts",
-          "line": 35,
+          "line": 36,
           "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
           "syntaxes": [],
           "aliases": []
@@ -5136,7 +5136,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 46,
+          "line": 47,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5708,7 +5708,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {

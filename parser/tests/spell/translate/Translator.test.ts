@@ -191,6 +191,15 @@ describe("Translator:  English to Spanish, rule by rule", () => {
     expect(parseSpellProject([{ path: "/Carta.es.spell", contents: lines.join("\n") }]).files[0]!.errors).toEqual([])
   })
 
+  test("a plural declaration with no article is written as one, with `de` (epic `language` T26)", () => {
+    const source = ['a "card" is a thing where:', '\t- its "rank" is a number', "cards' count is its rank * 2"].join(
+      "\n"
+    )
+    const { lines } = translated(source)
+    expect(lines.slice(2, 3)).toEqual(["la cuenta de una carta es su rango * 2"])
+    expect(parseSpellProject([{ path: "/Carta.es.spell", contents: lines.join("\n") }]).files[0]!.errors).toEqual([])
+  })
+
   test("a possessive agrees in number with a name of either gender:  `sus espadas`, `sus corazones`", () => {
     const source = 'a "card" is a thing where:\n\t- its "spades" is a number\n\t- its "hearts" is a number\n'
     expect(translated(source).lines.slice(1, 3)).toEqual([

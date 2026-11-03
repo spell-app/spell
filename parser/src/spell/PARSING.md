@@ -441,6 +441,9 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     `property_value_getter` (registered last, so a translation finds Spanish's `el color de una carta es` first)
     and `type_property` (`the_property_of_a_thing`) each have a syntax with `{possessive_mark}`;
     a misspelled one is refused (`PossessiveProperty.refuseIfDeclarationMisspelled()`)
+    - with no article (T26), a PLURAL known type, `cards' color is ...`:  the same declaration, warning to write
+      `a card's color` (`PossessiveProperty.warnIfNoArticle()`);  a singular one, `card's color is`, isn't read;
+      a translation writes it as one (the type match's `namesOne`)
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
   - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`

@@ -144,6 +144,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
   - A plural's apostrophe alone:  `the cards' names` is `the names of the cards`;  any word ending in `s`, `the boss' name`.
     `the card' name` is an error, saying to write `the card's name`.
   - A declaration too:  `a card's color is red if ...` is `the color of a card is red if ...`.
+    `cards' color is red if ...` means it too, with a warning to write `a card's color`:  a declaration names one card.
 - One letter of text is a `letter` (or `char`):  `character` is free for a program's own type, Star Wars's say.
   - `the first character of the name` and `the characters of the name` still read its letters.
   - A fill-in in a text reads the same way:  `"Score: [score]"` is `the score`, with `[its name]` for what `it` is now.

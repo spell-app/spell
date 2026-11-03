@@ -1853,7 +1853,7 @@
           "ruleNames": ["possessive_property"],
           "internal": false,
           "file": "src/spell/rules/properties/PossessiveProperty.ts",
-          "line": 35,
+          "line": 36,
           "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
           "syntaxes": [
             {
@@ -5115,7 +5115,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 46,
+          "line": 47,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -5136,6 +5136,21 @@
             {
               "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
               "example": "a card's value is its rank * 2",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"value\", {\n  get() {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly value: number }\nObject.defineProperty(Card.prototype, \"value\", {\n  get(this: Card) {\n    return this.rank * 2\n  },\n  configurable: true\n})"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"value\")\ndef _card_value(self) -> float:\n    return self.rank * 2"
+                }
+              }
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is :? {expression_body}?",
+              "example": "cards' value is its rank * 2",
               "outputs": {
                 "js": {
                   "code": "Object.defineProperty(Card.prototype, \"value\", {\n  get() {\n    return this.rank * 2\n  },\n  configurable: true\n})"
@@ -5177,6 +5192,12 @@
             },
             {
               "syntax": "(a|an) {type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:quoted_member} is :? {expression_body}?"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words} is {specifier:outline_specifier_enum} : {expression_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -5708,7 +5729,7 @@
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {
@@ -5719,6 +5740,9 @@
             },
             {
               "syntax": "(a|an) {type} {possessive_mark} {property:member_words}"
+            },
+            {
+              "syntax": "{type:known_type} {possessive_mark} {property:member_words}"
             }
           ],
           "aliases": ["type_property"]
