@@ -1419,6 +1419,7 @@
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
+            "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1508,6 +1509,9 @@
             },
             {
               "syntax": "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)"
+            },
+            {
+              "syntax": "((numbers:los números)|(names:los nombres))"
             },
             {
               "syntax": "((fewer:menos de)|(more:más de|mas de)|(at_least:al menos)|(at_most:como mucho|como máximo|como maximo))"
@@ -4869,11 +4873,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 59,
+          "line": 60,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?",
               "example": "un gestor-tareas tiene un nombre como texto",
               "outputs": {
                 "js": {
@@ -4888,7 +4892,7 @@
               }
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?",
               "example": "las cartas tienen una dirección como o bien up o down",
               "outputs": {
                 "js": {
@@ -4903,28 +4907,28 @@
               }
             },
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} (es|son) {specifier:outline_specifier} ((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -6030,7 +6034,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 25,
+          "line": 27,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6261,13 +6265,13 @@
               "example": "recetario familiar es un servidor web en \"https://api.example.com/v1\"",
               "outputs": {
                 "js": {
-                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\",\n  unclearNumbers: \",\"\n})"
                 },
                 "ts": {
-                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\"\n})"
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"web server\",\n  at: \"https://api.example.com/v1\",\n  unclearNumbers: \",\"\n})"
                 },
                 "py": {
-                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"web server\", \"at\": \"https://api.example.com/v1\"},\n)"
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.example.com/v1\",\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
             },
@@ -6465,6 +6469,20 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WritesLike",
+          "ruleNames": ["writes_like"],
+          "internal": false,
+          "file": "src/spell/rules/places/WritesLike.ts",
+          "line": 12,
+          "purpose": "How a place writes its numbers or its fields' names, by an example (epic `data` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} escribe {what:numbers_or_names} como {example:text}"
             }
           ],
           "aliases": ["statement"]

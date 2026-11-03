@@ -228,7 +228,9 @@ export class CreatePlace extends TypeDeclaration<
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
       ...(address && { at: textIn(address) }),
-      ...CreatePlace.detailsOf(match)
+      ...CreatePlace.detailsOf(match),
+      // a number its text can't settle, "1,200", reads the way the program's language writes one (epic `data` P23)
+      ...(SP.Language.of(match.scope).decimalMark === "," && { unclearNumbers: "," })
     }
     const thing = new P.ASTNewInstanceExpression(match, { type: typeAST })
     const made = new P.ASTAssignmentStatement(match, {

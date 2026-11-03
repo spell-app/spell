@@ -1,5 +1,6 @@
 import { P } from "spell/parser/parser"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
+import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription } from "./ingest.types"
 
@@ -77,6 +78,13 @@ export function spellPartsFor(
   if (checkEverySeconds !== undefined) {
     placeLines.push({ key: "check", text: `- check it every ${checkEverySeconds} seconds` })
   }
+  // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
+  const namesLike = isSheet ? undefined : nameExampleOf(every)
+  if (namesLike) placeLines.push({ key: "names", text: `- it writes names like "${namesLike}"` })
+  const fieldsShown = every.flatMap(({ fields }) => Object.values(fields))
+  if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
+    placeLines.push({ key: "numbers", text: '- it writes numbers like "1.200,5"' })
+  }
   for (const [collection, description] of shown) {
     if (isSheet || !description.at || description.at === collection) continue
     placeLines.push({ key: `at:${collection}`, text: `- ${collection.replace(/_/g, " ")} live at "${description.at}"` })
@@ -85,9 +93,6 @@ export function spellPartsFor(
       placeLines.push({ key: `id:${collection}`, text: line })
     }
   }
-  // a sheet reads no such line:  `whatSpellCantSay()` says so
-  if (!isSheet)
-    for (const [collection, description] of shown) placeLines.push(...fieldNameLines(collection, description))
   return {
     header: `${name} is ${articled(kind)} at "${address}":`,
     placeLines,
@@ -140,15 +145,23 @@ function typesInside(shown: ReadonlyArray<readonly [string, CollectionDescriptio
   return [...types.values()]
 }
 
-/** The lines that say what the source calls a field, when Spell's name for it isn't that. */
-function fieldNameLines(collection: string, description: CollectionDescription): SpellLine[] {
-  return Object.entries(description.fields).flatMap(([field, about]) => {
-    const { words, leftOut, type, wordsInQuotes } = about
-    if (isLeftOut(field, description, leftOut, type, about) || fieldNamed(words) === field) return []
-    const named = wordsInQuotes ? `"${words}"` : words
-    const text = `- ${articled(description.type)}'s ${named} is its "${field}"`
-    return [{ key: `name:${collection}:${field}`, text }]
-  })
+/**
+ * What the source calls a field, when its words don't find it:  `, stored as "avg_ht"` on its own line.
+ * - `hair_color`, `hairColor` and `Hair Color` all find `its "hair color"` by its words (`FieldNames`):  nothing to say.
+ */
+function storedAsFor(field: string, { words }: FieldDescription): string {
+  return ourNameFor(field) === fieldNamed(words) ? "" : `, stored as "${field}"`
+}
+
+/**
+ * One of the place's own field names of two words or more, if they're all spelled one way that isn't ours:  `hair_color`.
+ * - What `it writes names like "hair_color"` says, so a save or a query names a field it hasn't sent yet the server's way.
+ * - Spelled ours (`hairColor`), or several ways:  `undefined`.
+ */
+function nameExampleOf(collections: readonly CollectionDescription[]): string | undefined {
+  const names = collections.flatMap(({ fields }) => Object.keys(fields)).filter((name) => nameStyleLike(name))
+  const styles = new Set(names.map(nameStyleLike))
+  return styles.size === 1 && !styles.has("camel") ? names[0] : undefined
 }
 
 /** A type's lines. */
@@ -161,7 +174,7 @@ function typeLines(
   const lines: SpellLine[] = [{ key: `lives:${collection}`, text: `- it lives in ${place}` }]
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
-    const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}`
+    const line = `- its "${about.words}" is ${typeWordsFor(about, collections)}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   return {
@@ -199,18 +212,25 @@ function typeWordsFor(
   return SPELL_TYPES[type]!
 }
 
+/**
+ * A number's words for none, as the source writes them:  ` or "unknown"`, ` or "n/a" or "unknown"`.
+ * - Read as nothing, quietly, and what saving nothing writes back.  A number written as text needs nothing said:  it reads as one.
+ */
+function nothingWordsFor({ type, noNumberWords }: FieldDescription): string {
+  const words = type === "number" ? (noNumberWords ?? []).filter((word) => word.trim()) : []
+  return words.map((word) => ` or "${word}"`).join("")
+}
+
 /** What a person should know, on the line:  what Spell reads differently from what's there. */
 function commentFor(
-  { type, linksTo, writtenAsText, noNumberWords }: FieldDescription,
+  { type, linksTo }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (target && !target.leftOut && (type === "link" || type === "list of links")) return ""
   if (type === "link") return "  // an address"
   if (type === "list of links") return "  // each an address"
-  if (!writtenAsText) return ""
-  const none = noNumberWords?.length ? `;  ${noNumberWords.map((word) => `"${word}"`).join(", ")} reads as nothing` : ""
-  return `  // written as text there${none}`
+  return ""
 }
 
 /** The one value of `read` every collection has:  `undefined` when they differ, or any has none. */

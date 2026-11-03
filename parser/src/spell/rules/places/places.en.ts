@@ -35,6 +35,7 @@ import {
   WhileWaiting
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
+import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
 import { SaveDraft } from "./SaveDraft"
@@ -149,6 +150,10 @@ places.addRule(RowsIn, {
 places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
+places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
+  syntax: "((numbers:numbers)|(names:names))"
+})
+places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
 places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 

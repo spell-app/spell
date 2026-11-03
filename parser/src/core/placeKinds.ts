@@ -34,6 +34,12 @@ export type PlaceDetails = {
   nextPageIn?: string
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
+  /** How it spells a field's name, by an example:  `hair_color` (`it writes names like "hair_color"`). */
+  namesLike?: string
+  /** How it writes a number, by an example:  `1.200,5` (`it writes numbers like "1.200,5"`). */
+  numbersLike?: string
+  /** How a number its text can't settle reads, `1,200`:  the program's language's way, a comma in Spanish. */
+  unclearNumbers?: "." | ","
   /** The accounts a shared atmosphere account is limited to:  left out, whoever holds its records. */
   accounts?: readonly string[]
   /**
@@ -82,18 +88,20 @@ export function placeBehind(making: PlaceMaking): PlaceBehind {
  * a graphql server's mapping is worked out per class, and a program may save several in one place.
  */
 export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
-  const { GraphPlace } = making.folder
+  const { GraphPlace, RestPlace } = making.folder
+  const { collection, Class } = making
+  if (behind instanceof RestPlace) behind.addFields(collection, storedAsIn(Class))
   if (!(behind instanceof GraphPlace)) return
-  const { collection } = making
   behind.addCollection(collection, graphCollections(making)[collection]!)
 }
 
 /** Each kind's word, and how its place is made. */
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
-  "web server": ({ details }, { RestPlace }) =>
+  "web server": ({ details, collection, Class }, { RestPlace, nameStyleLike }) =>
     new RestPlace({
       url: details.at!,
-      collections: restCollections(details),
+      collections: restCollections(details, collection, storedAsIn(Class)),
+      ...(details.namesLike !== undefined && { namesLike: nameStyleLike(details.namesLike) }),
       ...restLinesForEveryCollection(details),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
@@ -193,14 +201,37 @@ function atmosphereCollections({ collections = {} }: PlaceDetails): Record<strin
   return Object.fromEntries(Object.entries(collections).flatMap(([name, { at }]) => (at ? [[name, at]] : [])))
 }
 
-/** A web server's mapping:  each collection's address, and its fields' names there. */
-function restCollections({ collections = {} }: PlaceDetails) {
+/**
+ * A web server's mapping:  each collection's address, and the names of its fields there that a program gave.
+ * - `collection` is first read by `Class`:  its `stored as` names join its own.
+ * - Every other field is matched by its words, as it's read (`FieldNames`).
+ */
+function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
+  const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(collections).map(([name, { at, fields }]) => [
-      name,
-      { ...(at !== undefined && { path: at.includes("{") ? at : `${at}{/id}` }), ...(fields && { fields }) }
-    ])
+    Object.entries(named).map(([name, { at, fields }]) => {
+      const all = name === collection ? { ...fields, ...storedAs } : fields
+      return [
+        name,
+        {
+          ...(at !== undefined && { path: at.includes("{") ? at : `${at}{/id}` }),
+          ...(all && Object.keys(all).length && { fields: all })
+        }
+      ]
+    })
   )
+}
+
+/** What `Class` says each of its fields is called where it's kept, when that's not its words:  `stored as "avg_ht"`. */
+function storedAsIn(Class: Function): Record<string, string> {
+  const named: Record<string, string> = {}
+  for (let schema = schemaOf(Class) as ReturnType<typeof schemaOf> | undefined; schema; schema = schema.parent) {
+    for (const [name, info] of schema.declared) {
+      const { storedAs } = info as { storedAs?: string }
+      if (storedAs !== undefined && !(name in named)) named[name] = storedAs
+    }
+  }
+  return named
 }
 
 /** What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is. */
@@ -220,23 +251,31 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
  * A graphql server's mapping, by convention:  a server that follows it needs no lines (epic `data` P11).
  * - `recipes` lists, `recipe(id)` finds one;  pages by connection.
  * - `addRecipe`, `changeRecipe`, `removeRecipe` write, taking a `RecipeInput!` and a `RecipePatch!`.
- * - Its fields are what the class declares, by each one's name there.
+ * - Its fields are what the class declares, by each one's name there:  its `stored as`, else as the server spells names
+ *   (`it writes names like "hair_color"`), else ours.
  */
-function graphCollections({ details, collection, Class }: PlaceMaking) {
-  const { at, fields = {} } = details.collections?.[collection] ?? {}
+function graphCollections({ details, collection, Class, folder }: PlaceMaking) {
+  const { at, fields: named = {} } = details.collections?.[collection] ?? {}
+  const style = details.namesLike === undefined ? undefined : folder.nameStyleLike(details.namesLike)
+  const fields: Record<string, string> = { ...named, ...storedAsIn(Class) }
+  if (style) {
+    for (const field of declaredFields(Class)) fields[field] ??= folder.theirNameFor(field, style)
+  }
   const list = at ?? collection
   const one = list.replace(/s$/, "")
-  const named = one.charAt(0).toUpperCase() + one.slice(1)
+  const typeName = one.charAt(0).toUpperCase() + one.slice(1)
   const selected = [ID_FIELD, ...declaredFields(Class).filter((field) => field !== ID_FIELD)]
   return {
     [collection]: {
       list,
       one,
       paging: "connection" as const,
-      fields: selected.map((field) => (fields[field] ? `${field}: ${fields[field]}` : field)),
-      insert: { mutation: `add${named}`, input: `${named}Input!` },
-      update: { mutation: `change${named}`, id: "ID!", input: `${named}Patch!` },
-      delete: { mutation: `remove${named}`, id: "ID!" }
+      fields: selected.map((field) =>
+        fields[field] && fields[field] !== field ? `${field}: ${fields[field]}` : field
+      ),
+      insert: { mutation: `add${typeName}`, input: `${typeName}Input!` },
+      update: { mutation: `change${typeName}`, id: "ID!", input: `${typeName}Patch!` },
+      delete: { mutation: `remove${typeName}`, id: "ID!" }
     }
   }
 }

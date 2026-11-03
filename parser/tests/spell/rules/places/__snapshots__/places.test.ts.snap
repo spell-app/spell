@@ -37,5 +37,6 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
   "versions_in": "type|field",
   "where_field": "property",
   "while_waiting": "body?",
+  "writes_like": "type|what|example",
 }
 `;

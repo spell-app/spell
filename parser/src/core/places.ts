@@ -74,6 +74,7 @@ import {
   sourcesReadBy,
   TYPE_KEY,
   untrackCells,
+  unsetReadsNothing,
   type Schema
 } from "spell/util"
 import type { UndoRecord } from "spell/util/persist/persist.types"
@@ -90,13 +91,14 @@ import type {
 import type { PlaceCache } from "spell/util/places/PlaceCache"
 import type { PlaceResult } from "spell/util/places/PlaceResult"
 import type { PlaceThingMaker, Places, SavedValue, WorkedOutValue } from "spell/util/places/Places"
+import { ourNameFor } from "spell/util/places/FieldNames"
 import { idOfRow, type PlaceRow } from "spell/util/places/places.types"
 import { POSITIONS_KEY } from "spell/util/places/positions"
 import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
-import { valueAsDeclared, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
+import { valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
@@ -223,12 +225,35 @@ const INSIDE_KEY = "$inside"
 /** Things made from a plain object inside a row:  `PlaceThings.withThingsInside()`. */
 const THINGS_INSIDE_ROWS = new WeakSet<SpellObject>()
 
-/** The name `schema` declares for `field`:  a place's `display_title`, as `displayTitle`.  None declared:  `field` itself. */
+/**
+ * The name `schema` declares for `field`, by its words:  a place's `display_title` or `Display Title`, as `displayTitle`.
+ * - A field its type says is `stored as` that name, by its own.
+ * - None declared:  `field` itself.
+ * - What a web server sends is named so already (`FieldNames`);  this finds the rest, a sheet's columns and what's inside a row.
+ */
 function nameDeclaredIn(schema: ReturnType<typeof schemaOf>, field: string): string {
   if (schema.info(field)) return field
-  const camel = field.replace(/_(\p{L})/gu, (_, letter: string) => letter.toUpperCase())
-  return schema.info(camel) ? camel : field
+  const stored = storedAsNamesOf(schema).get(field)
+  if (stored) return stored
+  const ours = ourNameFor(field)
+  return schema.info(ours) ? ours : field
 }
+
+/** Each field `schema` says its place calls something else, by that name:  `avg_ht` => `averageHeight`. */
+function storedAsNamesOf(schema: ReturnType<typeof schemaOf>): Map<string, string> {
+  let names = STORED_AS_NAMES.get(schema)
+  if (names) return names
+  names = new Map()
+  for (let each = schema as typeof schema | undefined; each; each = each.parent) {
+    for (const [name, info] of each.declared)
+      if (info.storedAs !== undefined && !names.has(info.storedAs)) names.set(info.storedAs, name)
+  }
+  STORED_AS_NAMES.set(schema, names)
+  return names
+}
+
+/** What `storedAsNamesOf()` found, for each schema. */
+const STORED_AS_NAMES = new WeakMap<object, Map<string, string>>()
 
 /**
  * A value as a row holds it:  a date as text, a list as an array, a thing as a reference to it.
@@ -635,8 +660,10 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (places.placeFor(placeName) !== places.declaredPlaceFor(placeName))
       this.noteWrittenInstead(`${type}#${id}`, field)
     const group = this.groupNumberFor(pending)
-    const asJson = this.writer.jsonFor(value)
-    const wasJson = this.writer.jsonFor(was)
+    // a number its place sent as text goes back as text, and nothing as its word for nothing:  `valueAsWritten()`
+    const Class = this.classNamed(type) as never
+    const asJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(value)) : this.writer.jsonFor(value)
+    const wasJson = Class ? valueAsWritten(Class, field, this.writer.jsonFor(was)) : this.writer.jsonFor(was)
     const thing = { collection, type, id, field, ...(group !== undefined && { group }) }
     this.writing(() => {
       if (Array.isArray(asJson) && Array.isArray(wasJson)) pending.changeList({ ...thing, items: asJson, was: wasJson })
@@ -916,15 +943,16 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
    * `fields`, of a thing of `type`, each plain object in a field declared as a type no place holds marked to be made as that thing.
    * - What `its "thumbnail" is a thumbnail` reads, for `"thumbnail": { "source": "..." }`:  so `the source of its thumbnail` is a thing's field,
    *   and the words need no path.
-   * - Inside such a thing, a field goes by the name the type declares, `display_title` as `displayTitle`:  nothing else maps it.
+   * - Each field goes by the name the type declares, by its words, `display_title` or `Display Title` as `displayTitle`:
+   *   a sheet's columns, and what's inside a row, which nothing else maps.
    * - A type a place holds is a link, `core.linked()`'s.  A type nobody can find stays a plain object, read the same way.
    */
-  private withThingsInside(type: string, fields: Record<string, unknown>, isInside = false): Record<string, unknown> {
+  private withThingsInside(type: string, fields: Record<string, unknown>): Record<string, unknown> {
     const Class = this.classNamed(type)
     if (!Class) return fields
     const schema = schemaOf(Class)
     const entries = Object.entries(fields).map(([field, value]) => {
-      const name = isInside ? nameDeclaredIn(schema, field) : field
+      const name = nameDeclaredIn(schema, field)
       const info = schema.info(name)
       const held = info?.itemType ?? info?.type
       return [name, typeof held === "string" ? this.markedInside(held, value) : value]
@@ -938,12 +966,17 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
     if (!Class || Class.savedIn) return value
     if (Array.isArray(value)) return value.map((item) => this.markedInside(type, item))
     if (!isPlainObject(value) || TYPE_KEY in value || REF_KEY in value) return value
-    return { ...this.withThingsInside(type, value, true), [TYPE_KEY]: type, [INSIDE_KEY]: true }
+    return { ...this.withThingsInside(type, value), [TYPE_KEY]: type, [INSIDE_KEY]: true }
   }
 
-  /** A thing made inside a row is known as one, so it's written back as plain fields. */
+  /**
+   * A thing made from a row:  a field the row didn't hold reads as nothing, not its type's default (`unsetReadsNothing()`),
+   * as a height a server didn't send isn't a height of 0.
+   * - One made inside a row is known as one, so it's written back as plain fields.
+   */
   protected make(json: Record<string, unknown>, ref?: string): unknown {
     const made = super.make(json, ref)
+    unsetReadsNothing(made as object)
     if (json[INSIDE_KEY]) THINGS_INSIDE_ROWS.add(made as SpellObject)
     return made
   }
@@ -971,13 +1004,15 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   private changeInPlace(thing: SpellObject, row: PlaceRow): string[] {
     const fields = thing as unknown as Record<string, unknown>
     const changed: string[] = []
-    for (const [key, json] of Object.entries(row)) {
-      if (key === "id" || key.startsWith("$")) continue
+    const schema = schemaOf(thing.constructor as never)
+    for (const [field, json] of Object.entries(row)) {
+      if (field === "id" || field.startsWith("$")) continue
+      const key = nameDeclaredIn(schema, field)
       const current = fields[key]
       if (!this.holdsTheSame(current, json)) changed.push(key)
       // what's inside and says the same stays the same thing:  what shows it has nothing to do
       if (current && THINGS_INSIDE_ROWS.has(current as SpellObject) && this.holdsTheSame(current, json)) continue
-      const declared = schemaOf(thing.constructor as never).info(key)
+      const declared = schema.info(key)
       const held = declared?.itemType ?? declared?.type
       const inside = typeof held === "string" ? this.markedInside(held, json) : json
       const value = valueAsDeclared(thing.constructor as never, key, this.read(this.withKnownHeld(inside)))

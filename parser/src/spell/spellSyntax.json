@@ -1406,6 +1406,7 @@
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
+            "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1495,6 +1496,9 @@
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
+            },
+            {
+              "syntax": "((numbers:numbers)|(names:names))"
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
@@ -4848,11 +4852,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 59,
+          "line": 60,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "a player has a name as text",
               "outputs": {
                 "js": {
@@ -4867,7 +4871,7 @@
               }
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "cards have a direction as either up or down",
               "outputs": {
                 "js": {
@@ -4882,28 +4886,28 @@
               }
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -6071,7 +6075,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 25,
+          "line": 27,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6506,6 +6510,20 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WritesLike",
+          "ruleNames": ["writes_like"],
+          "internal": false,
+          "file": "src/spell/rules/places/WritesLike.ts",
+          "line": 12,
+          "purpose": "How a place writes its numbers or its fields' names, by an example (epic `data` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} writes {what:numbers_or_names} like {example:text}"
             }
           ],
           "aliases": ["statement"]

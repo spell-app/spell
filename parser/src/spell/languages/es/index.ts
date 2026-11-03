@@ -23,6 +23,7 @@ export const spanish = SP.Language.register(
     words: spanishWords,
     messages: spanishMessages,
     parserMessages: spanishParserMessages,
-    articles: spanishAgreement
+    articles: spanishAgreement,
+    decimalMark: ","
   })
 )

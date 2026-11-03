@@ -144,7 +144,8 @@ describe("when someone else changes it", () => {
     const place = filled(new SilentPlace({ capabilities: WITH_IDS }))
     const { Recipe, someoneElse } = program(place, { select: ["title"] })
     const [recipe] = (await core.savedThings(Recipe)).items as InstanceType<typeof Recipe>[]
-    expect(recipe!.notes).toBe("")
+    // nothing yet, not "":  a field a row didn't hold reads as nothing (epic `data` P23)
+    expect(recipe!.notes).toBeUndefined()
     await vi.waitFor(() => expect(recipe!.notes).toBe("Salt"))
     await settled()
     expect(someoneElse).toEqual([])

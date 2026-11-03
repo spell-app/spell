@@ -101,15 +101,15 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
 const STARS_SPELL = `stars is a web server at "${API}":
 	- its id is its "url"
 	- check it every 30 seconds
+	- it writes names like "hair_color"
 	- people live at "/people"
 	- planets live at "/planets"
-	- a person's hair color is its "hair_color"
 
 a "person" is a thing:
 	- it lives in stars
 	- its "name" is text
-	- its "height" is a number  // written as text there;  "unknown" reads as nothing
-	- its "mass" is a number  // written as text there
+	- its "height" is a number or "unknown"
+	- its "mass" is a number
 	- its "hair color" is text
 	- its "homeworld" is a planet
 	- its "films" is a list of text  // each an address
@@ -118,7 +118,7 @@ a "person" is a thing:
 a "planet" is a thing:
 	- it lives in stars
 	- its "name" is text
-	- its "population" is a number  // written as text there`
+	- its "population" is a number`
 
 describe("adding a source", () => {
   test("what swapi.info's shape needs:  links, numbers as text, ids only in an address, several collections", async () => {
@@ -171,7 +171,9 @@ describe("adding a source", () => {
     }
     const { ingest } = ingestOf(routes)
     const { spell, description } = await ingest.add({ address: API, into: "/S.spell", name: "ships place" })
-    expect(spell).toContain(`- a ship's "cost in credits" is its "cost_in_credits"`)
+    // its words find it, as the server spells it:  nothing to say
+    expect(spell).toContain(`- its "cost in credits" is a number\n`)
+    expect(spell).toContain(`- it writes names like "cost_in_credits"`)
     expect(spell).toContain(`- its "parts" is a part`)
     expect(spell).toContain(`a "part" is a thing:`)
     expect(spell).toContain(`- its "width" is a number`)
@@ -327,7 +329,7 @@ describe("the agent", () => {
     expect(spell).toContain(`galaxy is a web server`)
     expect(spell).toContain(`- check it every 3600 seconds`)
     expect(spell).toContain(`- heroes live at "/people"`)
-    expect(spell).toContain(`- a hero's hair is its "hair_color"`)
+    expect(spell).toContain(`- its "hair" is text, stored as "hair_color"`)
     expect(spell).toContain(`a "planet" is a thing`)
     expect(spell).not.toMatch(/ghost|invented/)
     const description = descriptions.get("/A.galaxy.place.json5")!

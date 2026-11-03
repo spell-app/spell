@@ -46,6 +46,7 @@ import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
 import { RowsIn } from "./RowsIn"
+import { WritesLike } from "./WritesLike"
 
 /** The Spanish of the `places` rule module. */
 export const placesEs = new SpellParser({ module: "places" })
@@ -142,6 +143,10 @@ placesEs.addRule(RowsIn, {
 placesEs.addRule(NextPageIn, {
   syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
+placesEs.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
+  syntax: "((numbers:los números)|(names:los nombres))"
+})
+placesEs.addRule(WritesLike, { syntax: "{type:subject_implied} escribe {what:numbers_or_names} como {example:text}" })
 placesEs.addRule(AccountIncluded, { syntax: "{type:subject_implied} incluye la cuenta {account:text}" })
 placesEs.addRule(OperationAt, { syntax: "para {signature:method_signature} está en {path:text}" })
 
