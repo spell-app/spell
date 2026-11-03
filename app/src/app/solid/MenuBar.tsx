@@ -565,7 +565,10 @@ function followAppMenus(values: () => Partial<AppMenusThing>) {
 }
 
 /** A menu's items, as Spell orders them:  each action drawn by `itemFor`, a line at each break. */
-function SpellMenuRows(props: { items: MenuItem[]; itemFor: (item: SpellMenuAction) => JSX.Element }): JSX.Element {
+export function SpellMenuRows(props: {
+  items: MenuItem[]
+  itemFor: (item: SpellMenuAction) => JSX.Element
+}): JSX.Element {
   return <For each={props.items}>{(item) => (item.kind === "action" ? props.itemFor(item) : <Divider />)}</For>
 }
 
@@ -581,7 +584,7 @@ function itemState(item: SpellMenuAction): { menu: true; shortcut?: string } {
 }
 
 /** An action of a menu in `AppMenus.spellml`, as `core.menuOf()` gives it. */
-type SpellMenuAction = MenuItem & { kind: "action" }
+export type SpellMenuAction = MenuItem & { kind: "action" }
 
 /** The app menus' thing, as `AppMenus.spellml` compiles:  the editor's state its items grey and tick by. */
 type AppMenusThing = {
