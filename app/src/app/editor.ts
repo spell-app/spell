@@ -833,6 +833,9 @@ export class EditorStore extends Observable {
       { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
       { title: appTexts.text("discardChanges"), live: () => void editor.compileApp().catch(editor.showError) }
     )
+    // it's what's published now:  nothing left to save, or to discard, until the next edit
+    if (!isStaticBuild) file.isDirty = false
+    editor.edits++
     void editor.compileApp().catch(editor.showError)
   }
 

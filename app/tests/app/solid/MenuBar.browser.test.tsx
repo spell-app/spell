@@ -42,6 +42,8 @@ describe("<AppBarMenus>", () => {
       "─",
       `Save ${EDITOR_HOTKEYS.saveFile.shortcut}`,
       `Discard Changes ${EDITOR_HOTKEYS.discardChanges.shortcut}`,
+      "Publish",
+      "Versions",
       expect.stringMatching(/^Duplicate/),
       "─",
       "Project Settings",
