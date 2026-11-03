@@ -221,6 +221,9 @@ export const englishWords: SP.LanguageWords = {
       "undone-as": "undone-as",
       icon: "icon",
       title: "title",
+      // a menu filled from a list (epic `language` P19, Q21):  `<menu "more examples" for-each={...} action="...">`
+      "for-each": "for-each",
+      action: "action",
       "menu-bar": "menu-bar",
       locked: "locked",
       // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
@@ -277,6 +280,8 @@ export const englishWords: SP.LanguageWords = {
       placeSlot: "draw its {words}",
       menu: "its {name} is a menu of",
       menuAnd: "and",
+      menuTitled: "titled {quoted title}",
+      menuEach: "its {name} is a menu of {for-each} , each running {quoted action}",
       menuBar: "its menu bar is {quoted menu-bar}",
       group: "group {name}",
       notebookContent: "to draw its content :",

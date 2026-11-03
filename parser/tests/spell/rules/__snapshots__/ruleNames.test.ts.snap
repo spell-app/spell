@@ -357,6 +357,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "define_menu": [
       "define_menu",
       "define_menu",
+      "define_menu",
     ],
     "define_property_has": [
       "define_property_has",
@@ -921,6 +922,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "define_group",
       "define_menu",
       "define_menu",
+      "define_menu",
       "menu_bar",
       "drawn_markup",
       "drawn_markup",
@@ -1117,7 +1119,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "current_person · places · 1",
     "declare_event · events · 3",
     "define_group · classes · 1",
-    "define_menu · classes · 2",
+    "define_menu · classes · 3",
     "define_property_has · classes · 10",
     "definite_article · expressions · 1",
     "discard_draft · places · 1",

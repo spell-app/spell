@@ -401,6 +401,19 @@ Its first line is how you call it, with each blank's type in brackets:
 
     - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
       click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
+    - An item naming another of its menus is a sub-menu, so a menu bar is a menu of menus;
+      a menu's title follows its items, `titled "File"`:
+
+      ```spell
+      editor is an app where:
+      	- its "file menu" is a menu of "save", "-" and "more examples", titled "File"
+      	- its "more examples" is a menu of its examples, each running "open (an example)"
+      	- its "menu bar" is a menu of "file menu" and "edit menu"
+      	- its menu bar is "menu bar"
+      ```
+
+    - A menu filled from a list, `each running`, has an item per thing in it, titled with its title (else its name),
+      which runs the action with that thing.
 
 ### Lists count from 1, and `where`
 

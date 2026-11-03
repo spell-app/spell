@@ -1970,7 +1970,8 @@ classesEs.addRule(DefineGroup, {
 // el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
 // `- su "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]",
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -2014,7 +2015,14 @@ classesEs.addRule(DefineMenu, {
 
 // ... sin el sujeto:  `- "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]"
+  syntax:
+    "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?"
+})
+// un menú lleno de una lista, un elemento por cada cosa (épica `language` P19, Q21):
+// `- su "más ejemplos" es un menú de sus ejemplos, cada uno ejecutando "abrir ejemplo"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
 })
 
 // cuál de los menús de una aplicación es su barra de menú (épica `elemental-spell` P10):

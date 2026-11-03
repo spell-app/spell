@@ -2056,7 +2056,7 @@ classes.addRule(DefineGroup, {
 })
 
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -2131,7 +2131,13 @@ classes.addRule(DefineMenu, {
 
 // ... with the subject left out:  `- "game menu" is a menu of "deal" and "undo"`
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?"
+})
+// a menu filled from a list, an item per thing in it (epic `language` P19, Q21):
+// `- its "more examples" is a menu of its examples, each running "open example"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} is a menu of {list:expression} , each running {action:text} (, titled {title:text})?"
 })
 
 // which of an app's menus is its menu bar (epic `elemental-spell` P10):  `- its menu bar is "game menu"`

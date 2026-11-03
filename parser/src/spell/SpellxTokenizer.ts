@@ -292,7 +292,8 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
    * - In a body of spell:  notes and controls.
    * - In a drawing (or a control in one):  notes, controls and a placed slot, `<draw "front" />`.
-   * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them).
+   * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them);
+   *   and its sub-menus, `<menu "file menu" />` (epic `language` P19).
    * - In a note:  none;  its text is prose.
    */
   private isTagHere(word: TagWord, indent: number): boolean {
@@ -302,7 +303,9 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (!owner || owner.category === "template") return true
     if (owner.category === "note" || owner.category === "code") return false
     if (word.category === "code" && word.kind === "html") return this.isInDrawing()
-    if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
+    // its actions, and the menus inside it:  sub-menus (epic `language` P19)
+    if (owner.kind === "menu" && word.category === "declaration" && (word.kind === "action" || word.kind === "menu"))
+      return true
     if (word.category === "control" && isForSlot(word.kind)) return owner.kind === "for each"
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()

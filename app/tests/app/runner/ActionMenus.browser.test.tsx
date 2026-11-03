@@ -9,6 +9,7 @@ import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import "spell/app/app/solid/cellsBridge"
 import "spell/ui/components/ui-action"
 import "spell/ui/components/ui-toolbar"
+import "spell/ui/components/ui-menu"
 
 /**
  * A program's actions on the page (epic `elemental-spell` P10):  a small Solitaire, its game menu as the app's menu
@@ -227,5 +228,62 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     expect(menuBar.querySelector("ui-action")!.getAttribute("shortcut")).toBe("mod+D")
     expect(ActionMenus.shortcutForUI("meta+shift+Z")).toBe("mod+shift+Z")
     expect(ActionMenus.shortcutForUI("F2")).toBe("F2")
+  })
+})
+
+describe("ActionMenus:  a menu bar of menus (epic `language` P19)", () => {
+  installSpellElements(core)
+
+  /** A desk:  its menu bar is a menu of its File and Edit menus, File holding a sub-menu of its examples. */
+  class Desk extends App {
+    static elementTag = core.defineElement(this, "Desk", "App")
+    static menuBar = "menu bar"
+    examples = [{ title: "Solitaire" }, { title: "Cards" }]
+    opened: unknown[] = []
+    save(): void {}
+    openExample(example: unknown): void {
+      this.opened.push(example)
+    }
+    get moreExamplesItems(): unknown[] {
+      return this.examples
+    }
+  }
+  core.describeAction(Desk, "save", { title: "Save" })
+  core.describeMenu(Desk, "fileMenu", { items: ["save", "-", "moreExamples"], title: "File" })
+  core.describeMenu(Desk, "moreExamples", {
+    items: [],
+    each: "moreExamplesItems",
+    action: "openExample",
+    title: "More Examples"
+  })
+  core.describeMenu(Desk, "editMenu", { items: ["undo", "redo"], title: "Edit" })
+  core.describeMenu(Desk, "menuBar", { items: ["fileMenu", "editMenu"] })
+
+  test("each menu an item of the bar, holding its menu;  a sub-menu inside, its items from the list", async () => {
+    core.resetRuntime()
+    const root = document.createElement("div")
+    document.body.append(root)
+    try {
+      await Promise.resolve()
+      core.mountApp(new Desk(), root)
+      flush()
+      const app = root.querySelector("desk-app") as HTMLElement & { ready: Promise<void> }
+      await app.ready
+      flush()
+      const menuBar = app.shadowRoot!.querySelector("[part~=menu-bar]")!
+      const menus = [...menuBar.children]
+      expect(menus.map((menu) => menu.localName)).toEqual(["ui-item", "ui-item"])
+      expect(menus.map((menu) => menu.firstChild?.textContent)).toEqual(["File", "Edit"])
+      const file = menus[0]!.querySelector(":scope > ui-menu")!
+      expect([...file.children].map((item) => item.localName)).toEqual(["ui-action", "ui-item", "ui-item"])
+      const more = file.querySelector(":scope > ui-item:last-child")!
+      expect(more.firstChild?.textContent).toBe("More Examples")
+      const examples = more.querySelectorAll(":scope > ui-menu > ui-action")
+      expect(examples).toHaveLength(2)
+      const solitaire = examples[0] as HTMLElement & { action: { title: string } }
+      expect(solitaire.action.title).toBe("Solitaire")
+    } finally {
+      root.remove()
+    }
   })
 })
