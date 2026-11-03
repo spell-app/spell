@@ -73,7 +73,7 @@ describe("the lines", () => {
     expect(asked).toHaveLength(2)
   })
 
-  test("a number written as text reads as a number, a word for none as nothing;  anything else stays;  a null is no value", async () => {
+  test("a number written as text reads as a number, a word for none as nothing;  anything else is nothing, warned of once;  a null is nothing (epic `data` P23)", async () => {
     serve({
       [`${HOST}/people`]: [
         { id: 1, height: "172", mass: "1,358", weird: "30-165", planet: null },
@@ -92,9 +92,9 @@ describe("the lines", () => {
       `\t- its "planet" is text`
     ])("Person")
     const [first, second] = await read(Person)
-    expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, "30-165"])
-    expect([second!.height, second!.mass]).toEqual([null, null])
-    expect(first!.planet).toBe("")
+    expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, undefined])
+    expect([second!.height, second!.mass, second!.weird]).toEqual([undefined, undefined, 4])
+    expect(first!.planet).toBeUndefined()
     expect(second!.planet).toBe("Tatooine")
     expect(warn.mock.calls.flat().join("\n")).toMatch(/weird/)
     expect(warn.mock.calls.flat().join("\n")).not.toMatch(/planet/)

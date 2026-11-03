@@ -86,7 +86,7 @@ export type ReadRiders = {
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
   failed?: () => Drawing
-  /** `the message if that fails is "..."`:  the message that shows, Try again kept. */
+  /** `if that fails say "..."`:  the message that shows, Try again kept. */
   failedSay?: () => unknown
   /** `show them in:`:  the element the items go in, the loader and messages staying outside it. */
   items?: () => unknown

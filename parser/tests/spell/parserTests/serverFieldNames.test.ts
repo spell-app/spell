@@ -5,6 +5,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { parseSpellProject } from "spell/parser/spell/test"
+// After the helpers, which load the language whole:  the rules' folder can't load first
+import { checkEveryInWords } from "spell/parser/spell/rules/places"
 
 /** A program's lines, compiled:  what a test asks of it. */
 function compiled(lines: string[], path = "/Test.spell") {
@@ -80,5 +82,49 @@ describe("a field's own line says what isn't its words", () => {
     ])
     expect(errors).toEqual([])
     expect(js).toContain('fields: { hairColor: "hair_colour" }')
+  })
+})
+
+describe("how often to check, in the largest whole unit", () => {
+  it.each([
+    ["check it every 30 seconds", 30],
+    ["check it every 30", 30],
+    ["check it every 5 minutes", 300],
+    ["check it every minute", 60],
+    ["check it every 2 hours", 7200],
+    ["check it every hour", 3600],
+    ["check it every day", 86400],
+    ["check it every 2 days", 172800]
+  ])("%s", (line, seconds) => {
+    const { js, errors } = compiled(['star wars is a web server at "https://x":', `\t- ${line}`])
+    expect(errors).toEqual([])
+    expect(js).toContain(`checkedEvery: ${seconds}`)
+  })
+
+  it.each([
+    ["se revisa cada 30 segundos", 30],
+    ["se revisa cada 5 minutos", 300],
+    ["se revisa cada hora", 3600],
+    ["se revisa cada día", 86400]
+  ])("in Spanish:  %s", (line, seconds) => {
+    const { js, errors } = compiled(
+      ['guerra de las galaxias es un servidor web en "https://x":', `\t- ${line}`],
+      "/Test.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(js).toContain(`checkedEvery: ${seconds}`)
+  })
+
+  it("what the ingest writes", () => {
+    expect([30, 60, 300, 3600, 7200, 86400, 90, 172800].map(checkEveryInWords)).toEqual([
+      "every 30 seconds",
+      "every minute",
+      "every 5 minutes",
+      "every hour",
+      "every 2 hours",
+      "every day",
+      "every 90 seconds",
+      "every 2 days"
+    ])
   })
 })

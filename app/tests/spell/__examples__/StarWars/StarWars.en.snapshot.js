@@ -193,13 +193,13 @@ export const words = {
       playing: "playing",
       jumping: "jumping",
       found: "found",
-      signal: "signal",
-      lostSignal: "lost signal",
       goBack: "go back",
       goToWhere: "go to (where as text)",
       playTheOpening: "play the opening",
       punch: "punch it",
-      draw: "draw it"
+      draw: "draw it",
+      signal: "signal",
+      lostSignal: "lost signal"
     },
     Thing: {
       open: "open (a thing)"

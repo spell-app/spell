@@ -1,4 +1,5 @@
 import { P } from "spell/parser/parser"
+import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
 
@@ -76,7 +77,7 @@ export function spellPartsFor(
     placeLines.push({ key: "version", text: `- its version is its "${VERSION_FIELD}"` })
   }
   if (checkEverySeconds !== undefined) {
-    placeLines.push({ key: "check", text: `- check it every ${checkEverySeconds} seconds` })
+    placeLines.push({ key: "check", text: `- check it ${checkEveryInWords(checkEverySeconds)}` })
   }
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = isSheet ? undefined : nameExampleOf(every)
@@ -87,7 +88,7 @@ export function spellPartsFor(
   }
   for (const [collection, description] of shown) {
     if (isSheet || !description.at || description.at === collection) continue
-    placeLines.push({ key: `at:${collection}`, text: `- ${collection.replace(/_/g, " ")} live at "${description.at}"` })
+    placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} live at "${description.at}"` })
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
@@ -208,7 +209,7 @@ function typeWordsFor(
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (!target || target.leftOut) return SPELL_TYPES[type]!
   if (type === "link") return articled(target.type)
-  if (type === "list of links") return `a list of ${linksTo!.replace(/_/g, " ")}`
+  if (type === "list of links") return `a list of ${collectionWords(target)}`
   return SPELL_TYPES[type]!
 }
 
@@ -240,6 +241,17 @@ function sameOfEvery<Value>(
 ): Value | undefined {
   const values = new Set(collections.map(read))
   return values.size === 1 ? [...values][0] : undefined
+}
+
+/**
+ * What a program calls a collection:  its type, more than one, `characters` for a `character`.
+ * - Not the source's own name for it, `people`:  a person may rename the type, and the collection goes with it.
+ */
+function collectionWords({ type }: CollectionDescription): string {
+  return type
+    .split(" ")
+    .map((word, index, words) => (index === words.length - 1 ? P.pluralize(word) : word))
+    .join(" ")
 }
 
 /** `word` with its article. */
@@ -301,12 +313,15 @@ export type SpellMerge = {
  * - A line a person changed, whose field has changed too:  theirs stays, and it says so.
  * - A type that's gone stays:  removing a program's type is a person's call.
  * - `usesOf`:  where these words are used, in lines the tool didn't write.
+ * - `written`:  the lines it wrote last time, as the description keeps them (`PlaceDescription.spell`):
+ *   one written by an older version of the tool, in words it no longer writes, is put in today's (`inTodaysWords()`).
  */
 export function mergedSpell(
   text: string,
   before: SpellParts,
   after: SpellParts,
-  usesOf: (words: string, own: ReadonlySet<string>) => boolean
+  usesOf: (words: string, own: ReadonlySet<string>) => boolean,
+  written: readonly string[] = []
 ): SpellMerge {
   const merge: SpellMerge = { text, changed: [], couldnt: [] }
   const lines = text.split("\n")
@@ -339,8 +354,60 @@ export function mergedSpell(
       `The collection "${type.collection}" is gone from the source;  its type stays, for you to remove:  ${type.header}`
     )
   }
+  inTodaysWords(lines, written, after, merge)
   merge.text = lines.join("\n")
   return merge
+}
+
+/** A line under a place an older version wrote, naming a field the server spells differently:  `- a person's hair color is its "hair_color"`. */
+const OLD_FIELD_NAME_LINE = /^- an? .+?'s "?.+?"? is its "[^"]+"$/
+
+/**
+ * SIDE EFFECT:  each line the tool wrote last time (`written`), in words it no longer writes, put in today's (epic `data` P23):
+ * - a field's line, `- its "height" is a number  // written as text there`:  today's line for those words, in its type
+ * - a line under the place naming a field's spelling there, `- a person's hair color is its "hair_color"`:  gone, as the
+ *   field finds it by its words now, or says `stored as` on its own line
+ * - A line a person changed isn't one it wrote, so it's never touched.
+ */
+function inTodaysWords(lines: string[], written: readonly string[], after: SpellParts, merge: SpellMerge): void {
+  const wrote = new Set(written.map((line) => line.trim()))
+  const today = new Set(allLines(after).map(({ text }) => text))
+  const blocks = new Map<string, Map<string, string>>([[after.header, new Map()]])
+  for (const type of after.types) {
+    blocks.set(type.header, new Map(type.lines.flatMap(({ text }) => (wordsIn(text) ? [[wordsIn(text)!, text]] : []))))
+  }
+  let block: Map<string, string> | undefined
+  for (let at = 0; at < lines.length; at++) {
+    const line = lines[at]!
+    if (!line.startsWith("\t")) {
+      block = blocks.get(line)
+      continue
+    }
+    const text = line.trim()
+    if (!block || !wrote.has(text) || today.has(text)) continue
+    const now = block.get(wordsIn(text) ?? "")
+    if (now && /^- its "/.test(text)) {
+      // today's line may be in already, added at the block's end as new:  it takes the old one's place
+      const added = otherInBlock(lines, at, `\t${now}`)
+      lines[at] = `\t${now}`
+      if (added !== undefined) lines.splice(added, 1)
+      if (added !== undefined && added < at) at--
+      merge.changed.push(`In today's words:  ${now}`)
+    } else if (OLD_FIELD_NAME_LINE.test(text)) {
+      lines.splice(at--, 1)
+      merge.changed.push(`Removed, as its field finds it by its words:  ${text}`)
+    }
+  }
+}
+
+/** Where else the block holding line `at` has `line`:  `undefined` if nowhere. */
+function otherInBlock(lines: readonly string[], at: number, line: string): number | undefined {
+  let start = at
+  while (start > 0 && lines[start - 1]!.startsWith("\t")) start--
+  for (let index = start; index < lines.length && lines[index]!.startsWith("\t"); index++) {
+    if (index !== at && lines[index] === line) return index
+  }
+  return undefined
 }
 
 /** What `mergeBlock()` works on. */

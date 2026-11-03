@@ -174,11 +174,11 @@ export class PlaceIngest {
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
       description.notes = old.notes
     }
-    const before = spellPartsFor(old)
+    const before = writtenOf(spellPartsFor(old), old.spell)
     const after = spellPartsFor(description)
     const text = (await files.read(file)) ?? ""
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own))
+    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
     await this.readThroughIt(description, reader)
@@ -606,4 +606,21 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
     }
   }
   return [...said]
+}
+
+/**
+ * `parts`, only the lines the tool really wrote last time, `written`:  an older version wrote other words.
+ * - So a line today's version writes and that one didn't is new, and is added;  and one it wrote in older words is
+ *   `mergedSpell()`'s to put in today's.
+ * - No record of what was written:  `parts` as they are.
+ */
+function writtenOf(parts: SpellParts, written: readonly string[] | undefined): SpellParts {
+  if (!written?.length) return parts
+  const wrote = new Set(written.map((line) => line.trim()))
+  const kept = (lines: readonly SpellLine[]) => lines.filter(({ text }) => wrote.has(text))
+  return {
+    ...parts,
+    placeLines: kept(parts.placeLines),
+    types: parts.types.map((type) => ({ ...type, lines: kept(type.lines) }))
+  }
 }

@@ -164,6 +164,7 @@ describe("priority and precedence", () => {
         "while_waiting:  Priority.declaration",
         "with_commas:  Precedence.comparison",
         "without_waiting:  Priority.specific",
+        "writes_like:  Priority.declaration",
       ]
     `)
   })

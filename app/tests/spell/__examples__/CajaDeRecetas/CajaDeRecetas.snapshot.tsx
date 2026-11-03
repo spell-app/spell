@@ -69,7 +69,11 @@ core.useElement(Receta, RecetaElement)
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
  */
 export class RecetarioFamiliar extends Place {}
-export const recetarioFamiliar = core.place(new RecetarioFamiliar(), { name: "recetario_familiar", kind: "database on this device" })
+export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
+  name: "recetario_familiar",
+  kind: "database on this device",
+  unclearNumbers: ","
+})
 
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
 

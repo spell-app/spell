@@ -4,7 +4,7 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
 {
   "account_included": "type|account",
   "cancel_action": "action",
-  "checked_every": "type|number",
+  "checked_every": "type|number?|unit?",
   "collection_at": "collection|path",
   "create_place": "type|kind?|address?|with_nested_statements?|body?|superType?",
   "discard_draft": "draft",
@@ -37,5 +37,6 @@ exports[`testing spell module places, in Spanish > rule group specs > match snap
   "versions_in": "type|field",
   "where_field": "property",
   "while_waiting": "body?",
+  "writes_like": "type|what|example",
 }
 `;

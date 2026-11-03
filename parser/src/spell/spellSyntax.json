@@ -1406,6 +1406,7 @@
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
+            "check_unit",
             "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
@@ -1496,6 +1497,9 @@
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
+            },
+            {
+              "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
             },
             {
               "syntax": "((numbers:numbers)|(names:names))"
@@ -6449,11 +6453,14 @@
           "ruleNames": ["checked_every"],
           "internal": false,
           "file": "src/spell/rules/places/CheckedEvery.ts",
-          "line": 8,
+          "line": 14,
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "check {type:subject_it} every {number} (second|seconds)?"
+              "syntax": "check {type:subject_it} every {number} {unit:check_unit}?"
+            },
+            {
+              "syntax": "check {type:subject_it} every {unit:check_unit}"
             }
           ],
           "aliases": ["statement"]
@@ -6581,7 +6588,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 151,
+          "line": 150,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6595,7 +6602,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 159,
+          "line": 158,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6609,12 +6616,9 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 70,
-          "purpose": "`the message if that fails is \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()`.",
+          "line": 69,
+          "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
           "syntaxes": [
-            {
-              "syntax": "the message if that fails is {text:expression}"
-            },
             {
               "syntax": "if that fails say {text:expression}"
             }
@@ -6626,7 +6630,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 91,
+          "line": 90,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -6640,7 +6644,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 107,
+          "line": 106,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -6654,7 +6658,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 141,
+          "line": 140,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -6668,7 +6672,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 146,
+          "line": 145,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -6682,7 +6686,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 174,
+          "line": 173,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {

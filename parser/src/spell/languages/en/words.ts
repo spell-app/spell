@@ -309,7 +309,7 @@ export const englishWords: SP.LanguageWords = {
         waiting: "while waiting :",
         none: "if there are none :",
         failed: "if that fails :",
-        failedSay: "the message if that fails is",
+        failedSay: "if that fails say",
         items: "show them in :",
         whole: "show it all in :",
         inPages: "show them in pages",

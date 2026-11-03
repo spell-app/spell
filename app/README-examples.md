@@ -545,7 +545,7 @@ wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
 	- a wiki page's id is its "pageid"
 ```
 
-_From [its API](spaces/@spell/examples/StarWars/StarWarsApi.spell), shortened._
+_From [its API](spaces/@spell/examples/StarWars/StarWars.api.spell), shortened._
 
 Its rows link to each other by address:  a person says `"homeworld": "https://swapi.py4e.com/api/planets/1/"`.
 Say what a field links to, and reading it follows the link.

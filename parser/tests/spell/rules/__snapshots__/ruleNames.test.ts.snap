@@ -328,6 +328,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "belongs_to_one",
       "belongs_to_one",
     ],
+    "checked_every": [
+      "checked_every",
+      "checked_every",
+    ],
     "create_list_type": [
       "create_list_type",
       "create_list_type",
@@ -464,10 +468,6 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "helpful_word": [
       "helpful_word",
       "helpful_word",
-    ],
-    "if_that_fails_say": [
-      "if_that_fails_say",
-      "if_that_fails_say",
     ],
     "input_state": [
       "input_state",
@@ -974,6 +974,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "key_is_secret",
       "key_written",
       "checked_every",
+      "checked_every",
       "versions_in",
       "id_column",
       "rows_in",
@@ -986,7 +987,6 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "saved_in_place",
       "while_waiting",
       "if_there_are_none",
-      "if_that_fails_say",
       "if_that_fails_say",
       "show_them_paged",
       "show_them_all",
@@ -1093,7 +1093,8 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "cancel_event · events · 1",
     "changed_property · events · 1",
     "check_process · async · 1",
-    "checked_every · places · 1",
+    "check_unit · places · 1",
+    "checked_every · places · 2",
     "class_member · classes · 1",
     "collection_at · places · 1",
     "comment · core · 1",
@@ -1172,7 +1173,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "identifier_list · lists · 1",
     "if · if · 1",
     "if_that_fails · places · 1",
-    "if_that_fails_say · places · 2",
+    "if_that_fails_say · places · 1",
     "if_there_are_none · places · 1",
     "implied_it · variables · 1",
     "in_one_go · places · 1",

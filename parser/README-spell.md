@@ -1043,8 +1043,13 @@ recipe box is an app:
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.
   - Not the rider `if there are none:`, under a read in a drawing, which says no noun.
-- A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`,
-  or `the message if that fails is ...`;  `if that fails:` with lines under it draws them instead.
+- A failure's words alone, its Try again kept:  `if that fails say "Can't reach the cookbook."`;
+  `if that fails:` with lines under it draws them instead.
+- A field finds the server's own spelling by its words:  `its "cook name" is text` reads `cook_name`, `cookName` or `Cook Name`.
+  - Only a name that really differs says so, on its own line:  `its "title" is text, stored as "dish_name"`.
+  - A number written as text reads as one, `"172"`, `"1,200"`, `"1,5"`;  a field the server didn't send is nothing, not 0.
+  - The server's word for none:  `its "servings" is a number or "unknown"`, quiet, and what saving nothing writes back.
+  - Rarely needed, as the ingest writes them when it sees it:  `it writes numbers like "1.200,5"`, `it writes names like "cook_name"`.
 - The person using the program, who may not be whoever wrote it:  `they`, `them`, `their name`, `the person`:  `add a new recipe with cook = them`.
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile

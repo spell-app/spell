@@ -327,7 +327,7 @@ describe("the agent", () => {
     expect(prompts[0]).toContain("person-2")
     expect(prompts[0]).not.toContain("person-3")
     expect(spell).toContain(`galaxy is a web server`)
-    expect(spell).toContain(`- check it every 3600 seconds`)
+    expect(spell).toContain(`- check it every hour`)
     expect(spell).toContain(`- heroes live at "/people"`)
     expect(spell).toContain(`- its "hair" is text, stored as "hair_color"`)
     expect(spell).toContain(`a "planet" is a thing`)
@@ -440,11 +440,15 @@ describe("looking again", () => {
   async function updated(
     edit: (text: string) => string,
     changed: Record<string, unknown>,
-    others: Record<string, string> = {}
+    others: Record<string, string> = {},
+    { olderTool = false }: { olderTool?: boolean } = {}
   ) {
     const added = ingestOf(STARS, {}, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
     const start = edit(added.texts.get("/Stars.spell")!)
+    // what the description says it wrote, written the same way:  an older version of the tool
+    const written = added.descriptions.get("/Stars.stars.place.json5")!
+    if (olderTool) written.spell = edit(written.spell.join("\n")).split("\n")
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
       fetch,
@@ -461,6 +465,22 @@ describe("looking again", () => {
       description: added.descriptions.get("/Stars.stars.place.json5")!
     }
   }
+
+  test("a file an older version wrote, in words it no longer writes:  put in today's, each line where it was", async () => {
+    const older = (text: string) =>
+      text
+        .replace(`\t- it writes names like "hair_color"\n`, `\t- a person's hair color is its "hair_color"\n`)
+        .replace(
+          `- its "height" is a number or "unknown"`,
+          `- its "height" is a number  // written as text there;  "unknown" reads as nothing`
+        )
+    const { result, text } = await updated(older, {}, {}, { olderTool: true })
+    expect(text).toContain(`\t- its "height" is a number or "unknown"\n\t- its "mass" is a number\n`)
+    expect(text).toContain(`\t- planets live at "/planets"\n\t- it writes names like "hair_color"\n`)
+    expect(text).not.toMatch(/written as text|hair color is its/)
+    expect(result.couldntChange).toEqual([])
+    expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  - a person's hair color/)
+  })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {
     const { result, text } = await updated((same) => same, {})
