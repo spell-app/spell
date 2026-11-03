@@ -274,7 +274,7 @@ export type SpellxBranch = {
   span: SpellxSpan
 }
 
-/** A LOOP in a drawing:  `<for each column in its columns>`, its markup drawn once for each. */
+/** A LOOP in a drawing:  `<for column in its columns>` (`<for each ...>` too), its markup drawn once for each. */
 export type SpellxLoop = {
   kind: "loop"
   /** `for each` */

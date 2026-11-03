@@ -285,7 +285,7 @@ Its first line is how you call it, with each blank's type in brackets:
 | --- | --- |
 | `to start the game` | `export function startTheGame() {}` |
 | `to move (a card) to (a pile)` | `async moveToPile(pile) { ... }`, a method of the card |
-| `for each card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
+| `for card in the deck`, then `move it to the stock` | `for (const card of deck) { await card.moveToPile(stock) }`, when moving waits |
 | `move the card to the stock` | `await card.moveToPile(stock)`, inside an action, when moving waits |
 
 - An action may be written in any file, yet be a method of a template another file declares:
@@ -457,7 +457,7 @@ export class Tableau extends Pile {
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
     `if it is face up`, then markup, `otherwise`, then other markup.
   - Several such lines draw all of them, in order;  so does a loop, one each time round:
-    `<ui-text>Scores</ui-text>`, then `for each score in its scores` with `<ui-text>{the score}</ui-text>` under it.
+    `<ui-text>Scores</ui-text>`, then `for score in its scores` with `<ui-text>{the score}</ui-text>` under it.
 - A view can have SLOTS, named drawings it places:
   - `- it has slots "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
     (Spanish:  `- tiene las ranuras "frente" y "dorso"`)
@@ -1027,7 +1027,7 @@ recipe box is an app:
 	- its "search" is text
 	- its "matches" is every recipe where its title includes the search, sorted by its title
 	- to draw it:
-		for each recipe in the matches
+		for recipe in the matches
 			draw the recipe
 		while waiting:
 			<ui-loader/>

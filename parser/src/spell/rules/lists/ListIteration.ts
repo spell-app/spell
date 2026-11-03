@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { noteLoopItem } from "spell/parser/spell/rules/places/places.shared"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 import { KindName } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
@@ -80,3 +81,77 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     return item.is(KindName) ? KindName.variableName(item) : `${item.value}`
   }
 }
+
+/**
+ * `for films`, `for every film where ...`, `for its films`:  a loop with its item named for what's in the list -- `film`.
+ * - Named for the list's type when it's known, else for its own word, made singular.
+ * - With neither (`for the found`, of a type nobody knows):  it has only `it`.
+ * - Anything else as `ListIteration`.
+ */
+export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
+  @proto static loops = true
+  @proto static alias = ["statement", "expression"]
+  /** Over a method of the same words:  Spanish's `para sus cartas` might be `to`, in `para dibujar eso`. */
+  @proto static priority = Priority.declaration
+
+  /**
+   * Only what reads as a list:  one plural word, or words after a word that starts a list, `its films`.
+   * - So Spanish's `para mover cartas :` is still a method.
+   */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens)
+    if (!match) return undefined
+    const { list } = (match as P.MatchFor<this>).groups
+    const words = list.inputText.trim()
+    // what's left on the line belongs to a rule that names its item:  `for stars from 1 to 240`
+    const last = tokens.at(-1)
+    if (last && (match.end ?? 0) < last.start) return undefined
+    if (/\s/.test(words)) return STARTS_A_LIST.test(words) ? match : undefined
+    return words === P.singularize(words) ? undefined : match
+  }
+
+  getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
+    const { list } = match.groups
+    const datatype = match.scope.getItemType(list.datatype)
+    const name = ListIterationNamedForList.itemName(match, datatype)
+    const variable = new P.ScopeVariable({ name, datatype, declaredBy: list })
+    ;(match.data as ItemVariableData).itemVariable = variable
+    const itemType = typeof datatype === "string" ? match.scope.getType(datatype) : undefined
+    if (itemType) {
+      ;(match.data as { itemType?: P.TypeScope }).itemType = itemType
+      noteLoopItem(match.scope, itemType)
+    }
+    return new P.MethodScope({
+      parentScope: match.scope,
+      args: [variable],
+      mapItTo: name,
+      itDatatype: datatype,
+      declaredBy: match
+    })
+  }
+
+  getAST(match: P.MatchFor<this>): P.ASTExpression {
+    const { list } = match.groups
+    const { itemVariable: variable } = match.data as ItemVariableData
+    const method = new P.ASTMethodDefinition(match, {
+      inline: true,
+      args: [new P.ASTVariableExpression(list, { name: variable!.name, variable })],
+      body: P.matchAST<MethodBody>(this.getBody(match))
+    })
+    return new P.ASTCoreMethodInvocation(match, { methodName: "map", args: [P.matchAST(list), method] })
+  }
+
+  /** What the item's called -- see the class.  The list's last word is its noun:  `its films`, `las películas`. */
+  private static itemName(match: P.Match, datatype: unknown): string {
+    if (typeof datatype === "string" && match.scope.getType(datatype)) return P.instanceCase(datatype)
+    const { list } = (match as P.MatchFor<ListIterationNamedForList>).groups
+    const noun = list.inputText.trim().split(/\s+/).at(-1) ?? ""
+    return /^[\p{L}_-]+$/u.test(noun) && noun !== P.singularize(noun) ? P.singularize(noun) : ITEM_WITH_NO_NAME
+  }
+}
+
+/** Words that start a list, in each language. */
+const STARTS_A_LIST = /^(its|every|all|the|my|their|these|those|sus?|cada|tod[oa]s?|l[oa]s|mis|est[oa]s)\s/i
+
+/** The variable of a list with nothing to name its item for:  it's read as `it`. */
+const ITEM_WITH_NO_NAME = "item"

@@ -28,7 +28,7 @@ a "habit" is a view where:
 	- its "streak" is:
 		set run to 0
 		set best to 0
-		for each day in its days
+		for day in its days
 			if day is yes
 				set run to run + 1
 				if run > best: set best to run

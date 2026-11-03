@@ -105,6 +105,11 @@
 /* Breakpoints (`@custom-media`), inlined at build time. */
 @import "../../styles/media.css";
 
+/* `hide-empty`, with nothing in it to see */
+:host([hide-empty]:state(empty)) {
+  display: none;
+}
+
 /* Loader spin, shared by `loading` sections. */
 @keyframes ui-section-spin {
   to {

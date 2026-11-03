@@ -497,6 +497,12 @@ export type SpellxWords = {
    * - A word of several words is written with single spaces:  `otherwise if`, Spanish's `de lo contrario si`.
    */
   controls: Record<string, SpellxControlKind>
+  /** `<for>`'s own attributes, in this language, by their English names:  a head's phrase ends at the first. */
+  forAttributes: Record<string, string>
+  /** A bare `empty` or `loading` right after one of these is the phrase's:  `<for films where it is empty>`. */
+  forFlagsNotAfter: string[]
+  /** Words that start a list of two words, `its films`:  any other first word, `films doubling`, is a flag out of place. */
+  forListWords: string[]
   /**
    * An attribute's name => its English name:  Spanish's `{ "uno-de": "one-of", frase: "alias" }`.
    * - English's map each to itself, so every name a reader meets is in one table.
@@ -524,6 +530,38 @@ export type SpellxWords = {
  *   - `{a <slot>}`:  the indefinite article agreeing with that slot's first word (`a card`, `an app`)
  *   - `{param}` / `{value}`:  an event's parameter, its name and its kind
  */
+/** The words of what `<for>`'s attributes read as -- see `SP.SpellxTwin`. */
+export type SpellxForWords = {
+  /** The rider for what shows while waiting. */
+  waiting: string
+  /** The rider for what shows when there are none. */
+  none: string
+  /** The rider for what shows when it fails. */
+  failed: string
+  /** The failure's own message, its Try again kept. */
+  failedSay: string
+  /** The rider naming what goes around the items. */
+  items: string
+  /** The rider naming what goes around everything, the title. */
+  whole: string
+  /** A list drawn a page at a time. */
+  inPages: string
+  /** A list drawn whole. */
+  allAtOnce: string
+  /** The word in `loading={no}`. */
+  no: string
+  /** `paging="pages"`'s value. */
+  pages: string
+  /** `paging="none"`'s value. */
+  none_: string
+  /** `as="table"`'s value. */
+  table: string
+  /** A row's tag, in that table. */
+  row: string
+  /** What a bare `empty` says. */
+  nothingFound: string
+}
+
 export type SpellxTwinWords = {
   /** A template, named by a quoted name:  `{a name} {name} is {a super} {super} :`. */
   template: string
@@ -610,6 +648,8 @@ export type SpellxTwinWords = {
   handlers: Record<string, string>
   /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */
   controls: Record<string, string>
+  /** What `SP.SpellxTwin` writes for `<for>`'s attributes:  a line of code spell each, in the loop's body. */
+  forTag: SpellxForWords
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
@@ -652,7 +692,15 @@ export const SPELLX_ABILITY_KINDS: readonly string[] = [
 ]
 
 /** A spellx control tag in a drawing:  an if-chain's branches (Q53), or a loop. */
-export type SpellxControlKind = "if" | "otherwise if" | "otherwise" | "for each"
+export type SpellxControlKind =
+  | "if"
+  | "otherwise if"
+  | "otherwise"
+  | "for each"
+  // what a `<for>` shows in place of its items:  `<loading>`, `<empty>`, `<failed>`
+  | "for waiting"
+  | "for none"
+  | "for failed"
 
 /**
  * How a language's raw text declares things, found before a file is parsed (`SpellParser.declaredTypes()` ...),

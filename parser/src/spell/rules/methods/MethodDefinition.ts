@@ -550,6 +550,8 @@ export class MethodDefinition<
 
     // a drawing (English's `to draw it:`):  several drawn lines, or a loop of them, draw all of them (C28)
     if (DrawnLines.draws(method.body.statements)) method.body.statements = DrawnLines.gather(method.body.statements!)
+    else if (!method.body.statements && method.methodName === "draw")
+      method.body = DrawnLines.gatherLoopAlone(method.body)
 
     // Add props assignment to START of method body
     if (props) {

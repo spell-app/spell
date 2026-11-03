@@ -125,7 +125,9 @@ export class TreeLayout {
     const { paddingX, paddingY, minBoxWidth, edgeLabelPaddingX, edgeLabelPaddingY } = this.metrics
     const size = this.sizes?.get(node)
     const labelWidth = size?.labelWidth ?? TreeLayout.chars(node.label) * charWidth * fontSize
-    const detailWidth = node.detail ? (size?.detailWidth ?? TreeLayout.chars(node.detail) * charWidth * detailFontSize) : 0
+    const detailWidth = node.detail
+      ? (size?.detailWidth ?? TreeLayout.chars(node.detail) * charWidth * detailFontSize)
+      : 0
     const contentWidth = size?.contentWidth ?? 0
     const contentHeight = size?.contentHeight ?? 0
     const width = Math.max(minBoxWidth, Math.max(labelWidth, detailWidth, contentWidth) + 2 * paddingX)

@@ -33,7 +33,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	<property "T6">a new tableau with name = "T6"</>
 	<property "T7">a new tableau with name = "T7"</>
 	<action "create it" description="Every card of the deck into the stock">
-		for each card in the deck
+		for card in the deck
 			add it to the stock
 	</action>
 
@@ -41,7 +41,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 	<action "reset the stock" description="The discards, turned over, back into the stock">
 		set cards to a copy of list (the discards) as a pile
 		reverse the cards
-		for each card in the cards
+		for card in the cards
 			add it to the stock
 			turn the card face down
 	</action>
@@ -55,7 +55,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 		add it to the discards
 	</action>
 	<action "deal the cards" description="Gather every card into the stock, shuffle it, and deal the tableaus:  one card more in each, left to right">
-		for each card in the deck
+		for card in the deck
 			set start pile to the pile of the card
 			turn the card face down
 			if start pile is not the stock
@@ -88,7 +88,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				set anything changed to yes
 				pause for 500 msec
 		// each tableau's last card onto its foundation
-		for each pile in the tableaus
+		for pile in the tableaus
 			if the pile is empty return
 			set test card to the last card of the pile
 			set foundation to the first pile in the foundations where its suit is the suit of test card
@@ -97,7 +97,7 @@ The cards, the deck and the piles are this project's own:  `Card`, `Deck` and `P
 				play test card
 				pause for 100 msec
 		// each tableau's face-up cards, all together, onto another tableau
-		for each pile in the tableaus
+		for pile in the tableaus
 			set face up cards to the cards in the pile where the card is face up
 			if face up cards is empty return
 			set test card to the first card of face up cards
@@ -176,7 +176,7 @@ What a click or a drag does:  the card's own moves, and each pile's, as the game
 		if start pile cannot give up the card return no
 		if pile cannot take the card return no
 		set points to count the points for the card on pile
-		for each card in (cards in start pile starting with the card)
+		for card in (cards in start pile starting with the card)
 			move it to pile
 		if the start pile is a tableau and the start pile is not empty
 			pause for 200 msec

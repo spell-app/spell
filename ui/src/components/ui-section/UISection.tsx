@@ -447,6 +447,25 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** Which named slots have light-DOM content:  icon, badge, hint, actions. */
   readonly slots = new E.SlotContent(this.domElement)
 
+  /**
+   * `hide-empty`, and nothing in it to see:  hidden (`:state(empty)`).
+   * - Its content:  the default slot's children, as `SlotContent` reads them, so Solid's markers and blank text don't count.
+   * - `hide-empty="<selector>"`:  only what matches counts.
+   */
+  @E.cssState("empty")
+  get isEmpty(): boolean {
+    const hideEmpty = this.hideEmpty
+    if (hideEmpty == null) return false
+    return isSelector(hideEmpty) ? !this.matchesHideEmpty : !this.slots.hasContent("")
+  }
+
+  /** Is something in it what `hide-empty="<selector>"` asks for, as its content changes? */
+  @E.watches({ childList: true, subtree: true })
+  get matchesHideEmpty(): boolean {
+    const selector = this.hideEmpty
+    return !!selector && isSelector(selector) && !!this.domElement.querySelector(selector)
+  }
+
   /** Glyph of the `icon` shorthand. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
 
@@ -877,3 +896,8 @@ const HEIGHT_PROPERTY = "--_ui-section-height"
  * the top-level `offset`, or the stack of enclosing sticky titles above it, in pixels.
  */
 const STICK_TOP_PROPERTY = "--_ui-section-top"
+
+/** Is `hide-empty`'s value a selector, not just there (`""`, `"true"`)? */
+function isSelector(value: string): boolean {
+  return !!value && value !== "true"
+}

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { DataFile } from "spell/epic/data/DataFile.ts"
@@ -7,6 +8,7 @@ import { AskListeners } from "./AskListeners.ts"
  * ### `DetailsPages`
  * Which details and choice pages are still WAITING for Owen's answer, and an epic's list of them, as the side bar's
  * Details tab shows it (epic `epic-engine` P59).
+ * - A page with nothing to answer (a picture page) never waits (`takesAnswers()`).
  * - A page waits while either holds:
  *   - it has no answer for its round now (`answerOf()`):  never sent, or a new round asked since
  *   - a session waits on it (`epic ask wait`, `epic choices show --wait`:  a live heartbeat, `AskListeners`)
@@ -34,10 +36,21 @@ export class DetailsPages {
    */
   static isWaiting(page: string, now = Date.now()): boolean {
     try {
+      if (!DetailsPages.takesAnswers(page)) return false
       return !DetailsPages.answerOf(page) || AskListeners.liveFor(page, now) !== null
     } catch {
       return false
     }
+  }
+
+  /**
+   * Does `page` hold anything to answer:  a question, a text box, Send, or a choice page's rows?
+   * - a PICTURE page (the details skill's:  no questions, nothing to send) never gets an answer, so it would hold the
+   *   tab for good (epic `epic-engine` I201;  Owen, 2026-11-02:  "link just redraws the page, doesn't show it")
+   * - throws if the page won't read
+   */
+  static takesAnswers(page: string): boolean {
+    return ANSWER_ELEMENTS.test(readFileSync(page, "utf8"))
   }
 
   /**
@@ -54,6 +67,9 @@ export class DetailsPages {
       })
   }
 }
+
+/** The elements a page answers with:  a details page's questions, boxes and Send, a choice page's rows and bar. */
+const ANSWER_ELEMENTS = /<epic-(ask|text-box|send|choice-row|choices-bar)\b/
 
 /** A page of an epic's See Also, as `SeeAlso.linksOf()` lists it:  `href` a root path, `updated` ISO. */
 export type DetailsLinkInput = { href: string; title: string; kind: string; updated: string }

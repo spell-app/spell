@@ -62,11 +62,11 @@ a shelf is an app:
     const { warnings, errors } = parsed(SHELF(line))
     expect(errors).toEqual([])
     expect(warnings.join()).toContain(`"${line}" shows as text`)
-    expect(warnings.join()).toContain("{for each book in its books: draw book}")
+    expect(warnings.join()).toContain("{for book in its books: draw book}")
   })
 
   test("what the warning says to write compiles, and draws through a loop", () => {
-    const { compiled, errors } = parsed(SHELF("{for each book in its books: draw book}"))
+    const { compiled, errors } = parsed(SHELF("{for book in its books: draw book}"))
     expect(errors).toEqual([])
     expect(compiled).toContain("core.listDrawn(")
   })

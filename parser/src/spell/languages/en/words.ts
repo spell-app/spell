@@ -190,8 +190,23 @@ export const englishWords: SP.LanguageWords = {
       "else if": "otherwise if",
       otherwise: "otherwise",
       else: "otherwise",
-      "for each": "for each"
+      "for each": "for each",
+      for: "for each",
+      loading: "for waiting",
+      empty: "for none",
+      failed: "for failed"
     },
+    forAttributes: {
+      title: "title",
+      loading: "loading",
+      empty: "empty",
+      "hide-empty": "hide-empty",
+      failed: "failed",
+      paging: "paging",
+      as: "as"
+    },
+    forFlagsNotAfter: ["is", "are", "not", "isn't", "aren't"],
+    forListWords: ["its", "every", "all", "the", "my", "their", "these", "those"],
     attributes: {
       name: "name",
       aka: "aka",
@@ -285,7 +300,26 @@ export const englishWords: SP.LanguageWords = {
         if: "if {phrase}",
         "otherwise if": "otherwise if {phrase}",
         otherwise: "otherwise",
-        "for each": "for each {phrase}"
+        "for each": "for {phrase}",
+        "for waiting": "while waiting :",
+        "for none": "if there are none :",
+        "for failed": "if that fails :"
+      },
+      forTag: {
+        waiting: "while waiting :",
+        none: "if there are none :",
+        failed: "if that fails :",
+        failedSay: "the message if that fails is",
+        items: "show them in :",
+        whole: "show it all in :",
+        inPages: "show them in pages",
+        allAtOnce: "show them all",
+        no: "no",
+        pages: "pages",
+        none_: "none",
+        table: "table",
+        row: "row",
+        nothingFound: "Nothing found"
       }
     }
   },

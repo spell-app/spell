@@ -15,6 +15,7 @@ exports[`testing spell module lists, in Spanish > rule group specs > match snaps
   "list_empty": "list",
   "list_filter": "arg|list|body?",
   "list_iteration": "item|position?|list|body?",
+  "list_iteration_named_for_list": "list|body?",
   "list_length": "arg|list|body?",
   "list_membership_test": "operator|arg|body?",
   "list_move": "thing|list",

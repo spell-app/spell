@@ -18,7 +18,7 @@ A card dragged over it glows when it would take the card, by its own rules (`dro
 	</property>
 	<property "state" description="Its name, then its cards' short names:  stock: Q♠↑ 7♥↓">
 		set summary to (its name or "pile") + ":"
-		for each card in the pile
+		for card in the pile
 			set summary to summary + " " + the state of the card
 		return summary
 	</property>

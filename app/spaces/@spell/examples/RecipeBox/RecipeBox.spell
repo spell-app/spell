@@ -86,7 +86,7 @@ recipe box is an app:
 				<ui-button class="add" size="small" color="primary" disabled={the title of its new recipe is ""} onClick={add the new recipe}>Add recipe</ui-button>
 			</ui-extra>
 		</ui-card>
-		for each recipe in the matches
+		for recipe in the matches
 			draw the recipe
 		while waiting:
 			<ui-loader class="waiting" visible inline text>Finding your recipes</ui-loader>

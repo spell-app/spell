@@ -19756,6 +19756,16 @@ export interface UIPanelAttributes {
    */
   "prop:description"?: string
   /**
+   * Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.
+   * - takes:  text
+   */
+  "hide-empty"?: string
+  /**
+   * `hide-empty`, as the DOM element's property.
+   * @deprecated write `hide-empty` -- `prop:` stays only for compiled spell
+   */
+  "prop:hideEmpty"?: string
+  /**
    * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
@@ -22732,6 +22742,16 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:description"?: string
   /**
+   * Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.
+   * - takes:  text
+   */
+  "hide-empty"?: string
+  /**
+   * `hide-empty`, as the DOM element's property.
+   * @deprecated write `hide-empty` -- `prop:` stays only for compiled spell
+   */
+  "prop:hideEmpty"?: string
+  /**
    * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
@@ -23339,6 +23359,16 @@ export interface UIPropertyGroupAttributes {
    * @deprecated write `description` -- `prop:` stays only for compiled spell
    */
   "prop:description"?: string
+  /**
+   * Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.
+   * - takes:  text
+   */
+  "hide-empty"?: string
+  /**
+   * `hide-empty`, as the DOM element's property.
+   * @deprecated write `hide-empty` -- `prop:` stays only for compiled spell
+   */
+  "prop:hideEmpty"?: string
   /**
    * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
@@ -26905,6 +26935,16 @@ export interface UISectionAttributes {
    * @deprecated write `description` -- `prop:` stays only for compiled spell
    */
   "prop:description"?: string
+  /**
+   * Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  `hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.
+   * - takes:  text
+   */
+  "hide-empty"?: string
+  /**
+   * `hide-empty`, as the DOM element's property.
+   * @deprecated write `hide-empty` -- `prop:` stays only for compiled spell
+   */
+  "prop:hideEmpty"?: string
   /**
    * The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)

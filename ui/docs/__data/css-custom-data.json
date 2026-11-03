@@ -11874,7 +11874,7 @@
       "name": ":state(empty)",
       "description": {
         "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-toc>`:  Nothing to list (the followed content has no headings)."
+        "value": "Custom state of:\n\n- `<ui-panel>`:  With `hide-empty`:  nothing in it to see, so it's hidden.\n- `<ui-property-editor>`:  With `hide-empty`:  nothing in it to see, so it's hidden.\n- `<ui-property-group>`:  With `hide-empty`:  nothing in it to see, so it's hidden.\n- `<ui-section>`:  With `hide-empty`:  nothing in it to see, so it's hidden.\n- `<ui-toc>`:  Nothing to list (the followed content has no headings)."
       }
     },
     {
