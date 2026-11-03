@@ -18,8 +18,9 @@ export const markdownEs = {
     editable: "editable",
     sanitized: "saneado"
   },
+  values: { editable: { tabs: "solapas" } },
   events: { "ui-drawn": "dibujado" },
-  parts: { body: "cuerpo" },
+  parts: { body: "cuerpo", "edit-box": "caja-edicion" },
   texts: {
     sourceLoading: "Cargando {source}",
     sourceLoadError: "No se pudo cargar {source}.",
@@ -29,6 +30,11 @@ export const markdownEs = {
     sourceRenderError: "No se pudo mostrar {source}.",
     write: "Escribir",
     preview: "Vista previa",
-    editor: "Markdown"
+    editor: "Markdown",
+    editBox: "Editar {kind}",
+    paragraph: "párrafo",
+    heading: "título",
+    item: "elemento de lista",
+    cell: "celda de tabla"
   }
 } as const satisfies E.TagDictionary

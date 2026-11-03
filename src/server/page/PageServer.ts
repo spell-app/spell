@@ -178,6 +178,8 @@ export class PageServer {
         // an epic folder's page:  its path there, what the page editor saves and live reload reports
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
+        // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
+        writable: this.writes.writable.some((folder) => isInside(served.file, folder)),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),

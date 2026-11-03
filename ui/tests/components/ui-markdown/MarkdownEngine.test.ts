@@ -24,4 +24,16 @@ describe("MarkdownEngine.render()", () => {
     expect(headings.map(({ level }) => level)).toEqual([3, 6])
     expect(html).toContain('<h6 id="six">Six</h6>')
   })
+
+  test("`places`:  marks each editable piece with its place's number, and returns the places", () => {
+    const text = "# Title\n\nwords\n\n- [ ] item\n\n| a |\n| - |\n| 1 |"
+    const { html, places } = MarkdownEngine.instance.render(text, { ...PLAIN, places: true })
+    expect(places!.map((place) => text.slice(place.start, place.end))).toEqual(["Title", "words", "item", "a", "1"])
+    expect(html).toContain('<h1 data-ui-place="0" id="title">Title</h1>')
+    expect(html).toContain('<p data-ui-place="1">words</p>')
+    expect(html).toMatch(/<li data-ui-place="2">/)
+    expect(html).toContain('<th data-ui-place="3">a</th>')
+    expect(html).toContain('<td data-ui-place="4">1</td>')
+    expect(MarkdownEngine.instance.render(text, PLAIN).html).not.toContain("data-ui-place")
+  })
 })

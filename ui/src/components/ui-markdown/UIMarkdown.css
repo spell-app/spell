@@ -6,7 +6,7 @@
  *     the rendered HTML (`h1`-`h6` with ids, `p`, lists (task items:  `li > input[type=checkbox]`), `blockquote`,
  *     `table`, `hr`, `img`, inline `code` (`code.short`:  kept on one line), `del`),
  *     with each code block as a `<ui-code>` (its own sheet).
- * - `editable`:  `<nav part="tabs">` of `<button part="tab" aria-selected>`,
+ * - `editable="tabs"`:  `<nav part="tabs">` of `<button part="tab" aria-selected>`,
  *   a `<section>` around `<textarea part="editor">`, then the article's `<section>` (both `role=tabpanel`).
  * - A subclass's engine may draw the article's blocks as `ui-*` elements (`ui-header`, `ui-list`, `ui-table` ...:
  *   the app's `<spell-markdown>`, on spell's engine):  each styles itself, and this sheet only spaces them.
@@ -291,7 +291,41 @@
     resize: vertical;
   }
 
-  [part~="tabs"] ~ section {
+  /* the preview, under the tabs:  `editable="tabs"` draws the article `.tabs.editable` */
+  .ui.tabs.editable.markdown {
     margin-block-start: 0.75em;
+  }
+}
+
+/*******************************
+        Editing in place
+*******************************/
+
+/*
+ * `editable` (the article `.editable`):  holding ⌥ outlines each piece that can be edited (`:state(placing)`,
+ * `[data-ui-place]`), and the piece being edited shows its markdown in a box (`[part~="edit-box"]`), in place of
+ * its own content.
+ */
+@layer ui.components.markdown.states {
+  :host {
+    --_ui-markdown-edit-color: var(--ui-markdown-edit-color, var(--ui-primary));
+  }
+
+  :host(:state(placing)) .ui.editable.markdown [data-ui-place] {
+    outline: 1px dashed color-mix(in oklch, var(--_ui-markdown-edit-color) 70%, transparent);
+    outline-offset: -1px;
+    cursor: text;
+  }
+
+  .ui.editable.markdown [part~="edit-box"] {
+    outline: 2px solid var(--_ui-markdown-edit-color);
+    outline-offset: 1px;
+    border-radius: 2px;
+    background: color-mix(in oklch, var(--_ui-markdown-edit-color) 6%, transparent);
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.92em;
+    /* a new line typed in a paragraph (Shift+Enter) stays a line end in its text */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 }

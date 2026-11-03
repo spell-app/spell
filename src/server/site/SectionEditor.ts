@@ -9,8 +9,8 @@ import { readEdit, serverConfig } from "spell/server/site"
  *   - an element with an `id` (`EDITABLE`:  a docs page's `<ui-section>`, a plan item ...)
  *   - a `section` whose heading has one (the saga pages):
  *     the section, found through its heading's `id` (`parent: "section"`)
- * - the source comes fresh from the server with its `ETag`:
- *   saving is refused (409) if the file changed since, and the dialog says to reload
+ * - the source comes fresh from the server with its `ETag` (the live client's `readElement()`), and goes back through
+ *   its `editPage()`:  saving is refused (409) if the file changed since, and the dialog says to reload
  * - never commits:  the change sits in the working tree for review
  ****************/
 export class SectionEditor extends HTMLElement {
@@ -103,42 +103,31 @@ export class SectionEditor extends HTMLElement {
   /** fetch the target's source and show it */
   private async open(): Promise<void> {
     const target = this.target
-    const config = serverConfig()
-    if (!target || !config) return
-    const query = new URLSearchParams({
-      path: config.file,
-      id: target.id,
-      ...(target.parent && { parent: target.parent })
-    })
-    const answer = await fetch(`${config.edit ?? "/api/pages"}?${query}`)
-    const body = (await answer.json()) as { html?: string; etag?: string; error?: string }
+    const readElement = serverConfig()?.readElement
+    if (!target || !readElement) return
+    const read = await readElement({ id: target.id, parent: target.parent })
     const shadow = this.shadowRoot!
-    if (!answer.ok || body.html === undefined || !body.etag)
-      return this.say(body.error ?? `couldn't read it (${answer.status})`, true)
-    this.editing = { id: target.id, parent: target.parent, etag: body.etag }
+    if (!read.ok || read.html === undefined || !read.etag)
+      return this.say(read.error ?? `couldn't read it (${read.status})`, true)
+    this.editing = { id: target.id, parent: target.parent, etag: read.etag }
     shadow.querySelector(".what")!.textContent = target.parent ? `${target.parent} of #${target.id}` : `#${target.id}`
-    shadow.querySelector("textarea")!.value = body.html
+    shadow.querySelector("textarea")!.value = read.html
     this.say("")
     shadow.querySelector("dialog")!.showModal()
   }
 
   /** write the source back;  the page reloads when the file changes */
   private async save(): Promise<void> {
-    const config = serverConfig()
+    const editPage = serverConfig()?.editPage
     const editing = this.editing
-    if (!config || !editing) return
+    if (!editPage || !editing) return
     const html = this.shadowRoot!.querySelector("textarea")!.value
-    const answer = await fetch(`${config.edit ?? "/api/pages"}?path=${encodeURIComponent(config.file)}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json", "x-server-token": config.token, "if-match": editing.etag },
-      body: JSON.stringify({ id: editing.id, parent: editing.parent, html })
-    })
+    const answer = await editPage({ id: editing.id, parent: editing.parent, html, etag: editing.etag })
     if (answer.ok) {
       this.say("Saved -- reloading")
       return
     }
-    const body = (await answer.json().catch(() => ({}))) as { error?: string }
-    this.say(`${body.error ?? `failed (${answer.status})`}`, true)
+    this.say(answer.error ?? `failed (${answer.status})`, true)
   }
 
   /** a line under the editor */

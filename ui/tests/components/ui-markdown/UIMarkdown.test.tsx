@@ -288,13 +288,13 @@ describe("<ui-markdown> revealing a heading", () => {
 })
 
 ////////////////
-// ## `<ui-markdown editable>`
+// ## `<ui-markdown editable="tabs">`
 ////////////////
 
-describe("<ui-markdown editable>", () => {
-  /** An editable `<ui-markdown>` holding `text`, on its Write tab (nothing rendered yet). */
+describe('<ui-markdown editable="tabs">', () => {
+  /** A `<ui-markdown editable="tabs">` holding `text`, on its Write tab (nothing rendered yet). */
   async function editable(text: string, attributes = ""): Promise<DOMMarkdownElement> {
-    const host = await ElementFixture.render<DOMMarkdownElement>(md(text, `editable ${attributes}`))
+    const host = await ElementFixture.render<DOMMarkdownElement>(md(text, `editable="tabs" ${attributes}`))
     await ElementFixture.settle(host)
     return host
   }
@@ -393,6 +393,179 @@ describe("<ui-markdown editable>", () => {
     await expectAccessible(host)
   })
 })
+
+////////////////
+// ## `<ui-markdown editable>`:  editing in place
+////////////////
+
+describe("<ui-markdown editable>", () => {
+  /** The LOE table of the atmosphere guide "Spaces and Spell", shortened, under a paragraph. */
+  const TEXT = [
+    "Some **bold** words, and [a link](#here).",
+    "",
+    "| # | Piece | Days |",
+    "| --- | --- | --- |",
+    "| 1 | Drafts and versions | 5 |",
+    "| 4 | Sign-in | 5 |"
+  ].join("\n")
+
+  /** A `<ui-markdown editable>` holding `text`, rendered, its saves kept here (`saved`). */
+  async function editable(text = TEXT): Promise<{ host: DOMMarkdownElement; saved: string[] }> {
+    const host = await markdown(md(text, "editable"))
+    const saved: string[] = []
+    // the page's saver:  a listener that saves it itself cancels the element's own (no saver in these tests)
+    host.addEventListener("ui-saving", (event) => {
+      event.preventDefault()
+      saved.push((event as CustomEvent<{ content: string }>).detail.content)
+    })
+    return { host, saved }
+  }
+
+  /** The drawn piece holding `text`. */
+  function piece(host: DOMMarkdownElement, text: string): HTMLElement {
+    const pieces = [...body(host).querySelectorAll<HTMLElement>("[data-ui-place]")]
+    return pieces.find((each) => each.textContent?.trim() === text)!
+  }
+
+  /** The open box, if any. */
+  function box(host: DOMMarkdownElement): HTMLElement | null {
+    return host.shadowRoot!.querySelector<HTMLElement>("[part~=edit-box]")
+  }
+
+  /** ⌥-click (or a plain click, `altKey: false`) on `target`. */
+  async function click(host: DOMMarkdownElement, target: Element, altKey = true) {
+    target.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey }))
+    await ElementFixture.settle(host)
+  }
+
+  /** Type `text` over the box's, as a person does:  an `input`. */
+  async function type(host: DOMMarkdownElement, text: string) {
+    box(host)!.textContent = text
+    box(host)!.dispatchEvent(new InputEvent("input", { bubbles: true }))
+    await ElementFixture.settle(host)
+  }
+
+  /** Press `key` in the box, then let what it does finish. */
+  async function press(host: DOMMarkdownElement, key: string, shiftKey = false) {
+    box(host)!.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey, bubbles: true, cancelable: true }))
+    await ElementFixture.settle(host)
+    await nextFrames(3)
+    await ElementFixture.settle(host)
+  }
+
+  it("marks each paragraph and cell it can edit, and ⌥-click shows a cell's markdown in a box", async () => {
+    const { host } = await editable()
+    expect(body(host).querySelectorAll("[data-ui-place]").length).toBe(10)
+    await click(host, piece(host, "Drafts and versions"))
+    expect(box(host)!.textContent).toBe("Drafts and versions")
+    expect(box(host)!.getAttribute("aria-label")).toBe("Edit table cell")
+    expect(host.matches(":state(editing)")).toBe(true)
+    expect(host.shadowRoot!.activeElement).toBe(box(host))
+  })
+
+  it("shows a paragraph's markdown:  bold and a link kept as written", async () => {
+    const { host } = await editable()
+    await click(host, piece(host, "Some bold words, and a link."))
+    expect(box(host)!.textContent).toBe("Some **bold** words, and [a link](#here).")
+  })
+
+  it("Enter keeps it:  only that cell changes, `ui-changed` and a save;  Escape puts it back", async () => {
+    const { host, saved } = await editable()
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", changed)
+    await click(host, piece(host, "Drafts and versions"))
+    await type(host, "Drafts | versions")
+    await press(host, "Enter")
+    const next = TEXT.replace("Drafts and versions", "Drafts \\| versions")
+    expect(host.content).toBe(next)
+    expect(changed).toHaveBeenCalledTimes(1)
+    expect(saved).toEqual([next])
+    expect(box(host)).toBeNull()
+    expect(piece(host, "Drafts | versions")).toBeTruthy()
+    await click(host, piece(host, "Sign-in"))
+    await type(host, "Signing in")
+    await press(host, "Escape")
+    expect(host.content).toBe(next)
+    expect(piece(host, "Sign-in")).toBeTruthy()
+  })
+
+  it("Tab keeps it and moves to the next cell, Shift+Tab to the one before", async () => {
+    const { host } = await editable()
+    await click(host, piece(host, "Drafts and versions"))
+    await type(host, "Drafts")
+    await press(host, "Tab")
+    expect(box(host)!.textContent).toBe("5")
+    await press(host, "Tab", true)
+    expect(box(host)!.textContent).toBe("Drafts")
+    expect(host.content).toContain("| 1 | Drafts | 5 |")
+  })
+
+  it("keeps a box 5 seconds after the last key, and leaves it open;  4 seconds isn't enough", async () => {
+    vi.useFakeTimers()
+    try {
+      const { host, saved } = await editable()
+      await click(host, piece(host, "Drafts and versions"))
+      await type(host, "Drafts")
+      vi.advanceTimersByTime(4_000)
+      expect(saved).toEqual([])
+      vi.advanceTimersByTime(1_000)
+      await vi.runAllTimersAsync()
+      expect(saved).toEqual([TEXT.replace("Drafts and versions", "Drafts")])
+      expect(box(host)!.textContent).toBe("Drafts")
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("a plain click edits nothing, and follows a link;  without `editable`, ⌥-click edits nothing", async () => {
+    const { host } = await editable()
+    await click(host, piece(host, "Drafts and versions"), false)
+    expect(box(host)).toBeNull()
+    const plain = await markdown(md(TEXT))
+    expect(plain.shadowRoot!.querySelector("[data-ui-place]")).toBeNull()
+    await click(plain, body(plain).querySelector("td")!)
+    expect(plain.shadowRoot!.querySelector("[part~=edit-box]")).toBeNull()
+  })
+
+  it("⌥-click on a link opens the box, not the link", async () => {
+    const { host } = await editable()
+    const link = body(host).querySelector("a")!
+    const clicked = new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true })
+    link.dispatchEvent(clicked)
+    await ElementFixture.settle(host)
+    expect(clicked.defaultPrevented).toBe(true)
+    expect(box(host)!.textContent).toContain("[a link](#here)")
+  })
+
+  it("holding ⌥ outlines what can be edited;  letting go, or the window losing the focus, takes it off", async () => {
+    const { host } = await editable()
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true }))
+    await ElementFixture.settle(host)
+    expect(host.matches(":state(placing)")).toBe(true)
+    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", altKey: false }))
+    await ElementFixture.settle(host)
+    expect(host.matches(":state(placing)")).toBe(false)
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true }))
+    window.dispatchEvent(new FocusEvent("blur"))
+    await ElementFixture.settle(host)
+    expect(host.matches(":state(placing)")).toBe(false)
+  })
+
+  it("a title `skip-title` leaves out still counts:  the right text changes", async () => {
+    const { host } = await editable("# Title\n\nfirst\n\nlast")
+    host.setAttribute("skip-title", "")
+    await nextRender(host)
+    await click(host, piece(host, "last"))
+    await type(host, "end")
+    await press(host, "Enter")
+    expect(host.content).toBe("# Title\n\nfirst\n\nend")
+  })
+})
+
+/** Wait `count` animation frames. */
+async function nextFrames(count: number) {
+  for (let frame = 0; frame < count; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))
+}
 
 ////////////////
 // ## Examples

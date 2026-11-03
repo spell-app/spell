@@ -711,9 +711,12 @@ class PageComments {
     if (home.lastElementChild !== bullhorn) home.append(bullhorn)
     const count = this.waitingInPageOrder().length
     const open = this.jumpTargets().length
-    const tip = count
+    const jumps = count
       ? `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
       : `${open} ${open === 1 ? "comment" : "comments"}:  jump to the next`
+    // a page whose markdown is edited in place says how (epic `epic-engine` P60):  ⌥ is the only way in
+    const edits = document.querySelector("ui-markdown[editable]:not([editable=tabs])")
+    const tip = edits ? `${jumps}.  ⌥-click text to edit it` : jumps
     const badge = bullhorn.querySelector(".spell-toolbar-count")
     badge.textContent = String(count)
     badge.hidden = !count

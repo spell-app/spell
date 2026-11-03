@@ -20608,8 +20608,13 @@
           "name": "editable",
           "description": {
             "kind": "markdown",
-            "value": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "Edit the text where it's drawn:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and it becomes a box holding its markdown;  Enter or a click away keeps it, Tab moves to the next, Escape puts it back, and 5 seconds without typing keeps it too.  Holding ⌥ outlines what can be edited.  `editable=\"tabs\"`:  Write / Preview tabs instead, a text box for the whole markdown and its preview.  Each edit is a `ui-changed`, and `save()` writes it:  in place, each edit is saved as it's kept.\n\nTakes:  flag, or `tabs`"
+          },
+          "values": [
+            {
+              "name": "tabs"
+            }
+          ]
         },
         {
           "name": "sanitized",

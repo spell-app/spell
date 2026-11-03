@@ -16250,9 +16250,9 @@
             },
             {
               "name": "editable",
-              "description": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it.",
+              "description": "Edit the text where it's drawn:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and it becomes a box holding its markdown;  Enter or a click away keeps it, Tab moves to the next, Escape puts it back, and 5 seconds without typing keeps it too.  Holding ⌥ outlines what can be edited.  `editable=\"tabs\"`:  Write / Preview tabs instead, a text box for the whole markdown and its preview.  Each edit is a `ui-changed`, and `save()` writes it:  in place, each edit is saved as it's kept.",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"tabs\""
               },
               "fieldName": "editable"
             },
@@ -16398,15 +16398,19 @@
             },
             {
               "name": "tabs",
-              "description": "`editable`:  the Write / Preview tab list."
+              "description": "`editable=\"tabs\"`:  the Write / Preview tab list."
             },
             {
               "name": "tab",
-              "description": "`editable`:  each tab button."
+              "description": "`editable=\"tabs\"`:  each tab button."
             },
             {
               "name": "editor",
-              "description": "`editable`:  the `<textarea>` holding the markdown."
+              "description": "`editable=\"tabs\"`:  the `<textarea>` holding the markdown."
+            },
+            {
+              "name": "edit-box",
+              "description": "`editable`:  the box a piece becomes while it's edited in place, holding its markdown."
             }
           ],
           "cssStates": [
@@ -16425,6 +16429,14 @@
             {
               "name": "dirty",
               "description": "`content` changed since it was loaded or saved."
+            },
+            {
+              "name": "placing",
+              "description": "`editable`:  ⌥ is held, so what can be edited in place is outlined."
+            },
+            {
+              "name": "editing",
+              "description": "`editable`:  a piece is being edited in place."
             },
             {
               "name": "disabled",
@@ -16574,6 +16586,10 @@
               "name": "--ui-markdown-code-background",
               "default": "var(--ui-surface-strong)",
               "description": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space"
+            },
+            {
+              "name": "--ui-markdown-edit-color",
+              "default": "var(--ui-primary)"
             }
           ]
         }
