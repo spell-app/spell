@@ -429,7 +429,8 @@ export const getIndex = async (
     fileNames.map(async (name) => {
       const location = SP.SpellLocation.getFileLocation(projectId, name)
       // only drafted so far:  nothing on disk to say
-      if (!(await fileUtils.pathExists(location.serverPath))) return [location.path, { created: 0, modified: 0, size: 0 }] as const
+      if (!(await fileUtils.pathExists(location.serverPath)))
+        return [location.path, { created: 0, modified: 0, size: 0 }] as const
       const { created, modified, size } = await fileUtils.getPathInfo(location.serverPath)
       return [location.path, { created, modified, size }] as const
     })
@@ -572,7 +573,9 @@ export const request_getFile = async (request: Request, response: Response) => {
     return responseUtils.sendError(response, 404, new Error(`${location.path} not found`))
   }
   try {
-    const draft = isDraftable(location) ? await new ProjectDrafts(location.projectId).read(location.filePath!) : undefined
+    const draft = isDraftable(location)
+      ? await new ProjectDrafts(location.projectId).read(location.filePath!)
+      : undefined
     // its own type, by its extension:  a `.js` draft still imports as a script
     if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
     await responseUtils.sendFile(response, fileOrOldName(location.serverPath), { dotfiles: "allow" })
@@ -860,10 +863,10 @@ export const request_createFile = respondWithJSON(async (request) => {
 
 /**
  * `GET /api/projects/drafts/<project>` -- your drafts of a project, and its versions.
- * - Returns `{ drafts: DraftJSON[], versions: VersionJSON[], mayPublish }`.
+ * - Returns `SPACES.ProjectDraftsJSON`.
  */
-export const request_getDrafts = respondWithJSON(async (request) => {
-  const drafts = new ProjectDrafts(SP.SpellUrls.projectIdFor(tailOf(request, DRAFTS_URL)))
+export const request_getDrafts = respondWithJSON(async (request): Promise<SPACES.ProjectDraftsJSON> => {
+  const drafts = new ProjectDrafts(SP.SpellUrls.projectIdFor(tailOf(request, SPACES.DRAFTS_URL)))
   return { drafts: await drafts.drafts(), versions: await drafts.versions(), mayPublish: drafts.mayPublish() }
 })
 
@@ -898,9 +901,6 @@ export const request_restore = respondWithJSON(async (request) => {
   const { projectId, version } = request.body
   return await new ProjectDrafts(projectId).restore(version)
 })
-
-/** `/api/projects/drafts/`:  where a project's drafts and versions are listed. */
-export const DRAFTS_URL = "/api/projects/drafts/"
 
 /**
  * Rename a project file, keeping its position in `imports` (rewriting its `path` entry in place)

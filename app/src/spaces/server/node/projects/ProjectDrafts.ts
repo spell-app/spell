@@ -12,7 +12,7 @@
  * - The private folders, `__draft/` and `versions/`, are never served:  `isPrivatePath()`, which the routes ask.
  * - Who may publish, and so draft (Q27):  `mayPublish()`, a stand-in until atmosphere's roles.
  * - Node only:  the routes (`project-utils.ts`) are its one caller;  the editor asks through `SPACES.ProjectFiles`.
- * - Its storage moves to ATSpaces later (epic `atmosphere`):  the shapes it answers (`DraftJSON`, `VersionJSON`) stay.
+ * - Its storage moves to ATSpaces later (epic `atmosphere`):  the shapes it answers stay (`SPACES.DraftJSON` ...).
  */
 import { createHash } from "crypto"
 import { readFile } from "fs/promises"
@@ -21,7 +21,7 @@ import { crc32, deflateRawSync, inflateRawSync } from "zlib"
 
 import { SRV } from "spell/server"
 import { SP } from "spell/parser/spell"
-import { SPACES } from "spell/app/spaces"
+import { SPACES, type DraftJSON, type PublishJSON, type VersionJSON } from "spell/app/spaces"
 
 import * as fileUtils from "./file-utils"
 
@@ -69,7 +69,7 @@ export class ProjectDrafts {
   async save(filePath: string, contents: string): Promise<void> {
     if (!this.mayPublish()) throw new SRV.HttpError(403, `${this.person} may not draft ${this.projectId}`)
     const published = await fileUtils.loadTextFile(this.publicPath(filePath), "OPTIONAL")
-    if (published === contents) return void (await this.discard(filePath))
+    if (published === contents) return await this.discard(filePath)
     const old = await this.draftPathOf(filePath)
     const path = this.newDraftPath(filePath)
     await fileUtils.saveTextFile(path, contents)
@@ -193,7 +193,11 @@ export class ProjectDrafts {
 
   /** Every public file under `folder`, from the project's folder:  never the private folders, nor hidden files. */
   private async publicFiles(folder: string, from = ""): Promise<string[]> {
-    const names = await fileUtils.getFolderContents(folder, { includeFolders: true, namesOnly: true, ignoreHidden: true })
+    const names = await fileUtils.getFolderContents(folder, {
+      includeFolders: true,
+      namesOnly: true,
+      ignoreHidden: true
+    })
     const files: string[] = []
     for (const name of names) {
       const filePath = `${from}/${name}`
@@ -251,36 +255,6 @@ export class ProjectDrafts {
     if (Object.keys(records).length) await fileUtils.saveJSON5File(path, records)
     else if (await fileUtils.pathExists(path)) await fileUtils.deletePath(path)
   }
-}
-
-/** A draft, as `ProjectDrafts.drafts()` answers it. */
-export type DraftJSON = {
-  /** its file, from the project's folder, e.g. `/Counter.spell` */
-  filePath: string
-  /** whose */
-  person: string
-  /** Did the published file change since this draft started?  Publish then asks first (Q25). */
-  clashes: boolean
-  /** your draft's text */
-  mine: string
-  /** the published file's text */
-  theirs: string
-}
-
-/** A version of a project:  a zip of it at a Publish. */
-export type VersionJSON = {
-  /** its file's name, e.g. `Counter.2026-11-03-0915.zip` */
-  name: string
-  /** when, as its name says, e.g. `2026-11-03-0915` */
-  at: string
-}
-
-/** What a Publish did. */
-export type PublishJSON = {
-  /** the files written */
-  published: string[]
-  /** the version kept, when anything was published */
-  version?: string
 }
 
 /** Drafts' private folder in a project. */
