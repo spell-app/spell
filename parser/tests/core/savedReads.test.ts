@@ -165,7 +165,7 @@ describe("a field the compiler left out", () => {
     const place = filled(new CountingPlace({ capabilities: WITH_IDS }))
     const { Recipe } = program(place, { select: ["title"] })
     const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
-    expect(whileOnlyShowing(() => recipe!.notes)).toBeUndefined()
+    expect(whileOnlyShowing(() => recipe!.notes)).toBe("")
     await settled()
     expect(place.requests).toHaveLength(1)
   })

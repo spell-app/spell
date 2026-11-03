@@ -94,7 +94,7 @@ describe("the lines", () => {
     const [first, second] = await read(Person)
     expect([first!.height, first!.mass, first!.weird]).toEqual([172, 1358, undefined])
     expect([second!.height, second!.mass, second!.weird]).toEqual([undefined, undefined, 4])
-    expect(first!.planet).toBeUndefined()
+    expect(first!.planet).toBe("")
     expect(second!.planet).toBe("Tatooine")
     expect(warn.mock.calls.flat().join("\n")).toMatch(/weird/)
     expect(warn.mock.calls.flat().join("\n")).not.toMatch(/planet/)

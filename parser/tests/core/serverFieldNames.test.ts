@@ -102,13 +102,13 @@ describe("what a place sends, as the type declares it", () => {
     const { Character } = program(place)
     const [luke, jabba] = (await core.savedThings(Character)).items as Array<InstanceType<typeof Character>>
     expect([luke!.height, luke!.mass, luke!.hairColor, luke!.averageHeight]).toEqual([172, 1358, "blond", 1200])
-    expect([jabba!.height, jabba!.mass, jabba!.hairColor]).toEqual([undefined, undefined, undefined])
+    expect([jabba!.height, jabba!.mass, jabba!.hairColor]).toEqual([undefined, undefined, ""])
   })
 
-  test("a field it didn't send is nothing, not its type's default", async () => {
+  test("a number it didn't send is nothing, not 0;  text keeps its \"\", so a search still finds it", async () => {
     const { Character } = program(holding([{ id: "1", name: "R2-D2" }]))
     const [r2] = (await core.savedThings(Character)).items as Array<InstanceType<typeof Character>>
-    expect([r2!.height, r2!.mass, r2!.hairColor]).toEqual([undefined, undefined, undefined])
+    expect([r2!.height, r2!.mass, r2!.hairColor]).toEqual([undefined, undefined, ""])
   })
 
   test("a place that writes a comma for the fraction;  and a language that does, for what the text can't settle", async () => {

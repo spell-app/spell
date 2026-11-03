@@ -970,7 +970,7 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
   }
 
   /**
-   * A thing made from a row:  a field the row didn't hold reads as nothing, not its type's default (`unsetReadsNothing()`),
+   * A thing made from a row:  a number or date the row didn't hold reads as nothing, not 0 (`unsetReadsNothing()`),
    * as a height a server didn't send isn't a height of 0.
    * - One made inside a row is known as one, so it's written back as plain fields.
    */
