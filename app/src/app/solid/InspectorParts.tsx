@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { For, Loading, Show, createEffect, createMemo, createSignal, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { scrollIntoSight } from "spell/util"
@@ -6,7 +6,16 @@ import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
-import { Inspector, addressKey, isThing, type InspectorBand, type InspectorPanel, type PartRow } from "./Inspector"
+import {
+  Inspector,
+  addressKey,
+  isThing,
+  type InspectorBand,
+  type InspectorPanel,
+  type PartRow,
+  type SlicePlace
+} from "./Inspector"
+import { LazyMonaco } from "./LazyMonaco"
 import { InspectorActions, type ActionParameter, type InspectorAction } from "./InspectorActions"
 import { enabledWhenInSource, type WrittenEvent } from "./InspectorSource"
 import { PartEdits } from "./PartEdits"
@@ -442,43 +451,58 @@ const NOT_DRAWN_KEY = "not-drawn"
 const FOLDED_PREF = "inspector:folded"
 
 /****************
- * ### `<EventsBand>`
- * The selected part's events, a folding band at the end of the properties card, titled Events (epic `debut` P28):
- * what it does when people touch it.
- * - A drawn thing's, in its program's own words (`Inspector.writtenEventsOf()`):
+ * ### `<CodeBand>`
+ * The selected part's code, a folding band at the end of the properties card, titled Code (epic `editor`,
+ * Events In Code;  Owen's pick A):  what it does when people touch it, then what can be done to it.
+ * - A drawn thing's events, in its program's own words (`Inspector.writtenEventsOf()`):
  *   - first its abilities' conditions, a hand each:  `it can give up a card if`, its condition under it
  *     (an ability with no condition, `it can be dragged`, its words alone)
  *   - then its events, a bolt each:  `on click` as written (`when clicked` if written so), its code under it
  * - A Spell UI element's:  what it handles (`Inspector.eventsOf()`), `on click`, with the code it was written with.
- * - Each code box grows as it's typed into (`<EventCode>`);  what's typed is kept with the project (T18).
- * - Then the events added here, with the band's "+":  a dropdown of the DOM's everyday events not there yet
- *   (`DEFAULT_EVENTS`).
+ * - Then a thing's actions (`InspectorActions.of()`), each its run button (`<ActionRow>`) and its code.
+ * - Each one's code is the code editor on its lines of the file (`<CodeSlice>`):  typing there is typing in the file.
+ *   Code it can't find in the file shows as written, to read.
+ * - The band's "+":  a dropdown of the DOM's everyday events not there yet (`DEFAULT_EVENTS`), each writing an empty
+ *   handler in its place (`Inspector.addEvent()`), which then takes the cursor.
  * - Folds as the card's other bands do, remembered (`Inspector.setGroupFolded("events")`).
- * - Drawn while the part has an event, or one could be added:  never a "None yet." line.
+ * - Drawn while there's code to show, or an event could be added:  never a "None yet." line.
  ****************/
-export function EventsBand(props: {
-  /** The part selected, in the app. */
-  element: Element
+export function CodeBand(props: {
+  /** The part selected, in the app:  its events. */
+  element?: Element
+  /** The thing selected (or the trail leads to):  its actions. */
+  thing?: object
 }): JSX.Element {
   const rows = createMemo((): EventRow[] => {
     const element = props.element
-    if (!Inspector.isDrawnThing(element)) {
-      const handlers = Inspector.writtenHandlersOf(element)
-      return Inspector.eventsOf(element).map((event) => eventRow(event, handlers[event] ?? ""))
-    }
-    const written = Inspector.writtenEventsOf(element).map((row) => ({ ...row, key: row.words }))
-    const added = Inspector.addedEventsOf(element)
-      .filter((event) => !written.some((row) => sameWords(row.words, onWords(event))))
-      .map((event) => eventRow(event, ""))
-    return [...written, ...added]
+    if (!element) return []
+    // read again as a handler's added (`justAdded`), not on every key typed in one:  each row's editor follows its lines
+    void Inspector.justAdded
+    return untrack(() => {
+      if (!Inspector.isDrawnThing(element)) {
+        const handlers = Inspector.writtenHandlersOf(element)
+        return Inspector.eventsOf(element).map((event) => eventRow(event, handlers[event] ?? ""))
+      }
+      return Inspector.writtenEventsOf(element).map((row) => ({ ...row, key: row.words }))
+    })
+  })
+  const actions = createMemo(() => {
+    const core = runtimeCore()
+    return core && props.thing && isThing(props.thing)
+      ? InspectorActions.of(props.thing, core, editor.programWords)
+      : []
   })
   const addable = () =>
-    DEFAULT_EVENTS.filter((event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event))))
+    props.element
+      ? DEFAULT_EVENTS.filter(
+          (event) => !rows().some((row) => row.key === event || sameWords(row.words, onWords(event)))
+        )
+      : []
   return (
-    <Show when={rows().length || addable().length}>
+    <Show when={rows().length || addable().length || actions().length}>
       <ui-property-group
         class="InspectorEvents"
-        label={appTexts.text("inspectorEvents")}
+        label={appTexts.text("inspectorCode")}
         collapsible=""
         open={Inspector.isGroupFolded("events") ? "false" : undefined}
         ref={foldRemembered("events")}
@@ -491,22 +515,35 @@ export function EventsBand(props: {
             title={appTexts.text("inspectorAddEvent")}
             onClick={(event: MouseEvent) => event.stopPropagation()}
             ref={on<{ value: string }>("ui-changed", (event) => {
-              if (event.detail.value) Inspector.addEvent(props.element, event.detail.value)
+              if (event.detail.value && props.element) Inspector.addEvent(props.element, event.detail.value)
             })}
           >
             <ui-icon slot="trigger" name="plus" />
             <For each={addable()}>{(event) => <ui-item value={event}>{eventText(event)}</ui-item>}</For>
           </ui-dropdown>
         </Show>
-        <For each={rows()}>{(row) => <EventCode element={props.element} row={row} />}</For>
+        <Show when={props.element} keyed>
+          {(element) => (
+            <For each={rows()} keyed={(row) => `${row.kind}|${row.key}`}>
+              {(row) => <EventCode element={element} row={row()} />}
+            </For>
+          )}
+        </Show>
+        <Show when={props.thing} keyed>
+          {(thing) => (
+            <For each={actions()} keyed={(action) => action.name}>
+              {(action) => <ActionCode thing={thing} action={action()} />}
+            </For>
+          )}
+        </Show>
       </ui-property-group>
     </Show>
   )
 }
 
-/** One row of the Events band:  an event or an ability, as written, its code, and its key for what's typed. */
+/** One row of the Code band's events:  an event or an ability, as written, its code, and its key. */
 type EventRow = WrittenEvent & {
-  /** What its typed code is kept under, beside the part's key:  the DOM event (`click`), else its words. */
+  /** Which it is, among the part's:  the DOM event (`click`), else its words. */
   key: string
 }
 
@@ -534,81 +571,61 @@ function foldRemembered(band: InspectorBand): (group: HTMLElement) => void {
 }
 
 /**
- * One of a part's events or abilities:  its icon and words, then its code, in a box that grows as it's typed into.
+ * One of a part's events or abilities:  its icon and words, then its code, in the file (`<WrittenCode>`).
  * - An event's icon a bolt;  an ability's a hand.
- * - An ability with no condition (`it can be dragged`):  its words alone, no box.
- * - The box:  a `<ui-textarea grow>` (epic `ui-gaps` P14), one line to start;  its monospace look through its
- *   `control` part (`Inspector.css`).
- * - Its code:  what was typed here, else what the program was written with, else empty.
+ * - An ability with no condition (`it can be dragged`):  its words alone.
+ * - Where its code is, read once as it's drawn:  its editor follows its lines from then on.
  */
 function EventCode(props: { element: Element; row: EventRow }): JSX.Element {
-  const key = () => `${Inspector.keyOf(props.element) ?? ""}|${props.row.key}`
-  const isEvent = () => props.row.kind === "event"
+  const isEvent = props.row.kind === "event"
+  const place = Inspector.placeOfEvent(props.element, props.row)
+  const isAdded = Inspector.justAdded !== "" && sameWords(Inspector.justAdded, props.row.key)
+  // once drawn:  a write while drawing is refused
+  if (isAdded) queueMicrotask(() => Inspector.tookCursor())
   return (
     <section class={["InspectorEvent", props.row.kind]}>
       <h3>
-        <ui-icon name={isEvent() ? EVENT_ICON : ABILITY_ICON} />
+        <ui-icon name={isEvent ? EVENT_ICON : ABILITY_ICON} />
         {props.row.words}
       </h3>
-      <Show when={isEvent() || props.row.code}>
-        <ui-textarea
-          class="InspectorCode"
-          grow=""
-          fluid=""
-          spellcheck="false"
-          aria-label={props.row.words}
-          placeholder={appTexts.text(isEvent() ? "inspectorEventCode" : "inspectorConditionCode", {
-            event: props.row.words
-          })}
-          value={eventCode()[key()] ?? props.row.code}
-          ref={on<{ value: string }>("ui-typed", (event) => setEventCode(key(), event.detail.value))}
-        />
+      <Show when={place || props.row.code}>
+        <WrittenCode place={place} code={props.row.code} focus={isAdded} />
       </Show>
     </section>
   )
 }
 
-/** An event's icon, in the Events band:  a bolt. */
-const EVENT_ICON = "bolt"
-/** An ability's icon, in the Events band:  a hand. */
-const ABILITY_ICON = "hand paper outline"
-
-/****************
- * ### `<ActionsBand>`
- * What can be done to the selected thing, a folding band at the very end of the properties card, titled Actions
- * (epic `debut` P29):  each action of its type, a button reading its own words (`turn over`, `play it`),
- * done to the thing in the running app.
- * - Its actions:  its type's own, then those it inherits, in their file's order (`InspectorActions.of()`).
- * - One that takes something has a field after its button:  a select of the game's piles for `put it on a pile`
- *   (`<ActionParameterField>`);  with more than one, they go under its button.
- * - Dimmed while it isn't enabled, following the thing live;  its tooltip says why, its `enabled when` in its own
- *   words.
- * - While it waits (`put it on a pile` pauses), its button shows it's busy.
- * - An error goes to the program's console, as its own would.
- * - Not drawn for something that isn't one of the program's things, nor with nothing to do.
- ****************/
-export function ActionsBand(props: {
-  /** The thing selected (or the trail leads to). */
-  thing: object
-}): JSX.Element {
-  const actions = createMemo(() => {
-    const core = runtimeCore()
-    return core && isThing(props.thing) ? InspectorActions.of(props.thing, core, editor.programWords) : []
-  })
+/** One of a thing's actions:  its run button and fields (`<ActionRow>`), then its code, in the file. */
+function ActionCode(props: { thing: object; action: InspectorAction }): JSX.Element {
+  const place = Inspector.placeOfAction(props.thing, props.action)
   return (
-    <Show when={actions().length}>
-      <ui-property-group
-        class="InspectorActions"
-        label={appTexts.text("inspectorActions")}
-        collapsible=""
-        open={Inspector.isGroupFolded("actions") ? "false" : undefined}
-        ref={foldRemembered("actions")}
-      >
-        <For each={actions()}>{(action) => <ActionRow thing={props.thing} action={action} />}</For>
-      </ui-property-group>
+    <section class="InspectorEvent action">
+      <ActionRow thing={props.thing} action={props.action} />
+      <Show when={place}>{(found) => <WrittenCode place={found()} code="" />}</Show>
+    </section>
+  )
+}
+
+/**
+ * Code as written in the program:  the code editor on its lines of the file (`<CodeSlice>`, loaded with Monaco),
+ * else -- its lines not found -- the text, to read.
+ */
+function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus?: boolean }): JSX.Element {
+  return (
+    <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
+      {(place) => (
+        <Loading fallback={<pre class="InspectorCode">{props.code}</pre>}>
+          <LazyMonaco.CodeSlice file={place().file} from={place().from} to={place().to} focus={props.focus} />
+        </Loading>
+      )}
     </Show>
   )
 }
+
+/** An event's icon, in the Code band:  a bolt. */
+const EVENT_ICON = "bolt"
+/** An ability's icon, in the Code band:  a hand. */
+const ABILITY_ICON = "hand paper outline"
 
 /**
  * One action:  its button, then a field for each thing it takes.
@@ -701,24 +718,6 @@ function ActionParameterField(props: { parameter: ActionParameter; onChange: (va
     </Show>
   )
 }
-
-/** The code typed for events, by part and event (`<key>|<event>`;  reactive):  this project's, remembered. */
-function eventCode(): Record<string, string> {
-  codeChanged()
-  return (editorPrefs.get(Inspector.projectPref(CODE_PREF)) as Record<string, string> | undefined) ?? {}
-}
-
-/** Remember `code` for the event at `key`. */
-function setEventCode(key: string, code: string): void {
-  editorPrefs.set(Inspector.projectPref(CODE_PREF), { ...eventCode(), [key]: code })
-  setCodeChanged((count) => count + 1)
-}
-
-/** Counts the code typed, so the boxes read it again. */
-const [codeChanged, setCodeChanged] = createSignal(0)
-
-/** The start of the pref remembering the code typed for events, a project's each. */
-const CODE_PREF = "inspector:code"
 
 /** An event's name for people:  `mousedown` => `mouse down`;  one with no text of its own, as it is. */
 function eventText(event: string): string {

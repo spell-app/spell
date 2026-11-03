@@ -1,0 +1,7 @@
+/* A few lines of a file, as tall as they are:  its height is set as they change (`<CodeSlice>`). */
+.CodeSlice {
+  min-height: 1.5em;
+  border: 1px solid var(--ui-border-color);
+  border-radius: var(--ui-radius);
+  overflow: hidden;
+}

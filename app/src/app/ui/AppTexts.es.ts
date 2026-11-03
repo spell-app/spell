@@ -251,7 +251,7 @@ const APP_TEXTS_ES: AppTextPack = {
   "inspectorGroup.behaviour": "Comportamiento",
   "inspectorGroup.advanced": "Avanzado",
   inspectorNone: "ninguno",
-  inspectorEvents: "Eventos",
+  inspectorCode: "Código",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Editar el tema…",
   "themePage.app": "App",
@@ -259,9 +259,6 @@ const APP_TEXTS_ES: AppTextPack = {
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Cuaderno",
   inspectorEventHeading: "con {event}",
-  inspectorEventCode: "Qué pasa {event}",
-  inspectorConditionCode: "Su condición:  {event} ...",
-  inspectorActions: "Acciones",
   inspectorActionOnlyWhen: "Solo cuando {condition}",
   inspectorActionNotNow: "No se puede hacer ahora",
   inspectorActionNeeds: "Completa primero lo que necesita",
