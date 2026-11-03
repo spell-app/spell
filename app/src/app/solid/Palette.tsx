@@ -511,6 +511,8 @@ export function PartMenu(): JSX.Element {
         !target.hasAttribute("kind")
       )
     })
+  // Decided as the click starts, before the row runs:  a row may grey itself once it has run (Delete, Cut)
+  let isClosing = false
   return (
     <Show when={at()}>
       {(where) => (
@@ -522,7 +524,13 @@ export function PartMenu(): JSX.Element {
           aria-label={appTexts.text("menuEdit")}
           on-ui-closing={() => setAt(undefined)}
         >
-          <div class="BarMenuPanel" onClick={(event) => isAnItem(event) && setAt(undefined)}>
+          <div
+            class="BarMenuPanel"
+            ref={(panel) =>
+              panel.addEventListener("click", (event) => (isClosing = isAnItem(event)), { capture: true })
+            }
+            onClick={() => isClosing && setAt(undefined)}
+          >
             <ui-menu
               direction="vertical"
               size="small"
