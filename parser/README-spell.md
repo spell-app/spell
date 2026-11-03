@@ -395,23 +395,26 @@ Its first line is how you call it, with each blank's type in brackets:
 
     ```spell
     solitaire is an app where:
-    	- its "game menu" is a menu of "deal", "-", "undo" and "redo"
+    	- its "game" menu has actions "deal", "-", "undo" and "redo"
     	- its menu bar is "game menu"
     ```
 
+    - Its name is its words and `menu`, `game menu`;  its title, with no `titled`, is its words, `game`.
     - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
       click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
-    - An item naming another of its menus is a sub-menu, so a menu bar is a menu of menus;
-      a menu's title follows its items, `titled "File"`:
+    - A menu may hold other menus, its sub-menus, after its actions, so a menu bar is a menu of menus;
+      a menu's own title comes last, `titled "File"`:
 
       ```spell
       editor is an app where:
-      	- its "file menu" is a menu of "save", "-" and "more examples", titled "File"
-      	- its "more examples" is a menu of its examples, each running "open (an example)"
-      	- its "menu bar" is a menu of "file menu" and "edit menu"
-      	- its menu bar is "menu bar"
+      	- its "file" menu has actions "save" and "open" and menus "more examples", titled "File"
+      	- its "more examples" menu has its examples, each running "open (an example)"
+      	- its "bar" menu has menus "file" and "edit"
+      	- its menu bar is "bar menu"
       ```
 
+    - The same menus, said the older way, each item quoted by its full name, sub-menus among the actions:
+      `its "file menu" is a menu of "save", "-" and "more examples", titled "File"`.
     - A menu filled from a list, `each running`, has an item per thing in it, titled with its title (else its name),
       which runs the action with that thing.
 

@@ -5226,7 +5226,7 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 25,
+          "line": 34,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
@@ -5245,7 +5245,28 @@
               }
             },
             {
+              "syntax": "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?",
+              "example": "una partida es una aplicación donde:\n\t- su menú \"juego\" tiene acciones \"deshacer\", \"-\" y \"rehacer\" y menús \"ayuda\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\ncore.describeMenu(Partida, \"menúJuego\", { items: [\"undo\", \"-\", \"redo\", \"menúAyuda\"], title: \"juego\" })"
+                },
+                "ts": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\n\nexport class PartidaElement extends SpellElement<Partida> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"partida\", [])\n}\ncore.useElement(Partida, PartidaElement)\ncore.describeMenu(Partida, \"menúJuego\", { items: [\"undo\", \"-\", \"redo\", \"menúAyuda\"], title: \"juego\" })"
+                },
+                "py": {
+                  "code": "class Partida(App):\n    element_tag = \"syntax-block-app\"\n\ncore.describe_menu(Partida, \"menú_juego\", {\"items\": [\"undo\", \"-\", \"redo\", \"menú_ayuda\"], \"title\": \"juego\"})"
+                }
+              }
+            },
+            {
               "syntax": "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_implied} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
             },
             {
               "syntax": "{type:subject_its} {menu:quoted_member} es un (menú|menu) de {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"

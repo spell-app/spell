@@ -12,7 +12,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "create_type": "type|aka?|superType|with_nested_statements?|body?",
   "create_viewable_list_type": "type|aka?|instanceType|with_nested_statements?|body?",
   "define_group": "type|group",
-  "define_menu": "type|menu|items?|title?|list?|action?",
+  "define_menu": "type|menu|items?|title?|menuWord?|menus?|list?|action?",
   "define_property_has": "type|property|specifier?|rule?|body?",
   "drag_and_drop": "type|what|is?|body?",
   "drag_handler": "item?|moment?|body?",
