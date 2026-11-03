@@ -146,6 +146,32 @@ export function flatParentFor(element: Element): Element | undefined {
   return root.nodeType === NodeType.documentFragment && root.host ? root.host : undefined
 }
 
+/**
+ * Scroll `element` into view in the box that scrolls it, as a list's selected row does:
+ * - already wholly in view:  nothing moves
+ * - partly in view:  the least scrolling that shows it (`nearest`)
+ * - out of view:  to the box's middle, so what's around it shows too
+ * - The box:  its nearest scrolling ancestor, across shadow roots (`flatParentFor()`), else the window.
+ */
+export function scrollIntoSight(element: Element): void {
+  const box = element.getBoundingClientRect()
+  const view = scrollingBoxFor(element)?.getBoundingClientRect() ?? {
+    top: 0,
+    bottom: element.ownerDocument.defaultView?.innerHeight ?? 0
+  }
+  if (box.top >= view.top && box.bottom <= view.bottom) return
+  const isPartlyIn = box.bottom > view.top && box.top < view.bottom
+  element.scrollIntoView({ block: isPartlyIn ? "nearest" : "center" })
+}
+
+/** The nearest ancestor of `element` that scrolls up and down, across shadow roots:  `undefined` if none does. */
+function scrollingBoxFor(element: Element): Element | undefined {
+  for (let at = flatParentFor(element); at; at = flatParentFor(at)) {
+    if (at.scrollHeight > at.clientHeight && /auto|scroll/.test(getComputedStyle(at).overflowY)) return at
+  }
+  return undefined
+}
+
 ////////////////
 // ## Rows that scroll sideways
 ////////////////

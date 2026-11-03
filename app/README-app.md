@@ -465,7 +465,7 @@ app/src/app/solid/FileTabs.tsx                   the editor's side:  which files
 app/src/app/layout/EditorBar/EditorBar.spellml   the top bar:  its three sections, in Spell
 app/src/app/layout/EditorLayout/EditorLayout.spellml  the panes:  code, Program panel, app, Inspector, in Spell
 app/src/app/pages/SpellEditor.tsx                what's in each section and pane, each a thing that draws itself
-app/src/app/layout/FileMenu/FileMenu.spellml     the File menu:  its items, order, keys, greyed and ticked, in Spell
+app/src/app/layout/AppMenus/AppMenus.spellml     the File, Edit, View and Run menus:  their items, order, keys, greyed and ticked, in Spell
 app/src/app/solid/MenuBar.tsx                    the editor's side:  what each item does, and is called
 ```
 

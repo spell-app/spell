@@ -23,6 +23,15 @@
   break-inside: avoid;
   padding-block-end: 8px;
 
+  /* its name, and its "N more" at the right */
+  & .PaletteGroupHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    padding-inline-end: 4px;
+  }
+
   & h4 {
     margin: 0;
     padding: 2px 4px;
@@ -70,8 +79,16 @@
   align-items: center;
   gap: 6px;
 
-  & .PaletteSearch {
+  & .PaletteHint {
     flex: 1;
+    min-width: 0;
+    padding-inline-start: 4px;
+    color: var(--ui-text-muted);
+    font-size: 13px;
+  }
+
+  & .PaletteSearch {
+    flex: 0 1 220px;
     min-width: 0;
   }
 

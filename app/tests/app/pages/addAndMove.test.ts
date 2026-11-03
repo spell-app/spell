@@ -251,6 +251,25 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     expect(await written()).toEqual(before)
   })
 
+  test("Delete, by click and by Enter, closes the menu, though it greys itself once it has run", async () => {
+    const before = await written()
+    for (const how of ["click", "Enter"] as const) {
+      const [card] = await drawn("ui-card")
+      await page.mouse.click(card!.x, card!.y, { button: "right" })
+      await page.waitForTimeout(500)
+      if (how === "click") await page.locator('.PartMenu ui-action:has-text("Delete")').click()
+      else {
+        for (let row = 0; row < 4; row++) await page.keyboard.press("ArrowDown")
+        await page.keyboard.press("Enter")
+      }
+      await page.waitForTimeout(SETTLE_MS)
+      expect(await written()).toHaveLength(before.length - 1)
+      expect(await page.locator(".PartMenu").count()).toBe(0)
+      await press("ControlOrMeta+z")
+      expect(await written()).toEqual(before)
+    }
+  })
+
   /** The part menu's rows on `on`:  each one's words, and whether it's greyed, with why. */
   const menuRows = (on: Page) =>
     on.evaluate(() =>
@@ -515,10 +534,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
     const code = page.locator(".InputEditor .monaco-editor")
     expect(await code.count()).toBe(1)
-    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(await code.count()).toBe(0)
-    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
     await page.waitForSelector(".InputEditor .monaco-editor", { timeout: 30_000 })
   })
 
