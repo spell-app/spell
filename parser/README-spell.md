@@ -1062,6 +1062,8 @@ recipe box is an app:
   with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
+- Asking again, for a server that can't say what changed:  `check it every 30 seconds`, `every 5 minutes`, `every hour`;
+  or `check it once a day at 5am`, which reads again when 5am comes round on the person's clock (`at 5am UTC` for the server's).
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.
   - What the program has by that name wins over the type's plural:  a list property or variable called `recipes`.
 - Asking how many:  `if there are no recipes`, `if there are less than 2 recipes where it is quick`, anywhere a condition reads.

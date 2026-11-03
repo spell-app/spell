@@ -309,6 +309,7 @@ export class PlanDocFiles {
    * - first the MIGRATIONS (`plan.migrate()`, `Migrations`):
    *   - an older doc comes up to today's markup on its first edit, logged
    *   - a migration that would break the doc refuses the edit, as any change does
+   * - then "0. While you were out" (`refreshAway()`, epic `epic-engine` P62)
    * - then the whole-doc pass (`updateStates()`),
    *   with the page's `recent-since` from the doc's checkout (`recentSince()`), and its earlier versions for the words a
    *   new change mark replaced (`earlierVersions()`)
@@ -326,6 +327,8 @@ export class PlanDocFiles {
       plan.migrate()
       const result = change(plan)
       plan.updateStates()
+      // "0. While you were out", drawn again from the page as it is now (epic `epic-engine` P62)
+      plan.refreshAway({ isMerged: (sha) => this.isMerged(file, sha) })
       plan.touch()
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
@@ -616,6 +619,16 @@ export class PlanDocFiles {
    */
   static gitIn(cwd: string, ...args: string[]): string {
     return SRV.Git.out(args, cwd) ?? ""
+  }
+
+  /**
+   * Is commit `sha` in the base branch (`main`), in the checkout of the doc at `file`?  `undefined`:  git can't tell
+   * (no git, an unknown commit).
+   * - NEVER throws
+   */
+  isMerged(file: string, sha: string): boolean | undefined {
+    const run = SRV.Git.run(["merge-base", "--is-ancestor", sha, BASE_BRANCH], this.checkoutOf(file))
+    return run.ok ? true : run.code === 1 ? false : undefined
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
@@ -924,3 +937,6 @@ const EARLIER_COMMITS = 3
 
 /** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */
 const TIMED_FORMAT = "%H%x09%cI%x09%s"
+
+/** The branch a phase's commit is merged into (`isMerged()`). */
+const BASE_BRANCH = "main"

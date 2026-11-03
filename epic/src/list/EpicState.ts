@@ -47,6 +47,8 @@ export type EpicFacts = {
   urgent?: readonly string[]
   running?: boolean
   active?: string
+  /** its page has "0. While you were out" to read (epic `epic-engine` P62):  the card's mark links it */
+  away?: boolean
 }
 
 /**

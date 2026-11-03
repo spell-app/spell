@@ -185,8 +185,12 @@ Everything else stands:
 
 - `epic lint <name>`, then `epic open <name> --review`.
   - The person wakes to the doc, the night's calls and issues red.
+  - Its FIRST section, "0. While you were out", says what was done and what needs them, in order (epic `epic-engine`
+    P62):  the tool keeps it as every edit lands, from `NightSummary`, so nothing is written by hand;  only their
+    Done reading takes it off.  The Epics page's card says it's there.
   - Nothing to commit for the doc (in the epic repo, committed for you).
-- Final reply:  the summary, the judgement calls by phase (in words, ids after), and the problems.
+- Final reply:  a VERY high-level summary, a few lines (what was built, what needs them), then the section's link pair
+  (`epic pages link <epic page> --hash away`);  the detail is in the section, never repeated here (Owen's C4).
   - Then ONE AskUserQuestion (the person answers in the morning):  "Go through the night?".
   - "Review it now (Recommended)":  runs `/epic review <name>`, judgement calls first.
     That's [the epic skill](../epic/SKILL.md), "7. Review".

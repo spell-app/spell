@@ -81,6 +81,13 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
 - Sections are fixed:  each `kind` once, in that order, with its id.
   - `questions` keeps the id `#decisions`.
   - Drawn:  their titles, icons, notes, counts and the progress bar.
+  - "0. WHILE YOU WERE OUT" (`kind="away"`, id `away`;  epic `epic-engine` P62):  FIRST, before the Overview,
+    unnumbered, titled its own.
+    - What Claude did since Owen last pressed Done reading (`<epic-page away-read>`), and what needs him, in order:
+      written by the tool on EVERY edit (`PlanDoc.refreshAway()`, from `NightSummary`), never by hand;  nothing new,
+      no section.  `waiting` is its toolbar badge.
+    - Done reading is a Seen on `away` (`<epic-review buttons="away">`):  `inbox apply` runs `readAway()`.
+    - The Epics page's card says it's there (`<epic-card away>`).
   - A REPORT (`kind="report"`, P14) is the one section that isn't fixed:
     - what a run wrote for Owen to read (an overnight `/bedtime` report)
     - its own `id` and `title`

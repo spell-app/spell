@@ -1407,6 +1407,8 @@
             "place_kind_here",
             "place_kind_each_person",
             "check_unit",
+            "day_half",
+            "clock_zone",
             "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
@@ -1500,6 +1502,12 @@
             },
             {
               "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
+            },
+            {
+              "syntax": "((am:am|AM)|(pm:pm|PM))"
+            },
+            {
+              "syntax": "((utc:UTC|utc)|(local:local time))"
             },
             {
               "syntax": "((numbers:numbers)|(names:names))"
@@ -6103,7 +6111,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6485,6 +6493,23 @@
             },
             {
               "syntax": "check {type:subject_it} every {unit:check_unit}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CheckedAt",
+          "ruleNames": ["checked_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/CheckedAt.ts",
+          "line": 19,
+          "purpose": "Ask a place once a day, at a time of day if one is said.",
+          "syntaxes": [
+            {
+              "syntax": "check {type:subject_it} once a day (at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?)?"
+            },
+            {
+              "syntax": "check {type:subject_it} every day at {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"
             }
           ],
           "aliases": ["statement"]

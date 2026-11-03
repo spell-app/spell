@@ -93,7 +93,10 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
   /** Its place among the page's blocks, from 1;  1 when it isn't `connected`. */
   private place(connected: boolean): number {
     const parent = connected ? this.domElement.parentElement : null
-    const blocks = Array.from(parent?.querySelectorAll(":scope > epic-overview, :scope > epic-section") ?? [])
+    // "0. While you were out" (`kind="away"`, epic `epic-engine` P62) sits before it, unnumbered
+    const blocks = Array.from(
+      parent?.querySelectorAll(':scope > epic-overview, :scope > epic-section:not([kind="away"])') ?? []
+    )
     return blocks.indexOf(this.domElement) + 1 || 1
   }
 

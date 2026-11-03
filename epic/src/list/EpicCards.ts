@@ -112,7 +112,8 @@ export function epicGroupFor(state: EpicState): Exclude<EpicGroupName, "favorite
  * Epic `card`'s `<epic-card>` on the Epics page, as of `now`, with where it shows.
  * - `id="epic-<name>"`:  a live update of the page matches the card by it;  `epic`:  its name
  * - its facts, which its state is read from (`EpicState`), so the card marks itself as it's drawn:
- *   `phases`, `updated`, `urgent`, `future`, `standing`, `active`
+ *   `phases`, `updated`, `urgent`, `future`, `standing`, `active`;  `away`:  its "0. While you were out" waits
+ *     (epic `epic-engine` P62)
  *   - `running`, a session running for it, is the page server's to add (`RunningEpics`)
  * - `data-status`:  `done` or `open`, so the docs runtime counts it on the section's title and its state chips
  *   filter it, as they do a saga page's items
@@ -132,6 +133,7 @@ export function epicCardHtml(card: EpicCard, now: Date = new Date()): PlacedCard
     (facts.future ? " future" : "") +
     (facts.standing ? " standing" : "") +
     (facts.active ? ` active="${escapeHTML(facts.active)}"` : "") +
+    (facts.away ? " away" : "") +
     (worked ? ` worked="${localMinutes(worked)}"` : "") +
     (saga
       ? ` saga="${escapeHTML(saga.id)}" saga-title="${escapeHTML(saga.title)}" saga-purpose="${escapeHTML(saga.purpose)}"`

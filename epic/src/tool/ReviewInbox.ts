@@ -8,7 +8,7 @@ import { ThreadFacts } from "spell/epic/comments"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
-import { isItemId } from "spell/epic/definitions/definitions.types"
+import { AWAY_ID, isItemId } from "spell/epic/definitions/definitions.types"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
 import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
@@ -1311,6 +1311,8 @@ export class ReviewInbox {
         if (standing && STANDING_ID.test(standing) && "standing" in row && !("closed" in row)) ids.add(standing)
         continue
       }
+      // "0. While you were out" (epic `epic-engine` P62):  its Done reading
+      if (name === "epic-section" && id === AWAY_ID) ids.add(AWAY_ID)
       if (name === "epic-update") {
         if (id && UPDATE_ID.test(id.toLowerCase()) && !("seen" in row)) ids.add(id.toLowerCase())
         continue
@@ -1760,7 +1762,8 @@ function checkChangeMark(key: string, mark: CheckedMark) {
  * an `InboxError` otherwise.
  */
 function checkSeenMark(key: string, mark: CheckedMark) {
-  const isUpdate = UPDATE_ID.test(key)
+  // "0. While you were out"'s Done reading is a Seen too (epic `epic-engine` P62)
+  const isUpdate = UPDATE_ID.test(key) || key === AWAY_ID
   if (isUpdate && mark.action !== "seen") throw new InboxError(`an update takes Seen, not ${mark.action}:  ${key}`)
   if (!isUpdate && mark.action === "seen") throw new InboxError(`only an update (up3 ...) takes Seen:  ${key}`)
 }

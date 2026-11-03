@@ -110,6 +110,22 @@ describe("<epic-section>", () => {
     await expectAccessible(host)
   })
 
+  // epic `epic-engine` P62
+  test("WHILE YOU WERE OUT (`kind=away`):  its own title, unnumbered, a red badge of what waits;  it opens by itself", async () => {
+    const host = await render(
+      `<div><epic-section id="away" kind="away" title="0. While you were out" waiting="3"><p>The night.</p></epic-section>` +
+        `<epic-section id="phases" kind="phases"></epic-section></div>`
+    )
+    const phases = host.parentElement!.querySelector<FoldHost>("#phases")!
+    expect([titleText(host), titleText(phases)]).toEqual(["0. While you were out", "1. Phases"])
+    expect((host as unknown as { contentsEntry: unknown }).contentsEntry).toEqual({
+      label: "0. While you were out",
+      icon: "bed",
+      count: { open: 1, total: 1, attention: 3 }
+    })
+    await vi.waitFor(() => expect(toggle(host).getAttribute("aria-expanded")).toBe("true"))
+  })
+
   test("draws its numbered title, no tooltip;  starts FOLDED, a grey rule under its title bar and no gap below", async () => {
     const host = await render(
       `<div><epic-section id="phases" kind="phases"></epic-section>` +

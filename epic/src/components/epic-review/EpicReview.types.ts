@@ -43,6 +43,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   no note box
  * - `update`:  a new update block's (`<epic-update id="up3">`, epic `epic-engine` I168):  Seen (`UPDATE_BUTTONS`);
  *   no note box
+ * - `away`:  "0. While you were out" (`<epic-section kind="away">`, epic `epic-engine` P62):  Done reading
+ *   (`AWAY_BUTTONS`), a Seen that takes the section off;  no note box
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
  *   I140):  the thumbs up of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`), then Revisit (`ACCEPTED_BUTTONS`)
  */
@@ -57,7 +59,8 @@ export const REVIEW_KINDS = [
   "change",
   "update",
   "plan",
-  "accepted"
+  "accepted",
+  "away"
 ] as const
 
 /** One of `REVIEW_KINDS`. */
@@ -109,6 +112,7 @@ export type ReviewButtonSpec = {
     | "defer"
     | "reopenChange"
     | "seenUpdate"
+    | "doneReading"
     | "acceptPlan"
     | "deferPhase"
     | "doThis"
@@ -124,6 +128,7 @@ export type ReviewButtonSpec = {
     | "deferTip"
     | "reopenChangeTip"
     | "seenUpdateTip"
+    | "doneReadingTip"
     | "acceptPlanTip"
     | "doThisTip"
 }
@@ -227,6 +232,11 @@ export const UPDATE_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "seen", color: "grey", icon: "check", label: "seenUpdate", tip: "seenUpdateTip" }
 ]
 
+/** "0. While you were out"'s button (`buttons="away"`, P62):  Done reading, a Seen on `away`. */
+export const AWAY_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "seen", color: "green", icon: "check", label: "doneReading", tip: "doneReadingTip" }
+]
+
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
@@ -239,7 +249,8 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   change: CHANGE_BUTTONS,
   update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
-  accepted: ACCEPTED_BUTTONS
+  accepted: ACCEPTED_BUTTONS,
+  away: AWAY_BUTTONS
 }
 
 /**
@@ -371,7 +382,8 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   change: [],
   update: [],
   plan: NOTE_BUTTONS,
-  accepted: NOTE_BUTTONS
+  accepted: NOTE_BUTTONS,
+  away: []
 }
 
 ////////////////
@@ -535,6 +547,11 @@ export const REVIEW_NAME_TEXTS = [
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
   { key: "seenUpdate", text: "Seen", description: "A new update block's button (the check):  its name." },
+  {
+    key: "doneReading",
+    text: "Done reading",
+    description: '"0. While you were out"\'s button (the check):  its name.'
+  },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
 
@@ -593,6 +610,11 @@ export const REVIEW_TEXTS = [
     key: "deferTip",
     text: "Later:  after the other phases, still to do, once Claude applies it",
     description: "A phase's review button while the phases are agreed:  what Defer does."
+  },
+  {
+    key: "doneReadingTip",
+    text: "Done reading:  the section goes, and what Claude does next starts a new one",
+    description: '"0. While you were out"\'s button:  what Done reading does.'
   },
   {
     key: "seenUpdateTip",
