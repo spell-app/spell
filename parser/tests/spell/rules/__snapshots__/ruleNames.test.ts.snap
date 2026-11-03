@@ -465,6 +465,10 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "helpful_word",
       "helpful_word",
     ],
+    "if_that_fails_say": [
+      "if_that_fails_say",
+      "if_that_fails_say",
+    ],
     "input_state": [
       "input_state",
       "input_state",
@@ -983,6 +987,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "while_waiting",
       "if_there_are_none",
       "if_that_fails_say",
+      "if_that_fails_say",
       "show_them_paged",
       "show_them_all",
       "show_them_in",
@@ -1167,7 +1172,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "identifier_list · lists · 1",
     "if · if · 1",
     "if_that_fails · places · 1",
-    "if_that_fails_say · places · 1",
+    "if_that_fails_say · places · 2",
     "if_there_are_none · places · 1",
     "implied_it · variables · 1",
     "in_one_go · places · 1",
