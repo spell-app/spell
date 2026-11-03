@@ -121,6 +121,52 @@ describe.skipIf(!SERVING)("Things and Templates, rethought", { timeout: 180_000 
     expect(await page.locator(".InspectorPane").innerText()).toContain("Its 52 items")
   })
 
+  test("a part inspected in the app shows in Views, the rows around it opening (I18)", async () => {
+    // the board's grid, closed:  the row with the most rows inside it, but for the app's own
+    const grid = () =>
+      [...document.querySelectorAll('[data-panel="views"] ui-tree-item')]
+        .filter((row) => row.getAttribute("label") !== "Solitaire" && !row.hasAttribute("group"))
+        .sort((a, b) => b.querySelectorAll("ui-tree-item").length - a.querySelectorAll("ui-tree-item").length)[0]!
+    await page.evaluate(`(${grid})().shadowRoot.querySelector(".toggle").click()`)
+    await page.waitForTimeout(800)
+    expect(await page.evaluate(`(${grid})().hasAttribute("open")`)).toBe(false)
+    const isInspecting = () => page.evaluate(() => !!document.querySelector(".InspectAppButton.inspecting"))
+    if (!(await isInspecting())) await page.locator(".InspectAppButton").first().click({ force: true })
+    await page.waitForTimeout(1500)
+    // the lowest card on screen, inside that grid
+    const at = await page.evaluate(() => {
+      const cards: Element[] = []
+      const walk = (root: ParentNode) => {
+        for (const element of root.querySelectorAll("*")) {
+          if (element.localName === "solitaire-card") cards.push(element)
+          if (element.shadowRoot) walk(element.shadowRoot)
+        }
+      }
+      walk(document)
+      const box = cards
+        .map((card) => card.getBoundingClientRect())
+        .filter((box) => box.width > 10)
+        .sort((a, b) => b.bottom - a.bottom)[0]!
+      return [box.x + box.width / 2, box.bottom - 8]
+    })
+    await page.mouse.click(at[0]!, at[1]!)
+    await page.waitForTimeout(1500)
+    const shown = await page.evaluate(`(() => {
+      const top = [...document.querySelectorAll('[data-panel="views"] ui-tree > ui-tree-item')]
+      const row = [...document.querySelectorAll('[data-panel="views"] ui-tree-item[label="Card"]')].find((it) => it.selected)
+      const box = row?.getBoundingClientRect()
+      const view = document.querySelector(".InspectorViews").getBoundingClientRect()
+      return {
+        top: top.map((it) => it.getAttribute("label")),
+        isOpen: (${grid})().hasAttribute("open"),
+        isInView: !!box && box.top >= view.top && box.bottom <= view.bottom
+      }
+    })()`)
+    expect(shown).toEqual({ top: ["Solitaire", "Not drawn"], isOpen: true, isInView: true })
+    await page.locator(".InspectAppButton").first().click({ force: true })
+    await page.waitForTimeout(800)
+  })
+
   test("This app comes first in the add menu, and adds the app's own view", async () => {
     await page.locator("#AddPartButton").click()
     await page.waitForTimeout(1500)
