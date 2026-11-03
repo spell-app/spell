@@ -177,6 +177,9 @@ export class ReviewState {
   /** What's typed in its note box. */
   readonly typed = (): string => this.read((client, id) => client.typedOf(id)) ?? ""
 
+  /** The words its note box let go of last, as Claude took them (`ReviewClient.releasedOf()`, epic `epic-engine` I200). */
+  readonly released = (): string => this.read((client, id) => client.releasedOf(id)) ?? ""
+
   /** Owen's urgency for it, not applied yet:  `calm` (true:  not urgent), and has it gone with a send?  Else none. */
   readonly urgency = (): { calm: boolean; sent: boolean } | undefined =>
     this.read((client, id) => {

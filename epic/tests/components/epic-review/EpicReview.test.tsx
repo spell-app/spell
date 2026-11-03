@@ -681,6 +681,31 @@ describe("<epic-item> review controls", () => {
     )
   })
 
+  // epic `epic-engine` I200 (Owen, 2026-11-02:  "You are still leaving e.g. this after you have processed it")
+  test("a note made a comment as Claude took it (its mark gone):  the box empties, even with the focus", async () => {
+    const client = await adoptClient()
+    const host = await render(`<epic-item id="q12" title="Pencil?" status="open" open><p>Text</p></epic-item>`)
+    const field = () =>
+      deep(host).querySelector<HTMLTextAreaElement>(
+        "[part~='details'] [part~='note-box'] >>> ui-textarea >>> textarea"
+      )!
+    button(host, "revisit").click()
+    await settle()
+    field().value = "a pencil, or option-click?"
+    field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    await settle()
+    await vi.waitFor(() => expect(routes.inbox.marks.q12?.note).toBe("a pencil, or option-click?"))
+    routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
+    await client.refresh()
+    await settle()
+    field().focus()
+    // taken as a comment:  its mark leaves the inbox
+    delete routes.inbox.marks.q12
+    await client.refresh()
+    await settle()
+    await vi.waitFor(() => expect(field().value).toBe(""))
+  })
+
   test("the review label goes:  each review button's tooltip says it (`Approve:  Fine as it is · reviewed 10/7/26`)", async () => {
     await adoptClient()
     const host = await render(

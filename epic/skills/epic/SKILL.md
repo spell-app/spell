@@ -1056,7 +1056,13 @@ want you to just do it").
      - a pick gets none either:  its line ("recorded ...;  waiting for ...") goes inside the item's Choices (I153)
      - "Made todo T23 ..."
      - "Queued for P10 · ..."
-   - Then each "to talk over" (revisit soon), one at a time:
+   - A plain revisit's NOTE (words, no pick, no picture, not their comments in its text) is no "to talk over" any
+     more (epic `epic-engine` I200;  Owen, 2026-11-02:  "make it a comment like the rest and clear the field"):
+     - `wait` makes it a COMMENT on its item, its mark gone, so their note box empties:  printed under "comments, to
+       answer on their threads", with "his revisit note on P3, made a comment"
+     - answer it on its thread, as 3b says;  a note `wait` never took (`/airplane land`) becomes one, answered, at
+       `inbox clear`
+   - Then each "to talk over" left (a pick "B, but ...", a picture, their comments in its text), one at a time:
      - `status ... underway "<reading>"` as you take it up.
      - Answer their note INTO the item, as a reply:  `details --append`, with the reply markup of "revisit now" above.
        Their note quoted, the answer with evidence, option cards when they must choose, so they pick ON THE PAGE.

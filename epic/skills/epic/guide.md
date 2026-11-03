@@ -83,7 +83,9 @@ Then, for what it printed:
    (`epic details <epic>#J3 --append --file answer.html`;  `--more` for Add Details),
    `epic update <epic>#J3 noted "<what was written>"`, then `epic inbox done <epic>#J3`.
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
-   A revisit left "to talk over":  answer its note into the item, as above, then `epic inbox clear <epic>#J3`.
+   A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
+   the item, as above, then `epic inbox clear <epic>#J3`.
+   A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
 4. Comments:  `epic inbox working <epic>#C3 on`, answer into the item it's on,
    then `epic inbox done <epic>#C3 --file answer.html`.
 5. `epic inbox status <epic> --clear`, then `epic inbox wait <epic>` again, unless they said stop.

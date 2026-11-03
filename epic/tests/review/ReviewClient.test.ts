@@ -774,6 +774,25 @@ describe("ReviewClient:  a note Claude TOOK", () => {
     expect(server.inbox.marks.j2?.note).toBe("float them")
   })
 
+  // epic `epic-engine` I200 (Owen, 2026-11-02:  "You are still leaving e.g. this after you have processed it")
+  test("its sent mark LEFT the inbox (made a comment, or cleared):  the box lets go of the words, and closes", async () => {
+    const { client, server } = await sentNote("float them")
+    server.inbox.takeWork(undefined, (mark) => ({ anchor: mark.id, kind: "item", label: "J2", excerpt: "J2" }))
+    expect(server.inbox.marks.j2).toBeUndefined()
+    await client.refresh()
+    expect([client.typedOf("j2"), client.isBoxOpen("j2"), client.releasedOf("j2")]).toEqual(["", false, "float them"])
+    expect(client.readBackups()).toEqual({})
+  })
+
+  test("words typed after the note it let go of stay:  his next note", async () => {
+    const { client, server } = await sentNote("float them")
+    client.type("j2", "float them\n\nand dock them")
+    server.inbox.clearMarks(["j2"])
+    await client.refresh()
+    expect([client.typedOf("j2"), client.isBoxOpen("j2")]).toEqual(["and dock them", true])
+    expect(client.readBackups()).toEqual({ j2: "and dock them" })
+  })
+
   test("a page server older than `taken`:  a sent mark Claude works on counts as taken", async () => {
     const { client, server } = await sentNote("float them")
     server.inbox.setWorking("j2", "revisit")

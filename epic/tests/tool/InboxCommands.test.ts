@@ -583,19 +583,67 @@ test("print:  a new item by its kind and title, with its note and what it's abou
   expect(text).toContain('revisit (1):\n  - P1  Offline Pages  · soon · "too big?" · unsent')
 })
 
-test("clear:  a phase's note is kept as Owen's reply in the phase;  a new item's note is never a reply", async () => {
+test("clear:  a phase's note kept as Owen's reply in the phase (a picture's);  a new item's note is never a reply", async () => {
   withPhase()
   ReviewInbox.update(inboxFile, (inbox) => {
-    inbox.setMark("p1", { action: "revisit", note: "too big?" }, M1)
+    inbox.setMark("p1", { action: "revisit", note: "too big?", shot: "tests/p1-20261007-1000.png" }, M1)
     inbox.setNew(undefined, { kind: "todo", title: "pack", note: "chargers" }, M1)
   })
   await commands().inbox.run("x", file, ["clear", "p1", "new1"], {})
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   const replies = after.document.querySelectorAll("epic-reply")
-  expect(Array.from(replies, (reply) => [reply.parentElement!.id, reply.textContent])).toEqual([
+  // its picture beside its words:  a comment holds none, so it stays a reply (I200)
+  expect(Array.from(replies, (reply) => [reply.parentElement!.id, reply.textContent!.trim()])).toEqual([
     ["p-offline-pages", "too big?"]
   ])
+  expect(replies[0]!.querySelector("img")?.getAttribute("src")).toBe("tests/p1-20261007-1000.png")
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+})
+
+// epic `epic-engine` I200 (Owen, 2026-11-02:  "when you pick it up, make it a comment like the rest and clear the
+// field")
+test("wait:  a revisit's note to talk over goes over as a COMMENT on its item, its mark gone;  a pick's stays", async () => {
+  withPhase()
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p1", { action: "revisit", when: "soon", note: "a pencil, or ⌥-click?" }, M1)
+    inbox.setMark("j1", { action: "revisit", when: "soon", pick: "B", note: "but smaller" }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
+  const said = printed.join("\n")
+  expect(said).toMatch(/^sent [^\n]* \(1 mark, 1 comment\):/)
+  expect(said).toMatch(
+    /C1 {2}on p-offline-pages \(phase\) {2}"a pencil, or ⌥-click\?"[^\n]*\n {6}his revisit note on P1, made a comment/
+  )
+  // only the pick is talked over in the chat;  the comment is answered on its thread
+  expect(said).toMatch(/then talk over J1 in the chat/)
+  expect(said).toMatch(/epic inbox working x#<M id> on/)
+  const inbox = ReviewInbox.read(inboxFile)
+  expect([inbox.marks.p1, inbox.marks.j1?.pick]).toEqual([undefined, "B"])
+  expect(inbox.comments.c1).toMatchObject({
+    anchor: "p-offline-pages",
+    kind: "phase",
+    label: "Offline Pages",
+    text: "a pencil, or ⌥-click?",
+    at: new Date(M1).toISOString(),
+    status: "new"
+  })
+  // handed over once:  the next wait has nothing until Owen speaks on its thread
+  expect(inbox.hasWork).toBe(false)
+  // answered there, as any comment
+  await commands().inbox.run("x", file, ["done", "c1"], {})
+  expect(ReviewInbox.read(inboxFile).comments.c1.status).toBe("answered")
+})
+
+test("clear:  a revisit's note no wait took (/airplane land) becomes a comment, answered:  talked over in the chat", async () => {
+  ReviewInbox.update(inboxFile, (inbox) => inbox.setMark("j2", { action: "revisit", when: "soon", note: "why?" }, M1))
+  await commands().inbox.run("x", file, ["clear", "j2"], {})
+  expect(printed.join("\n")).toContain("the person's note made a comment:  C1")
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.marks.j2).toBeUndefined()
+  expect(inbox.comments.c1).toMatchObject({ anchor: "j2", kind: "item", text: "why?", status: "answered" })
+  // his turn now;  no reply card in the item
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).findItem("j2")!.querySelector("epic-reply")).toBeNull()
 })
 
 // epic `epic-engine` P4:  a test run's four answers, printed, handed over by `wait`, applied
