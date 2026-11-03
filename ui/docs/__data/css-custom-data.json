@@ -3957,6 +3957,20 @@
       }
     },
     {
+      "name": "--ui-item-icon-column-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `1.25em`"
+      }
+    },
+    {
+      "name": "--ui-item-icon-column-distance",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-item>`'s token.  Default:  `0.5em`"
+      }
+    },
+    {
       "name": "--ui-items-margin",
       "description": {
         "kind": "markdown",

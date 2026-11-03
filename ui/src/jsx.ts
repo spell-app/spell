@@ -17658,6 +17658,16 @@ export interface UIMenuAttributes {
    */
   "prop:ticks"?: boolean | ""
   /**
+   * Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  "icon-column"?: boolean | ""
+  /**
+   * `icon-column`, as the DOM element's property.
+   * @deprecated write `icon-column` -- `prop:` stays only for compiled spell
+   */
+  "prop:iconColumn"?: boolean | ""
+  /**
    * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
    * - takes:  flag (present / absent)
    */
@@ -36224,6 +36234,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `ticks` -- `prop:` stays only for compiled spell
    */
   "prop:ticks"?: boolean | ""
+  /**
+   * Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  "icon-column"?: boolean | ""
+  /**
+   * `icon-column`, as the DOM element's property.
+   * @deprecated write `icon-column` -- `prop:` stays only for compiled spell
+   */
+  "prop:iconColumn"?: boolean | ""
   /**
    * Its items are tabs, for a screen reader (`role=tablist`, each a `role=tab`, the chosen one `aria-selected`):  one Tab stop, arrow keys between them.  For a row that switches what's shown under it.  Off by default.
    * - takes:  flag (present / absent)

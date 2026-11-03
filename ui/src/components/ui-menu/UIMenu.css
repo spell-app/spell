@@ -453,6 +453,11 @@
     font-size: var(--_ui-menu-icon-size);
     opacity: var(--_ui-menu-icon-opacity);
   }
+  /* `icon-column`:  the icon box stays before the words, even in a vertical menu (whose icons float right) */
+  :host(:state(in-menu):state(in-icon-column)) > .item > .icon {
+    float: none;
+    margin: 0 var(--ui-item-icon-column-distance, 0.5em) 0 0;
+  }
   :host(:state(in-menu)) > .active.item > .icon,
   .ui.menu .active.item > .icon {
     opacity: 1;

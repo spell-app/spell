@@ -161,6 +161,12 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
     return !!this.itemContext?.ticks && this.kind === UIT.ITEM
   }
 
+  /** A row of a menu with an icon column (`<ui-menu icon-column>`):  an icon box always, empty with no icon. */
+  @E.cssState("in-icon-column")
+  get isInIconColumn(): boolean {
+    return !!this.itemContext?.iconColumn && this.kind === UIT.ITEM
+  }
+
   ////////////////
   // ## The box
   ////////////////
@@ -405,7 +411,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
             alt=""
           />
         </Show>
-        <Show when={this.hasIcon}>
+        <Show when={this.hasIcon || this.isInIconColumn}>
           <span class={UIT.ICON} part={this.partForName("icon")}>
             <slot name={this.slotForName("icon")}>{this.iconGlyph.svg}</slot>
           </span>

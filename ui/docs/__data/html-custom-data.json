@@ -21263,6 +21263,13 @@
           }
         },
         {
+          "name": "icon-column",
+          "description": {
+            "kind": "markdown",
+            "value": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "tabs",
           "description": {
             "kind": "markdown",
@@ -43108,6 +43115,13 @@
           "description": {
             "kind": "markdown",
             "value": "A menu of things that are on or off:  each item keeps a gutter before its words, and shows a tick there while `selected`, in plain text.  The solid accent fill is then only for the row under the pointer or the keyboard, never for what's on.  It moves nothing itself:  the page says which are `selected`.  Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "icon-column",
+          "description": {
+            "kind": "markdown",
+            "value": "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default.\n\nTakes:  flag (present / absent)"
           }
         },
         {

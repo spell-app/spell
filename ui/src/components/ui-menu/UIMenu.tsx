@@ -21,7 +21,8 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
     a.shrinkable === b.shrinkable &&
     a.iconsOnly === b.iconsOnly &&
     a.pressed === b.pressed &&
-    a.ticks === b.ticks
+    a.ticks === b.ticks &&
+    a.iconColumn === b.iconColumn
   )
 }
 
@@ -178,6 +179,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       current: "page",
       pressed: (this.choosesMany || this.ticks) && !isInteractive,
       ticks: this.ticks,
+      iconColumn: this.iconColumn,
       shrinkable: this.isShrinking,
       iconsOnly: this.isIconsOnly
     }

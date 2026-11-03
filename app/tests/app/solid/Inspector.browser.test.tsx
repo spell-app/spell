@@ -265,50 +265,22 @@ describe("the parts tree and events", () => {
     expect(Inspector.selected?.element).toBe(area.querySelector("ui-button"))
   })
 
-  test("a part's events:  what it handles, then what was added", async () => {
+  test("a part's events:  what it handles;  one added where it has no place in the program, nothing", async () => {
     const area = await inArea(`<ui-button>Go</ui-button>`)
     cleanups.push(Inspector.watch(area))
     const button = area.querySelector("ui-button")!
     // Solid's delegated handler, as `onClick` leaves it
     Object.assign(button, { _$click: () => {}, _$clickData: 1 })
     expect(Inspector.eventsOf(button)).toEqual(["click"])
+    // its code is written in its place in the program (`eventsInCode.test.ts`):  this button has none
     Inspector.addEvent(button, "mousedown")
     flush()
-    expect(Inspector.eventsOf(button)).toEqual(["click", "mousedown"])
-  })
-
-  // epic `ui-gaps` P14:  its own growing box (`fitHeight()`) became `<ui-textarea grow>`
-  test("an event's code box:  a <ui-textarea grow>, one line in the Output tab's type, taller as code is typed", async () => {
-    const area = await inArea(`<ui-button>Go</ui-button>`)
-    cleanups.push(Inspector.watch(area))
-    const host = await mount(() => <InspectorColumn />)
-    Inspector.toggle()
-    const button = area.querySelector("ui-button")!
-    Inspector.select(button)
-    Inspector.addEvent(button, "click")
-    flush()
-    await ElementFixture.settle(host)
-    const box = host.querySelector<HTMLElement & { value: string }>(".InspectorEvent .InspectorCode")!
-    const code = box.shadowRoot!.querySelector("textarea")!
-    const style = getComputedStyle(code)
-    expect([box.localName, box.hasAttribute("grow"), style.fontFamily, style.fontSize]).toEqual([
-      "ui-textarea",
-      true,
-      "monaco, monospace",
-      "13px"
-    ])
-    const one = code.getBoundingClientRect().height
-    expect(Math.round(one)).toBe(Math.round(parseFloat(style.lineHeight) + 14))
-    code.value = "go()\nstop()\nagain()"
-    code.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
-    await ElementFixture.settle(host)
-    expect(Math.round(code.getBoundingClientRect().height - one)).toBe(Math.round(2 * parseFloat(style.lineHeight)))
+    expect(Inspector.eventsOf(button)).toEqual(["click"])
   })
 })
 
-describe("the Events band (epic `debut` P28)", () => {
+describe("the Code band (epic `debut` P28;  epic `editor`, Events In Code)", () => {
   test("a Spell UI element's events end its properties card:  `on click`, with the code it was written with", async () => {
-    // a place of its own among the parts:  the events added to the other tests' buttons are remembered by theirs
     const area = await inArea(`<ui-segment></ui-segment><ui-button>Go</ui-button>`)
     cleanups.push(Inspector.watch(area))
     const button = area.querySelector("ui-button")!
@@ -319,7 +291,7 @@ describe("the Events band (epic `debut` P28)", () => {
     flush()
     await ElementFixture.settle(host)
     const band = host.querySelector(".InspectorMain ui-property-editor > ui-property-group.InspectorEvents")!
-    expect(band.getAttribute("label")).toBe("Events")
+    expect(band.getAttribute("label")).toBe("Code")
     expect([...band.querySelectorAll(".InspectorEvent h3")].map((h3) => h3.textContent)).toEqual(["on click"])
     expect(band.querySelector(".InspectorEvent ui-icon")!.getAttribute("name")).toBe("bolt")
   })
@@ -341,13 +313,8 @@ describe("the Events band (epic `debut` P28)", () => {
     await ElementFixture.settle(host)
     const rows = () => [...host.querySelectorAll(".InspectorEvents .InspectorEvent h3")].map((h3) => h3.textContent)
     expect(rows()).toEqual(["on click", "when card dropped on"])
-
-    // "+" adds one, after them
-    Inspector.addEvent(element, "mouseenter")
-    flush()
-    await ElementFixture.settle(host)
-    expect(rows()).toEqual(["on click", "when card dropped on", "on mouse enter"])
-    expect(host.querySelectorAll(".InspectorEvents .InspectorEvent .InspectorCode")).toHaveLength(3)
+    // no code known, and no place in a program:  no box
+    expect(host.querySelectorAll(".InspectorEvents .InspectorEvent :is(.InspectorCode, .CodeSlice)")).toHaveLength(0)
   })
 
   test("nothing selected:  no band", async () => {

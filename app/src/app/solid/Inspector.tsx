@@ -21,8 +21,19 @@ import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
-import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
-import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
+import { CodeBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
+import {
+  eventsInSource,
+  handlerPlacesInSource,
+  handlersInSource,
+  newEventIn,
+  placeOfAction,
+  placeOfWritten,
+  propertyEditorInSource,
+  type CodePlace,
+  type SourceFile,
+  type WrittenEvent
+} from "./InspectorSource"
 import { InspectorWrites, type InspectorScope, type NotWritten } from "./InspectorWrites"
 import { PartEdits } from "./PartEdits"
 import { on } from "./on"
@@ -655,31 +666,40 @@ export class Inspector {
   }
 
   /**
-   * The events `element` handles:  what its drawing listens for, through Solid (`onClick` ...), then those added
-   * here (`addEvent()`), each once (reactive, for the added ones).
-   * - The added ones are remembered by the part's place, a project's each:  a reload keeps them.
+   * The events `element` handles:  what its drawing listens for, through Solid (`onClick` ...), each once.
    * - A drawn thing's drawing is in its shadow root:  its handlers count as the thing's.
-   * - And those its tag was written with in the program (`writtenHandlersOf()`), whatever listens for them.
+   * - And those its tag was written with in the program (`writtenHandlersOf()`), whatever listens for them:
+   *   so one added here (`addEvent()`) shows as soon as it's written.
    */
   static eventsOf(element: Element): string[] {
     const handled = [element, ...(element.shadowRoot?.querySelectorAll("*") ?? [])].flatMap((at) =>
       Object.keys(at).flatMap((key) => SOLID_HANDLER.exec(key)?.[1] ?? [])
     )
     handled.push(...Object.keys(Inspector.writtenHandlersOf(element)))
-    eventsAdded()
-    const address = Inspector.addressOf(element)
-    const added = address ? (Inspector.addedEvents[addressKey(address)] ?? []) : []
-    return [...new Set([...handled, ...added])]
+    return [...new Set(handled)]
   }
 
   /**
-   * The events added here to `element` (`addEvent()`), remembered with the project (reactive).
-   * - A drawn thing's other events are as its program was written (`writtenEventsOf()`).
+   * Where `element`'s event or ability `row` is written:  its file and lines, for its code to be edited there
+   * (epic `editor`, Events In Code);  `undefined` if it can't be found.
+   * - A drawn thing's:  in its type, or a type it inherits (`placeOfWritten()`).
+   * - A Spell UI element's (`row.key`, its DOM event):  the line holding its `onClick={...}` (`handlerPlacesInSource()`).
    */
-  static addedEventsOf(element: Element): string[] {
-    eventsAdded()
-    const address = Inspector.addressOf(element)
-    return address ? (Inspector.addedEvents[addressKey(address)] ?? []) : []
+  static placeOfEvent(element: Element, row: WrittenEvent & { key?: string }): SlicePlace | undefined {
+    const thing = SpellElement.thingOf(element)
+    if (thing) return sliceOf(placeOfWritten(row, InspectorActions.typeWordsOf(thing), sourceFiles()))
+    const sources = new Map(sourceFiles().map((file) => [file.path, file.text]))
+    const handling = [...(element.shadowRoot?.querySelectorAll("*") ?? [])]
+    for (const at of [element, ...handling]) {
+      const place = row.key ? handlerPlacesInSource(at, sources)[row.key] : undefined
+      if (place) return sliceOf(place)
+    }
+    return undefined
+  }
+
+  /** Where `thing`'s action `action` is written:  its file and lines (`placeOfAction()`);  `undefined` if not found. */
+  static placeOfAction(thing: object, action: { words: string; name: string }): SlicePlace | undefined {
+    return sliceOf(placeOfAction(action, InspectorActions.typeWordsOf(thing), sourceFiles()))
   }
 
   /**
@@ -854,28 +874,38 @@ export class Inspector {
   }
 
   /**
-   * Add `event` to `element`'s events, remembered with the project;  once:  added again, nothing changes.
-   * - Writing a handler into the code is later.
-   * - Nothing happens for an element outside the app.
+   * Add DOM event `event` (`click`) to `element`:  an empty handler, written in its place in the program, as a step of
+   * `editor.history` (epic `editor`, Events In Code).
+   * - A drawn thing's:  in its own type, `- on click:` after its outline header's lines (`a card:`), else
+   *   `<on click>` ... `</on>` before its tag's end.
+   * - A Spell UI element's:  `onClick={}` on its tag.
+   * - Its row then shows with the cursor in its code (`Inspector.justAdded`).
+   * - Nothing happens where it can't be written:  an element with no place in the program.
+   * - TODO:  a Spanish program's own words (`al hacer clic`):  English is written for now.
    */
   static addEvent(element: Element, event: string): void {
-    const address = Inspector.addressOf(element)
-    if (!address) return
-    const added = Inspector.addedEvents
-    const key = addressKey(address)
-    if (added[key]?.includes(event)) return
-    editorPrefs.set(Inspector.eventsPref, { ...added, [key]: [...(added[key] ?? []), event] })
-    setEventsAdded((count) => count + 1)
+    const thing = SpellElement.thingOf(element)
+    const written = thing
+      ? newEventIn(InspectorActions.typeWordsOf(thing), sourceFiles(), onWordsOf(event))
+      : newHandlerOn(element, event)
+    if (!written) return
+    const file = sliceOf({ path: written.path, from: 1, to: 1 })?.file
+    if (!file) return
+    setJustAdded(thing ? onWordsOf(event) : event)
+    editor.history.change(
+      { file, at: written.at, before: "", after: written.code },
+      { title: appTexts.text("inspectorAddEvent") }
+    )
   }
 
-  /** The events added here, by the part's place (`addressKey()`):  this project's. */
-  private static get addedEvents(): Record<string, string[]> {
-    return (editorPrefs.get(Inspector.eventsPref) as Record<string, string[]> | undefined) ?? {}
+  /** The words or DOM event of the row added last (`addEvent()`), for it to take the cursor;  `""` once it has. */
+  static get justAdded(): string {
+    return justAdded()
   }
 
-  /** The pref remembering the events added here, the project's own. */
-  private static get eventsPref(): string {
-    return Inspector.projectPref(EVENTS_PREF)
+  /** The row added last has taken the cursor. */
+  static tookCursor(): void {
+    setJustAdded("")
   }
 
   /** What `element` is, as the Inspector shows it:  a drawn thing, a Spell UI element, else `undefined`. */
@@ -1098,8 +1128,6 @@ const FOLDED_PANELS_PREF = "inspector:foldedPanels"
 const INSPECTOR_ICON = "sliders horizontal"
 /** The start of the pref remembering what's selected, a project's each (`Inspector.selectionPref`). */
 const SELECTION_PREF = "inspector:selected"
-/** The start of the pref remembering the events added, a project's each (`Inspector.eventsPref`). */
-const EVENTS_PREF = "inspector:events"
 /** The pref remembering that Inspect app's help was seen:  closed, or a part selected (`Inspector.isHelpShown`). */
 const HELP_SEEN_PREF = "inspector:helpSeen"
 /** The pref remembering the phone's sheet's height, as dragged (`Inspector.sheetHeight`). */
@@ -1309,8 +1337,47 @@ function setArea(area: HTMLElement | undefined): void {
   setAreaMoved((count) => count + 1)
 }
 
-/** Counts the events added in the Inspector, so their lists read them again. */
-const [eventsAdded, setEventsAdded] = createSignal(0)
+/** The row added last, by its words (a drawn thing's) or DOM event:  `Inspector.justAdded`. */
+const [justAdded, setJustAdded] = createSignal("")
+
+/** Where an event's or action's code is:  its file, and its lines, 1-based (`Inspector.placeOfEvent()`). */
+export type SlicePlace = { file: SP.AnySpellFile; from: number; to: number }
+
+/** The program's spell files, by the names the compiler's marks give them, with their text. */
+function sourceFiles(): SourceFile[] {
+  return (editor.project?.spellFiles ?? []).map((file) => ({ path: marksPathOf(file), text: file.contents ?? "" }))
+}
+
+/** `file`'s name as the compiler's marks give it:  its path in its project. */
+function marksPathOf(file: SP.AnySpellFile): string {
+  return SP.SpellLocation.filePathOf(file.path)?.replace(/^\//, "") ?? file.path
+}
+
+/** `place`, with the file it names. */
+function sliceOf(place: CodePlace | undefined): SlicePlace | undefined {
+  const file = place && editor.project?.spellFiles.find((each) => marksPathOf(each) === place.path)
+  return file && place ? { file, from: place.from, to: place.to } : undefined
+}
+
+/** A new event's words, as a drawn thing's type writes it:  `click` => `on click`, `dblclick` => `on double click`. */
+function onWordsOf(event: string): string {
+  const words = event.replace(/^dbl/, "double ").replace(/^(mouse|key)(down|up|enter|leave)$/, "$1 $2")
+  return `on ${words}`
+}
+
+/**
+ * Where a new handler for `event` goes on Spell UI element `element`:  ` onClick={}` at the end of its tag as written.
+ * - `undefined`:  it has no place in the program, or it handles `event` already.
+ */
+function newHandlerOn(element: Element, event: string): { path: string; at: number; code: string } | undefined {
+  const place = SourceMarks.placeOfDrawn(element)
+  const text = place && sourceFiles().find((file) => file.path === place.path)?.text
+  if (!place || text === undefined) return undefined
+  const tag = SourceEdits.tagAt(text, SourceEdits.offsetAt(text, { line: place.line, character: place.column }))
+  const attribute = `on${upperFirst(event)}`
+  if (!tag || tag.attributes.some((each) => each.name.toLowerCase() === attribute.toLowerCase())) return undefined
+  return { path: place.path, at: tag.end - (tag.selfClosing ? 2 : 1), code: ` ${attribute}={}` }
+}
 
 /** Where Solid keeps an element's handler for a delegated event:  `_$$click` (NOT its data, `_$$clickData`). */
 const SOLID_HANDLER = /^_\$\$([a-z]+)$/
@@ -1877,8 +1944,8 @@ const SMALLEST_CARD_BODY = 32
  * - Nothing selected:  the card is titled "Inspector", and says how to select.
  * - A thing whose type was written with its own `<property-editor>`:  that, in place of its bands
  *   (`<OwnEditor>`;  Owen:  "a property-editor for Card that I can edit").
- * - Then its Events band (`<EventsBand>`), and a thing's Actions band (`<ActionsBand>`):
- *   what it does when people touch it, then what can be done to it (epic `debut` P28, P29;  Q45 A).
+ * - Then its Code band (`<CodeBand>`):  what it does when people touch it, then what can be done to it,
+ *   each one's code in the file (epic `debut` P28, P29;  epic `editor`, Events In Code).
  * - A thing's property whose value is a thing is a link to it (`<ThingLink>`);  a list's items are links too.
  *   Following one, the title is the TRAIL from what was selected (`Solitaire › DiscardPile · discards`),
  *   each step a pill that goes back to it (`Inspector.inspected`).
@@ -1994,9 +2061,8 @@ function PropertiesCard(): JSX.Element {
                 {(markup) => <OwnEditor markup={markup()} />}
               </Show>
             </Show>
-            <Show when={!part.together && part.element}>{(element) => <EventsBand element={element()} />}</Show>
-            <Show when={!part.layout && !part.together}>
-              <ActionsBand thing={part.value} />
+            <Show when={!part.together}>
+              <CodeBand element={part.element} thing={part.layout ? undefined : part.value} />
             </Show>
           </ui-property-editor>
         )}

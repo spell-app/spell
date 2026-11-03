@@ -241,6 +241,14 @@ export const menuVocabulary = {
         "Set it on a menu with one of these rows, so its words stay put whichever are on.  Off by default."
     },
     {
+      name: "icon-column",
+      group: "appearance",
+      kind: "boolean",
+      description:
+        "Each row keeps an icon box before its words, empty for a row with no icon, so every title starts at the " +
+        "same place, as a Mac's menus do.  With `ticks`, the tick comes first, then the icon.  Off by default."
+    },
+    {
       name: "tabs",
       group: "behaviour",
       kind: "boolean",

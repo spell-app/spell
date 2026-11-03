@@ -175,6 +175,8 @@ export type ItemContext = {
    * - What's on is the tick, in plain text;  the row under the pointer or keyboard takes the fill.
    */
   ticks?: boolean
+  /** Its items keep an icon box before their words, empty for one with no icon (`<ui-menu icon-column>`):  `:state(in-icon-column)`. */
+  iconColumn?: boolean
 }
 
 /** Roles an owner may give an item's root. */

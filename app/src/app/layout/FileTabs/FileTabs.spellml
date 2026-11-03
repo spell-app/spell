@@ -25,9 +25,9 @@ The editor's own side of it, which files there are and what showing one does, is
 <spell-view "file tab bar">
 	<property "files">a new file list</>
 	<property "more" description="The code pane's ⋯, the editor's own">a thing</>
-	<action "duplicate file"/>
-	<action "rename file"/>
-	<action "delete file"/>
+	<action "duplicate file" title="Duplicate File" icon="clone outline"/>
+	<action "rename file" title="Rename File" icon="edit outline"/>
+	<action "delete file" title="Delete File" icon="trash alternate outline"/>
 	<menu "tab menu">
 		<action "duplicate file"/>
 		<action "rename file"/>

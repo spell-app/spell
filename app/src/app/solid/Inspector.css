@@ -224,20 +224,20 @@ ui-panel.InspectorCard > .InspectorSection {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* the Events and Actions bands, at the properties card's end:  each the editor's full width (epic `debut` P28, P29) */
-.Inspector :is(ui-property-group.InspectorEvents, ui-property-group.InspectorActions) {
+/* the Code band, at the properties card's end:  the editor's full width (epic `debut` P28, P29) */
+.Inspector ui-property-group.InspectorEvents {
   grid-column: 1 / -1;
 }
 /* their rows too:  a band lays its content out as the editor's two columns */
 .Inspector :is(.InspectorEvent, .InspectorAction) {
   grid-column: 1 / -1;
 }
-/* Events' "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
+/* the Code band's "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
 .Inspector ui-dropdown.InspectorAddEvent {
   color: var(--ui-text-muted);
   --ui-dropdown-icon-spacing: 2px;
 }
-/* each event and ability:  its icon and words, then its code, in a box that grows with it */
+/* each event, ability and action:  its icon and words (or run button), then its code, in the file (`<CodeSlice>`) */
 .InspectorEvent {
   display: flex;
   flex-direction: column;
@@ -259,32 +259,18 @@ ui-panel.InspectorCard > .InspectorSection {
     margin: 0;
     color: var(--ui-text-muted);
   }
-  /* a `<ui-textarea grow>`:  one line, growing with its code (Owen:  "textarea should be one line");  this look on its
-     native textarea, its `control` part */
-  & > .InspectorCode {
-    width: 100%;
-  }
-  & > .InspectorCode::part(control) {
-    box-sizing: border-box;
-    min-block-size: calc(1lh + 14px);
-    max-block-size: 20lh;
-    padding: 6px 8px;
-    resize: none;
-    /* a nested line one step in, not a tab's eight spaces */
-    tab-size: 2;
-    /* an input's well, as the fields above it (the theme's), and their corners */
-    border: 1px solid var(--ui-input-border-color, var(--ui-border-color));
-    border-radius: 6px;
-    background: var(--ui-input-background, var(--ui-surface));
-    color: var(--ui-text-color);
-    /* the Output tab's type (`ConsoleLines.css`) */
+  /* code not found in the file, to read:  the Output tab's type (`ConsoleLines.css`) */
+  & > pre.InspectorCode {
+    margin: 0;
+    white-space: pre-wrap;
     font:
       13px / 1.4 monaco,
       monospace;
+    color: var(--ui-text-muted);
   }
-  /* its hint as light as an input's, so it never reads as typed */
-  & > .InspectorCode::part(control)::placeholder {
-    color: color-mix(in oklab, var(--ui-text-light) 55%, transparent);
+  /* an action's run button and fields keep their own spacing, its code under them */
+  & > .InspectorAction {
+    margin-block-end: 0;
   }
 }
 /* an action:  its button, then a field for what it takes;  with more than one, they go under it */

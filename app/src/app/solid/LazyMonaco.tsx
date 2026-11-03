@@ -2,7 +2,7 @@ import { lazy, type Component } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import type { FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
+import type { CodeSliceProps, FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
 import { CodeSettings } from "./CodeSettings"
 
 /**
@@ -29,6 +29,10 @@ export const LazyMonaco = {
   /** `<FileEditor>` -- see `spell/app/app/solid/monaco/FileEditor`. */
   FileEditor: lazy<Component<FileEditorProps>>(async () => ({
     default: (await loadMonaco()).FileEditor
+  })),
+  /** `<CodeSlice>`, a few lines of a file -- see `spell/app/app/solid/monaco/CodeSlice`. */
+  CodeSlice: lazy<Component<CodeSliceProps>>(async () => ({
+    default: (await loadMonaco()).CodeSlice
   })),
   /** What to show while Monaco loads. */
   Loading() {
