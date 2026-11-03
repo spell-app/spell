@@ -90,6 +90,7 @@ export function BarMenu(props: BarMenuProps): JSX.Element {
               direction="vertical"
               size="small"
               class="BarMenuItems"
+              icon-column=""
               ticks={props.ticks ? "" : undefined}
               aria-label={props.name}
               onPointerOver={(event) => followPointer(event, control)}
@@ -164,12 +165,14 @@ function followPointer(event: PointerEvent, control: BarMenuControl) {
  * ### `<SubMenuRow>`
  * A `<BarMenu>`'s row opening a sub-menu beside it:  its title, then a chevron;  the pointer over it, or a click.
  * - `sub`:  the sub-menu's id, a key of its menu's `subMenus`.
+ * - `icon`:  its icon, in the menu's icon column.
  ****************/
-export function SubMenuRow(props: { sub: string; children: JSX.Element }): JSX.Element {
+export function SubMenuRow(props: { sub: string; icon?: string; children: JSX.Element }): JSX.Element {
   const control = useContext(BarMenuContext)
   return (
     <ui-action
       class={SUB_ROW}
+      icon={props.icon}
       data-sub={props.sub}
       aria-haspopup="menu"
       selected={control?.openSub() === props.sub}
@@ -221,7 +224,7 @@ export function ProjectBarMenu(): JSX.Element {
         <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
         <Actions.resetApp menu />
         <Divider />
-        <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
+        <SubMenuRow sub="theme" icon="paint brush">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
       </BarMenu>
     </>
   )
@@ -246,7 +249,7 @@ export function FileBarMenu(props: { useRunner?: boolean }): JSX.Element {
     const state = itemState(item)
     switch (item.name) {
       case "moreExamples":
-        return <SubMenuRow sub="projects">{appTexts.text("moreProjects", root().words)}</SubMenuRow>
+        return <SubMenuRow sub="projects" icon={item.icon}>{appTexts.text("moreProjects", root().words)}</SubMenuRow>
       case "newFile":
         return <Actions.createFile {...state} />
       case "newExample":
@@ -578,14 +581,19 @@ export function SpellMenuRows(props: {
 }
 
 /**
- * What every `<Action>` takes from its Spell item:  it's in a menu, with the key the Spell names, if any.
- * - No key named:  the action's own, from `EDITOR_HOTKEYS`.
+ * What every `<Action>` takes from its Spell item:  it's in a menu, with the key and icon the Spell names, if any.
+ * - No key named:  the action's own, from `EDITOR_HOTKEYS`;  no icon named:  the action's own, if it has one.
  * - Greyed and ticked only where the Spell says when (`enabled-when`, `selected-when`):  those rows pass
  *   `disabled={!item.isEnabled}` or `active={item.isSelected}` themselves, so an action's own (Clear Console
  *   greyed while the console's empty, Save ticked while the file has changes) isn't overruled.
  */
-function itemState(item: SpellMenuAction): { menu: true; shortcut?: string } {
-  return item.shortcut ? { menu: true, shortcut: ActionMenus.shortcutForUI(item.shortcut) } : { menu: true }
+function itemState(item: SpellMenuAction): { menu: true; shortcut?: string; icon?: string } {
+  return {
+    menu: true,
+    // only what the Spell names:  an undefined key would overrule the action's own
+    ...(item.shortcut && { shortcut: ActionMenus.shortcutForUI(item.shortcut) }),
+    ...(item.icon && { icon: item.icon })
+  }
 }
 
 /** An action of a menu in `AppMenus.spellml`, as `core.menuOf()` gives it. */

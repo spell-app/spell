@@ -13,37 +13,37 @@ What each item does, and what it's called, is still the editor's own:  `<AppBarM
 	<property "line numbers showing" description="The code shows its line numbers">yes or no</>
 	<property "inspecting" description="A click in the app picks what it clicks">yes or no</>
 
-	<action "more examples"/>
-	<action "new file" shortcut="meta+N"/>
-	<action "new example"/>
-	<action "save" shortcut="meta+S"/>
-	<action "discard changes" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
-	<action "duplicate project"/>
-	<action "project settings"/>
-	<action "auto save" selected-when="its auto saving is yes"/>
-	<action "export project"/>
-	<action "import project"/>
-	<action "home"/>
+	<action "more examples" icon="folder open outline"/>
+	<action "new file" icon="file outline" shortcut="meta+N"/>
+	<action "new example" icon="file code outline"/>
+	<action "save" icon="save outline" shortcut="meta+S"/>
+	<action "discard changes" icon="undo" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
+	<action "duplicate project" icon="clone outline"/>
+	<action "project settings" icon="cog"/>
+	<action "auto save" icon="sync alternate" selected-when="its auto saving is yes"/>
+	<action "export project" icon="download"/>
+	<action "import project" icon="upload"/>
+	<action "home" icon="home"/>
 
-	<action "undo"/>
-	<action "redo"/>
+	<action "undo" icon="undo"/>
+	<action "redo" icon="redo"/>
 	<action "part actions"/>
-	<action "find"/>
-	<action "code settings"/>
+	<action "find" icon="search"/>
+	<action "code settings" icon="sliders horizontal"/>
 
-	<action "run mode" selected-when="its running is yes"/>
-	<action "edit mode" selected-when="its running is no"/>
-	<action "show code" selected-when="its code showing is yes"/>
-	<action "show program panel" selected-when="its program panel showing is yes"/>
-	<action "show inspector" selected-when="its inspector open is yes"/>
-	<action "inspector cards"/>
-	<action "show line numbers" selected-when="its line numbers showing is yes"/>
+	<action "run mode" icon="eye" selected-when="its running is yes"/>
+	<action "edit mode" icon="pencil alternate" selected-when="its running is no"/>
+	<action "show code" icon="code" selected-when="its code showing is yes"/>
+	<action "show program panel" icon="terminal" selected-when="its program panel showing is yes"/>
+	<action "show inspector" icon="info circle" selected-when="its inspector open is yes"/>
+	<action "inspector cards" icon="list"/>
+	<action "show line numbers" icon="list ol" selected-when="its line numbers showing is yes"/>
 
-	<action "compile and run"/>
-	<action "restart"/>
-	<action "inspect app" enabled-when="its inspecting is no"/>
-	<action "stop inspecting" enabled-when="its inspecting is yes"/>
-	<action "clear console"/>
+	<action "compile and run" icon="play"/>
+	<action "restart" icon="redo alternate"/>
+	<action "inspect app" icon="crosshairs" enabled-when="its inspecting is no"/>
+	<action "stop inspecting" icon="stop circle outline" enabled-when="its inspecting is yes"/>
+	<action "clear console" icon="ban"/>
 
 	<menu "file menu">
 		<action "more examples"/>

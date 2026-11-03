@@ -85,7 +85,7 @@ export function FileTabs() {
             on-ui-closing={() => setMenuAt(undefined)}
           >
             <div class="BarMenuPanel" onClick={() => setMenuAt(undefined)}>
-              <ui-menu direction="vertical" size="small" interactive="" class="BarMenuItems">
+              <ui-menu direction="vertical" size="small" interactive="" icon-column="" class="BarMenuItems">
                 <SpellMenuRows items={piece()!.menu(bar()!, "tab menu")} itemFor={tabMenuItem} />
               </ui-menu>
             </div>
@@ -100,11 +100,11 @@ export function FileTabs() {
 function tabMenuItem(item: SpellMenuAction): JSX.Element {
   switch (item.name) {
     case "duplicateFile":
-      return <Actions.duplicateFile menu />
+      return <Actions.duplicateFile menu icon={item.icon} />
     case "renameFile":
-      return <Actions.renameFile menu />
+      return <Actions.renameFile menu icon={item.icon} />
     case "deleteFile":
-      return <Actions.deleteFile menu />
+      return <Actions.deleteFile menu icon={item.icon} />
     default:
       return null
   }

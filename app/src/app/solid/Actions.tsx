@@ -44,7 +44,13 @@ export function Action(props: ActionProps) {
       }
     >
       <Match when={props.menu}>
-        <ui-action shortcut={props.shortcut} selected={props.active} title={props.tip} {...omit(rest, "color")}>
+        <ui-action
+          icon={props.icon}
+          shortcut={props.shortcut}
+          selected={props.active}
+          title={props.tip}
+          {...omit(rest, "color")}
+        >
           {props.title}
         </ui-action>
       </Match>
@@ -83,7 +89,7 @@ export type ActionProps = {
   button?: boolean
   /** Just its icon, `title` its tooltip:  a `<ui-icon link>` instead of a menu `<ui-item>`. */
   iconOnly?: boolean
-  /** An item of the top bar's menus:  a `<ui-action>`, its title and `shortcut`, no icon. */
+  /** An item of the top bar's menus:  a `<ui-action>`, its icon, title and `shortcut`, in the menu's icon column. */
   menu?: boolean
   /** Why it's greyed, as a tooltip:  a `menu` item's. */
   tip?: string
