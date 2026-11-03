@@ -115,6 +115,46 @@ describe("how often to check, in the largest whole unit", () => {
     expect(js).toContain(`checkedEvery: ${seconds}`)
   })
 
+  it.each([
+    ["check it once a day", undefined],
+    ["check it once a day at 5am", "{ hour: 5, minute: 0 }"],
+    ["check it every day at 5am", "{ hour: 5, minute: 0 }"],
+    ["check it once a day at 5:30 pm", "{ hour: 17, minute: 30 }"],
+    ["check it once a day at 12am", "{ hour: 0, minute: 0 }"],
+    ["check it once a day at 12pm", "{ hour: 12, minute: 0 }"],
+    ["check it once a day at 17:00", "{ hour: 17, minute: 0 }"],
+    ["check it once a day at 5am UTC", "{ hour: 5, minute: 0, utc: true }"]
+  ])("once a day, at a time:  %s", (line, at) => {
+    const { js, errors } = compiled(['star wars is a web server at "https://x":', `\t- ${line}`])
+    expect(errors).toEqual([])
+    expect(js).toContain("checkedEvery: 86400")
+    if (at) expect(js.replace(/\s+/g, " ")).toContain(`checkedAt: ${at}`)
+    else expect(js).not.toContain("checkedAt")
+  })
+
+  it.each([
+    ["se revisa una vez al día", undefined],
+    ["se revisa una vez al día a las 5", "{ hour: 5, minute: 0 }"],
+    ["se revisa cada día a las 5:30 de la tarde", "{ hour: 17, minute: 30 }"],
+    ["se revisa una vez al día a la 1", "{ hour: 1, minute: 0 }"]
+  ])("in Spanish:  %s", (line, at) => {
+    const { js, errors } = compiled(
+      ['guerra de las galaxias es un servidor web en "https://x":', `\t- ${line}`],
+      "/Test.es.spell"
+    )
+    expect(errors).toEqual([])
+    expect(js).toContain("checkedEvery: 86400")
+    if (at) expect(js.replace(/\s+/g, " ")).toContain(`checkedAt: ${at}`)
+  })
+
+  it.each(["check it once a day at 25", "check it once a day at 13pm", "check it once a day at 5:75"])(
+    "refuses a time no clock has:  %s",
+    (line) => {
+      const { errors } = compiled(['star wars is a web server at "https://x":', `\t- ${line}`])
+      expect(errors.join(" ")).toMatch(/isn.t a time of day/)
+    }
+  )
+
   it("what the ingest writes", () => {
     expect([30, 60, 300, 3600, 7200, 86400, 90, 172800].map(checkEveryInWords)).toEqual([
       "every 30 seconds",
@@ -122,7 +162,7 @@ describe("how often to check, in the largest whole unit", () => {
       "every 5 minutes",
       "every hour",
       "every 2 hours",
-      "every day",
+      "once a day",
       "every 90 seconds",
       "every 2 days"
     ])

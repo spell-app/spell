@@ -12,7 +12,7 @@ star wars is a web server at "https://swapi.py4e.com/api":
 	- its id is its "url"
 	- its rows are its "results"
 	- its next page is its "next"
-	- check it every day
+	- check it once a day at 5am
 	- characters live at "/people"
 	- planets live at "/planets"
 	- films live at "/films"

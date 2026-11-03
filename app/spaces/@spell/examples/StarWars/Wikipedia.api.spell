@@ -4,7 +4,7 @@
 // Its words belong to Wikipedia's writers.  They're asked for as it runs, never kept here, and the page says so.
 
 wikipedia is a web server at "https://en.wikipedia.org/api/rest_v1":
-	- check it every day
+	- check it once a day
 	- wiki pages live at "/page/summary"
 	- a wiki page's id is its "pageid"
 
