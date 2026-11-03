@@ -2648,6 +2648,18 @@
     },
     {
       "kind": "method",
+      "name": "useTitles",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "titles"
+        }
+      ],
+      "description": "Show action titles in the page's language (epic `language` P18, Q20): `titles` from the program's words file in that language (`words.titles`), by each title as written."
+    },
+    {
+      "kind": "method",
       "name": "onActionRun",
       "of": "core",
       "module": "acting",

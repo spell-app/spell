@@ -379,8 +379,13 @@ Its first line is how you call it, with each blank's type in brackets:
   		set its direction to up
   ```
 
-  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon` and `a new one replaces the last one` are the lines it may have;
+  - `shortcut` (once per key), `enabled when`, `selected when`, `undone as`, `icon`, `titled` and `a new one replaces the last one` are the lines it may have;
     `meta` is command on a Mac, control elsewhere.
+  - `- titled "Compile and Run"` is its title in menus, key tooltips and the Inspector, where its words aren't it;
+    a fill-in follows the program, `- titled "Duplicate [the project name]…"`.
+    - In another language:  its words there come from the program's names dictionary in that language,
+      `spell translate`'s, written into a words file of titles (`Editor.es.js`), which a host hands the core
+      (`core.useTitles()`).
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.

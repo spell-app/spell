@@ -743,11 +743,17 @@ export class SpellDeclarations {
   }
 
   /**
-   * A method's record as props:  its `params` and what it `returns` -- only what's known.
+   * A method's record as props:  its `params`, what it `returns`, whether it waits, and an action's own title
+   * (`- titled "Compile and Run"`) -- only what's known.
    * - Its name, owner and syntax come from its rule -- see `ruleDeclaration()`.
    */
   private static methodDeclaration({ params, returns, declaredBy }: P.ScopeMethod): SP.SpellDeclaration {
-    return definedOnly({ params: params.length ? params : undefined, returns, waits: waits(declaredBy) || undefined })
+    return definedOnly({
+      params: params.length ? params : undefined,
+      returns,
+      waits: waits(declaredBy) || undefined,
+      title: titleOf(declaredBy)
+    })
   }
 
   /**
@@ -891,6 +897,7 @@ const PROP_ORDER = [
   "params",
   "returns",
   "waits",
+  "title",
   "initializer",
   "constants",
   "constantOutputs",
@@ -966,6 +973,18 @@ function waits(declaredBy: P.Match | undefined): boolean {
     if (!found && node instanceof P.ASTMethodDefinition) found = node
   })
   return !!found?.isAsync
+}
+
+/**
+ * The title action `declaredBy` says it has, as written (`- titled "Compile and Run"`), fill-ins as typed -- else `undefined`.
+ * - Why:  a words file in another language gives each title its words there (`SP.SpellWords.titlesFrom()`).
+ */
+function titleOf(declaredBy: P.Match | undefined): string | undefined {
+  let found: string | undefined
+  P.forEachNode(declaredBy?.AST, (node) => {
+    if (!found && node instanceof P.ASTTypeDescription && node.describes === "action") found = node.title
+  })
+  return found
 }
 
 /** Constants enumerated values declare:  their strings, e.g. `["up", 2]` => `["up"]` (older `["'up'"]` too). */
