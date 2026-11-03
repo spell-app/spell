@@ -2057,6 +2057,11 @@ VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never th
     - exits 0 with work, which wakes the session:  requests for now, taken;  a send not yet handed over (`handedOver`)
       - a send with only comments too:  it prints them, each with Owen's latest reply
       - a Send on a docs page the epic owns (epic `epic-workflow` P13, see "Comments"):  each comment under its page
+      - a plain revisit's note (words, no pick, no picture, not his comments in its text:
+        `ReviewInbox.isNoteToTalkOver()`) goes over as a COMMENT on its item (`PlanDoc.commentPlaceOf()`), its mark
+        gone, so the page's note box lets go of the words (`ReviewClient.letGo()`);  answered on its thread like any
+        other (epic `epic-engine` I200;  Owen, 2026-11-02:  "make it a comment like the rest and clear the field")
+        - one `wait` never took (`/airplane land`):  `inbox clear | done` makes it a comment, answered
     - exits 2 on timeout
   - `epic inbox <name>` lists the comments waiting on the pages the epic owns too (`guides` in its JSON)
   - `apply [ids]`:  the sent approve / pick / Make Todo marks and test answers, into the doc (`PlanDoc.applyMark()`),

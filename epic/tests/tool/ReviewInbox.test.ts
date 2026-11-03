@@ -153,6 +153,33 @@ describe("ReviewInbox marks", () => {
     ])
   })
 
+  // epic `epic-engine` I200:  a revisit's note to talk over goes over as a comment, answered on its thread
+  test("takeWork(at, asComment):  a revisit's note to talk over goes over as a comment;  the rest stay marks", () => {
+    const inbox = new ReviewInbox()
+    inbox.setMark("q7", { action: "revisit", note: "why?" }, M1)
+    inbox.setMark("q8", { action: "revisit", note: "but?", pick: "B" }, M1)
+    inbox.setMark("q9", { action: "revisit", note: "see C1", comments: ["c1"] }, M1)
+    inbox.setMark("t1", { action: "revisit", note: "" }, M1)
+    inbox.markSent(M2)
+    const placed: string[] = []
+    const sent = inbox.takeWork(M3, (mark) => {
+      placed.push(mark.id)
+      return { anchor: mark.id, kind: "item", label: "Why", excerpt: "Why" }
+    })!.sent!
+    expect(placed).toEqual(["q7"])
+    expect(sent.marks.map((mark) => mark.id)).toEqual(["q8", "q9", "t1"])
+    expect(sent.comments).toEqual([
+      expect.objectContaining({ id: "c1", anchor: "q7", text: "why?", fromNote: "q7", at: new Date(M1).toISOString() })
+    ])
+    expect(Object.keys(inbox.marks)).toEqual(["q8", "q9", "t1"])
+    // no place for it (not on the page):  it stays a mark, talked over as before
+    const other = new ReviewInbox()
+    other.setMark("q7", { action: "revisit", note: "why?" }, M1)
+    other.markSent(M2)
+    expect(other.takeWork(M3, () => null)!.sent!.marks.map((mark) => mark.id)).toEqual(["q7"])
+    expect(ReviewInbox.isNoteToTalkOver({ action: "revisit", when: "now", note: "now!" })).toBe(false)
+  })
+
   test("bad marks throw an InboxError", () => {
     for (const bad of [
       "approve",

@@ -14,6 +14,7 @@ import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
+import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 
 import {
   CALM_ID,
@@ -61,7 +62,7 @@ import {
 
 import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
-import { CommentList } from "./CommentList"
+import { CommentList, type CommentPlace } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -1646,8 +1647,30 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Where a comment on item `id` sits on the page, as a bullhorn on it would anchor one (`BlockAnchors.js`):  for
+   * Owen's revisit note made a COMMENT as Claude takes it (`ReviewInbox.takeWork()`, epic `epic-engine` I200);
+   * `null` for anything that takes no note.
+   * - an item, a phase, an Overview sub-section:  its own id, its title the label and excerpt
+   * - the summary (no id of its own):  the Overview's first summary, `overview#summary-1`, its first words the excerpt
+   */
+  commentPlaceOf(id: string): CommentPlace | null {
+    const part = this.reviewPart(id)
+    const element = part?.element ?? this.findItem(id)
+    if (!element) return null
+    if (part?.kind === "summary") {
+      const excerpt = (this.describeItem(id)?.title ?? "").slice(0, EXCERPT_LENGTH).trim()
+      return { anchor: `${OVERVIEW_ID}#summary-1`, kind: "summary", label: "Overview", excerpt }
+    }
+    const title = PlanItem.titleOf(element)
+    const kind = !part ? "item" : part.kind === "overview" ? "section" : part.kind
+    return { anchor: element.id, kind, label: title, excerpt: title }
+  }
+
+  /**
    * Keep Owen's note -- `mark.note`, a mark Claude took and is clearing (`inbox done | clear`) -- in item `id`, as his
    * own reply:  `<epic-reply from="Owen" at="2026-10-06 10:42" re="revisit soon"><p>note</p></epic-reply>`.
+   * - a revisit's note to talk over becomes a comment instead (`commentPlaceOf()`, epic `epic-engine` I200):  this
+   *   keeps the rest (a pick's "but ...", a picture, a todo's next phase, a test's comment ...)
    * - placed before the first reply dated at or after the note (Claude's answer to it), else after the replies
    * - a note asking for MORE DETAILS (Add Details, revisit now) whose answer is the item's last card, its More Details
    *   (`<epic-more>`, no reply after it):  placed just BEFORE that card, as it came first;  the item draws it folded

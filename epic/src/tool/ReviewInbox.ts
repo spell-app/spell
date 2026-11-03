@@ -13,7 +13,7 @@ import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 // By file:  the review barrel is the page's (its client, its store);  these are plain functions
 import { STAGE_COUNTDOWN_MS, isHeld, isSent, partOf, withInlineComments } from "spell/epic/review/review.types"
 
-import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
+import { CommentList, type Comment, type CommentPlace, type IdentifiedComment } from "./CommentList"
 import { EpicPageFormat } from "./EpicPageFormat"
 import { PlanParts } from "./PlanParts"
 import { SharedComments } from "./SharedComments"
@@ -905,17 +905,21 @@ export class ReviewInbox {
    *   - and the sent urgency (`sentUrgency`)
    *   - and the comments this send handed over (`sentComments`):  only those Owen spoke on since the last send
    *     a session took, so a comment goes over once, until he replies again
+   *   - a revisit's note to talk over (`isNoteToTalkOver()`) goes over as a COMMENT, when `asComment` says where it
+   *     sits (epic `epic-engine` I200;  `noteAsComment()`):  its mark goes, so the page's note box lets go of the words,
+   *     and Claude answers it on its thread like any other;  marked `fromNote` (its item's id) in `comments`
    *   - `handedOver` becomes `sent`, so a send is taken once
    *   - a send with nothing left (all applied) is taken quietly:  nothing to wake for
    * - `canceled`:  "nevermind"s for work a session took:  stop those agents (`cancelNow()`)
    * - call it under the lock (`update()`)
    */
-  takeWork(at = isoTime()): TakenWork | null {
+  takeWork(at = isoTime(), asComment?: NotePlacer): TakenWork | null {
     const now = this.takeNow()
     for (const each of now) this.setWorking(each.id, each.action, at)
     let sent: TakenWork["sent"] = null
     if (this.hasNewSend) {
       const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
+      const fromNotes = asComment ? this.sentMarks.flatMap((mark) => this.noteAsComment(mark, asComment) ?? []) : []
       const marks = this.sentMarks.map((mark) => ({
         ...mark,
         again: Date.parse(mark.at) <= before,
@@ -924,9 +928,14 @@ export class ReviewInbox {
       const urgency = this.sentUrgency
       // a comment a sent revisit carries goes over inside it, never on its own too (I158)
       const carried = new Set(marks.flatMap((mark) => mark.comments ?? []))
-      const comments = this.sentComments.filter(
-        (comment) => !carried.has(comment.id) && Date.parse(ThreadFacts.lastWordsAt(comment)) > before
-      )
+      const made = new Set(fromNotes.map((comment) => comment.id))
+      const comments = [
+        ...this.sentComments.filter(
+          (comment) =>
+            !carried.has(comment.id) && !made.has(comment.id) && Date.parse(ThreadFacts.lastWordsAt(comment)) > before
+        ),
+        ...fromNotes
+      ]
       this.handedOver = this.sent
       if (marks.length || urgency.length || comments.length) sent = { at: this.sent!, marks, urgency, comments }
     }
@@ -935,6 +944,51 @@ export class ReviewInbox {
       .map(([id, { action, at: when }]) => ({ id, action, at: when }))
     for (const { id } of canceled) this.canceled[id].told = true
     return now.length || sent || canceled.length ? { now, sent, canceled } : null
+  }
+
+  /**
+   * Make sent mark `mark` a COMMENT, when it's a revisit's note to talk over (`isNoteToTalkOver()`) and `asComment`
+   * says where it sits (epic `epic-engine` I200);  returns the comment, else `undefined`.
+   * - Owen, 2026-11-02:  "when you pick it up, make it a comment like the rest and clear the field"
+   * - his words its text, by this inbox's person, at the mark's time (`commentFromNote()`)
+   * - its mark goes, and the mark Claude took for it:  the page's note box empties, the item shows no revisit
+   */
+  noteAsComment(mark: ListedMark, asComment: NotePlacer): (IdentifiedComment & { fromNote: string }) | undefined {
+    if (!ReviewInbox.isNoteToTalkOver(mark)) return undefined
+    const place = asComment(mark)
+    if (!place) return undefined
+    const id = this.commentFromNote(mark, place)
+    delete this.marks[mark.id]
+    delete this.taken[mark.id]
+    return { ...this.comments[id]!, id, fromNote: mark.id }
+  }
+
+  /**
+   * Add a comment at `place` saying `mark`'s note, by this inbox's person, dated when the note was written;  returns
+   * its id (`c4`).
+   * - `noteAsComment()`'s, and `epic inbox clear | done`'s for a note no `wait` handed over (`/airplane land`)
+   * - throws (`CommentsError`) on a bad place or blank note
+   */
+  commentFromNote(mark: { note?: string; at: string }, place: CommentPlace): string {
+    return this.commentList.add(place, mark.note ?? "", new Date(mark.at))
+  }
+
+  /**
+   * Is `mark` a revisit's note to TALK OVER, which Claude answers as a comment (epic `epic-engine` I200)?
+   * - a plain revisit, later, with words
+   * - NOT one with a pick ("pick B, but ..."), Owen's comments in its text (I140:  they're threads already), or a
+   *   picture (a comment holds none):  those are talked over as before, their notes kept in the item
+   * - NOT a revisit now (Do Now):  a request an agent takes, not a thread
+   */
+  static isNoteToTalkOver(mark: CheckedMark): boolean {
+    return (
+      mark.action === "revisit" &&
+      !ReviewInbox.isImmediate(mark) &&
+      !!mark.note?.trim() &&
+      !mark.pick &&
+      !mark.comments?.length &&
+      !mark.shot
+    )
   }
 
   /**
@@ -1486,10 +1540,17 @@ export type TakenWork = {
     /** `inlineComments`:  a revisit's or an approve's comments (its `comments`), as the inbox holds them (I140, I163) */
     marks: (ListedMark & { again: boolean; inlineComments?: IdentifiedComment[] })[]
     urgency: ListedUrgency[]
-    comments: IdentifiedComment[]
+    /** `fromNote`:  a revisit's note made this comment as it was taken, its item's id (I200) */
+    comments: (IdentifiedComment & { fromNote?: string })[]
   } | null
   canceled: { id: string; action: NowAction; at: string }[]
 }
+
+/**
+ * Where a revisit's note sits as a comment (`ReviewInbox.takeWork()`, epic `epic-engine` I200):  the epic page's
+ * place for its item (`PlanDoc.commentPlaceOf()`), else `undefined`, and it stays a mark.
+ */
+export type NotePlacer = (mark: ListedMark) => CommentPlace | null | undefined
 
 ////////////////
 // ## Constants
