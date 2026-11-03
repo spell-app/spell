@@ -562,6 +562,130 @@ describe("<ui-markdown editable>", () => {
   })
 })
 
+////////////////
+// ## `<ui-markdown editable>`:  formatting while you edit
+////////////////
+
+describe("<ui-markdown editable> formatting", () => {
+  /** A rendered `<ui-markdown editable>` holding `text`, its saves kept from the page (none in tests). */
+  async function editable(text: string): Promise<DOMMarkdownElement> {
+    localStorage.removeItem("ui-markdown:edit-view")
+    const host = await markdown(md(text, "editable"))
+    host.addEventListener("ui-saving", (event) => event.preventDefault())
+    return host
+  }
+
+  /** ⌥-click the piece holding `text`. */
+  async function open(host: DOMMarkdownElement, text: string) {
+    const piece = [...body(host).querySelectorAll<HTMLElement>("[data-ui-place]")].find(
+      (each) => each.textContent?.trim() === text
+    )!
+    piece.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, altKey: true }))
+    await ElementFixture.settle(host)
+  }
+
+  /** The open box, and its bar. */
+  function box(host: DOMMarkdownElement): HTMLElement {
+    return host.shadowRoot!.querySelector<HTMLElement>("[part~=edit-box]")!
+  }
+  function bar(host: DOMMarkdownElement): HTMLElement {
+    return host.shadowRoot!.querySelector<HTMLElement>("[part~=edit-bar]")!
+  }
+
+  /** Select `from`-`to` of the box's text. */
+  function select(host: DOMMarkdownElement, from: number, to: number) {
+    const walker = document.createTreeWalker(box(host), NodeFilter.SHOW_TEXT)
+    const nodes: Text[] = []
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) nodes.push(node as Text)
+    const point = (offset: number): [Text, number] => {
+      for (const node of nodes) {
+        if (offset <= node.data.length) return [node, offset]
+        offset -= node.data.length
+      }
+      return [nodes.at(-1)!, nodes.at(-1)!.data.length]
+    }
+    document.getSelection()!.setBaseAndExtent(...point(from), ...point(to))
+  }
+
+  /** Press `key` (a code, `KeyB`) in the box, with ⌘ (or Ctrl);  returns whether it was prevented. */
+  async function command(host: DOMMarkdownElement, code: string, shiftKey = false): Promise<boolean> {
+    const event = new KeyboardEvent("keydown", { code, key: code.slice(3).toLowerCase(), metaKey: true, shiftKey, bubbles: true, cancelable: true })
+    box(host).dispatchEvent(event)
+    await ElementFixture.settle(host)
+    return event.defaultPrevented
+  }
+
+  /** Enter in the box, and the drawing after it. */
+  async function enter(host: DOMMarkdownElement) {
+    box(host).dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }))
+    await ElementFixture.settle(host)
+    await nextFrames(3)
+  }
+
+  it("draws a bar of buttons above the box, light icons, the shape menu off for a table cell", async () => {
+    const host = await editable("words here\n\n| a |\n| - |\n| b |")
+    await open(host, "words here")
+    const icons = [...bar(host).querySelectorAll("ui-button")].map((button) => button.getAttribute("icon"))
+    expect(icons).toEqual(["bold", "italic", "strikethrough", "link", "list ul", "list ol", "eraser", "eye"])
+    expect(bar(host).querySelector("select")).toBeTruthy()
+    await enter(host)
+    await open(host, "b")
+    expect(bar(host).querySelector("select")).toBeNull()
+    expect(bar(host).querySelectorAll("ui-button").length).toBe(6)
+  })
+
+  it("⌘B bolds the selection, ⌘I italics, ⌘⇧X strikes;  ⌘E is left alone", async () => {
+    const host = await editable("some words here")
+    await open(host, "some words here")
+    select(host, 5, 10)
+    expect(await command(host, "KeyB")).toBe(true)
+    expect(box(host).textContent).toBe("some **words** here")
+    expect(box(host).querySelector(".md-mark")).toBeTruthy()
+    select(host, 0, 4)
+    await command(host, "KeyX", true)
+    expect(box(host).textContent).toBe("~~some~~ **words** here")
+    expect(await command(host, "KeyE")).toBe(false)
+    await enter(host)
+    expect(host.content).toBe("~~some~~ **words** here")
+  })
+
+  it("the shape menu makes a paragraph a heading;  the list button makes it a list", async () => {
+    const host = await editable("first\n\nsecond")
+    await open(host, "first")
+    const menu = bar(host).querySelector("select")!
+    menu.value = "h2"
+    menu.dispatchEvent(new Event("change"))
+    await enter(host)
+    expect(host.content).toBe("## first\n\nsecond")
+    await open(host, "second")
+    const bullet = [...bar(host).querySelectorAll("ui-button")].find((button) => button.getAttribute("icon") === "list ul")!
+    bullet.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await enter(host)
+    expect(host.content).toBe("## first\n\n- second")
+  })
+
+  it("the switch shows it formatted, remembered in this browser;  typed there, it's written back as markdown", async () => {
+    const host = await editable("some **bold** words")
+    await open(host, "some bold words")
+    const view = [...bar(host).querySelectorAll("ui-button")].at(-1)!
+    view.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    await ElementFixture.settle(host)
+    expect(box(host).querySelector("strong")?.textContent).toBe("bold")
+    expect(localStorage.getItem("ui-markdown:edit-view")).toContain("formatted")
+    box(host).querySelector("strong")!.textContent = "strong"
+    await enter(host)
+    expect(host.content).toBe("some **strong** words")
+  })
+
+  it("a piece that wouldn't come back exactly stays in the faded marks, its switch off", async () => {
+    const host = await editable("a <nobr>**kept**</nobr> b")
+    await open(host, "a kept b")
+    const view = [...bar(host).querySelectorAll("ui-button")].at(-1)!
+    expect(view.hasAttribute("disabled")).toBe(true)
+    expect(view.getAttribute("title")).toContain("can't show formatted")
+  })
+})
+
 /** Wait `count` animation frames. */
 async function nextFrames(count: number) {
   for (let frame = 0; frame < count; frame++) await new Promise((resolve) => requestAnimationFrame(resolve))

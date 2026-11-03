@@ -76,4 +76,9 @@ export type MarkdownRendering = {
   readonly drawsUITags?: boolean
   /** `text` rendered as `options` say. */
   render(text: string, options: MarkdownOptions): MarkdownResult
+  /**
+   * One piece's words rendered inline (no block around them):  the edit box's formatted view (epic `epic-engine`
+   * P61);  an engine without it gives the box only its faded-marks view.
+   */
+  renderInline?(text: string): string
 }

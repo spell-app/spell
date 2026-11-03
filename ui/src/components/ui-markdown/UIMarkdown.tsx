@@ -3,6 +3,9 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
 import type { codeVocabulary } from "spell/ui/components/ui-code/UICode.en"
+import { PrefStore } from "spell/util/persist/PrefStore"
+import { MarkdownBox, type BoxView } from "./MarkdownBox"
+import { MarkdownFormats, type Shape } from "./MarkdownFormats"
 import { MarkdownRenderer } from "./MarkdownRenderer"
 import { MarkdownSource } from "./MarkdownSource"
 import type {
@@ -296,6 +299,9 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   /** The open box's keep, 5 seconds after the last key. */
   private keepTimer?: E.CancelablePromise<unknown>
 
+  /** The engine of the last render:  the box's formatted view draws with it (`renderInline()`). */
+  private engine?: MarkdownRendering
+
   /** The saves kept edits start, one after another (`saveInTurn()`). */
   private saves: Promise<unknown> = Promise.resolve()
 
@@ -314,7 +320,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   /** ⌥-click:  open a box on the piece under it;  `false` when there's none, or it's the open box. */
   private openAt(event: MouseEvent): boolean {
     const target = event.target as Element
-    if (this.box?.field.contains(target)) return false
+    if (this.box?.editor.field.contains(target)) return false
     const piece = target.closest?.(PLACED) as HTMLElement | null
     if (!piece || !this.body?.contains(piece)) return false
     void this.open(piece, { x: event.clientX, y: event.clientY })
@@ -338,27 +344,42 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     const holder = UIMarkdown.holderOf(piece)
     const own = UIMarkdown.ownNodes(holder)
     const caret = point ? this.caretFor(holder, raw, point) : raw.length
-    const field = this.boxField(place.kind, raw)
-    holder.insertBefore(field, own[0] ?? null)
+    const shape = MarkdownFormats.shapeOf(text, { ...place, start, end })
+    const editor = this.boxFor(place.kind, raw, shape)
+    holder.insertBefore(editor.field, own[0] ?? null)
     for (const node of own) node.remove()
-    this.box = { piece, field, own, place: { ...place, start, end }, raw, opened: raw, base: text }
-    field.focus()
-    UIMarkdown.putCaret(field, caret)
+    this.domElement.shadowRoot?.append(editor.bar)
+    this.box = { piece, editor, own, place: { ...place, start, end }, raw, opened: raw, shape, openedShape: shape, base: text }
+    editor.focus(editor.view === "marks" ? caret : undefined)
   }
 
-  /** The box a piece of `kind` becomes:  its markdown, `raw`, as plain editable text. */
-  private boxField(kind: MarkdownPlaceKind, raw: string): HTMLElement {
-    const field = this.domElement.ownerDocument.createElement("span")
-    field.contentEditable = "plaintext-only"
-    field.setAttribute("part", this.partForName("edit-box"))
-    field.setAttribute("role", "textbox")
-    field.setAttribute("aria-label", this.translationForKey("editBox", { kind: this.translationForKey(kind) }))
-    if (kind === "paragraph") field.setAttribute("aria-multiline", "true")
-    field.textContent = raw
-    field.addEventListener("keydown", this.onBoxKey)
-    field.addEventListener("input", this.onBoxInput)
-    field.addEventListener("focusout", this.onBoxLeft)
-    return field
+  /** The box a piece of `kind` becomes, holding its markdown `raw`, with its formatting bar (`MarkdownBox`). */
+  private boxFor(kind: MarkdownPlaceKind, raw: string, shape: Shape | undefined): MarkdownBox {
+    const engine = this.engine
+    return new MarkdownBox({
+      document: this.domElement.ownerDocument,
+      kind,
+      raw,
+      shape,
+      label: this.translationForKey("editBox", { kind: this.translationForKey(kind) }),
+      parts: { box: this.partForName("edit-box"), bar: this.partForName("edit-bar") },
+      texts: (key) => this.translationForKey(key as never),
+      view: UIMarkdown.chosenView,
+      renderInline: engine?.renderInline ? (text) => engine.renderInline!(text) : undefined,
+      onKey: this.onBoxKey,
+      onInput: this.onBoxInput,
+      onLeave: this.onBoxLeft,
+      onView: (view) => (UIMarkdown.chosenView = view)
+    })
+  }
+
+  /** The box's view last chosen in this browser (`PrefStore`, `ui-markdown:edit-view`):  the faded marks first (J195). */
+  private static get chosenView(): BoxView {
+    return PrefStore.getAt(EDIT_VIEW_KEY) === "formatted" ? "formatted" : "marks"
+  }
+
+  private static set chosenView(view: BoxView) {
+    PrefStore.setAt(EDIT_VIEW_KEY, view)
   }
 
   /**
@@ -374,7 +395,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     const isNewLine = event.key === "Enter" && event.shiftKey && box.place.kind === "paragraph"
     // Home and End:  the box's start and end, never the page's (a Mac scrolls the page by them)
     const edge = event.shiftKey ? undefined : EDGE_KEYS[event.key as keyof typeof EDGE_KEYS]
-    if (edge !== undefined) UIMarkdown.putCaret(box.field, edge === "start" ? 0 : box.field.textContent!.length)
+    if (edge !== undefined) box.editor.caret = edge === "start" ? 0 : (box.editor.field.textContent ?? "").length
     else if (event.key === "Escape") void this.putBack()
     else if (event.key === "Enter" && !isNewLine) void this.keep("close")
     else if (event.key === "Tab") void this.keep(event.shiftKey ? "previous" : "next")
@@ -393,7 +414,9 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   @E.untracked
   private readonly onBoxLeft = (event: FocusEvent) => {
     const box = this.box
-    if (box && !box.field.contains(event.relatedTarget as Node | null)) void this.keep("close")
+    const to = event.relatedTarget as Node | null
+    // into the bar (its shape menu, the link's address):  still editing
+    if (box && !box.editor.field.contains(to) && !box.editor.bar.contains(to)) void this.keep("close")
   }
 
   /**
@@ -406,7 +429,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     const box = this.box
     if (!box) return
     this.keepTimer?.cancel()
-    const typed = box.field.innerText.replace(/\n$/, "")
+    const typed = box.editor.raw
     const text = this.textToShow
     let start = box.place.start
     if (text !== box.base) {
@@ -415,12 +438,16 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
       start = at
     }
     const place = { ...box.place, start, end: start + box.raw.length }
-    const next = MarkdownSource.replace(text, place, typed)
+    // a new shape (a heading's level, a list):  its line's lead rewritten too
+    const shape = box.editor.shape
+    const reshaped = shape && shape !== box.shape ? MarkdownFormats.reshape(text, place, typed, shape) : undefined
+    const next = reshaped?.text ?? MarkdownSource.replace(text, place, typed)
     const neighbour = how === "next" || how === "previous" ? this.neighbourOf(box.piece, how) : undefined
     const after = neighbour && this.startInNext(neighbour, place, next.length - text.length)
     if (next !== text) {
-      box.raw = next.slice(start, next.length - (text.length - place.end))
-      box.place = { ...place, end: start + box.raw.length }
+      box.place = reshaped?.place ?? { ...place, end: next.length - (text.length - place.end) }
+      box.raw = next.slice(box.place.start, box.place.end)
+      box.shape = shape
       box.base = next
       this.content = next
       this.saveInTurn()
@@ -448,8 +475,9 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   private async putBack() {
     const box = this.box
     if (!box) return
-    if (box.raw === box.opened) return void this.close(box)
-    box.field.textContent = box.opened
+    if (box.raw === box.opened && box.shape === box.openedShape) return void this.close(box)
+    box.editor.raw = box.opened
+    if (box.openedShape) box.editor.reshape(box.openedShape)
     await this.keep("close")
   }
 
@@ -460,8 +488,8 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   private close(box: OpenBox): Promise<void> | undefined {
     this.keepTimer?.cancel()
     this.box = undefined
-    box.field.removeEventListener("focusout", this.onBoxLeft)
-    box.field.replaceWith(...box.own)
+    box.editor.remove()
+    box.editor.field.replaceWith(...box.own)
     if (!this.isRenderWaiting) return
     this.isRenderWaiting = false
     return this.renderNow()
@@ -591,6 +619,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
         options.sanitized ? MarkdownRenderer.loadSanitizer() : undefined
       ])
       if (ticket !== this.ticket || !this.body) return
+      this.engine = engine
       const { html, headings, places } = engine.render(text, options)
       const fragment = sanitizer
         ? sanitizer.sanitize(html, { uiTags: !!engine.drawsUITags })
@@ -724,14 +753,6 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     return own
   }
 
-  /** Put the cursor `offset` characters into `field`'s text. */
-  private static putCaret(field: HTMLElement, offset: number) {
-    const text = field.firstChild
-    const selection = field.ownerDocument.getSelection()
-    if (!text || !selection) return
-    selection.collapse(text, Math.min(offset, text.textContent?.length ?? 0))
-  }
-
   /** A top-level node's markup, to compare renders by. */
   private static markupFor(node: Node): string {
     const markup = node.nodeType === E.NodeType.element ? (node as Element).outerHTML : node.textContent
@@ -766,8 +787,8 @@ type RenderParams = {
 type OpenBox = {
   /** the drawn piece:  a `<p>`, a heading, an `<li>`, a `<td>` / `<th>` */
   piece: HTMLElement
-  /** the box, in place of its own content */
-  field: HTMLElement
+  /** the box, in place of its own content, and its bar */
+  editor: MarkdownBox
   /** its own content, put back as the box closes */
   own: ChildNode[]
   /** its text's place in the content as kept last (offsets into the whole text, `skip-title`'s title too) */
@@ -776,9 +797,16 @@ type OpenBox = {
   raw: string
   /** its markdown as the box opened:  what Escape puts back */
   opened: string
+  /** its shape as kept last:  `undefined` for a table cell */
+  shape: Shape | undefined
+  /** its shape as the box opened */
+  openedShape: Shape | undefined
   /** the whole content as kept last:  a different one means it changed under the box */
   base: string
 }
+
+/** Where the box's view is remembered, in this browser (`PrefStore`). */
+const EDIT_VIEW_KEY = "ui-markdown:edit-view"
 
 /** `editable="tabs"`:  Write / Preview tabs, not editing in place. */
 const TABS = "tabs"

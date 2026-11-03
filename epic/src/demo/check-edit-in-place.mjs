@@ -16,6 +16,8 @@
  *   - a change behind the page (another cell, in the file):  patched in, beside the edit
  *   - another cell kept by the 5-second save, the box still open where it was, the scroll unmoved;  Escape puts it
  *     back, in the file too
+ *   - the formatting bar (P61):  above the box;  ⌘A, ⌘B and Enter bold a cell in the file, the page unmoved;  again,
+ *     the bold off
  *   - no page errors
  * - a screenshot of the table:  `edit-in-place.png` in outDir (default a temporary folder)
  * - exits 1 on any miss
@@ -145,6 +147,39 @@ try {
   await page.keyboard.press("Escape")
   await putBack
   check(readFileSync(file, "utf8").includes(`| ${cell} |`), "Escape put it back, in the file too")
+  ////////////////
+  // ## The formatting bar (P61)
+  ////////////////
+
+  const bold = "Projections"
+  await halfWay(page, bold)
+  const boldAt = await placeOf(page, bold)
+  await altClick(page, boldAt)
+  const barFacts = await page.evaluate(() => {
+    const root = document.querySelector("#loe ui-markdown").shadowRoot
+    const bar = root.querySelector("[part~=edit-bar]")?.getBoundingClientRect()
+    const box = root.querySelector("[part~=edit-box]")?.getBoundingClientRect()
+    return { bar: bar && { top: bar.top, bottom: bar.bottom, height: bar.height }, box: box && { top: box.top } }
+  })
+  check(
+    !!barFacts.bar && barFacts.bar.height > 0 && barFacts.bar.bottom <= barFacts.box.top + 1,
+    `the formatting bar sits just above the box (${barFacts.bar?.bottom} vs ${barFacts.box?.top})`
+  )
+  await page.keyboard.press("Meta+a")
+  const scrolled = await page.evaluate(() => scrollY)
+  const bolded = savedOnce(page)
+  await page.keyboard.press("Meta+b")
+  await page.keyboard.press("Enter")
+  await bolded
+  check(readFileSync(file, "utf8").includes(`| **${bold}** |`), "⌘B made the cell bold, in the file")
+  check((await page.evaluate(() => scrollY)) === scrolled, "the bar and the bold didn't move the page")
+  await altClick(page, await placeOf(page, bold))
+  await page.keyboard.press("Meta+a")
+  const unbolded = savedOnce(page)
+  await page.keyboard.press("Meta+b")
+  await page.keyboard.press("Enter")
+  await unbolded
+  check(readFileSync(file, "utf8").includes(`| ${bold} |`), "⌘B again took the bold off")
   await page.locator("#loe").screenshot({ path: join(outDir, "edit-in-place.png") })
   check(!errors.length, `no page errors${errors.length ? `:  ${errors.join(" / ")}` : ""}`)
 } finally {

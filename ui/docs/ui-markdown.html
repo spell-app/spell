@@ -115,7 +115,7 @@
 
               <ui-section id="examples-variations-editable-in-place" label="Editable in place" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="`editable`:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and edit its markdown where it is.  Enter keeps it, Tab moves on, Escape puts it back;  holding ⌥ outlines what can be edited."
+                  description="`editable`:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and edit its markdown where it is, a formatting bar above it.  Enter keeps it, Tab moves on, Escape puts it back;  holding ⌥ outlines what can be edited."
                 >
                   <ui-markdown editable>
                     <script type="text/markdown">
@@ -221,6 +221,11 @@
                     piece, Escape puts it back, and 5 seconds without typing keeps it too. Each keep is a `ui-changed` and a
                     `save()`:  a cell's `|` is escaped, and only that piece's text changes, every other byte as it was.
                     Holding ⌥ outlines what can be edited (`:state(placing)`).
+                  - The open box has a formatting bar above it: bold (⌘B), italic (⌘I), strikethrough (⌘⇧X), a link (⌘K),
+                    Paragraph or a heading, a bulleted or numbered list, clear formatting, and a switch between two views:
+                    the markdown with its marks faint (what's saved is what's seen), or formatted only, written back as
+                    markdown as it's kept. A piece that wouldn't come back exactly stays in the first. The view is
+                    remembered in the browser.
                   - An element with no `source` saves its own text back into the page through the page's inline saver
                     (`UI.sources.inlineSaver`): the docs pages' writes it into the page's file, found by its text.
                   - `editable="tabs"`: Write / Preview tabs. The preview draws as the element does, swapping only the
@@ -258,7 +263,8 @@
                 <script type="text/markdown">
                   Nothing of its own: links, task-list checkboxes and code blocks inside are ordinary tab stops. `editable`:
                   ⌥-click a piece to edit it; in its box, Enter keeps it, Shift+Enter is a new line in a paragraph, Tab and
-                  Shift+Tab keep it and move on, Escape puts it back, Home and End go to the box's start and end.
+                  Shift+Tab keep it and move on, Escape puts it back, Home and End go to the box's start and end; ⌘B bold,
+                  ⌘I italic, ⌘⇧X strikethrough, ⌘K a link (Ctrl on Windows and Linux).
                   `editable="tabs"`'s tabs are one tab stop: the arrow keys move between Write and Preview, Home and End to
                   either end.
                 </script>

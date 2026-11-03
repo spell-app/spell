@@ -94,6 +94,7 @@ export const markdownVocabulary = {
     { name: "tabs", description: '`editable="tabs"`:  the Write / Preview tab list.' },
     { name: "tab", description: '`editable="tabs"`:  each tab button.' },
     { name: "editor", description: '`editable="tabs"`:  the `<textarea>` holding the markdown.' },
+    { name: "edit-bar", description: "`editable`:  the formatting bar above the open box." },
     { name: "edit-box", description: "`editable`:  the box a piece becomes while it's edited in place, holding its markdown." }
   ],
   states: [
@@ -110,6 +111,23 @@ export const markdownVocabulary = {
     { key: "paragraph", text: "paragraph", description: "`editable`:  a paragraph, in `editBox`." },
     { key: "heading", text: "heading", description: "`editable`:  a heading, in `editBox`." },
     { key: "item", text: "list item", description: "`editable`:  a list item, in `editBox`." },
-    { key: "cell", text: "table cell", description: "`editable`:  a table cell, in `editBox`." }
+    { key: "cell", text: "table cell", description: "`editable`:  a table cell, in `editBox`." },
+    { key: "formatBar", text: "Formatting", description: "`editable`:  accessible name of the formatting bar." },
+    { key: "bold", text: "Bold (⌘B)", description: "`editable`:  the bar's bold button." },
+    { key: "italic", text: "Italic (⌘I)", description: "`editable`:  the bar's italic button." },
+    { key: "strikethrough", text: "Strikethrough (⌘⇧X)", description: "`editable`:  the bar's strikethrough button." },
+    { key: "link", text: "Link (⌘K)", description: "`editable`:  the bar's link button." },
+    { key: "linkAddress", text: "Link address:  Enter puts it on, empty takes it off", description: "`editable`:  the link's address field." },
+    { key: "shape", text: "Paragraph or heading", description: "`editable`:  the bar's shape menu." },
+    { key: "shapeParagraph", text: "Paragraph", description: "`editable`:  the shape menu's paragraph." },
+    { key: "shapeH2", text: "Heading 2", description: "`editable`:  the shape menu's `##`." },
+    { key: "shapeH3", text: "Heading 3", description: "`editable`:  the shape menu's `###`." },
+    { key: "shapeH4", text: "Heading 4", description: "`editable`:  the shape menu's `####`." },
+    { key: "bullet", text: "Bulleted list", description: "`editable`:  the bar's bulleted list button." },
+    { key: "numbered", text: "Numbered list", description: "`editable`:  the bar's numbered list button." },
+    { key: "clear", text: "Clear formatting", description: "`editable`:  the bar's clear formatting button." },
+    { key: "view", text: "Show it formatted, without its marks", description: "`editable`:  the bar's view switch." },
+    { key: "formattedOff", text: "This text can't show formatted:  written back, it wouldn't be the same", description: "`editable`:  the switch's tooltip, for a piece whose markdown wouldn't come back exactly." },
+    { key: "noFormattedView", text: "This markdown's engine has no formatted view", description: "`editable`:  the switch's tooltip, for a subclass's engine without `renderInline()`." }
   ]
 } as const satisfies E.ComponentVocabulary
