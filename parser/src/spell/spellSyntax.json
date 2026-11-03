@@ -5255,11 +5255,11 @@
           "ruleNames": ["define_menu"],
           "internal": false,
           "file": "src/spell/rules/classes/DefineMenu.ts",
-          "line": 20,
+          "line": 34,
           "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
               "example": "a game is an app where:\n\t- to deal:\n\t\t- undone as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
               "outputs": {
                 "js": {
@@ -5274,7 +5274,31 @@
               }
             },
             {
-              "syntax": "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+              "syntax": "{type:subject_its} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?",
+              "example": "a game is an app where:\n\t- its \"game\" menu has actions \"deal\", \"-\" and \"undo\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"-\", \"undo\"], title: \"game\" })"
+                },
+                "ts": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n}\ncore.useElement(Game, GameElement)\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"-\", \"undo\"], title: \"game\" })"
+                },
+                "py": {
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"-\", \"undo\"], \"title\": \"game\"})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} (menuWord:menu) has {list:expression} , each running {action:text} (, titled {title:text})?"
+            },
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of {list:expression} , each running {action:text} (, titled {title:text})?"
             }
           ],
           "aliases": ["statement"]

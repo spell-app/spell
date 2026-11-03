@@ -1971,7 +1971,8 @@ classesEs.addRule(DefineGroup, {
 // el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
 // `- su "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]",
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -2015,7 +2016,69 @@ classesEs.addRule(DefineMenu, {
 
 // ... sin el sujeto:  `- "menú del juego" es un menú de "repartir" y "deshacer"`
 classesEs.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]"
+  syntax:
+    "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)] (titulado {title:text})?"
+})
+// ... dicho con TIENE (épica `language` C1):  `- su menú "archivo" tiene acciones "guardar" y "abrir"`;
+// sus submenús, `tiene menús "archivo" y "editar"`;  ambos, `tiene acciones "guardar" y menús "recientes"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "sus acciones, y sus submenús:  nombrado `menú` y sus palabras",
+          input: [
+            "una partida es una aplicación donde:",
+            '\t- su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"'
+          ],
+          js: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"',
+            'core.describeMenu(Partida, "menúJuego", { items: ["undo", "-", "redo", "menúAyuda"], title: "juego" })'
+          ],
+          ts: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a partida, drawn in its own element, e.g. by `draw the partida`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its partida's properties;  its methods call its partida's.",
+            " * - What every view's element does, e.g. drawing its partida, is `SpellElement`'s.",
+            " */",
+            "export class PartidaElement extends SpellElement<Partida> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "partida", [])',
+            "}",
+            "core.useElement(Partida, PartidaElement)",
+            '// su menú "juego" tiene acciones "deshacer", "-" y "rehacer" y menús "ayuda"',
+            'core.describeMenu(Partida, "menúJuego", { items: ["undo", "-", "redo", "menúAyuda"], title: "juego" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+// ... sin el sujeto:  `- menú "archivo" tiene acciones "guardar" y "abrir"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_implied} (menuWord:menú|menu) {menu:quoted_member} tiene (acciones [items:{item:text} (,|y)] (y? (menús|menus) [menus:{item:text} (,|y)])?|(menús|menus) [menus:{item:text} (,|y)]) (titulado {title:text})?"
+})
+// ... y lleno de una lista:  `- su menú "ejemplos" tiene sus ejemplos, cada uno ejecutando "abrir ejemplo"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} (menuWord:menú|menu) {menu:quoted_member} tiene {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
+})
+// un menú lleno de una lista, un elemento por cada cosa (épica `language` P19, Q21):
+// `- su "más ejemplos" es un menú de sus ejemplos, cada uno ejecutando "abrir ejemplo"`
+classesEs.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} es un (menú|menu) de {list:expression} , cada uno ejecutando {action:text} (, titulado {title:text})?"
 })
 
 // cuál de los menús de una aplicación es su barra de menú (épica `elemental-spell` P10):

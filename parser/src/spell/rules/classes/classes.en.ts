@@ -2056,7 +2056,7 @@ classes.addRule(DefineGroup, {
 })
 
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?",
   tests: [
     {
       compileAs: "block",
@@ -2131,7 +2131,123 @@ classes.addRule(DefineMenu, {
 
 // ... with the subject left out:  `- "game menu" is a menu of "deal" and "undo"`
 classes.addRule(DefineMenu, {
-  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)] (titled {title:text})?"
+})
+// ... said with HAS, Owen's wording (epic `language` C1):  `- its "file" menu has actions "save" and "open"`;
+// its sub-menus, `has menus "file" and "edit"`;  both, `has actions "save" and menus "recent"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "its actions:  named for its words and `menu`, titled with its words",
+          input: ["a game is an app where:", '\t- its "game" menu has actions "deal", "-" and "undo"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "game" menu has actions "deal", "-" and "undo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"], title: "game" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "game" menu has actions "deal", "-" and "undo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"], title: "game" })'
+          ]
+        },
+        {
+          title: "its sub-menus, by their words;  a title of its own",
+          input: ["a game is an app where:", '\t- its "bar" menu has menus "game" and "help menu", titled "Menus"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "bar" menu has menus "game" and "help menu", titled "Menus"',
+            'core.describeMenu(Game, "barMenu", { items: ["gameMenu", "helpMenu"], title: "Menus" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "bar" menu has menus "game" and "help menu", titled "Menus"',
+            'core.describeMenu(Game, "barMenu", { items: ["gameMenu", "helpMenu"], title: "Menus" })'
+          ]
+        },
+        {
+          title: "both:  its actions, then its sub-menus",
+          input: ["a game is an app where:", '\t- its "file" menu has actions "deal" and "undo" and menus "recent"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// - its "file" menu has actions "deal" and "undo" and menus "recent"',
+            'core.describeMenu(Game, "fileMenu", { items: ["deal", "undo", "recentMenu"], title: "file" })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)",
+            '// - its "file" menu has actions "deal" and "undo" and menus "recent"',
+            'core.describeMenu(Game, "fileMenu", { items: ["deal", "undo", "recentMenu"], title: "file" })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+// ... with the subject left out:  `- "file" menu has actions "save" and "open"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_implied} {menu:quoted_member} (menuWord:menu) has (actions [items:{item:text} (,|and)] (and? menus [menus:{item:text} (,|and)])?|menus [menus:{item:text} (,|and)]) (titled {title:text})?"
+})
+// ... and filled from a list:  `- its "examples" menu has its examples, each running "open example"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} (menuWord:menu) has {list:expression} , each running {action:text} (, titled {title:text})?"
+})
+// a menu filled from a list, an item per thing in it (epic `language` P19, Q21):
+// `- its "more examples" is a menu of its examples, each running "open example"`
+classes.addRule(DefineMenu, {
+  syntax:
+    "{type:subject_its} {menu:quoted_member} is a menu of {list:expression} , each running {action:text} (, titled {title:text})?"
 })
 
 // which of an app's menus is its menu bar (epic `elemental-spell` P10):  `- its menu bar is "game menu"`

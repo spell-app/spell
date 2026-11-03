@@ -1268,6 +1268,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
   - A `<menu "game menu">` is ONE line, its `<action>`s quoted after it:
     `its "game menu" is a menu of "deal" , "-" and "undo"` (`define_menu`), its block swallowed (P10).
+    A `<menu>` inside it is a sub-menu, quoted the same way;  its `title=` adds `titled "..."`, and
+    `for-each=` with `action=` reads as `its "x" is a menu of <list> , each running "..."` (epic `language` P19).
     An app tag's `menu-bar=` is a line ending its body, `- its menu bar is "game menu"` (`menu_bar`).
   - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
 - A spellx DRAWING's markup (epic `elemental-spell` P7):

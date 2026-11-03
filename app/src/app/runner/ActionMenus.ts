@@ -99,11 +99,14 @@ export class ActionMenus {
   }
 
   /**
-   * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups.
+   * A menu's items as elements:  a `<ui-action>` drawing each action, a divider for each line between groups,
+   * and an item holding a `<ui-menu>` for each menu inside it, Spell UI's sub-menu (epic `language` P19).
    * - An action's shortcut goes on as its `shortcut` attribute, in Spell UI's words (`shortcutForUI()`).
+   * - A sub-menu's title and items are read as it's drawn:  a menu filled from a list shows the list as it was.
    */
   static itemsFor(items: readonly MenuItem[]): HTMLElement[] {
     return items.map((item) => {
+      if (item.kind === "menu") return ActionMenus.subMenuFor(item)
       const element = document.createElement(item.kind === "action" ? ACTION_TAG : ITEM_TAG)
       element.setAttribute(MADE, "")
       if (item.kind === "separator") element.setAttribute("type", "divider")
@@ -113,6 +116,19 @@ export class ActionMenus {
       }
       return element
     })
+  }
+
+  /** A menu inside a menu:  an item with its title, holding a vertical `<ui-menu>` of its items. */
+  private static subMenuFor(item: MenuItem & { kind: "menu" }): HTMLElement {
+    const element = document.createElement(ITEM_TAG)
+    element.setAttribute(MADE, "")
+    element.append(item.title)
+    const menu = document.createElement(MENU_TAG)
+    menu.setAttribute("direction", "vertical")
+    menu.setAttribute("aria-label", item.title)
+    menu.append(...ActionMenus.itemsFor(item.items))
+    element.append(menu)
+    return element
   }
 
   /**

@@ -631,6 +631,13 @@ export type SpellxTwinWords = {
   menu: string
   /** The words between a menu's items:  the last pair's, `and`. */
   menuAnd: string
+  /** A menu's own title, its `title=`, after its items (epic `language` P19):  `titled {quoted title}`. */
+  menuTitled: string
+  /**
+   * A menu filled from a list, its `for-each=` and `action=` (Q21):
+   * `its {name} is a menu of {for-each} , each running {quoted action}`.
+   */
+  menuEach: string
   /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
   menuBar: string
   /**
