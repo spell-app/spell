@@ -115,6 +115,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
+  // English's possessive only:  Spanish has no "'s"
+  "possessive-either":
+    'Se lee como {property} de {owner};  {whole} también tiene {property}:  para ese, escribe "{property} de {whole}"',
+  "its-not-it-is": '"it\'s" quiere decir "it is":  para su {property}, escribe "its {property}"',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":

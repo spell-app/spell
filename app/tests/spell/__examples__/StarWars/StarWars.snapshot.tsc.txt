@@ -5,7 +5,7 @@
 328:5 TS2322 Type 'undefined' is not assignable to type 'Film'.
 351:73 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
 419:60 TS2353 Object literal may only specify known properties, and 'link' does not exist in type 'PropInfo'.
-460:71 TS2345 Argument of type '(person: Person) => Promise<void>' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
+460:71 TS2345 Argument of type '(character: Character) => Promise<void>' is not assignable to parameter of type 'CollectionIterationCallback<unknown>'.
 482:73 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
 589:73 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
 704:73 TS2345 Argument of type 'undefined' is not assignable to parameter of type '((item: unknown, position: number) => Element) | null'.
@@ -20,7 +20,7 @@
 1106:5 TS2322 Type 'Thing | undefined' is not assignable to type 'Thing'.
 1114:5 TS2322 Type 'undefined' is not assignable to type 'Thing'.
 1120:5 TS2322 Type 'Film | undefined' is not assignable to type 'Film'.
-1128:14 TS2339 Property 'open' does not exist on type 'Person'.
+1128:14 TS2339 Property 'open' does not exist on type 'Character'.
 1135:52 TS2322 Type '"wrap"' is not assignable to type 'boolean | "" | undefined'.
 1149:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.
 1152:18 TS2322 Type '{ children: string; active: boolean; onClick: (event: Event) => void; style: string; }' is not assignable to type 'UIItemJSXAttributes'.

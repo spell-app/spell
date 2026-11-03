@@ -1822,11 +1822,41 @@
           "aliases": ["expression"]
         },
         {
+          "className": "PossessiveMark",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/properties/PossessiveMark.ts",
+          "line": 10,
+          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "PossessiveOwner",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/properties/PossessiveOwner.ts",
+          "line": 15,
+          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "PossessiveProperty",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/properties/PossessiveProperty.ts",
+          "line": 32,
+          "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "PropertyExpression",
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -2557,10 +2587,20 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/lists/ListItemExpression.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Base for rules which pick ONE item out of a list, e.g. `the first card of the deck`: what we are is an item of it.",
           "syntaxes": [],
           "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveOrdinal",
+          "ruleNames": [],
+          "internal": true,
+          "file": "src/spell/rules/lists/PossessiveOrdinal.ts",
+          "line": 16,
+          "purpose": "`the deck's first card` ~== `the first card of the deck` (epic `language`, P16).",
+          "syntaxes": [],
+          "aliases": []
         },
         {
           "className": "BracketedList",

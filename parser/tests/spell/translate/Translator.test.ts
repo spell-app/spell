@@ -153,6 +153,24 @@ describe("Translator:  English to Spanish, rule by rule", () => {
     expect([...file.risky.keys()]).toEqual([at])
   })
 
+  test("English's `'s` is written as `de`:  `the pile's first card's rank` (epic `language` P16)", () => {
+    const source = [
+      'a "card" is a thing where:',
+      '\t- its "rank" is a number',
+      'a "deck" is a list of cards',
+      "to test card setup",
+      "\tset the pile to a new deck",
+      "\tprint the pile's first card's rank",
+      "\tprint the pile's length"
+    ].join("\n")
+    const { lines } = translated(source)
+    expect(lines.slice(5, 7)).toEqual([
+      "\timprimir el rango de la primera carta en la pila",
+      "\timprimir el largo de la pila"
+    ])
+    expect(parseSpellProject([{ path: "/Carta.es.spell", contents: lines.join("\n") }]).files[0]!.errors).toEqual([])
+  })
+
   test("a possessive agrees in number with a name of either gender:  `sus espadas`, `sus corazones`", () => {
     const source = 'a "card" is a thing where:\n\t- its "spades" is a number\n\t- its "hearts" is a number\n'
     expect(translated(source).lines.slice(1, 3)).toEqual([

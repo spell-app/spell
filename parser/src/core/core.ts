@@ -327,12 +327,13 @@ export const coreMethods = defineCoreModule({
 
   /**
    * Special methods for `isOfType()`, for type names `typeOf()` never actually returns
-   * (`integer`, `character`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison.
+   * (`integer`, `letter`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison.
+   * - NOT `character`:  a project may name its own type that (epic `language` Q17), e.g. Star Wars's.
    */
   IS_OF_TYPE_SPECIALS: {
     integer: (thing: unknown): boolean => core.isAnInteger(thing),
-    character: (thing: unknown): boolean => core.typeOf(thing) === "text" && (thing as string).length === 1,
-    char: (thing: unknown): boolean => core.isOfType(thing, "character")
+    letter: (thing: unknown): boolean => core.typeOf(thing) === "text" && (thing as string).length === 1,
+    char: (thing: unknown): boolean => core.isOfType(thing, "letter")
   } as IsOfTypeSpecials,
 
   /**

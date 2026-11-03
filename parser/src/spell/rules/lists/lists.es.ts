@@ -475,6 +475,8 @@ listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specif
   ]
 })
 
+// packs: none PossessiveOrdinal -- Spanish has no "the deck's first card":  "la primera carta del mazo"
+
 listsEs.addRule(OrdinalWhereExpression, {
   syntax: "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
   tests: [

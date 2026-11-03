@@ -120,7 +120,10 @@ export class Garden extends App {
   get sill() { return this.getProp("sill") }
   set sill(value) { this.setProp("sill", value) }
 
-  /** a day goes by:  every plant is one day drier */
+  /**
+   * a day goes by:  every plant is one day drier
+   * (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
+   */
   waitADay() {
     this.sill.forEach((plant) => (plant.daysSinceWatered = plant.daysSinceWatered + 1))
   }

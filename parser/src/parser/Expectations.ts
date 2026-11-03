@@ -32,6 +32,21 @@ export class Expectations {
     return collector.results()
   }
 
+  /**
+   * Run `parse` as a normal parse, recording nothing, even inside `collect()`.
+   * - For a rule which parses tokens cut short on purpose, e.g. a possessive's owner up to its `'s`:
+   *   running out of THOSE tokens says nothing about what comes next.
+   */
+  static paused<T>(parse: () => T): T {
+    const outer = Expectations.current
+    Expectations.current = undefined
+    try {
+      return parse()
+    } finally {
+      Expectations.current = outer
+    }
+  }
+
   /** Everything recorded so far, in order. */
   readonly records: P.Expectation[] = []
   /** How many `Sequence`s deep the parse is right now. */

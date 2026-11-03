@@ -1813,7 +1813,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -1844,6 +1844,32 @@
           "syntaxes": [
             {
               "syntax": "{definite_article} {property:member_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveProperty",
+          "ruleNames": ["possessive_property"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveProperty.ts",
+          "line": 32,
+          "purpose": "`the character's name` ~== `the name of the character` (epic `language`, P16).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {property:member_words}",
+              "example": "the card's short rank",
+              "outputs": {
+                "js": {
+                  "code": "card.shortRank"
+                },
+                "ts": {
+                  "code": "card.shortRank"
+                },
+                "py": {
+                  "code": "card.short_rank"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -2112,6 +2138,26 @@
           "file": "src/spell/rules/properties/Property.ts",
           "line": 12,
           "purpose": "ONE word naming a property: initial-lower-case, not one of the language's own words (its `blacklist`).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "PossessiveMark",
+          "ruleNames": ["possessive_mark"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveMark.ts",
+          "line": 10,
+          "purpose": "The `'s` of a possessive, e.g. in `the character's name` (epic `language`, P16).",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
+          "className": "PossessiveOwner",
+          "ruleNames": ["possessive_owner"],
+          "internal": false,
+          "file": "src/spell/rules/properties/PossessiveOwner.ts",
+          "line": 15,
+          "purpose": "What comes before a possessive's `'s`, e.g. `the character` in `the character's name` (epic `language`, P16).",
           "syntaxes": [],
           "aliases": []
         }
@@ -2544,7 +2590,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/lists/ListItemExpression.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Base for rules which pick ONE item out of a list, e.g. `the first card of the deck`: what we are is an item of it.",
           "syntaxes": [],
           "aliases": ["expression"]
@@ -2781,6 +2827,32 @@
                 },
                 "py": {
                   "code": "core.get_item_at(my_list, 0)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "PossessiveOrdinal",
+          "ruleNames": ["possessive_ordinal"],
+          "internal": false,
+          "file": "src/spell/rules/lists/PossessiveOrdinal.ts",
+          "line": 16,
+          "purpose": "`the deck's first card` ~== `the first card of the deck` (epic `language`, P16).",
+          "syntaxes": [
+            {
+              "syntax": "{expression:possessive_owner} {possessive_mark} {ordinal} {arg:singular_identifier}",
+              "example": "deck's first card",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(deck, 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(deck, 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(deck, 0)"
                 }
               }
             }

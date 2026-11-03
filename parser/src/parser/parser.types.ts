@@ -54,7 +54,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,
   number: undefined,
   integer: "number",
-  character: "text",
+  // one letter of text:  `the first character of the name` (epic `language` Q18;  `character` until then)
+  letter: "text",
   // yes or no:  a javascript boolean -- NOT `one of red, black`, a property's list of values
   choice: undefined,
   date: undefined,

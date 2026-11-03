@@ -232,12 +232,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 
 - `match.datatype` says what an expression is, in spell's words.
   - its type:  `P.Datatype`, in [parser.types.ts](../parser/parser.types.ts)
-  - `text`, `number`, `integer`, `character`, `choice`, `date`
+  - `text`, `number`, `integer`, `letter`, `choice`, `date`
   - `list`, `thing`, `app`, `nothing`, `list of cards`
   - and a user's type, by its `TypeScope` name:  `Card`
   - `undefined` ~== unknown, compatible with everything:  nothing stops parsing for it
 - ONE normaliser, `SP.typeName()`, turns what a user WRITES into those words.
   - e.g. `string`, `boolean`, `yes or no`, `array`, `fraction`, `char`, plurals
+    - NOT `character`, since epic `language` Q17:  a program may name its own type that
   - `SpellType.mapValue()` uses it too, keeping classes Type_Case for compiled code (`List`).
   - The vocabulary is spell's, [`SP.TYPE_WORDS`](builtinTypes.ts), handed to the parser's `P.typeName()`.
     - The parser knows only each datatype's own name, so a translation brings its own words.
@@ -421,6 +422,18 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       - a rule taking only `{variable}` can't say it with `the`:  `the score 1 to 3 of ...`
     - the longest run its type declares, or a scan found further down (`P.TypeScope.knowsPropertyAhead()`)
     - `the_things` (`the cards`) steps aside for a property of that name, by the same walk
+  - `the character's name` is [`possessive_property`](rules/properties/PossessiveProperty.ts) (epic `language` P16), English only:
+    - its syntax:  `{expression:possessive_owner} {possessive_mark} {property:member_words}`
+    - `possessive_owner` is any operand ending at an `'s`, parsed on the tokens cut there, the last `'s` first:
+      so a chain reads left to right, and the rule is never its own first operand
+    - `possessive_mark`:  an apostrophe (`'` or `’`) and `s`, touching each other and the owner
+    - it reads as `the X of Y` does:  the longest run declared (`Priority.mostSpecific`), else one loose word
+      (`Priority.preferred`, so `the deck's first card` stays `possessive_ordinal`'s, at `Priority.specific`)
+    - after an `of` (`SpellExpression.ofObject()`), the types say whose `'s` it is:
+      the nearest name's when its type has the member or isn't known, else the whole phrase's when its type has it;
+      both:  the nearest, and the `of` phrase warns (`PossessiveProperty.warnIfEitherReading()`)
+    - never after a call:  `double the card's rank` doubles the rank
+    - a translation writes it as `the X of Y`:  the rule's `writtenAs`
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
   - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`
@@ -436,7 +449,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - the types:  `thing`, `list`, `app`, `text`, `date`
   - each entry:
     - its docs
-    - `itemType`, e.g. `text` holds `character`s
+    - `itemType`, e.g. `text` holds `letter`s
     - `members`, each a `SP.BuiltInMember`
   - not a `.spell` file, not statics on runtime classes (epic page D25)
   - A type's NAME and super-type stay those of `P.BUILT_IN_TYPES`:  the parser's vocabulary.

@@ -59,9 +59,10 @@ a plant belongs to one windowsill
 garden is an app where:
 	- its "sill" is a new windowsill
 	// a day goes by:  every plant is one day drier
+	// (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
 	- to wait a day:
 		for each plant in its sill
-			set the days since watered of the plant to the days since watered of the plant + 1
+			set the plant's days since watered to the plant's days since watered + 1
 	- to draw it:
 		return <div class="Garden">
 			<ui-button color="primary" onClick={wait a day}>A day goes by</ui-button>

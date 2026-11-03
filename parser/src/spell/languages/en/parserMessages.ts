@@ -160,6 +160,11 @@ export const PARSER_MESSAGES = {
   /** A rider's word that doesn't agree. */
   "hides-property":
     'Here "{name}" hides the property "{name}":  use another name, or say "its {name}" for the property',
+  /** `the name of the character's friend`, when the name of the character has a `friend` too (epic `language` Q16). */
+  "possessive-either":
+    'Read as {owner}\'s {property};  {whole} has a {property} too:  for that one, write "the {property} of {whole}"',
+  /** `it's name`, which says "it is name". */
+  "its-not-it-is": '"it\'s" means "it is":  for its {property}, write "its {property}"',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */

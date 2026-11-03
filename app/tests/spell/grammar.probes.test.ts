@@ -827,9 +827,9 @@ describe("datatypes", () => {
       "the length of the title  =>  number
       the length of the deck  =>  number
       the size of the deck  =>  number
-      the characters of the title  =>  list of characters
-      the first character of the title  =>  character
-      a random character of the title  =>  character
+      the characters of the title  =>  list of letters
+      the first character of the title  =>  letter
+      a random character of the title  =>  letter
       the length of the first character of the title  =>  number"
     `)
   })

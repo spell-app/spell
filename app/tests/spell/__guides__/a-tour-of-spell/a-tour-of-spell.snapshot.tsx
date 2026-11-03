@@ -145,7 +145,10 @@ export class Garden extends App {
   @prop({ init: () => new Windowsill(), early: true })
   accessor sill!: Windowsill
 
-  /** a day goes by:  every plant is one day drier */
+  /**
+   * a day goes by:  every plant is one day drier
+   * (`the plant's days since watered` is `the days since watered of the plant`, said the other way)
+   */
   waitADay() {
     this.sill.forEach((plant) => (plant.daysSinceWatered = plant.daysSinceWatered + 1))
   }

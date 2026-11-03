@@ -619,7 +619,15 @@ export type SpellxTwinWords = {
 }
 
 /** What a spellx template tag makes:  `<spell-view>` a view's template, `<spell-app>` an app ... */
-export type SpellxTemplateKind = "view" | "thing" | "page" | "app" | "page template" | "app template" | "notebook" | "more of"
+export type SpellxTemplateKind =
+  | "view"
+  | "thing"
+  | "page"
+  | "app"
+  | "page template"
+  | "app template"
+  | "notebook"
+  | "more of"
 
 /** What a spellx member tag declares. */
 export type SpellxDeclarationKind = "property" | "alias" | "action" | "draw" | "event" | "test" | "menu" | "group"
