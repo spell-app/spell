@@ -1555,19 +1555,20 @@ const SPELL_ELEMENTS: Map<string, SpellElementEntry> = ((globalThis as SpellElem
 /** `globalThis`, holding `SPELL_ELEMENTS`. */
 type SpellElementsGlobal = typeof globalThis & { [key: symbol]: Map<string, SpellElementEntry> | undefined }
 
-// a drop lands on the element of a viewable list its type says is droppable, or reordered:
-// `Dragging` knows only what we tell it
-Dragging.isDropTarget = (element) => {
-  const list = SpellElement.listOf(element)
-  const Class = list?.constructor as { reorderItemsAfter?: number } | undefined
-  return !!Class && (!!SpellElement.componentOf(element)?.isDroppable || Class.reorderItemsAfter !== undefined)
-}
-
-// ... and takes it if its rules say so:  `can take a card if: ...`
-Dragging.takesDrop = (element) => {
-  const component = SpellElement.componentOf(element)
-  return !!component && component.takesDrag()
-}
+// a drop lands on the element of a viewable list its type says is droppable, or reordered,
+// and it takes it if its rules say so (`can take a card if: ...`):  `Dragging` knows only what we tell it.
+// - A rule of this copy's own:  the editor's layout runs on another copy, whose rule doesn't know our elements
+Dragging.addDropRule({
+  isDropTarget: (element) => {
+    const list = SpellElement.listOf(element)
+    const Class = list?.constructor as { reorderItemsAfter?: number } | undefined
+    return !!Class && (!!SpellElement.componentOf(element)?.isDroppable || Class.reorderItemsAfter !== undefined)
+  },
+  takesDrop: (element) => {
+    const component = SpellElement.componentOf(element)
+    return !!component && component.takesDrag()
+  }
+})
 
 /** What a press in starts no drag:  it's the control's, e.g. typing in a task's title. */
 const CONTROL_SELECTOR = "input, textarea, select, button, [contenteditable]:not([contenteditable=false])"

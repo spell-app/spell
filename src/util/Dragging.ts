@@ -283,11 +283,26 @@ export class Dragging {
     return chain
   }
 
-  /** May `element` take a drop?  Set by its owner:  `SpellElement` says a viewable list's element may. */
-  static isDropTarget: (element: Element) => boolean = () => false
+  /** May `element` take a drop?  Yes if any owner's rule says so (`addDropRule()`). */
+  static isDropTarget(element: Element): boolean {
+    return Dragging.dropRules.some((rule) => rule.isDropTarget(element))
+  }
 
-  /** Would drop target `element` take what's dragged now?  Set by its owner, as `isDropTarget()`. */
-  static takesDrop: (element: Element) => boolean = () => true
+  /** Would drop target `element` take what's dragged now?  The rule that owns it says;  with none, yes. */
+  static takesDrop(element: Element): boolean {
+    const rule = Dragging.dropRules.find((each) => each.isDropTarget(element))
+    return rule ? rule.takesDrop(element) : true
+  }
+
+  /**
+   * Add an owner's rule for what takes a drop, e.g. `SpellElement`'s:  a viewable list's element.
+   * - A rule, not a setting:  each copy of a runtime on the page adds its own, and each knows only its own elements
+   *   (the editor's layout runs on a copy, beside the program's).  One setting, the last copy's, would refuse the rest.
+   */
+  static addDropRule(rule: DropRule): void {
+    Dragging.dropRules.push(rule)
+  }
+  private static readonly dropRules: DropRule[] = []
 
   /** The click a drag's pointer up makes is no click:  swallowed, once, before anything hears it. */
   private static swallowNextClick() {
@@ -299,6 +314,14 @@ export class Dragging {
     // a pointer up off the element makes no click:  stop waiting for one
     soon(() => window.removeEventListener("click", swallow, { capture: true }))
   }
+}
+
+/** One owner's rule for what takes a drop:  `Dragging.addDropRule()`. */
+export type DropRule = {
+  /** May `element` take a drop?  Only the owner's own elements. */
+  isDropTarget: (element: Element) => boolean
+  /** Would `element`, one of its drop targets, take what's dragged now? */
+  takesDrop: (element: Element) => boolean
 }
 
 /** How a drag goes:  what its owner says. */
