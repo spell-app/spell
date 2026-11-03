@@ -515,10 +515,10 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
   test("a project's code closes, and stays closed;  Show in Code opens it", async () => {
     const code = page.locator(".InputEditor .monaco-editor")
     expect(await code.count()).toBe(1)
-    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(await code.count()).toBe(0)
-    await page.locator('.BarTools ui-icon[name="code"]').click()
+    await page.locator(".ModeTabs .CodeToggle [part~=item]").first().click()
     await page.waitForSelector(".InputEditor .monaco-editor", { timeout: 30_000 })
   })
 
