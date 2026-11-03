@@ -553,6 +553,29 @@ describe("SpellElement", () => {
       done()
     })
 
+    test("the window losing focus mid-drag takes the cover down, and puts the token back (epic `language` T29)", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const covers = () =>
+        [...document.body.children].filter((child) => (child as HTMLElement).style.cursor === "grabbing")
+      const element = root.querySelector("game-token") as HTMLElement
+      const target = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+      // its let-go never reaches the page:  the window lost focus first
+      await drag(
+        element,
+        target,
+        () => {
+          expect(covers()).toHaveLength(1)
+          window.dispatchEvent(new FocusEvent("blur"))
+          expect(covers()).toEqual([])
+        },
+        "mouse"
+      )
+      expect([...trays[0]!.items]).toEqual([token])
+      done()
+    })
+
     test("`draggable when it is face up`:  a face-down token can't be dragged, a face-up one can (debut P27)", async () => {
       /** A token that drags only face up:  `- draggable when it is face up`. */
       class Domino extends Token {

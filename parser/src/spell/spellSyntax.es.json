@@ -1912,7 +1912,7 @@
           "ruleNames": ["its_known_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsKnownProperty.ts",
-          "line": 19,
+          "line": 21,
           "purpose": "`its {member words}`, where the words name a PROPERTY `it`'s type declares: the LONGEST run of them that does, e.g. `short rank` in `its short rank + its short suit`.",
           "syntaxes": [
             {
