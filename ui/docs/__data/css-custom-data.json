@@ -5308,6 +5308,13 @@
       }
     },
     {
+      "name": "--ui-markdown-bar-background",
+      "description": {
+        "kind": "markdown",
+        "value": "the bar's own ground: solid, over the text it sits on (a page may make the editor's clear)\n\n`<ui-markdown>`'s token.  Default:  `var(--ui-background)`"
+      }
+    },
+    {
       "name": "--ui-menu-margin",
       "description": {
         "kind": "markdown",
@@ -10620,6 +10627,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-tree-diagram>`:  Each edge label, on its line."
+      }
+    },
+    {
+      "name": "::part(edit-bar)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-markdown>`:  `editable`:  the formatting bar above the open box."
       }
     },
     {

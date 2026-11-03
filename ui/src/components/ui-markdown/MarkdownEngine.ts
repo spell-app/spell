@@ -74,6 +74,13 @@ export class MarkdownEngine {
     return { html, headings, ...(places && { places }) }
   }
 
+  /** One piece's words rendered inline, GitHub-flavoured (`MarkdownRendering.renderInline()`). */
+  renderInline(text: string): string {
+    const html = new Marked({ gfm: true }).parseInline(text, { async: false })
+    if (typeof html !== "string") throw new SourceError("MarkdownEngine.renderInline():  rendered asynchronously", { cause: { kind: "render" } })
+    return html
+  }
+
   /**
    * `html`, its first tag carrying `token`'s place (`data-ui-place`), when `MarkdownSource.placesOf()` gave it one.
    * - Static:  pure.

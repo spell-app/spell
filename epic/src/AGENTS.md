@@ -1557,6 +1557,9 @@ In `tools/`:
     - each keep is saved into the page's file at once, by the inline saver (`spell-ui-sources.js`):  the nearest element
       with an id read fresh (`SPELL_SERVER.readElement()`), the block found by its text, only its text swapped, indented as
       it was, its one-line tags kept (r52), then written back (`editPage()`, `shown`), so the page never reloads or moves
+    - the open box has a formatting bar above it (epic `epic-engine` P61, Q67):  bold, italic, strikethrough, a link,
+      Paragraph / H2-H4, lists, clear formatting;  ⌘B ⌘I ⌘K ⌘⇧X, never ⌘E (Claude Code's);  and a switch between the
+      markdown with its marks faint and formatted only, remembered per browser (Spell UI's `MarkdownBox`)
     - the toolbar bullhorn's tooltip says "⌥-click text to edit it";  `editable="tabs"` (Write / Preview) is left alone
     - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`
 - Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
