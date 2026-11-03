@@ -2322,9 +2322,10 @@ export class PlanDoc extends PlanReader {
    * - `isMerged`:  whether a commit is in `main` (`NightSummary`'s);  none, merging isn't mentioned.
    */
   refreshAway(options: SummaryOptions = {}): void {
-    const read = this.page.getAttribute("away-read")
-    if (!read) Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now) })
-    const summary = NightSummary.of(this, new Date(Date.parse(read ?? "") || this.now.getTime()), options)
+    // the first time:  counting starts this minute, as every later edit reads it back (so this edit's own work counts)
+    const read = this.page.getAttribute("away-read") ?? PlanTime.isoMinutes(this.now)
+    Markup.set(this.page, { awayRead: read })
+    const summary = NightSummary.of(this, new Date(Date.parse(read) || this.now.getTime()), options)
     const old = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
     if (summary.isEmpty) {
       old?.remove()
