@@ -274,6 +274,7 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
 /** `value`, plain data, as an expression. */
 export function plainValueAST(match: P.Match, value: unknown): P.ASTExpression {
   if (typeof value === "number") return new P.ASTNumericLiteral(match, { value })
+  if (typeof value === "boolean") return new P.ASTBooleanLiteral(match, value)
   if (typeof value === "string") return new P.ASTStringLiteral(match, { value: JSON.stringify(value) })
   if (Array.isArray(value)) {
     return new P.ASTListExpression(match, { items: value.map((each) => plainValueAST(match, each)) })

@@ -9,6 +9,7 @@ import { InOneGo } from "./InOneGo"
 import { CancelAction } from "./CancelAction"
 import { DiscardDraft } from "./DiscardDraft"
 import { AccountIncluded } from "./AccountIncluded"
+import { CheckedAt } from "./CheckedAt"
 import { CheckedEvery } from "./CheckedEvery"
 import { CollectionAt } from "./CollectionAt"
 import { CreatePlace } from "./CreatePlace"
@@ -140,6 +141,20 @@ placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second
 })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number} {unit:check_unit}?" })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {unit:check_unit}" })
+placesEs.addRule(Wording.specialize({ ruleName: "day_half", meanings: ["am", "pm"] }), {
+  syntax: "((am:de la mañana|am|AM)|(pm:de la tarde|de la noche|pm|PM))"
+})
+placesEs.addRule(Wording.specialize({ ruleName: "clock_zone", meanings: ["utc", "local"] }), {
+  syntax: "((utc:UTC|utc)|(local:hora local))"
+})
+placesEs.addRule(CheckedAt, {
+  syntax:
+    "{type:subject_implied} se revisa una vez al día (a (la|las) {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?)?"
+})
+placesEs.addRule(CheckedAt, {
+  syntax:
+    "{type:subject_implied} se revisa cada día a (la|las) {hour:number} (: {minute:number})? {half:day_half}? {zone:clock_zone}?"
+})
 placesEs.addRule(VersionsIn, { syntax: "{type:subject_its} versión está en {field:text}" })
 placesEs.addRule(IdColumn, { syntax: "{type:subject_its} identificador está en {column:text}" })
 placesEs.addRule(RowsIn, {

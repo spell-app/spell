@@ -7,6 +7,7 @@
  *   and hands it in.
  */
 import { schemaOf } from "spell/util"
+import type { ClockTime } from "spell/util/polling"
 import type * as PlacesFolder from "spell/util/places"
 import type { ListQuery, Place as PlaceBehind, PlacePerson } from "spell/util/places/places.types"
 
@@ -24,6 +25,8 @@ export type PlaceDetails = {
   keyNamed?: string
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
+  /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
+  checkedAt?: ClockTime
   /** The field holding a row's version, on a web server that has one. */
   versionsIn?: string
   /** The field holding a row's id:  a sheet's or an airtable's column, or a web server's field, for every collection. */

@@ -787,13 +787,13 @@ class SavedRead {
     return things
   }
 
-  /** Ask the place what changed, as often as its line says. */
+  /** Ask the place what changed, as often as its line says:  every so many seconds, or once a day at a time. */
   private startPolling(): void {
-    const { checkedEvery } = this.program.detailsOf(this.Class)
+    const { checkedEvery, checkedAt } = this.program.detailsOf(this.Class)
     // under node, asking again would keep the program running;  what's followed by a link shows what its list says
     if (!checkedEvery || typeof document === "undefined" || this.query.ids) return
     this.stopPolling?.()
-    this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh())
+    this.stopPolling = pollWhileVisible(checkedEvery, () => this.refresh(), { ...(checkedAt && { at: checkedAt }) })
   }
 
   /** The list is now `things`, and whoever follows it looks again. */

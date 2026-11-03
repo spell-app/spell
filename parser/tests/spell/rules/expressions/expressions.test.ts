@@ -46,6 +46,7 @@ describe("priority and precedence", () => {
         "can_give_up:  Precedence.comparison",
         "can_take:  Precedence.comparison",
         "cancel_action:  Priority.preferred",
+        "checked_at:  Priority.declaration",
         "checked_every:  Priority.declaration",
         "class_member:  Priority.userDeclared",
         "collection_at:  Priority.declaration",

@@ -20,12 +20,14 @@ export class CheckedEvery extends PlaceDetail<"type|number?|unit?"> {
 }
 
 /**
- * How often to check, as a person says it:  the largest whole unit, `every day`, `every 5 minutes`, `every 30 seconds`.
+ * How often to check, as a person says it:  the largest whole unit, `once a day`, `every 5 minutes`, `every 30 seconds`.
+ * - A day is `once a day`, which takes a time (`once a day at 5am`):  the ingest knows none, so writes none.
  * - What `spell place ingest` writes (epic `data` P23).
  */
 export function checkEveryInWords(seconds: number): string {
   const units = Object.entries(CHECK_UNIT_SECONDS).reverse()
   const [unit, size] = units.find(([, size]) => seconds >= size && seconds % size === 0) ?? ["second", 1]
   const count = seconds / size
-  return count === 1 ? `every ${unit}` : `every ${count} ${unit}s`
+  if (count === 1) return unit === "day" ? "once a day" : `every ${unit}`
+  return `every ${count} ${unit}s`
 }

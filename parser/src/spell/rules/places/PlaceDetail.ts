@@ -10,6 +10,7 @@ export type PlaceDetailValue = {
   collections?: Record<string, { at?: string; fields?: Record<string, string> }>
   keyNamed?: string
   checkedEvery?: number
+  checkedAt?: { hour: number; minute: number; utc?: boolean }
   versionsIn?: string
   idColumn?: string
   accounts?: string[]

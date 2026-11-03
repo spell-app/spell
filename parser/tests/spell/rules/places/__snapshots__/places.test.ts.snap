@@ -4,6 +4,7 @@ exports[`testing spell module places > rule group specs > match snapshot -- if t
 {
   "account_included": "type|account",
   "cancel_action": "action",
+  "checked_at": "type|hour?|minute?|half?|zone?",
   "checked_every": "type|number?|unit?",
   "collection_at": "collection|path",
   "create_place": "type|kind?|address?|with_nested_statements?|body?|superType?",

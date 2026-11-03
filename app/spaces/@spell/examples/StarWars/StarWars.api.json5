@@ -711,7 +711,7 @@
     "\t- its id is its \"url\"",
     "\t- its rows are its \"results\"",
     "\t- its next page is its \"next\"",
-    "\t- check it every day",
+    "\t- check it once a day",
     "\t- it writes names like \"hair_color\"",
     "\t- characters live at \"/people\"",
     "\t- planets live at \"/planets\"",
