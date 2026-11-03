@@ -383,8 +383,6 @@
     background: var(--_ui-markdown-bar-background);
     /* a theme's see-through ground still reads:  what's under it blurred away */
     backdrop-filter: blur(12px);
-    /* its shape menu opens on the bar's own ground:  a theme's see-through surface let the page show through */
-    --ui-select-picker-background: var(--_ui-markdown-bar-background);
     box-shadow: 0 2px 8px color-mix(in oklch, black 12%, transparent);
     font-size: 0.875em;
   }

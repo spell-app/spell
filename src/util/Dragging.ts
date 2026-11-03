@@ -24,7 +24,7 @@ import { beforeNextPaint, soon } from "./timing"
  *   the pile's `when a card is dropped on it`, else the program's `card-drop`.
  *   - What still sits where it was dragged from afterwards, a drop nobody took, slides back.
  * - Escape cancels it (epic `debut` P27, Q47):  everything slides back, and its owner hears `onCancel`,
- *   as it does for a drag the browser takes away.
+ *   as it does for a drag the browser takes away, or the window losing focus mid-drag (epic `language` T29).
  *   - What moved is drawn again in its new list, and glides there from where it was dropped (`Glides`).
  * - A mouse drag covers the whole page with the closed hand, whatever is under it (`DRAG_COVER`).
  *   - A rule can't do that:  nothing in a page's sheets reaches into every shadow root,
@@ -67,6 +67,7 @@ export class Dragging {
     window.addEventListener("pointerup", this.onUp, listening)
     window.addEventListener("pointercancel", this.onCancel, listening)
     window.addEventListener("keydown", this.onKey, { ...listening, capture: true })
+    window.addEventListener("blur", this.onBlur, listening)
   }
 
   /** Where the press started. */
@@ -186,8 +187,16 @@ export class Dragging {
     this.cancel(event)
   }
 
+  /**
+   * The window lost focus mid-drag (another app, a window switch):  put everything back.
+   * - Its let-go may never reach the page, so the cover would stay up, swallowing every click, until the next press.
+   */
+  private readonly onBlur = (event: FocusEvent) => {
+    if (this.moving.length) this.cancel(event)
+  }
+
   /** The drag is cancelled:  it leaves the list it's over, slides back, and its owner hears so (`onCancel`). */
-  private cancel(event: PointerEvent | KeyboardEvent) {
+  private cancel(event: PointerEvent | KeyboardEvent | FocusEvent) {
     this.listening.abort()
     const wasDragging = this.moving.length > 0
     if (this.over) Dragging.send(this.over, "dragleave", event)
@@ -223,7 +232,7 @@ export class Dragging {
   }
 
   /** Send drag event `type` to `target`, where `event`'s pointer is:  a `DragEvent`, as the browser's own. */
-  private static send(target: HTMLElement, type: string, event: PointerEvent | KeyboardEvent) {
+  private static send(target: HTMLElement, type: string, event: PointerEvent | KeyboardEvent | FocusEvent) {
     const { clientX, clientY } = "clientX" in event ? event : { clientX: 0, clientY: 0 }
     target.dispatchEvent(new DragEvent(type, { bubbles: true, composed: true, cancelable: true, clientX, clientY }))
   }

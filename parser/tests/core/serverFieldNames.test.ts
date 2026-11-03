@@ -105,7 +105,7 @@ describe("what a place sends, as the type declares it", () => {
     expect([jabba!.height, jabba!.mass, jabba!.hairColor]).toEqual([undefined, undefined, ""])
   })
 
-  test("a number it didn't send is nothing, not 0;  text keeps its \"\", so a search still finds it", async () => {
+  test('a number it didn\'t send is nothing, not 0;  text keeps its "", so a search still finds it', async () => {
     const { Character } = program(holding([{ id: "1", name: "R2-D2" }]))
     const [r2] = (await core.savedThings(Character)).items as Array<InstanceType<typeof Character>>
     expect([r2!.height, r2!.mass, r2!.hairColor]).toEqual([undefined, undefined, ""])
