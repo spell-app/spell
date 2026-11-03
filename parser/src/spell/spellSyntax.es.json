@@ -7895,7 +7895,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 27,
+          "line": 29,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -7910,6 +7910,21 @@
                 },
                 "py": {
                   "code": "Dirección = Literal[\"arriba\", \"abajo\"]\n\nclass Carta(Thing):\n    DIRECCIONES = (\"arriba\", \"abajo\")\n    dirección = prop(one_of=DIRECCIONES)\n\n    def voltear(self) -> None:\n        self.dirección = \"arriba\"\n\n    @property\n    def voltear_is_enabled(self) -> bool:\n        return self.dirección == \"abajo\"\n\ncore.describe_action(Carta, \"voltear\", {\"title\": \"voltearla\", \"shortcuts\": [\"meta+T\"], \"enabled_when\": \"voltear_is_enabled\", \"undone_as\": \"Voltear carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "titulada {title:text}",
+              "example": "un juego es una cosa donde:\n\t- para compilar:\n\t\t- titulada \"Código\"\n\t\timprimir 1",
+              "outputs": {
+                "js": {
+                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\" })"
+                },
+                "ts": {
+                  "code": "export class Juego extends Thing {\n  compilar() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Juego, \"compilar\", { title: \"Código\" })"
+                },
+                "py": {
+                  "code": "class Juego(Thing):\n    def compilar(self) -> None:\n        print(1)\n\ncore.describe_action(Juego, \"compilar\", {\"title\": \"Código\"})"
                 }
               }
             },

@@ -157,6 +157,33 @@ describe("core.menuOf()", () => {
     expect(core.menuBarOf(new App())).toBeUndefined()
   })
 
+  test("an item's title:  written, live, and in the page's language (epic `language` P18)", () => {
+    class Editor extends App {
+      projectName = "Solitaire"
+      compileAndRun(): void {}
+      duplicate(): void {}
+      /** `- titled "Duplicate [the project name]…"` */
+      get duplicateTitle(): string {
+        return `Duplicate ${this.projectName}…`
+      }
+    }
+    core.describeAction(Editor, "compileAndRun", { title: "Compile and Run" })
+    core.describeAction(Editor, "duplicate", { title: "duplicate it", titleFrom: "duplicateTitle" })
+    core.describeMenu(Editor, "runMenu", { items: ["compileAndRun", "duplicate"] })
+    const editor = new Editor()
+    const titles = () => core.menuOf(editor, "run menu")!.map((item) => (item.kind === "action" ? item.title : "-"))
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Solitaire…"])
+    editor.projectName = "Cards"
+    expect(titles()).toEqual(["Compile and Run", "Duplicate Cards…"])
+    core.useTitles({ "Compile and Run": "Compilar y ejecutar" })
+    try {
+      expect(titles()).toEqual(["Compilar y ejecutar", "Duplicate Cards…"])
+    } finally {
+      core.useTitles(undefined)
+    }
+    expect(titles()[0]).toBe("Compile and Run")
+  })
+
   test("an item naming no action of its thing is left out, with a warning", () => {
     class Table extends App {}
     core.describeMenu(Table, "tableMenu", { items: ["wipe", "undo"] })

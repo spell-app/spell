@@ -917,7 +917,7 @@ A kind that says so is saved in a file of its own.
     - It compiles as a test written at the top level does, exported, so the program runs it as it loads;
       its body starts with `const it = new Card()`, a real variable, so a `get` in it declares `it2`.
   - An ACTION's description, indented under it:  `- shortcut meta+T`, `- enabled when ...`, `- selected when ...`,
-    `- undone as "..."`, `- icon "..."`.
+    `- undone as "..."`, `- icon "..."`, `- titled "..."` (P18 of epic `language`:  a fill-in makes a getter, `titleFrom`).
     - Each is an [`action_detail`](rules/methods/ActionDetail.ts) line, taken only in a template's action's body:
       its `parse()` asks the `MethodScope` it's in for the statement that made it (`MethodScope.declaredBy`).
     - The line compiles to nothing;  the action's definition gathers them (`ActionDetail.detailsOf()`) and writes,

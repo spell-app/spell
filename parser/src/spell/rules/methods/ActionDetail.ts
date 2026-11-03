@@ -14,6 +14,8 @@ import type { MethodSignatureData } from "./methods.shared"
  *   - `- selected when it is face up`:  when it shows checked, in a menu
  *   - `- undone as "Turn Card"`:  its undo's name, `Undo Turn Card`
  *   - `- icon "rotate"`:  its icon
+ *   - `- titled "Turn Over"`:  its title in menus, key tooltips and the Inspector, where its words aren't it
+ *     (epic `language` P18);  a fill-in follows the program, `- titled "Duplicate [the project name]…"`
  *   - `- a new one replaces the last one`:  the newest wins, a running one canceled, where a repeat is otherwise ignored
  * - An action is a described command (Q33):  one action drives a menu item, a button and a key.
  *   Nothing runs from its description yet:  the actions phase (P10) reads it.
@@ -24,7 +26,7 @@ import type { MethodSignatureData } from "./methods.shared"
  *   Its action's definition gathers them (`detailsOf()`):  a getter for each condition, then
  *   `core.describeAction(Card, "turnOver", {...})` after the class.
  */
-export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoneAs?|icon?|replacesLast?"> {
+export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undoneAs?|icon?|replacesLast?|title?"> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
@@ -58,13 +60,14 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undon
       const statement = line instanceof P.Match ? (line.data as { statement?: P.Match }).statement : undefined
       if (!statement?.is(ActionDetail)) continue
       any = true
-      const { keys, enabled, selected, undoneAs, icon, replacesLast } = statement.groups
+      const { keys, enabled, selected, undoneAs, icon, replacesLast, title } = statement.groups
       if (keys) details.shortcuts.push(`${keys.value}`)
       if (enabled) details.enabled = enabled
       if (selected) details.selected = selected
       if (undoneAs) details.undoneAs = ActionDetail.textOf(undoneAs)
       if (icon) details.icon = ActionDetail.textOf(icon)
       if (replacesLast) details.replacesLast = true
+      if (title) details.title = title
     }
     return any ? details : undefined
   }
@@ -77,7 +80,7 @@ export class ActionDetail extends SpellStatement<"keys?|enabled?|selected?|undon
   }
 
   /** The text inside a `text` match's quotes, e.g. `Turn Card`. */
-  private static textOf(match: P.Match): string {
+  static textOf(match: P.Match): string {
     const [token] = match.tokens
     return token instanceof P.TextToken ? token.innerText : `${match.value}`
   }
@@ -97,4 +100,6 @@ export type ActionDetails = {
   icon?: string
   /** `- a new one replaces the last one` */
   replacesLast?: boolean
+  /** `- titled "Turn Over"`:  its `text` match, fill-ins and all */
+  title?: P.Match
 }

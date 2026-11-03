@@ -25,6 +25,7 @@
         "isActionEnabled",
         "isActionSelected",
         "actionTitle",
+        "useTitles",
         "onActionRun",
         "runShortcut",
         "menuOf",

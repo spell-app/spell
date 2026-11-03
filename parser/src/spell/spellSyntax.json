@@ -7940,7 +7940,7 @@
           "ruleNames": ["action_detail"],
           "internal": false,
           "file": "src/spell/rules/methods/ActionDetail.ts",
-          "line": 27,
+          "line": 29,
           "purpose": "One line of an ACTION's description, said indented under it (epic `elemental-spell` P5).",
           "syntaxes": [
             {
@@ -7955,6 +7955,21 @@
                 },
                 "py": {
                   "code": "Direction = Literal[\"up\", \"down\"]\n\nclass Card(Thing):\n    DIRECTIONS = (\"up\", \"down\")\n    direction = prop(one_of=DIRECTIONS)\n\n    def turn_over(self) -> None:\n        self.direction = \"up\"\n\n    @property\n    def turn_over_is_enabled(self) -> bool:\n        return self.direction == \"down\"\n\n    @property\n    def turn_over_is_selected(self) -> bool:\n        return self.direction == \"up\"\n\ncore.describe_action(Card, \"turn_over\", {\"title\": \"turn it over\", \"shortcuts\": [\"meta+T\", \"F2\"], \"icon\": \"rotate\", \"enabled_when\": \"turn_over_is_enabled\", \"selected_when\": \"turn_over_is_selected\", \"undone_as\": \"Turn Card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "titled {title:text}",
+              "example": "a game is a thing where:\n\t- to compile and run:\n\t\t- titled \"Compile and Run\"\n\t\tprint 1",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                },
+                "ts": {
+                  "code": "export class Game extends Thing {\n  compileAndRun() {\n    core.console.log(1)\n  }\n}\ncore.describeAction(Game, \"compileAndRun\", { title: \"Compile and Run\" })"
+                },
+                "py": {
+                  "code": "class Game(Thing):\n    def compile_and_run(self) -> None:\n        print(1)\n\ncore.describe_action(Game, \"compile_and_run\", {\"title\": \"Compile and Run\"})"
                 }
               }
             },

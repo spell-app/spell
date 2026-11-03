@@ -238,6 +238,8 @@ export const spanishWords: SP.LanguageWords = {
       "seleccionada-cuando": "selected-when",
       "se-deshace-como": "undone-as",
       icono: "icon",
+      título: "title",
+      titulo: "title",
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
@@ -284,7 +286,8 @@ export const spanishWords: SP.LanguageWords = {
         "enabled-when": "activa cuando {enabled-when}",
         "selected-when": "seleccionada cuando {selected-when}",
         "undone-as": "se deshace como {quoted undone-as}",
-        icon: "icono {quoted icon}"
+        icon: "icono {quoted icon}",
+        title: "titulada {quoted title}"
       },
       test: "para probar {words} :",
       event: "envía {name}",
