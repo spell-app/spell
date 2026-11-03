@@ -29,7 +29,7 @@ import {
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
 import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
-import fileMenuSpell from "spell/app/app/layout/FileMenu/FileMenu.spellml"
+import appMenusSpell from "spell/app/app/layout/AppMenus/AppMenus.spellml"
 import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 import type { MenuItem } from "spell/parser/core"
 
@@ -229,7 +229,7 @@ export function ProjectBarMenu(): JSX.Element {
 
 /****************
  * ### `<FileBarMenu>`
- * The File menu:  its items, their order, keys, and when each is greyed or ticked are Spell, `FileMenu.spellml`.
+ * The File menu:  its items, their order, keys, and when each is greyed or ticked are Spell, `AppMenus.spellml`.
  * - What each does, and what it's called, is here:  `itemFor()`, by the item's name.
  * - The project's name is in Duplicate's title.
  * - More Examples ›:  the group's projects, the one shown ticked;  in columns of 10 when there are more
@@ -241,36 +241,9 @@ export function FileBarMenu(props: { useRunner?: boolean }): JSX.Element {
   const root = trackProjectRoot(() => undefined)
   const projectName = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
   const path = tracked(() => editor.project?.path ?? "")
-  const [items, setItems] = createSignal<MenuItem[]>([])
-  const [menu, setMenu] = createSignal<FileMenuThing>()
-  void loadLayoutPiece(fileMenuSpell).then(
-    ({ exports, menu: menuOf }) => {
-      const thing = exports.fileMenu as FileMenuThing
-      setMenu(() => thing)
-      setItems(menuOf(thing, "file menu"))
-    },
-    (problem: unknown) => console.error("<FileBarMenu>:  can't load its Spell", problem)
-  )
-  createEffect(
-    () => [menu(), editor.canDiscardChanges, editor.isAutoSaving] as const,
-    ([thing, canDiscard, isAutoSaving]) => {
-      if (!thing) return
-      thing.canDiscard = canDiscard
-      thing.autoSaving = isAutoSaving
-    }
-  )
-  const itemFor = (item: MenuItem & { kind: "action" }): JSX.Element => {
-    const state = {
-      menu: true,
-      shortcut: item.shortcut && ActionMenus.shortcutForUI(item.shortcut),
-      // live:  read as each item draws, and again as the menu's thing changes
-      get disabled() {
-        return !item.isEnabled
-      },
-      get active() {
-        return item.isSelected
-      }
-    }
+  const items = spellMenu("file menu")
+  const itemFor = (item: SpellMenuAction): JSX.Element => {
+    const state = itemState(item)
     switch (item.name) {
       case "moreExamples":
         return <SubMenuRow sub="projects">{appTexts.text("moreProjects", root().words)}</SubMenuRow>
@@ -281,13 +254,20 @@ export function FileBarMenu(props: { useRunner?: boolean }): JSX.Element {
       case "save":
         return <Actions.saveFile {...state} />
       case "discardChanges":
-        return <Actions.discardChanges {...state} />
+        return <Actions.discardChanges {...state} disabled={!item.isEnabled} />
       case "duplicateProject":
         return <Actions.duplicateApp {...state} title={appTexts.text("duplicateProject", { project: projectName() })} />
       case "projectSettings":
         return <Actions.showProjectSettings {...state} title={appTexts.text("menuProjectSettings")} />
       case "autoSave":
-        return <Action {...state} title={appTexts.text("autoSave")} onClick={() => editor.toggleAutoSave()} />
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("autoSave")}
+            active={item.isSelected}
+            onClick={() => editor.toggleAutoSave()}
+          />
+        )
       case "exportProject":
         return <Actions.exportApp {...state} />
       case "importProject":
@@ -325,13 +305,10 @@ export function FileBarMenu(props: { useRunner?: boolean }): JSX.Element {
         )
       }}
     >
-      <For each={items()}>{(item) => (item.kind === "action" ? itemFor(item) : <Divider />)}</For>
+      <SpellMenuRows items={items()} itemFor={itemFor} />
     </BarMenu>
   )
 }
-
-/** The File menu's thing, as `FileMenu.spellml` compiles;  the page fills its actions in by what `<FileBarMenu>` draws. */
-type FileMenuThing = { canDiscard: boolean; autoSaving: boolean }
 
 /** More projects than this:  the project menu's More sub-menu lists them in columns of this many. */
 const PROJECTS_PER_COLUMN = 10
@@ -355,95 +332,166 @@ function ThemeSubMenu(): JSX.Element {
 /****************
  * ### `<AppBarMenus>`
  * The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name.
- * - File:  written in Spell (`<FileBarMenu>`).
- * - Edit:  the code editor's Undo, Redo, ─, Find, ─, Code Editor Settings….
- * - View:  Run, Edit, ─, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
+ * - File, Edit, View and Run:  their items, order, keys, greying and ticks are Spell, `AppMenus.spellml`
+ *   (epic `editor`, Backing In Spell);  what each item does, and its title, is here, by the item's name.
+ * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
+ * - View:  Run, Edit, ─, Code, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Help, which does nothing yet;  none in the static build.
+ * - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own.
  * - `mode`:  the page's, ticked in View.
+ * - SIDE EFFECT:  keeps the menus' Spell thing in step with the editor, for what greys and ticks their items.
  ****************/
 export function AppBarMenus(props: { mode: Mode }): JSX.Element {
+  followAppMenus(() => ({
+    canDiscard: editor.canDiscardChanges,
+    autoSaving: editor.isAutoSaving,
+    running: props.mode === "run",
+    codeShowing: props.mode === "edit" && !CodeShown.isClosed(editor.project?.path),
+    programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
+    inspectorOpen: Inspector.isOpen,
+    lineNumbersShowing: LineNumbers.isShowing,
+    inspecting: Inspector.isInspecting
+  }))
+  const edit = spellMenu("edit menu")
+  const view = spellMenu("view menu")
+  const run = spellMenu("run menu")
+  const editItem = (item: SpellMenuAction): JSX.Element => {
+    const state = itemState(item)
+    switch (item.name) {
+      case "undo":
+        return <Actions.undo {...state} />
+      case "redo":
+        return <Actions.redo {...state} />
+      case "partActions":
+        return <PartMenuItems />
+      case "find":
+        return <Actions.find {...state} />
+      case "codeSettings":
+        return <Action {...state} title={appTexts.text("codeSettings")} onClick={() => showCodeSettings()} />
+      default:
+        return null
+    }
+  }
+  const viewItem = (item: SpellMenuAction): JSX.Element => {
+    const state = itemState(item)
+    switch (item.name) {
+      case "runMode":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("runMode")}
+            active={item.isSelected}
+            onClick={() => EditorMode.show("run")}
+          />
+        )
+      case "editMode":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("editMode")}
+            active={item.isSelected}
+            onClick={() => EditorMode.show("edit")}
+          />
+        )
+      case "showCode":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("menuCode")}
+            active={item.isSelected}
+            onClick={() => {
+              EditorMode.show("edit")
+              CodeShown.set(editor.project?.path, CodeShown.isClosed(editor.project?.path))
+            }}
+          />
+        )
+      case "showProgramPanel":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("programPanel")}
+            active={item.isSelected}
+            onClick={() => toggleProgramPanel(props.mode)}
+          />
+        )
+      case "showInspector":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("inspector")}
+            active={item.isSelected}
+            onClick={() => Inspector.toggle()}
+          />
+        )
+      case "inspectorCards":
+        return (
+          <For each={INSPECTOR_PANELS}>
+            {(panel) => (
+              <Action
+                menu
+                title={appTexts.text("inspectorCard", { card: appTexts.text(PANEL_TEXTS[panel]) })}
+                active={Inspector.isOpen && Inspector.isShown(panel)}
+                onClick={() => Inspector.setShown(panel, !(Inspector.isOpen && Inspector.isShown(panel)))}
+              />
+            )}
+          </For>
+        )
+      case "showLineNumbers":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("lineNumbers")}
+            active={item.isSelected}
+            onClick={() => LineNumbers.toggle()}
+          />
+        )
+      default:
+        return null
+    }
+  }
+  const runItem = (item: SpellMenuAction): JSX.Element => {
+    const state = itemState(item)
+    switch (item.name) {
+      case "compileAndRun":
+        return <Actions.compileApp {...state} />
+      case "restart":
+        return <Actions.restartApp {...state} />
+      case "inspectApp":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("inspectApp")}
+            disabled={!item.isEnabled}
+            onClick={() => startInspecting()}
+          />
+        )
+      case "stopInspecting":
+        return (
+          <Action
+            {...state}
+            title={appTexts.text("stopInspecting")}
+            disabled={!item.isEnabled}
+            shortcut={EDITOR_HOTKEYS.stopInspecting.shortcut}
+            onClick={() => Inspector.stopInspecting()}
+          />
+        )
+      case "clearConsole":
+        return <Actions.clearConsole {...state} />
+      default:
+        return null
+    }
+  }
   return (
     <span class="AppBarMenus">
       <FileBarMenu useRunner={props.mode === "run"} />
       <BarMenu id="EditBarMenu" label={appTexts.text("menuEdit")} name={appTexts.text("menuEdit")}>
-        <Actions.undo menu />
-        <Actions.redo menu />
-        <Divider />
-        <PartMenuItems />
-        <Divider />
-        <Actions.find menu />
-        <Divider />
-        <Action menu title={appTexts.text("codeSettings")} onClick={() => showCodeSettings()} />
+        <SpellMenuRows items={edit()} itemFor={editItem} />
       </BarMenu>
       <BarMenu id="ViewBarMenu" label={appTexts.text("menuView")} name={appTexts.text("menuView")} ticks>
-        <Action
-          menu
-          title={appTexts.text("runMode")}
-          active={props.mode === "run"}
-          onClick={() => EditorMode.show("run")}
-        />
-        <Action
-          menu
-          title={appTexts.text("editMode")}
-          active={props.mode === "edit"}
-          onClick={() => EditorMode.show("edit")}
-        />
-        <Divider />
-        <Action
-          menu
-          title={appTexts.text("menuCode")}
-          active={props.mode === "edit" && !CodeShown.isClosed(editor.project?.path)}
-          onClick={() => {
-            EditorMode.show("edit")
-            CodeShown.set(editor.project?.path, CodeShown.isClosed(editor.project?.path))
-          }}
-        />
-        <Action
-          menu
-          title={appTexts.text("programPanel")}
-          active={props.mode === "edit" && ProgramPanelShown.isShowing}
-          onClick={() => toggleProgramPanel(props.mode)}
-        />
-        <Divider />
-        <Action menu title={appTexts.text("inspector")} active={Inspector.isOpen} onClick={() => Inspector.toggle()} />
-        <For each={INSPECTOR_PANELS}>
-          {(panel) => (
-            <Action
-              menu
-              title={appTexts.text("inspectorCard", { card: appTexts.text(PANEL_TEXTS[panel]) })}
-              active={Inspector.isOpen && Inspector.isShown(panel)}
-              onClick={() => Inspector.setShown(panel, !(Inspector.isOpen && Inspector.isShown(panel)))}
-            />
-          )}
-        </For>
-        <Divider />
-        <Action
-          menu
-          title={appTexts.text("lineNumbers")}
-          active={LineNumbers.isShowing}
-          onClick={() => LineNumbers.toggle()}
-        />
+        <SpellMenuRows items={view()} itemFor={viewItem} />
       </BarMenu>
       <BarMenu id="RunBarMenu" label={appTexts.text("menuRun")} name={appTexts.text("menuRun")}>
-        <Actions.compileApp menu />
-        <Actions.restartApp menu />
-        <Divider />
-        <Action
-          menu
-          title={appTexts.text("inspectApp")}
-          disabled={Inspector.isInspecting}
-          onClick={() => startInspecting()}
-        />
-        <Action
-          menu
-          title={appTexts.text("stopInspecting")}
-          shortcut={EDITOR_HOTKEYS.stopInspecting.shortcut}
-          disabled={!Inspector.isInspecting}
-          onClick={() => Inspector.stopInspecting()}
-        />
-        <Divider />
-        <Actions.clearConsole menu />
+        <SpellMenuRows items={run()} itemFor={runItem} />
       </BarMenu>
       <Show when={!isStaticBuild}>
         <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
@@ -472,6 +520,79 @@ function toggleProgramPanel(mode: Mode) {
 export function startInspecting() {
   if (!Inspector.isOpen) Inspector.toggle()
   else Inspector.startInspecting()
+}
+
+////////////////
+// ## The menus' Spell
+////////////////
+
+/** The app menus' thing, `AppMenus.spellml`, loaded once for the page:  every bar menu reads its own menu of it. */
+function appMenus(): Promise<{ thing: AppMenusThing; menuOf: (thing: object, name: string) => MenuItem[] }> {
+  loadingAppMenus ??= loadLayoutPiece(appMenusSpell).then(({ exports, menu }) => ({
+    thing: exports.appMenus as AppMenusThing,
+    menuOf: menu
+  }))
+  return loadingAppMenus
+}
+let loadingAppMenus: ReturnType<typeof appMenus> | undefined
+
+/**
+ * Menu `name` of `AppMenus.spellml`:  its items, once its Spell has loaded, none before.
+ * - NEVER throws:  Spell that won't load leaves the menu empty, and says so on the console.
+ */
+function spellMenu(name: string): () => MenuItem[] {
+  const [items, setItems] = createSignal<MenuItem[]>([])
+  appMenus().then(
+    ({ thing, menuOf }) => setItems(menuOf(thing, name)),
+    (problem: unknown) => console.error(`<AppBarMenus>:  can't load the Spell of the ${name}`, problem)
+  )
+  return items
+}
+
+/** Keep the menus' thing in step with `values`, the editor's state its items grey and tick by. */
+function followAppMenus(values: () => Partial<AppMenusThing>) {
+  const [thing, setThing] = createSignal<AppMenusThing>()
+  appMenus().then(
+    ({ thing }) => setThing(() => thing),
+    () => undefined // `spellMenu()` says so
+  )
+  createEffect(
+    () => [thing(), values()] as const,
+    ([it, now]) => {
+      if (it) Object.assign(it, now)
+    }
+  )
+}
+
+/** A menu's items, as Spell orders them:  each action drawn by `itemFor`, a line at each break. */
+function SpellMenuRows(props: { items: MenuItem[]; itemFor: (item: SpellMenuAction) => JSX.Element }): JSX.Element {
+  return <For each={props.items}>{(item) => (item.kind === "action" ? props.itemFor(item) : <Divider />)}</For>
+}
+
+/**
+ * What every `<Action>` takes from its Spell item:  it's in a menu, with the key the Spell names, if any.
+ * - No key named:  the action's own, from `EDITOR_HOTKEYS`.
+ * - Greyed and ticked only where the Spell says when (`enabled-when`, `selected-when`):  those rows pass
+ *   `disabled={!item.isEnabled}` or `active={item.isSelected}` themselves, so an action's own (Clear Console
+ *   greyed while the console's empty, Save ticked while the file has changes) isn't overruled.
+ */
+function itemState(item: SpellMenuAction): { menu: true; shortcut?: string } {
+  return item.shortcut ? { menu: true, shortcut: ActionMenus.shortcutForUI(item.shortcut) } : { menu: true }
+}
+
+/** An action of a menu in `AppMenus.spellml`, as `core.menuOf()` gives it. */
+type SpellMenuAction = MenuItem & { kind: "action" }
+
+/** The app menus' thing, as `AppMenus.spellml` compiles:  the editor's state its items grey and tick by. */
+type AppMenusThing = {
+  canDiscard: boolean
+  autoSaving: boolean
+  running: boolean
+  codeShowing: boolean
+  programPanelShowing: boolean
+  inspectorOpen: boolean
+  lineNumbersShowing: boolean
+  inspecting: boolean
 }
 
 /** The tag of a menu's items. */

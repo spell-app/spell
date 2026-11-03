@@ -1,0 +1,100 @@
+# The editor's app menus
+File, Edit, View and Run:  each one's items and their order, a line at each break, each one's key,
+when it's greyed and when it's ticked.
+What each item does, and what it's called, is still the editor's own:  `<AppBarMenus>` in `MenuBar.tsx` fills them in, by name.
+
+<spell-app "app menus">
+	<property "can discard" description="The file differs from where it started">yes or no</>
+	<property "auto saving" description="AutoSave is on">yes or no</>
+	<property "running" description="The page is in Run, not Edit">yes or no</>
+	<property "code showing" description="The code shows, in Edit">yes or no</>
+	<property "program panel showing" description="The Program panel shows under the code, in Edit">yes or no</>
+	<property "inspector open" description="The Inspector shows">yes or no</>
+	<property "line numbers showing" description="The code shows its line numbers">yes or no</>
+	<property "inspecting" description="A click in the app picks what it clicks">yes or no</>
+
+	<action "more examples"/>
+	<action "new file" shortcut="meta+N"/>
+	<action "new example"/>
+	<action "save" shortcut="meta+S"/>
+	<action "discard changes" shortcut="shift+meta+R" enabled-when="its can discard is yes"/>
+	<action "duplicate project"/>
+	<action "project settings"/>
+	<action "auto save" selected-when="its auto saving is yes"/>
+	<action "export project"/>
+	<action "import project"/>
+	<action "home"/>
+
+	<action "undo"/>
+	<action "redo"/>
+	<action "part actions"/>
+	<action "find"/>
+	<action "code settings"/>
+
+	<action "run mode" selected-when="its running is yes"/>
+	<action "edit mode" selected-when="its running is no"/>
+	<action "show code" selected-when="its code showing is yes"/>
+	<action "show program panel" selected-when="its program panel showing is yes"/>
+	<action "show inspector" selected-when="its inspector open is yes"/>
+	<action "inspector cards"/>
+	<action "show line numbers" selected-when="its line numbers showing is yes"/>
+
+	<action "compile and run"/>
+	<action "restart"/>
+	<action "inspect app" enabled-when="its inspecting is no"/>
+	<action "stop inspecting" enabled-when="its inspecting is yes"/>
+	<action "clear console"/>
+
+	<menu "file menu">
+		<action "more examples"/>
+		<action "-"/>
+		<action "new file"/>
+		<action "new example"/>
+		<action "-"/>
+		<action "save"/>
+		<action "discard changes"/>
+		<action "duplicate project"/>
+		<action "-"/>
+		<action "project settings"/>
+		<action "auto save"/>
+		<action "-"/>
+		<action "export project"/>
+		<action "import project"/>
+		<action "-"/>
+		<action "home"/>
+	</menu>
+
+	<menu "edit menu">
+		<action "undo"/>
+		<action "redo"/>
+		<action "-"/>
+		<action "part actions"/>
+		<action "-"/>
+		<action "find"/>
+		<action "-"/>
+		<action "code settings"/>
+	</menu>
+
+	<menu "view menu">
+		<action "run mode"/>
+		<action "edit mode"/>
+		<action "-"/>
+		<action "show code"/>
+		<action "show program panel"/>
+		<action "-"/>
+		<action "show inspector"/>
+		<action "inspector cards"/>
+		<action "-"/>
+		<action "show line numbers"/>
+	</menu>
+
+	<menu "run menu">
+		<action "compile and run"/>
+		<action "restart"/>
+		<action "-"/>
+		<action "inspect app"/>
+		<action "stop inspecting"/>
+		<action "-"/>
+		<action "clear console"/>
+	</menu>
+</spell-app>
