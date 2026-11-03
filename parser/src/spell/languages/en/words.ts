@@ -220,6 +220,7 @@ export const englishWords: SP.LanguageWords = {
       "selected-when": "selected-when",
       "undone-as": "undone-as",
       icon: "icon",
+      title: "title",
       "menu-bar": "menu-bar",
       locked: "locked",
       // retired, as waiting is the default:  an error, which `spell lint --fix` takes out (epic `language` P13)
@@ -263,7 +264,8 @@ export const englishWords: SP.LanguageWords = {
         "enabled-when": "enabled when {enabled-when}",
         "selected-when": "selected when {selected-when}",
         "undone-as": "undone as {quoted undone-as}",
-        icon: "icon {quoted icon}"
+        icon: "icon {quoted icon}",
+        title: "titled {quoted title}"
       },
       test: "to test {words} :",
       event: "it sends {name}",

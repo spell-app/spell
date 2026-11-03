@@ -600,6 +600,15 @@ export type SpellWordsData = {
    */
   messages?: Record<string, string>
   /**
+   * Each action's title in this file's language, by its title as written (epic `language` P18, Q20):
+   * `{ "Compile and Run": "Compilar y ejecutar" }` in an English program's Spanish words file.
+   * - Only in a words file of a language the program ISN'T written in:  its own language's titles are in its code.
+   * - Written from the program's names dictionary in that language, `<Project>.es.names.json5`, its `texts`:
+   *   `spell translate` fills them -- see `SP.SpellWords.titlesFrom()`.
+   * - A host showing the program in that language hands them to the core:  `core.useTitles()`.
+   */
+  titles?: Record<string, string>
+  /**
    * Each type's members by GROUP, in the order its file says them, by the type's class name (epic `debut` P26):
    * `{ Card: [{ name: "rank", description: "Ace is low ...", members: ["rank", "isARank", "value"] }, ...] }`.
    * - A group:  a template's `- group "rank"` (spellx's `<group "rank" .../>`), or a heading over its members
@@ -716,6 +725,11 @@ export type SpellDeclaration = {
   returns?: string
   /** A method that waits, e.g. `pause for 50 msec`:  `true`, else left out -- see `P.ScopeMethod.waits`. */
   waits?: boolean
+  /**
+   * An action's own title, as written, when it says one:  `Compile and Run` for `- titled "Compile and Run"`
+   * (epic `language` P18).  Fill-ins as typed.
+   */
+  title?: string
   /** `property`'s compiled initial value. */
   initializer?: string
   /** `classVariable`'s values as parsed, e.g. `["'clubs'", "'diamonds'"]`. */

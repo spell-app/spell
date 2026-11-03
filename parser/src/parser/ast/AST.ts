@@ -1821,6 +1821,8 @@ export type ASTTypeDescriptionProps = Prettify<{
   describes: "action" | "event" | "menu"
   name: string
   description: Record<string, ASTDescriptionValue>
+  /** An action's title as written (`- titled "Turn Over"`), fill-ins as typed:  for its declaration, never written. */
+  title?: string
 }>
 
 /** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
@@ -1837,6 +1839,7 @@ export class ASTTypeDescription extends ASTStatement {
   declare describes: "action" | "event" | "menu"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
+  declare title?: string
   constructor(match: P.AnyMatch, props: ASTTypeDescriptionProps) {
     super(match, props)
     if (typeof this.type === "string") this.type = new ASTTypeExpression(match, { name: this.type })

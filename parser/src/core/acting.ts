@@ -211,6 +211,8 @@ export const actingMethods = defineCoreModule({
   /**
    * Action `name`'s title on `thing`, as people read it:  its description's, its live title's (`Undo Turn Card`),
    * else its method's name in words.
+   * - In the page's language, when a host gave the core that language's titles (`useTitles()`):
+   *   `Compilar y ejecutar` for `Compile and Run`;  a live title (a fill-in) stays as the program says it.
    */
   actionTitle(thing: object, name: string): string {
     const description = describedAction(thing, name)
@@ -218,7 +220,22 @@ export const actingMethods = defineCoreModule({
       const title = (thing as Record<string, unknown>)[description.titleFrom]
       if (typeof title === "string") return title
     }
-    return description?.title ?? wordsOf(name)
+    const title = description?.title ?? wordsOf(name)
+    return core._titles?.[title] ?? title
+  },
+
+  /** The page's language's word for each action title, by its title as written:  `undefined` for none -- see `useTitles()`. */
+  _titles: undefined as Partial<Record<string, string>> | undefined,
+
+  /**
+   * Show action titles in the page's language (epic `language` P18, Q20):
+   * `titles` from the program's words file in that language (`words.titles`), by each title as written.
+   * - e.g. the editor, in Spanish, running its English menus:  `{ "Compile and Run": "Compilar y ejecutar" }`.
+   * - `undefined`:  each title as the program writes it.
+   * - A title it has no words for stays as written.
+   */
+  useTitles(titles?: Partial<Record<string, string>>): void {
+    core._titles = titles
   },
 
   /** Listen for every action run through `runAction()`.  Returns how to stop. */

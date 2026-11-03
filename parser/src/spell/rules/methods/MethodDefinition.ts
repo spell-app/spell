@@ -636,7 +636,8 @@ export class MethodDefinition<
    * a getter for each condition, then the description, after the class -- none when it says nothing.
    * - e.g. `- enabled when it is face down` => `get turnOverIsEnabled() { return this.isFaceDown }`
    * - then `core.describeAction(Card, "turnOver", { title: "turn it over", enabledWhen: "turnOverIsEnabled" })`
-   * - Its title is its words as written, `turn it over`.
+   * - Its title is its words as written, `turn it over`, unless it says one:  `- titled "Turn Over"`
+   *   (a fill-in:  a getter, `turnOverTitle`, and `titleFrom`, so it follows the program).
    * - Pure:  reads only matches.
    */
   private describedAction(match: P.MatchFor<this>, typeName: string, methodName: string): P.ASTStatement[] {
@@ -668,8 +669,25 @@ export class MethodDefinition<
     }
     if (details.undoneAs) description.undone_as = details.undoneAs
     if (details.replacesLast) description.replaces_last = true
+    // its title as written:  plain, it IS the title;  with a fill-in, a getter whose text is its title now
+    let title: string | undefined
+    if (details.title) {
+      title = ActionDetail.textOf(details.title)
+      if ((details.title.data as { fillIns?: unknown }).fillIns) {
+        const getter = `${methodName}_title`
+        const body = details.title.AST as P.ASTExpression
+        statements.push(
+          new P.ASTPropertyDefinition(details.title, {
+            type: typeName,
+            property: getter,
+            get: new P.ASTMethodDefinition(details.title, { body })
+          })
+        )
+        description.title_from = { member: getter }
+      } else description.title = title
+    }
     statements.push(
-      new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description })
+      new P.ASTTypeDescription(action, { type: typeName, describes: "action", name: methodName, description, title })
     )
     return statements
   }
