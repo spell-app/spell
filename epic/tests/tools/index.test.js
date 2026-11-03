@@ -225,7 +225,8 @@ describe("planOf():  an epic page's card data (epic-components P8)", () => {
     future: false,
     standing: false,
     saga: null,
-    urgent: ["q1", "i1"]
+    urgent: ["q1", "i1"],
+    away: false
   }
 
   it("reads the <epic-*> markup:  phases, the page's updated and future, the items that need Owen", () => {

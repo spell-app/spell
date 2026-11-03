@@ -5,6 +5,7 @@ import {
   OVERVIEW_PART,
   OVERVIEW_PART_ID,
   REPORT,
+  AWAY,
   SectionIds,
   type AttributeTest,
   type ChildSpec,
@@ -375,7 +376,8 @@ function childName(spec: ChildSpec): string {
 /** The section kinds whose title is their own, never drawn => what to call one in a message. */
 const TITLED_KINDS: Record<string, string> = {
   [OVERVIEW_PART]: "an Overview sub-section",
-  [REPORT]: "a report"
+  [REPORT]: "a report",
+  [AWAY]: "the While you were out section"
 }
 
 /** Whether attribute `name` is one any element may carry. */

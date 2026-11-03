@@ -58,13 +58,15 @@ export const epicSectionVocabulary = {
         "issues",
         "tests",
         "log",
-        "report"
+        "report",
+        "away"
       ],
       required: true,
       description:
         "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its " +
         "`<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and " +
-        "`report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+        '`report` prose;  `epics` (a saga page\'s) its `<epic-cards>`;  `away`, "0. While you were out", what Claude ' +
+        "did since you last read it, first on the page (written by the tool)."
     },
     {
       name: "title",
@@ -85,6 +87,13 @@ export const epicSectionVocabulary = {
       kind: "string",
       format: "ids",
       description: "The ids inside its part file:  a link to one loads the body first, then lands."
+    },
+    {
+      name: "waiting",
+      kind: "number",
+      description:
+        '`kind="away"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the ' +
+        "toolbar's red badge."
     },
     {
       name: "to-accept",
@@ -313,8 +322,8 @@ export const epicSectionVocabulary = {
     },
     {
       tag: "flow",
-      when: { attribute: "kind", values: ["overview-part", "report"] },
-      description: "An Overview sub-section's prose, or a report's."
+      when: { attribute: "kind", values: ["overview-part", "report", "away"] },
+      description: "An Overview sub-section's prose, a report's, or \"0. While you were out\"'s (written by the tool)."
     },
     {
       tag: "epic-status",

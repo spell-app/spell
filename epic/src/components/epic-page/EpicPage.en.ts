@@ -99,6 +99,14 @@ export const epicPageVocabulary = {
       description: "A `/bedtime` run is on, and what it runs (`P3-P6`):  items it changes are `recent`."
     },
     {
+      name: "away-read",
+      kind: "string",
+      format: "time",
+      description:
+        'When you last pressed Done reading on "0. While you were out" (epic `epic-engine` P62):  the section shows ' +
+        "what Claude did since;  written by the tool."
+    },
+    {
       name: "recent-since",
       kind: "string",
       format: "time",
@@ -487,6 +495,14 @@ export const epicPageVocabulary = {
   ],
   children: [
     { tag: "flow", slot: "durable", max: 1, description: "The guide's link." },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["away"] },
+      max: 1,
+      description:
+        "0. While you were out (epic `epic-engine` P62):  what Claude did since you last read it, and what needs you;  " +
+        "first, before the Overview, only while something new is in it."
+    },
     { tag: "epic-overview", min: 1, max: 1, description: "1. Overview." },
     {
       tag: "epic-section",

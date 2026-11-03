@@ -540,6 +540,11 @@
           "name": "favorite",
           "kind": "boolean",
           "description": "Starred:  its list shows it under Favorites, and only there."
+        },
+        {
+          "name": "away",
+          "kind": "boolean",
+          "description": "Its epic page has \"0. While you were out\" to read (epic `epic-engine` P62):  a red mark under its title links it."
         }
       ],
       "slots": [
@@ -577,6 +582,10 @@
           "description": "Its saga's label, a `<ui-label>`."
         },
         {
+          "name": "away",
+          "description": "`away`:  the \"While you were out\" mark, a `<ui-label>` linking the section."
+        },
+        {
           "name": "star",
           "description": "The star at its top right, a `<ui-button>`."
         },
@@ -591,6 +600,16 @@
           "key": "planning",
           "text": "planning",
           "description": "In progress with no phases yet:  the mark's words."
+        },
+        {
+          "key": "away",
+          "text": "While you were out",
+          "description": "`away`:  the mark's words."
+        },
+        {
+          "key": "awayTip",
+          "text": "Claude worked on it while you were out:  what was done, and what needs you",
+          "description": "`away`:  the mark's tooltip."
         },
         {
           "key": "star",
@@ -2978,6 +2997,11 @@
           "description": "A new update block's button (the check):  its name."
         },
         {
+          "key": "doneReading",
+          "text": "Done reading",
+          "description": "\"0. While you were out\"'s button (the check):  its name."
+        },
+        {
           "key": "boxSkip",
           "text": "Skip this",
           "description": "Note box button (the x):  its name."
@@ -4161,6 +4185,11 @@
           "name": "bedtime",
           "kind": "string",
           "description": "A `/bedtime` run is on, and what it runs (`P3-P6`):  items it changes are `recent`."
+        },
+        {
+          "name": "away-read",
+          "kind": "string",
+          "description": "When you last pressed Done reading on \"0. While you were out\" (epic `epic-engine` P62):  the section shows what Claude did since;  written by the tool."
         },
         {
           "name": "recent-since",
@@ -5787,9 +5816,10 @@
             "issues",
             "tests",
             "log",
-            "report"
+            "report",
+            "away"
           ],
-          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`;  `away`, \"0. While you were out\", what Claude did since you last read it, first on the page (written by the tool)."
         },
         {
           "name": "title",
@@ -5806,6 +5836,11 @@
           "name": "part-ids",
           "kind": "string",
           "description": "The ids inside its part file:  a link to one loads the body first, then lands."
+        },
+        {
+          "name": "waiting",
+          "kind": "number",
+          "description": "`kind=\"away\"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the toolbar's red badge."
         },
         {
           "name": "to-accept",

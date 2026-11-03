@@ -58,7 +58,8 @@
     -webkit-line-clamp: 4;
     line-clamp: 4;
   }
-  .saga {
+  .saga,
+  .away {
     margin-top: 4px;
   }
   /* the meta line (the phase under way, the page's file):  mono, small, as the brand's machine-made text */

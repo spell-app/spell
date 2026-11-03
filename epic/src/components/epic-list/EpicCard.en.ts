@@ -74,7 +74,13 @@ export const epicCardVocabulary = {
     },
     { name: "saga-title", kind: "string", description: "The saga's title, its label's words:  `Drawable Spell`." },
     { name: "saga-purpose", kind: "string", description: "The saga's purpose, its label's tooltip." },
-    { name: "favorite", kind: "boolean", description: "Starred:  its list shows it under Favorites, and only there." }
+    { name: "favorite", kind: "boolean", description: "Starred:  its list shows it under Favorites, and only there." },
+    {
+      name: "away",
+      kind: "boolean",
+      description:
+        'Its epic page has "0. While you were out" to read (epic `epic-engine` P62):  a red mark under its title links it.'
+    }
   ],
   events: [
     {
@@ -94,12 +100,19 @@ export const epicCardVocabulary = {
     { name: "base", description: "The card, a `<ui-card>`." },
     { name: "mark", description: "Its state's mark before the title:  `3/6` in progress, or the state's icon." },
     { name: "saga", description: "Its saga's label, a `<ui-label>`." },
+    { name: "away", description: '`away`:  the "While you were out" mark, a `<ui-label>` linking the section.' },
     { name: "star", description: "The star at its top right, a `<ui-button>`." },
     { name: "worked", description: "The day it was last worked on, at its bottom right, a `<time>`." }
   ],
   states: [],
   texts: [
     { key: "planning", text: "planning", description: "In progress with no phases yet:  the mark's words." },
+    { key: "away", text: "While you were out", description: "`away`:  the mark's words." },
+    {
+      key: "awayTip",
+      text: "Claude worked on it while you were out:  what was done, and what needs you",
+      description: "`away`:  the mark's tooltip."
+    },
     { key: "star", text: "Star {epic}", description: "The star's name, not starred." },
     { key: "unstar", text: "Unstar {epic}", description: "The star's name, starred." },
     {

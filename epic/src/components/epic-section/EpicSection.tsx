@@ -41,6 +41,7 @@ import {
   PHASE_FIELDS,
   PHASE_FILTER_STATES,
   REPORT,
+  AWAY,
   SECTION_LOOKS,
   STAYS_FOLDED_KINDS,
   ALL_QUERY,
@@ -530,19 +531,21 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             )
           : kind === "overview-part"
             ? () => this.reviewButtons()
-            : this.holdsItems()
-              ? () => (
-                  <>
-                    <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
-                      {(testing) => this.testButton(testing)}
-                    </Show>
-                    {this.filter()}
-                    <Show when={this.reviewState.reviewing() && this.newKind()}>
-                      {(newKind) => this.newButton(newKind())}
-                    </Show>
-                  </>
-                )
-              : undefined,
+            : kind === AWAY
+              ? () => this.doneReading()
+              : this.holdsItems()
+                ? () => (
+                    <>
+                      <Show when={kind === "tests" && this.reviewState.reviewing() && this.testing()}>
+                        {(testing) => this.testButton(testing)}
+                      </Show>
+                      {this.filter()}
+                      <Show when={this.reviewState.reviewing() && this.newKind()}>
+                        {(newKind) => this.newButton(newKind())}
+                      </Show>
+                    </>
+                  )
+                : undefined,
       before: kind === "overview-part" ? () => this.saidNote() : undefined,
       after: () => (
         <>
@@ -577,6 +580,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   contentsEntry(): ContentsEntry {
     const kind = this.domElement.getAttribute("kind") ?? ""
     const number = this.domElement.isConnected ? this.place(kind) : ""
+    // "0. While you were out":  its title, and a red badge of what waits on Owen in it (P62)
+    if (kind === AWAY) {
+      const waiting = Number(this.domElement.getAttribute("waiting")) || 0
+      return {
+        label: EpicSection.titleText(this.domElement),
+        icon: AWAY_ICON,
+        count: { open: 1, total: 1, attention: Math.max(waiting, 1) }
+      }
+    }
     if (kind === "overview-part" || !(kind in SECTION_LOOKS))
       return { label: `${number} ${EpicSection.titleText(this.domElement)}`.trim() }
     const look = SECTION_LOOKS[kind as keyof typeof SECTION_LOOKS]
@@ -904,6 +916,29 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Review (an Overview sub-section)
   ////////////////
 
+  /** "0. While you were out"'s Done reading, at the title's end, while the page is reviewed (P62). */
+  private doneReading(): JSX.Element {
+    return (
+      <Show when={this.reviewState.reviewing()}>
+        <epic-review of={this.id} shows="buttons" buttons="away" part={this.partForName("review-buttons")} />
+      </Show>
+    )
+  }
+
+  /**
+   * "0. While you were out" opens by itself as the page loads (P62):  it's what Owen came back to read, whatever fold he
+   * left it in;  once, after it first draws.
+   */
+  @E.onChange("isReady")
+  protected onAwayReady(isReady: boolean) {
+    if (!isReady || this.kind !== AWAY || this.hasOpenedAway) return
+    this.hasOpenedAway = true
+    E.afterSolidUpdate(() => void this.expand())
+  }
+
+  /** "0. While you were out" opened itself already (`onAwayReady()`). */
+  private hasOpenedAway = false
+
   /** The review buttons at the title's end:  Make Todo, Revisit. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
@@ -1124,7 +1159,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Its number by its place now, as `kind`:  `3`, or an Overview sub-section's `1.2`;  "" unplaced, or a report. */
   private place(kind: string | undefined): string {
     const parent = this.domElement.parentElement
-    if (!parent || kind === REPORT) return ""
+    if (!parent || kind === REPORT || kind === AWAY) return ""
     if (kind === "overview-part") {
       const own = EpicSection.placeOf(this.domElement, ":scope > epic-section")
       const overview = EpicSection.placeOf(parent, NUMBERED_BLOCKS) || 1
@@ -1254,3 +1289,6 @@ const NEW_CARD = "new-card"
 
 /** Where a waiting item's link to the summary goes:  it has no id, so the Overview it opens. */
 const SUMMARY_LINK = "overview"
+
+/** "0. While you were out"'s icon on the toolbar (P62):  one in `ICONS`. */
+const AWAY_ICON = "bed"

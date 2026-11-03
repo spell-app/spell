@@ -2,6 +2,8 @@ import { parseHTML } from "linkedom"
 
 import { escapeRegExp } from "spell/util/string"
 import {
+  AWAY,
+  AWAY_ID,
   OVERVIEW_ID,
   OVERVIEW_PART_ID,
   SectionIds,
@@ -15,6 +17,8 @@ import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
+
+import { NightSummary, type SummaryOptions } from "./NightSummary"
 
 import {
   CALM_ID,
@@ -1249,6 +1253,7 @@ export class PlanDoc extends PlanReader {
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
+    if (String(mark.id).toLowerCase() === AWAY_ID) return this.applyRead(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
     // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
@@ -2305,6 +2310,87 @@ export class PlanDoc extends PlanReader {
   }
 
   ////////////////
+  // ## While you were out
+  ////////////////
+
+  /**
+   * Draw "0. While you were out" again (epic `epic-engine` P62):  what Claude did since Owen last pressed Done reading
+   * (`<epic-page away-read>`), and what needs him now, from `NightSummary`;  first on the page, before the Overview.
+   * - Every edit runs it (`PlanDocFiles.edit()`), bedtime or not (Owen's C3;  J198):  never kept by hand, never stale.
+   * - Nothing new since:  no section.
+   * - A page that never had one starts counting now:  its history before isn't news.
+   * - `isMerged`:  whether a commit is in `main` (`NightSummary`'s);  none, merging isn't mentioned.
+   */
+  refreshAway(options: SummaryOptions = {}): void {
+    const read = this.page.getAttribute("away-read")
+    if (!read) Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now) })
+    const summary = NightSummary.of(this, new Date(Date.parse(read ?? "") || this.now.getTime()), options)
+    const old = this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)
+    if (summary.isEmpty) {
+      old?.remove()
+      return
+    }
+    const section = this.make("epic-section", {
+      id: AWAY_ID,
+      kind: AWAY,
+      title: AWAY_TITLE,
+      waiting: summary.waiting || undefined
+    })
+    section.append(...this.awayBody(summary))
+    if (old) old.replaceWith(section)
+    else Markup.place(this.page, section)
+  }
+
+  /**
+   * Owen pressed Done reading:  the section goes, and what comes after this moment is the next news.
+   * - logs it
+   */
+  readAway(): void {
+    Markup.set(this.page, { awayRead: PlanTime.isoMinutes(this.now) })
+    this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`)?.remove()
+    this.log("While you were out:  read")
+  }
+
+  /** The section's body:  the bedtime runs' lines, What was done, Still to do, each line linking its phase or item. */
+  private awayBody(summary: NightSummary): Node[] {
+    const html = (tag: string, ...children: (Node | string)[]) => {
+      const element = this.document.createElement(tag)
+      element.append(...children)
+      return element
+    }
+    const link = (id: string, text: string) => {
+      const anchor = html("a", text)
+      anchor.setAttribute("href", `#${id}`)
+      return anchor
+    }
+    const body: Node[] = summary.lead.map((line) => html("p", line))
+    if (summary.done.length) {
+      body.push(html("p", html("b", "What was done")))
+      body.push(
+        html(
+          "ul",
+          ...summary.done.map((line) => {
+            const merged = line.merged === undefined ? "" : line.merged ? ", merged" : ", not merged yet"
+            const commit = line.sha ? `  (${line.sha}${merged})` : ""
+            const built = line.built ? `:  ${line.built}` : ""
+            return html("li", link(line.id, line.label), ` ${line.status}${built}${commit}`)
+          })
+        )
+      )
+    }
+    if (summary.needs.length) {
+      body.push(html("p", html("b", "Still to do")))
+      body.push(
+        html(
+          "ol",
+          ...summary.needs.map((line) => html("li", link(line.id, line.label), ` ${line.why}:  ${line.title}`))
+        )
+      )
+    }
+    return body
+  }
+
+  ////////////////
   // ## Prompt
   ////////////////
 
@@ -2614,6 +2700,19 @@ export class PlanDoc extends PlanReader {
       return { applied: true, did }
     }
     return { applied: false, left: `${label}:  a change takes Accept or Reopen, not ${action}` }
+  }
+
+  /**
+   * "0. While you were out"'s Done reading (epic `epic-engine` P62):  a Seen on `away`, the section gone (`readAway()`).
+   * - gone already (read in another pass):  dropped
+   */
+  private applyRead({ action }: PlanMark): MarkResult {
+    if (action !== "seen")
+      return { applied: false, left: "AWAY:  While you were out takes Done reading, not " + action }
+    if (!this.page.querySelector(`:scope > epic-section[kind="${AWAY}"]`))
+      return { applied: false, gone: true, left: "AWAY:  read already:  dropped" }
+    this.readAway()
+    return { applied: true, did: "While you were out:  read" }
   }
 
   /**
@@ -2982,3 +3081,6 @@ function changeTitle(change: Element): string {
   const short = words.length > 50 ? `${words.slice(0, 49).trimEnd()}…` : words
   return `"${short}" (${(change.getAttribute("item") ?? "?").toUpperCase()})`
 }
+
+/** "While you were out"'s title, its own:  numbered 0, before the Overview's 1 (epic `epic-engine` P62). */
+const AWAY_TITLE = "0. While you were out"

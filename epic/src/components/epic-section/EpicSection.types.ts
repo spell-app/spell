@@ -195,8 +195,11 @@ export type SectionLook = (typeof SECTION_LOOKS)[keyof typeof SECTION_LOOKS]
  */
 export const REPORT = "report"
 
-/** The page's NUMBERED blocks, as siblings:  the Overview and the sections, but a report. */
-export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"])`
+/** "0. While you were out"'s kind (epic `epic-engine` P62):  its own title, unnumbered, first on the page. */
+export const AWAY = "away"
+
+/** The page's NUMBERED blocks, as siblings:  the Overview and the sections, but a report and "While you were out". */
+export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:not([kind="${REPORT}"], [kind="${AWAY}"])`
 
 /** The kinds that hold items:  an empty one says "none yet". */
 export const ITEM_KINDS = ["questions", "judgements", "todos", "issues", "tests"] as const

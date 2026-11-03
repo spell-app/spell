@@ -474,7 +474,9 @@ export function planOf(document) {
     future: page.hasAttribute("future"),
     standing: page.hasAttribute("standing"),
     saga: page.getAttribute("saga") || null,
-    urgent: Array.from(document.querySelectorAll(URGENT_SELECTOR), (item) => item.id)
+    urgent: Array.from(document.querySelectorAll(URGENT_SELECTOR), (item) => item.id),
+    // its "0. While you were out" waits to be read (epic `epic-engine` P62)
+    away: !!document.querySelector('epic-page > epic-section[kind="away"]')
   }
 }
 
@@ -486,6 +488,7 @@ function epicFacts(page) {
     future: page.future,
     standing: page.standing,
     urgent: page.urgent,
+    away: page.away,
     active: page.phases.find((phase) => phase.status === "active")?.label
   }
 }

@@ -409,6 +409,8 @@ export type RunningEpic = {
   standing?: boolean
   saga?: string
   urgent?: string[]
+  /** its page's "0. While you were out" waits (epic `epic-engine` P62) */
+  away?: boolean
   worked?: string
 }
 
@@ -466,7 +468,18 @@ function read(
   file: string
 ): Pick<
   RunningEpic,
-  "title" | "phases" | "done" | "total" | "active" | "updated" | "future" | "standing" | "saga" | "urgent" | "worked"
+  | "title"
+  | "phases"
+  | "done"
+  | "total"
+  | "active"
+  | "updated"
+  | "future"
+  | "standing"
+  | "saga"
+  | "urgent"
+  | "away"
+  | "worked"
 > {
   const html = readFileSync(file, "utf8")
   // drop the `Epic: ` epic pages' titles start with (since 2026-10-04):  the card is in the Epics list already
@@ -492,6 +505,7 @@ function read(
     .filter((tag) => (URGENT_STATES as readonly string[]).includes(attribute(tag, "state") ?? ""))
     .map((tag) => attribute(tag, "id") ?? "")
     .filter(Boolean)
+  const away = /<epic-section\b[^>]*\skind="away"/.test(html)
   const log = join(dirname(file), "parts", "log.html")
   const events = [...eventTimesIn(html), ...(existsSync(log) ? eventTimesIn(readFileSync(log, "utf8")) : [])]
   const worked = lastWorked([updated, ...events])
@@ -506,6 +520,7 @@ function read(
     ...(standing && { standing }),
     ...(saga && { saga }),
     ...(urgent.length > 0 && { urgent }),
+    ...(away && { away }),
     ...(worked && { worked: worked.toISOString() })
   }
 }

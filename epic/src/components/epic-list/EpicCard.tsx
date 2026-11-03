@@ -57,6 +57,12 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
     return !isServer && ServerLink.isServed()
   }
 
+  /** Where its "While you were out" mark goes:  its epic page's section (`#away`), by its title's link. */
+  private get awayLink(): string | undefined {
+    const href = this.domElement.querySelector(":scope > a[href]")?.getAttribute("href")
+    return href ? `${href.replace(/#.*$/, "")}#away` : undefined
+  }
+
   ////////////////
   // ## Rendering
   ////////////////
@@ -84,6 +90,20 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 title={this.sagaPurpose ?? ""}
               >
                 {this.sagaTitle || this.saga}
+              </ui-label>
+            </Show>
+            <Show when={this.away}>
+              <ui-label
+                class={AWAY}
+                part={this.partForName("away")}
+                size="mini"
+                color="red"
+                appearance="basic"
+                icon="bed"
+                link={this.awayLink}
+                title={this.translationForKey("awayTip")}
+              >
+                {this.translationForKey("away")}
               </ui-label>
             </Show>
             <ui-meta class={META}>
@@ -217,6 +237,8 @@ export interface EpicCard extends E.AttributeValues<typeof epicCardVocabulary> {
 const HEADER = "header"
 const MARK = "mark"
 const SAGA = "saga"
+/** Class of the "While you were out" mark (`away`, epic `epic-engine` P62). */
+const AWAY = "away"
 const META = "meta"
 const STAR = "star"
 const WORKED = "worked"

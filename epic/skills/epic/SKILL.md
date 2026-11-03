@@ -82,6 +82,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     `epic pages link <epic page> --hash p1 --text "P1 · Short Name"`.
   - "<P1 link pair> complete.  Next is <P2 link pair>."
   - After the last phase:  "All done:  <P<N> · Doc Review link pair> complete."
+  - Done while the person was away, it's a few lines and "0. While you were out"'s link pair (`--hash away`):  the
+    section at the top of the epic page keeps the detail by itself (epic `epic-engine` P62).
 
 ## 1. Name
 
