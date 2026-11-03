@@ -33,11 +33,13 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
 
 /****************
  * ### `ThemePreference`
- * The theme (`UI.themes`) and colour scheme a person chose:  ONE choice for every place Spell draws
- * (epic `debut` P21, Owen:  "one theme picker for everything"), re-applied on every page.
+ * The theme (`UI.themes`) and colour scheme a person chose, re-applied on every page:  ONE choice for every docs
+ * page, and one for the editor (epic `debut` P21;  the editor apart since epic `epic-engine` I204, Owen:  "the epic
+ * engine pages should not share the theme with the running app").
  * - `<ui-theme-menu>` changes it;  a page's entry calls `restore()` once (Spell UI's site:  `site/_src/site.ts`).
- * - Every place shares it:  the editor and its notebooks, the epic pages and guides, Spell UI's, App UI's and the
- *   brand's pages.  Pick a theme in any one, and every other draws in it.
+ * - Every docs page shares one:  the epic pages and guides, Spell UI's, App UI's and the brand's pages.  Pick a theme
+ *   in any one, and every other draws in it.
+ * - The editor and its notebooks keep their own (`keepIn(..., "spell-app")`), the same way, in a store of their own.
  * - Kept in the person's SPACE (Owen:  "Take from user preference in space"):  the store `spell-site`
  *   (`THEME_STORE`), a file beside their other preferences, `@spell/owen@/__prefs/spell-site.json5`:
  *   `{ theme: "glass", scheme: "dark" }`, through the page server (`ServerPlace`, `/api/prefs`).
@@ -104,10 +106,15 @@ export class ThemePreference {
   /**
    * Say where this page keeps the person's choice:  e.g. the editor, which the page server didn't serve but whose
    * `/api` reaches it, `ThemePreference.keepIn("space")`;  its read-only public build, `"browser"`.
+   * - `store`:  the space's store it's kept in, default `THEME_STORE`, every docs page's;  the editor keeps its own
+   *   (`"spell-app"`), so its theme and the docs pages' are two choices (Owen, 2026-11-03, epic `epic-engine` I204:
+   *   "the epic engine pages should not share the theme with the running app")
    * - Call before `restore()`.
    */
-  static keepIn(keptIn: ThemeKeptIn): void {
+  static keepIn(keptIn: ThemeKeptIn, store: string = THEME_STORE): void {
     ThemePreference.kept = keptIn
+    ThemePreference.store = store
+    ThemePreference.spaced = undefined
   }
 
   /**
@@ -306,13 +313,14 @@ export class ThemePreference {
    * - NEVER throws.
    */
   static async heard(saved: PrefSaved): Promise<void> {
-    if (saved.store !== THEME_STORE) return
+    if (saved.store !== ThemePreference.store) return
     if (saved.key === "theme" || saved.key === "scheme") await ThemePreference.took({ [saved.key]: saved.value })
   }
 
   /** Forget the in-memory theme and scheme, the address's and where they're kept (tests):  the next read goes back to them. */
   static reset(): void {
     ThemePreference.current = undefined
+    ThemePreference.store = THEME_STORE
     ThemePreference.addressed = undefined
     ThemePreference.kept = undefined
     ThemePreference.spaced = undefined
@@ -345,6 +353,9 @@ export class ThemePreference {
   /** Where the choice is kept, once said (`keepIn()`) or first read (`keptIn`). */
   private static kept: ThemeKeptIn | undefined
 
+  /** The space's store the choice is kept in (`keepIn()`):  every docs page's, unless the page says another. */
+  private static store = THEME_STORE
+
   /** The space's store, made on first use (`spaceStore`);  `null`:  none on this page. */
   private static spaced: PrefStore | null | undefined
 
@@ -361,11 +372,11 @@ export class ThemePreference {
     return typeof window !== "undefined" && !!(window as { SPELL_SERVER?: { prefs?: boolean } }).SPELL_SERVER?.prefs
   }
 
-  /** The person's `spell-site` store in their space (`ServerPlace`), or `undefined`:  kept in the browser. */
+  /** The person's store in their space (`store`, `ServerPlace`), or `undefined`:  kept in the browser. */
   private static get spaceStore(): PrefStore | undefined {
     if (ThemePreference.spaced === undefined)
       ThemePreference.spaced =
-        ThemePreference.keptIn === "space" ? new PrefStore(THEME_STORE, { place: ServerPlace.shared }) : null
+        ThemePreference.keptIn === "space" ? new PrefStore(ThemePreference.store, { place: ServerPlace.shared }) : null
     return ThemePreference.spaced ?? undefined
   }
 

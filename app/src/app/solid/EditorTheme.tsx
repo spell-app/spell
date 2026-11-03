@@ -53,7 +53,8 @@ export class EditorTheme {
     try {
       await uiReady
       const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
-      ThemePreference.keepIn(isStaticBuild ? "browser" : "space")
+      // its own store:  the editor's theme isn't the docs pages' (epic `epic-engine` I204)
+      ThemePreference.keepIn(isStaticBuild ? "browser" : "space", EDITOR_THEME_STORE)
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
@@ -211,3 +212,6 @@ const PICK_WAIT_MS = 100
 
 /** A drawn thing's class that's a card:  the full view selects one first. */
 const CARD = /card/i
+
+/** The space's store the editor keeps its theme in:  apart from the docs pages' (`spell-site`). */
+const EDITOR_THEME_STORE = "spell-app"
