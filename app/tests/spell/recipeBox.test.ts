@@ -22,6 +22,9 @@ import { SP } from "spell/parser/spell"
 import { parseSpellProject } from "spell/parser/spell/test"
 import { fixturePath } from "spell/app/spaces/test"
 
+// Spell UI, as a spellml drawing names its components:  `<card>` is `<ui-card>`
+import "spell/app/spaces/models/spellUIPack"
+
 /** `yarn build:element`'s output. */
 const ELEMENT_DIR = resolve(__dirname, "../../app/dist-element")
 
@@ -39,6 +42,8 @@ type Program = {
   source: string
   /** The classes its elements carry. */
   field: string
+  /** The project's other files, compiled with it:  an example's drawing, beside its API file. */
+  more?: { path: string; contents: string }[]
 }
 
 /** The built-in examples:  what people run, in the editor. */
@@ -87,8 +92,8 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let elsewhereUrl: string
 
   /** Compile `program`, and say where its page is. */
-  function serve(name: string, { path, source }: Program): string {
-    programs.set(`/programs/${name}.js`, compiledProgram(path, source))
+  function serve(name: string, { path, source, more }: Program): string {
+    programs.set(`/programs/${name}.js`, compiledProgram(path, source, more))
     programs.set(`/${name}.html`, pageFor(name))
     return `${servers.url}/${name}.html`
   }
@@ -457,25 +462,32 @@ start the box
   /** Each built-in example, and what it should say:  the words differ, the classes don't. */
   const SHIPPED = [
     {
-      path: "RecipeBox/RecipeBox.spell",
+      path: "RecipeBox/RecipeBox.api.spell",
       examples: ["Pizza Margherita", "Dal", "Tomato soup"],
       noRecipes: "No recipes yet. Add your first one.",
       noMatches: "No recipes match your search."
     },
     {
-      path: "CajaDeRecetas/CajaDeRecetas.es.spell",
+      path: "CajaDeRecetas/CajaDeRecetas.api.es.spell",
       examples: ["Pizza Margarita", "Dal", "Sopa de tomate"],
       noRecipes: "Todavía no hay recetas. Agrega la primera.",
       noMatches: "Ninguna receta coincide con tu búsqueda."
     }
   ]
 
-  /** An example as it ships. */
-  const shipped = (path: string): Program => ({
-    path: `/${path.split("/")[1]}`,
-    source: readFileSync(join(EXAMPLES, path), "utf8"),
-    field: ""
-  })
+  /**
+   * An example as it ships:  its API file, whose first lines say where it lives, and its drawing beside it.
+   * - `path`:  the API file, `RecipeBox/RecipeBox.api.spell`;  the drawing is the same name, `.spellml`, no `.api`.
+   */
+  const shipped = (path: string): Program => {
+    const drawing = path.replace(/\.api(\.\w\w)?\.spell$/, "$1.spellml")
+    return {
+      path: `/${path.split("/")[1]}`,
+      source: readFileSync(join(EXAMPLES, path), "utf8"),
+      field: "",
+      more: [{ path: `/${drawing.split("/")[1]}`, contents: readFileSync(join(EXAMPLES, drawing), "utf8") }]
+    }
+  }
 
   /** The titles an example's cards show. */
   const cardsOn = (page: Page) =>
@@ -552,7 +564,7 @@ start the box
   for (const backEnd of Object.keys(BACK_ENDS)) {
     test(`the example RecipeBox, on ${backEnd}:  only its first lines change`, { timeout: 60_000 }, async () => {
       const name = `shipped-${backEnd.replace(/\W/g, "")}`
-      const url = serve(name, withPlace(shipped("RecipeBox/RecipeBox.spell"), BACK_ENDS[backEnd]!(servers.url)))
+      const url = serve(name, withPlace(shipped("RecipeBox/RecipeBox.api.spell"), BACK_ENDS[backEnd]!(servers.url)))
       const { page, problems } = await opened(url)
       const held = heldBy[backEnd]!
       await page.locator("ui-form.recipe").first().waitFor(WAITING)
@@ -581,7 +593,7 @@ start the box
     { timeout: 60_000 },
     async () => {
       const down = `family cookbook is a web server at "${servers.url}/nowhere":\n\t- check it every 500 seconds`
-      const { page } = await opened(serve("shipped-down", withPlace(shipped("RecipeBox/RecipeBox.spell"), down)))
+      const { page } = await opened(serve("shipped-down", withPlace(shipped("RecipeBox/RecipeBox.api.spell"), down)))
       const failed = page.locator("ui-message.failed")
       await failed.waitFor(WAITING)
       expect(await failed.textContent()).toContain("We can't reach your recipes right now.")
@@ -1034,8 +1046,8 @@ iniciar la caja que publica`
 })
 
 /** `source`, one file, as a runner is handed it:  with its imports. */
-function compiledProgram(path: string, source: string): string {
-  const { scope, files } = parseSpellProject([{ path, contents: source }])
+function compiledProgram(path: string, source: string, more: { path: string; contents: string }[] = []): string {
+  const { scope, files } = parseSpellProject([{ path, contents: source }, ...more])
   const errors = files.flatMap((file) => file.errors)
   if (errors.length) throw new Error(`parse errors:\n${errors.join("\n")}`)
   const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))

@@ -171,7 +171,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 17 | `the short rank of the card` | `card.shortRank` |
-| lists | positions, ranges, adding, removing, `for each`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
+| lists | positions, ranges, adding, removing, `for`, `where` | 43 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
@@ -228,7 +228,7 @@ and the JavaScript they become.
     then its aliases, bulleted, under those.
 - A property's choices are a kind of their own, named by the template, then the property:  a card's suits make `card suit`.
   - Another template's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
-  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
+  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for card rank in card ranks`.
   - It holds plain text and numbers, so it has no properties or aliases of its own:  Spell says so if you give it one.
   - Spanish puts the words in its own order:  `palo de carta`, plural `palos de carta`.
 - A card's value is its rank's position, so an ace is 1 and a queen is 12:  the Solitaire example's card test checks the queen.
@@ -1019,8 +1019,8 @@ A program says once where its data lives, and which types live there, then write
 family cookbook is a web server at "https://api.example.com/v1":
 	- check it every 30 seconds
 
-a "recipe" is a view:
-	- it is saved in family cookbook
+a "recipe" is a thing:
+	- it lives in family cookbook
 	- its "title" is text
 
 recipe box is an app:
@@ -1037,6 +1037,8 @@ recipe box is an app:
 			<ui-message color="red">Can't reach the cookbook.</ui-message>
 ```
 
+- In a `.spellml` drawing the same loop is one tag:  `<for recipe in the matches empty="No recipes yet." />` draws each recipe,
+  with a loader, Try again and the empty message by itself ([README-spellx](README-spellx.md)).
 - Moving the data changes the first line:  `a graphql server at`, `a data folder at`, `a file at`, `a room at`, `a sheet at`, `a google sheet at`, `an airtable at`, `an atmosphere account at`, `a personal atmosphere account`, `a database on this device`, `an in memory database`.
   - `at` and `from` mean the same.  Only where it's read from, never read only.
 - Reading:  `every recipe`, `all recipes`, `recipes where it is quick`, `recipes, sorted by title`, `load the recipes`.

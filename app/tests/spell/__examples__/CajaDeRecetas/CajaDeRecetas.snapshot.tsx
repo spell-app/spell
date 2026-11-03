@@ -1,25 +1,22 @@
-import { core, App, View, Place, prop, thing, drawn } from "@spell/core"
+import { core, Thing, App, Place, prop, thing, drawn } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
-core.heading("Caja de recetas")
-/////////////////////
-// ## Caja de recetas
-/////////////////////
+core.heading("Caja de recetas:  dónde se guardan las recetas")
+////////////////////////////////////////////////////
+// ## Caja de recetas:  dónde se guardan las recetas
+////////////////////////////////////////////////////
 
-/** Una receta:  una tarjeta que puedes leer y cambiar */
-export class Receta extends View {
-  static elementTag = core.defineElement(this, "test-project")
-
+export class Receta extends Thing {
   // su "título" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 714, end: 734 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 642, end: 662 } })
   accessor título!: string
 
   // sus "porciones" es un número
-  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 738, end: 766 } })
+  @prop({ type: "number", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 666, end: 694 } })
   accessor porciones!: number
 
   // sus "notas" es texto
-  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.es.spell", start: 770, end: 790 } })
+  @prop({ type: "text", declaredAt: { path: "/CajaDeRecetas.api.es.spell", start: 698, end: 718 } })
   accessor notas!: string
 
   @drawn draw() {
@@ -47,26 +44,11 @@ export class Receta extends View {
 }
 
 /**
- * `<test-project-receta>`:  a receta, drawn in its own element, e.g. by `draw the receta`.
- * - The page defines its tag with this class:  `core.useElement()`, below.
- * - Its attributes are its receta's properties;  its methods call its receta's.
- * - What every view's element does, e.g. drawing its receta, is `SpellElement`'s.
- */
-export class RecetaElement extends SpellElement<Receta> {
-  @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-receta", "receta", [
-    { name: "título", kind: "string", description: "Its título." },
-    { name: "porciones", kind: "number", description: "Its porciones." },
-    { name: "notas", kind: "string", description: "Its notas." }
-  ])
-}
-core.useElement(Receta, RecetaElement)
-
-/**
- * Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
  * Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
  * recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
  * recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
  * (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
+ * Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spellml.
  */
 export class RecetarioFamiliar extends Place {}
 export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
@@ -75,10 +57,20 @@ export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {
   unclearNumbers: ","
 })
 
+// -----------
+core.heading("Caja de recetas")
+/////////////////////
+// ## Caja de recetas
+/////////////////////
+// Tus recetas, en tarjetas:  busca una, agrega otra, cambia cualquiera mientras escribes, quita una y deshazlo.
+// Dónde se guardan está en CajaDeRecetas.api.es.spell, y solo su primera línea lo sabe.
+
 core.heading("Una receta:  una tarjeta que puedes leer y cambiar")
+//## Una receta:  una tarjeta que puedes leer y cambiar
 
 core.heading("La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta")
-/** La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta */
+//## La caja:  la tarjeta de una receta nueva, y luego una tarjeta por cada receta
+
 @thing
 export class CajaDeRecetas extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -90,14 +82,6 @@ export class CajaDeRecetas extends App {
   // su "receta nueva" es una nueva receta con porciones = 4
   @prop({ init: () => new Receta({ porciones: 4 }), early: true })
   accessor recetaNueva!: Receta
-
-  /** las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
-  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spell", start: 1772, end: 1902 }, readsFrom: ["recetario_familiar"] }) }
-  get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
-    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda))
-    core.reverse(halladas)
-    return halladas
-  }, () => [this.búsqueda]) }
 
   /** Si todavía no hay nada guardado, unas cuantas para empezar */
   async create() {
@@ -120,6 +104,14 @@ export class CajaDeRecetas extends App {
     }
   }
 
+  /** Las más nuevas primero:  una receta nueva se suma al final, así que se muestran al revés */
+  static { this.declareProp("coincidencias", { declaredAt: { path: "/CajaDeRecetas.es.spellml", start: 1761, end: 1998 }, readsFrom: ["recetario_familiar"] }) }
+  get coincidencias() { return core.waitedValue(this, "coincidencias", async () => {
+    const halladas = core.filter(await core.savedThings(Receta, {}, "looks through"), (receta: Receta) => core.includes(receta.título, this.búsqueda))
+    core.reverse(halladas)
+    return halladas
+  }, () => [this.búsqueda]) }
+
   agregarLaRecetaNueva() {
     core.saveThing(this.recetaNueva)
     this.recetaNueva = new Receta({ porciones: 4 })
@@ -127,22 +119,22 @@ export class CajaDeRecetas extends App {
 
   @drawn draw() {
     return [
-      <header class="top">
-        <div class="heading">
-          <h1>Caja de recetas</h1>
-          <p>Todo lo que escribes se guarda al instante.</p>
-        </div>
+      <ui-stack class="top" direction="horizontal" wrap={true} align="end" justify="between">
+        <ui-stack align="start">
+          <ui-header size="large">Caja de recetas</ui-header>
+          <ui-text color="grey">Todo lo que escribes se guarda al instante.</ui-text>
+        </ui-stack>
         <ui-toolbar class="undo" menu="menú de la caja" aria-label="Recetas" />
-        <ui-form value={this}>
+        <ui-form class="find" value={this}>
           <ui-field label="Buscar">
             <ui-input class="search" name="búsqueda" icon="search" />
           </ui-field>
         </ui-form>
-      </header>,
+      </ui-stack>,
       <ui-card class="new" fluid={true}>
         <ui-content>
           <ui-form prop:value={this.recetaNueva}>
-            <h2>Agrega una receta</h2>
+            <ui-header size="small">Agrega una receta</ui-header>
             <ui-field label="Nombre de la receta">
               <ui-input class="draft" name="título" size="large" />
             </ui-field>
@@ -161,12 +153,12 @@ export class CajaDeRecetas extends App {
         </ui-extra>
       </ui-card>,
       core.drawRead(() => this.coincidencias, (receta: Receta) => core.drawThing(receta), {
-        waiting: () => <ui-loader class="waiting" visible={true} inline={true} text={true}>Buscando tus recetas</ui-loader>,
-        none: () => <ui-text class="none">
+        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Buscando tus recetas"}</ui-loader>,
+        none: () => <ui-text class="none" color="grey">
           {this.búsqueda === "" ? "Todavía no hay recetas. Agrega la primera." : "Ninguna receta coincide con tu búsqueda."}
         </ui-text>,
         failed: () => <ui-message class="failed" color="red">
-          <p>No podemos llegar a tus recetas ahora mismo.</p>
+          No podemos llegar a tus recetas ahora mismo.
           <ui-button class="again" onClick={core.pressed(this, () => core.reloadSaved())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
             Reintentar
           </ui-button>
@@ -201,7 +193,7 @@ export const cajaDeRecetas = new CajaDeRecetas()
 // su "menú de la caja" es un menú de "deshacer"
 core.describeMenu(CajaDeRecetas, "menúDeLaCaja", { items: ["undo"] })
 // -----------
-core.installStyles(undefined, `/* File styles.css:  how the recipe box looks (the same as Recipe Box, its twin).¬   - The box is one grid, <caja-de-recetas-app>:  its header across the top, then a card each, the new recipe's first.¬   - Each recipe is a <caja-de-recetas-receta>, an element of its own:  its insides are reached by their parts. */¬¬caja-de-recetas-app {¬  --ui-card-margin-block: 0;¬  --ui-form-row-distance: 0.75em;¬  --ui-menu-margin: 0;¬  --ui-message-margin: 0;¬¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  padding-block-end: 1.5em;¬}¬¬caja-de-recetas-receta {¬  display: block;¬}¬¬/****************¬ * Across the top:  the title, then undo and search, on the right while there's room¬ ****************/¬¬.top {¬  grid-column: 1 / -1;¬}¬¬.top {¬  display: flex;¬  flex-wrap: wrap;¬  align-items: end;¬  gap: 0.5em 1em;¬¬  .heading {¬    flex: 1 1 100%;¬  }¬¬  h1,¬  p {¬    margin: 0;¬  }¬¬  p {¬    color: var(--ui-text-muted);¬  }¬¬  ui-form {¬    --ui-form-row-distance: 0;¬¬    flex: 1 1 10em;¬  }¬¬  /* with room, one line:  the search stays the same width as undo's words change */¬  @media (min-width: 40em) {¬    .heading {¬      flex-basis: 16em;¬    }¬¬    ui-form {¬      flex: 0 1 18em;¬    }¬  }¬}¬¬/****************¬ * The cards¬ ****************/¬¬/* the new recipe's card stands beside two rows of others:  no hole under its neighbours */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬¬.new h2 {¬  margin: 0 0 0.5em;¬  font-size: 1.15em;¬}¬¬/* Add, at the foot of its card, on the right */¬.new ui-extra {¬  text-align: end;¬}¬¬/* said beside the new recipe's card, in place of the others */¬.none {¬  color: var(--ui-text-muted);¬}¬¬.waiting {¬  justify-self: start;¬}¬`)
+core.installStyles(undefined, `/* File styles.css:  how the box is laid out.¬   - The box, <caja-de-recetas-app>, is one grid:  its top row across, then a card each, the new recipe's first. */¬¬caja-de-recetas-app {¬  display: grid;¬  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18em), 1fr));¬  align-items: start;¬  gap: 1em;¬  max-width: 66em;¬  margin-inline: auto;¬  --ui-card-margin-block: 0;¬}¬¬.top {¬  grid-column: 1 / -1;¬}¬¬/* the search takes the room that's left on the top row, and its own row on a phone */¬.find {¬  flex: 1 1 12em;¬}¬¬/* the new recipe's card stands beside two rows of others */¬@media (min-width: 40em) {¬  .new::part(card) {¬    grid-row: span 2;¬  }¬}¬`)
 // -----------
 if (!core.isCarryingOver) cajaDeRecetas.start()
 
@@ -209,8 +201,6 @@ if (!core.isCarryingOver) cajaDeRecetas.start()
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      /** `RecetaElement` */
-      "test-project-receta": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
       /** `CajaDeRecetasElement` */
       "test-project-app": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
     }
