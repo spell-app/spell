@@ -50,7 +50,7 @@
     {
       "type": "RecipeBox",
       "superType": "App",
-      "defined": "/RecipeBox.spell:1452-3916"
+      "defined": "/RecipeBox.spell:1452-3911"
     },
     {
       "property": "search",
@@ -109,7 +109,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeBox.spell:2341-3916"
+      "defined": "/RecipeBox.spell:2341-3911"
     }
   ],
   "codeLines": [

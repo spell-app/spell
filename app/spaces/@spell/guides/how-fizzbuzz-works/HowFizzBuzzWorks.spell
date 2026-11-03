@@ -12,7 +12,7 @@
 // The indented lines under it are how to do it.
 to play fizzbuzz
 	// say each number in turn, from 1 to 20:  this kind of line is called a LOOP
-	for each number from 1 to 20
+	for number from 1 to 20
 		// "divided by 15 is an integer" means 15 goes into it with nothing left over
 		// - 15 first, because a number that 15 goes into is one that 3 and 5 both go into
 		if the number divided by 15 is an integer: print the number, "fizzbuzz"

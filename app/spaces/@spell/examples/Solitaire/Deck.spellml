@@ -4,8 +4,8 @@ The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if yo
 <spell-thing "deck" template="list of cards">
 	<property "jokers" description="No jokers, unless it's made `with jokers`">yes or no</>
 	<action "create it" description="One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does">
-		for each rank in card ranks
-			for each suit in card suits
+		for rank in card ranks
+			for suit in card suits
 				add a new card with rank = the rank, suit = the suit to the deck
 		if its jokers is yes
 			add a new joker with color = red to the deck
@@ -13,7 +13,7 @@ The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if yo
 	</action>
 	<property "state" description="Its cards' short names, top to bottom">
 		set card names to a new list of text
-		for each card in the deck
+		for card in the deck
 			add the state of the card to card names
 		return "deck: " + card names
 	</property>

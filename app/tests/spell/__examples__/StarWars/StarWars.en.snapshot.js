@@ -193,6 +193,8 @@ export const words = {
       playing: "playing",
       jumping: "jumping",
       found: "found",
+      signal: "signal",
+      lostSignal: "lost signal",
       goBack: "go back",
       goToWhere: "go to (where as text)",
       playTheOpening: "play the opening",

@@ -11,7 +11,7 @@ A widget of its own, as no `ui-*` stretches a star:  `ui-space` is the bare box 
 		</segment>
 	</draw>
 	<draw "stars">
-		<for each star from 1 to 240>
+		<for stars from 1 to 240>
 			<space class="streak" style={"--n: " + star} />
 		</for>
 	</draw>

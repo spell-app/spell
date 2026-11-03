@@ -18,20 +18,23 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 
 	<property "found" description="Whatever's found:  the film, character, planet, ship or anything else with that in its name">
 		set matches to a new list of things
-		for each film in every film where its title includes the search of the guide
+		for film in every film where its title includes the search of the guide
 			add the film to matches
-		for each character in every character where its name includes the search of the guide
+		for character in every character where its name includes the search of the guide
 			add the character to matches
-		for each planet in every planet where its name includes the search of the guide
+		for planet in every planet where its name includes the search of the guide
 			add the planet to matches
-		for each starship in every starship where its name includes the search of the guide
+		for starship in every starship where its name includes the search of the guide
 			add the starship to matches
-		for each vehicle in every vehicle where its name includes the search of the guide
+		for vehicle in every vehicle where its name includes the search of the guide
 			add the vehicle to matches
-		for each one in every species where its name includes the search of the guide
+		for one in every species where its name includes the search of the guide
 			add the one to matches
 		return matches
 	</property>
+
+	<property "signal">"Waiting for a signal from the galaxy"</property>
+	<property "lost signal">"The signal from swapi.py4e.com is lost."</property>
 
 	<action "go back">
 		if its trail is empty
@@ -99,101 +102,26 @@ Each type below adds to its type there, with `<spell-more-of>`:  so looking agai
 			draw the page of its showing
 		<otherwise if its search is not "">
 			<header size="medium">Searching for “{its search}”</header>
-			<cards columns="4" doubling>{draw its search list}</cards>
+			<for its found as="cards" columns="4" doubling loading={its signal} failed={its lost signal} empty="Nobody and nothing by that name, in this galaxy." />
 		<otherwise if its tab is "films">
 			<segment class="opening" inverted align="center">
 				<text class="long-ago" size="large">A long time ago in a galaxy far, far away....</text>
 				<button class="play-opening" size="massive" onClick={play the opening of the guide}>Play the opening</button>
 			</segment>
-			<cards columns="4" doubling>{draw its films list}</cards>
+			<for every film as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise if its tab is "characters">
-			<cards columns="4" doubling>{draw its characters list}</cards>
+			<for every character as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise if its tab is "planets">
-			<cards columns="4" doubling>{draw its planets list}</cards>
+			<for every planet as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise if its tab is "vehicles">
-			<cards columns="4" doubling>{draw its vehicles list}</cards>
+			<for every vehicle as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise if its tab is "species">
-			<cards columns="4" doubling>{draw its species list}</cards>
+			<for every species as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		<otherwise>
-			<cards columns="4" doubling>{draw its ships list}</cards>
+			<for every starship as="cards" columns="4" doubling loading={its signal} failed={its lost signal} />
 		</>
 	</draw>
 
-	<draw "search list">
-		for each one in its found
-			draw the one
-		while waiting:
-			draw its signal
-		if there are none:
-			<text>Nobody and nothing by that name, in this galaxy.</text>
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "films list">
-		for each film in every film
-			draw the film
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "characters list">
-		for each character in every character
-			draw the character
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "planets list">
-		for each planet in every planet
-			draw the planet
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "vehicles list">
-		for each vehicle in every vehicle
-			draw the vehicle
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "species list">
-		for each one in every species
-			draw the one
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "ships list">
-		for each starship in every starship
-			draw the starship
-		while waiting:
-			draw its signal
-		if that fails:
-			draw its lost signal
-	</draw>
-
-	<draw "signal">
-		<loader visible inline text>Waiting for a signal from the galaxy</loader>
-	</draw>
-
-	<draw "lost signal">
-		<message color="red">
-			<text paragraph>The signal from swapi.py4e.com is lost.</text>
-			<button onClick={try again}>Try again</button>
-		</message>
-	</draw>
 </spell-app>
 
 
@@ -340,9 +268,8 @@ A table of what's known, leaving out what isn't;  a list under its heading, or n
 		<if its single>
 			<header class="section" size="small">{its heading}</header>
 			<cards columns="4" doubling>{draw its single}</cards>
-		<otherwise if its things is not empty>
-			<header class="section" size="small">{its heading}</header>
-			<cards columns="4" doubling>{draw each one in its things}</cards>
+		<otherwise>
+			<for its things title={its heading} as="cards" columns="4" doubling hide-empty />
 		</>
 	</draw>
 </spell-thing>
@@ -554,7 +481,7 @@ A species with no picture takes the first of its people who has one.
 	<property "picture" description="Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing">
 		set everyone to every character
 		set found to ""
-		for each character in its people
+		for character in its people
 			if found is ""
 				set found to the character's picture
 		return found
