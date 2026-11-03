@@ -109,6 +109,8 @@ export type JSXMatchData = {
    * its children's `slot="frente"` name its slots as they compile, `front` -- see `SpellJSX.withSlotNames()`.
    */
   view?: P.TypeScope
+  /** `<film/>` in a loop over films:  the loop's item, drawn. */
+  loopItem?: P.ScopeVariable
 }
 
 /**

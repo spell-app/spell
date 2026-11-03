@@ -30,7 +30,7 @@ import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { AddNewThing } from "./AddNewThing"
-import { ListIteration } from "./ListIteration"
+import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -1018,6 +1018,9 @@ listsEs.addRule(ListIteration, {
   ]
 })
 
+// el elemento nombrado por la lista:  `para películas`
+listsEs.addRule(ListIterationNamedForList, { syntax: "(para|por) cada? {list:expression} :? {statement_body}?" })
+
 // the item named for a value kind of several words (epic `spanish` P22)
 listsEs.addRule(ListIteration, {
   syntax: "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
@@ -1045,7 +1048,7 @@ listsEs.addRule(ListIteration, {
 
 listsEs.addRule(ListRangeIteration, {
   syntax:
-    "(para|por) cada? {item:singular_identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
+    "(para|por) cada? {item:identifier} (de|desde) {start:expression} (hacia abajo)? (a|hasta) {end:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",

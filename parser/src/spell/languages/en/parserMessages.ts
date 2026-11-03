@@ -39,7 +39,7 @@ export const PARSER_MESSAGES = {
     '{circle}:  each makes the next as it\'s made, so none can ever be made.  Hold one with no "new", and make it in an action',
   /** A loop or a draw on its own line in an element, which shows as text. */
   "statement-in-markup":
-    '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for each book in its books: draw book}"',
+    '"{line}" shows as text:  it can\'t sit inside an element on a line of its own.  Write it in braces, as in "{for book in its books: draw book}"',
   /** `if it is empty`, `it` a thing that holds no items. */
   "never-empty": "{AType} isn't a list, so it's never empty:  say which, as in \"if its books is empty\"",
   /** `its "books" is a new list`, the `is` already said. */
@@ -332,6 +332,9 @@ export const PARSER_MESSAGES = {
   "spellx-otherwise-after-closed-if":
     '{tag} goes on with the "{if}" above it, but a "</>" closed that:  remove the "</>"',
   /** `<if>` or a handler with no phrase after its word:  `{word}` is `if`, `on` ... */
+  "spellx-for-flag-first": 'Move "{flag}" after the attributes of {tag}:  written first, it reads as part of the list',
+  "spellx-for-needs-as": '"{attribute}" on {tag} goes on what\'s around its items:  say which, with {as}="cards"',
+  "spellx-for-table-needs-cells": '{tag} draws a row for each item:  name its columns, <cell "Name">{its name}</cell>',
   "spellx-missing-phrase": '{tag} needs words after its "{word}"',
   /** A line of a body indented less than the body's first line (Q7). */
   "spellx-indented-less": "This line is indented less than the rest of {tag}:  indent it one step more than {tag}",

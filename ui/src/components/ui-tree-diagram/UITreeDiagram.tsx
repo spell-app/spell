@@ -193,7 +193,7 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
     const { svg, layout } = this
     const width = svg?.getBoundingClientRect().width
     if (!svg || !width || !layout) return 1
-    return width / ((layout.width * this.pixelsPerUnit()) || width)
+    return width / (layout.width * this.pixelsPerUnit() || width)
   }
 
   /** Pixels per user unit, at natural size:  one label `em` on the page is `fontSize` units. */
@@ -279,7 +279,11 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
    * - And hand the root `<ui-tree-node>` to its slot.
    */
   @E.onChange("layout", "nodesTree", "isReady")
-  protected onLayoutChanged(layout: TreeDiagramLayout | undefined, tree: TreeDiagramNode | undefined, isReady: boolean) {
+  protected onLayoutChanged(
+    layout: TreeDiagramLayout | undefined,
+    tree: TreeDiagramNode | undefined,
+    isReady: boolean
+  ) {
     if (!isReady) return
     this.nodesSlot?.assign(...(tree?.element ? [tree.element] : []))
     this.drawnScale = this.scaleNow()
@@ -411,7 +415,11 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
     const kind = () => UITreeDiagram.wordFor(box().node.kind)
     return (
       <g
-        class={[NODE_CLASS, { [ROOT_CLASS]: isRoot(), [CLICKABLE_CLASS]: !!this.clickable }, kind() && `kind-${kind()}`]}
+        class={[
+          NODE_CLASS,
+          { [ROOT_CLASS]: isRoot(), [CLICKABLE_CLASS]: !!this.clickable },
+          kind() && `kind-${kind()}`
+        ]}
         part={[this.partForName("node"), isRoot() && this.partForName("root-node"), kind() && `kind-${kind()}`]
           .filter(Boolean)
           .join(" ")}
@@ -446,8 +454,7 @@ export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
 
   /** `box`'s fold button (part `toggle`), where its lines leave it:  a circle with a `+` or a `-`. */
   private foldButton(box: Accessor<TreeDiagramBox>): JSX.Element {
-    const label = () =>
-      this.translationForKey(box().isFolded ? "unfoldNode" : "foldNode", { label: box().node.label })
+    const label = () => this.translationForKey(box().isFolded ? "unfoldNode" : "foldNode", { label: box().node.label })
     return (
       <g
         class={TOGGLE_CLASS}

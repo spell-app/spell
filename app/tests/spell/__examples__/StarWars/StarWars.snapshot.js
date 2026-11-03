@@ -90,7 +90,7 @@ export class Character extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 11984, end: 12080 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10851, end: 10947 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -99,13 +99,13 @@ export class Character extends Thing {
     })
   }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 12093, end: 12144 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 10960, end: 11011 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
 
   /** Their own picture on Wikipedia, or nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 12157, end: 12365 }, readsFrom: ["wikipedia", "star_wars"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 11024, end: 11232 }, readsFrom: ["wikipedia", "star_wars"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     if ((await core.answerOf(this, "page")) && (await core.answerOf(this, "page")).fits && (await core.answerOf(this, "page")).thumbnail) return (await core.answerOf(this, "page")).thumbnail.source
     return ""
@@ -115,7 +115,7 @@ export class Character extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12415, end: 12866 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11282, end: 11733 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Height", value: measureAmountInUnit(this.height, "cm") }))
@@ -219,7 +219,7 @@ export class Planet extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 13526, end: 13644 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 12393, end: 12511 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -231,7 +231,7 @@ export class Planet extends Thing {
   }
 
   /** What colour a world is, from its weather */
-  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 13657, end: 14034 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("hue", { declaredAt: { path: "/StarWars.spellml", start: 12524, end: 12901 }, readsFrom: ["star_wars"] }) }
   get hue() {
     if (core.includes(this.climate, "frozen")) return 200
     if (core.includes(this.climate, "arid")) return 38
@@ -244,7 +244,7 @@ export class Planet extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 14084, end: 14677 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 12951, end: 13544 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Climate", value: this.climate }))
@@ -341,7 +341,7 @@ export class Film extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 10789, end: 10889 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 9656, end: 9756 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.title,
@@ -362,7 +362,7 @@ export class Film extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 11077, end: 11376 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 9944, end: 10243 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Directed by", value: this.director }))
@@ -495,7 +495,7 @@ export class Species extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 17739, end: 17843 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16606, end: 16710 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -506,7 +506,7 @@ export class Species extends Thing {
   }
 
   /** Its first character's picture:  asking for everyone at once costs one read, and each link then asks nothing */
-  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 17856, end: 18159 }, readsFrom: ["star_wars", "wikipedia"] }) }
+  static { this.declareProp("picture", { declaredAt: { path: "/StarWars.spellml", start: 16723, end: 17021 }, readsFrom: ["star_wars", "wikipedia"] }) }
   get picture() { return core.waitedValue(this, "picture", async () => {
     const everyone = await core.savedThings(Character)
     let found = ""
@@ -520,7 +520,7 @@ export class Species extends Thing {
     return core.drawThing(this.card)
   }
 
-  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 18208, end: 18433 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("facts", { declaredAt: { path: "/StarWars.spellml", start: 17070, end: 17295 }, readsFrom: ["star_wars"] }) }
   get facts() {
     const known = new List({ instanceType: "Fact" })
     known.append(new Fact({ label: "Language", value: this.language }))
@@ -629,7 +629,7 @@ export class Vehicle extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16996, end: 17085 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15863, end: 15952 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -760,7 +760,7 @@ export class Starship extends Thing {
   get edited() { return this.getProp("edited") }
   set edited(value) { this.setProp("edited", value) }
 
-  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 16335, end: 16425 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("card", { declaredAt: { path: "/StarWars.spellml", start: 15202, end: 15292 }, readsFrom: ["star_wars"] }) }
   get card() {
     return new Card({
       label: this.name,
@@ -825,7 +825,7 @@ export class WikiPage extends Thing {
   get contentUrls() { return this.getProp("contentUrls") }
   set contentUrls(value) { this.setProp("contentUrls", value) }
 
-  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 8546, end: 8715 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("fits", { declaredAt: { path: "/StarWars.spellml", start: 7487, end: 7656 }, readsFrom: ["wikipedia"] }) }
   get fits() {
     if (core.includes(this.title, "List of")) return false
     return core.includes(this.about, "star wars") || core.includes(this.about, "fictional") || core.includes(this.about, " film ")
@@ -903,7 +903,7 @@ export const starWars = core.place(new StarWar(), {
       mglt: "MGLT",
       starshipClass: "starship_class"
     } }
-  }, firstReads: () => [[Starship], [Character], [Species], [Vehicle], [Planet], [Film]] })
+  }, firstReads: () => [[Film], [Character], [Planet], [Vehicle], [Species], [Starship]] })
 
 core.heading("Wikipedia:  a page each, by its name.  Not every name has one")
 /** Wikipedia:  a page each, by its name.  Not every name has one */
@@ -1013,7 +1013,7 @@ export class WikiNote extends Thing {
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
-  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 8795, end: 8846 }, readsFrom: ["wikipedia"] }) }
+  static { this.declareProp("page", { declaredAt: { path: "/StarWars.spellml", start: 7736, end: 7787 }, readsFrom: ["wikipedia"] }) }
   get page() { return core.waitedValue(this, "page", async () => {
     return await core.savedThingWithId(WikiPage, this.name)
   }, () => [this.name]) }
@@ -1070,7 +1070,7 @@ export class FactTable extends Thing {
   get facts() { return this.getProp("facts") }
   set facts(value) { this.setProp("facts", value) }
 
-  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 10015, end: 10073 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("shown", { declaredAt: { path: "/StarWars.spellml", start: 8956, end: 9014 }, readsFrom: ["star_wars"] }) }
   get shown() {
     return core.filter(this.facts, (fact) => fact.isKnown)
   }
@@ -1105,12 +1105,7 @@ export class Section extends Thing {
         h("ui-header", { class: "section", size: "small" }, () => this.heading),
         h("ui-cards", { columns: "4", doubling: true }, () => core.drawThing(this.single))
       ]
-    } else if (!core.isEmpty(this.things)) {
-      return [
-        h("ui-header", { class: "section", size: "small" }, () => this.heading),
-        h("ui-cards", { columns: "4", doubling: true }, () => core.drawItems(this.things))
-      ]
-    }
+    } else return core.drawRead(() => this.things, (thing) => core.drawThing(thing), { whole: () => h("ui-section", { label: () => this.heading, "hide-empty": "" }), items: () => h("ui-cards", { columns: "4", doubling: true }) })
   }
 }
 
@@ -1201,7 +1196,7 @@ export class Guide extends App {
   set jumping(value) { this.setProp("jumping", value) }
 
   /** Whatever's found:  the film, character, planet, ship or anything else with that in its name */
-  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 640, end: 1493 }, readsFrom: ["star_wars"] }) }
+  static { this.declareProp("found", { declaredAt: { path: "/StarWars.spellml", start: 640, end: 1463 }, readsFrom: ["star_wars"] }) }
   get found() { return core.waitedValue(this, "found", async () => {
     const matches = new List({ instanceType: "Thing" })
     core.map(core.filter(await core.savedThings(Film, {}, "looks through"), (film) => core.includes(film.title, this.search)), (film) => matches.append(film))
@@ -1212,6 +1207,14 @@ export class Guide extends App {
     core.map(core.getItemAt(this, position(core.filter(await core.savedThings(Species, {}, "looks through"), (species) => core.includes(species.name, this.search)))), (one) => matches.append(one))
     return matches
   }, () => [this.search]) }
+
+  get signal() {
+    return "Waiting for a signal from the galaxy"
+  }
+
+  get lostSignal() {
+    return "The signal from swapi.py4e.com is lost."
+  }
 
   goBack() {
     if (core.isEmpty(this.trail)) {
@@ -1316,14 +1319,17 @@ export class Guide extends App {
     if (this.showing && this.search === "") return this.showing.drawPage()
     else if (this.search !== "") {
       return [
-        h("ui-header", { size: "medium" }, "Searching for “", () => this.search, "”"),
-        h("ui-cards", { columns: "4", doubling: true },
-          h("slot", { name: "search_list" }, () => this.drawSearchList())
-        )
+        h("ui-header", { size: "medium", part: "shelf" }, "Searching for “", () => this.search, "”"),
+        core.drawRead(() => this.found, (thing) => core.drawThing(thing), {
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+          none: () => h("ui-text", { part: "shelf" }, "Nobody and nothing by that name, in this galaxy."),
+          failedSay: () => this.lostSignal,
+          items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+        })
       ]
     } else if (this.tab === "films") {
       return [
-        h("ui-segment", { class: "opening", inverted: true, align: "center" },
+        h("ui-segment", { class: "opening", inverted: true, align: "center", part: "shelf" },
           h("ui-text", { class: "long-ago", size: "large" }, "A long time ago in a galaxy far, far away...."),
           h("ui-button", {
             class: "play-opening",
@@ -1332,79 +1338,43 @@ export class Guide extends App {
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
           }, "Play the opening")
         ),
-        h("ui-cards", { columns: "4", doubling: true },
-          h("slot", { name: "films_list" }, () => this.drawFilmsList())
-        )
+        core.drawRead(async () => await core.savedThings(Film, {}, "as drawn"), (film) => core.drawThing(film), {
+          waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+          failedSay: () => this.lostSignal,
+          items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+        })
       ]
     } else if (this.tab === "characters") {
-      return h("ui-cards", { columns: "4", doubling: true, part: "shelf" },
-        h("slot", { name: "characters_list" }, () => this.drawCharactersList())
-      )
+      return core.drawRead(async () => await core.savedThings(Character, {}, "as drawn"), (character) => core.drawThing(character), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+        failedSay: () => this.lostSignal,
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
     } else if (this.tab === "planets") {
-      return h("ui-cards", { columns: "4", doubling: true, part: "shelf" },
-        h("slot", { name: "planets_list" }, () => this.drawPlanetsList())
-      )
+      return core.drawRead(async () => await core.savedThings(Planet, {}, "as drawn"), (planet) => core.drawThing(planet), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+        failedSay: () => this.lostSignal,
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
     } else if (this.tab === "vehicles") {
-      return h("ui-cards", { columns: "4", doubling: true, part: "shelf" },
-        h("slot", { name: "vehicles_list" }, () => this.drawVehiclesList())
-      )
+      return core.drawRead(async () => await core.savedThings(Vehicle, {}, "as drawn"), (vehicle) => core.drawThing(vehicle), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+        failedSay: () => this.lostSignal,
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
     } else if (this.tab === "species") {
-      return h("ui-cards", { columns: "4", doubling: true, part: "shelf" },
-        h("slot", { name: "species_list" }, () => this.drawSpeciesList())
-      )
+      return core.drawRead(async () => await core.savedThings(Species, {}, "as drawn"), (species) => core.drawThing(species), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+        failedSay: () => this.lostSignal,
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
     } else {
-      return h("ui-cards", { columns: "4", doubling: true, part: "shelf" },
-        h("slot", { name: "ships_list" }, () => this.drawShipsList())
-      )
+      return core.drawRead(async () => await core.savedThings(Starship, {}, "as drawn"), (starship) => core.drawThing(starship), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "shelf" }, () => this.signal),
+        failedSay: () => this.lostSignal,
+        items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
+      })
     }
-  }
-
-  drawSearchList() {
-    return core.drawRead(() => this.found, (one) => core.drawThing(one), {
-      waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()),
-      none: () => h("ui-text", { part: "search_list" }, "Nobody and nothing by that name, in this galaxy."),
-      failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal())
-    })
-  }
-
-  drawFilmsList() {
-    return core.drawRead(async () => await core.savedThings(Film, {}, "as drawn"), (film) => core.drawThing(film), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawCharactersList() {
-    return core.drawRead(async () => await core.savedThings(Character, {}, "as drawn"), (character) => core.drawThing(character), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawPlanetsList() {
-    return core.drawRead(async () => await core.savedThings(Planet, {}, "as drawn"), (planet) => core.drawThing(planet), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawVehiclesList() {
-    return core.drawRead(async () => await core.savedThings(Vehicle, {}, "as drawn"), (vehicle) => core.drawThing(vehicle), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawSpeciesList() {
-    return core.drawRead(async () => await core.savedThings(Species, {}, "as drawn"), (one) => core.drawThing(one), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawShipsList() {
-    return core.drawRead(async () => await core.savedThings(Starship, {}, "as drawn"), (starship) => core.drawThing(starship), { waiting: () => h("slot", { name: "signal" }, () => this.drawSignal()), failed: () => h("slot", { name: "lost_signal" }, () => this.drawLostSignal()) })
-  }
-
-  drawSignal() {
-    return h("ui-loader", { visible: true, inline: true, text: true, part: "signal" },
-      "Waiting for a signal from the galaxy"
-    )
-  }
-
-  drawLostSignal() {
-    return h("ui-message", { color: "red", part: "lost_signal" },
-      h("ui-text", { paragraph: true }, "The signal from swapi.py4e.com is lost."),
-      h("ui-button", {
-        onClick: core.pressed(this, () => core.reloadSaved()),
-        style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-      }, "Try again")
-    )
   }
 }
 export const guide = new Guide()

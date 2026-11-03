@@ -25,7 +25,16 @@ import { OperationAt } from "./OperationAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
-import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
+import {
+  IfThatFails,
+  IfThatFailsSay,
+  IfThereAreNone,
+  ShowItAllIn,
+  ShowThemAll,
+  ShowThemIn,
+  ShowThemPaged,
+  WhileWaiting
+} from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
 import { SaveDraft } from "./SaveDraft"
 import { SavedInPlace } from "./SavedInPlace"
@@ -141,7 +150,12 @@ placesEs.addRule(SavedInPlace, { syntax: `${A} {type:known_type} (se guarda|vive
 placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive) en {place:expression}" })
 
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
-placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna) :? {statement_body}?" })
+placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })
+placesEs.addRule(IfThatFailsSay, { syntax: "el mensaje si falla es {text:expression}" })
+placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
+placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })
+placesEs.addRule(ShowThemIn, { syntax: "mostrarlos en :? {statement_body}?" })
+placesEs.addRule(ShowItAllIn, { syntax: "mostrar todo en :? {statement_body}?" })
 placesEs.addRule(IfThatFails, { syntax: "si falla :? {statement_body}?" })
 
 placesEs.addRule(InOneGo, {

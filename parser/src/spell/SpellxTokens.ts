@@ -82,6 +82,8 @@ export type SpellxAttribute = {
   value?: SpellxText
   /** Where the attribute starts. */
   start: number
+  /** It as written, `columns="4"`:  `<for>` hands on what isn't its own to what's around its items. */
+  raw?: string
 } & Pick<SpellxText, "tokens">
 
 /** A spellx closer:  `</>`, or `</property>` with its word. */

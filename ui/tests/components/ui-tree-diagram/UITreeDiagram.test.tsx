@@ -191,7 +191,9 @@ describe("<ui-tree-node>", () => {
   })
 
   test("follows the tags:  a label changed, a node added", async () => {
-    const host = await ElementFixture.render(`<ui-tree-diagram><ui-tree-node label="a"></ui-tree-node></ui-tree-diagram>`)
+    const host = await ElementFixture.render(
+      `<ui-tree-diagram><ui-tree-node label="a"></ui-tree-node></ui-tree-diagram>`
+    )
     await ElementFixture.settle()
     const root = host.querySelector("ui-tree-node")!
     root.setAttribute("label", "b")
@@ -302,7 +304,9 @@ describe("<ui-tree-diagram> variations", () => {
       <ui-tree-node label="Root"><ui-tree-node label="a"></ui-tree-node><ui-tree-node label="b"></ui-tree-node></ui-tree-node>
     </ui-tree-diagram>`)
     await ElementFixture.settle()
-    const [root, a, b] = [...svgOf(host).querySelectorAll("g[part~=node] rect.box")].map((box) => box.getBoundingClientRect())
+    const [root, a, b] = [...svgOf(host).querySelectorAll("g[part~=node] rect.box")].map((box) =>
+      box.getBoundingClientRect()
+    )
     expect(a!.left).toBeGreaterThan(root!.right)
     expect(b!.top).toBeGreaterThan(a!.bottom)
   })
@@ -332,14 +336,19 @@ describe("<ui-tree-diagram> variations", () => {
 ////////////////
 
 describe("<ui-tree-diagram> events", () => {
-  const TREE = JSON.stringify({ label: "Root", children: [{ label: "a", children: [{ label: "under a" }] }, { label: "b" }] })
+  const TREE = JSON.stringify({
+    label: "Root",
+    children: [{ label: "a", children: [{ label: "under a" }] }, { label: "b" }]
+  })
 
   test("a click on a node sends `ui-node-clicked`, with its node and path", async () => {
     const host = await ElementFixture.render(markup(TREE))
     await ElementFixture.settle()
     const clicked = vi.fn()
     host.addEventListener("ui-node-clicked", (event) => clicked((event as CustomEvent).detail))
-    svgOf(host).querySelectorAll("g[part~=node]")[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
+    svgOf(host)
+      .querySelectorAll("g[part~=node]")[1]!
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
     expect(clicked).toHaveBeenCalledTimes(1)
     expect(clicked.mock.calls[0]![0]).toMatchObject({ path: "0.0", node: { label: "a" } })
   })
