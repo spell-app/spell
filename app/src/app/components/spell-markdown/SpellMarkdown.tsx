@@ -26,7 +26,7 @@ const vocabulary = {
 /****************
  * ### `SpellMarkdown`
  * The component behind `<spell-markdown>`:  markdown drawn by spell's own engine, in `ui-*` elements.
- * - A `<ui-markdown>` in every way (text or `source`, `editable`, `sanitized`, headings, `reveal()`),
+ * - A `<ui-markdown>` in every way (text or `source`, `editable`'s tabs, `sanitized`, headings, `reveal()`),
  *   but drawn by `MDEngine` (`spell/parser/markdown`, on the parser) instead of marked:  `loadEngine()`.
  *   - `ui-header`, `ui-list`, `ui-table`, `ui-message` for alerts, `ui-checkbox` for tasks ...
  *   - their families come with the family's barrel;  `sanitized` keeps them (`MDEngine.drawsUITags`)
@@ -38,6 +38,19 @@ const vocabulary = {
  ****************/
 export class SpellMarkdown extends UIMarkdown {
   @E.proto static vocabulary: E.ComponentVocabulary = vocabulary
+
+  /**
+   * `editable` is ALWAYS the Write / Preview tabs here:  spell's engine marks no pieces, so nothing could be edited
+   * in place (`<ui-markdown editable>`'s meaning since epic `epic-engine` P60, its tabs `editable="tabs"`;  r54).
+   */
+  get hasTabs(): boolean {
+    return !!this.editable
+  }
+
+  /** Never in place:  see `hasTabs`. */
+  get editsInPlace(): boolean {
+    return false
+  }
 
   /** Spell's engine, `MDEngine`:  its own lazy chunk, imported once for the page. */
   protected loadEngine(): Promise<MarkdownRendering> {
