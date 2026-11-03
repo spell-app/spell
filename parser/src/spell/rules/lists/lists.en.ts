@@ -23,7 +23,7 @@ import { ListFilter } from "./ListFilter"
 import { ListSortedBy } from "./ListSortedBy"
 import { SortKeyField } from "./SortKeyField"
 import { AddNewThing } from "./AddNewThing"
-import { ListIteration } from "./ListIteration"
+import { ListIteration, ListIterationNamedForList } from "./ListIteration"
 import { ListLength } from "./ListLength"
 import { ListMembershipTest } from "./ListMembershipTest"
 import { ListMove } from "./ListMove"
@@ -993,6 +993,9 @@ lists.addRule(ListIteration, {
   ]
 })
 
+// the item named for the list:  `for films`
+lists.addRule(ListIterationNamedForList, { syntax: "for each? {list:expression} :? {statement_body}?" })
+
 // the item named for a value kind of several words (epic `spanish` P22)
 lists.addRule(ListIteration, {
   syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
@@ -1019,7 +1022,7 @@ lists.addRule(ListIteration, {
 })
 
 lists.addRule(ListRangeIteration, {
-  syntax: "for each? {item:singular_identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
+  syntax: "for each? {item:identifier} from {start:expression} down? to {end:expression} :? {statement_body}?",
   tests: [
     {
       compileAs: "block",

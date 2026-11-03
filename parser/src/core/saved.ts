@@ -32,8 +32,8 @@
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 import h from "@solidjs/h"
-import { createComponent } from "@solidjs/web"
-import { Errored, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
+import { createComponent, insert, type JSX } from "@solidjs/web"
+import { Errored, For, Loading, createDeferred, createMemo, getOwner, onCleanup } from "solid-js"
 
 import { pollWhileVisible } from "spell/util/polling"
 
@@ -46,7 +46,7 @@ import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spel
 import type { PlaceRowsChange } from "spell/util/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
-import { drawnInWindow } from "./drawnWindow"
+import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "./drawnWindow"
 import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
@@ -85,6 +85,14 @@ export type ReadRiders = {
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
   failed?: () => Drawing
+  /** `if that fails say "..."`:  the message that shows, Try again kept. */
+  failedSay?: () => unknown
+  /** `show them in:`:  the element the items go in, the loader and messages staying outside it. */
+  items?: () => unknown
+  /** `show it all in:`:  the element everything goes in, a titled section. */
+  whole?: () => unknown
+  /** `show them in pages`, `show them all`:  how a long list draws;  none:  more as you scroll. */
+  paging?: () => "pages" | "all"
 }
 
 /** A row's id, always asked for:  it's what makes it one row. */
@@ -1190,24 +1198,47 @@ export const savedMethods = defineCoreModule({
   ): Drawing {
     // a read written straight in the drawing is a function that waits:  what it read shows until a new answer lands
     const current = read.constructor.name === ASYNC_FUNCTION ? (createDeferred(read as never) as typeof read) : read
-    const items = () => ((current() as { items?: readonly Item[] } | undefined)?.items ?? []) as readonly Item[]
+    const items = () => {
+      const list = current() as { items?: readonly Item[] } | readonly Item[] | undefined
+      return (Array.isArray(list) ? list : ((list as { items?: readonly Item[] } | undefined)?.items ?? [])) as readonly Item[]
+    }
     const drawn = () => {
       if (!drawEach) return current() as Drawing
       // made once, so a change to the list keeps what's drawn:  typing in a recipe keeps its input
-      const list = drawnInWindow({
-        items,
-        drawItem: (item, position) => drawEach(item, position() + 1),
-        // the same read draws the same list, so coming back finds it as it was
-        key: () => {
-          const list = current()
-          return list instanceof List ? list : undefined
-        },
-        more: () => MORE_PAGES.get(current() as object)
-      })
+      const more = () => MORE_PAGES.get(current() as object)
+      const paging = riders.paging?.()
+      const around = riders.items?.() as Element | undefined
+      const row = around?.firstElementChild ?? undefined
+      const drawItem = (item: Item, position: () => number) => {
+        const drawing = drawEach(item, position() + 1)
+        return row ? rowOf(row, around!, drawing) : drawing
+      }
+      const list =
+        paging === "pages"
+          ? drawnInPages({ items, drawItem, more })
+          : paging === "all"
+            ? (createComponent(For as never, {
+                get each() {
+                  return items()
+                },
+                children: drawItem
+              } as never) as JSX.Element)
+            : drawnInWindow({
+                items,
+                drawItem,
+                // the same read draws the same list, so coming back finds it as it was
+                key: () => {
+                  const list = current()
+                  return list instanceof List ? list : undefined
+                },
+                more
+              })
+      if (row) row.remove()
+      const shown = around ? drawnIn(around, list) : list
       const isEmpty = createMemo(() => !items().length)
-      return (() => (isEmpty() ? (riders.none?.() ?? null) : list)) as unknown as Drawing
+      return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
-    const whileLoading = riders.waiting
+    const whileLoading = riders.waiting ?? (drawEach ? drawnLoader : undefined)
     const body = () =>
       whileLoading
         ? createComponent(Loading, {
@@ -1219,12 +1250,15 @@ export const savedMethods = defineCoreModule({
             }
           })
         : standInFor(drawn)
-    return createComponent(Errored, {
-      fallback: (error: unknown) => (riders.failed ? riders.failed() : failedDrawing(error)),
+    const whole = createComponent(Errored, {
+      fallback: (error: unknown) =>
+        riders.failed ? riders.failed() : failedDrawing(riders.failedSay ? `${riders.failedSay()}` : error),
       get children() {
         return body()
       }
     }) as Drawing
+    const section = riders.whole?.() as Element | undefined
+    return section ? (drawnIn(section, whole as JSX.Element) as Drawing) : whole
   }
 })
 Object.assign(core, savedMethods)
@@ -1254,9 +1288,96 @@ function noteUndo(title: "saved-added" | "saved-removed", undo: () => void, redo
   core.RUNTIME?.history.record({ undo, redo }, { title: core.message(title) })
 }
 
+/** What a list shows while it waits, when nothing said what to. */
+function drawnLoader(): Drawing {
+  return h("ui-loader", { visible: true, inline: true }) as unknown as Drawing
+}
+
+/** `drawing`, inside `element`:  what's around a list's items, or its section. */
+function drawnIn(element: Element, drawing: JSX.Element): JSX.Element {
+  insert(element, () => drawing)
+  return element as unknown as JSX.Element
+}
+
+/**
+ * One item of a table:  its cells in a copy of the row in `table`, and, for the first, a header row from what each cell's named.
+ * - `<cell "Name">` is `<ui-cell data-column="Name">`.
+ */
+function rowOf(row: Element, table: Element, cells: Drawing): JSX.Element {
+  const drawn = row.cloneNode(false) as Element
+  insert(drawn, () => cells as JSX.Element)
+  const named = [...drawn.children].filter((cell) => cell.hasAttribute(COLUMN_NAME))
+  if (named.length && !table.querySelector(`:scope > [${HEADER_ROW}]`)) {
+    const header = row.cloneNode(false) as Element
+    header.setAttribute("header", "")
+    header.setAttribute(HEADER_ROW, "")
+    for (const cell of named) {
+      const title = document.createElement(cell.localName)
+      title.textContent = cell.getAttribute(COLUMN_NAME)
+      header.append(title)
+    }
+    table.prepend(header)
+  }
+  return drawn as unknown as JSX.Element
+}
+
+/**
+ * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
+ * - A page holds `MOST_AT_ONCE`.
+ * - Next at the end of what's read asks a place for its next page.
+ */
+function drawnInPages<Item>({
+  items,
+  drawItem,
+  more
+}: {
+  items: () => readonly Item[]
+  drawItem: (item: Item, position: () => number) => JSX.Element
+  more: () => MorePages | undefined
+}): JSX.Element {
+  const pageChanged = new Cell()
+  let page = 0
+  const pageNow = () => {
+    pageChanged.read()
+    return page
+  }
+  const goTo = (to: number) => {
+    page = to
+    pageChanged.changed()
+  }
+  const lastDrawn = () => (pageNow() + 1) * MOST_AT_ONCE
+  const hasNext = () => items().length > lastDrawn() || !!more()?.hasMorePages
+  const next = async () => {
+    if (items().length <= lastDrawn()) await more()?.readNextPage()
+    if (items().length > lastDrawn()) goTo(page + 1)
+  }
+  const list = createComponent(For as never, {
+    get each() {
+      return items().slice(pageNow() * MOST_AT_ONCE, lastDrawn())
+    },
+    children: (item: Item, position: () => number) =>
+      drawItem(item, () => pageNow() * MOST_AT_ONCE + position())
+  } as never) as JSX.Element
+  const pager = h(
+    "ui-stack",
+    { direction: "horizontal", justify: "center", align: "center" },
+    h("ui-button", { disabled: () => !pageNow(), onClick: () => goTo(page - 1) }, core.message("page-previous")),
+    h("ui-text", () => core.message("page-number", { page: pageNow() + 1 })),
+    h("ui-button", { disabled: () => !hasNext(), onClick: () => void next() }, core.message("page-next"))
+  )
+  return [list, () => (hasNext() || pageNow() ? pager : null)] as unknown as JSX.Element
+}
+
+/** What a cell's column is called, on the cell:  `<cell "Name">`. */
+const COLUMN_NAME = "data-column"
+
+/** The mark on the header row a table of items makes. */
+const HEADER_ROW = "data-header-row"
+
 /** What shows when a read failed, and nothing said what to:  a message, and Try again. */
 function failedDrawing(error: unknown): Drawing {
-  const message = core.message("read-failed", { why: `${(error as Error)?.message ?? error}` })
+  const why = typeof error === "string" ? undefined : `${(error as Error)?.message ?? error}`
+  const message = why === undefined ? (error as string) : core.message("read-failed", { why })
   const button = h("ui-button", { onClick: () => void savedMethods.reloadSaved() }, core.message("write-retry"))
   return h("ui-message", { color: "red" }, message, button) as unknown as Drawing
 }

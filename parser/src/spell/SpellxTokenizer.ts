@@ -303,6 +303,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (owner.category === "note" || owner.category === "code") return false
     if (word.category === "code" && word.kind === "html") return this.isInDrawing()
     if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
+    if (word.category === "control" && isForSlot(word.kind)) return owner.kind === "for each"
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
   }
@@ -511,6 +512,14 @@ export class SpellxTokenizer extends P.Tokenizer {
       head.errors.push(this.message("spellx-one-line-tag", { tag: `<${word.word}>`, open }))
     } else if (!phrase.closed) head.errors.push(this.message("spellx-unclosed-head", { tag: `<${word.word}>` }))
     let phraseText = phrase.text
+    if (word.kind === "for each") {
+      const at = this.forAttributesAt(phrase.text)
+      if (at !== undefined) {
+        head.attributes = this.readForAttributes(text, phrase.start + at, phrase.start + phrase.text.length)
+        phraseText = phrase.text.slice(0, at).trimEnd()
+        head.errors.push(...this.forHeadErrors(word, phraseText, head))
+      }
+    }
     if (word.category === "handler") {
       for (let attribute = this.trailingAttribute(phraseText); attribute;) {
         const start = phrase.start + attribute.at
@@ -525,9 +534,76 @@ export class SpellxTokenizer extends P.Tokenizer {
       }
     }
     if (phraseText) head.phrase = this.textAt(text, phrase.start, phrase.start + phraseText.length, false)
-    else if (word.kind !== "otherwise" && !SP.SPELLX_ABILITY_KINDS.includes(word.kind))
+    else if (word.kind !== "otherwise" && !isForSlot(word.kind) && !SP.SPELLX_ABILITY_KINDS.includes(word.kind))
       head.errors.push(this.message("spellx-missing-phrase", { tag: `<${word.word}>`, word: word.word }))
     return head
+  }
+
+  /**
+   * Where `<for>`'s attributes start in its `phrase`, if it has any:  the first of its own, or a `word=` with no space.
+   * - Anything in quotes, parens or braces is the phrase's;  so is `with cook = them`, its `=` spaced.
+   * - A bare `empty` or `loading` right after `is`, as in `where it is empty`, is the phrase's too.
+   */
+  private forAttributesAt(phrase: string): number | undefined {
+    const { forAttributes, forFlagsNotAfter } = this.words
+    let depth = 0
+    let isQuoted = false
+    let previous = ""
+    for (let pos = 0; pos < phrase.length; pos++) {
+      const char = phrase[pos]!
+      if (char === '"') isQuoted = !isQuoted
+      if (isQuoted || char === '"') continue
+      if ("({[".includes(char)) depth++
+      else if (")}]".includes(char)) depth--
+      if (depth || !/[\p{L}\p{M}\d_-]/u.test(char)) continue
+      const word = phrase.slice(pos).match(ATTRIBUTE_WORD)![0]
+      const lower = word.toLowerCase()
+      const isGlued = phrase[pos + word.length] === "="
+      const name = forAttributes[lower]
+      if (pos > 0 && (isGlued || (name && !forFlagsNotAfter.includes(previous) && FOR_FLAGS.has(name)))) return pos
+      previous = lower
+      pos += word.length - 1
+    }
+    return undefined
+  }
+
+  /** `<for>`'s attributes, from `start` to `end`:  each its English name, if it's one of its own. */
+  private readForAttributes(text: string, start: number, end: number): SP.SpellxAttribute[] {
+    const attributes: SP.SpellxAttribute[] = []
+    let pos = start
+    while (pos < end) {
+      pos = skipSpace(text, pos, end)
+      const word = text.slice(pos, end).match(ATTRIBUTE_NAME)?.[0]
+      if (!word) {
+        pos++
+        continue
+      }
+      const { end: attributeEnd, ...attribute } = this.readAttribute(text, pos, end, word)
+      attributes.push({
+        ...attribute,
+        name: this.words.forAttributes[word.toLowerCase()] ?? word,
+        raw: text.slice(pos, attributeEnd)
+      })
+      pos = attributeEnd
+    }
+    return attributes
+  }
+
+  /** What's wrong with a `<for>` head:  a flag before its attributes, what's around its items unnamed, a table with no cells. */
+  private forHeadErrors(word: TagWord, phrase: string, head: Head): string[] {
+    const errors: string[] = []
+    const tag = `<${word.word}>`
+    const { forAttributes, forListWords } = this.words
+    const as = Object.keys(forAttributes).find((it) => forAttributes[it] === "as")!
+    const [first, flag, ...more] = phrase.split(/\s+/)
+    if (flag && !more.length && !forListWords.includes(first!.toLowerCase()))
+      errors.push(this.message("spellx-for-flag-first", { flag, tag }))
+    const layout = head.attributes.find((attribute) => attribute.name === "as")
+    const handedOn = head.attributes.find((attribute) => !Object.values(forAttributes).includes(attribute.name))
+    if (handedOn && !layout) errors.push(this.message("spellx-for-needs-as", { attribute: handedOn.word, tag, as }))
+    const table = this.words.twins?.forTag.table
+    if (layout?.value?.text === table && head.selfClosing) errors.push(this.message("spellx-for-table-needs-cells", { tag }))
+    return errors
   }
 
   /**
@@ -754,7 +830,9 @@ export class SpellxTokenizer extends P.Tokenizer {
       case "control": {
         // an if-chain closes by any of its words;  a loop by its own
         const control = controls[lower]
-        return tag.kind === "for each" ? control === "for each" : !!control && control !== "for each"
+        return tag.kind === "for each" || isForSlot(tag.kind)
+          ? control === tag.kind
+          : !!control && control !== "for each" && !isForSlot(control)
       }
     }
     return false
@@ -943,6 +1021,15 @@ const WORD_START = /^\p{L}/u
 
 /** An attribute's name:  a word, `:` and `.` allowed, as in markup. */
 const ATTRIBUTE_NAME = /^[\p{L}\p{M}\d_:.@-]+/u
+
+/** Is `kind` one of a `<for>`'s slots:  `<loading>`, `<empty>`, `<failed>`? */
+const isForSlot = (kind: string) => kind === "for waiting" || kind === "for none" || kind === "for failed"
+
+/** A word in a `<for>`'s phrase. */
+const ATTRIBUTE_WORD = /^[\p{L}\p{M}\d_-]+/u
+
+/** `<for>`'s attributes that may stand with no value, or be written with one:  so each ends a phrase, by itself. */
+const FOR_FLAGS = new Set(["loading", "empty", "hide-empty"])
 
 /** A closer:  `</>`, or `</word>`, spaces allowed before its `>`. */
 /** A comment after a line's closer:  `</>   // ace = 1`. */

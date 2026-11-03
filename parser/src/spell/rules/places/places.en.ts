@@ -24,7 +24,16 @@ import { OperationAt } from "./OperationAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
-import { IfThatFails, IfThereAreNone, WhileWaiting } from "./ReadRider"
+import {
+  IfThatFails,
+  IfThatFailsSay,
+  IfThereAreNone,
+  ShowItAllIn,
+  ShowThemAll,
+  ShowThemIn,
+  ShowThemPaged,
+  WhileWaiting
+} from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
@@ -149,6 +158,11 @@ places.addRule(SavedInPlace, { syntax: "{type:subject_implied} (is saved|lives) 
 
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) :? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?" })
+places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })
+places.addRule(ShowThemPaged, { syntax: "show them in pages" })
+places.addRule(ShowThemAll, { syntax: "show them all" })
+places.addRule(ShowThemIn, { syntax: "show them in :? {statement_body}?" })
+places.addRule(ShowItAllIn, { syntax: "show it all in :? {statement_body}?" })
 places.addRule(IfThatFails, { syntax: "if that fails :? {statement_body}?" })
 
 places.addRule(InOneGo, {

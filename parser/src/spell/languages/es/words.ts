@@ -209,8 +209,28 @@ export const spanishWords: SP.LanguageWords = {
       "si no": "otherwise",
       sino: "otherwise",
       "de lo contrario": "otherwise",
-      "para cada": "for each"
+      "para cada": "for each",
+      para: "for each",
+      cargando: "for waiting",
+      vacío: "for none",
+      vacio: "for none",
+      fallo: "for failed"
     },
+    forAttributes: {
+      título: "title",
+      titulo: "title",
+      cargando: "loading",
+      vacío: "empty",
+      vacio: "empty",
+      "ocultar-vacío": "hide-empty",
+      "ocultar-vacio": "hide-empty",
+      fallo: "failed",
+      paginación: "paging",
+      paginacion: "paging",
+      como: "as"
+    },
+    forFlagsNotAfter: ["es", "son", "está", "esta", "están", "estan", "no"],
+    forListWords: ["sus", "su", "cada", "toda", "todas", "todos", "los", "las", "mis", "estos", "estas"],
     attributes: {
       nombre: "name",
       alias: "aka",
@@ -306,7 +326,26 @@ export const spanishWords: SP.LanguageWords = {
         if: "si {phrase}",
         "otherwise if": "de lo contrario si {phrase}",
         otherwise: "de lo contrario",
-        "for each": "para cada {phrase}"
+        "for each": "para cada {phrase}",
+        "for waiting": "mientras espera :",
+        "for none": "si no hay nada :",
+        "for failed": "si falla :"
+      },
+      forTag: {
+        waiting: "mientras espera :",
+        none: "si no hay nada :",
+        failed: "si falla :",
+        failedSay: "si falla di",
+        items: "mostrarlos en :",
+        whole: "mostrar todo en :",
+        inPages: "mostrarlos en páginas",
+        allAtOnce: "mostrarlos todos",
+        no: "no",
+        pages: "páginas",
+        none_: "ninguna",
+        table: "tabla",
+        row: "fila",
+        nothingFound: "No se encontró nada"
       }
     }
   },

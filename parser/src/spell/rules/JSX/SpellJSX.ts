@@ -109,6 +109,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
     const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
+    if (isSpellx && !element.attributes?.length && !element.children?.length) {
+      match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
+      if (match.data.loopItem) return match
+    }
     if (isSpellx && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
       const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
@@ -139,6 +143,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
+    const { loopItem } = match.data
+    if (loopItem) {
+      const value = new P.ASTVariableExpression(match, { name: loopItem.name, variable: loopItem })
+      return new P.ASTCoreMethodInvocation(match, { methodName: "drawThing", args: [value] }) as unknown as P.ASTJSXElement
+    }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)
       return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
@@ -150,6 +159,24 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       attrs: SpellJSX.clickableAttrs(match, attrs),
       children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
     })
+  }
+
+  /**
+   * `<film/>` in a loop over films:  this film, drawn as `draw the film` is.
+   * - Only with nothing on it or in it, named as the loop's item is.
+   */
+  private static loopItemNamed(from: P.Scope, tagName: string): P.ScopeVariable | undefined {
+    if (tagName.includes("-")) return undefined
+    let scope: P.Scope | undefined = from
+    while (scope) {
+      const declaredBy = (scope as P.MethodScope).declaredBy
+      if ((declaredBy?.rule as { loops?: boolean } | undefined)?.loops) {
+        const variable = (scope as P.MethodScope).args?.(tagName) as P.ScopeVariable | undefined
+        if (variable) return variable
+      }
+      scope = scope.parentScope
+    }
+    return undefined
   }
 
   /**

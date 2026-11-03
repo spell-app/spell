@@ -61,6 +61,13 @@ export class DrawnLines {
     return [...before, new P.ASTReturnStatement(match, { value: list })]
   }
 
+  /** A drawing that's one line, `for films`, with nothing under it:  it draws each item, as a body of lines would. */
+  static gatherLoopAlone<Body extends P.ASTNode | undefined>(body: Body): Body {
+    if (!DrawnLines.isLoop(body as Line) || !DrawnLines.lineDraws(body as Line)) return body
+    const [line] = DrawnLines.gather([body as Line])
+    return line as unknown as Body
+  }
+
   /** Does `lines` have a drawn line anywhere in it -- a loop's, a branch's? */
   static draws(lines: Line[] | undefined): boolean {
     return !!lines?.some((line) => DrawnLines.lineDraws(line))
@@ -126,6 +133,7 @@ export class DrawnLines {
    * - Its function is named as a drawing is:  a drawing never waits, it shows what it has (`P.DRAWING_NAME`).
    */
   private static asRead(unit: Unit): void {
+    if (unit.kind === "loop") DrawnLines.takeRidersFromBody(unit)
     const riders = unit.riders?.map((rider) => {
       const kind = rider.match.rule as unknown as { kind: string }
       const method = rider.args?.args?.[1] as P.ASTMethodDefinition
@@ -152,6 +160,31 @@ export class DrawnLines {
       ]
       unit.kind = "drawn value"
     }
+  }
+
+  /**
+   * A loop's body:  its riders join the loop's, as a `<for>`'s attributes and its `<failed>` are written there.
+   * - With nothing left in it, each item draws itself:  `<for films />`, `draw the film`.
+   */
+  private static takeRidersFromBody(unit: Unit): void {
+    const loop = DrawnLines.statementOf(unit.lines[0]!) as P.ASTCoreMethodInvocation
+    const method = DrawnLines.callbackOf(loop)
+    if (!method) return
+    const statements = method.body?.statements ?? []
+    const riders = statements.map((line) => DrawnLines.statementOf(line)).filter(DrawnLines.isRider)
+    if (riders.length) {
+      unit.riders = [...riders, ...(unit.riders ?? [])]
+      method.body!.statements = statements.filter((line) => !DrawnLines.isRider(DrawnLines.statementOf(line)))
+    }
+    const hasLines = method.body?.statements?.some(
+      (line) => !(line instanceof P.ASTComment) && !(line instanceof P.ASTBlankLine)
+    )
+    if (hasLines) return
+    const [item] = method.args ?? []
+    if (!item) return
+    const draw = new P.ASTCoreMethodInvocation(loop.match, { methodName: "drawThing", args: [item as P.ASTExpression] })
+    method.body = new P.ASTStatementGroup(loop.match, { statements: [draw] }) as never
+    unit.draws = true
   }
 
   /**
@@ -287,7 +320,13 @@ export class DrawnLines {
     if (DrawnLines.isDrawnLine(statement) || DrawnLines.isDrawnValue(statement)) return true
     if (DrawnLines.isLoop(statement)) {
       const body = DrawnLines.callbackOf(statement as P.ASTCoreMethodInvocation)!.body
-      return DrawnLines.draws(body?.statements)
+      // with nothing to do in it, or only what shows around it:  each item draws itself
+      const lines = (body?.statements ?? (body ? [body] : [])) as Line[]
+      const isItsOwn = lines.every((each) => {
+        const inside = DrawnLines.statementOf(each)
+        return !inside || inside instanceof P.ASTComment || inside instanceof P.ASTBlankLine || DrawnLines.isRider(inside)
+      })
+      return isItsOwn || DrawnLines.draws(body?.statements)
     }
     const branch = statement as Branch | undefined
     if (

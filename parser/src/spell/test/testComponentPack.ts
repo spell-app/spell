@@ -23,7 +23,12 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     header: "ui-header",
     toolbar: "ui-toolbar",
     button: "ui-button",
-    segment: "ui-segment"
+    segment: "ui-segment",
+    cards: "ui-cards",
+    list: "ui-list",
+    table: "ui-table",
+    row: "ui-row",
+    cell: "ui-cell"
   },
-  es: { texto: "es-texto", imagen: "es-imagen", encabezado: "es-encabezado", boton: "es-boton" }
+  es: { texto: "es-texto", imagen: "es-imagen", encabezado: "es-encabezado", boton: "es-boton", tarjetas: "es-tarjetas", tabla: "es-tabla", fila: "es-fila", celda: "es-celda" }
 }
