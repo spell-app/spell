@@ -9,7 +9,6 @@ core.heading("Counter")
 // What's where, top to bottom:
 //   a counter:  its count, counting up, and its drawing
 //   the app:  one counter, drawn
-//   start
 //   tests
 
 core.heading("A counter -- in the outline style:  its name, then what's true of it")
@@ -18,7 +17,7 @@ core.heading("A counter -- in the outline style:  its name, then what's true of 
 //////////////////////////////////////////////////////////////////////////
 /**
  * A view:  each counter is its own element on the page.
- * The Counter notebook, `@spell/notebooks/Counter`, imports it, and tries it out.
+ * The Counter notebook, `@spell/notebooks/Counter`, draws its own and tries it out.
  */
 @thing
 export class Counter extends View {
@@ -98,10 +97,6 @@ export class CounterAppElement extends SpellElement<CounterApp> {
 core.useElement(CounterApp, CounterAppElement)
 export const counterApp = new CounterApp()
 
-core.heading("Start")
-//## Start
-if (!core.isCarryingOver) counterApp.start()
-
 core.heading("Tests")
 /** Tests */
 export function testCounting() {
@@ -116,6 +111,8 @@ export function testCounting() {
     core.expect(counter.count, `the count of the counter`, 2, `2`)
   })
 }
+// -----------
+if (!core.isCarryingOver) counterApp.start()
 // -----------
 if (!core.isCarryingOver) testCounting()
 

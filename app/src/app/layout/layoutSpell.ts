@@ -1,5 +1,6 @@
 import { runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
+import type { MenuItem } from "spell/parser/core"
 
 /**
  * The editor's own layout pieces, written in Spell (`.spellml`, epic `editor` P6, its first stage of turtles):
@@ -34,7 +35,13 @@ let loading: ReturnType<typeof layoutRuntime> | undefined
  */
 export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
   const { runtime, coreUrl } = await layoutRuntime()
-  return { exports: await runtime.importCompiled(compiled, coreUrl), draw: (thing) => runtime.core.drawThing(thing) }
+  // The editor draws each piece where it belongs:  an app in one must not start itself, as a program's does
+  runtime.core.appLayout = true
+  return {
+    exports: await runtime.importCompiled(compiled, coreUrl),
+    draw: (thing) => runtime.core.drawThing(thing),
+    menu: (thing, name) => runtime.core.menuOf(thing, name) ?? []
+  }
 }
 
 /** A layout piece, as `loadLayoutPiece()` answers it. */
@@ -43,4 +50,6 @@ export type LayoutPiece = {
   exports: Record<string, any>
   /** `thing`'s drawing, for Solid to insert. */
   draw: (thing: unknown) => unknown
+  /** The items of `thing`'s menu `name`, in order. */
+  menu: (thing: object, name: string) => MenuItem[]
 }

@@ -297,8 +297,6 @@ core.describe_action(TaskList, "remove_the_done_tasks", {"title": "remove the do
 # - its "tasks menu" is a menu of "show all" , "show to do" , "show done" , "-" and "remove the done tasks"
 core.describe_menu(TaskList, "tasks_menu", {"items": ["show_all", "show_to_do", "show_done", "-", "remove_the_done_tasks"]})
 
-task_list.start()
-
 
 # -----------
 
@@ -383,6 +381,12 @@ task-list-task[done] {
   opacity: 0.6;
 }
 """)
+
+
+# -----------
+
+
+task_list.start()
 
 
 # -----------

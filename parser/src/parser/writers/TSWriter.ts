@@ -75,7 +75,7 @@ export class TSWriter extends JSWriter {
    */
   static TYPES: Record<P.Datatype, string> = {
     text: "string",
-    character: "string",
+    letter: "string",
     number: "number",
     integer: "number",
     choice: "boolean",

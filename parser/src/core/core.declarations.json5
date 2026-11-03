@@ -105,7 +105,7 @@
       "of": "core",
       "module": "core",
       "section": "types",
-      "description": "Special methods for `isOfType()`, for type names `typeOf()` never actually returns (`integer`, `character`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison."
+      "description": "Special methods for `isOfType()`, for type names `typeOf()` never actually returns (`integer`, `letter`, `char`) -- checked instead of a plain `=== typeOf(thing)` comparison."
     },
     {
       "kind": "method",
@@ -1429,6 +1429,19 @@
     },
     {
       "kind": "method",
+      "name": "drawAgain",
+      "of": "core",
+      "module": "drawing",
+      "params": [
+        {
+          "name": "types"
+        }
+      ],
+      "section": "Drawing things",
+      "description": "Draw the views of each of `types` again after an edit, keeping every element the page has (epic `editor`, Edit Without Redraw):  each view that draws again finds the element each thing it holds already has."
+    },
+    {
+      "kind": "method",
       "name": "drawOwn",
       "of": "core",
       "module": "drawing",
@@ -2252,6 +2265,55 @@
         }
       ],
       "description": "Why each of the last run's things that `carryOver()` would start afresh can't come over -- `[]` if they all can."
+    },
+    {
+      "kind": "method",
+      "name": "keptTopLevel",
+      "of": "core",
+      "module": "carry",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "make"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "What top-level variable `name` holds in a program edited as it runs:  the running program's, as its module had it."
+    },
+    {
+      "kind": "method",
+      "name": "loadOverRunning",
+      "of": "core",
+      "module": "carry",
+      "waits": true,
+      "params": [
+        {
+          "name": "running"
+        },
+        {
+          "name": "load"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "Load a new version of the running program with `load()`, its top-level variables kept (`keptTopLevel()`)."
+    },
+    {
+      "kind": "method",
+      "name": "takeNewClasses",
+      "of": "core",
+      "module": "carry",
+      "params": [
+        {
+          "name": "previous"
+        },
+        {
+          "name": "next"
+        }
+      ],
+      "section": "An edit taken while the program runs (epic editor, Edit Without Redraw)",
+      "description": "The running things become the new program's:  each class in `previous` takes over from the one of its name in `next`."
     },
     {
       "property": "BASE_TYPES",

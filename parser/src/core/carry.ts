@@ -15,6 +15,8 @@
  *   - Nor when the edit changed the program's start, the file that starts its app (P17).
  *   - Nor when one of its things can't come over (`carryProblems()`).
  *   - Either way the program starts afresh too.
+ * - An app on the page takes an edit without any of that:  the same things, on the new classes (`takeNewClasses()`).
+ *   This is what's left for a program with no app, or one that imports another (`runCompiled()`).
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 import { getProps, schemaOf, setProp, withoutCreate, type PropInfo } from "spell/util"
@@ -24,7 +26,7 @@ import { defineCoreModule } from "./core.types"
 import { isPlainObject } from "./state"
 // Import directly to avoid circular import
 import { Thing } from "./classes/Thing"
-import { List } from "./classes/List"
+import { List, carryListFamily } from "./classes/List"
 import type { NamedThing, ThingClass, ThingLike } from "./things"
 
 export const carryMethods = defineCoreModule({
@@ -81,9 +83,126 @@ export const carryMethods = defineCoreModule({
    */
   carryProblems(previous: NamedThing[], exports: Record<string, unknown>): string[] {
     return new CarryOver().problems(previous, exports).map(({ name, problem }) => `${name}:  ${problem}`)
+  },
+
+  ////////////////
+  // ## An edit taken while the program runs (epic `editor`, Edit Without Redraw)
+  ////////////////
+
+  /**
+   * What top-level variable `name` holds in a program edited as it runs:  the running program's, as its module had it.
+   * - e.g. `export const stock = core.keptTopLevel("stock", () => new Pile())`, as the runner writes it (`LiveEdit`).
+   * - `make()` is only for a program loaded any other way, which has no running one to keep.
+   * - See `takeOverRunning()`.
+   */
+  keptTopLevel<T>(name: string, make: () => T): T {
+    return runningTopLevel && name in runningTopLevel ? (runningTopLevel[name] as T) : make()
+  },
+
+  /**
+   * Load a new version of the running program with `load()`, its top-level variables kept (`keptTopLevel()`).
+   * - The classes it makes are only made:  the running things become them in `takeNewClasses()`.
+   * - `isCarryingOver` meanwhile, as a program loading to carry things over is.
+   */
+  async loadOverRunning<T>(running: Record<string, unknown>, load: () => Promise<T>): Promise<T> {
+    runningTopLevel = running
+    core.isCarryingOver = true
+    try {
+      return await load()
+    } finally {
+      core.isCarryingOver = false
+      runningTopLevel = undefined
+    }
+  },
+
+  /**
+   * The running things become the new program's:  each class in `previous` takes over from the one of its name in `next`.
+   * - Nothing is made, moved or copied:  each thing stays the same object, holding what it held.
+   * - What the old class had goes:  its prototype is empty and sits on the new one's, so its things, whoever holds them,
+   *   read every method from the new class, and `constructor` is the new class.
+   *   - A closure still naming the old class (a drawing not drawn again) works too:
+   *     `new Old()` makes a thing of the new class, and `instanceof Old` asks the new one.
+   * - Each exclusive family keeps who holds what (`carryListFamily()`):  so a card still knows its pile.
+   * - A property whose starting value changed:  things still holding the old one follow, as the side bar's do.
+   * - The chain never grows:  classes retired before point at the newest.
+   * - Pure bookkeeping:  nothing draws, see `core.drawAgain()`.
+   * - `previous` and `next`:  the program's exports, old and new.
+   * - NEVER throws on what isn't a class of the same name:  that's left alone.
+   */
+  takeNewClasses(previous: Record<string, unknown>, next: Record<string, unknown>): void {
+    const retired = core.getRuntimeState("retiredClasses", () => new Map<string, Function[]>())
+    for (const [name, Old] of Object.entries(previous)) {
+      const New = next[name]
+      if (!isThingClass(Old) || !isThingClass(New) || Old === New) continue
+      followStartingValues(Old, New)
+      carryListFamily(Old as unknown as typeof List, New as unknown as typeof List)
+      retireClass(Old, New)
+      const older = retired.get(name) ?? []
+      for (const before of older) {
+        Object.setPrototypeOf(before.prototype, New.prototype)
+        Object.setPrototypeOf(before, New)
+        Object.defineProperty(before, Symbol.hasInstance, {
+          configurable: true,
+          value: (value: unknown) => value instanceof New
+        })
+      }
+      retired.set(name, [...older, Old])
+    }
   }
 })
 Object.assign(core, carryMethods)
+
+/** The running program's variables, while a new version of it loads -- see `core.loadOverRunning()`. */
+let runningTopLevel: Record<string, unknown> | undefined
+
+/** Is `value` a class of things, of the program's? */
+function isThingClass(value: unknown): value is Function {
+  if (typeof value !== "function") return false
+  const { prototype } = value as { prototype?: unknown }
+  return prototype instanceof Thing || prototype instanceof List
+}
+
+/** `Old` no longer has anything of its own:  everything it had, it now reads from `New`.  See `core.takeNewClasses()`. */
+function retireClass(Old: Function, New: Function): void {
+  for (const key of Reflect.ownKeys(Old.prototype as object)) Reflect.deleteProperty(Old.prototype as object, key)
+  Object.setPrototypeOf(Old.prototype, New.prototype)
+  for (const key of Reflect.ownKeys(Old)) {
+    if (key !== "prototype" && key !== "name" && key !== "length") Reflect.deleteProperty(Old, key)
+  }
+  Object.setPrototypeOf(Old, New)
+  Object.defineProperty(Old, Symbol.hasInstance, {
+    configurable: true,
+    value: (value: unknown) => value instanceof New
+  })
+}
+
+/**
+ * Things of class `Old` still holding a starting value `New` changes take the new one.
+ * - Only a plain starting value:  `default: 5`, or `init: () => 5`.
+ * - Outside any action, so it's no step of the program's own undo.
+ */
+function followStartingValues(Old: Function, New: Function): void {
+  const before = schemaOf(Old)
+  for (const [name, info] of schemaOf(New).declared) {
+    const [was, now] = [startingValueOf(before.info(name)), startingValueOf(info)]
+    if (was === undefined || now === undefined || was === now) continue
+    for (const thing of core.things.all()) {
+      if (!(thing instanceof Old) || isComputed(New.prototype as object, name)) continue
+      const target = thing as unknown as Record<string, unknown>
+      if (target[name] === was) target[name] = now
+    }
+  }
+}
+
+/** The plain value `info` starts a property at:  `undefined` for none, or for what's made new each time. */
+function startingValueOf(info: PropInfo | undefined): unknown {
+  if (info?.default !== undefined) return info.default
+  if (!info?.init || !PLAIN_INIT.test(String(info.init))) return undefined
+  return info.init()
+}
+
+/** `() => 5`, `() => "hello"`, `() => true`:  a starting value that makes nothing. */
+const PLAIN_INIT = /^\(\)\s*=>\s*(?:-?\d|"|'|true\b|false\b)/
 
 /**
  * One carry-over, from the last run's things to the new run's classes -- see `core.carryOver()`.
@@ -249,7 +368,7 @@ function hasChangedType(Old: Function, Class: ThingClass, name: string, value: u
 /** What `typeof` says of a value of each of spell's plain types:  `text` is a `string`. */
 const PLAIN_TYPES: Record<string, string> = {
   text: "string",
-  character: "string",
+  letter: "string",
   number: "number",
   integer: "number",
   choice: "boolean"

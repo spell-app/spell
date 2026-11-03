@@ -310,17 +310,16 @@ export const Actions = {
       />
     )
   },
-  /** "Revert File":  read the file from the server again, dropping its unsaved changes (⌘⇧R). */
-  revertFile: (props: ActionProps) => {
-    const fileIsDirty = tracked(() => !!editor.file?.isDirty)
+  /** "Discard Changes":  the file back to where it was when the project was opened;  ⌘Z brings them back (⌘⇧R). */
+  discardChanges: (props: ActionProps) => {
+    const canDiscard = tracked(() => editor.canDiscardChanges)
     return (
       <Action
-        title={appTexts.text("revertFile")}
-        active={fileIsDirty()}
-        color="red"
+        title={appTexts.text("discardChanges")}
+        disabled={!canDiscard()}
         icon="arrow rotate left"
-        shortcut={EDITOR_HOTKEYS.revertFile.shortcut}
-        onClick={() => editor.revertFile()}
+        shortcut={EDITOR_HOTKEYS.discardChanges.shortcut}
+        onClick={() => editor.discardChanges()}
         {...props}
       />
     )

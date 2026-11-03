@@ -127,7 +127,6 @@ habit.name = "Read"
 habit.monday = true
 habit.tuesday = true
 habit.thursday = true
-if (!core.isCarryingOver) habit.start()
 
 core.heading("A check:  ticking Wednesday joins the two runs into one")
 /** A check:  ticking Wednesday joins the two runs into one */
@@ -160,6 +159,8 @@ core.heading("Try it")
 // with a box to add new ones.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the habit looks -- its name, a row of seven checkboxes, then its count and streak. */¬¬.Habit {¬  max-width: 24em;¬  margin: 2em auto;¬}¬¬.Days {¬  display: flex;¬  justify-content: space-between;¬}¬¬.Habit p {¬  margin-block-start: 1em;¬  white-space: pre;¬}¬`)
+// -----------
+if (!core.isCarryingOver) habit.start()
 // -----------
 if (!core.isCarryingOver) testStreaks()
 

@@ -245,7 +245,9 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
   there `<div>` is the web's, and so is `<button>`, never Spell UI's.
   - So `spell spellx convert` writes a member whose drawing has one (`<div>`, `<button>`, `<label>`) as a
     `<spell>` chunk, just that member, and the program stays the same;  every other member is a tag.
-- `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
+- `</>` closes any element, `<text>{its rank}</>`.
+- A name with a dash is a pack's too, when it has one:  `<tree-diagram>` is `<ui-tree-diagram>`;
+  else it's left as written, as a name with a capital always is.
 - Plain Spell is untouched:  its drawings name tags as before.
 
 **Comments are `<!-- ... -->`, anywhere:**  among a template's members, in a body, in a drawing's markup, in an
@@ -291,6 +293,11 @@ it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `
 - A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
 - Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
 
+**Types and start values:**  `<property "count" type="number">0</property>` is a stored number, starting at 0.
+- It reads as `its "count" is a number starting at 0`;  Spanish, `<propiedad "cuenta" tipo="número">0</>`, `su "cuenta" es un número empezando en 0`.
+- `<property "count" type="number" />` with no body starts at its type's own, 0 for a number.
+- Without `type=`, the body is worked out each time it's read:  `<property "name">its rank + " of " + its suit</>`.
+
 **Groups:**  `<group "direction" description="Face up or face down"/>` is a heading over the members after it, up to
 the next, as text sits under a `##` heading;  a member before any group is in none.
 - A member written away from its group says so, `group="direction"`.
@@ -318,6 +325,10 @@ the next, as text sits under a `##` heading;  a member before any group is in no
 - Plain Spell writes the same tags, in its markup:  the same program.  Spanish says `<si ...>`, `<si no>`.
 - A branch in no element is an error that says to write `if ...` on a line of its own.
 
+**`<json>` blocks:**  `<json>{ "name": "Ace" }</json>` keeps its text as written, as `<markdown>` does:
+its `{` and `[` aren't holes.
+It's Spell UI's `<ui-json>`, which draws nothing and holds data for others to read.
+
 **`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
 or a notebook.  It reads as that markup alone, with nothing around it, as a `<spell>` chunk's drawing does.
 
@@ -330,8 +341,7 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 	A button that counts its clicks.
 
 	<spell-view "counter">
-		<property "count">a number</>
-		<action "create it">set its count to 0</>
+		<property "count" type="number">0</property>
 		<action "count up">set its count to its count + 1</>
 		<draw><button onClick={count up}>Clicked {its count} times</button></draw>
 	</spell-view>
@@ -349,6 +359,8 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
   block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
 - `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
+- Every one of Spell UI's component pages is a project of notebooks, in `@spell/notebooks`:
+  each of its page's tabs one notebook.
 - A notebook is only ever a `.spellml` file.  The editor shows its page, editable in place, at
   `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
 - `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's

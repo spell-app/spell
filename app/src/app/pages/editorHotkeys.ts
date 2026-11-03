@@ -2,7 +2,7 @@ import { createSignal, onSettled } from "solid-js"
 
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
-import { Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
+import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import type { monaco } from "spell/app/app/solid/monaco"
 
 /**
@@ -21,14 +21,16 @@ import type { monaco } from "spell/app/app/solid/monaco"
  *   - in the code:  the code editor's own undo
  *   - in the running app, in Run:  the program's own, as ever:  not ours, so the key goes on
  *   - anywhere else in Edit, the Inspector's fields too:  the editor's history (`editor.history`);
- *     with nothing there, the running program's
+ *     with nothing there, what was typed in the code, so a click on the app doesn't strand it (epic
+ *     `elemental-spell` J116);  with nothing there either, the running program's
  */
 export const EDITOR_HOTKEYS = {
   saveFile: { shortcut: "mod+S", run: () => editor.saveFile() },
-  revertFile: { shortcut: "shift+mod+R", run: () => editor.revertFile() },
+  discardChanges: { shortcut: "shift+mod+R", run: () => editor.discardChanges() },
   compileApp: { shortcut: "mod+Enter", run: () => editor.compileApp() },
   createFile: { shortcut: "mod+N", run: () => editor.createFile() },
   stopInspecting: { shortcut: "Escape", run: stopInspecting, outsideCode: true },
+  changeThis: { shortcut: "mod+K", run: () => ChangeThis.open(), outsideCode: true },
   undo: { shortcut: "mod+Z", codeEditorAction: "undo", run: () => undoOutsideCode("undo"), inProperties: true },
   redo: { shortcut: "shift+mod+Z", codeEditorAction: "redo", run: () => undoOutsideCode("redo"), inProperties: true },
   find: { shortcut: "mod+F", codeEditorAction: "actions.find" },
@@ -72,7 +74,7 @@ export function editorHotkeys(isRunning: () => boolean): void {
     void editor
       .loadRuntime()
       .then(({ core }) => {
-        core.pageUndoKey = (action) => !isRunningNow() && editor.history[action]()
+        core.pageUndoKey = (action) => !isRunningNow() && undoInEdit(action)
       })
       .catch((error: unknown) => console.error("editorHotkeys():  couldn't reach the program's runtime", error))
     const disposers: (() => void)[] = []
@@ -146,8 +148,22 @@ export function isRunningApp(): boolean {
 /** Undo or redo pressed outside the code, where the code editor binds its own:  `false` in Run, so the key goes on. */
 function undoOutsideCode(action: "undo" | "redo"): unknown {
   if (isRunningNow()) return false
-  editor.history[action]()
+  undoInEdit(action)
   return undefined
+}
+
+/**
+ * Undo or redo in Edit with the focus off the code:  the side bar's change, else what was typed in the code.
+ * - true if it did either.
+ * - Leaves the focus where it is:  on the thing selected in the app, say.
+ */
+function undoInEdit(action: "undo" | "redo"): boolean {
+  if (editor.history[action]()) return true
+  const codeEditor = editor.getInputEditor()
+  const model = codeEditor?.getModel()
+  if (!codeEditor || !model || !(action === "undo" ? model.canUndo() : model.canRedo())) return false
+  codeEditor.trigger("keyboard", action, undefined)
+  return true
 }
 
 /**
@@ -176,7 +192,7 @@ const CLIPBOARD_ACTIONS = {
 export function undoOrRedo(action: "undo" | "redo"): void {
   const way = undoWay()
   if (way === "code") runCodeEditorAction(action)
-  else if (way === "history") editor.history[action]()
+  else if (way === "history") undoInEdit(action)
 }
 
 /** Run the code editor's own action `name` (`undo`, `actions.find`), focusing it first.  Nothing without one. */

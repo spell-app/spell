@@ -1587,6 +1587,12 @@ classesEs.addRule(OutlineSpecifierDatatype, {
   tests: [{ tests: [["un número", "number"]] }]
 })
 
+// a stored value and where it starts:  `su "cuenta" es un número empezando en 0`
+classesEs.addRule(OutlineSpecifierDatatype, {
+  syntax: `${A} {datatype:singular_type} empezando en {start:expression}`,
+  tests: [{ tests: [["un número empezando en 0", "number"]] }]
+})
+
 // `un palo de su mazo`:  a value kind, saying where its list is kept -- for the reader;  the kind says it already
 classesEs.addRule(OutlineSpecifierDatatype, {
   syntax: `${A} {datatype:singular_type} ${OF} (su|sus) {owner:member_words}`,

@@ -733,7 +733,7 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   <summary>Output</summary>
 
   ```text
-  Spanish (es):  complete, 19 modules
+  Spanish (es):  complete, 20 modules
   ```
 
   </details>

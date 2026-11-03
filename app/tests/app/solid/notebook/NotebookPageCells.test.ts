@@ -135,6 +135,7 @@ describe("NotebookPageCells", () => {
     )
     expect(cells).toEqual([
       { kind: "heading", title: "Counter", lead: "A button that counts its clicks." },
+      { kind: "template", name: "counter" },
       { kind: "heading", heading: "Counter" },
       { kind: "drawing", description: "A counter starts at 0, and adds one each time it's clicked." },
       { kind: "drawing", name: "One counter" },
@@ -144,7 +145,7 @@ describe("NotebookPageCells", () => {
       { kind: "drawing", description: "Click either one." }
     ])
     // a section's cell is its opening tag;  deleting it takes the section whole
-    const several = tagged.cells[4]!
+    const several = tagged.cells[5]!
     expect(several.code).toBe('<section label="Several counters">')
     const deleted = NotebookPageCells.deleted(TAGGED, several)
     expect(deleted).not.toContain("Two counters")

@@ -28,7 +28,7 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, line for line, cards and all, as Solitaire was in the outline style before it was spellx:
-it deals, plays and passes six tests, two of them its jokers', which Solitaire has since dropped.
+it deals, plays and passes six tests, as Solitaire does, two of them its jokers'.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
 
@@ -65,7 +65,7 @@ spell test @spell/examples/Solitario
 
 </details>
 
-- `spell test @spell/examples/Solitaire` runs the English four, without the jokers:  `card setup` for `la preparación de la carta`.
+- `spell test @spell/examples/Solitaire` runs the English:  `card setup` for `la preparación de la carta`.
 - `--verbose` prints each check, in the program's language:
   ``✅ Como se esperaba, `su rango` es `dama` ``, and a failing one `❌ Inesperado: 2 + 2 debería ser 5 pero en realidad es 4`.
 - The command's own lines, `✓ Compiling`, stay English:  the program speaks Spanish, the tool doesn't.
@@ -84,6 +84,10 @@ spell explain si --in @spell/examples/Solitario
 ```text
 if  si {condition:expression} (entonces|:)? {statement_body}?
 e.g. si x
+
+if_there_are_none  si no hay (ninguno|ninguna) :? {statement_body}?
+
+if_that_fails  si falla :? {statement_body}?
 
 backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
 e.g. imprimir 1 si bar si no 2
@@ -342,7 +346,7 @@ spell translate check es
 <summary>Output</summary>
 
 ```text
-Spanish (es):  complete, 19 modules
+Spanish (es):  complete, 20 modules
 ```
 
 </details>

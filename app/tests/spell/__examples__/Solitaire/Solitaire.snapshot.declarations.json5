@@ -2,6 +2,7 @@
   "spellVersion": "0.8.0",
   "provides": [
     "Card",
+    "Joker",
     "Deck",
     "Pile",
     "Solitaire",
@@ -10,7 +11,9 @@
     "Foundation",
     "Tableau",
     "test_card_setup",
+    "test_jokers",
     "test_a_new_deck",
+    "test_two_jokers",
     "test_piles",
     "test_the_moves"
   ],
@@ -284,10 +287,88 @@
       "defined": "/Card.spellml:3179-4061"
     },
     {
+      "type": "Joker",
+      "superType": "Card",
+      "defined": "/Jokers.spellml:405-1829"
+    },
+    {
+      "property": "color",
+      "classVariable": "Colors",
+      "of": "Joker",
+      "group": "what's different",
+      "groupDescription": "A joker comes red or black",
+      "enumeration": [
+        "red",
+        "black"
+      ],
+      "defined": "/Jokers.spellml:513-551"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} {definite_article} (expression:red|reds|black|blacks) joker",
+      "output": "is_the_$color_joker",
+      "rule": "quoted_property",
+      "of": "Joker",
+      "group": "what's different",
+      "kind": "method",
+      "name": "\"is the (color) joker\"",
+      "values": {
+        "color": [
+          "red",
+          "black"
+        ]
+      },
+      "staticOf": "Joker",
+      "defined": "/Jokers.spellml:556-585"
+    },
+    {
+      "property": "value",
+      "of": "Joker",
+      "group": "what it changes",
+      "groupDescription": "A card's own, written again for a joker",
+      "datatype": "number",
+      "defined": "/Jokers.spellml:672-733"
+    },
+    {
+      "property": "picture",
+      "of": "Joker",
+      "group": "what it changes",
+      "datatype": "text",
+      "defined": "/Jokers.spellml:748-782"
+    },
+    {
+      "property": "name",
+      "of": "Joker",
+      "group": "what it changes",
+      "datatype": "text",
+      "defined": "/Jokers.spellml:797-834"
+    },
+    {
+      "property": "state",
+      "of": "Joker",
+      "group": "what it changes",
+      "datatype": "text",
+      "defined": "/Jokers.spellml:839-1052"
+    },
+    {
+      "syntax": "test jokers",
+      "output": "test_jokers",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "jokers",
+      "defined": "/Jokers.spellml:1068-1820"
+    },
+    {
       "type": "Deck",
       "superType": "List",
       "itemType": "Card",
-      "defined": "/Deck.spellml:63-964"
+      "defined": "/Deck.spellml:97-1712"
+    },
+    {
+      "property": "jokers",
+      "of": "Deck",
+      "datatype": "choice",
+      "defined": "/Deck.spellml:144-228"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -300,13 +381,13 @@
       ],
       "kind": "method",
       "name": "create it",
-      "defined": "/Deck.spellml:110-365"
+      "defined": "/Deck.spellml:233-646"
     },
     {
       "property": "state",
       "of": "Deck",
       "datatype": "text",
-      "defined": "/Deck.spellml:378-589"
+      "defined": "/Deck.spellml:659-870"
     },
     {
       "syntax": "test a new deck",
@@ -315,7 +396,16 @@
       "alias": "statement",
       "kind": "function",
       "name": "a new deck",
-      "defined": "/Deck.spellml:605-955"
+      "defined": "/Deck.spellml:886-1288"
+    },
+    {
+      "syntax": "test two jokers",
+      "output": "test_two_jokers",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "two jokers",
+      "defined": "/Deck.spellml:1300-1703"
     },
     {
       "type": "Pile",
@@ -692,53 +782,63 @@
     124,
     140,
     193,
-    237,
-    241,
-    246,
+    240,
+    243,
+    249,
     253,
-    276,
-    281,
-    287,
-    294,
-    300,
-    306,
-    327,
-    363,
-    373,
-    376,
-    400,
-    403,
-    419,
-    422,
-    426,
-    449,
-    452,
-    470,
-    473,
-    479,
-    485,
-    503,
+    258,
+    262,
+    267,
+    277,
+    316,
+    320,
+    326,
+    335,
+    342,
+    358,
+    381,
+    386,
+    392,
+    399,
+    405,
+    411,
+    432,
+    468,
+    478,
+    481,
+    505,
     508,
-    513,
-    518,
-    523,
-    528,
-    533,
-    538,
-    543,
-    548,
-    553,
-    558,
-    563,
-    568,
-    574,
-    579,
-    589,
-    599,
-    621,
-    725,
-    728,
-    731,
-    754
+    524,
+    527,
+    531,
+    554,
+    557,
+    575,
+    578,
+    584,
+    590,
+    608,
+    613,
+    618,
+    623,
+    628,
+    633,
+    638,
+    643,
+    648,
+    653,
+    658,
+    663,
+    668,
+    673,
+    679,
+    684,
+    694,
+    704,
+    726,
+    830,
+    833,
+    836,
+    859
   ]
 }

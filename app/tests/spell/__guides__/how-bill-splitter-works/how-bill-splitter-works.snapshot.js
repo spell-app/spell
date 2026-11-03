@@ -92,7 +92,6 @@ core.heading("Start:  a $60 dinner for three, with an 18% tip")
 bill.amount = 60
 bill.percent = 18
 bill.people = 3
-if (!core.isCarryingOver) bill.start()
 
 core.heading("Checks")
 /** Checks */
@@ -125,6 +124,8 @@ core.heading("Try it")
 // with their own row, their own amount and their own share of the tip.
 // -----------
 core.installStyles(undefined, `/* File styles.css:  how the bill looks -- the three boxes, then the sums in two columns. */¬¬.Bill {¬  max-width: 22em;¬  margin: 2em auto;¬}¬¬.Bill ui-input {¬  margin-block-end: 0.5em;¬}¬¬.Sums {¬  display: grid;¬  grid-template-columns: 1fr auto;¬  gap: 0.25em;¬  margin-block-start: 1em;¬  font-variant-numeric: tabular-nums;¬}¬¬.Each {¬  font-weight: bold;¬}¬`)
+// -----------
+if (!core.isCarryingOver) bill.start()
 // -----------
 if (!core.isCarryingOver) testMoney()
 if (!core.isCarryingOver) testSplitting()

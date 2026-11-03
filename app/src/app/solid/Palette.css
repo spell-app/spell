@@ -1,25 +1,68 @@
 /* The palette, and what shows where a part would land:  `Palette.tsx`, `PartEdits.ts`. */
 .PalettePopup {
-  --ui-popup-max-width: 280px;
+  --ui-popup-max-width: min(780px, 92vw);
 }
 
 .PaletteBody {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: 240px;
-  max-height: min(60vh, 480px);
+  width: min(740px, 88vw);
+  max-height: min(70vh, 560px);
 }
 
-.PalettePane {
-  height: 100%;
-  padding: 8px;
+/* every part, by topic, in columns:  a topic stays whole */
+.PaletteGroups {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  column-width: 165px;
+  column-gap: 12px;
+}
+.PaletteGroup {
+  break-inside: avoid;
+  padding-block-end: 8px;
 
-  & .PaletteBody {
-    width: 100%;
-    max-height: 100%;
-    height: 100%;
+  & h4 {
+    margin: 0;
+    padding: 2px 4px;
+    color: var(--ui-text-muted);
+    font-size: 12px;
+    font-weight: var(--ui-font-weight-bold, 700);
   }
+}
+
+/* kept open:  one 40px bar across the top of the panes */
+.PaletteStrip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding-inline: var(--spell-gap, 8px);
+  min-width: 0;
+
+  & .PaletteStripItems {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* an empty app, in Edit:  what to do */
+.EmptyAppPrompt {
+  display: none;
+}
+.AppPaneProgram:has(.App > :empty, .App > * > :is(ui-container, es-contenedor):only-child:empty) > .EmptyAppPrompt {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--ui-text-muted);
+  font-size: 15px;
+  text-align: center;
+  pointer-events: none;
 }
 
 .PaletteHead {
@@ -35,12 +78,6 @@
   & .PalettePin.pinned {
     color: var(--ui-primary);
   }
-}
-
-.PaletteTree {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
 }
 
 .PaletteGhost {

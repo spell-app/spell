@@ -90,8 +90,9 @@ describe("core.isOfType()", () => {
     expect(core.isOfType("a", "text")).toBe(true)
     expect(core.isOfType("bar", "text")).toBe(true)
   })
-  test("matches 'character' and 'char' correctly", () => {
-    expect(core.isOfType("a", "character")).toBe(true)
+  test("matches 'letter' and 'char' correctly;  'character' is a project's own type, if any (epic `language` Q17)", () => {
+    expect(core.isOfType("a", "letter")).toBe(true)
+    expect(core.isOfType("a", "character")).toBe(false)
     expect(core.isOfType("a", "char")).toBe(true)
     expect(core.isOfType("", "char")).toBe(false)
     expect(core.isOfType("abc", "char")).toBe(false)

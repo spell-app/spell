@@ -1,9 +1,11 @@
-import { createEffect, createSignal, onCleanup } from "solid-js"
+import { Show, createEffect, createSignal, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
@@ -56,7 +58,42 @@ export function FileTabs() {
     }
   )
 
-  return <div class="FileTabs">{piece()?.draw(bar()) as JSX.Element}</div>
+  // a right click on a tab:  that file shown, and what can be done to it
+  const [menuAt, setMenuAt] = createSignal<{ x: number; y: number }>()
+  const openMenu = (event: MouseEvent) => {
+    const tab = event.composedPath().find((at) => (at as Element).localName === "ui-item") as Element | undefined
+    if (!tab?.parentElement) return
+    const file = bar()?.files.getValues()[[...tab.parentElement.children].indexOf(tab)]
+    if (!file) return
+    event.preventDefault()
+    editor.showEditor(file.path)
+    setMenuAt({ x: event.clientX, y: event.clientY })
+  }
+  return (
+    <div class="FileTabs" onContextMenu={openMenu}>
+      {piece()?.draw(bar()) as JSX.Element}
+      <Show when={menuAt()}>
+        {(where) => (
+          <ui-popup
+            at={where()}
+            open-on="manual"
+            visible=""
+            class="BarMenuPopup FileTabMenu"
+            aria-label={appTexts.text("menuFile")}
+            on-ui-closing={() => setMenuAt(undefined)}
+          >
+            <div class="BarMenuPanel" onClick={() => setMenuAt(undefined)}>
+              <ui-menu direction="vertical" size="small" interactive="" class="BarMenuItems">
+                <Actions.duplicateFile menu />
+                <Actions.renameFile menu />
+                <Actions.deleteFile menu />
+              </ui-menu>
+            </div>
+          </ui-popup>
+        )}
+      </Show>
+    </div>
+  )
 }
 
 /** A file in `FileTabs.spellml`, as its compiled class has it. */

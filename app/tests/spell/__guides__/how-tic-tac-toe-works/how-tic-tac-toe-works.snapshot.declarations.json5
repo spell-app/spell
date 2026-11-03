@@ -186,7 +186,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "a row",
-      "defined": "/HowTicTacToeWorks.spell:2903-3215"
+      "defined": "/HowTicTacToeWorks.spell:2885-3197"
     }
   ],
   "codeLines": [
@@ -207,6 +207,6 @@
     111,
     118,
     124,
-    143
+    142
   ]
 }

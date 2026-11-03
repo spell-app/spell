@@ -10,6 +10,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
  * - `set the X to` follows that order too;  `set X to` makes a local.
  * - `its X` follows `it`, so in a loop it's the item;  `the X` never is.
  * - A bare `X` never reads a property.
+ * - `the X's Y` reads as `the Y of the X` (P16);  after an `of`, the types say which name the `'s` is (Q16).
  * - A local that hides a property warns where it's made and where `the X` reads it;
  *   an argument or loop variable warns only on that read.
  *
@@ -47,6 +48,7 @@ const PLAY = "to play it:"
 
 const ENGLISH_PROJECT = (action: string, lines: string, loose = "set x to 1") => `a pile is a thing:
 	- it has a name as text
+	- it has a score as a number
 	- to shuffle it:
 		set x to 1
 a stock is a pile
@@ -378,6 +380,47 @@ const ENGLISH: NameRow[] = [
     js: "positionOf(Game.Colors, this.color)"
   },
 
+  // a possessive, `the X's Y` ~== `the Y of the X` (P16)
+  { title: "possessive:  the X's Y reads Y of the X", spell: "set v to the stock's name", js: "v = this.stock.name" },
+  { title: "possessive:  a curly apostrophe too", spell: "set v to the stock’s name", js: "v = this.stock.name" },
+  { title: "possessive:  its X's Y", spell: "set v to its stock's name", js: "v = this.stock.name" },
+  {
+    title: "possessive:  a chain reads left to right",
+    spell: "set v to the stock's name's length",
+    js: "v = this.stock.name.length"
+  },
+  { title: "possessive:  set the X's Y writes it", spell: 'set the stock\'s name to "s"', js: 'this.stock.name = "s"' },
+  { title: "possessive:  a local's Y", spell: "set p to the pile\nset v to p's name", js: "v = p.name" },
+  { title: "possessive:  a bare X's Y does NOT read the property", spell: "set v to stock's name", js: ERROR },
+  {
+    title: "possessive:  in a loop, the X's Y is still the action's thing",
+    spell: "for each card in the cards\n\tset v to the stock's name",
+    js: "v = this.stock.name"
+  },
+  {
+    title: "possessive:  a loop variable's Y",
+    spell: "for each card in the cards\n\tset v to card's rank",
+    js: "v = card.rank"
+  },
+  { title: "possessive:  [the X's Y] in a text", spell: 'set v to "[the stock\'s name]"', js: "this.stock.name" },
+  { title: 'possessive:  it\'s Y is an error, saying "its"', spell: "set v to it's score", js: ERROR },
+  {
+    title: "possessive after an of:  the nearest name's, when it has it",
+    spell: "set v to the name of the game's stock",
+    js: "v = this.stock.name"
+  },
+  {
+    title: "possessive after an of:  the whole phrase's, when only it has it",
+    spell: "set v to the pile of the game's name",
+    js: "v = this.pile.name"
+  },
+  {
+    title: "possessive after an of:  both have it, the nearest's, and warns",
+    spell: "set v to the pile of the game's score",
+    js: "this.score.pile",
+    warns: "has a score too"
+  },
+
   // an action's own words
   { title: "action phrase:  a literal action name wins", spell: "reset the stock", js: "this.resetTheStock()" },
 
@@ -492,7 +535,7 @@ function checkRow(row: NameRow, path: string, project: typeof ENGLISH_PROJECT, a
   expect(errors).toEqual([])
   expect(compiled).toContain(row.js)
   const hiding = warnings.filter((warning) => warning.includes(HIDES) || warning.includes(OCULTA))
-  if (row.warns) expect(hiding).not.toEqual([])
+  if (row.warns) expect(warnings.filter((warning) => warning.includes(row.warns!))).not.toEqual([])
   else expect(hiding).toEqual([])
 }
 

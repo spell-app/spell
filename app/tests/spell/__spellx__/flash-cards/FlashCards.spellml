@@ -6,7 +6,6 @@
 //   a card:  its two sides, and turning it over
 //   the quiz:  the deck, the card showing, the score, and its drawing
 //   the deck:  the words to learn
-//   start
 //   tests
 
 
@@ -116,7 +115,6 @@
 
 	## Start
 	start over
-	start quiz
 
 
 	## Tests

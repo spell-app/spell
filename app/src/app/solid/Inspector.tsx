@@ -19,6 +19,7 @@ import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { DRAG_START_PX } from "spell/util/Dragging"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
+import { CodeShown } from "./EditorMode"
 import { InspectorActions } from "./InspectorActions"
 import { ActionsBand, EventsBand, InspectorCard, InspectorViews, appParts } from "./InspectorParts"
 import { eventsInSource, handlersInSource, propertyEditorInSource, type WrittenEvent } from "./InspectorSource"
@@ -316,6 +317,7 @@ export class Inspector {
    * - Answers whether it's written anywhere.  NEVER throws.
    */
   static showWritten(element: Element): boolean {
+    CodeShown.set(editor.project?.path, true)
     const place = Inspector.writtenPlaceOf(element)?.place
     const file = place && InspectorWrites.fileNamed(place.path)
     if (!place || !file) return false
@@ -1787,9 +1789,7 @@ function InspectorSheetBar(): JSX.Element {
         link=""
         class="IconAction InspectorSheetClose"
         label={appTexts.text("inspectorSheetClose")}
-        data-tooltip={appTexts.text("inspectorSheetClose")}
-        data-position="top right"
-        data-inverted=""
+        title={appTexts.text("inspectorSheetClose")}
         onClick={() => Inspector.putSheetAway()}
       />
     </div>
@@ -2414,17 +2414,13 @@ export function InspectorToggle(): JSX.Element {
         link=""
         class={["IconAction", { active: Inspector.isOpen }]}
         label={appTexts.text("inspector")}
-        data-tooltip={appTexts.text("inspector")}
-        data-position="bottom right"
-        data-inverted=""
+        title={appTexts.text("inspector")}
         onClick={() => Inspector.toggle()}
       />
       <ui-dropdown
         class="InspectorPanelsDropdown"
         aria-label={appTexts.text("inspectorPanels")}
-        data-tooltip={appTexts.text("inspectorPanels")}
-        data-position="bottom right"
-        data-inverted=""
+        title={appTexts.text("inspectorPanels")}
         ref={on<{ value: string }>("ui-changed", (event) => {
           const panel = event.detail.value as InspectorPanel
           if (!panel) return
@@ -2464,9 +2460,7 @@ export function InspectAppButton(props: { id?: string }): JSX.Element {
       class={["IconAction", "InspectAppButton", { inspecting: Inspector.isInspecting }]}
       label={appTexts.text("inspectorInspect")}
       aria-pressed={Inspector.isInspecting ? "true" : "false"}
-      data-tooltip={Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect")}
-      data-position="bottom right"
-      data-inverted=""
+      title={Inspector.isHelpShown ? undefined : appTexts.text("inspectorInspect")}
       onClick={() => {
         if (!Inspector.isOpen) Inspector.toggle()
         else if (Inspector.isInspecting) Inspector.stopInspecting()

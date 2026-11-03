@@ -1,0 +1,20 @@
+/*
+ * Look of the box on what's selected (`ChangeThis.tsx`):  a menu's popup, with words in it.
+ */
+ui-popup.ChangeThisPopup::part(popup) {
+  padding: 8px;
+}
+.ChangeThisBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+}
+.ChangeThisBox p {
+  margin: 0;
+}
+.ChangeThisWorking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

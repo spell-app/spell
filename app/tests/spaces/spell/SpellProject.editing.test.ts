@@ -32,6 +32,7 @@ describe("SpellProject editing", () => {
     // its cards, deck and piles, then its game
     expect(project.spellFiles.map((file) => file.filePath)).toEqual([
       "/Card.spellml",
+      "/Jokers.spellml",
       "/Deck.spellml",
       "/Pile.spellml",
       "/Solitaire.spellml"

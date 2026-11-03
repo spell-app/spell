@@ -429,6 +429,13 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
       SOURCE.replace("<ui-button>Go</ui-button>", "<button>Go</button>").replace("<ui-text", "<text")
     )
   }, 30_000)
+
+  test("a component's own event stays on its element:  no <on ...> hears it", () => {
+    const source = SOURCE.replace("<ui-text on-click={flip it}>face</>", "<modal on-ui-closed={flip it}>face</modal>")
+    const { status, stdout } = spell(["lint", "."], tempProject("OwnEvent", source, SP.SPELLML_SUFFIX))
+    expect(stdout).not.toContain("HTML's habit")
+    expect(status).toBe(0)
+  }, 30_000)
 })
 
 describe("spell lint:  editor pages (epic property-editor P6, Q17)", () => {
@@ -614,9 +621,9 @@ describe("spell run", () => {
 describe("spell test", () => {
   test("reports each test -- its cards', deck's and piles', then its game's", () => {
     const { status, stdout } = spell(["test", "@spell/examples/Solitaire"])
-    const tests = ["card setup", "a new deck", "piles", "the moves"]
+    const tests = ["card setup", "jokers", "a new deck", "two jokers", "piles", "the moves"]
     expect(stdout).toBe(
-      `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n4 passed\n`
+      `${tests.map((name) => `✓ test ${name}  (${stdout.match(new RegExp(`test ${name}  \\((\\d+) checks`))?.[1]} checks)\n`).join("")}\n${tests.length} passed\n`
     )
     expect(status).toBe(0)
   })

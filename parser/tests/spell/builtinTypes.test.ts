@@ -46,6 +46,7 @@ describe("built-in type table", () => {
         "viewable list selection => []",
         "text length => 3",
         "text characters => ["A","d","a"]",
+        "text letters => ["A","d","a"]",
         "date year => 2026",
         "date day => 4",
       ]
@@ -65,7 +66,7 @@ describe("built-in type table", () => {
     expect(list.getMember("length")).toMatchObject({ name: "length", datatype: "number" })
     expect(list.getMember("shuffle (a list)")).toBeUndefined()
     // a sub-type finds it too, e.g. `a deck is a list of cards`
-    expect(SP.SpellParser.rootScope.types.get("text")!.itemType).toBe("character")
+    expect(SP.SpellParser.rootScope.types.get("text")!.itemType).toBe("letter")
   })
 
   test("a `stored` member is in its type's scope, and a REAL property of its runtime class, which keeps a set value", () => {

@@ -97,6 +97,3 @@ caja de recetas es una aplicación:
 				<p>No podemos llegar a tus recetas ahora mismo.</p>
 				<ui-button class="again" onClick={reintentar}>Reintentar</ui-button>
 			</ui-message>
-
-
-iniciar la caja de recetas

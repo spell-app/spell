@@ -60,7 +60,6 @@ to draw (an adding machine)
 ## Start
 set adder to a new adding machine
 clear the adder
-start the adder
 
 
 ## A check:  12 and 5 make 17

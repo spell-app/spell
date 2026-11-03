@@ -5,7 +5,7 @@ import "spell/parser/parser"
 import { editor } from "spell/app/app/editor"
 import { AppTexts } from "spell/app/app/ui/AppTexts"
 import { PageLoading } from "spell/app/app/solid/PageLoading"
-import { EditorTheme, ErrorNotice, Notice, addAppIconsPageWide } from "spell/app/app/solid"
+import { EditorTheme, ErrorNotice, Notice, RestartNeeded, addAppIconsPageWide } from "spell/app/app/solid"
 import { Routes } from "spell/app/app/pages/routes"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { staticFiles } from "spell/app/app/static/StaticFiles"
@@ -46,6 +46,7 @@ render(
     <>
       <Routes />
       <Notice />
+      <RestartNeeded />
       <ErrorNotice />
     </>
   ),

@@ -89,14 +89,17 @@ spell lint @spell/examples
 ```text
 @spell/examples holds several projects -- name one, or pass --all:
   @spell/examples/bill-splitter
+  @spell/examples/CajaDeRecetas
   @spell/examples/calculator
   @spell/examples/Counter
   @spell/examples/fizzbuzz
   @spell/examples/flash-cards
   @spell/examples/habit-tracker
   @spell/examples/ListaDeTareas
+  @spell/examples/RecipeBox
   @spell/examples/Solitaire
   @spell/examples/Solitario
+  @spell/examples/StarWars
   @spell/examples/TaskList
   @spell/examples/tic-tac-toe
 ```
@@ -112,14 +115,17 @@ spell lint --all @spell/examples
 
 ```text
 ✓ @spell/examples/bill-splitter
+✓ @spell/examples/CajaDeRecetas  1 warning
 ✓ @spell/examples/calculator
 ✓ @spell/examples/Counter
 ✓ @spell/examples/fizzbuzz
 ✓ @spell/examples/flash-cards
 ✓ @spell/examples/habit-tracker
 ✓ @spell/examples/ListaDeTareas
+✓ @spell/examples/RecipeBox  1 warning
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
+✓ @spell/examples/StarWars  6 warnings
 ✓ @spell/examples/TaskList
 ✓ @spell/examples/tic-tac-toe
 ```
@@ -499,11 +505,13 @@ spell test @spell/examples/Solitaire 2>/dev/null
 
 ```text
 ✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test jokers  (15 checks)
+✓ test a new deck  (6 checks)
+✓ test two jokers  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+6 passed
 ```
 
 </details>

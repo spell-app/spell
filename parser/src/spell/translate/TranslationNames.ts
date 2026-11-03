@@ -385,4 +385,4 @@ function builtInMeaning(words: string): string | undefined {
 }
 
 /** The meanings `P.TypeWords` maps to, which a type's name may also be written as. */
-const BUILT_IN_MEANINGS = new Set(["text", "number", "integer", "character", "choice", "date", "list", "thing", "app"])
+const BUILT_IN_MEANINGS = new Set(["text", "number", "integer", "letter", "choice", "date", "list", "thing", "app"])

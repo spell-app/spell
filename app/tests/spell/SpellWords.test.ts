@@ -14,6 +14,7 @@ describe("SpellWords", () => {
     const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
     expect(Object.keys(words.types)).toEqual([
       "Card",
+      "Joker",
       "Deck",
       "Pile",
       "StockPile",

@@ -99,7 +99,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "la cuenta pendiente",
-      "defined": "/ComoFuncionaListaDeTareas.es.spell:3117-3374"
+      "defined": "/ComoFuncionaListaDeTareas.es.spell:3090-3347"
     }
   ],
   "codeLines": [
@@ -114,6 +114,6 @@
     81,
     84,
     90,
-    130
+    129
   ]
 }

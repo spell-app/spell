@@ -117,7 +117,7 @@ describe("editor hotkeys", () => {
   test.each([
     ["Mod+S", { key: "s", metaKey: true }, "saveFile"],
     ["Ctrl+S", { key: "s", ctrlKey: true }, "saveFile"],
-    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "revertFile"],
+    ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "discardChanges"],
     ["Mod+Enter", { key: "Enter", metaKey: true }, "compileApp"],
     ["Mod+N", { key: "n", metaKey: true }, "createFile"]
   ] as const)("%s calls `editor.%s()`, instead of the browser's own", async (_name, init, method) => {
@@ -222,10 +222,11 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
 function spyOnHotkeys() {
   expect(Object.keys(EDITOR_HOTKEYS)).toEqual([
     "saveFile",
-    "revertFile",
+    "discardChanges",
     "compileApp",
     "createFile",
     "stopInspecting",
+    "changeThis",
     "undo",
     "redo",
     "find",
@@ -238,7 +239,7 @@ function spyOnHotkeys() {
   ])
   return {
     saveFile: spyOnEditor("saveFile", () => Promise.resolve()),
-    revertFile: spyOnEditor("revertFile", () => Promise.resolve()),
+    discardChanges: spyOnEditor("discardChanges", () => undefined),
     compileApp: spyOnEditor("compileApp", () => Promise.resolve()),
     createFile: spyOnEditor("createFile", () => Promise.resolve())
   }

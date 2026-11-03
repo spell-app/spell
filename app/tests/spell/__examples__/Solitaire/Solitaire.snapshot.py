@@ -272,19 +272,128 @@ def test_card_setup() -> None:
 
 
 ###########
+# ## Jokers
+###########
+# A joker is a card, with what makes it a joker on top:  a subclass of `card`.
+# - It has no rank or suit, so it changes what those decided:  its value, its picture, its name and its short name.
+# - Everything else it gets from `card`:  it turns over, draws both its sides and drags as any card does.
+# - A deck holds its two only when it's made `with jokers`.  Solitaire's own game plays without them.
+
+
+Color = Literal["red", "black"]
+
+
+class Joker(Card):
+    element_tag = "test-project-joker"
+
+    # - its "color" is one of red or black
+    COLORS = ("red", "black")
+    color = prop(one_of=COLORS)
+
+    @staticmethod
+    def is_the_color_joker(card: Card, color: Color) -> bool:
+        return isinstance(card, Joker) and card.color == color
+
+    @property
+    def value(self) -> float:
+        if Joker.is_the_color_joker(self, "red"):
+            return 53
+        return 54
+
+    @property
+    def picture(self) -> str:
+        return "🃟"
+
+    @property
+    def name(self) -> str:
+        return f"{self.color} joker"
+
+    @property
+    def state(self) -> str:
+        """Its short name:  *R↑ is the red joker, face up"""
+        letter = core.upper_case(core.get_item_at(self.color, 0))
+        arrow = "↑" if self.is_face_direction("up") else "↓"
+        return f"*{letter}{arrow}"
+
+
+# A joker comes red or black
+
+# A card's own, written again for a joker
+
+
+def test_jokers() -> None:
+    with core.test("test jokers"):
+        it = Joker()
+        core.echo_test_action("get a new joker whose color is red and direction is up")
+        it_2 = Joker(color="red", direction="up")
+        core.expect(isinstance(it_2, Card), "it is a card", True, "yes")
+        core.expect(isinstance(it_2, Joker), "it is a joker", True, "yes")
+        core.expect(it_2.color, "its color", "red", "red")
+        core.expect(it_2.name, "its name", "red joker", "\"red joker\"")
+        core.expect(it_2.state, "its state", "*R↑", "\"*R↑\"")
+        core.expect(it_2.picture, "its picture", "🃟", "\"🃟\"")
+        core.expect(Joker.is_the_color_joker(it_2, "red"), "it is the red joker", True, "yes")
+        core.expect(
+            Joker.is_the_color_joker(it_2, "black"),
+            "it is the black joker",
+            False,
+            "no",
+        )
+        core.expect(
+            not Joker.is_the_color_joker(it_2, "black"),
+            "it is not the black joker",
+            True,
+            "yes",
+        )
+
+        # what it gets from card
+        core.expect(it_2.is_face_direction("up"), "it is face up", True, "yes")
+        core.echo_test_action("turn it over")
+        it_2.turn_over()
+        core.expect(it_2.is_face_direction("down"), "it is face down", True, "yes")
+
+        core.echo_test_action("set black joker to a new joker whose color is black")
+        black_joker = Joker(color="black")
+        core.expect(black_joker.picture, "the picture of black joker", "🃟", "\"🃟\"")
+
+        core.echo_test_action(
+            "set the card to a new card whose rank is queen and suit is spades",
+        )
+        card = Card(rank="queen", suit="spades")
+        core.expect(isinstance(card, Joker), "the card is a joker", False, "no")
+        core.expect(not isinstance(card, Joker), "the card is not a joker", True, "yes")
+        core.expect(
+            Joker.is_the_color_joker(card, "red"),
+            "the card is the red joker",
+            False,
+            "no",
+        )
+
+
+# -----------
+
+
+###########
 # ## A deck
 ###########
-# The 52 cards of a standard deck, ace of clubs first.
+# The 52 cards of a standard deck, ace of clubs first -- and its two jokers, if you ask.
 
 
 class Deck(List):
     item_type = Card
 
+    # No jokers, unless it's made `with jokers`
+    # - its "jokers" is yes or no
+    jokers = prop(type="choice")
+
     def create(self) -> None:
-        """One of each card, ace of clubs first:  each starts face down, as every two sided view does"""
+        """One of each card, ace of clubs first, then its two jokers, red then black:  each starts face down, as every two sided view does"""
         for rank in Card.RANKS:
             for suit in Card.SUITS:
                 self.append(Card(rank=rank, suit=suit))
+        if self.jokers:
+            self.append(Joker(color="red"))
+            self.append(Joker(color="black"))
 
     @property
     def state(self) -> str:
@@ -319,9 +428,44 @@ def test_a_new_deck() -> None:
             "king of spades",
             "\"king of spades\"",
         )
+        core.expect(
+            isinstance(deck.random_item(), Joker),
+            "a random card of the deck is a joker",
+            False,
+            "no",
+        )
         core.echo_test_action("shuffle the deck")
         deck.randomize()
         core.expect(len(deck), "the number of cards in the deck", 52, "52")
+
+
+def test_two_jokers() -> None:
+    with core.test("test two jokers"):
+        it = Deck()
+        core.echo_test_action("the deck is a new deck with jokers")
+        deck = Deck(jokers=True)
+        core.expect(len(deck), "the number of cards in the deck", 54, "54")
+        core.echo_test_action("set wild cards to the cards in the deck where it is a joker")
+        wild_cards = deck.filter(lambda card: isinstance(card, Joker))
+        core.expect(len(wild_cards), "the number of cards in wild cards", 2, "2")
+        core.expect(
+            deck.first_item.is_the_rank_of_suit("ace", "clubs"),
+            "the first card of the deck is the ace of clubs",
+            True,
+            "yes",
+        )
+        core.expect(
+            Joker.is_the_color_joker(deck.last_item, "black"),
+            "the last card of the deck is the black joker",
+            True,
+            "yes",
+        )
+        core.expect(
+            getattr(deck.last_item, "name", None),
+            "the name of the bottom card of the deck",
+            "black joker",
+            "\"black joker\"",
+        )
 
 
 # -----------
@@ -897,7 +1041,6 @@ def test_the_moves() -> None:
 
 
 asyncio.run(solitaire.start_a_new_game())
-solitaire.start()
 
 
 # -----------
@@ -1122,8 +1265,16 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
 # -----------
 
 
+solitaire.start()
+
+
+# -----------
+
+
 test_card_setup()
+test_jokers()
 test_a_new_deck()
+test_two_jokers()
 test_piles()
 test_the_moves()
 

@@ -9,13 +9,13 @@
     {
       "type": "Counter",
       "superType": "View",
-      "defined": "/Counter.spell:434-773"
+      "defined": "/Counter.spell:425-764"
     },
     {
       "property": "count",
       "of": "Counter",
       "datatype": "number",
-      "defined": "/Counter.spell:466-489"
+      "defined": "/Counter.spell:457-480"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -28,7 +28,7 @@
       ],
       "kind": "method",
       "name": "create it",
-      "defined": "/Counter.spell:523-557"
+      "defined": "/Counter.spell:514-548"
     },
     {
       "syntax": "count up (of {thisArg:expression})?",
@@ -41,7 +41,7 @@
       ],
       "kind": "method",
       "name": "count up",
-      "defined": "/Counter.spell:562-607"
+      "defined": "/Counter.spell:553-598"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -54,18 +54,18 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:685-773"
+      "defined": "/Counter.spell:676-764"
     },
     {
       "type": "CounterApp",
       "superType": "App",
-      "defined": "/Counter.spell:808-941"
+      "defined": "/Counter.spell:799-932"
     },
     {
       "property": "counter",
       "of": "CounterApp",
       "datatype": "Counter",
-      "defined": "/Counter.spell:840-870"
+      "defined": "/Counter.spell:831-861"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -78,7 +78,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Counter.spell:875-941"
+      "defined": "/Counter.spell:866-932"
     },
     {
       "syntax": "test counting",
@@ -87,18 +87,18 @@
       "alias": "statement",
       "kind": "function",
       "name": "counting",
-      "defined": "/Counter.spell:982-1158"
+      "defined": "/Counter.spell:944-1120"
     }
   ],
   "codeLines": [
-    21,
-    24,
-    30,
-    34,
-    39,
-    49,
-    52,
-    57,
-    69
+    20,
+    23,
+    29,
+    33,
+    38,
+    48,
+    51,
+    56,
+    64
   ]
 }

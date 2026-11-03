@@ -44,6 +44,7 @@ and in the app's build folder, `app/` at the app folder's root.
   - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
     `solid/InspectorWrites.ts` writes the Inspector's changes through it;
     `solid/PartEdits.ts` the parts added, moved, cut, pasted and deleted, drawn by `solid/Palette.tsx`
+    `solid/ChangeThis.tsx` asks a Claude session on this machine to change what's selected (`spaces`' `ChangeRequests`)
   - `layout/`:  the editor's own pieces written in Spell, the file tabs, the top bar and the panes (`layoutSpell.ts`;  [README-app.md](../../README-app.md), "The editor in Spell")
   - `index.tsx`:  the entry, drawing the app into `#app-root`
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
@@ -168,6 +169,11 @@ and in the app's build folder, `app/` at the app folder's root.
     - Each `<spell-viewer>` loads its OWN copy (`loadRuntime()`).
       So apps on a page don't share a `core`.
     - No import map:  `runCompiled()` links each program's imports.
+    - A recompile of the same program with an app on the page takes the edit as it runs ([LiveEdit](runner/LiveEdit.ts),
+      epic `editor`, Edit Without Redraw):  the same elements and things, only what changed drawn again.
+      - What it can't take (a new type, a line at the top level) waits for Restart, and the editor says so
+        (`editor.restartNeededBecause`, `<RestartNeeded>`):  never a surprise reload.
+      - A program with no app, or one that imports another, runs again instead.
     - A recompile of the same program keeps its things, e.g. the game in progress
       (`keepThings`, epic `drawable-thing` P16).
       - Restart starts afresh, on purpose:  each runner's own (`restart()`, `editor.restartApp()`).

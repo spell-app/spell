@@ -76,8 +76,6 @@ export class CodeThemes {
         "editor.foreground": color("--ui-code-color"),
         "editorCursor.foreground": color("--ui-code-cursor"),
         "editor.selectionBackground": color("--ui-code-selection"),
-        "editor.lineHighlightBackground": color("--ui-code-current-line"),
-        "editor.lineHighlightBorder": color("--ui-code-current-line"),
         "editorLineNumber.foreground": color("--ui-code-gutter-color"),
         "editorLineNumber.activeForeground": color("--ui-code-gutter-active"),
         "editorBracketMatch.background": color("--ui-code-bracket"),

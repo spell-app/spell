@@ -20,10 +20,6 @@ export const STARTER_PROGRAMS = {
 \t\t</ui-container>
 \t</draw>
 </spell-app>
-
-<spell>
-\tstart the my app
-</spell>
 `
   },
   /** A button that counts its clicks. */
@@ -43,10 +39,6 @@ A button that counts its clicks.
 \t\t</ui-container>
 \t</draw>
 </spell-app>
-
-<spell>
-\tstart the my app
-</spell>
 `
   },
   /** A little game:  roll a die, and see how far you get. */
@@ -74,10 +66,6 @@ A little game:  how many rolls does it take to roll a six?
 \t\t</ui-container>
 \t</draw>
 </spell-app>
-
-<spell>
-\tstart the my app
-</spell>
 `
   }
 } as const

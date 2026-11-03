@@ -176,6 +176,7 @@ async function fixHtmlHabits(
 /**
  * The HTML habits in `project`'s `.spellml` files that `--fix` can't put right -- only `file`'s, if given:
  * an element's `on-click=` (or any `on-...=`), which spellx handles in its template, with `<on click>...</>`.
+ * - NOT a component's own event (`on-ui-closed=`):  it reaches only a listener on that element, never an `<on ...>`.
  * - Each a problem, where it is;  read from the files as last parsed.
  */
 function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[] {
@@ -186,7 +187,7 @@ function htmlHabitsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Proble
     P.Tokenizer.forEachToken(spellFile.match.tokens, (token) => {
       if (!(token instanceof P.JSXElementToken)) return
       for (const attribute of token.attributes ?? []) {
-        if (!/^on-/.test(attribute.name)) continue
+        if (!/^on-/.test(attribute.name) || /^on-ui-/.test(attribute.name)) continue
         const event = attribute.name.slice(3).replaceAll("-", " ")
         problems.push({
           project: project.projectId,

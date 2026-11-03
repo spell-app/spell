@@ -87,7 +87,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "money",
-      "defined": "/HowBillSplitterWorks.spell:2353-2445"
+      "defined": "/HowBillSplitterWorks.spell:2342-2434"
     },
     {
       "syntax": "test splitting",
@@ -96,7 +96,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "splitting",
-      "defined": "/HowBillSplitterWorks.spell:2447-2550"
+      "defined": "/HowBillSplitterWorks.spell:2436-2539"
     }
   ],
   "codeLines": [
@@ -109,7 +109,7 @@
     57,
     61,
     67,
-    98,
-    105
+    97,
+    104
   ]
 }

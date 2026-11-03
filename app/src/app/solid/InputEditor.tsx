@@ -15,7 +15,7 @@ import "./InputEditor.css"
 /****************
  * ### `<InputRoot>`
  * The code column of `SpellEditor`:  the project's files as tabs (`<FileTabs>`), over the code (`<InputEditor>`).
- * - Its actions (Save, Revert File, New File, the line numbers, the code editor's settings) are the top bar's menus
+ * - Its actions (Save, Discard Changes, New File, the line numbers, the code editor's settings) are the top bar's menus
  *   (epic `debut` P32).
  ****************/
 export function InputRoot(props: InputRootProps) {

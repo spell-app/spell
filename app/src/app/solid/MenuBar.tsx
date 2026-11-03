@@ -1,4 +1,4 @@
-import { For, Show, createContext, createSignal, useContext } from "solid-js"
+import { For, Show, createContext, createEffect, createSignal, useContext } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { SP } from "spell/parser/spell"
@@ -8,7 +8,9 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Action,
   Actions,
+  AppMark,
   CodeSettings,
+  CodeShown,
   EditorMode,
   EditorTheme,
   INSPECTOR_PANELS,
@@ -26,6 +28,10 @@ import {
   type Mode
 } from "spell/app/app/solid"
 import { EDITOR_HOTKEYS } from "spell/app/app/pages/editorHotkeys"
+import { loadLayoutPiece } from "spell/app/app/layout/layoutSpell"
+import fileMenuSpell from "spell/app/app/layout/FileMenu/FileMenu.spellml"
+import { ActionMenus } from "spell/app/app/runner/ActionMenus"
+import type { MenuItem } from "spell/parser/core"
 
 import "./MenuBar.css"
 
@@ -182,38 +188,123 @@ function Divider(): JSX.Element {
 
 /****************
  * ### `<ProjectBarMenu>`
- * The top bar's first menu, the PROJECT's:  Spell's own hat, then the project's name, bold, a caret after it.
- * - New Example, Duplicate Solitaire, ─, Reset to Saved, Rename Solitaire…, Delete Solitaire…, ─,
- *   Project Settings, Theme:  Fruity ›, ─, More Examples ›, ─, Home.
- * - The words follow the project's group:  New Guide, More Guides ...
+ * The top bar's first menu, the PROJECT's, after Spell's hat and name (`<AppMark>`, our major branding):
+ * the project's name, bold, a caret after it.
+ * - Rename Solitaire…, Delete Solitaire…, Reset to Saved, ─, Theme:  Fruity ›.
+ * - Everything else about a project is in the File menu.
  * - Theme ›:  Spell UI's theme menu in its menu mode (`<ui-theme-menu show="menu">`), then Edit Theme….
- * - More Examples ›:  the group's projects, the one shown ticked;  in columns of 10 when there are more
- *   (Owen:  "More examples should be in columns if there are more than 10").
- *   `useRunner`:  the one chosen opens in Run.
  * - SIDE EFFECT:  names the browser's tab for the project (`followTabTitle()`).
  ****************/
-export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
+export function ProjectBarMenu(): JSX.Element {
   followTabTitle()
-  const root = trackProjectRoot(() => undefined)
   const shown = tracked(() => ({
     path: editor.project?.path ?? "",
     title: editor.project ? new SP.SpellProject(editor.project.path).title : ""
   }))
   const project = () => ({ project: shown().title })
   return (
-    <BarMenu
-      id="ProjectBarMenu"
-      class="ProjectBarMenu"
-      name={appTexts.text("projectMenu", project())}
-      label={
-        <span class="ProjectBarLabel">
-          <span class="hat" />
-          <span class="ProjectName">{shown().title}</span>
-          <ui-icon name="dropdown" class="ProjectCaret" />
-        </span>
+    <>
+      <AppMark />
+      <BarMenu
+        id="ProjectBarMenu"
+        class="ProjectBarMenu"
+        name={appTexts.text("projectMenu", project())}
+        label={
+          <span class="ProjectBarLabel">
+            <span class="ProjectName">{shown().title}</span>
+            <ui-icon name="dropdown" class="ProjectCaret" />
+          </span>
+        }
+        subMenus={{ theme: () => <ThemeSubMenu /> }}
+      >
+        <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
+        <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
+        <Actions.resetApp menu />
+        <Divider />
+        <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
+      </BarMenu>
+    </>
+  )
+}
+
+/****************
+ * ### `<FileBarMenu>`
+ * The File menu:  its items, their order, keys, and when each is greyed or ticked are Spell, `FileMenu.spellml`.
+ * - What each does, and what it's called, is here:  `itemFor()`, by the item's name.
+ * - The project's name is in Duplicate's title.
+ * - More Examples ›:  the group's projects, the one shown ticked;  in columns of 10 when there are more
+ *   (Owen:  "More examples should be in columns if there are more than 10").
+ *   `useRunner`:  the one chosen opens in Run.
+ * - The static build's actions that need a server draw nothing, as everywhere (`HIDDEN_IN_STATIC_BUILD`).
+ ****************/
+export function FileBarMenu(props: { useRunner?: boolean }): JSX.Element {
+  const root = trackProjectRoot(() => undefined)
+  const projectName = tracked(() => (editor.project ? new SP.SpellProject(editor.project.path).title : ""))
+  const path = tracked(() => editor.project?.path ?? "")
+  const [items, setItems] = createSignal<MenuItem[]>([])
+  const [menu, setMenu] = createSignal<FileMenuThing>()
+  void loadLayoutPiece(fileMenuSpell).then(
+    ({ exports, menu: menuOf }) => {
+      const thing = exports.fileMenu as FileMenuThing
+      setMenu(() => thing)
+      setItems(menuOf(thing, "file menu"))
+    },
+    (problem: unknown) => console.error("<FileBarMenu>:  can't load its Spell", problem)
+  )
+  createEffect(
+    () => [menu(), editor.canDiscardChanges, editor.isAutoSaving] as const,
+    ([thing, canDiscard, isAutoSaving]) => {
+      if (!thing) return
+      thing.canDiscard = canDiscard
+      thing.autoSaving = isAutoSaving
+    }
+  )
+  const itemFor = (item: MenuItem & { kind: "action" }): JSX.Element => {
+    const state = {
+      menu: true,
+      shortcut: item.shortcut && ActionMenus.shortcutForUI(item.shortcut),
+      // live:  read as each item draws, and again as the menu's thing changes
+      get disabled() {
+        return !item.isEnabled
+      },
+      get active() {
+        return item.isSelected
       }
+    }
+    switch (item.name) {
+      case "moreExamples":
+        return <SubMenuRow sub="projects">{appTexts.text("moreProjects", root().words)}</SubMenuRow>
+      case "newFile":
+        return <Actions.createFile {...state} />
+      case "newExample":
+        return <Actions.createApp {...state} />
+      case "save":
+        return <Actions.saveFile {...state} />
+      case "discardChanges":
+        return <Actions.discardChanges {...state} />
+      case "duplicateProject":
+        return <Actions.duplicateApp {...state} title={appTexts.text("duplicateProject", { project: projectName() })} />
+      case "projectSettings":
+        return <Actions.showProjectSettings {...state} title={appTexts.text("menuProjectSettings")} />
+      case "autoSave":
+        return <Action {...state} title={appTexts.text("autoSave")} onClick={() => editor.toggleAutoSave()} />
+      case "exportProject":
+        return <Actions.exportApp {...state} />
+      case "importProject":
+        return <Actions.importApp {...state} />
+      case "home":
+        return <Actions.showProjectChooser {...state} />
+      default:
+        return null
+    }
+  }
+  return (
+    <BarMenu
+      id="FileBarMenu"
+      label={appTexts.text("menuFile")}
+      name={appTexts.text("menuFile")}
+      ticks
       subMenus={{
-        theme: () => <ThemeSubMenu />,
         projects: () => (
           <ui-menu
             direction="vertical"
@@ -224,10 +315,7 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
           >
             <For each={root().projects}>
               {(each) => (
-                <ui-action
-                  selected={each.path === shown().path}
-                  onClick={() => openProject(each.path, props.useRunner)}
-                >
+                <ui-action selected={each.path === path()} onClick={() => openProject(each.path, props.useRunner)}>
                   <ui-icon name={root().icon ?? PROJECT_ICON} />
                   {each.name}
                 </ui-action>
@@ -237,24 +325,13 @@ export function ProjectBarMenu(props: { useRunner?: boolean }): JSX.Element {
         )
       }}
     >
-      <Actions.createApp menu />
-      <Actions.duplicateApp menu title={appTexts.text("duplicateProject", project())} />
-      <Divider />
-      <Actions.resetApp menu />
-      <Actions.renameApp menu title={appTexts.text("renameProject", project())} />
-      <Actions.deleteApp menu title={appTexts.text("deleteProject", project())} />
-      <Actions.exportApp menu />
-      <Actions.importApp menu />
-      <Divider />
-      <Actions.showProjectSettings menu title={appTexts.text("menuProjectSettings")} />
-      <SubMenuRow sub="theme">{appTexts.text("themeIs", { theme: EditorTheme.chosenTitle })}</SubMenuRow>
-      <Divider />
-      <SubMenuRow sub="projects">{appTexts.text("moreProjects", root().words)}</SubMenuRow>
-      <Divider />
-      <Actions.showProjectChooser menu />
+      <For each={items()}>{(item) => (item.kind === "action" ? itemFor(item) : <Divider />)}</For>
     </BarMenu>
   )
 }
+
+/** The File menu's thing, as `FileMenu.spellml` compiles;  the page fills its actions in by what `<FileBarMenu>` draws. */
+type FileMenuThing = { canDiscard: boolean; autoSaving: boolean }
 
 /** More projects than this:  the project menu's More sub-menu lists them in columns of this many. */
 const PROJECTS_PER_COLUMN = 10
@@ -278,7 +355,7 @@ function ThemeSubMenu(): JSX.Element {
 /****************
  * ### `<AppBarMenus>`
  * The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name.
- * - File:  Save, Revert File, ─, New File, Duplicate File, Rename File, Delete File.
+ * - File:  written in Spell (`<FileBarMenu>`).
  * - Edit:  the code editor's Undo, Redo, ─, Find, ─, Code Editor Settings….
  * - View:  Run, Edit, ─, Program Panel, ─, the Inspector and its cards, ─, Line Numbers;  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
@@ -288,15 +365,7 @@ function ThemeSubMenu(): JSX.Element {
 export function AppBarMenus(props: { mode: Mode }): JSX.Element {
   return (
     <span class="AppBarMenus">
-      <BarMenu id="FileBarMenu" label={appTexts.text("menuFile")} name={appTexts.text("menuFile")}>
-        <Actions.saveFile menu />
-        <Actions.revertFile menu />
-        <Divider />
-        <Actions.createFile menu />
-        <Actions.duplicateFile menu />
-        <Actions.renameFile menu />
-        <Actions.deleteFile menu />
-      </BarMenu>
+      <FileBarMenu useRunner={props.mode === "run"} />
       <BarMenu id="EditBarMenu" label={appTexts.text("menuEdit")} name={appTexts.text("menuEdit")}>
         <Actions.undo menu />
         <Actions.redo menu />
@@ -321,6 +390,15 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
           onClick={() => EditorMode.show("edit")}
         />
         <Divider />
+        <Action
+          menu
+          title={appTexts.text("menuCode")}
+          active={props.mode === "edit" && !CodeShown.isClosed(editor.project?.path)}
+          onClick={() => {
+            EditorMode.show("edit")
+            CodeShown.set(editor.project?.path, CodeShown.isClosed(editor.project?.path))
+          }}
+        />
         <Action
           menu
           title={appTexts.text("programPanel")}

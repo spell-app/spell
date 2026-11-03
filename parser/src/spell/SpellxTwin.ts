@@ -449,19 +449,32 @@ export class SpellxTwin {
   /**
    * A property:  `its "suit" is one of clubs, diamonds`, `its "color" is one of red, black :` and its lines ...
    * - Each `alias=` is a line indented under it, `- it "is a (suit)"`:  its own aliases (Q13).
+   * - Its `type=`, a stored property of that type, its body the value it starts at:
+   *   `<property "count" type="number">0</>` reads as `its "count" is a number starting at 0`.
+   *   Worked-out lines are never typed this way:  it's an error, as a value that's stored can't be worked out.
    */
   private property(): SpellxTwinLine {
     const shapes = this.words.property
     const list = this.attribute("one-of")
-    const shape = this.inlineBody.length
-      ? shapes.value
-      : this.block
-        ? list
-          ? shapes.listBody
-          : shapes.body
-        : list
-          ? shapes.list
-          : shapes.bare
+    const type = this.attribute("type")
+    if (type && this.block)
+      SP.addSpellxError(
+        this.head,
+        this.language.parserMessage("spellx-typed-body", { name: this.tag.name?.text ?? "" })
+      )
+    const shape = type
+      ? this.inlineBody.some((token) => !(token instanceof P.CommentToken))
+        ? shapes.typedValue
+        : shapes.typed
+      : this.inlineBody.length
+        ? shapes.value
+        : this.block
+          ? list
+            ? shapes.listBody
+            : shapes.body
+          : list
+            ? shapes.list
+            : shapes.bare
     const aliases = this.attributes("alias").map((alias) => [
       this.bullet(),
       ...this.expand(this.words.propertyAlias, { alias: alias.value })

@@ -31,7 +31,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "named_thing": "type|name",
   "new_list": "instanceType?",
   "new_thing": "type|props?",
-  "outline_specifier_datatype": "datatype|owner?",
+  "outline_specifier_datatype": "datatype|start?|owner?",
   "outline_specifier_enum": "enumeration",
   "outline_specifier_instance": "new_list?|new_thing?",
   "outline_specifier_list": "instanceType",

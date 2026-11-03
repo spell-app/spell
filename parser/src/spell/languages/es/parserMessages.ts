@@ -115,6 +115,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',
   "hides-property": 'Aquí "{name}" oculta la propiedad "{name}":  usa otro nombre, o di "su {name}" para la propiedad',
+  // English's possessive only:  Spanish has no "'s"
+  "possessive-either":
+    'Se lee como {property} de {owner};  {whole} también tiene {property}:  para ese, escribe "{property} de {whole}"',
+  "its-not-it-is": '"it\'s" quiere decir "it is":  para su {property}, escribe "its {property}"',
   "rule-before-property": 'Declara "{name}" antes de su regla, p. ej. "- tiene {aName} como texto"',
   "always-the-same": '{name} siempre es {value}:  para darle un tipo, escribe "{name} es {type}"',
   "not-a-property-body-line":
@@ -226,6 +230,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
   "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
   "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
+  "spellx-typed-body":
+    'una propiedad con tipo= se guarda, y empieza en un valor en la línea de su etiqueta:  <propiedad "{name}" tipo="número">0</>',
   "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
 
   ////////////////

@@ -86,6 +86,7 @@ const BUILT_IN_GENDERS: Record<string, Gender> = {
   fraccion: "feminine",
   decimal: "masculine",
   entero: "masculine",
+  letra: "feminine",
   carácter: "masculine",
   caracter: "masculine",
   opción: "feminine",

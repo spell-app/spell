@@ -2,7 +2,7 @@
 export const words = {
   lang: "en",
   types: {
-    Person: {
+    Character: {
       name: "name",
       height: "height",
       mass: "mass",

@@ -236,6 +236,7 @@ export const spanishWords: SP.LanguageWords = {
       alias: "aka",
       plantilla: "template",
       "uno-de": "one-of",
+      tipo: "type",
       frase: "alias",
       descripción: "description",
       descripcion: "description",
@@ -277,6 +278,8 @@ export const spanishWords: SP.LanguageWords = {
         listBody: "su {name} es uno de {one-of} :",
         body: "su {name} es :",
         value: "su {name} es",
+        typed: "su {name} es {a type} {type}",
+        typedValue: "su {name} es {a type} {type} empezando en",
         bare: "tiene {a words} {words}"
       },
       // el sujeto de una frase queda implícito, como en el esquema:  `- "es un (palo)"`
@@ -381,6 +384,7 @@ export const spanishWords: SP.LanguageWords = {
     length: ["largo", "longitud"],
     size: ["tamaño", "tamano"],
     characters: ["caracteres"],
+    letters: ["letras"],
     year: ["año", "ano"],
     day: ["día", "dia"],
     selection: ["selección", "seleccion"]
@@ -445,8 +449,9 @@ export const spanishTypeWords: P.TypeWords = {
   fraccion: "number",
   decimal: "number",
   entero: "integer",
-  carácter: "character",
-  caracter: "character",
+  letra: "letter",
+  carácter: "letter",
+  caracter: "letter",
   opción: "choice",
   opcion: "choice",
   booleano: "choice",

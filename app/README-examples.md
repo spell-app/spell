@@ -36,7 +36,7 @@ its program on the left, the app it makes on the right, and the JavaScript it co
 | Example | Address | What it shows | Running |
 | --- | --- | --- | --- |
 | FizzBuzz | [`@spell/examples/fizzbuzz`](spaces/@spell/examples/fizzbuzz/) | Counting to 100 with fizz and buzz:  a loop, `if` and `otherwise`, and `print`, in eight lines | <a href="docs/images/examples/fizzbuzz.png"><img src="docs/images/examples/fizzbuzz.png" width="360" alt="FizzBuzz open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
-| Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines;  the Counter notebook imports it | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
+| Counter | [`@spell/examples/Counter`](spaces/@spell/examples/Counter/) | A button that counts its clicks:  a view with one property, one action and a drawing, in a few lines | <a href="docs/images/examples/Counter.png"><img src="docs/images/examples/Counter.png" width="360" alt="Counter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Calculator | [`@spell/examples/calculator`](spaces/@spell/examples/calculator/) | A pocket calculator on Spell UI:  an app with text properties, actions like `to clear (a calculator)`, and a keypad of buttons whose clicks are Spell | <a href="docs/images/examples/calculator.png"><img src="docs/images/examples/calculator.png" width="360" alt="Calculator open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Tic-Tac-Toe | [`@spell/examples/tic-tac-toe`](spaces/@spell/examples/tic-tac-toe/) | Noughts and crosses on a grid of squares that draw themselves:  whose turn it is, and three in a row, written as sentences | <a href="docs/images/examples/tic-tac-toe.png"><img src="docs/images/examples/tic-tac-toe.png" width="360" alt="Tic-Tac-Toe open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
 | Bill Splitter | [`@spell/examples/bill-splitter`](spaces/@spell/examples/bill-splitter/) | Who owes what after a meal:  a form of people and what each ordered, a tip shared out the same way, and sums that follow every keystroke | <a href="docs/images/examples/bill-splitter.png"><img src="docs/images/examples/bill-splitter.png" width="360" alt="Bill Splitter open in the Spell editor:  its Spell on the left, the app running on the right"></a> |
@@ -134,7 +134,7 @@ The Calculator shows them plainest, in 113 lines, because it keeps each part in 
 | what its things are | `a calculator has a total as a number`, one of its six properties | the component's state |
 | what they do | `to clear (a calculator):`, and four more actions | its event handlers |
 | how they draw | `to draw (a calculator)`:  a keypad of Spell UI buttons, each with a click like `onClick={append "7" to it}` | its JSX |
-| the start | `start the calculator`, which puts its drawing on the page | `createRoot(root).render(<App />)` |
+| the start | `clear the calculator`:  the app then starts by itself, which puts its drawing on the page | `createRoot(root).render(<App />)` |
 
 <details>
 <summary>The four parts, in the Calculator's own lines</summary>
@@ -174,7 +174,6 @@ to draw (a calculator)
 ```spell
 set calculator to a new calculator
 clear the calculator
-start the calculator
 ```
 
 - The whole program, its other four actions too:
@@ -585,7 +584,7 @@ about one in five of its 260 names has a picture that's really of it, and the re
 
 ## Solitaire:  a game in spellx, and things that draw themselves
 
-Klondike in four files, written in spellx, as Task List is.
+Klondike in five files, written in spellx, as Task List is.
 Its cards, its deck and its piles are its own files, before the game, in its project file's order:
 
 ```json5
@@ -680,11 +679,13 @@ spell test @spell/examples/Solitaire
 ```text
 ✓ Compiling @spell/examples/Solitaire
 ✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test jokers  (15 checks)
+✓ test a new deck  (6 checks)
+✓ test two jokers  (5 checks)
 ✓ test piles  (8 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+6 passed
 ```
 
 </details>
@@ -712,7 +713,7 @@ una "columna" es una pila donde:
 
 _The tableau's rule, in Spanish:  a column, `columna`._
 
-- Its tests are six, in Spanish, two of them its jokers', which Solitaire has dropped:
+- Its tests are six, in Spanish, two of them its jokers':
   `spell test @spell/examples/Solitario` runs them.
 - Where the two differ, a Spanish word does:  the queen is `dama`, so its short name is D, and the king's R.
 

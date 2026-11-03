@@ -180,11 +180,19 @@ describe("adding a source", () => {
   })
 
   test("a collection named after one of Spell's own types says whose", async () => {
+    const routes = { [API]: { dates: `${API}/dates` }, [`${API}/dates`]: [{ id: 1, name: "Opening night" }] }
+    const { ingest } = ingestOf(routes)
+    const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
+    expect(spell).toContain(`a "cast date" is a thing:`)
+    expect(spell).toContain(`- cast dates live at "/dates"`)
+  })
+
+  test("`characters` are the program's own:  `character` is no type of Spell's (epic `language` Q17)", async () => {
     const routes = { [API]: { characters: `${API}/characters` }, [`${API}/characters`]: [{ id: 1, name: "Rey" }] }
     const { ingest } = ingestOf(routes)
     const { spell } = await ingest.add({ address: API, into: "/C.spell", name: "cast" })
-    expect(spell).toContain(`a "cast character" is a thing:`)
-    expect(spell).toContain(`- cast characters live at "/characters"`)
+    expect(spell).toContain(`a "character" is a thing:`)
+    expect(spell).toContain(`- characters live at "/characters"`)
   })
 
   test("a read that returns nothing writes nothing", async () => {

@@ -100,7 +100,8 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     property selection (list)
   type Text
     property length (number)
-    property characters (list of characters)
+    property characters (list of letters)
+    property letters (list of letters)
     method character (n) of (a text)
     method number of characters in (a text)
     method a random character of (a text)
@@ -116,9 +117,13 @@ exports[`ScopeExplorer > root holds the built-in types, then the project:  its f
     file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spellml
+      type Joker (is a Card)
+      function test jokers
     file Deck.spellml
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spellml
       type Pile (is a ViewableList)
       function test piles
@@ -174,7 +179,8 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     property selection (list)
   type Text
     property length (number)
-    property characters (list of characters)
+    property characters (list of letters)
+    property letters (list of letters)
     method character (n) of (a text)
     method number of characters in (a text)
     method a random character of (a text)
@@ -190,9 +196,13 @@ exports[`ScopeExplorer of a project importing another, compiled > the imported p
     file Card.spellml
       type Card (is a TwoSidedView)
       function test card setup
+    file Jokers.spellml
+      type Joker (is a Card)
+      function test jokers
     file Deck.spellml
       type Deck (is a List)
       function test a new deck
+      function test two jokers
     file Pile.spellml
       type Pile (is a ViewableList)
       function test piles

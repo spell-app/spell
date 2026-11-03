@@ -220,6 +220,7 @@ export const englishWords: SP.LanguageWords = {
       aka: "aka",
       template: "template",
       "one-of": "one-of",
+      type: "type",
       alias: "alias",
       description: "description",
       shortcut: "shortcut",
@@ -257,6 +258,8 @@ export const englishWords: SP.LanguageWords = {
         listBody: "its {name} is one of {one-of} :",
         body: "its {name} is :",
         value: "its {name} is",
+        typed: "its {name} is {a type} {type}",
+        typedValue: "its {name} is {a type} {type} starting at",
         bare: "it has {a words} {words}"
       },
       propertyAlias: "it {quoted alias}",

@@ -196,7 +196,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "three in a row",
-      "defined": "/TicTacToe.spell:3126-3488"
+      "defined": "/TicTacToe.spell:3108-3470"
     }
   ],
   "codeLines": [
@@ -218,6 +218,6 @@
     110,
     117,
     130,
-    151
+    150
   ]
 }
