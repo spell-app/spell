@@ -83,7 +83,8 @@ import { WithNestedStatements } from "./WithNestedStatements"
 export const classesEs = new SpellParser({ module: "classes" })
 
 /** What may follow a property's declaration:  its rules, `, que debe ...` -- English's `RULES`. */
-const RULES = "(,? que {rule:must_rule})? {nested_statements}?"
+const RULES =
+  "((o|u) [nothing:{word:text} (o|u)])? (,? (guardado|guardada) como {storedAs:text})? (,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
 const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"

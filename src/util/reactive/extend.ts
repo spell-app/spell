@@ -43,6 +43,8 @@ export const STATE_CELLS = Symbol("stateCells")
 export const KEYS = Symbol("keys")
 /** Memoized derived values, by name -- see `derive()`. */
 export const DERIVED = Symbol("derived")
+/** Set on an object whose values come from somewhere else:  an unset number or date is nothing -- see `unsetReadsNothing()`. */
+const UNSET_IS_NOTHING = Symbol("unsetIsNothing")
 
 /** What `extend` keeps on an object, under the symbols above. */
 export type Extended = {
@@ -100,6 +102,7 @@ export function cellsOf(target: object): Cell[] {
  *   - its `init`, stored the same way
  *   - else its default, NOT stored (`defaultFor()`):
  *     its `default`, else its first choice (`oneOf`), else its type's (`number` 0, `text` "", `choice` false)
+ *   - for a number or a date, nothing, on an object whose values come from somewhere else (`unsetReadsNothing()`)
  * - An initializer is called with `this` ~== `target`, and its value stored WITHOUT notifying the prop's readers:
  *   nobody can have read another value.
  *   The key set does change, so `keysOf()` readers hear of it.
@@ -116,14 +119,30 @@ export function getProp<T>(target: any, property: string, initializer?: () => T)
     info = declared(target, property)
     info?.whenUnset?.(target)
     initializer = info?.init as (() => T) | undefined
-    if (!initializer) return defaultFor(info)
+    if (!initializer) return unsetValueOf(target, info)
   }
   const value = initializer.call(target)
   // a passed `initializer` that makes nothing:  its declared default all the same
-  if (value === undefined) return defaultFor(info ?? declared(target, property))
+  if (value === undefined) return unsetValueOf(target, info ?? declared(target, property))
   record.set(property, value)
   extended[KEYS]?.changed()
   return value
+}
+
+/**
+ * SIDE EFFECT:  `target`'s numbers and dates that aren't set read as nothing (`undefined`) from now on, not as 0 or now.
+ * - For an object whose values come from somewhere else, a row a server sent:  a height it didn't send isn't a height of 0.
+ * - Text and choices keep their defaults, `""` and no:  a search's `its title includes ""` still finds a thing with no title.
+ * - A declared `init` still runs:  that's what its author said it starts as.
+ */
+export function unsetReadsNothing(target: object): void {
+  Object.defineProperty(extendedFor(target), UNSET_IS_NOTHING, { value: true, configurable: true })
+}
+
+/** What an unset prop reads as:  its declared default, or nothing for a number or date on an object `unsetReadsNothing()` marked. */
+function unsetValueOf(target: any, info: PropInfo | undefined): unknown {
+  if (target[UNSET_IS_NOTHING] && (info?.type === "number" || info?.type === "date")) return undefined
+  return defaultFor(info)
 }
 
 /**

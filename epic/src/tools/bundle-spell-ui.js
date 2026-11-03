@@ -244,6 +244,13 @@ const ICONS = {
   "solid/trash-can": ["trash can"],
   "solid/rotate-left": ["rotate left", "undo alternate"], // Undo, in the toast after a comment's deleted
   "solid/plug": ["plug"],
+  // the formatting bar of `<ui-markdown editable>`'s box (epic `epic-engine` P61)
+  "solid/bold": ["bold"],
+  "solid/italic": ["italic"],
+  "solid/strikethrough": ["strikethrough"],
+  "solid/list-ul": ["list ul", "list"],
+  "solid/list-ol": ["list ol", "ordered list"],
+  "solid/eraser": ["eraser"],
   "solid/circle-play": ["circle play"],
   "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell/epic/list/EpicState`)
   // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading

@@ -20,7 +20,7 @@ export const markdownEs = {
   },
   values: { editable: { tabs: "solapas" } },
   events: { "ui-drawn": "dibujado" },
-  parts: { body: "cuerpo", "edit-box": "caja-edicion" },
+  parts: { body: "cuerpo", "edit-box": "caja-edicion", "edit-bar": "barra-edicion" },
   texts: {
     sourceLoading: "Cargando {source}",
     sourceLoadError: "No se pudo cargar {source}.",
@@ -35,6 +35,23 @@ export const markdownEs = {
     paragraph: "párrafo",
     heading: "título",
     item: "elemento de lista",
-    cell: "celda de tabla"
+    cell: "celda de tabla",
+    formatBar: "Formato",
+    bold: "Negrita (⌘B)",
+    italic: "Cursiva (⌘I)",
+    strikethrough: "Tachado (⌘⇧X)",
+    link: "Enlace (⌘K)",
+    linkAddress: "Dirección del enlace:  Intro lo pone, vacía lo quita",
+    shape: "Párrafo o título",
+    shapeParagraph: "Párrafo",
+    shapeH2: "Título 2",
+    shapeH3: "Título 3",
+    shapeH4: "Título 4",
+    bullet: "Lista con viñetas",
+    numbered: "Lista numerada",
+    clear: "Quitar el formato",
+    view: "Mostrarlo con formato, sin sus marcas",
+    formattedOff: "Este texto no puede mostrarse con formato:  al escribirlo de nuevo no sería el mismo",
+    noFormattedView: "El motor de este markdown no tiene vista con formato"
   }
 } as const satisfies E.TagDictionary

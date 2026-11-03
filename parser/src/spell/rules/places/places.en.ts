@@ -35,6 +35,7 @@ import {
   WhileWaiting
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
+import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
 import { SaveDraft } from "./SaveDraft"
@@ -140,7 +141,11 @@ places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:mem
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
-places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} (second|seconds)?" })
+places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
+  syntax: "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
+})
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number} {unit:check_unit}?" })
+places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:check_unit}" })
 places.addRule(VersionsIn, { syntax: "{type:subject_its} version is its? {field:text}" })
 places.addRule(IdColumn, { syntax: "{type:subject_its} id is its? {column:text}" })
 places.addRule(RowsIn, {
@@ -149,6 +154,10 @@ places.addRule(RowsIn, {
 places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
+places.addRule(Wording.specialize({ ruleName: "numbers_or_names", meanings: ["numbers", "names"] }), {
+  syntax: "((numbers:numbers)|(names:names))"
+})
+places.addRule(WritesLike, { syntax: "{type:subject_it} writes {what:numbers_or_names} like {example:text}" })
 places.addRule(AccountIncluded, { syntax: "{type:subject_it} includes the account {account:text}" })
 places.addRule(OperationAt, { syntax: "to {signature:method_signature} is at {path:text}" })
 
@@ -158,7 +167,6 @@ places.addRule(SavedInPlace, { syntax: "{type:subject_implied} (is saved|lives) 
 
 places.addRule(WhileWaiting, { syntax: "while (waiting|loading) :? {statement_body}?" })
 places.addRule(IfThereAreNone, { syntax: "if there are none :? {statement_body}?" })
-places.addRule(IfThatFailsSay, { syntax: "the message if that fails is {text:expression}" })
 places.addRule(IfThatFailsSay, { syntax: "if that fails say {text:expression}" })
 places.addRule(ShowThemPaged, { syntax: "show them in pages" })
 places.addRule(ShowThemAll, { syntax: "show them all" })

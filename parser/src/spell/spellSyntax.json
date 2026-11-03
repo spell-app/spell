@@ -1406,6 +1406,8 @@
             "place_kind",
             "place_kind_here",
             "place_kind_each_person",
+            "check_unit",
+            "numbers_or_names",
             "there_are_how_many",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1495,6 +1497,12 @@
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
+            },
+            {
+              "syntax": "((second:second|seconds)|(minute:minute|minutes)|(hour:hour|hours)|(day:day|days))"
+            },
+            {
+              "syntax": "((numbers:numbers)|(names:names))"
             },
             {
               "syntax": "((none:no)|(fewer:less than|fewer than)|(more:more than)|(at_least:at least)|(at_most:at most))"
@@ -4848,11 +4856,11 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 59,
+          "line": 60,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "a player has a name as text",
               "outputs": {
                 "js": {
@@ -4867,7 +4875,7 @@
               }
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?",
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?",
               "example": "cards have a direction as either up or down",
               "outputs": {
                 "js": {
@@ -4882,28 +4890,28 @@
               }
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "(a|an) {type:singular_type} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:plural_type} have (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:quoted_member} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} {property:body_member_words} (is|are) {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (,? which must {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -6095,7 +6103,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 25,
+          "line": 27,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6469,11 +6477,14 @@
           "ruleNames": ["checked_every"],
           "internal": false,
           "file": "src/spell/rules/places/CheckedEvery.ts",
-          "line": 8,
+          "line": 14,
           "purpose": "How often to ask a place that can't announce what changed.",
           "syntaxes": [
             {
-              "syntax": "check {type:subject_it} every {number} (second|seconds)?"
+              "syntax": "check {type:subject_it} every {number} {unit:check_unit}?"
+            },
+            {
+              "syntax": "check {type:subject_it} every {unit:check_unit}"
             }
           ],
           "aliases": ["statement"]
@@ -6535,6 +6546,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "WritesLike",
+          "ruleNames": ["writes_like"],
+          "internal": false,
+          "file": "src/spell/rules/places/WritesLike.ts",
+          "line": 12,
+          "purpose": "How a place writes its numbers or its fields' names, by an example (epic `data` P23).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} writes {what:numbers_or_names} like {example:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "AccountIncluded",
           "ruleNames": ["account_included"],
           "internal": false,
@@ -6587,7 +6612,7 @@
           "ruleNames": ["while_waiting"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 151,
+          "line": 150,
           "purpose": "`while waiting:`, `while loading:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6601,7 +6626,7 @@
           "ruleNames": ["if_there_are_none"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 159,
+          "line": 158,
           "purpose": "`if there are none:` -- see `ReadRider`.",
           "syntaxes": [
             {
@@ -6615,12 +6640,9 @@
           "ruleNames": ["if_that_fails_say"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 70,
-          "purpose": "`the message if that fails is \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()`.",
+          "line": 69,
+          "purpose": "`if that fails say \"Lost the signal\"`: the failure's own words, its Try again kept -- see `core.drawRead()` (epic `language` P17).",
           "syntaxes": [
-            {
-              "syntax": "the message if that fails is {text:expression}"
-            },
             {
               "syntax": "if that fails say {text:expression}"
             }
@@ -6632,7 +6654,7 @@
           "ruleNames": ["show_them_paged"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 91,
+          "line": 90,
           "purpose": "`show them in pages`, `show them all`: how a long list is drawn, instead of more as you scroll -- see `core.drawRead()`.",
           "syntaxes": [
             {
@@ -6646,7 +6668,7 @@
           "ruleNames": ["show_them_all"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 107,
+          "line": 106,
           "purpose": "`show them all` -- see `ShowThemPaged`.",
           "syntaxes": [
             {
@@ -6660,7 +6682,7 @@
           "ruleNames": ["show_them_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 141,
+          "line": 140,
           "purpose": "`show them in:`, then an element: what goes around a list's items, the loader and messages outside it.",
           "syntaxes": [
             {
@@ -6674,7 +6696,7 @@
           "ruleNames": ["show_it_all_in"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 146,
+          "line": 145,
           "purpose": "`show it all in:`, then an element: what goes around the list and whatever shows in its place, a titled section.",
           "syntaxes": [
             {
@@ -6688,7 +6710,7 @@
           "ruleNames": ["if_that_fails"],
           "internal": false,
           "file": "src/spell/rules/places/ReadRider.ts",
-          "line": 174,
+          "line": 173,
           "purpose": "`if that fails:` -- see `ReadRider`.",
           "syntaxes": [
             {

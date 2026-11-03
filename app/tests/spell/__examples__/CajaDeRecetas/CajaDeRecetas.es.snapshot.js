@@ -10,8 +10,8 @@ export const words = {
     CajaDeRecetas: {
       búsqueda: "búsqueda",
       recetaNueva: "receta nueva",
-      coincidencias: "coincidencias",
       create: "crearla",
+      coincidencias: "coincidencias",
       agregarLaRecetaNueva: "agregar la receta nueva"
     }
   },

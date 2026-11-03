@@ -1,0 +1,13 @@
+## Caja de recetas:  dónde se guardan las recetas
+// Dónde se guardan lo dice la línea siguiente, y solo ella lo sabe.  Cámbiala para guardarlas en otro lugar:
+//   recetario familiar es una carpeta de datos en "http://127.0.0.1:4791/api/places/recipes"
+//   recetario familiar es una sala en "http://127.0.0.1:4791/api/rooms/recipes"
+// (Las dos las sirve en tu computadora "yarn tsx scripts/recipe-servers.ts", en la carpeta principal de Spell.)
+// Lo que se dibuja y se hace con ellas está en CajaDeRecetas.es.spellml.
+recetario familiar es una base de datos en este dispositivo
+
+una "receta" es una cosa:
+	- vive en recetario familiar
+	- su "título" es texto
+	- sus "porciones" es un número
+	- sus "notas" es texto

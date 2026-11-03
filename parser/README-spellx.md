@@ -353,7 +353,7 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   move it.
 - Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
   `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
-  `the message if that fails is "..."`.
+  `if that fails say "..."`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 

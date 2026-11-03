@@ -23,7 +23,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * - one on its line:  `, which must not be empty`
  * - an indented body of them:  `- it must not be empty`
  */
-export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
+export const RULES =
+  "(or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? which must {rule:must_rule})? {nested_statements}?"
 
 /** The kind of place whose rows link to each other by address. */
 const WEB_SERVER = "web server"
@@ -57,7 +58,7 @@ const WEB_SERVER = "web server"
  *   - A rule on a line of its own, `- its title must ...`, is `property_must`'s.
  */
 export class DefinePropertyHas extends SpellStatement<
-  "type|property|specifier?|rule?|body?",
+  "type|property|specifier?|nothing?|storedAs?|rule?|body?",
   { valueType?: P.TypeScope; builtInName?: string }
 > {
   @proto static priority = Priority.declaration
@@ -418,6 +419,15 @@ export class DefinePropertyHas extends SpellStatement<
       check.addProp("rules", new P.ASTArrayLiteral(match, { items }))
     }
 
+    // what its place calls it, and its words for no value:  `stored as "avg_ht"`, `or "unknown"` (epic `data` P23)
+    const { storedAs } = match.groups
+    if (storedAs) check.addProp("storedAs", new P.ASTStringLiteral(match, { value: JSON.stringify(textOf(storedAs)) }))
+    const nothingAs = DefinePropertyHas.nothingWordsOf(match)
+    if (nothingAs.length) {
+      const items = nothingAs.map((word) => new P.ASTStringLiteral(match, { value: JSON.stringify(word) }))
+      check.addProp("nothingAs", new P.ASTArrayLiteral(match, { items }))
+    }
+
     const linksTo = DefinePropertyHas.linkedTypeOf(match)
     if (linksTo && !(specifier instanceof P.ASTNewInstanceExpression))
       check.addProp("link", new P.ASTBooleanLiteral(match, { value: true }))
@@ -441,6 +451,13 @@ export class DefinePropertyHas extends SpellStatement<
       if (ast) statements.push(ast as P.ASTStatement)
     }
     return new P.ASTStatementGroup(match, { statements })
+  }
+
+  /** The words its place writes for no value, as written:  `["n/a", "unknown"]` for `or "n/a" or "unknown"`. */
+  static nothingWordsOf(match: P.MatchFor<DefinePropertyHas>): string[] {
+    const list = match.groups.nothing as P.Match | undefined
+    const said = (list?.matched ?? []).filter((item): item is P.Match => item instanceof P.Match && !!item.raw)
+    return said.filter((item) => /^["']/.test(`${item.raw}`)).map(textOf)
   }
 
   /**
@@ -474,4 +491,9 @@ export class DefinePropertyHas extends SpellStatement<
     if (!(said instanceof P.ASTStringLiteral)) return undefined
     return new P.ASTStringLiteral(said.match, { value: said.value, quote: "'" })
   }
+}
+
+/** A text's words, without its quotes. */
+function textOf(text: P.Match): string {
+  return `${text.raw}`.trim().replace(/^["'`]|["'`]$/g, "")
 }

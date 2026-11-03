@@ -222,6 +222,8 @@ export type FieldDescription = {
   writtenAsText?: boolean
   /** What it writes for no number:  `"unknown"`. */
   noNumberWords?: string[]
+  /** It writes a comma between a number's whole part and its fraction, as its values show:  `"1,5"`, `"1.200,5"`. */
+  decimalComma?: boolean
   /** The collection it links to, by address. */
   linksTo?: string
   /** Why the Spell leaves it out. */

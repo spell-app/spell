@@ -338,6 +338,9 @@ export class SpellxWriter {
   private property(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
     const name = unquote(groupText(statement, "property"))
     if (!name || name.includes('"')) return undefined
+    // what its place calls it, its words for none (`stored as "x"`, `or "unknown"`):  no attribute says them yet, so it stays a line
+    const { nothing, storedAs } = statement.groups as { nothing?: P.Match; storedAs?: P.Match }
+    if (nothing || storedAs) return undefined
     const lead = fill(this.twins.property.value, { name: quoted(name) })
     if (!text.startsWith(`${lead} `) && text !== lead && !text.startsWith(`${lead}:`)) return undefined
     const rest = text.slice(lead.length).trim()
