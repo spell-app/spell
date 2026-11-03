@@ -72,6 +72,7 @@ a game is a base:
 	- ${action}
 ${lines.replace(/^/gm, "\t\t")}
 	- it has a later as a number
+	- it has a later score as a number
 
 	- it has a blue as a number
 to helper:
@@ -181,6 +182,16 @@ const ENGLISH: NameRow[] = [
     js: "v = this.later"
   },
   { title: "declared below the action:  its X reads it", spell: "set v to its later", js: "v = this.later" },
+  {
+    title: "declared below the action, two words:  its X reads them (P17)",
+    spell: "set v to its later score",
+    js: "v = this.laterScore"
+  },
+  {
+    title: "declared below the action, two words:  the X reads them",
+    spell: "set v to the later score",
+    js: "v = this.laterScore"
+  },
 
   // an inherited property, and a getter
   { title: "inherited property:  the X reads it", spell: "set v to the label", js: "v = this.label" },

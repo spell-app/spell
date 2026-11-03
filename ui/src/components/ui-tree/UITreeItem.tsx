@@ -140,10 +140,10 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     this.depth = depth
   }
 
-  /** It was selected, by whatever:  it shows. */
+  /** It was selected, by whatever:  it shows, in the middle of the tree if it was out of sight. */
   @E.onChange("selected", { defer: true })
   protected onSelectedChanged(selected: boolean | undefined) {
-    if (selected) this.domElement.scrollIntoView?.({ block: "nearest" })
+    if (selected) E.scrollIntoSight(this.domElement)
   }
 }
 

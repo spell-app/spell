@@ -7,6 +7,7 @@ import fileTabs from "spell/app/app/layout/FileTabs/FileTabs.spellml"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { Actions } from "./Actions"
 import { CodeMoreMenu } from "./CodeOutput"
+import { SpellMenuRows, type SpellMenuAction } from "./MenuBar"
 import { fileIconFor } from "./chrome"
 import { trackProjectFiles } from "./FileDropdown"
 
@@ -19,6 +20,7 @@ import "./FileTabs.css"
  * - which files there are, and which is showing (`trackProjectFiles()`), kept in the bar's files as they change
  * - what showing one does:  `editor.showEditor()`
  * - the bar's ⋯ (`<CodeMoreMenu>`)
+ * - what a tab's right-click menu's items do, and are called:  its items and their order are the Spell's `tab menu`
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  ****************/
 export function FileTabs() {
@@ -84,9 +86,7 @@ export function FileTabs() {
           >
             <div class="BarMenuPanel" onClick={() => setMenuAt(undefined)}>
               <ui-menu direction="vertical" size="small" interactive="" class="BarMenuItems">
-                <Actions.duplicateFile menu />
-                <Actions.renameFile menu />
-                <Actions.deleteFile menu />
+                <SpellMenuRows items={piece()!.menu(bar()!, "tab menu")} itemFor={tabMenuItem} />
               </ui-menu>
             </div>
           </ui-popup>
@@ -94,6 +94,20 @@ export function FileTabs() {
       </Show>
     </div>
   )
+}
+
+/** An item of a tab's right-click menu, by its name in `FileTabs.spellml`. */
+function tabMenuItem(item: SpellMenuAction): JSX.Element {
+  switch (item.name) {
+    case "duplicateFile":
+      return <Actions.duplicateFile menu />
+    case "renameFile":
+      return <Actions.renameFile menu />
+    case "deleteFile":
+      return <Actions.deleteFile menu />
+    default:
+      return null
+  }
 }
 
 /** A file in `FileTabs.spellml`, as its compiled class has it. */

@@ -3,6 +3,7 @@ Every file of the project as a tab over the code, in a pane's one bar, as every 
 Each shows a small icon for its kind of file, which the dropdown's rows show too when the bar's too narrow.
 A click shows that file, and a file with changes not saved shows a dot.
 The bar's ⋯ is at its right, which compiled code to show beside the code.
+A right click on a tab shows that file, and its menu:  Duplicate, Rename, Delete.
 The editor's own side of it, which files there are and what showing one does, is `FileTabs.tsx`.
 
 <spell-thing "file">
@@ -24,6 +25,14 @@ The editor's own side of it, which files there are and what showing one does, is
 <spell-view "file tab bar">
 	<property "files">a new file list</>
 	<property "more" description="The code pane's ⋯, the editor's own">a thing</>
+	<action "duplicate file"/>
+	<action "rename file"/>
+	<action "delete file"/>
+	<menu "tab menu">
+		<action "duplicate file"/>
+		<action "rename file"/>
+		<action "delete file"/>
+	</menu>
 	<spell>
 		<css>
 			/* the dot on a tab whose file isn't saved:  the theme's warning hue */

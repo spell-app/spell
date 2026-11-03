@@ -1,4 +1,4 @@
-import { For, createSignal } from "solid-js"
+import { For, Show, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { editor } from "spell/app/app/editor"
@@ -101,9 +101,17 @@ if (editorPrefs.get(OLD_MODE_PREF) === "debug") editorPrefs.set(PANEL_PREF, true
 editorPrefs.forget(OLD_MODE_PREF)
 const [isShowing, setShowing] = createSignal(!!editorPrefs.get(PANEL_PREF))
 
+/** Show the current project's code, or close it. */
+export function toggleCode() {
+  const path = editor.project?.path
+  CodeShown.set(path, CodeShown.isClosed(path))
+}
+
 /****************
  * ### `<ModeButtons>`
- * Run | Edit in the top bar, as the theme's segmented tabs:  the one showing is chosen.
+ * Run | Edit in the top bar, as the theme's segmented tabs:  the one showing is chosen;
+ * then, in Edit, the code's icon, which shows the code or closes it (Owen:  "it should be part of the run|edit group").
+ * - The code's icon is never chosen, so the thumb stays on the mode:  `aria-pressed` says whether the code shows.
  * - `current`:  the mode the page is in, e.g. `"run"` on the run page.
  * - A header's segmented menu (`appearance="segmented link header"`), inside the bar's own:
  *   its thumb slides to the mode chosen, the same look as every header's tabs.
@@ -121,6 +129,17 @@ export function ModeButtons(props: { current: Mode }): JSX.Element {
             </ui-item>
           )}
         </For>
+        <Show when={props.current === "edit"}>
+          <ui-item
+            class="CodeToggle"
+            label={appTexts.text("menuCode")}
+            title={appTexts.text("menuCode")}
+            aria-pressed={CodeShown.isClosed(editor.project?.path) ? "false" : "true"}
+            onClick={() => toggleCode()}
+          >
+            <ui-icon name="code" />
+          </ui-item>
+        </Show>
       </ui-menu>
     </ui-item>
   )

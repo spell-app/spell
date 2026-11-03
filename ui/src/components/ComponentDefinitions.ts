@@ -34,6 +34,9 @@ const DOCS_VOCABULARY_MODULES = import.meta.glob<Record<string, unknown>>("../do
 /** Every Spanish dictionary module, by path:  the palette's snippet for a program in Spanish. */
 const SPANISH_MODULES = import.meta.glob<Record<string, unknown>>("./*/*.es.ts", { eager: true })
 
+/** Tags a page holds once, around everything else:  never something to add to an app. */
+const NEVER_ADDED = new Set(["ui-root", "ui-components"])
+
 /**
  * A vocabulary module's folder:
  * - `./ui-button/UIOr.en.ts` => `ui-button`
@@ -107,6 +110,41 @@ export class ComponentDefinitions {
     }
     const other = offered.filter((definition) => !definition.topics.length)
     if (other.length) topics.set(ValueSets.topics[0]!, [...(topics.get(ValueSets.topics[0]!) ?? []), ...other])
+    return topics
+  }
+
+  /**
+   * The editor's palette, by topic, in `ValueSets.topics` order:  the topics with anything in them.
+   * - `parts`:  what it offers ready-made (`paletteByTopic()`).
+   * - `more`:  every other component filed there (`paletteMoreByTopic()`), shown when its "N more" is clicked.
+   */
+  static paletteGroups(): { topic: ComponentTopic; parts: ComponentDefinition[]; more: ComponentDefinition[] }[] {
+    const parts = ComponentDefinitions.paletteByTopic()
+    const more = ComponentDefinitions.paletteMoreByTopic()
+    return ValueSets.topics
+      .filter((topic) => parts.has(topic) || more.has(topic))
+      .map((topic) => ({ topic, parts: parts.get(topic) ?? [], more: more.get(topic) ?? [] }))
+  }
+
+  /**
+   * Every other component the palette could add, by topic, as `paletteByTopic()` files them:  its "N more".
+   * - A folder's main tag only (`ui-tabs`, never `ui-tab`):  a part that only makes sense inside another isn't offered.
+   * - Each under its first topic, sorted by name;  none has a snippet, so adding one writes its bare tag.
+   */
+  static paletteMoreByTopic(): Map<ComponentTopic, ComponentDefinition[]> {
+    const offered = new Set(ComponentDefinitions.palette())
+    const more = ComponentDefinitions.all.filter(
+      (definition) =>
+        definition.tag === definition.folder &&
+        !offered.has(definition) &&
+        !NEVER_ADDED.has(definition.tag) &&
+        definition.topics.length
+    )
+    const topics = new Map<ComponentTopic, ComponentDefinition[]>()
+    for (const topic of ValueSets.topics) {
+      const list = more.filter((definition) => definition.topics[0] === topic)
+      if (list.length) topics.set(topic, list)
+    }
     return topics
   }
 

@@ -1,6 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { scrollIntoSight } from "spell/util"
 import { editor, runtimeCore } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
@@ -207,7 +208,8 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   createEffect(
     () => Inspector.selected?.element,
     (element) => {
-      if (element) openRowsAround(props.nodes, element)
+      // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
+      if (element) queueMicrotask(() => openRowsAround(props.nodes, element))
     }
   )
   const notDrawn = createMemo(() => {
@@ -253,14 +255,21 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   )
 }
 
-/** Open the rows around `element`'s, among `nodes`:  answers whether it's in them. */
-function openRowsAround(nodes: readonly PartNode[], element: Element): boolean {
-  return nodes.some((node) => {
-    if (node.element === element) return true
-    if (!openRowsAround(node.children, element)) return false
-    if (isFolded(node.key)) toggleFold(node.key)
-    return true
-  })
+/** Open the rows around `element`'s, among `nodes`, in one change:  its row then scrolls into view. */
+function openRowsAround(nodes: readonly PartNode[], element: Element): void {
+  const around = keysAround(nodes, element)
+  const folded = foldedKeys()
+  if (around?.some((key) => folded.has(key))) setFolds([...folded].filter((key) => !around.includes(key)))
+}
+
+/** The keys of the rows around `element`'s, outermost first:  `undefined` if it isn't among `nodes`. */
+function keysAround(nodes: readonly PartNode[], element: Element): string[] | undefined {
+  for (const node of nodes) {
+    if (node.element === element) return []
+    const inside = keysAround(node.children, element)
+    if (inside) return [node.key, ...inside]
+  }
+  return undefined
 }
 
 /** One part's row, with the parts inside it. */
@@ -278,11 +287,12 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         PartEdits.rememberRow(row, props.node.element)
         whenRowToggled(() => toggleFold(props.node.key))(row)
         chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
-        // selected from elsewhere, a click in the code or the app:  its row comes into view
+        // selected from elsewhere, a click in the code or the app:  its row comes into view,
+        // again once the rows around it open (`openRowsAround()`), as it was hidden till then
         createEffect(
-          () => Inspector.selected?.element === props.node.element,
+          () => Inspector.selected?.element === props.node.element && foldedKeys(),
           (isLast) => {
-            if (isLast) row.scrollIntoView({ block: "nearest" })
+            if (isLast) requestAnimationFrame(() => scrollIntoSight(row))
           }
         )
       }}

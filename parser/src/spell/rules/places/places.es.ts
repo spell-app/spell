@@ -157,6 +157,7 @@ placesEs.addRule(SavedInPlace, { syntax: "{type:subject_implied} (se guarda|vive
 placesEs.addRule(WhileWaiting, { syntax: "mientras (espera|carga) :? {statement_body}?" })
 placesEs.addRule(IfThereAreNone, { syntax: "si no hay (ninguno|ninguna|nada) :? {statement_body}?" })
 placesEs.addRule(IfThatFailsSay, { syntax: "el mensaje si falla es {text:expression}" })
+placesEs.addRule(IfThatFailsSay, { syntax: "si falla decir {text:expression}" })
 placesEs.addRule(ShowThemPaged, { syntax: "mostrarlos en (páginas|paginas)" })
 placesEs.addRule(ShowThemAll, { syntax: "mostrarlos todos" })
 placesEs.addRule(ShowThemIn, { syntax: "mostrarlos en :? {statement_body}?" })
