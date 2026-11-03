@@ -705,7 +705,11 @@ describe("every URL spell builds is answered by the server and by spaces' disk r
     }
     const index = SP.SpellUrls.indexUrl(PROJECT)
     expect(index).toBe(`/api/projects/index/${PLACE}`)
-    expect((await diskFetch({ url: index })).imports).toEqual((await request("GET", index)).json().imports)
+    // the disk reader reads what's published:  the server's index also lists files only drafted so far (epic `editor` P24)
+    const published = (await request("GET", index)).json().imports.filter(
+      (entry: { path: string }) => entry.path.includes("@") || fs.existsSync(fixturePath(`user/Proj${entry.path}`))
+    )
+    expect((await diskFetch({ url: index })).imports).toEqual(published)
     const list = SP.SpellUrls.listUrl("owen@spell")
     expect(await diskFetch({ url: list })).toEqual((await request("GET", list)).json())
     const saved = SP.SpellUrls.saveUrl(`${PROJECT}/both.txt`)
