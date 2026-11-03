@@ -33,7 +33,8 @@ export const treeDiagramVocabulary = {
   ],
   skeleton: "12 tall",
   noun: "tree diagram",
-  description: "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.",
+  description:
+    "A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON.",
   attributes: [
     {
       name: "tree",
@@ -57,7 +58,8 @@ export const treeDiagramVocabulary = {
       name: "foldable",
       group: "behaviour",
       kind: "boolean",
-      description: "A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so."
+      description:
+        "A node with children gets a button that folds them away, and opens them again;  `ui-node-toggled` says so."
     },
     {
       name: "clickable",

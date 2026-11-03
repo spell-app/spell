@@ -95,7 +95,7 @@ export const sectionVocabulary = {
       kind: "string",
       description:
         "Hidden while nothing's in it to see:  no element in its content, and no text but blanks.  " +
-        'A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  ' +
+        "A loader counts, so a section waiting for its list keeps its title.  A selector narrows what counts:  " +
         '`hide-empty="ui-card"` hides it until a card is in it.  Follows its content as it changes.'
     },
     {

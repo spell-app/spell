@@ -146,7 +146,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const { loopItem } = match.data
     if (loopItem) {
       const value = new P.ASTVariableExpression(match, { name: loopItem.name, variable: loopItem })
-      return new P.ASTCoreMethodInvocation(match, { methodName: "drawThing", args: [value] }) as unknown as P.ASTJSXElement
+      return new P.ASTCoreMethodInvocation(match, {
+        methodName: "drawThing",
+        args: [value]
+      }) as unknown as P.ASTJSXElement
     }
     // a chain branch alone, in no element (an error), or an `<html>` block:  its children, drawn as they are
     if (match.data.chain || match.data.htmlBlock)

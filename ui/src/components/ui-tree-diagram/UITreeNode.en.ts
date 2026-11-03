@@ -66,9 +66,7 @@ export const treeNodeVocabulary = {
     }
   ],
   events: [],
-  slots: [
-    { name: "", description: "What shows in its box, besides its label;  and the `<ui-tree-node>`s under it." }
-  ],
+  slots: [{ name: "", description: "What shows in its box, besides its label;  and the `<ui-tree-node>`s under it." }],
   parts: [{ name: "content", description: "The box around what it holds, placed over the node's box in the drawing." }],
   states: [],
   texts: []

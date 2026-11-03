@@ -369,7 +369,10 @@ describe("TreeLayout.of()", () => {
   })
 
   test("takes its sizes from `metrics`", () => {
-    const layout = TreeLayout.of({ label: "ab" }, { metrics: { ...TREE_DIAGRAM_METRICS, paddingX: 50, minBoxWidth: 0 } })
+    const layout = TreeLayout.of(
+      { label: "ab" },
+      { metrics: { ...TREE_DIAGRAM_METRICS, paddingX: 50, minBoxWidth: 0 } }
+    )
     expect(layout.boxes[0]!.width).toBeCloseTo(2 * charWidth * fontSize + 100, 5)
   })
 })

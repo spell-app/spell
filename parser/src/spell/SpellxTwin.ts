@@ -665,7 +665,8 @@ export class SpellxTwin {
     if (tag.kind !== "for each" || !tag.attributes.length) return []
     const words = this.words.forTag
     const own = (name: string) => tag.attributes.find((attribute) => attribute.name === name)
-    const isNo = (attribute: SP.SpellxAttribute) => !attribute.value?.quoted && attribute.value?.text.trim() === words.no
+    const isNo = (attribute: SP.SpellxAttribute) =>
+      !attribute.value?.quoted && attribute.value?.text.trim() === words.no
     const said = (attribute: SP.SpellxAttribute) =>
       attribute.value?.quoted ? `"${attribute.value.text}"` : attribute.value!.text.trim()
     const lines: string[] = []

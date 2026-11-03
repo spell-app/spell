@@ -1200,7 +1200,9 @@ export const savedMethods = defineCoreModule({
     const current = read.constructor.name === ASYNC_FUNCTION ? (createDeferred(read as never) as typeof read) : read
     const items = () => {
       const list = current() as { items?: readonly Item[] } | readonly Item[] | undefined
-      return (Array.isArray(list) ? list : ((list as { items?: readonly Item[] } | undefined)?.items ?? [])) as readonly Item[]
+      return (
+        Array.isArray(list) ? list : ((list as { items?: readonly Item[] } | undefined)?.items ?? [])
+      ) as readonly Item[]
     }
     const drawn = () => {
       if (!drawEach) return current() as Drawing
@@ -1217,12 +1219,15 @@ export const savedMethods = defineCoreModule({
         paging === "pages"
           ? drawnInPages({ items, drawItem, more })
           : paging === "all"
-            ? (createComponent(For as never, {
-                get each() {
-                  return items()
-                },
-                children: drawItem
-              } as never) as JSX.Element)
+            ? (createComponent(
+                For as never,
+                {
+                  get each() {
+                    return items()
+                  },
+                  children: drawItem
+                } as never
+              ) as JSX.Element)
             : drawnInWindow({
                 items,
                 drawItem,
@@ -1368,13 +1373,15 @@ function drawnInPages<Item>({
     if (items().length <= lastDrawn()) await more()?.readNextPage()
     if (items().length > lastDrawn()) goTo(page + 1)
   }
-  const list = createComponent(For as never, {
-    get each() {
-      return items().slice(pageNow() * MOST_AT_ONCE, lastDrawn())
-    },
-    children: (item: Item, position: () => number) =>
-      drawItem(item, () => pageNow() * MOST_AT_ONCE + position())
-  } as never) as JSX.Element
+  const list = createComponent(
+    For as never,
+    {
+      get each() {
+        return items().slice(pageNow() * MOST_AT_ONCE, lastDrawn())
+      },
+      children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * MOST_AT_ONCE + position())
+    } as never
+  ) as JSX.Element
   const pager = h(
     "ui-stack",
     { direction: "horizontal", justify: "center", align: "center" },

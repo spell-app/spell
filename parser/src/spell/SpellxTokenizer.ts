@@ -602,7 +602,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     const handedOn = head.attributes.find((attribute) => !Object.values(forAttributes).includes(attribute.name))
     if (handedOn && !layout) errors.push(this.message("spellx-for-needs-as", { attribute: handedOn.word, tag, as }))
     const table = this.words.twins?.forTag.table
-    if (layout?.value?.text === table && head.selfClosing) errors.push(this.message("spellx-for-table-needs-cells", { tag }))
+    if (layout?.value?.text === table && head.selfClosing)
+      errors.push(this.message("spellx-for-table-needs-cells", { tag }))
     return errors
   }
 

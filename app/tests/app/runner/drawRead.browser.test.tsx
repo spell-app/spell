@@ -25,9 +25,7 @@ function drawn(rows: readonly number[], riders: Record<string, () => unknown> = 
   box = document.createElement("div")
   document.body.append(box)
   const drawItem = (row: number) =>
-    cell
-      ? h("ui-cell", { "data-column": "Number" }, `${row}`)
-      : h("div", { class: "row" }, `${row}`)
+    cell ? h("ui-cell", { "data-column": "Number" }, `${row}`) : h("div", { class: "row" }, `${row}`)
   dispose = render(() => core.drawRead(() => rows, drawItem as never, riders as never) as never, box)
   flush()
 }

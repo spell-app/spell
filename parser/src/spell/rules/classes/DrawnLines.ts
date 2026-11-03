@@ -322,7 +322,9 @@ export class DrawnLines {
       const body = DrawnLines.callbackOf(statement as P.ASTCoreMethodInvocation)!.body
       // nothing in it at all, or only what shows around it (`<for films />`):  each item draws itself
       const lines = (body instanceof P.ASTStatementBlock ? (body.statements ?? []) : body ? [body] : []) as Line[]
-      const steps = lines.map((each) => DrawnLines.statementOf(each)).filter((each) => !(each instanceof P.ASTBlankLine))
+      const steps = lines
+        .map((each) => DrawnLines.statementOf(each))
+        .filter((each) => !(each instanceof P.ASTBlankLine))
       const isItsOwn = !steps.length || steps.some((each) => DrawnLines.isRider(each))
       return isItsOwn || DrawnLines.draws(body?.statements)
     }

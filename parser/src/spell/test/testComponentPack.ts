@@ -30,5 +30,14 @@ const TEST_TAGS: Record<string, Record<string, string>> = {
     row: "ui-row",
     cell: "ui-cell"
   },
-  es: { texto: "es-texto", imagen: "es-imagen", encabezado: "es-encabezado", boton: "es-boton", tarjetas: "es-tarjetas", tabla: "es-tabla", fila: "es-fila", celda: "es-celda" }
+  es: {
+    texto: "es-texto",
+    imagen: "es-imagen",
+    encabezado: "es-encabezado",
+    boton: "es-boton",
+    tarjetas: "es-tarjetas",
+    tabla: "es-tabla",
+    fila: "es-fila",
+    celda: "es-celda"
+  }
 }
