@@ -15,7 +15,7 @@ import { CLI } from "spell/app/cli"
  *   (decision Q17;  `CLI.EditorPages`).
  * - `--fix`:  puts right what it can, writes it back,
  *   then lists what it did, one line each (`... fixed:  ...`), on stdout (with `--json`, on stderr):
- *   - each retired word in the spell, e.g. `drawable thing` => `view` -- see `fixRetiredWords()`
+ *   - each retired word in the spell, e.g. `parts` => `slots` -- see `fixRetiredWords()`
  *   - a `.spellml` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
  *   - each editor page
  *   - What it can't put right is still an error.
@@ -79,11 +79,11 @@ async function checkProject(
 
 /**
  * With `--fix`:  put each RETIRED word in `project` right -- only `file`'s, if given --
- * e.g. `a card is a drawable thing` => `a card is a view`, `- it has parts "front"` => `- it has slots "front"`,
+ * e.g. `- it has parts "front"` => `- it has slots "front"`, `- animation deal it:` => `- to deal it:`,
  * and write each changed file back (epic `elemental-spell`, Q61).
  * - The parser marks each one as an error whose `data.replacement` is its new word:
  *   see `SpellType.retiredWordErrorsIn()`.
- * - A word written with a capital keeps it:  `Drawable thing` => `View`.
+ * - A word written with a capital keeps it:  `Parts` => `Slots`.
  * - A word that's simply gone takes its colon and spaces with it:  `wait for: deal` => `deal` (epic `language` P13).
  * - Not a test project's files:  they stay frozen, as their editor pages do.
  * - SIDE EFFECT:  parses `project`, then hands it each file's new text, so what's listed after is what's left.

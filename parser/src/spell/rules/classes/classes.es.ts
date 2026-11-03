@@ -404,7 +404,7 @@ classesEs.addRule(ReopenType, {
 })
 
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`,
+  syntax: `${A} {type:type_words} (alias {aka:singular_type})? es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`,
   tests: [
     {
       compileAs: "statement",
@@ -437,7 +437,7 @@ classesEs.addRule(CreateViewableListType, {
 
 // ... with its name quoted, as an outline names it:  `una "pila" es una lista visible de cartas donde:`
 classesEs.addRule(CreateViewableListType, {
-  syntax: `${A} {type:quoted_type} es ${A} lista (visible|dibujable) ${OF} {instanceType:type} {with_nested_statements}?`
+  syntax: `${A} {type:quoted_type} es ${A} lista visible ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {
@@ -1667,6 +1667,7 @@ classesEs.addRule(ThePropertyOfAThing, {
 // which says `el color de una carta`
 // packs: none AThingsProperty -- Spanish has no "a card's color"
 // packs: none ThePropertyOfAThing -- Spanish has no "a card's color" (epic `language` T24)
+// packs: none ThePropertyOfAThing -- Spanish has no "cards' color" (epic `language` T26)
 
 classesEs.addRule(ItsQuotedProperty, {
   syntax: "{type:subject_its} {property:quoted_member}"
@@ -1875,6 +1876,9 @@ classesEs.addRule(PropertyValueGetter, {
 // packs: none PropertyValueGetter -- Spanish has no "a card's value is"
 // packs: none PropertyValueGetter -- Spanish has no "a card's \"short name\" is"
 // packs: none PropertyValueGetter -- Spanish has no "a card's color is one of"
+// packs: none PropertyValueGetter -- Spanish has no "cards' value is" (epic `language` T26)
+// packs: none PropertyValueGetter -- Spanish has no "cards' \"short name\" is"
+// packs: none PropertyValueGetter -- Spanish has no "cards' color is one of"
 
 // quoted:  its body is markup, which IS the drawing -- `- para "dibujarla": <div>[rango]</div>`
 classesEs.addRule(DrawIt, {

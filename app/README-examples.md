@@ -510,7 +510,7 @@ _Task List in the editor:  the first task is ticked, because the program makes i
 as Solitario is Solitaire (below):  its own `tarea`, in `Tarea.es.spell`.
 
 ```spell
-una "tarea" es una cosa dibujable donde:
+una "tarea" es una vista donde:
 	- su "título" es texto
 	- su "nota" es texto
 	- su "prioridad" es una de baja, normal o alta

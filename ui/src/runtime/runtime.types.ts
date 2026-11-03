@@ -558,6 +558,23 @@ export type SourceSaveResult = {
  */
 export type SourceSaver = (request: SourceSaveRequest) => Promise<SourceSaveResult>
 
+/** What `UI.sources.saveInline()` hands its inline saver. */
+export type InlineSaveRequest = {
+  /** the DOM element whose own text it is, e.g. a `<ui-markdown>` holding a `<script type="text/markdown">` */
+  element: Element
+  /** its text as the page has it now, dedented (`LoadableComponent.inlineTextOf()`):  how it's found in the file */
+  before: string
+  /** its new text, dedented */
+  text: string
+}
+
+/**
+ * Writes an element's own text back into the page's file;  `UI.sources.inlineSaver`.
+ * - `ui` ships none, as `SourceSaver`:  the docs pages' is `spell-ui-sources.js` (spell-epic's), on the page server.
+ * - MUST throw on failure, as `SourceSaver`:  `conflict` when the text isn't in the file as `before` says.
+ */
+export type InlineSourceSaver = (request: InlineSaveRequest) => Promise<SourceSaveResult>
+
 /**
  * Why loading or saving a source failed, as `SourceError.kind` and `ui-error`'s `detail.kind`.
  * - `load`:  the fetch failed or answered non-2xx

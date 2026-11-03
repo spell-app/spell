@@ -300,6 +300,7 @@ async function start() {
     history.replaceState(null, "", `#${landing.hash}`)
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
+  editMarkdownInPlace([main])
   highlight()
   addCodeCopies(main)
   wireImageZoom()
@@ -1469,6 +1470,7 @@ async function rewire(page, changed) {
   wireItemFilters(main)
   highlightIn(changed)
   addCodeCopies(main)
+  editMarkdownInPlace(changed)
   const entries = railKey(outline, counts)
   if (entries !== page.entries) page.rail = buildNavigation(main, outline, counts)
   page.entries = entries
@@ -1979,6 +1981,29 @@ function showItems({ section, lists, notes, chips, states }, shown) {
 /** A filterable list's items:  its `[data-status]` children. */
 function itemsOf(list) {
   return Array.from(list.querySelectorAll(":scope > [data-status]"))
+}
+
+////////////////
+// ## Editing in place
+////////////////
+
+/**
+ * Every `<ui-markdown>` of a page the page server may save is edited where it's drawn:  ⌥-click a paragraph, a
+ * heading, a list item or a table cell (epic `epic-engine` P60, request r53;  Owen:  "click in e.g. a table cell and
+ * edit the text there directly, auto-save immediately").
+ * - `editable` set on each in `nodes` without one of its own, so `editable="tabs"` stays
+ * - only when the page says it may be saved (`SPELL_SERVER.writable`:  its file in the page server's writable
+ *   folders);  from disk, or a page outside them, nothing changes
+ * - the live page only:  the page's file never holds it, so a live update never takes it away (the patch compares
+ *   the file's versions);  a block a patch brings in gets it here (`rewire()`)
+ * - a plain click reads as before:  ⌥ is the only way in, so no pencil and no mode
+ */
+function editMarkdownInPlace(nodes) {
+  if (!window.SPELL_SERVER?.writable) return
+  for (const node of nodes) {
+    for (const markdown of PagePatch.withSelf(node, "ui-markdown"))
+      if (!markdown.hasAttribute("editable")) markdown.setAttribute("editable", "")
+  }
 }
 
 ////////////////

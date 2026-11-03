@@ -126,7 +126,7 @@ export class Card extends View {
  * `<solitaire-card>`:  a card, drawn in its own element, e.g. by `draw the card`.
  * - The page defines its tag with this class:  `core.useElement()`, below.
  * - Its attributes are its card's properties;  its methods call its card's.
- * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.
+ * - What every view's element does, e.g. drawing its card, is `SpellElement`'s.
  */
 export class CardElement extends SpellElement<Card> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("solitaire-card", "card", [

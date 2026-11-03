@@ -21,7 +21,7 @@
  *     site can't make VS Code jump with an `<img src>`
  */
 import { spawn } from "node:child_process"
-import { sep } from "node:path"
+import { basename, sep } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { SRV } from "spell/server"
@@ -84,19 +84,29 @@ export function pageFile(files: SRV.StaticHandler, path: string): string {
 /**
  * The window to show `file` in:  the one with pid `pid`, if it's alive;  else the one whose folders hold `file`
  * deepest (a worktree's window for a worktree's page);  else any.
+ * - A page of the epic folder (`epics/<epic>/...`) is in EVERY window's folders, as deep:  the tie goes to the
+ *   epic's own window, its worktree's folder named for it (epic `epic-engine` I202;  a link whose window was reloaded
+ *   showed the page in another epic's side bar)
  */
 export function pickWindow(pid: number, file: string, entries: Map<number, WindowEntry> = Window.entries()) {
   if (entries.has(pid)) return entries.get(pid)
+  const epic = EPIC_PAGE.exec(file.split(sep).join("/"))?.[1]
   let best: WindowEntry | undefined
   let bestLength = -1
   for (const entry of entries.values()) {
+    const isEpics = !!epic && basename(entry.folders?.[0] ?? "") === epic
     for (const folder of entry.folders ?? []) {
-      const inside = file.startsWith(folder + sep)
-      if (inside && folder.length > bestLength) [best, bestLength] = [entry, folder.length]
+      if (!file.startsWith(folder + sep)) continue
+      // the epic's own window wins a tie:  half a character deeper
+      const depth = folder.length + (isEpics ? 0.5 : 0)
+      if (depth > bestLength) [best, bestLength] = [entry, depth]
     }
   }
   return best ?? entries.values().next().value
 }
+
+/** A page of an epic, in the epic folder:  its epic's id. */
+const EPIC_PAGE = /\/epics\/([^/]+)\//
 
 /** A page that closes its own tab;  if the browser won't let it, it says where the page went (`where`). */
 function closingPage(path: string, where: string): string {

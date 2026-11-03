@@ -17089,15 +17089,15 @@ export interface UIMarkdownAttributes {
    */
   "prop:skipTitle"?: boolean | ""
   /**
-   * Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it.
-   * - takes:  flag (present / absent)
+   * Edit the text where it's drawn:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and it becomes a box holding its markdown;  Enter or a click away keeps it, Tab moves to the next, Escape puts it back, and 5 seconds without typing keeps it too.  Holding ⌥ outlines what can be edited.  `editable="tabs"`:  Write / Preview tabs instead, a text box for the whole markdown and its preview.  Each edit is a `ui-changed`, and `save()` writes it:  in place, each edit is saved as it's kept.
+   * - takes:  flag, or `tabs`
    */
-  editable?: boolean | ""
+  editable?: boolean | "" | "tabs"
   /**
    * `editable`, as the DOM element's property.
    * @deprecated write `editable` -- `prop:` stays only for compiled spell
    */
-  "prop:editable"?: boolean | ""
+  "prop:editable"?: boolean | "" | "tabs"
   /**
    * Sanitize the rendered markup with DOMPurify (its own lazy chunk, loaded only then):  no scripts, event handlers or `javascript:` links.  Set it for text you didn't write;  without it, raw HTML is kept as written.
    * - takes:  flag (present / absent)

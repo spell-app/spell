@@ -6,6 +6,7 @@ import { parseSpellProject } from "spell/parser/spell/test"
  * A possessive DECLARATION (epic `language` T24):  `a card's value is ...` declares just what
  * `the value of a card is ...` does -- the same program, the same declarations, the same warnings.
  * - Only where each was written differs:  a declaration's `defined` range, and the line's comment.
+ * - A plural with no article, `cards' value is ...`, is one too, warning to write `a card's value` (T26).
  * - Reads (`the card's value`) are `NameMeanings.test.ts`'s table, and the rule tests in `properties.en.ts`.
  */
 
@@ -61,6 +62,69 @@ describe("a possessive declaration is the same as `the X of a Y is`", () => {
     expect(compiled("a card' color is red if its suit is hearts otherwise it is black").errors).toEqual([
       '4:2 An apostrophe alone follows a word ending in "s", as in "the cards\' names":  write "a card\'s color"'
     ])
+  })
+})
+
+/** Each possessive declaration with a plural owner and no article (T26), and the `a card's` form it means. */
+const PLURALS: Array<{ title: string; plural: string; one: string; property: string }> = [
+  {
+    title: "a value",
+    plural: "cards' value is its rank * 2",
+    one: "a card's value is its rank * 2",
+    property: "value"
+  },
+  {
+    title: "a value, a colon and a body",
+    plural: "cards' value is:\n\treturn its rank",
+    one: "a card's value is:\n\treturn its rank",
+    property: "value"
+  },
+  {
+    title: "red if ... otherwise",
+    plural: "cards' color is red if its suit is hearts otherwise it is black",
+    one: "a card's color is red if its suit is hearts otherwise it is black",
+    property: "color"
+  },
+  {
+    title: "one of a list of its own",
+    plural: "cards' color is one of red, black:\n\tred if its suit is hearts\n\tblack otherwise",
+    one: "a card's color is one of red, black:\n\tred if its suit is hearts\n\tblack otherwise",
+    property: "color"
+  },
+  {
+    title: "a quoted name",
+    plural: 'cards\' "short name" is its rank',
+    one: 'a card\'s "short name" is its rank',
+    property: "short name"
+  },
+  {
+    title: "a curly apostrophe",
+    plural: "cards’ value is its rank",
+    one: "a card's value is its rank",
+    property: "value"
+  }
+]
+
+describe("a plural owner with no article is read as one, warning to write that (T26)", () => {
+  for (const { title, plural, one, property } of PLURALS) {
+    test(title, () => {
+      const mine = compiled(plural)
+      const theirs = compiled(one)
+      expect(mine.errors).toEqual([])
+      expect(mine.warnings).toEqual([
+        `4:0 Write "a card's ${property} is ...":  a declaration names one card`,
+        ...theirs.warnings
+      ])
+      expect(mine.program).toEqual(theirs.program)
+    })
+  }
+
+  test("a singular owner with no article isn't a declaration, as before", () => {
+    expect(compiled("card's value is its rank").errors).toEqual([`4:0 Don't understand "card's value is its rank"`])
+  })
+
+  test("nor is a plural no type is called", () => {
+    expect(compiled("widgets' value is 3").errors).toEqual([`4:0 Don't understand "widgets' value is 3"`])
   })
 })
 

@@ -129,7 +129,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A retired word
 
-- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredTypeWords` / `retiredRuleWords`:
+- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredRuleWords`:
   it still reads, as a parse error naming its replacement (`""`:  simply gone), which `spell lint --fix` writes
   (`SpellType.noteRetiredLiterals()`, `retiredWordErrorsIn()`, `spell/parser/spell`;  `fixRetiredWords()`, spell-app's `lintCommand.ts`)
 - **Use it when:**  taking a word out of the language:  no rewrite command of its own.

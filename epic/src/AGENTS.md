@@ -1548,7 +1548,18 @@ In `tools/`:
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
-  - Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
+  - EDITING IN PLACE (epic `epic-engine` P60, request r53;  Owen:  "click in e.g. a table cell and edit the text there
+    directly, auto-save immediately"):  on a page the page server may save (`SPELL_SERVER.writable`, its file in the
+    writable folders), every `<ui-markdown>` is `editable` (`editMarkdownInPlace()`, at start and on every rewire)
+    - ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell:  it becomes a box holding its markdown;
+      Enter or a click away keeps it, Tab moves on, Escape puts it back, 5 seconds without typing keeps it too;  a plain
+      click reads as before (Owen picked ⌥-click over a pencil, Q66);  holding ⌥ outlines what can be edited
+    - each keep is saved into the page's file at once, by the inline saver (`spell-ui-sources.js`):  the nearest element
+      with an id read fresh (`SPELL_SERVER.readElement()`), the block found by its text, only its text swapped, indented as
+      it was, its one-line tags kept (r52), then written back (`editPage()`, `shown`), so the page never reloads or moves
+    - the toolbar bullhorn's tooltip says "⌥-click text to edit it";  `editable="tabs"` (Write / Preview) is left alone
+    - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`
+- Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
     every `<pre><code>` gets a `<ui-button appearance="circular basic" size="mini" icon="copy">` first in it, centred
     on its first line, "Copied" in the page's notices (`addCodeCopies()`, at start and after every body or patch);
     the code scrolls, the button stays.  Not `<epic-code>` / `<ui-code copy>`:  they draw their own, at the right.

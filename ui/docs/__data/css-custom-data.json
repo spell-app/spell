@@ -5301,6 +5301,13 @@
       }
     },
     {
+      "name": "--ui-markdown-edit-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-markdown>`'s token.  Default:  `var(--ui-primary)`"
+      }
+    },
+    {
       "name": "--ui-menu-margin",
       "description": {
         "kind": "markdown",
@@ -10616,10 +10623,17 @@
       }
     },
     {
+      "name": "::part(edit-box)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-markdown>`:  `editable`:  the box a piece becomes while it's edited in place, holding its markdown."
+      }
+    },
+    {
       "name": "::part(editor)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-markdown>`:  `editable`:  the `<textarea>` holding the markdown.\n- `<ui-property-editor>`:  The editor's outer box.\n- `<ui-theme-editor>`:  The whole editor:  the bar, the preview, and the side column."
+        "value": "Part of:\n\n- `<ui-markdown>`:  `editable=\"tabs\"`:  the `<textarea>` holding the markdown.\n- `<ui-property-editor>`:  The editor's outer box.\n- `<ui-theme-editor>`:  The whole editor:  the bar, the preview, and the side column."
       }
     },
     {
@@ -11431,14 +11445,14 @@
       "name": "::part(tab)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-markdown>`:  `editable`:  each tab button.\n- `<ui-tab>`:  The pane box.\n- `<ui-tabs>`:  One tab (`<button role=tab class=\"item\">`)."
+        "value": "Part of:\n\n- `<ui-markdown>`:  `editable=\"tabs\"`:  each tab button.\n- `<ui-tab>`:  The pane box.\n- `<ui-tabs>`:  One tab (`<button role=tab class=\"item\">`)."
       }
     },
     {
       "name": "::part(tabs)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-markdown>`:  `editable`:  the Write / Preview tab list.\n- `<ui-tabs>`:  The whole tab set:  menu and panes."
+        "value": "Part of:\n\n- `<ui-markdown>`:  `editable=\"tabs\"`:  the Write / Preview tab list.\n- `<ui-tabs>`:  The whole tab set:  menu and panes."
       }
     },
     {
@@ -11861,6 +11875,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-menu>`:  `shrinkable` and `segmented`:  one button showing the chosen item, a dropdown.\n- `<ui-toolbar>`:  `shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+      }
+    },
+    {
+      "name": ":state(editing)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-markdown>`:  `editable`:  a piece is being edited in place."
       }
     },
     {
@@ -12435,6 +12456,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-placeholder>`:  Always set:  lets a placeholder find placeholder siblings, for the gap between consecutive ones."
+      }
+    },
+    {
+      "name": ":state(placing)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-markdown>`:  `editable`:  ⌥ is held, so what can be edited in place is outlined."
       }
     },
     {

@@ -46,7 +46,7 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print errors as JSON")
     .option(
       "--fix",
-      "put right what it can:  retired words (drawable thing => view), " +
+      "put right what it can:  retired words (parts => slots), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)

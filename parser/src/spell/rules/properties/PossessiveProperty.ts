@@ -3,6 +3,7 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import { Priority, declaredPrefix } from "spell/parser/spell/rules/rules.types"
+import { SpellType, getKnownType } from "spell/parser/spell/rules/types"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { PossessiveMark } from "./PossessiveMark"
 
@@ -175,6 +176,31 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
     if (!mark || !type || !property) return
     const before = match.tokens.slice(0, match.tokens.indexOf(mark.tokens[0]!))
     PossessiveProperty.refuseIfMisspelled(match, type, mark, `${property.raw}`, P.Tokenizer.join(before))
+  }
+
+  /**
+   * A possessive DECLARATION with no article (T26):  its owner must be plural, as in `cards' color is red if ...`,
+   * read as `a card's color is ...` (T24), with a warning saying to write that:  a declaration names one card.
+   * - `match`:  a declaration's, with groups `type`, `property` and `possessive_mark`.
+   * - `false` for a singular owner with no article, `card's color is ...`:  not a declaration, as before T26.
+   * - `true` otherwise, and for a declaration with its article.
+   * - SIDE EFFECT:  notes the warning on `match`, at its owner;
+   *   and the owner's words in the singular on its match, `namesOne`, so a translation writes one (`Translator`).
+   */
+  static warnIfNoArticle(match: P.Match): boolean {
+    const { type, possessive_mark: mark, property } = match.groups as Partial<Record<string, P.Match>>
+    if (!mark || !type || !property || match.tokens[0] !== type.tokens[0]) return true
+    const numberWord = SpellType.numberWordOf(type)
+    if (SpellType.inflectingAsRead(type, () => P.getPlurality(numberWord)) === "singular") return false
+    const words = `${type.raw}`.split(/\s+/)
+    const last = SpellType.inflectingAsRead(type, () => P.singularize(words.at(-1)!))
+    const singular = [...words.slice(0, -1), last].join(" ")
+    ;(type.data as { namesOne?: string }).namesOne = singular
+    const language = SP.Language.of(match.scope)
+    const aType = language.withArticle("indefinite", singular, getKnownType(type))
+    const params = { aType, type: singular, property: `${property.raw}` }
+    SP.SpellWarnings.note(match, language.parserMessage("possessive-declaration-plural", params), type)
+    return true
   }
 
   /** Is `owner` the word `it`, alone:  `it's name`? */

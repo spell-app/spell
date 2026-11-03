@@ -427,11 +427,15 @@ class FileWriting {
     return { text: theirs[at]! }
   }
 
-  /** A name a person chose, through the dictionary:  a type's, or any other;  quoted if it was. */
+  /**
+   * A name a person chose, through the dictionary:  a type's, or any other;  quoted if it was.
+   * - A type written plural that names ONE, `cards' color is ...` (epic `language` T26):  written singular,
+   *   as its rule noted (`namesOne`).
+   */
   writeName(match: P.Match, raw: string): Piece {
     const { names } = this.translator
     const quoted = /^".*"$/.test(raw)
-    const words = quoted ? raw.slice(1, -1) : raw
+    const words = (match.data as { namesOne?: string }).namesOne ?? (quoted ? raw.slice(1, -1) : raw)
     const isType = /type/.test(match.ruleName ?? "")
     let translated: string | undefined
     let gender: string | undefined

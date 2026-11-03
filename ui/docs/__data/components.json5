@@ -16967,8 +16967,11 @@
         },
         {
           "name": "editable",
-          "kind": "boolean",
-          "description": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it."
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "tabs"
+          ],
+          "description": "Edit the text where it's drawn:  ⌥-click (Alt-click) a paragraph, a heading, a list item or a table cell, and it becomes a box holding its markdown;  Enter or a click away keeps it, Tab moves to the next, Escape puts it back, and 5 seconds without typing keeps it too.  Holding ⌥ outlines what can be edited.  `editable=\"tabs\"`:  Write / Preview tabs instead, a text box for the whole markdown and its preview.  Each edit is a `ui-changed`, and `save()` writes it:  in place, each edit is saved as it's kept."
         },
         {
           "name": "sanitized",
@@ -17134,15 +17137,19 @@
         },
         {
           "name": "tabs",
-          "description": "`editable`:  the Write / Preview tab list."
+          "description": "`editable=\"tabs\"`:  the Write / Preview tab list."
         },
         {
           "name": "tab",
-          "description": "`editable`:  each tab button."
+          "description": "`editable=\"tabs\"`:  each tab button."
         },
         {
           "name": "editor",
-          "description": "`editable`:  the `<textarea>` holding the markdown."
+          "description": "`editable=\"tabs\"`:  the `<textarea>` holding the markdown."
+        },
+        {
+          "name": "edit-box",
+          "description": "`editable`:  the box a piece becomes while it's edited in place, holding its markdown."
         }
       ],
       "states": [
@@ -17161,6 +17168,14 @@
         {
           "name": "dirty",
           "description": "`content` changed since it was loaded or saved."
+        },
+        {
+          "name": "placing",
+          "description": "`editable`:  ⌥ is held, so what can be edited in place is outlined."
+        },
+        {
+          "name": "editing",
+          "description": "`editable`:  a piece is being edited in place."
         },
         {
           "name": "disabled",
@@ -17224,17 +17239,42 @@
         {
           "key": "write",
           "text": "Write",
-          "description": "`editable`:  the editing tab."
+          "description": "`editable=\"tabs\"`:  the editing tab."
         },
         {
           "key": "preview",
           "text": "Preview",
-          "description": "`editable`:  the preview tab."
+          "description": "`editable=\"tabs\"`:  the preview tab."
         },
         {
           "key": "editor",
           "text": "Markdown",
-          "description": "`editable`:  accessible name of the text box."
+          "description": "`editable=\"tabs\"`:  accessible name of the text box."
+        },
+        {
+          "key": "editBox",
+          "text": "Edit {kind}",
+          "description": "`editable`:  accessible name of the box a piece becomes."
+        },
+        {
+          "key": "paragraph",
+          "text": "paragraph",
+          "description": "`editable`:  a paragraph, in `editBox`."
+        },
+        {
+          "key": "heading",
+          "text": "heading",
+          "description": "`editable`:  a heading, in `editBox`."
+        },
+        {
+          "key": "item",
+          "text": "list item",
+          "description": "`editable`:  a list item, in `editBox`."
+        },
+        {
+          "key": "cell",
+          "text": "table cell",
+          "description": "`editable`:  a table cell, in `editBox`."
         }
       ],
       "mainTag": "ui-markdown",
@@ -46472,6 +46512,11 @@
           "name": "--ui-markdown-code-background",
           "default": "var(--ui-surface-strong)",
           "description": "inline code's chip: the foundation's (`ui-typography`), so its padding reads as the chip, not as a space",
+          "type": "color"
+        },
+        {
+          "name": "--ui-markdown-edit-color",
+          "default": "var(--ui-primary)",
           "type": "color"
         }
       ]

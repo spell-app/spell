@@ -27,6 +27,11 @@ export type MarkdownOptions = {
   headingOffset: number
   /** sanitize the markup (`MarkdownSanitizer`, loaded on first use) */
   sanitized: boolean
+  /**
+   * mark each piece that can be edited in place with its place's number (`data-ui-place`), and return the places
+   * (`editable`);  an engine that can't leaves them out, and nothing is editable in place
+   */
+  places?: boolean
 }
 
 /** What an engine's render came to. */
@@ -35,6 +40,28 @@ export type MarkdownResult = {
   html: string
   /** every heading, in order */
   headings: MarkdownHeading[]
+  /** `places`:  each editable piece's place in the text, by the number its element is marked with */
+  places?: MarkdownPlace[]
+}
+
+////////////////
+// ## Editing in place
+////////////////
+
+/** The kinds of piece `editable` edits in place. */
+export type MarkdownPlaceKind = "paragraph" | "heading" | "item" | "cell"
+
+/**
+ * Where one piece's own text sits in the markdown (`MarkdownSource`):  a paragraph, a heading's words, a list
+ * item's line, a table cell's text.
+ */
+export type MarkdownPlace = {
+  /** what kind of piece */
+  kind: MarkdownPlaceKind
+  /** offset of its first character in the text */
+  start: number
+  /** offset just after its last */
+  end: number
 }
 
 /**

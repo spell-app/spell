@@ -14,13 +14,11 @@ describe("testing spell module classes, in Spanish", () => {
     return { code, errors: code.split("\n").filter((line) => line.includes("PARSE ERROR")) }
   }
 
-  test("an old word is an error naming its new word:  `cosa dibujable` is now `vista` (epic `elemental-spell` P1)", () => {
-    const block = SP.spanish.parser.getScope("old-words").parse("una carta es una cosa dibujable", "block")!
-    const errors = SP.Block.getParseErrors(block) ?? []
-    expect(errors.map((error) => [error.message, error.data.replacement])).toEqual([
-      ['"cosa dibujable" ahora es "vista":  di "vista", o ejecuta `spell lint --fix`', "vista"]
-    ])
-    expect(`${block.compile()}`).toContain("export class Carta extends View {")
+  test("the old words for views are gone, free for a program's own names:  `un dibujable` (epic `language` T25)", () => {
+    const { code, errors } = compiled("old-words-free", ["un dibujable es una cosa", "una carta es un dibujable"])
+    expect(errors).toEqual([])
+    expect(code).toContain("export class Dibujable extends Thing {}")
+    expect(code).toContain("export class Carta extends Dibujable {}")
   })
 
   describe("drawing:  ONE `para dibujarlo`, and a list's `para dibujar cada elemento` (`draw_method`, P20)", () => {

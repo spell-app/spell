@@ -90,7 +90,13 @@ export type ServerConfig = {
    * check's), so a page keeps them in the browser (Spell UI's `ThemePreference.keptIn`)
    */
   prefs?: boolean
+  /**
+   * this page's own file is in the page server's writable folders (`"writable"`):  its page editor may save it, so
+   * the docs runtime lets its text be edited in place (epic `epic-engine` P60)
+   */
+  writable?: boolean
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
+  readElement?: (read: ElementRead) => Promise<ElementReadResult>
   saveFile?: (save: FileSave) => Promise<PageEditResult>
   readPage?: () => Promise<PageSource>
   takeScroll?: () => number | undefined
@@ -170,7 +176,17 @@ export type PageEdit = { id: string; html: string; inner?: boolean; parent?: str
 export type PageEditResult = { ok: boolean; status: number; etag?: string; error?: string }
 
 /**
- * Start live reload in this page, and add `SPELL_SERVER.editPage()`.
+ * One element of the page's own file, read as it is on disk now (`GET /api/pages?id=`), for an edit of it.
+ * - `id`:  the element
+ * - `parent`:  a tag name:  `#id`'s nearest such ancestor instead (a section, through its heading)
+ */
+export type ElementRead = { id: string; parent?: string }
+
+/** What a read answered:  the element's markup, byte for byte, and the file's version (`ETag`) to edit it from. */
+export type ElementReadResult = { ok: boolean; status: number; html?: string; etag?: string; error?: string }
+
+/**
+ * Start live reload in this page, and add `SPELL_SERVER.editPage()` and `readElement()`.
  * - the page's own file changed:
  *   offers the new version to the page (`spell-server:reloading`, `PageChange`):  as the server sent it with the
  *   change, else fetched
@@ -330,6 +346,14 @@ export function liveClient(scrollKey: string): void {
     if (answer.ok) etag = body.etag
     if (answer.ok && shown && body.etag) ownEtags.add(body.etag)
     return { ok: answer.ok, status: answer.status, etag: body.etag, error: body.error }
+  }
+
+  config.readElement = async ({ id, parent }) => {
+    const query = new URLSearchParams({ path: config.file, id, ...(parent && { parent }) })
+    const answer = await fetch(`${config.edit ?? "/api/pages"}?${query}`, { cache: "no-store" })
+    const body = (await answer.json().catch(() => ({}))) as { html?: string; etag?: string; error?: string }
+    const ok = answer.ok && typeof body.html === "string"
+    return { ok, status: answer.status, html: body.html, etag: body.etag, error: body.error }
   }
 
   // a stale generated file:  told once a page, and nothing waits for the answer (best effort, NEVER throws)

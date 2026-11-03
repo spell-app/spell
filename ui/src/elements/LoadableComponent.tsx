@@ -110,6 +110,17 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
     this.sendSourceEvent(E.SourceEvent.change, { content: text })
   }
 
+  /**
+   * The page changed the DOM element's own text after its edits were SAVED (`saveInline()` writes the saved text
+   * into the page, a live update brings someone else's):  the page's text shows again, so the edits no longer hide
+   * what comes after.
+   * - Unsaved edits stay:  a save then finds what changed under them.
+   */
+  @onChange("inlineText", { defer: true })
+  protected onInlineTextChanged() {
+    if (this.wasEdited !== undefined && !this.isDirty && !this.source) this.wasEdited = undefined
+  }
+
   ////////////////
   // ## Loading
   ////////////////
@@ -308,7 +319,9 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
    * Save `text` (default the content) back to `source`;  resolves `true` once saved HERE.
    * - `text` given:  shown first, as setting `content`.
    * - The cancelable `ui-saving` first:  cancelled -> `false` (the listener saves).
-   * - No `source`:  nothing to write -- the content stays, `ui-saved`, `true`.
+   * - No `source`:  the DOM element's own text, written back into the page by the page's inline saver
+   *   (`UI.sources.saveInline()`:  the docs pages' writes the page's file);  no inline saver, nothing to write --
+   *   the content stays, `ui-saved`, `true`.
    * - Else `UI.sources.save()` (`fragment`:  `saveFragment()`), then
    *   - `ui-saved` with the new `etag`
    *   - or `ui-error` (`save`, `conflict`, `no-saver` ...) and `false`
@@ -320,17 +333,23 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
     const { content, lastETag: etag } = this
     const source = this.source || undefined
     if (!this.sendSourceEvent(E.SourceEvent.save, { source, content, etag })) return false
-    if (!source) {
+    const ui = source || this.wantsInlineContent ? await UI.load() : undefined
+    if (!source && !ui?.sources.inlineSaver) {
       this.isDirty = false
       this.sendSourceEvent(E.SourceEvent.saved, { source })
       return true
     }
     this.isSaving = true
     try {
-      const ui = await UI.load()
-      const result = await ui.sources.save({ url: source, text: content, etag, fragment: this.saveFragment() })
+      const sources = ui!.sources
+      // inline:  how the page has the text now finds it in the page's file
+      const before = LoadableComponent.inlineTextOf(this.domElement)
+      const result = source
+        ? await sources.save({ url: source, text: content, etag, fragment: this.saveFragment() })
+        : await sources.saveInline({ element: this.domElement, before, text: content })
       this.lastETag = result.etag
-      this.isDirty = false
+      // edited again while it saved:  still dirty, for the next save
+      if (this.content === content) this.isDirty = false
       this.sendSourceEvent(E.SourceEvent.saved, { source, etag: result.etag })
       return true
     } catch (error) {

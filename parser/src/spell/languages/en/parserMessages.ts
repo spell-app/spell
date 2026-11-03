@@ -168,6 +168,8 @@ export const PARSER_MESSAGES = {
   /** `the card' name`:  an apostrophe alone, after a word not ending in "s" (epic `language` T23). */
   "possessive-needs-s":
     'An apostrophe alone follows a word ending in "s", as in "the cards\' names":  write "{owner}\'s {property}"',
+  /** `cards' color is ...`:  a declaration's owner plural, with no article (epic `language` T26). */
+  "possessive-declaration-plural": 'Write "{aType}\'s {property} is ...":  a declaration names one {type}',
   /** A property's rule (`must ...`) above the property it's about. */
   "rule-before-property": 'Declare "{name}" above its rule, e.g. "- it has a {name} as text"',
   /** An outline's getter which is only a value, `- score is 0`:  `{type}` is `example-number` ... */
@@ -283,8 +285,8 @@ export const PARSER_MESSAGES = {
   /** A `<markdown>` block outside a type's outline. */
   "markdown-outside-outline":
     "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>",
-  /** An old word for a built-in type, `a card is a drawable thing`:  `{replacement}` is its new word. */
-  "retired-type-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
+  /** One of spell's old words, `it has parts "front"`:  `{replacement}` is its new word. */
+  "retired-word": '"{words}" is now "{replacement}":  say "{replacement}" instead, or run `spell lint --fix`',
   "retired-word-gone":
     '"{words}" isn\'t needed any more, as spell waits by itself:  take it out, or run `spell lint --fix`',
   /** A `<css>` block in a type that doesn't draw. */

@@ -80,6 +80,18 @@ test("picks the window by pid, else the one holding the file deepest, else any",
   expect(pickWindow(99, "/x.html", new Map())).toBeUndefined()
 })
 
+// epic `epic-engine` I202:  a link whose window was reloaded showed an epic's page in another epic's side bar
+test("pickWindow():  an epic folder's page, in every window as deep, goes to its epic's own window", () => {
+  const epics = "/www/spell/spell.epics"
+  const entries = new Map<number, WindowEntry>([
+    [1, { pid: 1, port: 1, token: "", folders: ["/www/spell.worktrees/data", epics] }],
+    [2, { pid: 2, port: 2, token: "", folders: ["/www/spell.worktrees/epic-engine", epics] }]
+  ])
+  expect(pickWindow(99, `${epics}/epics/epic-engine/details/x.html`, entries)?.pid).toBe(2)
+  expect(pickWindow(99, `${epics}/epics/data/data.plan.html`, entries)?.pid).toBe(1)
+  expect(pickWindow(99, `${epics}/guides/x.html`, entries)?.pid).toBe(1)
+})
+
 // epic `epic-engine` I136:  the side bar shows a set's page by the address `epic pages link` prints
 test("a component set's address is its page's file", () => {
   expect(pageFile(server.web.files, "/components/ui/ui-button.html")).toBe(join(root, "ui/docs/ui-button.html"))
