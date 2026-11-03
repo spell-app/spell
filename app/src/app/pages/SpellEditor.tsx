@@ -28,23 +28,21 @@ import {
   ProgramPanelShown,
   ProjectBarMenu,
   SpellPage,
+  SpellReference,
   ThemeMenu,
-  ThingExplorer,
   TreeRoot,
-  TypeExplorer,
   on,
   tracked,
   trackProjectRoot,
   rememberedSizes,
   type Mode
 } from "spell/app/app/solid"
-import { editor, runtimeCore } from "spell/app/app/editor"
+import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { loadLayoutPiece, type LayoutPiece } from "spell/app/app/layout/layoutSpell"
 import editorBarSpell from "spell/app/app/layout/EditorBar/EditorBar.spellml"
 import editorLayoutSpell from "spell/app/app/layout/EditorLayout/EditorLayout.spellml"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
-import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
 import { CodeOutputPane, CodeOutputShown, FollowAlong } from "spell/app/app/solid/CodeOutput"
@@ -281,15 +279,15 @@ export function AppPane() {
  *   - Code Spell, on a `.spellml` file:  the code spell it means (`SX.CodeSpellWriter`;  P8)
  *   - Spellx, on a `.spell` file:  it written as spellx (`SX.SpellxWriter`)
  * - Sentence:  the spell tree of the cursor's line (`<TreeRoot>`).
- * - At the right, whatever tab shows:  Clear Console, on Output only, and Close (`onClose`).
- * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`.
- * - Things and Templates, for developers, are tabs here;  the Inspector's Views card is the one tree a person needs.
- *   a tab remembered from before shows Program Output.
+ * - Reference:  what you can use, your app's templates and Spell's (`<SpellReference>`), its search in this header.
+ * - At the right, whatever tab shows:  Clear Console, on Output only, the Reference's search, and Close (`onClose`).
+ * - Remembers which tab shows, as the editor's preference `spellEditor:programTab`:
+ *   a tab remembered from before, Things or Templates, shows Program Output.
+ * - What the app made is the Inspector's Views card, its things not drawn among them (epic `editor` P19).
  ****************/
 export function ProgramPanel(props: { onClose: () => void }) {
   const remembered = editorPrefs.get(TAB_PREF) as ProgramTabId
-  // the Things tab's state, kept here so it outlives switching tabs
-  let thingsState: ThingExplorerState = {}
+  const [filter, setFilter] = createSignal("")
   const [tab, setTab] = createSignal<ProgramTabId>(PROGRAM_TABS.includes(remembered) ? remembered : "output")
   // which form the file is in:  its other form is the `spell` tab's view
   const form = tracked(() => (editor.file instanceof SP.SpellFile ? editor.file.form : undefined))
@@ -303,6 +301,16 @@ export function ProgramPanel(props: { onClose: () => void }) {
         <>
           <Show when={tab() === "output"}>
             <Actions.clearConsole iconOnly />
+          </Show>
+          <Show when={tab() === "reference"}>
+            <ui-input
+              class="ReferenceSearch"
+              size="mini"
+              icon="search"
+              aria-label={appTexts.text("paletteSearch")}
+              placeholder={appTexts.text("paletteSearch")}
+              ref={on<{ value: string }>("ui-typed", (event) => setFilter(event.detail.value))}
+            />
           </Show>
           <ui-icon
             name="close"
@@ -337,30 +345,8 @@ export function ProgramPanel(props: { onClose: () => void }) {
         <Match when={tab() === "tree"}>
           <TreeRoot showToolbar={false} />
         </Match>
-        <Match when={tab() === "things"}>
-          <Show
-            when={runtimeCore()?.things}
-            keyed
-            fallback={<p class="InspectorTip">{appTexts.text("inspectorNoParts")}</p>}
-          >
-            {(things) => (
-              <ThingExplorer
-                things={things}
-                words={editor.programWords}
-                state={thingsState}
-                onStateChange={(changed) => (thingsState = changed)}
-                onSelect={(thing) => Inspector.inspectThing(thing)}
-              />
-            )}
-          </Show>
-        </Match>
-        <Match when={tab() === "templates"}>
-          <TypeExplorer
-            tree={editor.scopeTree}
-            onOpen={editor.openScopeLink}
-            loadDetails={editor.scopeDetails}
-            onRefresh={() => void editor.refreshScopes()}
-          />
+        <Match when={tab() === "reference"}>
+          <SpellReference filter={filter()} />
         </Match>
       </Switch>
     </RunnerPane>
@@ -409,7 +395,7 @@ function columnsFor(isRunning: boolean, isInspecting: boolean, hasOutput: boolea
 }
 
 /** Tabs of `<ProgramPanel>`, in order;  `spell` is the file's other form, code spell or spellx (`tabFor()`). */
-const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "things", "templates"] as const
+const PROGRAM_TABS = ["output", "javascript", "typescript", "python", "spell", "tree", "reference"] as const
 /** One of `<ProgramPanel>`'s tabs. */
 type ProgramTabId = (typeof PROGRAM_TABS)[number]
 /** Icon of each tab (Fomantic's names, else Font Awesome's), and its title's key. */
@@ -420,8 +406,7 @@ const TAB_LOOKS: Record<ProgramTabId, { icon: string; text: AppTextKey }> = {
   python: { icon: "python", text: "pythonTab" },
   spell: { icon: "file alternate outline", text: "codeSpellTab" },
   tree: { icon: "tree", text: "treeTab" },
-  things: { icon: "cubes", text: "thingsTab" },
-  templates: { icon: "sitemap", text: "typesTab" }
+  reference: { icon: "book", text: "referenceTab" }
 }
 /** The preference that remembers which tab `<ProgramPanel>` shows. */
 const TAB_PREF = "programTab"

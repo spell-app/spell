@@ -440,6 +440,11 @@ export const APP_TEXTS = {
   inspectorFilter: "Filter",
   inspectorNotDrawn: "Not drawn",
   inspectorNoParts: "Run the app to see its parts.",
+  // the Views card's sort (`<InspectorViews>`)
+  inspectorSort: "Sort",
+  inspectorSortDocument: "In document order",
+  inspectorSortName: "By name",
+  inspectorSortType: "By type",
   // an event's name, for people (`<EventsBand>`):  "event.<the DOM event>"
   "event.click": "click",
   "event.dblclick": "double click",
@@ -456,8 +461,12 @@ export const APP_TEXTS = {
   codeOutputHeader: "Compiled code",
   codeOutputOff: "Hide it",
   codeOutputClose: "Hide the compiled code",
-  thingsTab: "Things",
-  typesTab: "Templates",
+  referenceTab: "Reference",
+  // the Reference tab (`<SpellReference>`):  what you can use
+  referenceSpell: "Spell",
+  referenceNothing: "Pick something to see what it is.",
+  referenceShowInCode: "Show in code",
+  thisApp: "This app",
   javascriptTab: "JavaScript",
   treeTab: "Sentence",
 

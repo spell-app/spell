@@ -470,7 +470,7 @@ export class EditorStore extends Observable {
     // a program in another language draws with that language's tags (`<es-texto>`) and says its tests' lines in it,
     // as `<SpellAppRunner>` runs it:  Spell UI defines the tags first (epic `spanish` P21)
     const lang = project.wordsLanguages[0]
-    // the Things tab's words:  a words file per language its files are in, the one it speaks first
+    // the Inspector's words for its things:  a words file per language its files are in, the one it speaks first
     editor.programWords = wordsOfLanguages(project.wordsFiles.map((file) => SP.SpellWords.read(file.contents ?? "")))
     if (lang && lang !== "en") {
       const { RootLoader } = await import("spell/ui/components/ui-root")
@@ -566,11 +566,11 @@ export class EditorStore extends Observable {
   }
 
   ////////////////
-  // ## Explorers:  the Types and Things tabs
+  // ## The Reference, and the Inspector's words
   ////////////////
 
   /**
-   * Scope tree of current `project`, for the Types tab -- see `LSP.ScopeExplorer`.
+   * Scope tree of current `project`, for the Reference tab and the add menu's This app -- see `LSP.ScopeExplorer`.
    * - Worked out again after each compile, by `refreshScopes()`.
    * - `undefined` until the editor's language service has loaded, with Monaco.
    */
@@ -578,7 +578,7 @@ export class EditorStore extends Observable {
   accessor scopeTree: LSP.ScopeNode | undefined
 
   /**
-   * Spell's words for the members of the running program's types, for the Things tab -- see `SP.SpellWords`.
+   * Spell's words for the members of the running program's types, for the Inspector -- see `SP.SpellWords`.
    * - From the project's own words files, read as each run starts.
    */
   @prop()
@@ -621,8 +621,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Details of Types tab node or member `path` -- `null` if it isn't in the last tree.
-   * - An arrow:  handed to `<TypeExplorer loadDetails>` as is.
+   * Details of node or member `path` of the Reference tab's tree -- `null` if it isn't in the last tree.
+   * - An arrow:  `<SpellReference>` calls it as is.
    */
   scopeDetails = async (path: string): Promise<LSP.ScopeDetails | null> => {
     const { project } = editor
@@ -630,7 +630,7 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Show the place a Types tab link points to, e.g. `spell:/@spell/examples/Solitaire/Card.spell#L12`.
+   * Show the place a Reference link points to, e.g. `spell:/@spell/examples/Solitaire/Card.spell#L12`.
    * - The editor's own addresses (`AppAddresses`):  `spell:/<file.path>`, then the line, if any.
    * - Anything else opens in a new browser tab, e.g. a link in a docstring.
    */
