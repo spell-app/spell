@@ -1440,7 +1440,8 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       With `keepLastGood`, one whose first line is being edited keeps its early call until the next full parse.
     - Not yet:  an alias, `a card "is the (rank) of (suits)"`, used above its definition.
   - Then every PROPERTY they declare is known ahead by name (epic `language` P2, `parser.stubDeclaredProperties()`).
-    - So an action can read `the X` above the line declaring it, or in a later file.
+    - So an action can read `the X`, or `its X` (P17), above the line declaring it, or in a later file:
+      a `.spellml` view's drawing above its `<property>` tags too, through the file's skeleton.
     - `SpellParser.declaredProperties()` scans:  a body's `- it has a deck`, `- its "suit" is ...`, `- deck is a deck`;
       a top line's `a card has a suit`, `cards have a suit`, `the short rank of a card is ...`.
     - Only names, on the type (`P.TypeScope.propertiesAhead`, journaled):  the real declaration still records it.

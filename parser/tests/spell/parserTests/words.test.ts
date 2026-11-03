@@ -236,6 +236,27 @@ describe("what compiles", () => {
     ).compiled
     expect(plain).toContain("core.drawEach(this.cards, (card) => core.drawThing(card))")
   })
+
+  it("`if that fails say` is the failure's message, as `the message if that fails is` is (epic `language` P17)", () => {
+    const box = (rider: string, ...more: string[]) =>
+      compiled(
+        "a card is a view",
+        "recipe box is an app:",
+        '\t- its "cards" is a list of cards',
+        "\t- to draw it:",
+        "\t\tfor each card in its cards",
+        "\t\t\tdraw the card",
+        `\t\t${rider}`,
+        ...more
+      )
+    const short = box('if that fails say "No signal"')
+    expect(short.errors).toEqual([])
+    expect(short.compiled).toContain('failedSay: () => "No signal"')
+    expect(box('the message if that fails is "No signal"').compiled).toContain('failedSay: () => "No signal"')
+    const block = box("if that fails:", "\t\t\t<ui-text>Lost</ui-text>")
+    expect(block.errors).toEqual([])
+    expect(block.compiled).toContain("failed: () =>")
+  })
 })
 
 describe('I13:  is "Ana" or "Bo"', () => {
@@ -392,6 +413,17 @@ una receta es una vista:
     ]
     expect(inSpanish(CASA, ...riders("ninguno")).warnings.join()).toContain('"ninguna"')
     expect(inSpanish(CASA, ...riders("ninguna")).warnings).toEqual([])
+    const failed = inSpanish(
+      CASA,
+      "caja de recetas es una aplicación:",
+      '\t- sus "recetas guardadas" es cada receta',
+      "\t- para dibujarla:",
+      "\t\tpara cada receta en sus recetas guardadas",
+      "\t\t\tdibujar la receta",
+      '\t\tsi falla decir "Sin señal"'
+    )
+    expect(failed.errors).toEqual([])
+    expect(failed.compiled).toContain('failedSay: () => "Sin señal"')
   })
 })
 
