@@ -999,7 +999,7 @@ export class Section extends Thing {
           <ui-cards columns="4" doubling={true}>{core.drawThing(this.single)}</ui-cards>
         </>
       )
-    } else return core.drawRead(() => this.things, (thing: Thing) => core.drawThing(thing), { whole: () => <ui-section label={this.heading} hide-empty={true} />, items: () => <ui-cards columns="4" doubling={true} /> })
+    } else return core.drawRead(() => this.things, (thing: Thing) => core.drawThing(thing), { whole: () => <ui-section label={this.heading} hide-empty="" />, items: () => <ui-cards columns="4" doubling={true} /> })
   }
 }
 

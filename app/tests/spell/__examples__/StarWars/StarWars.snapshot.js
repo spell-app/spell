@@ -1105,7 +1105,7 @@ export class Section extends Thing {
         h("ui-header", { class: "section", size: "small" }, () => this.heading),
         h("ui-cards", { columns: "4", doubling: true }, () => core.drawThing(this.single))
       ]
-    } else return core.drawRead(() => this.things, (thing) => core.drawThing(thing), { whole: () => h("ui-section", { label: () => this.heading, "hide-empty": true }), items: () => h("ui-cards", { columns: "4", doubling: true }) })
+    } else return core.drawRead(() => this.things, (thing) => core.drawThing(thing), { whole: () => h("ui-section", { label: () => this.heading, "hide-empty": "" }), items: () => h("ui-cards", { columns: "4", doubling: true }) })
   }
 }
 
