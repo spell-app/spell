@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { startRecipeServers, type RecipeServers } from "spell/server/test/recipeDemo"
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
-import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
+import { PlaceIngest, descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceIngest"
 import { PoliteReader, READER_NAME } from "spell/parser/spell/ingest/PoliteReader"
 import {
   IngestStopped,
@@ -67,19 +67,28 @@ function fakeFetch(routes: Record<string, unknown>) {
   return { fetch, asked }
 }
 
-/** Files in memory. */
+/**
+ * Files in memory.
+ * - `descriptions` holds each one as it's read back, so a test changes it as a person would the file:
+ *   written and read through the shape on disk, `allCollections` and all.
+ */
 function memoryFiles(start: Record<string, string> = {}) {
   const texts = new Map(Object.entries(start))
   const descriptions = new Map<string, PlaceDescription>()
+  const listed: Array<{ file: string; path: string }> = []
   const files: IngestFiles = {
     read: async (path) => texts.get(path),
     write: async (path, text) => void texts.set(path, text),
-    readDescription: async (path) => descriptions.get(path),
-    writeDescription: async (path, description) => void descriptions.set(path, structuredClone(description)),
-    descriptionsBeside: async () => [...descriptions.keys()],
+    readDescription: async (path) => {
+      const held = descriptions.get(path)
+      return held && descriptionOnDisk(held)
+    },
+    writeDescription: async (path, description) =>
+      void descriptions.set(path, descriptionFromDisk(structuredClone(description))),
+    listInProject: async (file, path) => void listed.push({ file, path }),
     otherSpellBeside: async (path) => [...texts].filter(([other]) => other !== path).map(([, text]) => text)
   }
-  return { files, texts, descriptions }
+  return { files, texts, descriptions, listed }
 }
 
 /** A `PlaceIngest` on a fake source, with no agent, and no one to ask. */
@@ -101,15 +110,15 @@ function ingestOf(routes: Record<string, unknown>, more: Partial<IngestSettings>
 const STARS_SPELL = `stars is a web server at "${API}":
 	- its id is its "url"
 	- check it every 30 seconds
+	- it writes names like "hair_color"
 	- people live at "/people"
 	- planets live at "/planets"
-	- a person's hair color is its "hair_color"
 
 a "person" is a thing:
 	- it lives in stars
 	- its "name" is text
-	- its "height" is a number  // written as text there;  "unknown" reads as nothing
-	- its "mass" is a number  // written as text there
+	- its "height" is a number or "unknown"
+	- its "mass" is a number
 	- its "hair color" is text
 	- its "homeworld" is a planet
 	- its "films" is a list of text  // each an address
@@ -118,16 +127,34 @@ a "person" is a thing:
 a "planet" is a thing:
 	- it lives in stars
 	- its "name" is text
-	- its "population" is a number  // written as text there`
+	- its "population" is a number`
 
 describe("adding a source", () => {
+  test("its description is written once beside it, what every collection shares in allCollections, and named in the project", async () => {
+    const { ingest, descriptions, listed } = ingestOf(STARS)
+    await ingest.add({ address: API, into: "/Stars.api.spell", name: "stars" })
+    expect([...descriptions.keys()]).toEqual(["/Stars.api.json5"])
+    expect(listed).toEqual([{ file: "/Stars.api.spell", path: "/Stars.api.json5" }])
+    const onDisk = descriptionOnDisk(descriptions.get("/Stars.api.json5")!)
+    expect(onDisk.allCollections).toMatchObject({ idField: "url", idIsAnAddress: true })
+    expect(onDisk.collections.people).not.toHaveProperty("idField")
+    expect(onDisk.collections.people).toMatchObject({ type: "person", at: "/people" })
+    // a collection's own setting wins over what they all share
+    const back = descriptionFromDisk({
+      ...onDisk,
+      collections: { ...onDisk.collections, people: { ...onDisk.collections.people, idField: "name" } }
+    })
+    expect(back.collections.people!.idField).toBe("name")
+    expect(back.collections.planets!.idField).toBe("url")
+  })
+
   test("what swapi.info's shape needs:  links, numbers as text, ids only in an address, several collections", async () => {
     const { ingest, texts, descriptions } = ingestOf(STARS)
     const result = await ingest.add({ address: `${API}/`, into: "/Stars.spell", name: "stars" })
     expect(result.spell).toBe(STARS_SPELL)
     expect(texts.get("/Stars.spell")).toBe(`${STARS_SPELL}\n`)
-    expect(result.descriptionPath).toBe("/Stars.stars.place.json5")
-    const description = descriptions.get("/Stars.stars.place.json5")!
+    expect(result.descriptionPath).toBe("/Stars.json5")
+    const description = descriptions.get("/Stars.json5")!
     expect(description.about).toMatchObject({ kind: "web server", address: API, lookedAt: "2026-10-31T12:00:00.000Z" })
     expect(description.about.fingerprint).toMatch(/^[0-9a-f]{16}$/)
     expect(description.about.version).toBeUndefined()
@@ -159,7 +186,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`- its rows are its "results"`)
     expect(spell).toContain(`- its next page is its "next"`)
     expect(spell).toContain(`- its id is its "url"`)
-    const moves = descriptions.get("/M.moves-place.place.json5")!.collections.moves!
+    const moves = descriptions.get("/M.json5")!.collections.moves!
     expect(moves).toMatchObject({ rowsSeen: 3, rowsItSays: 900, paging: "next field" })
     expect(moves.readThrough).toEqual({ rows: 1 })
   })
@@ -171,7 +198,9 @@ describe("adding a source", () => {
     }
     const { ingest } = ingestOf(routes)
     const { spell, description } = await ingest.add({ address: API, into: "/S.spell", name: "ships place" })
-    expect(spell).toContain(`- a ship's "cost in credits" is its "cost_in_credits"`)
+    // its words find it, as the server spells it:  nothing to say
+    expect(spell).toContain(`- its "cost in credits" is a number\n`)
+    expect(spell).toContain(`- it writes names like "cost_in_credits"`)
     expect(spell).toContain(`- its "parts" is a part`)
     expect(spell).toContain(`a "part" is a thing:`)
     expect(spell).toContain(`- its "width" is a number`)
@@ -279,11 +308,11 @@ describe("which file", () => {
     expect(texts.get("/Mine.spell")).toBe(once)
   })
 
-  test("another place by that name stops;  and a Spanish file can't take English Spell", async () => {
-    const start = { "/Mine.spell": `stars is a web server at "https://other.test"\n` }
+  test("a second server stops:  one to a file;  and a Spanish file can't take English Spell", async () => {
+    const start = { "/Mine.spell": `elsewhere is a web server at "https://other.test"\n` }
     await expect(
       ingestOf(STARS, {}, start).ingest.add({ address: API, into: "/Mine.spell", name: "stars" })
-    ).rejects.toThrow(/--name/)
+    ).rejects.toThrow(/already holds elsewhere, and a server gets a file of its own/)
     await expect(ingestOf(STARS).ingest.add({ address: API, into: "/Mine.es.spell" })).rejects.toThrow(
       /another language/
     )
@@ -325,12 +354,12 @@ describe("the agent", () => {
     expect(prompts[0]).toContain("person-2")
     expect(prompts[0]).not.toContain("person-3")
     expect(spell).toContain(`galaxy is a web server`)
-    expect(spell).toContain(`- check it every 3600 seconds`)
+    expect(spell).toContain(`- check it every hour`)
     expect(spell).toContain(`- heroes live at "/people"`)
-    expect(spell).toContain(`- a hero's hair is its "hair_color"`)
+    expect(spell).toContain(`- its "hair" is text, stored as "hair_color"`)
     expect(spell).toContain(`a "planet" is a thing`)
     expect(spell).not.toMatch(/ghost|invented/)
-    const description = descriptions.get("/A.galaxy.place.json5")!
+    const description = descriptions.get("/A.json5")!
     expect(description.about).toMatchObject({ readBy: "a test", version: { says: "1.2", where: "its docs" } })
     expect(description.canDo.limits).toBe("100 a day")
     expect(description.notes).toContain("Everything is public.")
@@ -365,11 +394,7 @@ describe("a key", () => {
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
     expect(texts.get("/K.spell")).toContain(`- its key is the secret "STUFF_KEY"`)
-    const written = [
-      texts.get("/K.spell"),
-      JSON.stringify(descriptions.get("/K.stuff.place.json5")),
-      prompts.join("")
-    ].join("\n")
+    const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
     expect(description.collections.stuff_things!.readThrough).toEqual({ rows: 1 })
@@ -438,11 +463,15 @@ describe("looking again", () => {
   async function updated(
     edit: (text: string) => string,
     changed: Record<string, unknown>,
-    others: Record<string, string> = {}
+    others: Record<string, string> = {},
+    { olderTool = false }: { olderTool?: boolean } = {}
   ) {
     const added = ingestOf(STARS, {}, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
     const start = edit(added.texts.get("/Stars.spell")!)
+    // what the description says it wrote, written the same way:  an older version of the tool
+    const written = added.descriptions.get("/Stars.json5")!
+    if (olderTool) written.spell = edit(written.spell.join("\n")).split("\n")
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
       fetch,
@@ -452,13 +481,29 @@ describe("looking again", () => {
       sleep: async () => {}
     })
     added.texts.set("/Stars.spell", start)
-    const [result] = await ingest.update("/Stars.spell")
+    const result = await ingest.update("/Stars.spell")
     return {
-      result: result!,
+      result,
       text: added.texts.get("/Stars.spell")!,
-      description: added.descriptions.get("/Stars.stars.place.json5")!
+      description: added.descriptions.get("/Stars.json5")!
     }
   }
+
+  test("a file an older version wrote, in words it no longer writes:  put in today's, each line where it was", async () => {
+    const older = (text: string) =>
+      text
+        .replace(`\t- it writes names like "hair_color"\n`, `\t- a person's hair color is its "hair_color"\n`)
+        .replace(
+          `- its "height" is a number or "unknown"`,
+          `- its "height" is a number  // written as text there;  "unknown" reads as nothing`
+        )
+    const { result, text } = await updated(older, {}, {}, { olderTool: true })
+    expect(text).toContain(`\t- its "height" is a number or "unknown"\n\t- its "mass" is a number\n`)
+    expect(text).toContain(`\t- planets live at "/planets"\n\t- it writes names like "hair_color"\n`)
+    expect(text).not.toMatch(/written as text|hair color is its/)
+    expect(result.couldntChange).toEqual([])
+    expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  - a person's hair color/)
+  })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {
     const { result, text } = await updated((same) => same, {})
@@ -539,12 +584,12 @@ describe("looking again", () => {
   test("a person's own key in the description stays, and the words chosen", async () => {
     const added = ingestOf(STARS)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
-    const held = added.descriptions.get("/Stars.stars.place.json5")!
+    const held = added.descriptions.get("/Stars.json5")!
     Object.assign(held, { myNotes: "ask Sam" })
     held.collections.people!.fields.height!.means = "In centimetres"
-    const [result] = await added.ingest.update("/Stars.spell")
-    const description = added.descriptions.get("/Stars.stars.place.json5")! as PlaceDescription & { myNotes?: string }
-    expect(result!.changes).toEqual([])
+    const result = await added.ingest.update("/Stars.spell")
+    const description = added.descriptions.get("/Stars.json5")! as PlaceDescription & { myNotes?: string }
+    expect(result.changes).toEqual([])
     expect(description.myNotes).toBe("ask Sam")
     expect(description.collections.people!.fields.height!.means).toBe("In centimetres")
   })

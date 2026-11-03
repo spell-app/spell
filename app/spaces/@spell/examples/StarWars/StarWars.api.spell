@@ -1,0 +1,127 @@
+## Star Wars:  where it all lives
+// A server other people run, and what it holds.  What's drawn and done with it is in StarWars.spellml;
+// the pictures and what they're of come from Wikipedia, in Wikipedia.api.spell.
+// `star wars` is what this wrote, from looking at the server:
+//   spell place ingest https://swapi.py4e.com/api --into StarWars.api.spell --name "star wars"
+// `spell place update StarWars.api.spell` looks again, and changes only this file and StarWars.api.json5.
+//
+// Star Wars belongs to Lucasfilm and Disney.
+// It's asked for as it runs, never kept here, and the page says where it comes from.
+
+star wars is a web server at "https://swapi.py4e.com/api":
+	- its id is its "url"
+	- its rows are its "results"
+	- its next page is its "next"
+	- check it every day
+	- characters live at "/people"
+	- planets live at "/planets"
+	- films live at "/films"
+	- species live at "/species"
+	- vehicles live at "/vehicles"
+	- starships live at "/starships"
+	- it writes names like "hair_color"
+
+a "character" is a thing:
+	- it lives in star wars
+	- its "name" is text
+	- its "height" is a number or "unknown"
+	- its "mass" is a number or "unknown"
+	- its "hair color" is text
+	- its "skin color" is text
+	- its "eye color" is text
+	- its "birth year" is text
+	- its "gender" is text
+	- its "homeworld" is a planet
+	- its "films" is a list of films
+	- its "species" is a list of species
+	- its "vehicles" is a list of vehicles
+	- its "starships" is a list of starships
+	- its "created" is a date
+	- its "edited" is a date
+
+a "planet" is a thing:
+	- it lives in star wars
+	- its "name" is text
+	- its "rotation period" is a number or "unknown"
+	- its "orbital period" is a number or "unknown"
+	- its "diameter" is a number
+	- its "climate" is text
+	- its "gravity" is text
+	- its "terrain" is text
+	- its "surface water" is a number or "unknown"
+	- its "population" is a number or "unknown"
+	- its "residents" is a list of characters
+	- its "films" is a list of films
+	- its "created" is a date
+	- its "edited" is a date
+
+a "film" is a thing:
+	- it lives in star wars
+	- its "title" is text
+	- its "episode id" is a number
+	- its "opening crawl" is text
+	- its "director" is text
+	- its "producer" is text
+	- its "release date" is a date
+	- its "characters" is a list of characters
+	- its "planets" is a list of planets
+	- its "starships" is a list of starships
+	- its "vehicles" is a list of vehicles
+	- its "species" is a list of species
+	- its "created" is a date
+	- its "edited" is a date
+
+a "species" is a thing:
+	- it lives in star wars
+	- its "name" is text
+	- its "classification" is text
+	- its "designation" is text
+	- its "average height" is a number or "n/a" or "unknown"
+	- its "skin colors" is text
+	- its "hair colors" is text
+	- its "eye colors" is text
+	- its "average lifespan" is text
+	- its "homeworld" is a planet
+	- its "language" is text
+	- its "people" is a list of characters
+	- its "films" is a list of films
+	- its "created" is a date
+	- its "edited" is a date
+
+a "vehicle" is a thing:
+	- it lives in star wars
+	- its "name" is text
+	- its "model" is text
+	- its "manufacturer" is text
+	- its "cost in credits" is a number or "unknown"
+	- its "length" is a number
+	- its "max atmosphering speed" is a number
+	- its "crew" is a number
+	- its "passengers" is a number
+	- its "cargo capacity" is a number or "none" or "unknown"
+	- its "consumables" is text
+	- its "vehicle class" is text
+	- its "pilots" is a list of characters
+	- its "films" is a list of films
+	- its "created" is a date
+	- its "edited" is a date
+
+a "starship" is a thing:
+	- it lives in star wars
+	- its "name" is text
+	- its "model" is text
+	- its "manufacturer" is text
+	- its "cost in credits" is a number or "unknown"
+	- its "length" is a number
+	- its "max atmosphering speed" is text
+	- its "crew" is text
+	- its "passengers" is a number or "n/a" or "unknown"
+	- its "cargo capacity" is a number or "unknown"
+	- its "consumables" is text
+	- its "hyperdrive rating" is a number or "unknown"
+	- its "mglt" is a number or "unknown"
+	- its "starship class" is text
+	- its "pilots" is a list of characters
+	- its "films" is a list of films
+	- its "created" is a date
+	- its "edited" is a date

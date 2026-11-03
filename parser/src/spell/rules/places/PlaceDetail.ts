@@ -15,6 +15,8 @@ export type PlaceDetailValue = {
   accounts?: string[]
   rowsIn?: string
   nextPageIn?: string
+  namesLike?: string
+  numbersLike?: string
 }
 
 /**

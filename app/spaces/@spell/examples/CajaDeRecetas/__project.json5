@@ -1,9 +1,13 @@
 {
   "title": "Caja de recetas",
-  "description": "Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea",
+  "description": "Recetas en tarjetas:  búscalas, agrégalas, cámbialas mientras escribes, quítalas y deshazlo.  Dónde se guardan lo dice una sola línea de su archivo de API, CajaDeRecetas.api.es.spell",
   "imports": [
     {
-      "path": "/CajaDeRecetas.es.spell",
+      "path": "/CajaDeRecetas.api.es.spell",
+      "active": true
+    },
+    {
+      "path": "/CajaDeRecetas.es.spellml",
       "active": true
     },
     {

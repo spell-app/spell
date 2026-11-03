@@ -44,7 +44,7 @@
  */
 import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
 // By file:  the rest of `spell/util/places` has no business in the core
-import { NO_NUMBER, NUMBER_AS_TEXT } from "spell/util/places/places.types"
+import { NO_NUMBER, numberInText, type DecimalMark } from "spell/util/places/places.types"
 import { parseRef, refText, type SavedRef } from "spell/util/places/refs"
 
 import { programThings, core } from "./core"
@@ -526,21 +526,85 @@ function isReference(json: unknown): json is Record<string, unknown> {
 /**
  * `value`, a saved row's text, as what `Class` declares `key` to be:
  * - a date:  a `Date`, from its ISO text
- * - a number:  a number, from its digits (`"172"`, `"1,358"`), which is how many web servers write them (epic `data` P18);
- *   a word for no number at all (`NO_NUMBER`) reads as nothing there, which a number shows as its usual 0
- * - else, and any other text:  `value`, as it is, so a number that's wrong still says so
+ * - a number:  a number, from its digits (`"172"`, `"1,358"`, `"1 200"`, `"1.200,5"`), which is how many web servers write them
+ *   (epic `data` P18, P23;  `numberInText()`), its marks read as its place writes them (`readNumbersAs()`)
+ *   - a word for no number at all reads as nothing, quietly:  the property's own (`or "unknown"`, `PropInfo.nothingAs`), or one
+ *     of the usual ones (`NO_NUMBER`)
+ *   - any other text:  nothing, with a warning on the program's console, once per field
+ *   - one that came as text is written back as text (`valueAsWritten()`)
+ * - else, and any other text:  `value`, as it is
  * - a `null` where a property's declared:  nothing, as that's how a row says it has none
  */
 export function valueAsDeclared(Class: SpellClass, key: string, value: unknown): unknown {
   if (value === null) return schemaOf(Class).info(key) ? undefined : value
   if (typeof value !== "string") return value
-  const declared = schemaOf(Class).info(key)?.type
-  if (declared === "date") {
+  const info = schemaOf(Class).info(key)
+  if (info?.type === "date") {
     const date = new Date(value)
     return Number.isNaN(date.getTime()) ? value : date
   }
-  if (declared !== "number") return value
+  if (info?.type !== "number") return value
+  sentAsText(Class).add(key)
   // nothing, not 0:  a height nobody knows isn't a height of 0
-  if (NO_NUMBER.test(value)) return null
-  return NUMBER_AS_TEXT.test(value) ? Number(value.replaceAll(",", "")) : value
+  if (isNothingWord(info.nothingAs, value) || NO_NUMBER.test(value)) return undefined
+  const { mark, unclear } = NUMBER_MARKS.get(Class) ?? {}
+  const number = numberInText(value, mark, unclear)
+  if (number === undefined) warnNotANumber(Class, key, value)
+  return number
+}
+
+/**
+ * `json`, what a program set `Class`'s `key` to, as its place wants it back:  the other way round from `valueAsDeclared()`.
+ * - A number that came as text goes back as text, its mark the place's:  `1.5` as `"1,5"`, where it writes numbers that way.
+ * - Nothing, where the property names its word for it (`or "unknown"`):  that word.
+ * - Anything else:  `json`, as it is.
+ */
+export function valueAsWritten(Class: SpellClass, key: string, json: unknown): unknown {
+  const info = schemaOf(Class).info(key)
+  if (info?.type !== "number") return json
+  if (json === undefined || json === null) return info.nothingAs?.[0] ?? json
+  if (typeof json !== "number" || !SENT_AS_TEXT.get(Class)?.has(key)) return json
+  const text = String(json)
+  return NUMBER_MARKS.get(Class)?.mark === "," ? text.replace(".", ",") : text
+}
+
+/**
+ * SIDE EFFECT:  `Class`'s numbers, from its place, read with these marks from now on -- see `valueAsDeclared()`.
+ * - `mark`:  the fraction's mark the place writes (`it writes numbers like "1.200,5"`).
+ * - `unclear`:  how a number the text can't settle reads, `1,200`:  the program's language's way.
+ */
+export function readNumbersAs(Class: SpellClass, marks: { mark?: DecimalMark; unclear?: DecimalMark }): void {
+  NUMBER_MARKS.set(Class, marks)
+}
+
+/** How each type's place writes numbers -- see `readNumbersAs()`. */
+const NUMBER_MARKS = new WeakMap<Function, { mark?: DecimalMark; unclear?: DecimalMark }>()
+
+/** Each type's number fields its place sent as text:  written back as text. */
+const SENT_AS_TEXT = new WeakMap<Function, Set<string>>()
+
+/** The fields already warned about, `Recipe.servings`:  once each. */
+const WARNED_NOT_A_NUMBER = new Set<string>()
+
+/** `Class`'s fields its place sent as text. */
+function sentAsText(Class: SpellClass): Set<string> {
+  let fields = SENT_AS_TEXT.get(Class)
+  if (!fields) SENT_AS_TEXT.set(Class, (fields = new Set()))
+  return fields
+}
+
+/** Is `value` one of a property's words for no number, in any case? */
+function isNothingWord(words: readonly string[] | undefined, value: string): boolean {
+  const said = value.trim().toLowerCase()
+  return !!words?.some((word) => word.trim().toLowerCase() === said)
+}
+
+/** Say once that `Class`'s `key` came as text that isn't a number, which reads as nothing. */
+function warnNotANumber(Class: SpellClass, key: string, value: string): void {
+  const field = `${Class.name}.${key}`
+  if (WARNED_NOT_A_NUMBER.has(field)) return
+  WARNED_NOT_A_NUMBER.add(field)
+  core.console.warn(
+    `${field} is a number, but its place sent "${value}", which reads as nothing;  if that's how it says it has none, say so:  \`is a number or "${value}"\``
+  )
 }

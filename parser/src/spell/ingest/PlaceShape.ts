@@ -1,4 +1,4 @@
-import { NO_NUMBER, NUMBER_AS_TEXT } from "spell/util/places/places.types"
+import { decimalMarkIn, NO_NUMBER, numberInText } from "spell/util/places/places.types"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { collectionNameFor } from "spell/parser/spell/rules/places/places.shared"
@@ -108,7 +108,9 @@ function exampleOf(values: readonly unknown[]): { example?: unknown } {
 }
 
 /** What `values`, none of them empty, hold:  all of them have to agree, or it's text. */
-function kindOf(values: readonly unknown[]): Pick<FieldDescription, "type" | "writtenAsText" | "noNumberWords"> {
+function kindOf(
+  values: readonly unknown[]
+): Pick<FieldDescription, "type" | "writtenAsText" | "noNumberWords" | "decimalComma"> {
   if (!values.length) return { type: "nothing" }
   if (values.every((value) => typeof value === "number")) return { type: "number" }
   if (values.every((value) => typeof value === "boolean")) return { type: "yes or no" }
@@ -128,14 +130,21 @@ function kindOf(values: readonly unknown[]): Pick<FieldDescription, "type" | "wr
 }
 
 /** What `texts` hold:  an address, a date, a number written as text, or just text. */
-function kindOfTexts(texts: readonly string[]): Pick<FieldDescription, "type" | "writtenAsText" | "noNumberWords"> {
+function kindOfTexts(
+  texts: readonly string[]
+): Pick<FieldDescription, "type" | "writtenAsText" | "noNumberWords" | "decimalComma"> {
   const filled = texts.filter((text) => text.trim())
   if (filled.length && filled.every((text) => IS_LINK.test(text))) return { type: "link" }
   if (filled.length && filled.every((text) => IS_DATE.test(text))) return { type: "date" }
   const noNumberWords = [...new Set(filled.filter((text) => NO_NUMBER.test(text)))]
-  const numbers = filled.filter((text) => NUMBER_AS_TEXT.test(text))
+  const numbers = filled.filter((text) => numberInText(text) !== undefined)
   if (numbers.length && numbers.length + filled.filter((text) => NO_NUMBER.test(text)).length === filled.length) {
-    return { type: "number", writtenAsText: true, ...(noNumberWords.length && { noNumberWords }) }
+    return {
+      type: "number",
+      writtenAsText: true,
+      ...(noNumberWords.length && { noNumberWords }),
+      ...(decimalMarkIn(numbers) === "," && { decimalComma: true })
+    }
   }
   return { type: "text" }
 }

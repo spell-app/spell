@@ -14,7 +14,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
   translate  translate check  translate fix  translate speedtest
-  place ingest
+  place ingest  place update
   ```
 
   - Owen's names (epic `repo-split` P13):
@@ -81,7 +81,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [translateTimes.ts](translateTimes.ts), here, copies each project to a scratch folder (without its own lists),
     runs it in each mode (`cold`, `glossary`, `update`) and tier, prints a table of min, median and max, writes
     `--json`, and deletes every scratch folder, a failed run's too
-- `spell place ingest` (epic `data` P18) needs no project, so its work is here too:
+- `spell place ingest` and `spell place update` (epic `data` P18) need no project, so their work is here too:
   - [placeIngest.ts](placeIngest.ts):  the terminal, the disk, and the read through the Spell, `core` run in this process,
     with every request through `PoliteReader`, so it can't write
   - the steps are spell's [ingest/](../spell/ingest/), `PlaceIngest`, handed all of those, with the question (`AskSomeone`):
@@ -112,5 +112,5 @@ As WWOD §20, plus:
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
   the command end to end, the app folder's [cli.test.ts](../../../app/tests/cli/cli.test.ts).
-- `spell place ingest`'s:  [PlaceIngest.test.ts](../../tests/spell/ingest/PlaceIngest.test.ts), on a source it writes and the demo's real servers,
+- `spell place ingest`'s and `update`'s:  [PlaceIngest.test.ts](../../tests/spell/ingest/PlaceIngest.test.ts), on a source it writes and the demo's real servers,
   with a stubbed agent and a real read through the Spell.

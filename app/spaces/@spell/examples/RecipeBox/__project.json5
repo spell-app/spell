@@ -1,9 +1,13 @@
 {
   "title": "Recipe Box",
-  "description": "Your recipes on cards:  find, add, change as you type, remove and undo.  One line says where they're kept",
+  "description": "Your recipes on cards:  find, add, change as you type, remove and undo.  Where they're kept is one line of its API file, RecipeBox.api.spell",
   "imports": [
     {
-      "path": "/RecipeBox.spell",
+      "path": "/RecipeBox.api.spell",
+      "active": true
+    },
+    {
+      "path": "/RecipeBox.spellml",
       "active": true
     },
     {

@@ -6,8 +6,7 @@ import {
   type PlaceCapabilities,
   type PlaceContext,
   type PlaceErrorKind,
-  type WhyNotWritable,
-  type PlaceRow
+  type WhyNotWritable
 } from "./places.types"
 
 /** The header a change's id goes in, unless the place says otherwise:  a server that remembers them makes it once. */
@@ -154,16 +153,6 @@ export function valueAt(value: unknown, path: string | undefined): unknown {
   let at = value
   for (const name of path.split(".")) at = (at as Record<string, unknown> | null | undefined)?.[name]
   return at
-}
-
-/** `row`, with each field named as `names` says:  a field it doesn't name keeps its name. */
-export function renamed(row: PlaceRow, names: Readonly<Record<string, string>>): PlaceRow {
-  return Object.fromEntries(Object.entries(row).map(([field, value]) => [names[field] ?? field, value]))
-}
-
-/** Which way round `names` is:  `{ a: "b" }` => `{ b: "a" }`. */
-export function turnedRound(names: Readonly<Record<string, string>>): Record<string, string> {
-  return Object.fromEntries(Object.entries(names).map(([ours, theirs]) => [theirs, ours]))
 }
 
 /** The usual way a key goes on a request. */

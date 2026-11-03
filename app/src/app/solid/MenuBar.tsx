@@ -569,7 +569,12 @@ export function SpellMenuRows(props: {
   items: MenuItem[]
   itemFor: (item: SpellMenuAction) => JSX.Element
 }): JSX.Element {
-  return <For each={props.items}>{(item) => (item.kind === "action" ? props.itemFor(item) : <Divider />)}</For>
+  // a sub-menu (epic `language` P19) isn't drawn here yet:  the editor's own menus have none
+  return (
+    <For each={props.items}>
+      {(item) => (item.kind === "action" ? props.itemFor(item) : item.kind === "separator" ? <Divider /> : null)}
+    </For>
+  )
 }
 
 /**

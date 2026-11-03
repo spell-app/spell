@@ -28,101 +28,101 @@
     {
       "type": "Character",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:2257-2866"
+      "defined": "/StarWars.api.spell:1008-1533"
     },
     {
       "property": "name",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2311-2329"
+      "defined": "/StarWars.api.spell:1062-1080"
     },
     {
       "property": "height",
       "of": "Character",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:2333-2357"
+      "defined": "/StarWars.api.spell:1084-1121"
     },
     {
       "property": "mass",
       "of": "Character",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:2416-2438"
+      "defined": "/StarWars.api.spell:1125-1160"
     },
     {
       "property": "hair_color",
       "asWritten": "hair color",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2497-2521"
+      "defined": "/StarWars.api.spell:1164-1188"
     },
     {
       "property": "skin_color",
       "asWritten": "skin color",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2525-2549"
+      "defined": "/StarWars.api.spell:1192-1216"
     },
     {
       "property": "eye_color",
       "asWritten": "eye color",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2553-2576"
+      "defined": "/StarWars.api.spell:1220-1243"
     },
     {
       "property": "birth_year",
       "asWritten": "birth year",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2580-2604"
+      "defined": "/StarWars.api.spell:1247-1271"
     },
     {
       "property": "gender",
       "of": "Character",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2608-2628"
+      "defined": "/StarWars.api.spell:1275-1295"
     },
     {
       "property": "homeworld",
       "of": "Character",
       "datatype": "Planet",
-      "defined": "/StarWarsApi.spell:2632-2659"
+      "defined": "/StarWars.api.spell:1299-1326"
     },
     {
       "property": "films",
       "of": "Character",
       "datatype": "list of films",
-      "defined": "/StarWarsApi.spell:2663-2693"
+      "defined": "/StarWars.api.spell:1330-1360"
     },
     {
       "property": "species",
       "of": "Character",
       "datatype": "list of species",
-      "defined": "/StarWarsApi.spell:2697-2731"
+      "defined": "/StarWars.api.spell:1364-1398"
     },
     {
       "property": "vehicles",
       "of": "Character",
       "datatype": "list of vehicles",
-      "defined": "/StarWarsApi.spell:2735-2771"
+      "defined": "/StarWars.api.spell:1402-1438"
     },
     {
       "property": "starships",
       "of": "Character",
       "datatype": "list of starships",
-      "defined": "/StarWarsApi.spell:2775-2813"
+      "defined": "/StarWars.api.spell:1442-1480"
     },
     {
       "property": "created",
       "of": "Character",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:2817-2840"
+      "defined": "/StarWars.api.spell:1484-1507"
     },
     {
       "property": "edited",
       "of": "Character",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:2844-2866"
+      "defined": "/StarWars.api.spell:1511-1533"
     },
     {
       "property": "card",
@@ -164,88 +164,88 @@
     {
       "type": "Planet",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:2868-3558"
+      "defined": "/StarWars.api.spell:1535-2031"
     },
     {
       "property": "name",
       "of": "Planet",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:2919-2937"
+      "defined": "/StarWars.api.spell:1586-1604"
     },
     {
       "property": "rotation_period",
       "asWritten": "rotation period",
       "of": "Planet",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:2941-2974"
+      "defined": "/StarWars.api.spell:1608-1654"
     },
     {
       "property": "orbital_period",
       "asWritten": "orbital period",
       "of": "Planet",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:3033-3065"
+      "defined": "/StarWars.api.spell:1658-1703"
     },
     {
       "property": "diameter",
       "of": "Planet",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:3124-3150"
+      "defined": "/StarWars.api.spell:1707-1733"
     },
     {
       "property": "climate",
       "of": "Planet",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3180-3201"
+      "defined": "/StarWars.api.spell:1737-1758"
     },
     {
       "property": "gravity",
       "of": "Planet",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3205-3226"
+      "defined": "/StarWars.api.spell:1762-1783"
     },
     {
       "property": "terrain",
       "of": "Planet",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3230-3251"
+      "defined": "/StarWars.api.spell:1787-1808"
     },
     {
       "property": "surface_water",
       "asWritten": "surface water",
       "of": "Planet",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:3255-3286"
+      "defined": "/StarWars.api.spell:1812-1856"
     },
     {
       "property": "population",
       "of": "Planet",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:3345-3373"
+      "defined": "/StarWars.api.spell:1860-1901"
     },
     {
       "property": "residents",
       "of": "Planet",
       "datatype": "list of characters",
-      "defined": "/StarWarsApi.spell:3432-3471"
+      "defined": "/StarWars.api.spell:1905-1944"
     },
     {
       "property": "films",
       "of": "Planet",
       "datatype": "list of films",
-      "defined": "/StarWarsApi.spell:3475-3505"
+      "defined": "/StarWars.api.spell:1948-1978"
     },
     {
       "property": "created",
       "of": "Planet",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:3509-3532"
+      "defined": "/StarWars.api.spell:1982-2005"
     },
     {
       "property": "edited",
       "of": "Planet",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:3536-3558"
+      "defined": "/StarWars.api.spell:2009-2031"
     },
     {
       "property": "card",
@@ -281,88 +281,88 @@
     {
       "type": "Film",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:3560-4030"
+      "defined": "/StarWars.api.spell:2033-2503"
     },
     {
       "property": "title",
       "of": "Film",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3609-3628"
+      "defined": "/StarWars.api.spell:2082-2101"
     },
     {
       "property": "episode_id",
       "asWritten": "episode id",
       "of": "Film",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:3632-3660"
+      "defined": "/StarWars.api.spell:2105-2133"
     },
     {
       "property": "opening_crawl",
       "asWritten": "opening crawl",
       "of": "Film",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3664-3691"
+      "defined": "/StarWars.api.spell:2137-2164"
     },
     {
       "property": "director",
       "of": "Film",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3695-3717"
+      "defined": "/StarWars.api.spell:2168-2190"
     },
     {
       "property": "producer",
       "of": "Film",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:3721-3743"
+      "defined": "/StarWars.api.spell:2194-2216"
     },
     {
       "property": "release_date",
       "asWritten": "release date",
       "of": "Film",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:3747-3775"
+      "defined": "/StarWars.api.spell:2220-2248"
     },
     {
       "property": "characters",
       "of": "Film",
       "datatype": "list of characters",
-      "defined": "/StarWarsApi.spell:3779-3819"
+      "defined": "/StarWars.api.spell:2252-2292"
     },
     {
       "property": "planets",
       "of": "Film",
       "datatype": "list of planets",
-      "defined": "/StarWarsApi.spell:3823-3857"
+      "defined": "/StarWars.api.spell:2296-2330"
     },
     {
       "property": "starships",
       "of": "Film",
       "datatype": "list of starships",
-      "defined": "/StarWarsApi.spell:3861-3899"
+      "defined": "/StarWars.api.spell:2334-2372"
     },
     {
       "property": "vehicles",
       "of": "Film",
       "datatype": "list of vehicles",
-      "defined": "/StarWarsApi.spell:3903-3939"
+      "defined": "/StarWars.api.spell:2376-2412"
     },
     {
       "property": "species",
       "of": "Film",
       "datatype": "list of species",
-      "defined": "/StarWarsApi.spell:3943-3977"
+      "defined": "/StarWars.api.spell:2416-2450"
     },
     {
       "property": "created",
       "of": "Film",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:3981-4004"
+      "defined": "/StarWars.api.spell:2454-2477"
     },
     {
       "property": "edited",
       "of": "Film",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:4008-4030"
+      "defined": "/StarWars.api.spell:2481-2503"
     },
     {
       "property": "card",
@@ -418,96 +418,96 @@
     {
       "type": "Species",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:4032-4565"
+      "defined": "/StarWars.api.spell:2505-2998"
     },
     {
       "property": "name",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4084-4102"
+      "defined": "/StarWars.api.spell:2557-2575"
     },
     {
       "property": "classification",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4106-4134"
+      "defined": "/StarWars.api.spell:2579-2607"
     },
     {
       "property": "designation",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4138-4163"
+      "defined": "/StarWars.api.spell:2611-2636"
     },
     {
       "property": "average_height",
       "asWritten": "average height",
       "of": "Species",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4167-4199"
+      "defined": "/StarWars.api.spell:2640-2694"
     },
     {
       "property": "skin_colors",
       "asWritten": "skin colors",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4265-4290"
+      "defined": "/StarWars.api.spell:2698-2723"
     },
     {
       "property": "hair_colors",
       "asWritten": "hair colors",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4294-4319"
+      "defined": "/StarWars.api.spell:2727-2752"
     },
     {
       "property": "eye_colors",
       "asWritten": "eye colors",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4323-4347"
+      "defined": "/StarWars.api.spell:2756-2780"
     },
     {
       "property": "average_lifespan",
       "asWritten": "average lifespan",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4351-4381"
+      "defined": "/StarWars.api.spell:2784-2814"
     },
     {
       "property": "homeworld",
       "of": "Species",
       "datatype": "Planet",
-      "defined": "/StarWarsApi.spell:4385-4412"
+      "defined": "/StarWars.api.spell:2818-2845"
     },
     {
       "property": "language",
       "of": "Species",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4416-4438"
+      "defined": "/StarWars.api.spell:2849-2871"
     },
     {
       "property": "people",
       "of": "Species",
       "datatype": "list of characters",
-      "defined": "/StarWarsApi.spell:4442-4478"
+      "defined": "/StarWars.api.spell:2875-2911"
     },
     {
       "property": "films",
       "of": "Species",
       "datatype": "list of films",
-      "defined": "/StarWarsApi.spell:4482-4512"
+      "defined": "/StarWars.api.spell:2915-2945"
     },
     {
       "property": "created",
       "of": "Species",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:4516-4539"
+      "defined": "/StarWars.api.spell:2949-2972"
     },
     {
       "property": "edited",
       "of": "Species",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:4543-4565"
+      "defined": "/StarWars.api.spell:2976-2998"
     },
     {
       "property": "card",
@@ -543,101 +543,101 @@
     {
       "type": "Vehicle",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:4567-5302"
+      "defined": "/StarWars.api.spell:3000-3549"
     },
     {
       "property": "name",
       "of": "Vehicle",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4619-4637"
+      "defined": "/StarWars.api.spell:3052-3070"
     },
     {
       "property": "model",
       "of": "Vehicle",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4641-4660"
+      "defined": "/StarWars.api.spell:3074-3093"
     },
     {
       "property": "manufacturer",
       "of": "Vehicle",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:4664-4690"
+      "defined": "/StarWars.api.spell:3097-3123"
     },
     {
       "property": "cost_in_credits",
       "asWritten": "cost in credits",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4694-4727"
+      "defined": "/StarWars.api.spell:3127-3173"
     },
     {
       "property": "length",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4786-4810"
+      "defined": "/StarWars.api.spell:3177-3201"
     },
     {
       "property": "max_atmosphering_speed",
       "asWritten": "max atmosphering speed",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4840-4880"
+      "defined": "/StarWars.api.spell:3205-3245"
     },
     {
       "property": "crew",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4910-4932"
+      "defined": "/StarWars.api.spell:3249-3271"
     },
     {
       "property": "passengers",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:4962-4990"
+      "defined": "/StarWars.api.spell:3275-3303"
     },
     {
       "property": "cargo_capacity",
       "asWritten": "cargo capacity",
       "of": "Vehicle",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5020-5052"
+      "defined": "/StarWars.api.spell:3307-3362"
     },
     {
       "property": "consumables",
       "of": "Vehicle",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5119-5144"
+      "defined": "/StarWars.api.spell:3366-3391"
     },
     {
       "property": "vehicle_class",
       "asWritten": "vehicle class",
       "of": "Vehicle",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5148-5175"
+      "defined": "/StarWars.api.spell:3395-3422"
     },
     {
       "property": "pilots",
       "of": "Vehicle",
       "datatype": "list of characters",
-      "defined": "/StarWarsApi.spell:5179-5215"
+      "defined": "/StarWars.api.spell:3426-3462"
     },
     {
       "property": "films",
       "of": "Vehicle",
       "datatype": "list of films",
-      "defined": "/StarWarsApi.spell:5219-5249"
+      "defined": "/StarWars.api.spell:3466-3496"
     },
     {
       "property": "created",
       "of": "Vehicle",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:5253-5276"
+      "defined": "/StarWars.api.spell:3500-3523"
     },
     {
       "property": "edited",
       "of": "Vehicle",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:5280-5302"
+      "defined": "/StarWars.api.spell:3527-3549"
     },
     {
       "property": "card",
@@ -661,114 +661,114 @@
     {
       "type": "Starship",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:5304-6184"
+      "defined": "/StarWars.api.spell:3551-4197"
     },
     {
       "property": "name",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5357-5375"
+      "defined": "/StarWars.api.spell:3604-3622"
     },
     {
       "property": "model",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5379-5398"
+      "defined": "/StarWars.api.spell:3626-3645"
     },
     {
       "property": "manufacturer",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5402-5428"
+      "defined": "/StarWars.api.spell:3649-3675"
     },
     {
       "property": "cost_in_credits",
       "asWritten": "cost in credits",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5432-5465"
+      "defined": "/StarWars.api.spell:3679-3725"
     },
     {
       "property": "length",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5524-5548"
+      "defined": "/StarWars.api.spell:3729-3753"
     },
     {
       "property": "max_atmosphering_speed",
       "asWritten": "max atmosphering speed",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5578-5614"
+      "defined": "/StarWars.api.spell:3757-3793"
     },
     {
       "property": "crew",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5618-5636"
+      "defined": "/StarWars.api.spell:3797-3815"
     },
     {
       "property": "passengers",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5640-5668"
+      "defined": "/StarWars.api.spell:3819-3869"
     },
     {
       "property": "cargo_capacity",
       "asWritten": "cargo capacity",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5734-5766"
+      "defined": "/StarWars.api.spell:3873-3918"
     },
     {
       "property": "consumables",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:5825-5850"
+      "defined": "/StarWars.api.spell:3922-3947"
     },
     {
       "property": "hyperdrive_rating",
       "asWritten": "hyperdrive rating",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5854-5889"
+      "defined": "/StarWars.api.spell:3951-3999"
     },
     {
       "property": "mglt",
       "of": "Starship",
       "datatype": "number",
-      "defined": "/StarWarsApi.spell:5948-5970"
+      "defined": "/StarWars.api.spell:4003-4038"
     },
     {
       "property": "starship_class",
       "asWritten": "starship class",
       "of": "Starship",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:6029-6057"
+      "defined": "/StarWars.api.spell:4042-4070"
     },
     {
       "property": "pilots",
       "of": "Starship",
       "datatype": "list of characters",
-      "defined": "/StarWarsApi.spell:6061-6097"
+      "defined": "/StarWars.api.spell:4074-4110"
     },
     {
       "property": "films",
       "of": "Starship",
       "datatype": "list of films",
-      "defined": "/StarWarsApi.spell:6101-6131"
+      "defined": "/StarWars.api.spell:4114-4144"
     },
     {
       "property": "created",
       "of": "Starship",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:6135-6158"
+      "defined": "/StarWars.api.spell:4148-4171"
     },
     {
       "property": "edited",
       "of": "Starship",
       "datatype": "date",
-      "defined": "/StarWarsApi.spell:6162-6184"
+      "defined": "/StarWars.api.spell:4175-4197"
     },
     {
       "property": "card",
@@ -790,40 +790,45 @@
       "defined": "/StarWars.spellml:15305-15327"
     },
     {
+      "type": "StarWar",
+      "superType": "Place",
+      "defined": "/StarWars.api.spell:621-1006"
+    },
+    {
       "type": "WikiPage",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:6568-6768"
+      "defined": "/Wikipedia.api.spell:551-797"
     },
     {
       "property": "title",
       "of": "WikiPage",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:6622-6641"
+      "defined": "/Wikipedia.api.spell:605-624"
     },
     {
       "property": "about",
       "of": "WikiPage",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:6645-6664"
+      "defined": "/Wikipedia.api.spell:628-672"
     },
     {
       "property": "summary",
       "of": "WikiPage",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:6668-6689"
+      "defined": "/Wikipedia.api.spell:676-718"
     },
     {
       "property": "thumbnail",
       "of": "WikiPage",
       "datatype": "Thumbnail",
-      "defined": "/StarWarsApi.spell:6693-6723"
+      "defined": "/Wikipedia.api.spell:722-752"
     },
     {
       "property": "content_urls",
       "asWritten": "content urls",
       "of": "WikiPage",
       "datatype": "PageAddressBook",
-      "defined": "/StarWarsApi.spell:6727-6768"
+      "defined": "/Wikipedia.api.spell:756-797"
     },
     {
       "property": "fits",
@@ -834,45 +839,40 @@
     {
       "type": "Thumbnail",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:6850-6899"
+      "defined": "/Wikipedia.api.spell:879-928"
     },
     {
       "property": "source",
       "of": "Thumbnail",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:6879-6899"
+      "defined": "/Wikipedia.api.spell:908-928"
     },
     {
       "type": "PageAddressBook",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:6901-6969"
+      "defined": "/Wikipedia.api.spell:930-998"
     },
     {
       "property": "desktop",
       "of": "PageAddressBook",
       "datatype": "PageAddress",
-      "defined": "/StarWarsApi.spell:6938-6969"
+      "defined": "/Wikipedia.api.spell:967-998"
     },
     {
       "type": "PageAddress",
       "superType": "Thing",
-      "defined": "/StarWarsApi.spell:6971-7021"
+      "defined": "/Wikipedia.api.spell:1000-1050"
     },
     {
       "property": "page",
       "of": "PageAddress",
       "datatype": "text",
-      "defined": "/StarWarsApi.spell:7003-7021"
-    },
-    {
-      "type": "StarWar",
-      "superType": "Place",
-      "defined": "/StarWarsApi.spell:585-2255"
+      "defined": "/Wikipedia.api.spell:1032-1050"
     },
     {
       "type": "Wikipedia",
       "superType": "Place",
-      "defined": "/StarWarsApi.spell:6252-6566"
+      "defined": "/Wikipedia.api.spell:385-549"
     },
     {
       "type": "Card",
@@ -1130,19 +1130,19 @@
     {
       "type": "Guide",
       "superType": "App",
-      "defined": "/StarWars.spellml:368-5385"
+      "defined": "/StarWars.spellml:369-5386"
     },
     {
       "property": "tab",
       "of": "Guide",
       "datatype": "text",
-      "defined": "/StarWars.spellml:389-406"
+      "defined": "/StarWars.spellml:390-407"
     },
     {
       "property": "search",
       "of": "Guide",
       "datatype": "text",
-      "defined": "/StarWars.spellml:411-431"
+      "defined": "/StarWars.spellml:412-432"
     },
     {
       "syntax": "create {thisArg:expression}",
@@ -1155,50 +1155,37 @@
       ],
       "kind": "method",
       "name": "create it",
-      "defined": "/StarWars.spellml:436-499"
+      "defined": "/StarWars.spellml:437-500"
     },
     {
       "property": "showing",
       "of": "Guide",
       "datatype": "thing",
-      "defined": "/StarWars.spellml:504-528"
+      "defined": "/StarWars.spellml:505-529"
     },
     {
       "property": "trail",
       "of": "Guide",
       "datatype": "list of things",
-      "defined": "/StarWars.spellml:533-568"
+      "defined": "/StarWars.spellml:534-569"
     },
     {
       "property": "playing",
       "of": "Guide",
       "datatype": "Film",
-      "defined": "/StarWars.spellml:573-596"
+      "defined": "/StarWars.spellml:574-597"
     },
     {
       "property": "jumping",
       "of": "Guide",
       "datatype": "choice",
-      "defined": "/StarWars.spellml:601-627"
+      "defined": "/StarWars.spellml:602-628"
     },
     {
       "property": "found",
       "of": "Guide",
       "datatype": "list of things",
-      "defined": "/StarWars.spellml:640-1463"
-    },
-    {
-      "property": "signal",
-      "of": "Guide",
-      "datatype": "text",
-      "defined": "/StarWars.spellml:1479-1536"
-    },
-    {
-      "property": "lost_signal",
-      "asWritten": "lost signal",
-      "of": "Guide",
-      "datatype": "text",
-      "defined": "/StarWars.spellml:1549-1614"
+      "defined": "/StarWars.spellml:641-1464"
     },
     {
       "syntax": "go back (of {thisArg:expression})?",
@@ -1212,7 +1199,7 @@
       "kind": "method",
       "name": "go back",
       "returns": "nothing",
-      "defined": "/StarWars.spellml:1628-1814"
+      "defined": "/StarWars.spellml:1480-1666"
     },
     {
       "syntax": "go to {callArgs:expression} (of {thisArg:expression})?",
@@ -1231,7 +1218,7 @@
           "datatype": "text"
         }
       ],
-      "defined": "/StarWars.spellml:1828-1973"
+      "defined": "/StarWars.spellml:1680-1825"
     },
     {
       "syntax": "play the opening (of {thisArg:expression})?",
@@ -1245,7 +1232,7 @@
       "kind": "method",
       "name": "play the opening",
       "waits": true,
-      "defined": "/StarWars.spellml:1987-2050"
+      "defined": "/StarWars.spellml:1839-1902"
     },
     {
       "syntax": "punch {thisArg:expression}",
@@ -1259,7 +1246,7 @@
       "kind": "method",
       "name": "punch it",
       "waits": true,
-      "defined": "/StarWars.spellml:2064-2285"
+      "defined": "/StarWars.spellml:1916-2137"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1272,7 +1259,20 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/StarWars.spellml:2299-3804"
+      "defined": "/StarWars.spellml:2151-3656"
+    },
+    {
+      "property": "signal",
+      "of": "Guide",
+      "datatype": "text",
+      "defined": "/StarWars.spellml:5240-5297"
+    },
+    {
+      "property": "lost_signal",
+      "asWritten": "lost signal",
+      "of": "Guide",
+      "datatype": "text",
+      "defined": "/StarWars.spellml:5310-5375"
     },
     {
       "syntax": "open {thisArg:expression}",
@@ -1387,202 +1387,202 @@
     }
   ],
   "codeLines": [
-    14,
     15,
+    16,
     21,
-    27,
-    32,
-    37,
-    42,
-    47,
-    52,
-    57,
-    62,
-    67,
-    72,
-    77,
-    82,
-    87,
-    92,
-    101,
-    107,
-    113,
-    117,
+    26,
+    31,
+    36,
+    41,
+    46,
+    51,
+    56,
+    61,
+    66,
+    71,
+    76,
+    81,
+    86,
+    91,
+    100,
+    106,
+    112,
+    116,
+    149,
     150,
-    151,
-    157,
-    163,
-    169,
-    174,
-    179,
-    184,
+    155,
+    160,
+    165,
+    170,
+    175,
+    180,
+    185,
     190,
-    196,
-    201,
-    206,
-    211,
-    216,
-    221,
-    233,
-    242,
-    246,
+    195,
+    200,
+    205,
+    210,
+    215,
+    227,
+    236,
+    240,
+    271,
+    272,
     277,
-    278,
-    283,
-    288,
-    293,
-    298,
-    303,
-    308,
-    313,
-    318,
-    323,
-    328,
-    333,
-    338,
-    343,
-    352,
-    356,
-    360,
-    364,
+    282,
+    287,
+    292,
+    297,
+    302,
+    307,
+    312,
+    317,
+    322,
+    327,
+    332,
+    337,
+    346,
+    350,
+    354,
+    358,
+    419,
+    420,
     425,
-    426,
-    431,
-    436,
-    442,
-    447,
-    452,
-    457,
-    462,
-    467,
-    472,
-    477,
-    482,
-    487,
-    492,
-    497,
-    508,
-    518,
-    522,
-    549,
-    550,
-    555,
-    560,
-    566,
-    572,
+    430,
+    435,
+    440,
+    445,
+    450,
+    455,
+    460,
+    465,
+    470,
+    475,
+    480,
+    485,
+    490,
+    501,
+    511,
+    515,
+    542,
+    543,
+    548,
+    553,
+    558,
+    563,
+    568,
+    573,
     578,
-    584,
-    590,
-    596,
-    601,
-    606,
-    611,
-    616,
-    621,
-    626,
-    631,
-    640,
-    670,
-    671,
-    676,
-    681,
-    687,
+    583,
+    588,
+    593,
+    598,
+    603,
+    608,
+    613,
+    618,
+    627,
+    657,
+    658,
+    663,
+    668,
+    673,
+    678,
+    683,
+    688,
     693,
     698,
     703,
-    709,
-    715,
-    720,
-    726,
-    732,
-    737,
-    742,
-    747,
+    708,
+    713,
+    718,
+    723,
+    728,
+    733,
+    738,
+    743,
     752,
-    757,
-    762,
-    771,
-    801,
-    802,
-    807,
-    812,
-    817,
-    822,
-    827,
-    837,
-    838,
-    844,
-    845,
-    851,
-    852,
-    858,
-    909,
-    932,
-    933,
-    937,
-    941,
-    946,
-    950,
-    955,
-    960,
-    965,
-    1010,
+    782,
+    810,
+    811,
+    816,
+    821,
+    826,
+    831,
+    836,
+    846,
+    847,
+    853,
+    854,
+    860,
+    861,
+    867,
+    885,
+    886,
+    890,
+    894,
+    899,
+    903,
+    908,
+    913,
+    918,
+    963,
+    964,
+    968,
+    973,
+    990,
+    991,
+    995,
+    999,
+    1005,
     1011,
-    1015,
+    1019,
     1020,
-    1037,
-    1038,
-    1042,
-    1046,
-    1052,
-    1058,
-    1066,
-    1067,
-    1072,
+    1025,
+    1030,
+    1039,
+    1040,
+    1044,
+    1049,
+    1054,
+    1064,
+    1065,
+    1069,
+    1073,
     1077,
-    1086,
-    1087,
-    1091,
-    1096,
-    1101,
-    1111,
+    1081,
+    1085,
+    1090,
+    1095,
+    1107,
     1112,
-    1116,
+    1115,
     1120,
-    1124,
-    1128,
-    1132,
-    1137,
-    1142,
-    1154,
-    1159,
-    1162,
-    1167,
-    1172,
-    1177,
-    1182,
-    1187,
-    1192,
-    1198,
-    1210,
-    1214,
-    1218,
-    1228,
-    1236,
-    1241,
-    1249,
-    1388,
-    1396,
-    1458,
+    1125,
+    1130,
+    1135,
+    1140,
+    1145,
+    1151,
+    1163,
+    1173,
+    1181,
+    1186,
+    1194,
+    1324,
+    1328,
+    1341,
+    1349,
+    1411,
+    1412,
+    1432,
+    1433,
+    1437,
+    1441,
+    1445,
+    1450,
+    1455,
     1459,
-    1479,
-    1480,
-    1484,
-    1488,
-    1492,
-    1497,
-    1502,
-    1506,
-    1513
+    1466
   ]
 }

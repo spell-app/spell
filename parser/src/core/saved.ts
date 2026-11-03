@@ -52,6 +52,7 @@ import { defineCoreModule } from "./core.types"
 import type { Drawing } from "./drawing"
 import { knowCollection, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, heldBy } from "./places"
+import { readNumbersAs } from "./saving"
 import { showSignIn } from "./signInBar"
 import { forgetWaitedValue, standInFor } from "./waiting"
 // Import directly to avoid circular import
@@ -85,7 +86,7 @@ export type ReadRiders = {
   none?: () => Drawing
   /** `if that fails:`:  what shows when it can't be read. */
   failed?: () => Drawing
-  /** `the message if that fails is "..."`:  the message that shows, Try again kept. */
+  /** `if that fails say "..."`:  the message that shows, Try again kept. */
   failedSay?: () => unknown
   /** `show them in:`:  the element the items go in, the loader and messages staying outside it. */
   items?: () => unknown
@@ -259,6 +260,11 @@ class ProgramPlaces {
     const collection =
       mapped && !KEEP_THEIR_OWN_NAME.has(details.kind ?? "") ? mapped.replace(/^\//, "") : savedIn.collection
     const making = { details, folder: this.folder!, collection, Class, person: this.person }
+    // how its numbers read:  the mark the place's line says, else the program's language's for one the text can't settle
+    readNumbersAs(Class, {
+      ...(details.numbersLike !== undefined && { mark: this.folder!.decimalMarkIn([details.numbersLike]) }),
+      ...(details.unclearNumbers !== undefined && { unclear: details.unclearNumbers })
+    })
     let behind = this.places!.placeFor(name)
     if (!behind) {
       const { thing } = declared

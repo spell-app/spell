@@ -291,6 +291,11 @@ its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as
 `- its menu bar is "GameMenu"`.
 - A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
+- A `<menu "FileMenu" />` inside a menu is a sub-menu, so a menu bar is a menu of menus;
+  `title="File"` is a menu's title, `titled "File"`.
+- `<menu "MoreExamples" for-each={its examples} action="open example" />` is filled from a list:
+  an item per thing in it, titled with its title (else its name), running the action with it.
+  - Its twin:  `its "MoreExamples" is a menu of its examples, each running "open example"`.
 - Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
 
 **Types and start values:**  `<property "count" type="number">0</property>` is a stored number, starting at 0.
@@ -348,7 +353,7 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   move it.
 - Its plain Spell twin is the loop with a line for each attribute, under it, as `while waiting:` is:
   `show them in: <ui-cards columns="4">`, `show it all in: <ui-section label="The Films">`, `show them in pages`,
-  `the message if that fails is "..."`.
+  `if that fails say "..."`.
 
 **`<if>` inside an element:**  every branch stays on the page, hidden while it isn't the one.
 

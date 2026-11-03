@@ -237,7 +237,7 @@ describe("what compiles", () => {
     expect(plain).toContain("core.drawEach(this.cards, (card) => core.drawThing(card))")
   })
 
-  it("`if that fails say` is the failure's message, as `the message if that fails is` is (epic `language` P17)", () => {
+  it("`if that fails say` is the failure's message (epic `language` P17);  P22's stand-in, `the message if that fails is`, is gone", () => {
     const box = (rider: string, ...more: string[]) =>
       compiled(
         "a card is a view",
@@ -252,7 +252,7 @@ describe("what compiles", () => {
     const short = box('if that fails say "No signal"')
     expect(short.errors).toEqual([])
     expect(short.compiled).toContain('failedSay: () => "No signal"')
-    expect(box('the message if that fails is "No signal"').compiled).toContain('failedSay: () => "No signal"')
+    expect(box('the message if that fails is "No signal"').compiled).not.toContain("failedSay")
     const block = box("if that fails:", "\t\t\t<ui-text>Lost</ui-text>")
     expect(block.errors).toEqual([])
     expect(block.compiled).toContain("failed: () =>")

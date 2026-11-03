@@ -212,7 +212,7 @@ describe("following a link", () => {
     serve()
     const { list } = await people()
     expect(list[0]!.height).toBe(172)
-    expect(list[1]!.height).toBeNull()
+    expect(list[1]!.height).toBeUndefined()
   })
 
   test("a read nobody can answer says why, and asks again the next time", async () => {
