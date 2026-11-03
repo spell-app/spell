@@ -2016,6 +2016,10 @@
           "file": "src/app/solid/CodeOutput.tsx"
         },
         {
+          "name": "CodeSlice",
+          "file": "src/app/solid/monaco/CodeSlice.tsx"
+        },
+        {
           "name": "FallbackEditor",
           "file": "src/app/solid/InputEditor.tsx"
         },
