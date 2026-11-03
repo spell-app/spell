@@ -36,6 +36,7 @@ exports[`testing spell module lists > rule group specs > match snapshot -- if th
   "ordinal_position_expression": "ordinal|arg|expression",
   "ordinal_where_expression": "ordinal|arg|list|body?",
   "position_expression": "arg|position|expression",
+  "possessive_ordinal": "expression|possessive_mark|ordinal|arg",
   "random_item_expression": "arg|list",
   "random_items_expression": "number|arg|list",
   "range_between_expression": "arg|start|end|list",
