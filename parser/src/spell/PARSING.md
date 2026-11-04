@@ -1749,7 +1749,9 @@ What a program's lines about where data lives compile to, and what reads the res
   - An old `project.json` is read too.
 - Compiled output is never one of a project's own files.
   - The server's index lists only spell, CSS and javascript files, and property editor pages:  see `isManifestFile()`.
-    - `.spell`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - `.spell`, `.spellml`, `.css`, `.js`, `.jsx` and `.editor.html` (`SP.EDITOR_PAGE_SUFFIX`)
+    - A property editors file, `Card.editor.spellml` or `Solitaire.editors.spellml` (`SP.isPropertyEditorsName()`,
+      epic `editor` P25) lists as one of its own:  a text file, never compiled, which the Inspector reads.
     - So no other target's output, e.g. `<Project>.spell.py`, is ever listed.
   - Of those, it leaves out:
     - a project's `<Project>.spell.js`, and a fixture's `<Project>.snapshot.js`
@@ -1764,7 +1766,8 @@ What a program's lines about where data lives compile to, and what reads the res
   - Else the index would add them to the project file.
   - The list:  `GENERATED_SUFFIXES`, beside `isManifestFile()`.
 - A file's kind is the END of its name (`SpellProject.getFileForPath()`):
-  `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell.
+  `helpers.min.js` is javascript, and only what ends in none of `.css`, `.js`, `.jsx`, `.editor.html` is parsed as spell;
+  a property editors file, `Card.editor.spellml`, is text, never parsed.
 - What spell BUILDS for a project goes in its build folder, not beside its source (epic `people-and-orgs` P11).
   - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:

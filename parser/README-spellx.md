@@ -109,6 +109,10 @@ reversible:`, and reads to the same tree as the English card.
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
 - In a drawing, a tag that isn't a Spell word is a component's:  `<text>`, `<image>`, `<solitaire-card>`.
+- A type's property editor, the layout of its Inspector card, can live in a file of its own:
+  `Card.editor.spellml`, or one for the project, `Solitaire.editors.spellml`, a `<property-editor "card">` per type.
+  - The editor opens and colours it as spellml, and the Inspector reads it;  it's never compiled.
+  - Not the property editor page, `Card.editor.html`, which New Property Editor... makes.
 - `<spell-more-of "card">` adds to a type another file of the project declares, `a card:` in plain Spell:
   so a place's fields can stay in a plain `.spell` file, and what's drawn in a `.spellml` file beside it.
 

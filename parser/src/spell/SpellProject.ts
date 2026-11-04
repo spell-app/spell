@@ -1445,6 +1445,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       throw new TypeError(`SpellProject.getFileForPath('${fullPath}'): path is not a file path.`)
     }
     const name = location.file ?? ""
+    // a property editors file, `Card.editor.spellml` (epic `editor` P25):  text the Inspector reads, never compiled
+    if (SP.isPropertyEditorsName(name)) return new SP.SpellJSFile(fullPath)
     const suffix = Object.keys(SpellProject.extensionMap).find((suffix) => name.endsWith(suffix))
     const Constructor = suffix ? SpellProject.extensionMap[suffix] : SP.SpellFile
     return new Constructor(fullPath)
