@@ -37,6 +37,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-signed-out`, `sign-in-signing`, `sign-in-as` | signing in to a place:  the JavaScript core's | `place` |
 | `sign-in-ended`, `sign-in-failed`, `sign-in-who` | the same | `name`, `why` |
 | `sign-in`, `sign-out` | its buttons | |
+| `page-previous`, `page-next`, `page-number` | a list read a page at a time, its buttons:  the JavaScript core's | `page` |
 """
 
 import re
@@ -86,6 +87,9 @@ MESSAGES: dict[str, str] = {
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
     "sign-in": "Sign in",
     "sign-out": "Sign out",
+    "page-previous": "Previous",
+    "page-next": "Next",
+    "page-number": "Page {page}",
 }
 
 # A named placeholder in a message, `{type}`.
