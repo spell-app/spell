@@ -12080,6 +12080,13 @@
           }
         },
         {
+          "name": "unsaved",
+          "description": {
+            "kind": "markdown",
+            "value": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "hint",
           "description": {
             "kind": "markdown",
@@ -26334,6 +26341,13 @@
           }
         },
         {
+          "name": "unsaved",
+          "description": {
+            "kind": "markdown",
+            "value": "A change here can't be saved:  a crossed-out save icon after the info icon, this text its tip.  The control still changes the value.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "hint",
           "description": {
             "kind": "markdown",
@@ -26726,6 +26740,13 @@
           "description": {
             "kind": "markdown",
             "value": "A value other than its property's default shows bold, so what's been changed stands out (`:state(set)` on each property shows it either way).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "unsaved",
+          "description": {
+            "kind": "markdown",
+            "value": "Changes here can't be saved:  each property shows a crossed-out save icon after its info icon, this text its tip (`<ui-field unsaved>`).  The values still change as they're edited.\n\nTakes:  text"
           }
         },
         {

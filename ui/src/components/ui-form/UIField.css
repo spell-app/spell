@@ -82,6 +82,33 @@
     white-space: nowrap;
   }
 
+  /* ## The not-saved icon:  a save icon, a line through it */
+  .field > .row > .unsaved {
+    position: relative;
+    display: inline-flex;
+    width: 1em;
+    height: 1em;
+    opacity: 0.5;
+    cursor: help;
+  }
+  .field > .row > .unsaved > svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+  .field > .row > .unsaved::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: -10%;
+    width: 120%;
+    height: 0.15em;
+    border-radius: 0.1em;
+    background: currentColor;
+    box-shadow: 0 0 0 0.06em var(--ui-panel-background, transparent);
+    transform: rotate(-45deg);
+  }
+
   /* ## The info icon and its tip */
   .field > .row > .info {
     position: relative;

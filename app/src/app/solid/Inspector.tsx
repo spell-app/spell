@@ -826,6 +826,20 @@ export class Inspector {
     return chosen ?? InspectorWrites.startingScope(part.value, Inspector.storedNamesOf(part.value))
   }
 
+  /**
+   * Why changes to `part`'s fields can't all be saved, for each field's crossed-out save icon (Q29, Q30):
+   * on This, a thing made in a loop has no line of its own to write to.
+   * - Several:  each one's own line is written, and this says some can't be.
+   * - `undefined`:  every change can be saved.
+   */
+  static unsavedTipOf(part: Inspected): string | undefined {
+    if (!isThing(part.value) || Inspector.scopeOf(part) !== "this") return undefined
+    const each = part.together ?? [part]
+    const automatic = each.filter((one) => !InspectorWrites.hasOwnLine(one.value)).length
+    if (!automatic) return undefined
+    return appTexts.text(automatic < each.length ? "inspectorUnsavedSomeAuto" : "inspectorUnsavedAuto")
+  }
+
   /** Apply changes to `part`'s fields to `scope`, remembered for its type. */
   static setScope(part: { value: object }, scope: InspectorScope): void {
     const key = part.value.constructor.name
@@ -2047,6 +2061,7 @@ function PropertiesCard(): JSX.Element {
             schema={part.schema}
             value={part.together?.map((each) => each.value) ?? part.value}
             origins={Inspector.originsOf(part)}
+            unsaved={Inspector.unsavedTipOf(part)}
             compact=""
             show-defaults=""
             on-ui-changed={(event: CustomEvent<{ name?: string; value: unknown }>) =>
@@ -2122,7 +2137,8 @@ const SCOPE_PREF = "scope"
 
 /****************
  * ### `<ScopeSwitch>`
- * `This card | All cards`, in the row that names what's inspected, so it costs no height.
+ * `This | All Cards`, short, in the row that names what's inspected, beside its chip, which already names the thing
+ * (Q32):  so it costs no height.
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
  * - Several things:  one switch for them all, the choice remembered for their type;  of several types, none.
@@ -2144,19 +2160,22 @@ function ScopeSwitch(props: { part: Inspected }): JSX.Element {
         class="InspectorScope"
         onClick={() => Inspector.setScope(props.part, "this")}
       >
-        {count() > 1
-          ? appTexts.text("inspectorScopeThese", { count: count() })
-          : appTexts.text("inspectorScopeThis", { type: typeWords() })}
+        {count() > 1 ? appTexts.text("inspectorScopeThese", { count: count() }) : appTexts.text("inspectorScopeThis")}
       </ui-item>
       <ui-item
         selected={scope() === "all"}
         class="InspectorScope"
         onClick={() => Inspector.setScope(props.part, "all")}
       >
-        {appTexts.text("inspectorScopeAll", { types: P.pluralize(typeWords()) })}
+        {appTexts.text("inspectorScopeAll", { Types: titleCase(P.pluralize(typeWords())) })}
       </ui-item>
     </Show>
   )
+}
+
+/** `words` with each one's first letter capital:  `discard piles` => `Discard Piles`. */
+function titleCase(words: string): string {
+  return words.replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase())
 }
 
 /** A thing's type, in words:  `DiscardPile` => `discard pile`. */
@@ -2175,22 +2194,14 @@ const [notSaved, setNotSaved] = createSignal<{ part: object; why: NotWritten } |
 function NotSavedNote(props: { part: Inspected }): JSX.Element {
   // only for what's inspected now:  selecting something else lets go of it
   const why = (): NotWritten | undefined => {
-    // on This, one of many:  said at once, not only after a change
-    if (
-      isThing(props.part.value) &&
-      Inspector.scopeOf(props.part) === "this" &&
-      (props.part.together ?? [props.part]).every((each) => !InspectorWrites.hasOwnLine(each.value))
-    ) {
-      return { reason: "playing" }
-    }
+    // a thing made in a loop says so on each field, its crossed-out save icon (`Inspector.unsavedTipOf()`)
     if (isThing(props.part.value) && Inspector.scopeOf(props.part) === "all" && Inspector.isAllFromCode(props.part)) {
       return { reason: "allFromCode" }
     }
-    return notSaved()?.part === props.part ? notSaved()?.why : undefined
+    const why = notSaved()?.part === props.part ? notSaved()?.why : undefined
+    return why?.reason === "playing" ? undefined : why
   }
   const words = (reason: NotWritten["reason"]) => {
-    if (reason === "playing" && props.part.together) return appTexts.text("inspectorPlayingMany")
-    if (reason === "playing") return appTexts.text("inspectorPlaying", { type: wordsOfType(props.part.value) })
     if (reason === "allFromCode") {
       return appTexts.text("inspectorAllFromCode", { type: wordsOfType(props.part.value) })
     }

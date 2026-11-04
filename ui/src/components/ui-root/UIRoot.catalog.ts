@@ -426,6 +426,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: [
       "label",
       "description",
+      "unsaved",
       "hint",
       "output",
       "error",
@@ -941,6 +942,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "options",
       "label",
       "description",
+      "unsaved",
       "hint",
       "output",
       "error",
@@ -968,6 +970,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "columns",
       "origins",
       "show-defaults",
+      "unsaved",
       "output",
       "error",
       "size",

@@ -78,7 +78,9 @@ export function eventsDeclared(
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
       if (!lines) continue
-      const row = { kind: place.kind, words: wordsAt(place, lines), code: codeAt(place, lines) }
+      const row = isOnTypeTag(place, lines)
+        ? { kind: place.kind, words: bareAbility(place.name), code: "" }
+        : { kind: place.kind, words: wordsAt(place, lines), code: codeAt(place, lines) }
       if (!rows.some((other) => sameWords(other.words, row.words))) rows.push(row)
     }
   }
@@ -99,7 +101,10 @@ export function placeOfDeclaredEvent(
     for (const place of places) {
       if (place.of !== name || (place.kind !== "event" && place.kind !== "ability")) continue
       const lines = files.find((file) => file.path === place.path)?.text.split("\n")
-      if (lines && sameWords(wordsAt(place, lines), row.words)) return codePlaceOf(place, lines)
+      // an ability that's its type tag's bare attribute (`<spell-view "card" draggable>`) has no code to edit
+      if (lines && !isOnTypeTag(place, lines) && sameWords(wordsAt(place, lines), row.words)) {
+        return codePlaceOf(place, lines)
+      }
     }
   }
   return undefined
@@ -124,6 +129,16 @@ export function placeOfDeclaredAction(
     }
   }
   return undefined
+}
+
+/** Is `place` an ability its type's tag says with a bare attribute, `<spell-view "card" draggable>`? */
+function isOnTypeTag(place: SP.SpellDeclarationPlace, lines: readonly string[]): boolean {
+  return place.kind === "ability" && /^\s*<spell-/.test(lines[place.line] ?? "")
+}
+
+/** A bare ability's word, as its attribute says it:  `it is draggable` => `draggable`. */
+function bareAbility(name: string): string {
+  return name.replace(/^(?:it|its\s+\w+)\s+(?:is|are)\s+/i, "")
 }
 
 /** A declaration's words as written on its first line, up to its code:  `on click`, `clickable when`. */

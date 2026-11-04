@@ -12,7 +12,12 @@ export const propertyEditorEs = {
   tag: "ui-property-editor",
   name: "editor-propiedades",
   aka: ["editor de propiedades", "inspector", "hoja de propiedades", "formulario de ajustes", "editor de objetos"],
-  attributes: { schema: "esquema", origins: "origenes", "show-defaults": "mostrar-predeterminados" },
+  attributes: {
+    schema: "esquema",
+    origins: "origenes",
+    "show-defaults": "mostrar-predeterminados",
+    unsaved: "sin-guardar"
+  },
   parts: { footer: "pie" },
   texts: {
     save: "Guardar",
