@@ -216,11 +216,18 @@
     margin-right: 5px;
     font-size: 0.8em;
     vertical-align: -0.05em;
-    animation: epic-thread-spin 0.9s linear infinite;
+    animation: epic-thread-spin 3.4s ease-in-out infinite;
   }
+  /* like a coin on a table, a turn then a second's rest (I213) */
   @keyframes epic-thread-spin {
-    to {
-      rotate: 1turn;
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {

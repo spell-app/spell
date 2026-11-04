@@ -323,10 +323,17 @@
    * epic `epic-engine` I211:  "spinning like in 3d like a coin")
    */
   .status ui-label[data-spins]::part(icon) {
-    animation: epic-page-coin 1.6s linear infinite;
+    animation: epic-page-coin 3.4s ease-in-out infinite;
   }
+  /* a turn, then a second's rest (I213) */
   @keyframes epic-page-coin {
-    to {
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
       rotate: y 1turn;
     }
   }

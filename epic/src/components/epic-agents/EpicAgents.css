@@ -68,7 +68,7 @@
     border: 1.5px solid color-mix(in oklab, currentColor 25%, transparent);
     border-top-color: currentColor;
     border-radius: 50%;
-    animation: epic-agents-turn 1.1s linear infinite;
+    animation: epic-agents-turn 3.4s ease-in-out infinite;
   }
   /*
    * the BARE spinner beside an epic page header's Send (`draws="spinner"`, T53):  no pill round it (Owen, 2026-10-29:
@@ -98,9 +98,16 @@
     height: var(--epic-agents-spinner-size, 16px);
     border-width: 2px;
   }
+  /* like a coin on a table, a turn then a second's rest (I213) */
   @keyframes epic-agents-turn {
-    to {
-      rotate: 1turn;
+    0% {
+      rotate: y 0turn;
+    }
+    70% {
+      rotate: y 1turn;
+    }
+    100% {
+      rotate: y 1turn;
     }
   }
   @media (prefers-reduced-motion: reduce) {
