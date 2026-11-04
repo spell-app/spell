@@ -226,3 +226,56 @@ describe("<ui-tree>", () => {
     await expectAccessible(await tree('choose="many"'))
   })
 })
+
+describe("<ui-tree sticky-path>", () => {
+  /** A tree in a 120px box that scrolls:  Solitaire (Grid (StockPile (card 1 ... card 30)), Moves). */
+  async function deepTree() {
+    const cards = Array.from({ length: 30 }, (_, at) => `<ui-tree-item label="card ${at + 1}"></ui-tree-item>`)
+    const box = (await ElementFixture.render(
+      `<div style="height: 120px; overflow-y: auto; width: 300px">
+        <ui-tree sticky-path label="Views">
+          <ui-tree-item label="Solitaire" open>
+            <ui-tree-item label="Grid" open>
+              <ui-tree-item label="StockPile" open>${cards.join("")}</ui-tree-item>
+            </ui-tree-item>
+            <ui-tree-item label="Moves"></ui-tree-item>
+          </ui-tree-item>
+        </ui-tree>
+      </div>`
+    )) as HTMLElement
+    await ElementFixture.settle()
+    return { box, host: box.querySelector("ui-tree")! }
+  }
+
+  /** The path's words, as it shows them;  empty while it doesn't. */
+  async function path(host: Element): Promise<string[]> {
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    await ElementFixture.settle()
+    return [...host.shadowRoot!.querySelectorAll('[part~="path-row"]')].map((each) => each.textContent!)
+  }
+
+  it("shows nothing at the top, and the rows around the first one in view once they scroll away", async () => {
+    const { box, host } = await deepTree()
+    expect(await path(host)).toEqual([])
+    box.scrollTop = 22 * 12
+    box.dispatchEvent(new Event("scroll"))
+    expect(await path(host)).toEqual(["Solitaire", "Grid", "StockPile"])
+    const line = host.shadowRoot!.querySelector<HTMLElement>('[part~="path"]')!
+    expect(line.getAttribute("aria-hidden")).toBe("true")
+    expect(line.getBoundingClientRect().top).toBe(box.getBoundingClientRect().top)
+  })
+
+  it("scrolls to a row its path names, selecting nothing", async () => {
+    const { box, host } = await deepTree()
+    box.scrollTop = 22 * 12
+    box.dispatchEvent(new Event("scroll"))
+    await path(host)
+    const grid = [...host.shadowRoot!.querySelectorAll<HTMLElement>('[part~="path-row"]')][1]!
+    grid.click()
+    const gridRow = row(host, "Grid").shadowRoot!.querySelector('[part~="row"]')!
+    // a line down, where the path was:  Solitaire, all that was around it, is in view again, so the path goes
+    expect(Math.round(gridRow.getBoundingClientRect().top)).toBe(Math.round(box.getBoundingClientRect().top) + 22)
+    expect(selected(host)).toEqual([])
+    expect(await path(host)).toEqual([])
+  })
+})

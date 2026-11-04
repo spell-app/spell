@@ -43764,6 +43764,13 @@
           }
         },
         {
+          "name": "sticky-path",
+          "description": {
+            "kind": "markdown",
+            "value": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "disabled",
           "description": {
             "kind": "markdown",

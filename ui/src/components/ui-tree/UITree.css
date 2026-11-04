@@ -7,6 +7,7 @@
  *   | `--ui-tree-hover-background` | a row under the mouse |
  *   | `--ui-tree-selected-background` / `-color` | a selected row |
  *   | `--ui-tree-muted-color` | the triangle, the icon and `which` |
+ *   | `--ui-tree-path-background` | `sticky-path`'s line, over the rows it covers |
  */
 @layer ui.components {
   :host {
@@ -20,6 +21,7 @@
     --_ui-tree-selected-background: var(--ui-tree-selected-background, var(--ui-primary-background));
     --_ui-tree-selected-color: var(--ui-tree-selected-color, var(--ui-primary-text, var(--ui-text-color)));
     --_ui-tree-muted-color: var(--ui-tree-muted-color, var(--ui-text-muted));
+    --_ui-tree-path-background: var(--ui-tree-path-background, var(--ui-background));
     display: block;
     min-width: 0;
     color: var(--ui-text-color);
@@ -39,6 +41,45 @@
   .empty {
     padding: 0.5em 8px;
     color: var(--_ui-tree-muted-color);
+  }
+
+  /* `sticky-path`:  one line pinned over the top rows, taking no room of its own, so nothing moves when it shows */
+  .path {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    box-sizing: border-box;
+    height: var(--_ui-tree-row-height);
+    margin-block-end: calc(var(--_ui-tree-row-height) * -1);
+    padding-inline: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    background: var(--_ui-tree-path-background);
+    /* over a see-through pane, the rows under it blurred out of the way */
+    backdrop-filter: blur(12px);
+    border-block-end: 1px solid var(--ui-border-color);
+    color: var(--_ui-tree-muted-color);
+  }
+  /* the outer rows give way first:  each shrinks a hundred times more than the one after it */
+  .path-row {
+    flex: 0 1 auto;
+    min-width: 1.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .path-row:last-child {
+    min-width: 0;
+    color: var(--ui-text-color);
+  }
+  .path-row:hover {
+    color: var(--ui-text-color);
+    text-decoration: underline;
+  }
+  .separator {
+    flex: none;
   }
 
   .row {

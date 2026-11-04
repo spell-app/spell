@@ -36864,6 +36864,16 @@ export interface UITreeAttributes {
    */
   "prop:label"?: string
   /**
+   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
+   * - takes:  flag (present / absent)
+   */
+  "sticky-path"?: boolean | ""
+  /**
+   * `sticky-path`, as the DOM element's property.
+   * @deprecated write `sticky-path` -- `prop:` stays only for compiled spell
+   */
+  "prop:stickyPath"?: boolean | ""
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

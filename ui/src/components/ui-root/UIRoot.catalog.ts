@@ -1578,7 +1578,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
-    attributes: ["choose", "filter", "label"]
+    attributes: ["choose", "filter", "label", "sticky-path"]
   },
   "ui-tree-diagram": {
     folder: "ui-tree-diagram",

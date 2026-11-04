@@ -38043,6 +38043,11 @@
           "description": "What a screen reader calls the tree."
         },
         {
+          "name": "sticky-path",
+          "kind": "keyOnly",
+          "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -38172,6 +38177,14 @@
         {
           "name": "empty",
           "description": "The box around the `empty` slot."
+        },
+        {
+          "name": "path",
+          "description": "`sticky-path`:  the pinned line naming the rows scrolled out of sight."
+        },
+        {
+          "name": "path-row",
+          "description": "`sticky-path`:  each row's name in the path."
         }
       ],
       "states": [
@@ -50986,6 +50999,11 @@
         {
           "name": "--ui-tree-muted-color",
           "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-tree-path-background",
+          "default": "var(--ui-background)",
           "type": "color"
         }
       ]
