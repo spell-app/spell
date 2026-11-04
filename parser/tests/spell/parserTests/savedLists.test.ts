@@ -1,16 +1,24 @@
 /**
- * Adding to and removing from a place's things, by the list a program names (epic `data` I61):
+ * Adding to and removing from a place's things, by the list a program names (epic `data` I61, I64):
  * - `the saved todos`:  every saved todo, whatever the program calls its own properties
  * - a warning where an add or remove only changes what a property read, and saves nothing
+ * - a loop over a read, removing as it goes, reaches every one
  */
-import { describe, expect, it } from "vite-plus/test"
+import { enableExternalSource, flush } from "solid-js"
+import { beforeAll, beforeEach, describe, expect, it } from "vite-plus/test"
 
-import { parseSpellProject } from "spell/parser/spell/test"
+import { bridgeSolid } from "spell/util"
+
+import { core } from "spell/parser/core"
+import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
 
 /** A program's one file, compiled. */
 function compiled(path: string, ...lines: string[]) {
   return parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }]).files[0]!
 }
+
+/** Lets a write through, and an answer back. */
+const settled = () => new Promise((resolve) => setTimeout(resolve, 60))
 
 const TODOS = `todo list is an in memory database
 a todo is a thing:
@@ -96,5 +104,42 @@ describe("I61:  the saved todos, and a warning on a write to a read", () => {
     expect(own.warnings.join()).toContain(
       "Esto añade solo a lo que se leyó, y no guarda nada:  para guardarlo, añádelo a las tareas guardadas"
     )
+  })
+})
+
+describe("I64:  a loop removing what it reads reaches every one", () => {
+  beforeAll(() => bridgeSolid({ enableExternalSource, flush }))
+  beforeEach(() => core.resetRuntime())
+
+  const BOX = `${TODOS}
+
+my todos is an app:
+	- its "all of them" is every todo
+	- to add three:
+		add (a new todo with title = "a", user = 1) to the todos
+		add (a new todo with title = "b", user = 1) to the todos
+		add (a new todo with title = "c", user = 1) to the todos
+		add (a new todo with title = "d", user = 2) to the todos
+	- to clear the first:
+		for one in every todo where its user is 1:
+			remove one from the todos
+`
+
+  it("compiles to a loop round a copy", () => {
+    expect(compiled("/Test.spell", BOX).compiled).toContain(
+      "core.duplicateList(await core.savedThings(Todo, { filter: { user: 1 } }))"
+    )
+  })
+
+  it("three match, all three removed", async () => {
+    const run = runSpellFiles([{ path: "/Test.spell", contents: BOX }], { registered: true })
+    const { my_todos: page } = run("my_todos") as { my_todos: any }
+    await page.addThree()
+    await settled()
+    await page.clearTheFirst()
+    await settled()
+    await core.reloadSaved()
+    const left = (await core.answerOf(page, "allOfThem")) as { items: Array<{ title: string }> }
+    expect(left.items.map(({ title }) => title)).toEqual(["d"])
   })
 })

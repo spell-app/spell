@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
-import { noteLoopItem } from "spell/parser/spell/rules/places/places.shared"
+import { isInDrawing, noteLoopItem } from "spell/parser/spell/rules/places/places.shared"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 import { KindName } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
@@ -17,6 +17,8 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  *   `for each card rank in card ranks`, then `card rank` in the body -- see `itemName()`.
  * - Builds `core.map(list, (item, position?) => { ... })`,
  *   one by one if its body waits, which the writers work out -- see `WriterProject.findWaiting()`.
+ * - A read of saved things goes round a copy, outside a drawing (epic `data` I64):  `core.map(core.duplicateList(<the read>), ...)`.
+ *   The read's own list follows its place, so `remove one from the favourites` in the body would skip the next one.
  * - How javascript writes it (`JSWriter`):
  *   - as the list's own method, where it knows the value is a list
  *   - as a `for...of` loop, when its body waits
@@ -40,6 +42,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     // for `getAST()`, which can't look it up
     ;(match.data as ItemVariableData).itemVariable = variable
+    ;(match.data as LoopData).inDrawing = isInDrawing(match.scope)
     // for `DrawnLines`:  a saved type's loop draws as a read
     const itemType = typeof datatype === "string" ? match.scope.getType(datatype) : undefined
     if (itemType) {
@@ -72,7 +75,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
 
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "map", // TODO...
-      args: [P.matchAST(list), method]
+      args: [loopedList(match, P.matchAST(list)), method]
     })
   }
 
@@ -120,6 +123,7 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
     const name = ListIterationNamedForList.itemName(match, datatype)
     const variable = new P.ScopeVariable({ name, datatype, declaredBy: list })
     ;(match.data as ItemVariableData).itemVariable = variable
+    ;(match.data as LoopData).inDrawing = isInDrawing(match.scope)
     const itemType = typeof datatype === "string" ? match.scope.getType(datatype) : undefined
     if (itemType) {
       ;(match.data as { itemType?: P.TypeScope }).itemType = itemType
@@ -142,7 +146,10 @@ export class ListIterationNamedForList extends SpellStatement<"list|body?"> {
       args: [new P.ASTVariableExpression(list, { name: variable!.name, variable })],
       body: P.matchAST<MethodBody>(this.getBody(match))
     })
-    return new P.ASTCoreMethodInvocation(match, { methodName: "map", args: [P.matchAST(list), method] })
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "map",
+      args: [loopedList(match, P.matchAST(list)), method]
+    })
   }
 
   /** What the item's called -- see the class.  The list's last word is its noun:  `its films`, `las películas`. */
@@ -159,3 +166,22 @@ const STARTS_A_LIST = /^(its|every|all|the|my|their|these|those|sus?|cada|tod[oa
 
 /** The variable of a list with nothing to name its item for:  it's read as `it`. */
 const ITEM_WITH_NO_NAME = "item"
+
+/** What a loop notes while parsing, for `getAST()`. */
+type LoopData = ItemVariableData & {
+  /** It's in a drawing's lines:  a drawn read follows its place, as it should. */
+  inDrawing?: boolean
+}
+
+/**
+ * `list`, a loop's, as it goes round:  a copy, for a read of saved things outside a drawing (epic `data` I64).
+ * - The read's own list follows its place:  each thing the body removes from the place shifts it under the loop,
+ *   so every other one was skipped.
+ * - Not a read already filtered here (`core.filter()`):  that's a list of its own.
+ * - Not in a drawing:  a drawn list SHOULD follow its place, and `DrawnLines` reads the read as it is.
+ */
+function loopedList(match: P.Match, list: P.ASTExpression): P.ASTExpression {
+  const isSavedRead = list instanceof P.ASTCoreMethodInvocation && list.methodName === "savedThings"
+  if (!isSavedRead || (match.data as LoopData).inDrawing) return list
+  return new P.ASTCoreMethodInvocation(match, { methodName: "duplicateList", args: [list] })
+}
