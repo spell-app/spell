@@ -615,7 +615,13 @@ function WrittenCode(props: { place: SlicePlace | undefined; code: string; focus
     <Show when={props.place} fallback={<pre class="InspectorCode">{props.code}</pre>}>
       {(place) => (
         <Loading fallback={<pre class="InspectorCode">{props.code}</pre>}>
-          <LazyMonaco.CodeSlice file={place().file} from={place().from} to={place().to} focus={props.focus} />
+          <LazyMonaco.CodeSlice
+            file={place().file}
+            from={place().from}
+            to={place().to}
+            column={place().column}
+            focus={props.focus}
+          />
         </Loading>
       )}
     </Show>

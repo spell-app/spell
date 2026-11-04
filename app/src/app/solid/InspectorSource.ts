@@ -141,6 +141,11 @@ export type CodePlace = {
   from: number
   /** Its last line. */
   to: number
+  /**
+   * Where its code starts on its first line, 1-based, when its words come first there:
+   * `- clickable when it is face up` starts at `it`.
+   */
+  column?: number
 }
 
 /** A program's spell file, as the places read it:  its path and text. */
@@ -163,8 +168,18 @@ export function placeOfWritten(
       const lines = file.text.split("\n")
       for (const [first, last] of typeLineRanges(file.text, name)) {
         for (let at = first; at <= last; at++) {
-          const said = lines[at]!.trim().replace(/^(?:-\s+|<)/, "")
-          if (words.test(said)) return { path: file.path, ...bodyLines(lines, at, last) }
+          const line = lines[at]!
+          const said = line.trim().replace(/^(?:-\s+|<)/, "")
+          const found = words.exec(said)
+          if (!found) continue
+          const body = bodyLines(lines, at, last)
+          // its code on its own line, after its words:  the slice starts after them
+          const isOwnLine = body.from === at + 1 && !line.trim().startsWith("<")
+          if (!isOwnLine) return { path: file.path, ...body }
+          const afterWords =
+            line.length - line.trimStart().length + (line.trim().length - said.length) + found[0].length
+          const column = afterWords + /^\s*:?\s*/.exec(line.slice(afterWords))![0].length + 1
+          return { path: file.path, ...body, column }
         }
       }
     }

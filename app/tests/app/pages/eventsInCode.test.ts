@@ -103,7 +103,8 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
           line.replace(/\s+/g, " ").trim()
         )
       )
-      .toEqual(["- on click play it"])
+      // its words are its row's header:  the field holds only its code
+      .toEqual(["play it"])
     // an action:  its run button, then its code
     const action = page.locator(".InspectorEvent.action").filter({ hasText: "play it" }).first()
     expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
@@ -132,6 +133,24 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       })
     ).toBe(true)
     // undo, from the same editor
+    for (let step = 0; step < 8 && (await mainFile()) !== before; step++) {
+      await page.keyboard.press("ControlOrMeta+Z")
+      await page.waitForTimeout(150)
+    }
+    expect(await mainFile()).toBe(before)
+  })
+
+  test("a one-line row's field starts after its words, and typing at its start lands there", async () => {
+    const before = await mainFile()
+    const field = row("clickable when").locator(".CodeSlice")
+    await expect
+      .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
+      .toMatch(/^it is face up or its pile is the stock/)
+    await field.locator(".view-line").first().click()
+    await page.keyboard.press("Home")
+    await page.keyboard.type("really ")
+    await page.waitForTimeout(300)
+    expect(await mainFile()).toContain("- clickable when really it is face up")
     for (let step = 0; step < 8 && (await mainFile()) !== before; step++) {
       await page.keyboard.press("ControlOrMeta+Z")
       await page.waitForTimeout(150)
