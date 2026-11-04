@@ -1,0 +1,24 @@
+# Public Servers
+Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
+GitHub's is first.
+
+<spell-app "public servers">
+	<spell>
+		- its "tab" is text
+		- to create it:
+			set its tab to "github"
+	</spell>
+
+	<action "show (server as text)">
+		set its tab to server
+	</action>
+
+	<draw>
+		<toolbar class="tabs" appearance="secondary pointing" aria-label="Servers">
+			<item active={its tab is "github"} onClick={show "github"}>GitHub</item>
+		</toolbar>
+		<if its tab is "github">
+			draw (a new github page)
+		</if>
+	</draw>
+</spell-app>

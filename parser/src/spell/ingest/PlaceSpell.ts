@@ -1,4 +1,5 @@
 import { P } from "spell/parser/parser"
+import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
 import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { nameStyleLike, ourNameFor } from "spell/util/places/FieldNames"
@@ -46,6 +47,8 @@ export type TypeLines = {
   lines: SpellLine[]
   /** A type for what's inside a row, nowhere of its own:  known by its header, as several share a collection. */
   isInside?: boolean
+  /** A type inside a row:  the fields it's written from, by the source's names, so a line Spell can't read is left out there. */
+  insideFields?: Record<string, FieldDescription>
 }
 
 /** Is `after` the type `before` was:  a collection's own by its collection, one inside a row by its header. */
@@ -73,11 +76,14 @@ export function spellPartsFor(
   { about, collections, checkEverySeconds }: PlaceDescription,
   { withKey = true }: { withKey?: boolean } = {}
 ): SpellParts {
-  const { name, kind, address, keySecret } = about
+  const { name, kind, address, keySecret, keyIfSet } = about
   const shown = Object.entries(collections).filter(([, collection]) => !collection.leftOut)
   const every = shown.map(([, collection]) => collection)
   const placeLines: SpellLine[] = []
-  if (withKey && keySecret) placeLines.push({ key: "key", text: `- its key is the secret "${keySecret}"` })
+  if (withKey && keySecret) {
+    const ifSet = keyIfSet ? ", if it's set" : ""
+    placeLines.push({ key: "key", text: `- its key is the secret "${keySecret}"${ifSet}` })
+  }
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"
   if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `- its id is its "${sameId}"` })
@@ -85,6 +91,11 @@ export function spellPartsFor(
   if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(every, (collection) => collection.nextAt) : undefined
   if (nextAt) placeLines.push({ key: "next", text: `- its next page is ${fieldInWords(nextAt)}` })
+  // every list that pages says its next page in its `Link` header, GitHub's way:  one with no pages asks nothing of it
+  const paging = new Set(every.map((collection) => collection.paging).filter((each) => each !== "none"))
+  if (kind === "web server" && !nextAt && paging.size === 1 && paging.has("link header")) {
+    placeLines.push({ key: "next", text: `- its next page is in its "Link" header` })
+  }
   // every list with more than a page can be asked for more at a time, and none is too big to read in one:
   // every name in one request
   const paged = every.filter(({ takesLimit }) => takesLimit !== undefined)
@@ -214,7 +225,7 @@ function typesInside(
         ]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing:`
-      types.set(words, { collection, header, lines, isInside: true })
+      types.set(words, { collection, header, lines, isInside: true, insideFields: inside })
       add(collection, words, inside)
     }
   }
@@ -258,7 +269,7 @@ function typeLines(
   }
   return {
     collection,
-    header: `${/^[aeiou]/i.test(description.type) ? "an" : "a"} "${description.type}" is a thing:`,
+    header: `${articled(description.type).replace(description.type, `"${description.type}"`)} is a thing:`,
     lines
   }
 }
@@ -342,7 +353,7 @@ function collectionWords({ type }: CollectionDescription): string {
 
 /** `word` with its article. */
 export function articled(word: string): string {
-  return `${/^[aeiou]/i.test(word) ? "an" : "a"} ${word}`
+  return `${englishAgreement.article("indefinite", word, undefined)} ${word}`
 }
 
 /** `parts` as text. */

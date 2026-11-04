@@ -22,6 +22,12 @@ export class SpellRuntime extends Eventful() {
   readonly actions = new ActionQueue()
   /** The program's app, once one is made:  the last stop up an event's chain (`send()`, `sending.ts`). */
   app?: object
+  /**
+   * Finds a place's key by its name (`its key is the secret "GITHUB_TOKEN"`), for a run on a server side:
+   * a test, or a runner in node, hands in the environment's.
+   * - A page never sets it:  nothing in a browser holds a key, so a place that needs one refuses there (`WebPlace`).
+   */
+  keyFrom?: (name: string) => string | undefined
 }
 
 /**

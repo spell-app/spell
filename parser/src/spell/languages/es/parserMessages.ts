@@ -186,6 +186,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "on-line": "en la línea {line}",
   "on-line-of-file": "en la línea {line} de {file}",
   "check-time-not-a-time": '"{time}" no es una hora del día:  dila como 5, 5:30 o 17:00',
+  "next-page-header-not-link":
+    'La página siguiente se dice en una cabecera "Link", no "{header}":  `su página siguiente está en su cabecera "Link"`, o nombra el campo de su respuesta que la dice',
   "found-only-by-name":
     'Las cosas de "{thing}" solo se encuentran por su nombre, sin una lista de todas:  léelas una a una, por su identificador',
   "no-dotted-field":

@@ -1,0 +1,21 @@
+{
+  "title": "Public Servers",
+  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely",
+  "readsOtherPeoplesServers": true,
+  "imports": [{
+    "path": "/GitHub.api.spell",
+    "active": true
+  }, {
+    "path": "/PublicServers.spellml",
+    "active": true
+  }, {
+    "path": "/GitHub.spellml",
+    "active": true
+  }, {
+    "path": "/styles.css",
+    "active": true
+  }],
+  "development": {
+    "apis": ["GitHub.api.json5"]
+  }
+}

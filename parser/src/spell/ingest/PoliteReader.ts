@@ -1,4 +1,5 @@
-import { backoffFor, retryAfter } from "spell/util/retrying"
+import { backoffFor, rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
+import { clockTime } from "spell/util/time"
 
 import { IngestStopped } from "./ingest.types"
 
@@ -50,6 +51,8 @@ export type ReadAnswer = {
 /**
  * Reads a source the polite way:  everything `spell place ingest` sends goes through here.
  * - Names itself, leaves a gap between requests, and waits when told to (a 429 or a 503, as long as `Retry-After` says).
+ * - Minds a rate limit its answers name (GitHub's `x-ratelimit-remaining`, `x-ratelimit-reset`):
+ *   with none left, it waits for the reset, if that's soon, and else stops, saying when it is.
  * - Stops at a size:  so many requests, so many bytes an answer, so many in all.
  * - NEVER sends a write:  `fetch` refuses anything but a `GET`, a `HEAD` or a GraphQL query, whoever asks.
  *   So a read through the Spell can't write either.
@@ -69,6 +72,10 @@ export class PoliteReader {
   private bytes = 0
   /** When the last one went. */
   private lastAt = 0
+  /** How many requests its rate limit last said were left. */
+  private limitLeft: number | undefined
+  /** When its rate limit last said it resets, in msec since 1970. */
+  private limitResetAt: number | undefined
 
   constructor({
     fetch,
@@ -127,17 +134,53 @@ export class PoliteReader {
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)
         throw new IngestStopped(`stopped reading at its limit, ${MOST_REQUESTS} requests or ${MOST_BYTES} bytes`)
+      await this.waitForLimit(url)
       await this.waitForGap()
       this.requests++
       const response = await this.send(url, { ...init, headers, signal: AbortSignal.timeout(TIMEOUT_MS) })
-      if ((response.status === 429 || response.status === 503) && attempt <= MOST_RETRIES) {
+      this.noteLimit(response.headers)
+      const isTooMany = response.status === 429 || response.status === 503
+      if (isTooMany && response.headers.has("retry-after") && attempt <= MOST_RETRIES) {
         await this.sleep(retryAfter(response, LONGEST_WAIT_MS) ?? backoffFor(attempt))
+        continue
+      }
+      // GitHub says a limit used up with a 403:  the next time round waits for its reset, or stops
+      if ((isTooMany || response.status === 403) && this.limitLeft === 0 && attempt <= MOST_RETRIES) continue
+      if (isTooMany && attempt <= MOST_RETRIES) {
+        await this.sleep(backoffFor(attempt))
         continue
       }
       const { text, isCut } = await this.textOf(response)
       const landed = response.url || url
       return { status: response.status, text: this.withoutKey(text), headers: response.headers, isCut, url: landed }
     }
+  }
+
+  /** SIDE EFFECT:  what an answer says of its rate limit is noted. */
+  private noteLimit(headers: Headers): void {
+    const left = rateLimitLeft(headers)
+    if (left === undefined) return
+    this.limitLeft = left
+    this.limitResetAt = rateLimitResetAt(headers)
+  }
+
+  /**
+   * With no requests left of its rate limit, wait for it to reset.
+   * - throws `IngestStopped` when that's longer than it waits:  saying when, and that a key may give more
+   */
+  private async waitForLimit(url: string): Promise<void> {
+    if (this.limitLeft !== 0) return
+    const wait = (this.limitResetAt ?? 0) - Date.now()
+    if (wait <= LONGEST_WAIT_MS) {
+      if (wait > 0) await this.sleep(wait)
+      this.limitLeft = undefined
+      return
+    }
+    const at = clockTime(new Date(this.limitResetAt!))
+    const more = this.key === undefined ? ";  a key may give more:  --key-secret <NAME>" : ""
+    throw new IngestStopped(
+      `${new URL(url).host} says its rate limit is used up for now:  it can be asked again at ${at}${more}`
+    )
   }
 
   /** Leave a gap since the last request. */

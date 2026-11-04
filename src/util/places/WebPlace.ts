@@ -27,7 +27,8 @@ const GONE_STATUSES = new Set([404, 410])
  *   - any other 4xx:  `PlaceError` `"refused"`, or what a subclass says it means (`errorKindFor()`)
  *   - a 5xx, a 408, a 425, a 429, or nothing at all:  thrown as it is, so it counts as no answer, and a change resends
  * - A KEY is named, never written (epic `data`, Q11):
- *   - `keyNamed` says a place needs one, by name.
+ *   - `keyNamed` says a place needs one, by name;  with `keyIfSet`, it takes one when it's there, and goes without
+ *     when it isn't, GitHub's way.
  *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
@@ -38,6 +39,8 @@ export abstract class WebPlace {
   protected readonly url: string
   /** The name of the key it needs, if it does. */
   protected readonly keyNamed: string | undefined
+  /** It goes without its key when nothing here holds it. */
+  private readonly keyIfSet: boolean
   /** Finds that key, on a server side. */
   private readonly keyFrom: WebPlaceProps["keyFrom"]
   /** Puts that key on a request. */
@@ -47,9 +50,17 @@ export abstract class WebPlace {
   /** Sends the requests. */
   private readonly api = new Api()
 
-  constructor({ url, keyNamed, keyFrom, sendKey = sendAsBearer, changeIdHeader = CHANGE_ID_HEADER }: WebPlaceProps) {
+  constructor({
+    url,
+    keyNamed,
+    keyIfSet = false,
+    keyFrom,
+    sendKey = sendAsBearer,
+    changeIdHeader = CHANGE_ID_HEADER
+  }: WebPlaceProps) {
     this.url = url.replace(/\/+$/, "")
     this.keyNamed = keyNamed
+    this.keyIfSet = keyIfSet
     this.keyFrom = keyFrom
     this.sendKey = sendKey
     this.changeIdHeader = changeIdHeader
@@ -109,11 +120,11 @@ export abstract class WebPlace {
     return status !== undefined && status >= 400 && status < 500 && !TRY_AGAIN_STATUSES.has(status)
   }
 
-  /** The key it needs, if it needs one.  - throws `PlaceError` `"refused"` when nothing here holds it */
+  /** The key it needs, if it needs one.  - throws `PlaceError` `"refused"` when nothing here holds it, unless it goes without */
   private async keyOrRefusal(): Promise<string | undefined> {
     if (this.keyNamed === undefined) return undefined
     const key = await this.keyFrom?.(this.keyNamed)
-    if (key !== undefined) return key
+    if (key !== undefined || this.keyIfSet) return key
     throw new PlaceError(
       `${this.constructor.name}:  ${this.url} needs the key named "${this.keyNamed}", and a key is never kept in a page;  this place has to go through a server side`,
       { cause: { kind: "refused", whyNot: "place" } }
@@ -127,6 +138,8 @@ export type WebPlaceProps = {
   url: string
   /** The NAME of the key it needs:  it's never written here.  See `WebPlace`. */
   keyNamed?: string
+  /** It takes its key when `keyFrom` finds it, and goes without when it doesn't:  GitHub's 60 requests an hour.  Default `false`. */
+  keyIfSet?: boolean
   /**
    * Finds a key by its name:  only ever handed in on a server side (`PlaceKeys`).  Left out:  a place with `keyNamed` refuses.
    * - It can wait, for a key that's a token made from another (`GoogleToken`).

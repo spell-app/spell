@@ -401,7 +401,7 @@ export class ReadGathering {
     }
     const args = (node as P.ASTScopedMethodInvocation).args?.args ?? []
     if (methodName === "on") this.noteListener(args[0], node)
-    if (SAVED_READS.has(methodName)) this.noteSavedRead(node, args, facts)
+    if (SAVED_READS.has(methodName)) this.noteSavedRead(node, args, facts, methodName === "savedThings")
     else if (NEEDS_WHOLE_ROW.has(methodName)) this.noteWholeRow(node, args, at)
     else if (methodName === SENDS_WHOLE_ROW.call && args[SENDS_WHOLE_ROW.argument]) {
       this.noteWholeRow(node, args.slice(SENDS_WHOLE_ROW.argument), at)
@@ -422,8 +422,12 @@ export class ReadGathering {
     }
   }
 
-  /** SIDE EFFECT:  notes a read of a saved type:  `core.savedThings(Recipe, { filter })`. */
-  private noteSavedRead(node: P.ASTNode, args: readonly P.ASTNode[], facts: BodyFacts): void {
+  /**
+   * SIDE EFFECT:  notes a read of a saved type:  `core.savedThings(Recipe, { filter })`.
+   * - Only a list (`isList`) can be asked first:  one thing by its id or place isn't a list of them all,
+   *   and a collection found by name has no list (GitHub's `the user whose id is its login`).
+   */
+  private noteSavedRead(node: P.ASTNode, args: readonly P.ASTNode[], facts: BodyFacts, isList: boolean): void {
     const type = args[0] && unwrapped(args[0] as P.ASTExpression)
     if (!(type instanceof P.ASTTypeExpression)) return
     const query = args[1] instanceof P.ASTObjectLiteral && args[1].properties?.length ? args[1] : undefined
@@ -434,7 +438,7 @@ export class ReadGathering {
       node,
       ...(query && { query }),
       queryText: query ? queryText(query) : "",
-      canAskFirst: !query || isWrittenOut(query)
+      canAskFirst: isList && (!query || isWrittenOut(query))
     })
   }
 

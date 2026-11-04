@@ -149,6 +149,12 @@ const ASYNC_FUNCTION = "AsyncFunction"
 /** Each run's places:  a new run has its own. */
 const PROGRAMS = new WeakMap<object, ProgramPlaces>()
 
+/** Where this run finds a place's key, when it runs on a server side:  `SpellRuntime.keyFrom`. */
+function keyFinder(): { keyFrom?: (name: string) => string | undefined } {
+  const keyFrom = core.RUNTIME?.keyFrom
+  return keyFrom ? { keyFrom } : {}
+}
+
 /** The places of the program running now. */
 function programPlaces(): ProgramPlaces {
   const runtime = core.RUNTIME as object
@@ -264,7 +270,7 @@ class ProgramPlaces {
     const mapped = details.collections?.[savedIn.collection]?.at
     const collection =
       mapped && !KEEP_THEIR_OWN_NAME.has(details.kind ?? "") ? mapped.replace(/^\//, "") : savedIn.collection
-    const making = { details, folder: this.folder!, collection, Class, person: this.person }
+    const making = { details, folder: this.folder!, collection, Class, person: this.person, ...keyFinder() }
     // how its numbers read:  the mark the place's line says, else the program's language's for one the text can't settle
     readNumbersAs(Class, {
       ...(details.numbersLike !== undefined && { mark: this.folder!.decimalMarkIn([details.numbersLike]) }),
@@ -342,7 +348,14 @@ class ProgramPlaces {
 
   /** The place `details` says, with no class read from it yet:  a room or an atmosphere account needs none. */
   private placeNeedingNoClass(details: PlaceDetails): PlaceBehind {
-    return placeBehind({ details, folder: this.folder!, collection: "", Class: Object, person: this.person })
+    return placeBehind({
+      details,
+      folder: this.folder!,
+      collection: "",
+      Class: Object,
+      person: this.person,
+      ...keyFinder()
+    })
   }
 
   /** The list says `people` now, as a read does:  nobody's write. */

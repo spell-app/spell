@@ -331,6 +331,8 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
+    /** It answered without the key too, so it takes it only when it's set:  GitHub's, 60 requests an hour without. */
+    keyIfSet?: boolean
     /** Who read the samples:  `Claude API`, `claude -p`, or nobody. */
     readBy: string
     /** Where its docs were. */

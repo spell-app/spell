@@ -30,6 +30,12 @@ const LONGEST_EXAMPLE = 80
 /** How often to ask a place that can't say what changed, unless something says otherwise. */
 export const USUAL_CHECK_SECONDS = 30
 
+/** The share of a rate limit a program's checks may take. */
+const SHARE_OF_LIMIT = 0.1
+
+/** An hour, in seconds:  what most rate limits are for, GitHub's among them. */
+const HOUR_SECONDS = 3600
+
 /**
  * What the rows of each collection show, with no agent:  what `--no-ai` gets, and what an agent's reading goes on top of.
  * - `name`:  what the program calls the place.
@@ -56,9 +62,23 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     collections,
     notes: [...look.notes],
     spellCantSay: [],
-    ...(kind === "web server" || kind === "graphql server" ? { checkEverySeconds: USUAL_CHECK_SECONDS } : {}),
+    ...(kind === "web server" || kind === "graphql server"
+      ? { checkEverySeconds: checkSecondsWithin(look.headers, Object.keys(collections).length) }
+      : {}),
     spell: []
   }
+}
+
+/**
+ * How often a program may ask what changed, and keep within the rate limit its answers name:  `USUAL_CHECK_SECONDS`, or less often.
+ * - A check asks each collection once, and takes at most a tenth of its limit, over the hour most limits are for:
+ *   GitHub's 60 an hour with no key is a check every half hour, for three collections;  its 5000 with one, the usual.
+ */
+export function checkSecondsWithin(headers: Record<string, string>, collections: number): number {
+  const limit = Number(headers["x-ratelimit-limit"] ?? headers["ratelimit-limit"])
+  if (!(limit > 0)) return USUAL_CHECK_SECONDS
+  const seconds = (HOUR_SECONDS * Math.max(collections, 1)) / (limit * SHARE_OF_LIMIT)
+  return seconds <= USUAL_CHECK_SECONDS ? USUAL_CHECK_SECONDS : Math.ceil(seconds / 60) * 60
 }
 
 /** One collection's description. */
@@ -309,12 +329,13 @@ function canDoFrom({ headers, writesOffered }: PlaceLook, kind: string): PlaceDe
   const methods = headers["access-control-allow-methods"] ?? headers.allow
   const origin = headers["access-control-allow-origin"]
   const limits = Object.entries(headers).filter(([name]) => /rate-?limit|retry-after/i.test(name))
+  const limit = headers["x-ratelimit-limit"] ?? headers["ratelimit-limit"]
   return {
     read: "Yes:  it's been read.",
     write: writeWords(kind, methods, writesOffered),
     live: "It doesn't say what changed:  a program asks again, as often as its line says.",
     limits: limits.length
-      ? limits.map(([name, value]) => `${name}:  ${value}`).join(";  ")
+      ? `${limit ? `It allows ${limit} requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  ` : ""}${limits.map(([name, value]) => `${name}:  ${value}`).join(";  ")}`
       : "It named none in its answers.",
     browsers: origin
       ? `Yes:  it says ${origin === "*" ? "any page" : `a page from ${origin}`} may read it.`

@@ -556,6 +556,62 @@ describe("a key", () => {
   })
 })
 
+describe("GitHub's way (epic `data` P28)", () => {
+  const at = (path: string) => `${API}${path}`
+  const LIMITS = { "x-ratelimit-limit": "60", "x-ratelimit-remaining": "59", "x-ratelimit-reset": "1793764004" }
+  const issue = (number: number) => ({
+    number,
+    title: `Issue ${number}`,
+    url: at(`/repos/o/r/issues/${number}`),
+    reactions: { total_count: 1, "+1": 1, "-1": 0, laugh: 0 }
+  })
+  const ROUTES = {
+    [API]: Response.json({ current_user_url: at("/user") }, { headers: LIMITS }),
+    [at("/repos/o/r/issues")]: Response.json([issue(1)], {
+      headers: { ...LIMITS, link: `<${at("/repos/o/r/issues/more")}>; rel="next"` }
+    }),
+    [at("/repos/o/r/issues/more")]: Response.json([issue(2)], { headers: LIMITS }),
+    [at("/users/ryansolid")]: Response.json(
+      { login: "ryansolid", name: "Ryan", public_repos: 109 },
+      { headers: LIMITS }
+    )
+  }
+  const ASK = {
+    address: API,
+    into: "/G.spell",
+    name: "github",
+    keySecret: "GH_KEY",
+    collections: ["issues=/repos/o/r/issues", "users=/users/{name}"],
+    samples: ["ryansolid"]
+  }
+
+  test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
+    const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    const { spell, description } = await ingest.add(ASK)
+    expect(spell).toContain(`- its key is the secret "GH_KEY", if it's set`)
+    expect(spell).toContain(`- its next page is in its "Link" header`)
+    expect(spell).toContain(`a "user" is a thing:`)
+    expect(spell).toContain(`- a user's id is its "login"`)
+    expect(spell).not.toMatch(/"\+1"|its "1"/)
+    expect(description.notes.join("\n")).toMatch(/Left out reaction's "\+1"/)
+    expect(description.spellCantSay.join("\n")).not.toMatch(/Link header/)
+    // asked once with no key, to see that it answers without one
+    expect(asked.filter(({ headers }) => !headers.get("authorization")).length).toBe(1)
+    expect(descriptions.get("/G.json5")!.about.keyIfSet).toBe(true)
+    // 60 an hour with no key, two collections:  a check every 20 minutes keeps to a tenth of it
+    expect(spell).toContain(`- check it every 20 minutes`)
+    expect(description.canDo.limits).toMatch(/It allows 60 requests/)
+  })
+
+  test("looking again leaves out what it left out before", async () => {
+    const { ingest, texts } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
+    await ingest.add(ASK)
+    const { spell } = await ingest.update("/G.spell")
+    expect(spell).not.toMatch(/"\+1"|its "1"/)
+    expect(texts.get("/G.spell")).toContain(`- its next page is in its "Link" header`)
+  })
+})
+
 describe("the manners", () => {
   test("it names itself, and never sends a write, whoever asks", async () => {
     const { fetch, asked } = fakeFetch({ [API]: {} })
@@ -583,6 +639,28 @@ describe("the manners", () => {
     const reader = new PoliteReader({ fetch, sleep: async (msec) => void waits.push(msec) })
     expect((await reader.read(API)).status).toBe(200)
     expect(waits).toContain(3000)
+  })
+
+  test("a rate limit used up:  it waits for the reset when that's soon, else stops, saying when (epic `data` P28)", async () => {
+    const waits: number[] = []
+    let tries = 0
+    const usedUp = (inMs: number) => ({
+      "x-ratelimit-remaining": "0",
+      "x-ratelimit-reset": String(Math.ceil((Date.now() + inMs) / 1000))
+    })
+    const soon = (async () =>
+      ++tries === 1
+        ? new Response("limit", { status: 403, headers: usedUp(3000) })
+        : Response.json({})) as typeof globalThis.fetch
+    const reader = new PoliteReader({ fetch: soon, sleep: async (msec) => void waits.push(msec) })
+    expect((await reader.read(API)).status).toBe(200)
+    expect(Math.max(...waits)).toBeGreaterThan(1000)
+    const later = (async () =>
+      new Response("limit", { status: 403, headers: usedUp(3_600_000) })) as typeof globalThis.fetch
+    const stopped = new PoliteReader({ fetch: later, sleep: async () => {} })
+    await expect(stopped.read(API)).rejects.toThrow(
+      /stars.test says its rate limit is used up for now:  .* --key-secret/
+    )
   })
 
   test("it stops at a size:  an answer too big is cut, and a look too long stops", async () => {

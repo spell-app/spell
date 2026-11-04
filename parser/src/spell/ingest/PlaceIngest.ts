@@ -13,7 +13,7 @@ import {
 } from "./ingest.types"
 import { agentRead, renameCollections } from "./PlaceReading"
 import { answersUnder, IS_WEB_ADDRESS, KINDS_IT_CAN_LOOK_AT, kindFoundAt, kindReadFrom, lookAtPlace } from "./PlaceLook"
-import { describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
+import { checkSecondsWithin, describeLook, fingerprintOf, plainNameFor } from "./PlaceShape"
 import {
   mergedSpell,
   placeLineAt,
@@ -23,7 +23,7 @@ import {
   type SpellLine,
   type SpellParts
 } from "./PlaceSpell"
-import { PoliteReader } from "./PoliteReader"
+import { keptHeaders, PoliteReader } from "./PoliteReader"
 
 /** How many times it leaves out a line Spell can't read, and tries again. */
 const MOST_COMPILES = 12
@@ -108,6 +108,7 @@ export class PlaceIngest {
     refuseSecondServer(file, existing)
     const description = describeLook(look, { kind, name: ask.name ?? plainNameFor(address, kind) })
     if (ask.keySecret) description.about.keySecret = ask.keySecret
+    if (ask.keySecret) await this.noteKeyIfSet(description, look)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
@@ -158,6 +159,7 @@ export class PlaceIngest {
     })
     const description = describeLook(look, { kind, name })
     if (keySecret) description.about.keySecret = keySecret
+    if (keySecret) await this.noteKeyIfSet(description, look)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     if (carryOver(description, old)) {
       // something new, for the agent to read;  what was chosen before still stands
@@ -172,6 +174,8 @@ export class PlaceIngest {
       // what was said stays, and what this look found to say joins it:  a list answering from somewhere new
       description.notes = [...new Set([...old.notes, ...look.notes])]
     }
+    // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
+    this.compileLeavingOut(description, file)
     const before = writtenOf(spellPartsFor(old), old.spell)
     const after = spellPartsFor(description)
     const text = (await files.read(file)) ?? ""
@@ -244,6 +248,32 @@ export class PlaceIngest {
       )
     }
     return new PoliteReader({ fetch, ...withDefined({ key, sleep }) })
+  }
+
+  /**
+   * SIDE EFFECT:  when the first collection it looked at answers without the key too, the key's only for when it's set
+   * (GitHub answers 60 requests an hour with none);  and a program checks within the limit it has without one.
+   * - One request, with no key, of a page of it.  NEVER throws:  no answer leaves the key needed.
+   */
+  private async noteKeyIfSet(description: PlaceDescription, { address, collections }: PlaceLook): Promise<void> {
+    const { fetch, sleep } = this.settings
+    const first = collections[0]
+    // a web server's list, by its path:  not a GraphQL field's, nor one found by name
+    if (!first?.at.startsWith("/") || first.at.includes("{")) return
+    try {
+      const reader = new PoliteReader({ fetch, ...withDefined({ sleep }) })
+      const { status, headers } = await reader.read(new URL(`${address.replace(/\/+$/, "")}${first.at}`).href)
+      if (status >= 400) return
+      description.about.keyIfSet = true
+      const limit = headers.get("x-ratelimit-limit") ?? headers.get("ratelimit-limit")
+      if (limit) description.canDo.limits += `.  Without its key, it allows ${limit}.`
+      const shown = Object.values(description.collections).filter(({ leftOut }) => !leftOut).length
+      const keyless = checkSecondsWithin(keptHeaders(headers), shown)
+      if (description.checkEverySeconds !== undefined && keyless > description.checkEverySeconds)
+        description.checkEverySeconds = keyless
+    } catch {
+      // no answer:  the key stays needed
+    }
   }
 
   /** The place is already in the file:  nothing changes. */
@@ -517,9 +547,29 @@ function leaveOutLine(description: PlaceDescription, parts: SpellParts, line: st
       return true
     }
     if (held && kind === "lives") return leaveOutCollection(description, collection, reason)
+    if (kind === "inside") return leaveOutInside(description, parts, collection, field!, reason)
   }
   const type = parts.types.find(({ header }) => header === line)
   return !!type && leaveOutCollection(description, type.collection, reason)
+}
+
+/**
+ * SIDE EFFECT:  the Spell leaves out a field of a type inside a row, `typeWords`, by its `words`:
+ * GitHub's reactions' `+1` and `-1`.  - `false` if there's no such line
+ */
+function leaveOutInside(
+  description: PlaceDescription,
+  { types }: SpellParts,
+  typeWords: string,
+  words: string,
+  reason: string
+): boolean {
+  const fields = types.find(({ isInside, header }) => isInside && header.includes(`"${typeWords}"`))?.insideFields
+  const [name, about] = Object.entries(fields ?? {}).find(([, each]) => each.words === words && !each.leftOut) ?? []
+  if (!about) return false
+  about.leftOut = reason
+  description.notes.push(`Left out ${typeWords}'s "${name}":  ${reason}`)
+  return true
 }
 
 /** SIDE EFFECT:  the Spell leaves out a whole collection. */
@@ -661,9 +711,9 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
           `A list of objects inside a field:  ${field} of ${name} holds them, and a type's line can't say their shape yet, so it's left out.`
         )
     }
-    if (paging === "link header")
+    if (paging === "link header" && each.some(([, collection]) => collection.paging === "next field"))
       said.add(
-        `Paging by a Link header:  ${name} says its next page there, and no line can name it, so a read gets only its first page.`
+        `Paging by a Link header in one collection and a field in another:  ${name} says its next page in its Link header, and "its next page is" is for the whole place, so a read of it gets only its first page.`
       )
     if (rowsAt && new Set(each.map(([, collection]) => collection.rowsAt)).size > 1)
       said.add(`Rows kept somewhere different in each collection:  "its rows are" is for the whole place.`)

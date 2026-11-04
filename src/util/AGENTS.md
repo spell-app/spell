@@ -209,6 +209,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `WebPlace` turns an answer into what the engine needs:  not found, refused, or no answer (a 5xx, a 429:  it resends).
     - A key is named (`keyNamed`), never written:  there's no `headers` setting, and a place that needs one refuses,
       unless a server side hands it `keyFrom` (`PlaceKeys`, in `spell/server/places`).
+      With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
     - `RestPlace`:  named operations (`operations`, `call()`), each a `POST`;  versions, if the server has them (`If-Match`);  without, the last save wins the whole record.
     - `GraphPlace`:  a plain `POST`, selecting only what's asked;  mutations named in its mapping.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).

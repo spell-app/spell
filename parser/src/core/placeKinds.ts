@@ -23,6 +23,8 @@ export type PlaceDetails = {
   collections?: Record<string, { at?: string; fields?: Record<string, string> }>
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
+  /** It goes without its key where nothing holds it, a browser:  `its key is the secret "GITHUB_TOKEN", if it's set`. */
+  keyIfSet?: boolean
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
   /** Once a day at this time, instead:  `check it once a day at 5am` (`pollWhileVisible()`'s `at`). */
@@ -35,6 +37,8 @@ export type PlaceDetails = {
   rowsIn?: string
   /** Which field of a web server's answer says where its next page is, for every collection. */
   nextPageIn?: string
+  /** A web server says where its next page is in its `Link` header, for every collection (`its next page is in its "Link" header`). */
+  nextPageInLink?: boolean
   /** Each named operation's address, by its name. */
   operations?: Record<string, string>
   /** How it spells a field's name, by an example:  `hair_color` (`it writes names like "hair_color"`). */
@@ -74,6 +78,8 @@ export type PlaceMaking = {
   Class: Function
   /** Who's at this page, for a place that has people. */
   person: PlacePerson
+  /** Finds a key by its name, on a server side only:  `SpellRuntime.keyFrom`.  Left out:  a place that needs one refuses. */
+  keyFrom?: (name: string) => string | undefined
 }
 
 /** A row's id, in a place that isn't told otherwise. */
@@ -109,7 +115,7 @@ export function knowCollection(behind: PlaceBehind, making: PlaceMaking): void {
 
 /** Each kind's word, and how its place is made. */
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
-  "web server": ({ details, collection, Class }, { RestPlace, nameStyleLike }) =>
+  "web server": ({ details, collection, Class, keyFrom }, { RestPlace, nameStyleLike }) =>
     new RestPlace({
       url: details.at!,
       collections: restCollections(details, collection, storedAsIn(Class)),
@@ -119,13 +125,21 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
       ...(details.pageSize !== undefined && { pageSize: details.pageSize }),
       ...(details.versionsIn !== undefined && { versions: { field: details.versionsIn } }),
       ...(details.operations && { operations: details.operations }),
-      ...(details.keyNamed !== undefined && { keyNamed: details.keyNamed })
+      ...(details.keyNamed !== undefined && {
+        keyNamed: details.keyNamed,
+        ...(keyFrom && { keyFrom }),
+        ...(details.keyIfSet && { keyIfSet: true })
+      })
     }),
   "graphql server": (making, { GraphPlace }) =>
     new GraphPlace({
       url: making.details.at!,
       collections: graphCollections(making),
-      ...(making.details.keyNamed !== undefined && { keyNamed: making.details.keyNamed })
+      ...(making.details.keyNamed !== undefined && {
+        keyNamed: making.details.keyNamed,
+        ...(making.keyFrom && { keyFrom: making.keyFrom }),
+        ...(making.details.keyIfSet && { keyIfSet: true })
+      })
     }),
   "data folder": ({ details }, { RemotePlace, ChunkedPlace, WebChunks, JsonChunks }) => {
     const at = details.at!
@@ -258,16 +272,20 @@ function storedAsIn(Class: Function): Record<string, string> {
   return named
 }
 
-/** What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is. */
-function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDetails) {
-  if (idColumn === undefined && rowsIn === undefined && nextPageIn === undefined) return {}
+/**
+ * What a web server's lines say of every collection:  its id's field, where its rows are, where its next page is.
+ * - Its next page in its `Link` header:  it pages by cursor, with no field for it, as `RestPlace` reads that header then.
+ */
+function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn, nextPageInLink }: PlaceDetails) {
+  const pages = nextPageIn !== undefined || !!nextPageInLink
+  if (idColumn === undefined && rowsIn === undefined && !pages) return {}
   return {
     allCollections: {
       ...(idColumn !== undefined && idColumn !== ID_FIELD && { fields: { [ID_FIELD]: idColumn } }),
       ...(rowsIn !== undefined && { rowsAt: rowsIn }),
       ...(nextPageIn !== undefined && { nextAt: nextPageIn })
     },
-    ...(nextPageIn !== undefined && { can: { page: "cursor" as const } })
+    ...(pages && { can: { page: "cursor" as const } })
   }
 }
 

@@ -10,6 +10,9 @@ const PLAIN_NAME = /^[a-z][a-zA-Z0-9]*$/
 /** Where one word of a name ends and the next starts:  `_`, `-`, a space, or a capital after a small letter or digit. */
 const WORD_BREAK = /[\s_-]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
 
+/** Our name for a row's id. */
+const ID = "id"
+
 /****************
  * ### `FieldNames`
  * One collection's field names:  ours (`hairColor`, what compiled Spell calls them) and the server's (`hair_color`).
@@ -17,6 +20,7 @@ const WORD_BREAK = /[\s_-]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
  *   So a program says `its "hair color" is text`, and nothing about how the server spells it.
  * - `named`:  the names a program gave by hand (`stored as "avg_ht"`), which win.
  * - It remembers each spelling it reads, and writes under it:  a save goes back as the server spelled it.
+ * - A field named to be our `id` (`its id is its "login"`) reads as itself too, `login`, unless the row has one already.
  * - Before it's read anything:  `style`, how the server spells names (`it writes names like "hair_color"`), else ours.
  * - NEVER throws.
  ****************/
@@ -44,6 +48,9 @@ export class FieldNames {
       if (!this.theirs.has(our)) this.pair(our, their)
       read[our] = value
     }
+    // a field that's its id is still itself too:  GitHub's user `login`, Wikipedia's `title`, which a page shows
+    const theirId = this.theirs.get(ID)
+    if (theirId !== undefined && theirId in row) read[ourNameFor(theirId)] ??= row[theirId]
     return read
   }
 

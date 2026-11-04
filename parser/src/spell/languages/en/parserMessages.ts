@@ -278,6 +278,9 @@ export const PARSER_MESSAGES = {
     'Nothing can be made from itself:  "{name}" is already a kind of thing, so call this one something else',
   /** A dot in a field's name, under a place. */
   "check-time-not-a-time": '"{time}" isn\'t a time of day:  say one as 5am, 5:30pm or 17:00',
+  /** `its next page is in its "{header}" header`, a header other than `Link`. */
+  "next-page-header-not-link":
+    'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
   "found-only-by-name":
     '{things} are only found by name, with no list of them all:  read one at a time, "the {thing} whose id is ..."',
   "no-dotted-field":

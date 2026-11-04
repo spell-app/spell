@@ -17,6 +17,7 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
 import { LoadThings } from "./LoadThings"
@@ -36,6 +37,7 @@ import {
   WhileWaiting
 } from "./ReadRider"
 import { NextPageIn } from "./NextPageIn"
+import { NextPageInLink } from "./NextPageInLink"
 import { WritesLike } from "./WritesLike"
 import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
@@ -145,6 +147,7 @@ places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:t
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
+places.addRule(KeyIfSet, { syntax: "{type:subject_its} key is the secret {name:text}, if it's set" })
 places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
@@ -173,6 +176,7 @@ places.addRule(RowsIn, {
 places.addRule(NextPageIn, {
   syntax: "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
 })
+places.addRule(NextPageInLink, { syntax: "{type:subject_its} next page is in its {header:text} header" })
 places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
 })

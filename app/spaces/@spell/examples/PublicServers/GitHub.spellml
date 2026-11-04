@@ -1,0 +1,85 @@
+# GitHub
+Who wrote Solid, its issues, and anyone on GitHub by their login.
+Every thing it shows is in GitHub.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+with `<spell-more-of>`, so looking again at the server never touches a line of this.
+A page in a browser holds no key:  it asks as anyone does, 60 times an hour, so it checks for changes every half hour.
+
+<spell-thing "github page">
+	<spell>
+		- its "login" is text
+		- to create it:
+			set its login to "ryansolid"
+	</spell>
+	<property "person" description="Whoever has that login:  GitHub finds them by it, with no list of everyone">the user whose id is its login</property>
+
+	<draw>
+		<header size="large">Solid, on GitHub</header>
+		<form value={it} class="find">
+			<field label="Anyone on GitHub, by their login">
+				<input name="login" icon="search" placeholder="ryansolid" />
+			</field>
+		</form>
+		draw its profile
+		<header size="medium">Who wrote it</header>
+		<for every contributor as="cards" columns="5" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
+		<header size="medium">Its issues</header>
+		<for every issue as="cards" columns="2" doubling loading="Asking GitHub" failed="GitHub can't be reached just now." />
+		<text class="credits" size="small">
+			From <link link="https://docs.github.com/en/rest">GitHub's REST API</link>, asked for as you look.
+		</text>
+	</draw>
+
+	<draw "profile">
+		<if its person>
+			draw the card of its person
+		</if>
+		while waiting:
+			<loader visible inline text>Asking GitHub</loader>
+		if that fails:
+			<text>Nobody on GitHub has that login.</text>
+	</draw>
+</spell-thing>
+
+
+# Someone on GitHub
+Their picture, their name, and what they've made public.
+
+<spell-more-of "user">
+	<draw "card">
+		<ui-card class="person">
+			<image src={its avatar url} alt="" />
+			<content>
+				<header>{its name}</header>
+				<meta>{its login}</meta>
+			</content>
+			<extra>{its public repos} public repositories · {its followers} followers</extra>
+		</ui-card>
+	</draw>
+</spell-more-of>
+
+<spell-more-of "contributor">
+	<draw>
+		<ui-card class="person">
+			<image src={its avatar url} alt="" />
+			<content>
+				<header>{its login}</header>
+				<meta>{its contributions} contributions</meta>
+			</content>
+		</ui-card>
+	</draw>
+</spell-more-of>
+
+
+# An issue
+Its number, its title, whose it is, and how much it's been talked about.
+
+<spell-more-of "issue">
+	<draw>
+		<ui-card class="issue">
+			<content>
+				<header>#{its number} {its title}</header>
+				<meta>{its state} · {the login of its user} · {its comments} comments</meta>
+			</content>
+		</ui-card>
+	</draw>
+</spell-more-of>

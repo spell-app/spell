@@ -6564,6 +6564,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "KeyIfSet",
+          "ruleNames": ["key_if_set"],
+          "internal": false,
+          "file": "src/spell/rules/places/KeyIfSet.ts",
+          "line": 12,
+          "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} key is the secret {name:text}, if it's set"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "KeyIsSecret",
           "ruleNames": ["key_is_secret"],
           "internal": false,
@@ -6677,6 +6691,20 @@
           "syntaxes": [
             {
               "syntax": "{type:subject_its} next page is (the {inner:text} of)? (the {outer:text} of)? its? {field:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "NextPageInLink",
+          "ruleNames": ["next_page_in_link"],
+          "internal": false,
+          "file": "src/spell/rules/places/NextPageInLink.ts",
+          "line": 16,
+          "purpose": "A web server says where its next page is in its `Link` header, not in its answer (epic `data` P28).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} next page is in its {header:text} header"
             }
           ],
           "aliases": ["statement"]

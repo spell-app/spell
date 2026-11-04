@@ -9,6 +9,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 export type PlaceDetailValue = {
   collections?: Record<string, { at?: string; fields?: Record<string, string> }>
   keyNamed?: string
+  keyIfSet?: boolean
   checkedEvery?: number
   checkedAt?: { hour: number; minute: number; utc?: boolean }
   versionsIn?: string
@@ -16,6 +17,7 @@ export type PlaceDetailValue = {
   accounts?: string[]
   rowsIn?: string
   nextPageIn?: string
+  nextPageInLink?: boolean
   namesLike?: string
   numbersLike?: string
   listsGive?: string[]

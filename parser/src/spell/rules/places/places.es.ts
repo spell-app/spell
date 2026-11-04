@@ -18,6 +18,7 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
+import { KeyIfSet } from "./KeyIfSet"
 import { KeyIsSecret } from "./KeyIsSecret"
 import { KeyWritten } from "./KeyWritten"
 import { LoadThings } from "./LoadThings"
@@ -48,6 +49,7 @@ import { TotalOf } from "./TotalOf"
 import { TryAgain } from "./TryAgain"
 import { VersionsIn } from "./VersionsIn"
 import { NextPageIn } from "./NextPageIn"
+import { NextPageInLink } from "./NextPageInLink"
 import { RowsIn } from "./RowsIn"
 import { ListsGiveOnly } from "./ListsGiveOnly"
 import { PageSizeIs } from "./PageSizeIs"
@@ -139,6 +141,7 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
+placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave es el secreto {name:text}, si la hay" })
 placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
 placesEs.addRule(Wording.specialize({ ruleName: "check_unit", meanings: ["second", "minute", "hour", "day"] }), {
@@ -168,6 +171,7 @@ placesEs.addRule(RowsIn, {
 placesEs.addRule(NextPageIn, {
   syntax: "{type:subject_its} página siguiente está en (el {inner:text} de)? (el {outer:text} de)? su? {field:text}"
 })
+placesEs.addRule(NextPageInLink, { syntax: "{type:subject_its} página siguiente está en su cabecera {header:text}" })
 placesEs.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"
 })
