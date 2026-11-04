@@ -24,9 +24,13 @@ import {
 
 import { contentVersion } from "./contentVersion"
 import { PlaceEvents } from "./PlaceEvents"
+import { NOTHING_TAKEN_DOWN, isThingTakenDown, takenDownError, type TakenDown } from "./takenDown"
 
 /** How long after a file is heard changing the folder is looked at:  a storage may tell each write of one save. */
 const SETTLE_MS = 50
+
+/** What a refusal calls a folder taken down whole. */
+const WHOLE_FOLDER = "this space"
 
 /****************
  * ### `FolderPlace`
@@ -62,6 +66,11 @@ const SETTLE_MS = 50
  *   - and a member to read it (epic `atmosphere` P5, T15):  anyone else's read is refused, `"role"`, as a read direct
  *     with no credential is
  * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
+ * - TAKEN DOWN (epic `atmosphere` P6), as its host says (`takenDown`, the app's `Takedowns`), asked afresh each time:
+ *   - the whole folder:  every read and write refused, `"taken down"`, naming the host's abuse contact
+ *   - a thing:  left out of every read, and a change to it refused the same way
+ *   - a watcher, or a reader asking what changed, hears it as removed;  put back, as there again
+ *   - its file stays on the disk:  undoing it is a line in the host's log
  * - A request saying nobody (the folder's own code, a test) is trusted:  it's on this machine already.
  * - Its own operations (`operations`), answered by `call()`:  the app's member list (`SPACE_MEMBER_OPERATIONS`).
  * - Node only:  a browser reaches one through `PlaceServer`.
@@ -89,6 +98,10 @@ export class FolderPlace extends ChunkedPlace {
   private readonly space: FolderSpace | undefined
   /** Its own operations, by name. */
   private readonly operations: Readonly<Record<string, FolderOperation>>
+  /** What's taken down in it now, as its host says. */
+  private readonly takenDown: (identity: string | undefined) => Promise<TakenDown>
+  /** Each thing taken down when it last looked, by collection:  so a takedown, or its undoing, is told once. */
+  private readonly toldDown = new Map<string, Set<string>>()
 
   constructor({
     storage,
@@ -97,6 +110,7 @@ export class FolderPlace extends ChunkedPlace {
     mayChangeAnyRow,
     space,
     operations = {},
+    takenDown = async () => NOTHING_TAKEN_DOWN,
     checkedAtMostEvery,
     identifiesBy
   }: FolderPlaceProps) {
@@ -115,6 +129,7 @@ export class FolderPlace extends ChunkedPlace {
     this.mayChangeAnyRow = mayChangeAnyRow
     this.space = space
     this.operations = operations
+    this.takenDown = takenDown
   }
 
   /** What it can do:  what a `ChunkedPlace` can, and it hears changes from the disk;  and what it was told to say. */
@@ -129,15 +144,16 @@ export class FolderPlace extends ChunkedPlace {
   /** The list, once it's in step with the folder:  see `ChunkedPlace.list()`. */
   async list(collection: string, query: ListQuery, context: PlaceContext = {}): Promise<ListAnswer> {
     await this.mayReadOrDie(context)
-    await this.keepInStep(collection)
-    return { ...(await super.list(collection, query, context)), version: this.events.version }
+    const down = await this.inStepUnlessDown(collection, context)
+    const answer = await super.list(collection, query, context)
+    return { ...answer, rows: this.withoutTakenDown(down, collection, answer.rows), version: this.events.version }
   }
 
   /** The things with these ids, once the list is in step with the folder. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext = {}): Promise<PlaceRow[]> {
     await this.mayReadOrDie(context)
-    await this.keepInStep(collection)
-    return super.getMany(collection, ids, context)
+    const down = await this.inStepUnlessDown(collection, context)
+    return this.withoutTakenDown(down, collection, await super.getMany(collection, ids, context))
   }
 
   /**
@@ -161,10 +177,11 @@ export class FolderPlace extends ChunkedPlace {
   /** What changed in `collection` since `token`, a list's `version`:  a token from another run answers with every thing. */
   async changesSince(collection: string, token: string, context: PlaceContext = {}): Promise<ChangesAnswer> {
     await this.mayReadOrDie(context)
-    await this.keepInStep(collection)
+    const down = await this.inStepUnlessDown(collection, context)
     const known = this.events.changesSince(collection, token)
-    if (known) return known
-    return { rows: await this.allRows(collection, context), removed: [], token: this.events.version }
+    if (known) return { ...known, rows: this.withoutTakenDown(down, collection, known.rows) }
+    const rows = this.withoutTakenDown(down, collection, await this.allRows(collection, context))
+    return { rows, removed: [], token: this.events.version }
   }
 
   /** Tell `onEvent` of each change to `target`, by this place or on the disk.  Returns what stops it. */
@@ -203,9 +220,10 @@ export class FolderPlace extends ChunkedPlace {
   /**
    * Make these changes, and tell whoever's watching:  see `ChunkedPlace.apply()`.
    * - throws `PlaceError` `"refused"`:  `"owner"`, for a change to someone else's thing;  `"role"`, from someone whose
-   *   role in the space can't write:  see the class
+   *   role in the space can't write;  `"taken down"`, for a change to something taken down:  see the class
    */
   async apply(_changes: readonly PlaceChange[], context: PlaceContext = {}): Promise<ApplyAnswer> {
+    await this.notTakenDownOrDie(_changes, context)
     const changes =
       this.says.whoWrites === "its members"
         ? await this.membersChanges(_changes, context)
@@ -284,13 +302,14 @@ export class FolderPlace extends ChunkedPlace {
 
   /**
    * Run its operation `name`, as who's asking (`context.identity`):  see `operations`.
-   * - throws `PlaceError` `"not found"` for one it hasn't;  what the operation throws
+   * - throws `PlaceError` `"not found"` for one it hasn't;  `"refused"`, `"taken down"`, for a folder taken down;
+   *   what the operation throws
    */
-  call(name: string, input: unknown, context: SelectingContext = {}): Promise<unknown> {
+  async call(name: string, input: unknown, context: SelectingContext = {}): Promise<unknown> {
     const operation = Object.hasOwn(this.operations, name) ? this.operations[name] : undefined
-    if (!operation) {
-      return Promise.reject(new PlaceError(`FolderPlace:  no operation "${name}"`, { cause: { kind: "not found" } }))
-    }
+    if (!operation) throw new PlaceError(`FolderPlace:  no operation "${name}"`, { cause: { kind: "not found" } })
+    const down = await this.takenDown(context.identity)
+    if (down.isWhole) throw takenDownError(WHOLE_FOLDER, down)
     return operation(input, context)
   }
 
@@ -298,6 +317,52 @@ export class FolderPlace extends ChunkedPlace {
   private async ownerOf(collection: string, id: string): Promise<string | undefined> {
     const owner = (await this.bodyOf(collection, id))?.[OWNER_FIELD]
     return typeof owner === "string" ? owner : undefined
+  }
+
+  ////////////////
+  // ## Taken down
+  ////////////////
+
+  /**
+   * In step with the folder, unless it's all taken down:  what's taken down now, each change to it told.
+   * - throws `PlaceError` `"refused"`, `"taken down"`, for a folder taken down whole
+   */
+  private async inStepUnlessDown(collection: string, { identity }: PlaceContext): Promise<TakenDown> {
+    const down = await this.takenDown(identity)
+    if (down.isWhole) throw takenDownError(WHOLE_FOLDER, down)
+    await this.keepInStep(collection)
+    await this.tellTakedowns(down, collection)
+    return down
+  }
+
+  /** `rows` of `collection`, without what's taken down. */
+  private withoutTakenDown(down: TakenDown, collection: string, rows: PlaceRow[]): PlaceRow[] {
+    if (!down.things.get(collection)?.size) return rows
+    return rows.filter((row) => !isThingTakenDown(down, collection, idOfRow(row, this.idField) ?? ""))
+  }
+
+  /**
+   * Tell whoever's watching, and the changes since a token, of each thing of `collection` taken down or put back since
+   * it last looked:  taken down, as removed;  put back, as there again, with its row.
+   */
+  private async tellTakedowns(down: TakenDown, collection: string): Promise<void> {
+    const now = new Set(down.things.get(collection) ?? [])
+    const before = this.toldDown.get(collection) ?? new Set<string>()
+    this.toldDown.set(collection, now)
+    for (const id of now) if (!before.has(id)) this.events.tell({ collection, id })
+    for (const id of before) {
+      if (now.has(id)) continue
+      const row = await this.bodyOf(collection, id)
+      this.events.tell({ collection, id, ...(row && { row }) })
+    }
+  }
+
+  /** - throws `PlaceError` `"refused"`, `"taken down"`, when the folder, or a thing `changes` touch, is taken down */
+  private async notTakenDownOrDie(changes: readonly PlaceChange[], { identity }: PlaceContext): Promise<void> {
+    const down = await this.takenDown(identity)
+    if (down.isWhole) throw takenDownError(WHOLE_FOLDER, down)
+    const hit = changes.find(({ collection, id }) => id !== undefined && isThingTakenDown(down, collection, id))
+    if (hit) throw takenDownError(`"${hit.collection}" ${hit.id}`, down)
   }
 
   ////////////////
@@ -482,6 +547,11 @@ export type FolderPlaceProps = {
   space?: FolderSpace
   /** Its own operations, by name, answered by `call()`:  through `PlaceServer`'s `call`.  Left out:  none. */
   operations?: Readonly<Record<string, FolderOperation>>
+  /**
+   * What's taken down in it now, for who's asking, as its host says (epic `atmosphere` P6):  asked for each read and
+   * write, so their own account taken down is the whole folder, for them.  Left out:  nothing ever is.
+   */
+  takenDown?: (identity: string | undefined) => Promise<TakenDown>
   /** The least time between two asks of what changed, in seconds, that it will take:  `describe()` says it. */
   checkedAtMostEvery?: number
   /** Who it takes people to be, with no sign-in:  `describe()` says it. */

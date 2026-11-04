@@ -28,6 +28,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`):  the JavaScript core's | `step` |
 | `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
 | `write-refused-role` | the same, refused as your role can't write:  the JavaScript core's, so far | `thing` |
+| `write-refused-taken-down` | the same, refused as Spell took it down:  the JavaScript core's, so far | `thing` |
 | `write-retry`, `write-show-me` | that notice's buttons:  the JavaScript core's, so far | |
 | `write-merged` | the notice when a merge kept yours:  the JavaScript core's, so far | `thing`, `field`, `theirs` |
 | `write-use-theirs` | that notice's button:  the JavaScript core's, so far | |
@@ -41,6 +42,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `sign-in-as-spell`, `sign-in-spell-signed-out` | a Spell account's:  the JavaScript core's | `place`, `name` |
 | `sign-in-check-email` | the same, waiting for its link or code | `email` |
 | `sign-in-email`, `sign-in-email-me`, `sign-in-code` | its fields and button | |
+| `sign-in-abuse` | where to report abuse, on a Spell account's bar:  the JavaScript core's | `contact` |
 """
 
 import re
@@ -62,6 +64,7 @@ MESSAGES: dict[str, str] = {
     "redo-step": "Redo {step}",
     "write-refused": "Couldn't save your change to {thing}",
     "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
+    "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
     "language": "en",
     "write-retry": "Retry",
     "read-failed": "Can't read this right now:  {why}",
@@ -88,6 +91,7 @@ MESSAGES: dict[str, str] = {
         "Sign in again, and what you changed goes through."
     ),
     "sign-in-failed": "That didn't sign you in:  {why}",
+    "sign-in-abuse": "To report abuse on Spell:  {contact}",
     "sign-in-who": "Your handle, e.g. alice.bsky.social",
     "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
     "sign-in-spell-signed-out": (

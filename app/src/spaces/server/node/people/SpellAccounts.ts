@@ -1,6 +1,7 @@
 import { slug } from "spell/util/string"
 import type { SignInAccounts } from "spell/server/signIn"
 import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
+import type { Takedowns } from "spell/app/spaces/server/node/places/Takedowns"
 import { PeopleStore } from "./PeopleStore"
 
 /** How a person's folder is named in their org's:  `owen@/`. */
@@ -18,6 +19,7 @@ const PERSON_FOLDER = /^([^/@]+)@\/$/
  * - INVITE ONLY:  `accountFor()` finds only someone with a file;  `invite()` makes one, through the people store's
  *   own first-file step (`PeopleStore.me()`), the invited email their only one.
  * - No store of its own:  a person's file is their account.
+ * - An account Spell took down (`Takedowns`, epic `atmosphere` P6) can't sign in:  `isTakenDown()`.
  * - Its id from the email's name:  `ana@example.com` is `ana@spell`;  a name taken gets a number, `ana-2@spell`.
  * - Node only.
  ****************/
@@ -26,10 +28,18 @@ export class SpellAccounts implements SignInAccounts {
   private readonly people: PeopleStore
   /** The org accounts are in. */
   private readonly org: string
+  /** What Spell took down:  left out, nothing is. */
+  private readonly takedowns: Takedowns | undefined
 
-  constructor(people: PeopleStore, { org = HOME_ORG }: { org?: string } = {}) {
+  constructor(people: PeopleStore, { org = HOME_ORG, takedowns }: SpellAccountsOptions = {}) {
     this.people = people
     this.org = org
+    this.takedowns = takedowns
+  }
+
+  /** Is the account `person` (`ana@spell`) taken down, so it can't sign in? */
+  async isTakenDown(person: string): Promise<boolean> {
+    return (await this.takedowns?.isAccountDown(person)) ?? false
   }
 
   /** The account with `email`:  `ana@spell`;  `undefined` for none. */
@@ -66,6 +76,14 @@ export class SpellAccounts implements SignInAccounts {
     for (let number = 2; taken.has(id); number++) id = `${base}-${number}`
     return id
   }
+}
+
+/** Options of `SpellAccounts`. */
+export type SpellAccountsOptions = {
+  /** The org accounts are in:  default Spell's own, `HOME_ORG`. */
+  org?: string
+  /** What Spell took down:  an account taken down can't sign in.  Left out:  none is. */
+  takedowns?: Takedowns
 }
 
 /** Do `one` and `other` name one mailbox?  An address's case doesn't matter, in practice. */

@@ -110,6 +110,14 @@ const signInDir = process.env.SPELL_SIGN_IN_DIR
   : join(homedir(), ".spell", "sign-in")
 
 /**
+ * Where people report abuse on this server (epic `atmosphere` P6, Q7 A):  its ABUSE CONTACT.
+ * - Shown on the sign-in bar and the sign-in link's page, and named in every refusal of something taken down.
+ * - `SPELL_ABUSE_CONTACT` sets it;  default `abuse@spell.spaces`, until the epic's Q12 settles the domain Spell's
+ *   mail comes from.
+ */
+const abuseContact = process.env.SPELL_ABUSE_CONTACT || "abuse@spell.spaces"
+
+/**
  * Normalized environment variables for the server and client setup, and the folders spell's projects are in.
  * - Node only:  the editor's server, the language server, the `spell` command, tests.
  */
@@ -125,6 +133,7 @@ const environment = {
   staticDir,
   spellSpacesDir,
   signInDir,
+  abuseContact,
   packageFolder,
   spaceFolders,
   /** The built-in projects, e.g. `spaces/@spell/examples/Solitaire` -- the `@spell/...` groups. */

@@ -24,6 +24,7 @@ export const spanishMessages: CoreMessages = {
   "redo-step": "Rehacer {step}",
   "write-refused": "No se pudo guardar tu cambio en {thing}",
   "write-refused-role": "No se pudo guardar tu cambio en {thing}:  tu papel no puede escribir aquí",
+  "write-refused-taken-down": "No se pudo guardar tu cambio en {thing}:  Encanto lo retiró",
   language: "es",
   "write-retry": "Reintentar",
   "page-previous": "Anterior",
@@ -49,6 +50,7 @@ export const spanishMessages: CoreMessages = {
   "sign-in-ended":
     "Tu sesión en {place} ha terminado:  duran dos semanas como mucho.  Vuelve a iniciar sesión, y lo que cambiaste se guardará.",
   "sign-in-failed": "No se pudo iniciar sesión:  {why}",
+  "sign-in-abuse": "Para denunciar un abuso en Encanto:  {contact}",
   "sign-in-who": "Tu nombre de usuario, p. ej. alicia.bsky.social",
   "sign-in-as-spell": "Sesión iniciada en {place} con tu cuenta de Encanto, {name}.",
   "sign-in-spell-signed-out":

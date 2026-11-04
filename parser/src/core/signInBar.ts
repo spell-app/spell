@@ -3,6 +3,8 @@
  * - Who's signed in, with Sign out;  or who isn't, with a field and Sign in;  and when it's ended, that it has, and what's kept.
  * - The two kinds of account named apart:  a Spell account (an email, then "check your email" with a box for its code,
  *   epic `atmosphere` P3), and an atmosphere account (a handle).
+ * - A Spell account's bar, with nobody signed in, also says where to report abuse:  the host's abuse contact, as its
+ *   server said it (`PlaceSignIn.abuseContact`, epic `atmosphere` P6).
  * - A program writes nothing for it:  as with a read's riders, a person should never be left guessing.
  * - On the page's Spell UI, by its tags, as a read's failure message is:  core never imports Spell UI.
  * - Plain DOM, drawn again as the sign-in changes:  no Solid, as nothing here belongs to the program's drawing.
@@ -73,6 +75,7 @@ function drawInto(bar: HTMLElement, placeName: string, place: Place): void {
   if (status === "signed in") parts.push(buttonFor("sign-out", () => void signIn.signOut()))
   else if (status === "waiting for a code" && signIn.enterCode) parts.push(...codeParts(signIn))
   else if (status !== "signing in") parts.push(...signInParts(signIn))
+  if (status !== "signed in" && signIn.abuseContact) parts.push(abuseLine(signIn.abuseContact))
   bar.replaceChildren(...parts)
 }
 
@@ -118,6 +121,15 @@ type FieldAndButton = {
   go: (typed: string) => Promise<void>
   /** The field's type:  `email`.  Left out:  text. */
   type?: string
+}
+
+/** Where to report abuse, quietly, on a line of its own. */
+function abuseLine(contact: string): HTMLElement {
+  const line = document.createElement("small")
+  line.classList.add("spell-sign-in-abuse")
+  line.style.display = "block"
+  line.textContent = core.message("sign-in-abuse", { contact })
+  return line
 }
 
 /** A button saying the message `key`. */

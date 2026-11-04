@@ -1,5 +1,4 @@
 import { SRV } from "spell/server"
-import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { prefsPersonFor } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
@@ -28,10 +27,7 @@ export function useSpellUiThemes(writer: SpellUiThemes | undefined): void {
 /** Is whoever `request` is from a Spell admin:  `spell-admin` in Spell's own org?  `people`:  a test's store. */
 export async function isSpellAdmin(request: SRV.Request, people: PeopleStore = peopleStore()): Promise<boolean> {
   const { id, org } = prefsPersonFor(request)
-  const { person } = await people.person(id, org)
-  if (!person) return false
-  const roles = await people.rolesOf(person)
-  return roles.some((org) => org.id === HOME_ORG && org.role === SPELL_ADMIN)
+  return people.isSpellAdmin(id, org)
 }
 
 /** `GET /api/themes/spell-ui`:  see the file's docs. */
@@ -44,6 +40,3 @@ export const request_saveIntoSpellUi = respondWithJSON(async (request) => {
   const file = (themes ??= new SpellUiThemes()).save({ name: `${name}`, text: `${text}`, overwrite: !!overwrite })
   return { file }
 })
-
-/** The role that may save into Spell UI. */
-const SPELL_ADMIN = "spell-admin"

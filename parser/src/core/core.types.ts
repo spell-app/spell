@@ -169,6 +169,7 @@ export type TestCheck = {
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
  * | `write-refused` | the notice when a place refuses a change | `thing` |
  * | `write-refused-role` | the same, refused as your role can't write:  a guest of a space, or no member (epic `atmosphere` P4) | `thing` |
+ * | `write-refused-taken-down` | the same, refused as Spell took it down (epic `atmosphere` P6) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
  * | `write-merged` | the notice when a merge kept your value over someone else's | `thing`, `field`, `theirs` |
  * | `write-lost` | the notice when someone else's change replaced your long text | `thing`, `field`, `mine` |
@@ -188,6 +189,7 @@ export type TestCheck = {
  * | `sign-in-email-me` | the button that emails the link and code | |
  * | `sign-in-ended` | what shows once a sign-in has run out | `place` |
  * | `sign-in-failed` | what shows when signing in didn't work | `why` |
+ * | `sign-in-abuse` | where to report abuse, the host's abuse contact, on a Spell account's bar (epic `atmosphere` P6) | `contact` |
  * | `sign-in-who` | the field for who they are | |
  * | `sign-in`, `sign-out` | its buttons | |
  *
@@ -209,6 +211,7 @@ export const CORE_MESSAGES = {
   "redo-step": "Redo {step}",
   "write-refused": "Couldn't save your change to {thing}",
   "write-refused-role": "Couldn't save your change to {thing}:  your role can't write here",
+  "write-refused-taken-down": "Couldn't save your change to {thing}:  Spell took it down",
   language: "en",
   "write-retry": "Retry",
   "page-previous": "Previous",
@@ -234,6 +237,7 @@ export const CORE_MESSAGES = {
   "sign-in-ended":
     "Your sign-in to {place} has ended:  they last two weeks at most.  Sign in again, and what you changed goes through.",
   "sign-in-failed": "That didn't sign you in:  {why}",
+  "sign-in-abuse": "To report abuse on Spell:  {contact}",
   "sign-in-who": "Your handle, e.g. alice.bsky.social",
   "sign-in-as-spell": "Signed in to {place} with your Spell account, {name}.",
   "sign-in-spell-signed-out":

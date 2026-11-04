@@ -20,6 +20,9 @@ import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 /** The token the server wants. */
 const TOKEN = "space-folders-token"
 
+/** Where people ask about a takedown, here. */
+const ABUSE = "abuse@test.example"
+
 /** The org file:  Owen and Matt are members of spell, and Grace its admin. */
 const SPELL_ORG = `{
   "$type": "Org",
@@ -69,7 +72,8 @@ beforeAll(async () => {
   folders = new SpaceFolders({
     folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
     people: new PeopleStore(peopleStorage),
-    personFor: (request) => request.get("x-person") ?? "owen@spell"
+    personFor: (request) => request.get("x-person") ?? "owen@spell",
+    abuseContact: ABUSE
   })
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
@@ -115,6 +119,28 @@ function updateOf(id: string, title: string) {
 function onDisk(parts: string[], id: string): Record<string, unknown> | undefined {
   const file = join(spaces, ...parts, "recipes", `${id}.json`)
   return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>) : undefined
+}
+
+/** Ask the write side for `person`'s credential to read `address`:  the cookie to send back, and the answer. */
+async function credentialOf(
+  address: string,
+  person: string
+): Promise<{ status: number; cookie: string; body: unknown }> {
+  const answer = await fetch(`http://127.0.0.1:${port}/api/places/spaces/${address}/credential`, {
+    method: "POST",
+    headers: { "x-server-token": TOKEN, "x-person": person, "content-type": "application/json" },
+    body: "{}"
+  })
+  const setCookie = answer.headers.get("set-cookie") ?? ""
+  return { status: answer.status, cookie: setCookie.split(";")[0]!, body: await answer.json() }
+}
+
+/** A plain read of `path` on the read side, sending `cookie`. */
+async function readDirect(path: string, cookie?: string): Promise<{ status: number; text: string }> {
+  const answer = await fetch(`http://127.0.0.1:${port}/api/reads/spaces/${path}`, {
+    headers: cookie ? { cookie } : {}
+  })
+  return { status: answer.status, text: await answer.text() }
 }
 
 describe("SpaceFolders, a person's space:  written by its members (epic `atmosphere` P4)", () => {
@@ -326,28 +352,6 @@ describe("SpaceFolders, a space read direct, with a credential for the whole spa
     await folderAt(COOKBOOK, "ana@spell").call(SPACE_MEMBER_OPERATIONS.add, { person: "cy@spell", role: "guest" }, {})
   })
 
-  /** Ask the write side for `person`'s credential to read `address`:  the cookie to send back, and the answer. */
-  async function credentialOf(
-    address: string,
-    person: string
-  ): Promise<{ status: number; cookie: string; body: unknown }> {
-    const answer = await fetch(`http://127.0.0.1:${port}/api/places/spaces/${address}/credential`, {
-      method: "POST",
-      headers: { "x-server-token": TOKEN, "x-person": person, "content-type": "application/json" },
-      body: "{}"
-    })
-    const setCookie = answer.headers.get("set-cookie") ?? ""
-    return { status: answer.status, cookie: setCookie.split(";")[0]!, body: await answer.json() }
-  }
-
-  /** A plain read of `path` on the read side, sending `cookie`. */
-  async function readDirect(path: string, cookie?: string): Promise<{ status: number; text: string }> {
-    const answer = await fetch(`http://127.0.0.1:${port}/api/reads/spaces/${path}`, {
-      headers: cookie ? { cookie } : {}
-    })
-    return { status: answer.status, text: await answer.text() }
-  }
-
   test("a member's credential, and a guest's, reads the whole space:  its list and each thing, no run token", async () => {
     await folderAt(COOKBOOK, "ana@spell").apply([insertOf("d-1", "Dal")], {})
     for (const person of ["bo@spell", "cy@spell"]) {
@@ -427,5 +431,135 @@ describe("SpaceFolders, a space read direct, with a credential for the whole spa
       message: "You can't read this:  you aren't a member of @family"
     })
     expect((await folderAt(COOKBOOK, "cy@spell").list("recipes", {}, {})).rows.length).toBeGreaterThan(0)
+  })
+})
+
+describe("SpaceFolders, what Spell took down (epic `atmosphere` P6, Q7 A)", () => {
+  const PANTRY = "@family/pantry"
+  const BY = { by: "grace@spell", reason: "doxxing:  a stranger's home address" }
+
+  /** The recipes' ids the write side lists, as `person`. */
+  async function idsThrough(address: string, person: string): Promise<string[]> {
+    return (await folderAt(address, person).list("recipes", {}, {})).rows.map((row) => `${row.id}`)
+  }
+
+  /** The recipes' ids the list file read direct holds, as `person`. */
+  async function idsDirect(address: string, person: string): Promise<string[]> {
+    const { cookie } = await credentialOf(address, person)
+    const { text } = await readDirect(`${address}/recipes.list.json`, cookie)
+    return (JSON.parse(text) as { rows: { id: string }[] }).rows.map((row) => row.id)
+  }
+
+  beforeAll(async () => {
+    await folderAt(PANTRY, "ana@spell").apply([insertOf("p-1", "Dal"), insertOf("p-2", "Grace's address")], {})
+  })
+
+  test("a record:  gone from both read paths, its own file 451, a change refused;  put back, there again", async () => {
+    await folders.takedowns.take("hide", { kind: "record", space: PANTRY, collection: "recipes", id: "p-2" }, BY)
+    expect(await idsThrough(PANTRY, "bo@spell")).toEqual(["p-1"])
+    expect(await idsDirect(PANTRY, "bo@spell")).toEqual(["p-1"])
+    const { cookie } = await credentialOf(PANTRY, "bo@spell")
+    const own = await readDirect(`${PANTRY}/recipes/p-2.json`, cookie)
+    expect(own.status).toBe(451)
+    expect(JSON.parse(own.text).error).toBe(`"recipes" p-2 was taken down by Spell.  To ask about it:  ${ABUSE}`)
+    await expect(folderAt(PANTRY, "ana@spell").apply([updateOf("p-2", "Again")], {})).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "taken down" }
+    })
+    // its file stays on the disk, as it was
+    expect(onDisk(["@family", "pantry"], "p-2")).toMatchObject({ title: "Grace's address" })
+
+    await folders.takedowns.take("restore", { kind: "record", space: PANTRY, collection: "recipes", id: "p-2" }, BY)
+    expect((await idsThrough(PANTRY, "bo@spell")).sort()).toEqual(["p-1", "p-2"])
+    expect((await idsDirect(PANTRY, "bo@spell")).sort()).toEqual(["p-1", "p-2"])
+  })
+
+  test("a reader asking what changed hears it taken down, and put back", async () => {
+    const place = folderAt(PANTRY, "bo@spell")
+    const { version } = await place.list("recipes", {}, {})
+    await folders.takedowns.take("hide", { kind: "record", space: PANTRY, collection: "recipes", id: "p-1" }, BY)
+    const down = await place.changesSince!("recipes", version!, {})
+    expect(down.removed).toContain("p-1")
+    expect(down.rows.map((row) => row.id)).not.toContain("p-1")
+    await folders.takedowns.take("restore", { kind: "record", space: PANTRY, collection: "recipes", id: "p-1" }, BY)
+    const back = await place.changesSince!("recipes", down.token, {})
+    expect(back.rows).toEqual([expect.objectContaining({ id: "p-1", title: "Dal" })])
+  })
+
+  test("a space:  every read, write and credential refused, 451, naming the abuse contact;  then put back", async () => {
+    const before = await credentialOf(PANTRY, "bo@spell")
+    await folders.takedowns.take("hide", { kind: "space", space: PANTRY }, BY)
+    const message = `This space was taken down by Spell.  To ask about it:  ${ABUSE}`
+    await expect(folderAt(PANTRY, "bo@spell").list("recipes", {}, {})).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "taken down" },
+      message
+    })
+    await expect(folderAt(PANTRY, "ana@spell").apply([insertOf("p-3", "New")], {})).rejects.toMatchObject({
+      cause: { whyNot: "taken down" }
+    })
+    const credential = await credentialOf(PANTRY, "bo@spell")
+    expect(credential.status).toBe(451)
+    expect(credential.body).toEqual({ error: message, kind: "refused", whyNot: "taken down" })
+    const direct = await readDirect(`${PANTRY}/recipes.list.json`, before.cookie)
+    expect(direct.status).toBe(451)
+    expect(JSON.parse(direct.text).error).toBe(message)
+
+    await folders.takedowns.take("restore", { kind: "space", space: PANTRY }, BY)
+    expect((await idsThrough(PANTRY, "bo@spell")).sort()).toEqual(["p-1", "p-2"])
+    expect((await readDirect(`${PANTRY}/recipes.list.json`, before.cookie)).status).toBe(200)
+  })
+
+  test("an account:  its own spaces down for everyone, and its requests to any other refused;  then put back", async () => {
+    const ANAS = "ana@spell/recipes"
+    await folders.takedowns.take("hide", { kind: "account", person: "ana@spell" }, BY)
+    await expect(folderAt(ANAS, "ana@spell").list("recipes", {}, {})).rejects.toMatchObject({
+      cause: { whyNot: "taken down" }
+    })
+    await expect(folderAt(PANTRY, "ana@spell").list("recipes", {}, {})).rejects.toMatchObject({
+      cause: { whyNot: "taken down" }
+    })
+    expect((await credentialOf(PANTRY, "ana@spell")).status).toBe(451)
+    // everyone else reads the family's pantry as before
+    expect((await idsThrough(PANTRY, "bo@spell")).length).toBe(2)
+    expect(await folders.takedowns.isAccountDown("ana@spell")).toBe(true)
+
+    await folders.takedowns.take("restore", { kind: "account", person: "ana@spell" }, BY)
+    expect((await idsThrough(PANTRY, "ana@spell")).length).toBe(2)
+    expect(await folders.takedowns.isAccountDown("ana@spell")).toBe(false)
+  })
+
+  test("the log says who, when and why, in the folder's `__takedowns.json5`:  never read direct", async () => {
+    const log = await folders.takedowns.log(PANTRY)
+    expect(log[0]).toMatchObject({
+      action: "hide",
+      kind: "record",
+      space: PANTRY,
+      collection: "recipes",
+      id: "p-2",
+      by: "grace@spell",
+      reason: "doxxing:  a stranger's home address"
+    })
+    expect(log.at(-1)).toMatchObject({ action: "restore", kind: "space" })
+    expect(readFileSync(join(spaces, "@family", "pantry", "__takedowns.json5"), "utf8")).toContain("doxxing")
+    expect(await folders.takedowns.log("ana@spell")).toEqual([
+      expect.objectContaining({ action: "hide", kind: "account", person: "ana@spell" }),
+      expect.objectContaining({ action: "restore", kind: "account", person: "ana@spell" })
+    ])
+    const { cookie } = await credentialOf(PANTRY, "bo@spell")
+    expect((await readDirect(`${PANTRY}/__takedowns.json5`, cookie)).status).toBe(404)
+  })
+
+  test("delete:  hidden, and its file removed;  an account is never deleted, and a reason is a must", async () => {
+    await folderAt(PANTRY, "ana@spell").apply([insertOf("p-9", "To delete")], {})
+    await folders.takedowns.take("delete", { kind: "record", space: PANTRY, collection: "recipes", id: "p-9" }, BY)
+    expect(onDisk(["@family", "pantry"], "p-9")).toBeUndefined()
+    expect(await idsThrough(PANTRY, "bo@spell")).not.toContain("p-9")
+    await expect(folders.takedowns.take("delete", { kind: "account", person: "ana@spell" }, BY)).rejects.toThrow(
+      TypeError
+    )
+    await expect(
+      folders.takedowns.take("hide", { kind: "space", space: PANTRY }, { by: "grace@spell", reason: " " })
+    ).rejects.toThrow(/say why/)
   })
 })

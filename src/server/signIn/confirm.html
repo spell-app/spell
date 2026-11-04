@@ -4,6 +4,7 @@
   - First it says where the request came from, so nobody can trick someone into approving their own sign-in;
     then ONE button, which signs THIS device in.  The page that asked signs in a moment later, by itself.
   - Plain DOM, its words set as text:  it loads nothing, so it opens on any device.
+  - At its foot, where to report abuse:  the server's abuse contact, from `GET /api/sign-in/me` (epic `atmosphere` P6).
 -->
 <html lang="en">
   <head>
@@ -64,8 +65,13 @@
         font-weight: 600;
         cursor: pointer;
       }
-      button[hidden] {
+      button[hidden],
+      p[hidden] {
         display: none;
+      }
+      .small {
+        margin-top: 2.5rem;
+        font-size: 0.85rem;
       }
     </style>
   </head>
@@ -76,12 +82,14 @@
       <p id="where" class="quiet"></p>
       <button id="confirm" type="button" hidden>Yes, sign me in</button>
       <p id="after"></p>
+      <p id="abuse" class="quiet small" hidden></p>
     </main>
     <script type="module">
       const what = document.getElementById("what")
       const where = document.getElementById("where")
       const button = document.getElementById("confirm")
       const after = document.getElementById("after")
+      const abuse = document.getElementById("abuse")
       const key = new URLSearchParams(location.search).get("key") ?? ""
 
       /** The server's answer, or its words for why not. */
@@ -103,6 +111,15 @@
         where.textContent = ""
         button.hidden = true
       }
+
+      // where to report abuse, as the server's settings say;  a server with none shows nothing
+      asked("/api/sign-in/me")
+        .then(({ abuseContact }) => {
+          if (!abuseContact) return
+          abuse.textContent = `To report abuse on Spell:  ${abuseContact}`
+          abuse.hidden = false
+        })
+        .catch(() => undefined)
 
       try {
         const { email, kind, from } = await asked(`/api/sign-in/link?key=${encodeURIComponent(key)}`)

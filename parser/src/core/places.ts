@@ -97,6 +97,7 @@ import { POSITIONS_KEY } from "spell/util/places/positions"
 import { parseRef } from "spell/util/places/refs"
 import { BrowserCopy } from "spell/util/places/SaveQueue"
 
+import type { CoreMessageKey } from "./core.types"
 import { core, onPlaceWrite, whileReading, type PlaceWriteListener } from "./core"
 import { valueAsDeclared, valueAsWritten, Loader, REF_KEY, Saver, type LoaderOptions } from "./saving"
 import { fieldsOf, hasSetter, isPlainObject, setField } from "./state"
@@ -151,6 +152,12 @@ const DRAFT_STORE = "spell-place-drafts"
 
 /** The event Show me sends, unless `PlaceThingsOptions.showMe` says otherwise. */
 const SHOW_ME_EVENT = "show-me"
+
+/** The refusal notice that says why, by the refusal's `whyNot`;  any other, the plain one, `write-refused`. */
+const REFUSAL_MESSAGES: Partial<Record<string, CoreMessageKey>> = {
+  role: "write-refused-role",
+  "taken down": "write-refused-taken-down"
+}
 
 /** Every write, sent to whichever `PlaceThings` or draft the thing belongs to:  ONE for all of them. */
 const PLACE_WRITES: PlaceWriteListener = {
@@ -868,8 +875,9 @@ export class PlaceThings extends Loader implements PlaceThingMaker {
       { text: core.message("write-retry"), click: retry },
       ...(thing ? [{ text: core.message("write-show-me"), click: () => this.showMe(thing) }] : [])
     ]
-    // refused as their role can't write (a guest, no member):  the notice says so (epic `atmosphere` P4)
-    const key = error.cause?.whyNot === "role" ? "write-refused-role" : "write-refused"
+    // refused as their role can't write (a guest, no member, epic `atmosphere` P4), or as Spell took it down (P6):
+    // the notice says so
+    const key = REFUSAL_MESSAGES[error.cause?.whyNot ?? ""] ?? "write-refused"
     const message = core.message(key, { thing: `${type ?? ""} ${id ?? ""}`.trim() })
     void core.notify(message, { class: "error", actions })
   }

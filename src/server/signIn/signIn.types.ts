@@ -25,7 +25,8 @@ export const SignInRefusals = [
   "wrong code",
   "too many tries",
   "expired",
-  "used"
+  "used",
+  "taken down"
 ] as const
 /**
  * Why a sign-in was refused:
@@ -35,6 +36,7 @@ export const SignInRefusals = [
  * - `"too many tries"`:  that request's done:  ask for a new one
  * - `"expired"`:  older than `SIGN_IN_MINUTES`
  * - `"used"`:  its link or code already signed someone in
+ * - `"taken down"`:  Spell took the account down (epic `atmosphere` P6):  it can't sign in until it's put back
  */
 export type SignInRefusal = (typeof SignInRefusals)[number]
 
@@ -94,6 +96,8 @@ export type SignInAccounts = {
   accountFor(email: string): Promise<string | undefined>
   /** Make an account for `email`, or find the one it has:  its address.  - throws if it can't */
   invite(email: string): Promise<string>
+  /** Is the account `person` (`ana@spell`) taken down, so it can't sign in (epic `atmosphere` P6)?  Left out:  none is. */
+  isTakenDown?(person: string): Promise<boolean>
 }
 
 /** One device's sign-in, as it's kept. */

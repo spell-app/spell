@@ -40,6 +40,10 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *       (`request.person`), which the guard, the project data folders, the prefs and the people routes read
  *     - invite only:  `POST /api/sign-in/invite { email }`, with this run's token, makes an account (`SpellAccounts`)
  *     - mail goes to the local catcher (`environment.signInDir`'s `mail/`) until a mail service is chosen (Q12)
+ *     - an account Spell took down can't sign in;  `GET /api/sign-in/me` says the abuse contact
+ *       (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`), which the sign-in bar and the link's page show (P6)
+ *   - TAKEDOWNS (epic `atmosphere` P6):  what Spell took down (`spell app takedown`, the log in each folder's
+ *     `__takedowns.json5`) is refused through both the project data folders and the reads direct
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -56,11 +60,18 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
 const appRoutes: RouteModule = {
   name: "app",
   setup({ router, guard, root, info, live, addPageConfig, onListening, onStop }) {
-    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3)
+    // every project data folder;  a space's own read direct, with a credential signed by a key kept beside the
+    // sign-ins (epic `atmosphere` P5);  what Spell took down refused on both sides (P6)
+    const folders = new SpaceFolders({
+      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
+    })
+    // who's signed in, on every request after this:  the ONE sign-in check (epic `atmosphere` P3);  an account taken
+    // down can't sign in, and the abuse contact is on the sign-in bar (P6)
     const signIn = new SignInCheck({
       signIns: new SignIns({ file: join(environment.signInDir, "sessions.json") }),
       mailer: new MailCatcher({ folder: join(environment.signInDir, "mail") }),
-      accounts: new SpellAccounts(peopleStore())
+      accounts: new SpellAccounts(peopleStore(), { takedowns: folders.takedowns }),
+      abuseContact: environment.abuseContact
     })
     router.use(signIn.check)
     signIn.route(router, guard)
@@ -74,10 +85,7 @@ const appRoutes: RouteModule = {
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // before `/api`'s own routes, whose last answers every path it doesn't know
-    // a space's own folder read direct, with a credential signed by a key kept beside the sign-ins (epic `atmosphere` P5)
-    const folders = new SpaceFolders({
-      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
-    }).route({ router, guard })
+    folders.route({ router, guard })
     onStop(() => folders.close())
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)

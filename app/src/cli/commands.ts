@@ -4,6 +4,8 @@
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
  * - `spell app changes wait | done | list`:  the changes people ask for in the editor, for a Claude session (epic `editor` P18)
+ * - `spell app takedown hide | delete | restore | list <target>`:  Spell taking down a record, a space or an account,
+ *   for Spell's admins, with a reason in a log beside it (epic `atmosphere` P6)
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
@@ -83,6 +85,46 @@ export default function appCommands(spell: Command): void {
     .command("list")
     .description("every request kept")
     .action((_options, command: Command) => runChanges(["list"], command))
+
+  const takedown = app
+    .command("takedown")
+    .description("for Spell's admins:  take down a record, a space or an account, or put it back, with a reason logged")
+
+  takedown
+    .command("hide")
+    .description("neither read nor written, through Spell's server or read direct;  its files stay")
+    .argument(
+      "<target>",
+      "a space's folder, @family/cookbook (with --record, one thing of it), or an account, ana@spell"
+    )
+    .option("--record <collection/id>", "one thing of the space, e.g. recipes/r-1")
+    .requiredOption("--reason <words>", 'why, for the log, e.g. "doxxing:  a stranger\'s home address"')
+    .action((target: string, _options, command: Command) => runTakedown("hide", target, command))
+
+  takedown
+    .command("delete")
+    .description("hidden, and its files removed:  a record's file, or every thing of a space;  not an account")
+    .argument("<target>", "a space's folder, @family/cookbook (with --record, one thing of it)")
+    .option("--record <collection/id>", "one thing of the space, e.g. recipes/r-1")
+    .requiredOption("--reason <words>", "why, for the log")
+    .action((target: string, _options, command: Command) => runTakedown("delete", target, command))
+
+  takedown
+    .command("restore")
+    .description("put it back as it was, what wasn't deleted")
+    .argument(
+      "<target>",
+      "a space's folder, @family/cookbook (with --record, one thing of it), or an account, ana@spell"
+    )
+    .option("--record <collection/id>", "one thing of the space, e.g. recipes/r-1")
+    .requiredOption("--reason <words>", "why, for the log")
+    .action((target: string, _options, command: Command) => runTakedown("restore", target, command))
+
+  takedown
+    .command("list")
+    .description("the takedowns logged in a space's folder, or an account's, oldest first")
+    .argument("<target>", "a space's folder, @family/cookbook, or an account, ana@spell")
+    .action((target: string, _options, command: Command) => runTakedown("list", target, command))
 
   const preview = app
     .command("preview")
@@ -185,6 +227,14 @@ function contentCheckCommand(options: { bless?: boolean }): Promise<never> {
 /** `spell app vscode [verb]`:  loads no spell (`vscodeCommand.ts`). */
 function vscodeCommand(verb: string | undefined, options: { force?: boolean }): Promise<never> {
   return CLI.runCommand(async () => (await import("spell/app/cli/commands/vscodeCommand")).vscodeCommand(verb, options))
+}
+
+/** Run a `spell app takedown` verb:  no `loadApp()`, only spaces' node side (`takedownCommand.ts`). */
+function runTakedown(verb: string, target: string, command: Command): Promise<void> {
+  return CLI.runCommand(async () => {
+    const { takedownCommand } = await import("spell/app/cli/commands/takedownCommand")
+    return takedownCommand(verb, target, command.optsWithGlobals())
+  })
 }
 
 /** Run a `spell app changes` verb:  no `loadApp()`, since it needs no spell, so a session's wait starts at once. */

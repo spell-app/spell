@@ -409,6 +409,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         can't write").  Who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
         - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
+      - TAKEN DOWN (epic `atmosphere` P6):  what its host says is down (`takenDown`, a `TakenDown`, asked afresh for
+        each request, for who's asking):  the whole folder refuses every read, write and operation;  a thing is left out
+        of every read and a change to it refused;  a watcher hears it removed, and back when it's restored
+      - `takenDown.ts`:  the shape, and the ONE refusal, `takenDownError()` (`whyNot: "taken down"`, naming the abuse
+        contact), which `PlaceServer` answers 451 (`TAKEN_DOWN_STATUS`)
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
       - holds keys (`PlaceKeys`), and scrubs them from every answer
@@ -426,6 +431,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - never a `__` name, a dot file or a folder of its own;  opens no place, writes nothing:  reads work while
         nothing's written
       - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`
+      - taken down (epic `atmosphere` P6, `takenDown`):  the whole space, or the reader's own account, 451;  a thing is
+        left out of its list file as it's served, and its own file answered 451;  the disk stays as it is
     - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
       - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
@@ -466,6 +473,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         system, this machine or this network), then one button
       - the mail catcher's list, `/sign-in/mail` ([mail.html](signIn/mail.html))
       - invite only:  an email with no account is refused;  `invite` wants this run's token (`Guard.tokenCheck`)
+      - an account Spell took down (`SignInAccounts.isTakenDown()`) is refused 451, naming the abuse contact
+        (`abuseContact`), which `GET me` also answers, for the sign-in bar and the link's page (epic `atmosphere` P6)
     - `SignIns`:  the rules, no HTTP:  a request good once for 10 minutes, its code (5 wrong tries) or its link;  a link
       confirmed on another device signs both in;  a device signed in for 30 days, only its token's hash kept, in a file
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);  a real sender waits on

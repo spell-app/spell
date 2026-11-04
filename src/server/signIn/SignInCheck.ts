@@ -4,6 +4,7 @@ import {
   SIGN_IN_PREFIX,
   type SignedInAnswer,
   type SignInAskAnswer,
+  type SignInMeAnswer,
   type SignInAsker,
   type SignInLinkAnswer,
   type SignInWaitAnswer
@@ -31,7 +32,8 @@ const STATUS_OF_REFUSAL: Record<SignInRefusal, number> = {
   "wrong code": 400,
   "too many tries": 429,
   expired: 410,
-  used: 410
+  used: 410,
+  "taken down": 451
 }
 
 /** What an email looks like, near enough:  something, an `@`, something with a dot. */
@@ -96,6 +98,10 @@ const SYSTEMS: [RegExp, string][] = [
  * - The link's page (`CONFIRM_PAGE`) first says where the request came from:  so nobody can trick someone into
  *   approving their own sign-in.  Then one button.
  * - INVITE ONLY:  an email with no account is refused, `"not invited"`.  Accounts are the app's (`SignInAccounts`).
+ * - An account Spell took down (epic `atmosphere` P6) is refused too, `"taken down"`, naming the abuse contact:  no
+ *   mail goes out.  A device signed in to it before stays signed in, but every space refuses it (the app's `Takedowns`).
+ * - The ABUSE CONTACT (`abuseContact`, the server's settings) is in `GET me`'s answer:  the sign-in bar and the
+ *   link's page show it.
  * - The cookie is `HttpOnly` and `SameSite=Strict`:  no other site's page sends it, nor any page's script reads it.
  * - Every route is behind `Guard`'s host check:  the server's own addresses only.
  * - Knows no people and no mail service:  `accounts` and `mailer` are handed in.
@@ -107,11 +113,14 @@ export class SignInCheck {
   readonly mailer: Mailer
   /** Who has an account, and making one. */
   private readonly accounts: SignInAccounts
+  /** Where people report abuse:  `""` for none. */
+  private readonly abuseContact: string
 
-  constructor({ signIns = new SignIns(), mailer, accounts }: SignInCheckProps) {
+  constructor({ signIns = new SignIns(), mailer, accounts, abuseContact = "" }: SignInCheckProps) {
     this.signIns = signIns
     this.mailer = mailer
     this.accounts = accounts
+    this.abuseContact = abuseContact
   }
 
   /** Middleware:  who's signed in on this device, on the request (`request.person`);  nobody, `undefined`. */
@@ -151,19 +160,33 @@ export class SignInCheck {
   // ## Each request
   ////////////////
 
-  /** `GET me`:  who's signed in on this device. */
-  private me(request: SRV.Request): SignedInAnswer {
+  /** `GET me`:  who's signed in on this device, and where to report abuse. */
+  private me(request: SRV.Request): SignInMeAnswer {
     const session = this.signIns.personOf(cookieOf(request, SESSION_COOKIE))
-    return session ? { person: session.person, email: session.email } : {}
+    return {
+      ...(session && { person: session.person, email: session.email }),
+      ...(this.abuseContact && { abuseContact: this.abuseContact })
+    }
   }
 
-  /** `POST ask { email }`:  a request, and its mail.  - throws `HttpError(403)` for an email with no account */
+  /** - throws `HttpError(451)` for an account Spell took down, naming the abuse contact */
+  private async notTakenDownOrDie(person: string): Promise<void> {
+    if (!(await this.accounts.isTakenDown?.(person))) return
+    const asking = this.abuseContact ? `  To ask about it:  ${this.abuseContact}` : ""
+    throw new SRV.HttpError(STATUS_OF_REFUSAL["taken down"], `The account ${person} was taken down by Spell.${asking}`)
+  }
+
+  /**
+   * `POST ask { email }`:  a request, and its mail.
+   * - throws `HttpError(403)` for an email with no account;  451 for an account taken down
+   */
   private async ask(request: SRV.Request): Promise<SignInAskAnswer> {
     const email = emailIn(request)
     const person = await this.accounts.accountFor(email)
     if (!person) {
       throw new SRV.HttpError(403, `${email} has no Spell account here:  this server is by invite only.`)
     }
+    await this.notTakenDownOrDie(person)
     const asked = this.signIns.ask({ email, person, kind: "sign-in", from: askerOf(request) })
     const where = whereFrom(asked.from)
     await this.mailer.send({
@@ -222,6 +245,7 @@ export class SignInCheck {
   private async invite(request: SRV.Request): Promise<{ person: string }> {
     const email = emailIn(request)
     const person = await this.accounts.invite(email)
+    await this.notTakenDownOrDie(person)
     const asked = this.signIns.ask({ email, person, kind: "invite", from: { near: "from this machine's person" } })
     await this.mailer.send({
       to: email,
@@ -256,6 +280,8 @@ export type SignInCheckProps = {
   mailer: Mailer
   /** Who has an account, and making one:  the app's. */
   accounts: SignInAccounts
+  /** Where people report abuse, the server's settings':  shown on the sign-in bar and the link's page.  Default none. */
+  abuseContact?: string
 }
 
 /** What the session cookie always says:  the whole server, out of every script's and other site's reach. */

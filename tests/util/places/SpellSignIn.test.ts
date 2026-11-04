@@ -89,3 +89,11 @@ test("one sign-in per server, for every place on the page", () => {
   expect(SpellSignIn.for("/api/places/spaces/a")).toBe(SpellSignIn.for("/api/places/spaces/b"))
   expect(SpellSignIn.for("http://127.0.0.1:9/x")).not.toBe(SpellSignIn.for("/api/places/spaces/a"))
 })
+
+test("the server's abuse contact, from `me`, for the bar to show (epic `atmosphere` P6)", async () => {
+  const { fetcher } = fakeServer({ me: () => ({ body: { abuseContact: "abuse@test.example" } }) })
+  const signIn = new SpellSignIn({ fetcher })
+  await signIn.ready
+  expect(signIn.status).toBe("signed out")
+  expect(signIn.abuseContact).toBe("abuse@test.example")
+})

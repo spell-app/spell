@@ -4,6 +4,7 @@
  * - Real HTTP, a real folder.  Node's `fetch` keeps no cookies, so a test sends the one it was given by hand;
  *   a browser's, in the app's recipe box test (`tests/spell/recipeBox.test.ts`).
  */
+import { readFileSync } from "node:fs"
 import { createServer } from "node:http"
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
@@ -159,5 +160,67 @@ describe("DirectReads, and RemotePlace reading through it", () => {
       cause: { whyNot: "role" },
       message: "You can't read this:  you aren't a member"
     })
+  })
+})
+
+describe("DirectReads, what's taken down (epic `atmosphere` P6)", () => {
+  test("a thing:  left out of its list file as it's served, its own file 451;  the whole space 451;  the disk as it was", async () => {
+    const root = newFolder()
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root }),
+      format: new JsonChunks({ summaries: EVERY_FIELD })
+    })
+    await place.apply(
+      [
+        { kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } },
+        { kind: "insert", collection: "recipes", id: "r-2", fields: { title: "Pie" } }
+      ],
+      {}
+    )
+    const down = { isWhole: false, things: new Map([["recipes", new Set(["r-2"])]]), contact: "abuse@test.example" }
+    const asked: string[] = []
+    const reads = new DirectReads({
+      prefix: SPACE_READS_PREFIX,
+      credentials: new ReadCredentials(),
+      filesOf: () => new ChunkFiles({ root }),
+      mayRead: async () => true,
+      takenDown: async (_space, person) => {
+        asked.push(person)
+        return down
+      }
+    })
+    const router = new SRV.Router()
+    const guard = new SRV.Guard({ token: TOKEN })
+    reads.route(router, guard)
+    const server = createServer(SRV.toListener(router.handle))
+    const port = await SRV.listenPreferred(server)
+    guard.allowPort(port)
+    closes.push(
+      () =>
+        new Promise((done) => {
+          server.closeAllConnections()
+          server.close(() => done())
+        })
+    )
+    const cookie = reads.cookieFor("cookbook", "bo@spell").split(";")[0]!
+    const read = async (path: string) => {
+      const answer = await fetch(`http://127.0.0.1:${port}${SPACE_READS_PREFIX}/cookbook/${path}`, {
+        headers: { cookie }
+      })
+      return { status: answer.status, text: await answer.text() }
+    }
+    const list = JSON.parse((await read("recipes.list.json")).text)
+    expect(list.rows.map(({ id }: { id: string }) => id)).toEqual(["r-1"])
+    expect(Object.keys(list.versions)).toEqual(["r-1"])
+    const pie = await read("recipes/r-2.json")
+    expect(pie.status).toBe(451)
+    expect(JSON.parse(pie.text).error).toBe(
+      `"recipes" r-2 was taken down by Spell.  To ask about it:  abuse@test.example`
+    )
+    expect((await read("recipes/r-1.json")).status).toBe(200)
+    expect(asked).toContain("bo@spell")
+    down.isWhole = true
+    expect((await read("recipes.list.json")).status).toBe(451)
+    expect(JSON.parse(readFileSync(`${root}/recipes.list.json`, "utf8")).rows).toHaveLength(2)
   })
 })

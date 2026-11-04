@@ -12,7 +12,12 @@ import { ask, serveHandler, type Served } from "spell/server/test/serve"
 
 /** The accounts:  Ana has one;  an invite makes one. */
 class FakeAccounts implements SignInAccounts {
-  readonly people = new Map([["ana@example.com", "ana@spell"]])
+  readonly people = new Map([
+    ["ana@example.com", "ana@spell"],
+    ["eve@example.com", "eve@spell"]
+  ])
+  /** The accounts Spell took down. */
+  readonly takenDown = new Set(["eve@spell"])
   async accountFor(email: string) {
     return this.people.get(email)
   }
@@ -20,6 +25,9 @@ class FakeAccounts implements SignInAccounts {
     const person = `${email.split("@")[0]}@spell`
     this.people.set(email, person)
     return person
+  }
+  async isTakenDown(person: string) {
+    return this.takenDown.has(person)
   }
 }
 
@@ -34,7 +42,12 @@ let referee: Referee
 beforeAll(async () => {
   folder = mkdtempSync(join(tmpdir(), "spell-sign-in-check-"))
   mailer = new MailCatcher({ folder: join(folder, "mail") })
-  const check = new SignInCheck({ signIns: new SignIns(), mailer, accounts: new FakeAccounts() })
+  const check = new SignInCheck({
+    signIns: new SignIns(),
+    mailer,
+    accounts: new FakeAccounts(),
+    abuseContact: "abuse@test.example"
+  })
   const guard = new SRV.Guard({ token: TOKEN })
   const router = new SRV.Router()
   router.use(check.check)
@@ -100,7 +113,11 @@ describe("signing in by email", () => {
     const cookie = cookieFrom(right.headers)
     expect(`${right.headers["set-cookie"]}`).toMatch(/HttpOnly; SameSite=Strict/)
     const me = await ask(served.port, "GET", "/api/sign-in/me", { headers: { cookie } })
-    expect(JSON.parse(me.text)).toEqual({ person: "ana@spell", email: "ana@example.com" })
+    expect(JSON.parse(me.text)).toEqual({
+      person: "ana@spell",
+      email: "ana@example.com",
+      abuseContact: "abuse@test.example"
+    })
 
     // all the readers see her:  a guarded write with no token, and a place's identity
     const write = await posted("/write", {}, { cookie, origin: `http://127.0.0.1:${served.port}` })
@@ -150,6 +167,24 @@ describe("signing in by email", () => {
     expect(mail.subject).toBe("You're invited to Spell")
     expect(JSON.parse((await posted("/api/sign-in/confirm", { key })).text).person).toBe("bo@spell")
     expect((await posted("/api/sign-in/ask", { email: "bo@example.com" })).status).toBe(200)
+  })
+
+  test("an account Spell took down can't sign in, or be invited:  451, naming the abuse contact, and no mail", async () => {
+    for (const path of ["/api/sign-in/ask", "/api/sign-in/invite"]) {
+      const refused = await posted(path, { email: "eve@example.com" }, { "x-server-token": TOKEN })
+      expect(refused.status, path).toBe(451)
+      expect(JSON.parse(refused.text).error).toBe(
+        "The account eve@spell was taken down by Spell.  To ask about it:  abuse@test.example"
+      )
+    }
+    expect(await mailer.newestTo("eve@example.com")).toBeUndefined()
+  })
+
+  test("`me` says where to report abuse, signed in or not;  so does the link's page", async () => {
+    expect(JSON.parse((await ask(served.port, "GET", "/api/sign-in/me")).text)).toEqual({
+      abuseContact: "abuse@test.example"
+    })
+    expect((await ask(served.port, "GET", "/sign-in/confirm")).text).toContain("To report abuse on Spell")
   })
 
   test("the mail catcher's list, and its page", async () => {

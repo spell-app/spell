@@ -17,6 +17,15 @@ export type SignedInAnswer = {
   email?: string
 }
 
+/**
+ * What `GET /api/sign-in/me` answers in full:  who's signed in, and where to report abuse (epic `atmosphere` P6).
+ * - `abuseContact`:  the host's abuse address, which the sign-in bar shows;  left out by a server that has none.
+ */
+export type SignInMeAnswer = SignedInAnswer & {
+  /** The host's abuse contact:  `abuse@...`. */
+  abuseContact?: string
+}
+
 /** What `POST /api/sign-in/ask` answers:  the one-time request this page waits on. */
 export type SignInAskAnswer = {
   /** Its id:  only this page knows it, and asks after it by it (`POST /api/sign-in/waiting`). */
@@ -80,6 +89,8 @@ export class SpellSignIn implements PlaceSignIn {
   private _problem: string | undefined
   /** Who's signed in. */
   private signedIn: SignedInAnswer = {}
+  /** The host's abuse contact, as the server said it. */
+  private _abuseContact: string | undefined
   /** The request this page waits on, and where its email went. */
   private waitingOn: { request: string; email: string } | undefined
   /** Stops asking after it. */
@@ -103,6 +114,11 @@ export class SpellSignIn implements PlaceSignIn {
   /** Why the last try failed, in words for people. */
   get problem(): string | undefined {
     return this._problem
+  }
+
+  /** Where to report abuse:  the host's abuse contact, once the server's said it (epic `atmosphere` P6). */
+  get abuseContact(): string | undefined {
+    return this._abuseContact
   }
 
   /** Where the code went, while waiting for one. */
@@ -182,7 +198,8 @@ export class SpellSignIn implements PlaceSignIn {
   /** Who's signed in already, as the page opens.  NEVER throws:  a server with no sign-in is nobody. */
   private async lookUp(): Promise<void> {
     try {
-      const answer = await this.ask<SignedInAnswer>("me")
+      const { abuseContact, ...answer } = await this.ask<SignInMeAnswer>("me")
+      this._abuseContact = abuseContact
       if (answer.person) return this.signedInAs(answer)
     } catch (ignored) {
       // a server with no sign-in:  nobody is, and signing in says why

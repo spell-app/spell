@@ -35,6 +35,9 @@ import "spell/app/spaces/models/spellUIPack"
 /** `yarn build:element`'s output. */
 const ELEMENT_DIR = resolve(__dirname, "../../app/dist-element")
 
+/** Where people report abuse, here (epic `atmosphere` P6). */
+const ABUSE = "abuse@test.example"
+
 /** The token the demo's place server wants. */
 const DEMO_TOKEN = "recipe-box-demo"
 
@@ -143,11 +146,12 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
     // who's asking:  whoever's signed in, else this machine's person, as the page server's own
     spaceFolders = new SpaceFolders({
       folderFor: (address) => join(spaces, ...SP.SpellUrls.folderFor(address)!.path.split("/")),
-      people
+      people,
+      abuseContact: ABUSE
     })
     mailer = new MailCatcher({ folder: join(spaces, ".mail") })
     accounts = new SpellAccounts(people)
-    const signIn = new SignInCheck({ mailer, accounts })
+    const signIn = new SignInCheck({ mailer, accounts, abuseContact: ABUSE })
     const element = SRV.folderRoute("/element/", ELEMENT_DIR)
     /** Answer with a program, a page or `<spell-viewer>`'s files, if that's what's asked for. */
     const pages: Handler = (request, reply, next) => {
@@ -796,6 +800,69 @@ start the box
         expect(bosTry.said).toContain("you aren't a member of")
 
         for (const one of [ana, bo, gil, dee, anasOwn]) await one.close()
+      }
+    )
+
+    test(
+      "taken down (P6):  a recipe Spell hides is gone for the members on both read paths, " +
+        "its own file refused as taken down;  restored, it's back;  the sign-in bar says where to report abuse",
+      { timeout: 120_000 },
+      async () => {
+        const ana = await signedIn("takedown-ana", EMAILS.ana)
+        await ana.page.locator("ui-input.draft input").fill("Stranger's address stew")
+        await ana.page.locator("ui-button.add").click()
+        await expect.poll(() => recipeTitled("Stranger's address stew"), WAITING).toMatchObject({ by: address.ana })
+        const id = `${recipeTitled("Stranger's address stew")!.id}`
+        const bo = await signedIn("takedown-bo", EMAILS.bo)
+        await expect.poll(() => titlesOn(bo.page), WAITING).toContain("Stranger's address stew")
+
+        /** What Bo's page reads of the cookbook, by each path:  the direct list, the server's list, the thing's file. */
+        const readsOf = (page: Page) =>
+          page.evaluate(async (thing) => {
+            const direct = await fetch("/api/reads/spaces/@family/cookbook/recipes.list.json", { cache: "no-store" })
+            const through = await fetch("/api/places/spaces/@family/cookbook/list", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ collection: "recipes" })
+            })
+            const own = await fetch(`/api/reads/spaces/@family/cookbook/recipes/${thing}.json`, { cache: "no-store" })
+            const titles = (answer: { rows: { title: string }[] }) => answer.rows.map(({ title }) => title)
+            return {
+              direct: titles(await direct.json()),
+              through: titles(await through.json()),
+              own: { status: own.status, said: await own.text() }
+            }
+          }, id)
+
+        const target = { kind: "record" as const, space: "@family/cookbook", collection: "recipes", id }
+        await spaceFolders.takedowns.take("hide", target, { by: "grace@spell", reason: "doxxing" })
+        await bo.page.reload()
+        await expect.poll(() => titlesOn(bo.page), WAITING).not.toContain("Stranger's address stew")
+        const hidden = await readsOf(bo.page)
+        expect(hidden.direct).not.toContain("Stranger's address stew")
+        expect(hidden.through).not.toContain("Stranger's address stew")
+        expect(hidden.own.status).toBe(451)
+        expect(hidden.own.said).toContain(`was taken down by Spell.  To ask about it:  ${ABUSE}`)
+        // its file is still on the disk:  hidden, not lost
+        expect(recipeTitled("Stranger's address stew")).toBeDefined()
+
+        await spaceFolders.takedowns.take("restore", target, { by: "grace@spell", reason: "a mistake" })
+        await bo.page.reload()
+        await expect.poll(() => titlesOn(bo.page), WAITING).toContain("Stranger's address stew")
+        const back = await readsOf(bo.page)
+        expect(back.direct).toContain("Stranger's address stew")
+        expect(back.through).toContain("Stranger's address stew")
+        expect(back.own.status).toBe(200)
+
+        // the abuse contact, on a page nobody's signed in to yet
+        const fresh = await browser.newContext()
+        const page = await fresh.newPage()
+        await page.goto(serve("takedown-fresh", withPlace(english(), LINES)))
+        await expect
+          .poll(() => page.locator("ui-message.spell-sign-in").textContent(), WAITING)
+          .toContain(`To report abuse on Spell:  ${ABUSE}`)
+        await fresh.close()
+        for (const one of [ana, bo]) await one.close()
       }
     )
   })

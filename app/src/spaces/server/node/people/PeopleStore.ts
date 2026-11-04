@@ -18,6 +18,9 @@ import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
 /** A saved entry, as the people library's things are saved:  `{ "$type": "Person", "id": "owen", ... }`. */
 type Entry = Record<string, unknown>
 
+/** The role in Spell's own org that makes someone a Spell admin. */
+const SPELL_ADMIN: Role = "spell-admin"
+
 /****************
  * ### `PeopleStore`
  * People and orgs in spell-spaces, read and written through a `SpaceStorage` (epic `people-and-orgs` P9).
@@ -176,6 +179,16 @@ export class PeopleStore {
         .filter((membership) => membership.person === person || sameAs(membership.person, person))
         .map((membership) => ({ id: org.id, name: org.name || org.id, role: membership.role }))
     )
+  }
+
+  /**
+   * Is the person `id` of `org` a Spell admin:  `spell-admin` in Spell's own org (Owen's C5, "admin function")?
+   * - `false` for someone with no file.  Who may save into Spell UI, and take things down (epic `atmosphere` P6).
+   */
+  async isSpellAdmin(id: string, org = HOME_ORG): Promise<boolean> {
+    const { person } = await this.person(id, org)
+    if (!person) return false
+    return (await this.rolesOf(person)).some((each) => each.id === HOME_ORG && each.role === SPELL_ADMIN)
   }
 
   ////////////////

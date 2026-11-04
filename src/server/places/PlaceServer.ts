@@ -14,6 +14,7 @@ import {
 import { SRV } from "spell/server"
 
 import { PlaceKeys } from "./PlaceKeys"
+import { TAKEN_DOWN_STATUS } from "./takenDown"
 
 /** The biggest request:  a big batch of changes. */
 const BODY_LIMIT = 10 * 1024 * 1024
@@ -48,6 +49,7 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - A program's lines about a place come with each request (`lines`), and a place that takes them follows them (`Place.withLines()`):  no key among them.
  * - A refusal says why (`whyNot`), so `RemotePlace` can pass it on, per field and per owner.
  * - Answers:  refused 422, not found 404, out of date 409, too much 413;  anything else 500, which counts as no answer, so a change resends.
+ *   - Refused as taken down (epic `atmosphere` P6):  451, `TAKEN_DOWN_STATUS`, still a refusal to `RemotePlace`.
  * - A change's `changeId` it has seen is made once:  it's answered with what it made.
  * - Each read stops as the asker hangs up.
  * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
@@ -256,6 +258,7 @@ export class PlaceServer {
 
   /** What to answer a failure with. */
   private statusOf(error: unknown): number {
+    if (error instanceof PlaceError && error.cause?.whyNot === "taken down") return TAKEN_DOWN_STATUS
     if (error instanceof PlaceError && error.kind) return STATUS_OF_KIND[error.kind]
     return error instanceof SRV.HttpError ? error.status : 500
   }

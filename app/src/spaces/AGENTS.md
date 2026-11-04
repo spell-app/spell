@@ -173,6 +173,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Written:  ONE file at a time, its comments kept;  a friend is written as a reference, never into their file.
   - `me()` writes a starter `__me.json5` the first time, from git's name and email.
   - Nobody is refused a save yet, under `@spell` either (J46):  the permissions UI is todo T8.
+  - `isSpellAdmin(id, org)`:  `spell-admin` in Spell's own org, the ONE check (themes' Save into Spell UI, takedowns).
 - SPELL ACCOUNTS ([SpellAccounts.ts](server/node/people/SpellAccounts.ts), epic `atmosphere` P3):  the people of Spell's
   own org, as a sign-in by email finds them (an email in `Person.emails`);  invite only, an invite making one through
   `PeopleStore.me()`, `ana@example.com` => `ana@spell`.
@@ -265,6 +266,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       so reading works while the write side is stopped.
     - Something private is a space of its own:  `ana@spell/recipes` lists Ana alone, so @family's members read none of it.
     - Reads through the write side are checked against the member list too (T15).
+  - TAKEDOWNS ([Takedowns.ts](server/node/places/Takedowns.ts), epic `atmosphere` P6, Q7 A):  Spell taking down a
+    record, a space or an account, and putting it back, each with a reason, by a Spell admin (`spell app takedown`).
+    - The log is the truth:  one entry each (who, when, what, why) in the folder's `__takedowns.json5` (an account's:
+      their own space's folder), one of `SPACE_NAMES`, so never listed, read direct or copied out.
+    - Read afresh for each request, on both sides:  a record is left out of every read, and a change to it refused;
+      a space, the account whose space it is, or the asker's own account, refuses everything, 451, naming the abuse
+      contact (`environment.abuseContact`, `SPELL_ABUSE_CONTACT`).
+    - `hide` leaves the files;  `delete` removes them too (an account is only hidden);  `restore` puts it back.
+    - An account taken down can't sign in (`SpellAccounts.isTakenDown()`).
+    - Reports, reasons people see, and appeals:  a todo, before Spell opens to everyone.
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.

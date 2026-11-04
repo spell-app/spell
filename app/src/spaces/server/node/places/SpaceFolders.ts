@@ -10,7 +10,7 @@ import {
 } from "spell/util/places/places.types"
 import { EVERY_FIELD, JsonChunks } from "spell/util/places/JsonChunks"
 import type { SRV } from "spell/server"
-import { DirectReads, FolderPlace, PlaceServer, type PlaceCredentialMade } from "spell/server/places"
+import { DirectReads, FolderPlace, PlaceServer, takenDownError, type PlaceCredentialMade } from "spell/server/places"
 import { ReadCredentials } from "spell/server/signIn"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
@@ -20,6 +20,7 @@ import { folderForPlace } from "spell/app/spaces/server/node/projects/project-ut
 import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 import { SpaceMembers } from "./SpaceMembers"
+import { Takedowns } from "./Takedowns"
 
 /****************
  * ### `SpaceFolders`
@@ -64,6 +65,12 @@ import { SpaceMembers } from "./SpaceMembers"
  * - Its member list is the place's own operations (`SPACE_MEMBER_OPERATIONS`), through the same route's `call`:
  *   who's in it, a member added or given a role, one removed or leaving.
  * - A folder with a `__members/` gets its person's membership written there, with the owner's role, if it's missing.
+ * - TAKEDOWNS (epic `atmosphere` P6, Q7 A):  what Spell took down (`Takedowns`, its log in each folder's
+ *   `__takedowns.json5`) is refused on both sides, asked afresh for each request:
+ *   - a record:  left out of every read, through the write side and read direct;  a change to it refused, "taken down"
+ *   - a space, the account whose space it is, or the asker's own account:  every read, write and credential refused,
+ *     451, naming the abuse contact
+ *   - put back (`restore`), it's read again at once:  a page following it hears it come back
  * - Node only;  NEVER imported by the editor's browser code.
  ****************/
 export class SpaceFolders {
@@ -79,6 +86,8 @@ export class SpaceFolders {
   private readonly people: PeopleStore
   /** Who's asking, as an address:  `owen@spell`. */
   private readonly personFor: (request: SRV.Request) => string
+  /** What Spell took down, in each folder. */
+  readonly takedowns: Takedowns
 
   constructor({
     folderFor = folderForPlace,
@@ -87,16 +96,22 @@ export class SpaceFolders {
       const { id, org } = prefsPersonFor(request)
       return `${id}@${org}`
     },
-    credentials = new ReadCredentials()
+    credentials = new ReadCredentials(),
+    abuseContact
   }: SpaceFoldersProps = {}) {
     this.folderFor = folderFor
     this.people = people
     this.personFor = personFor
+    this.takedowns = new Takedowns({
+      storageFor: (address) => this.folderAt(address)?.storage,
+      ...(abuseContact !== undefined && { contact: abuseContact })
+    })
     this.reads = new DirectReads({
       prefix: SPACE_READS_PREFIX,
       credentials,
       filesOf: (space) => this.spaceFolderAt(space)?.storage,
-      mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.memberOf(person))?.canRead
+      mayRead: async (space, person) => !!(await this.spaceFolderAt(space)?.members.memberOf(person))?.canRead,
+      takenDown: (space, person) => this.takedowns.takenDownIn(space, person)
     })
   }
 
@@ -137,7 +152,8 @@ export class SpaceFolders {
         ? { space: { id: members.spaceId, memberOf: members.memberOf }, operations: members.operations }
         : { mayChangeAnyRow: (who: string) => members.keeps(who) }),
       checkedAtMostEvery: SPACE_FOLDER_CHECKS_AT_MOST_EVERY,
-      identifiesBy: "this machine"
+      identifiesBy: "this machine",
+      takenDown: (asker) => this.takedowns.takenDownIn(address, asker)
     })
     this.places.set(address, place)
     return place
@@ -146,12 +162,15 @@ export class SpaceFolders {
   /**
    * A credential for `identity` to read the space the route names `name` direct:  its cookie, and where it's read.
    * - `undefined` for a program's own data, which isn't read direct:  the route answers 404.
-   * - throws `PlaceError` `"refused"`, `"role"`, for someone who isn't one of its members
+   * - throws `PlaceError` `"refused"`:  `"taken down"`, for a space Spell took down;  `"role"`, for someone who isn't
+   *   one of its members
    */
   async credentialFor(name: string, identity: string | undefined): Promise<PlaceCredentialMade | undefined> {
     const address = this.addressFor(name, identity)
     const folder = address === undefined ? undefined : this.spaceFolderAt(address)
     if (!folder || !address) return undefined
+    const down = await this.takedowns.takenDownIn(address, identity)
+    if (down.isWhole) throw takenDownError("this space", down)
     const member = identity === undefined ? undefined : await folder.members.memberOf(identity)
     if (!member?.canRead) {
       throw new PlaceError(`You can't read this:  you aren't a member of ${folder.members.spaceId}`, {
@@ -223,6 +242,8 @@ export type SpaceFoldersProps = {
   personFor?: (request: SRV.Request) => string
   /** Signs and checks the credentials a space is read direct with:  default a key for this run alone. */
   credentials?: ReadCredentials
+  /** Where people ask about a takedown:  default the server's (`environment.abuseContact`). */
+  abuseContact?: string
 }
 
 /** One project data folder:  its files, and who's in its space. */

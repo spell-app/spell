@@ -1,4 +1,5 @@
 import type { ChunkStore } from "spell/util/places/ChunkedPlace"
+import { JsonChunks } from "spell/util/places/JsonChunks"
 import { SRV } from "spell/server"
 import {
   READ_CREDENTIAL_COOKIE,
@@ -8,9 +9,13 @@ import {
   type ReadCredentials
 } from "spell/server/signIn"
 
+import { NOTHING_TAKEN_DOWN, TAKEN_DOWN_STATUS, isThingTakenDown, takenDownMessage, type TakenDown } from "./takenDown"
+
 /** What a thing's file and a list's file end in:  `JsonChunks`' names, the only files it serves. */
 const LIST_FILE = /^[^/]+\.list\.json$/
-const BODY_FILE = /^([^/]+)\/[^/]+\.json$/
+/** What a list file's name ends in, after its collection. */
+const LIST_ENDING = ".list.json"
+const BODY_FILE = /^([^/]+)\/([^/]+\.json)$/
 
 /****************
  * ### `DirectReads`
@@ -30,6 +35,10 @@ const BODY_FILE = /^([^/]+)\/[^/]+\.json$/
  * - Each read checks the credential's signature (`ReadCredentials`), that it's for this space, and that its person is
  *   still a reader (`mayRead`, the member list):  so someone who leaves is refused at once.
  *   - No credential, or none good:  401, and a page asks Spell's server for one.  A reader no longer:  403.
+ * - TAKEN DOWN (epic `atmosphere` P6), as the host says (`takenDown`), asked afresh for each read:
+ *   - the whole space, or the reader's own account:  451 (`TAKEN_DOWN_STATUS`), naming the host's abuse contact
+ *   - a thing:  left out of its list file as it's served, and its own file answered 451
+ *   - the files stay as they are on the disk:  nothing here writes
  * - Reads NOTHING through a place:  a space's files, as they are, so it works while nothing's written.
  * - Behind `Guard`'s host check only:  the credential is what lets a read in, no run token.
  * - Node only.  Knows no people and no folders:  `filesOf` and `mayRead` are handed in (the app's `SpaceFolders`).
@@ -43,12 +52,25 @@ export class DirectReads {
   private readonly filesOf: DirectReadsProps["filesOf"]
   /** May this person read this space now? */
   private readonly mayRead: DirectReadsProps["mayRead"]
+  /** What's taken down in this space, for this person, now. */
+  private readonly takenDown: NonNullable<DirectReadsProps["takenDown"]>
+  /** The files' format:  where a list's rows are, and which thing a file is. */
+  private readonly json: JsonChunks
 
-  constructor({ prefix, credentials, filesOf, mayRead }: DirectReadsProps) {
+  constructor({
+    prefix,
+    credentials,
+    filesOf,
+    mayRead,
+    takenDown = async () => NOTHING_TAKEN_DOWN,
+    format = new JsonChunks()
+  }: DirectReadsProps) {
     this.prefix = prefix
     this.credentials = credentials
     this.filesOf = filesOf
     this.mayRead = mayRead
+    this.takenDown = takenDown
+    this.json = format
   }
 
   /** Add its one route to `router`, behind `guard`'s host check. */
@@ -77,8 +99,8 @@ export class DirectReads {
 
   /**
    * The text of the file at `path` (`@family/cookbook/recipes.list.json`), for whoever holds one of `credentials`.
-   * - throws `HttpError`:  401 with no good credential for that space, 403 for someone who's no reader now, 404 for a
-   *   file that isn't there or isn't one it serves
+   * - throws `HttpError`:  401 with no good credential for that space, 451 for the space (or the reader's account)
+   *   or the thing taken down, 403 for someone who's no reader now, 404 for a file that isn't there or isn't one it serves
    */
   private async read(path: string, credentials: readonly string[]): Promise<string> {
     const credential = this.credentialFor(path, credentials)
@@ -86,6 +108,8 @@ export class DirectReads {
       throw new SRV.HttpError(401, "no credential to read this space:  ask Spell's server for one, signed in")
     }
     const { space, person } = credential
+    const down = await this.takenDown(space, person)
+    if (down.isWhole) throw new SRV.HttpError(TAKEN_DOWN_STATUS, takenDownMessage("this space", down.contact))
     if (!(await this.mayRead(space, person))) {
       throw new SRV.HttpError(403, `${person} can't read ${space}:  they aren't one of its members`)
     }
@@ -100,7 +124,34 @@ export class DirectReads {
     }
     const text = await files.read(address)
     if (text === undefined) throw new SRV.HttpError(404, `${space} has no file ${address} to read`)
-    return text
+    return this.withoutTakenDown(down, address, text)
+  }
+
+  /**
+   * `text`, the file at `address`, as it's served with `down` taken down:  a list without those things.
+   * - throws `HttpError(451)` for a thing's own file that's taken down
+   */
+  private withoutTakenDown(down: TakenDown, address: string, text: string): string {
+    if (!down.things.size) return text
+    const body = BODY_FILE.exec(address)
+    if (body) {
+      const collection = this.json.collectionOfFolder(body[1]!)
+      const id = this.json.idOfFile(body[2]!)
+      if (id !== undefined && isThingTakenDown(down, collection, id)) {
+        throw new SRV.HttpError(TAKEN_DOWN_STATUS, takenDownMessage(`"${collection}" ${id}`, down.contact))
+      }
+      return text
+    }
+    const collection = this.json.collectionOfFolder(address.slice(0, -LIST_ENDING.length))
+    const gone = down.things.get(collection)
+    if (!gone?.size) return text
+    const list = this.json.listIn(text)
+    const rows = list.rows.filter((row) => !gone.has(`${row[this.json.idOf]}`))
+    const keep = <T>(byId: Record<string, T> | undefined) =>
+      byId && Object.fromEntries(Object.entries(byId).filter(([id]) => !gone.has(id)))
+    const versions = keep(list.versions)
+    const stamps = keep(list.stamps)
+    return this.json.listText({ rows, ...(versions && { versions }), ...(stamps && { stamps }) })
   }
 
   /** The credential among these that's good, for the space `path` is in:  the most particular one, if more fit. */
@@ -133,4 +184,11 @@ export type DirectReadsProps = {
   filesOf: (space: string) => Pick<ChunkStore, "read"> | undefined | Promise<Pick<ChunkStore, "read"> | undefined>
   /** May `person` read `space` now:  its member list, read afresh. */
   mayRead: (space: string, person: string) => Promise<boolean>
+  /**
+   * What's taken down in `space` now, for `person` (epic `atmosphere` P6):  the host's takedowns, read afresh.
+   * - Their own account taken down is the whole space, for them.  Left out:  nothing ever is.
+   */
+  takenDown?: (space: string, person: string) => Promise<TakenDown>
+  /** The files' format, for where a list's rows are;  default plain `JsonChunks`. */
+  format?: JsonChunks
 }

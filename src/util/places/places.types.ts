@@ -508,6 +508,8 @@ export type PlaceSignIn = {
   enterCode?(code: string): Promise<void>
   /** Where the code went, while `"waiting for a code"`. */
   readonly sentTo?: string | undefined
+  /** Where to report abuse, the host's abuse contact, which the bar shows (epic `atmosphere` P6).  Left out:  none said. */
+  readonly abuseContact?: string | undefined
   /**
    * Who's signed in, for a sign-in that knows by itself (a Spell account's);  `undefined` for nobody.
    * - Left out:  the place says, `Place.currentPerson()`.
@@ -580,13 +582,15 @@ export type WriteQuestion = {
 }
 
 /** Every reason a write isn't allowed. */
-export const WhyNotWritables = ["place", "owner", "field", "role"] as const
+export const WhyNotWritables = ["place", "owner", "field", "role", "taken down"] as const
 /**
  * Why a write isn't allowed:
  * - `"place"`:  this place doesn't take this write from anyone
  * - `"owner"`:  it isn't yours
  * - `"field"`:  this field can't be written, as with Airtable's formulas
  * - `"role"`:  your role can't write:  you're a guest of the space, or not one of its members (epic `atmosphere` P4)
+ * - `"taken down"`:  Spell took it down (a thing, a space or an account), so it's neither read nor written;
+ *   its message says where to ask about it (epic `atmosphere` P6)
  */
 export type WhyNotWritable = (typeof WhyNotWritables)[number]
 

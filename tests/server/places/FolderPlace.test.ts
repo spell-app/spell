@@ -407,3 +407,75 @@ describe("FolderPlace, written by its members (epic `atmosphere` P4)", () => {
     )
   })
 })
+
+describe("FolderPlace, taken down (epic `atmosphere` P6)", () => {
+  /** Two recipes, and what its host says is taken down:  changed by the test as it goes. */
+  async function withTakedowns() {
+    const down: { isWhole: boolean; things: Map<string, Set<string>>; contact: string } = {
+      isWhole: false,
+      things: new Map(),
+      contact: "abuse@test.example"
+    }
+    const asked: (string | undefined)[] = []
+    const root = newFolder()
+    const place = new FolderPlace({
+      storage: new ChunkFiles({ root }),
+      format: new JsonChunks({ summaries: { recipes: ["title"] } }),
+      takenDown: async (identity) => {
+        asked.push(identity)
+        return down
+      }
+    })
+    await place.apply(
+      [
+        { kind: "insert", collection: "recipes", id: "r-1", fields: { title: "Dal" } },
+        { kind: "insert", collection: "recipes", id: "r-2", fields: { title: "Soup" } }
+      ],
+      {}
+    )
+    return { place, down, asked, root }
+  }
+
+  test("a thing:  left out of lists and reads by id, a change to it refused;  its file stays", async () => {
+    const { place, down, root } = await withTakedowns()
+    down.things.set("recipes", new Set(["r-2"]))
+    expect((await place.list("recipes", {}, {})).rows.map(({ id }) => id)).toEqual(["r-1"])
+    expect(await place.getMany("recipes", ["r-1", "r-2"], {})).toEqual([expect.objectContaining({ id: "r-1" })])
+    await expect(
+      place.apply([{ kind: "update", collection: "recipes", id: "r-2", fields: { title: "x" } }], {})
+    ).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "taken down" },
+      message: `"recipes" r-2 was taken down by Spell.  To ask about it:  abuse@test.example`
+    })
+    expect(existsSync(join(root, "recipes", "r-2.json"))).toBe(true)
+  })
+
+  test("the whole folder:  every read, write and operation refused, naming where to ask", async () => {
+    const { place, down } = await withTakedowns()
+    down.isWhole = true
+    const refused = { kind: "refused", cause: { whyNot: "taken down" } }
+    await expect(place.list("recipes", {}, {})).rejects.toMatchObject({
+      ...refused,
+      message: "This space was taken down by Spell.  To ask about it:  abuse@test.example"
+    })
+    await expect(place.getMany("recipes", ["r-1"], {})).rejects.toMatchObject(refused)
+    await expect(place.changesSince("recipes", "x", {})).rejects.toMatchObject(refused)
+    await expect(
+      place.apply([{ kind: "insert", collection: "recipes", id: "r-3", fields: { title: "x" } }], {})
+    ).rejects.toMatchObject(refused)
+  })
+
+  test("asked afresh, for who's asking:  a watcher hears a thing taken down as removed, and put back as there", async () => {
+    const { place, down, asked } = await withTakedowns()
+    const heard: PlaceEvent[] = []
+    stops.push(place.watch({ collection: "recipes" }, (event) => heard.push(event)))
+    down.things.set("recipes", new Set(["r-1"]))
+    await place.list("recipes", {}, { identity: "bo@spell" })
+    expect(heard).toEqual([{ collection: "recipes", id: "r-1" }])
+    down.things.clear()
+    await place.list("recipes", {}, {})
+    expect(heard.at(-1)).toMatchObject({ collection: "recipes", id: "r-1", row: { title: "Dal" } })
+    expect(asked).toContain("bo@spell")
+  })
+})
