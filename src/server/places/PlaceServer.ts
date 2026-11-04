@@ -1,4 +1,5 @@
 import {
+  PLACE_CREDENTIAL,
   PLACES_PREFIX,
   PlaceError,
   idOfRow,
@@ -52,6 +53,8 @@ const STATUS_OF_KIND: Record<PlaceErrorKind, number> = {
  * - A place may be OPENED by its name, as it's first asked for, rather than listed (`open`):  a name then holds `/`s,
  *   an address, `/api/places/spaces/owen@spell/recipes/list` (the app's project data folders, epic `atmosphere` P1).
  * - Who's asking (`identityOf`) goes to the place as `PlaceContext.identity`:  what decides what they own.
+ * - A place read DIRECT, apart from here (epic `atmosphere` P5):  `POST /api/places/<name>/credential` hands who's
+ *   asking a credential to read it (`credentialFor`), as a cookie, and answers where it's read, `{ readsAt }`.
  *   Left out:  nobody in particular, and a place that cares refuses or trusts as it says.
  * - Node only.  Knows nothing of what a place is.
  ****************/
@@ -68,19 +71,23 @@ export class PlaceServer {
   private readonly open: PlaceServerProps["open"]
   /** Who's asking. */
   private readonly identityOf: PlaceServerProps["identityOf"]
+  /** A credential to read a place direct. */
+  private readonly credentialFor: PlaceServerProps["credentialFor"]
 
   constructor({
     places = {},
     keys = new PlaceKeys(),
     prefix = PLACES_PREFIX,
     open,
-    identityOf = (request) => request.person
+    identityOf = (request) => request.person,
+    credentialFor
   }: PlaceServerProps) {
     this.places = places
     this.keys = keys
     this.prefix = prefix
     this.open = open
     this.identityOf = identityOf
+    this.credentialFor = credentialFor
   }
 
   /** Add its routes to `router`, each behind `guard`:  this run's token, the server's own host and origin. */
@@ -123,6 +130,13 @@ export class PlaceServer {
       ...checks,
       answering((ask) => this.changes(ask))
     )
+    if (this.credentialFor) {
+      router.post(
+        `${this.prefix}/${place}/${PLACE_CREDENTIAL}`,
+        ...checks,
+        answering((ask) => this.credential(ask))
+      )
+    }
     return this
   }
 
@@ -190,6 +204,19 @@ export class PlaceServer {
     return place.changesSince(this.collectionOrDie(collection), token, context)
   }
 
+  /**
+   * `POST credential`:  a credential to read the place direct, as a cookie => `{ readsAt }`.
+   * - throws what `credentialFor` throws:  a refusal for someone who may not read it
+   */
+  private async credential({ place, placeName, context, reply }: PlaceAsk): Promise<object> {
+    const made = await this.credentialFor!({ place, placeName, identity: context.identity })
+    if (!made) {
+      throw new PlaceError(`PlaceServer:  "${placeName}" isn't read direct`, { cause: { kind: "not found" } })
+    }
+    reply.set("Set-Cookie", made.cookie)
+    return { readsAt: made.readsAt }
+  }
+
   ////////////////
   // ## Answering
   ////////////////
@@ -213,6 +240,7 @@ export class PlaceServer {
         place: this.placeForLines(await this.placeOrDie(placeName, identity), request.body),
         placeName,
         body: request.body,
+        reply,
         context: { signal: stop.signal, ...(identity !== undefined && { identity }) }
       })
     } catch (error) {
@@ -321,6 +349,25 @@ export type PlaceServerProps = {
   keys?: PlaceKeys
   /** Where it listens;  default `/api/places`. */
   prefix?: string
+  /**
+   * A credential for `identity` to read `place` direct, apart from this server (epic `atmosphere` P5):  the cookie to
+   * set, and where it's read.
+   * - `undefined`:  that place isn't read direct, 404.  Left out:  none is, and there's no `credential` route.
+   * - throws `PlaceError` `"refused"` for someone who may not read it
+   */
+  credentialFor?: (ask: {
+    place: Place
+    placeName: string
+    identity: string | undefined
+  }) => Promise<PlaceCredentialMade | undefined>
+}
+
+/** A credential to read a place direct, as `PlaceServer` hands it out. */
+export type PlaceCredentialMade = {
+  /** The whole `Set-Cookie` value:  the credential, and the path only its read address has. */
+  cookie: string
+  /** Where the place is read direct:  `/api/reads/spaces/@family/cookbook`. */
+  readsAt: string
 }
 
 /** One request, as its route's method sees it. */
@@ -331,6 +378,8 @@ type PlaceAsk = {
   placeName: string
   /** The JSON sent. */
   body: unknown
+  /** The reply:  for a header an answer sets (a credential's cookie). */
+  reply: SRV.Reply
   /** What goes to the place:  a signal that fires when the asker hangs up, and who's asking. */
   context: { signal: AbortSignal; identity?: string }
 }

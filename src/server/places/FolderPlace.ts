@@ -59,6 +59,8 @@ const SETTLE_MS = 50
  *   - every thing is the space's, written as its own id (`owner` is `space.id`, `@family`), as an AT Protocol Space's
  *     own account writes it:  so a recipe Ana and Bo both edit is one thing
  *   - who's asking must be a member whose role writes (`space.memberOf()`), or the whole change is refused, `"role"`
+ *   - and a member to read it (epic `atmosphere` P5, T15):  anyone else's read is refused, `"role"`, as a read direct
+ *     with no credential is
  * - Either way, who wrote each thing last is `by` (`BY_FIELD`), from who's asking:  a change can't claim it.
  * - A request saying nobody (the folder's own code, a test) is trusted:  it's on this machine already.
  * - Its own operations (`operations`), answered by `call()`:  the app's member list (`SPACE_MEMBER_OPERATIONS`).
@@ -126,12 +128,14 @@ export class FolderPlace extends ChunkedPlace {
 
   /** The list, once it's in step with the folder:  see `ChunkedPlace.list()`. */
   async list(collection: string, query: ListQuery, context: PlaceContext = {}): Promise<ListAnswer> {
+    await this.mayReadOrDie(context)
     await this.keepInStep(collection)
     return { ...(await super.list(collection, query, context)), version: this.events.version }
   }
 
   /** The things with these ids, once the list is in step with the folder. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext = {}): Promise<PlaceRow[]> {
+    await this.mayReadOrDie(context)
     await this.keepInStep(collection)
     return super.getMany(collection, ids, context)
   }
@@ -156,6 +160,7 @@ export class FolderPlace extends ChunkedPlace {
 
   /** What changed in `collection` since `token`, a list's `version`:  a token from another run answers with every thing. */
   async changesSince(collection: string, token: string, context: PlaceContext = {}): Promise<ChangesAnswer> {
+    await this.mayReadOrDie(context)
     await this.keepInStep(collection)
     const known = this.events.changesSince(collection, token)
     if (known) return known
@@ -165,6 +170,20 @@ export class FolderPlace extends ChunkedPlace {
   /** Tell `onEvent` of each change to `target`, by this place or on the disk.  Returns what stops it. */
   watch(target: WatchTarget, onEvent: (event: PlaceEvent) => void): () => void {
     return this.events.watch(target, onEvent)
+  }
+
+  /**
+   * Written by its members, it's read by them only:  who's asking must be one (epic `atmosphere` P5, T15).
+   * - A request saying nobody is trusted, as for a write.
+   * - throws `PlaceError` `"refused"`, `"role"`
+   */
+  private async mayReadOrDie({ identity }: PlaceContext): Promise<void> {
+    if (this.says.whoWrites !== "its members" || identity === undefined) return
+    const space = this.space!
+    if ((await space.memberOf(identity))?.canRead) return
+    throw new PlaceError(`You can't read this:  you aren't a member of ${space.id}`, {
+      cause: { kind: "refused", whyNot: "role" }
+    })
   }
 
   /** Every thing in `collection`, whole. */

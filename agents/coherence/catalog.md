@@ -420,6 +420,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
     each folder as it's asked for (epic `atmosphere` P1).  Never a route per folder.
     A space's own folder is written by its members (P4):  `SpaceMembers`, handed to `FolderPlace` as `space`;
     its member list is the same route's `call`, never a route of its own.
+    A space's own folder is READ DIRECT (P5):  `RemotePlace`'s `readsAt`, a `ChunkedPlace` on `WebChunks`, one plain `GET`
+    of its list from the kit's `DirectReads`;  its credential from the same route (`credential`), signed by
+    `ReadCredentials`.  Never a reader of its own.
   - Every thing of one place copied into another:  `PlaceCopy`.  A version made from content:  `contentVersion()`
     (`spell/server/places`), CSV rows' and a folder's things'.
 - **Use it when:**  anything a page reads from or saves to somewhere other than memory.

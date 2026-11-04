@@ -317,3 +317,115 @@ describe("SpaceFolders, what it says", () => {
     }
   })
 })
+
+describe("SpaceFolders, a space read direct, with a credential for the whole space (epic `atmosphere` P5)", () => {
+  const COOKBOOK = "@family/cookbook"
+
+  // Cy left the cookbook above:  back as a guest
+  beforeAll(async () => {
+    await folderAt(COOKBOOK, "ana@spell").call(SPACE_MEMBER_OPERATIONS.add, { person: "cy@spell", role: "guest" }, {})
+  })
+
+  /** Ask the write side for `person`'s credential to read `address`:  the cookie to send back, and the answer. */
+  async function credentialOf(
+    address: string,
+    person: string
+  ): Promise<{ status: number; cookie: string; body: unknown }> {
+    const answer = await fetch(`http://127.0.0.1:${port}/api/places/spaces/${address}/credential`, {
+      method: "POST",
+      headers: { "x-server-token": TOKEN, "x-person": person, "content-type": "application/json" },
+      body: "{}"
+    })
+    const setCookie = answer.headers.get("set-cookie") ?? ""
+    return { status: answer.status, cookie: setCookie.split(";")[0]!, body: await answer.json() }
+  }
+
+  /** A plain read of `path` on the read side, sending `cookie`. */
+  async function readDirect(path: string, cookie?: string): Promise<{ status: number; text: string }> {
+    const answer = await fetch(`http://127.0.0.1:${port}/api/reads/spaces/${path}`, {
+      headers: cookie ? { cookie } : {}
+    })
+    return { status: answer.status, text: await answer.text() }
+  }
+
+  test("a member's credential, and a guest's, reads the whole space:  its list and each thing, no run token", async () => {
+    await folderAt(COOKBOOK, "ana@spell").apply([insertOf("d-1", "Dal")], {})
+    for (const person of ["bo@spell", "cy@spell"]) {
+      const { status, cookie, body } = await credentialOf(COOKBOOK, person)
+      expect(status, person).toBe(200)
+      expect(body).toEqual({ readsAt: "/api/reads/spaces/@family/cookbook" })
+      expect(cookie).toMatch(/^spell-space-read=/)
+      const list = await readDirect(`${COOKBOOK}/recipes.list.json`, cookie)
+      expect(list.status, person).toBe(200)
+      expect(JSON.parse(list.text).rows).toEqual(expect.arrayContaining([expect.objectContaining({ title: "Dal" })]))
+      const dal = await readDirect(`${COOKBOOK}/recipes/d-1.json`, cookie)
+      expect(JSON.parse(dal.text)).toMatchObject({ title: "Dal", owner: "@family", by: "ana@spell" })
+    }
+  })
+
+  test("its cookie:  only that space's read address gets it, out of every script's and other site's reach", async () => {
+    const answer = await fetch(`http://127.0.0.1:${port}/api/places/spaces/${COOKBOOK}/credential`, {
+      method: "POST",
+      headers: { "x-server-token": TOKEN, "x-person": "bo@spell", "content-type": "application/json" },
+      body: "{}"
+    })
+    expect(answer.headers.get("set-cookie")).toMatch(
+      /; Path=\/api\/reads\/spaces\/@family\/cookbook\/; HttpOnly; SameSite=Strict; Max-Age=2592000$/
+    )
+  })
+
+  test("no credential, a forged one, or one for another space:  401;  someone outside it gets none:  `role`", async () => {
+    expect((await readDirect(`${COOKBOOK}/recipes.list.json`)).status).toBe(401)
+    const { cookie } = await credentialOf(COOKBOOK, "bo@spell")
+    const forged = cookie.replace(/.$/, (last) => (last === "A" ? "B" : "A"))
+    expect((await readDirect(`${COOKBOOK}/recipes.list.json`, forged)).status).toBe(401)
+    // Ana's own recipe box is a space of its own:  the family's credential reads none of it
+    await folderAt("ana@spell/recipes", "ana@spell").apply([insertOf("a-1", "Ana's own")], {})
+    expect((await readDirect("ana@spell/recipes/recipes.list.json", cookie)).status).toBe(401)
+    const refused = await credentialOf("ana@spell/recipes", "bo@spell")
+    expect(refused.status).toBe(422)
+    expect(refused.body).toEqual({
+      error: "You can't read this:  you aren't a member of ana@spell",
+      kind: "refused",
+      whyNot: "role"
+    })
+    expect((await credentialOf(COOKBOOK, "dee@spell")).status).toBe(422)
+    // Ana reads her own
+    const anas = await credentialOf("ana@spell/recipes", "ana@spell")
+    expect((await readDirect("ana@spell/recipes/recipes/a-1.json", anas.cookie)).status).toBe(200)
+  })
+
+  test("someone who leaves is refused at once:  their credential is no good any more, 403", async () => {
+    const NOTES = "ana@spell/notes"
+    const asAna = folderAt(NOTES, "ana@spell")
+    await asAna.call(SPACE_MEMBER_OPERATIONS.add, { person: "bo@spell", role: "guest" }, {})
+    await asAna.apply([insertOf("n-1", "Shopping")], {})
+    const { cookie } = await credentialOf(NOTES, "bo@spell")
+    expect((await readDirect(`${NOTES}/recipes.list.json`, cookie)).status).toBe(200)
+    await asAna.call(SPACE_MEMBER_OPERATIONS.remove, { person: "bo@spell" }, {})
+    const after = await readDirect(`${NOTES}/recipes.list.json`, cookie)
+    expect(after.status).toBe(403)
+    expect(after.text).toContain("bo@spell can't read ana@spell/notes")
+  })
+
+  test("only its list and things:  never its members, a dot file, or a folder of its own", async () => {
+    const NOTES = "ana@spell/notes"
+    const { cookie } = await credentialOf(NOTES, "ana@spell")
+    for (const path of ["__members/ana@spell.json5", ".hidden.json", "recipes/../__members/x.json", "nothing/x.json"]) {
+      expect((await readDirect(`${NOTES}/${path}`, cookie)).status, path).toBe(404)
+    }
+  })
+
+  test("a program's own data isn't read direct:  no credential for it, 404", async () => {
+    expect((await credentialOf("personal/recipes", "owen@spell")).status).toBe(404)
+  })
+
+  test("reads through the write side are checked against the member list too (T15)", async () => {
+    await expect(folderAt(COOKBOOK, "dee@spell").list("recipes", {}, {})).rejects.toMatchObject({
+      kind: "refused",
+      cause: { whyNot: "role" },
+      message: "You can't read this:  you aren't a member of @family"
+    })
+    expect((await folderAt(COOKBOOK, "cy@spell").list("recipes", {}, {})).rows.length).toBeGreaterThan(0)
+  })
+})

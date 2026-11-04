@@ -1,6 +1,6 @@
 /**
  * What's behind a place, from what its line says (`placeBehind()`):  here, a data folder's two kinds of address
- * (epic `atmosphere` P1), and who writes it, by its address (P4).
+ * (epic `atmosphere` P1), who writes it, by its address (P4), and where a space's own is read direct (P5).
  * - The rest of what a place does at run time:  `places.test.ts`.
  */
 import { describe, expect, test } from "vite-plus/test"
@@ -38,6 +38,17 @@ describe("placeBehind(), a data folder", () => {
     expect(whoWrites("personal/recipes")).toBe("only the owner")
     expect(PlacesFolder.whoWritesFolderAt("http://127.0.0.1:4747/api/places/spaces/owen@spell/recipes?x")).toBe(
       "its members"
+    )
+  })
+
+  test("a space's own folder is read direct, apart from where it's written;  a program's own data isn't (P5)", () => {
+    const readsAt = (at: string) =>
+      (folderAt(`/api/places/spaces/${at}`) as unknown as { reads?: { store: { url: string } } }).reads?.store.url
+    expect(readsAt("@family/cookbook")).toBe("/api/reads/spaces/@family/cookbook")
+    expect(readsAt("personal/recipes")).toBeUndefined()
+    expect(readsAt("@spell/examples/RecipeBox/__data/recipes")).toBeUndefined()
+    expect(PlacesFolder.spaceReadAddressFor("http://127.0.0.1:4747/api/places/spaces/owen@spell/recipes?x")).toBe(
+      "http://127.0.0.1:4747/api/reads/spaces/owen@spell/recipes"
     )
   })
 

@@ -8,7 +8,7 @@ import { join } from "path"
 import { PREF_SAVED_EVENT } from "spell/util"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
-import { MailCatcher, SignInCheck, SignIns } from "spell/server/signIn"
+import { MailCatcher, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
 import environment from "spell/app/spaces/server/node/environment"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -32,6 +32,8 @@ import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
  *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
  *     routes are
+ *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
+ *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
  *   - `/api/sign-in/...` -- signing in to a Spell account by email, a link and a code (`SignInCheck`, epic `atmosphere`
  *     P3), with the link's page at `/sign-in/confirm`, and every mail the local catcher caught at `/sign-in/mail`
  *     - its check runs FIRST, for every route after it:  who's signed in on the device is on the request
@@ -72,7 +74,10 @@ const appRoutes: RouteModule = {
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // before `/api`'s own routes, whose last answers every path it doesn't know
-    const folders = new SpaceFolders().route({ router, guard })
+    // a space's own folder read direct, with a credential signed by a key kept beside the sign-ins (epic `atmosphere` P5)
+    const folders = new SpaceFolders({
+      credentials: new ReadCredentials({ file: join(environment.signInDir, "space-reads.key") })
+    }).route({ router, guard })
     onStop(() => folders.close())
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)

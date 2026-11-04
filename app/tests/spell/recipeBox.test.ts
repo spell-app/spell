@@ -101,6 +101,8 @@ describe.skipIf(!existsSync(join(ELEMENT_DIR, "spell-runtime.js")))("the recipe 
   let spaceFolders: SpaceFolders
   /** That spell.spaces. */
   let spaces: string
+  /** The write side of the project data folders stopped:  every request to it is no answer (epic `atmosphere` P5). */
+  let writesStopped = false
   /** The sign-in's local mail catcher (epic `atmosphere` P3). */
   let mailer: MailCatcher
   /** The accounts in that spell.spaces. */
@@ -167,6 +169,10 @@ ${token ? `<script>window.SPELL_SERVER = { token: "${token}" }</script>` : ""}
       },
       routes: (router) => {
         router.use(signIn.check)
+        router.use((request, reply, next) => {
+          if (writesStopped && request.path.startsWith("/api/places/spaces/")) return reply.status(503).send("stopped")
+          next()
+        })
         router.use((request, reply, next) => {
           if (request.path === "/flaky/recipes") {
             if (!flakyIsUp) return reply.status(404).send("not yet")
@@ -634,11 +640,15 @@ start the box
       writeFileSync(join(spaces, "@family", "__org.json5"), JSON.stringify(org, null, 2))
     })
 
-    /** A browser of its own, signed in by the code emailed to `email`, on the cookbook:  its page. */
-    async function signedIn(name: string, email: string): Promise<{ page: Page; close: () => Promise<void> }> {
+    /** A browser of its own, signed in by the code emailed to `email`, on the cookbook (or `lines`'):  its page. */
+    async function signedIn(
+      name: string,
+      email: string,
+      lines = LINES
+    ): Promise<{ page: Page; close: () => Promise<void> }> {
       const browserContext = await browser.newContext()
       const page = await browserContext.newPage()
-      await page.goto(serve(name, withPlace(english(), LINES)))
+      await page.goto(serve(name, withPlace(english(), lines)))
       const bar = page.locator("ui-message.spell-sign-in")
       await expect.poll(() => bar.textContent(), WAITING).toContain("with a Spell account")
       const before = (await mailer.newestTo(email))?.sentAt ?? 0
@@ -703,6 +713,89 @@ start the box
         expect(recipeTitled("Dee's stew")).toBeUndefined()
 
         for (const one of [ana, bo, dee]) await one.close()
+      }
+    )
+
+    test(
+      "read direct (P5):  Bo, a member, and Gil, a guest, read the cookbook straight from its files, " +
+        "with the write side stopped too;  Dee is refused;  Ana's own box isn't the family's to read",
+      { timeout: 120_000 },
+      async () => {
+        const GIL = "gil@example.com"
+        address.gil = await accounts.invite(GIL)
+        const org = JSON.parse(readFileSync(join(spaces, "@family", "__org.json5"), "utf8")) as {
+          members: object[]
+        }
+        org.members.push({ $type: "Membership", person: { $ref: `Person#${address.gil}` }, role: "guest" })
+        writeFileSync(join(spaces, "@family", "__org.json5"), JSON.stringify(org, null, 2))
+
+        const ana = await signedIn("direct-ana", EMAILS.ana)
+        await ana.page.locator("ui-input.draft input").fill("Read direct stew")
+        await ana.page.locator("ui-button.add").click()
+        await expect.poll(() => recipeTitled("Read direct stew"), WAITING).toMatchObject({ by: address.ana })
+
+        // Bo's page reads the list file itself, with the credential the write side gave him, as a cookie no script reads
+        const bo = await signedIn("direct-bo", EMAILS.bo)
+        const directRead = bo.page.waitForResponse((answer) =>
+          answer.url().endsWith("/api/reads/spaces/@family/cookbook/recipes.list.json")
+        )
+        await bo.page.reload()
+        expect((await directRead).status()).toBe(200)
+        await expect.poll(() => titlesOn(bo.page), WAITING).toContain("Read direct stew")
+        expect(await bo.page.context().cookies()).toContainEqual(
+          expect.objectContaining({
+            name: "spell-space-read",
+            path: "/api/reads/spaces/@family/cookbook/",
+            httpOnly: true
+          })
+        )
+        expect(await bo.page.evaluate(() => document.cookie)).not.toContain("spell-space-read")
+
+        // a guest reads it too
+        const gil = await signedIn("direct-gil", GIL)
+        await expect.poll(() => titlesOn(gil.page), WAITING).toContain("Read direct stew")
+
+        // the write side stopped:  reading still works, for a page opened afresh
+        writesStopped = true
+        try {
+          await bo.page.reload()
+          await expect.poll(() => titlesOn(bo.page), WAITING).toContain("Read direct stew")
+          await gil.page.reload()
+          await expect.poll(() => titlesOn(gil.page), WAITING).toContain("Read direct stew")
+        } finally {
+          writesStopped = false
+        }
+
+        // Dee, no member:  no credential for her, and nothing read
+        const dee = await signedIn("direct-dee", EMAILS.dee)
+        const deesAsk = dee.page.waitForResponse((answer) => answer.url().endsWith("/credential"))
+        await dee.page.reload()
+        expect((await deesAsk).status()).toBe(422)
+        expect(await titlesOn(dee.page)).not.toContain("Read direct stew")
+
+        // Ana's own recipe box is a space of its own:  the family's members read none of it
+        const ANAS = `family cookbook is a data folder at "${address.ana}/recipes":
+	- check it every 5 seconds`
+        const anasOwn = await signedIn("direct-ana-own", EMAILS.ana, ANAS)
+        await anasOwn.page.locator("ui-input.draft input").fill("Ana's secret")
+        await anasOwn.page.locator("ui-button.add").click()
+        const anasList = join(spaces, "@spell", `${address.ana!.split("@")[0]}@`, "recipes", "recipes.list.json")
+        await expect
+          .poll(() => existsSync(anasList) && readFileSync(anasList, "utf8"), WAITING)
+          .toContain("Ana's secret")
+        const bosTry = await bo.page.evaluate(async (at) => {
+          const read = await fetch(`/api/reads/spaces/${at}/recipes/recipes.list.json`)
+          const credential = await fetch(`/api/places/spaces/${at}/credential`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: "{}"
+          })
+          return { read: read.status, credential: credential.status, said: await credential.text() }
+        }, address.ana!)
+        expect(bosTry).toMatchObject({ read: 401, credential: 422 })
+        expect(bosTry.said).toContain("you aren't a member of")
+
+        for (const one of [ana, bo, gil, dee, anasOwn]) await one.close()
       }
     )
   })

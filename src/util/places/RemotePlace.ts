@@ -1,5 +1,7 @@
 import type { ApiError } from "spell/util/fetching"
 
+import { ChunkedPlace } from "./ChunkedPlace"
+import { EVERY_FIELD, JsonChunks } from "./JsonChunks"
 import {
   type ApplyAnswer,
   type ChangesAnswer,
@@ -9,6 +11,9 @@ import {
   type PlaceCapabilities,
   type PlaceChange,
   type PlaceContext,
+  PLACE_CREDENTIAL,
+  PlaceError,
+  idOfRow,
   type PlaceErrorKind,
   type PlaceLines,
   type PlaceRow,
@@ -18,6 +23,7 @@ import {
   type WriteAnswer,
   type WriteQuestion
 } from "./places.types"
+import { WebChunks } from "./WebChunks"
 import { jsonIn, WebPlace } from "./WebPlace"
 
 /** What it assumes a place on a server side does:  it's told what's done on each answer, in `handled`. */
@@ -72,6 +78,12 @@ const OUT_OF_DATE_STATUS = 409
  * - Never holds a key, so it takes no `keyNamed`.
  * - A program's lines about the place go with every request (`lines`):  never a key, only its name.
  * - A place that says which fields take no write (`ListAnswer.readOnlyFields`) is answered for here (`canWrite()`).
+ * - READING DIRECT (`readsAt`, epic `atmosphere` P5, Q6 C):  a space's own folder is read straight from its files,
+ *   one plain `GET` of its list (`ChunkedPlace` on `WebChunks`), and only written through the server side.
+ *   - So reading works while the server side can't write, or isn't there.
+ *   - The read needs a credential for the whole space:  refused, it asks the server side for one (`credential`), which
+ *     comes back as a cookie only that address reads, never in the page's own storage;  then reads again, once.
+ *   - What it's shown of each thing's version is the list's, as the server side's are:  a change made from it is checked.
  ****************/
 export class RemotePlace extends WebPlace implements Place {
   /** What it says it can do. */
@@ -84,15 +96,24 @@ export class RemotePlace extends WebPlace implements Place {
   private readonly lines: PlaceLines | undefined
   /** The fields each collection takes no write to, as last said. */
   private readonly readOnlyFields = new Map<string, Set<string>>()
+  /** Where its files are read direct, when they are:  a space's own folder's (`readsAt`). */
+  private readonly reads: ChunkedPlace | undefined
   /** How a person signs in here, if each person is someone. */
   readonly signIn?: PlaceSignIn
 
-  constructor({ url, can, token, lines, signIn }: RemotePlaceProps) {
+  constructor({ url, can, token, lines, signIn, readsAt }: RemotePlaceProps) {
     super({ url, changeIdHeader: false })
     this.capabilities = { ...REMOTE_CAPABILITIES, ...can }
     this.token = token
     this.lines = lines
     if (signIn) this.signIn = signIn
+    this.reads =
+      readsAt === undefined
+        ? undefined
+        : new ChunkedPlace({
+            store: new WebChunks({ url: readsAt }),
+            format: new JsonChunks({ summaries: EVERY_FIELD })
+          })
   }
 
   /** What it can do:  `can`, since a server's answer can't be waited for here. */
@@ -102,6 +123,8 @@ export class RemotePlace extends WebPlace implements Place {
 
   /** The rows of `collection` that `query` asks for:  the place behind it does what it can, and says. */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    const reads = this.reads
+    if (reads) return this.readingDirect(collection, context, () => reads.list(collection, query, context))
     const { versions, ...answer } = await this.ask<ListAnswer & WithVersions>("list", { collection, query }, context)
     this.note(collection, versions)
     if (answer.readOnlyFields) this.readOnlyFields.set(collection, new Set(answer.readOnlyFields))
@@ -110,6 +133,8 @@ export class RemotePlace extends WebPlace implements Place {
 
   /** The rows of `collection` with these ids. */
   async getMany(collection: string, ids: readonly string[], context: SelectingContext): Promise<PlaceRow[]> {
+    const reads = this.reads
+    if (reads) return this.readingDirect(collection, context, () => reads.getMany(collection, ids, context))
     const body = { collection, ids, ...(context.select && { select: context.select }) }
     const { rows, versions } = await this.ask<{ rows: PlaceRow[] } & WithVersions>("getMany", body, context)
     this.note(collection, versions)
@@ -181,6 +206,33 @@ export class RemotePlace extends WebPlace implements Place {
     return status !== GUARD_STATUS && super.isAnAnswer(status)
   }
 
+  /**
+   * `read()`'s answer, from the space's files:  asked again once, with a credential from the server side, when refused.
+   * - Each thing's version as the list says it is noted, for a change made from it.
+   * - throws `PlaceError` `"refused"` when the server side won't give one:  who's asking isn't a member
+   */
+  private async readingDirect<T extends ListAnswer | PlaceRow[]>(
+    collection: string,
+    context: PlaceContext,
+    read: () => Promise<T>
+  ): Promise<T> {
+    let answer: T
+    try {
+      answer = await read()
+    } catch (error) {
+      if (!(error instanceof PlaceError) || error.kind !== "refused") throw error
+      await this.ask(PLACE_CREDENTIAL, {}, context)
+      answer = await read()
+    }
+    const rows = Array.isArray(answer) ? answer : answer.rows
+    for (const row of rows) {
+      const id = idOfRow(row, this.capabilities.idOf)
+      const version = id === undefined ? undefined : this.reads!.versionOf(collection, id)
+      if (version !== undefined) this.seenVersions.set(`${collection}\n${id}`, version)
+    }
+    return answer
+  }
+
   /** Ask the server side.  - throws as `WebPlace.answerTo()` */
   private async ask<T>(what: string, data: object, context: PlaceContext): Promise<T> {
     const token = this.token ?? pageToken()
@@ -215,6 +267,11 @@ export type RemotePlaceProps = {
   lines?: PlaceLines
   /** How a person signs in to the server side:  a project data folder's `SpellSignIn`.  Left out:  nobody does. */
   signIn?: PlaceSignIn
+  /**
+   * Where its files are read direct, apart from the server side, which only writes then (epic `atmosphere` P5):
+   * a space's own folder, `spaceReadAddressFor()`.  Left out:  read through the server side too.
+   */
+  readsAt?: string
 }
 
 /** The write token of the server that served this page. */

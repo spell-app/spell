@@ -270,11 +270,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A space written by its members (P4, Q1, Q6):  every thing the space's own (`owner` is `@family`), who wrote it last `by`
       (`BY_FIELD`);  a refusal for a role that can't write is `whyNot: "role"`.  Its members are `SpaceMember`s, a read, a write
       and a manage flag each, in the shape of AT Protocol's lists (T6);  joining and leaving, `SPACE_MEMBER_OPERATIONS`.
+    - A space's own folder is READ DIRECT (P5, Q6 C), at `SPACE_READS_PREFIX` (`spaceReadAddressFor()`), and only written
+      through Spell's server:  so reading works while it can't write.  A program's own data is read through the server.
   - `RemotePlace`:  in a browser, any place on a server side, speaking to `PlaceServer`.
     - NOT `ServerPlace`, in `persist/`, which never throws and holds only preferences.
     - A refusal says the server side's own words (`WebPlace.messageOf()`), scrubbed of keys.
     - A program's lines go with every request (`lines`, `PlaceLines`):  never a key, only its name.  A place that takes them follows them (`Place.withLines()`).
     - A field the place says takes no write (`ListAnswer.readOnlyFields`) reads as read only here (`canWrite()`).
+    - `readsAt` (epic `atmosphere` P5):  its lists read straight from the files (`ChunkedPlace` on `WebChunks`), written
+      through the server side;  refused, it asks for a credential (`PLACE_CREDENTIAL`), a cookie, and reads again once.
   - `SheetPlace`:  a CSV file at an address, read only, with no key and no server of ours (epic `data` P7).
     A program's `sheet` at a place server's address is a `RemotePlace` instead, which writes (`isPlaceServerAddress()`).
     - One file, one collection.  `parseCsv()` reads it;  [SheetTable](places/SheetTable.ts) makes its rows, shared with

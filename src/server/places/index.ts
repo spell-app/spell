@@ -4,6 +4,8 @@
  * - `FolderPlace`:  a folder as a place, a list file and one file per thing, its changes heard from the disk.
  * - `FilePlace`:  one file as a place.
  * - `PlaceServer`:  any place over HTTP, on the kit's router, behind `Guard`;  `PlaceKeys`, what it holds.
+ * - `DirectReads`:  a space's files read straight, apart from the server that writes them, with a credential for the
+ *   whole space (epic `atmosphere` P5).
  * - `Referee`:  puts everyone's changes in a shared space in one order;  `LiveRoomPlace` is its browser half.
  * - `GoogleSheetPlace`:  a Google Sheet as a place, its token from `GoogleToken`.
  * - `AirtablePlace`:  an Airtable base as a place:  its key held here, one read however many tabs.
@@ -20,6 +22,7 @@ export * from "./FolderPlace"
 export * from "./FilePlace"
 export * from "./PlaceKeys"
 export * from "./PlaceServer"
+export * from "./DirectReads"
 export * from "./Referee"
 export * from "./RateQueue"
 export * from "./GoogleToken"

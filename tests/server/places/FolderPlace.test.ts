@@ -378,6 +378,23 @@ describe("FolderPlace, written by its members (epic `atmosphere` P4)", () => {
     expect((await place.list("recipes", {}, {})).rows).toEqual([])
   })
 
+  test("read by its members only, a guest too:  anyone else is refused, `role` (epic `atmosphere` P5, T15)", async () => {
+    const { place } = membersFolder()
+    await place.apply([insert], { identity: "ana@spell" })
+    expect((await place.list("recipes", {}, { identity: "cy@spell" })).rows).toHaveLength(1)
+    for (const read of [
+      () => place.list("recipes", {}, { identity: "dee@spell" }),
+      () => place.getMany("recipes", ["r-1"], { identity: "dee@spell" }),
+      () => place.changesSince("recipes", "", { identity: "dee@spell" })
+    ]) {
+      await expect(read()).rejects.toMatchObject({
+        kind: "refused",
+        cause: { whyNot: "role" },
+        message: "You can't read this:  you aren't a member of @family"
+      })
+    }
+  })
+
   test("its own operations, as who's asking;  one it hasn't is not found", async () => {
     const { place } = membersFolder()
     expect(await place.call("hello", "hi", { identity: "ana@spell" })).toBe("hi, ana@spell")

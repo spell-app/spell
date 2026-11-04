@@ -257,6 +257,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Joining, leaving, admins (T6):  the place's own operations, through the same route's `call`
       (`members`, `addMember`, `removeMember`);  written to the folder's `__members/`, or the org's file through the people
       store (`setRole()`, `removeMembership()`).  A member may always leave;  the last admin can't.
+  - READ DIRECT (epic `atmosphere` P5, Q6 C):  a space's own folder's files are read straight, apart from where they're
+    written, at `/api/reads/spaces/<address>/` (the kit's `DirectReads`), with a credential for the whole space.
+    - A member, a guest too, gets one from the write side (`POST .../credential`), a cookie only that address reads;
+      anyone else is refused, `"role"`.  Signed by a key beside the sign-ins (`environment.signInDir`'s `space-reads.key`).
+    - Each read asks the member list again:  someone who leaves reads no more.  It opens no place and writes nothing,
+      so reading works while the write side is stopped.
+    - Something private is a space of its own:  `ana@spell/recipes` lists Ana alone, so @family's members read none of it.
+    - Reads through the write side are checked against the member list too (T15).
   - Who's asking:  `prefsPersonFor()`, whoever's signed in, else this machine's person.
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);  the recipe box in a
     browser, `tests/spell/recipeBox.test.ts`.

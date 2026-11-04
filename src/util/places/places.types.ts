@@ -759,6 +759,31 @@ export function isSpaceFolderAddress(address: string): boolean {
 }
 
 /**
+ * Where a space's own folder is READ, straight from its files, apart from where it's written (epic `atmosphere` P5, Q6 C):
+ * `/api/reads/spaces/@family/cookbook/recipes.list.json`.
+ * - A plain `GET` of each file, with a credential for the whole space:  so reading works while Spell's server can't write.
+ */
+export const SPACE_READS_PREFIX = "/api/reads/spaces"
+
+/**
+ * What a `PlaceServer` with credentials answers, for reading a place direct:  `POST <place>/credential`.
+ * - Its answer sets a cookie only the place's read address gets, and says that address:  `{ readsAt }`.
+ */
+export const PLACE_CREDENTIAL = "credential"
+
+/**
+ * Where the project data folder written at `address` is read directly:  `undefined` for one that's no space's own.
+ * - Only a space's own folder (`"its members"`, `whoWritesFolderAt()`):  a program's own data stays read through
+ *   Spell's server, which shows each person what's theirs.
+ * - `/api/places/spaces/@family/cookbook` => `/api/reads/spaces/@family/cookbook`, its origin kept.
+ */
+export function spaceReadAddressFor(address: string): string | undefined {
+  if (!isSpaceFolderAddress(address) || whoWritesFolderAt(address) !== "its members") return undefined
+  const [path = ""] = address.split(/[?#]/)
+  return path.replace(`${SPACE_FOLDERS_PREFIX}/`, `${SPACE_READS_PREFIX}/`)
+}
+
+/**
  * Does `address` name a place on a `PlaceServer`, rather than a file anyone can fetch?
  * - How a program says a sheet has a server in front, with no word for it:  `family cookbook is a sheet at "/api/places/recipes"`.
  * - Only its path counts:  a file's address may hold anything in its query.

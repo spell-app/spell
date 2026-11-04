@@ -407,6 +407,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `whoWrites: "its members"` (epic `atmosphere` P4):  every thing is the space's, written as its own id (`owner`
         is `@family`), and a member whose role writes changes any of it;  anyone else is refused, `"role"` ("your role
         can't write").  Who's a member is handed in (`space.memberOf()`):  the app's `SpaceMembers`
+        - and read by its members only (P5, T15):  anyone else's read is refused, `"role"`
       - either way, who wrote each thing last is `by`;  its own `operations` answer `call()` (the app's member list)
     - `FilePlace`:  one JSON5 file as a place, its comments kept
     - `PlaceServer`:  any place over HTTP, on the `Router`, behind `Guard`, reads too;  `RemotePlace` is its browser half
@@ -416,6 +417,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         The app's `SpaceFolders` serves every project data folder this way, at `/api/places/spaces/<address>/`
       - who's asking, by default:  `request.person`, whoever's signed in (`SignInCheck`, epic `atmosphere` P3);  a device
         signed in needs no run token
+      - a place read direct (epic `atmosphere` P5):  `POST <name>/credential` hands who's asking a credential to read it,
+        as a cookie, and answers where (`credentialFor`, `{ readsAt }`)
+    - `DirectReads`:  a space's files read straight, apart from the server that writes them (epic `atmosphere` P5, Q6 C):
+      a plain `GET` of its list file and each thing's, as `JsonChunks` lays them out, so `WebChunks` reads them
+      - with a credential for the WHOLE space, in a cookie only that space's read address gets (`HttpOnly`,
+        `SameSite=Strict`);  none good, 401;  someone who's no reader now (`mayRead`, the member list), 403
+      - never a `__` name, a dot file or a folder of its own;  opens no place, writes nothing:  reads work while
+        nothing's written
+      - the app's `SpaceFolders` serves every space's own folder this way, at `/api/reads/spaces/<address>/`
     - `Referee`:  ONE per shared space, on any place as its store, over the kit's websocket (epic `data` P8);  `LiveRoomPlace` is its browser half
       - each step gets the next number, and goes to everyone;  a `changeId` it has seen isn't made again
       - the last to arrive wins a field;  what it replaced unseen goes with it, so the loser is told
@@ -460,6 +470,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       confirmed on another device signs both in;  a device signed in for 30 days, only its token's hash kept, in a file
     - `MailCatcher`:  the local mail catcher, a file per mail, behind the ONE mail seam (`Mailer`);  a real sender waits on
       the epic's Q12
+    - `ReadCredentials`:  credentials to read a whole space straight from its files, signed by this server's key (kept in a
+      file, so a restart keeps them good), good 30 days (epic `atmosphere` P5);  `DirectReads` checks them
+    - `cookiesOf()`:  the ONE reader of a request's cookies, every one of a name (each space's credential has its own path)
     - It knows no people:  the accounts are handed in (`SignInAccounts`, the app's `SpellAccounts`).
     - Its page half is `SpellSignIn`, in `spell/util/places`.
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)

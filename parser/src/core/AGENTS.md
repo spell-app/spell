@@ -294,6 +294,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `personal "recipes"` into the page server's address for it (`CreatePlace.folderAddressFor()`), and this makes a
       `RemotePlace` that says what that server does (`spaceFolderCapabilities()`):
       who writes it is its address's, a space's own folder its members, a program's own data each row's owner (P4).
+      - A space's own folder is read direct (P5):  the `RemotePlace` gets `readsAt` (`spaceReadAddressFor()`), so its
+        lists come straight from the files, with a credential for the whole space, and only its writes go through Spell.
     - A place's `checkedAtMostEvery` raises `check it every` to it.
     - Its sign-in is a Spell account's, by email (`SpellSignIn`, epic `atmosphere` P3):  its bar says that until someone
       signs in it takes them to be this machine's person (`identifiesBy: "this machine"`), and offers to email a link

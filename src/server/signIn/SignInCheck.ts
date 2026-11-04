@@ -299,11 +299,21 @@ function textIn(said: unknown, name: string): string {
 
 /** The cookie `name` a request carries;  `undefined` for none. */
 function cookieOf(request: SRV.Request, name: string): string | undefined {
+  return cookiesOf(request, name)[0]
+}
+
+/**
+ * Every cookie named `name` a request carries, most particular path first, as a browser sends them:
+ * a space's read credentials share one name, each with its own path (`ReadCredentials`).
+ * - The ONE reader of a request's cookies.
+ */
+export function cookiesOf(request: SRV.Request, name: string): string[] {
+  const values: string[] = []
   for (const part of (request.get("cookie") ?? "").split(";")) {
     const [key, ...value] = part.trim().split("=")
-    if (key === name) return value.join("=") || undefined
+    if (key === name && value.join("=")) values.push(value.join("="))
   }
-  return undefined
+  return values
 }
 
 /** The link a mail carries:  this server's confirm page, at the address the request reached it by. */
