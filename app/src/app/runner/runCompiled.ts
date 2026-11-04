@@ -65,6 +65,9 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   const { coreUrl } = options
   // blob URL of each project linked this run, by id
   const linked = new Map<string, Promise<string>>()
+  // each project's text, and the order they finished linking in:  deepest first
+  const importTexts = new Map<string, string>()
+  const linkedInOrder: string[] = []
   const urls: string[] = []
   try {
     // before it's imported:  importing it starts its app, which may read them
@@ -81,9 +84,12 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     }
     // the classes of each project it imports, e.g. Solitaire's `Card`, for `core.fromJSON()` and carrying over:
     // the program imported them already, so this runs nothing again
-    for (const projectUrl of linked.values()) {
-      const project = await projectUrl
-      core.things.addClasses((await import(/* @vite-ignore */ project)) as Record<string, unknown>)
+    const imports: RunningImports = new Map()
+    for (const projectId of linkedInOrder) {
+      const url = await linked.get(projectId)!
+      const exports = (await import(/* @vite-ignore */ url)) as Record<string, unknown>
+      core.things.addClasses(exports)
+      imports.set(projectId, { compiled: importTexts.get(projectId)!, url, exports })
     }
     core.things.setTopLevel(program)
     // the tests it didn't run itself as it loaded:  never on a run that carries things over, which skipped its own
@@ -99,7 +105,8 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     }
     if (previous) carryOver(previous, program)
     lastCompiled = compiled
-    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program }
+    keepImportUrls(imports, urls)
+    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program, imports }
     return undefined
   } catch (error) {
     // the next recompile carries the last good run's things over, not this broken one's
@@ -122,7 +129,15 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     for (const projectId of projectImportsOf(source)) {
       if (chain.includes(projectId)) throw new Error(`Projects import each other: ${[...chain, projectId].join(" → ")}`)
       let url = linked.get(projectId)
-      if (!url) linked.set(projectId, (url = loadImport!(projectId).then((text) => link(text, [...chain, projectId]))))
+      if (!url) {
+        url = loadImport!(projectId).then(async (text) => {
+          importTexts.set(projectId, text)
+          const linkedUrl = await link(text, [...chain, projectId])
+          linkedInOrder.push(projectId)
+          return linkedUrl
+        })
+        linked.set(projectId, url)
+      }
       imports[projectId] = await url
     }
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
@@ -141,10 +156,12 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
  * Take an edit to the running program as it runs, keeping every thing and element (epic `editor`, Edit Without Redraw):
  * - The new program's classes are loaded, with its top-level code left out and its variables the running ones (`LiveEdit`).
  * - The running things become those classes (`core.takeNewClasses()`).
+ * - Each project it imports is weighed the same way, deepest first (epic `editor`, Live Edit Everywhere):
+ *   one that changed loads over its running self, its things kept;  one that didn't stays the module it was.
  * - Only the views of what changed draw again, keeping their elements (`core.drawAgain()`).
  * - Answers `undefined` when this edit isn't for it, and the run goes on as usual:
  *   - no app mounted, nor a last run to go from
- *   - a project that imports others:  their things are their own run's, and aren't kept
+ *   - a project whose imports changed which projects they are:  a project added or dropped
  *   - a program it can't read for sure (`LiveEdit`'s `not-live`)
  *   - what the program can't take, for a runner that can't say so:  no `onRestartNeeded`
  * - What it can't take, with `onRestartNeeded`:  nothing runs, the app stays as it is, and the runner says so.
@@ -152,40 +169,124 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
  */
 async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<{ problem?: string } | undefined> {
   const last = lastProgram
-  if (!last || !appIsMounted() || projectImportsOf(compiled).length) return undefined
+  if (!last || !appIsMounted()) return undefined
+  const importIds = projectImportsOf(compiled)
+  // each project it imports, read again and weighed as the program is:  deepest first (epic `editor`, Live Edit Everywhere)
+  const importEdits: Array<{ projectId: string; text: string; edit: LiveEdit }> = []
+  if (importIds.length) {
+    if (!options.loadImport || !sameImports(last.imports, compiled)) return undefined
+    for (const [projectId, running] of last.imports) {
+      const text = await options.loadImport(projectId)
+      const before = { compiled: running.compiled, stamped: running.compiled }
+      importEdits.push({ projectId, text, edit: LiveEdit.between(before, { compiled: text, stamped: text }) })
+    }
+  }
   const stamped = stampedFrom(compiled, options)
   const edit = LiveEdit.between(last, { compiled, stamped })
-  if (edit.kind === "not-live") return undefined
-  if (edit.kind === "restart") {
+  const edits = [...importEdits.map((it) => it.edit), edit]
+  if (edits.some((it) => it.kind === "not-live")) return undefined
+  const restart = importEdits.find((it) => it.edit.kind === "restart")
+  const restartBecause = edit.restartBecause ?? (restart && `${restart.edit.restartBecause}, in ${restart.projectId}`)
+  if (restartBecause) {
     if (!options.onRestartNeeded) return undefined
-    core.console.info(`This takes effect on restart:  ${edit.restartBecause}.`)
-    options.onRestartNeeded(edit.restartBecause)
+    core.console.info(`This takes effect on restart:  ${restartBecause}.`)
+    options.onRestartNeeded(restartBecause)
     return {}
   }
   options.onRestartNeeded?.(undefined)
-  if (edit.kind === "same") return {}
-  const url = URL.createObjectURL(
-    new Blob([SourceMarks.inline(linkModule(edit.text, options.coreUrl), options.sourceMap)], {
-      type: "text/javascript"
-    })
-  )
+  if (edits.every((it) => it.kind === "same")) return {}
+  const urls: string[] = []
+  const imports: RunningImports = new Map(last.imports)
   try {
-    const program = await core.loadOverRunning(
-      last.exports,
-      () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
-    )
-    core.takeNewClasses(last.exports, program)
-    core.things.setTopLevel(program)
-    lastProgram = { compiled, stamped, exports: program }
+    const drawAgain: string[] = []
+    let isEverything = false
+    const followDrawing = (taken: LiveEdit) => {
+      if (taken.drawAgain === "everything") isEverything = true
+      else drawAgain.push(...taken.drawAgain)
+    }
+    // each changed project loads over its running self, its own imports the running ones
+    for (const { projectId, text, edit: taken } of importEdits) {
+      if (taken.kind !== "live") continue
+      const running = imports.get(projectId)!
+      const url = blobUrl(linkModule(taken.text, options.coreUrl, urlsOf(imports)))
+      const exports = await core.loadOverRunning(
+        running.exports,
+        () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
+      )
+      core.takeNewClasses(running.exports, exports)
+      core.things.addClasses(exports)
+      imports.set(projectId, { compiled: text, url, exports })
+      urls.push(running.url)
+      followDrawing(taken)
+    }
+    let program = last.exports
+    if (edit.kind === "live") {
+      const url = blobUrl(
+        SourceMarks.inline(linkModule(edit.text, options.coreUrl, urlsOf(imports)), options.sourceMap)
+      )
+      try {
+        program = await core.loadOverRunning(
+          last.exports,
+          () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
+        )
+      } finally {
+        URL.revokeObjectURL(url)
+      }
+      core.takeNewClasses(last.exports, program)
+      core.things.setTopLevel(program)
+      followDrawing(edit)
+    }
+    lastProgram = { compiled, stamped, exports: program, imports }
     lastCompiled = compiled
-    core.drawAgain(edit.drawAgain)
+    // the old modules' URLs:  their modules are retired, so nothing imports them again
+    urls.forEach((url) => URL.revokeObjectURL(url))
+    core.drawAgain(isEverything ? "everything" : [...new Set(drawAgain)])
     return {}
   } catch (error) {
     console.error(error)
     return { problem: error instanceof Error ? error.message : String(error) }
-  } finally {
-    URL.revokeObjectURL(url)
   }
+}
+
+/**
+ * Does `compiled` import the projects the running program does, and only them?
+ * - A project added or dropped:  the program runs again, as before.
+ */
+function sameImports(running: RunningImports, compiled: string): boolean {
+  const imported = new Set<string>()
+  const add = (source: string) => {
+    for (const projectId of projectImportsOf(source)) {
+      if (imported.has(projectId)) continue
+      imported.add(projectId)
+      const it = running.get(projectId)
+      if (it) add(it.compiled)
+    }
+  }
+  add(compiled)
+  return imported.size === running.size && [...imported].every((projectId) => running.has(projectId))
+}
+
+/** A `blob:` URL of module `text`. */
+function blobUrl(text: string): string {
+  return URL.createObjectURL(new Blob([text], { type: "text/javascript" }))
+}
+
+/** Each running project's URL, by id:  what `linkModule()` points a program's imports at. */
+function urlsOf(imports: RunningImports): Record<string, string> {
+  return Object.fromEntries([...imports].map(([projectId, it]) => [projectId, it.url]))
+}
+
+/**
+ * Keep the URLs of the projects `imports` holds:  a live edit links the program onto them again (`takeEdit()`).
+ * - Taken out of `urls`, so the run doesn't revoke them;  the last run's are revoked instead.
+ */
+function keepImportUrls(imports: RunningImports, urls: string[]): void {
+  const kept = new Set([...imports.values()].map((it) => it.url))
+  for (const url of kept) {
+    const at = urls.indexOf(url)
+    if (at >= 0) urls.splice(at, 1)
+  }
+  for (const it of lastProgram?.imports.values() ?? []) if (!kept.has(it.url)) URL.revokeObjectURL(it.url)
 }
 
 /** `compiled`, as the program runs it:  what it draws saying where it's written, for an editor (`placesFrom`). */
@@ -194,7 +295,10 @@ function stampedFrom(compiled: string, options: RunCompiledOptions): string {
 }
 
 /** The program running now, to take an edit as it runs -- see `takeEdit()`. */
-let lastProgram: (ProgramText & { exports: Record<string, unknown> }) | undefined
+let lastProgram: (ProgramText & { exports: Record<string, unknown>; imports: RunningImports }) | undefined
+
+/** Each project the running program imports, by id, deepest first:  the text it ran, its module's URL, what it exports. */
+type RunningImports = Map<string, { compiled: string; url: string; exports: Record<string, unknown> }>
 
 /** Options for `runCompiled()`. */
 export type RunCompiledOptions = {

@@ -10,6 +10,7 @@ import {
 } from "spell/app/app/solid/InspectorSource"
 
 import card from "../../../spaces/@spell/examples/Solitaire/Card.spellml?raw"
+import cardEditor from "../../../spaces/@spell/examples/Solitaire/Card.editor.spellml?raw"
 import pile from "../../../spaces/@spell/examples/Solitaire/Pile.spellml?raw"
 import solitaire from "../../../spaces/@spell/examples/Solitaire/Solitaire.spellml?raw"
 
@@ -111,12 +112,34 @@ describe("eventsDeclared()", () => {
     ])
   })
 
-  test("a type's own `<property-editor>`:  its markup as written, its own type's first;  none:  empty", () => {
+  test("a type's own `<property-editor>`, in its own file (epic `editor` P25):  Solitaire's card", () => {
     const words = ["property-editor", "editor-de-propiedades"]
-    const markup = propertyEditorInSource(["card", "two sided view"], [card], words)
+    const markup = propertyEditorInSource(["card", "two sided view"], [card], words, [cardEditor])
     expect(markup).toMatch(/^<ui-property-group label="Card" columns="2">/)
     expect(markup).toContain('<ui-property name="suit" label="Suit" as="buttons" width="16" />')
     expect(markup).not.toContain("property-editor")
+    // Card.spellml holds none of its own any more
+    expect(propertyEditorInSource(["card"], [card], words)).toBe("")
+  })
+
+  test('a project\'s editors file:  one `<property-editor "name">` per type, before any inline one', () => {
+    const words = ["property-editor", "spell-property-editor"]
+    const editors = [
+      '<property-editor "pile">\n\t<ui-property name="cards" />\n</property-editor>',
+      '<spell-property-editor "card">\n\t<ui-property name="rank" />\n</>'
+    ].join("\n\n")
+    expect(propertyEditorInSource(["card"], [card], words, [editors])).toBe('<ui-property name="rank" />')
+    expect(propertyEditorInSource(["pile"], [pile], words, [editors])).toBe('<ui-property name="cards" />')
+    expect(propertyEditorInSource(["deck"], [], words, [editors])).toBe("")
+    // Spanish's, in `Carta.editor.es.spellml`
+    const carta = '<editor-de-propiedades "carta">\n\t<ui-property name="palo" />\n</>'
+    expect(propertyEditorInSource(["carta"], [], ["editor-de-propiedades"], [carta])).toBe(
+      '<ui-property name="palo" />'
+    )
+  })
+
+  test("inline in the type's spellml still:  Spanish's word;  none:  empty", () => {
+    const words = ["property-editor", "editor-de-propiedades"]
     const spanish =
       '<spell-view "carta">\n\t<editor-de-propiedades>\n\t\t<ui-property name="palo" />\n\t</>\n</spell-view>'
     expect(propertyEditorInSource(["carta"], [spanish], words)).toBe('<ui-property name="palo" />')

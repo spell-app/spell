@@ -986,7 +986,7 @@
           "file": "src/app/solid/Actions.tsx"
         },
         {
-          "name": "FileBarMenu",
+          "name": "fileMenuParts",
           "file": "src/app/solid/MenuBar.tsx"
         },
         {

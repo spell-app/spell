@@ -704,6 +704,8 @@ describe("compiled spell draws with Solid", () => {
     // the counter library's drawing, edited:  a new label
     // (Solitaire imported a card library until epic `spanish` P21, and showed the game kept, drawn the new way;
     //  an edit to the counter app's own file would start afresh:  it starts the app -- P17, below)
+    // what the console held:  an edit taken as it runs (epic `editor`, Live Edit Everywhere) leaves it as it was
+    const printedBefore = consoleText()
     let asked = false
     const edited = await counterAppSource((counter) => counter.replace("`Count: ", "`Clicks: "))
     setSource({ ...edited, importUrl: (id) => ((asked = true), edited.importUrl!(id)) })
@@ -712,8 +714,8 @@ describe("compiled spell draws with Solid", () => {
     await waitFor(() => button()?.textContent === "Clicks: 2", 10_000)
     await ElementFixture.settle(host)
     expect(host.querySelector(".spell-draw-error")).toBeNull()
-    // neither the app's tests nor the library's run again:  the same program, its things carried over
-    const printed = consoleText()
+    // neither the app's tests nor the library's run again:  the same program, its things kept
+    const printed = consoleText().replace(printedBefore, "")
     expect(printed).not.toContain("test the imported counter")
     expect(printed).not.toContain("test counting")
   })

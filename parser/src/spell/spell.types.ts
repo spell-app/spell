@@ -89,9 +89,27 @@ export function formOfName(name: string | undefined): SpellForm {
  * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or markup, in any language?
  * - `Card.spell`, `Carta.es.spell`, `Card.spellml`, `Carta.es.spellml`, the old `Card.spellx`
  * - NOT a project's built output, `Solitaire.spell.js`.
+ * - NOT a property editors file, `Card.editor.spellml` (`isPropertyEditorsName()`):  it's never compiled.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name))
+  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name)) && !isPropertyEditorsName(name)
+}
+
+/** The end of a property editors file's name:  `.editor.spellml`, `.editors.spellml`, `.editor.es.spellml` ... */
+const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell(?:ml|x)$/
+
+/**
+ * Is `name` (a file's name or path) a PROPERTY EDITORS file's (epic `editor` P25, from `data`'s P31 Q28)?
+ * - `Card.editor.spellml`, one type's;  `Solitaire.editors.spellml`, any of the project's types'
+ * - In another language, its code before the ending:  `Carta.editor.es.spellml`
+ * - It holds `<property-editor "card">` blocks (or the prefixed `<spell-property-editor "card">`):
+ *   each a type's layout for its Inspector card, as markup.
+ * - One of a project's own files, which the editor opens and colours as spellml, and the Inspector reads;
+ *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
+ * - Not the property editor PAGE, `Card.editor.html` (`EDITOR_PAGE_SUFFIX`):  that's a page of its own.
+ */
+export function isPropertyEditorsName(name: string | undefined): boolean {
+  return !!name && PROPERTY_EDITORS_NAME.test(name)
 }
 
 /**

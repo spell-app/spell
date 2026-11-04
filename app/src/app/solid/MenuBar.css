@@ -169,6 +169,25 @@ ui-menu.ProjectsSubMenu ui-action::part(title) {
   }
 }
 
+/* the ☰ menu (`<FoldedBarMenus>`, epic `editor` I46):  on a tablet's width only, in the menus' place */
+.AppBarMenusFolded {
+  display: none;
+}
+@media (--ui-tablet) {
+  .AppBarMenus {
+    display: none;
+  }
+  .AppBarMenusFolded {
+    display: contents;
+  }
+}
+ui-item.FoldedBarMenu::part(item) {
+  color: var(--ui-text-muted);
+}
+ui-item.FoldedBarMenu:hover::part(item) {
+  color: var(--ui-text-color);
+}
+
 /* a phone runs only:  the project's menu stays, File · Edit · View · Run · Help go */
 @media (--ui-mobile) {
   .AppBarMenus {
