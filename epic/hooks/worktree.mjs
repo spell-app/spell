@@ -131,6 +131,7 @@ import {
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 import { CheckoutPatches } from "spell/epic/command/CheckoutPatches.ts"
 import { CheckoutServers } from "spell/epic/command/CheckoutServers.ts"
 import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
@@ -389,7 +390,7 @@ class Worktree {
       try {
         const target = readlinkSync(link)
         const at = resolve(dirname(link), target)
-        const inside = at === path || at.startsWith(`${path}/`)
+        const inside = pathInside(path, at) !== undefined
         const mains = join(root, name)
         if (isAbsolute(target) || inside || existsSync(link) || lstatSync(at, { throwIfNoEntry: false })) continue
         if (!existsSync(mains)) continue

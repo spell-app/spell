@@ -97,7 +97,7 @@ export function pickWindow(pid: number, file: string, entries: Map<number, Windo
   for (const entry of entries.values()) {
     const isEpics = !!epic && basename(entry.folders?.[0] ?? "") === epic
     for (const folder of entry.folders ?? []) {
-      if (!file.startsWith(folder + sep)) continue
+      if (!SRV.pathInside(folder, file)) continue
       // the epic's own window wins a tie:  half a character deeper
       const depth = folder.length + (isEpics ? 0.5 : 0)
       if (depth > bestLength) [best, bestLength] = [entry, depth]

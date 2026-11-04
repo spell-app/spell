@@ -27,3 +27,11 @@ export function kitFolders(kit: string): string[] {
     .map((folder) => join(kit, folder))
     .filter((dir) => existsSync(join(dir, "package.json")))
 }
+
+/**
+ * The kit's own file at its root, listing the repos beside it (`peerRepos()`), which no folder of it has:
+ * what marks a folder as a kit.
+ * - named ONCE (epic `coherence` P29):  the page server's settings (`kitOf()`), the `spell` command's `KIT_MARKER`
+ * - NOT the epic hub's `REPOS_FILE` (`~/.spell-epic/repos.json5`, the hub's registered repos):  same name, another file
+ */
+export const REPOS_FILE = "repos.json5"

@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { readTypeScript } from "spell/util/node/typescript.ts"
+import { pathInside } from "spell/server/RealPath"
 
 import { elementBaseConfig } from "./elementConfig.ts"
 import { PACK_MODULES } from "./packModules.ts"
@@ -485,7 +486,7 @@ ${families.join(",\n")}
    * its elements (`components/`), and the code they share with node (`src`).
    */
   private isSource(file: string): boolean {
-    return [this.components, this.src].some((folder) => !relative(folder, file).startsWith(".."))
+    return [this.components, this.src].some((folder) => pathInside(folder, file) !== undefined)
   }
 
   ////////////////

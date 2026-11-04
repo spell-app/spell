@@ -343,6 +343,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       compare of checkout, worktree, content-folder and session paths, links followed on BOTH sides
       - `of()`:  the real path;  a missing one, its nearest folder that's there, real, then the rest as given
       - `same()`, `isIn()`, `from()`:  equal, inside, the path inside
+      - `pathInside(folder, path)` beside it (epic `coherence` P29):  the path inside as spelled, links NOT followed,
+        the ONE inside check every tool here makes (`relative().startsWith("..")` before)
       - who:  `EpicConfig` (`main`, `worktreeNameOf()`), `Worktrees` (`named()`, `idle()`, `remove()`,
         `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
         `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)

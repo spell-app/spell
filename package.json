@@ -128,6 +128,11 @@
       "types": "./dist-types/src/server/kitFolders.d.ts",
       "default": "./src/server/kitFolders.ts"
     },
+    "./util/node/findUp": {
+      "spell-source": "./src/util/node/findUp.ts",
+      "types": "./dist-types/src/util/node/findUp.d.ts",
+      "default": "./src/util/node/findUp.ts"
+    },
     "./util/node/json5": {
       "spell-source": "./src/util/node/json5.ts",
       "types": "./dist-types/src/util/node/json5.d.ts",

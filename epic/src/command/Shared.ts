@@ -15,7 +15,7 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 import { FileLock } from "spell/server/FileLock"
 import { Git } from "spell/server/Git"
 import { Links } from "spell/server/Links"
-import { RealPath } from "spell/server/RealPath"
+import { RealPath, pathInside } from "spell/server/RealPath"
 import type { SRV } from "spell/server"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -752,8 +752,8 @@ function pendingPaths(dir: string): string[] {
 /** `checkout`'s short name:  `main` (the main checkout), a worktree's name, else its path relative to the main one. */
 function checkoutName({ main, worktrees }: SharedConfig, checkout: string): string {
   for (const folder of worktrees) {
-    const inWorktrees = relative(folder, checkout)
-    if (inWorktrees && !inWorktrees.startsWith("..")) return inWorktrees
+    const inWorktrees = pathInside(folder, checkout)
+    if (inWorktrees) return inWorktrees
   }
   return relative(main, checkout) || "main"
 }

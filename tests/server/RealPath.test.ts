@@ -45,4 +45,22 @@ describe("RealPath", () => {
     expect(RealPath.from(OLD, REAL)).toBe("")
     expect(RealPath.from(REAL, TOP)).toBeUndefined()
   })
+
+  test("pathInside():  the path from the folder, as spelled, links NOT followed", () => {
+    const { pathInside } = SRV
+    expect(pathInside(REAL, join(REAL, "src", "x.ts"))).toBe("src/x.ts")
+    expect(pathInside(REAL, REAL)).toBe("")
+    // a name that only starts with two dots is inside;  `..` itself isn't
+    expect(pathInside(REAL, join(REAL, "..x"))).toBe("..x")
+    expect(pathInside(REAL, join(REAL, "..x", "y"))).toBe("..x/y")
+    expect(pathInside(REAL, join(REAL, ".."))).toBeUndefined()
+    // a sibling `<folder>-x` isn't
+    expect(pathInside(REAL, `${REAL}-x`)).toBeUndefined()
+    expect(pathInside(REAL, join(`${REAL}-x`, "src"))).toBeUndefined()
+    // through a link:  inside the folder it's spelled under, not the one it leads to
+    expect(pathInside(OLD, join(OLD, "src"))).toBe("src")
+    expect(pathInside(REAL, join(OLD, "src"))).toBeUndefined()
+    expect(RealPath.from(REAL, join(OLD, "src"))).toBe("src")
+    expect(pathInside("", REAL)).toBeUndefined()
+  })
 })

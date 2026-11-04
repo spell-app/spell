@@ -4,6 +4,8 @@ import { tmpdir } from "os"
 import { dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
+import { findUp } from "spell/util/node/findUp"
+
 /**
  * spell-parser's code folders:  what compiled spell is checked against.
  * - Found from this file's folder, `src/spell/node/`.
@@ -33,14 +35,10 @@ export const APP_DIR: string | undefined = installedPackage("spell-app", "src/ap
  * - `sub`:  e.g. `spell-app`'s `src/app/` (epic `repo-split` P14:  one package, its code under one `src/`)
  */
 function installedPackage(name: string, sub = ""): string | undefined {
-  for (let folder = CODE_FOLDERS.srcDir; ; folder = dirname(folder)) {
-    const candidate = join(folder, "node_modules", name)
-    if (existsSync(join(candidate, "package.json"))) {
-      const found = join(realpathSync(candidate), sub)
-      return existsSync(found) ? found : undefined
-    }
-    if (dirname(folder) === folder) return undefined
-  }
+  const folder = findUp(CODE_FOLDERS.srcDir, join("node_modules", name, "package.json"))
+  if (!folder) return undefined
+  const found = join(realpathSync(join(folder, "node_modules", name)), sub)
+  return existsSync(found) ? found : undefined
 }
 
 /**
@@ -105,12 +103,9 @@ export function describeTypecheckError({ line, column, code, message }: Typechec
  */
 export function nodeBinary(name: string): string {
   const start = resolve(CODE_FOLDERS.srcDir, "..")
-  for (let folder = start; ; folder = dirname(folder)) {
-    const candidate = resolve(folder, `node_modules/.bin/${name}`)
-    if (existsSync(candidate)) return candidate
-    if (dirname(folder) === folder)
-      throw new Error(`no node_modules/.bin/${name} at or above ${start}:  run \`yarn install\``)
-  }
+  const folder = findUp(start, `node_modules/.bin/${name}`)
+  if (!folder) throw new Error(`no node_modules/.bin/${name} at or above ${start}:  run \`yarn install\``)
+  return resolve(folder, `node_modules/.bin/${name}`)
 }
 
 /** The `node_modules` folder yarn hoists to:  the one holding `.bin/tsc`. */

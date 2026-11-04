@@ -57,6 +57,8 @@ describe("isInside()", () => {
     expect(SRV.isInside("/a/b", "/a/b")).toBe(true)
     expect(SRV.isInside("/a/b", "/a/b/c")).toBe(true)
     expect(SRV.isInside("/a/b", "/a/bc")).toBe(false)
+    expect(SRV.isInside("/a/b", "/a/b-x/c")).toBe(false)
+    expect(SRV.isInside("/a/b", "/a/b/..x")).toBe(true)
     expect(SRV.isInside("/a/b", "/a")).toBe(false)
   })
 })

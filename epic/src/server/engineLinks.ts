@@ -3,9 +3,11 @@
  * (`/_epic/assets/...`, `/_epic/pack/...`;  epic `epic-eject` P7), read from the disk.
  * - The page rewrite the asset-route migrations ran (`rewriteEngineLinks()`) went with them (epic `repo-split` Q45).
  * - Plain `node` loads it (`check-spell.js`):
- *   node built-ins only, relative imports by their `.ts` name, no `enum`.
+ *   node built-ins and the kit's `RealPath` only, relative imports by their `.ts` name, no `enum`.
  */
-import { join, relative, resolve } from "node:path"
+import { join, resolve } from "node:path"
+
+import { pathInside } from "spell/server/RealPath"
 
 import { ENGINE_ROUTES } from "./server.types.ts"
 
@@ -22,7 +24,7 @@ export function engineFileFor(path: string, engine: string): string | undefined 
     const folder = join(engine, route.dir)
     const file = resolve(folder, decodeURIComponent(path.slice(route.prefix.length)))
     // never outside its folder (`..`)
-    return relative(folder, file).startsWith("..") ? undefined : file
+    return pathInside(folder, file) === undefined ? undefined : file
   }
   return undefined
 }

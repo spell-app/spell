@@ -43,6 +43,7 @@ import { escapeRegExp } from "spell/util/string.ts"
 import { getLineStarts, positionForOffset } from "spell/parser/parser/tokenizer/tokenizer.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
+import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 /**
@@ -776,7 +777,7 @@ const CODE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".jsx", "
 function generatedAmong(files: string[], cwd: string): Set<string> {
   const root = files.length ? gitRoot(cwd) : undefined
   if (!root) return new Set()
-  const inside = files.filter((file) => !relative(root, file).startsWith(".."))
+  const inside = files.filter((file) => pathInside(root, file) !== undefined)
   const answer = git(
     root,
     ["check-attr", "-z", "--stdin", "linguist-generated"],

@@ -1,9 +1,9 @@
 import chalk from "chalk"
-import { relative } from "node:path"
 import { emitKeypressEvents } from "node:readline"
 import { createInterface } from "node:readline/promises"
 
 import { within } from "spell/util/timing"
+import { pathInside } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 
 /**
@@ -178,6 +178,5 @@ export type AskOptions = {
 
 /** `path` relative to the current folder, when it's under it;  else as given. */
 export function relativePath(path: string): string {
-  const rel = relative(process.cwd(), path)
-  return rel.startsWith("..") ? path : rel
+  return pathInside(process.cwd(), path) ?? path
 }

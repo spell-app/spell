@@ -190,16 +190,17 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
+import { findUp } from "spell/util/node/findUp"
 import { after, waitUntil } from "spell/util/timing.ts"
 import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { isProcessAlive } from "spell/server/Heartbeat"
 import { Processes } from "spell/server/Processes"
-import { RealPath } from "spell/server/RealPath"
+import { RealPath, pathInside } from "spell/server/RealPath"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { Editor } from "spell/epic/config/Editor.ts"
@@ -259,10 +260,7 @@ export function codeEnv(env = process.env) {
 
 /** The nearest folder at or above `dir` holding `.git` (a checkout, or a worktree);  `dir` itself if none. */
 function checkoutAround(dir) {
-  for (let at = resolve(dir); ; at = dirname(at)) {
-    if (existsSync(join(at, ".git"))) return at
-    if (dirname(at) === at) return resolve(dir)
-  }
+  return findUp(dir, ".git") ?? resolve(dir)
 }
 
 /**
@@ -833,7 +831,7 @@ export class Window {
     return liveSessions()
       .filter(({ title, cwd }) => {
         const at = cwd ? real(cwd) : ""
-        return titledFor(title, name) || at === worktree || at.startsWith(worktree + sep)
+        return titledFor(title, name) || pathInside(worktree, at) !== undefined
       })
       .map(({ pid, sessionId, title }) => ({
         sessionId,
@@ -1095,7 +1093,7 @@ export class Window {
       // the first folder counts only when it's a worktree's (a worktree-only window):  else it's the repo root
       const folders = (entry.folders ?? []).filter((folder, at) => at > 0 || worktreeOf(folder) !== null).map(real)
       for (const folder of folders) {
-        const inside = cwd === folder || cwd.startsWith(folder + sep)
+        const inside = pathInside(folder, cwd) !== undefined
         if (inside && folder.length > bestLength) [best, bestLength] = [entry, folder.length]
       }
     }
@@ -1534,8 +1532,8 @@ export function movedWorkspace(text, fromDir, toDir) {
  */
 export function movedWindowFile(file, oldFolder, newFolder) {
   if (existsSync(file)) return file
-  const within = relative(resolve(oldFolder), resolve(file))
-  if (!within || within.startsWith("..") || isAbsolute(within)) return file
+  const within = pathInside(oldFolder, file)
+  if (!within) return file
   const moved = join(newFolder, within)
   return existsSync(moved) ? moved : file
 }

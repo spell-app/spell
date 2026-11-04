@@ -18,6 +18,7 @@
 import { existsSync, statSync } from "fs"
 import { basename, dirname, resolve } from "path"
 
+import { findUp } from "spell/util/node/findUp"
 import { SP } from "spell/parser/spell"
 import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
@@ -154,8 +155,5 @@ async function resolveDiskPath(arg: string, path: string): Promise<CLI.CliProjec
 
 /** Nearest folder at or above `folder` holding a project file (`__project.json5`, or an old `project.json`), if any. */
 export function projectDirAbove(folder: string): string | undefined {
-  for (let dir = folder; ; dir = dirname(dir)) {
-    if (hasProjectFile(dir)) return dir
-    if (dirname(dir) === dir) return undefined
-  }
+  return findUp(folder, hasProjectFile)
 }

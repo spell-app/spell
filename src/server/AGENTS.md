@@ -159,6 +159,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
     from spell-epic, epic `coherence` P7)
+    - and `pathInside(folder, path)` beside it, the ONE inside check (epic `coherence` P29):  the path from the
+      folder, `/`-separated, or `undefined`;  links NOT followed;  a `..x` folder is inside, a sibling `<folder>-x`
+      isn't.  `isInside()` (`safePath.ts`) is its yes / no.
   - `Processes` -- what's running, asked the same way on macOS, Linux and Windows (epic `epic-friend` P15):
     `table()` (pid => parent and command), `parents()`, `folderOf()`, `portsOf()`, `openFiles()`, and `run()` /
     `call()`, which start a bare command name (`code`, `npx`) through the shell on Windows;  `ps` and `lsof`, Linux's
@@ -226,7 +229,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
-        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout),
+        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
+        reader of the kit's peers, each one's name and folder, epic `coherence` P29),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
         - every path in a part is from ITS folder;
@@ -237,7 +241,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
-        node built-ins, `json5`, `spell/server/contentFolder` and type imports only,
+        node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
+        and type imports only,
         and `./settings.ts` with its extension.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at.
       Every page it serves gets the local one (`withLocalCopies()`), so pages load offline.

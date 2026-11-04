@@ -277,6 +277,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `path\.join\(root, req|startsWith\(root\)`
 - **Score:**  `path\.join\(root, req|join\(\w*[rR]oot\w*, decodeURIComponent` · home `src/server/safePath.ts`
 - **Copies:**  `--`
+  - `isInside()` is `pathInside()`'s yes / no ("Running git, finding a checkout, a real path"), since epic `coherence` P29.
+  - `spell publish`'s page check served its folder with a server of its own, whose path test let a sibling
+    folder (`<dir>-x/`) through:  the kit's `WebServer` since P29.
 
 ### Opening a browser
 
@@ -293,19 +296,50 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **It is:**  `Git` (`spell/server`, `src/server/Git.ts`):  `run()` (never throws), `out()`, `lines()`, `mustRun()`
   (a `GitError`), `mainRoot()`;  `checkoutOf()` (`src/server/checkout.ts`) for a checkout and its main checkout,
   with no git run;  `RealPath` (`src/server/RealPath.ts`) for comparing paths through links
+  - "Is this path in that folder?":  `pathInside(folder, path)` (`src/server/RealPath.ts`, epic `coherence` P29),
+    the path from there or `undefined`, links NOT followed;  a `..x` folder is inside, a sibling `<folder>-x` isn't.
+    Links followed on both sides:  `RealPath.from()` / `isIn()`.  "Are these one place?":  `RealPath.same()`.
+  - "The nearest folder up that holds X":  `findUp(from, marker or test)` (`spell/util/node/findUp`, P29), for a
+    checkout (`.git`), the kit (`REPOS_FILE`), a package (`package.json`), an install (`yarn.lock`), a project, a
+    tool in `node_modules`
+  - The kit's marker file, `repos.json5`, named once:  `REPOS_FILE` (`spell/server/kitFolders`), the `spell`
+    command's `KIT_MARKER`;  its peers read one way, `peerRepos()` (`spell/server/page/settings`):  each one's name
+    and folder.  NOT the epic hub's `REPOS_FILE` (`~/.spell-epic/repos.json5`), another file.
   - Each by its own name from plain `node` (`spell/server/Git` ...), and from the `spell` command (no linkedom).
   - spell-epic's own part, `EpicCheckout`:  the caller's checkout (`nearest()`), the code's (`CODE_ROOT`),
     `mustGit()` for a verb's message.
-- **Use it when:**  any tool runs git, or asks which checkout a path is in.
-- **Flag:**  `spawnSync\("git"|execFileSync\("git"|"--git-common-dir"|show-toplevel|realpathSync`
+- **Use it when:**  any tool runs git, or asks which checkout a path is in, whether a path is inside a folder, or
+  which folder up holds something.
+- **Flag:**  `spawnSync\("git"|execFileSync\("git"|"--git-common-dir"|show-toplevel|realpathSync|startsWith\("\.\."\)|startsWith\(\w+ \+ sep\)|dirname\(\w+\) === \w+`
 - **Score:**  `\b(spawnSync|execFileSync|execSync|spawn)\("git"|"--git-common-dir"|--show-toplevel|=== realpathSync\(|realpathSync\(\w+\) ===`
   · home `src/server/Git.ts`, `src/server/checkout.ts`, `src/server/RealPath.ts`
 - **Copies:**  `--`
   - Moved from spell-epic in epic `coherence` P7, with about 20 git runners, 10 checkout finders and 9 real-path
     helpers across spell-epic and the kit;  Spell UI's design export (`DesignExport.readGit()`) since P23.
   - Fine:  a test's own scratch repo (`spawnSync("git", ...)` in a test);  `epic/src/tool/InboxPoller.mjs`.
+  - P29 moved about 30 hand inside checks onto `pathInside()` (`relative().startsWith("..")`, `startsWith(folder + sep)`,
+    two rules that disagreed about a `..x` folder) and 21 walks up onto `findUp()`.
+  - Fine:  the toolchain's own inside check in `declarations.ts` (the toolchain sits under the server:  it keeps
+    `pathInside()`'s rule, said there);  `checkoutOf()`'s and the lint's `packageRootOf()`'s walks, which do more at
+    each folder than a test can say;  link arithmetic on URLs (`posix.join(dir, href).startsWith("..")`), which is
+    no file path.
   - spell-app's VS Code extension asks `checkoutOf()` whether a window's checkout is a worktree since epic
     `coherence` P24 (its `.git` FILE alone took a submodule for one)
+
+### A package's folder, or the file a name means
+
+- **It is:**  the toolchain's `packageFolderFor()`, `sourceFileFor()` and `packageRootFor()` (`spell/toolchain/sourceNames`,
+  epic `coherence` P29):  as node's resolver finds the package, by its real path;  a folder of the kit too
+  (`spell/parser/py` is `parser/src/py`), the published `spell`'s `dist/` too
+  - spell-epic's `packageDir()` and the app's `environment.packageFolder()` are it, by name;  `NodePackage.dir()`
+    (`spell/element-tools/NodePackage`) when a package hides its `package.json`
+- **Use it when:**  a tool needs a package's folder, a sub-path's folder, or the source file a name means.
+- **Flag:**  `import\.meta\.resolve\(\x60\$\{\w+\}/package\.json|join\(\w+, "src", sub\)`
+- **Copies:**  `--`
+  - P29 put two finders on it:  `packageDir()`, which missed the kit's folders since epic `repo-split` P20 (I22),
+    and `environment.packageFolder()`.
+  - Fine:  the code map's `moduleFileFor()` (`src/cli/map/importLinks.ts`):  it names a MAPPED checkout's files by
+    their paths, any checkout, with no install of its own to resolve through.
 
 ### The epic folder
 

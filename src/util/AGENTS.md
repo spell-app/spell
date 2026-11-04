@@ -87,6 +87,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `timing.ts`, which the browser bundles hold.
   - For code that must stay synchronous:  `FileLock.run()`, `CheckoutServers`' stop;  everything else `await`s `waitUntil()`.
   - `spell/util/node/timing`;  plain `node` loads it too, as `spell/util/node/timing.ts`.
+- [findUp.ts](node/findUp.ts):  `findUp(from, marker or test)`, the nearest folder at or above `from` that holds
+  `marker` (a path from it) or that the test says yes to;  `undefined` up to the disk's root (epic `coherence` P29).
+  - The ONE walk up the folders:  a checkout, the kit, a package, an install, a project, a tool in `node_modules`.
+  - `spell/util/node/findUp`;  plain `node` loads it too:  it imports nothing of ours (the toolchain, the hooks).
 - [typescript.ts](node/typescript.ts):  the ONE reader of our JavaScript and TypeScript (epic `coherence` P26),
   on oxc's parser, the one Vite+ ships.
   - `readTypeScript(file, text)`:  its tree, its comments, its imports (oxc's own list), and `docstringOf(node)`;
