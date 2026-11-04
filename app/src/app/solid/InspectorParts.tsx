@@ -217,6 +217,7 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
   createEffect(
     () => Inspector.selected?.element,
     (element) => {
+      setRevealing(() => element)
       // once this update's done:  folds written while a selection settles redrew the app's pane (I18)
       if (element) queueMicrotask(() => openRowsAround(props.nodes, element))
     }
@@ -297,11 +298,12 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         whenRowToggled(() => toggleFold(props.node.key))(row)
         chooseRow((event) => Inspector.clicked(props.node.element, props.shown(), event as MouseEvent))(row)
         // selected from elsewhere, a click in the code or the app:  its row comes into view,
-        // again once the rows around it open (`openRowsAround()`), as it was hidden till then
+        // again once the rows around it open (`openRowsAround()`), as it was hidden till then;
+        // a row opened or closed by hand never scrolls the tree (I27)
         createEffect(
-          () => Inspector.selected?.element === props.node.element && foldedKeys(),
-          (isLast) => {
-            if (isLast) requestAnimationFrame(() => scrollIntoSight(row))
+          () => revealing() === props.node.element && foldedKeys(),
+          (isRevealing) => {
+            if (isRevealing) requestAnimationFrame(() => revealRow(row))
           }
         )
       }}
@@ -443,6 +445,19 @@ function setFolds(keys: readonly string[]): void {
 
 /** Counts the folds, so the tree reads them again. */
 const [foldsChanged, setFoldsChanged] = createSignal(0)
+
+/**
+ * The part whose row should come into view:  set as the selection changes, cleared once its row shows.
+ * - So only a new selection scrolls the tree;  opening or closing a row by hand never does (I27).
+ */
+const [revealing, setRevealing] = createSignal<Element | undefined>()
+
+/** Scroll `row` into the tree's view, once it's drawn:  then nothing more to reveal till the next selection. */
+function revealRow(row: Element): void {
+  if (!row.getClientRects().length) return
+  scrollIntoSight(row)
+  setRevealing(undefined)
+}
 
 /** The key of the "Not drawn" group, among the parts' (theirs are `<place>|<tag>`). */
 const NOT_DRAWN_KEY = "not-drawn"
