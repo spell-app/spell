@@ -482,14 +482,16 @@ export class PokemonAbility extends Thing {
   accessor slot!: number
 
   // - its "ability" is an ability
-  @prop({ type: "Ability" })
-  accessor ability!: Ability
+  static { this.declareProp("ability", { type: "Ability", link: true }) }
+  get ability(): Ability { return core.linked(this, "ability", Ability) as Ability }
+  set ability(value: Ability) { this.setProp("ability", value) }
 }
 
 export class PastAbility extends Thing {
   // - its "generation" is a generation
-  @prop({ type: "Generation" })
-  accessor generation!: Generation
+  static { this.declareProp("generation", { type: "Generation", link: true }) }
+  get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
+  set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "abilities" is a list of past ability abilities
   @prop({ itemType: "PastAbilityAbility", init: () => new List<PastAbilityAbility>({ instanceType: "PastAbilityAbility" }) })
@@ -518,8 +520,9 @@ export class GameIndex extends Thing {
 
 export class PokemonMove extends Thing {
   // - its "move" is a move
-  @prop({ type: "Move" })
-  accessor move!: Move
+  static { this.declareProp("move", { type: "Move", link: true }) }
+  get move(): Move { return core.linked(this, "move", Move) as Move }
+  set move(value: Move) { this.setProp("move", value) }
 
   // - its "version group details" is a list of version group details
   @prop({ itemType: "VersionGroupDetail", init: () => new List<VersionGroupDetail>({ instanceType: "VersionGroupDetail" }) })
@@ -654,8 +657,9 @@ export class Stat extends Thing {
 
 export class PastStat extends Thing {
   // - its "generation" is a generation
-  @prop({ type: "Generation" })
-  accessor generation!: Generation
+  static { this.declareProp("generation", { type: "Generation", link: true }) }
+  get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
+  set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "stats" is a list of stats
   @prop({ itemType: "Stat", init: () => new List<Stat>({ instanceType: "Stat" }) })
@@ -668,8 +672,9 @@ export class PokemonType extends Thing {
   accessor slot!: number
 
   // - its "kind" is a type, stored as "type"
-  @prop({ type: "Type", storedAs: "type" })
-  accessor kind!: Type
+  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true }) }
+  get kind(): Type { return core.linked(this, "kind", Type) as Type }
+  set kind(value: Type) { this.setProp("kind", value) }
 }
 
 export class PokedexNumber extends Thing {
@@ -736,34 +741,41 @@ export class Variety extends Thing {
   accessor default!: boolean
 
   // - its "pokemon" is a pokemon
-  @prop({ type: "Pokemon" })
-  accessor pokemon!: Pokemon
+  static { this.declareProp("pokemon", { type: "Pokemon", link: true }) }
+  get pokemon(): Pokemon { return core.linked(this, "pokemon", Pokemon) as Pokemon }
+  set pokemon(value: Pokemon) { this.setProp("pokemon", value) }
 }
 
 export class DamageRelation extends Thing {
   // - its "no damage to" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor noDamageTo!: List<Type>
+  static { this.declareProp("noDamageTo", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get noDamageTo(): List<Type> { return core.linked(this, "noDamageTo", Type) as List<Type> }
+  set noDamageTo(value: List<Type>) { this.setProp("noDamageTo", value) }
 
   // - its "half damage to" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor halfDamageTo!: List<Type>
+  static { this.declareProp("halfDamageTo", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get halfDamageTo(): List<Type> { return core.linked(this, "halfDamageTo", Type) as List<Type> }
+  set halfDamageTo(value: List<Type>) { this.setProp("halfDamageTo", value) }
 
   // - its "double damage to" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor doubleDamageTo!: List<Type>
+  static { this.declareProp("doubleDamageTo", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get doubleDamageTo(): List<Type> { return core.linked(this, "doubleDamageTo", Type) as List<Type> }
+  set doubleDamageTo(value: List<Type>) { this.setProp("doubleDamageTo", value) }
 
   // - its "no damage from" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor noDamageFrom!: List<Type>
+  static { this.declareProp("noDamageFrom", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get noDamageFrom(): List<Type> { return core.linked(this, "noDamageFrom", Type) as List<Type> }
+  set noDamageFrom(value: List<Type>) { this.setProp("noDamageFrom", value) }
 
   // - its "half damage from" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor halfDamageFrom!: List<Type>
+  static { this.declareProp("halfDamageFrom", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get halfDamageFrom(): List<Type> { return core.linked(this, "halfDamageFrom", Type) as List<Type> }
+  set halfDamageFrom(value: List<Type>) { this.setProp("halfDamageFrom", value) }
 
   // - its "double damage from" is a list of types
-  @prop({ itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) })
-  accessor doubleDamageFrom!: List<Type>
+  static { this.declareProp("doubleDamageFrom", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }) }) }
+  get doubleDamageFrom(): List<Type> { return core.linked(this, "doubleDamageFrom", Type) as List<Type> }
+  set doubleDamageFrom(value: List<Type>) { this.setProp("doubleDamageFrom", value) }
 }
 
 export class TypePokemon extends Thing {
@@ -772,8 +784,9 @@ export class TypePokemon extends Thing {
   accessor slot!: number
 
   // - its "pokemon" is a pokemon
-  @prop({ type: "Pokemon" })
-  accessor pokemon!: Pokemon
+  static { this.declareProp("pokemon", { type: "Pokemon", link: true }) }
+  get pokemon(): Pokemon { return core.linked(this, "pokemon", Pokemon) as Pokemon }
+  set pokemon(value: Pokemon) { this.setProp("pokemon", value) }
 }
 
 export class EffectEntry extends Thing {
@@ -810,8 +823,9 @@ export class AbilityPokemon extends Thing {
   accessor slot!: number
 
   // - its "pokemon" is a pokemon
-  @prop({ type: "Pokemon" })
-  accessor pokemon!: Pokemon
+  static { this.declareProp("pokemon", { type: "Pokemon", link: true }) }
+  get pokemon(): Pokemon { return core.linked(this, "pokemon", Pokemon) as Pokemon }
+  set pokemon(value: Pokemon) { this.setProp("pokemon", value) }
 }
 
 export class ContestCombo extends Thing {
@@ -826,12 +840,14 @@ export class ContestCombo extends Thing {
 
 export class Normal extends Thing {
   // - its "use before" is a list of moves
-  @prop({ itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }) })
-  accessor useBefore!: List<Move>
+  static { this.declareProp("useBefore", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }) }) }
+  get useBefore(): List<Move> { return core.linked(this, "useBefore", Move) as List<Move> }
+  set useBefore(value: List<Move>) { this.setProp("useBefore", value) }
 
   // - its "use after" is a list of moves
-  @prop({ itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }) })
-  accessor useAfter!: List<Move>
+  static { this.declareProp("useAfter", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }) }) }
+  get useAfter(): List<Move> { return core.linked(this, "useAfter", Move) as List<Move> }
+  set useAfter(value: List<Move>) { this.setProp("useAfter", value) }
 }
 
 export class Super extends Thing {}
@@ -876,8 +892,9 @@ export class PastValue extends Thing {
   accessor effectEntries!: List<string>
 
   // - its "kind" is a type, stored as "type"
-  @prop({ type: "Type", storedAs: "type" })
-  accessor kind!: Type
+  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true }) }
+  get kind(): Type { return core.linked(this, "kind", Type) as Type }
+  set kind(value: Type) { this.setProp("kind", value) }
 
   // - its "version group" is text
   @prop({ type: "text" })
@@ -890,8 +907,9 @@ export class Chain extends Thing {
   accessor baby!: boolean
 
   // - its "species" is a pokemon species
-  @prop({ type: "PokemonSpecies" })
-  accessor species!: PokemonSpecies
+  static { this.declareProp("species", { type: "PokemonSpecies", link: true }) }
+  get species(): PokemonSpecies { return core.linked(this, "species", PokemonSpecies) as PokemonSpecies }
+  set species(value: PokemonSpecies) { this.setProp("species", value) }
 
   // - its "evolution details" is a list of text
   @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }) })

@@ -261,6 +261,8 @@ export type PropInfo = {
    * - Read as nothing, quietly;  saving nothing writes the first back (`spell/parser/core/saving`).
    */
   nothingAs?: readonly string[]
+  /** It may hold the address of a thing of its `type` until something follows it:  `spell/parser/core`'s `core.linked()`. */
+  link?: boolean
   /**
    * Called when it's read and unset, with what it's read from:  a place's read may have left it out (`spell/parser/core/saved`).
    * - Only on that path:  a set value's read costs nothing.
