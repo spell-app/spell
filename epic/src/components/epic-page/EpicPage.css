@@ -93,7 +93,11 @@
      */
     --epic-state-attention: light-dark(var(--ui-red), var(--ui-red-on-light));
     --epic-state-attention-on: light-dark(var(--ui-red-on), var(--ui-ink-on-dark));
-    --epic-state-replied: var(--ui-orange);
+    /*
+     * orange is an AMBER on the pages, further from red than Spell UI's own orange (hue 48-52), which read as red in a
+     * thin status circle (Owen, 2026-11-03, epic `epic-engine` I207:  "too close to red, couldn't tell it was different")
+     */
+    --epic-state-replied: light-dark(oklch(0.71 0.18 58), oklch(0.79 0.16 62));
     --epic-state-replied-on: var(--ui-orange-on);
     --epic-state-open: var(--ui-yellow);
     --epic-state-open-on: var(--ui-yellow-on);

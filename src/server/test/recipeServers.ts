@@ -135,6 +135,7 @@ const ONE_RECIPE = /^\/recipes\/([^/]+)$/
 /**
  * The web server, at `/recipes`.
  * - `?name=...`, `?cuisine=...` filter;  `?sort=name,-servings` orders;  `?fields=id,name` selects.
+ * - `?search=...`:  names holding that text, capitals aside, as swapi's does.
  * - An update with `versions` needs `If-Match`:  428 with none, 412 with an old one.
  * - An `Idempotency-Key` it's seen answers what that change made, and makes nothing.
  * - An unknown id:  404.  `{ "refuse": true }` in a body:  422.
@@ -211,9 +212,11 @@ function listRecipes(
   reply: SRV.Reply,
   { paging, wire }: { paging: string; wire: (recipe: WireRecipe) => Partial<WireRecipe> }
 ): void {
-  const { sort, fields, limit, offset, cursor, ...filter } = request.query as Record<string, string | undefined>
-  let rows = [...box.recipes.values()].filter((recipe) =>
-    Object.entries(filter).every(([field, value]) => `${recipe[field as keyof WireRecipe]}` === value)
+  const { sort, fields, limit, offset, cursor, search, ...filter } = request.query as Record<string, string | undefined>
+  let rows = [...box.recipes.values()].filter(
+    (recipe) =>
+      Object.entries(filter).every(([field, value]) => `${recipe[field as keyof WireRecipe]}` === value) &&
+      (search === undefined || `${recipe.name}`.toLowerCase().includes(search.toLowerCase()))
   )
   for (const each of (sort ?? "").split(",").filter(Boolean).reverse()) {
     const isDown = each.startsWith("-")

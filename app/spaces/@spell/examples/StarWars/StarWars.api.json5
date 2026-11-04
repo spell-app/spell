@@ -6,7 +6,7 @@
     "name": "star wars",
     "kind": "web server",
     "address": "https://swapi.py4e.com/api",
-    "lookedAt": "2026-11-03T15:10:54.638Z",
+    "lookedAt": "2026-11-04T01:08:04.715Z",
     "fingerprint": "5177353c7e1596cb",
     "readBy": "nobody:  worked out from what came back",
     "docsAt": "https://swapi.py4e.com/documentation"
@@ -31,6 +31,7 @@
       "at": "/people",
       "rowsSeen": 30,
       "rowsItSays": 87,
+
       "fields": {
         "name": {
           "words": "name",
@@ -138,8 +139,14 @@
           "linksTo": "people"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "name"
       }
     },
     "planets": {
@@ -147,6 +154,7 @@
       "at": "/planets",
       "rowsSeen": 30,
       "rowsItSays": 61,
+
       "fields": {
         "name": {
           "words": "name",
@@ -245,8 +253,14 @@
           "linksTo": "planets"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "name"
       }
     },
     "films": {
@@ -254,6 +268,7 @@
       "at": "/films",
       "rowsSeen": 7,
       "rowsItSays": 7,
+
       "fields": {
         "title": {
           "words": "title",
@@ -347,8 +362,14 @@
           "linksTo": "films"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "title"
       }
     },
     "species": {
@@ -356,6 +377,7 @@
       "at": "/species",
       "rowsSeen": 30,
       "rowsItSays": 37,
+
       "fields": {
         "name": {
           "words": "name",
@@ -448,8 +470,14 @@
           "linksTo": "species"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "name"
       }
     },
     "vehicles": {
@@ -457,6 +485,7 @@
       "at": "/vehicles",
       "rowsSeen": 30,
       "rowsItSays": 39,
+
       "fields": {
         "name": {
           "words": "name",
@@ -562,8 +591,14 @@
           "linksTo": "vehicles"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "name"
       }
     },
     "starships": {
@@ -571,6 +606,7 @@
       "at": "/starships",
       "rowsSeen": 30,
       "rowsItSays": 37,
+
       "fields": {
         "name": {
           "words": "name",
@@ -695,8 +731,14 @@
           "linksTo": "starships"
         }
       },
+
       "readThrough": {
         "rows": 5
+      },
+
+      "searchedBy": {
+        "param": "search",
+        "field": "name"
       }
     }
   },
@@ -713,6 +755,7 @@
     "\t- its next page is its \"next\"",
     "\t- check it once a day",
     "\t- it writes names like \"hair_color\"",
+    "\t- it searches names and titles with \"search\"",
     "\t- characters live at \"/people\"",
     "\t- planets live at \"/planets\"",
     "\t- films live at \"/films\"",

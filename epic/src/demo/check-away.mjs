@@ -12,6 +12,8 @@
  *   - the section is FIRST on the page, titled "0. While you were out", open by itself
  *   - the page's toolbar has its button, with a red badge
  *   - its What was done and Still to do lines, and a link landing on its item
+ *   - each line and part heading an `<epic-away-line>` (I206);  a line's Read applied as `epic inbox apply` would (the
+ *     tool's `applyMark()` on `away:q1`, the page rewritten):  that line gone, live, the rest still there
  *   - no page errors
  * - a screenshot:  `away.png` in outDir (default a temporary folder)
  * - exits 1 on any miss;  re-runs itself under `tsx` (the epic tool is TypeScript)
@@ -51,7 +53,8 @@ const content = execFileSync(process.execPath, [join(ROOT, "bin/epic"), "config"
 }).trim()
 const PAGE = "pages/check-away.html"
 const file = join(content, PAGE)
-writeFileSync(file, nightPage())
+const night = nightPage()
+writeFileSync(file, night.toString())
 
 const misses = []
 const check = (isOk, what) => {
@@ -100,6 +103,18 @@ try {
     return !!box && box.top >= 0 && box.top < innerHeight
   })
   check(landed, "a line's link lands on its item")
+  const before = await page.evaluate(() => [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line")))
+  check(before.includes("done") && before.includes("todo") && before.includes("q1"), `every line and part heading is an <epic-away-line> (${before.join(" ")})`)
+  // Owen ticks Q1's line Read, and `epic inbox apply` applies it:  the page rewritten, the live update brings it in
+  night.now = new Date(2026, 10, 3, 8, 0)
+  night.applyMark({ id: "away:q1", action: "seen" })
+  night.refreshAway({ isMerged: () => false })
+  writeFileSync(file, night.toString())
+  await page
+    .waitForFunction(() => !document.querySelector("#away epic-away-line[line='q1']"), undefined, { timeout: 10_000 })
+    .catch(() => {})
+  const after = await page.evaluate(() => [...document.querySelectorAll("#away epic-away-line")].map((line) => line.getAttribute("line")))
+  check(!after.includes("q1") && after.includes("i1") && after.includes("done"), `a line read leaves;  the rest stays (${after.join(" ")})`)
   check(!errors.length, `no page errors${errors.length ? `:  ${errors.join(" / ")}` : ""}`)
 } finally {
   await browser.close()
@@ -108,7 +123,7 @@ try {
 console.log(`screenshot:  ${join(outDir, "away.png")}`)
 process.exit(misses.length ? 1 : 0)
 
-/** An epic page after a night:  the tool's test fixture, the night written on it by `PlanDoc`. */
+/** An epic page after a night:  the tool's test fixture, the night written on it by `PlanDoc` (kept, to apply a Read). */
 function nightPage() {
   const html = readFileSync(join(ROOT, "tests/tool/fixtures/epic-plan.html"), "utf8")
   const plan = PlanDoc.parse(html, new Date(2026, 10, 2, 22, 0), { person: "Owen" })
@@ -127,7 +142,7 @@ function nightPage() {
   plan.updateStates()
   plan.log("Bedtime done:  1 done, 1 part done")
   plan.refreshAway({ isMerged: () => false })
-  return plan.toString()
+  return plan
 }
 
 /** This checkout's page server, from `spell server status`. */

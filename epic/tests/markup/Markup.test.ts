@@ -84,6 +84,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-commit": { sha: "82d5106c165cbebf3922fd97793798e41f1b2760" },
   "epic-event": { at: "2026-10-06T08:12-04:00", icon: "pen to square" },
   "epic-update": { phase: "2.1" },
+  "epic-away-line": { line: "i206", heading: true },
   "epic-net-effect": { option: "A", recommended: true },
   "epic-question": {},
   "epic-summary": {},

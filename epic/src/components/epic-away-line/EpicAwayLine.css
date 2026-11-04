@@ -1,0 +1,40 @@
+/*
+ * `<epic-away-line>` (`EpicAwayLine.tsx`):  one line of "0. While you were out", its ✓ Read first.
+ * - Public tokens (`--epic-away-line-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-away-line.types, ui.components.epic-away-line.states;
+
+@layer ui.components.epic-away-line.types {
+  :host {
+    --_epic-away-line-gap: var(--epic-away-line-gap, 0.4em);
+    display: block;
+    margin-block: 0.25em;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  [part~="base"] {
+    display: flex;
+    align-items: baseline;
+    gap: var(--_epic-away-line-gap);
+  }
+  [part~="read"] {
+    flex: none;
+  }
+  [part~="body"] {
+    flex: 1;
+    min-inline-size: 0;
+  }
+  :host(:state(heading)) {
+    margin-block-start: 0.75em;
+    font-weight: 600;
+  }
+}
+
+@layer ui.components.epic-away-line.states {
+  /* read, waiting for `epic inbox apply`:  faded, as a seen update goes quiet */
+  :host(:state(read)) [part~="body"] {
+    opacity: 0.5;
+  }
+}

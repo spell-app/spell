@@ -549,7 +549,13 @@ describe("a batch sent again, holding more than the one before it", () => {
         return { isOpen: true, send: (text) => Boolean(sent.push(text)), close() {} }
       }
     })
-    const change = (changeId: string) => ({ kind: "insert" as const, collection: "recipes", id: changeId, fields: {}, changeId })
+    const change = (changeId: string) => ({
+      kind: "insert" as const,
+      collection: "recipes",
+      id: changeId,
+      fields: {},
+      changeId
+    })
     let isAnswered = false
     const answer = place.apply([change("c1"), change("c2")], {}).then(() => (isAnswered = true))
     const step = (seq: number, changeId: string) =>

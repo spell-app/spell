@@ -12,6 +12,8 @@ import { PlanItem } from "./PlanItem"
  * - the lead:  the bedtime runs that ended since (`Bedtime done:  ...`, the log's own line)
  * - Never kept by hand:  `PlanDoc.refreshAway()` draws the section from this on every edit (Owen's C3:  for all work,
  *   bedtime or not;  J198).
+ * - A line Owen ticked Read leaves it (epic `epic-engine` I206):  `seen`, when he read each line (by its phase's or item's
+ *   id) or each part (`done`, `todo`);  a change to it after that brings it back.
  * - Pure over the doc, but `isMerged`, which the caller hands in (it runs git);  without it, nothing is said of merging.
  ****************/
 export class NightSummary {
@@ -34,11 +36,17 @@ export class NightSummary {
    * The summary of `plan` since `since`.
    * - `isMerged(sha)`:  whether a commit is in `main`;  `undefined` (or none given):  unknown, so not said
    */
-  static of(plan: PlanDoc, since: Date, { isMerged }: SummaryOptions = {}): NightSummary {
+  static of(plan: PlanDoc, since: Date, { isMerged, seen = {} }: SummaryOptions = {}): NightSummary {
     const from = since.getTime()
+    // read since it last changed:  by itself, or with its whole part
+    const isRead = (id: string, part: AwayPart, at: number) =>
+      NightSummary.timeOf(seen[id]) >= at || NightSummary.timeOf(seen[part]) >= at
     const lead = plan
       .reviewLines()
-      .filter((line) => Date.parse(line.at.replace(" ", "T")) >= from && BEDTIME_DONE.test(line.text))
+      .filter((line) => {
+        const at = NightSummary.timeOf(line.at)
+        return at >= from && BEDTIME_DONE.test(line.text) && NightSummary.timeOf(seen.done) < at
+      })
       .map((line) => line.text.replace(BEDTIME_DONE, "").trim())
     const done: DoneLine[] = []
     const partDone: NeedLine[] = []
@@ -49,6 +57,12 @@ export class NightSummary {
       const isDone = phase.status === "done" && doneAt >= from
       const isUnderWay = phase.status === "active" && !!window && window.from >= from
       if (!isDone && !isUnderWay) continue
+      const changedAt = isDone ? doneAt : window!.from
+      if (isRead(phase.id, "done", changedAt)) {
+        if (isUnderWay && !isRead(phase.id, "todo", changedAt))
+          partDone.push({ id: phase.id, label: `P${phase.number}`, title: phase.name, why: "part done" })
+        continue
+      }
       const sha = Array.from(element.querySelectorAll("epic-commit"))
         .map((commit) => commit.getAttribute("sha") ?? "")
         .findLast(Boolean)
@@ -60,12 +74,13 @@ export class NightSummary {
         sha: sha ? sha.slice(0, 9) : undefined,
         merged: sha ? isMerged?.(sha) : undefined
       })
-      if (isUnderWay) partDone.push({ id: phase.id, label: `P${phase.number}`, title: phase.name, why: "part done" })
+      if (isUnderWay && !isRead(phase.id, "todo", changedAt))
+        partDone.push({ id: phase.id, label: `P${phase.number}`, title: phase.name, why: "part done" })
     }
-    const items = Array.from(plan.document.querySelectorAll("epic-item[id]")).filter(
-      (item) =>
-        Date.parse(item.getAttribute("changed") ?? "") >= from && !CLOSED.test(item.getAttribute("status") ?? "")
-    )
+    const items = Array.from(plan.document.querySelectorAll("epic-item[id]")).filter((item) => {
+      const changed = NightSummary.timeOf(item.getAttribute("changed"))
+      return changed >= from && !CLOSED.test(item.getAttribute("status") ?? "") && !isRead(item.id, "todo", changed)
+    })
     const needs = NEED_ORDER.flatMap(([why, wants]) =>
       items.filter(wants).map((item) => ({
         id: item.id,
@@ -85,6 +100,12 @@ export class NightSummary {
   /** How many things wait on Owen:  the section's toolbar badge. */
   get waiting(): number {
     return this.needs.length
+  }
+
+  /** `text`, a time as the page writes it (`2026-11-03 14:30`, ISO), in ms;  `-Infinity` for none. */
+  private static timeOf(text: string | null | undefined): number {
+    const at = text ? Date.parse(text.replace(" ", "T")) : NaN
+    return Number.isNaN(at) ? -Infinity : at
   }
 
   /** The text of `field`'s first line:  its first list item or paragraph, else its own text;  "" for none. */
@@ -127,7 +148,15 @@ export type NeedLine = {
 export type SummaryOptions = {
   /** whether a commit (its sha) is in `main`;  `undefined`:  unknown */
   isMerged?: (sha: string) => boolean | undefined
+  /**
+   * when Owen ticked each line Read (by its phase's or item's id) or each part (`done`, `todo`), as the page writes
+   * times;  read before its last change, it shows again (`<epic-page away-seen>`, I206)
+   */
+  seen?: Readonly<Record<string, string>>
 }
+
+/** A part of the section, as its heading's tick names it. */
+export type AwayPart = "done" | "todo"
 
 /** The log's line for a bedtime run that ended (`epic bedtime <name> done "<summary>"`). */
 const BEDTIME_DONE = /^Bedtime done:\s*/
