@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { SpellJSXContent } from "./SpellJSXContent"
 
 /**
@@ -36,11 +37,12 @@ export class SpellJSXExpression extends SpellJSXContent {
     const { expression, error } = match.data
     const value = expression?.AST as P.ASTExpression | undefined
     return new P.ASTJSXExpression(match, {
-      // a date on a page says itself in words:  a `Date` is nothing a page can hold
+      // a date on a page says itself in words:  a `Date` is nothing a page can hold;
+      // a measure in the reader's units, `{its height}` => `5 ft 8 in` (epic `language` P24)
       expression:
         value && expression?.datatype === "date"
           ? new P.ASTCoreMethodInvocation(match, { methodName: "dateShown", args: [value] })
-          : value,
+          : value && SP.shownMeasureAST(expression, value),
       error: error?.AST as P.ASTParseError | undefined
     })
   }

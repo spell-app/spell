@@ -41,8 +41,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     spell, the templates are data here.
 - [dimensions/](dimensions/) holds spell's built-in DIMENSIONS, kinds of measure and their units, written in spell:
   [dimensions.spell](dimensions/dimensions.spell) and its Spanish twin (epic `language` P23).
-  - Compiled by the same `yarn core:gen:templates` into [dimensions.generated.ts](dimensions.generated.ts) (the
-    table [dimensions.ts](dimensions.ts) loads), Python's `spell_core/dimensions_generated.py`, and the compiler's own.
+  - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
+    (what [dimensions.ts](dimensions.ts), Spell UI and the compiler read) and Python's `spell_core/dimensions_generated.py`.
     NEVER edit those:  edit the source, run that.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.

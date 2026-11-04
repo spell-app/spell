@@ -3,6 +3,10 @@
 - The same numbers as the JavaScript core's tests, `tests/spell/Dimensions.test.ts`.
 """
 
+import json
+from pathlib import Path
+from typing import Any
+
 import pytest
 
 from spell_core import Core
@@ -43,3 +47,18 @@ def test_a_programs_own_dimension(core: Core) -> None:
     core.define_unit("DataSize", {"id": "byte", "names": ["byte", "B"], "factor": 1})
     core.define_unit("DataSize", {"id": "kilobyte", "names": ["kilobyte", "KB"], "factor": 1000})
     assert core.convert_measure(3, "DataSize", "kilobyte", "byte") == 3000
+
+
+# What each measure is shown as, for a reader of each system:  shared with the JavaScript core's tests.
+SHOWN: dict[str, Any] = json.loads(
+    (Path(__file__).parents[3] / "core" / "measuresShown.expected.json5").read_text(encoding="utf-8")
+)
+
+
+@pytest.mark.parametrize("case", SHOWN["cases"], ids=lambda case: f"{case['value']} {case['unit']} {case['system']}")
+def test_shown_as_the_javascript_core_shows_it(core: Core, case: dict[str, Any]) -> None:
+    core.use_measure_system(case["system"])
+    try:
+        assert core.measure_shown(case["value"], case["dimension"], case["unit"]) == case["shown"]
+    finally:
+        core.use_measure_system(None)

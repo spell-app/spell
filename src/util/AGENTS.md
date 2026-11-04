@@ -45,6 +45,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     Taken by file, `spell/util/Api`, in no barrel
   - `string.ts`, `number.ts`, `time.ts`, `color.ts` and `timing.ts` import nothing, so plain `node` loads them too,
     with their extension (`spell/util/time.ts`)
+  - `measures/` -- numbers with units (epic `language` P23, P24):  `Dimension` converts a measure and writes it for
+    people, from the table compiled from Spell's `dimensions.spell` (`dimensions.generated.ts`, the parser's
+    `yarn core:gen:templates`);  `MeasureSystem`, how the reader measures, metric or US:  their choice
+    (`spell-site:units`), else their region's.  Taken by file, in no barrel:  the core and `<ui-dimension>` use it
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
     `copyText()` (the clipboard, with the fallback VS Code's side bar needs)
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`

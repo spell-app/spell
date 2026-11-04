@@ -2,18 +2,20 @@
  * The files spell's built-in DIMENSIONS compile to (epic `language` P23) -- see `SP.loadBuiltInDimensions()`.
  * - Their source is the core's `src/core/dimensions/dimensions.spell`, and each other language's twin,
  *   `dimensions.es.spell`:  line for line the same dimensions and units, in that language's words.
- * - Compiled ONCE, here, in a root without them (`SP.Language.bareRootScope()`), into:
- *   - the JavaScript core's table, `src/core/dimensions.generated.ts`, and Python's, `spell_core/dimensions_generated.py`:
- *     each dimension's units by the English names
- *   - the compiler's, `src/spell/builtInDimensions.generated.ts`:  each language's words for each dimension and unit,
- *     paired with the English in order, so a Spanish `pulgada` is the inch
+ * - Compiled ONCE, here, in a root without them (`SP.Language.bareRootScope()`), into two tables:
+ *   - the kit's `spell/util/measures/dimensions.generated.ts`:  each language's words for each dimension and unit,
+ *     paired with the English in order, so a Spanish `pulgada` is the inch;  the JavaScript core, Spell UI's
+ *     `<ui-dimension>` and the compiler all read it
+ *   - Python's core's, `spell_core/dimensions_generated.py`
  * - Pure but for reading the sources:  `writeBuiltInTemplates.ts` writes the files, a test checks they're current.
  * - NODE ONLY, and NOT in the barrel.
  */
 import { existsSync, readFileSync } from "fs"
 import { resolve } from "path"
 
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import type { BuiltInDimensionData } from "spell/util/measures/dimensions.generated"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 
 /** One generated file:  its path from the parser folder's root, and its text. */
@@ -27,46 +29,53 @@ const SOURCE_FOLDER = "src/core/dimensions"
 
 /** Every file the built-in dimensions compile to, as they should be now. */
 export function builtInDimensionFiles(): BuiltInDimensionFile[] {
-  const byLanguage = compiledDimensions()
-  const english = byLanguage.en!
+  const table = builtInDimensionTable()
   return [
-    { path: "src/core/dimensions.generated.ts", text: coreFile(english) },
-    { path: "src/py/core/spell_core/dimensions_generated.py", text: pythonFile(english) },
-    { path: "src/spell/builtInDimensions.generated.ts", text: compilerFile(byLanguage) }
+    { path: "../src/util/measures/dimensions.generated.ts", text: tableFile(table) },
+    { path: "src/py/core/spell_core/dimensions_generated.py", text: pythonFile(table) }
   ]
 }
 
 /**
- * The built-in dimensions in each language they're written in, the English first:  each paired with the English
- * dimension and unit in the same place, so it has the English type name and unit ids.
+ * The built-in dimensions, every language's words for each:  what `spell/util/measures` holds.
+ * - Each twin's dimensions and units are paired with the English ones in the same place, so a Spanish `pulgada`
+ *   is the inch's id.
  * - Throws if a source doesn't compile cleanly, or a twin doesn't pair with the English.
  */
-export function compiledDimensions(): Record<string, SP.BuiltInDimension[]> {
+export function builtInDimensionTable(): BuiltInDimensionData[] {
   const english = compileDimensions("en")
-  const byLanguage: Record<string, SP.BuiltInDimension[]> = { en: english }
+  const table: BuiltInDimensionData[] = english.map(({ name, units }) => ({
+    name,
+    words: { en: wordOf(name) },
+    units: units.map(({ id, names, factor, offset }) => ({
+      id,
+      names: { en: names },
+      factor,
+      ...(offset ? { offset } : {})
+    }))
+  }))
   for (const language of SP.Language.all.values()) {
     if (language.lang === "en" || !existsSync(sourcePath(language.lang))) continue
     const twin = compileDimensions(language.lang)
-    if (twin.length !== english.length)
+    if (twin.length !== english.length) {
       throw new Error(`Built-in dimensions:  the ${language.lang} twin has ${twin.length}, not ${english.length}`)
-    byLanguage[language.lang] = twin.map((dimension, index) => {
-      const partner = english[index]!
-      if (dimension.units.length !== partner.units.length) {
-        throw new Error(
-          `Built-in dimensions:  ${language.lang}'s ${dimension.name} has a different number of units than ${partner.name}`
-        )
+    }
+    twin.forEach((dimension, index) => {
+      const entry = table[index]!
+      if (dimension.units.length !== entry.units.length) {
+        throw new Error(`Built-in dimensions:  ${language.lang}'s ${dimension.name} has other units than ${entry.name}`)
       }
-      const units = dimension.units.map((unit, at) => {
-        const englishUnit = partner.units[at]!
+      entry.words[language.lang] = wordOf(dimension.name)
+      dimension.units.forEach((unit, at) => {
+        const englishUnit = entry.units[at]!
         if (Math.abs(unit.factor - englishUnit.factor) > 1e-9) {
           throw new Error(`Built-in dimensions:  ${language.lang}'s ${unit.id} isn't the size of ${englishUnit.id}`)
         }
-        return { ...englishUnit, names: unit.names }
+        englishUnit.names[language.lang] = unit.names
       })
-      return { name: partner.name, word: dimension.name === partner.name ? undefined : wordOf(dimension.name), units }
     })
   }
-  return byLanguage
+  return table
 }
 
 /** The source in language `lang`, from the parser folder's root. */
@@ -74,8 +83,8 @@ function sourcePath(lang: string): string {
   return resolve(PACKAGE_ROOT, SOURCE_FOLDER, `dimensions${lang === "en" ? "" : `.${lang}`}.spell`)
 }
 
-/** The dimensions the source in `lang` declares, in order. */
-function compileDimensions(lang: string): SP.BuiltInDimension[] {
+/** The dimensions the source in `lang` declares, in order:  each one's type name, and its units. */
+function compileDimensions(lang: string): Array<{ name: string; units: P.DimensionUnit[] }> {
   const path = `/dimensions${lang === "en" ? "" : `.${lang}`}.spell`
   const contents = readFileSync(sourcePath(lang), "utf8")
   const { files } = parseSpellProject([{ path, contents }], { parentScope: SP.Language.for(lang).bareRootScope() })
@@ -96,29 +105,41 @@ function wordOf(name: string): string {
 // ## The files
 ////////////////
 
-/** The JavaScript core's table. */
-function coreFile(english: SP.BuiltInDimension[]): string {
-  const data = english.map(({ name, units }) => ({ name, units }))
+/** `spell/util/measures`' table:  the one every runtime and page reads, the compiler too. */
+function tableFile(table: BuiltInDimensionData[]): string {
   return [
-    "// GENERATED by `yarn core:gen:templates` from `dimensions/dimensions.spell`:  NEVER edit by hand -- edit that, then",
-    "// run this (epic `language` P23).",
-    'import type { DimensionData } from "./dimensions"',
+    "// GENERATED by the parser's `yarn core:gen:templates` from its `core/dimensions/dimensions.spell` and each twin:",
+    "// NEVER edit by hand -- edit those, then run that (epic `language` P23).",
     "",
-    "/** Spell's built-in dimensions, compiled from `dimensions/dimensions.spell`:  each one's units, the base first. */",
-    `export const BUILT_IN_DIMENSIONS: DimensionData[] = ${JSON.stringify(data, undefined, 2)}`,
+    "/** A built-in dimension, as compiled:  its type name, its word in each language, its units. */",
+    "export type BuiltInDimensionData = {",
+    "  /** its type name, the English's:  `Length` */",
+    "  name: string",
+    '  /** its word in each language:  `{ en: "length", es: "longitud" }` */',
+    "  words: Record<string, string>",
+    "  /** its units, the base first, each with its names in each language */",
+    "  units: Array<{ id: string; names: Record<string, string[]>; factor: number; offset?: number }>",
+    "}",
+    "",
+    "/** Spell's built-in dimensions, compiled from the parser's `core/dimensions/dimensions.spell` and each twin. */",
+    `export const BUILT_IN_DIMENSIONS: BuiltInDimensionData[] = ${JSON.stringify(table, undefined, 2)}`,
     ""
   ].join("\n")
 }
 
-/** Python's core's table:  the same data. */
-function pythonFile(english: SP.BuiltInDimension[]): string {
-  const lines = english.map(({ name, units }) => {
+/** Python's core's table:  each unit's names, English first. */
+function pythonFile(table: BuiltInDimensionData[]): string {
+  const lines = table.map(({ name, units }) => {
     const unitLines = units.flatMap((unit) => [
       "            {",
       `                "id": ${JSON.stringify(unit.id)},`,
-      `                "names": [${unit.names.map((name) => pythonString(name)).join(", ")}],`,
+      // one name a line, its trailing comma keeping ruff from joining them
+      `                "names": [`,
+      ...[...new Set(Object.values(unit.names).flat())].map((name) => `                    ${pythonString(name)},`),
+      "                ],",
       `                "factor": ${unit.factor},`,
       ...(unit.offset ? [`                "offset": ${unit.offset},`] : []),
+      `                "symbol": ${pythonString(unit.names.en?.[1] ?? unit.names.en?.[0] ?? unit.id)},`,
       "            },"
     ])
     return [
@@ -146,16 +167,4 @@ function pythonFile(english: SP.BuiltInDimension[]): string {
 /** `text` as Python writes it, as ruff formats it:  `"in"`, `'"'`. */
 function pythonString(text: string): string {
   return text.includes('"') && !text.includes("'") ? `'${text}'` : JSON.stringify(text)
-}
-
-/** The compiler's table, every language's words. */
-function compilerFile(byLanguage: Record<string, SP.BuiltInDimension[]>): string {
-  return [
-    "// GENERATED by `yarn core:gen:templates` from the core's `dimensions/dimensions.spell`:  NEVER edit by hand.",
-    'import type { BuiltInDimension } from "./builtInDimensions"',
-    "",
-    "/** Spell's built-in dimensions, in each language's words -- see `loadBuiltInDimensions()`. */",
-    `export const BUILT_IN_DIMENSIONS_BY_LANGUAGE: Record<string, BuiltInDimension[]> = ${JSON.stringify(byLanguage, undefined, 2)}`,
-    ""
-  ].join("\n")
 }

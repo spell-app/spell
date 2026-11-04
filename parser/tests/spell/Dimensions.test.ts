@@ -3,9 +3,8 @@ import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { core } from "spell/parser/core"
-import { BUILT_IN_DIMENSIONS } from "spell/parser/core/dimensions.generated"
-import { BUILT_IN_DIMENSIONS_BY_LANGUAGE } from "spell/parser/spell/builtInDimensions.generated"
-import { builtInDimensionFiles, compiledDimensions } from "spell/parser/spell/node/builtInDimensionFiles"
+import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
+import { builtInDimensionFiles, builtInDimensionTable } from "spell/parser/spell/node/builtInDimensionFiles"
 import { parseSpellProject, runSpell } from "spell/parser/spell/test"
 
 /**
@@ -35,14 +34,8 @@ function valueOf(expression: string, before: string[] = []): unknown {
 const PERSON = ["a person is a thing:", '\t- its "height" is a length in cm', '\t- its "mass" is a weight in kg']
 
 describe("the built-in dimensions are compiled:  if not, run `yarn core:gen:templates` in the parser folder", () => {
-  const byLanguage = compiledDimensions()
-
-  test("the compiler's, every language's words", () => {
-    expect(BUILT_IN_DIMENSIONS_BY_LANGUAGE).toEqual(byLanguage)
-  })
-
-  test("the JavaScript core's", () => {
-    expect(BUILT_IN_DIMENSIONS).toEqual(byLanguage.en!.map(({ name, units }) => ({ name, units })))
+  test("the kit's table, `spell/util/measures`:  every language's words", () => {
+    expect(BUILT_IN_DIMENSIONS).toEqual(builtInDimensionTable())
   })
 
   test("Python's core's", () => {
@@ -149,5 +142,29 @@ describe("in spell", () => {
     expect(squeezed(`${file!.compiled}`)).toContain(
       squeezed('core.measureText(persona.altura, "Length", "centimeter", ["foot", "inch"])')
     )
+  })
+})
+
+describe("shown in the reader's units (P24)", () => {
+  test("printed, put in text, drawn:  `core.measureShown()`", () => {
+    const { js, errors } = compiled([
+      ...PERSON,
+      "\t- to draw it:",
+      "\t\treturn <ui-text>{its height}</ui-text>",
+      "the person is a new person",
+      "print the person's height",
+      'print "Tall:  [the height of the person]"'
+    ])
+    expect(errors).toEqual([])
+    const shown = squeezed('core.measureShown(person.height, "Length", "centimeter")')
+    expect(squeezed(js).split(shown).length - 1).toBe(2)
+    expect(squeezed(js)).toContain(squeezed('core.measureShown(this.height, "Length", "centimeter")'))
+  })
+
+  test("`<ui-dimension value={its height}>` is told what its value measures", () => {
+    const { js, errors } = compiled([...PERSON, "\t- to draw it:", "\t\treturn <ui-dimension value={its height}/>"])
+    expect(errors).toEqual([])
+    expect(squeezed(js)).toContain(squeezed('dimension: "Length"'))
+    expect(squeezed(js)).toContain(squeezed('unit: "centimeter"'))
   })
 })

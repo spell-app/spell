@@ -159,9 +159,31 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
-      attrs: SpellJSX.clickableAttrs(match, attrs),
+      attrs: SpellJSX.clickableAttrs(match, SpellJSX.withMeasure(match, tagName, attrs)),
       children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
     })
+  }
+
+  /**
+   * `attrs`, and for a `<ui-dimension value={its height}>` what its value measures, `dimension="Length"
+   * unit="centimeter"` (epic `language` P24, Owen's C4):  its value is a plain number, so the element can't tell.
+   * - Not when the element says them itself.
+   */
+  private static withMeasure(
+    match: P.MatchFor<SpellJSX>,
+    tagName: string,
+    attrs: P.ASTJSXAttribute[] | undefined
+  ): P.ASTJSXAttribute[] | undefined {
+    if (tagName !== MEASURE_TAG || !attrs) return attrs
+    const attributes = match.data.attributes ?? []
+    const said = (name: string) =>
+      attributes.some((attr) => (attr?.data as JSXMatchData | undefined)?.attribute === name)
+    const value = attributes.find((attr) => (attr?.data as JSXMatchData | undefined)?.attribute === "value")
+    const measure = SP.measureOf((value?.data as JSXMatchData | undefined)?.expression)
+    if (!measure || said("dimension") || said("unit")) return attrs
+    const attribute = (name: string, text: string) =>
+      new P.ASTJSXAttribute(match, { name, value: new P.ASTStringLiteral(match, { value: text, quote: '"' }) })
+    return [...attrs, attribute("dimension", measure.dimension), attribute("unit", measure.unit)]
   }
 
   /**
@@ -471,3 +493,6 @@ const UNTIL_FOUND = "until-found"
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
 // written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
 const CLICKABLE_STYLE = "cursor:var(--ui-control-cursor,pointer);user-select:none"
+
+/** Spell UI's element that shows one measure:  `<ui-dimension value={its height}>`. */
+const MEASURE_TAG = "ui-dimension"

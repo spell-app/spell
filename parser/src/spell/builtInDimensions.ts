@@ -1,28 +1,18 @@
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
-import { BUILT_IN_DIMENSIONS_BY_LANGUAGE } from "./builtInDimensions.generated"
+import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 
 /**
  * DIMENSIONS, kinds of measure, as the compiler knows them (epic `language` P23):
  * a dimension is a type whose record holds its units (`P.TypeScope.units`), e.g. `Length`'s meter, inch, foot.
  * - Spell's built-in five (length, weight, temperature, volume, speed) are written in spell, in the core's
- *   `dimensions/dimensions.spell` and its Spanish twin, compiled ONCE by `yarn core:gen:templates` into
- *   `builtInDimensions.generated.ts`:  every language's words for each, which each root loads
- *   (`loadBuiltInDimensions()`), and the core's own table.
+ *   `dimensions/dimensions.spell` and its Spanish twin, compiled ONCE by `yarn core:gen:templates` into the kit's
+ *   `spell/util/measures/dimensions.generated.ts`:  every language's words for each, which each root loads
+ *   (`loadBuiltInDimensions()`), and the runtimes convert by.
  * - A program declares its own the same way, `data size is a dimension:` (spell's `define_dimension`).
  * - A property says what it measures, `its "height" is a length in cm` (`P.ScopeVariable.measure`);
  *   `its height in feet` converts it, `172 cm` is a written one (spell's `measure_in`, `measure_literal`).
  */
-
-/** One dimension in one language's words, as compiled:  its type's name, its word, and its units. */
-export type BuiltInDimension = {
-  /** its type's name, the English's:  `Length` */
-  name: string
-  /** its word in this language, if not its name's:  `longitud` */
-  word?: string
-  /** its units, each its id, its names in this language, and how it converts */
-  units: P.DimensionUnit[]
-}
 
 /**
  * The FIRST word or mark of every unit name any dimension the compiler has met declares, and of each one's plural, lower
@@ -51,21 +41,19 @@ const FIRST_WORD = /^[\p{L}\p{M}\d_-]+|^\S/u
  * - SIDE EFFECT:  adds a type per dimension to `scope` -- `SP.Language.rootScope` calls it as it builds, once.
  */
 export function loadBuiltInDimensions(scope: P.RootScope, languages: readonly SP.Language[]): void {
-  const langs = [
-    ...new Set(languages.map((language) => (BUILT_IN_DIMENSIONS_BY_LANGUAGE[language.lang] ? language.lang : "en")))
-  ]
-  const english = BUILT_IN_DIMENSIONS_BY_LANGUAGE.en ?? []
-  for (const [index, { name }] of english.entries()) {
-    const said = langs.map((lang) => BUILT_IN_DIMENSIONS_BY_LANGUAGE[lang]?.[index]).filter((it) => !!it)
-    const word = said.find((it) => it.word)?.word
+  const langs = languages.map((language) => language.lang)
+  for (const { name, words, units } of BUILT_IN_DIMENSIONS) {
+    // its word in the first of the languages that isn't the name's, `longitud`, as its short name
+    const word = langs.map((lang) => words[lang]).find((it) => it && P.classCase(it) !== name)
     const [type] = scope.types!.add({ name, superType: "Dimension", aka: word && P.classCase(word) })
-    // each unit by every language's names for it
-    const units = english[index]!.units.map((unit) => ({
-      ...unit,
-      names: [...new Set(said.flatMap((it) => it.units.find((each) => each.id === unit.id)?.names ?? []))]
+    // each unit by every name those languages give it;  English's for a language the table doesn't have
+    type!.units = units.map(({ id, names, factor, offset }) => ({
+      id,
+      names: [...new Set(langs.flatMap((lang) => names[lang] ?? names.en ?? []))],
+      factor,
+      ...(offset ? { offset } : {})
     }))
-    type!.units = units
-    units.forEach(noteUnitNames)
+    type!.units.forEach(noteUnitNames)
   }
 }
 
@@ -127,4 +115,19 @@ export function measureOf(match: P.Match | undefined): P.Measure | undefined {
   const data = match?.data as { member?: unknown; measure?: P.Measure } | undefined
   if (data?.measure) return data.measure
   return data?.member instanceof P.ScopeVariable ? data.member.measure : undefined
+}
+
+/**
+ * `ast`, `match`'s, written in the reader's units if `match` is a measure:  `core.measureShown(this.height, "Length",
+ * "centimeter")`, `5 ft 8 in` to a US reader (epic `language` P24, Q27) -- else `ast` as it is.
+ * - Where a measure is SHOWN:  printed, put in text (`[its height]`), drawn (`{its height}`).
+ */
+export function shownMeasureAST(match: P.Match | undefined, ast: P.ASTExpression): P.ASTExpression {
+  const measure = measureOf(match)
+  if (!match || !measure) return ast
+  const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
+  return new P.ASTCoreMethodInvocation(match, {
+    methodName: "measureShown",
+    args: [ast, text(measure.dimension), text(measure.unit)]
+  })
 }

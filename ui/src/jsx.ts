@@ -7410,6 +7410,216 @@ export interface UIDetailAttributes {
 export interface UIDetailJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDetailAttributes>, UIDetailAttributes {}
 
+/** `<ui-dimension>`'s own attributes, from its vocabulary. */
+export interface UIDimensionAttributes {
+  /**
+   * The measure's number, in `unit`:  `172`.  Nothing shows nothing.
+   * - takes:  number
+   */
+  value?: number | `${number}`
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: number | `${number}`
+  /**
+   * What it measures:  `length`, `weight`, `temperature`, `volume` or `speed`, in any language Spell's dimensions are written in (`longitud`).  Spell says it for a measure.
+   * - takes:  text
+   */
+  dimension?: string
+  /**
+   * `dimension`, as the DOM element's property.
+   * @deprecated write `dimension` -- `prop:` stays only for compiled spell
+   */
+  "prop:dimension"?: string
+  /**
+   * The unit `value` is in, by any of its names:  `cm`, `centimeter`, `kg`, `°F`.  Spell says it for a measure.
+   * - takes:  text
+   */
+  unit?: string
+  /**
+   * `unit`, as the DOM element's property.
+   * @deprecated write `unit` -- `prop:` stays only for compiled spell
+   */
+  "prop:unit"?: string
+  /**
+   * The units to show it in, largest first, joined by `and`:  `"feet and inches"`, `"kg"`.  Left out:  the reader's own, from their region or their choice.
+   * - takes:  text
+   */
+  in?: string
+  /**
+   * `in`, as the DOM element's property.
+   * @deprecated write `in` -- `prop:` stays only for compiled spell
+   */
+  "prop:in"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-dimension>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIDimensionJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIDimensionAttributes>, UIDimensionAttributes {}
+
 /** `<ui-dimmer>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIDimmerEventMap {
   /**
@@ -39245,6 +39455,11 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-detail": UIDetailJSXAttributes
       /**
+       * `<ui-dimension>`:  A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.
+       * - also known as:  measure, measurement, unit, number with units, length, weight, temperature
+       */
+      "ui-dimension": UIDimensionJSXAttributes
+      /**
        * `<ui-dimmer>`:  A dimmer hides distractions to focus attention on particular content.
        * - also known as:  overlay, backdrop, scrim, mask, blocker
        * - slots:
@@ -40157,6 +40372,7 @@ declare global {
     "ui-date": HTMLElement
     "ui-description": HTMLElement
     "ui-detail": HTMLElement
+    "ui-dimension": HTMLElement
     "ui-dimmer": UIHTMLElement<UIDimmerEventMap>
     "ui-divider": HTMLElement
     "ui-dropdown": UIHTMLElement<UIDropdownEventMap>

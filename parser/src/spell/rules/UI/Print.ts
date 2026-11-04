@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { Wording } from "spell/parser/spell/rules/expressions/Wording"
@@ -18,7 +19,8 @@ export class Print extends SpellStatement<"operator?|expressions"> {
     const methodName = kind ? CONSOLE_METHOD_FOR_KIND[kind] : "log"
     return new P.ASTConsoleMethodInvocation(match, {
       methodName,
-      args: expressions.items.map((item) => P.asAST<P.ASTExpression>(item.AST))
+      // a measure in the reader's units:  `print its height` => `5 ft 8 in` (epic `language` P24)
+      args: expressions.items.map((item) => SP.shownMeasureAST(item, P.asAST<P.ASTExpression>(item.AST)))
     })
   }
 }

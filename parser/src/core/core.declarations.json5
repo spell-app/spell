@@ -3174,6 +3174,36 @@
       "description": "`value` of dimension `dimension`'s unit `from`, written for people, in `to` -- see `Dimension.text()`: `its height in feet and inches` compiles to this."
     },
     {
+      "kind": "method",
+      "name": "measureShown",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "value"
+        },
+        {
+          "name": "dimension"
+        },
+        {
+          "name": "from"
+        }
+      ],
+      "description": "`value` of dimension `dimension`'s unit `from`, written in the READER's units:  `5 ft 8 in` in the US, `172 cm` elsewhere (epic `language` P24, Q27) -- a measure printed, or put in text, compiles to this."
+    },
+    {
+      "kind": "method",
+      "name": "useMeasureSystem",
+      "of": "core",
+      "module": "dimensions",
+      "params": [
+        {
+          "name": "system"
+        }
+      ],
+      "description": "Show every measure in `system` from now on, whatever the reader chose (`undefined`:  theirs again):  for a host, or a test -- see `MeasureSystem.use()`."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"

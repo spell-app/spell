@@ -1,4 +1,4 @@
-import { camelCase, proto, upperFirst } from "spell/util"
+import { proto, upperFirst, withoutAccents } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
@@ -45,15 +45,12 @@ export function dimensionOf(match: P.Match): P.TypeScope | undefined {
   return type?.superType === "Dimension" ? type : undefined
 }
 
-/** A unit's id, from its name:  `centimeter`, `fluid_ounce`, `meter_per_second`. */
+/** A unit's id, from its name:  `centimeter`, `fluidOunce`, `meterPerSecond`;  accents dropped, `kilometro`. */
 export function unitId(name: string): string {
-  return camelCase(
-    name
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^\p{L}\d]+/gu, " ")
-      .trim()
-  )
+  const words = withoutAccents(name)
+    .split(/[^\p{L}\d]+/u)
+    .filter(Boolean)
+  return words.map((word, index) => (index ? upperFirst(word.toLowerCase()) : word.toLowerCase())).join("")
 }
 
 /** `match`, refused:  a unit line under a type that isn't a dimension. */

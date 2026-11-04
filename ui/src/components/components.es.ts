@@ -47,6 +47,7 @@ import { embedEs } from "spell/ui/components/ui-embed/UIEmbed.es"
 import { emojiEs } from "spell/ui/components/ui-emoji/UIEmoji.es"
 import { feedEs } from "spell/ui/components/ui-feed/UIFeed.es"
 import { eventEs } from "spell/ui/components/ui-feed/UIFeedEvent.es"
+import { dimensionEs } from "spell/ui/components/ui-dimension/UIDimension.es"
 import { flagEs } from "spell/ui/components/ui-flag/UIFlag.es"
 import { flyoutEs } from "spell/ui/components/ui-flyout/UIFlyout.es"
 import { fieldEs } from "spell/ui/components/ui-form/UIField.es"
@@ -691,6 +692,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   emojiEs,
   feedEs,
   eventEs,
+  dimensionEs,
   flagEs,
   flyoutEs,
   fieldEs,

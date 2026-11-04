@@ -6,7 +6,9 @@
   `convert_measure()` / `measure_text()`.
 """
 
+import locale
 import math
+import os
 from typing import Any
 
 from spell_core.dimensions_generated import BUILT_IN_DIMENSIONS
@@ -65,8 +67,9 @@ class Dimension:
 
     def symbol_of(self, unit_id: str) -> str:
         """What unit `unit_id` is written as next to a number:  its first `aka`, else its name."""
-        names = self.unit(unit_id)["names"]
-        return names[1] if len(names) > 1 else names[0]
+        unit = self.unit(unit_id)
+        names = unit["names"]
+        return unit.get("symbol") or (names[1] if len(names) > 1 else names[0])
 
 
 def _round_for_people(value: float) -> float:
@@ -82,6 +85,65 @@ def _number_text(value: float) -> str:
 
 # every dimension the running program knows, by name:  the built-in ones, then its own
 _DIMENSIONS: dict[str, Dimension] = {}
+
+# The regions that measure in US units (Q27):  the US, Liberia, Myanmar -- the JavaScript `US_UNIT_REGIONS`.
+US_UNIT_REGIONS = ("US", "LR", "MM")
+
+# What each built-in unit is shown as for a reader of each system, by the unit's id:  the JavaScript `READER_UNITS`,
+# held to it by `tests/core/measuresShown.expected.json5`.
+READER_UNITS: dict[str, dict[str, list[str]]] = {
+    "meter": {"us": ["foot", "inch"]},
+    "centimeter": {"us": ["foot", "inch"]},
+    "millimeter": {"us": ["inch"]},
+    "kilometer": {"us": ["mile"]},
+    "inch": {"metric": ["centimeter"]},
+    "foot": {"metric": ["centimeter"]},
+    "yard": {"metric": ["meter"]},
+    "mile": {"metric": ["kilometer"]},
+    "kilogram": {"us": ["pound"]},
+    "gram": {"us": ["ounce"]},
+    "pound": {"metric": ["kilogram"]},
+    "ounce": {"metric": ["gram"]},
+    "stone": {"metric": ["kilogram"]},
+    "celsius": {"us": ["fahrenheit"]},
+    "kelvin": {"us": ["fahrenheit"]},
+    "fahrenheit": {"metric": ["celsius"]},
+    "liter": {"us": ["cup"]},
+    "milliliter": {"us": ["teaspoon"]},
+    "gallon": {"metric": ["liter"]},
+    "quart": {"metric": ["liter"]},
+    "pint": {"metric": ["milliliter"]},
+    "cup": {"metric": ["milliliter"]},
+    "fluidOunce": {"metric": ["milliliter"]},
+    "tablespoon": {"metric": ["milliliter"]},
+    "teaspoon": {"metric": ["milliliter"]},
+    "meterPerSecond": {"us": ["milePerHour"]},
+    "kilometerPerHour": {"us": ["milePerHour"]},
+    "milePerHour": {"metric": ["kilometerPerHour"]},
+    "knot": {"metric": ["kilometerPerHour"]},
+}
+
+# the system a host or test said to use, `use_measure_system()`
+_used_system: list[str | None] = [None]
+
+
+def measure_system() -> str:
+    """How the reader measures, `metric` or `us`:  the host's, else `SPELL_UNITS`, else the system locale's region."""
+    if _used_system[0]:
+        return _used_system[0]
+    chosen = os.environ.get("SPELL_UNITS", "")
+    if chosen in ("metric", "us"):
+        return chosen
+    language = locale.getlocale()[0] or ""
+    region = language.replace("-", "_").split("_")[1].upper() if "_" in language.replace("-", "_") else ""
+    return "us" if region in US_UNIT_REGIONS else "metric"
+
+
+def units_for(dimension: Dimension, unit: str, system: str | None = None) -> list[str]:
+    """The units `unit` is shown in for a reader of `system`:  the unit itself when they read it already."""
+    shown = READER_UNITS.get(unit, {}).get(system or measure_system())
+    known = {each["id"] for each in dimension.units}
+    return list(shown) if shown and all(each in known for each in shown) else [unit]
 
 
 class DimensionMethods:
@@ -115,6 +177,23 @@ class DimensionMethods:
     def measure_text(self, value: float, dimension: str, from_unit: str, to: str | list[str] | None = None) -> str:
         """`value` written for people, in `to`:  `its height in feet and inches` -- see `Dimension.text()`."""
         return self.dimension_named(dimension).text(float(value), from_unit, to)
+
+    def measure_shown(self, value: object, dimension: str, from_unit: str) -> str:
+        """`value` written in the READER's units:  `5 ft 8 in` in the US, `172 cm` elsewhere;  nothing is `""`."""
+        if value is None or value == "" or isinstance(value, bool):
+            return ""
+        try:
+            number = float(value)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return ""
+        if math.isnan(number):
+            return ""
+        found = self.dimension_named(dimension)
+        return found.text(number, from_unit, units_for(found, from_unit))
+
+    def use_measure_system(self, system: str | None) -> None:
+        """Show every measure in `system` (`metric`, `us`) from now on (`None`:  the reader's again)."""
+        _used_system[0] = system
 
 
 for _dimension in BUILT_IN_DIMENSIONS:
