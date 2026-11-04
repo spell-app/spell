@@ -192,7 +192,10 @@ function epicOf(file: string): string {
 
 /** Send:  every mark so far is sent;  whether anything was new to hand over (a Send with nothing new wakes nobody). */
 function sendMarks(inbox: ReviewInbox): boolean {
-  const fresh = inbox.hasUnsent
+  // a stage accept counting down goes with a PRESS of Send (I222);  never with Auto Send (`sendNow()`), which would cut
+  // its countdown short
+  const released = inbox.releaseHeld(new Date(Date.now() - 1).toISOString()) > 0
+  const fresh = inbox.hasUnsent || released
   inbox.markSent()
   return fresh
 }
