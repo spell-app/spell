@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path"
 
 import { chromium, type Browser, type Page } from "playwright"
@@ -9,7 +9,8 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
  * - A piece opens in the editor like any project.
  * - A published change to a piece shows in the running editor.
  * - A piece that stops compiling can't lock you out:  the editor runs its last good compile, and says why.
- * - Writes the editor bar's file, and ALWAYS puts it back (`afterAll`, and on exit).
+ * - A piece's project shows the editor built from your drafts, in a frame:  the editor you're using never runs a draft.
+ * - Writes the editor bar's file and a draft of it, and ALWAYS puts them back (`afterAll`, and on exit).
  * - Needs this checkout's editor running:  `spell server start all`.
  *   Skips itself when it isn't, as in CI, where nothing serves the editor.
  * - Headless Playwright, never a real browser window.
@@ -20,6 +21,9 @@ const KIT = path.resolve(import.meta.dirname, "../../../..")
 
 /** The editor bar's piece, the file this test changes. */
 const BAR = path.join(KIT, "app/spaces/@spell/editor/editor-bar/EditorBar.spellml")
+
+/** Today's draft of the bar, as the server names one:  `__draft/EditorBar.owen-2026-11-03.spellml` (P24, Q24). */
+const BAR_DRAFTS = path.join(path.dirname(BAR), "__draft")
 
 /** The running editor's address, from that note;  `undefined`:  none noted. */
 function editorAddress(): string | undefined {
@@ -44,7 +48,10 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
   const original = readFileSync(BAR, "utf8")
-  const putBack = () => writeFileSync(BAR, original)
+  const putBack = () => {
+    writeFileSync(BAR, original)
+    rmSync(BAR_DRAFTS, { recursive: true, force: true })
+  }
 
   /**
    * Wait until `check` is true on the page, up to `ms`.
@@ -74,6 +81,28 @@ describe.skipIf(!SERVING)("the editor in itself", { timeout: 180_000 }, () => {
     expect(
       await until(() => /editor\slayout/.test(document.querySelector(".InputEditor .view-lines")?.textContent ?? ""))
     ).toBe(true)
+  })
+
+  test("a piece shows the editor from your drafts, in a frame:  a draft of the bar shows there, never outside", async () => {
+    const now = new Date()
+    const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+      .map((it) => String(it).padStart(2, "0"))
+      .join("-")
+    mkdirSync(BAR_DRAFTS, { recursive: true })
+    writeFileSync(
+      path.join(BAR_DRAFTS, `EditorBar.owen-${day}.spellml`),
+      original.replace(`class="AppMenu tight EditorBar"`, `class="AppMenu tight EditorBar DraftProbe"`)
+    )
+    await page.goto(`${EDITOR}edit/@spell/editor/editor-bar`, { timeout: 60_000 })
+    const frame = page.frameLocator("iframe.DraftEditorFrame")
+    await frame.locator(".EditorBar.DraftProbe").first().waitFor({ timeout: 90_000 })
+    // the piece's own program runs out of sight in the outer page:  only its own bar counts
+    expect(
+      await page.evaluate(
+        () => [...document.querySelectorAll(".DraftProbe")].filter((it) => !it.closest(".AppPaneProgram")).length
+      )
+    ).toBe(0)
+    rmSync(BAR_DRAFTS, { recursive: true, force: true })
   })
 
   test("a published change to the bar shows in the running editor", async () => {

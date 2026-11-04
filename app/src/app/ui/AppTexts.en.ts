@@ -292,6 +292,7 @@ export const APP_TEXTS = {
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeFixturesLine: "The frozen apps the tests run against.",
   editorPieceBroken: "The editor's {piece} doesn't compile, so the editor runs the last one that did.  Fix it and publish again:  {problem}",
+  draftEditorTitle: "The editor, from your drafts of its pieces",
   homeEditorLine: "The editor's own pieces, in Spell:  change one, publish it, and the editor you're using changes.",
   homeNoGuides: "Guides are on their way.",
   homeNotebooksLine: "Spell UI's pages, written in Spell.",

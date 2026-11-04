@@ -1,6 +1,7 @@
 import { editor, runtimeUrl } from "spell/app/app/editor"
 import { loadRuntime, type SpellRuntime } from "spell/app/app/runner/loadRuntime"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { SP } from "spell/parser/spell"
 import type { MenuItem } from "spell/parser/core"
 
 /**
@@ -31,11 +32,24 @@ function layoutRuntime(): Promise<{ runtime: SpellRuntime; coreUrl: string }> {
 }
 let loading: ReturnType<typeof layoutRuntime> | undefined
 
+/** The group the editor's own pieces are projects of (epic `editor` P22). */
+export const EDITOR_PIECES = "@spell/editor"
+
+/**
+ * Is this page the editor built from your DRAFTS of its pieces?  `?pieces=draft` in its address (epic `editor` P22):
+ * what an editor piece's project shows in its app pane, a second editor in a frame, so the editor you're using never runs
+ * a draft.
+ */
+export const isDraftEditor = new URLSearchParams(globalThis.location?.search ?? "").get("pieces") === "draft"
+
 /**
  * What layout piece `compiled` exports, and how to draw one of its things.
+ * - `piece`:  its project in `EDITOR_PIECES`, `editor-layout` ...:  in the draft editor (`isDraftEditor`), that project is
+ *   compiled here, from your drafts, in place of `compiled`;  one that doesn't compile keeps `compiled`, and says why
  * - throws if the runtime or the piece can't load
  */
-export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
+export async function loadLayoutPiece(compiled: string, piece?: string): Promise<LayoutPiece> {
+  if (isDraftEditor && piece) compiled = (await draftOf(piece)) ?? compiled
   const { runtime, coreUrl } = await layoutRuntime()
   // The editor draws each piece where it belongs:  an app in one must not start itself, as a program's does
   runtime.core.appLayout = true
@@ -45,6 +59,23 @@ export async function loadLayoutPiece(compiled: string): Promise<LayoutPiece> {
     menu: (thing, name) => runtime.core.menuOf(thing, name) ?? [],
     useTitles: (titles) => runtime.core.useTitles(titles)
   }
+}
+
+/**
+ * Piece `piece`'s project compiled from your drafts, in the page;  `undefined` if it doesn't compile (said, as
+ * `layoutPieceBroken()` says it).
+ * - NEVER throws.
+ */
+async function draftOf(piece: string): Promise<string | undefined> {
+  try {
+    const project = new SP.SpellProject(`${EDITOR_PIECES}/${piece}`)
+    await project.compile()
+    if (project.compiled) return project.compiled
+    layoutPieceBroken(piece, project.parseError ?? "")
+  } catch (problem) {
+    layoutPieceBroken(piece, problem instanceof Error ? problem.message : String(problem))
+  }
+  return undefined
 }
 
 /**

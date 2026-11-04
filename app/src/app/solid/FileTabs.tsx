@@ -29,7 +29,7 @@ export function FileTabs() {
   const [bar, setBar] = createSignal<FileTabBar>()
   let isGone = false
   onCleanup(() => (isGone = true))
-  void loadLayoutPiece(fileTabs).then(
+  void loadLayoutPiece(fileTabs, "file-tabs").then(
     (loaded) => {
       if (isGone) return
       setPiece(() => loaded)

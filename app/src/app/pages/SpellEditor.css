@@ -43,6 +43,13 @@
     flex: 1 1 auto;
     min-height: 0;
   }
+  /* one of the editor's own pieces:  the editor from your drafts, filling the pane (`<DraftEditorFrame>`) */
+  & > .AppPaneBody > .DraftEditorFrame {
+    flex: 1 1 auto;
+    min-height: 0;
+    border: 0;
+    border-radius: var(--ui-radius-m);
+  }
 }
 
 /*

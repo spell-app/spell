@@ -375,6 +375,7 @@ const APP_TEXTS_ES: AppTextPack = {
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
   editorPieceBroken: "La pieza {piece} del editor no compila, así que el editor usa la última que sí compiló.  Arréglala y publícala de nuevo:  {problem}",
+  draftEditorTitle: "El editor, con tus borradores de sus piezas",
   homeEditorLine: "Las piezas del propio editor, en Encanto:  cambia una, publícala, y el editor que usas cambia.",
   homeNoGuides: "Las guías están en camino.",
   homeNotebooksLine: "Las páginas de Spell UI, escritas en Encanto.",

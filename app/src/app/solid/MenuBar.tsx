@@ -514,7 +514,7 @@ function appMenus(): Promise<{
   menuOf: (thing: object, name: string) => MenuItem[]
   useTitles: (titles: Record<string, string>) => void
 }> {
-  loadingAppMenus ??= loadLayoutPiece(appMenusSpell).then(({ exports, menu, useTitles }) => ({
+  loadingAppMenus ??= loadLayoutPiece(appMenusSpell, "app-menus").then(({ exports, menu, useTitles }) => ({
     thing: exports.appMenus as AppMenusThing,
     menuOf: menu,
     useTitles
