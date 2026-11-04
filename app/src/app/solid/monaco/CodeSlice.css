@@ -5,3 +5,8 @@
   border-radius: var(--ui-radius);
   overflow: hidden;
 }
+
+/* The words before a one-line row's code, `- clickable when `:  its header already says them (`hideWordsBefore()`). */
+.CodeSlice .CodeSliceHidden {
+  display: none;
+}

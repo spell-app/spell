@@ -229,7 +229,7 @@ ui-panel.InspectorCard > .InspectorSection {
   grid-column: 1 / -1;
 }
 /* their rows too:  a band lays its content out as the editor's two columns */
-.Inspector :is(.InspectorEvent, .InspectorAction) {
+.Inspector .InspectorEvent {
   grid-column: 1 / -1;
 }
 /* the Code band's "+", at the end of its band's title:  a bare icon and its caret, in the band's grey */
@@ -268,29 +268,14 @@ ui-panel.InspectorCard > .InspectorSection {
       monospace;
     color: var(--ui-text-muted);
   }
-  /* an action's run button and fields keep their own spacing, its code under them */
-  & > .InspectorAction {
-    margin-block-end: 0;
-  }
 }
-/* an action:  its button, then a field for what it takes;  with more than one, they go under it */
-.InspectorAction {
-  display: flex;
+/* an action's header:  its signature, `to put (a card) on (a pile)`, each type a small badge, words in their place */
+.InspectorActionSignature {
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 8px;
-  margin-block-end: 8px;
+  font-weight: var(--ui-font-weight-normal, 400);
 
-  & > .InspectorActionField {
-    flex: 1 1 8em;
-    width: 8em;
-    min-width: 0;
-    max-width: 100%;
-    /* a select is 14em at least by default:  here it shares the row with its button, else wraps under it */
-    --ui-select-min-width: 8em;
-  }
-  &.many > .InspectorActionField {
-    flex-basis: 100%;
+  & > .InspectorActionType {
+    margin: 0;
   }
 }
 

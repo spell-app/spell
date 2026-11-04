@@ -75,6 +75,7 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     paging: look.paging,
     ...(look.rowsAt !== undefined && { rowsAt: look.rowsAt }),
     ...(look.nextAt !== undefined && { nextAt: look.nextAt }),
+    ...(look.searchedBy && { searchedBy: look.searchedBy }),
     fields
   }
 }

@@ -107,3 +107,65 @@ describe("PlanDoc.refreshAway() and readAway()", () => {
     expect(plan.page.getAttribute("away-read")).toMatch(/^2026-11-03T08:00/)
   })
 })
+
+describe("a line's Read (I206)", () => {
+  /** Owen ticks `line` Read at `at`:  the Seen mark on `away:<line>` applied, the section drawn again. */
+  function readLine(plan: PlanDoc, line: string, at: Date) {
+    plan.now = at
+    const done = plan.applyMark({ id: `away:${line}`, action: "seen" } as Parameters<PlanDoc["applyMark"]>[0])
+    expect(done.applied).toBe(true)
+    plan.refreshAway()
+  }
+
+  /** The section's lines, by key. */
+  function lines(plan: PlanDoc): string[] {
+    const section = plan.page.querySelector('epic-section[kind="away"]')
+    return Array.from(section?.querySelectorAll("epic-away-line") ?? [], (line) => line.getAttribute("line")!)
+  }
+
+  test("each line and each part's heading is an <epic-away-line>, listed on the section for the inbox", () => {
+    const plan = readPage()
+    night(plan)
+    plan.refreshAway()
+    const keys = lines(plan)
+    expect(keys[0]).toBe("done")
+    expect(keys).toContain("todo")
+    expect(keys).toContain("q1")
+    expect(plan.page.querySelector('epic-section[kind="away"]')!.getAttribute("lines")).toBe(keys.join(" "))
+    expect(Markup.validate(plan.document).map((problem) => problem.message)).toEqual([])
+  })
+
+  test("a line read leaves;  the rest stays;  the item itself stays open", () => {
+    const plan = readPage()
+    night(plan)
+    plan.refreshAway()
+    readLine(plan, "q1", new Date(2026, 10, 3, 8, 0))
+    expect(lines(plan)).not.toContain("q1")
+    expect(lines(plan)).toContain("i1")
+    expect(plan.findItem("q1")!.getAttribute("status")).not.toBe("done")
+    expect(plan.page.getAttribute("away-seen")).toMatch(/^q1=2026-11-03T08:00/)
+  })
+
+  test("a part's heading read takes its whole part;  the other part stays", () => {
+    const plan = readPage()
+    night(plan)
+    plan.refreshAway()
+    readLine(plan, "done", new Date(2026, 10, 3, 8, 0))
+    expect(lines(plan)).not.toContain("done")
+    expect(lines(plan).slice(0, 2)).toEqual(["todo", "q1"])
+  })
+
+  test("a line read, then changed again, comes back;  Done reading forgets every line's read", () => {
+    const plan = readPage()
+    night(plan)
+    plan.refreshAway()
+    readLine(plan, "i1", new Date(2026, 10, 3, 8, 0))
+    expect(lines(plan)).not.toContain("i1")
+    plan.now = new Date(2026, 10, 3, 9, 0)
+    plan.findItem("i1")!.setAttribute("changed", "2026-11-03T09:00")
+    plan.refreshAway()
+    expect(lines(plan)).toContain("i1")
+    plan.applyMark({ id: "away", action: "seen" } as Parameters<PlanDoc["applyMark"]>[0])
+    expect(plan.page.hasAttribute("away-seen")).toBe(false)
+  })
+})

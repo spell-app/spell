@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  361bd72f80633e1c
+// sources:  a9965e30c8f51d13
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -10,6 +10,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-answer": {"folder":"epic-answer","attributes":["id","title"]},
   "epic-aside": {"folder":"epic-aside","attributes":["title"]},
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details"]},
+  "epic-away-line": {"folder":"epic-away-line","attributes":["line","heading"]},
   "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite","away"]},
   "epic-cards": {"folder":"epic-cards","skeleton":{"height":"2em"},"attributes":["saga"]},
   "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","was","accepted"]},
@@ -36,7 +37,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-option-form": {"folder":"epic-option-form","skeleton":{"height":"4em"},"attributes":["heading","option-title","note","shot","for","submit"]},
   "epic-original": {"folder":"epic-original","attributes":[]},
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
-  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","recent-since","repo","reviewing"]},
+  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
@@ -45,7 +46,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
-  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","waiting","to-accept","to-see","open"]},
+  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","waiting","lines","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","asks","working","working-on","countdown"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},

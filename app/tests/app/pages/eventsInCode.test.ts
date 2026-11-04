@@ -103,9 +103,22 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
           line.replace(/\s+/g, " ").trim()
         )
       )
-      .toEqual(["- on click play it"])
-    // an action:  its run button, then its code
-    const action = page.locator(".InspectorEvent.action").filter({ hasText: "play it" }).first()
+      // its words are its row's header:  the field holds only its code
+      .toEqual(["play it"])
+    // an action:  its signature, its types in badges, then its code
+    const action = page
+      .locator(".InspectorEvent.action")
+      .filter({ has: page.locator(".InspectorActionSignature", { hasText: /to\s*play/ }) })
+      .first()
+    const signature = action.locator(".InspectorActionSignature")
+    expect((await signature.innerText()).replace(/\s+/g, " ").trim()).toBe("to play a card")
+    expect(await signature.locator("ui-label").allInnerTexts()).toEqual(["a card"])
+    // it takes nothing else:  a run button for the card selected
+    expect(await signature.locator("ui-button.InspectorActionButton").count()).toBe(1)
+    // one that needs a pile:  its type a badge, and no select or button, as it can't run from here
+    const putOn = page.locator(".InspectorActionSignature").filter({ hasText: /put/ }).first()
+    expect(await putOn.locator("ui-label").allInnerTexts()).toEqual(["a card", "a pile"])
+    expect(await putOn.locator("ui-button, ui-select, ui-input").count()).toBe(0)
     expect((await action.locator(".CodeSlice .view-line").first().innerText()).replace(/\s+/g, " ")).toContain(
       "if the pile of the card"
     )
@@ -132,6 +145,24 @@ describe.skipIf(!SERVING)("The Inspector's Code band", { timeout: 180_000 }, () 
       })
     ).toBe(true)
     // undo, from the same editor
+    for (let step = 0; step < 8 && (await mainFile()) !== before; step++) {
+      await page.keyboard.press("ControlOrMeta+Z")
+      await page.waitForTimeout(150)
+    }
+    expect(await mainFile()).toBe(before)
+  })
+
+  test("a one-line row's field starts after its words, and typing at its start lands there", async () => {
+    const before = await mainFile()
+    const field = row("clickable when").locator(".CodeSlice")
+    await expect
+      .poll(async () => (await field.locator(".view-lines").innerText()).replace(/\s+/g, " ").trim())
+      .toMatch(/^it is face up or its pile is the stock/)
+    await field.locator(".view-line").first().click()
+    await page.keyboard.press("Home")
+    await page.keyboard.type("really ")
+    await page.waitForTimeout(300)
+    expect(await mainFile()).toContain("- clickable when really it is face up")
     for (let step = 0; step < 8 && (await mainFile()) !== before; step++) {
       await page.keyboard.press("ControlOrMeta+Z")
       await page.waitForTimeout(150)

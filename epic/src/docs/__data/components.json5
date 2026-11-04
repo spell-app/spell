@@ -457,6 +457,77 @@
       ]
     },
     {
+      "tag": "epic-away-line",
+      "name": "epic-away-line",
+      "folder": "epic-away-line",
+      "mainTag": "epic-away-line",
+      "main": true,
+      "page": true,
+      "href": "epic-away-line.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "while you were out",
+        "away line",
+        "news line",
+        "read",
+        "seen"
+      ],
+      "description": "One line of \"0. While you were out\" (a phase done, a call waiting, an issue, a test), or a part's heading (What was done, Still to do), with a ✓ Read at its start while the page is reviewed (Owen, 2026-11-03:  \"a tick per section as well, so I can say 'that's good' on part but not on the whole thing\").  Read, it fades at once, and `epic inbox apply` takes it off;  the epic tool writes every one, never a person.",
+      "noun": "away line",
+      "attributes": [
+        {
+          "name": "line",
+          "kind": "string",
+          "description": "What it's about:  a phase's or an item's id (`p-while-you-were-out`, `i205`), or a part's (`done`, `todo`).  Its Read mark goes under `away:<line>`."
+        },
+        {
+          "name": "heading",
+          "kind": "boolean",
+          "description": "A part's heading (What was done, Still to do):  read, the whole part leaves the section."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The line:  its link and its words."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The line:  the tick, then its words."
+        },
+        {
+          "name": "read",
+          "description": "Its ✓ Read, while the page is reviewed:  an `<epic-review buttons=\"away-line\">`."
+        },
+        {
+          "name": "body",
+          "description": "Its words."
+        }
+      ],
+      "states": [
+        {
+          "name": "read",
+          "description": "Its Read mark is in the review inbox:  faded until `epic inbox apply` takes it off."
+        },
+        {
+          "name": "heading",
+          "description": "A part's heading."
+        }
+      ],
+      "texts": [
+        {
+          "key": "buttonsLabel",
+          "text": "this line",
+          "description": "Read's group, spoken."
+        }
+      ]
+    },
+    {
       "tag": "epic-card",
       "name": "epic-card",
       "folder": "epic-card",
@@ -3002,6 +3073,11 @@
           "description": "\"0. While you were out\"'s button (the check):  its name."
         },
         {
+          "key": "readLine",
+          "text": "Read",
+          "description": "A line of \"0. While you were out\"'s button (the check):  its name."
+        },
+        {
           "key": "boxSkip",
           "text": "Skip this",
           "description": "Note box button (the x):  its name."
@@ -4190,6 +4266,11 @@
           "name": "away-read",
           "kind": "string",
           "description": "When you last pressed Done reading on \"0. While you were out\" (epic `epic-engine` P62):  the section shows what Claude did since;  written by the tool."
+        },
+        {
+          "name": "away-seen",
+          "kind": "string",
+          "description": "When you ticked each line or part of \"0. While you were out\" Read (epic `epic-engine` I206):  `<line>=<time>` pairs, by phase or item id, or a part's (`done`, `todo`);  a line read before its last change shows again.  Written by the tool;  cleared by Done reading."
         },
         {
           "name": "recent-since",
@@ -5841,6 +5922,11 @@
           "name": "waiting",
           "kind": "number",
           "description": "`kind=\"away\"`:  how many things in it wait on you (epic `epic-engine` P62), written by the tool:  the toolbar's red badge."
+        },
+        {
+          "name": "lines",
+          "kind": "string",
+          "description": "`kind=\"away\"`:  its lines' keys, space-separated (`done p-x todo i205`;  epic `epic-engine` I206), written by the tool:  each `<epic-away-line>` in it takes its own Read, which the review inbox knows by these."
         },
         {
           "name": "to-accept",
@@ -7653,6 +7739,18 @@
       "docs": false,
       "tags": [
         "epic-ask"
+      ],
+      "tokens": []
+    },
+    "epic-away-line": {
+      "folder": "epic-away-line",
+      "mainTag": "epic-away-line",
+      "title": "<epic-away-line>",
+      "summary": "The <epic-away-line> element: one line of 0. While you were out, or a part's heading, with its own Read tick.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-away-line"
       ],
       "tokens": []
     },

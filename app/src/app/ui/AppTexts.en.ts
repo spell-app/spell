@@ -155,11 +155,13 @@ export const APP_TEXTS = {
   published: "Published {count} file(s):  kept as version {version}.",
   nothingToPublish: "Nothing to publish:  no file has a draft.",
   publishClashHeading: "Published since your draft began",
-  publishClashMessage: "Someone published these files after you started your draft.  Theirs is on the left, yours on the right.",
+  publishClashMessage:
+    "Someone published these files after you started your draft.  Theirs is on the left, yours on the right.",
   publishStartAgain: "Start Again from Theirs",
   publishAnyway: "Publish Mine Anyway",
   noVersions: "No versions yet:  each Publish keeps one.",
-  versionsMessage: "Each Publish kept the whole project.  Restoring one makes it your draft;  nothing is public until you publish.",
+  versionsMessage:
+    "Each Publish kept the whole project.  Restoring one makes it your draft;  nothing is public until you publish.",
   restoreVersion: "Restore",
   versionRestored: "Restored {count} file(s) from {version} as your draft.",
   autoSave: "AutoSave",
@@ -434,8 +436,8 @@ export const APP_TEXTS = {
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words
   inspectorActionOnlyWhen: "Only when {condition}",
   inspectorActionNotNow: "Can't be done now",
-  inspectorActionNeeds: "Fill in what it takes first",
-  inspectorActionValue: "a value",
+  // an action's run button's tip:  `{action}` is its words, `play it`
+  inspectorActionRun: "Run {action}",
   inspectorProperties: "Properties",
   inspectorHide: "Hide this card",
   inspectorLetGo: "Let go of {part} (Esc)",

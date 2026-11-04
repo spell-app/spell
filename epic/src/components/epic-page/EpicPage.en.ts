@@ -107,6 +107,14 @@ export const epicPageVocabulary = {
         "what Claude did since;  written by the tool."
     },
     {
+      name: "away-seen",
+      kind: "string",
+      description:
+        'When you ticked each line or part of "0. While you were out" Read (epic `epic-engine` I206):  ' +
+        "`<line>=<time>` pairs, by phase or item id, or a part's (`done`, `todo`);  a line read before its last " +
+        "change shows again.  Written by the tool;  cleared by Done reading."
+    },
+    {
       name: "recent-since",
       kind: "string",
       format: "time",
