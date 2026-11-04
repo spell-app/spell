@@ -425,7 +425,7 @@ export class RestPlace extends WebPlace implements Place {
 
   /** `row` from the server, named our way, its version noted.  `response`:  where an `ETag` may be. */
   private noted(collection: string, wireRow: PlaceRow, response?: Response): PlaceRow {
-    const row = this.namesOf(collection).fromServer(wireRow)
+    const row = withPictures(this.namesOf(collection).fromServer(wireRow), this.mappingOf(collection).pictures)
     const id = idOfRow(row, this.capabilities.idOf)
     if (id !== undefined) this.noteVersion(collection, id, row, response)
     return row
@@ -506,6 +506,27 @@ export type RestCollection = {
   rowAt?: string
   /** Where a list's next cursor is in its answer, a dotted path.  Left out:  its `Link` header. */
   nextAt?: string
+  /**
+   * Fields holding a picture's id on another server, by ours, each with where its pictures are (epic `data` P29):
+   * `{ coverI: "https://covers.openlibrary.org/b/id/{id}-M.jpg" }`.
+   * - Each row read has its picture's address there instead:  `11481354` => `.../b/id/11481354-M.jpg`.
+   * - Whatever the braces say, the value goes there.
+   */
+  pictures?: Readonly<Record<string, string>>
+}
+
+/** A name in braces, where a picture's id goes in its address. */
+const PICTURE_ID = /\{[^{}]*\}/
+
+/** SIDE EFFECT:  `row`, each of its `pictures` fields holding its picture's address, not its id:  `RestCollection.pictures`. */
+function withPictures(row: PlaceRow, pictures: Readonly<Record<string, string>> | undefined): PlaceRow {
+  for (const [field, address] of Object.entries(pictures ?? {})) {
+    const id = row[field]
+    if (typeof id === "string" || typeof id === "number") {
+      row[field] = address.replace(PICTURE_ID, encodeURIComponent(`${id}`))
+    }
+  }
+  return row
 }
 
 /**

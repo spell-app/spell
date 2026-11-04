@@ -6,6 +6,12 @@ import { IngestStopped } from "./ingest.types"
 /** Says who's asking, so a server's owner can see and say no. */
 export const READER_NAME = "spell-place-ingest (+https://github.com/spell-app/spell)"
 
+/**
+ * The page it asks as, in an `Origin` header:  a server says whether a page may read it only when a page asks
+ * (Open Library's `access-control-allow-origin: *` comes only then).
+ */
+export const READER_ORIGIN = "https://example.com"
+
 /** The most requests one look makes, in all. */
 const MOST_REQUESTS = 60
 
@@ -50,7 +56,7 @@ export type ReadAnswer = {
 
 /**
  * Reads a source the polite way:  everything `spell place ingest` sends goes through here.
- * - Names itself, leaves a gap between requests, and waits when told to (a 429 or a 503, as long as `Retry-After` says).
+ * - Names itself, asks as a page would (`READER_ORIGIN`, so a server says whether pages may read it), leaves a gap between requests, and waits when told to (a 429 or a 503, as long as `Retry-After` says).
  * - Minds a rate limit its answers name (GitHub's `x-ratelimit-remaining`, `x-ratelimit-reset`):
  *   with none left, it waits for the reset, if that's soon, and else stops, saying when it is.
  * - Stops at a size:  so many requests, so many bytes an answer, so many in all.
@@ -130,6 +136,8 @@ export class PoliteReader {
     refuseWrite(url, (init.method ?? "GET").toUpperCase(), init.body)
     const headers = new Headers(init.headers)
     headers.set("user-agent", READER_NAME)
+    // a browser sets its own, and won't let a page:  so only where it can
+    if (!headers.has("origin")) headers.set("origin", READER_ORIGIN)
     if (this.key !== undefined) headers.set("authorization", `Bearer ${this.key}`)
     for (let attempt = 1; ; attempt++) {
       if (!this.hasRoom)

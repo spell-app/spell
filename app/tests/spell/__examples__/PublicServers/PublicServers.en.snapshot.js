@@ -196,8 +196,125 @@ export const words = {
       diffUrl: "diff url",
       patchUrl: "patch url"
     },
+    Book: {
+      authors: "authors",
+      authorName: "author name",
+      coverEdition: "cover edition",
+      coverHeight: "cover height",
+      coverI: "cover i",
+      coverWidth: "cover width",
+      ebookAccess: "ebook access",
+      editionCount: "edition count",
+      firstPublishYear: "first publish year",
+      fulltext: "fulltext",
+      ia: "ia",
+      iaCollection: "ia collection",
+      language: "language",
+      lendingEditionS: "lending edition s",
+      lendingIdentifierS: "lending identifier s",
+      publicScanB: "public scan b",
+      seriesKey: "series key",
+      seriesName: "series name",
+      seriesPosition: "series position",
+      title: "title",
+      subtitle: "subtitle",
+      writer: "writer",
+      draw: "draw it",
+      open: "open (a book)"
+    },
+    Author: {
+      links: "links",
+      kind: "kind",
+      key: "key",
+      name: "name",
+      sourceRecords: "source records",
+      birthDate: "birth date",
+      bio: "bio",
+      title: "title",
+      alternateNames: "alternate names",
+      remoteIds: "remote ids",
+      photos: "photos",
+      deathDate: "death date",
+      personalName: "personal name",
+      latestRevision: "latest revision",
+      revision: "revision",
+      created: "created",
+      lastModified: "last modified"
+    },
+    Edition: {
+      kind: "kind",
+      title: "title",
+      authors: "authors",
+      publishDate: "publish date",
+      sourceRecords: "source records",
+      numberOfPages: "number of pages",
+      publishers: "publishers",
+      physicalFormat: "physical format",
+      notes: "notes",
+      fullTitle: "full title",
+      covers: "covers",
+      works: "works",
+      key: "key",
+      localId: "local id",
+      latestRevision: "latest revision",
+      revision: "revision",
+      created: "created",
+      lastModified: "last modified"
+    },
+    Link: {
+      title: "title",
+      url: "url",
+      kind: "kind"
+    },
+    Kind: {
+      key: "key"
+    },
+    RemoteId: {
+      viaf: "viaf",
+      wikidata: "wikidata",
+      isni: "isni",
+      amazon: "amazon",
+      bookbrainz: "bookbrainz",
+      goodreads: "goodreads",
+      gnd: "gnd",
+      imdb: "imdb",
+      lcNaf: "lc naf",
+      librarything: "librarything",
+      musicbrainz: "musicbrainz",
+      storygraph: "storygraph",
+      inventaire: "inventaire",
+      librivox: "librivox",
+      projectGutenberg: "project gutenberg",
+      opacSbn: "opac sbn"
+    },
+    Created: {
+      kind: "kind",
+      value: "value"
+    },
+    LastModified: {
+      kind: "kind",
+      value: "value"
+    },
+    EditionAuthor: {
+      key: "key"
+    },
+    Note: {
+      kind: "kind",
+      value: "value"
+    },
+    Work: {
+      key: "key"
+    },
+    OpenLibraryPage: {
+      search: "search",
+      showing: "showing",
+      create: "create it",
+      found: "found",
+      draw: "draw it"
+    },
     PublicServer: {
       tab: "tab",
+      library: "library",
       create: "create it",
       showServer: "show (server as text)",
       draw: "draw it"
@@ -208,5 +325,10 @@ export const words = {
       person: "person",
       draw: "draw it"
     }
+  },
+  groups: {
+    Book: [
+      { name: "What a book can do, from anywhere", members: ["open"] }
+    ]
   }
 }

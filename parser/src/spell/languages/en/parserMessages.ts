@@ -281,6 +281,8 @@ export const PARSER_MESSAGES = {
   /** `its next page is in its "{header}" header`, a header other than `Link`. */
   "next-page-header-not-link":
     'A next page is said in a "Link" header, not "{header}":  `its next page is in its "Link" header`, or name the field of its answer that says it',
+  "searched-only":
+    '{things} are only found by a search, with no list of them all:  search them, "every {thing} where its {field} includes ..."',
   "found-only-by-name":
     '{things} are only found by name, with no list of them all:  read one at a time, "the {thing} whose id is ..."',
   "no-dotted-field":

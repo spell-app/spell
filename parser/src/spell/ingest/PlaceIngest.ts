@@ -1,4 +1,5 @@
 import { SP } from "spell/parser/spell"
+import { fieldNamed } from "spell/parser/spell/rules/places/PlaceDetail"
 import { parseSpellProject } from "spell/parser/spell/test/parseSpellProject"
 
 import {
@@ -110,6 +111,7 @@ export class PlaceIngest {
     if (ask.keySecret) description.about.keySecret = ask.keySecret
     if (ask.keySecret) await this.noteKeyIfSet(description, look)
     if (ask.collections?.length) description.about.collectionsAsked = [...ask.collections]
+    await this.notePictures(description, ask.pictures, reader)
     await this.readWithAgent(description, look, { keepName: !!ask.name })
     const warnings = this.compileLeavingOut(description, file)
     this.checkAddedCompiles(existing, description, file)
@@ -143,13 +145,16 @@ export class PlaceIngest {
   /** Look again at one place. */
   private async updateOne(file: string, descriptionPath: string, old: PlaceDescription): Promise<IngestResult> {
     const { files } = this.settings
-    const { name, kind, address, keySecret, docsAt, collectionsAsked } = old.about
+    const { name, kind, address, keySecret, docsAt, collectionsAsked, picturesAsked } = old.about
     const reader = this.readerFor(keySecret)
     this.say(`Looking again at ${address} ...`)
     // the collections it was asked for, as asked, and only those;  else every one it has, and whatever's new
     const collections = collectionsAsked ?? Object.values(old.collections).map(({ at }) => at)
     // a collection found by name is read by the names it was read by before
-    const samples = Object.values(old.collections).flatMap(({ samples: names }) => names ?? [])
+    // each by its own collection's address, as two collections found by name may each have their own (Open Library's)
+    const samples = Object.values(old.collections).flatMap(({ at, samples: names }) =>
+      (names ?? []).map((sample) => `${at}=${sample}`)
+    )
     const look = await lookAtPlace(kind, {
       address,
       reader,
@@ -161,6 +166,7 @@ export class PlaceIngest {
     if (keySecret) description.about.keySecret = keySecret
     if (keySecret) await this.noteKeyIfSet(description, look)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
+    await this.notePictures(description, picturesAsked, reader)
     if (carryOver(description, old)) {
       // something new, for the agent to read;  what was chosen before still stands
       await this.readWithAgent(description, look, { keepName: true })
@@ -276,6 +282,50 @@ export class PlaceIngest {
     }
   }
 
+  /**
+   * SIDE EFFECT:  each field `asked` names, `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`, holds a picture's id,
+   * where it answers a picture:  tried on a real value, one request each (epic `data` P29).
+   * - One that doesn't is said, and left as it is.
+   * - NEVER throws, but `IngestStopped` past the reader's limits.
+   */
+  private async notePictures(
+    description: PlaceDescription,
+    asked: readonly string[] | undefined,
+    reader: PoliteReader
+  ): Promise<void> {
+    if (!asked?.length) return
+    description.about.picturesAsked = [...asked]
+    for (const given of asked) {
+      const cut = given.indexOf("=")
+      const [field, address] = [given.slice(0, cut).trim(), given.slice(cut + 1).trim()]
+      if (cut < 0 || !PICTURE_ID.test(address)) {
+        description.notes.push(
+          `"${given}" isn't a field and where its pictures are, with braces for its id:  left out.`
+        )
+        continue
+      }
+      const holding = Object.entries(description.collections).filter(([, { fields }]) => fields[field])
+      if (!holding.length) description.notes.push(`No collection has a field "${field}", to hold a picture's id.`)
+      for (const [collection, { fields }] of holding) {
+        const about = fields[field]!
+        const example = [about.example].flat()[0]
+        if (typeof example !== "string" && typeof example !== "number") continue
+        const url = address.replace(PICTURE_ID, encodeURIComponent(`${example}`))
+        try {
+          const { status, headers } = await reader.read(url)
+          if (status < 400 && /^image\//i.test(headers.get("content-type") ?? "")) about.pictureAt = address
+          else
+            description.notes.push(
+              `${collection}'s "${field}" isn't a picture's id:  ${url} answered ${status}, no picture.`
+            )
+        } catch (error) {
+          if (error instanceof IngestStopped) throw error
+          description.notes.push(`${collection}'s "${field}" couldn't be tried:  ${url} didn't answer.`)
+        }
+      }
+    }
+  }
+
   /** The place is already in the file:  nothing changes. */
   private async alreadyThere(file: string, name: string, text: string): Promise<IngestResult> {
     const { files } = this.settings
@@ -372,13 +422,22 @@ export class PlaceIngest {
     const byName = Object.fromEntries(
       shown.flatMap(({ type, samples }) => (samples?.length ? [[type, samples[0]!]] : []))
     )
+    // answering only a search:  searched for what it was looked at with, `dune`
+    const bySearch = Object.fromEntries(
+      shown.flatMap(({ type, searchedOnly, searchedFor, searchedBy, fields }) =>
+        searchedOnly && searchedFor !== undefined && searchedBy
+          ? [[type, { field: fieldNamed(fields[searchedBy.field]?.words ?? searchedBy.field), text: searchedFor }]]
+          : []
+      )
+    )
     const spell = spellTextOf(spellPartsFor(description, { withKey: false }))
-    const { byType, complaints } = await readThrough({ spell, types, byName, fetch: reader.fetch })
+    const { byType, complaints } = await readThrough({ spell, types, byName, bySearch, fetch: reader.fetch })
     for (const collection of shown) {
       const read = byType[collection.type]
       if (read) collection.readThrough = read
     }
-    description.notes = [...description.notes, ...new Set(complaints)]
+    // looking again, the last look's notes are there already:  each said once
+    description.notes = [...new Set([...description.notes, ...complaints])]
     const rows = shown.reduce((sum, { readThrough: read }) => sum + (read?.rows ?? 0), 0)
     if (!rows) {
       const why = shown.map(({ type, readThrough: read }) => `${type}:  ${read?.problem ?? "no rows"}`).join("\n")
@@ -520,6 +579,9 @@ function compile(text: string, file: string): { errors: string[]; warnings: stri
   const { files } = parseSpellProject([{ path: `/${name}`, contents: text }])
   return { errors: files[0]!.errors as string[], warnings: files[0]!.warnings as string[] }
 }
+
+/** Where a picture's id goes, in where its pictures are:  `{id}`. */
+const PICTURE_ID = /\{[^{}]*\}/
 
 /** What an error says, without where:  lines move when a place is added. */
 function withoutPlaceInFile(error: string): string {
@@ -715,9 +777,11 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
       said.add(
         `Paging by a Link header in one collection and a field in another:  ${name} says its next page in its Link header, and "its next page is" is for the whole place, so a read of it gets only its first page.`
       )
-    if (rowsAt && new Set(each.map(([, collection]) => collection.rowsAt)).size > 1)
+    // what's said of lists is said of those that list:  one found by name is read a thing at a time
+    const lists = each.filter(([, { at }]) => !/\{[^{}/]*\}/.test(at))
+    if (rowsAt && new Set(lists.map(([, collection]) => collection.rowsAt)).size > 1)
       said.add(`Rows kept somewhere different in each collection:  "its rows are" is for the whole place.`)
-    if (nextAt && new Set(each.map(([, collection]) => collection.nextAt)).size > 1)
+    if (nextAt && new Set(lists.map(([, collection]) => collection.nextAt)).size > 1)
       said.add(`A next page kept somewhere different in each collection:  "its next page is" is for the whole place.`)
   }
   const { kind } = about

@@ -1,9 +1,15 @@
 {
   "title": "Public Servers",
-  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely",
+  "description": "Public REST servers other people run, each as `spell place ingest` wrote it, untouched, and each a page of its own.  GitHub:  a key named, never written, taken from the environment when it's set and gone without when it isn't;  lists that page by their Link header;  a rate limit read politely.  Open Library:  books found only by a search, refused at compile time without one;  each book's authors linked by their ids;  its covers on another server, each address built from the book's cover id",
   "readsOtherPeoplesServers": true,
   "imports": [{
     "path": "/GitHub.api.spell",
+    "active": true
+  }, {
+    "path": "/OpenLibrary.api.spell",
+    "active": true
+  }, {
+    "path": "/OpenLibrary.spellml",
     "active": true
   }, {
     "path": "/PublicServers.spellml",
@@ -16,6 +22,6 @@
     "active": true
   }],
   "development": {
-    "apis": ["GitHub.api.json5"]
+    "apis": ["GitHub.api.json5", "OpenLibrary.api.json5"]
   }
 }

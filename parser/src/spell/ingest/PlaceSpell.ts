@@ -87,12 +87,14 @@ export function spellPartsFor(
   const sameId = sameOfEvery(every, ({ idField }) => idField)
   const isSheet = kind === "sheet" || kind === "google sheet"
   if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `- its id is its "${sameId}"` })
-  const rowsAt = sameOfEvery(every, (collection) => collection.rowsAt)
+  // what's said of lists is said of those that list:  one found by name is read a thing at a time
+  const lists = every.filter(({ at }) => !isFoundByNameAt(at))
+  const rowsAt = sameOfEvery(lists, (collection) => collection.rowsAt)
   if (rowsAt) placeLines.push({ key: "rows", text: `- its rows are ${fieldInWords(rowsAt)}` })
-  const nextAt = kind === "web server" ? sameOfEvery(every, (collection) => collection.nextAt) : undefined
+  const nextAt = kind === "web server" ? sameOfEvery(lists, (collection) => collection.nextAt) : undefined
   if (nextAt) placeLines.push({ key: "next", text: `- its next page is ${fieldInWords(nextAt)}` })
   // every list that pages says its next page in its `Link` header, GitHub's way:  one with no pages asks nothing of it
-  const paging = new Set(every.map((collection) => collection.paging).filter((each) => each !== "none"))
+  const paging = new Set(lists.map((collection) => collection.paging).filter((each) => each !== "none"))
   if (kind === "web server" && !nextAt && paging.size === 1 && paging.has("link header")) {
     placeLines.push({ key: "next", text: `- its next page is in its "Link" header` })
   }
@@ -127,11 +129,24 @@ export function spellPartsFor(
   for (const [collection, description] of shown) {
     if (isSheet || !description.at || description.at === collection) continue
     // found by name, with no list:  where its name goes, `wiki pages are found at "/page/summary/{name}"`
-    const where = /\{[^{}/]*\}/.test(description.at) ? "are found at" : "live at"
+    // answering only a search:  `books are searched at "/search.json"`
+    const where = isFoundByNameAt(description.at)
+      ? "are found at"
+      : description.searchedOnly
+        ? "are searched at"
+        : "live at"
     placeLines.push({ key: `at:${collection}`, text: `- ${collectionWords(description)} ${where} "${description.at}"` })
     if (!sameId && description.idField && description.idField !== USUAL_ID) {
       const line = `- ${articled(description.type)}'s id is its "${description.idField}"`
       placeLines.push({ key: `id:${collection}`, text: line })
+    }
+  }
+  // a field holding a picture's id, on another server:  `a book's "cover i" is a picture at "https://..."`
+  for (const [collection, description] of shown) {
+    for (const [field, about] of Object.entries(description.fields)) {
+      if (!about.pictureAt || about.leftOut) continue
+      const line = `- ${articled(description.type)}'s "${about.words}" is a picture at "${about.pictureAt}"`
+      placeLines.push({ key: `picture:${collection}:${field}`, text: line })
     }
   }
   return {
@@ -142,6 +157,11 @@ export function spellPartsFor(
       ...typesInside(shown, collections)
     ]
   }
+}
+
+/** Is a collection at this address found by name, with no list:  `/page/summary/{name}`? */
+function isFoundByNameAt(at: string): boolean {
+  return /\{[^{}/]*\}/.test(at)
 }
 
 /**
@@ -293,11 +313,13 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo, inside, isListInside, isItsOwner, words }: FieldDescription,
+  { type, linksTo, inside, isListInside, isItsOwner, words, pictureAt }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>,
   owner: string,
   own: ReadonlySet<string>
 ): string {
+  // its picture's address, built as it's read
+  if (pictureAt) return "text"
   if (isItsOwner) return isListInside ? `a list of ${P.pluralize(owner)}` : articled(owner)
   if (inside) {
     const held = insideTypeFor(words, owner, own)
@@ -305,8 +327,9 @@ function typeWordsFor(
   }
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (!target || target.leftOut) return SPELL_TYPES[type]!
-  if (type === "link") return articled(target.type)
-  if (type === "list of links") return `a list of ${collectionWords(target)}`
+  // an address, or an id of one found by name:  Open Library's `author_key`
+  if (type === "link" || type === "text") return articled(target.type)
+  if (type === "list of links" || type === "list of text") return `a list of ${collectionWords(target)}`
   return SPELL_TYPES[type]!
 }
 
@@ -321,9 +344,10 @@ function nothingWordsFor({ type, noNumberWords }: FieldDescription): string {
 
 /** What a person should know, on the line:  what Spell reads differently from what's there. */
 function commentFor(
-  { type, linksTo }: FieldDescription,
+  { type, linksTo, pictureAt }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
+  if (pictureAt) return "  // a picture's address"
   const target = linksTo === undefined ? undefined : collections[linksTo]
   if (target && !target.leftOut && (type === "link" || type === "list of links")) return ""
   if (type === "link") return "  // an address"

@@ -33,7 +33,7 @@ const SEARCH_PARAMS = ["search", "q"]
 const SEARCHED_FIELDS = ["name", "title"]
 
 /** The fields an answer usually says how many there are in. */
-const COUNT_FIELDS = ["count", "total", "total_count", "totalCount"]
+const COUNT_FIELDS = ["count", "total", "total_count", "totalCount", "numFound", "num_found"]
 
 /** A `<...>; rel="next"` in a `Link` header. */
 const NEXT_LINK = /<([^>]+)>\s*;[^,]*\brel="?next"?/
@@ -131,9 +131,10 @@ export async function answersUnder(
 ): Promise<boolean> {
   const [first] = collections ?? []
   if (!first || !IS_WEB_ADDRESS.test(address)) return false
-  const { at } = wantedAt(first)
-  const path = IS_FOUND_BY_NAME.test(at) ? at.replace(IS_FOUND_BY_NAME, encodeURIComponent(samples?.[0] ?? "")) : at
-  if (IS_FOUND_BY_NAME.test(at) && !samples?.length) return false
+  const { name, at } = wantedAt(first)
+  const [sample] = samplesFor(name, samples)
+  const path = IS_FOUND_BY_NAME.test(at) ? at.replace(IS_FOUND_BY_NAME, encodeURIComponent(sample ?? "")) : at
+  if (IS_FOUND_BY_NAME.test(at) && sample === undefined) return false
   try {
     const answer = await reader.read(`${address}${path}`)
     return answer.status < 400 && isJSON(answer.text)
@@ -222,8 +223,15 @@ async function lookAtWebServer({
   for (const { name, at } of wanted) {
     try {
       const look = IS_FOUND_BY_NAME.test(at)
-        ? await readFoundByName(place, name, at, samples ?? [], reader)
-        : await readCollection(place, name, at, reader)
+        ? await readFoundByName(place, name, at, samplesFor(name, samples, at), reader)
+        : searchIn(at)
+          ? await readSearched(place, name, at, reader)
+          : await readCollection(place, name, at, reader)
+      if (look.searchedOnly) {
+        notes.push(
+          `"${name}" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.`
+        )
+      }
       if (look.movedFrom) {
         notes.push(
           `"${name}" answered from ${look.at}, not ${look.movedFrom}:  its line says where it answers, so each read is one request, not two.`
@@ -239,7 +247,8 @@ async function lookAtWebServer({
   return {
     address: place,
     collections: read,
-    headers: keptHeaders(first.headers),
+    // what its lists answered with too:  an address that's a page for people (Open Library's) says nothing of pages
+    headers: { ...read[0]?.headers, ...keptHeaders(first.headers) },
     ...(found.text !== undefined && { docs: found.text, docsAt: found.at! }),
     ...(version && { version }),
     notes
@@ -251,10 +260,65 @@ async function lookAtWebServer({
  * - A path with a name in braces, and no name of its own, is named for what's before them:  `/page/summary/{name}` => `summary`.
  */
 function wantedAt(given: string): { name: string; at: string } {
-  const [named, path = named] = given.includes("=") ? given.split("=", 2) : [undefined, given]
-  const at = `/${path!.trim().replace(/^\/+/, "")}`
-  const listed = at.replace(/\/\{[^{}]*\}.*$/, "")
+  // at the first `=` only:  a search's path has one of its own, `books=/search.json?q=dune`
+  const cut = given.indexOf("=")
+  const isNamed = cut >= 0 && !given.slice(0, cut).includes("?")
+  const [named, path] = isNamed ? [given.slice(0, cut), given.slice(cut + 1)] : [undefined, given]
+  const at = `/${path.trim().replace(/^\/+/, "")}`
+  const listed = at
+    .replace(/\/\{[^{}]*\}.*$/, "")
+    .replace(/[?#].*$/, "")
+    .replace(/\.json$/, "")
   return { name: named?.trim() || listed.slice(listed.lastIndexOf("/") + 1), at }
+}
+
+/**
+ * The names `--samples` gives the collection `name`:  each plain one, and each named for it, `authors=OL79034A`.
+ * - So two collections found by name each read by their own:  Open Library's author and edition ids look alike.
+ * - Named by its address instead, `/authors/{name}.json=OL79034A`:  how looking again names them.
+ */
+function samplesFor(name: string, samples: readonly string[] | undefined, at?: string): string[] {
+  return (samples ?? []).flatMap((sample) => {
+    const cut = sample.indexOf("=")
+    if (cut < 0) return [sample]
+    const named = sample.slice(0, cut).trim()
+    return named === name || named === at ? [sample.slice(cut + 1).trim()] : []
+  })
+}
+
+/** A search's address, as `--collections` gives it:  `/search.json?q=dune`, its path, its parameter and the word asked. */
+function searchIn(at: string): { path: string; param: string; word: string } | undefined {
+  const [, path, param, word] = /^([^?]+)\?([^=&]+)=([^&]+)$/.exec(at) ?? []
+  return path && param && word ? { path, param, word: decodeURIComponent(word).toLowerCase() } : undefined
+}
+
+/**
+ * A collection asked for by a search, `/search.json?q=dune`:  read as asked, then asked with no search.
+ * - Answering nothing with none, it's searched only, with no list of them all (Open Library's books).
+ * - What it searches is the field holding the word in the most rows, the usual ones first.
+ */
+async function readSearched(place: string, name: string, at: string, reader: PoliteReader): Promise<CollectionLook> {
+  const { path, param, word } = searchIn(at)!
+  const look = await readCollection(place, name, at, reader, { isSearch: true })
+  look.at = path
+  const holding = (field: string) => look.rows.filter((row) => textIn(row[field]).toLowerCase().includes(word)).length
+  const fields = [...new Set([...SEARCHED_FIELDS, ...look.rows.flatMap((row) => Object.keys(row))])]
+  const field = fields.reduce<string | undefined>(
+    (best, each) => (holding(each) > (best === undefined ? 0 : holding(best)) ? each : best),
+    undefined
+  )
+  if (field !== undefined) look.searchedBy = { param, field }
+  look.searchedFor = word
+  try {
+    const answer = await reader.read(`${place}${path}`)
+    const body = answer.status < 400 && !answer.isCut ? jsonOf(answer.text) : undefined
+    const rows = Array.isArray(body) ? body : wrappedRows(body)?.rows
+    if (!rows?.length) look.searchedOnly = true
+  } catch (error) {
+    if (error instanceof IngestStopped) throw error
+    look.searchedOnly = true
+  }
+  return look
 }
 
 /** A collection found by name, its address saying where the name goes:  `/page/summary/{name}`. */
@@ -323,7 +387,13 @@ function wrappedRows(body: unknown): { rows: unknown[]; rowsAt: string } | undef
 }
 
 /** A few pages of one collection. */
-async function readCollection(place: string, name: string, at: string, reader: PoliteReader): Promise<CollectionLook> {
+async function readCollection(
+  place: string,
+  name: string,
+  at: string,
+  reader: PoliteReader,
+  { isSearch = false }: { isSearch?: boolean } = {}
+): Promise<CollectionLook> {
   const look: CollectionLook = { name, at, rows: [], paging: "none", pagesRead: 0, hasMore: false }
   let url: string | undefined = `${place}${at}`
   while (url && look.pagesRead < MOST_PAGES) {
@@ -335,6 +405,7 @@ async function readCollection(place: string, name: string, at: string, reader: P
     const rows = Array.isArray(body) ? body : wrapped?.rows
     if (!rows) throw new TypeError("its answer isn't a list")
     look.pagesRead++
+    if (look.pagesRead === 1) look.headers = keptHeaders(answer.headers)
     // led elsewhere on the same server, swapi's `/people` to `/people/`:  its address is where it answered from
     if (look.pagesRead === 1) {
       const landed = answer.url.replace(/[?#].*$/, "")
@@ -358,7 +429,7 @@ async function readCollection(place: string, name: string, at: string, reader: P
   if (look.rowsItSays === undefined) delete look.rowsItSays
   if (look.hasMore && !look.takesLimit) look.takesLimit = false
   // searched by the names its list gives, before a summary's rows are read whole
-  const searchedBy = await searchOf(`${place}${look.at}`, look, reader)
+  const searchedBy = isSearch ? undefined : await searchOf(`${place}${look.at}`, look, reader)
   if (searchedBy) look.searchedBy = searchedBy
   const summary = summaryOf(look.rows, place)
   if (summary) {

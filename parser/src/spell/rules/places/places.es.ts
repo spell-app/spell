@@ -24,6 +24,7 @@ import { KeyWritten } from "./KeyWritten"
 import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
+import { PictureAt } from "./PictureAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -43,6 +44,7 @@ import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
 import { SearchesWith } from "./SearchesWith"
+import { SearchedAt } from "./SearchedAt"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -135,6 +137,13 @@ placesEs.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (se guarda|vive) 
 
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} están en {path:text}` })
 placesEs.addRule(CollectionAt, { syntax: `${THE} {collection:plural_type} se encuentran en {path:text}` })
+placesEs.addRule(SearchedAt, { syntax: `${THE} {collection:plural_type} se buscan en {path:text}` })
+placesEs.addRule(PictureAt, {
+  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} es una imagen en {path:text}`
+})
+placesEs.addRule(PictureAt, {
+  syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} es una imagen en {path:text}`
+})
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:member_words} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })

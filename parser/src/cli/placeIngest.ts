@@ -49,6 +49,7 @@ export type PlaceIngestOptions = {
   docs?: string
   collections?: string
   samples?: string
+  pictures?: string
   ai?: boolean
 }
 
@@ -58,13 +59,14 @@ export type PlaceIngestOptions = {
  * - throws `CliError` for whatever stopped it, having written nothing
  */
 export async function placeIngest(address: string, options: PlaceIngestOptions): Promise<number> {
-  const { kind, into, name, keySecret, docs, collections, samples, ai = true } = options
+  const { kind, into, name, keySecret, docs, collections, samples, pictures, ai = true } = options
   return stoppedAsCliError(async () => {
     const result = await ingestFor(ai).add({
       address,
       ...withValues({ kind, into, name, keySecret, docs }),
       ...(collections && { collections: collections.split(",").map((each) => each.trim()) }),
-      ...(samples && { samples: samples.split(",").map((each) => each.trim()) })
+      ...(samples && { samples: samples.split(",").map((each) => each.trim()) }),
+      ...(pictures && { pictures: pictures.split(",").map((each) => each.trim()) })
     })
     printAdded(result)
     return CLI.EXIT.OK
@@ -179,7 +181,7 @@ function filesBeside(path: string): string[] {
 
 /**
  * Compile the Spell and really read each type through it, on `core`:  the same place, the same row reading, as a page has.
- * - Each read asks for a page, not every row.
+ * - Each read asks for a page, not every row;  one that answers only a search searches, as a program has to.
  * - For as long as it runs, `fetch` is the one it's handed, so it can't write, and it stops at a size;
  *   and a relative address means here, as no page says where it is.
  * - What the program complains of on the console is collected:  `Expected weird to be type 'number', got: 30-165`.
@@ -187,7 +189,7 @@ function filesBeside(path: string): string[] {
  * - Every field is asked for:  what a type's `select` leaves out is what the program reads, and this one reads none.
  * - NEVER throws for a read that fails:  see `ReadThrough`.
  */
-export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {}, fetch }) => {
+export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {}, bySearch = {}, fetch }) => {
   const { core } = await import("spell/parser/core")
   const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
   const held = {
@@ -225,7 +227,10 @@ export const readThroughSpell: ReadThrough = async ({ spell, types, byName = {},
             complaints.push(`No row read filled ${words}'s "${field}".`)
           continue
         }
-        const list = await core.savedThings(Class, { page: { size: READ_ROWS } })
+        // answering only a search:  searched, as a program has to
+        const searched = bySearch[words]
+        const search = searched && { search: { [searched.field]: searched.text } }
+        const list = await core.savedThings(Class, { page: { size: READ_ROWS }, ...search })
         byType[words] = { rows: list.items.length }
         // a list that gives only names (`its lists give only each one's "name"`):  its first, read whole, says the rest
         const checked = givesOnly.test(spell) && list.items.length ? await readWhole(Class, list.items[0]!) : list.items

@@ -73,6 +73,8 @@ export class EveryThingWhere extends SpellExpression<"type|body?", { own?: OwnLi
       const where = getWhereMethod(match, type, body)
       return !handedFilterOf(where) && !handedSearchOf(where, searchesOf(saved)?.fields ?? []).length
     })
+    // given only to a search:  this `where` has to be one
+    if (savedPlaceOfMatch(type)) EveryThing.refusedUnlessSearched(match, type, () => getWhereMethod(match, type, body))
     const never = SP.Language.of(scope).parserMessage("never-both")
     SP.SpellWarnings.noteIf(match, never, () => canNeverBeTrue(P.matchAST(body)))
   }

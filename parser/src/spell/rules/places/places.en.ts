@@ -23,6 +23,7 @@ import { KeyWritten } from "./KeyWritten"
 import { LoadThings } from "./LoadThings"
 import { NumberOfThingsWhere } from "./NumberOfThingsWhere"
 import { OperationAt } from "./OperationAt"
+import { PictureAt } from "./PictureAt"
 import { CurrentPerson, PeopleHere, TheirField } from "./PeopleWords"
 import { TheyAre } from "./TheyAre"
 import { WhereField } from "./WhereField"
@@ -48,6 +49,7 @@ import { SavedInPlace } from "./SavedInPlace"
 import { SavedInTheCloud } from "./SavedInTheCloud"
 import { SearchedFields } from "./SearchedFields"
 import { SearchesWith } from "./SearchesWith"
+import { SearchedAt } from "./SearchedAt"
 import { ThereAreThings } from "./ThereAreThings"
 import { ThingWithId } from "./ThingWithId"
 import { TotalOf } from "./TotalOf"
@@ -145,6 +147,13 @@ places.addRule(SavedInTheCloud, { syntax: "{type:subject_it} (is saved|lives) in
 
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} live at {path:text}" })
 places.addRule(CollectionAt, { syntax: "{collection:plural_type} are found at {path:text}" })
+places.addRule(SearchedAt, { syntax: "{collection:plural_type} are searched at {path:text}" })
+places.addRule(PictureAt, {
+  syntax: "(a|an) {owner:known_type}'s {property:member_words} is a picture at {path:text}"
+})
+places.addRule(PictureAt, {
+  syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is a picture at {path:text}"
+})
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
 places.addRule(KeyIfSet, { syntax: "{type:subject_its} key is the secret {name:text}, if it's set" })

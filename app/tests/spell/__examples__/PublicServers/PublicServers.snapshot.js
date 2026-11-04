@@ -961,12 +961,637 @@ export const github = core.place(new Github(), {
   }, firstReads: () => [[Contributor], [Issue]] })
 
 // -----------
+core.heading("Open Library:  books by what they're called, who wrote them, and their covers")
+///////////////////////////////////////////////////////////////////////////////////
+// ## Open Library:  books by what they're called, who wrote them, and their covers
+///////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spellml.
+// `open library` is what this wrote, from looking at the server:
+//   spell place ingest https://openlibrary.org --into OpenLibrary.api.spell --name "open library" --no-ai
+//     --collections "books=/search.json?q=dune,authors=/authors/{name}.json,editions=/books/{name}.json"
+//     --samples authors=OL79034A,editions=OL32848840M --pictures "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
+// `spell place update OpenLibrary.api.spell` looks again, and changes only this file and OpenLibrary.api.json5.
+// It has no list of every book:  a program searches it, `every book where its title includes ...`.
+// Each book's authors are their ids, each read from the author's own record when something reads it;
+// its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.
+
+export class Book extends Thing {
+  // - its "authors" is a list of authors, stored as "author_key"
+  static { this.declareProp("authors", { itemType: "Author", storedAs: "author_key", init: () => new List({ instanceType: "Author" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1489, end: 1547 } }) }
+  get authors() { return core.linked(this, "authors", Author) }
+  set authors(value) { this.setProp("authors", value) }
+
+  // - its "author name" is a list of text
+  static { this.declareProp("authorName", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1551, end: 1586 } }) }
+  get authorName() { return this.getProp("authorName") }
+  set authorName(value) { this.setProp("authorName", value) }
+
+  // - its "cover edition" is an edition, stored as "cover_edition_key"
+  static { this.declareProp("coverEdition", { type: "Edition", storedAs: "cover_edition_key", link: true, declaredAt: { path: "/OpenLibrary.api.spell", start: 1590, end: 1654 } }) }
+  get coverEdition() { return core.linked(this, "coverEdition", Edition) }
+  set coverEdition(value) { this.setProp("coverEdition", value) }
+
+  // - its "cover height" is a number
+  static { this.declareProp("coverHeight", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1658, end: 1688 } }) }
+  get coverHeight() { return this.getProp("coverHeight") }
+  set coverHeight(value) { this.setProp("coverHeight", value) }
+
+  /** a picture's address */
+  // - its "cover i" is text
+  static { this.declareProp("coverI", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1692, end: 1713 } }) }
+  get coverI() { return this.getProp("coverI") }
+  set coverI(value) { this.setProp("coverI", value) }
+
+  // - its "cover width" is a number
+  static { this.declareProp("coverWidth", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1741, end: 1770 } }) }
+  get coverWidth() { return this.getProp("coverWidth") }
+  set coverWidth(value) { this.setProp("coverWidth", value) }
+
+  // - its "ebook access" is text
+  static { this.declareProp("ebookAccess", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1774, end: 1800 } }) }
+  get ebookAccess() { return this.getProp("ebookAccess") }
+  set ebookAccess(value) { this.setProp("ebookAccess", value) }
+
+  // - its "edition count" is a number
+  static { this.declareProp("editionCount", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1804, end: 1835 } }) }
+  get editionCount() { return this.getProp("editionCount") }
+  set editionCount(value) { this.setProp("editionCount", value) }
+
+  // - its "first publish year" is a number
+  static { this.declareProp("firstPublishYear", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1839, end: 1875 } }) }
+  get firstPublishYear() { return this.getProp("firstPublishYear") }
+  set firstPublishYear(value) { this.setProp("firstPublishYear", value) }
+
+  // - its "fulltext" is yes or no, stored as "has_fulltext"
+  static { this.declareProp("fulltext", { type: "choice", storedAs: "has_fulltext", declaredAt: { path: "/OpenLibrary.api.spell", start: 1879, end: 1932 } }) }
+  get fulltext() { return this.getProp("fulltext") }
+  set fulltext(value) { this.setProp("fulltext", value) }
+
+  // - its "ia" is a list of text
+  static { this.declareProp("ia", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1936, end: 1962 } }) }
+  get ia() { return this.getProp("ia") }
+  set ia(value) { this.setProp("ia", value) }
+
+  // - its "ia collection" is a list of text
+  static { this.declareProp("iaCollection", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1966, end: 2003 } }) }
+  get iaCollection() { return this.getProp("iaCollection") }
+  set iaCollection(value) { this.setProp("iaCollection", value) }
+
+  // - its "language" is a list of text
+  static { this.declareProp("language", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2007, end: 2039 } }) }
+  get language() { return this.getProp("language") }
+  set language(value) { this.setProp("language", value) }
+
+  // - its "lending edition s" is text
+  static { this.declareProp("lendingEditionS", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2043, end: 2074 } }) }
+  get lendingEditionS() { return this.getProp("lendingEditionS") }
+  set lendingEditionS(value) { this.setProp("lendingEditionS", value) }
+
+  // - its "lending identifier s" is text
+  static { this.declareProp("lendingIdentifierS", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2078, end: 2112 } }) }
+  get lendingIdentifierS() { return this.getProp("lendingIdentifierS") }
+  set lendingIdentifierS(value) { this.setProp("lendingIdentifierS", value) }
+
+  // - its "public scan b" is yes or no
+  static { this.declareProp("publicScanB", { type: "choice", declaredAt: { path: "/OpenLibrary.api.spell", start: 2116, end: 2148 } }) }
+  get publicScanB() { return this.getProp("publicScanB") }
+  set publicScanB(value) { this.setProp("publicScanB", value) }
+
+  // - its "series key" is a list of text
+  static { this.declareProp("seriesKey", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2152, end: 2186 } }) }
+  get seriesKey() { return this.getProp("seriesKey") }
+  set seriesKey(value) { this.setProp("seriesKey", value) }
+
+  // - its "series name" is a list of text
+  static { this.declareProp("seriesName", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2190, end: 2225 } }) }
+  get seriesName() { return this.getProp("seriesName") }
+  set seriesName(value) { this.setProp("seriesName", value) }
+
+  // - its "series position" is a list of text
+  static { this.declareProp("seriesPosition", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2229, end: 2268 } }) }
+  get seriesPosition() { return this.getProp("seriesPosition") }
+  set seriesPosition(value) { this.setProp("seriesPosition", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2272, end: 2291 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "subtitle" is text
+  static { this.declareProp("subtitle", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2295, end: 2317 } }) }
+  get subtitle() { return this.getProp("subtitle") }
+  set subtitle(value) { this.setProp("subtitle", value) }
+
+  /** Who wrote it first:  read from Open Library's record of them, by their id */
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1714, end: 1850 }, readsFrom: ["open_library"] }) }
+  get writer() {
+    return core.getItemAt(this.authors, 0)
+  }
+
+  draw() {
+    return h("ui-card", {
+      class: "book",
+      onClick: core.pressed(this, async () => await this.open()),
+      style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+    },
+      h("ui-image", { src: () => this.coverI, alt: "" }),
+      h("ui-content",
+        h("ui-header", () => this.title),
+        h("ui-meta", () => core.getItemAt(this.authorName, 0), " · ", () => this.firstPublishYear)
+      )
+    )
+  }
+
+  drawPage() {
+    return h("ui-stack", { class: "book-page", direction: "horizontal", wrap: true, align: "start", part: "page" },
+      h("ui-image", { class: "cover", src: () => this.coverI, alt: "" }),
+      h("ui-stack",
+        h("ui-header", { size: "large" }, () => this.title),
+        h("ui-text",
+          "First published in ",
+          () => this.firstPublishYear,
+          " · ",
+          () => this.editionCount,
+          " editions"
+        ),
+        () => this.drawWriting()
+      )
+    )
+  }
+
+  static drawsWaiting = true
+  drawWriting() {
+    if (this.writer) return this.writer.drawCard()
+
+    core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "writing" },
+      "Asking Open Library who wrote it"
+    ))
+    core.readRider("failed", () => h("ui-text", { part: "writing" }, "Open Library can't say who wrote it just now."))
+  }
+
+  ///////////////////////////////////////
+  // ## What a book can do, from anywhere
+  ///////////////////////////////////////
+  // Only this file can name the public servers:  so its other files ask this.
+
+  async open() {
+    publicServers.library.showing = this
+  }
+
+  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "title"] }
+}
+
+export class Author extends Thing {
+  // - its "links" is a list of links
+  static { this.declareProp("links", { itemType: "Link", init: () => new List({ instanceType: "Link" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2374, end: 2404 } }) }
+  get links() { return this.getProp("links") }
+  set links(value) { this.setProp("links", value) }
+
+  // - its "kind" is a kind, stored as "type"
+  static { this.declareProp("kind", { type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2408, end: 2446 } }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+
+  // - its "key" is text
+  static { this.declareProp("key", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2450, end: 2467 } }) }
+  get key() { return this.getProp("key") }
+  set key(value) { this.setProp("key", value) }
+
+  // - its "name" is text
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2471, end: 2489 } }) }
+  get name() { return this.getProp("name") }
+  set name(value) { this.setProp("name", value) }
+
+  // - its "source records" is a list of text
+  static { this.declareProp("sourceRecords", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2493, end: 2531 } }) }
+  get sourceRecords() { return this.getProp("sourceRecords") }
+  set sourceRecords(value) { this.setProp("sourceRecords", value) }
+
+  // - its "birth date" is text
+  static { this.declareProp("birthDate", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2535, end: 2559 } }) }
+  get birthDate() { return this.getProp("birthDate") }
+  set birthDate(value) { this.setProp("birthDate", value) }
+
+  // - its "bio" is text
+  static { this.declareProp("bio", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2563, end: 2580 } }) }
+  get bio() { return this.getProp("bio") }
+  set bio(value) { this.setProp("bio", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2584, end: 2603 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "alternate names" is a list of text
+  static { this.declareProp("alternateNames", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2607, end: 2646 } }) }
+  get alternateNames() { return this.getProp("alternateNames") }
+  set alternateNames(value) { this.setProp("alternateNames", value) }
+
+  // - its "remote ids" is a remote id
+  static { this.declareProp("remoteIds", { type: "RemoteId", declaredAt: { path: "/OpenLibrary.api.spell", start: 2650, end: 2681 } }) }
+  get remoteIds() { return this.getProp("remoteIds") }
+  set remoteIds(value) { this.setProp("remoteIds", value) }
+
+  // - its "photos" is a list of numbers
+  static { this.declareProp("photos", { itemType: "number", init: () => new List({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2685, end: 2718 } }) }
+  get photos() { return this.getProp("photos") }
+  set photos(value) { this.setProp("photos", value) }
+
+  // - its "death date" is text
+  static { this.declareProp("deathDate", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2722, end: 2746 } }) }
+  get deathDate() { return this.getProp("deathDate") }
+  set deathDate(value) { this.setProp("deathDate", value) }
+
+  // - its "personal name" is text
+  static { this.declareProp("personalName", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2750, end: 2777 } }) }
+  get personalName() { return this.getProp("personalName") }
+  set personalName(value) { this.setProp("personalName", value) }
+
+  // - its "latest revision" is a number
+  static { this.declareProp("latestRevision", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2781, end: 2814 } }) }
+  get latestRevision() { return this.getProp("latestRevision") }
+  set latestRevision(value) { this.setProp("latestRevision", value) }
+
+  // - its "revision" is a number
+  static { this.declareProp("revision", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2818, end: 2844 } }) }
+  get revision() { return this.getProp("revision") }
+  set revision(value) { this.setProp("revision", value) }
+
+  // - its "created" is a created
+  static { this.declareProp("created", { type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 2848, end: 2874 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - its "last modified" is a last modified
+  static { this.declareProp("lastModified", { type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 2878, end: 2916 } }) }
+  get lastModified() { return this.getProp("lastModified") }
+  set lastModified(value) { this.setProp("lastModified", value) }
+
+  drawCard() {
+    return h("ui-card", { class: "author", part: "card" },
+      h("ui-content",
+        h("ui-header", () => this.name),
+        h("ui-meta", "Born ", () => this.birthDate),
+        h("ui-description", () => this.bio)
+      )
+    )
+  }
+
+  static savedIn = { place: "open_library", collection: "authors", select: ["name", "birthDate", "bio", "title"] }
+}
+
+export class Edition extends Thing {
+  // - its "kind" is a kind, stored as "type"
+  static { this.declareProp("kind", { type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2974, end: 3012 } }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3016, end: 3035 } }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "authors" is a list of edition authors
+  static { this.declareProp("authors", { itemType: "EditionAuthor", init: () => new List({ instanceType: "EditionAuthor" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3039, end: 3081 } }) }
+  get authors() { return this.getProp("authors") }
+  set authors(value) { this.setProp("authors", value) }
+
+  // - its "publish date" is text
+  static { this.declareProp("publishDate", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3085, end: 3111 } }) }
+  get publishDate() { return this.getProp("publishDate") }
+  set publishDate(value) { this.setProp("publishDate", value) }
+
+  // - its "source records" is a list of text
+  static { this.declareProp("sourceRecords", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3115, end: 3153 } }) }
+  get sourceRecords() { return this.getProp("sourceRecords") }
+  set sourceRecords(value) { this.setProp("sourceRecords", value) }
+
+  // - its "number of pages" is a number
+  static { this.declareProp("numberOfPages", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3157, end: 3190 } }) }
+  get numberOfPages() { return this.getProp("numberOfPages") }
+  set numberOfPages(value) { this.setProp("numberOfPages", value) }
+
+  // - its "publishers" is a list of text
+  static { this.declareProp("publishers", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3194, end: 3228 } }) }
+  get publishers() { return this.getProp("publishers") }
+  set publishers(value) { this.setProp("publishers", value) }
+
+  // - its "physical format" is text
+  static { this.declareProp("physicalFormat", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3232, end: 3261 } }) }
+  get physicalFormat() { return this.getProp("physicalFormat") }
+  set physicalFormat(value) { this.setProp("physicalFormat", value) }
+
+  // - its "notes" is a note
+  static { this.declareProp("notes", { type: "Note", declaredAt: { path: "/OpenLibrary.api.spell", start: 3265, end: 3286 } }) }
+  get notes() { return this.getProp("notes") }
+  set notes(value) { this.setProp("notes", value) }
+
+  // - its "full title" is text
+  static { this.declareProp("fullTitle", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3290, end: 3314 } }) }
+  get fullTitle() { return this.getProp("fullTitle") }
+  set fullTitle(value) { this.setProp("fullTitle", value) }
+
+  // - its "covers" is a list of numbers
+  static { this.declareProp("covers", { itemType: "number", init: () => new List({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3318, end: 3351 } }) }
+  get covers() { return this.getProp("covers") }
+  set covers(value) { this.setProp("covers", value) }
+
+  // - its "works" is a list of works
+  static { this.declareProp("works", { itemType: "Work", init: () => new List({ instanceType: "Work" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3355, end: 3385 } }) }
+  get works() { return this.getProp("works") }
+  set works(value) { this.setProp("works", value) }
+
+  // - its "key" is text
+  static { this.declareProp("key", { type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3389, end: 3406 } }) }
+  get key() { return this.getProp("key") }
+  set key(value) { this.setProp("key", value) }
+
+  // - its "local id" is a list of text
+  static { this.declareProp("localId", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3410, end: 3442 } }) }
+  get localId() { return this.getProp("localId") }
+  set localId(value) { this.setProp("localId", value) }
+
+  // - its "latest revision" is a number
+  static { this.declareProp("latestRevision", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3446, end: 3479 } }) }
+  get latestRevision() { return this.getProp("latestRevision") }
+  set latestRevision(value) { this.setProp("latestRevision", value) }
+
+  // - its "revision" is a number
+  static { this.declareProp("revision", { type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3483, end: 3509 } }) }
+  get revision() { return this.getProp("revision") }
+  set revision(value) { this.setProp("revision", value) }
+
+  // - its "created" is a created
+  static { this.declareProp("created", { type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 3513, end: 3539 } }) }
+  get created() { return this.getProp("created") }
+  set created(value) { this.setProp("created", value) }
+
+  // - its "last modified" is a last modified
+  static { this.declareProp("lastModified", { type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 3543, end: 3581 } }) }
+  get lastModified() { return this.getProp("lastModified") }
+  set lastModified(value) { this.setProp("lastModified", value) }
+
+  static savedIn = { place: "open_library", collection: "editions", select: ["title", "authors"] }
+}
+
+export class Link extends Thing {
+  // - its "title" is text
+  static { this.declareProp("title", { type: "text" }) }
+  get title() { return this.getProp("title") }
+  set title(value) { this.setProp("title", value) }
+
+  // - its "url" is text
+  static { this.declareProp("url", { type: "text" }) }
+  get url() { return this.getProp("url") }
+  set url(value) { this.setProp("url", value) }
+
+  // - its "kind" is a kind, stored as "type"
+  static { this.declareProp("kind", { type: "Kind", storedAs: "type" }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+}
+
+export class Kind extends Thing {
+  // - its "key" is text
+  static { this.declareProp("key", { type: "text" }) }
+  get key() { return this.getProp("key") }
+  set key(value) { this.setProp("key", value) }
+}
+
+export class RemoteId extends Thing {
+  // - its "viaf" is a number
+  static { this.declareProp("viaf", { type: "number" }) }
+  get viaf() { return this.getProp("viaf") }
+  set viaf(value) { this.setProp("viaf", value) }
+
+  // - its "wikidata" is text
+  static { this.declareProp("wikidata", { type: "text" }) }
+  get wikidata() { return this.getProp("wikidata") }
+  set wikidata(value) { this.setProp("wikidata", value) }
+
+  // - its "isni" is a number
+  static { this.declareProp("isni", { type: "number" }) }
+  get isni() { return this.getProp("isni") }
+  set isni(value) { this.setProp("isni", value) }
+
+  // - its "amazon" is text
+  static { this.declareProp("amazon", { type: "text" }) }
+  get amazon() { return this.getProp("amazon") }
+  set amazon(value) { this.setProp("amazon", value) }
+
+  // - its "bookbrainz" is text
+  static { this.declareProp("bookbrainz", { type: "text" }) }
+  get bookbrainz() { return this.getProp("bookbrainz") }
+  set bookbrainz(value) { this.setProp("bookbrainz", value) }
+
+  // - its "goodreads" is a number
+  static { this.declareProp("goodreads", { type: "number" }) }
+  get goodreads() { return this.getProp("goodreads") }
+  set goodreads(value) { this.setProp("goodreads", value) }
+
+  // - its "gnd" is a number
+  static { this.declareProp("gnd", { type: "number" }) }
+  get gnd() { return this.getProp("gnd") }
+  set gnd(value) { this.setProp("gnd", value) }
+
+  // - its "imdb" is text
+  static { this.declareProp("imdb", { type: "text" }) }
+  get imdb() { return this.getProp("imdb") }
+  set imdb(value) { this.setProp("imdb", value) }
+
+  // - its "lc naf" is text
+  static { this.declareProp("lcNaf", { type: "text" }) }
+  get lcNaf() { return this.getProp("lcNaf") }
+  set lcNaf(value) { this.setProp("lcNaf", value) }
+
+  // - its "librarything" is text
+  static { this.declareProp("librarything", { type: "text" }) }
+  get librarything() { return this.getProp("librarything") }
+  set librarything(value) { this.setProp("librarything", value) }
+
+  // - its "musicbrainz" is text
+  static { this.declareProp("musicbrainz", { type: "text" }) }
+  get musicbrainz() { return this.getProp("musicbrainz") }
+  set musicbrainz(value) { this.setProp("musicbrainz", value) }
+
+  // - its "storygraph" is text
+  static { this.declareProp("storygraph", { type: "text" }) }
+  get storygraph() { return this.getProp("storygraph") }
+  set storygraph(value) { this.setProp("storygraph", value) }
+
+  // - its "inventaire" is text
+  static { this.declareProp("inventaire", { type: "text" }) }
+  get inventaire() { return this.getProp("inventaire") }
+  set inventaire(value) { this.setProp("inventaire", value) }
+
+  // - its "librivox" is a number
+  static { this.declareProp("librivox", { type: "number" }) }
+  get librivox() { return this.getProp("librivox") }
+  set librivox(value) { this.setProp("librivox", value) }
+
+  // - its "project gutenberg" is a number
+  static { this.declareProp("projectGutenberg", { type: "number" }) }
+  get projectGutenberg() { return this.getProp("projectGutenberg") }
+  set projectGutenberg(value) { this.setProp("projectGutenberg", value) }
+
+  // - its "opac sbn" is text
+  static { this.declareProp("opacSbn", { type: "text" }) }
+  get opacSbn() { return this.getProp("opacSbn") }
+  set opacSbn(value) { this.setProp("opacSbn", value) }
+}
+
+export class Created extends Thing {
+  // - its "kind" is text, stored as "type"
+  static { this.declareProp("kind", { type: "text", storedAs: "type" }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+
+  // - its "value" is a date
+  static { this.declareProp("value", { type: "date" }) }
+  get value() { return this.getProp("value") }
+  set value(value) { this.setProp("value", value) }
+}
+
+export class LastModified extends Thing {
+  // - its "kind" is text, stored as "type"
+  static { this.declareProp("kind", { type: "text", storedAs: "type" }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+
+  // - its "value" is a date
+  static { this.declareProp("value", { type: "date" }) }
+  get value() { return this.getProp("value") }
+  set value(value) { this.setProp("value", value) }
+}
+
+export class EditionAuthor extends Thing {
+  // - its "key" is text
+  static { this.declareProp("key", { type: "text" }) }
+  get key() { return this.getProp("key") }
+  set key(value) { this.setProp("key", value) }
+}
+
+export class Note extends Thing {
+  // - its "kind" is text, stored as "type"
+  static { this.declareProp("kind", { type: "text", storedAs: "type" }) }
+  get kind() { return this.getProp("kind") }
+  set kind(value) { this.setProp("kind", value) }
+
+  // - its "value" is text
+  static { this.declareProp("value", { type: "text" }) }
+  get value() { return this.getProp("value") }
+  set value(value) { this.setProp("value", value) }
+}
+
+export class Work extends Thing {
+  // - its "key" is text
+  static { this.declareProp("key", { type: "text" }) }
+  get key() { return this.getProp("key") }
+  set key(value) { this.setProp("key", value) }
+}
+
+export class OpenLibrary extends Place {}
+export const openLibrary = core.place(new OpenLibrary(), {
+  name: "open_library",
+  kind: "web server",
+  at: "https://openlibrary.org",
+  idColumn: "key",
+  rowsIn: "docs",
+  checkedEvery: 30,
+  namesLike: "author_key",
+  searches: { param: "q", fields: ["titles"] },
+  collections: {
+    books: {
+      at: "/search.json",
+      searchedOnly: true,
+      pictures: { coverI: "https://covers.openlibrary.org/b/id/{id}-M.jpg" }
+    },
+    authors: { at: "/authors/{id}.json" },
+    editions: { at: "/books/{id}.json" }
+  }
+})
+
+// -----------
+core.heading("Open Library")
+//////////////////
+// ## Open Library
+//////////////////
+// Books by what they're called, who wrote them, and their covers.
+// Every thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// Open Library has no list of every book, only a search:  so the page always searches, for what's typed.
+
+export class OpenLibraryPage extends Thing {
+  // - its "search" is text
+  static { this.declareProp("search", { type: "text" }) }
+  get search() { return this.getProp("search") }
+  set search(value) { this.setProp("search", value) }
+
+  // - its "showing" is a book
+  static { this.declareProp("showing", { type: "Book", link: true }) }
+  get showing() { return core.linked(this, "showing", Book) }
+  set showing(value) { this.setProp("showing", value) }
+
+  create() {
+    this.search = "dune"
+  }
+
+  /** What the search finds:  Open Library looks, by the title, and gives back the first hundred */
+  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spellml", start: 546, end: 715 }, readsFrom: ["open_library"] }) }
+  get found() { return core.waitedValue(this, "found", async () => {
+    return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book) => core.includes(book.title, this.search))
+  }, () => [this.search]) }
+
+  static drawsWaiting = true
+  draw() {
+    return [
+      h("ui-header", { size: "large" }, "Books, from Open Library"),
+      h("ui-form", { class: "find", value: this },
+        h("ui-field", { label: "A book, by its title" },
+          h("ui-input", { name: "search", icon: "search", placeholder: "Dune" })
+        )
+      ),
+      this.showing ? [
+        h("ui-button", {
+          class: "back",
+          appearance: "basic",
+          icon: "arrow left",
+          onClick: core.pressed(this, async () => (this.showing = undefined)),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Back"),
+        this.showing.drawPage()
+      ] : core.drawRead(() => this.found, (book) => core.drawThing(book), {
+        waiting: () => h("ui-loader", { visible: true, inline: true, text: true }, "Asking Open Library"),
+        none: () => h("ui-text", "No book is called that."),
+        failedSay: () => "Open Library can't be reached just now.",
+        paging: () => "pages",
+        items: () => h("ui-cards", { columns: "5", doubling: true })
+      }),
+      h("ui-text", { class: "credits", size: "small" },
+        "From ",
+        h("ui-link", { link: "https://openlibrary.org/developers/api" }, "Open Library's API"),
+        ", asked for as you look;  its covers from its covers server."
+      )
+    ]
+  }
+}
+
+core.heading("A book")
+////////////
+// ## A book
+////////////
+// Its cover, its title and who wrote it:  on its card, the first name the search gave;  on its own page, its first author, read from their own record.
+
+core.heading("Who wrote it")
+//# Who wrote it
+
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first.
+// GitHub's is first, then Open Library's.
 
 export class PublicServer extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -975,6 +1600,11 @@ export class PublicServer extends App {
   static { this.declareProp("tab", { type: "text" }) }
   get tab() { return this.getProp("tab") }
   set tab(value) { this.setProp("tab", value) }
+
+  // - its "library" is a new open library page
+  static { this.declareProp("library", { init: () => new OpenLibraryPage(), early: true }) }
+  get library() { return this.getProp("library") }
+  set library(value) { this.setProp("library", value) }
 
   create() {
     this.tab = "github"
@@ -991,13 +1621,20 @@ export class PublicServer extends App {
           active: () => this.tab === "github",
           onClick: core.pressed(this, () => this.showServer("github")),
           style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-        }, "GitHub")
+        }, "GitHub"),
+        h("ui-item", {
+          active: () => this.tab === "open library",
+          onClick: core.pressed(this, () => this.showServer("open library")),
+          style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
+        }, "Open Library")
       ),
-      this.tab === "github" ? core.drawThing(new GithubPage()) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : undefined
     ]
   }
 }
 export const publicServers = new PublicServer()
+
+core.heading("What a book can do, from anywhere")
 // -----------
 core.heading("GitHub")
 ////////////
@@ -1075,6 +1712,6 @@ core.heading("An issue")
 // Its number, its title, whose it is, and how much it's been talked about.
 
 // -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬`)
+core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()

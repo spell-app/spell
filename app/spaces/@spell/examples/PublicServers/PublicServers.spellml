@@ -1,10 +1,11 @@
 # Public Servers
 Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-GitHub's is first.
+GitHub's is first, then Open Library's.
 
 <spell-app "public servers">
 	<spell>
 		- its "tab" is text
+		- its "library" is a new open library page
 		- to create it:
 			set its tab to "github"
 	</spell>
@@ -16,9 +17,21 @@ GitHub's is first.
 	<draw>
 		<toolbar class="tabs" appearance="secondary pointing" aria-label="Servers">
 			<item active={its tab is "github"} onClick={show "github"}>GitHub</item>
+			<item active={its tab is "open library"} onClick={show "open library"}>Open Library</item>
 		</toolbar>
 		<if its tab is "github">
 			draw (a new github page)
-		</if>
+		<otherwise if its tab is "open library">
+			draw its library
+		</>
 	</draw>
 </spell-app>
+
+
+# What a book can do, from anywhere
+Only this file can name the public servers:  so its other files ask this.
+
+<spell>
+	to open (a book):
+		set the showing of the library of the public servers to it
+</spell>

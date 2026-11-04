@@ -293,6 +293,54 @@ describe("adding a source", () => {
     expect(pages).toMatchObject({ samples: ["Tatooine", "Hoth"], readThrough: { rows: 1 } })
   })
 
+  test("Open Library's way (epic `data` P29):  books only by a search, authors linked by their ids, covers on another server", async () => {
+    const COVERS = "https://covers.test/b/id/{id}-M.jpg"
+    const books = [
+      { key: "/works/OL1W", title: "Dune", author_key: ["OL1A"], cover_i: 7 },
+      { key: "/works/OL2W", title: "Dune Messiah", author_key: ["OL1A"], cover_i: 8 }
+    ]
+    const answers: Record<string, () => Response> = {
+      [`${API}/search.json?q=dune`]: () => Response.json({ numFound: 2, docs: books }),
+      [`${API}/search.json`]: () => Response.json({ numFound: 0, docs: [] }),
+      [`${API}/authors/OL1A.json`]: () => Response.json({ key: "/authors/OL1A", name: "Frank Herbert" }),
+      ["https://covers.test/b/id/7-M.jpg"]: () => new Response("jpeg", { headers: { "content-type": "image/jpeg" } })
+    }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = `${input instanceof Request ? input.url : input instanceof URL ? input.href : input}`
+      asked.push(url)
+      return answers[url]?.() ?? new Response("nope", { status: 404 })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = ingestOf({}, { fetch })
+    const { spell } = await ingest.add({
+      address: API,
+      kind: "web server",
+      into: "/L.spell",
+      name: "library",
+      collections: ["books=/search.json?q=dune", "authors=/authors/{name}.json"],
+      samples: ["authors=OL1A"],
+      pictures: [`cover_i=${COVERS}`]
+    })
+    expect(spell).toContain(`- books are searched at "/search.json"`)
+    expect(spell).toContain(`- it searches titles with "q"`)
+    // what's said of lists is said of those that list:  authors are read one at a time
+    expect(spell).toContain(`- its rows are its "docs"`)
+    expect(spell).toContain(`- authors are found at "/authors/{name}.json"`)
+    expect(spell).toContain(`- its "authors" is a list of authors, stored as "author_key"`)
+    expect(spell).toContain(`- a book's "cover i" is a picture at "${COVERS}"`)
+    expect(spell).toContain(`- its "cover i" is text  // a picture's address`)
+    const { collections, about } = descriptions.get("/L.json5")!
+    expect(collections.books).toMatchObject({ searchedOnly: true, searchedFor: "dune", readThrough: { rows: 2 } })
+    expect(collections.authors).toMatchObject({ samples: ["OL1A"], readThrough: { rows: 1 } })
+    expect(about.picturesAsked).toEqual([`cover_i=${COVERS}`])
+    // the read through searched, as a program has to
+    expect(asked.filter((url) => url.startsWith(`${API}/search.json`))).toEqual([
+      `${API}/search.json?q=dune`,
+      `${API}/search.json`,
+      `${API}/search.json?q=dune`
+    ])
+  })
+
   test("a list of names, each whole at its address, PokéAPI's way:  read whole, inside things in words", async () => {
     const at = (path: string) => `${API}${path}`
     const pikachu = {

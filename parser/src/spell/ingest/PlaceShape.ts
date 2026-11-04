@@ -11,6 +11,7 @@ import type {
   PlaceDescription,
   PlaceLook
 } from "./ingest.types"
+import { READER_ORIGIN } from "./PoliteReader"
 
 /** An address, as a link holds it. */
 const IS_LINK = /^https?:\/\/\S+$/
@@ -47,6 +48,7 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     collections[collectionNameFor(type)] = describeCollection(each, type)
   }
   for (const collection of Object.values(collections)) findLinks(collection, collections, look.address)
+  look.collections.forEach((each, at) => findIdLinks(each.rows, Object.values(collections)[at]!, collections))
   return {
     about: {
       name,
@@ -103,6 +105,8 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.takesLimit !== undefined && { takesLimit: look.takesLimit }),
     ...(look.samples && { samples: look.samples }),
     ...(look.searchedBy && { searchedBy: look.searchedBy }),
+    ...(look.searchedOnly && { searchedOnly: true }),
+    ...(look.searchedFor !== undefined && { searchedFor: look.searchedFor }),
     fields
   }
 }
@@ -324,6 +328,37 @@ function findLinks(
   }
 }
 
+/** A field's name that says it holds another's id:  `author_key`, `cover_edition_key`, `owner_id`. */
+const ID_WORDS = / (?:keys?|ids?)$/
+
+/**
+ * SIDE EFFECT:  each field of `collection` holding the id of a thing found by name, or a list of them, links to it:
+ * Open Library's book's `author_key`, `["OL79034A"]`, the authors found at `/authors/{name}.json` (epic `data` P29).
+ * - Known by the names that collection was read by:  some row here holds one of them.
+ * - Named for what it links to, as its name only says it's an id:  `author key` is the book's `authors`,
+ *   `cover edition key` its `cover edition`, when nothing else has those words.
+ */
+function findIdLinks(
+  rows: ReadonlyArray<Record<string, unknown>>,
+  collection: CollectionDescription,
+  collections: Readonly<Record<string, CollectionDescription>>
+): void {
+  const named = Object.entries(collections).filter(([, { samples }]) => samples?.length)
+  for (const [name, field] of Object.entries(collection.fields)) {
+    if ((field.type !== "text" && field.type !== "list of text") || field.linksTo) continue
+    const values = new Set(rows.flatMap((row) => [row[name]].flat()).filter((value) => typeof value === "string"))
+    const target = named.find(
+      ([, { samples, type }]) => type !== collection.type && samples!.some((one) => values.has(one))
+    )
+    if (!target) continue
+    field.linksTo = target[0]
+    const base = field.words.replace(ID_WORDS, "")
+    if (base === field.words) continue
+    const words = field.type === "list of text" ? P.pluralize(base) : base
+    if (!Object.values(collection.fields).some((each) => each.words === words)) field.words = words
+  }
+}
+
 /** What a look shows the place can do. */
 function canDoFrom({ headers, writesOffered }: PlaceLook, kind: string): PlaceDescription["canDo"] {
   const methods = headers["access-control-allow-methods"] ?? headers.allow
@@ -338,7 +373,7 @@ function canDoFrom({ headers, writesOffered }: PlaceLook, kind: string): PlaceDe
       ? `${limit ? `It allows ${limit} requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  ` : ""}${limits.map(([name, value]) => `${name}:  ${value}`).join(";  ")}`
       : "It named none in its answers.",
     browsers: origin
-      ? `Yes:  it says ${origin === "*" ? "any page" : `a page from ${origin}`} may read it.`
+      ? `Yes:  it says ${origin === "*" || origin === READER_ORIGIN ? "any page" : `a page from ${origin}`} may read it.`
       : "Not from a page on another address, as far as it says:  it sends no access-control header, so a page needs a server side in front."
   }
 }

@@ -271,9 +271,19 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--collections <paths>",
       "its collections' paths, comma-separated, for a source that doesn't list them;  name=path names one, and a " +
-        'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}"'
+        'name in braces is found by name, with no list:  "wiki pages=/page/summary/{name}";  one asked with a search ' +
+        'is searched:  "books=/search.json?q=dune"'
     )
-    .option("--samples <names>", "names to read a collection found by name by, comma-separated:  Tatooine,Hoth")
+    .option(
+      "--samples <names>",
+      "names to read a collection found by name by, comma-separated:  Tatooine,Hoth;  name=sample for one " +
+        "collection's own:  authors=OL79034A,editions=OL7353617M"
+    )
+    .option(
+      "--pictures <fields>",
+      "fields holding a picture's id on another server, comma-separated, each field=address, its braces where the id " +
+        'goes:  "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"'
+    )
     .option("--no-ai", "ask no agent:  only what can be worked out from what comes back")
     .action((address: string, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./placeIngest")).placeIngest(address, command.optsWithGlobals()))

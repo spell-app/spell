@@ -56,6 +56,11 @@ export type ReadThroughAsk = {
   types: Readonly<Record<string, string>>
   /** A type found by name, with no list, by its words:  a name to read one by. */
   byName?: Readonly<Record<string, string>>
+  /**
+   * A type that answers only a search, by its words:  the field to search, by Spell's name for it, and the text.
+   * - `{ book: { field: "title", text: "dune" } }`
+   */
+  bySearch?: Readonly<Record<string, { field: string; text: string }>>
   /** Every request the program makes goes through this:  it can't write, and it stops at a size. */
   fetch: typeof globalThis.fetch
 }
@@ -121,8 +126,16 @@ export type IngestAsk = {
    * - A path with a name in braces is a collection found by name, with no list:  read by `samples`.
    */
   collections?: readonly string[]
-  /** Names to read a collection found by name by:  `Luke Skywalker`, `Tatooine`. */
+  /**
+   * Names to read a collection found by name by:  `Luke Skywalker`, `Tatooine`.
+   * - `name=sample` is one collection's own:  `authors=OL79034A`.
+   */
   samples?: readonly string[]
+  /**
+   * Fields holding a picture's id on another server, each `field=address`, the braces where the id goes (epic `data` P29):
+   * `cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Each is tried on a row's value before it's written.
+   */
+  pictures?: readonly string[]
 }
 
 /** What one run did. */
@@ -198,6 +211,12 @@ export type CollectionLook = {
   samples?: string[]
   /** The address it was asked at, when it answered from another (its `at`):  swapi's `/people`, answering from `/people/`. */
   movedFrom?: string
+  /** Interesting headers of its first answer, as `PlaceLook.headers`. */
+  headers?: Record<string, string>
+  /** It answers only a search, with no list of them all:  Open Library's books, at `/search.json?q=...`. */
+  searchedOnly?: boolean
+  /** The word it was searched for, when `--collections` asked with one:  `dune`. */
+  searchedFor?: string
 }
 
 /** Everything a look at a place found. */
@@ -273,6 +292,11 @@ export type FieldDescription = {
   isListInside?: boolean
   /** It holds what holds it, the same fields:  PokéAPI's chain's `evolves_to`, a list of chains. */
   isItsOwner?: boolean
+  /**
+   * It holds a picture's id, and this is where its pictures are, the braces where the id goes (epic `data` P29):
+   * `https://covers.openlibrary.org/b/id/{id}-M.jpg`.  Tried on a value, which answered a picture.
+   */
+  pictureAt?: string
 }
 
 /** One collection of a place. */
@@ -305,6 +329,10 @@ export type CollectionDescription = {
   samples?: string[]
   /** How it searches, when trying it narrowed the rows:  `it searches names with "search"`. */
   searchedBy?: SearchSeen
+  /** It answers only a search, with no list of them all:  `books are searched at "/search.json"`. */
+  searchedOnly?: boolean
+  /** The word it was searched for, which a read through the Spell searches for again:  `dune`. */
+  searchedFor?: string
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** What a read through the Spell found. */
@@ -339,6 +367,8 @@ export type PlaceDescription = {
     docsAt?: string
     /** The collections it was asked to look at, `--collections` as given:  looking again looks at only these. */
     collectionsAsked?: string[]
+    /** The fields it was told hold a picture's id, `--pictures` as given:  looking again tries them again. */
+    picturesAsked?: string[]
   }
   /** What it can do, in plain words. */
   canDo: {

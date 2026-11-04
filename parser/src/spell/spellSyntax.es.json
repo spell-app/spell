@@ -4091,7 +4091,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -6178,7 +6178,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 33,
+          "line": 36,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -6501,6 +6501,37 @@
             },
             {
               "syntax": "(el|la|los|las) {collection:plural_type} se encuentran en {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SearchedAt",
+          "ruleNames": ["searched_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/SearchedAt.ts",
+          "line": 14,
+          "purpose": "Where a web server keeps a type's things that it gives only to a search, with no list of them all (epic `data` P29).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {collection:plural_type} se buscan en {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PictureAt",
+          "ruleNames": ["picture_at"],
+          "internal": false,
+          "file": "src/spell/rules/places/PictureAt.ts",
+          "line": 13,
+          "purpose": "A field holding a picture's id, on another server, and where its pictures are (epic `data` P29).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} es una imagen en {path:text}"
+            },
+            {
+              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} es una imagen en {path:text}"
             }
           ],
           "aliases": ["statement"]

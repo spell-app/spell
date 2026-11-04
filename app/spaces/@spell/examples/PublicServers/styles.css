@@ -1,3 +1,12 @@
 .person image {
   aspect-ratio: 1;
 }
+
+.book image {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.book-page .cover {
+  max-width: 16rem;
+}

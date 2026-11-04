@@ -134,6 +134,18 @@ export function isFoundByName(saved: P.SavedPlace | undefined): boolean {
 }
 
 /**
+ * Is what's saved in `saved` given only to a search, with no list of them all:  `books are searched at "/search.json"`
+ * (epic `data` P29)?
+ */
+export function isSearchedOnly(saved: P.SavedPlace | undefined): boolean {
+  const declaredBy = saved?.placeType.declaredBy
+  const rule = declaredBy?.rule.constructor as unknown as {
+    detailsOf?(match: P.Match): { collections?: Record<string, { searchedOnly?: boolean }> }
+  }
+  return !!declaredBy && !!rule.detailsOf?.(declaredBy)?.collections?.[saved!.collection]?.searchedOnly
+}
+
+/**
  * Is `field` one of the `words` a server says it searches (`SearchesWith`)?
  * - As written, or that plus `s` or `es`:  `names` is `name`, `nombres` is `nombre`, `ciudades` is `ciudad`.
  * - The runtime matches the same way:  `RestPlace`'s `searchedWord()`.

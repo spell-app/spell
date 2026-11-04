@@ -188,6 +188,7 @@ export class WriterProject {
       forEachNode(files, (node) => {
         if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
       })
+      this.noteLinkedElsewhere(scope)
     }
     const allowed = new Map<P.ASTMethodDefinition, boolean>()
     for (const [method, name] of named) {
@@ -335,6 +336,27 @@ export class WriterProject {
     const eventName = event && quotedText(event)
     if (!eventName || !(listener instanceof P.ASTMethodDefinition)) return
     this.listeners.set(eventName, [...(this.listeners.get(eventName) ?? []), listener])
+  }
+
+  /**
+   * SIDE EFFECT:  notes each field another of the project's files declares that follows an address (epic `data` P29):
+   * a page's file reading `the first item of its authors`, a field of the API file's, `its "authors" is a list of authors`.
+   * - From the declaring line's own tree:  the types' records don't say it.
+   */
+  protected noteLinkedElsewhere(scope: P.Scope | undefined): void {
+    const seen = new Set<P.TypeScope>()
+    for (let layer = scope; layer; layer = layer.parentScope) {
+      if (!(layer instanceof P.ProjectScope || layer instanceof P.FileScope)) continue
+      for (const type of layer.types?.get() ?? []) {
+        if (seen.has(type) || !type.savedPlace()) continue
+        seen.add(type)
+        for (const variable of type.variables?.get() ?? []) {
+          forEachNode([variable.declaredBy?.AST], (node) => {
+            if (node instanceof P.ASTReactiveProperty && node.linksTo) this.waitingValues.add(node.property.value)
+          })
+        }
+      }
+    }
   }
 
   /** SIDE EFFECT:  notes what the project IMPORTS that waits, from its declarations:  Klondike's `turn face up`, from Cards. */

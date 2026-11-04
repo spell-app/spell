@@ -20,7 +20,17 @@ export type PlaceDetails = {
   /** Its address, as written. */
   at?: string
   /** Each collection's mapping, by the name it goes by:  its address there, and its fields' names there. */
-  collections?: Record<string, { at?: string; fields?: Record<string, string> }>
+  collections?: Record<
+    string,
+    {
+      at?: string
+      fields?: Record<string, string>
+      /** Given only to a search:  `books are searched at "/search.json"`.  The compiler's, so a read always searches. */
+      searchedOnly?: boolean
+      /** Fields holding a picture's id, by ours, with where its pictures are:  see `RestCollection.pictures`. */
+      pictures?: Record<string, string>
+    }
+  >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
   /** It goes without its key where nothing holds it, a browser:  `its key is the secret "GITHUB_TOKEN", if it's set`. */
@@ -247,13 +257,14 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
         {
           ...(at !== undefined && { path: pathTemplateOf(at) }),
-          ...(all && Object.keys(all).length && { fields: all })
+          ...(all && Object.keys(all).length && { fields: all }),
+          ...(pictures && { pictures })
         }
       ]
     })

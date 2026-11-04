@@ -801,12 +801,544 @@ export const github = core.place(new Github(), {
   }, firstReads: () => [[Contributor], [Issue]] })
 
 // -----------
+core.heading("Open Library:  books by what they're called, who wrote them, and their covers")
+///////////////////////////////////////////////////////////////////////////////////
+// ## Open Library:  books by what they're called, who wrote them, and their covers
+///////////////////////////////////////////////////////////////////////////////////
+// A server other people run, and what it holds.  What's drawn from it is in OpenLibrary.spellml.
+// `open library` is what this wrote, from looking at the server:
+//   spell place ingest https://openlibrary.org --into OpenLibrary.api.spell --name "open library" --no-ai
+//     --collections "books=/search.json?q=dune,authors=/authors/{name}.json,editions=/books/{name}.json"
+//     --samples authors=OL79034A,editions=OL32848840M --pictures "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
+// `spell place update OpenLibrary.api.spell` looks again, and changes only this file and OpenLibrary.api.json5.
+// It has no list of every book:  a program searches it, `every book where its title includes ...`.
+// Each book's authors are their ids, each read from the author's own record when something reads it;
+// its cover is a picture on another server, covers.openlibrary.org, its address built from the book's cover id.
+
+export class Book extends Thing {
+  // - its "authors" is a list of authors, stored as "author_key"
+  static { this.declareProp("authors", { itemType: "Author", storedAs: "author_key", init: () => new List<Author>({ instanceType: "Author" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1489, end: 1547 } }) }
+  get authors(): List<Author> { return core.linked(this, "authors", Author) as List<Author> }
+  set authors(value: List<Author>) { this.setProp("authors", value) }
+
+  // - its "author name" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1551, end: 1586 } })
+  accessor authorName!: List<string>
+
+  // - its "cover edition" is an edition, stored as "cover_edition_key"
+  static { this.declareProp("coverEdition", { type: "Edition", storedAs: "cover_edition_key", link: true, declaredAt: { path: "/OpenLibrary.api.spell", start: 1590, end: 1654 } }) }
+  get coverEdition(): Edition { return core.linked(this, "coverEdition", Edition) as Edition }
+  set coverEdition(value: Edition) { this.setProp("coverEdition", value) }
+
+  // - its "cover height" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1658, end: 1688 } })
+  accessor coverHeight!: number
+
+  /** a picture's address */
+  // - its "cover i" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1692, end: 1713 } })
+  accessor coverI!: string
+
+  // - its "cover width" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1741, end: 1770 } })
+  accessor coverWidth!: number
+
+  // - its "ebook access" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 1774, end: 1800 } })
+  accessor ebookAccess!: string
+
+  // - its "edition count" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1804, end: 1835 } })
+  accessor editionCount!: number
+
+  // - its "first publish year" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 1839, end: 1875 } })
+  accessor firstPublishYear!: number
+
+  // - its "fulltext" is yes or no, stored as "has_fulltext"
+  @prop({ type: "choice", storedAs: "has_fulltext", declaredAt: { path: "/OpenLibrary.api.spell", start: 1879, end: 1932 } })
+  accessor fulltext!: boolean
+
+  // - its "ia" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1936, end: 1962 } })
+  accessor ia!: List<string>
+
+  // - its "ia collection" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 1966, end: 2003 } })
+  accessor iaCollection!: List<string>
+
+  // - its "language" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2007, end: 2039 } })
+  accessor language!: List<string>
+
+  // - its "lending edition s" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2043, end: 2074 } })
+  accessor lendingEditionS!: string
+
+  // - its "lending identifier s" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2078, end: 2112 } })
+  accessor lendingIdentifierS!: string
+
+  // - its "public scan b" is yes or no
+  @prop({ type: "choice", declaredAt: { path: "/OpenLibrary.api.spell", start: 2116, end: 2148 } })
+  accessor publicScanB!: boolean
+
+  // - its "series key" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2152, end: 2186 } })
+  accessor seriesKey!: List<string>
+
+  // - its "series name" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2190, end: 2225 } })
+  accessor seriesName!: List<string>
+
+  // - its "series position" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2229, end: 2268 } })
+  accessor seriesPosition!: List<string>
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2272, end: 2291 } })
+  accessor title!: string
+
+  // - its "subtitle" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2295, end: 2317 } })
+  accessor subtitle!: string
+
+  /** Who wrote it first:  read from Open Library's record of them, by their id */
+  static { this.declareProp("writer", { declaredAt: { path: "/OpenLibrary.spellml", start: 1714, end: 1850 }, readsFrom: ["open_library"] }) }
+  get writer() {
+    return core.getItemAt(this.authors, 0)
+  }
+
+  @drawn draw() {
+    return (
+      <ui-card class="book" onClick={core.pressed(this, async () => await this.open())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+        <ui-image src={this.coverI} alt="" />
+        <ui-content>
+          <ui-header>{this.title}</ui-header>
+          <ui-meta>{core.getItemAt(this.authorName, 0)} · {this.firstPublishYear}</ui-meta>
+        </ui-content>
+      </ui-card>
+    )
+  }
+
+  drawPage() {
+    return (
+      <ui-stack class="book-page" direction="horizontal" wrap={true} align="start" part="page">
+        <ui-image class="cover" src={this.coverI} alt="" />
+        <ui-stack>
+          <ui-header size="large">{this.title}</ui-header>
+          <ui-text>First published in {this.firstPublishYear} · {this.editionCount} editions</ui-text>
+          {this.drawWriting()}
+        </ui-stack>
+      </ui-stack>
+    )
+  }
+
+  drawWriting() {
+    if (this.writer) return this.writer.drawCard()
+
+    core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="writing">Asking Open Library who wrote it</ui-loader>)
+    core.readRider("failed", () => <ui-text part="writing">Open Library can't say who wrote it just now.</ui-text>)
+  }
+
+  ///////////////////////////////////////
+  // ## What a book can do, from anywhere
+  ///////////////////////////////////////
+  // Only this file can name the public servers:  so its other files ask this.
+
+  async open() {
+    publicServers.library.showing = this
+  }
+
+  static savedIn = { place: "open_library", collection: "books", select: ["authors", "authorName", "coverI", "editionCount", "firstPublishYear", "title"] }
+}
+
+export class Author extends Thing {
+  // - its "links" is a list of links
+  @prop({ itemType: "Link", init: () => new List<Link>({ instanceType: "Link" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2374, end: 2404 } })
+  accessor links!: List<Link>
+
+  // - its "kind" is a kind, stored as "type"
+  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2408, end: 2446 } })
+  accessor kind!: Kind
+
+  // - its "key" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2450, end: 2467 } })
+  accessor key!: string
+
+  // - its "name" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2471, end: 2489 } })
+  accessor name!: string
+
+  // - its "source records" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2493, end: 2531 } })
+  accessor sourceRecords!: List<string>
+
+  // - its "birth date" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2535, end: 2559 } })
+  accessor birthDate!: string
+
+  // - its "bio" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2563, end: 2580 } })
+  accessor bio!: string
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2584, end: 2603 } })
+  accessor title!: string
+
+  // - its "alternate names" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2607, end: 2646 } })
+  accessor alternateNames!: List<string>
+
+  // - its "remote ids" is a remote id
+  @prop({ type: "RemoteId", declaredAt: { path: "/OpenLibrary.api.spell", start: 2650, end: 2681 } })
+  accessor remoteIds!: RemoteId
+
+  // - its "photos" is a list of numbers
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 2685, end: 2718 } })
+  accessor photos!: List<number>
+
+  // - its "death date" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2722, end: 2746 } })
+  accessor deathDate!: string
+
+  // - its "personal name" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 2750, end: 2777 } })
+  accessor personalName!: string
+
+  // - its "latest revision" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2781, end: 2814 } })
+  accessor latestRevision!: number
+
+  // - its "revision" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 2818, end: 2844 } })
+  accessor revision!: number
+
+  // - its "created" is a created
+  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 2848, end: 2874 } })
+  accessor created!: Created
+
+  // - its "last modified" is a last modified
+  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 2878, end: 2916 } })
+  accessor lastModified!: LastModified
+
+  drawCard() {
+    return (
+      <ui-card class="author" part="card">
+        <ui-content>
+          <ui-header>{this.name}</ui-header>
+          <ui-meta>Born {this.birthDate}</ui-meta>
+          <ui-description>{this.bio}</ui-description>
+        </ui-content>
+      </ui-card>
+    )
+  }
+
+  static savedIn = { place: "open_library", collection: "authors", select: ["name", "birthDate", "bio", "title"] }
+}
+
+export class Edition extends Thing {
+  // - its "kind" is a kind, stored as "type"
+  @prop({ type: "Kind", storedAs: "type", declaredAt: { path: "/OpenLibrary.api.spell", start: 2974, end: 3012 } })
+  accessor kind!: Kind
+
+  // - its "title" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3016, end: 3035 } })
+  accessor title!: string
+
+  // - its "authors" is a list of edition authors
+  @prop({ itemType: "EditionAuthor", init: () => new List<EditionAuthor>({ instanceType: "EditionAuthor" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3039, end: 3081 } })
+  accessor authors!: List<EditionAuthor>
+
+  // - its "publish date" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3085, end: 3111 } })
+  accessor publishDate!: string
+
+  // - its "source records" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3115, end: 3153 } })
+  accessor sourceRecords!: List<string>
+
+  // - its "number of pages" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3157, end: 3190 } })
+  accessor numberOfPages!: number
+
+  // - its "publishers" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3194, end: 3228 } })
+  accessor publishers!: List<string>
+
+  // - its "physical format" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3232, end: 3261 } })
+  accessor physicalFormat!: string
+
+  // - its "notes" is a note
+  @prop({ type: "Note", declaredAt: { path: "/OpenLibrary.api.spell", start: 3265, end: 3286 } })
+  accessor notes!: Note
+
+  // - its "full title" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3290, end: 3314 } })
+  accessor fullTitle!: string
+
+  // - its "covers" is a list of numbers
+  @prop({ itemType: "number", init: () => new List<number>({ instanceType: "number" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3318, end: 3351 } })
+  accessor covers!: List<number>
+
+  // - its "works" is a list of works
+  @prop({ itemType: "Work", init: () => new List<Work>({ instanceType: "Work" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3355, end: 3385 } })
+  accessor works!: List<Work>
+
+  // - its "key" is text
+  @prop({ type: "text", declaredAt: { path: "/OpenLibrary.api.spell", start: 3389, end: 3406 } })
+  accessor key!: string
+
+  // - its "local id" is a list of text
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/OpenLibrary.api.spell", start: 3410, end: 3442 } })
+  accessor localId!: List<string>
+
+  // - its "latest revision" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3446, end: 3479 } })
+  accessor latestRevision!: number
+
+  // - its "revision" is a number
+  @prop({ type: "number", declaredAt: { path: "/OpenLibrary.api.spell", start: 3483, end: 3509 } })
+  accessor revision!: number
+
+  // - its "created" is a created
+  @prop({ type: "Created", declaredAt: { path: "/OpenLibrary.api.spell", start: 3513, end: 3539 } })
+  accessor created!: Created
+
+  // - its "last modified" is a last modified
+  @prop({ type: "LastModified", declaredAt: { path: "/OpenLibrary.api.spell", start: 3543, end: 3581 } })
+  accessor lastModified!: LastModified
+
+  static savedIn = { place: "open_library", collection: "editions", select: ["title", "authors"] }
+}
+
+export class Link extends Thing {
+  // - its "title" is text
+  @prop({ type: "text" })
+  accessor title!: string
+
+  // - its "url" is text
+  @prop({ type: "text" })
+  accessor url!: string
+
+  // - its "kind" is a kind, stored as "type"
+  @prop({ type: "Kind", storedAs: "type" })
+  accessor kind!: Kind
+}
+
+export class Kind extends Thing {
+  // - its "key" is text
+  @prop({ type: "text" })
+  accessor key!: string
+}
+
+export class RemoteId extends Thing {
+  // - its "viaf" is a number
+  @prop({ type: "number" })
+  accessor viaf!: number
+
+  // - its "wikidata" is text
+  @prop({ type: "text" })
+  accessor wikidata!: string
+
+  // - its "isni" is a number
+  @prop({ type: "number" })
+  accessor isni!: number
+
+  // - its "amazon" is text
+  @prop({ type: "text" })
+  accessor amazon!: string
+
+  // - its "bookbrainz" is text
+  @prop({ type: "text" })
+  accessor bookbrainz!: string
+
+  // - its "goodreads" is a number
+  @prop({ type: "number" })
+  accessor goodreads!: number
+
+  // - its "gnd" is a number
+  @prop({ type: "number" })
+  accessor gnd!: number
+
+  // - its "imdb" is text
+  @prop({ type: "text" })
+  accessor imdb!: string
+
+  // - its "lc naf" is text
+  @prop({ type: "text" })
+  accessor lcNaf!: string
+
+  // - its "librarything" is text
+  @prop({ type: "text" })
+  accessor librarything!: string
+
+  // - its "musicbrainz" is text
+  @prop({ type: "text" })
+  accessor musicbrainz!: string
+
+  // - its "storygraph" is text
+  @prop({ type: "text" })
+  accessor storygraph!: string
+
+  // - its "inventaire" is text
+  @prop({ type: "text" })
+  accessor inventaire!: string
+
+  // - its "librivox" is a number
+  @prop({ type: "number" })
+  accessor librivox!: number
+
+  // - its "project gutenberg" is a number
+  @prop({ type: "number" })
+  accessor projectGutenberg!: number
+
+  // - its "opac sbn" is text
+  @prop({ type: "text" })
+  accessor opacSbn!: string
+}
+
+export class Created extends Thing {
+  // - its "kind" is text, stored as "type"
+  @prop({ type: "text", storedAs: "type" })
+  accessor kind!: string
+
+  // - its "value" is a date
+  @prop({ type: "date" })
+  accessor value!: Date
+}
+
+export class LastModified extends Thing {
+  // - its "kind" is text, stored as "type"
+  @prop({ type: "text", storedAs: "type" })
+  accessor kind!: string
+
+  // - its "value" is a date
+  @prop({ type: "date" })
+  accessor value!: Date
+}
+
+export class EditionAuthor extends Thing {
+  // - its "key" is text
+  @prop({ type: "text" })
+  accessor key!: string
+}
+
+export class Note extends Thing {
+  // - its "kind" is text, stored as "type"
+  @prop({ type: "text", storedAs: "type" })
+  accessor kind!: string
+
+  // - its "value" is text
+  @prop({ type: "text" })
+  accessor value!: string
+}
+
+export class Work extends Thing {
+  // - its "key" is text
+  @prop({ type: "text" })
+  accessor key!: string
+}
+
+export class OpenLibrary extends Place {}
+export const openLibrary = core.place(new OpenLibrary(), {
+  name: "open_library",
+  kind: "web server",
+  at: "https://openlibrary.org",
+  idColumn: "key",
+  rowsIn: "docs",
+  checkedEvery: 30,
+  namesLike: "author_key",
+  searches: { param: "q", fields: ["titles"] },
+  collections: {
+    books: {
+      at: "/search.json",
+      searchedOnly: true,
+      pictures: { coverI: "https://covers.openlibrary.org/b/id/{id}-M.jpg" }
+    },
+    authors: { at: "/authors/{id}.json" },
+    editions: { at: "/books/{id}.json" }
+  }
+})
+
+// -----------
+core.heading("Open Library")
+//////////////////
+// ## Open Library
+//////////////////
+// Books by what they're called, who wrote them, and their covers.
+// Every thing it shows is in OpenLibrary.api.spell, as `spell place ingest` wrote it;  each type below adds to its type there,
+// with `<spell-more-of>`, so looking again at the server never touches a line of this.
+// Open Library has no list of every book, only a search:  so the page always searches, for what's typed.
+
+@thing
+export class OpenLibraryPage extends Thing {
+  // - its "search" is text
+  @prop({ type: "text" })
+  accessor search!: string
+
+  // - its "showing" is a book
+  static { this.declareProp("showing", { type: "Book", link: true }) }
+  get showing(): Book { return core.linked(this, "showing", Book) as Book }
+  set showing(value: Book) { this.setProp("showing", value) }
+
+  create() {
+    this.search = "dune"
+  }
+
+  /** What the search finds:  Open Library looks, by the title, and gives back the first hundred */
+  static { this.declareProp("found", { declaredAt: { path: "/OpenLibrary.spellml", start: 546, end: 715 }, readsFrom: ["open_library"] }) }
+  get found() { return core.waitedValue(this, "found", async () => {
+    return core.filter(await core.savedThings(Book, { search: { title: this.search } }, "looks through"), (book: Book) => core.includes(book.title, this.search))
+  }, () => [this.search]) }
+
+  static drawsWaiting = true
+  @drawn draw() {
+    return [
+      <ui-header size="large">Books, from Open Library</ui-header>,
+      <ui-form class="find" value={this}>
+        <ui-field label="A book, by its title">
+          <ui-input name="search" icon="search" placeholder="Dune" />
+        </ui-field>
+      </ui-form>,
+      this.showing ? [
+        <ui-button class="back" appearance="basic" icon="arrow left" onClick={core.pressed(this, async () => (this.showing = undefined))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Back
+        </ui-button>,
+        this.showing.drawPage()
+      ] : core.drawRead(() => this.found, (book: Book) => core.drawThing(book), {
+        waiting: () => <ui-loader visible={true} inline={true} text={true}>{"Asking Open Library"}</ui-loader>,
+        none: () => <ui-text>{"No book is called that."}</ui-text>,
+        failedSay: () => "Open Library can't be reached just now.",
+        paging: () => "pages",
+        items: () => <ui-cards columns="5" doubling={true} />
+      }),
+      <ui-text class="credits" size="small">
+        {"From "}
+        <ui-link link="https://openlibrary.org/developers/api">Open Library's API</ui-link>
+        , asked for as you look;  its covers from its covers server.
+      </ui-text>
+    ]
+  }
+}
+
+core.heading("A book")
+////////////
+// ## A book
+////////////
+// Its cover, its title and who wrote it:  on its card, the first name the search gave;  on its own page, its first author, read from their own record.
+
+core.heading("Who wrote it")
+//# Who wrote it
+
+// -----------
 core.heading("Public Servers")
 ////////////////////
 // ## Public Servers
 ////////////////////
 // Servers other people run, each read through the Spell `spell place ingest` wrote for it, untouched:  each a page of its own.
-// GitHub's is first.
+// GitHub's is first, then Open Library's.
 
 @thing
 export class PublicServer extends App {
@@ -815,6 +1347,10 @@ export class PublicServer extends App {
   // - its "tab" is text
   @prop({ type: "text" })
   accessor tab!: string
+
+  // - its "library" is a new open library page
+  @prop({ init: () => new OpenLibraryPage(), early: true })
+  accessor library!: OpenLibraryPage
 
   create() {
     this.tab = "github"
@@ -830,8 +1366,11 @@ export class PublicServer extends App {
         <ui-item active={this.tab === "github"} onClick={core.pressed(this, () => this.showServer("github"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
           GitHub
         </ui-item>
+        <ui-item active={this.tab === "open library"} onClick={core.pressed(this, () => this.showServer("open library"))} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+          Open Library
+        </ui-item>
       </ui-toolbar>,
-      this.tab === "github" ? core.drawThing(new GithubPage()) : undefined
+      this.tab === "github" ? core.drawThing(new GithubPage()) : this.tab === "open library" ? core.drawThing(this.library) : undefined
     ]
   }
 }
@@ -844,7 +1383,8 @@ export class PublicServer extends App {
  */
 export class PublicServerElement extends SpellElement<PublicServer> {
   @E.proto static vocabulary = SpellElement.vocabularyFor("test-project-app", "public server", [
-    { name: "tab", kind: "string", description: "Its tab." }
+    { name: "tab", kind: "string", description: "Its tab." },
+    { name: "library", kind: "json", description: "Its library." }
   ])
 
   create() {
@@ -857,6 +1397,8 @@ export class PublicServerElement extends SpellElement<PublicServer> {
 }
 core.useElement(PublicServer, PublicServerElement)
 export const publicServers = new PublicServer()
+
+core.heading("What a book can do, from anywhere")
 // -----------
 core.heading("GitHub")
 ////////////
@@ -933,7 +1475,7 @@ core.heading("An issue")
 // Its number, its title, whose it is, and how much it's been talked about.
 
 // -----------
-core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬`)
+core.installStyles(undefined, `.person image {¬  aspect-ratio: 1;¬}¬¬.book image {¬  aspect-ratio: 2 / 3;¬  object-fit: cover;¬}¬¬.book-page .cover {¬  max-width: 16rem;¬}¬`)
 // -----------
 if (!core.isCarryingOver) publicServers.start()
 

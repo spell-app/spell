@@ -7,7 +7,10 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /** What a detail adds to what a place's lines say:  `core.place()`'s second argument, merged. */
 export type PlaceDetailValue = {
-  collections?: Record<string, { at?: string; fields?: Record<string, string> }>
+  collections?: Record<
+    string,
+    { at?: string; fields?: Record<string, string>; searchedOnly?: boolean; pictures?: Record<string, string> }
+  >
   keyNamed?: string
   keyIfSet?: boolean
   checkedEvery?: number

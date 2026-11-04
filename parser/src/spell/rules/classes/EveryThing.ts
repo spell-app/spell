@@ -4,6 +4,7 @@ import { SP } from "spell/parser/spell"
 import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
   isFoundByName,
+  isSearchedOnly,
   isSearchedField,
   savedPlaceOfMatch,
   searchesOf
@@ -30,8 +31,10 @@ export class EveryThing extends SpellExpression<"type"> {
   }
 
   /**
-   * `match`, or a parse error when `type` is found only by name, with no list of them all (epic `data` P27):
-   * `wiki pages are found at "/page/summary/{name}"`, so `every wiki page` can't be read.
+   * `match`, or a parse error when `type` has no list of them all:
+   * - found only by name (epic `data` P27):  `wiki pages are found at "/page/summary/{name}"`, so `every wiki page` can't be read
+   * - given only to a search (epic `data` P29):  `books are searched at "/search.json"`, so `every book` can't either,
+   *   and the message says how to search:  `every book where its title includes ...`
    */
   static refusedIfFoundByName(match: P.Match, type: P.Match): P.Match {
     const saved = savedPlaceOfMatch(type)
@@ -40,9 +43,46 @@ export class EveryThing extends SpellExpression<"type"> {
     const words = `${type.raw}`.trim()
     const params = { things: P.pluralize(words), thing: P.singularize(words) }
     // the line that says so may be anywhere in the project:  asked when the errors are gathered
-    const message = () => language.parserMessage("found-only-by-name", params)
-    SP.SpellWarnings.refuseIf(match, message, () => isFoundByName(saved))
+    // ONE refusal a line:  which it is, asked then too
+    const searched = EveryThing.unsearchedRefusal(match, type, undefined)
+    const message = () =>
+      isFoundByName(saved) ? language.parserMessage("found-only-by-name", params) : searched.message()
+    SP.SpellWarnings.refuseIf(match, message, () => isFoundByName(saved) || searched.holds())
     return match
+  }
+
+  /**
+   * SIDE EFFECT:  a parse error when `type` is given only to a search, and `where` hands the place none (epic `data` P29):
+   * `books are searched at "/search.json"`, `- it searches titles with "q"`.
+   * - `where`:  the `where`'s function, made when the errors are gathered.
+   * - `every book where its title includes the search` searches;  `every book`, or `every book where it is long`, can't be read.
+   */
+  static refusedUnlessSearched(match: P.Match, type: P.Match, where: (() => P.ASTMethodDefinition) | undefined): void {
+    if (!savedPlaceOfMatch(type)) return
+    const { message, holds } = EveryThing.unsearchedRefusal(match, type, where)
+    SP.SpellWarnings.refuseIf(match, message, holds)
+  }
+
+  /** What `refusedUnlessSearched()` says, and whether it still holds:  both asked when the errors are gathered. */
+  private static unsearchedRefusal(
+    match: P.Match,
+    type: P.Match,
+    where: (() => P.ASTMethodDefinition) | undefined
+  ): { message: () => string; holds: () => boolean } {
+    const saved = savedPlaceOfMatch(type)
+    const language = SP.Language.of(match.scope)
+    const words = `${type.raw}`.trim()
+    const message = () => {
+      const [field = "name"] = searchesOf(saved)?.fields ?? []
+      return language.parserMessage("searched-only", {
+        things: P.pluralize(words),
+        thing: P.singularize(words),
+        field: P.singularize(field)
+      })
+    }
+    const holds = () =>
+      isSearchedOnly(saved) && !(where && handedSearchOf(where(), searchesOf(saved)?.fields ?? []).length)
+    return { message, holds }
   }
 
   /** A list of the type, e.g. `list of piles`, `list of card-suits`. */
