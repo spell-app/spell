@@ -8,6 +8,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import {
   Inspector,
+  ThingChip,
   addressKey,
   isThing,
   itemsOf,
@@ -266,7 +267,9 @@ function PartsTree(props: { rows: readonly PartRow[]; nodes: readonly PartNode[]
                   label={Inspector.thingLabel(thing)}
                   selected={Inspector.inspected?.value === thing}
                   ref={chooseRow(() => Inspector.inspectThing(thing))}
-                />
+                >
+                  <ThingChip label={Inspector.thingLabel(thing)} inRow />
+                </ui-tree-item>
               )}
             </For>
           </ui-tree-item>
@@ -319,6 +322,8 @@ function keysAround(nodes: readonly PartNode[], element: Element): string[] | un
 /** One part's row, with the parts inside it. */
 function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Element {
   const words = () => Inspector.rowWordsFor(props.node.element)
+  // a thing made as the program runs is a pill, as the Inspector shows it;  markup the program wrote stays words (Owen)
+  const isThingRow = () => !!SpellElement.thingOf(props.node.element)
   return (
     <ui-tree-item
       icon={Inspector.iconFor(props.node.element)}
@@ -342,6 +347,9 @@ function PartItem(props: { node: PartNode; shown: () => Element[] }): JSX.Elemen
         )
       }}
     >
+      <Show when={isThingRow()}>
+        <ThingChip label={Inspector.thingLabel(SpellElement.thingOf(props.node.element) as object)} inRow />
+      </Show>
       <For each={props.node.children} keyed={(child) => child.element}>
         {(child) => <PartItem node={child()} shown={props.shown} />}
       </For>

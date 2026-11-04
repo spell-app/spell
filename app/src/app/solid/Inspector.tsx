@@ -2719,17 +2719,33 @@ function ThingLink(props: { thing: object; step: string; label?: string }): JSX.
   return (
     <div class={["InspectorThingLink", { item: !props.label }]}>
       <Show when={label()}>{(shown) => <span class="InspectorThingLabel">{shown()}</span>}</Show>
-      <ui-button
-        appearance="basic"
-        size="small"
-        icon="angle right"
-        icon-position="right"
-        class="InspectorThingButton"
-        onClick={() => Inspector.inspect(props.step)}
-      >
-        {Inspector.thingLabel(props.thing, props.step)}
-      </ui-button>
+      <ThingChip label={Inspector.thingLabel(props.thing, props.step)} onClick={() => Inspector.inspect(props.step)} />
     </div>
+  )
+}
+
+/****************
+ * ### `<ThingChip>`
+ * A thing made as the program runs, as a pill:  `Card · king of diamonds ›`.
+ * - The Inspector's link to a thing (`<ThingLink>`), and each such row of the Views tree (Owen:  "Full pill for items
+ *   that are allocated objects, as opposed to `grid` above it, which is declared in spellml").
+ * - `inRow`:  drawn inside a tree row, as its label:  `inert`, so a click, the keys and focus stay the row's,
+ *   and no `›`, since a click there selects rather than follows.
+ ****************/
+export function ThingChip(props: { label: string; onClick?: () => void; inRow?: boolean }): JSX.Element {
+  return (
+    <ui-button
+      appearance="basic"
+      size="small"
+      icon={props.inRow ? undefined : "angle right"}
+      icon-position={props.inRow ? undefined : "right"}
+      class={["InspectorThingButton", { InspectorRowChip: props.inRow }]}
+      slot={props.inRow ? "label" : undefined}
+      inert={props.inRow ? "" : undefined}
+      onClick={props.onClick}
+    >
+      {props.label}
+    </ui-button>
   )
 }
 
