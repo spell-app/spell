@@ -148,6 +148,32 @@ describe("adding a source", () => {
     expect(back.collections.planets!.idField).toBe("url")
   })
 
+  test("a field every row sent the same no, 0 or empty is filled;  one sent as nothing isn't (epic `data` I53)", async () => {
+    // the look sees a closing date;  the read through the Spell, none
+    let isReading = false
+    const rows = () =>
+      [1, 2].map((id) => ({
+        id,
+        title: `Issue ${id}`,
+        locked: false,
+        comments: 0,
+        body: "",
+        closed_at: isReading ? null : "2026-11-01T10:00:00Z"
+      }))
+    const routes = { [API]: { issues: `${API}/issues` } }
+    Object.defineProperty(routes, `${API}/issues`, { get: rows, enumerable: true })
+    const { ingest } = ingestOf(routes, {
+      readThrough: (asked) => {
+        isReading = true
+        return readThroughSpell(asked)
+      }
+    })
+    const { description } = await ingest.add({ address: API, into: "/I.spell", name: "issues place" })
+    const notes = description.notes.join("\n")
+    expect(notes).not.toMatch(/"(?:locked|comments|body)"/)
+    expect(notes).toMatch(/No row read filled issue's "closedAt"/)
+  })
+
   test("what swapi.info's shape needs:  links, numbers as text, ids only in an address, several collections", async () => {
     const { ingest, texts, descriptions } = ingestOf(STARS)
     const result = await ingest.add({ address: `${API}/`, into: "/Stars.spell", name: "stars" })
@@ -384,6 +410,51 @@ describe("adding a source", () => {
     expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
   })
 
+  test("a name and an address to a collection nobody asked for is the place's one name type, held whole (epic `data` I47)", async () => {
+    const at = (path: string) => `${API}${path}`
+    const pikachu = {
+      id: 25,
+      name: "pikachu",
+      types: [{ slot: 1, type: { name: "electric", url: at("/type/13/") } }],
+      stats: [{ base_stat: 90, stat: { name: "speed", url: at("/stat/6/") }, chart: at("/charts/6") }],
+      color: { name: "yellow", url: at("/pokemon-color/10/") },
+      forms: [{ name: "pikachu", url: at("/pokemon-form/25/") }]
+    }
+    const routes = {
+      [API]: { pokemon: at("/pokemon/"), type: at("/type/") },
+      [at("/pokemon")]: { count: 1, next: null, results: [pikachu] },
+      [at("/type")]: { count: 1, next: null, results: [{ id: 13, name: "electric" }] }
+    }
+    const { ingest } = ingestOf(routes)
+    const { spell } = await ingest.add({ address: API, into: "/P.spell", name: "poke api" })
+    // one of its own collections stays a link;  the rest are each a poke api name, with no comment
+    expect(spell).toContain(`- its "kind" is a type, stored as "type"`)
+    expect(spell).toContain(`- its "stat" is a poke api name\n`)
+    expect(spell).toContain(`- its "color" is a poke api name\n`)
+    expect(spell).toContain(`- its "forms" is a list of poke api names\n`)
+    // a plain address inside a row says so, as one at the top does
+    expect(spell).toContain(`- its "chart" is text  // an address`)
+    // ONE type for the whole place
+    expect(spell.match(/^a "poke api name" is a thing:/gm)).toHaveLength(1)
+    expect(spell).toContain(`\t- its "name" is text\n\t- its "address" is text, stored as "url"  // never read`)
+    // read through it, the pair is held whole:  its name, and its address still there
+    const { core } = await import("spell/parser/core")
+    const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
+    const held = globalThis.fetch
+    globalThis.fetch = fakeFetch(routes).fetch
+    try {
+      core.resetRuntime()
+      const { Pokemon } = runSpellFiles([{ path: "/P.spell", contents: spell }])("Pokemon") as {
+        Pokemon: new () => unknown
+      }
+      const list = await core.savedThings(Pokemon as never, { page: { size: 5 } })
+      const [first] = list.items as Array<{ stats: { items: Array<{ stat: { name: string; address: string } }> } }>
+      expect(first!.stats.items[0]!.stat).toMatchObject({ name: "speed", address: at("/stat/6/") })
+    } finally {
+      globalThis.fetch = held
+    }
+  })
+
   test("a field Spell's plain words stop at gets quotes;  an object inside a row is a type of its own, read in words", async () => {
     const routes = {
       [API]: { ships: `${API}/ships` },
@@ -555,7 +626,7 @@ describe("the agent", () => {
     const description = descriptions.get("/A.json5")!
     expect(description.about).toMatchObject({ readBy: "a test", version: { says: "1.2", where: "its docs" } })
     expect(description.canDo.limits).toBe("100 a day")
-    expect(description.notes).toContain("Everything is public.")
+    expect(description.agentNotes).toContain("Everything is public.")
     expect(description.collections.heroes!.fields.homeworld!.linksTo).toBe("planets")
   })
 
@@ -735,7 +806,7 @@ describe("looking again", () => {
     edit: (text: string) => string,
     changed: Record<string, unknown>,
     others: Record<string, string> = {},
-    { olderTool = false }: { olderTool?: boolean } = {}
+    { olderTool = false, before }: { olderTool?: boolean; before?: (written: PlaceDescription) => void } = {}
   ) {
     const added = ingestOf(STARS, {}, others)
     await added.ingest.add({ address: API, into: "/Stars.spell", name: "stars" })
@@ -743,6 +814,7 @@ describe("looking again", () => {
     // what the description says it wrote, written the same way:  an older version of the tool
     const written = added.descriptions.get("/Stars.json5")!
     if (olderTool) written.spell = edit(written.spell.join("\n")).split("\n")
+    before?.(written)
     const { fetch } = fakeFetch({ ...STARS, ...changed })
     const ingest = new PlaceIngest({
       fetch,
@@ -774,6 +846,41 @@ describe("looking again", () => {
     expect(text).not.toMatch(/written as text|hair color is its/)
     expect(result.couldntChange).toEqual([])
     expect(result.changes.join("\n")).toMatch(/Removed, as its field finds it by its words:  - a person's hair color/)
+  })
+
+  test("a note fixed since is gone;  the agent's stay, as it isn't asked again (epic `data` I54)", async () => {
+    const stale = `No row read filled person's "mass".`
+    const { description } = await updated(
+      (same) => same,
+      {},
+      {},
+      {
+        before: (written) => {
+          written.notes.push(stale)
+          written.agentNotes = ["It asks people to be gentle."]
+        }
+      }
+    )
+    expect(description.notes).not.toContain(stale)
+    expect(description.agentNotes).toEqual(["It asks people to be gentle."])
+  })
+
+  test("a description from before agentNotes:  its notes sorted once, the checks' said again, the rest the agent's (epic `data` I54)", async () => {
+    const stale = `No row read filled person's "mass".`
+    const { description } = await updated(
+      (same) => same,
+      {},
+      {},
+      {
+        before: (written) => {
+          delete written.agentNotes
+          written.about.readBy = "an agent"
+          written.notes = [stale, "Expected mass to be type 'number', got: x", "It asks people to be gentle."]
+        }
+      }
+    )
+    expect(description.notes).toEqual([])
+    expect(description.agentNotes).toEqual(["It asks people to be gentle."])
   })
 
   test("nothing changed:  it says so, and the file's as it was", async () => {

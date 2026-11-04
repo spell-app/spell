@@ -64,6 +64,7 @@ export function describeLook(look: PlaceLook, { kind, name }: { kind: string; na
     canDo: canDoFrom(look, kind),
     collections,
     notes: [...look.notes],
+    agentNotes: [],
     spellCantSay: [],
     ...(kind === "web server" || kind === "graphql server"
       ? { checkEverySeconds: checkSecondsWithin(look.headers, Object.keys(collections).length) }
@@ -118,6 +119,7 @@ const DEEPEST_INSIDE = 3
 /**
  * Each field of `rows`, and what it holds, from every row read.
  * - A `{ name, url }` is a link, by its address:  what PokéAPI's rows point at each other with (`core.linked()` reads both).
+ *   Marked `isNamedLink`:  one to a collection nobody asked for is held whole, its name and address (epic `data` I47).
  * - A field holding an object, or a list of them, is the fields inside it:  a type of its own in the Spell.
  *   No deeper than `DEEPEST_INSIDE`:  past that it's left out.
  */
@@ -161,7 +163,8 @@ function fieldsOfRows(rows: ReadonlyArray<Record<string, unknown>>, depth: numbe
       const kind = kindOf(values)
       // a yes or no named `is_hidden` is `its "hidden"`:  what's read as `if it is hidden`
       const yesOrNo = kind.type === "yes or no" ? /^(?:is|has) (.+)$/.exec(words)?.[1] : undefined
-      return [name, { words: yesOrNo ?? words, ...kind, ...exampleOf(values) }]
+      const named = isLinkKind(kind.type) && holdsNamedLinks(rows.map((row) => row[name]))
+      return [name, { words: yesOrNo ?? words, ...kind, ...exampleOf(values), ...(named && { isNamedLink: true }) }]
     })
   )
 }
@@ -212,6 +215,20 @@ function isObject(value: unknown): boolean {
 function linkIn(value: unknown): unknown {
   if (Array.isArray(value)) return value.every(isNamedLink) ? value.map((each) => (each as { url: string }).url) : value
   return isNamedLink(value) ? (value as { url: string }).url : value
+}
+
+/** Is this kind an address, or a list of them? */
+function isLinkKind(type: FieldKind): boolean {
+  return type === "link" || type === "list of links"
+}
+
+/**
+ * Do `values`, a field of each row, hold links with their names, PokéAPI's `{ name, url }`, or lists of them:
+ * not only addresses, swapi's `"https://..."`?
+ */
+function holdsNamedLinks(values: readonly unknown[]): boolean {
+  const held = values.flat().filter((value) => value !== null && value !== undefined)
+  return held.length > 0 && held.every(isNamedLink)
 }
 
 /** Is this a link with its name, PokéAPI's way:  `{ "name": "pikachu", "url": "https://..." }`? */

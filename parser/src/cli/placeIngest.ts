@@ -12,7 +12,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import JSON5 from "json5"
 
 import { json5Edited } from "spell/util/node/json5"
-import { schemaOf, whileOnlyShowing } from "spell/util/reactive"
+import { peekProp, schemaOf, whileOnlyShowing } from "spell/util/reactive"
 import { CLI } from "spell/cli"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import {
@@ -288,25 +288,26 @@ async function readWhole(Class: new () => unknown, thing: unknown): Promise<unkn
   return [thing]
 }
 
-/** Each field `Class` declares that all of `things` left at its usual value. */
+/**
+ * Each field `Class` declares that none of `things` filled:  the server left it out, or sent nothing (`null`).
+ * - Filled is what a row STORED (`peekProp()`), not a value unlike a new thing's (epic `data` I53):
+ *   a yes or no that's no on every row, a count always 0, text always empty, are all the server's answer.
+ * - A list is filled when one holds an item;  a date, when there is one.
+ * - Only looking:  a field holding an address isn't following it.
+ */
 function fieldsNeverFilled(Class: new () => unknown, things: readonly unknown[]): string[] {
   if (!things.length) return []
   const usual = new Class() as Record<string, unknown>
-  const isFilled = (value: unknown, field: string) => {
+  const isFilled = (thing: unknown, field: string) => {
+    const value = whileOnlyShowing(() => (thing as Record<string, unknown>)[field])
     if (value instanceof Date) return true
     if (value && typeof value === "object" && "items" in value) return (value.items as unknown[]).length > 0
-    return value !== usual[field] && value !== undefined
+    const stored = peekProp<unknown>(thing, field)
+    if (stored !== undefined) return stored !== null
+    // nothing stored:  what it reads by itself, worked out from what is
+    return value !== usual[field] && value !== undefined && value !== null
   }
-  return [...schemaOf(Class).declared.keys()].filter(
-    // only looking:  a field holding an address isn't following it
-    (field) =>
-      !things.some((thing) =>
-        isFilled(
-          whileOnlyShowing(() => (thing as Record<string, unknown>)[field]),
-          field
-        )
-      )
-  )
+  return [...schemaOf(Class).declared.keys()].filter((field) => !things.some((thing) => isFilled(thing, field)))
 }
 
 ////////////////

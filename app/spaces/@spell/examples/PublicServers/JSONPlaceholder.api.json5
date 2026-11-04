@@ -6,7 +6,7 @@
     "name": "jsonplaceholder",
     "kind": "web server",
     "address": "https://jsonplaceholder.typicode.com",
-    "lookedAt": "2026-11-04T11:20:23.132Z",
+    "lookedAt": "2026-11-04T12:22:38.244Z",
     "fingerprint": "41ca721faecfcfbf",
     "readBy": "nobody:  worked out from what came back",
     "collectionsAsked": [
@@ -17,6 +17,7 @@
     ],
     "triesWrites": true
   },
+
   "canDo": {
     "read": "Yes:  it's been read.",
     "write": "Yes:  it took a write of each kind, tried on posts (adding 201, changing 200, deleting 200).  It answers as if saved, and keeps nothing:  what was added, as 101, wasn't there when read again.",
@@ -24,10 +25,12 @@
     "limits": "It allows 3600000 requests until its limit resets, and its answers say how many are left and when:  a look minds it, and a program checks for changes within a tenth of it.  x-ratelimit-limit:  3600000;  x-ratelimit-remaining:  3599999;  x-ratelimit-reset:  1793625538",
     "browsers": "Yes:  it says any page may read it."
   },
+
   "allCollections": {
     "idField": "id",
     "paging": "none"
   },
+
   "collections": {
     "posts": {
       "type": "post",
@@ -248,11 +251,16 @@
       }
     }
   },
+
   "notes": [],
+  "agentNotes": [],
+
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
   ],
+
   "checkEverySeconds": 30,
+
   "spell": [
     "jsonplaceholder is a web server at \"https://jsonplaceholder.typicode.com\":",
     "\t- check it every 30 seconds",

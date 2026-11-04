@@ -87,7 +87,7 @@ an "edition" is a thing:
 
 a "link" is a thing:
 	- its "title" is text
-	- its "url" is text
+	- its "url" is text  // an address
 	- its "kind" is a kind, stored as "type"
 
 a "kind" is a thing:

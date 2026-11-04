@@ -183,7 +183,8 @@ function applyReading(
   if (reading.checkEverySeconds >= 1 && description.checkEverySeconds !== undefined) {
     description.checkEverySeconds = Math.round(reading.checkEverySeconds)
   }
-  description.notes.push(...reading.notes.filter(Boolean))
+  // the agent's own, kept from look to look:  what it said before stays, said once
+  description.agentNotes = [...new Set([...(description.agentNotes ?? []), ...reading.notes.filter(Boolean)])]
   for (const said of reading.collections) {
     const collection = description.collections[said.name]
     if (!collection) continue

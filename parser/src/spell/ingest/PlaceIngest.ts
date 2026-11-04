@@ -170,6 +170,8 @@ export class PlaceIngest {
     if (keySecret) await this.noteKeyIfSet(description, look)
     if (collectionsAsked) description.about.collectionsAsked = collectionsAsked
     await this.notePictures(description, picturesAsked, reader)
+    // the agent's notes stay, as it isn't asked again;  everything else, this look says afresh
+    description.agentNotes = agentNotesOf(old)
     if (carryOver(description, old)) {
       // something new, for the agent to read;  what was chosen before still stands
       await this.readWithAgent(description, look, { keepName: true })
@@ -180,8 +182,6 @@ export class PlaceIngest {
       description.canDo = old.canDo
       description.about.readBy = old.about.readBy
       if (old.checkEverySeconds !== undefined) description.checkEverySeconds = old.checkEverySeconds
-      // what was said stays, and what this look found to say joins it:  a list answering from somewhere new
-      description.notes = [...new Set([...old.notes, ...look.notes])]
     }
     if (old.about.triesWrites) await this.noteWrites(description, look, reader)
     // a line of the new look's that Spell can't read is left out, as the first look's was:  GitHub's reactions' `+1`
@@ -453,7 +453,7 @@ export class PlaceIngest {
       const read = byType[collection.type]
       if (read) collection.readThrough = read
     }
-    // looking again, the last look's notes are there already:  each said once
+    // each said once
     description.notes = [...new Set([...description.notes, ...complaints])]
     const rows = shown.reduce((sum, { readThrough: read }) => sum + (read?.rows ?? 0), 0)
     if (!rows) {
@@ -751,9 +751,27 @@ function carryOver(description: PlaceDescription, old: PlaceDescription): boolea
     }
   }
   description.collections = kept
-  const { about, canDo, collections, notes, spellCantSay, checkEverySeconds, spell, ...personsKeys } = old
+  const { about, canDo, collections, notes, agentNotes, spellCantSay, checkEverySeconds, spell, ...personsKeys } = old
   Object.assign(description, personsKeys)
   return isNew
+}
+
+/**
+ * What the notes the checks write start with, or say:  what each look says again (epic `data` I54).
+ * - A read through the Spell, the program's own complaints, the look, the pictures tried, a line left out, the agent failing.
+ */
+const CHECKS_NOTE =
+  /^(?:No row read filled |Expected |Left out |Stopped before |It holds more than the |It's bigger than it reads|The agent(?:'s answer| couldn't)|No collection has a field |[A-Z]\w*:  )|, but its place sent |" answer(?:s only a search|ed from |ed with no rows)|" couldn't be read:  |isn't a picture's id|couldn't be tried:  |where its pictures are|is a plain list, and Spell reads/
+
+/**
+ * The agent's notes of `old`, a description looked at before.
+ * - One from before they had a list of their own (epic `data` I54):  sorted once from its notes.
+ *   None, when no agent read it;  else each note the checks wouldn't write.
+ */
+function agentNotesOf(old: PlaceDescription): string[] {
+  if (old.agentNotes) return [...old.agentNotes]
+  if (/^nobody/.test(old.about.readBy)) return []
+  return [...new Set(old.notes.filter((note) => !CHECKS_NOTE.test(note)))]
 }
 
 /** What's different from the last look, in words for people. */
@@ -788,8 +806,12 @@ function whatSpellCantSay({ about, collections, canDo }: PlaceDescription): stri
   const links = each.flatMap(([name, { fields, idField }]) =>
     Object.entries(fields)
       .filter(
-        ([field, { type, linksTo }]) =>
-          field !== idField && (type === "link" || type === "list of links") && !(linksTo && shown.has(linksTo))
+        // a name and an address is held whole, the place's name type:  it reads as what it is (epic `data` I47)
+        ([field, { type, linksTo, isNamedLink }]) =>
+          field !== idField &&
+          (type === "link" || type === "list of links") &&
+          !isNamedLink &&
+          !(linksTo && shown.has(linksTo))
       )
       .map(([field]) => `${name}.${field}`)
   )

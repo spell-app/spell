@@ -161,7 +161,8 @@ export function spellPartsFor(
     placeLines,
     types: [
       ...shown.map(([collection, description]) => typeLines(collection, description, name, collections)),
-      ...typesInside(shown, collections)
+      ...typesInside(shown, collections, name),
+      ...namedLinkTypes(shown, collections, name)
     ]
   }
 }
@@ -232,7 +233,8 @@ function insideTypeFor(words: string, owner: string, own: ReadonlySet<string>): 
  */
 function typesInside(
   shown: ReadonlyArray<readonly [string, CollectionDescription]>,
-  collections: Readonly<Record<string, CollectionDescription>>
+  collections: Readonly<Record<string, CollectionDescription>>,
+  place: string
 ): TypeLines[] {
   const types = new Map<string, TypeLines>()
   const own = new Set(shown.map(([, { type }]) => type))
@@ -243,11 +245,11 @@ function typesInside(
       if (types.has(words)) continue
       const lines = Object.entries(inside).flatMap(([name, about]) => {
         if (about.leftOut || (!about.inside && !about.isItsOwner && !SPELL_TYPES[about.type])) return []
-        const what = typeWordsFor(about, collections, words, own)
+        const what = typeWordsFor(about, collections, words, own, place)
         return [
           {
             key: `inside:${words}:${about.words}`,
-            text: `- its "${about.words}" is ${what}${storedAsFor(name, about)}`
+            text: `- its "${about.words}" is ${what}${storedAsFor(name, about)}${commentFor(about, collections)}`
           }
         ]
       })
@@ -258,6 +260,60 @@ function typesInside(
   }
   for (const [collection, { fields, type }] of shown) add(collection, type, fields)
   return [...types.values()]
+}
+
+/**
+ * What a place calls what it points at by its name and address, nowhere it was asked to read:  `poke api name`.
+ * - ONE type for the whole place, however many fields hold one (epic `data` I47).
+ */
+function namedLinkType(place: string): string {
+  return `${place} name`
+}
+
+/** Does a field of `fields`, or of what's inside them, hold a name and an address to nowhere asked for? */
+function holdsNamedLinkToNowhere(
+  fields: Readonly<Record<string, FieldDescription>>,
+  collections: Readonly<Record<string, CollectionDescription>>
+): boolean {
+  return Object.values(fields).some(({ isNamedLink, linksTo, leftOut, inside }) => {
+    if (leftOut) return false
+    if (inside && holdsNamedLinkToNowhere(inside, collections)) return true
+    const target = linksTo === undefined ? undefined : collections[linksTo]
+    return !!isNamedLink && (!target || !!target.leftOut)
+  })
+}
+
+/**
+ * The place's name type, when any field holds one:  a name and an address, held inside the row, never read (epic `data` I47).
+ * - `its "stat" is a poke api name`, so `the name of the stat of stat` is `hp`;  its address is still there to follow.
+ * - Asking for that collection later (`spell place update`, with it in `--collections`) makes the field a real link.
+ */
+function namedLinkTypes(
+  shown: ReadonlyArray<readonly [string, CollectionDescription]>,
+  collections: Readonly<Record<string, CollectionDescription>>,
+  place: string
+): TypeLines[] {
+  if (!shown.some(([, { fields }]) => holdsNamedLinkToNowhere(fields, collections))) return []
+  const words = namedLinkType(place)
+  const insideFields: Record<string, FieldDescription> = {
+    name: { words: "name", type: "text" },
+    url: { words: "address", type: "link" }
+  }
+  return [
+    {
+      collection: shown[0]![0],
+      header: `${articled(words).replace(words, `"${words}"`)} is a thing:`,
+      lines: [
+        { key: `inside:${words}:name`, text: `- its "name" is text` },
+        {
+          key: `inside:${words}:address`,
+          text: `- its "address" is text, stored as "url"  // never read:  its collection wasn't asked for`
+        }
+      ],
+      isInside: true,
+      insideFields
+    }
+  ]
 }
 
 /**
@@ -290,7 +346,7 @@ function typeLines(
   const own = new Set(Object.values(collections).map(({ type }) => type))
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
-    const what = typeWordsFor(about, collections, description.type, own)
+    const what = typeWordsFor(about, collections, description.type, own, place)
     const line = `- its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
@@ -340,10 +396,11 @@ function isLeftOut(
  *   Anywhere else, it's only an address:  text.
  */
 function typeWordsFor(
-  { type, linksTo, inside, isListInside, isItsOwner, words, pictureAt }: FieldDescription,
+  { type, linksTo, inside, isListInside, isItsOwner, isNamedLink, words, pictureAt }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>,
   owner: string,
-  own: ReadonlySet<string>
+  own: ReadonlySet<string>,
+  place: string
 ): string {
   // its picture's address, built as it's read
   if (pictureAt) return "text"
@@ -353,7 +410,14 @@ function typeWordsFor(
     return isListInside ? `a list of ${P.pluralize(held)}` : articled(held)
   }
   const target = linksTo === undefined ? undefined : collections[linksTo]
-  if (!target || target.leftOut) return SPELL_TYPES[type]!
+  if (!target || target.leftOut) {
+    // a name and an address, to somewhere nobody asked for:  held whole, never read
+    if (isNamedLink)
+      return type === "list of links"
+        ? `a list of ${P.pluralize(namedLinkType(place))}`
+        : articled(namedLinkType(place))
+    return SPELL_TYPES[type]!
+  }
   // an address, or an id of one found by name:  Open Library's `author_key`
   if (type === "link" || type === "text") return articled(target.type)
   if (type === "list of links" || type === "list of text") return `a list of ${collectionWords(target)}`
@@ -371,12 +435,13 @@ function nothingWordsFor({ type, noNumberWords }: FieldDescription): string {
 
 /** What a person should know, on the line:  what Spell reads differently from what's there. */
 function commentFor(
-  { type, linksTo, pictureAt }: FieldDescription,
+  { type, linksTo, pictureAt, isNamedLink }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
 ): string {
   if (pictureAt) return "  // a picture's address"
   const target = linksTo === undefined ? undefined : collections[linksTo]
-  if (target && !target.leftOut && (type === "link" || type === "list of links")) return ""
+  // a link to one of its own types, or a name type holding its address:  nothing reads as an address by surprise
+  if ((isNamedLink || (target && !target.leftOut)) && (type === "link" || type === "list of links")) return ""
   if (type === "link") return "  // an address"
   if (type === "list of links") return "  // each an address"
   return ""
@@ -480,6 +545,8 @@ export function mergedSpell(
   for (const type of after.types) {
     const was = before.types.find((each) => isSameType(each, type))
     if (!was) {
+      // one blank line before it, whatever the file ended with
+      while (lines.at(-1) === "") lines.pop()
       lines.push("", type.header, ...type.lines.map((line) => `\t${line.text}`))
       merge.changed.push(
         type.isInside
@@ -503,6 +570,7 @@ export function mergedSpell(
   }
   inTodaysWords(lines, written, after, merge)
   merge.text = lines.join("\n")
+  if (text.endsWith("\n") && !merge.text.endsWith("\n")) merge.text += "\n"
   return merge
 }
 

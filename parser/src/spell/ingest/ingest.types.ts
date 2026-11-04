@@ -315,6 +315,12 @@ export type FieldDescription = {
   decimalComma?: boolean
   /** The collection it links to, by address. */
   linksTo?: string
+  /**
+   * Each link it holds comes with its name, PokéAPI's `{ "name": "hp", "url": "https://..." }` (epic `data` I47).
+   * - Linking to no collection asked for, it's held whole as the place's name type, `a poke api name`, never read:
+   *   so `the name of the stat of stat` is `hp`, not its address.
+   */
+  isNamedLink?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
   /** The line naming it needs its words in quotes:  they hold one the plain form stops at, like `in`. */
@@ -425,8 +431,16 @@ export type PlaceDescription = {
   }
   /** Each collection, by what Spell calls it:  `films`. */
   collections: Record<string, CollectionDescription>
-  /** What a person should know. */
+  /**
+   * What a person should know, as this look found it:  each look says them all again (epic `data` I54).
+   * - A read through the Spell (`No row read filled ...`), the look itself, the pictures tried, a line left out.
+   */
   notes: string[]
+  /**
+   * What the agent said someone using it should know:  kept from look to look, as a look with the same shape doesn't ask it again.
+   * - Left out:  a description from before (epic `data` I54), whose notes are sorted once, on its next look.
+   */
+  agentNotes?: string[]
   /** What Spell has no words for yet. */
   spellCantSay: string[]
   /** How often to ask it what changed, in seconds. */

@@ -46,12 +46,12 @@ a "title" is a thing:
 	- its "display" is text
 
 a "thumbnail" is a thing:
-	- its "source" is text
+	- its "source" is text  // an address
 	- its "width" is a number
 	- its "height" is a number
 
 an "originalimage" is a thing:
-	- its "source" is text
+	- its "source" is text  // an address
 	- its "width" is a number
 	- its "height" is a number
 
@@ -60,13 +60,13 @@ a "content url" is a thing:
 	- its "mobile" is a mobile
 
 a "desktop" is a thing:
-	- its "page" is text
-	- its "revisions" is text
-	- its "edit" is text
-	- its "talk" is text
+	- its "page" is text  // an address
+	- its "revisions" is text  // an address
+	- its "edit" is text  // an address
+	- its "talk" is text  // an address
 
 a "mobile" is a thing:
-	- its "page" is text
-	- its "revisions" is text
-	- its "edit" is text
-	- its "talk" is text
+	- its "page" is text  // an address
+	- its "revisions" is text  // an address
+	- its "edit" is text  // an address
+	- its "talk" is text  // an address

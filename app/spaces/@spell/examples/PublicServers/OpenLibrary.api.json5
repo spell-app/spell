@@ -6,7 +6,7 @@
     "name": "open library",
     "kind": "web server",
     "address": "https://openlibrary.org",
-    "lookedAt": "2026-11-04T04:20:14.202Z",
+    "lookedAt": "2026-11-04T12:22:27.482Z",
     "fingerprint": "7832c51cee4075f6",
     "version": {
       "says": "1.0.0",
@@ -23,6 +23,7 @@
       "cover_i=https://covers.openlibrary.org/b/id/{id}-M.jpg"
     ]
   },
+
   "canDo": {
     "read": "Yes:  it's been read.",
     "write": "Nothing says:  never tried.",
@@ -30,16 +31,18 @@
     "limits": "It named none in its answers.",
     "browsers": "Yes:  it says any page may read it."
   },
+
   "allCollections": {
     "idField": "key",
     "paging": "none"
   },
+
   "collections": {
     "books": {
       "type": "book",
       "at": "/search.json",
       "rowsSeen": 100,
-      "rowsItSays": 48296,
+      "rowsItSays": 48293,
       "rowsAt": "docs",
       "searchedBy": {
         "param": "q",
@@ -648,17 +651,20 @@
       }
     }
   },
+
   "notes": [
     "\"books\" answers only a search:  asked with none, it gave nothing, so its line says it's searched, and a program can't read every one.",
-    "Left out editions's \"isbn_10\":  Spell couldn't read its line:  - its \"isbn 10\" is a list of text -- Don't understand \"its \"isbn 10\" is a list of text\"",
-    "Left out editions's \"isbn_13\":  Spell couldn't read its line:  - its \"isbn 13\" is a list of text -- Don't understand \"its \"isbn 13\" is a list of text\"",
-    "No row read filled book's \"publicScanB\".",
     "No row read filled book's \"subtitle\"."
   ],
+
+  "agentNotes": [],
+
   "spellCantSay": [
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
   ],
+
   "checkEverySeconds": 30,
+
   "spell": [
     "open library is a web server at \"https://openlibrary.org\":",
     "\t- its id is its \"key\"",
@@ -738,7 +744,7 @@
     "",
     "a \"link\" is a thing:",
     "\t- its \"title\" is text",
-    "\t- its \"url\" is text",
+    "\t- its \"url\" is text  // an address",
     "\t- its \"kind\" is a kind, stored as \"type\"",
     "",
     "a \"kind\" is a thing:",

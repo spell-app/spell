@@ -6,7 +6,7 @@
     "name": "poke api",
     "kind": "web server",
     "address": "https://pokeapi.co/api/v2",
-    "lookedAt": "2026-11-04T02:25:24.790Z",
+    "lookedAt": "2026-11-04T12:29:15.739Z",
     "fingerprint": "ce6a4341dc171ec1",
     "version": {
       "says": "v2",
@@ -16,6 +16,7 @@
     "docsAt": "https://pokeapi.co/docs/v2",
     "collectionsAsked": ["pokemon", "pokemon-species", "type", "ability", "move", "evolution-chain", "generation"]
   },
+
   "canDo": {
     "read": "Yes:  it's been read.",
     "write": "Nothing says:  never tried.",
@@ -23,6 +24,7 @@
     "limits": "It named none in its answers.",
     "browsers": "Yes:  it says any page may read it."
   },
+
   "allCollections": {
     "idField": "url",
     "idIsAnAddress": true,
@@ -30,6 +32,7 @@
     "rowsAt": "results",
     "nextAt": "next"
   },
+
   "collections": {
     "pokemon": {
       "type": "pokemon",
@@ -112,6 +115,7 @@
               "words": "ability",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/ability/65/",
+              "isNamedLink": true,
               "linksTo": "abilities"
             }
           },
@@ -140,6 +144,7 @@
               "words": "generation",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/generation/4/",
+              "isNamedLink": true,
               "linksTo": "generations"
             },
             "abilities": {
@@ -176,9 +181,12 @@
         "forms": {
           "words": "forms",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/pokemon-form/1/"
-          ]
+          ],
+
+          "isNamedLink": true
         },
         "game_indices": {
           "words": "game indices",
@@ -208,7 +216,8 @@
             "version": {
               "words": "version",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version/1/"
+              "example": "https://pokeapi.co/api/v2/version/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -488,6 +497,7 @@
               "words": "move",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/move/13/",
+              "isNamedLink": true,
               "linksTo": "moves"
             },
             "version_group_details": {
@@ -528,12 +538,14 @@
                 "version_group": {
                   "words": "version group",
                   "type": "link",
-                  "example": "https://pokeapi.co/api/v2/version-group/3/"
+                  "example": "https://pokeapi.co/api/v2/version-group/3/",
+                  "isNamedLink": true
                 },
                 "move_learn_method": {
                   "words": "move learn method",
                   "type": "link",
-                  "example": "https://pokeapi.co/api/v2/move-learn-method/2/"
+                  "example": "https://pokeapi.co/api/v2/move-learn-method/2/",
+                  "isNamedLink": true
                 },
                 "order": {
                   "words": "order",
@@ -550,7 +562,8 @@
           "words": "species",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
-          "linksTo": "pokemon_species"
+          "linksTo": "pokemon_species",
+          "isNamedLink": true
         },
         "sprites": {
           "words": "sprites",
@@ -765,7 +778,8 @@
             "stat": {
               "words": "stat",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/stat/1/"
+              "example": "https://pokeapi.co/api/v2/stat/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -796,6 +810,7 @@
               "words": "generation",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/generation/1/",
+              "isNamedLink": true,
               "linksTo": "generations"
             },
             "stats": {
@@ -825,7 +840,8 @@
                 "stat": {
                   "words": "stat",
                   "type": "link",
-                  "example": "https://pokeapi.co/api/v2/stat/9/"
+                  "example": "https://pokeapi.co/api/v2/stat/9/",
+                  "isNamedLink": true
                 }
               },
               "isListInside": true
@@ -862,6 +878,7 @@
               "words": "kind",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/type/12/",
+              "isNamedLink": true,
               "linksTo": "types"
             }
           },
@@ -955,7 +972,8 @@
         "growth_rate": {
           "words": "growth rate",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/growth-rate/4/"
+          "example": "https://pokeapi.co/api/v2/growth-rate/4/",
+          "isNamedLink": true
         },
         "pokedex_numbers": {
           "words": "pokedex numbers",
@@ -985,7 +1003,8 @@
             "pokedex": {
               "words": "pokedex",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/pokedex/1/"
+              "example": "https://pokeapi.co/api/v2/pokedex/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -993,43 +1012,52 @@
         "egg_groups": {
           "words": "egg groups",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/egg-group/1/",
             "https://pokeapi.co/api/v2/egg-group/7/"
-          ]
+          ],
+
+          "isNamedLink": true
         },
         "color": {
           "words": "color",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/pokemon-color/5/"
+          "example": "https://pokeapi.co/api/v2/pokemon-color/5/",
+          "isNamedLink": true
         },
         "shape": {
           "words": "shape",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/pokemon-shape/8/"
+          "example": "https://pokeapi.co/api/v2/pokemon-shape/8/",
+          "isNamedLink": true
         },
         "evolves_from_species": {
           "words": "evolves from species",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
-          "linksTo": "pokemon_species"
+          "linksTo": "pokemon_species",
+          "isNamedLink": true
         },
         "evolution_chain": {
           "words": "evolution chain",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/evolution-chain/1/",
-          "linksTo": "evolution_chains"
+          "linksTo": "evolution_chains",
+          "isNamedLink": true
         },
         "habitat": {
           "words": "habitat",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/pokemon-habitat/3/"
+          "example": "https://pokeapi.co/api/v2/pokemon-habitat/3/",
+          "isNamedLink": true
         },
         "generation": {
           "words": "generation",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/generation/1/",
-          "linksTo": "generations"
+          "linksTo": "generations",
+          "isNamedLink": true
         },
         "names": {
           "words": "names",
@@ -1059,7 +1087,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1091,7 +1120,8 @@
             "area": {
               "words": "area",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/pal-park-area/2/"
+              "example": "https://pokeapi.co/api/v2/pal-park-area/2/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1136,12 +1166,14 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/9/"
+              "example": "https://pokeapi.co/api/v2/language/9/",
+              "isNamedLink": true
             },
             "version": {
               "words": "version",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version/1/"
+              "example": "https://pokeapi.co/api/v2/version/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1174,7 +1206,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1201,6 +1234,7 @@
               "words": "pokemon",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/pokemon/1/",
+              "isNamedLink": true,
               "linksTo": "pokemon"
             }
           },
@@ -1245,52 +1279,70 @@
             "no_damage_to": {
               "words": "no damage to",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/8/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "half_damage_to": {
               "words": "half damage to",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/6/",
                 "https://pokeapi.co/api/v2/type/9/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "double_damage_to": {
               "words": "double damage to",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/1/",
                 "https://pokeapi.co/api/v2/type/6/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "no_damage_from": {
               "words": "no damage from",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/8/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "half_damage_from": {
               "words": "half damage from",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/6/",
                 "https://pokeapi.co/api/v2/type/7/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "double_damage_from": {
               "words": "double damage from",
               "type": "list of links",
+
               "example": [
                 "https://pokeapi.co/api/v2/type/2/"
               ],
+
+              "isNamedLink": true,
               "linksTo": "types"
             }
           }
@@ -1328,6 +1380,7 @@
               "words": "generation",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/generation/1/",
+              "isNamedLink": true,
               "linksTo": "generations"
             }
           },
@@ -1337,12 +1390,14 @@
           "words": "generation",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/generation/1/",
-          "linksTo": "generations"
+          "linksTo": "generations",
+          "isNamedLink": true
         },
         "move_damage_class": {
           "words": "move damage class",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/move-damage-class/2/"
+          "example": "https://pokeapi.co/api/v2/move-damage-class/2/",
+          "isNamedLink": true
         },
         "names": {
           "words": "names",
@@ -1372,7 +1427,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1406,6 +1462,7 @@
               "words": "pokemon",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/pokemon/16/",
+              "isNamedLink": true,
               "linksTo": "pokemon"
             }
           },
@@ -1414,11 +1471,14 @@
         "moves": {
           "words": "moves",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/move/1/",
             "https://pokeapi.co/api/v2/move/3/"
           ],
-          "linksTo": "moves"
+
+          "linksTo": "moves",
+          "isNamedLink": true
         },
         "sprites": {
           "words": "sprites",
@@ -1465,7 +1525,8 @@
           "words": "generation",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/generation/3/",
-          "linksTo": "generations"
+          "linksTo": "generations",
+          "isNamedLink": true
         },
         "names": {
           "words": "names",
@@ -1495,7 +1556,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1535,7 +1597,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/5/"
+              "example": "https://pokeapi.co/api/v2/language/5/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1578,7 +1641,8 @@
             "version_group": {
               "words": "version group",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version-group/11/"
+              "example": "https://pokeapi.co/api/v2/version-group/11/",
+              "isNamedLink": true
             },
             "effect_entries": {
               "words": "effect entries",
@@ -1608,7 +1672,8 @@
                 "language": {
                   "words": "language",
                   "type": "link",
-                  "example": "https://pokeapi.co/api/v2/language/5/"
+                  "example": "https://pokeapi.co/api/v2/language/5/",
+                  "isNamedLink": true
                 }
               },
               "isListInside": true
@@ -1652,12 +1717,14 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/5/"
+              "example": "https://pokeapi.co/api/v2/language/5/",
+              "isNamedLink": true
             },
             "version_group": {
               "words": "version group",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version-group/5/"
+              "example": "https://pokeapi.co/api/v2/version-group/5/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1698,6 +1765,7 @@
               "words": "pokemon",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/pokemon/44/",
+              "isNamedLink": true,
               "linksTo": "pokemon"
             }
           },
@@ -1771,18 +1839,24 @@
                 "use_before": {
                   "words": "use before",
                   "type": "list of links",
+
                   "example": [
                     "https://pokeapi.co/api/v2/move/3/",
                     "https://pokeapi.co/api/v2/move/21/"
                   ],
+
+                  "isNamedLink": true,
                   "linksTo": "moves"
                 },
                 "use_after": {
                   "words": "use after",
                   "type": "list of links",
+
                   "example": [
                     "https://pokeapi.co/api/v2/move/116/"
                   ],
+
+                  "isNamedLink": true,
                   "linksTo": "moves"
                 }
               }
@@ -1807,17 +1881,20 @@
         "contest_type": {
           "words": "contest type",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/contest-type/5/"
+          "example": "https://pokeapi.co/api/v2/contest-type/5/",
+          "isNamedLink": true
         },
         "contest_effect": {
           "words": "contest effect",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/contest-effect/1/"
+          "example": "https://pokeapi.co/api/v2/contest-effect/1/",
+          "isNamedLink": true
         },
         "damage_class": {
           "words": "damage class",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/move-damage-class/2/"
+          "example": "https://pokeapi.co/api/v2/move-damage-class/2/",
+          "isNamedLink": true
         },
         "effect_entries": {
           "words": "effect entries",
@@ -1854,7 +1931,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/5/"
+              "example": "https://pokeapi.co/api/v2/language/5/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -1867,7 +1945,8 @@
           "words": "generation",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/generation/1/",
-          "linksTo": "generations"
+          "linksTo": "generations",
+          "isNamedLink": true
         },
         "meta": {
           "words": "meta",
@@ -1877,12 +1956,14 @@
             "ailment": {
               "words": "ailment",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/move-ailment/0/"
+              "example": "https://pokeapi.co/api/v2/move-ailment/0/",
+              "isNamedLink": true
             },
             "category": {
               "words": "category",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/move-category/0/"
+              "example": "https://pokeapi.co/api/v2/move-category/0/",
+              "isNamedLink": true
             },
             "min_hits": {
               "words": "min hits",
@@ -1960,7 +2041,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -2010,12 +2092,14 @@
               "words": "kind",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/type/1/",
+              "isNamedLink": true,
               "linksTo": "types"
             },
             "version_group": {
               "words": "version group",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version-group/3/"
+              "example": "https://pokeapi.co/api/v2/version-group/3/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -2027,18 +2111,21 @@
         "super_contest_effect": {
           "words": "super contest effect",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/super-contest-effect/5/"
+          "example": "https://pokeapi.co/api/v2/super-contest-effect/5/",
+          "isNamedLink": true
         },
         "target": {
           "words": "target",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/move-target/10/"
+          "example": "https://pokeapi.co/api/v2/move-target/10/",
+          "isNamedLink": true
         },
         "type": {
           "words": "kind",
           "type": "link",
           "example": "https://pokeapi.co/api/v2/type/1/",
-          "linksTo": "types"
+          "linksTo": "types",
+          "isNamedLink": true
         },
         "machines": {
           "words": "machines",
@@ -2080,12 +2167,14 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/9/"
+              "example": "https://pokeapi.co/api/v2/language/9/",
+              "isNamedLink": true
             },
             "version_group": {
               "words": "version group",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/version-group/3/"
+              "example": "https://pokeapi.co/api/v2/version-group/3/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -2093,11 +2182,14 @@
         "learned_by_pokemon": {
           "words": "learned by pokemon",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/pokemon/35/",
             "https://pokeapi.co/api/v2/pokemon/36/"
           ],
-          "linksTo": "pokemon"
+
+          "linksTo": "pokemon",
+          "isNamedLink": true
         },
         "url": {
           "words": "url",
@@ -2141,6 +2233,7 @@
               "words": "species",
               "type": "link",
               "example": "https://pokeapi.co/api/v2/pokemon-species/1/",
+              "isNamedLink": true,
               "linksTo": "pokemon_species"
             },
             "evolution_details": {
@@ -2293,16 +2386,20 @@
         "main_region": {
           "words": "main region",
           "type": "link",
-          "example": "https://pokeapi.co/api/v2/region/1/"
+          "example": "https://pokeapi.co/api/v2/region/1/",
+          "isNamedLink": true
         },
         "moves": {
           "words": "moves",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/move/1/",
             "https://pokeapi.co/api/v2/move/2/"
           ],
-          "linksTo": "moves"
+
+          "linksTo": "moves",
+          "isNamedLink": true
         },
         "names": {
           "words": "names",
@@ -2332,7 +2429,8 @@
             "language": {
               "words": "language",
               "type": "link",
-              "example": "https://pokeapi.co/api/v2/language/1/"
+              "example": "https://pokeapi.co/api/v2/language/1/",
+              "isNamedLink": true
             }
           },
           "isListInside": true
@@ -2340,28 +2438,37 @@
         "pokemon_species": {
           "words": "pokemon species",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/pokemon-species/1/",
             "https://pokeapi.co/api/v2/pokemon-species/2/"
           ],
-          "linksTo": "pokemon_species"
+
+          "linksTo": "pokemon_species",
+          "isNamedLink": true
         },
         "types": {
           "words": "types",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/type/1/",
             "https://pokeapi.co/api/v2/type/2/"
           ],
-          "linksTo": "types"
+
+          "linksTo": "types",
+          "isNamedLink": true
         },
         "version_groups": {
           "words": "version groups",
           "type": "list of links",
+
           "example": [
             "https://pokeapi.co/api/v2/version-group/1/",
             "https://pokeapi.co/api/v2/version-group/2/"
-          ]
+          ],
+
+          "isNamedLink": true
         },
         "url": {
           "words": "url",
@@ -2375,136 +2482,31 @@
       }
     }
   },
+
   "notes": [
-    "Pokemon.number is a number, but its place sent \"https://pokeapi.co/api/v2/pokemon/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/pokemon/1/\"`",
-    "Expected ability to be type 'Ability', got: [object Object]",
-    "Expected generation to be type 'Generation', got: [object Object]",
-    "Expected version to be type 'text', got: [object Object]",
-    "Expected move to be type 'Move', got: [object Object]",
-    "Expected versionGroup to be type 'text', got: [object Object]",
-    "Expected moveLearnMethod to be type 'text', got: [object Object]",
-    "Expected species to be type 'PokemonSpecies', got: [object Object]",
-    "Expected stat to be type 'text', got: [object Object]",
-    "Expected kind to be type 'Type', got: [object Object]",
     "No row read filled pokemon's \"heldItems\".",
     "No row read filled pokemon's \"pastTypes\".",
-    "PokemonSpecies.number is a number, but its place sent \"https://pokeapi.co/api/v2/pokemon-species/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/pokemon-species/1/\"`",
-    "Expected growthRate to be type 'text', got: [object Object]",
-    "Expected pokedex to be type 'text', got: [object Object]",
-    "Expected color to be type 'text', got: [object Object]",
-    "Expected shape to be type 'text', got: [object Object]",
-    "Expected evolutionChain to be type 'EvolutionChain', got: [object Object]",
-    "Expected habitat to be type 'text', got: [object Object]",
-    "Expected language to be type 'text', got: [object Object]",
-    "Expected area to be type 'text', got: [object Object]",
-    "Expected pokemon to be type 'Pokemon', got: [object Object]",
-    "No row read filled pokemon species's \"baby\".",
-    "No row read filled pokemon species's \"legendary\".",
-    "No row read filled pokemon species's \"mythical\".",
-    "No row read filled pokemon species's \"genderDifferences\".",
-    "No row read filled pokemon species's \"formsSwitchable\".",
     "No row read filled pokemon species's \"evolvesFromSpecies\".",
     "No row read filled pokemon species's \"formDescriptions\".",
-    "Type.number is a number, but its place sent \"https://pokeapi.co/api/v2/type/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/type/1/\"`",
-    "Expected moveDamageClass to be type 'text', got: [object Object]",
-    "PlaceThings:  couldn't tell the program what changed TypeError: SpellEvents must be initiallized with a 'type'.",
-    "No row read filled type's \"pastDamageRelations\".",
-    "Ability.number is a number, but its place sent \"https://pokeapi.co/api/v2/ability/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/ability/1/\"`",
-    "Move.number is a number, but its place sent \"https://pokeapi.co/api/v2/move/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/move/1/\"`",
-    "Expected super to be type 'Super', got: [object Object]",
-    "Expected contestType to be type 'text', got: [object Object]",
-    "Expected contestEffect to be type 'text', got: [object Object]",
-    "Expected damageClass to be type 'text', got: [object Object]",
-    "Expected ailment to be type 'text', got: [object Object]",
-    "Expected category to be type 'text', got: [object Object]",
-    "Expected superContestEffect to be type 'text', got: [object Object]",
-    "Expected target to be type 'text', got: [object Object]",
-    "No row read filled move's \"priority\".",
-    "No row read filled move's \"effectChanges\".",
-    "No row read filled move's \"pastValues\".",
-    "No row read filled move's \"statChanges\".",
-    "No row read filled move's \"machines\".",
-    "EvolutionChain.number is a number, but its place sent \"https://pokeapi.co/api/v2/evolution-chain/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/evolution-chain/1/\"`",
-    "Generation.number is a number, but its place sent \"https://pokeapi.co/api/v2/generation/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/generation/1/\"`",
-    "Expected mainRegion to be type 'text', got: [object Object]",
-    "No row read filled generation's \"abilities\".",
-    "Pokemon.number is a number, but its place sent \"https://pokeapi.co/api/v2/pokemon/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/pokemon/1/\"`",
-    "Expected ability to be type 'Ability', got: [object Object]",
-    "Expected generation to be type 'Generation', got: [object Object]",
-    "Expected version to be type 'text', got: [object Object]",
-    "Expected move to be type 'Move', got: [object Object]",
-    "Expected versionGroup to be type 'text', got: [object Object]",
-    "Expected moveLearnMethod to be type 'text', got: [object Object]",
-    "Expected species to be type 'PokemonSpecies', got: [object Object]",
-    "Expected stat to be type 'text', got: [object Object]",
-    "Expected kind to be type 'Type', got: [object Object]",
-    "No row read filled pokemon's \"heldItems\".",
-    "No row read filled pokemon's \"pastTypes\".",
-    "PokemonSpecies.number is a number, but its place sent \"https://pokeapi.co/api/v2/pokemon-species/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/pokemon-species/1/\"`",
-    "Expected growthRate to be type 'text', got: [object Object]",
-    "Expected pokedex to be type 'text', got: [object Object]",
-    "Expected color to be type 'text', got: [object Object]",
-    "Expected shape to be type 'text', got: [object Object]",
-    "Expected evolutionChain to be type 'EvolutionChain', got: [object Object]",
-    "Expected habitat to be type 'text', got: [object Object]",
-    "Expected language to be type 'text', got: [object Object]",
-    "Expected area to be type 'text', got: [object Object]",
-    "Expected pokemon to be type 'Pokemon', got: [object Object]",
-    "No row read filled pokemon species's \"baby\".",
-    "No row read filled pokemon species's \"legendary\".",
-    "No row read filled pokemon species's \"mythical\".",
-    "No row read filled pokemon species's \"genderDifferences\".",
-    "No row read filled pokemon species's \"formsSwitchable\".",
-    "No row read filled pokemon species's \"evolvesFromSpecies\".",
-    "No row read filled pokemon species's \"formDescriptions\".",
-    "Type.number is a number, but its place sent \"https://pokeapi.co/api/v2/type/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/type/1/\"`",
-    "Expected moveDamageClass to be type 'text', got: [object Object]",
-    "PlaceThings:  couldn't tell the program what changed TypeError: SpellEvents must be initiallized with a 'type'.",
-    "No row read filled type's \"pastDamageRelations\".",
-    "Ability.number is a number, but its place sent \"https://pokeapi.co/api/v2/ability/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/ability/1/\"`",
-    "Move.number is a number, but its place sent \"https://pokeapi.co/api/v2/move/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/move/1/\"`",
-    "Expected super to be type 'Super', got: [object Object]",
-    "Expected contestType to be type 'text', got: [object Object]",
-    "Expected contestEffect to be type 'text', got: [object Object]",
-    "Expected damageClass to be type 'text', got: [object Object]",
-    "Expected ailment to be type 'text', got: [object Object]",
-    "Expected category to be type 'text', got: [object Object]",
-    "Expected superContestEffect to be type 'text', got: [object Object]",
-    "Expected target to be type 'text', got: [object Object]",
-    "No row read filled move's \"priority\".",
-    "No row read filled move's \"effectChanges\".",
-    "No row read filled move's \"pastValues\".",
-    "No row read filled move's \"statChanges\".",
-    "No row read filled move's \"machines\".",
-    "EvolutionChain.number is a number, but its place sent \"https://pokeapi.co/api/v2/evolution-chain/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/evolution-chain/1/\"`",
-    "Generation.number is a number, but its place sent \"https://pokeapi.co/api/v2/generation/1/\", which reads as nothing;  if that's how it says it has none, say so:  `is a number or \"https://pokeapi.co/api/v2/generation/1/\"`",
-    "Expected mainRegion to be type 'text', got: [object Object]",
-    "No row read filled generation's \"abilities\".",
-    "No row read filled pokemon's \"heldItems\".",
-    "No row read filled pokemon's \"pastTypes\".",
-    "No row read filled pokemon species's \"baby\".",
-    "No row read filled pokemon species's \"legendary\".",
-    "No row read filled pokemon species's \"mythical\".",
-    "No row read filled pokemon species's \"genderDifferences\".",
-    "No row read filled pokemon species's \"formsSwitchable\".",
-    "No row read filled pokemon species's \"evolvesFromSpecies\".",
-    "No row read filled pokemon species's \"formDescriptions\".",
-    "PlaceThings:  couldn't tell the program what changed TypeError: SpellEvents must be initiallized with a 'type'.",
     "No row read filled type's \"pastDamageRelations\".",
     "Expected super to be type 'Super', got: [object Object]",
-    "No row read filled move's \"priority\".",
     "No row read filled move's \"effectChanges\".",
     "No row read filled move's \"pastValues\".",
     "No row read filled move's \"statChanges\".",
     "No row read filled move's \"machines\".",
     "No row read filled generation's \"abilities\"."
   ],
+
+  "agentNotes": [],
+
   "spellCantSay": [
-    "A link to somewhere else:  pokemon.forms, pokemon.location_area_encounters, pokemon_species.growth_rate, pokemon_species.egg_groups, pokemon_species.color, pokemon_species.shape, pokemon_species.habitat, types.move_damage_class, moves.contest_type, moves.contest_effect, moves.damage_class, moves.super_contest_effect, moves.target, generations.main_region, generations.version_groups hold addresses of nothing described here, so they read as text.",
+    "A link to somewhere else:  pokemon.location_area_encounters hold addresses of nothing described here, so they read as text.",
     "A list of objects inside a field:  sprites of types holds them, and a type's line can't say their shape yet, so it's left out.",
     "What it can filter or sort:  no line says, so `where` and `sorted by` load its rows and work here, up to the usual ceiling."
   ],
+
   "checkEverySeconds": 30,
+
   "spell": [
     "poke api is a web server at \"https://pokeapi.co/api/v2\":",
     "\t- its id is its \"url\"",
@@ -2533,7 +2535,7 @@
     "\t- its \"weight\" is a number",
     "\t- its \"abilities\" is a list of pokemon abilities",
     "\t- its \"past abilities\" is a list of past abilities",
-    "\t- its \"forms\" is a list of text  // each an address",
+    "\t- its \"forms\" is a list of poke api names",
     "\t- its \"game indices\" is a list of game indices",
     "\t- its \"held items\" is a list of text",
     "\t- its \"location area encounters\" is text  // an address",
@@ -2560,14 +2562,14 @@
     "\t- its \"hatch counter\" is a number",
     "\t- its \"gender differences\" is yes or no, stored as \"has_gender_differences\"",
     "\t- its \"forms switchable\" is yes or no",
-    "\t- its \"growth rate\" is text  // an address",
+    "\t- its \"growth rate\" is a poke api name",
     "\t- its \"pokedex numbers\" is a list of pokedex numbers",
-    "\t- its \"egg groups\" is a list of text  // each an address",
-    "\t- its \"color\" is text  // an address",
-    "\t- its \"shape\" is text  // an address",
+    "\t- its \"egg groups\" is a list of poke api names",
+    "\t- its \"color\" is a poke api name",
+    "\t- its \"shape\" is a poke api name",
     "\t- its \"evolves from species\" is a pokemon species",
     "\t- its \"evolution chain\" is an evolution chain",
-    "\t- its \"habitat\" is text  // an address",
+    "\t- its \"habitat\" is a poke api name",
     "\t- its \"generation\" is a generation",
     "\t- its \"names\" is a list of names",
     "\t- its \"pal park encounters\" is a list of pal park encounters",
@@ -2584,7 +2586,7 @@
     "\t- its \"past damage relations\" is a list of text",
     "\t- its \"game indices\" is a list of game indices",
     "\t- its \"generation\" is a generation",
-    "\t- its \"move damage class\" is text  // an address",
+    "\t- its \"move damage class\" is a poke api name",
     "\t- its \"names\" is a list of names",
     "\t- its \"pokemon\" is a list of type pokemon",
     "\t- its \"moves\" is a list of moves",
@@ -2610,9 +2612,9 @@
     "\t- its \"priority\" is a number",
     "\t- its \"power\" is a number",
     "\t- its \"contest combos\" is a contest combo",
-    "\t- its \"contest type\" is text  // an address",
-    "\t- its \"contest effect\" is text  // an address",
-    "\t- its \"damage class\" is text  // an address",
+    "\t- its \"contest type\" is a poke api name",
+    "\t- its \"contest effect\" is a poke api name",
+    "\t- its \"damage class\" is a poke api name",
     "\t- its \"effect entries\" is a list of effect entries",
     "\t- its \"effect changes\" is a list of text",
     "\t- its \"generation\" is a generation",
@@ -2620,8 +2622,8 @@
     "\t- its \"names\" is a list of names",
     "\t- its \"past values\" is a list of past values",
     "\t- its \"stat changes\" is a list of text",
-    "\t- its \"super contest effect\" is text  // an address",
-    "\t- its \"target\" is text  // an address",
+    "\t- its \"super contest effect\" is a poke api name",
+    "\t- its \"target\" is a poke api name",
     "\t- its \"kind\" is a type, stored as \"type\"",
     "\t- its \"machines\" is a list of text",
     "\t- its \"flavor text entries\" is a list of flavor text entries",
@@ -2637,12 +2639,12 @@
     "\t- its \"number\" is a number, stored as \"id\"",
     "\t- its \"name\" is text",
     "\t- its \"abilities\" is a list of text",
-    "\t- its \"main region\" is text  // an address",
+    "\t- its \"main region\" is a poke api name",
     "\t- its \"moves\" is a list of moves",
     "\t- its \"names\" is a list of names",
     "\t- its \"pokemon species\" is a list of pokemon species",
     "\t- its \"types\" is a list of types",
-    "\t- its \"version groups\" is a list of text  // each an address",
+    "\t- its \"version groups\" is a list of poke api names",
     "",
     "a \"pokemon ability\" is a thing:",
     "\t- its \"hidden\" is yes or no, stored as \"is_hidden\"",
@@ -2659,7 +2661,7 @@
     "",
     "a \"game index\" is a thing:",
     "\t- its \"game index\" is a number",
-    "\t- its \"version\" is text",
+    "\t- its \"version\" is a poke api name",
     "",
     "a \"pokemon move\" is a thing:",
     "\t- its \"move\" is a move",
@@ -2667,16 +2669,16 @@
     "",
     "a \"version group detail\" is a thing:",
     "\t- its \"level learned at\" is a number",
-    "\t- its \"version group\" is text",
-    "\t- its \"move learn method\" is text",
+    "\t- its \"version group\" is a poke api name",
+    "\t- its \"move learn method\" is a poke api name",
     "\t- its \"order\" is a number",
     "",
     "a \"sprite\" is a thing:",
     "\t- its \"other\" is an other",
-    "\t- its \"back shiny\" is text",
-    "\t- its \"front shiny\" is text",
-    "\t- its \"back default\" is text",
-    "\t- its \"front default\" is text",
+    "\t- its \"back shiny\" is text  // an address",
+    "\t- its \"front shiny\" is text  // an address",
+    "\t- its \"back default\" is text  // an address",
+    "\t- its \"front default\" is text  // an address",
     "",
     "an \"other\" is a thing:",
     "\t- its \"home\" is a home",
@@ -2685,30 +2687,30 @@
     "\t- its \"official artwork\" is an official artwork",
     "",
     "a \"home\" is a thing:",
-    "\t- its \"front shiny\" is text",
-    "\t- its \"front default\" is text",
+    "\t- its \"front shiny\" is text  // an address",
+    "\t- its \"front default\" is text  // an address",
     "",
     "a \"showdown\" is a thing:",
-    "\t- its \"back shiny\" is text",
-    "\t- its \"front shiny\" is text",
-    "\t- its \"back default\" is text",
-    "\t- its \"front default\" is text",
+    "\t- its \"back shiny\" is text  // an address",
+    "\t- its \"front shiny\" is text  // an address",
+    "\t- its \"back default\" is text  // an address",
+    "\t- its \"front default\" is text  // an address",
     "",
     "a \"dream world\" is a thing:",
-    "\t- its \"front default\" is text",
+    "\t- its \"front default\" is text  // an address",
     "",
     "an \"official artwork\" is a thing:",
-    "\t- its \"front shiny\" is text",
-    "\t- its \"front default\" is text",
+    "\t- its \"front shiny\" is text  // an address",
+    "\t- its \"front default\" is text  // an address",
     "",
     "a \"cry\" is a thing:",
-    "\t- its \"latest\" is text",
-    "\t- its \"legacy\" is text",
+    "\t- its \"latest\" is text  // an address",
+    "\t- its \"legacy\" is text  // an address",
     "",
     "a \"stat\" is a thing:",
     "\t- its \"base stat\" is a number",
     "\t- its \"effort\" is a number",
-    "\t- its \"stat\" is text",
+    "\t- its \"stat\" is a poke api name",
     "",
     "a \"past stat\" is a thing:",
     "\t- its \"generation\" is a generation",
@@ -2720,25 +2722,25 @@
     "",
     "a \"pokedex number\" is a thing:",
     "\t- its \"entry number\" is a number",
-    "\t- its \"pokedex\" is text",
+    "\t- its \"pokedex\" is a poke api name",
     "",
     "a \"name\" is a thing:",
     "\t- its \"name\" is text",
-    "\t- its \"language\" is text",
+    "\t- its \"language\" is a poke api name",
     "",
     "a \"pal park encounter\" is a thing:",
     "\t- its \"base score\" is a number",
     "\t- its \"rate\" is a number",
-    "\t- its \"area\" is text",
+    "\t- its \"area\" is a poke api name",
     "",
     "a \"flavor text entry\" is a thing:",
     "\t- its \"flavor text\" is text",
-    "\t- its \"language\" is text",
-    "\t- its \"version\" is text",
+    "\t- its \"language\" is a poke api name",
+    "\t- its \"version\" is a poke api name",
     "",
     "a \"genus\" is a thing:",
     "\t- its \"genus\" is text",
-    "\t- its \"language\" is text",
+    "\t- its \"language\" is a poke api name",
     "",
     "a \"variety\" is a thing:",
     "\t- its \"default\" is yes or no, stored as \"is_default\"",
@@ -2759,10 +2761,10 @@
     "an \"effect entry\" is a thing:",
     "\t- its \"effect\" is text",
     "\t- its \"short effect\" is text",
-    "\t- its \"language\" is text",
+    "\t- its \"language\" is a poke api name",
     "",
     "an \"effect change\" is a thing:",
-    "\t- its \"version group\" is text",
+    "\t- its \"version group\" is a poke api name",
     "\t- its \"effect entries\" is a list of effect entries",
     "",
     "an \"ability pokemon\" is a thing:",
@@ -2781,8 +2783,8 @@
     "a \"super\" is a thing:",
     "",
     "a \"meta\" is a thing:",
-    "\t- its \"ailment\" is text",
-    "\t- its \"category\" is text",
+    "\t- its \"ailment\" is a poke api name",
+    "\t- its \"category\" is a poke api name",
     "\t- its \"drain\" is a number",
     "\t- its \"healing\" is a number",
     "\t- its \"crit rate\" is a number",
@@ -2793,12 +2795,16 @@
     "a \"past value\" is a thing:",
     "\t- its \"effect entries\" is a list of text",
     "\t- its \"kind\" is a type, stored as \"type\"",
-    "\t- its \"version group\" is text",
+    "\t- its \"version group\" is a poke api name",
     "",
     "a \"chain\" is a thing:",
     "\t- its \"baby\" is yes or no, stored as \"is_baby\"",
     "\t- its \"species\" is a pokemon species",
     "\t- its \"evolution details\" is a list of text",
-    "\t- its \"evolves to\" is a list of chains"
+    "\t- its \"evolves to\" is a list of chains",
+    "",
+    "a \"poke api name\" is a thing:",
+    "\t- its \"name\" is text",
+    "\t- its \"address\" is text, stored as \"url\"  // never read:  its collection wasn't asked for"
   ]
 }
